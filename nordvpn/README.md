@@ -49,3 +49,6 @@ Default locations: US, CA, GB, NL, CH, DE, JP (edit `~/.config/nordvpn-wg/locati
   connects immediately.
 - The private key lives in the system connection files (root-only) and in
   `~/.config/nordvpn-wg/private_key` (mode 600, for adding locations later).
+
+---
+Check: `./install.sh status nordvpn` · Remove: `./install.sh uninstall nordvpn`

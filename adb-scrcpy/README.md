@@ -25,3 +25,6 @@ The phone may display its VPN address (like `10.2.0.2`), which you can't reach. 
 advertises its real LAN address over mDNS, and that's what `phone` uses. Check with
 `avahi-browse -rt _adb-tls-connect._tcp`. If the phone isn't visible at all, enable
 the VPN's "allow LAN connections" option.
+
+---
+Check: `./install.sh status adb-scrcpy` · Remove: `./install.sh uninstall adb-scrcpy`

@@ -1,81 +1,112 @@
-# steam-frame-tweaks
+# Steam Frame Tweaks
 
-Productivity tweaks for **desktop mode on the Valve Steam Frame** (SteamOS, aarch64).
-Everything installs into your home directory (`~/.local`, user services, Flatpak user
-overrides). Nothing touches SteamOS's read-only system partition, so OS updates won't
-undo it.
+**Make the Valve Steam Frame's desktop mode a better place to work.** Pick from a dozen
+self-contained tweaks: local dictation, the arrow keys the Steam keyboard lacks, phone
+mirroring, a shared and lockable KDE wallet, protected Signal and Firefox, NordVPN that
+survives updates, and Claude Desktop. Install them from a checklist.
 
-```sh
-git clone <this repo> ~/steam-frame-tweaks
-cd ~/steam-frame-tweaks
-./install.sh                     # list components
-./install.sh dictation arrowpad  # install some
-./install.sh all
-```
+- **Nothing in the system partition.** Everything goes into your home folder, so SteamOS
+  updates don't undo it, and nothing needs `sudo` or `steamos-readonly disable`.
+- **Pick and choose.** Every tweak installs, checks and removes on its own; dependencies are
+  added automatically.
+- **Safe to re-run.** Installing again repairs; `status` tells you what's healthy.
 
-Prerequisites: [Homebrew](https://brew.sh) (works on SteamOS aarch64) for `dictation`
-and `adb-scrcpy`.
+## Quick start
 
-## Tweaks
-
-| Tweak | What you get |
-|---|---|
-| [**Dictation**](dictation/) | Local Whisper speech-to-text on the Frame's GPU. One shortcut to record, then the text is typed, copied to the clipboard and logged. |
-| [**Arrow Pad**](arrowpad/) | Floating nav pad (arrows, Home/End, PgUp/PgDn, one-shot Ctrl/Alt/Shift, F-keys, Copy/Paste, 🎤 dictation) that never steals focus. Includes a guide to which keyboard to use when. |
-| [**Full Keyboard**](full-keyboard/) | Installs TaiKeid's full-size VR keyboard (checksum-verified). |
-| [**Mouse cursor fix**](cursor/) | Makes the mouse pointer visible in desktop mode. |
-| [**Phone Mirror**](adb-scrcpy/) | `adb` for aarch64 + `scrcpy`, plus a launcher that finds your phone's wireless-debugging port automatically. |
-| [**Wallet**](wallet/) | One KDE wallet shared by desktop mode and VR (steam-frame-nix's launcher approach), a desktop unlock dialog with 4-hour auto-lock, and KWalletManager. |
-| [**Signal**](signal/) | Makes the Flathub Signal store its database key in the shared KDE wallet instead of plaintext, and quits it after 15 minutes idle (`signal-guard`). |
-| [**NordVPN**](nordvpn/) | NordVPN's WireGuard servers as NetworkManager connections (several countries) with a tray icon to switch, surviving SteamOS updates. |
-| [**Firefox**](firefox/) | Strong anti-fingerprinting (resistFingerprinting, letterboxing, WebRTC limits). The Frame's aarch64/Adreno combination is otherwise very identifiable. |
-| [**Claude Desktop**](claude-desktop/) | Official Linux arm64 beta, installed and updated without apt. |
-| [**Tools**](tools/) | `restart-plasmashell`: get the taskbar/system tray back after a crash. |
-| [ydotool](ydotool/) | Shared helper for keystroke injection (installed automatically). |
-
-Each folder's README covers usage, configuration and how it works.
-
-## General Frame desktop-mode notes
-- **Desktop mode is nested.** Plasma runs inside its own D-Bus session with
-  `XDG_RUNTIME_DIR=/run/user/$UID/nested_plasma`. Things launched from shortcuts can
-  see a different environment. Several tweaks here work around that.
-- **Two sessions, two D-Bus buses**: apps started from the desktop and from VR can get
-  different wallets, portals and clipboards. See [wallet](wallet/).
-- **Steam on-screen keyboard**: hold **Shift** for ←/→ cursor keys.
-- **X11-only on-screen keyboards** (e.g. CoreKeyboard from Flathub) don't appear or
-  work under the Wayland desktop.
-- **Desktop mode teardown**: closing the Desktop can make Steam delete the nested
-  session's runtime dir (`/run/user/$UID/nested_plasma`) while KWin keeps running. Open
-  windows keep working, but new apps fail with "Failed to initialize Wayland". Fix:
-  exit and reopen desktop mode, or reboot.
-- **Apps installed into `/usr`** (via `steamos-readonly disable` + pacman) vanish at every
-  SteamOS update. Prefer home-dir installs, Flatpaks, or system config in `/etc` (see [nordvpn](nordvpn/)).
-- **Vulkan apps** may crash in the Gamescope WSI layer; try `DISABLE_GAMESCOPE_WSI=1`.
-
-## Related projects
-Other people publishing Frame tweaks (as of October 2026):
-- [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix): Home Manager modules
-  covering a lot of the same ground (two-session quirks, clipboard, KDE wallet, VR keyboard).
-- [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils):
-  Tailscale, distrobox from desktop mode, waypipe, mouse cursor, Full Keyboard app.
-- [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard):
-  full-size VR keyboard (installed by our `full-keyboard`).
-- Dictation alternatives: [techieyann/frame-voice](https://github.com/techieyann/frame-voice)
-  (controller-triggered), [groffta/whisper-frame](https://github.com/groffta/whisper-frame)
-  (push-to-talk on the Select button), [gripspeak](https://github.com/gripspeak/gripspeak).
-
-## Uninstall
+In desktop mode, open **Konsole** and run:
 
 ```sh
-systemctl --user disable --now ydotoold
-wallet-launcher --remove $(wallet-launcher --list)
-rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus,wallet-unlock,wallet-gate,with-keyring,gh,nordvpn-wg,nordvpn-tray}
-rm -f ~/.config/autostart/nordvpn-tray.desktop
-rm -f ~/.config/environment.d/90-kwin-software-cursor.conf ~/.local/bin/signal-guard
-rm -rf ~/.local/share/{whisper,arrowpad} ~/.local/lib/android-tools ~/.local/opt/claude-desktop
-rm -f ~/.local/share/applications/{dictate,arrowpad,phone-mirror,com.anthropic.Claude}.desktop
-rm -f ~/.config/systemd/user/ydotoold.service
+git clone https://github.com/AstronautCheetah/steam-frame-tweaks ~/steam-frame-tweaks
+~/steam-frame-tweaks/get.sh
 ```
-Full Keyboard has its own uninstaller (see its README).
-**Leave the Signal override in place.** Once the key lives in the wallet, switching
-Signal back to the plaintext store would leave it unable to open its own database.
+
+<!-- once public:  curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/steam-frame-tweaks/main/get.sh | bash -->
+
+A checklist opens: tick what you want and press OK. It also adds **Steam Frame Tweaks** to
+the app menu, so you can come back later to add, repair or remove tweaks.
+
+Some tweaks use [Homebrew](https://brew.sh) (dictation, phone mirror). Install it first if you
+want those.
+
+## The tweaks
+
+| | Tweak | What you get |
+|---|---|---|
+| ⌨️ | [**Dictation**](dictation/) | Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut to start/stop; the text is typed into the focused app, copied, and logged. |
+| ⌨️ | [**Arrow Pad**](arrowpad/) | Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Shift, clipboard keys and a 🎤 button. Never steals focus. |
+| ⌨️ | [**Full Keyboard**](full-keyboard/) | TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install). |
+| 🖱️ | [**Mouse cursor fix**](cursor/) | Makes the pointer visible in desktop mode. |
+| 📱 | [**Phone Mirror**](adb-scrcpy/) | Mirror and control your Android phone (scrcpy over wireless adb, with an aarch64 adb). Finds the phone's changing port automatically. |
+| 🔐 | [**Shared KDE wallet**](wallet/) | One wallet for desktop mode *and* VR, an unlock dialog that works on the desktop, 4-hour auto-lock, password-gated apps, and CLI credentials (`gh`) kept out of plain-text files. |
+| 🔐 | [**Signal hardening**](signal/) | Signal's database key in the wallet instead of plain text; Signal quits after 15 minutes idle, and reopening needs the wallet password. |
+| 🌐 | [**NordVPN (WireGuard)**](nordvpn/) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. |
+| 🕵️ | [**Firefox privacy**](firefox/) | Firefox's strongest anti-fingerprinting (the Tor Browser approach), letterboxing, WebRTC limits, daily re-randomization. |
+| 🤖 | [**Claude Desktop**](claude-desktop/) | Anthropic's official Linux arm64 beta, installed and updated without apt. |
+| 🛠️ | [**Tools**](tools/) | `restart-plasmashell`: bring the taskbar and tray back after a crash. |
+
+Each folder's README covers usage, settings, how it works, and the gotchas we hit.
+
+## Using the installer
+
+```text
+./install.sh                    checklist (desktop mode), or help + status (terminal)
+./install.sh install signal     install (adds dependencies: wallet)
+./install.sh install all
+./install.sh status             health check, changes nothing
+./install.sh update             git pull + re-run the installer of everything installed
+./install.sh uninstall nordvpn  remove one
+./install.sh list
+```
+
+```text
+$ ./install.sh status
+  ✔ dictation       dictate ready (2 model(s))
+  ✔ wallet          wallet locked; 5 app launcher(s) routed/gated
+  ✔ signal          key in wallet; idle guard on (IDLE_MINUTES=15)
+  ! nordvpn         not set up yet (run: nordvpn-wg setup)
+  · claude-desktop  not installed
+```
+
+Removing a tweak keeps your settings and data (it says what it kept). Settings live in
+`~/.config` (`dictate.conf`, `signal-guard.conf`, `phone.conf`, `nordvpn-wg/`, …).
+
+## Things worth knowing about the Frame
+
+- **Desktop mode is nested.** Plasma runs inside the Steam/VR session with its own D-Bus and
+  `XDG_RUNTIME_DIR` (`/run/user/$UID/nested_plasma`). Apps started from the desktop, from
+  shortcuts and from VR can see different environments, wallets and keyrings. Many tweaks
+  here exist because of this; see [wallet](wallet/).
+- **Anything installed into `/usr`** (via `steamos-readonly disable` + pacman) disappears at the
+  next SteamOS update. Prefer home-folder installs, Flatpaks, or config in `/etc` (as
+  [nordvpn](nordvpn/) does).
+- **SteamOS's stock KDE wallet has no password.** Set one; see [SECURITY.md](SECURITY.md).
+- **Steam's on-screen keyboard:** hold **Shift** for ←/→.
+  X11-only on-screen keyboards (e.g. CoreKeyboard) don't work under the Wayland desktop.
+- **Closing desktop mode can half-tear it down.** Steam may delete the nested session's runtime
+  folder while KWin keeps running, so new apps fail with "Failed to initialize Wayland". Exit
+  and reopen desktop mode, or reboot.
+- **Vulkan apps** can crash in the Gamescope WSI layer; try `DISABLE_GAMESCOPE_WSI=1`.
+
+## How this compares
+
+Other Frame projects, and how this one relates:
+
+| Project | Approach | Overlap |
+|---|---|---|
+| [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) | Nix Home Manager modules, declarative | Two-session fixes, shared wallet (our [wallet](wallet/) adapts its launcher approach without Nix), VR keyboard patches |
+| [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils) | `setup.sh` + app installers | Cursor fix (adopted from here, credited), Full Keyboard installer |
+| [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard) | Native VR keyboard | Installed by our `full-keyboard` |
+| [techieyann/frame-voice](https://github.com/techieyann/frame-voice), [groffta/whisper-frame](https://github.com/groffta/whisper-frame), [gripspeak](https://github.com/gripspeak/gripspeak) | Dictation apps | Alternatives to our [dictation](dictation/) |
+
+**Choose this repo if** you want a checklist installer, no Nix, and the security, privacy and
+connectivity pieces (wallet, Signal, Firefox, NordVPN) alongside input and quality-of-life fixes.
+
+## Contributing, security, license
+
+- New tweaks are folders with `install.sh` / `status.sh` / `uninstall.sh`; see
+  [CONTRIBUTING.md](CONTRIBUTING.md).
+- What touches secrets, and the threat model: [SECURITY.md](SECURITY.md).
+- [MIT](LICENSE). Changes: [CHANGELOG.md](CHANGELOG.md).
+
+Built on SteamOS 0.4.5 (build 20261006) on a Steam Frame. Tested on one headset so far:
+reports from others are welcome.

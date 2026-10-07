@@ -14,3 +14,6 @@ Launch **Full Keyboard** from the dashboard's app launcher. Launching again rece
 Re-run the install to update; the upstream installer keeps the previous release for rollback.
 
 **Which keyboard when?** See the [keyboard guide](../arrowpad/README.md#which-keyboard-when).
+
+---
+Check: `./install.sh status full-keyboard` · Remove: `./install.sh uninstall full-keyboard`

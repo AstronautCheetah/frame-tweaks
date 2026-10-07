@@ -1,0 +1,27 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck -x -S warning $(grep -lE '^#!/bin/(ba)?sh' -r --exclude-dir=.git .)
+      - name: Python syntax
+        run: |
+          for f in $(grep -lE '^#!/usr/bin/env python3' -r --exclude-dir=.git .); do
+            python3 -m py_compile "$f"
+          done
+      - name: Manifest and installer self-checks
+        run: |
+          # every component in components.tsv has install/uninstall/status scripts and a README
+          grep -v '^#' components.tsv | cut -f1 | while read -r c; do
+            for f in install.sh uninstall.sh status.sh README.md; do
+              test -f "$c/$f" || { echo "missing $c/$f"; exit 1; }
+            done
+          done
+          ./install.sh list
+          ./install.sh _deps all
+          ./install.sh _deps signal | grep -q '^wallet signal'

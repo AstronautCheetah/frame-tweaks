@@ -10,3 +10,6 @@ claude-desktop-update     # later: fetch a newer version if there is one
 ```
 
 It doesn't auto-update in this form, so run `claude-desktop-update` now and then.
+
+---
+Check: `./install.sh status claude-desktop` · Remove: `./install.sh uninstall claude-desktop`

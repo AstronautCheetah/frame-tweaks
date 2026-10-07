@@ -70,3 +70,18 @@ install_py_tool() {
     sed "1s|.*|#!$TWEAKS_VENV/bin/python|" "$1" > "$BIN/$(basename "$1")"
     chmod 755 "$BIN/$(basename "$1")"
 }
+
+# --- status.sh helpers: print one line, exit 0 = installed/OK, 1 = not installed, 2 = needs attention
+status_ok()      { printf 'ok       %s\n' "$*"; exit 0; }
+status_missing() { printf 'missing  %s\n' "$*"; exit 1; }
+status_warn()    { printf 'warning  %s\n' "$*"; exit 2; }
+
+# remove_files <path>...: delete if present, saying what went
+remove_files() {
+    local f
+    for f in "$@"; do
+        if [ -e "$f" ] || [ -L "$f" ]; then rm -rf -- "$f" && say "removed $f"; fi
+    done
+}
+
+QT_VENV="$HOME/.local/share/arrowpad/venv"   # PyQt6, shared by arrowpad and nordvpn-tray
