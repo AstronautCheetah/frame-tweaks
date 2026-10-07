@@ -53,7 +53,9 @@ say "Wallet closes after $IDLE minutes unused (WALLET_IDLE_MINUTES=… to change
 apps=(org.kde.kwalletmanager)
 flatpak info org.signal.Signal >/dev/null 2>&1 && apps+=(org.signal.Signal)
 [ -f "$APPS/com.anthropic.Claude.desktop" ] && apps+=(com.anthropic.Claude)
-"$BIN/wallet-launcher" "${apps[@]}"
+# --gate: open through our unlock dialog first, so these never trigger ksecretd's own
+# prompt (the one that floats in VR and blocks every other unlock while it's open).
+"$BIN/wallet-launcher" --gate "${apps[@]}"
 cat <<MSG
 
 Add other wallet-using apps with:  wallet-launcher <app-id>   (--electron for Electron apps)

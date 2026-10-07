@@ -56,6 +56,25 @@ It derives the same key KDE's login auto-unlock (kwallet-pam) uses (PBKDF2-SHA51
 D-Bus (jeepney), so neither password nor key appears on a command line. The Signal
 launcher runs it before Signal starts.
 
+## One unlock route: our dialog, never ksecretd's prompt
+There are two password prompts, and only one works reliably:
+
+| | Window | Behaviour |
+|---|---|---|
+| ✅ ours | **"Unlock wallet"** (`kdialog`) | Appears where you are; unlocks with the password-derived key. |
+| ❌ ksecretd's | **"KDE Wallet Service"** (`ksecretd`) | Floats in VR. **While it's open, ksecretd ignores every other unlock**, so a correct password typed into our dialog looks wrong, and a forgotten one blocks the wallet. |
+
+ksecretd prompts when an app asks for a secret while the wallet is locked without going
+through our gate first. So:
+- **Routes closed:** Signal, KWalletManager and Claude Desktop open through our dialog
+  (`wallet-launcher --gate`), like Firefox and Android Mirror.
+- **Prompt replaced:** if a ksecretd prompt still appears while the wallet is locked (e.g. an
+  already-running app asking again after the auto-lock), `wallet-lock-sync` closes it (like
+  its ✕, which ksecretd treats as Cancel) and shows our dialog on the same display. A ksecretd
+  window on an *unlocked* wallet is an "allow this app?" question and is left alone.
+- **One auto-lock clock:** whichever way the wallet gets unlocked, the 4-hour auto-lock
+  restarts from then.
+
 ## "Closed" means locked: `wallet-lock-sync`
 Closing the wallet in KWalletManager (or KWallet's idle timeout) only closes `kwalletd6`'s view
 of it; `ksecretd` stays unlocked, and apps such as Signal keep getting their secrets without a
