@@ -26,5 +26,8 @@ advertises its real LAN address over mDNS, and that's what `phone` uses. Check w
 `avahi-browse -rt _adb-tls-connect._tcp`. If the phone isn't visible at all, enable
 the VPN's "allow LAN connections" option.
 
+## Credits
+[scrcpy](https://github.com/Genymobile/scrcpy) (Apache-2.0); `adb` from Android's platform tools (Apache-2.0) as packaged by [Arch Linux ARM](https://archlinuxarm.org). See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status adb-scrcpy` · Remove: `./install.sh uninstall adb-scrcpy`

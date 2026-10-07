@@ -30,6 +30,15 @@ latched-blue modifiers) and a toolbar with 📌 **pin** (stops accidental moves)
 position** (bottom centre), **−** / **+** (size, 0.6×–2×) and ✕ close. **Grab to move:** drag
 the panel or toolbar background. Position, size and pin state are remembered per window.
 
+**Controller haptics, like Full Keyboard:** a light tick when the laser moves onto a key and a
+click when you press one, on the hand doing the pointing (the one moving its controller). It
+uses SteamVR Input with Full Keyboard's values; the toolbar and dragging don't pulse. Needs
+SteamVR running; otherwise the pad works without it.
+
+**Sizing:** the pad keeps its proportions, and **+**/**−** change its size in steps (0.6×–2×),
+remembered per window. In VR it draws at 1× and fixes its window size, because the VR session's
+virtual screen runs at 1.5×, and Steam would otherwise stretch the window and open gaps.
+
 **Labels follow your keyboard language:** the pad reads KDE's current layout (re-checked every
 few seconds) and uses the legends printed on that language's keyboards: German *Strg, Entf,
 Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian
@@ -71,6 +80,9 @@ Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, Re
 - Single instance via a `QLocalServer` socket (`arrowpad-$UID`).
 - PyQt6 in a private venv (`~/.local/share/arrowpad/venv`, ~280 MB), because SteamOS
   ships no Python GUI bindings.
+
+## Credits
+Look, toolbar, pin/recenter/size controls and haptic values from [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard) (MIT); one-shot modifiers and the F-key layer from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s VR keyboard (Apache-2.0). Icons: KDE Breeze (LGPL-3.0). Haptics via [pyopenvr](https://github.com/cmbruns/pyopenvr) (BSD). See also [CREDITS.md](../CREDITS.md).
 
 ---
 Check: `./install.sh status arrowpad` · Remove: `./install.sh uninstall arrowpad`

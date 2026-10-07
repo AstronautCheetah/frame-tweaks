@@ -140,6 +140,21 @@ cmd_reinstall() {
 
 cmd_gui() {
     ensure_menu_entry
+    # The full window (hide rows, live status) needs PyQt6, shared with Arrow Pad and the
+    # NordVPN tray. Offer to set it up; otherwise fall back to kdialog's plain checklist.
+    local qt="$HOME/.local/share/arrowpad/venv"
+    if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
+       kdialog --title "Steam Frame Tweaks" --yesno "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist."; then
+        python3 -m venv "$qt" && "$qt/bin/pip" install -q PyQt6 ||
+            kdialog --sorry "Couldn't install PyQt6; using the simple checklist."
+    fi
+    if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then
+        exec "$qt/bin/python" gui/frame-tweaks-gui.py
+    fi
+    cmd_kdialog_gui
+}
+
+cmd_kdialog_gui() {
     local args=() id st
     for id in "${IDS[@]}"; do
         status_of "$id" >/dev/null; st=$?

@@ -1,0 +1,16 @@
+{
+  "default_bindings": [
+    { "controller_type": "frame_controller", "binding_url": "bindings_frame_controller.json" }
+  ],
+  "actions": [
+    { "name": "/actions/arrowpad/out/haptic_left", "type": "vibration" },
+    { "name": "/actions/arrowpad/out/haptic_right", "type": "vibration" }
+  ],
+  "action_sets": [ { "name": "/actions/arrowpad", "usage": "leftright" } ],
+  "localization": [ {
+    "language_tag": "en_US",
+    "/actions/arrowpad": "Arrow Pad",
+    "/actions/arrowpad/out/haptic_left": "Left hand feedback",
+    "/actions/arrowpad/out/haptic_right": "Right hand feedback"
+  } ]
+}

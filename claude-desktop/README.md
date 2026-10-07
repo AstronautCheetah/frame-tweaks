@@ -11,5 +11,8 @@ claude-desktop-update     # later: fetch a newer version if there is one
 
 It doesn't auto-update in this form, so run `claude-desktop-update` now and then.
 
+## Credits
+Claude Desktop is Anthropic's; this only downloads it from Anthropic's apt repository and verifies its checksum. Not affiliated with Anthropic. See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status claude-desktop` · Remove: `./install.sh uninstall claude-desktop`

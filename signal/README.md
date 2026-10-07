@@ -59,5 +59,8 @@ access, not against someone who can use desktop mode while you're unlocked.
 Signal's warning about "experimental" backends mainly concerns GNOME libsecret on
 other desktops. On KDE, kwallet6 is the native, intended backend.
 
+## Credits
+Headset-off detection uses the proximity sensor as documented by [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils#proximity-sensor). Signal is a trademark of Signal Technology Foundation; not affiliated. See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status signal` · Remove: `./install.sh uninstall signal`

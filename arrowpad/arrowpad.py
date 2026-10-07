@@ -50,12 +50,23 @@ def pick_display(argv):
 
 
 TARGET = pick_display(sys.argv)
+if TARGET == "vr":
+    # The VR display is a 1280x720 virtual screen at 1.5x (Xft.dpi 144). Draw at 1x and keep
+    # the window a fixed size, so Steam can't stretch it (which opened big gaps between keys).
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+    os.environ.pop("QT_SCALE_FACTOR", None)
 
-from PyQt6.QtCore import QPoint, QRectF, QSize, Qt, QTimer  # noqa: E402
+from PyQt6.QtCore import QEvent, QObject, QPoint, QRectF, QSize, Qt, QTimer  # noqa: E402
 from PyQt6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPainterPath  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket  # noqa: E402
-from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QPushButton,  # noqa: E402
+from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLayout, QPushButton,  # noqa: E402
                              QVBoxLayout, QWidget)
+
+try:  # controller haptics (optional): SteamVR Input via the openvr module
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from haptics import Haptics  # noqa: E402
+except Exception:  # pragma: no cover
+    Haptics = None
 
 # Linux input-event-codes.h
 EV_SYN, EV_KEY, SYN_REPORT = 0x00, 0x01, 0
@@ -221,7 +232,10 @@ class ArrowPad(QWidget):
         self.pinned = cfg.get("pinned", False)
 
         outer = QVBoxLayout(self)
+        outer.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)   # window = content size
         self.outer = outer
+        self.haptics = Haptics() if Haptics else None
+        self.hover_filter = HoverHaptics(self)
         # toolbar: pin, reset position, smaller, larger ......... close
         bar = QHBoxLayout()
         self.tools = {}
@@ -248,6 +262,7 @@ class ArrowPad(QWidget):
                 b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 b.pressed.connect(lambda r=r, c=c: self.on_press(r, c))
                 b.released.connect(lambda r=r, c=c: self.on_release(r, c))
+                b.installEventFilter(self.hover_filter)
                 grid.addWidget(b, r, c)
                 self.buttons.append((r, c, b))
         outer.addLayout(grid)
@@ -389,7 +404,12 @@ class ArrowPad(QWidget):
         self.save_config()
 
     # ---- input ----------------------------------------------------------
+    def pulse(self, kind):
+        if self.haptics:
+            self.haptics.pulse(kind)
+
     def on_press(self, r, c):
+        self.pulse("press")
         name = self.name_at(r, c)
         if name in KEY and name not in MODIFIERS:
             self.yd.key(KEY[name], True)
@@ -482,8 +502,23 @@ class ArrowPad(QWidget):
     def closeEvent(self, ev):
         self.save_config()
         self.release_all_mods()   # never leave a modifier stuck down
+        if self.haptics:
+            self.haptics.close()
         super().closeEvent(ev)
         QApplication.quit()
+
+
+class HoverHaptics(QObject):
+    """A light tick when the pointer moves onto a key (not the toolbar), like Full Keyboard."""
+
+    def __init__(self, pad):
+        super().__init__(pad)
+        self.pad = pad
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Enter:
+            self.pad.pulse("hover")
+        return False
 
 
 def default_socket():

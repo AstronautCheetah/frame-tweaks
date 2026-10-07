@@ -20,5 +20,6 @@ House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on comma
 in plain-text files; verify downloads when the publisher offers checksums; credit the
 projects you borrow from.
 
-**Testing installers:** never test the GUI or uninstall paths against a real setup without
+**Testing installers:** the installer window honours `FRAME_TWEAKS_DRY_RUN=1` too (prints the plan).
+ never test the GUI or uninstall paths against a real setup without
 `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`. An unticked checklist means "remove".

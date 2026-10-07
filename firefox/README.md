@@ -40,5 +40,8 @@ adding per-site exceptions, which themselves make you more identifiable. For ble
 with a large crowd, Tor Browser remains stronger than any single-browser setting.
 Adding uBlock Origin (from addons.mozilla.org) also blocks many fingerprinting scripts.
 
+## Credits
+`resistFingerprinting` comes from the Tor Project's Tor Browser, upstreamed into Firefox (MPL-2.0). Results measured with [EFF Cover Your Tracks](https://coveryourtracks.eff.org). See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status firefox` · Remove: `./install.sh uninstall firefox`

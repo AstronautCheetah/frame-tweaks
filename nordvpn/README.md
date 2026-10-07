@@ -50,5 +50,8 @@ Default locations: US, CA, GB, NL, CH, DE, JP (edit `~/.config/nordvpn-wg/locati
 - The private key lives in the system connection files (root-only) and in
   `~/.config/nordvpn-wg/private_key` (mode 600, for adding locations later).
 
+## Credits
+Uses NordVPN's public server API and NordLynx (WireGuard). NordVPN is a trademark of Nord Security; this project isn't affiliated with it. See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status nordvpn` · Remove: `./install.sh uninstall nordvpn`
