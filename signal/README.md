@@ -58,3 +58,6 @@ reopens without a password (`wallet-unlock --lock` locks it early). It's protect
 access, not against someone who can use desktop mode while you're unlocked.
 Signal's warning about "experimental" backends mainly concerns GNOME libsecret on
 other desktops. On KDE, kwallet6 is the native, intended backend.
+
+---
+Check: `./install.sh status signal` · Remove: `./install.sh uninstall signal`

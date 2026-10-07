@@ -53,3 +53,6 @@ arrowpad --quit
 - Single instance via a `QLocalServer` socket (`arrowpad-$UID`).
 - PyQt6 in a private venv (`~/.local/share/arrowpad/venv`, ~280 MB), because SteamOS
   ships no Python GUI bindings.
+
+---
+Check: `./install.sh status arrowpad` · Remove: `./install.sh uninstall arrowpad`

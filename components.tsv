@@ -1,0 +1,13 @@
+# id	title	depends	description
+dictation	Dictation	ydotool	Local Whisper speech-to-text on the GPU: one shortcut to record, text is typed and copied
+arrowpad	Arrow Pad	ydotool	Floating arrows/Home/End/F-keys/Ctrl pad with a dictation button; never steals focus
+full-keyboard	Full Keyboard (VR)		TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified)
+cursor	Mouse cursor fix		Makes the mouse pointer visible in desktop mode
+adb-scrcpy	Phone Mirror		adb for aarch64 + scrcpy, with a launcher that finds your phone automatically
+wallet	Shared KDE wallet		One wallet for desktop mode and VR, desktop unlock dialog, 4-hour auto-lock, keyring for CLI tools
+signal	Signal hardening	wallet	Signal's key in the wallet instead of plaintext; quits after 15 minutes idle
+nordvpn	NordVPN (WireGuard)		NordVPN as NetworkManager connections with a tray icon; survives SteamOS updates
+firefox	Firefox privacy		Strong anti-fingerprinting (resistFingerprinting, letterboxing, WebRTC limits)
+claude-desktop	Claude Desktop		Official Linux arm64 beta, installed and updated without apt
+tools	Tools		restart-plasmashell: bring back a crashed taskbar/system tray
+ydotool	ydotool (helper)		Keystroke injection for any app; installed automatically when needed

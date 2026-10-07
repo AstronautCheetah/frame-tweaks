@@ -13,3 +13,6 @@ Undo: delete `~/.config/environment.d/90-kwin-software-cursor.conf` and reboot.
 
 Credit: from [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils),
 via Cas and Chary XR's "Steam Frame: 10 Things To Do FIRST", credited there to ThrillSeeker.
+
+---
+Check: `./install.sh status cursor` · Remove: `./install.sh uninstall cursor`

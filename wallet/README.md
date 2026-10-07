@@ -97,3 +97,6 @@ and Chromium's zygote never starts. `frame-outer-bus` switches `XDG_RUNTIME_DIR`
 
 Caveat: apps routed to the outer bus use that session's portals and notifications, so
 some desktop integration (e.g. a tray icon, dark-mode detection) may differ.
+
+---
+Check: `./install.sh status wallet` · Remove: `./install.sh uninstall wallet`

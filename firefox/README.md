@@ -39,3 +39,6 @@ If a site breaks, use a separate Firefox profile without RFP for that site, rath
 adding per-site exceptions, which themselves make you more identifiable. For blending in
 with a large crowd, Tor Browser remains stronger than any single-browser setting.
 Adding uBlock Origin (from addons.mozilla.org) also blocks many fingerprinting scripts.
+
+---
+Check: `./install.sh status firefox` · Remove: `./install.sh uninstall firefox`

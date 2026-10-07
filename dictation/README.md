@@ -36,3 +36,6 @@ Log: `/run/user/$UID/dictate/dictate.log`. Last recording: `/run/user/$UID/dicta
   `/run/user/$UID/nested_plasma/`, but apps started from shortcuts see
   `XDG_RUNTIME_DIR=/run/user/$UID`, so `wl-copy` silently failed. The script finds the socket itself.
 - whisper.cpp's Vulkan backend crashes in the Gamescope WSI layer, so it runs with `DISABLE_GAMESCOPE_WSI=1`.
+
+---
+Check: `./install.sh status dictation` · Remove: `./install.sh uninstall dictation`
