@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=NordVPN Tray
+Comment=Tray menu for the NordVPN WireGuard connections
+Exec=@BIN@/nordvpn-tray
+Icon=network-vpn
+Terminal=false
+Categories=Network;
+X-KDE-autostart-phase=2

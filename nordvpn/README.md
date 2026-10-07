@@ -13,12 +13,17 @@ nothing is installed system-wide.
 nordvpn-wg setup        # once: paste your access token into the hidden prompt
 ```
 
-Get the token at Nord Account → NordVPN → **Access token** (Set up NordVPN manually →
-Generate new token). It's used once to fetch your WireGuard key and isn't stored.
+Get the token at Nord Account → **NordVPN** → scroll to **Advanced settings** → **Get access
+token** → verify by email → **Generate new token** (a 30-day token is enough). It's shown only
+once. Paste it into the hidden prompt with Ctrl+Shift+V. It's used once to fetch your
+WireGuard key and isn't stored. (The "Service credentials" username/password are for
+OpenVPN/IKEv2, which SteamOS's NetworkManager doesn't support.)
 
 ## Use
-Each location shows up as **NordVPN <Country>** in the network menu of the system tray.
-Click one to connect. Or from a terminal:
+SteamOS on the Frame has **no Plasma network applet**, so the installer adds a **NordVPN tray
+icon** (`nordvpn-tray`, autostarts with desktop mode): grey = disconnected, green = connected,
+yellow = working. Click it to pick a location, disconnect, show your public IP, or re-pick
+the least-loaded servers. Or from a terminal:
 
 ```sh
 nordvpn-wg list          # locations; ● = connected
@@ -36,7 +41,8 @@ Default locations: US, CA, GB, NL, CH, DE, JP (edit `~/.config/nordvpn-wg/locati
 - Each location is pinned to the server that was least loaded when it was created. Run
   `nordvpn-wg refresh` now and then (an active connection is reconnected to its new server).
 - While connected, DNS goes only to NordVPN's resolvers (103.86.96.100 / 103.86.99.100).
-- NordLynx is IPv4-only; IPv6 is disabled on the tunnel. There's no kill switch: if the
+- NordLynx is IPv4-only; IPv6 is disabled on the tunnel. On a network that has IPv6, IPv6
+  traffic bypasses the VPN (check: `ip -6 addr show scope global`). There's no kill switch: if the
   tunnel drops, traffic goes out normally.
 - Connections are saved through NetworkManager's D-Bus API (`AddConnection2`), because this
   NetworkManager's `nmcli` can't set WireGuard peers and `nmcli connection import`
