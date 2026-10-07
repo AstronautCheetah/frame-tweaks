@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6 (2026-10-07)
+- Wallet: one unlock route. `wallet-lock-sync` now replaces ksecretd's own password prompt
+  (which floats in VR and blocks every other unlock while open) with our dialog on the same
+  display; KWalletManager and Claude Desktop are gated like Signal; the 4-hour auto-lock
+  restarts whenever the wallet is unlocked, by any route.
+
 ## 0.1.5 (2026-10-07)
 - New **clipboard** tweak: one clipboard for desktop mode and VR windows (dnut/clipboard-sync
   built from upstream, started with the desktop session; approach from steam-frame-nix).

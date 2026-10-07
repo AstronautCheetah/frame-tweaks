@@ -7,9 +7,13 @@ pops up as a floating VR window on the Steam session's display.
                            Schedules an automatic lock after WALLET_LOCK_HOURS (default 4).
   wallet-unlock --lock     lock it now
   wallet-unlock --status   print locked / unlocked
-  wallet-unlock --watch    keep ksecretd in step with kwalletd6: when the wallet is closed
-                           (KWalletManager's Close, idle timeout), really lock it. Run by
-                           wallet-lock-sync.service.
+  wallet-unlock --watch    run by wallet-lock-sync.service:
+                           - when the wallet is closed (KWalletManager's Close, idle timeout),
+                             really lock it (kwalletd6's close leaves ksecretd unlocked);
+                           - whenever it gets unlocked, (re)start the auto-lock timer;
+                           - replace ksecretd's own password prompt ("KDE Wallet Service",
+                             floating in VR; while it's open every other unlock is ignored)
+                             with this dialog, on the same display.
 
 It derives the same key KDE's login-time auto-unlock (kwallet-pam) uses,
 PBKDF2-SHA512 over the wallet's salt, and hands it to ksecretd's pamOpen on the
@@ -94,6 +98,78 @@ def lock(conn):
         pass
 
 
+def x_env(display):
+    """Environment to reach an X display; the desktop's :2 needs its XAUTHORITY."""
+    env = dict(os.environ, DISPLAY=display)
+    if display != ":0":
+        src = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "ksmserver"],
+                             capture_output=True, text=True).stdout.split()
+        if src:
+            try:
+                senv = dict(kv.split("=", 1) for kv in
+                            Path(f"/proc/{src[0]}/environ").read_text().split("\0") if "=" in kv)
+                env["DISPLAY"] = senv.get("DISPLAY", display)
+                if "XAUTHORITY" in senv:
+                    env["XAUTHORITY"] = senv["XAUTHORITY"]
+            except OSError:
+                pass
+    return env
+
+
+def ksecretd_prompts():
+    """[(display, window id)] of visible ksecretd dialogs: the "bad" route. (Ours are
+    titled "Unlock wallet", class kdialog.)"""
+    found = []
+    for display in (":0", ":2"):
+        env = x_env(display)
+        try:
+            tree = subprocess.run(["xwininfo", "-root", "-tree"], env=env, capture_output=True,
+                                  text=True, timeout=3).stdout
+        except (OSError, subprocess.SubprocessError):
+            continue
+        for line in tree.splitlines():
+            if '"KDE Wallet Service": ("ksecretd"' not in line:
+                continue
+            wid = line.split()[0]
+            info = subprocess.run(["xwininfo", "-id", wid], env=env, capture_output=True, text=True).stdout
+            if "IsViewable" in info and "Width: 1\n" not in info:
+                found.append((env["DISPLAY"], int(wid, 16)))
+    return found
+
+
+def close_window(display, wid):
+    """Ask a window to close, like its ✕ button (WM_DELETE_WINDOW); ksecretd treats it as
+    Cancel. Plain Xlib through ctypes: no xdotool on SteamOS."""
+    import ctypes as C
+
+    class ClientMessage(C.Structure):
+        _fields_ = [("type", C.c_int), ("serial", C.c_ulong), ("send_event", C.c_int),
+                    ("display", C.c_void_p), ("window", C.c_ulong), ("message_type", C.c_ulong),
+                    ("format", C.c_int), ("data", C.c_long * 5), ("pad", C.c_long * 24)]
+    xlib = C.cdll.LoadLibrary("libX11.so.6")
+    xlib.XOpenDisplay.restype = C.c_void_p
+    xlib.XInternAtom.restype = C.c_ulong
+    xlib.XInternAtom.argtypes = [C.c_void_p, C.c_char_p, C.c_int]
+    xlib.XSendEvent.argtypes = [C.c_void_p, C.c_ulong, C.c_int, C.c_long, C.c_void_p]
+    old = os.environ.get("XAUTHORITY")
+    env = x_env(display)
+    if "XAUTHORITY" in env:
+        os.environ["XAUTHORITY"] = env["XAUTHORITY"]
+    dpy = xlib.XOpenDisplay(display.encode())
+    if old is not None:
+        os.environ["XAUTHORITY"] = old
+    if not dpy:
+        return False
+    ev = ClientMessage(type=33, window=wid, format=32,                      # 33 = ClientMessage
+                       message_type=xlib.XInternAtom(dpy, b"WM_PROTOCOLS", False))
+    ev.data[0] = xlib.XInternAtom(dpy, b"WM_DELETE_WINDOW", False)
+    ev.data[1] = 0                                                           # CurrentTime
+    xlib.XSendEvent(dpy, wid, False, 0, C.byref(ev))
+    xlib.XFlush(C.c_void_p(dpy))
+    xlib.XCloseDisplay(C.c_void_p(dpy))
+    return True
+
+
 def prompt_pending():
     """True if one of ksecretd's own password prompts is showing (VR display :0 or the
     desktop). While it is, ksecretd ignores pamOpen, so a right password looks wrong."""
@@ -164,8 +240,10 @@ def watch():
     secrets. Turn every close into a real lock."""
     from jeepney import MatchRule
     from jeepney.bus_messages import message_bus as mb
+    import threading
+    threading.Thread(target=broker, daemon=True).start()
     with bus() as conn:
-        for member in ("walletClosed", "allWalletsClosed"):
+        for member in ("walletClosed", "allWalletsClosed", "walletOpened"):
             rule = MatchRule(type="signal", interface="org.kde.KWallet", member=member)
             call(conn, mb.AddMatch(rule))
         while True:
@@ -174,6 +252,10 @@ def watch():
                 continue
             member = msg.header.fields.get(3)          # 3 = MEMBER
             body = msg.body
+            if member == "walletOpened" and body and body[0] == WALLET:
+                # Unlocked by any route: the 4-hour auto-lock counts from now.
+                print(f"{time.strftime('%T')} wallet opened -> auto-lock in {schedule_lock()} h", flush=True)
+                continue
             if member == "allWalletsClosed" or (member == "walletClosed" and body and body[0] == WALLET):
                 try:
                     if not is_locked(conn) or ksecretd_open(conn):
@@ -181,6 +263,31 @@ def watch():
                         print(f"{time.strftime('%T')} wallet closed -> locked and closed in ksecretd", flush=True)
                 except Exception as e:                  # keep watching even if one lock fails
                     print(f"lock failed: {e}", flush=True)
+
+
+def broker():
+    """Replace ksecretd's own password prompt with ours. Only while the wallet is locked:
+    a ksecretd window on an unlocked wallet is an "allow this app?" question, left alone."""
+    exe = os.path.abspath(sys.argv[0])
+    while True:
+        time.sleep(1.5)
+        try:
+            prompts = ksecretd_prompts()
+            if not prompts:
+                continue
+            with bus() as conn:
+                if not is_locked(conn):
+                    continue
+            for display, wid in prompts:
+                close_window(display, wid)
+                print(f"{time.strftime('%T')} closed ksecretd's prompt on {display}; showing ours", flush=True)
+            time.sleep(0.5)
+            env = x_env(prompts[0][0])
+            env.pop("WAYLAND_DISPLAY", None)          # kdialog on that X display
+            env["QT_QPA_PLATFORM"] = "xcb"
+            subprocess.run([exe], env=env)              # our dialog; unlocks on success
+        except Exception as e:                          # keep brokering whatever happens
+            print(f"broker: {e}", flush=True)
 
 
 def notify(text):
