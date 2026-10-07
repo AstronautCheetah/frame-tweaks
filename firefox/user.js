@@ -8,6 +8,10 @@ user_pref("privacy.resistFingerprinting", true);
 // Round the content area to common sizes (grey margins) so the VR desktop's unusual
 // window size doesn't identify you.
 user_pref("privacy.resistFingerprinting.letterboxing", true);
+// Re-key the canvas/WebGL/audio randomization every day (normal and private windows),
+// so even randomized values can't link your visits across days.
+user_pref("privacy.resistFingerprinting.randomization.daily_reset.enabled", true);
+user_pref("privacy.resistFingerprinting.randomization.daily_reset.private.enabled", true);
 // Always ask for English pages without prompting (RFP otherwise asks per site).
 user_pref("privacy.spoof_english", 2);
 

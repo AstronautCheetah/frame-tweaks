@@ -1,8 +1,8 @@
 # Firefox: anti-fingerprinting
 
-The Frame makes a browser unusually easy to fingerprint: very few browsers report a
-**Linux aarch64** platform, an **Adreno** GPU, or the VR desktop's odd window size, and the
-timezone gives away your location even behind a VPN. This turns on Firefox's strongest
+The Frame makes a browser easier to fingerprint: an **Adreno** GPU, the VR desktop's odd
+window size and touch input are rare, and the timezone gives away your location even behind a
+VPN. (Firefox already reports Linux x86_64 on aarch64 by itself.) This turns on Firefox's strongest
 built-in protection, `privacy.resistFingerprinting` (RFP, the Tor Browser approach), via a
 `user.js` in the default profile, so it's applied at every start and Sync can't undo it.
 
@@ -22,7 +22,18 @@ What sites see with it on:
 Kept: Strict tracking protection (blocks known fingerprinting scripts), HTTPS-only mode,
 saved passwords and Firefox Sync.
 
+- canvas/WebGL/audio readings **randomized**, re-keyed **daily**
+
 Check the result at <https://coveryourtracks.eff.org>.
+
+## Reading the Cover Your Tracks result
+Expect "**unique**" with ~18 bits even when everything works. The remaining values (Firefox
+version on Linux, RFP's font allowlist, letterboxed 1400×900, `maxTouchPoints` 5,
+`hardwareConcurrency` 4, UTC/Atlantic/Reykjavik, WebGL vendor "Mozilla") are the **fixed values
+every RFP Firefox reports**, verified here with a headless Firefox that has no touch device
+(RFP on: 5 touch points, 4 cores; off: 0 and 8). EFF's comparison set has few RFP users, so
+that shared signature looks rare there. Changing any of those values would make you stand
+out *from other RFP users*, so don't. Canvas/WebGL show as "randomized": no stable hash.
 
 If a site breaks, use a separate Firefox profile without RFP for that site, rather than
 adding per-site exceptions, which themselves make you more identifiable. For blending in
