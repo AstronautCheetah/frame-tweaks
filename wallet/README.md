@@ -105,5 +105,8 @@ and Chromium's zygote never starts. `frame-outer-bus` switches `XDG_RUNTIME_DIR`
 Caveat: apps routed to the outer bus use that session's portals and notifications, so
 some desktop integration (e.g. a tray icon, dark-mode detection) may differ.
 
+## Credits
+The shared-wallet launcher approach is adapted from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) (Apache-2.0), reimplemented without Nix. The unlock key derivation follows KDE's kwallet-pam. D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status wallet` · Remove: `./install.sh uninstall wallet`

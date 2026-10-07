@@ -58,8 +58,13 @@ Each folder's README covers usage, settings, how it works, and the gotchas we hi
 
 ## Using the installer
 
+**Steam Frame Tweaks** in the app menu (desktop or VR "+" menu) opens the installer window:
+one row per tweak with its live status, tick to install, untick to remove, **Hide** rows you
+don't need (hidden ones are never removed) and **Show hidden** to bring them back. It uses
+PyQt6, set up on first use (shared with Arrow Pad); without it you get a simple checklist.
+
 ```text
-./install.sh                    checklist (desktop mode), or help + status (terminal)
+./install.sh                    installer window (desktop mode), or help + status (terminal)
 ./install.sh install signal     install (adds dependencies: wallet)
 ./install.sh install all
 ./install.sh status             health check, changes nothing
@@ -110,6 +115,15 @@ Other Frame projects, and how this one relates:
 
 **Choose this repo if** you want a checklist installer, no Nix, and the security, privacy and
 connectivity pieces (wallet, Signal, Firefox, NordVPN) alongside input and quality-of-life fixes.
+
+## Credits
+
+This builds on [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) (shared-wallet
+launchers, two-session know-how), [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils)
+(cursor fix, proximity sensor), [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)
+(Arrow Pad style and haptics) and [techieyann/frame-voice](https://github.com/techieyann/frame-voice)
+(installer shape), and on whisper.cpp, scrcpy, ydotool, KDE and others. Details and licenses:
+[CREDITS.md](CREDITS.md). Not affiliated with Valve or any vendor named here.
 
 ## Contributing, security, license
 

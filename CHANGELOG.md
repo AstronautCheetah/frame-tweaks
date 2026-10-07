@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4 (2026-10-07)
+- New installer window (PyQt6, Full Keyboard style): live status per tweak, Hide/Unhide per
+  row, "Show hidden" toggle, removals confirmed separately.
+- Arrow Pad: controller haptics via SteamVR Input (hover tick, press click, on the pointing
+  hand); VR window renders at 1x with a fixed size, so there are no gaps between keys.
+- CREDITS.md with what came from which project and every dependency's license; a Credits
+  section in each tweak's README and the main README.
+
 ## 0.1.3 (2026-10-07)
 - Wallet: fix "password refused". The lock left ksecretd *open but locked*, so the unlock was
   silently ignored and every password looked wrong. Locking now fully closes the wallet in

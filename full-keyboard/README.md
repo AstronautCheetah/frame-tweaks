@@ -15,5 +15,8 @@ Re-run the install to update; the upstream installer keeps the previous release 
 
 **Which keyboard when?** See the [keyboard guide](../arrowpad/README.md#which-keyboard-when).
 
+## Credits
+Full Keyboard is [TaiKeid](https://github.com/TaiKeid/steam-frame-full-keyboard)'s (MIT). The checksum-then-install pattern follows [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils)' `install-full-keyboard.sh`. See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status full-keyboard` · Remove: `./install.sh uninstall full-keyboard`

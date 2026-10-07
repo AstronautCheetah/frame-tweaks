@@ -48,5 +48,8 @@ Log: `/run/user/$UID/dictate/dictate.log`. Last recording: `/run/user/$UID/dicta
   `XDG_RUNTIME_DIR=/run/user/$UID`, so `wl-copy` silently failed. The script finds the socket itself.
 - whisper.cpp's Vulkan backend crashes in the Gamescope WSI layer, so it runs with `DISABLE_GAMESCOPE_WSI=1`.
 
+## Credits
+[whisper.cpp](https://github.com/ggml-org/whisper.cpp) (MIT) and OpenAI's Whisper models do the transcription; [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) types. Alternatives: [frame-voice](https://github.com/techieyann/frame-voice), [whisper-frame](https://github.com/groffta/whisper-frame). See also [CREDITS.md](../CREDITS.md).
+
 ---
 Check: `./install.sh status dictation` · Remove: `./install.sh uninstall dictation`
