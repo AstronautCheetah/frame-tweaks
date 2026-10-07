@@ -28,6 +28,7 @@ and `adb-scrcpy`.
 | [**Wallet**](wallet/) | One KDE wallet shared by desktop mode and VR (steam-frame-nix's launcher approach), a desktop unlock dialog with 4-hour auto-lock, and KWalletManager. |
 | [**Signal**](signal/) | Makes the Flathub Signal store its database key in the shared KDE wallet instead of plaintext, and quits it after 15 minutes idle (`signal-guard`). |
 | [**NordVPN**](nordvpn/) | NordVPN's WireGuard servers as NetworkManager connections (several countries) with a tray icon to switch, surviving SteamOS updates. |
+| [**Firefox**](firefox/) | Strong anti-fingerprinting (resistFingerprinting, letterboxing, WebRTC limits). The Frame's aarch64/Adreno combination is otherwise very identifiable. |
 | [**Claude Desktop**](claude-desktop/) | Official Linux arm64 beta, installed and updated without apt. |
 | [**Tools**](tools/) | `restart-plasmashell`: get the taskbar/system tray back after a crash. |
 | [ydotool](ydotool/) | Shared helper for keystroke injection (installed automatically). |
