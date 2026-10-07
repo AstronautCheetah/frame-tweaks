@@ -25,7 +25,7 @@ arrowpad --quit
 - **Hold to repeat**: holding a button holds the key, so the app's key repeat applies.
 - **Fn** switches to F1–F12, Insert, PrintScreen and Menu.
 - **Copy / Paste / Cut / Undo / All** send the Ctrl shortcuts.
-- **🎤** toggles [dictation](../dictation/) and turns red while recording. The text
+- **🎤** toggles [dictation](../dictation/): red while recording, yellow while transcribing. The text
   goes to the focused app, because the pad never takes focus.
 - **Toggle, don't duplicate**: launching again hides/shows the running pad. The
   position is remembered in `~/.config/arrowpad.json`.

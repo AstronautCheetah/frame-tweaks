@@ -1,4 +1,4 @@
-# Phone Mirror: wireless adb + scrcpy
+# Android Mirror: wireless adb + scrcpy
 
 Mirror and control an Android phone in a desktop window.
 
@@ -10,7 +10,7 @@ Mirror and control an Android phone in a desktop window.
   `adb` from Arch Linux ARM plus the few libraries SteamOS lacks or has too old
   (protobuf, fmt, abseil, libusb). They're kept private in `~/.local/lib/android-tools`.
 - **scrcpy** from Homebrew.
-- **`phone`** / *Phone Mirror* launcher: wireless debugging picks a new port every time
+- **`phone`** / *Android Mirror* launcher: wireless debugging picks a new port every time
   it's switched on, so `phone` looks it up via mDNS, connects and starts scrcpy.
   Extra args go to scrcpy, e.g. `phone --turn-screen-off`.
   With several phones around, set `PHONE_NAME="Pixel 9"` in `~/.config/phone.conf`.

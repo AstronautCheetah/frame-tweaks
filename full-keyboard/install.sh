@@ -4,7 +4,7 @@ source "$(dirname "$0")/../lib/common.sh"
 REL=https://github.com/TaiKeid/steam-frame-full-keyboard/releases/latest/download
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 curl -fsSL -o "$T/SHA256SUMS" "$REL/SHA256SUMS"
-ARCHIVE=$(grep -oE 'framekeyboard-[0-9.]+-aarch64\.tar\.gz' "$T/SHA256SUMS" | head -1)
+ARCHIVE=$(grep -m1 -oE 'framekeyboard-[0-9.]+-aarch64\.tar\.gz' "$T/SHA256SUMS")
 VER=$(echo "$ARCHIVE" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 if [ -e "$HOME/.local/share/framekeyboard/releases/$VER" ]; then
     say "Full Keyboard $VER already installed"; exit 0

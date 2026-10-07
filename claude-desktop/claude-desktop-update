@@ -25,7 +25,7 @@ echo "$VER" > "$OPT/.deb-version"
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/icons"
 ln -sf "$OPT/claude-desktop" "$HOME/.local/bin/claude-desktop"
 cp -a "$T/root/usr/share/icons/hicolor" "$HOME/.local/share/icons/"
-ORIG="$HOME/.local/share/applications/.wallet-launcher-originals"
+ORIG="$HOME/.local/share/frame-tweaks/launcher-originals"   # wallet-launcher's originals
 for d in "$T"/root/usr/share/applications/*.desktop; do
     dest="$HOME/.local/share/applications/$(basename "$d")"
     # Routed to the shared wallet (wallet/)? Refresh the original, then re-wrap it.

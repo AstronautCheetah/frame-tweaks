@@ -33,7 +33,7 @@ the password. Add `--no-shared` for apps that don't store anything in the wallet
 (their bus stays as it is):
 
 ```sh
-wallet-launcher --gate --no-shared org.mozilla.firefox phone-mirror
+wallet-launcher --gate --no-shared org.mozilla.firefox android-mirror
 ```
 
 A gate only controls *launching from the menu*. It doesn't encrypt the app's data. For

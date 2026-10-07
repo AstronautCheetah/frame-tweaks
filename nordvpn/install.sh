@@ -14,6 +14,7 @@ if ! "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
 fi
 sed "1s|.*|#!$QT_VENV/bin/python|" "$REPO_DIR/nordvpn/nordvpn-tray" > "$BIN/nordvpn-tray"
 chmod 755 "$BIN/nordvpn-tray"
+install_icon frame-tweaks-nordvpn
 install_desktop "$REPO_DIR/nordvpn/nordvpn-tray.desktop"
 mkdir -p "$HOME/.config/autostart"
 sed "s|@BIN@|$BIN|g" "$REPO_DIR/nordvpn/nordvpn-tray.desktop" > "$HOME/.config/autostart/nordvpn-tray.desktop"
