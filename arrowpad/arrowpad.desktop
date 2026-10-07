@@ -1,8 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Arrow Pad
-Comment=Floating arrow/navigation keys that never steal focus
-Exec=@BIN@/arrowpad
+Comment=Floating arrow/navigation keys in desktop mode; never steals focus
+Exec=@BIN@/arrowpad --desktop
 Icon=frame-tweaks-arrowpad
 Terminal=false
 Categories=Utility;Accessibility;
+StartupWMClass=arrowpad

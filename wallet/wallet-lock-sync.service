@@ -1,0 +1,10 @@
+[Unit]
+Description=Lock the KDE wallet (ksecretd) whenever kwalletd6 closes it
+
+[Service]
+ExecStart=%h/.local/bin/wallet-unlock --watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

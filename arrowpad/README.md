@@ -12,9 +12,15 @@ working in.
  Alt   Super Undo  Cut   All    Paste   Alt  Super Undo Cut   All   Paste
 ```
 
+Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
+- **Arrow Pad** (`arrowpad --desktop`): inside desktop mode.
+- **Arrow Pad (VR window)** (`arrowpad --vr`): its own floating window in VR.
+
+They're separate instances, so you can have both. Each remembers its own position.
+
 ```sh
 ./install.sh arrowpad
-arrowpad                 # launch; run again to hide/show it (bind this to a shortcut)
+arrowpad --desktop       # launch; run again to hide/show it (bind this to a shortcut)
 arrowpad --scale 1.5     # bigger buttons (or ARROWPAD_SCALE=1.5)
 arrowpad --quit
 ```

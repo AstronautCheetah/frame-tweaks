@@ -56,6 +56,13 @@ It derives the same key KDE's login auto-unlock (kwallet-pam) uses (PBKDF2-SHA51
 D-Bus (jeepney), so neither password nor key appears on a command line. The Signal
 launcher runs it before Signal starts.
 
+## "Closed" means locked: `wallet-lock-sync`
+Closing the wallet in KWalletManager (or KWallet's idle timeout) only closes `kwalletd6`'s view
+of it; `ksecretd` stays unlocked, and apps such as Signal keep getting their secrets without a
+prompt. The `wallet-lock-sync` user service (`wallet-unlock --watch`) listens for kwalletd6's
+`walletClosed` signal and then really locks `ksecretd`. The **Lock Wallet** menu entry
+(`wallet-unlock --lock`) locks it on demand.
+
 ## Command-line tools: `with-keyring`
 Terminals in desktop mode are on the nested desktop's D-Bus, which has **no Secret
 Service**, so CLI tools that use the system keyring silently fall back to plain-text files.

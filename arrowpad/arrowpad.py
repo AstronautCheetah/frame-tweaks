@@ -27,7 +27,32 @@ from pathlib import Path
 # Must be set before Qt is imported: KWin only honours "no focus" for X11 windows.
 os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
+
+def pick_display(argv):
+    """--desktop / --vr choose where the pad opens, whichever menu launched it.
+    Desktop mode is a nested Plasma session with its own X display (:2 here) and
+    X authority file; VR floating windows live on the Steam session's display :0."""
+    if "--desktop" in argv:
+        src = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "ksmserver"],
+                             capture_output=True, text=True).stdout.split()
+        if not src:
+            sys.exit("arrowpad: desktop mode isn't running")
+        env = dict(kv.split("=", 1) for kv in Path(f"/proc/{src[0]}/environ").read_text().split("\0") if "=" in kv)
+        for k in ("DISPLAY", "XAUTHORITY"):
+            if k in env:
+                os.environ[k] = env[k]
+        return "desktop"
+    if "--vr" in argv:
+        os.environ["DISPLAY"] = ":0"
+        os.environ.pop("XAUTHORITY", None)
+        return "vr"
+    return "vr" if os.environ.get("DISPLAY") == ":0" else "desktop"
+
+
+TARGET = pick_display(sys.argv)
+
 from PyQt6.QtCore import QPoint, Qt, QTimer  # noqa: E402
+from PyQt6.QtGui import QIcon  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QGridLayout, QPushButton,  # noqa: E402
                              QWidget)
@@ -64,8 +89,9 @@ TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = tran
         **{m: f"{m}: tap = next key only, double-tap = lock" for m in MODIFIERS}}
 DOUBLE_TAP = 0.4
 RUN = Path(f"/run/user/{os.getuid()}")
-CONFIG = Path.home() / ".config/arrowpad.json"
-SERVER_NAME = f"arrowpad-{os.getuid()}"
+CONFIG = Path.home() / f".config/arrowpad{'-vr' if TARGET == 'vr' else ''}.json"
+SERVER_NAME = f"arrowpad-{os.getuid()}-{TARGET}"   # desktop and VR pads are separate instances
+ICON = Path.home() / ".local/share/icons/hicolor/256x256/apps/frame-tweaks-arrowpad.png"
 STYLE = """
 QWidget#pad { background: palette(window); }
 QPushButton { border-radius: 6px; }
@@ -106,7 +132,7 @@ class ArrowPad(QWidget):
                          | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setObjectName("pad")
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
-        self.setWindowTitle("Arrow Pad")
+        self.setWindowTitle("Arrow Pad" + (" (VR)" if TARGET == "vr" else ""))
         self.setStyleSheet(STYLE)
         self.yd = yd
         self.mod_state = {m: "off" for m in MODIFIERS}   # off | oneshot | locked
@@ -281,10 +307,17 @@ def main():
                     help="button size multiplier (default 1.0)")
     ap.add_argument("--socket", default=default_socket(), help="ydotoold socket path")
     ap.add_argument("--quit", action="store_true", help="close a running pad")
+    ap.add_argument("--desktop", action="store_true", help="open in desktop mode (even from the VR menu)")
+    ap.add_argument("--vr", action="store_true", help="open as a floating VR window")
     args = ap.parse_args()
 
     app = QApplication(sys.argv)
     app.setApplicationName("arrowpad")
+    # Taskbar/window icon instead of the generic X11 logo; the desktop file name lets
+    # KWin match the window to its menu entry.
+    app.setDesktopFileName("arrowpad-vr" if TARGET == "vr" else "arrowpad")
+    if ICON.exists():
+        app.setWindowIcon(QIcon(str(ICON)))
     if signal_running("quit" if args.quit else "toggle") or args.quit:
         return
     try:

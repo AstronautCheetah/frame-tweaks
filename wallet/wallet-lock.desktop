@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Lock Wallet
+Comment=Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)
+Exec=@BIN@/wallet-unlock --lock
+Icon=frame-tweaks-lock
+Terminal=false
+Categories=Utility;Security;

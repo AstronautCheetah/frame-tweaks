@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 (2026-10-07)
+- Wallet: closing the wallet now really locks it (`wallet-lock-sync` service; kwalletd6's
+  close left ksecretd unlocked, so Signal opened without a password). New **Lock Wallet** entry.
+- Arrow Pad: **Arrow Pad (VR window)** entry (`--vr`) next to the desktop one (`--desktop`),
+  separate instances; taskbar shows the Arrow Pad icon instead of the X11 logo.
+- The installer has its own **Steam Frame Tweaks** menu entry (`./install.sh menu`), created on
+  every install/update.
+- Fix: re-running the wallet installer dropped Signal's idle guard from its launcher.
+
 ## 0.1.1 (2026-10-07)
 - App-menu icons that Steam's "+" menu can show; Dictate's matches the Arrow Pad 🎤 button.
 - Fix duplicate entries in Steam's "+" menu (launcher backups moved out of the applications
