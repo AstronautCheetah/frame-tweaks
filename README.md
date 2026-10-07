@@ -1,60 +1,53 @@
 # steam-frame-tweaks
 
 Productivity tweaks for **desktop mode on the Valve Steam Frame** (SteamOS, aarch64).
-Everything installs into your home directory (`~/.local`). Nothing touches
-SteamOS's read-only system partition, so OS updates won't undo it, and
-removing a component is just deleting its files.
+Everything installs into your home directory (`~/.local`, user services, Flatpak user
+overrides). Nothing touches SteamOS's read-only system partition, so OS updates won't
+undo it.
 
 ```sh
 git clone <this repo> ~/steam-frame-tweaks
 cd ~/steam-frame-tweaks
-./install.sh                 # list components
-./install.sh dictation arrowpad
+./install.sh                     # list components
+./install.sh dictation arrowpad  # install some
+./install.sh all
 ```
 
-Prerequisites: [Homebrew](https://brew.sh) (works on SteamOS aarch64) for
-`dictation` and `adb-scrcpy`. Your user must be in the `input` group
-(the default on SteamOS) for `ydotool`.
+Prerequisites: [Homebrew](https://brew.sh) (works on SteamOS aarch64) for `dictation`
+and `adb-scrcpy`.
 
-## Components
+## Tweaks
 
-| Component | What you get |
+| Tweak | What you get |
 |---|---|
-| `dictation` | **Local speech-to-text** with whisper.cpp on the Frame's GPU (~3.5 s for 11 s of speech with `small.en`). Run `dictate` (or bind *Dictate (toggle)* to a shortcut): first press starts recording (chime), second press transcribes. The text is typed into the focused window, copied to the clipboard (shows in Klipper), and appended to `~/.local/share/dictation-history.txt`. |
-| `arrowpad` | **Arrow Pad**: a floating, always-on-top pad with ↑↓←→, Home/End, PgUp/PgDn, Esc, Tab, Backspace, Del, Enter, and sticky Shift/Ctrl. Tapping it **never steals focus**, so keys go to the app you're working in. Holding a key repeats. This fills the gap in the Steam on-screen keyboard, which has no arrow keys. |
-| `adb-scrcpy` | `adb` for aarch64 (Google ships x86 only) + `scrcpy`, plus a **Phone Mirror** launcher (`phone`) that finds your phone's ever-changing wireless-debugging port via mDNS and mirrors it. |
-| `claude-desktop` | The official **Claude Desktop** Linux beta (arm64 `.deb`, SHA256-verified, unpacked without apt). `claude-desktop-update` updates it. |
-| `tools` | `restart-plasmashell`: brings back the taskbar/system tray if plasmashell crashes. |
-| `ydotool` | Keystroke injection via uinput + a user service; installed automatically by `dictation` and `arrowpad`. |
+| [**Dictation**](dictation/) | Local Whisper speech-to-text on the Frame's GPU. One shortcut to record, then the text is typed, copied to the clipboard and logged. |
+| [**Arrow Pad**](arrowpad/) | Floating arrow/Home/End/PgUp/PgDn pad that never steals focus. Fills the gap in the Steam keyboard. |
+| [**Phone Mirror**](adb-scrcpy/) | `adb` for aarch64 + `scrcpy`, plus a launcher that finds your phone's wireless-debugging port automatically. |
+| [**Signal**](signal/) | Makes the Flathub Signal store its database key in KDE Wallet instead of plaintext. |
+| [**Claude Desktop**](claude-desktop/) | Official Linux arm64 beta, installed and updated without apt. |
+| [**Tools**](tools/) | `restart-plasmashell`: get the taskbar/system tray back after a crash. |
+| [ydotool](ydotool/) | Shared helper for keystroke injection (installed automatically). |
 
-## Configuration
+Each folder's README covers usage, configuration and how it works.
 
-- **Dictation**: `~/.config/dictate.conf` (see `dictation/dictate.conf.example`):
-  vocabulary hints (`DICTATE_PROMPT`), model choice, copy-only mode.
-  Troubleshooting log: `/run/user/$UID/dictate/dictate.log`.
-- **Arrow Pad**: `arrowpad --scale 1.5` for bigger buttons (or `ARROWPAD_SCALE`).
-- **Phone Mirror**: `~/.config/phone.conf` with `PHONE_NAME="Pixel 9"` if more than
-  one phone is on the network. Extra args go to scrcpy: `phone --turn-screen-off`.
+## General Frame desktop-mode notes
+- **Desktop mode is nested.** Plasma runs inside its own D-Bus session with
+  `XDG_RUNTIME_DIR=/run/user/$UID/nested_plasma`. Things launched from shortcuts can
+  see a different environment. Several tweaks here work around that.
+- **Steam on-screen keyboard**: hold **Shift** for ←/→ cursor keys.
+- **X11-only on-screen keyboards** (e.g. CoreKeyboard from Flathub) don't appear or
+  work under the Wayland desktop.
+- **Vulkan apps** may crash in the Gamescope WSI layer; try `DISABLE_GAMESCOPE_WSI=1`.
 
-## Notes and gotchas found along the way
-
-- **Desktop mode runs nested.** Plasma runs in its own D-Bus session with
-  `XDG_RUNTIME_DIR=/run/user/$UID/nested_plasma`. Apps started from shortcuts
-  or the launcher may instead see `/run/user/$UID`, where there's no Wayland
-  socket, so `wl-copy` fails silently. The dictate script handles this.
-- **whisper.cpp + Vulkan** crashes inside the Gamescope WSI layer; set
-  `DISABLE_GAMESCOPE_WSI=1` (the dictate script does).
-- **Steam on-screen keyboard**: hold **Shift** to get ← / → cursor keys.
-  There are no up/down keys, hence Arrow Pad.
-- **X11-only on-screen keyboards** (e.g. CoreKeyboard) don't show up or work
-  under the Wayland desktop.
-- **Wireless ADB with an always-on VPN** (e.g. Proton on GrapheneOS): the phone
-  may display its VPN address, but it still advertises its LAN address over
-  mDNS, which is what `phone` uses. Pairing codes expire once the pairing dialog
-  closes, so pair promptly.
-- **Arrow Pad focus trick**: it runs under XWayland with the X11
-  "doesn't accept input focus" hint, which KWin honours. Native Wayland has no
-  equivalent for normal windows.
+## Related projects
+Other people publishing Frame tweaks (as of October 2026):
+- [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix): Home Manager modules
+  covering a lot of the same ground (two-session quirks, clipboard, KDE wallet, VR keyboard).
+- [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils):
+  Tailscale, distrobox from desktop mode, waypipe, mouse cursor, Full Keyboard app.
+- Dictation alternatives: [techieyann/frame-voice](https://github.com/techieyann/frame-voice)
+  (controller-triggered), [groffta/whisper-frame](https://github.com/groffta/whisper-frame)
+  (push-to-talk on the Select button), [gripspeak](https://github.com/gripspeak/gripspeak).
 
 ## Uninstall
 
@@ -65,3 +58,5 @@ rm -rf ~/.local/share/{whisper,arrowpad} ~/.local/lib/android-tools ~/.local/opt
 rm -f ~/.local/share/applications/{dictate,arrowpad,phone-mirror,com.anthropic.Claude}.desktop
 rm -f ~/.config/systemd/user/ydotoold.service
 ```
+**Leave the Signal override in place.** Once the key lives in the wallet, switching
+Signal back to the plaintext store would leave it unable to open its own database.

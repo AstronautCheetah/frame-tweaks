@@ -1,0 +1,16 @@
+#!/bin/bash
+# Report whether Signal's database key is wallet-encrypted or plaintext.
+CFG="$HOME/.var/app/org.signal.Signal/config/Signal/config.json"
+[ -f "$CFG" ] || { echo "Signal hasn't been started yet: the key will be created in the wallet on first launch."; exit 0; }
+python3 - "$CFG" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+backend = d.get("safeStorageBackend", "none")
+if "key" in d:
+    print(f"PLAINTEXT key still on disk (backend: {backend}). Start Signal once more to finish migrating.")
+    sys.exit(1)
+if "encryptedKey" in d:
+    print(f"OK: database key is encrypted via {backend}; no plaintext key on disk.")
+else:
+    print("No key in config yet."); sys.exit(1)
+PY
