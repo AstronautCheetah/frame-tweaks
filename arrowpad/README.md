@@ -25,12 +25,22 @@ arrowpad --scale 1.5     # bigger buttons (or ARROWPAD_SCALE=1.5)
 arrowpad --quit
 ```
 
+**Looks and handles like Full Keyboard:** its Graphite theme (dark panel, gradient keycaps,
+latched-blue modifiers) and a toolbar with 📌 **pin** (stops accidental moves), ⌖ **reset
+position** (bottom centre), **−** / **+** (size, 0.6×–2×) and ✕ close. **Grab to move:** drag
+the panel or toolbar background. Position, size and pin state are remembered per window.
+
+**Labels follow your keyboard language:** the pad reads KDE's current layout (re-checked every
+few seconds) and uses the legends printed on that language's keyboards: German *Strg, Entf,
+Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian
+*Canc, Inizio, Pag↑*; English otherwise. Copy, paste, cut, undo and select-all are icons.
+
 - **Modifiers** (Shift, Ctrl, Alt, Super): tap = one-shot (applies to the next key,
   then releases), **double-tap = lock** (outlined) until tapped again. A held modifier
   also applies to mouse clicks (Ctrl+click, Shift+click).
 - **Hold to repeat**: holding a button holds the key, so the app's key repeat applies.
 - **Fn** switches to F1–F12, Insert, PrintScreen and Menu.
-- **Copy / Paste / Cut / Undo / All** send the Ctrl shortcuts.
+- **Copy / Paste / Cut / Undo / Select all** (icons) send the Ctrl shortcuts.
 - **🎤** toggles [dictation](../dictation/): red while recording, yellow while transcribing. The text
   goes to the focused app, because the pad never takes focus.
 - **Toggle, don't duplicate**: launching again hides/shows the running pad. The
@@ -47,6 +57,8 @@ arrowpad --quit
 | Nix user who wants arrows/Esc/Ctrl inside Steam's own VR keyboard, plus swipe | [steam-frame-nix VR keyboard](https://github.com/lhns/steam-frame-nix/blob/main/docs/keyboard.md) |
 
 ## Ideas borrowed
+- Look, toolbar, pin, recenter and size buttons: from [Full Keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)
+  (its Graphite theme colours, MIT). Toolbar and clipboard icons: KDE Breeze.
 - One-shot / double-tap-lock modifiers and the F-key layer: from steam-frame-nix's VR
   keyboard patch and Full Keyboard.
 - Copy/Paste buttons and "launch again recenters instead of duplicating": from Full Keyboard.
