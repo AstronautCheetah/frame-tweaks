@@ -26,12 +26,35 @@ wallet-launcher --remove org.example.App
 
 Installed by default for: KWalletManager, Signal and Claude Desktop (when present).
 
-## Auto-close
-The installer sets KWallet to close the wallet after **4 hours unused**
-(`WALLET_IDLE_MINUTES=60 ./install.sh wallet` to change; stored in `~/.config/kwalletrc` as
-`Close When Idle` / `Idle Timeout`). The timer restarts whenever any app reads the wallet.
-Once it closes, the next app that needs it asks for the password.
+## Unlocking from the desktop: `wallet-unlock`
+The shared wallet's own password prompt comes from `ksecretd` on the Steam session's
+display, so it appears as a **floating VR window**, which may not take clicks or typing.
+`wallet-unlock` asks in a normal dialog on *your* display instead:
 
+```sh
+wallet-unlock            # dialog if locked; then auto-locks after WALLET_LOCK_HOURS (4)
+wallet-unlock --status   # locked / unlocked
+wallet-unlock --lock     # lock now
+```
+
+It derives the same key KDE's login auto-unlock (kwallet-pam) uses (PBKDF2-SHA512 over
+`~/.local/share/kwalletd/kdewallet.salt`) and passes it to `ksecretd`'s `pamOpen` over
+D-Bus (jeepney), so neither password nor key appears on a command line. The Signal
+launcher runs it before Signal starts.
+
+## Auto-lock (4 hours)
+`wallet-unlock` starts a transient systemd timer (`wallet-autolock.timer`) that runs
+`wallet-unlock --lock` 4 hours after you unlock, via the Secret Service `Lock` call plus
+closing kwalletd6's handle. KWallet's own *Close When Idle* setting (also set, 240 min)
+isn't enough on its own (see below).
+
+## KDE 6 gotcha: `ksecretd` holds the wallet
+In KDE Frameworks 6, `kwalletd6` is a front end and **`ksecretd`** keeps the actual
+unlocked state. Closing the wallet through `kwalletd6` (`close(…, force)`), or even
+restarting `kwalletd6`, leaves `ksecretd` unlocked, so apps reopen the wallet silently.
+A wallet unlocked before you set a password also stays unlocked until `ksecretd` restarts or
+is locked through `org.freedesktop.Secret.Service.Lock`. `ksecretd` is D-Bus-activatable
+only under the name `org.kde.secretservicecompat`.
 ## Security: set a wallet password
 SteamOS seeds every Frame with the same stock `kdewallet` (`steamos-setup-kwallet`
 copies it from `/usr/share/kwalletd`), and it opens **without a password**. Until you

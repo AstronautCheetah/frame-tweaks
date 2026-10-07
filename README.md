@@ -25,8 +25,9 @@ and `adb-scrcpy`.
 | [**Full Keyboard**](full-keyboard/) | Installs TaiKeid's full-size VR keyboard (checksum-verified). |
 | [**Mouse cursor fix**](cursor/) | Makes the mouse pointer visible in desktop mode. |
 | [**Phone Mirror**](adb-scrcpy/) | `adb` for aarch64 + `scrcpy`, plus a launcher that finds your phone's wireless-debugging port automatically. |
-| [**Wallet**](wallet/) | One KDE wallet shared by desktop mode and VR (steam-frame-nix's launcher approach), plus KWalletManager. |
+| [**Wallet**](wallet/) | One KDE wallet shared by desktop mode and VR (steam-frame-nix's launcher approach), a desktop unlock dialog with 4-hour auto-lock, and KWalletManager. |
 | [**Signal**](signal/) | Makes the Flathub Signal store its database key in the shared KDE wallet instead of plaintext, and quits it after 15 minutes idle (`signal-guard`). |
+| [**NordVPN**](nordvpn/) | NordVPN's WireGuard servers as tray network connections (several countries) that survive SteamOS updates. |
 | [**Claude Desktop**](claude-desktop/) | Official Linux arm64 beta, installed and updated without apt. |
 | [**Tools**](tools/) | `restart-plasmashell`: get the taskbar/system tray back after a crash. |
 | [ydotool](ydotool/) | Shared helper for keystroke injection (installed automatically). |
@@ -46,6 +47,8 @@ Each folder's README covers usage, configuration and how it works.
   session's runtime dir (`/run/user/$UID/nested_plasma`) while KWin keeps running. Open
   windows keep working, but new apps fail with "Failed to initialize Wayland". Fix:
   exit and reopen desktop mode, or reboot.
+- **Apps installed into `/usr`** (via `steamos-readonly disable` + pacman) vanish at every
+  SteamOS update. Prefer home-dir installs, Flatpaks, or system config in `/etc` (see [nordvpn](nordvpn/)).
 - **Vulkan apps** may crash in the Gamescope WSI layer; try `DISABLE_GAMESCOPE_WSI=1`.
 
 ## Related projects
@@ -65,7 +68,7 @@ Other people publishing Frame tweaks (as of October 2026):
 ```sh
 systemctl --user disable --now ydotoold
 wallet-launcher --remove $(wallet-launcher --list)
-rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus}
+rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus,wallet-unlock,nordvpn-wg}
 rm -f ~/.config/environment.d/90-kwin-software-cursor.conf ~/.local/bin/signal-guard
 rm -rf ~/.local/share/{whisper,arrowpad} ~/.local/lib/android-tools ~/.local/opt/claude-desktop
 rm -f ~/.local/share/applications/{dictate,arrowpad,phone-mirror,com.anthropic.Claude}.desktop

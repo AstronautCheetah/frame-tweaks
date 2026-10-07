@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+"""nordvpn-wg: NordVPN (NordLynx/WireGuard) as ordinary NetworkManager connections.
+
+Survives SteamOS updates: nothing is installed into /usr; the connections live in
+/etc/NetworkManager/system-connections, which updates keep. Toggle them from the
+network icon in the system tray, or from here.
+
+  nordvpn-wg setup                    one-time: asks for your NordVPN access token
+                                      (Nord Account → NordVPN → Access token), fetches
+                                      your WireGuard key, creates the connections
+  nordvpn-wg list                     configured locations and their current servers
+  nordvpn-wg add CC [CC...]           add locations by country code (e.g. DE JP)
+  nordvpn-wg remove CC [CC...]        remove locations
+  nordvpn-wg refresh                  re-pick the least loaded server per location
+  nordvpn-wg up CC | down | status    connect / disconnect / show
+
+The token is used once and not stored. Your WireGuard private key is kept in
+~/.config/nordvpn-wg/private_key (mode 600) so locations can be added later.
+"""
+import getpass
+import json
+import os
+import shutil
+import socket
+import struct
+import subprocess
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from base64 import b64encode
+from pathlib import Path
+
+API = "https://api.nordvpn.com/v1"
+CONF = Path.home() / ".config/nordvpn-wg"
+KEY = CONF / "private_key"
+LOCATIONS = CONF / "locations"
+SERVERS = CONF / "servers.json"           # last server picked per location (for `list`)
+DEFAULT_LOCATIONS = ["US", "CA", "GB", "NL", "CH", "DE", "JP"]
+PREFIX = "nordvpn-"                      # NetworkManager interface name prefix
+DNS = "103.86.96.100,103.86.99.100"      # NordVPN's DNS servers
+
+
+def get(path, params=None, auth=None):
+    url = f"{API}/{path}" + ("?" + urllib.parse.urlencode(params) if params else "")
+    req = urllib.request.Request(url, headers={"User-Agent": "nordvpn-wg"})
+    if auth:
+        req.add_header("Authorization", "Basic " + b64encode(f"token:{auth}".encode()).decode())
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.load(r)
+
+
+def nmcli(*args, check=True):
+    return subprocess.run(["nmcli", *args], capture_output=True, text=True, check=check).stdout
+
+
+def countries():
+    return {c["code"]: c for c in get("servers/countries")}
+
+
+def best_server(country_id):
+    servers = get("servers/recommendations", {
+        "filters[country_id]": country_id,
+        "filters[servers_technologies][identifier]": "wireguard_udp",
+        "limit": 1})
+    if not servers:
+        raise SystemExit(f"no WireGuard server found for country id {country_id}")
+    s = servers[0]
+    tech = next(t for t in s["technologies"] if t["identifier"] == "wireguard_udp")
+    pub = next(m["value"] for m in tech["metadata"] if m["name"] == "public_key")
+    city = s["locations"][0]["country"]["city"]["name"]
+    return s["hostname"], s["station"], pub, city, s["load"]
+
+
+def locations():
+    if LOCATIONS.exists():
+        return [l.strip().upper() for l in LOCATIONS.read_text().split() if l.strip()]
+    return list(DEFAULT_LOCATIONS)
+
+
+def save_locations(locs):
+    CONF.mkdir(parents=True, exist_ok=True)
+    LOCATIONS.write_text("\n".join(dict.fromkeys(locs)) + "\n")
+
+
+def con_name(country):
+    return f"NordVPN {country['name']}"
+
+
+def existing():
+    """{interface: connection name} for our connections."""
+    out = nmcli("-t", "-f", "NAME,TYPE", "connection", "show")
+    names = [l.rsplit(":", 1)[0].replace("\\:", ":") for l in out.splitlines() if l.endswith(":wireguard")]
+    res = {}
+    for n in names:
+        iface = nmcli("-g", "connection.interface-name", "connection", "show", n).strip()
+        if iface.startswith(PREFIX):
+            res[iface] = n
+    return res
+
+
+def active():
+    out = nmcli("-t", "-f", "NAME,DEVICE", "connection", "show", "--active")
+    return {l.split(":")[-1] for l in out.splitlines() if l.split(":")[-1].startswith(PREFIX)}
+
+
+def add_connection(name, iface, key, pub, endpoint):
+    """Save a WireGuard profile via NetworkManager's D-Bus API (AddConnection2).
+    Unlike `nmcli connection import` this doesn't activate it, and the private
+    key never appears on a command line or in a temp file."""
+    from jeepney import DBusAddress, MessageType, new_method_call
+    from jeepney.io.blocking import open_dbus_connection
+    ip4 = lambda a: struct.unpack("=I", socket.inet_aton(a))[0]   # network byte order
+    settings = {
+        "connection": {"id": ("s", name), "type": ("s", "wireguard"),
+                       "interface-name": ("s", iface), "autoconnect": ("b", False)},
+        "wireguard": {"private-key": ("s", key), "peers": ("aa{sv}", [{
+            "public-key": ("s", pub), "endpoint": ("s", endpoint),
+            "allowed-ips": ("as", ["0.0.0.0/0"]), "persistent-keepalive": ("u", 25)}])},
+        "ipv4": {"method": ("s", "manual"),
+                 "address-data": ("aa{sv}", [{"address": ("s", "10.5.0.2"), "prefix": ("u", 32)}]),
+                 "dns": ("au", [ip4(d) for d in DNS.split(",")]),
+                 "dns-priority": ("i", -50)},     # use only Nord's DNS while connected
+        "ipv6": {"method": ("s", "disabled")},
+    }
+    nm = DBusAddress("/org/freedesktop/NetworkManager/Settings",
+                     bus_name="org.freedesktop.NetworkManager",
+                     interface="org.freedesktop.NetworkManager.Settings")
+    with open_dbus_connection("SYSTEM") as conn:
+        r = conn.send_and_get_reply(new_method_call(nm, "AddConnection2", "a{sa{sv}}ua{sv}",
+                                                    (settings, 1, {})))   # 1 = save to disk
+        if r.header.message_type == MessageType.error:
+            raise SystemExit(f"NetworkManager refused the connection: {r.body}")
+
+
+def create(code, country, key):
+    iface = PREFIX + code.lower()
+    host, ip, pub, city, load = best_server(country["id"])
+    was_active = iface in active()
+    if iface in existing():
+        nmcli("connection", "delete", existing()[iface])
+    add_connection(con_name(country), iface, key, pub, f"{ip}:51820")
+    picked = json.loads(SERVERS.read_text()) if SERVERS.exists() else {}
+    picked[code] = f"{host} ({city})"
+    SERVERS.write_text(json.dumps(picked, indent=1))
+    if was_active:
+        nmcli("connection", "up", con_name(country))
+    print(f"{con_name(country):28} {host} ({city}, load {load}%)")
+
+
+def need_key():
+    if not KEY.exists():
+        raise SystemExit("Run 'nordvpn-wg setup' first.")
+    return KEY.read_text().strip()
+
+
+def ask_token():
+    if os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY"):
+        if shutil.which("kdialog") and not sys.stdin.isatty():
+            r = subprocess.run(["kdialog", "--title", "NordVPN", "--password",
+                                "NordVPN access token (Nord Account → NordVPN → Access token):"],
+                               capture_output=True, text=True)
+            return r.stdout.strip() if r.returncode == 0 else ""
+    return getpass.getpass("NordVPN access token (input hidden): ").strip()
+
+
+def cmd_setup():
+    token = ask_token()
+    if not token:
+        raise SystemExit("No token given.")
+    try:
+        creds = get("users/services/credentials", auth=token)
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f"NordVPN rejected the token (HTTP {e.code}).")
+    del token
+    CONF.mkdir(parents=True, exist_ok=True)
+    os.chmod(CONF, 0o700)
+    KEY.touch(mode=0o600)
+    KEY.write_text(creds["nordlynx_private_key"] + "\n")
+    save_locations(locations())
+    cmd_refresh()
+
+
+def cmd_refresh():
+    key, cs = need_key(), countries()
+    for code in locations():
+        if code not in cs:
+            print(f"unknown country code {code}, skipped", file=sys.stderr)
+            continue
+        create(code, cs[code], key)
+
+
+def cmd_add(codes):
+    key, cs = need_key(), countries()
+    for code in (c.upper() for c in codes):
+        if code not in cs:
+            raise SystemExit(f"unknown country code {code} (see 'nordvpn-wg countries')")
+        create(code, cs[code], key)
+        save_locations(locations() + [code])
+
+
+def cmd_remove(codes):
+    have = existing()
+    for code in (c.upper() for c in codes):
+        iface = PREFIX + code.lower()
+        if iface in have:
+            nmcli("connection", "delete", have[iface])
+        save_locations([l for l in locations() if l != code])
+        print(f"removed {code}")
+
+
+def cmd_list():
+    have, up = existing(), active()
+    picked = json.loads(SERVERS.read_text()) if SERVERS.exists() else {}
+    for code in locations():
+        iface = PREFIX + code.lower()
+        name = have.get(iface, "(missing: run refresh)")
+        print(f"{'●' if iface in up else ' '} {code}  {name:28} {picked.get(code, '') if iface in have else ''}")
+
+
+def cmd_up(code):
+    iface, have = PREFIX + code.lower(), existing()
+    if iface not in have:
+        raise SystemExit(f"{code} isn't configured (nordvpn-wg add {code.upper()})")
+    for other in active() - {iface}:
+        nmcli("connection", "down", have[other])
+    print(nmcli("connection", "up", have[iface]).strip())
+
+
+def cmd_down():
+    have = existing()
+    for iface in active():
+        nmcli("connection", "down", have[iface])
+        print(f"disconnected {have[iface]}")
+
+
+def cmd_status():
+    up = active()
+    if not up:
+        print("NordVPN: disconnected")
+        return
+    have = existing()
+    for iface in up:
+        print(f"NordVPN: connected via {have.get(iface, iface)}")
+    try:
+        with urllib.request.urlopen("https://api.nordvpn.com/v1/helpers/ips/insights", timeout=10) as r:
+            info = json.load(r)
+        print(f"public IP {info.get('ip')} ({info.get('city')}, {info.get('country')}), "
+              f"protected: {info.get('protected')}")
+    except Exception:
+        pass
+
+
+def main():
+    a = sys.argv[1:]
+    if not a or a[0] in ("-h", "--help", "help"):
+        print(__doc__)
+    elif a[0] == "setup":
+        cmd_setup()
+    elif a[0] == "refresh":
+        cmd_refresh()
+    elif a[0] == "add" and len(a) > 1:
+        cmd_add(a[1:])
+    elif a[0] == "remove" and len(a) > 1:
+        cmd_remove(a[1:])
+    elif a[0] == "list":
+        cmd_list()
+    elif a[0] == "countries":
+        for code, c in sorted(countries().items()):
+            print(code, c["name"])
+    elif a[0] in ("up", "connect") and len(a) == 2:
+        cmd_up(a[1])
+    elif a[0] in ("down", "disconnect"):
+        cmd_down()
+    elif a[0] == "status":
+        cmd_status()
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    main()

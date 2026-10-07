@@ -19,9 +19,11 @@ by itself over two launches: the first adds the wallet-encrypted key (keeping th
 plaintext one until it's confirmed), the second deletes the plaintext key. The installer
 runs both launches for you, then checks the result.
 
-## Idle lock (`signal-guard`)
+## Unlock and idle lock (`signal-guard`)
 Signal Desktop has no lock of its own (Signal has declined to add one), so the Signal
-launcher starts `signal-guard` alongside it. It quits Signal (gracefully) after
+launcher runs `signal-guard`. First it runs [`wallet-unlock`](../wallet/#unlocking-from-the-desktop-wallet-unlock):
+if the wallet is locked, you get a password dialog on the desktop, and Signal doesn't start
+without it. Then it watches for inactivity. It quits Signal (gracefully) after
 **15 minutes** without keyboard, mouse or controller input. Reopening Signal then needs
 the wallet, so if the wallet is locked you're asked for its password.
 
@@ -51,8 +53,8 @@ makes the wallet close after 4 hours unused.
 
 **What this does and doesn't protect against:** with the wallet locked and Signal not running,
 Signal's database can't be decrypted, so someone picking up the headset can't open it. But the
-wallet's 4-hour timer counts from its *last use* by any app (Chromium, Claude Desktop, …),
-so within that window Signal reopens without a password. It's protection against casual
+wallet stays unlocked for 4 hours after you unlock it, so within that window Signal
+reopens without a password (`wallet-unlock --lock` locks it early). It's protection against casual
 access, not against someone who can use desktop mode while you're unlocked.
 Signal's warning about "experimental" backends mainly concerns GNOME libsecret on
 other desktops. On KDE, kwallet6 is the native, intended backend.
