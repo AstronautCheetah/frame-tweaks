@@ -27,7 +27,7 @@ and `adb-scrcpy`.
 | [**Phone Mirror**](adb-scrcpy/) | `adb` for aarch64 + `scrcpy`, plus a launcher that finds your phone's wireless-debugging port automatically. |
 | [**Wallet**](wallet/) | One KDE wallet shared by desktop mode and VR (steam-frame-nix's launcher approach), a desktop unlock dialog with 4-hour auto-lock, and KWalletManager. |
 | [**Signal**](signal/) | Makes the Flathub Signal store its database key in the shared KDE wallet instead of plaintext, and quits it after 15 minutes idle (`signal-guard`). |
-| [**NordVPN**](nordvpn/) | NordVPN's WireGuard servers as tray network connections (several countries) that survive SteamOS updates. |
+| [**NordVPN**](nordvpn/) | NordVPN's WireGuard servers as NetworkManager connections (several countries) with a tray icon to switch, surviving SteamOS updates. |
 | [**Claude Desktop**](claude-desktop/) | Official Linux arm64 beta, installed and updated without apt. |
 | [**Tools**](tools/) | `restart-plasmashell`: get the taskbar/system tray back after a crash. |
 | [ydotool](ydotool/) | Shared helper for keystroke injection (installed automatically). |
@@ -68,7 +68,8 @@ Other people publishing Frame tweaks (as of October 2026):
 ```sh
 systemctl --user disable --now ydotoold
 wallet-launcher --remove $(wallet-launcher --list)
-rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus,wallet-unlock,wallet-gate,nordvpn-wg}
+rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus,wallet-unlock,wallet-gate,nordvpn-wg,nordvpn-tray}
+rm -f ~/.config/autostart/nordvpn-tray.desktop
 rm -f ~/.config/environment.d/90-kwin-software-cursor.conf ~/.local/bin/signal-guard
 rm -rf ~/.local/share/{whisper,arrowpad} ~/.local/lib/android-tools ~/.local/opt/claude-desktop
 rm -f ~/.local/share/applications/{dictate,arrowpad,phone-mirror,com.anthropic.Claude}.desktop
