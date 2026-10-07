@@ -69,7 +69,7 @@ Other people publishing Frame tweaks (as of October 2026):
 ```sh
 systemctl --user disable --now ydotoold
 wallet-launcher --remove $(wallet-launcher --list)
-rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus,wallet-unlock,wallet-gate,nordvpn-wg,nordvpn-tray}
+rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus,wallet-unlock,wallet-gate,with-keyring,gh,nordvpn-wg,nordvpn-tray}
 rm -f ~/.config/autostart/nordvpn-tray.desktop
 rm -f ~/.config/environment.d/90-kwin-software-cursor.conf ~/.local/bin/signal-guard
 rm -rf ~/.local/share/{whisper,arrowpad} ~/.local/lib/android-tools ~/.local/opt/claude-desktop

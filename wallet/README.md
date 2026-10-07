@@ -56,6 +56,17 @@ It derives the same key KDE's login auto-unlock (kwallet-pam) uses (PBKDF2-SHA51
 D-Bus (jeepney), so neither password nor key appears on a command line. The Signal
 launcher runs it before Signal starts.
 
+## Command-line tools: `with-keyring`
+Terminals in desktop mode are on the nested desktop's D-Bus, which has **no Secret
+Service**, so CLI tools that use the system keyring silently fall back to plain-text files.
+`gh auth login`, for example, prints "Authentication credentials saved in plain text" and
+writes the token to `~/.config/gh/hosts.yml`.
+
+`with-keyring CMD` runs a command against the shared wallet on the outer bus (unlocking it
+with the desktop dialog if needed). The installer adds a `~/.local/bin/gh` wrapper that uses
+it, points git's credential helper at the wrapper, and moves an existing plain-text gh token
+into the wallet (`gh auth status` then shows "(keyring)").
+
 ## Auto-lock (4 hours)
 `wallet-unlock` starts a transient systemd timer (`wallet-autolock.timer`) that runs
 `wallet-unlock --lock` 4 hours after you unlock, via the Secret Service `Lock` call plus
