@@ -26,7 +26,7 @@ and `adb-scrcpy`.
 | [**Mouse cursor fix**](cursor/) | Makes the mouse pointer visible in desktop mode. |
 | [**Phone Mirror**](adb-scrcpy/) | `adb` for aarch64 + `scrcpy`, plus a launcher that finds your phone's wireless-debugging port automatically. |
 | [**Wallet**](wallet/) | One KDE wallet shared by desktop mode and VR (steam-frame-nix's launcher approach), plus KWalletManager. |
-| [**Signal**](signal/) | Makes the Flathub Signal store its database key in the shared KDE wallet instead of plaintext. |
+| [**Signal**](signal/) | Makes the Flathub Signal store its database key in the shared KDE wallet instead of plaintext, and quits it after 15 minutes idle (`signal-guard`). |
 | [**Claude Desktop**](claude-desktop/) | Official Linux arm64 beta, installed and updated without apt. |
 | [**Tools**](tools/) | `restart-plasmashell`: get the taskbar/system tray back after a crash. |
 | [ydotool](ydotool/) | Shared helper for keystroke injection (installed automatically). |
@@ -42,6 +42,10 @@ Each folder's README covers usage, configuration and how it works.
 - **Steam on-screen keyboard**: hold **Shift** for ←/→ cursor keys.
 - **X11-only on-screen keyboards** (e.g. CoreKeyboard from Flathub) don't appear or
   work under the Wayland desktop.
+- **Desktop mode teardown**: closing the Desktop can make Steam delete the nested
+  session's runtime dir (`/run/user/$UID/nested_plasma`) while KWin keeps running. Open
+  windows keep working, but new apps fail with "Failed to initialize Wayland". Fix:
+  exit and reopen desktop mode, or reboot.
 - **Vulkan apps** may crash in the Gamescope WSI layer; try `DISABLE_GAMESCOPE_WSI=1`.
 
 ## Related projects
@@ -62,7 +66,7 @@ Other people publishing Frame tweaks (as of October 2026):
 systemctl --user disable --now ydotoold
 wallet-launcher --remove $(wallet-launcher --list)
 rm -f ~/.local/bin/{dictate,arrowpad,phone,adb,ydotool,ydotoold,claude-desktop,claude-desktop-update,restart-plasmashell,wallet-launcher,frame-outer-bus}
-rm -f ~/.config/environment.d/90-kwin-software-cursor.conf
+rm -f ~/.config/environment.d/90-kwin-software-cursor.conf ~/.local/bin/signal-guard
 rm -rf ~/.local/share/{whisper,arrowpad} ~/.local/lib/android-tools ~/.local/opt/claude-desktop
 rm -f ~/.local/share/applications/{dictate,arrowpad,phone-mirror,com.anthropic.Claude}.desktop
 rm -f ~/.config/systemd/user/ydotoold.service

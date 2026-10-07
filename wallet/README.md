@@ -26,6 +26,12 @@ wallet-launcher --remove org.example.App
 
 Installed by default for: KWalletManager, Signal and Claude Desktop (when present).
 
+## Auto-close
+The installer sets KWallet to close the wallet after **4 hours unused**
+(`WALLET_IDLE_MINUTES=60 ./install.sh wallet` to change; stored in `~/.config/kwalletrc` as
+`Close When Idle` / `Idle Timeout`). The timer restarts whenever any app reads the wallet.
+Once it closes, the next app that needs it asks for the password.
+
 ## Security: set a wallet password
 SteamOS seeds every Frame with the same stock `kdewallet` (`steamos-setup-kwallet`
 copies it from `/usr/share/kwalletd`), and it opens **without a password**. Until you

@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""signal-guard: quit Signal Desktop after a period of inactivity, so that
+reopening it requires the (password-protected) KDE wallet again.
+
+  signal-guard -- <command...>   start the guard (once), then exec the command
+                                 (the Signal menu entry uses this)
+  signal-guard --status          show idle time and the timeout
+
+Idle means no input on any keyboard, mouse or controller device (read straight
+from /dev/input, so it works in both the desktop and VR sessions). Optionally
+also lock as soon as the headset is taken off (proximity sensor).
+Settings in ~/.config/signal-guard.conf:
+  IDLE_MINUTES=15
+  LOCK_ON_HEADSET_OFF=0      # 1 = quit Signal ~10 s after the headset is removed
+"""
+import fcntl
+import glob
+import os
+import re
+import select
+import signal
+import struct
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+CONF = Path.home() / ".config/signal-guard.conf"
+RUN = Path(f"/run/user/{os.getuid()}")
+LOCK = RUN / "signal-guard.lock"
+STATE = RUN / "signal-guard.last-input"
+SIGNAL_MAIN = re.compile(r"/app/Signal/signal-desktop(?!.*--type=)")
+PROX = glob.glob("/sys/bus/iio/devices/iio:device*/in_proximity_raw")
+HEADSET_OFF_GRACE = 10          # seconds off-head before locking
+GONE_EXIT = 120                 # guard exits when Signal has been gone this long
+
+
+def conf():
+    c = {"IDLE_MINUTES": "15", "LOCK_ON_HEADSET_OFF": "0"}
+    if CONF.exists():
+        for line in CONF.read_text().splitlines():
+            m = re.match(r"\s*([A-Z_]+)\s*=\s*(\S+)", line)
+            if m:
+                c[m[1]] = m[2]
+    return float(c["IDLE_MINUTES"]) * 60, c["LOCK_ON_HEADSET_OFF"] == "1"
+
+
+def signal_pids():
+    out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-af", "signal-desktop"],
+                         capture_output=True, text=True).stdout
+    return [int(l.split()[0]) for l in out.splitlines() if SIGNAL_MAIN.search(l)]
+
+
+# Sensors that report constantly without anyone touching anything.
+IGNORE_DEVICES = re.compile(r"^(als\d+)")
+EV_KEY, EV_REL, EV_ABS = 1, 2, 3
+EVENT = "llHHi"
+EVENT_SIZE = struct.calcsize(EVENT)
+
+
+def input_devices():
+    """event nodes of all input devices except always-chattering sensors."""
+    devs = []
+    for blk in Path("/proc/bus/input/devices").read_text().split("\n\n"):
+        name = re.search(r'N: Name="([^"]*)"', blk)
+        ev = re.search(r"H: Handlers=.*\b(event\d+)", blk)
+        if name and ev and not IGNORE_DEVICES.match(name[1]):
+            devs.append(f"/dev/input/{ev[1]}")
+    return devs
+
+
+def has_user_input(data):
+    """True if the raw events contain a key/button, movement or stick/touch event."""
+    for i in range(0, len(data) - EVENT_SIZE + 1, EVENT_SIZE):
+        if struct.unpack_from(EVENT, data, i)[2] in (EV_KEY, EV_REL, EV_ABS):
+            return True
+    return False
+
+
+def headset_worn():
+    if not PROX:
+        return True
+    try:
+        raw = float(Path(PROX[0]).read_text())
+    except (OSError, ValueError):
+        return True
+    # SteamVR's rule: worn while raw > prox_far * 0.8; prox_far is ~17-18.
+    return raw > 14
+
+
+def quit_signal(reason):
+    for pid in signal_pids():
+        os.kill(pid, signal.SIGTERM)          # Electron quits gracefully on TERM
+    subprocess.run(["notify-send", "-a", "Signal guard", "Signal locked", reason],
+                   stderr=subprocess.DEVNULL)
+
+
+def guard():
+    idle_limit, headset_lock = conf()
+    fds, last_scan, last_input = {}, 0.0, time.monotonic()
+    off_since, gone_since = None, None
+    while True:
+        now = time.monotonic()
+        if now - last_scan > 30:                       # pick up hot-plugged devices
+            for path in input_devices():
+                if path not in fds:
+                    try:
+                        fds[path] = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+                    except OSError:
+                        pass
+            last_scan = now
+        ready, _, _ = select.select(list(fds.values()), [], [], 2)
+        for fd in ready:
+            try:
+                if has_user_input(os.read(fd, EVENT_SIZE * 64)):
+                    last_input = time.monotonic()
+            except OSError:                            # device unplugged
+                for p, f in list(fds.items()):
+                    if f == fd:
+                        os.close(f)
+                        del fds[p]
+        now = time.monotonic()
+        STATE.write_text(str(int(now - last_input)))
+
+        if not signal_pids():
+            gone_since = gone_since or now
+            if now - gone_since > GONE_EXIT:
+                return
+            last_input = now                           # restart the clock on next launch
+            continue
+        gone_since = None
+
+        if now - last_input >= idle_limit:
+            quit_signal(f"No activity for {int(idle_limit // 60)} minutes.")
+            last_input = now
+        if headset_lock:
+            if headset_worn():
+                off_since = None
+            else:
+                off_since = off_since or now
+                if now - off_since >= HEADSET_OFF_GRACE:
+                    quit_signal("Headset was taken off.")
+                    off_since = None
+
+
+def main():
+    args = sys.argv[1:]
+    if args[:1] == ["--status"]:
+        idle_limit, headset_lock = conf()
+        running = LOCK.exists() and subprocess.run(["fuser", "-s", str(LOCK)]).returncode == 0
+        idle = STATE.read_text() if STATE.exists() else "?"
+        print(f"guard {'running' if running else 'not running'}; Signal "
+              f"{'running' if signal_pids() else 'not running'}; idle {idle}s of "
+              f"{int(idle_limit)}s; lock on headset off: {'yes' if headset_lock else 'no'}")
+        return
+    if args[:1] != ["--"] or len(args) < 2:
+        sys.exit(__doc__)
+    if os.fork() == 0:                                 # child: become the single guard
+        os.setsid()
+        lockf = open(LOCK, "w")
+        try:
+            fcntl.flock(lockf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            os._exit(0)                                # a guard is already running
+        devnull = os.open(os.devnull, os.O_RDWR)
+        for fd in (0, 1, 2):
+            os.dup2(devnull, fd)
+        time.sleep(5)                                  # let Signal start
+        guard()
+        os._exit(0)
+    os.execvp(args[1], args[1:])
+
+
+if __name__ == "__main__":
+    main()

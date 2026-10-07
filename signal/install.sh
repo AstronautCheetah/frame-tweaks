@@ -10,6 +10,13 @@ flatpak info "$APP" >/dev/null 2>&1 || die "Install Signal first (Discover, or: 
 say "Telling Signal to use KDE Wallet (kwallet6)"
 flatpak override --user --env=SIGNAL_PASSWORD_STORE=kwallet6 "$APP"
 "$BIN/wallet-launcher" "$APP"
+
+# Idle lock: Signal quits after IDLE_MINUTES without input; reopening it needs the wallet.
+install -m755 "$REPO_DIR/signal/signal-guard" "$BIN/signal-guard"
+[ -f "$HOME/.config/signal-guard.conf" ] ||
+    printf '# signal-guard settings\nIDLE_MINUTES=15\nLOCK_ON_HEADSET_OFF=0\n' > "$HOME/.config/signal-guard.conf"
+sed -i "s|^Exec=$BIN/frame-outer-bus |Exec=$BIN/frame-outer-bus $BIN/signal-guard -- |" "$APPS/$APP.desktop"
+grep -q signal-guard "$APPS/$APP.desktop" || die "couldn't add signal-guard to the Signal launcher"
 LAUNCH=$(sed -n 's/^Exec=//p' "$APPS/$APP.desktop" | head -1 | sed 's/ @@u %U @@//')
 
 # Signal migrates on its own: 1st launch adds encryptedKey (keeping the plaintext
