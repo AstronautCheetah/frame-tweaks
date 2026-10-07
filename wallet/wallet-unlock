@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""wallet-unlock: unlock the shared KDE wallet with a password dialog shown on
+the display you're using (the desktop), instead of ksecretd's own prompt, which
+pops up as a floating VR window on the Steam session's display.
+
+  wallet-unlock            ask (kdialog) if the wallet is locked; exit 0 when unlocked.
+                           Schedules an automatic lock after WALLET_LOCK_HOURS (default 4).
+  wallet-unlock --lock     lock it now
+  wallet-unlock --status   print locked / unlocked
+
+It derives the same key KDE's login-time auto-unlock (kwallet-pam) uses,
+PBKDF2-SHA512 over the wallet's salt, and hands it to ksecretd's pamOpen on the
+outer session bus. The password and key never appear on a command line.
+"""
+import hashlib
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from jeepney import DBusAddress, MessageType, new_method_call
+from jeepney.bus_messages import message_bus
+from jeepney.io.blocking import open_dbus_connection
+
+WALLET = "kdewallet"
+SALT = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "kwalletd" / f"{WALLET}.salt"
+OUTER_BUS = f"unix:path=/run/user/{os.getuid()}/bus"
+SECRETS = DBusAddress("/org/freedesktop/secrets", bus_name="org.freedesktop.secrets",
+                      interface="org.freedesktop.Secret.Service")
+COLLECTION = f"/org/freedesktop/secrets/collection/{WALLET}"
+KSECRETD = DBusAddress("/ksecretd", bus_name="org.kde.ksecretd", interface="org.kde.KWallet")
+KWALLETD = DBusAddress("/modules/kwalletd6", bus_name="org.kde.kwalletd6", interface="org.kde.KWallet")
+
+
+def bus():
+    return open_dbus_connection(OUTER_BUS)
+
+
+def call(conn, msg):
+    reply = conn.send_and_get_reply(msg)
+    if reply.header.message_type == MessageType.error:
+        raise RuntimeError(f"{reply.header.fields.get(4, 'D-Bus error')}: {reply.body}")
+    return reply.body
+
+
+def ensure_ksecretd(conn):
+    """ksecretd holds the wallet; it is D-Bus activatable only as secretservicecompat."""
+    if call(conn, message_bus.NameHasOwner("org.kde.ksecretd"))[0]:
+        return
+    call(conn, message_bus.StartServiceByName("org.kde.secretservicecompat"))
+    for _ in range(50):
+        if call(conn, message_bus.NameHasOwner("org.kde.ksecretd"))[0]:
+            return
+        time.sleep(0.1)
+    raise RuntimeError("ksecretd did not start")
+
+
+def is_locked(conn):
+    ensure_ksecretd(conn)
+    msg = new_method_call(DBusAddress(COLLECTION, bus_name="org.freedesktop.secrets",
+                                      interface="org.freedesktop.DBus.Properties"),
+                          "Get", "ss", ("org.freedesktop.Secret.Collection", "Locked"))
+    return call(conn, msg)[0][1]
+
+
+def lock(conn):
+    ensure_ksecretd(conn)
+    call(conn, new_method_call(SECRETS, "Lock", "ao", ([COLLECTION],)))
+    try:  # kwalletd6 keeps its own open handle on top of ksecretd
+        call(conn, new_method_call(KWALLETD, "close", "sb", (WALLET, True)))
+    except Exception:
+        pass
+
+
+def ask_password(retry):
+    text = ("Wrong password (is Caps Lock on?). Try again:" if retry
+            else "Password for the KDE wallet:")
+    r = subprocess.run(["kdialog", "--title", "Unlock wallet", "--password", text],
+                       capture_output=True, text=True)
+    return None if r.returncode else r.stdout.rstrip("\n")
+
+
+def unlock(conn):
+    ensure_ksecretd(conn)
+    salt = SALT.read_bytes()
+    for attempt in range(3):
+        pw = ask_password(attempt > 0)
+        if pw is None:
+            return False
+        key = hashlib.pbkdf2_hmac("sha512", pw.encode(), salt, 50000, 56)
+        del pw
+        conn.send(new_method_call(KSECRETD, "pamOpen", "sayi", (WALLET, key, 0)))
+        for _ in range(20):            # pamOpen has no reply; poll the result
+            time.sleep(0.1)
+            if not is_locked(conn):
+                return True
+    return False
+
+
+def schedule_lock():
+    """(Re)start a transient systemd timer that locks the wallet later."""
+    hours = os.environ.get("WALLET_LOCK_HOURS", "4")
+    env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}",
+               DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
+    subprocess.run(["systemctl", "--user", "stop", "wallet-autolock.timer"], env=env,
+                   stderr=subprocess.DEVNULL)
+    subprocess.run(["systemd-run", "--user", "--quiet", "--unit=wallet-autolock",
+                    f"--on-active={hours}h", os.path.abspath(sys.argv[0]), "--lock"],
+                   env=env, stderr=subprocess.DEVNULL)
+    return hours
+
+
+def notify(text):
+    subprocess.run(["notify-send", "-a", "Wallet", text], stderr=subprocess.DEVNULL)
+
+
+def main():
+    arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    with bus() as conn:
+        if arg == "--status":
+            print("locked" if is_locked(conn) else "unlocked")
+        elif arg == "--lock":
+            lock(conn)
+            print("locked" if is_locked(conn) else "still unlocked?")
+        elif arg == "--schedule-lock":
+            print(f"wallet locks in {schedule_lock()} h")
+        elif arg:
+            sys.exit(__doc__)
+        elif not is_locked(conn):
+            print("Wallet already unlocked.")
+        elif unlock(conn):
+            hours = schedule_lock()
+            print(f"Wallet unlocked; it locks again in {hours} h.")
+            notify(f"Wallet unlocked for {hours} hours")
+        else:
+            print("Wallet still locked.", file=sys.stderr)
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

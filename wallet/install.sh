@@ -3,6 +3,8 @@
 source "$(dirname "$0")/../lib/common.sh"
 ensure_path
 install -m755 "$REPO_DIR/wallet/frame-outer-bus" "$REPO_DIR/wallet/wallet-launcher" "$BIN/"
+ensure_tweaks_venv
+install_py_tool "$REPO_DIR/wallet/wallet-unlock"
 
 say "Installing KWalletManager (Flathub)"
 flatpak install -y --noninteractive flathub org.kde.kwalletmanager

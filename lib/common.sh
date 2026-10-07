@@ -54,3 +54,19 @@ install_desktop() {
     sed "s|@BIN@|$BIN|g" "$1" > "$APPS/$(basename "$1")"
     update-desktop-database "$APPS" 2>/dev/null || true
 }
+
+# Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
+TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
+ensure_tweaks_venv() {
+    if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
+        say "Creating Python venv with jeepney"
+        python3 -m venv "$TWEAKS_VENV"
+        "$TWEAKS_VENV/bin/pip" install -q jeepney
+    fi
+}
+
+# install_py_tool <src> : install a Python tool into ~/.local/bin, running on the shared venv.
+install_py_tool() {
+    sed "1s|.*|#!$TWEAKS_VENV/bin/python|" "$1" > "$BIN/$(basename "$1")"
+    chmod 755 "$BIN/$(basename "$1")"
+}
