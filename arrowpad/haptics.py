@@ -1,6 +1,10 @@
-"""Controller haptics for Arrow Pad through SteamVR Input, like Full Keyboard: a light tick
-when the laser moves onto a key, a firmer click on press, on the hand doing the pointing.
-Optional: does nothing without SteamVR or the openvr module."""
+"""Controller haptics for Arrow Pad, like Full Keyboard: a light tick when the laser moves
+onto a key, a firmer click on press, on the hand doing the pointing.
+
+SteamVR delivers SteamVR Input haptics only to the app that has input focus. Full Keyboard
+owns its VR overlay, so it does; our VR window is a Steam floating window, so the dashboard
+has focus. We therefore also send the older direct pulse (IVRSystem.TriggerHapticPulse),
+which isn't tied to input focus. Optional: does nothing without SteamVR or openvr."""
 import math
 import os
 from pathlib import Path
@@ -29,6 +33,13 @@ class Haptics:
         except Exception:      # no SteamVR running, no openvr module, …
             self.ok = False
 
+    def pointing_index(self):
+        """Tracked-device index of the pointing hand (see pointing_hand)."""
+        vr = self.vr_mod
+        role = (vr.TrackedControllerRole_LeftHand if self.pointing_hand() == "left"
+                else vr.TrackedControllerRole_RightHand)
+        return self.system.getTrackedDeviceIndexForControllerRole(role)
+
     def pointing_hand(self):
         """The hand turning faster right now is the one sweeping the laser."""
         vr = self.vr_mod
@@ -51,9 +62,15 @@ class Haptics:
             return
         try:
             duration, freq, amp = HOVER if kind == "hover" else PRESS
+            hand = self.pointing_hand()
             self.input.updateActionState([self.active])
-            self.input.triggerHapticVibrationAction(self.out[self.pointing_hand()], 0, duration, freq,
+            self.input.triggerHapticVibrationAction(self.out[hand], 0, duration, freq,
                                                     amp, self.vr_mod.k_ulInvalidInputValueHandle)
+            # Direct pulse, not tied to input focus. Duration in microseconds (max 3999);
+            # strength comes from the length, so scale it by amplitude.
+            idx = self.pointing_index()
+            if idx != self.vr_mod.k_unTrackedDeviceIndexInvalid:
+                self.system.triggerHapticPulse(idx, 0, int(min(3999, duration * 1e6) * max(0.25, amp)))
         except Exception:
             self.ok = False    # SteamVR went away: stop trying
 

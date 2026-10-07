@@ -7,7 +7,7 @@ README of the tweak that uses them; software we install or call keeps its own li
 
 | Project | License | What we took |
 |---|---|---|
-| [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) | Apache-2.0 | The **shared-wallet launcher** approach (`keyring.enable`: run wallet-using apps on the outer D-Bus so desktop mode and VR share one `kwalletd6`), which our [wallet](wallet/) reimplements without Nix. Much of our understanding of the Frame's **two sessions**: Steam's "+" menu (icons only from hicolor; rescans on the applications folder's mtime; a `~/.local/share/applications` entry replaces the Flatpak one), the portal setup. Ideas for the [Arrow Pad](arrowpad/): one-shot/locked modifiers and an F-key layer, from its VR keyboard patches. No code copied. |
+| [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) | Apache-2.0 | The **shared clipboard** (its `clipboardSync`: run dnut/clipboard-sync from the desktop session; our [clipboard](clipboard/)). The **shared-wallet launcher** approach (`keyring.enable`: run wallet-using apps on the outer D-Bus so desktop mode and VR share one `kwalletd6`), which our [wallet](wallet/) reimplements without Nix. Much of our understanding of the Frame's **two sessions**: Steam's "+" menu (icons only from hicolor; rescans on the applications folder's mtime; a `~/.local/share/applications` entry replaces the Flatpak one), the portal setup. Ideas for the [Arrow Pad](arrowpad/): one-shot/locked modifiers and an F-key layer, from its VR keyboard patches. No code copied. |
 | [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils) | none stated | The **mouse cursor fix** (`KWIN_FORCE_SW_CURSOR=1`, our [cursor](cursor/)), and the documentation of the **proximity sensor** used by [signal-guard](signal/)'s headset-off option. The checksum-then-run pattern of our [full-keyboard](full-keyboard/) installer follows its `install-full-keyboard.sh`. No code copied. |
 | [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard) | MIT | Installed by [full-keyboard](full-keyboard/). The [Arrow Pad](arrowpad/)'s look and feel follows it: the **Graphite theme colours**, the toolbar (pin, recenter, smaller/larger), copy/paste buttons, relaunch-to-toggle, and its **haptic feedback values** (hover 4 ms / 10 % / 240 Hz, press 25 ms / 100 % / 150 Hz). |
 | [techieyann/frame-voice](https://github.com/techieyann/frame-voice) | MIT | The shape of our installer: a one-line `get.sh` bootstrap, a graphical installer, and a documented uninstall. No code copied. |
@@ -20,6 +20,7 @@ FIRST*, which credits **ThrillSeeker**.
 
 | Software | License | Used by |
 |---|---|---|
+| [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) | see upstream | clipboard (built from upstream source, not bundled; approach from steam-frame-nix's `clipboardSync`) |
 | [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and OpenAI's Whisper models | MIT | dictation (via Homebrew; models from Hugging Face) |
 | [ydotool](https://github.com/ReimuNotMoe/ydotool) | AGPL-3.0 | dictation, Arrow Pad (Arch Linux ARM package, not modified) |
 | [scrcpy](https://github.com/Genymobile/scrcpy) | Apache-2.0 | Android Mirror (Homebrew) |
