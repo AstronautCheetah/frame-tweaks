@@ -1,0 +1,8 @@
+#!/bin/sh
+# wallet-gate CMD...: run CMD only once the KDE wallet is unlocked. If it's locked,
+# wallet-unlock asks for the password in a dialog on this display.
+if ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
+    notify-send -a Wallet "$(basename "$1") not started" "The wallet is still locked." 2>/dev/null
+    exit 1
+fi
+exec "$@"

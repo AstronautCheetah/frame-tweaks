@@ -26,6 +26,20 @@ wallet-launcher --remove org.example.App
 
 Installed by default for: KWalletManager, Signal and Claude Desktop (when present).
 
+## Password-gating other apps: `--gate`
+`wallet-launcher --gate <app-id>` makes the app's menu entry run **`wallet-gate`** first: if
+the wallet is locked you get the `wallet-unlock` dialog, and the app doesn't start without
+the password. Add `--no-shared` for apps that don't store anything in the wallet themselves
+(their bus stays as it is):
+
+```sh
+wallet-launcher --gate --no-shared org.mozilla.firefox phone-mirror
+```
+
+A gate only controls *launching from the menu*. It doesn't encrypt the app's data. For
+Firefox's saved logins, also set Firefox's **Primary Password**, which actually encrypts them.
+Re-running an app's own installer (e.g. `adb-scrcpy`) rewrites its entry, so re-apply the gate.
+
 ## Unlocking from the desktop: `wallet-unlock`
 The shared wallet's own password prompt comes from `ksecretd` on the Steam session's
 display, so it appears as a **floating VR window**, which may not take clicks or typing.
