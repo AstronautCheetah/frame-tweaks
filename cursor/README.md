@@ -1,0 +1,15 @@
+# Mouse cursor fix
+
+In desktop mode the mouse moves, but its pointer isn't drawn: KWin puts the cursor
+on a hardware plane that the headset's view doesn't show. `KWIN_FORCE_SW_CURSOR=1`
+makes KWin draw it into the frame itself.
+
+```sh
+./install.sh cursor     # then reboot
+env | grep KWIN         # in a desktop-mode terminal: KWIN_FORCE_SW_CURSOR=1
+```
+
+Undo: delete `~/.config/environment.d/90-kwin-software-cursor.conf` and reboot.
+
+Credit: from [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils),
+via Cas and Chary XR's "Steam Frame: 10 Things To Do FIRST", credited there to ThrillSeeker.

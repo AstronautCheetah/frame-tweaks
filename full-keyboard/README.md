@@ -1,0 +1,16 @@
+# Full Keyboard (VR)
+
+[TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)
+(MIT): a full-size VR keyboard for the Frame's dashboard and local apps, typed with
+the controller lasers. It has arrows, F-keys, a numpad, Ctrl/Alt, Copy/Paste, haptics,
+grab-to-move, and many languages. It's a separate app (the system keyboard button
+still opens Steam's).
+
+```sh
+./install.sh full-keyboard    # latest release, SHA256-verified, then its own installer
+```
+
+Launch **Full Keyboard** from the dashboard's app launcher. Launching again recenters it.
+Re-run the install to update; the upstream installer keeps the previous release for rollback.
+
+**Which keyboard when?** See the [keyboard guide](../arrowpad/README.md#which-keyboard-when).

@@ -1,0 +1,16 @@
+#!/bin/sh
+# Run a command on the Frame's outer session (Steam session D-Bus + runtime dir),
+# so it shares that session's kwalletd6 and portals, while keeping the window on
+# whichever display it was launched from. Used by wallet-launcher entries.
+run=/run/user/$(id -u)
+# From the nested desktop, WAYLAND_DISPLAY is relative to its own runtime dir:
+# pin it as an absolute path before switching XDG_RUNTIME_DIR.
+case "${WAYLAND_DISPLAY:-}" in
+    ""|/*) ;;
+    *) [ -S "${XDG_RUNTIME_DIR:-$run}/$WAYLAND_DISPLAY" ] &&
+           WAYLAND_DISPLAY="${XDG_RUNTIME_DIR:-$run}/$WAYLAND_DISPLAY" && export WAYLAND_DISPLAY ;;
+esac
+# flatpak registers instances under XDG_RUNTIME_DIR; the outer flatpak-portal must find them.
+export XDG_RUNTIME_DIR="$run"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=$run/bus"
+exec "$@"

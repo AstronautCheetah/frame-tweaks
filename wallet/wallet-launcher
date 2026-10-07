@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""wallet-launcher: make apps use the ONE KDE wallet shared by both Frame sessions.
+
+The Frame runs two sessions: Steam/VR on the outer D-Bus (/run/user/$UID/bus)
+and the nested Plasma desktop on a private bus. An app started from the desktop
+talks to a second kwalletd6 on the private bus; secrets it stores there are
+invisible to the same app in VR, and two daemons writing one wallet file can
+overwrite each other's changes.
+
+This writes a launcher override into ~/.local/share/applications that starts
+the app on the outer bus (and, for Flatpaks, lets it talk to the wallet), so
+every launch, from the desktop menu or the VR "+" menu, uses the same wallet.
+Approach from lhns/steam-frame-nix (docs/launchers.md, `keyring.enable`).
+
+  wallet-launcher org.signal.Signal com.anthropic.Claude   # add
+  wallet-launcher --electron some.electron.App             # also --password-store=kwallet6
+  wallet-launcher --remove org.signal.Signal               # restore the original entry
+  wallet-launcher --list
+"""
+import argparse
+import os
+import re
+import shlex
+import sys
+from pathlib import Path
+
+HOME = Path.home()
+APPS = HOME / ".local/share/applications"
+SOURCES = [HOME / ".local/share/flatpak/exports/share/applications",
+           Path("/var/lib/flatpak/exports/share/applications")]
+MARK = "X-FrameTweaks-Wallet"
+BACKUP_DIR = APPS / ".wallet-launcher-originals"
+WRAPPER = str(HOME / ".local/bin/frame-outer-bus")
+TALK = ["--talk-name=org.kde.kwalletd6", "--talk-name=org.freedesktop.secrets"]
+
+
+def source_for(app_id):
+    own = APPS / f"{app_id}.desktop"
+    backup = BACKUP_DIR / f"{app_id}.desktop"
+    if backup.exists():                       # re-run: start from the untouched original
+        return backup
+    for d in SOURCES:
+        if (d / f"{app_id}.desktop").exists():
+            return d / f"{app_id}.desktop"
+    if own.exists():                          # host app with its own entry (e.g. Claude Desktop)
+        return own
+    sys.exit(f"wallet-launcher: no desktop entry found for {app_id}")
+
+
+def rewrite_exec(cmd, app_id, electron):
+    args = shlex.split(cmd)
+    if args and args[0] == WRAPPER:          # re-run on an already wrapped entry
+        args = args[1:]
+    if len(args) > 1 and os.path.basename(args[0]) == "flatpak" and args[1] == "run":
+        idx = next((i for i, a in enumerate(args) if a == app_id), None)
+        if idx is None:
+            sys.exit(f"wallet-launcher: can't find {app_id} in: {cmd}")
+        extra = [t for t in TALK if t not in args]
+        args = args[:idx] + extra + [app_id] + (["--password-store=kwallet6"] if electron else []) + args[idx + 1:]
+    elif electron:
+        args = args[:1] + ["--password-store=kwallet6"] + args[1:]
+    out = [WRAPPER] + args
+    # Field codes (%U, @@u) must stay unquoted.
+    return " ".join(a if re.fullmatch(r"%[a-zA-Z]|@@[a-z]?", a) else shlex.quote(a) for a in out)
+
+
+def add(app_id, electron):
+    src = source_for(app_id)
+    lines = src.read_text().splitlines()
+    if src.parent == APPS and src.name == f"{app_id}.desktop":
+        BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        (BACKUP_DIR / src.name).write_text("\n".join(lines) + "\n")
+    out = []
+    for line in lines:
+        if line.startswith("Exec="):
+            line = "Exec=" + rewrite_exec(line[5:], app_id, electron)
+        elif line.startswith("DBusActivatable="):
+            line = "DBusActivatable=false"   # otherwise the desktop starts it over its own bus
+        elif line.startswith(MARK + "="):
+            continue
+        out.append(line)
+        if line == "[Desktop Entry]":
+            out.append(f"{MARK}=true")
+    APPS.mkdir(parents=True, exist_ok=True)
+    (APPS / f"{app_id}.desktop").write_text("\n".join(out) + "\n")
+    print(f"{app_id}: launches on the outer bus (shared wallet)")
+
+
+def remove(app_id):
+    target, backup = APPS / f"{app_id}.desktop", BACKUP_DIR / f"{app_id}.desktop"
+    if backup.exists():
+        backup.replace(target)
+    elif target.exists() and f"{MARK}=true" in target.read_text():
+        target.unlink()
+    else:
+        print(f"{app_id}: no wallet launcher"); return
+    print(f"{app_id}: original launcher restored")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("apps", nargs="*")
+    ap.add_argument("--electron", action="store_true", help="also pass --password-store=kwallet6")
+    ap.add_argument("--remove", action="store_true")
+    ap.add_argument("--list", action="store_true")
+    a = ap.parse_args()
+    if a.list:
+        for f in sorted(APPS.glob("*.desktop")):
+            if f"{MARK}=true" in f.read_text():
+                print(f.stem)
+        return
+    if not a.apps:
+        ap.error("give at least one app ID")
+    for app in a.apps:
+        remove(app) if a.remove else add(app, a.electron)
+    os.system("update-desktop-database -q ~/.local/share/applications 2>/dev/null")
+
+
+if __name__ == "__main__":
+    main()
