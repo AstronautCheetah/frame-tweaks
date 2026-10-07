@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Arrow Pad
+Comment=Floating arrow/navigation keys that never steal focus
+Exec=@BIN@/arrowpad
+Icon=input-keyboard
+Terminal=false
+Categories=Utility;Accessibility;

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Bring back the desktop-mode taskbar/system tray if plasmashell has crashed.
+# In SteamOS's nested desktop session plasmashell isn't a systemd unit, so it
+# must be relaunched with the session's environment (taken from ksmserver).
+pkill -x plasmashell && sleep 1
+src=$(pgrep -u "$(id -u)" -x ksmserver | head -1)
+[ -n "$src" ] || { echo "No Plasma session (ksmserver) found — are you in desktop mode?" >&2; exit 1; }
+mapfile -d '' envs < "/proc/$src/environ"
+cd "$HOME" && env -i "${envs[@]}" setsid -f plasmashell >"/run/user/$(id -u)/plasmashell.log" 2>&1 </dev/null
+sleep 2; pgrep -x plasmashell >/dev/null && echo "plasmashell restarted" || { echo "plasmashell failed; see /run/user/$(id -u)/plasmashell.log" >&2; exit 1; }
