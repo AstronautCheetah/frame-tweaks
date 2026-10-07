@@ -39,8 +39,12 @@ flatpak install -y --noninteractive flathub org.kde.kwalletmanager
 IDLE=${WALLET_IDLE_MINUTES:-240}
 kwriteconfig6 --file kwalletrc --group Wallet --key "Close When Idle" true
 kwriteconfig6 --file kwalletrc --group Wallet --key "Idle Timeout" "$IDLE"
+# Reconfigure only wallet services that are already running: calling one on the desktop's
+# bus would start a second wallet service there (two copies writing one wallet file).
 for bus in "${DBUS_SESSION_BUS_ADDRESS:-}" "unix:path=/run/user/$(id -u)/bus"; do
-    [ -n "$bus" ] && DBUS_SESSION_BUS_ADDRESS="$bus" qdbus6 org.kde.kwalletd6 /modules/kwalletd6 \
+    [ -n "$bus" ] || continue
+    busctl --address="$bus" status org.kde.kwalletd6 >/dev/null 2>&1 || continue
+    DBUS_SESSION_BUS_ADDRESS="$bus" qdbus6 org.kde.kwalletd6 /modules/kwalletd6 \
         org.kde.KWallet.reconfigure >/dev/null 2>&1 || true
 done
 say "Wallet closes after $IDLE minutes unused (WALLET_IDLE_MINUTES=… to change)"

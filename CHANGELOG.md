@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 (2026-10-07)
+- Wallet: fix "password refused". The lock left ksecretd *open but locked*, so the unlock was
+  silently ignored and every password looked wrong. Locking now fully closes the wallet in
+  ksecretd, unlocking clears a stuck state first, and the installer no longer starts a second
+  wallet service in the desktop session.
+- Arrow Pad: Full Keyboard style (Graphite theme, icon toolbar), pin, reset position, −/+ size,
+  grab-to-move, labels in the keyboard's language (de/fr/es/it), clipboard keys as icons.
+
 ## 0.1.2 (2026-10-07)
 - Wallet: closing the wallet now really locks it (`wallet-lock-sync` service; kwalletd6's
   close left ksecretd unlocked, so Signal opened without a password). New **Lock Wallet** entry.

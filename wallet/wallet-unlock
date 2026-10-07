@@ -67,9 +67,27 @@ def is_locked(conn):
     return call(conn, msg)[0][1]
 
 
+def ksecretd_close(conn):
+    """Fully close the wallet inside ksecretd. The Secret Service Lock only hides the
+    secrets: the wallet stays loaded ("open" and "locked" at once), and then pamOpen
+    sees it as already open and does nothing, so every password looks wrong."""
+    try:
+        call(conn, new_method_call(KSECRETD, "close", "sb", (WALLET, True)))
+    except Exception:
+        pass
+
+
+def ksecretd_open(conn):
+    try:
+        return bool(call(conn, new_method_call(KSECRETD, "isOpen", "s", (WALLET,)))[0])
+    except Exception:
+        return False
+
+
 def lock(conn):
     ensure_ksecretd(conn)
     call(conn, new_method_call(SECRETS, "Lock", "ao", ([COLLECTION],)))
+    ksecretd_close(conn)
     try:  # kwalletd6 keeps its own open handle on top of ksecretd
         call(conn, new_method_call(KWALLETD, "close", "sb", (WALLET, True)))
     except Exception:
@@ -86,6 +104,8 @@ def ask_password(retry):
 
 def unlock(conn):
     ensure_ksecretd(conn)
+    if ksecretd_open(conn):          # stuck "open but locked": pamOpen would be ignored
+        ksecretd_close(conn)
     salt = SALT.read_bytes()
     for attempt in range(3):
         pw = ask_password(attempt > 0)
@@ -131,9 +151,9 @@ def watch():
             body = msg.body
             if member == "allWalletsClosed" or (member == "walletClosed" and body and body[0] == WALLET):
                 try:
-                    if not is_locked(conn):
-                        call(conn, new_method_call(SECRETS, "Lock", "ao", ([COLLECTION],)))
-                        print(f"{time.strftime('%T')} wallet closed -> locked ksecretd", flush=True)
+                    if not is_locked(conn) or ksecretd_open(conn):
+                        lock(conn)
+                        print(f"{time.strftime('%T')} wallet closed -> locked and closed in ksecretd", flush=True)
                 except Exception as e:                  # keep watching even if one lock fails
                     print(f"lock failed: {e}", flush=True)
 
