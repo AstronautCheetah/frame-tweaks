@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Android Mirror
+Comment=Mirror and control an Android phone (scrcpy over wireless adb)
+Exec=@BIN@/phone
+Icon=frame-tweaks-phone
+Terminal=false
+Categories=Utility;

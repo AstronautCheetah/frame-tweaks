@@ -18,5 +18,6 @@ cat > "$BIN/arrowpad" <<EOS
 exec "$VENV/bin/python" "$HOME/.local/share/arrowpad/arrowpad.py" "\$@"
 EOS
 chmod +x "$BIN/arrowpad"
+install_icon frame-tweaks-arrowpad
 install_desktop "$REPO_DIR/arrowpad/arrowpad.desktop"
 say "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."

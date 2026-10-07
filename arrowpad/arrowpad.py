@@ -59,7 +59,7 @@ LAYERS = {
         ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
 }
-TIPS = {"🎤": "Dictation: tap to start, tap again to type what you said",
+TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types",
         "All": "Select all (Ctrl+A)", "Undo": "Undo (Ctrl+Z)", "Fn": "F1–F12 layer",
         **{m: f"{m}: tap = next key only, double-tap = lock" for m in MODIFIERS}}
 DOUBLE_TAP = 0.4
@@ -72,6 +72,7 @@ QPushButton { border-radius: 6px; }
 QPushButton[state="oneshot"] { background: #3d7bd9; color: white; }
 QPushButton[state="locked"]  { background: #1f4f99; color: white; border: 2px solid #9cc2ff; }
 QPushButton[state="active"]  { background: #c0392b; color: white; }
+QPushButton[state="busy"]    { background: #d9a400; color: black; }
 """
 
 
@@ -153,7 +154,7 @@ class ArrowPad(QWidget):
             elif name == "Fn":
                 state = "locked" if self.layer == "fn" else "off"
             elif name == "🎤":
-                state = "active" if self.dictating() else "off"
+                state = {"recording": "active", "transcribing": "busy"}.get(self.dictation_state(), "off")
             else:
                 state = "off"
             if b.property("state") != state:
@@ -214,13 +215,15 @@ class ArrowPad(QWidget):
 
     # ---- dictation ------------------------------------------------------
     @staticmethod
-    def dictating():
-        pid = RUN / "dictate/rec.pid"
-        try:
-            os.kill(int(pid.read_text()), 0)
-            return True
-        except (OSError, ValueError):
-            return False
+    def dictation_state():
+        """recording / transcribing / idle, from dictate's pid files."""
+        for name, state in (("rec.pid", "recording"), ("busy.pid", "transcribing")):
+            try:
+                os.kill(int((RUN / "dictate" / name).read_text()), 0)
+                return state
+            except (OSError, ValueError):
+                pass
+        return "idle"
 
     def refresh_mic(self):
         if self.isVisible():

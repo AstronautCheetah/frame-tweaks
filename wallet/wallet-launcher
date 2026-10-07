@@ -15,8 +15,9 @@ Approach from lhns/steam-frame-nix (docs/launchers.md, `keyring.enable`).
   wallet-launcher org.signal.Signal com.anthropic.Claude   # add
   wallet-launcher --electron some.electron.App             # also --password-store=kwallet6
   wallet-launcher --gate org.mozilla.firefox               # also require the wallet password
-  wallet-launcher --gate --no-shared phone-mirror          # password only, keep the app's own bus
+  wallet-launcher --gate --no-shared android-mirror         # password only, keep the app's own bus
   wallet-launcher --remove org.signal.Signal               # restore the original entry
+  wallet-launcher --reapply android-mirror                  # rebuild from the original, same flags
   wallet-launcher --list
 """
 import argparse
@@ -31,7 +32,9 @@ APPS = HOME / ".local/share/applications"
 SOURCES = [HOME / ".local/share/flatpak/exports/share/applications",
            Path("/var/lib/flatpak/exports/share/applications")]
 MARK = "X-FrameTweaks-Wallet"
-BACKUP_DIR = APPS / ".wallet-launcher-originals"
+# Outside APPS: Steam's "+" menu also lists entries in subfolders of APPS (duplicates).
+BACKUP_DIR = HOME / ".local/share/frame-tweaks/launcher-originals"
+OLD_BACKUP_DIR = APPS / ".wallet-launcher-originals"
 WRAPPER = str(HOME / ".local/bin/frame-outer-bus")
 GATE = str(HOME / ".local/bin/wallet-gate")
 TALK = ["--talk-name=org.kde.kwalletd6", "--talk-name=org.freedesktop.secrets"]
@@ -90,6 +93,24 @@ def add(app_id, electron, shared=True, gate=False):
     print(f"{app_id}: {', '.join(what)}")
 
 
+def flags_of(app_id):
+    """(shared, gate) as currently applied to app_id's entry."""
+    text = (APPS / f"{app_id}.desktop").read_text()
+    return WRAPPER in text, GATE in text
+
+
+def migrate_backups():
+    """Move backups from the old in-APPS folder (which Steam listed as extra entries)."""
+    if OLD_BACKUP_DIR.is_dir():
+        BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        for f in OLD_BACKUP_DIR.glob("*.desktop"):
+            if not (BACKUP_DIR / f.name).exists():
+                f.replace(BACKUP_DIR / f.name)
+            else:
+                f.unlink()
+        OLD_BACKUP_DIR.rmdir()
+
+
 def remove(app_id):
     target, backup = APPS / f"{app_id}.desktop", BACKUP_DIR / f"{app_id}.desktop"
     if backup.exists():
@@ -111,7 +132,10 @@ def main():
                     help="don't move the app to the outer bus (for apps that don't use the wallet)")
     ap.add_argument("--remove", action="store_true")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--reapply", action="store_true",
+                    help="rebuild the wrapper from the (updated) original, keeping its flags")
     a = ap.parse_args()
+    migrate_backups()
     if a.list:
         for f in sorted(APPS.glob("*.desktop")):
             text = f.read_text()
@@ -122,8 +146,15 @@ def main():
     if not a.apps:
         ap.error("give at least one app ID")
     for app in a.apps:
-        remove(app) if a.remove else add(app, a.electron, not a.no_shared, a.gate)
+        if a.remove:
+            remove(app)
+        elif a.reapply:
+            shared, gate = flags_of(app)
+            add(app, "--password-store=kwallet6" in (APPS / f"{app}.desktop").read_text(), shared, gate)
+        else:
+            add(app, a.electron, not a.no_shared, a.gate)
     os.system("update-desktop-database -q ~/.local/share/applications 2>/dev/null")
+    os.utime(APPS)   # Steam's "+" menu rescans when this directory's mtime changes
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ protect against.
 
 **Threat model.** These tweaks protect against *casual* access: someone else picking up the
 headset (e.g. children on a shared, password-less SteamOS login) can't open Signal, Firefox
-or Phone Mirror, or read Signal's database, while the wallet is locked. They don't protect
+or Android Mirror, or read Signal's database, while the wallet is locked. They don't protect
 against someone who can use desktop mode while the wallet is unlocked (4 hours after you
 unlock it, or until `wallet-unlock --lock`), or against malware running as your user.
 

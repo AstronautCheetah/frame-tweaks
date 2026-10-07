@@ -17,7 +17,7 @@ install -m755 "$REPO_DIR/signal/signal-guard" "$BIN/signal-guard"
     printf '# signal-guard settings\nIDLE_MINUTES=15\nLOCK_ON_HEADSET_OFF=0\n' > "$HOME/.config/signal-guard.conf"
 sed -i "s|^Exec=$BIN/frame-outer-bus |Exec=$BIN/frame-outer-bus $BIN/signal-guard -- |" "$APPS/$APP.desktop"
 grep -q signal-guard "$APPS/$APP.desktop" || die "couldn't add signal-guard to the Signal launcher"
-LAUNCH=$(sed -n 's/^Exec=//p' "$APPS/$APP.desktop" | head -1 | sed 's/ @@u %U @@//')
+LAUNCH=$(sed -n 's/^Exec=//p;T;q' "$APPS/$APP.desktop" | sed 's/ @@u %U @@//')
 
 # Signal migrates on its own: 1st launch adds encryptedKey (keeping the plaintext
 # key until decryption is confirmed), 2nd launch deletes the plaintext key.

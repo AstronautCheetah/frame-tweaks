@@ -20,6 +20,7 @@ for m in ${DICTATE_MODELS:-small.en-q5_1 base.en-q5_1}; do
 done
 
 install -m755 "$REPO_DIR/dictation/dictate" "$BIN/dictate"
+install_icon frame-tweaks-dictate
 install_desktop "$REPO_DIR/dictation/dictate.desktop"
 [ -f "$HOME/.config/dictate.conf" ] || cp "$REPO_DIR/dictation/dictate.conf.example" "$HOME/.config/dictate.conf"
 
