@@ -10,8 +10,9 @@ signal/check          # verify: "OK: database key is encrypted via kwallet6"
 ```
 
 It sets `SIGNAL_PASSWORD_STORE=kwallet6` as a per-user Flatpak override (same as
-doing it in Flatseal). The startup warning goes away and Signal stores its database
-key in your wallet.
+doing it in Flatseal), so the startup warning goes away and Signal stores its database
+key in your wallet. It also gives Signal a [wallet launcher](../wallet/), so it uses the
+same wallet whether you start it from the desktop or from VR.
 
 **Already using Signal with plaintext?** The installer handles it. Signal migrates
 by itself over two launches: the first adds the wallet-encrypted key (keeping the
@@ -19,8 +20,8 @@ plaintext one until it's confirmed), the second deletes the plaintext key. The i
 runs both launches for you, then checks the result.
 
 ## How secure is it?
-The key is only as protected as your wallet. If `kdewallet` was created with an
-**empty password**, it's stored without real protection. With a password, you'll be
+The key is only as protected as your wallet. SteamOS's stock `kdewallet` has an
+**empty password**, so set one ([wallet](../wallet/#security-set-a-wallet-password)). With a password, you'll be
 asked for it once per session when Signal (or another app) first opens the wallet.
 You can change it in *System Settings → KDE Wallet → Wallet Manager → Change Password*.
 Signal's warning about "experimental" backends mainly concerns GNOME libsecret on

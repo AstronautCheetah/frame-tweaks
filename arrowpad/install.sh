@@ -1,5 +1,5 @@
 #!/bin/bash
-# Arrow Pad: floating arrows/Home/End/PgUp/PgDn/Shift/Ctrl pad that doesn't steal focus.
+# Arrow Pad: no-focus nav pad (arrows, one-shot modifiers, F-keys, clipboard, 🎤 dictation).
 source "$(dirname "$0")/../lib/common.sh"
 ensure_path
 
