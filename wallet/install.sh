@@ -2,7 +2,7 @@
 # One KDE wallet for both sessions (steam-frame-nix approach) + KWalletManager.
 source "$(dirname "$0")/../lib/common.sh"
 ensure_path
-install -m755 "$REPO_DIR/wallet/frame-outer-bus" "$REPO_DIR/wallet/wallet-launcher" "$BIN/"
+install -m755 "$REPO_DIR/wallet/frame-outer-bus" "$REPO_DIR/wallet/wallet-launcher" "$REPO_DIR/wallet/wallet-gate" "$BIN/"
 ensure_tweaks_venv
 install_py_tool "$REPO_DIR/wallet/wallet-unlock"
 
