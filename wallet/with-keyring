@@ -1,0 +1,11 @@
+#!/bin/sh
+# with-keyring CMD...: run a command line tool with the shared KDE wallet as its keyring
+# (Secret Service / org.freedesktop.secrets). In desktop-mode terminals the session bus
+# is the nested desktop's, which has no Secret Service, so tools like gh fall back to
+# plain-text files. This points the command at the outer bus where the wallet lives,
+# unlocking it first (desktop dialog) if it's locked.
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+if [ "$("$HOME/.local/bin/wallet-unlock" --status 2>/dev/null)" = locked ]; then
+    "$HOME/.local/bin/wallet-unlock" >/dev/null || { echo "with-keyring: wallet still locked" >&2; exit 1; }
+fi
+exec "$@"

@@ -5,6 +5,22 @@ ensure_path
 install -m755 "$REPO_DIR/wallet/frame-outer-bus" "$REPO_DIR/wallet/wallet-launcher" "$REPO_DIR/wallet/wallet-gate" "$BIN/"
 ensure_tweaks_venv
 install_py_tool "$REPO_DIR/wallet/wallet-unlock"
+install -m755 "$REPO_DIR/wallet/with-keyring" "$BIN/"
+
+# gh (Homebrew) would store its token in plain text: no Secret Service on the desktop's bus.
+REAL_GH=$(PATH="${PATH//$BIN:/}" command -v gh || true)
+if [ -n "$REAL_GH" ]; then
+    printf '#!/bin/sh\n# gh with its token in the shared KDE wallet (see with-keyring)\nexec "$HOME/.local/bin/with-keyring" %s "$@"\n' "$REAL_GH" > "$BIN/gh"
+    chmod 755 "$BIN/gh"
+    for h in https://github.com https://gist.github.com; do
+        git config --global --get "credential.$h.helper" >/dev/null 2>&1 &&
+            git config --global --replace-all "credential.$h.helper" "!$BIN/gh auth git-credential" '^!.*gh auth git-credential$'
+    done
+    if grep -q oauth_token "$HOME/.config/gh/hosts.yml" 2>/dev/null; then
+        say "Moving gh's plain-text token into the wallet"
+        "$REAL_GH" auth token | "$BIN/gh" auth login --with-token --hostname github.com
+    fi
+fi
 
 say "Installing KWalletManager (Flathub)"
 flatpak install -y --noninteractive flathub org.kde.kwalletmanager
