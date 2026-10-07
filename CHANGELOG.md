@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 (2026-10-07)
+- New **clipboard** tweak: one clipboard for desktop mode and VR windows (dnut/clipboard-sync
+  built from upstream, started with the desktop session; approach from steam-frame-nix).
+- Wallet: when an unlock fails because one of KWallet's own prompts is open (it then ignores
+  other unlocks), say so instead of "wrong password".
+- Arrow Pad haptics: also send SteamVR's direct pulse, which isn't tied to input focus
+  (SteamVR Input haptics only reach the focused app, and Steam's dashboard has focus).
+
 ## 0.1.4 (2026-10-07)
 - New installer window (PyQt6, Full Keyboard style): live status per tweak, Hide/Unhide per
   row, "Show hidden" toggle, removals confirmed separately.

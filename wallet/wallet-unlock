@@ -94,6 +94,25 @@ def lock(conn):
         pass
 
 
+def prompt_pending():
+    """True if one of ksecretd's own password prompts is showing (VR display :0 or the
+    desktop). While it is, ksecretd ignores pamOpen, so a right password looks wrong."""
+    for display in (":0", os.environ.get("DISPLAY", ":2")):
+        try:
+            tree = subprocess.run(["xwininfo", "-root", "-tree"], env=dict(os.environ, DISPLAY=display),
+                                  capture_output=True, text=True, timeout=3).stdout
+        except (OSError, subprocess.SubprocessError):
+            continue
+        for line in tree.splitlines():
+            if '"KDE Wallet Service": ("ksecretd"' in line:
+                wid = line.split()[0]
+                info = subprocess.run(["xwininfo", "-id", wid], env=dict(os.environ, DISPLAY=display),
+                                      capture_output=True, text=True).stdout
+                if "IsViewable" in info:
+                    return True
+    return False
+
+
 def ask_password(retry):
     text = ("Wrong password (is Caps Lock on?). Try again:" if retry
             else "Password for the KDE wallet:")
@@ -118,6 +137,12 @@ def unlock(conn):
             time.sleep(0.1)
             if not is_locked(conn):
                 return True
+        if prompt_pending():
+            subprocess.run(["kdialog", "--title", "Unlock wallet", "--sorry",
+                            "A KDE Wallet password prompt is already open (look in VR, around the "
+                            "dashboard). While it is open the wallet ignores this dialog.\n\n"
+                            "Type the password there, or close that prompt and try again."])
+            return False
     return False
 
 
