@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Dictate (toggle)
+Comment=Start/stop local Whisper speech-to-text
+Exec=@BIN@/dictate
+Icon=audio-input-microphone
+Terminal=false
+Categories=Utility;Accessibility;

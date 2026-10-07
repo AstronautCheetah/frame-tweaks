@@ -1,0 +1,9 @@
+[Unit]
+Description=ydotool daemon (virtual keyboard used by dictation and arrowpad)
+
+[Service]
+ExecStart=%h/.local/bin/ydotoold --socket-path=/run/user/%U/.ydotool_socket --socket-own=%U:%G
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,7 @@
+# Copy to ~/.config/dictate.conf to customise dictation.
+# Words Whisper should spell your way (names, jargon):
+#DICTATE_PROMPT="Claude Code, SteamOS, Steam Frame, KDE Plasma."
+# Faster, slightly less accurate model:
+#DICTATE_MODEL="$HOME/.local/share/whisper/ggml-base.en-q5_1.bin"
+# Only copy to the clipboard, don't type into the focused window:
+#DICTATE_NOTYPE=1

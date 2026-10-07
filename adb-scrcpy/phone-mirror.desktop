@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Phone Mirror
+Comment=Mirror and control an Android phone via scrcpy (wireless ADB)
+Exec=@BIN@/phone
+Icon=smartphone
+Terminal=false
+Categories=Utility;

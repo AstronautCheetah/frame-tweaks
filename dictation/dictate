@@ -1,0 +1,55 @@
+#!/bin/bash
+# Toggle dictation: 1st run starts recording, 2nd run stops, transcribes locally
+# with whisper.cpp, copies the text to the clipboard (Klipper history), appends it
+# to ~/.local/share/dictation-history.txt, and types it into the focused window.
+# Set DICTATE_NOTYPE=1 to only copy (no typing).
+export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
+RUN=/run/user/$(id -u)
+export YDOTOOL_SOCKET=$RUN/.ydotool_socket
+# Shortcut/launcher runs get XDG_RUNTIME_DIR=/run/user/<uid>, but the desktop's
+# Wayland socket lives under nested_plasma/ — point wl-copy at it explicitly.
+if [ ! -S "${XDG_RUNTIME_DIR:-$RUN}/${WAYLAND_DISPLAY:-wayland-0}" ]; then
+    for s in $RUN/nested_plasma/wayland-0 $RUN/*/wayland-0; do
+        [ -S "$s" ] && { export WAYLAND_DISPLAY="$s"; break; }
+    done
+fi
+# Per-user settings (DICTATE_MODEL, DICTATE_PROMPT, DICTATE_NOTYPE) can live here.
+[ -f "$HOME/.config/dictate.conf" ] && . "$HOME/.config/dictate.conf"
+MODEL="${DICTATE_MODEL:-$HOME/.local/share/whisper/ggml-small.en-q5_1.bin}"
+# Vocabulary hint so Whisper spells these words correctly.
+PROMPT="${DICTATE_PROMPT:-Claude Code, SteamOS, Steam Frame, KDE Plasma.}"
+# Fixed path: launcher, shortcut and terminal see different XDG_RUNTIME_DIRs.
+STATE=$RUN/dictate
+HISTORY="$HOME/.local/share/dictation-history.txt"
+LOG="$STATE/dictate.log"
+SOUNDS=/usr/share/sounds/ocean/stereo
+mkdir -p "$STATE"; WAV="$STATE/rec.wav"; PID="$STATE/rec.pid"
+
+notify() { notify-send -a Dictation -t 1500 "$@" 2>/dev/null; }
+cue() { pw-play "$SOUNDS/$1.oga" 2>/dev/null & }
+log() { echo "$(date +%T) $*" >> "$LOG"; }
+
+if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then
+    kill -INT "$(cat "$PID")"; rm -f "$PID"; sleep 0.3
+    cue device-removed
+    notify "Transcribing…"
+    log "stop: $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$WAV")s of audio"
+    TEXT=$(DISABLE_GAMESCOPE_WSI=1 whisper-cli -m "$MODEL" -f "$WAV" -t 5 -nt -np \
+            --prompt "$PROMPT" 2>>"$LOG" \
+        | tr '\n' ' ' | sed -E 's/\[[A-Z_ ]+\]//g; s/^ +//; s/ +$//; s/  +/ /g')
+    [ -z "$TEXT" ] && { log "no speech"; notify "No speech detected"; exit 0; }
+    # Trailing space after a finished sentence, so the next dictation flows on.
+    [[ "$TEXT" =~ [.?!]$ ]] && TEXT="$TEXT "
+    cp "$WAV" "$STATE/last.wav"
+    printf '%s\t%s\n' "$(date '+%F %T')" "$TEXT" >> "$HISTORY"
+    log "text: $TEXT"
+    printf '%s' "$TEXT" | setsid wl-copy 2>>"$LOG" || log "wl-copy failed (WAYLAND_DISPLAY=$WAYLAND_DISPLAY)"
+    [ -z "$DICTATE_NOTYPE" ] && ydotool type --key-delay 2 -- "$TEXT"
+    notify "Copied to clipboard" "$TEXT"
+else
+    rm -f "$PID"
+    pw-record --rate 16000 --channels 1 --format s16 "$WAV" & echo $! > "$PID"
+    log "start pid $!"
+    sleep 0.15; cue device-added
+    notify "🎙 Listening… (run again to stop)"
+fi

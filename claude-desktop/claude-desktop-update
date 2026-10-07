@@ -1,0 +1,33 @@
+#!/bin/bash
+# Install or update Claude Desktop (official Linux beta, arm64) without apt:
+# fetch the latest .deb from Anthropic's apt repo, verify its SHA256 and unpack
+# it into ~/.local/opt. Safe to re-run; does nothing when already current.
+set -euo pipefail
+REPO=https://downloads.claude.ai/claude-desktop/apt/stable
+OPT="$HOME/.local/opt/claude-desktop"
+P=$(curl -fsSL $REPO/dists/stable/main/binary-arm64/Packages)
+VER=$(echo "$P" | grep ^Version: | sort -V -k2 | tail -1 | cut -d' ' -f2)
+BLOCK=$(echo "$P" | awk -v v="$VER" '/^Package:/{b=""} {b=b $0 "\n"} /^$/ && b ~ "Version: " v "\n" {print b; exit} END{if (b ~ "Version: " v "\n") print b}')
+F=$(echo "$BLOCK" | grep ^Filename: | head -1 | cut -d' ' -f2)
+H=$(echo "$BLOCK" | grep ^SHA256: | head -1 | cut -d' ' -f2)
+CUR=$(cat "$OPT/.deb-version" 2>/dev/null || echo none)
+[ "$VER" = "$CUR" ] && { echo "Claude Desktop already at $VER"; exit 0; }
+
+T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
+echo "Claude Desktop: $CUR -> $VER"
+curl -fL# -o "$T/pkg.deb" "$REPO/$F"
+echo "$H  $T/pkg.deb" | sha256sum -c --quiet
+bsdtar -xf "$T/pkg.deb" -C "$T" data.tar.xz && mkdir "$T/root" && tar -xf "$T/data.tar.xz" -C "$T/root"
+pkill -f "$OPT/" || true
+rm -rf "$OPT" && mkdir -p "$(dirname "$OPT")" && cp -a "$T/root/usr/lib/claude-desktop" "$OPT"
+echo "$VER" > "$OPT/.deb-version"
+
+mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/icons"
+ln -sf "$OPT/claude-desktop" "$HOME/.local/bin/claude-desktop"
+cp -a "$T/root/usr/share/icons/hicolor" "$HOME/.local/share/icons/"
+for d in "$T"/root/usr/share/applications/*.desktop; do
+    sed "s|^Exec=claude-desktop|Exec=$HOME/.local/bin/claude-desktop|" "$d" \
+        > "$HOME/.local/share/applications/$(basename "$d")"
+done
+update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+echo "Done. Launch 'Claude' from the app menu."
