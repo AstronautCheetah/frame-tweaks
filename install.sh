@@ -7,6 +7,7 @@
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update              git pull, then re-run the installer of everything installed
 #   ./install.sh list                components and what they do
+#   ./install.sh menu                (re)create the "Steam Frame Tweaks" app-menu entry
 #   ./install.sh ID...               same as "install ID..."
 #
 # Everything installs into your home directory; nothing touches SteamOS's read-only system
@@ -23,6 +24,25 @@ while IFS=$'\x1f' read -r id title deps desc; do
     [[ -z $id || $id == \#* ]] && continue
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc
 done < <(tr '\t' '\037' < components.tsv)
+
+# The installer's own app-menu entry (desktop menu and Steam's VR "+" menu).
+ensure_menu_entry() {
+    local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor"
+    mkdir -p "$apps" "$icons/256x256/apps"
+    install -m644 icons/frame-tweaks.png "$icons/256x256/apps/frame-tweaks.png"
+    cat > "$apps/steam-frame-tweaks.desktop" <<DESKTOP
+[Desktop Entry]
+Type=Application
+Name=Steam Frame Tweaks
+Comment=Install, check and remove Steam Frame desktop-mode tweaks
+Exec=env FRAME_TWEAKS_GUI=1 $PWD/install.sh gui
+Icon=frame-tweaks
+Terminal=false
+Categories=Settings;Utility;
+DESKTOP
+    update-desktop-database -q "$apps" 2>/dev/null || true
+    touch "$apps" "$icons"     # Steam's "+" menu rescans on these
+}
 
 bold() { printf '\033[1m%s\033[0m\n' "$*"; }
 is_component() { [[ -n ${TITLE[$1]:-} ]]; }
@@ -73,6 +93,7 @@ cmd_status() {
 
 cmd_install() {
     [[ $# -eq 0 ]] && { echo "install what? (./install.sh list)" >&2; exit 1; }
+    ensure_menu_entry
     [[ $1 == all ]] && set -- "${IDS[@]}"
     check_ids "$@"
     local id failed=()
@@ -118,6 +139,7 @@ cmd_reinstall() {
 }
 
 cmd_gui() {
+    ensure_menu_entry
     local args=() id st
     for id in "${IDS[@]}"; do
         status_of "$id" >/dev/null; st=$?
@@ -167,6 +189,7 @@ case ${1:-} in
     _reinstall)  cmd_reinstall ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
     list)        cmd_list ;;
+    menu)        ensure_menu_entry; echo "Added 'Steam Frame Tweaks' to the app menu." ;;
     -h|--help|help) usage ;;
     --version|version) echo "$VERSION" ;;
     *)           cmd_install "$@" ;;

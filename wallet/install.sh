@@ -7,6 +7,16 @@ ensure_tweaks_venv
 install_py_tool "$REPO_DIR/wallet/wallet-unlock"
 install -m755 "$REPO_DIR/wallet/with-keyring" "$BIN/"
 
+# Closing the wallet (KWalletManager, idle timeout) only closes kwalletd6's view; ksecretd
+# stays unlocked. This service turns every close into a real lock.
+mkdir -p "$HOME/.config/systemd/user"
+cp "$REPO_DIR/wallet/wallet-lock-sync.service" "$HOME/.config/systemd/user/"
+sysctl_user daemon-reload
+sysctl_user enable --now wallet-lock-sync
+sysctl_user restart wallet-lock-sync
+install_icon frame-tweaks-lock
+install_desktop "$REPO_DIR/wallet/wallet-lock.desktop"
+
 # gh (Homebrew) would store its token in plain text: no Secret Service on the desktop's bus.
 REAL_GH=$(PATH="${PATH//$BIN:/}" command -v gh || true)
 if [ -n "$REAL_GH" ]; then

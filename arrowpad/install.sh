@@ -20,4 +20,5 @@ EOS
 chmod +x "$BIN/arrowpad"
 install_icon frame-tweaks-arrowpad
 install_desktop "$REPO_DIR/arrowpad/arrowpad.desktop"
+install_desktop "$REPO_DIR/arrowpad/arrowpad-vr.desktop"
 say "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
