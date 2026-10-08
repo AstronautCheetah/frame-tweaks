@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: ShellCheck
         run: |
           sudo apt-get install -y shellcheck
@@ -14,6 +16,11 @@ jobs:
           for f in $(grep -lE '^#!/usr/bin/env python3' -r --exclude-dir=.git .); do
             python3 -m py_compile "$f"
           done
+      - name: No attribution trailers (CLAUDE.md)
+        run: |
+          if git log --format=%B | grep -iE '^[[:space:]]*(Co-authored-by|Claude-Session|Assisted-by|Generated-by)[[:space:]]*:|^[[:space:]]*(🤖[[:space:]]*)?Generated with \['; then
+            echo "attribution trailer found in history"; exit 1
+          fi
       - name: Manifest and installer self-checks
         run: |
           # every component in components.tsv has install/uninstall/status scripts and a README

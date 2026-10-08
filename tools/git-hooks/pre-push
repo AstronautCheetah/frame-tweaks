@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Backstop for the commit-msg hook, which a stray -c core.hooksPath=... or --no-verify skips:
+# it refuses a push whose new commits carry an attribution trailer (always).
+set -euo pipefail
+zero=0000000000000000000000000000000000000000
+pattern='^[[:space:]]*(Co-authored-by|Claude-Session|Assisted-by|Generated-by)[[:space:]]*:|^[[:space:]]*(🤖[[:space:]]*)?Generated with \['
+while read -r _lref lsha _rref rsha; do
+    [ "$lsha" = "$zero" ] && continue
+    if [ "$rsha" = "$zero" ] || ! git cat-file -e "$rsha^{commit}" 2>/dev/null; then
+        range=$(git rev-list "$lsha" --not --remotes)
+    else
+        range=$(git rev-list "$rsha..$lsha")
+    fi
+    for c in $range; do
+        if git log -1 --format=%B "$c" | grep -qiE "$pattern"; then
+            echo "pre-push: refusing: commit $(git rev-parse --short "$c") carries an attribution trailer (see CLAUDE.md)." >&2
+            exit 1
+        fi
+    done
+done

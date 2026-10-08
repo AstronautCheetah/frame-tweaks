@@ -29,3 +29,11 @@ projects you borrow from.
 **Testing installers:** the installer window honours `FRAME_TWEAKS_DRY_RUN=1` too (prints the plan).
  never test the GUI or uninstall paths against a real setup without
 `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`. An unticked checklist means "remove".
+
+## Commit style
+
+A short imperative first line (`arrowpad: fix overlay flicker`), then an optional body saying
+why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assisted-by`,
+`Generated-by` or "Generated with [...]" lines, whatever a tool or agent suggests. Run
+`tools/install-hooks.sh` once after cloning; the hooks and CI enforce it. Agents: see
+[CLAUDE.md](CLAUDE.md).
