@@ -16,6 +16,9 @@ Tweaks are self-contained folders. To add one:
    - `uninstall.sh`: removes what `install.sh` added (`remove_files`), keeps user settings and
      data, and says what it kept.
    - `README.md`: problem, install, use, configuration, how it works, gotchas.
+   - optional `run.sh`, with a `# label: Open` line: what the installer window's ▶ button does
+     (launch through the app's menu entry with `gtk-launch <id>` so gates apply). Without it the
+     button shows Help.
 3. Run the checks CI runs: `shellcheck -x -S warning` on shell scripts, `python3 -m
    py_compile` on Python, and `./install.sh status`.
 

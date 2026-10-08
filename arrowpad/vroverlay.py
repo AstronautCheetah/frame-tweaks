@@ -19,8 +19,21 @@ from PyQt6.QtGui import QImage, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton
 
 KEY = "steam-frame-tweaks.arrowpad"
+MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it back
 WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.45, 0.30, 2.0, 0.05
 FORWARD, BELOW, TILT_DEG = 0.55, 0.30, 25     # reset: in front of you, below eye level, tilted up
+
+
+def _rigid_mul(a, b):
+    """Compose two 3x4 rigid transforms (rotation | translation)."""
+    return [[sum(a[r][k] * b[k][c] for k in range(3)) + (a[r][3] if c == 3 else 0.0)
+             for c in range(4)] for r in range(3)]
+
+
+def _rigid_inv(a):
+    rt = [[a[c][r] for c in range(3)] for r in range(3)]          # rotation transposed
+    t = [-sum(rt[r][k] * a[k][3] for k in range(3)) for r in range(3)]
+    return [rt[r] + [t[r]] for r in range(3)]
 
 
 def _mat(rows):
@@ -49,8 +62,8 @@ class OverlayHost:
         self.last_device = None         # controller behind the latest laser event
         self.size = (0, 0)
         self.dirty = True
-        if config.get("vr_pose"):
-            self.pose = config["vr_pose"]
+        self.pose = config.get("vr_pose")
+        if self.pose and self.distance_from_head() <= MAX_DISTANCE:
             self.apply_pose()
         else:
             self.reset_position()
@@ -76,6 +89,20 @@ class OverlayHost:
         self.dirty = False
 
     # ---- placement --------------------------------------------------------
+    def device_matrix(self, index):
+        poses = self.system.getDeviceToAbsoluteTrackingPose(openvr.TrackingUniverseStanding, 0,
+                                                            openvr.k_unMaxTrackedDeviceCount)
+        if index is None or index >= len(poses) or not poses[index].bPoseIsValid:
+            return None
+        m = poses[index].mDeviceToAbsoluteTracking.m
+        return [[m[r][c] for c in range(4)] for r in range(3)]
+
+    def distance_from_head(self):
+        head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
+        if head is None or not self.pose:
+            return 0.0
+        return math.dist([head[r][3] for r in range(3)], [self.pose[r][3] for r in range(3)])
+
     def apply_pose(self):
         self.ov.setOverlayTransformAbsolute(self.handle, openvr.TrackingUniverseStanding, _mat(self.pose))
 
@@ -157,7 +184,7 @@ class OverlayHost:
             if t == openvr.VREvent_MouseMove:
                 pos = self.to_widget(ev.data.mouse)
                 if self.drag is not None:
-                    self.drag_to(pos)
+                    self.drag_follow()
                 else:
                     self.set_hover(self.button_at(pos), dev)
                     if self.pressed is not None:
@@ -169,7 +196,11 @@ class OverlayHost:
                     self.pressed = b
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
                 elif not self.pad.pinned:
-                    self.drag = (pos, [row[:] for row in self.pose])
+                    # Grab: the panel follows the controller rigidly, like Full Keyboard's grip
+                    # grab. (Moving it by laser coordinates on the panel ran away.)
+                    ctrl = self.device_matrix(dev)
+                    if ctrl is not None:
+                        self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose))
             elif t == openvr.VREvent_MouseButtonUp:
                 pos = self.to_widget(ev.data.mouse)
                 if self.pressed is not None:
@@ -177,21 +208,20 @@ class OverlayHost:
                     self.pressed = None
                 if self.drag is not None:
                     self.drag = None
+                    if self.distance_from_head() > MAX_DISTANCE:
+                        self.reset_position()
                     self.save()
             self.dirty = True
         if self.dirty and visible:
             self.render()
 
-    def drag_to(self, pos):
-        """Keep the grabbed point under the laser: the panel moves with it, in its own plane.
-        (Mouse coordinates are relative to the moving panel, so correct by the offset from
-        the grab point each time instead of using the total distance.)"""
-        grab, _ = self.drag
-        per_px = self.width_m / max(1, self.size[0])
-        dx, dy = (pos.x() - grab.x()) * per_px, -(pos.y() - grab.y()) * per_px
-        for r in range(3):              # along the overlay's own x and y axes
-            self.pose[r][3] += self.pose[r][0] * dx + self.pose[r][1] * dy
-        self.apply_pose()
+    def drag_follow(self):
+        """While grabbed: overlay = controller now x (controller at grab)^-1 x overlay at grab."""
+        dev, offset = self.drag
+        ctrl = self.device_matrix(dev)
+        if ctrl is not None:
+            self.pose = _rigid_mul(ctrl, offset)
+            self.apply_pose()
 
     def close(self):
         try:
