@@ -16,6 +16,18 @@ Before=steamvr.service
 [Service]
 Type=oneshot
 ExecStart=$D/sft-curvature arm
+# Sandboxing: it only edits SteamVR's settings file and its own note of the previous value.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.config/openvr %h/.local/state
+PrivateTmp=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
 UNIT
 # While SteamVR runs: inject the patch (and again after a dashboard reload).
 cat > "$U/sft-curvature.service" <<UNIT
@@ -28,6 +40,19 @@ PartOf=steamvr.service
 ExecStart=$D/sft-curvature watch
 Restart=on-failure
 RestartSec=10
+# Sandboxing: reads SteamVR's dashboard files, talks to 127.0.0.1:8087, writes one status file.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%t
+PrivateTmp=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+IPAddressAllow=localhost
+IPAddressDeny=any
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
 UNIT
 # Wants=, not Requires=: SteamVR starts normally even if these fail.
 cat > "$U/steamvr.service.d/sft-curvature.conf" <<UNIT
