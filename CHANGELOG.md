@@ -1,6 +1,25 @@
 # Changelog
 
 ## Unreleased
+- **Release channels:** updates and `get.sh` take stable `vX.Y.Z` releases only (pre-releases
+  used to win over their final version); `beta` in `~/.config/steam-frame-tweaks/channel` opts
+  into pre-releases.
+- **Installer:** one install/update/removal at a time; every run logged; `debug-info` (redacted
+  report; also a **Diagnostics** button); `hold`/`unhold`; `update --to vX.Y.Z`; per-tweak
+  versions with `migrate.sh`; `check-system` (also after every update).
+- **Installer window:** crash page with copyable details, single instance, D-pad row navigation
+  in VR (left D-pad up/down, A ticks).
+- **Backups:** `backup_file`/`restore_file` and per-key KDE settings restore; the wallet puts its
+  `kwalletrc` settings back on removal.
+- **Wallet:** fixed the 4-hour auto-lock never being scheduled again after one failed lock
+  (a leftover unit name blocked it, silently); status warns when unlocked without an auto-lock.
+- **Sandboxing** for ydotoold, wallet-lock-sync and the curvature services.
+- **New tweaks:** Memory caps (Whisper, scrcpy, VSCodium) and Screen reader (Orca).
+- **Packaging:** AppStream metainfo, desktop ID `io.github.AstronautCheetah.FrameTweaks`, icons in
+  three sizes; CI validates them.
+- **Docs:** README/SECURITY tables and per-tweak "At a glance" boxes generated from each tweak's
+  `meta`; Common issues; roadmap.
+- **Engineering:** unit tests, release workflow, actions pinned to commits.
 - Uninstalling Dictation, Wallet, Arrow Pad, NordVPN or Android Mirror now also removes its
   menu icon (found by the install test).
 - ydotool: a service that fails to start is reported as a warning instead of failing the

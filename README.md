@@ -105,9 +105,17 @@ Categories fold, and rows or whole categories can be hidden (never removed). Row
 ./install.sh install signal     install (adds dependencies: wallet)
 ./install.sh status             health check, changes nothing
 ./install.sh update             move to the newest release and re-run what's installed
+./install.sh update --to v0.3.1 go to a specific release (roll back)
+./install.sh hold wallet        keep a tweak as it is during updates (unhold to undo)
 ./install.sh uninstall nordvpn  remove one (keeps its settings)
+./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
+./install.sh debug-info         a redacted report for bug reports
 ./install.sh list
 ```
+
+Updates follow stable releases. To also get pre-releases, put `beta` in
+`~/.config/steam-frame-tweaks/channel`. Every install, update and removal is logged in
+`~/.local/state/frame-tweaks/logs/`, and only one can run at a time.
 
 ```text
 $ ./install.sh status
