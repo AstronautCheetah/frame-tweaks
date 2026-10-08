@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: ⌨️
+name: Dictation
+group: core
+what: Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut or the Arrow Pad's 🎤 to start/stop; the text is typed into the focused app, copied, and logged.
+why: Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough to transcribe locally, so nothing leaves the headset.
+changes: `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
+access: Microphone while recording; types through ydotool
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall dictation` (keeps `~/.config/dictate.conf` and your dictation history)

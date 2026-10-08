@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 🌐
+name: NordVPN (WireGuard)
+group: extras
+what: NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates.
+why: The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs.
+changes: `nordvpn-wg`, tray app, KDE autostart entry
+access: **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`)
+survives-updates: Yes (its connections live in NetworkManager's settings, which updates keep)
+undo: `./install.sh uninstall nordvpn`

@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 🛠️
+name: Tools
+group: core
+what: `restart-plasmashell`: bring the taskbar and tray back after a crash.
+why: In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session.
+changes: `~/.local/bin/restart-plasmashell`
+access: –
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall tools`

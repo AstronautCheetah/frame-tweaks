@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: ⌨️
+name: ydotool (helper)
+group: helper
+what: The virtual keyboard Dictation and Arrow Pad type through. Installed automatically.
+why: Under KDE Wayland ordinary programs can't send keystrokes to other apps; ydotool goes through the kernel's `/dev/uinput`.
+changes: `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold`
+access: **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running)
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall ydotool`

@@ -6,6 +6,14 @@ VPN. (Firefox already reports Linux x86_64 on aarch64 by itself.) This turns on 
 built-in protection, `privacy.resistFingerprinting` (RFP, the Tor Browser approach), via a
 `user.js` in the default profile, so it's applied at every start and Sync can't undo it.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** Preferences in Firefox's profile (`user.js`)
+> - **Undo:** `./install.sh uninstall firefox`, then reset the changed preferences in `about:config` (Firefox keeps their last values)
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh firefox            # then restart Firefox
 firefox/install.sh --remove     # take it out again

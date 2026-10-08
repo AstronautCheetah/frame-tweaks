@@ -4,6 +4,15 @@ A compact, always-on-top pad for desktop mode with the keys Steam's on-screen
 keyboard lacks. It never steals focus, so whatever you tap goes to the app you're
 working in.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
+> - **Unusual access:** Types through ydotool. In VR: a SteamVR overlay. **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
+> - **Undo:** `./install.sh uninstall arrowpad`
+<!-- /generated:glance -->
+
 ```
  nav layer                                  Fn layer
  Esc   Tab   Bksp  Del   🖱R    🖱M          F1    F2    F3   F4    🖱R   🖱M

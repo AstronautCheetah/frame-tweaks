@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 📱
+name: Android Mirror
+group: extras
+what: Mirror and control your Android phone in a desktop window (scrcpy over wireless adb). Finds the phone's changing port automatically.
+why: Use your phone without taking the headset off. Google ships `adb` only for x86, so this installs an aarch64 build that runs on the Frame.
+changes: `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher
+access: Network connection to your phone's wireless debugging; pairing keys in `~/.android`
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall adb-scrcpy`

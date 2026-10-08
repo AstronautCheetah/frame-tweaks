@@ -3,6 +3,14 @@
 [VSCodium](https://vscodium.com) is VS Code built from Microsoft's open-source code without
 their telemetry and branding. Installed from Flathub (aarch64).
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** Flathub app (`com.vscodium.codium`)
+> - **Undo:** `./install.sh uninstall vscodium`
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh vscodium
 ```

@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: ⌨️
+name: Arrow Pad
+group: core
+what: Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super, right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus.
+why: Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop.
+changes: `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
+access: Types through ydotool. In VR: a SteamVR overlay. **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall arrowpad`

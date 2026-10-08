@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 🧑‍💻
+name: VSCodium
+group: extras
+what: VS Code without telemetry, from Flathub.
+why: Coding on the headset: Flathub has the aarch64 build; pairs with Arrow Pad and dictation.
+changes: Flathub app (`com.vscodium.codium`)
+access: –
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall vscodium`

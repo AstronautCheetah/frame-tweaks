@@ -5,6 +5,15 @@ flat, and there's no setting to change that: the curvature rule is hard-coded (c
 dashboard, theater per setting, flat in the world). This tweak presses **Toggle Curvature**
 for you on every window you float, so they start curved like the dashboard.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+> - **Changes:** `~/.local/share/frame-tweaks/curvature`, user units `sft-vr-debugger`, `sft-curvature`, a `steamvr.service` drop-in
+> - **Unusual access:** **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects a small script into the dashboard. Any program running as you could use that port too
+> - **Undo:** `./install.sh uninstall curvature`
+<!-- /generated:glance -->
+
 It stays your choice: toggle a window flat and it stays flat. Moving it back into the
 dashboard and out again curves it again (SteamVR resets the toggle when a window is
 re-docked).

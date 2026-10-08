@@ -52,8 +52,10 @@ jobs:
           sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 >/dev/null
           python3 -m pip install --quiet PyQt6
           QT_QPA_PLATFORM=offscreen python3 -m unittest discover -s tests -v
-      - name: Docs consistency (README rows, links)
-        run: python3 dev/check-docs.py
+      - name: Docs consistency (README rows, links, generated tables)
+        run: |
+          python3 dev/check-docs.py
+          python3 dev/gen-docs.py --check
       - name: Install, status and uninstall in a throwaway home
         run: |
           sudo apt-get install -y libarchive-tools     # bsdtar, as on SteamOS

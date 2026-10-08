@@ -2,6 +2,15 @@
 
 Mirror and control an Android phone in a desktop window.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher
+> - **Unusual access:** Network connection to your phone's wireless debugging; pairing keys in `~/.android`
+> - **Undo:** `./install.sh uninstall adb-scrcpy`
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh adb-scrcpy
 ```

@@ -3,6 +3,15 @@
 [groffta/whisper-frame](https://github.com/groffta/whisper-frame) adds two ways to dictate,
 typed into the focused window:
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** Upstream's own installer (user services `whisper-ptt`, `whisper-panel`), pinned release
+> - **Unusual access:** Microphone; listens for the headset's Select button
+> - **Undo:** `./install.sh uninstall whisper-frame`
+<!-- /generated:glance -->
+
 - **Hold the headset's Select button** until the beep, speak, release.
 - **Hold the mic under any floating window** (it appears at each window's bottom-right).
 

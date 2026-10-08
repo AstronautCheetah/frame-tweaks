@@ -5,6 +5,15 @@
 clipboards**, so copying in a floating VR window and pasting in the desktop (or back) doesn't
 work.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `clipboard-sync` built from source, KDE autostart entry
+> - **Unusual access:** Reads and writes both sessions' clipboards
+> - **Undo:** `./install.sh uninstall clipboard`
+<!-- /generated:glance -->
+
 **Fix:** [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) watches every X11 and
 Wayland clipboard it can reach and keeps them in sync. Started with the desktop session, it
 sees both.

@@ -6,6 +6,15 @@ the controller lasers. It has arrows, F-keys, a numpad, Ctrl/Alt, Copy/Paste, ha
 grab-to-move, and many languages. It's a separate app (the system keyboard button
 still opens Steam's).
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** Upstream's own installer into `~/.local/share/framekeyboard`, pinned release
+> - **Unusual access:** A SteamVR overlay; types through its own input path
+> - **Undo:** `./install.sh uninstall full-keyboard` (keeps its settings in `~/.config/framekeyboard`)
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh full-keyboard    # latest release, SHA256-verified, then its own installer
 ```

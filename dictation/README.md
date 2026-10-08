@@ -3,6 +3,15 @@
 Speech-to-text that runs entirely on the Frame: whisper.cpp on the GPU (Vulkan).
 The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the device.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
+> - **Unusual access:** Microphone while recording; types through ydotool
+> - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/dictate.conf` and your dictation history)
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh dictation
 ```
