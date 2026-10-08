@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 (2026-10-07)
+- Arrow Pad VR: fix the overlay flying away (drag moved it by laser coordinates on the moving
+  panel, which ran away; it now follows the controller rigidly, like Full Keyboard's grab). A
+  panel more than 4 m away comes back; launching again recenters it.
+- Installer window: a ▶ button per tweak (Open, Dictate, Unlock, Restart, Tray, …) from each
+  tweak's `run.sh`; Help where there's nothing to launch.
+
 ## 0.2.0 (2026-10-07)
 - Installer window: tweaks grouped by category (Convenience → Privacy & security → System →
   Developer); click any row (or ⓘ) for details: what it is, why it's included, who made it,

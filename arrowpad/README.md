@@ -16,8 +16,9 @@ Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
 - **Arrow Pad** (`arrowpad --desktop`): inside desktop mode.
 - **Arrow Pad (VR window)** (`arrowpad --vr`): a **native SteamVR overlay**, like Full
   Keyboard. Visible while the dashboard is; point and pull the trigger to type. **Reset** puts it
-  in front of you, **−/+** change its width in 5 cm steps (0.30–2 m), drag the panel to move it,
-  **Pin** stops that. It never takes keyboard focus, so keys reach the app you were using; a
+  in front of you, **−/+** change its width in 5 cm steps (0.30–2 m), point at the panel's
+  background and hold the trigger to carry it with your controller (like Full Keyboard's grab),
+  **Pin** stops that. Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
   floating *window* couldn't do that (gamescope gives clicked windows focus and ignores requests
   to hand it back).
 

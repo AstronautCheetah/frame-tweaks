@@ -499,6 +499,9 @@ class ArrowPad(QWidget):
 
     # ---- window / settings ----------------------------------------------
     def toggle_visible(self):
+        if self.overlay:          # VR: relaunching recenters it in front of you (Full Keyboard does too)
+            self.overlay.reset_position()
+            return
         if self.isVisible():
             self.save_config()
             self.release_all_mods()

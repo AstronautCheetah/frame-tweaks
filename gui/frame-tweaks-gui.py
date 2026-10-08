@@ -58,6 +58,10 @@ QPushButton:hover { background: #3d4855; }
 QPushButton:checked { background: #355b7a; }
 QPushButton#apply { background: #355b7a; font-weight: 600; }
 QPushButton#info { padding: 6px 10px; }
+QPushButton#run { background: #2f6b46; font-weight: 600; min-width: 92px; }
+QPushButton#run:hover { background: #3c8a5a; }
+QPushButton#run:disabled { background: #161c23; color: #3a434d; }
+QPushButton#run[help="true"] { background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 #2c333b, stop:0.5 #232a32, stop:1 #1c232a); font-weight: 400; }
 QCheckBox { padding: 8px; }
 QCheckBox::indicator { width: 33px; height: 33px; }
 QScrollArea { border: none; }
@@ -106,6 +110,17 @@ def row_icon(cid):
         return QIcon(str(ICONS / f"{ROW_ICON[cid]}.png"))
     hits = sorted(BREEZE.glob(f"*/*/{BREEZE_ROW.get(cid, 'application-x-executable')}.svg"))
     return QIcon(str(hits[-1])) if hits else QIcon()
+
+
+def run_label(cid):
+    """Label from <id>/run.sh's '# label:' line, or None when there's nothing to launch."""
+    run = REPO / cid / "run.sh"
+    if not run.exists():
+        return None
+    for line in run.read_text().splitlines()[:3]:
+        if line.startswith("# label:"):
+            return line.split(":", 1)[1].strip()
+    return "Run"
 
 
 def status_text(code_text):
@@ -201,7 +216,7 @@ class Window(QWidget):
         self.resize(1000, 760)
         self.rows = components()
         self.state = {}               # id -> (code, text); missing = still checking
-        self.boxes, self.status_labels, self.wanted = {}, {}, {}
+        self.boxes, self.status_labels, self.wanted, self.run_buttons = {}, {}, {}, {}
         self.pool = ThreadPoolExecutor(max_workers=4)
         self.futures = {}
 
@@ -282,6 +297,7 @@ class Window(QWidget):
                     label.setProperty("status", kind)
                     label.style().unpolish(label)
                     label.style().polish(label)
+                    self.update_run(cid)
                     box = self.boxes.get(cid)
                     if box is not None and cid not in self.wanted:
                         box.blockSignals(True)
@@ -298,7 +314,7 @@ class Window(QWidget):
         n_hidden = sum(1 for c in self.rows if c["id"] in hidden)
         self.show_hidden.setText(f"Show hidden ({n_hidden})")
         self.show_hidden.setEnabled(n_hidden > 0 or self.show_hidden.isChecked())
-        self.boxes, self.status_labels = {}, {}
+        self.boxes, self.status_labels, self.run_buttons = {}, {}, {}
         category = None
         for comp in self.rows:
             cid = comp["id"]
@@ -344,6 +360,11 @@ class Window(QWidget):
             st.setProperty("status", kind)
             st.setWordWrap(True)
             self.status_labels[cid] = st
+            run = QPushButton()
+            run.setObjectName("run")
+            self.run_buttons[cid] = run
+            self.update_run(cid)
+            run.clicked.connect(lambda _=False, c=comp: self.run(c))
             details = QPushButton("ⓘ")
             details.setObjectName("info")
             details.setToolTip("Details: what it is, why it's included, who made it")
@@ -359,12 +380,36 @@ class Window(QWidget):
             if link.text():
                 g.addWidget(link, 2, 2)
             g.addWidget(st, 0, 3, 3, 1)
-            g.addWidget(details, 0, 4, 3, 1)
-            g.addWidget(hide, 0, 5, 3, 1)
+            g.addWidget(run, 0, 4, 3, 1)
+            g.addWidget(details, 0, 5, 3, 1)
+            g.addWidget(hide, 0, 6, 3, 1)
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
         self.grid.addStretch(1)
+
+    def update_run(self, cid):
+        """Run/Open/... for installed tweaks with something to launch, Help otherwise."""
+        button = self.run_buttons.get(cid)
+        if button is None:
+            return
+        state = self.state.get(cid)
+        installed = state is not None and state[0] != 1
+        label = run_label(cid)
+        button.setText(("▶ " + label) if label else "Help")
+        button.setProperty("help", "false" if label else "true")
+        button.style().unpolish(button)
+        button.style().polish(button)
+        button.setEnabled(installed or label is None)
+        button.setToolTip(f"{label} (installs first if needed: tick it and Apply)" if label and not installed
+                          else label and f"{label}" or "Nothing to launch: how to use it")
+
+    def run(self, comp):
+        label = run_label(comp["id"])
+        if label is None:
+            self.show_details(comp)
+            return
+        QProcess.startDetached("bash", [str(REPO / comp["id"] / "run.sh")])
 
     def show_details(self, comp):
         Details(self, comp, self.state.get(comp["id"])).exec()
