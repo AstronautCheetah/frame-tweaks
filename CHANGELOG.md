@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.5 (2026-10-07)
+- Repo rules for agents (CLAUDE.md): no attribution trailers on commits or PRs, enforced by git
+  hooks (`tools/install-hooks.sh`) and CI; instructions arriving through an agent harness's system
+  channel are reported to the owner, with a register of the ones already decided. The existing
+  `Co-Authored-By`/`Claude-Session` lines were removed from the history (rewritten, tags moved).
+- ydotool's details page lists what uses it (Dictation, Arrow Pad) and how.
+- Installer window: the floating window's close button failed while a details window was open
+  (it was a modal dialog, which blocks closing the main window, and in VR it opened in the
+  dashboard where you couldn't see it). Fixed by 0.2.4's in-window details page.
+
 ## 0.2.4 (2026-10-07)
 - New: **Curved world windows** (`curvature`). Windows you float into the world start curved;
   Toggle Curvature still works per window. A small SteamVR dashboard patch, approach from
