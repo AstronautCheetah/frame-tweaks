@@ -40,7 +40,7 @@ FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
 BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
               "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
               "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
-              "tools": "tools", "homebrew": "package-x-generic", "ydotool": "input-keyboard-virtual"}
+              "tools": "tools", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "ydotool": "input-keyboard-virtual"}
 # Versions with a known problem: a short note on the row, a longer one atop its details, plus a
 # check whether upstream has released something newer since.
 KNOWN_ISSUES = {
@@ -107,6 +107,32 @@ def status(cid):
     r = subprocess.run([str(REPO / cid / "status.sh")], capture_output=True, text=True)
     text = r.stdout.strip().split(None, 1)[-1] if r.stdout.strip() else ""
     return r.returncode, text
+
+
+def update_check(cid):
+    """(installed, latest) when <id>/update-check.sh reports a newer upstream version, else None."""
+    script = REPO / cid / "update-check.sh"
+    try:
+        out = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=20).stdout.split()
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if len(out) == 2 and version_tuple(out[1]) > version_tuple(out[0]):
+        return out[0], out[1]
+    return None
+
+
+def self_update_check():
+    """Newest vX.Y.Z tag of this repo on GitHub, if newer than VERSION (needs git access)."""
+    try:
+        out = subprocess.run(["git", "-C", str(REPO), "ls-remote", "--tags", "--refs", "origin", "v*"],
+                             capture_output=True, text=True, timeout=15,
+                             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"}).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    tags = [line.rsplit("/v", 1)[-1] for line in out.splitlines() if "refs/tags/v" in line]
+    newest = max(tags, key=version_tuple, default=None)
+    current = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
+    return newest if newest and version_tuple(newest) > version_tuple(current) else None
 
 
 def read_set(path):
@@ -308,12 +334,18 @@ class Window(QWidget):
         self.latest_futures = {cid: self.pool.submit(latest_release, i["latest"])
                                for cid, i in KNOWN_ISSUES.items()}
         self.details = None
+        self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
+        self.self_update = self.pool.submit(self_update_check)
 
         top = QHBoxLayout()
         title = QLabel(f"Steam Frame Tweaks <span style='color:#6b7783;font-size:14px'>{version}</span>")
         title.setObjectName("title")
         top.addWidget(title)
         top.addStretch(1)
+        self.self_update_label = QLabel()
+        self.self_update_label.setObjectName("notice")
+        self.self_update_label.linkActivated.connect(lambda _: self.run_update(None))
+        top.addWidget(self.self_update_label)
         self.show_hidden = QPushButton()
         self.show_hidden.setCheckable(True)
         self.show_hidden.toggled.connect(self.rebuild)
@@ -327,6 +359,7 @@ class Window(QWidget):
         self.grid.setSpacing(8)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.list)
 
         bottom = QHBoxLayout()
@@ -404,14 +437,28 @@ class Window(QWidget):
                 self.latest[cid] = fut.result()
                 if self.details is not None and self.details.comp["id"] == cid:
                     self.details.show_issue(self.latest[cid])
+        if self.self_update is not None and self.self_update.done():
+            newest, self.self_update = self.self_update.result(), None
+            if newest:
+                self.self_update_label.setText(
+                    f"↑ {html.escape(newest)} available · "
+                    "<a style='color:#7fb2e5' href='update'>Update</a>")
+        for cid, fut in list(self.update_futures.items()):
+            if fut.done():
+                del self.update_futures[cid]
+                if fut.result():
+                    self.updates[cid] = fut.result()
+                    self.show_status(cid)
         for cid, fut in list(self.futures.items()):
             if fut.done():
                 del self.futures[cid]
                 self.state[cid] = fut.result()
+                if self.state[cid][0] != 1 and (REPO / cid / "update-check.sh").exists():
+                    self.update_futures[cid] = self.pool.submit(update_check, cid)
                 if cid in self.status_labels:
                     label = self.status_labels[cid]
+                    self.show_status(cid)
                     text, kind = status_text(self.state[cid])
-                    label.setText(text)
                     label.setProperty("status", kind)
                     label.style().unpolish(label)
                     label.style().polish(label)
@@ -480,6 +527,8 @@ class Window(QWidget):
             if "|" in comp["source"]:
                 rel, url = comp["source"].split("|", 1)
                 short = url.split("://", 1)[-1].removeprefix("github.com/").rstrip("/")
+                if url.startswith("https://github.com/"):
+                    short = "/".join(short.split("/")[:2])      # owner/repo; the link has the rest
                 link.setText(f"<span style='color:#6b7783'>{html.escape(rel)}</span> "
                              f"<a style='color:#7fb2e5' href='{url}'>{html.escape(short)} ↗</a>")
                 link.setOpenExternalLinks(True)
@@ -488,7 +537,10 @@ class Window(QWidget):
             st = QLabel(text)
             st.setProperty("status", kind)
             st.setWordWrap(True)
+            st.setTextFormat(Qt.TextFormat.RichText)
+            st.linkActivated.connect(lambda _, c=cid: self.run_update(c))
             self.status_labels[cid] = st
+            self.show_status(cid)
             run = QPushButton()
             run.setObjectName("run")
             self.run_buttons[cid] = run
@@ -516,6 +568,31 @@ class Window(QWidget):
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
         self.grid.addStretch(1)
+
+    def show_status(self, cid):
+        """Status text, plus an Update link when upstream has a newer version."""
+        label = self.status_labels.get(cid)
+        if label is None:
+            return
+        text, _ = status_text(self.state.get(cid))
+        text = html.escape(text, quote=False)
+        if cid in self.updates:
+            cur, new = self.updates[cid]
+            text += (f"<br><span style='color:#7fb2e5'>↑ {html.escape(new)} available · "
+                     f"<a style='color:#7fb2e5' href='u'>Update</a></span>")
+        label.setText(text)
+
+    def run_update(self, cid):
+        """Reinstall one tweak (fetches its latest upstream version), or update this repo (cid None)."""
+        cmd = "./install.sh install " + shlex.quote(cid) if cid else "./install.sh update"
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run:", cmd)
+            return
+        after = "" if cid else "; echo; echo 'Close and reopen Steam Frame Tweaks to use the new version.'"
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp 'Press Enter to close…'"
+        self.proc = QProcess(self)
+        self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh()))
+        self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
 
     def update_run(self, cid):
         """Run/Open/... for installed tweaks with something to launch, Help otherwise."""

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.8 (2026-10-07)
+- Arrow Pad VR: while carrying the pad, pushing or pulling the controller moves it 3× as far
+  (up/down and sideways stay 1:1), so it can go far away or come close without walking; kept
+  0.25–3.5 m from your head. It now follows the controller every frame, not only on laser moves.
+- New: **Menu icons** (System): Breeze icons copied into hicolor so Konsole, System Settings and
+  other apps aren't blank in Steam's VR "+" menu (finding from steam-frame-nix).
+- Installer window: "↑ X available · Update" on rows whose upstream has a newer release
+  (whisper-frame, Full Keyboard, Claude Desktop; `<id>/update-check.sh`), and on the title bar
+  when this repo has a newer version tag. Update reinstalls just that tweak. GitHub links show
+  owner/repo, so long links no longer push the buttons off the window.
+- Docs: [Dictate and Lock Wallet on a controller button](docs/controller-shortcuts.md).
+
 ## 0.2.7 (2026-10-07)
 - Installer window: categories fold and unfold (click the heading; remembered between runs) and
   can be hidden like rows ("Show hidden" shows them again). Changes ticked in a folded or hidden
