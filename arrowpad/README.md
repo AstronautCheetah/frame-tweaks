@@ -20,6 +20,8 @@ Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
   tilted back 50°, and **follows the dashboard** when it moves or the play space is re-centred,
   using Full Keyboard's placement. **Reset** puts it back there, **−/+** change its width in 5 cm steps (0.30–2 m), point at the panel's
   background and hold the trigger to carry it with your controller (like Full Keyboard's grab),
+  and **push or pull the controller to send it further away or bring it closer**: that motion
+  is amplified 3×, while up/down and side to side move it 1:1 (kept 0.25–3.5 m from you),
   **Pin** stops that. Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
   floating *window* couldn't do that (gamescope gives clicked windows focus and ignores requests
   to hand it back).

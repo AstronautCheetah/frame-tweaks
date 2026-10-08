@@ -38,4 +38,4 @@ install_icon frame-tweaks-dictate
 install_desktop "$REPO_DIR/dictation/dictate.desktop"
 [ -f "$HOME/.config/dictate.conf" ] || cp "$REPO_DIR/dictation/dictate.conf.example" "$HOME/.config/dictate.conf"
 
-say "Done. Bind 'Dictate (toggle)' to a key in System Settings → Keyboard → Shortcuts."
+say "Done. Bind 'Dictate (toggle)' to a key (and a controller button): docs/controller-shortcuts.md"

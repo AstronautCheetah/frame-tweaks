@@ -27,6 +27,8 @@ KEY = "steam-frame-tweaks.arrowpad"
 MAX_TEX = (1024, 768)
 MIN_RENDER_INTERVAL = 0.2            # at most 5 texture updates a second
 SWAP_SHOW_MS, SWAP_HIDE_MS = 60, 50  # double buffering: load, show new, then hide old
+DEPTH_GAIN = 3.0                     # dragging: push/pull moves the pad 3x as far; up/down/sideways 1:1
+DEPTH_MIN, DEPTH_MAX = 0.25, 3.5     # dragging: keep the pad this far from your head (m, horizontally)
 POSE_EPSILON = 0.0015                # ignore anchor jitter below 1.5 mm (and ~0.1°)
 TEX_DIR = f"/run/user/{os.getuid()}"
 MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it back
@@ -82,7 +84,7 @@ class OverlayHost:
         self.sizes = [(0, 0), (0, 0)]   # mouse scale per overlay
         self.hover = None               # button under the laser
         self.pressed = None             # button being pressed
-        self.drag = None                # (grab pixel, start transform) while dragging the panel
+        self.drag = None                # (device, offset, controller start, depth axis) while dragging
         self.last_device = None         # controller behind the latest laser event
         self.last_render = 0.0
         self.ticks = 0
@@ -315,7 +317,9 @@ class OverlayHost:
                 for h in self.handles:
                     self.ov.hideOverlay(h)
             self.visible = visible
-        if visible and self.drag is None and self.ticks % 5 == 0:
+        if self.drag is not None:
+            self.drag_follow()                  # every tick, not just on laser moves
+        elif visible and self.ticks % 5 == 0:
             self.follow_dashboard()             # ride along with the dashboard, ~10x a second
         for handle in self.handles:
             self.pump(handle)
@@ -348,7 +352,8 @@ class OverlayHost:
                     # grab. (Moving it by laser coordinates on the panel ran away.)
                     ctrl = self.device_matrix(dev)
                     if ctrl is not None:
-                        self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose))
+                        self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose),
+                                     [ctrl[r][3] for r in range(3)], self.depth_axis())
             elif t == openvr.VREvent_MouseButtonUp:
                 pos = self.to_widget(ev.data.mouse)
                 if self.pressed is not None:
@@ -363,13 +368,35 @@ class OverlayHost:
                         self.remember_offset()     # the new spot, relative to the dashboard
                     self.save()
 
+    def depth_axis(self):
+        """Horizontal unit vector from the head toward the pad (the push/pull direction)."""
+        head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
+        if head is None or not self.pose:
+            return None
+        v = [self.pose[0][3] - head[0][3], 0.0, self.pose[2][3] - head[2][3]]
+        n = math.hypot(v[0], v[2])
+        return [v[0] / n, 0.0, v[2] / n] if n > 1e-3 else None
+
     def drag_follow(self):
-        """While grabbed: overlay = controller now x (controller at grab)^-1 x overlay at grab."""
-        dev, offset = self.drag
+        """While grabbed: overlay = controller now x (controller at grab)^-1 x overlay at grab,
+        and the controller's push/pull along the head-to-pad direction is amplified
+        (DEPTH_GAIN), so the pad can be sent far away or brought close without walking."""
+        dev, offset, start, axis = self.drag
         ctrl = self.device_matrix(dev)
-        if ctrl is not None:
-            self.pose = _rigid_mul(ctrl, offset)
-            self.apply_pose()
+        if ctrl is None:
+            return
+        pose = _rigid_mul(ctrl, offset)
+        head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
+        if axis is not None and head is not None:
+            pushed = sum((ctrl[i][3] - start[i]) * axis[i] for i in range(3))
+            extra = pushed * (DEPTH_GAIN - 1)
+            # keep it between DEPTH_MIN and DEPTH_MAX from the head, measured along the axis
+            dist = sum((pose[i][3] - head[i][3]) * axis[i] for i in range(3))
+            extra = min(max(extra, DEPTH_MIN - dist), DEPTH_MAX - dist)
+            for i in range(3):
+                pose[i][3] += axis[i] * extra
+        self.pose = pose
+        self.apply_pose()
 
     def close(self):
         try:
