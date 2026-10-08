@@ -35,7 +35,7 @@ take_lock() {
 # Every changing run is logged (the last 5 are kept), for ./install.sh debug-info.
 start_log() {
     mkdir -p "$LOGS"
-    local log; log="$LOGS/$(date +%Y%m%d-%H%M%S)-$1.log"
+    local log; log="$LOGS/$(date +%Y%m%d-%H%M%S)-$$-$1.log"
     { echo "# frame-tweaks $VERSION: $*"; date; } > "$log"
     exec > >(tee -a "$log") 2>&1
     find "$LOGS" -name '*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
