@@ -176,6 +176,7 @@ cmd_reinstall() {
     [[ ${#installed[@]} -eq 0 ]] && { echo "Nothing installed yet."; return; }
     run_migrations "${installed[@]}"
     cmd_install "${installed[@]}"
+    echo; bold "Checking the SteamOS/SteamVR parts the tweaks rely on"; cmd_check_system || true
 }
 
 cmd_gui() {
