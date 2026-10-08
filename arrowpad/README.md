@@ -5,11 +5,11 @@ keyboard lacks. It never steals focus, so whatever you tap goes to the app you'r
 working in.
 
 ```
- nav layer                              Fn layer
- Esc   Tab   Bksp  Del   Enter  Fn      F1   F2   F3   F4    F5    Fn
- Shift Home   ↑    End   PgUp   🎤      F6   F7   F8   F9    F10   🎤
- Ctrl   ←     ↓     →    PgDn   Copy    F11  F12  Ins  PrtSc Menu  Copy
- Alt   Super Undo  Cut   All    Paste   Alt  Super Undo Cut   All   Paste
+ nav layer                                  Fn layer
+ Esc   Tab   Bksp  Del   🖱R    🖱M          F1    F2    F3   F4    🖱R   🖱M
+ Fn    Home   ↑    End   PgUp   🎤          Fn    F5    F6   F7    F8    🎤
+ Ctrl   ←     ↓     →    PgDn   Copy        Ctrl  F9    F10  F11   F12   Copy
+ Alt   Super Undo  Cut   All    Paste       Alt   Super Ins  PrtSc Menu  Paste
 ```
 
 Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
@@ -22,7 +22,7 @@ Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
   background and hold the trigger to carry it with your controller (like Full Keyboard's grab),
   and **push or pull the controller to send it further away or bring it closer**: that motion
   is amplified 3×, while up/down and side to side move it 1:1 (kept 0.25–3.5 m from you),
-  **Pin** stops that. Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
+  **Pin** stops that (its icon shows the state: a pin when pinned, a crossed-out pin when not, like Full Keyboard). Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
   floating *window* couldn't do that (gamescope gives clicked windows focus and ignores requests
   to hand it back).
 
@@ -54,11 +54,17 @@ few seconds) and uses the legends printed on that language's keyboards: German *
 Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian
 *Canc, Inizio, Pag↑*; English otherwise. Copy, paste, cut, undo and select-all are icons.
 
-- **Modifiers** (Shift, Ctrl, Alt, Super): tap = one-shot (applies to the next key,
+- **🖱R / 🖱M (right / middle click):** tap one and your **next click anywhere** (laser or
+  mouse, on any floating window or the desktop) becomes a right or middle click; the key lights
+  up until then. Only one can be on; tap it again to cancel (it also cancels itself after 20 s).
+  It works by catching that one click on the Steam session's display and replaying it as the
+  other button, because laser clicks don't pass through anything else the pad can see.
+- **Modifiers** (Ctrl, Alt, Super): tap = one-shot (applies to the next key,
   then releases), **double-tap = lock** (outlined) until tapped again. A held modifier
-  also applies to mouse clicks (Ctrl+click, Shift+click).
+  also applies to mouse clicks (Ctrl+click, Alt+click).
 - **Hold to repeat**: holding a button holds the key, so the app's key repeat applies.
-- **Fn** switches to F1–F12, Insert, PrintScreen and Menu.
+- **Fn** swaps the keys to the F-key layer (F1–F12, Insert, PrintScreen, Menu); Fn stays lit
+  while it's on, and tapping it again swaps back.
 - **Copy / Paste / Cut / Undo / Select all** (icons) send the Ctrl shortcuts.
 - **🎤** toggles [dictation](../dictation/): red while recording, yellow while transcribing. The text
   goes to the focused app, because the pad never takes focus.

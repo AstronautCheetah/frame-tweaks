@@ -150,6 +150,11 @@ cmd_gui() {
             kdialog --sorry "Couldn't install PyQt6; using the simple checklist."
     fi
     if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then
+        # A copy of the interpreter under its own name, so SteamVR gives the window its own
+        # controller bindings (it keys them by program name; Arrow Pad also runs on Python).
+        local sft="$qt/bin/sft-python"
+        cp -u "$(readlink -f "$qt/bin/python")" "$sft" 2>/dev/null || true
+        if "$sft" -c 'import PyQt6' 2>/dev/null; then exec "$sft" gui/frame-tweaks-gui.py; fi
         exec "$qt/bin/python" gui/frame-tweaks-gui.py
     fi
     cmd_kdialog_gui

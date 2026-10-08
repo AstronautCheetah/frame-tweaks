@@ -358,6 +358,7 @@ class Window(QWidget):
         self.grid = QVBoxLayout(self.list)
         self.grid.setSpacing(8)
         scroll = QScrollArea()
+        self.scroll = scroll
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.list)
@@ -393,6 +394,14 @@ class Window(QWidget):
         outer.setContentsMargins(20, 16, 20, 16)
         outer.addWidget(self.stack)
         QTimer(self, interval=100, timeout=self.collect).start()
+        self.vr_buttons = None
+        if os.environ.get("DISPLAY") == ":0":          # opened in VR: controller buttons too
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            from vrbuttons import VRButtons
+            self.vr_buttons = VRButtons({"back": self.go_back, "home": self.go_home,
+                                         "toggle": self.toggle_pointed_row})
+            if self.vr_buttons.ok:
+                QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.underMouse())).start()
         self.refresh()
 
     # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
@@ -698,7 +707,29 @@ class Window(QWidget):
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", cmd])
 
+    # ---- controller buttons in VR (vrbuttons.py): B back, Y home, A tick ----------
+    def go_back(self):
+        if self.details is not None:
+            self.close_details()
+        else:
+            self.stack.setCurrentIndex(0)
+
+    def go_home(self):
+        self.close_details()
+        self.scroll.verticalScrollBar().setValue(0)
+
+    def toggle_pointed_row(self):
+        if self.stack.currentIndex() != 0:
+            return
+        w = QApplication.widgetAt(QCursor.pos())
+        while w is not None and not isinstance(w, Row):
+            w = w.parentWidget()
+        if w is not None and w.comp["id"] in self.boxes:
+            self.boxes[w.comp["id"]].toggle()
+
     def closeEvent(self, ev):
+        if self.vr_buttons:
+            self.vr_buttons.close()
         self.pool.shutdown(wait=False, cancel_futures=True)
         super().closeEvent(ev)
 

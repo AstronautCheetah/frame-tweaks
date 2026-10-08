@@ -1,0 +1,18 @@
+{
+  "action_manifest_version": 0,
+  "controller_type": "frame_controller",
+  "name": "Steam Frame Tweaks",
+  "description": "B = back, Y = home, A = tick/untick the row you point at",
+  "bindings": {
+    "/actions/sft": {
+      "sources": [
+        { "path": "/user/hand/right/input/b", "mode": "button",
+          "inputs": { "click": { "output": "/actions/sft/in/back" } } },
+        { "path": "/user/hand/right/input/y", "mode": "button",
+          "inputs": { "click": { "output": "/actions/sft/in/home" } } },
+        { "path": "/user/hand/right/input/a", "mode": "button",
+          "inputs": { "click": { "output": "/actions/sft/in/toggle" } } }
+      ]
+    }
+  }
+}
