@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, 
 REPO = Path(__file__).resolve().parent.parent
 CONF = Path.home() / ".config/steam-frame-tweaks"
 HIDDEN, SHOWN = CONF / "hidden", CONF / "shown"     # SHOWN: default-hidden rows you unhid
+COLLAPSED, HIDDEN_CATS = CONF / "collapsed-categories", CONF / "hidden-categories"
 GITHUB = "https://github.com/AstronautCheetah/steam-frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
@@ -56,6 +57,10 @@ KNOWN_ISSUES = {
 STYLE = """
 QWidget { background: #0b1016; color: #e8ecf0; font-size: 14px; }
 QLabel#title { font-size: 20px; font-weight: 600; }
+QWidget#cathead QPushButton#cattoggle { background: transparent; border: none; text-align: left;
+                  font-size: 13px; font-weight: 700; color: #7fb2e5; letter-spacing: 1px; padding: 10px 4px 2px 4px; }
+QWidget#cathead QPushButton#cattoggle:hover { color: #a9cdf0; }
+QWidget#cathead QPushButton#cathide { padding: 3px 10px; font-size: 12px; margin-top: 8px; }
 QLabel#category { font-size: 13px; font-weight: 700; color: #7fb2e5; letter-spacing: 1px;
                   padding: 10px 4px 2px 4px; }
 QLabel#name { font-size: 15px; font-weight: 600; }
@@ -106,7 +111,7 @@ def status(cid):
 
 def read_set(path):
     try:
-        return set(path.read_text().split())
+        return {line.strip() for line in path.read_text().splitlines() if line.strip()}
     except OSError:
         return set()
 
@@ -159,6 +164,29 @@ def status_text(code_text):
     code, text = code_text
     return ({0: "✔ " + text, 2: "! " + text}.get(code, "· not installed"),
             {0: "ok", 2: "warn"}.get(code, "missing"))
+
+
+class CategoryHeader(QWidget):
+    """▾/▸ CATEGORY (n): click to collapse or expand (remembered); Hide/Unhide on the right."""
+
+    def __init__(self, window, category, count, collapsed, hidden):
+        super().__init__()
+        self.setObjectName("cathead")
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 4, 0)
+        arrow = "▶" if collapsed else "▼"
+        toggle = QPushButton(f"{arrow}  {category.upper().replace('&', '&&')}  ({count})" + ("   · hidden" if hidden else ""))
+        toggle.setObjectName("cattoggle")
+        toggle.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        toggle.setToolTip("Expand" if collapsed else "Collapse")
+        toggle.clicked.connect(lambda: window.toggle_collapsed(category))
+        lay.addWidget(toggle, 1)
+        hide = QPushButton("Unhide category" if hidden else "Hide category")
+        hide.setObjectName("cathide")
+        hide.setToolTip("Show this category again" if hidden else
+                        "Hide the whole category from the list (doesn't remove anything)")
+        hide.clicked.connect(lambda: window.toggle_category_hidden(category))
+        lay.addWidget(hide)
 
 
 class Row(QWidget):
@@ -302,8 +330,8 @@ class Window(QWidget):
         scroll.setWidget(self.list)
 
         bottom = QHBoxLayout()
-        hint = QLabel("Tick to install, untick to remove, click a row for details. "
-                      "Hidden tweaks are only hidden, never removed.")
+        hint = QLabel("Tick to install, untick to remove. Click a row for details, a category to fold it.\n"
+                      "Hidden tweaks and categories are only hidden, never removed.")
         hint.setObjectName("desc")
         bottom.addWidget(hint)
         bottom.addStretch(1)
@@ -338,6 +366,18 @@ class Window(QWidget):
     def hidden(self):
         defaults = {c["id"] for c in self.rows if "hidden-by-default" in c["flags"]}
         return read_set(HIDDEN) | (defaults - read_set(SHOWN))
+
+    def toggle_collapsed(self, category):
+        collapsed = read_set(COLLAPSED)
+        collapsed ^= {category}
+        write_set(COLLAPSED, collapsed)
+        self.rebuild()
+
+    def toggle_category_hidden(self, category):
+        cats = read_set(HIDDEN_CATS)
+        cats ^= {category}
+        write_set(HIDDEN_CATS, cats)
+        self.rebuild()
 
     def toggle_hidden(self, cid):
         hidden, shown = read_set(HIDDEN), read_set(SHOWN)
@@ -389,21 +429,29 @@ class Window(QWidget):
             if item.widget():
                 item.widget().deleteLater()
         hidden = self.hidden()
-        n_hidden = sum(1 for c in self.rows if c["id"] in hidden)
+        hidden_cats = read_set(HIDDEN_CATS) & {c["category"] for c in self.rows}
+        collapsed = read_set(COLLAPSED)
+        showing = self.show_hidden.isChecked()
+        n_hidden = sum(1 for c in self.rows if c["id"] in hidden and c["category"] not in hidden_cats)
+        n_hidden += len(hidden_cats)
         self.show_hidden.setText(f"Show hidden ({n_hidden})")
-        self.show_hidden.setEnabled(n_hidden > 0 or self.show_hidden.isChecked())
+        self.show_hidden.setEnabled(n_hidden > 0 or showing)
         self.boxes, self.status_labels, self.run_buttons = {}, {}, {}
         category = None
         for comp in self.rows:
             cid = comp["id"]
+            cat = comp["category"]
             is_hidden = cid in hidden
-            if is_hidden and not self.show_hidden.isChecked():
+            if cat in hidden_cats and not showing:
                 continue
-            if comp["category"] != category:
-                category = comp["category"]
-                head = QLabel(category.upper())
-                head.setObjectName("category")
-                self.grid.addWidget(head)
+            if is_hidden and not showing:
+                continue
+            if cat != category:
+                category = cat
+                count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden))
+                self.grid.addWidget(CategoryHeader(self, cat, count, cat in collapsed, cat in hidden_cats))
+            if cat in collapsed:
+                continue
             row = Row(self, comp)
             row.setProperty("hidden_row", "true" if is_hidden else "false")
             g = QGridLayout(row)
@@ -537,8 +585,10 @@ class Window(QWidget):
         if self.futures:
             self.say("Still checking status; try again in a moment.")
             return
-        add = [cid for cid, b in self.boxes.items() if b.isChecked() and self.state[cid][0] != 0]
-        remove = [cid for cid, b in self.boxes.items() if not b.isChecked() and self.state[cid][0] != 1]
+        # From what you ticked (self.wanted), so rows in collapsed or hidden categories count too.
+        want = {c["id"]: self.wanted.get(c["id"], self.state[c["id"]][0] != 1) for c in self.rows}
+        add = [cid for cid, on in want.items() if on and self.state[cid][0] != 0]
+        remove = [cid for cid, on in want.items() if not on and self.state[cid][0] != 1]
         if not add and not remove:
             self.say("Nothing to change.")
             return
