@@ -22,20 +22,12 @@ body:
     validations:
       required: true
   - type: textarea
-    id: status
+    id: diagnostics
     attributes:
-      label: Output of ./install.sh status
-      description: Run it in Konsole from the Frame Tweaks folder (e.g. ~/frame-tweaks).
-      render: text
-    validations:
-      required: true
-  - type: textarea
-    id: versions
-    attributes:
-      label: Versions
+      label: Diagnostics report
       description: |
-        Paste the output of:
-        cat ~/frame-tweaks/VERSION; grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release; cat /opt/steamvr/bin/version.txt
-      render: text
+        In the installer window press **Diagnostics** (or run `./install.sh debug-info` in the
+        Frame Tweaks folder). It saves `~/frame-tweaks-debug-….txt` with versions, status and
+        recent logs, with user names, paths and IP addresses removed. Read it, then drag it here.
     validations:
       required: true

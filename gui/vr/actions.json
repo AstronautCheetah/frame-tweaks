@@ -5,7 +5,9 @@
   "actions": [
     { "name": "/actions/sft/in/back", "type": "boolean" },
     { "name": "/actions/sft/in/home", "type": "boolean" },
-    { "name": "/actions/sft/in/toggle", "type": "boolean" }
+    { "name": "/actions/sft/in/toggle", "type": "boolean" },
+    { "name": "/actions/sft/in/up", "type": "boolean" },
+    { "name": "/actions/sft/in/down", "type": "boolean" }
   ],
   "action_sets": [ { "name": "/actions/sft", "usage": "single" } ],
   "localization": [ {
@@ -13,6 +15,8 @@
     "/actions/sft": "Frame Tweaks",
     "/actions/sft/in/back": "Back",
     "/actions/sft/in/home": "Home (the list, scrolled to the top)",
-    "/actions/sft/in/toggle": "Tick / untick the row you point at"
+    "/actions/sft/in/toggle": "Tick / untick the row you point at (or the highlighted one)",
+    "/actions/sft/in/up": "Highlight the previous row",
+    "/actions/sft/in/down": "Highlight the next row"
   } ]
 }
