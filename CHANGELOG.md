@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 (2026-10-07)
+- Arrow Pad VR: placed and anchored like Full Keyboard: just below Steam's dashboard (main
+  panel, else the dashboard bar), top edge 6 cm below, 24 cm toward you, 50° from upright, and
+  it follows the dashboard. It used to stay at a fixed spot in the room, so re-centring the play
+  space left it behind (it was 3 m away, above your head). Default width 0.55 m.
+
 ## 0.2.1 (2026-10-07)
 - Arrow Pad VR: fix the overlay flying away (drag moved it by laser coordinates on the moving
   panel, which ran away; it now follows the controller rigidly, like Full Keyboard's grab). A
