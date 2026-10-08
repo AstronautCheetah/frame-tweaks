@@ -9,4 +9,6 @@ c=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv
 [ -z "$c" ] && { notify-send -a Phone "Phone not found" "Is Wireless debugging on, on the same Wi-Fi?"; exit 1; }
 dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
 adb connect "$dev" >/dev/null
-exec scrcpy -s "$dev" --video-bit-rate=8M --max-size=1920 "$@"
+# With "Memory caps" installed, scrcpy runs inside its memory limit.
+cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" scrcpy --)
+exec "${cap[@]}" scrcpy -s "$dev" --video-bit-rate=8M --max-size=1920 "$@"

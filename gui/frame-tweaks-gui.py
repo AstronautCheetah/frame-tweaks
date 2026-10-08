@@ -41,7 +41,7 @@ FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
 BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
               "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
               "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
-              "tools": "tools", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "ydotool": "input-keyboard-virtual"}
+              "tools": "tools", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
 # Versions with a known problem: a short note on the row, a longer one atop its details, plus a
 # check whether upstream has released something newer since.
 KNOWN_ISSUES = {

@@ -12,6 +12,7 @@ README of the tweak that uses them; software we install or call keeps its own li
 | [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard) | MIT | Installed by [full-keyboard](full-keyboard/). The [Arrow Pad](arrowpad/)'s look and feel follows it: the **Graphite theme colours**, the toolbar (pin, recenter, smaller/larger), copy/paste buttons, relaunch-to-toggle, and its **haptic feedback values** (hover 4 ms / 10 % / 240 Hz, press 25 ms / 100 % / 150 Hz). |
 | [techieyann/frame-voice](https://github.com/techieyann/frame-voice) | MIT | The shape of our installer: a one-line `get.sh` bootstrap, a graphical installer, and a documented uninstall. No code copied. |
 | [groffta/whisper-frame](https://github.com/groffta/whisper-frame) | MIT | Installed by [whisper-frame](whisper-frame/) from its upstream releases (we add a SteamVR-restart fix). Our [dictation](dictation/) shares its Whisper model and bundled whisper-cli. |
+| [Jovian-Experiments/Jovian-NixOS](https://github.com/Jovian-Experiments/Jovian-NixOS) | MIT | Ideas for [memory caps](memcap/) (early out-of-memory handling) and the [screen reader](screen-reader/) (Orca in the session). No code copied. |
 | [gripspeak](https://github.com/gripspeak/gripspeak) | – | Not used; an alternative worth knowing. |
 
 The cursor fix was popularised by Cas and Chary XR's video *Steam Frame: 10 Things To Do

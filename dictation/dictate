@@ -64,7 +64,9 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
         notify "No speech detected"; return
     fi
-    text=$(DISABLE_GAMESCOPE_WSI=1 "$WHISPER" -m "$MODEL" -f "$wav" -t 5 -nt -np -l "$LANGUAGE" \
+    # With "Memory caps" installed, Whisper runs inside its memory limit.
+    local cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" whisper --)
+    text=$(DISABLE_GAMESCOPE_WSI=1 "${cap[@]}" "$WHISPER" -m "$MODEL" -f "$wav" -t 5 -nt -np -l "$LANGUAGE" \
             --prompt "$PROMPT" 2>>"$LOG" \
         | tr '\n' ' ' | sed -E 's/\[[A-Z_ ]+\]//g; s/\([a-z ]+\)//g; s/^ +//; s/ +$//; s/  +/ /g')
     # Drop Whisper's well-known phantom phrases when they are the whole result.

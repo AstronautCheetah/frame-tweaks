@@ -9,19 +9,26 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO=$PWD
-DEFAULT=(cursor tools curvature menu-icons homebrew ydotool dictation wallet)
+DEFAULT=(cursor tools curvature menu-icons homebrew ydotool dictation wallet memcap)
+# Screen reader needs Orca and KDE's config tools (the Frame has them, CI doesn't).
+command -v orca >/dev/null && command -v kreadconfig6 >/dev/null && DEFAULT+=(screen-reader)
 TWEAKS=("${@:-${DEFAULT[@]}}")
 # Settings uninstall deliberately keeps (relative to the fake home), per tweak.
 # tools: the shared "~/.local/bin on PATH" setup (ensure_path) stays; other tweaks rely on it.
 # dictation, wallet: settings they promise to keep, the shared PATH setup, shared dependencies.
 PATHSET=".bashrc .config/environment.d/10-local-bin.conf"
 YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.service"   # a dependency other tweaks share
+# memcap keeps your limits file; KDE settings files stay (only the changed keys are restored).
 declare -A KEEP=([curvature]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
-                 [dictation]="$PATHSET .config/dictate.conf $YDOTOOL" [wallet]="$PATHSET")
+                 [dictation]="$PATHSET .config/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
+                 [memcap]="$PATHSET .config/frame-tweaks/memcap.conf" [screen-reader]=".config/kaccessrc")
 
 work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"' EXIT
 stubs="$work/stubs"; mkdir -p "$stubs"
-for cmd in systemctl flatpak brew kdialog notify-send nmcli kwriteconfig6 qdbus qdbus6 busctl gtk-launch sudo gpgv; do
+# KDE's config tools are real when present (they only write into the fake home), else stubbed.
+stub_cmds=(systemctl flatpak brew kdialog notify-send nmcli qdbus qdbus6 busctl gtk-launch sudo gpgv)
+command -v kwriteconfig6 >/dev/null || stub_cmds+=(kwriteconfig6)
+for cmd in "${stub_cmds[@]}"; do
     cat > "$stubs/$cmd" <<STUB
 #!/bin/bash
 echo "$cmd \$*" >> "$work/calls.log"
@@ -78,7 +85,7 @@ for t in "${TWEAKS[@]}"; do
         after=$(snapshot "$home")
         # (caches that desktop tools regenerate don't count)
         left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <(printf '%s\n' ${KEEP[$t]:-} | sed 's|^|./|') |
-               grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$' || true)
+               grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$|^\./\.cache/' || true)
         outside=$(find /tmp /var/tmp "$REPO" -newer "$marker" -type f 2>/dev/null |
                   grep -v "^$work/" | grep -v "^$REPO/\.git/" | grep -v "^/tmp/claude" || true)
         if [ -n "$left" ]; then

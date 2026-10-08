@@ -1,0 +1,18 @@
+#!/bin/bash
+# capped <profile> -- command...: run a command in its own systemd scope with that profile's
+# memory limits (~/.config/frame-tweaks/memcap.conf), so one heavy app can't freeze the headset.
+# Above MemoryHigh the kernel slows the app and reclaims its memory; at MemoryMax it's stopped.
+# Falls back to running the command unlimited when systemd isn't reachable.
+profile=${1:?usage: capped <profile> -- command...}; shift
+[ "${1:-}" = -- ] && shift
+conf="$HOME/.config/frame-tweaks/memcap.conf"
+high=$(sed -n "s/^${profile}_high=//p" "$conf" 2>/dev/null | tail -1)
+max=$(sed -n "s/^${profile}_max=//p" "$conf" 2>/dev/null | tail -1)
+[ -n "$high" ] && [ -n "$max" ] || exec "$@"
+uid=$(id -u)
+# systemd-run needs the user manager's bus; the command keeps its own session's environment.
+exec env XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+    systemd-run --user --scope --quiet --collect --unit="capped-$profile-$$" \
+    -p MemoryHigh="$high" -p MemoryMax="$max" \
+    env XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}" DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}" "$@" ||
+    exec "$@"
