@@ -5,6 +5,16 @@ Description=Lock the KDE wallet (ksecretd) whenever kwalletd6 closes it
 ExecStart=%h/.local/bin/wallet-unlock --watch
 Restart=on-failure
 RestartSec=5
+# Sandboxing (lighter than ydotoold's: it shows the unlock dialog and talks to both desktops'
+# D-Bus and X servers, so the home folder, /run/user and /tmp stay writable).
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=%h %t /tmp
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=default.target

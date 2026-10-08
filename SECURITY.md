@@ -38,6 +38,11 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | claude-code / claude-desktop | `~/.local/bin/claude` / `~/.local/opt/claude-desktop` | Anthropic's installer / Anthropic's apt index |
 | Installer window (VR) | – | **Claims the controller's A, B and Y** through SteamVR Input while the laser is over the window |
 
+**Our background services are sandboxed** with systemd's options (no new privileges, read-only
+system, read-only or limited home, private `/tmp`, restricted address families; the curvature
+watcher may only reach `localhost`). `systemd-analyze --user security <unit>` shows the result.
+Upstream services (whisper-frame's) are left as their authors ship them.
+
 **Threat model.** These tweaks protect against *casual* access: someone else picking up the
 headset (e.g. children on a shared, password-less SteamOS login) can't open Signal, Firefox
 or Android Mirror, or read Signal's database, while the wallet is locked. They don't protect

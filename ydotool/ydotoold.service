@@ -4,6 +4,20 @@ Description=ydotool daemon (virtual keyboard used by dictation and arrowpad)
 [Service]
 ExecStart=%h/.local/bin/ydotoold --socket-path=/run/user/%U/.ydotool_socket --socket-own=%U:%G
 Restart=on-failure
+# Sandboxing: it only needs /dev/uinput and its socket in /run/user/<uid>.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%t
+PrivateTmp=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
 
 [Install]
 WantedBy=default.target
