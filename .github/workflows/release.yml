@@ -16,6 +16,7 @@ on:
         default: false
 permissions:
   contents: write
+  actions: write       # to start CI on the release commit (pushes made here don't trigger it)
 concurrency:
   group: release
 jobs:
@@ -68,3 +69,4 @@ jobs:
           flags=(--draft --title "v$V" --notes-file notes.md)
           [ "$PRE" = true ] && flags+=(--prerelease)
           gh release create "v$V" "${flags[@]}"
+          gh workflow run ci.yml --ref main
