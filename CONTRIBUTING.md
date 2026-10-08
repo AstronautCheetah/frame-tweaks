@@ -43,3 +43,12 @@ why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assist
 `main` is the only branch. When more than one session works on the repo, each uses its own
 worktree (`dev/agent-worktree.sh add <slug>`) and publishes with `dev/safe-push.sh`. See
 [docs/claude/parallel-work.md](docs/claude/parallel-work.md).
+
+## Checks before a release
+
+- `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home (also runs in CI).
+- `dev/check-docs.py`: every tweak has a README row; relative links resolve.
+- `dev/check-pins.sh`: upstream releases newer than a tweak's `pin`. Bump a pin only after
+  reading the release, in its own commit, with the new version, URL and SHA256.
+- Releases are `vX.Y.Z` tags on `main`; `get.sh` and `./install.sh update` install the newest.
+ 

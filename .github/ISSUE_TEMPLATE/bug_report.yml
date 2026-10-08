@@ -1,0 +1,41 @@
+name: Bug report
+description: Something a tweak does (or doesn't do) on your Frame
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please don't paste passwords, tokens or wallet contents.
+        Security problems: use a private security advisory instead (see SECURITY.md).
+  - type: input
+    id: tweak
+    attributes:
+      label: Which tweak?
+      placeholder: e.g. arrowpad, wallet, curvature
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: Desktop mode or VR? Steps to reproduce if you have them.
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: Output of ./install.sh status
+      description: Run it in Konsole from the Frame Tweaks folder (e.g. ~/frame-tweaks).
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      description: |
+        Paste the output of:
+        cat ~/frame-tweaks/VERSION; grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release; cat /opt/steamvr/bin/version.txt
+      render: text
+    validations:
+      required: true

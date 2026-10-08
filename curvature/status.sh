@@ -8,5 +8,6 @@ s=$(timeout 8 "$D/sft-curvature" status 2>/dev/null) || true
 case "$s" in
     patched) status_ok "world windows start curved" ;;
     port*closed*) status_warn "waiting for a SteamVR restart (reboot once)" ;;
+    *changed*) status_warn "$s" ;;
     *) status_warn "${s:-not responding}" ;;
 esac

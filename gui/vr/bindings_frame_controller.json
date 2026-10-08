@@ -1,7 +1,7 @@
 {
   "action_manifest_version": 0,
   "controller_type": "frame_controller",
-  "name": "Steam Frame Tweaks",
+  "name": "Frame Tweaks",
   "description": "B = back, Y = home, A = tick/untick the row you point at",
   "bindings": {
     "/actions/sft": {

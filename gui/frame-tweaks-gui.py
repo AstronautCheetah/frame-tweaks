@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Steam Frame Tweaks: graphical installer.
+"""Frame Tweaks: graphical installer.
 
 Rows grouped by category (convenience first, developer tools last). Tick to install, untick
 to remove; click a row for details (what it is, why it's here, who made it, its README).
@@ -28,7 +28,7 @@ REPO = Path(__file__).resolve().parent.parent
 CONF = Path.home() / ".config/steam-frame-tweaks"
 HIDDEN, SHOWN = CONF / "hidden", CONF / "shown"     # SHOWN: default-hidden rows you unhid
 COLLAPSED, HIDDEN_CATS = CONF / "collapsed-categories", CONF / "hidden-categories"
-GITHUB = "https://github.com/AstronautCheetah/steam-frame-tweaks/tree/main"
+GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
@@ -319,7 +319,7 @@ class Window(QWidget):
     def __init__(self):
         super().__init__()
         version = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else ""
-        self.setWindowTitle(f"Steam Frame Tweaks {version}")
+        self.setWindowTitle(f"Frame Tweaks {version}")
         icon = ICONS / "frame-tweaks.png"
         if icon.exists():
             self.setWindowIcon(QIcon(str(icon)))
@@ -338,7 +338,7 @@ class Window(QWidget):
         self.self_update = self.pool.submit(self_update_check)
 
         top = QHBoxLayout()
-        title = QLabel(f"Steam Frame Tweaks <span style='color:#6b7783;font-size:14px'>{version}</span>")
+        title = QLabel(f"Frame Tweaks <span style='color:#6b7783;font-size:14px'>{version}</span>")
         title.setObjectName("title")
         top.addWidget(title)
         top.addStretch(1)
@@ -597,7 +597,7 @@ class Window(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
-        after = "" if cid else "; echo; echo 'Close and reopen Steam Frame Tweaks to use the new version.'"
+        after = "" if cid else "; echo; echo 'Close and reopen Frame Tweaks to use the new version.'"
         full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp 'Press Enter to close…'"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh()))
