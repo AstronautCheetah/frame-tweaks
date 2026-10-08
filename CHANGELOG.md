@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.7 (2026-10-07)
+- Installer window: categories fold and unfold (click the heading; remembered between runs) and
+  can be hidden like rows ("Show hidden" shows them again). Changes ticked in a folded or hidden
+  category still apply.
+- Docs: next-steps lists use numbered items with readiness lights
+  (`docs/claude/emoji-status-lists.md`).
+
 ## 0.2.6 (2026-10-07)
 - New: **Homebrew** row in System (above Tools): shows and installs the package manager several
   tweaks use. Removing the row leaves Homebrew in place and prints its own uninstaller.
