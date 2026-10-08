@@ -80,8 +80,10 @@ def install():
         added.append(dst)
     LIST.parent.mkdir(parents=True, exist_ok=True)
     LIST.write_text("".join(f"{p}\n" for p in sorted(set(added) | {p for p in mine if p.exists()})))
-    os.utime(HOME / ".local/share/icons/hicolor", None)        # theme caches notice
-    os.utime(HOME / ".local/share/applications", None)        # Steam rescans its "+" menu
+    for d in (HOME / ".local/share/icons/hicolor",              # theme caches notice
+              HOME / ".local/share/applications"):              # Steam rescans its "+" menu
+        if d.is_dir():
+            os.utime(d, None)
     for p in added:
         print("icon:", p.stem)
 
