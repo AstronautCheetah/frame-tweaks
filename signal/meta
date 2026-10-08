@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 🔐
+name: Signal hardening
+group: extras
+what: Signal's database key in the wallet instead of plain text; Signal quits after 15 minutes idle, and reopening needs the wallet password.
+why: A headset gets passed around: shared with family, often without a SteamOS login password. Flathub Signal otherwise keeps its key in plain text.
+changes: `signal-guard`, a Flatpak override for Signal, Signal's `config.json`
+access: Quits Signal when idle; key in the wallet
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall signal` (Signal keeps using the wallet: switching back would lock you out of its data)

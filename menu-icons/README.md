@@ -4,6 +4,14 @@ Steam's VR **"+" menu** looks up app icons only in the *hicolor* theme (and `pix
 apps whose icon only KDE's Breeze theme has show up blank: **Konsole**, **System Settings**,
 and a few others (Remote Desktop/SSH viewers, Avahi, Emoji Selector, …).
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** Copies of Breeze icons in `~/.local/share/icons/hicolor`
+> - **Undo:** `./install.sh uninstall menu-icons`
+<!-- /generated:glance -->
+
 This copies those icons from Breeze into `~/.local/share/icons/hicolor/scalable/apps/`, for
 Konsole and System Settings always, and for every other app in the menu whose icon is missing
 from hicolor but present in Breeze. Desktop mode keeps showing Breeze's icons (hicolor is only

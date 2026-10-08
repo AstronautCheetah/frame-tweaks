@@ -3,6 +3,15 @@
 Anthropic's coding agent in the terminal: `claude` in Konsole. It reads and edits files in
 the folder you start it in and runs commands there, asking first.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer)
+> - **Unusual access:** Downloads Anthropic's installer over HTTPS
+> - **Undo:** `./install.sh uninstall claude-code`
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh claude-code
 claude          # in any terminal; the first run logs in through your browser

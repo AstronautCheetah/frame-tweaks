@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 📋
+name: Shared clipboard
+group: core
+what: Copy in a floating VR window, paste in the desktop, and back.
+why: The Frame's VR session and its nested desktop each have their own clipboard. This runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as steam-frame-nix does.
+changes: `clipboard-sync` built from source, KDE autostart entry
+access: Reads and writes both sessions' clipboards
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall clipboard`

@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 🌀
+name: Curved world windows
+group: core
+what: Windows you float into the world start curved, like the dashboard; Toggle Curvature still works.
+why: SteamVR has no setting for it (world windows always start flat), so a tiny dashboard patch presses the toggle for you. Restart SteamVR once after installing.
+changes: `~/.local/share/frame-tweaks/curvature`, user units `sft-vr-debugger`, `sft-curvature`, a `steamvr.service` drop-in
+access: **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects a small script into the dashboard. Any program running as you could use that port too
+survives-updates: Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+undo: `./install.sh uninstall curvature`

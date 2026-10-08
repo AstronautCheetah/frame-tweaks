@@ -18,6 +18,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 
 | Tweak | Files and services | Unusual access (why) |
 |---|---|---|
+<!-- generated:security (dev/gen-docs.py, from each tweak's meta) -->
 | dictation | `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard` | Microphone while recording; types through ydotool |
 | whisper-frame | Upstream's own installer (user services `whisper-ptt`, `whisper-panel`), pinned release | Microphone; listens for the headset's Select button |
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv) | Types through ydotool. In VR: a SteamVR overlay. **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST |
@@ -31,11 +32,13 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | nordvpn | `nordvpn-wg`, tray app, KDE autostart entry | **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`) |
 | homebrew | `/home/linuxbrew` | **Needs sudo once** to create that folder |
-| menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | tools | `~/.local/bin/restart-plasmashell` | – |
+| menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
-| vscodium, signal, firefox | Flathub apps | – |
-| claude-code / claude-desktop | `~/.local/bin/claude` / `~/.local/opt/claude-desktop` | Anthropic's installer / Anthropic's apt index |
+| vscodium | Flathub app (`com.vscodium.codium`) | – |
+| claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads Anthropic's installer over HTTPS |
+| claude-desktop | `~/.local/opt/claude-desktop`, `claude-desktop-update`, menu entry | Checks against the SHA256 in Anthropic's apt index |
+<!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y** through SteamVR Input while the laser is over the window |
 
 **Our background services are sandboxed** with systemd's options (no new privileges, read-only

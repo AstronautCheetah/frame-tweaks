@@ -4,6 +4,14 @@ In desktop mode the mouse moves, but its pointer isn't drawn: KWin puts the curs
 on a hardware plane that the headset's view doesn't show. `KWIN_FORCE_SW_CURSOR=1`
 makes KWin draw it into the frame itself.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `~/.config/environment.d/` (one variable for KWin)
+> - **Undo:** `./install.sh uninstall cursor`
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh cursor     # then reboot
 env | grep KWIN         # in a desktop-mode terminal: KWIN_FORCE_SW_CURSOR=1

@@ -7,6 +7,15 @@ started from VR, and two daemons writing the same wallet file can overwrite each
 other. This follows [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s
 launcher approach (`keyring.enable`), without needing Nix:
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, user service `wallet-lock-sync`, `kwalletrc` setting; rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`)
+> - **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); moves the GitHub CLI token into the wallet
+> - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the KDE settings it changed)
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh wallet
 wallet-launcher --list            # apps currently routed to the shared wallet

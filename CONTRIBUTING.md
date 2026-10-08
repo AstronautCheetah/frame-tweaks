@@ -44,6 +44,13 @@ why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assist
 worktree (`dev/agent-worktree.sh add <slug>`) and publishes with `dev/safe-push.sh`. See
 [docs/claude/parallel-work.md](docs/claude/parallel-work.md).
 
+## Docs metadata (`<tweak>/meta`)
+
+Every tweak has a `meta` file: emoji, name, group (core / extras / helper), what you get, why,
+what it changes, unusual access, whether it survives SteamOS updates, and how to undo it. The
+README tables, SECURITY.md's change list and each tweak's "At a glance" box are generated from
+it: edit `meta`, then run `dev/gen-docs.py` (CI fails when they're out of date).
+
 ## Changing files a tweak doesn't own
 
 Before editing a user file, call `backup_file <tweak> <file>` and `restore_file` on uninstall

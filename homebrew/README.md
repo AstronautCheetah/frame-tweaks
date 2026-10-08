@@ -5,6 +5,15 @@
 remove them. Several tweaks use it, and they offer to install it when it's missing; this row
 lets you see it, and install it up front.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (it lives in /home/linuxbrew)
+> - **Changes:** `/home/linuxbrew`
+> - **Unusual access:** **Needs sudo once** to create that folder
+> - **Undo:** Not removed automatically (other tweaks' programs live in it); `./install.sh uninstall homebrew` prints Homebrew's own uninstaller
+<!-- /generated:glance -->
+
 ```sh
 ./install.sh homebrew
 brew install <program>      # anything from https://formulae.brew.sh

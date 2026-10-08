@@ -4,6 +4,15 @@ Installers that put NordVPN's own app into `/usr` (e.g. scripts that unlock the 
 root and use pacman) lose it at **every SteamOS update**, because the update replaces the
 whole system partition. Your settings in `/var` and `/etc` remain, but `nordvpn` is gone.
 
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)
+> - **Changes:** `nordvpn-wg`, tray app, KDE autostart entry
+> - **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`)
+> - **Undo:** `./install.sh uninstall nordvpn`
+<!-- /generated:glance -->
+
 This uses NordVPN's WireGuard servers (NordLynx) as ordinary **NetworkManager** connections
 instead. They live in `/etc/NetworkManager/system-connections`, which updates keep, and
 nothing is installed system-wide.
