@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 (2026-10-08)
 - **Release channels:** updates and `get.sh` take stable `vX.Y.Z` releases only (pre-releases
   used to win over their final version); `beta` in `~/.config/steam-frame-tweaks/channel` opts
   into pre-releases.
