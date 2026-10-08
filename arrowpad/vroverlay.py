@@ -105,7 +105,8 @@ class OverlayHost:
         """Periodic check: redraw only when something visible changed (mic colour, modifiers,
         layer, pin, language), so SteamVR doesn't reload the image for nothing."""
         p = self.pad
-        sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale)
+        sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale,
+               p.click_swap.armed)
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             self.dirty = True

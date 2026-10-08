@@ -1,0 +1,18 @@
+{
+  "default_bindings": [
+    { "controller_type": "frame_controller", "binding_url": "bindings_frame_controller.json" }
+  ],
+  "actions": [
+    { "name": "/actions/sft/in/back", "type": "boolean" },
+    { "name": "/actions/sft/in/home", "type": "boolean" },
+    { "name": "/actions/sft/in/toggle", "type": "boolean" }
+  ],
+  "action_sets": [ { "name": "/actions/sft", "usage": "single" } ],
+  "localization": [ {
+    "language_tag": "en_US",
+    "/actions/sft": "Steam Frame Tweaks",
+    "/actions/sft/in/back": "Back",
+    "/actions/sft/in/home": "Home (the list, scrolled to the top)",
+    "/actions/sft/in/toggle": "Tick / untick the row you point at"
+  } ]
+}

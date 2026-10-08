@@ -79,20 +79,21 @@ KEY = {
     **{f"F{n}": c for n, c in zip(range(1, 11), range(59, 69))}, "F11": 87, "F12": 88,
     "A": 30, "C": 46, "V": 47, "X": 45, "Z": 44,
 }
-MODIFIERS = ("Shift", "Ctrl", "Alt", "Super")
+MODIFIERS = ("Ctrl", "Alt", "Super")
+MOUSE = ("RMB", "MMB")       # toggles: the next click becomes a right / middle click
 CHORDS = {"Copy": "C", "Paste": "V", "Cut": "X", "Undo": "Z", "All": "A"}  # Ctrl + key
 LAYERS = {
     "nav": [
-        ["Esc", "Tab", "Bksp", "Del", "Enter", "Fn"],
-        ["Shift", "Home", "↑", "End", "PgUp", "🎤"],
+        ["Esc", "Tab", "Bksp", "Del", "RMB", "MMB"],
+        ["Fn", "Home", "↑", "End", "PgUp", "🎤"],
         ["Ctrl", "←", "↓", "→", "PgDn", "Copy"],
         ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
     "fn": [
-        ["F1", "F2", "F3", "F4", "F5", "Fn"],
-        ["F6", "F7", "F8", "F9", "F10", "🎤"],
-        ["F11", "F12", "Ins", "PrtSc", "Menu", "Copy"],
-        ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
+        ["F1", "F2", "F3", "F4", "RMB", "MMB"],
+        ["Fn", "F5", "F6", "F7", "F8", "🎤"],
+        ["Ctrl", "F9", "F10", "F11", "F12", "Copy"],
+        ["Alt", "Super", "Ins", "PrtSc", "Menu", "Paste"],
     ],
 }
 # Key legends as printed on physical keyboards of each language (others keep English).
@@ -113,11 +114,14 @@ LAYOUT_LANG = {"de": "de", "at": "de", "ch": "de", "fr": "fr", "be": "fr", "ca":
 # Clipboard keys show icons (language-neutral), like Full Keyboard's copy/paste buttons.
 BREEZE = Path("/usr/share/icons/breeze-dark")
 ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
-         "All": "edit-select-all", "pin": "window-pin", "reset": "crosshairs",
+         "All": "edit-select-all", "pin": "window-unpin", "pin_on": "window-pin", "reset": "crosshairs",
+         "RMB": "input-mouse-click-right", "MMB": "input-mouse-click-middle",
          "smaller": "zoom-out", "larger": "zoom-in", "close": "window-close"}
 TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types",
         "Copy": "Copy (Ctrl+C)", "Paste": "Paste (Ctrl+V)", "Cut": "Cut (Ctrl+X)",
-        "All": "Select all (Ctrl+A)", "Undo": "Undo (Ctrl+Z)", "Fn": "F1–F12 layer",
+        "All": "Select all (Ctrl+A)", "Undo": "Undo (Ctrl+Z)", "Fn": "F1–F12 layer (tap again to go back)",
+        "RMB": "Right click: your next click becomes a right click",
+        "MMB": "Middle click: your next click becomes a middle click",
         **{m: f"{m}: tap = next key only, double-tap = lock" for m in MODIFIERS}}
 DOUBLE_TAP = 0.4
 SCALE_MIN, SCALE_MAX, SCALE_STEP = 0.6, 2.0, 0.1
@@ -207,6 +211,109 @@ class Ydotool:
             self.key(c, False)
 
 
+class ClickSwap:
+    """Right/middle-click toggles: the next click anywhere in the Steam session is replayed as
+    the chosen button. Laser and mouse clicks don't pass through any input device we can read,
+    so this grabs the pointer on the Steam session's X display (:0, which holds every floating
+    window and the desktop) for one click, then replays it there with XTEST. One click, then
+    it's released; also released after TIMEOUT seconds, or when toggled off."""
+    TIMEOUT = 20
+    BUTTONS = {"RMB": 3, "MMB": 2}
+
+    def __init__(self, on_done):
+        import ctypes as C
+        self.C, self.on_done = C, on_done
+        self.x = self.t = self.dpy = None
+        self.armed = None                 # "RMB" / "MMB" while waiting for the click
+        self.press = None
+        self.timer = QTimer(interval=15, timeout=self.poll)
+        self.deadline = 0.0
+
+    def _open(self):
+        if self.dpy:
+            return True
+        C = self.C
+        try:
+            x, t = C.CDLL("libX11.so.6"), C.CDLL("libXtst.so.6")
+        except OSError:
+            return False
+        x.XOpenDisplay.restype = C.c_void_p
+        x.XDefaultRootWindow.restype = C.c_ulong
+        x.XDefaultRootWindow.argtypes = [C.c_void_p]
+        x.XGrabPointer.argtypes = [C.c_void_p, C.c_ulong, C.c_int, C.c_uint, C.c_int, C.c_int,
+                                   C.c_ulong, C.c_ulong, C.c_ulong]
+        x.XUngrabPointer.argtypes = [C.c_void_p, C.c_ulong]
+        x.XPending.argtypes = [C.c_void_p]
+        x.XNextEvent.argtypes = [C.c_void_p, C.c_void_p]
+        x.XFlush.argtypes = [C.c_void_p]
+        t.XTestFakeMotionEvent.argtypes = [C.c_void_p, C.c_int, C.c_int, C.c_int, C.c_ulong]
+        t.XTestFakeButtonEvent.argtypes = [C.c_void_p, C.c_uint, C.c_int, C.c_ulong]
+        display = ":0" if Path("/tmp/.X11-unix/X0").exists() else os.environ.get("DISPLAY", "")
+        self.dpy = x.XOpenDisplay(display.encode())
+        self.x, self.t = x, t
+        return bool(self.dpy)
+
+    def arm(self, which):
+        """Toggle `which` ("RMB"/"MMB"); arming one disarms the other. Returns the armed one."""
+        if self.armed == which:
+            self.disarm()
+            return None
+        self.disarm()
+        if not self._open():
+            return None
+        root = self.x.XDefaultRootWindow(self.dpy)
+        # owner_events False, ButtonPress|ButtonRelease, async pointer and keyboard
+        if self.x.XGrabPointer(self.dpy, root, 0, (1 << 2) | (1 << 3), 1, 1, 0, 0, 0) != 0:
+            return None
+        self.x.XFlush(self.dpy)
+        self.armed, self.press = which, None
+        self.deadline = time.monotonic() + self.TIMEOUT
+        self.timer.start()
+        return which
+
+    def disarm(self):
+        if self.armed and self.dpy:
+            self.x.XUngrabPointer(self.dpy, 0)
+            self.x.XFlush(self.dpy)
+        self.armed, self.press = None, None
+        self.timer.stop()
+
+    def poll(self):
+        try:
+            self._poll()
+        except Exception:
+            self.disarm()             # never leave the pointer grabbed
+            self.on_done()
+
+    def _poll(self):
+        if time.monotonic() > self.deadline:
+            self.disarm()
+            self.on_done()
+            return
+        ev = (self.C.c_long * 24)()
+        while self.armed and self.x.XPending(self.dpy):
+            self.x.XNextEvent(self.dpy, ev)
+            ints = self.C.cast(ev, self.C.POINTER(self.C.c_int))
+            etype = ints[0]
+            # XButtonEvent: type, serial, send_event, display, window, root, subwindow, time,
+            # x, y, x_root, y_root, state, button (64-bit: longs/pointers are 8 bytes)
+            base = 8 * 8 // 4                                 # int index after the 8 long-sized fields
+            x_root, y_root, button = ints[base + 2], ints[base + 3], ints[base + 5]
+            if etype == 4:                                     # ButtonPress
+                self.press = (x_root, y_root, button)
+            elif etype == 5 and self.press is not None:        # ButtonRelease: replay as chosen
+                px, py, _ = self.press
+                which = self.armed
+                self.disarm()
+                b = self.BUTTONS[which]
+                self.t.XTestFakeMotionEvent(self.dpy, -1, px, py, 0)
+                self.t.XTestFakeButtonEvent(self.dpy, b, 1, 0)
+                self.t.XTestFakeButtonEvent(self.dpy, b, 0, 0)
+                self.x.XFlush(self.dpy)
+                self.on_done()
+                return
+
+
 def breeze_icon(name):
     hits = sorted(BREEZE.glob(f"*/*/{name}.svg"))
     return QIcon(str(hits[-1])) if hits else None
@@ -248,6 +355,7 @@ class ArrowPad(QWidget):
         bar.addStretch(1)
         self.tools["close"] = self.tool_button("close", "Close")
         bar.addWidget(self.tools["close"])
+        self.click_swap = ClickSwap(self.restyle)
         outer.addLayout(bar)
         self.tools["pin"].clicked.connect(self.toggle_pin)
         self.tools["reset"].clicked.connect(self.reset_position)
@@ -343,10 +451,15 @@ class ArrowPad(QWidget):
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             b.setToolTip(TIPS.get(name, ""))
-            icon = breeze_icon(ICONS[name]) if name in CHORDS else None
+            icon = breeze_icon(ICONS[name]) if name in CHORDS or name in MOUSE else None
             if icon:
                 b.setIcon(icon)
-                b.setText("")
+                b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike
+                if name in MOUSE:
+                    f = QFont(QApplication.font())
+                    f.setPixelSize(round(key * 0.24))
+                    f.setBold(True)
+                    b.setFont(f)
                 continue
             b.setIcon(QIcon())
             text = self.label(name)
@@ -379,12 +492,21 @@ class ArrowPad(QWidget):
                 state = self.mod_state[name]
             elif name == "Fn":
                 state = "locked" if self.layer == "fn" else "off"
+            elif name in MOUSE:
+                state = "locked" if self.click_swap.armed == name else "off"
             elif name == "🎤":
                 state = {"recording": "active", "transcribing": "busy"}.get(self.dictation_state(), "off")
             else:
                 state = "off"
             self.set_state(b, state)
-        self.set_state(self.tools["pin"], "locked" if self.pinned else "off")
+        # Pin shows its state by icon, like Full Keyboard (no highlight behind it).
+        pin = self.tools["pin"]
+        icon = breeze_icon(ICONS["pin_on" if self.pinned else "pin"])
+        if icon and pin.property("pinned") != self.pinned:
+            pin.setIcon(icon)
+            pin.setProperty("pinned", self.pinned)
+        pin.setToolTip("Pinned: tap to allow moving" if self.pinned else "Pin: stop accidental moves")
+
 
     @staticmethod
     def set_state(b, state):
@@ -406,6 +528,10 @@ class ArrowPad(QWidget):
         if self.drag_offset is not None:
             self.drag_offset = None
             self.save_config()
+
+    def toggle_click(self, which):
+        self.click_swap.arm(which)
+        self.restyle()
 
     def toggle_pin(self):
         self.pinned = not self.pinned
@@ -443,6 +569,8 @@ class ArrowPad(QWidget):
         elif name == "Fn":
             self.layer = "fn" if self.layer == "nav" else "nav"
             self.relabel()
+        elif name in MOUSE:
+            self.toggle_click(name)
         elif name == "🎤":
             subprocess.Popen([str(Path.home() / ".local/bin/dictate")], start_new_session=True)
             QTimer.singleShot(300, self.restyle)
@@ -527,6 +655,7 @@ class ArrowPad(QWidget):
     def closeEvent(self, ev):
         self.save_config()
         self.release_all_mods()   # never leave a modifier stuck down
+        self.click_swap.disarm()  # nor the pointer grabbed
         if self.overlay:
             self.overlay.close()
         if self.haptics:

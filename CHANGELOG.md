@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.9 (2026-10-07)
+- Arrow Pad: **right-click and middle-click toggles** (🖱R / 🖱M, top right): your next click
+  anywhere becomes a right or middle click; only one at a time, cancels after 20 s. Shift and
+  Enter are gone to make room; Fn moved to the left column. The F-key layer is rearranged to
+  match. Pin shows its state by icon (pin / crossed-out pin), like Full Keyboard.
+- Installer window in VR: controller **B = back, Y = home, A = tick/untick the row you point
+  at**, claimed only while the laser is over the window. The window runs on a copy of Python
+  named `sft-python` so SteamVR gives it its own bindings.
+- Docs: the status-list convention, rewritten short and specific to this repo.
+
 ## 0.2.8 (2026-10-07)
 - Arrow Pad VR: while carrying the pad, pushing or pulling the controller moves it 3× as far
   (up/down and sideways stay 1:1), so it can go far away or come close without walking; kept
