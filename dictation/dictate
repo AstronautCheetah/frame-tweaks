@@ -6,8 +6,8 @@
 #   dictate            toggle
 #   dictate --status   print idle / recording / transcribing
 #
-# Settings in ~/.config/dictate.conf: DICTATE_MODEL, DICTATE_PROMPT, DICTATE_NOTYPE=1
-# (copy only), DICTATE_MAX_SECONDS (auto-stop, default 300).
+# Settings in ~/.config/dictate.conf: DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
+# DICTATE_NOTYPE=1 (copy only), DICTATE_MAX_SECONDS (auto-stop, default 300).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 RUN=/run/user/$(id -u)
 export YDOTOOL_SOCKET=$RUN/.ydotool_socket
@@ -20,7 +20,12 @@ if [ ! -S "${XDG_RUNTIME_DIR:-$RUN}/${WAYLAND_DISPLAY:-wayland-0}" ]; then
 fi
 # shellcheck source=/dev/null
 [ -f "$HOME/.config/dictate.conf" ] && . "$HOME/.config/dictate.conf"
-MODEL="${DICTATE_MODEL:-$HOME/.local/share/whisper/ggml-small.en-q5_1.bin}"
+# Same model file as whisper-frame (groffta/whisper-frame), so the two never keep two copies.
+MODEL="${DICTATE_MODEL:-$HOME/.local/share/whisper/ggml-small-q8_0.bin}"
+LANGUAGE="${DICTATE_LANG:-en}"     # the shared model is multilingual: say which language
+# whisper-frame bundles a GPU build of whisper-cli; use it when present, else Homebrew's.
+WHISPER="$HOME/.local/lib/whisper-frame/whisper-cli"
+[ -x "$WHISPER" ] || WHISPER=$(command -v whisper-cli)
 # Vocabulary hint so Whisper spells these words correctly.
 PROMPT="${DICTATE_PROMPT:-Claude Code, SteamOS, Steam Frame, KDE Plasma.}"
 MAX_SECONDS="${DICTATE_MAX_SECONDS:-300}"
@@ -59,7 +64,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
         notify "No speech detected"; return
     fi
-    text=$(DISABLE_GAMESCOPE_WSI=1 whisper-cli -m "$MODEL" -f "$wav" -t 5 -nt -np \
+    text=$(DISABLE_GAMESCOPE_WSI=1 "$WHISPER" -m "$MODEL" -f "$wav" -t 5 -nt -np -l "$LANGUAGE" \
             --prompt "$PROMPT" 2>>"$LOG" \
         | tr '\n' ' ' | sed -E 's/\[[A-Z_ ]+\]//g; s/\([a-z ]+\)//g; s/^ +//; s/ +$//; s/  +/ /g')
     # Drop Whisper's well-known phantom phrases when they are the whole result.

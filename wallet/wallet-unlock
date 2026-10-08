@@ -64,11 +64,11 @@ def ensure_ksecretd(conn):
 
 
 def is_locked(conn):
+    """Locked = ksecretd doesn't have the wallet open. (Not the Secret Service "Locked"
+    property: after a pamOpen unlock it still says True, which made every correct password
+    look wrong.)"""
     ensure_ksecretd(conn)
-    msg = new_method_call(DBusAddress(COLLECTION, bus_name="org.freedesktop.secrets",
-                                      interface="org.freedesktop.DBus.Properties"),
-                          "Get", "ss", ("org.freedesktop.Secret.Collection", "Locked"))
-    return call(conn, msg)[0][1]
+    return not ksecretd_open(conn)
 
 
 def ksecretd_close(conn):
@@ -90,7 +90,10 @@ def ksecretd_open(conn):
 
 def lock(conn):
     ensure_ksecretd(conn)
-    call(conn, new_method_call(SECRETS, "Lock", "ao", ([COLLECTION],)))
+    try:
+        call(conn, new_method_call(SECRETS, "Lock", "ao", ([COLLECTION],)))
+    except Exception:
+        pass
     ksecretd_close(conn)
     try:  # kwalletd6 keeps its own open handle on top of ksecretd
         call(conn, new_method_call(KWALLETD, "close", "sb", (WALLET, True)))

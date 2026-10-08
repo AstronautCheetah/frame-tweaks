@@ -1,6 +1,7 @@
 # id	title	depends	description
 dictation	Dictation	ydotool	Local Whisper speech-to-text on the GPU: one shortcut to record, text is typed and copied
 arrowpad	Arrow Pad	ydotool	Floating arrows/Home/End/F-keys/Ctrl pad with a dictation button; never steals focus
+whisper-frame	whisper-frame		groffta's dictation: hold Select or a mic under any floating window (shares dictation's model)
 full-keyboard	Full Keyboard (VR)		TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified)
 cursor	Mouse cursor fix		Makes the mouse pointer visible in desktop mode
 clipboard	Shared clipboard		One clipboard for desktop mode and VR floating windows (clipboard-sync, built from upstream)
