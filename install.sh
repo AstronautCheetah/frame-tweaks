@@ -20,7 +20,7 @@ VERSION=$(cat VERSION 2>/dev/null || echo dev)
 declare -A TITLE DEPS DESC
 IDS=()
 # (Tabs become \x1f first: read merges empty fields between whitespace separators like tab.)
-while IFS=$'\x1f' read -r id title deps desc; do
+while IFS=$'\x1f' read -r id title deps desc _source; do
     [[ -z $id || $id == \#* ]] && continue
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc
 done < <(tr '\t' '\037' < components.tsv)

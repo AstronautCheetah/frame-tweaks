@@ -53,6 +53,7 @@ if it's missing. It needs your sudo password once; if you've never set one, run 
 | 🔐 | [**Signal hardening**](signal/) | Signal's database key in the wallet instead of plain text; Signal quits after 15 minutes idle, and reopening needs the wallet password. | A headset gets passed around: shared with family, often without a SteamOS login password. Flathub Signal otherwise keeps its key in plain text. |
 | 🌐 | [**NordVPN (WireGuard)**](nordvpn/) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
 | 🕵️ | [**Firefox privacy**](firefox/) | Firefox's strongest anti-fingerprinting (the Tor Browser approach), letterboxing, WebRTC limits, daily re-randomization. | The Frame's hardware (Adreno GPU, VR-desktop screen size, touch input) is rare among browsers, so it's easy to fingerprint. |
+| 🧑‍💻 | [**VSCodium**](vscodium/) | VS Code without telemetry, from Flathub. | Coding on the headset: Flathub has the aarch64 build; pairs with Arrow Pad and dictation. |
 | 🤖 | [**Claude Desktop**](claude-desktop/) | Anthropic's official Linux arm64 beta, installed and updated without apt. | It's packaged as a `.deb` for Ubuntu/Debian. SteamOS has no apt and a read-only root, so this unpacks the arm64 build into your home folder. |
 | 🛠️ | [**Tools**](tools/) | `restart-plasmashell`: bring the taskbar and tray back after a crash. | In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session. |
 
@@ -61,7 +62,7 @@ Each folder's README covers usage, settings, how it works, and the gotchas we hi
 ## Using the installer
 
 **Steam Frame Tweaks** in the app menu (desktop or VR "+" menu) opens the installer window:
-one row per tweak with its live status, tick to install, untick to remove, **Hide** rows you
+one row per tweak with its live status and a link to the project it comes from, tick to install, untick to remove, **Hide** rows you
 don't need (hidden ones are never removed) and **Show hidden** to bring them back. It uses
 PyQt6, set up on first use (shared with Arrow Pad); without it you get a simple checklist.
 

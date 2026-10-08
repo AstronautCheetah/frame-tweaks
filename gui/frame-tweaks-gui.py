@@ -25,7 +25,11 @@ BREEZE = Path("/usr/share/icons/breeze-dark")
 ROW_ICON = {"dictation": "frame-tweaks-dictate", "arrowpad": "frame-tweaks-arrowpad",
             "adb-scrcpy": "frame-tweaks-phone", "nordvpn": "frame-tweaks-nordvpn",
             "wallet": "frame-tweaks-lock"}
-BREEZE_ROW = {"full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
+FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
+FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
+               "firefox": "org.mozilla.firefox"}
+BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
+              "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
               "firefox": "internet-web-browser", "claude-desktop": "help-about",
               "tools": "tools", "ydotool": "input-keyboard-virtual"}
 
@@ -54,8 +58,8 @@ def components():
     for line in (REPO / "components.tsv").read_text().splitlines():
         if not line.strip() or line.startswith("#"):
             continue
-        cid, title, deps, desc = (line.split("\t") + ["", "", "", ""])[:4]
-        rows.append((cid, title, deps.split(), desc))
+        cid, title, deps, desc, source = (line.split("\t") + ["", "", "", "", ""])[:5]
+        rows.append((cid, title, deps.split(), desc, source))
     return rows
 
 
@@ -79,6 +83,11 @@ def save_hidden(hidden):
 
 
 def row_icon(cid):
+    if cid in FLATPAK_ROW:   # the app's own icon, as Flathub exports it
+        hits = sorted(FLATPAK_ICONS.glob(f"*/apps/{FLATPAK_ROW[cid]}.*"),
+                      key=lambda p: (p.suffix == ".svg", p.parent.parent.name))
+        if hits:
+            return QIcon(str(hits[-1]))
     if cid in ROW_ICON and (ICONS / f"{ROW_ICON[cid]}.png").exists():
         return QIcon(str(ICONS / f"{ROW_ICON[cid]}.png"))
     hits = sorted(BREEZE.glob(f"*/*/{BREEZE_ROW.get(cid, 'application-x-executable')}.svg"))
@@ -154,7 +163,7 @@ class Window(QWidget):
         self.show_hidden.setEnabled(n_hidden > 0 or self.show_hidden.isChecked())
         old = {cid: b.isChecked() for cid, b in self.boxes.items()}
         self.boxes = {}
-        for cid, title, deps, desc in self.rows:
+        for cid, title, deps, desc, source in self.rows:
             hidden = cid in self.hidden
             if hidden and not self.show_hidden.isChecked():
                 continue
@@ -176,6 +185,14 @@ class Window(QWidget):
             info = QLabel(desc + (f"  <i style='color:#6b7783'>needs: {', '.join(deps)}</i>" if deps else ""))
             info.setObjectName("desc")
             info.setWordWrap(True)
+            link = QLabel()
+            if "|" in source:     # credit the project it comes from, with a link to it
+                rel, url = source.split("|", 1)
+                short = url.split("://", 1)[-1].removeprefix("github.com/").rstrip("/")
+                link.setText(f"<span style='color:#6b7783'>{rel}</span> "
+                             f"<a style='color:#7fb2e5' href='{url}'>{short} ↗</a>")
+                link.setOpenExternalLinks(True)
+                link.setToolTip(f"Open {url}")
             st = QLabel({0: "✔ " + text, 2: "! " + text}.get(code, "· not installed"))
             st.setProperty("status", {0: "ok", 2: "warn"}.get(code, "missing"))
             st.setWordWrap(True)
@@ -183,12 +200,14 @@ class Window(QWidget):
             hide.setToolTip("Show this tweak in the list again" if hidden else
                             "Hide this tweak from the list (doesn't remove it)")
             hide.clicked.connect(lambda _=False, c=cid: self.toggle_hidden(c))
-            g.addWidget(box, 0, 0, 2, 1)
-            g.addWidget(icon, 0, 1, 2, 1)
+            g.addWidget(box, 0, 0, 3, 1)
+            g.addWidget(icon, 0, 1, 3, 1)
             g.addWidget(name, 0, 2)
             g.addWidget(info, 1, 2)
-            g.addWidget(st, 0, 3, 2, 1)
-            g.addWidget(hide, 0, 4, 2, 1)
+            if link.text():
+                g.addWidget(link, 2, 2)
+            g.addWidget(st, 0, 3, 3, 1)
+            g.addWidget(hide, 0, 4, 3, 1)
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)

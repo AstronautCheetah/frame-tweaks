@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.8 (2026-10-07)
+- whisper-frame: window mic **off by default**. It polls SteamVR's compositor ~60x/s per window,
+  measured at ~31% of a CPU core (itself + vrwebhelper + vrserver), causing VR jitter.
+  Opt in with `WHISPER_FRAME_WINDOW_MIC=1`.
+- Installer window: each tweak that comes from another project links to it.
+- New **vscodium** tweak (Flathub).
+
 ## 0.1.7 (2026-10-07)
 - Wallet: fix "correct password refused" for good. The dialog judged success by the Secret
   Service "Locked" flag, which stays True after a pamOpen unlock; it now checks whether
