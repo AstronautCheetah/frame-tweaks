@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 (2026-10-07)
+- Menu icons: no longer fails on a fresh home folder that has no icon theme folder yet
+  (found by the new install test in CI).
+
 ## 0.3.0 (2026-10-07): first release candidate
 
 Frame Tweaks (formerly "Steam Frame Tweaks") is a checklist installer of home-folder-only
