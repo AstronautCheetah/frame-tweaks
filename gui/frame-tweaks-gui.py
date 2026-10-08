@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6.QtCore import QProcess, Qt, QTimer
+from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QCursor, QIcon
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout,
@@ -70,6 +71,7 @@ QLabel[status="missing"], QLabel[status="checking"] { color: #6b7783; }
 QWidget#row { background: #161c23; border-radius: 10px; }
 QWidget#row:hover { background: #1c242d; }
 QWidget#row[hidden_row="true"] { background: #11161c; }
+QWidget#row[focused="true"] { background: #1f2a36; border: 2px solid #7fb2e5; }
 QWidget#row QLabel, QWidget#row QCheckBox { background: transparent; }
 QPushButton { background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 #2c333b, stop:0.5 #232a32, stop:1 #1c232a);
               border: none; border-bottom: 3px solid #0c1015; border-radius: 8px; padding: 6px 14px; }
@@ -380,6 +382,10 @@ class Window(QWidget):
         self.show_hidden.setCheckable(True)
         self.show_hidden.toggled.connect(self.rebuild)
         top.addWidget(self.show_hidden)
+        diag = QPushButton("Diagnostics")
+        diag.setToolTip("Save a report for a bug report (user names and paths removed)")
+        diag.clicked.connect(self.save_diagnostics)
+        top.addWidget(diag)
         refresh = QPushButton("Refresh")
         refresh.clicked.connect(self.refresh)
         top.addWidget(refresh)
@@ -420,6 +426,9 @@ class Window(QWidget):
         self.stack.addWidget(page)
         self.confirm_page, self.confirm_text, self.confirm_yes = self.make_confirm_page()
         self.stack.addWidget(self.confirm_page)
+        self.error_page, self.error_text = self.make_error_page()
+        self.stack.addWidget(self.error_page)
+        self.row_widgets, self.focus_index = [], -1
         outer = QVBoxLayout(self)
         outer.setContentsMargins(20, 16, 20, 16)
         outer.addWidget(self.stack)
@@ -429,7 +438,9 @@ class Window(QWidget):
             sys.path.insert(0, str(Path(__file__).resolve().parent))
             from vrbuttons import VRButtons
             self.vr_buttons = VRButtons({"back": self.go_back, "home": self.go_home,
-                                         "toggle": self.toggle_pointed_row})
+                                         "toggle": self.toggle_pointed_row,
+                                         "up": lambda: self.move_focus(-1),
+                                         "down": lambda: self.move_focus(+1)})
             if self.vr_buttons.ok:
                 QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.underMouse())).start()
         self.refresh()
@@ -510,6 +521,7 @@ class Window(QWidget):
 
     # ---- layout -----------------------------------------------------------------
     def rebuild(self, *_):
+        self.row_widgets, self.focus_index = [], -1
         while self.grid.count():
             item = self.grid.takeAt(0)
             if item.widget():
@@ -539,6 +551,7 @@ class Window(QWidget):
             if cat in collapsed:
                 continue
             row = Row(self, comp)
+            self.row_widgets.append(row)
             row.setProperty("hidden_row", "true" if is_hidden else "false")
             g = QGridLayout(row)
             g.setContentsMargins(8, 10, 12, 10)
@@ -749,13 +762,74 @@ class Window(QWidget):
         self.scroll.verticalScrollBar().setValue(0)
 
     def toggle_pointed_row(self):
+        """A: the row the laser points at, else the highlighted one (left D-pad)."""
         if self.stack.currentIndex() != 0:
             return
         w = QApplication.widgetAt(QCursor.pos())
         while w is not None and not isinstance(w, Row):
             w = w.parentWidget()
+        if w is None and 0 <= self.focus_index < len(self.row_widgets):
+            w = self.row_widgets[self.focus_index]
         if w is not None and w.comp["id"] in self.boxes:
             self.boxes[w.comp["id"]].toggle()
+
+    def move_focus(self, step):
+        """Left D-pad up/down: move a highlight through the visible rows."""
+        if self.stack.currentIndex() != 0 or not self.row_widgets:
+            return
+        old = self.focus_index
+        self.focus_index = max(0, min(len(self.row_widgets) - 1, old + step if old >= 0 else 0))
+        for i in {old, self.focus_index}:
+            if 0 <= i < len(self.row_widgets):
+                r = self.row_widgets[i]
+                r.setProperty("focused", "true" if i == self.focus_index else "false")
+                r.style().unpolish(r)
+                r.style().polish(r)
+        self.scroll.ensureWidgetVisible(self.row_widgets[self.focus_index], 0, 40)
+
+    # ---- diagnostics and errors -------------------------------------------------
+    def save_diagnostics(self):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: ./install.sh debug-info")
+            return
+        r = subprocess.run([str(REPO / "install.sh"), "debug-info"], capture_output=True, text=True)
+        path = next((l.split(" ", 1)[1] for l in r.stdout.splitlines() if l.startswith("Wrote ")), None)
+        self.say(f"Saved {path.replace(str(Path.home()), '~')}: read it, then attach it to a bug report."
+                 if path else "Couldn't write the report (see ./install.sh debug-info).")
+
+    def make_error_page(self):
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        head = QLabel("Something went wrong in the installer window")
+        head.setObjectName("title")
+        lay.addWidget(head)
+        hint = QLabel("Copy the details into a bug report. The window keeps working: go back and try again.")
+        hint.setObjectName("desc")
+        lay.addWidget(hint)
+        text = QTextBrowser()
+        lay.addWidget(text, 1)
+        buttons = QHBoxLayout()
+        copy = QPushButton("Copy for bug report")
+        copy.clicked.connect(lambda: (QApplication.clipboard().setText(text.toPlainText()),
+                                      copy.setText("Copied")))
+        back = QPushButton("← Back")
+        back.clicked.connect(lambda: (copy.setText("Copy for bug report"), self.stack.setCurrentIndex(0)))
+        buttons.addWidget(back)
+        buttons.addStretch(1)
+        buttons.addWidget(copy)
+        lay.addLayout(buttons)
+        return page, text
+
+    def show_error(self, kind, value, tb):
+        """sys.excepthook: show it in the window (a dialog would open elsewhere in VR)."""
+        import platform
+        import traceback
+        version = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "dev"
+        details = (f"Frame Tweaks {version}, Python {platform.python_version()}, {platform.machine()}\n\n"
+                   + "".join(traceback.format_exception(kind, value, tb)))
+        self.error_text.setPlainText(details.replace(str(Path.home()), "~"))
+        self.stack.setCurrentWidget(self.error_page)
+        sys.__excepthook__(kind, value, tb)
 
     def closeEvent(self, ev):
         if self.vr_buttons:
@@ -764,11 +838,27 @@ class Window(QWidget):
         super().closeEvent(ev)
 
 
+SERVER = f"frame-tweaks-gui-{os.getuid()}"
+
+
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("steam-frame-tweaks")
     app.setDesktopFileName("steam-frame-tweaks")
+    # One window: a second launch asks the running one to come forward and exits.
+    probe = QLocalSocket()
+    probe.connectToServer(SERVER)
+    if probe.waitForConnected(300):
+        probe.write(b"show")
+        probe.waitForBytesWritten(300)
+        return
+    QLocalServer.removeServer(SERVER)
+    server = QLocalServer()
+    server.listen(SERVER)
     w = Window()
+    server.newConnection.connect(lambda: (server.nextPendingConnection(), w.showNormal(),
+                                          w.raise_(), w.activateWindow()))
+    sys.excepthook = w.show_error
     w.show()
     sys.exit(app.exec())
 
