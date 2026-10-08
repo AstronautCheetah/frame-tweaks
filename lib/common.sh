@@ -167,6 +167,49 @@ install_py_tool() {
     chmod 755 "$BIN/$(basename "$1")"
 }
 
+# --- backups of user files a tweak changes -------------------------------------------------
+# Never back up files that hold secrets in plain text (Signal's config.json before migration,
+# gh's hosts.yml): a backup would recreate the leak the tweak removes.
+BACKUPS="$HOME/.local/state/frame-tweaks/backups"
+
+# backup_file <tweak> <file>: keep the file as it was before this tweak first changed it.
+backup_file() {
+    local dest="$BACKUPS/$1/${2#"$HOME"/}"
+    [ -e "$dest" ] || [ -e "$dest.absent" ] && return 0
+    mkdir -p "$(dirname "$dest")"
+    if [ -e "$2" ]; then cp -p "$2" "$dest"; else : > "$dest.absent"; fi
+}
+# restore_file <tweak> <file>: put it back as it was (or remove it if it didn't exist).
+restore_file() {
+    local dest="$BACKUPS/$1/${2#"$HOME"/}"
+    if [ -e "$dest" ]; then cp -p "$dest" "$2" && rm -f "$dest" && say "restored $2"
+    elif [ -e "$dest.absent" ]; then rm -f "$2" "$dest.absent" && say "removed $2 (it didn't exist before)"
+    fi
+}
+# KDE settings change key by key, so only those keys are recorded and restored (the rest of the
+# file may have changed since):  save_kconfig <tweak> <file> <group> <key>...
+save_kconfig() {
+    local tweak=$1 file=$2 group=$3 key rec; shift 3
+    rec="$BACKUPS/$tweak/kconfig"; mkdir -p "$(dirname "$rec")"
+    for key in "$@"; do
+        grep -qF "$file	$group	$key	" "$rec" 2>/dev/null && continue    # first value wins
+        if kreadconfig6 --file "$file" --group "$group" --key "$key" --default "<unset>" | grep -qx "<unset>"; then
+            printf '%s\t%s\t%s\t%s\n' "$file" "$group" "$key" "<unset>" >> "$rec"
+        else
+            printf '%s\t%s\t%s\t%s\n' "$file" "$group" "$key" "$(kreadconfig6 --file "$file" --group "$group" --key "$key")" >> "$rec"
+        fi
+    done
+}
+restore_kconfig() {
+    local rec="$BACKUPS/$1/kconfig" file group key value
+    [ -f "$rec" ] || return 0
+    while IFS=$'\t' read -r file group key value; do
+        if [ "$value" = "<unset>" ]; then kwriteconfig6 --file "$file" --group "$group" --key "$key" --delete
+        else kwriteconfig6 --file "$file" --group "$group" --key "$key" "$value"; fi
+    done < "$rec"
+    rm -f "$rec"; say "restored KDE settings changed by $1"
+}
+
 # --- status.sh helpers: print one line, exit 0 = installed/OK, 1 = not installed, 2 = needs attention
 status_ok()      { printf 'ok       %s\n' "$*"; exit 0; }
 status_missing() { printf 'missing  %s\n' "$*"; exit 1; }

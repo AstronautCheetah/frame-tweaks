@@ -44,6 +44,12 @@ why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assist
 worktree (`dev/agent-worktree.sh add <slug>`) and publishes with `dev/safe-push.sh`. See
 [docs/claude/parallel-work.md](docs/claude/parallel-work.md).
 
+## Changing files a tweak doesn't own
+
+Before editing a user file, call `backup_file <tweak> <file>` and `restore_file` on uninstall
+(KDE settings: `save_kconfig` / `restore_kconfig`, key by key). Prefer marked blocks you can
+remove again (like Firefox's `user.js`). Never back up files holding secrets in plain text.
+
 ## Checks before a release
 
 - `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home (also runs in CI).

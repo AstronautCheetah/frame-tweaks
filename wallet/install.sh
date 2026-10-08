@@ -37,6 +37,7 @@ flatpak install -y --noninteractive flathub org.kde.kwalletmanager
 
 # Lock the wallet after it has gone unused for a while (both daemons read kwalletrc).
 IDLE=${WALLET_IDLE_MINUTES:-240}
+save_kconfig wallet kwalletrc Wallet "Close When Idle" "Idle Timeout"     # restored on uninstall
 kwriteconfig6 --file kwalletrc --group Wallet --key "Close When Idle" true
 kwriteconfig6 --file kwalletrc --group Wallet --key "Idle Timeout" "$IDLE"
 # Reconfigure only wallet services that are already running: calling one on the desktop's
