@@ -13,7 +13,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
       - name: ShellCheck
@@ -47,6 +47,11 @@ jobs:
             grep -qE '^version=.+' "$pin" && grep -qE '^url=https://' "$pin" && grep -qE '^sha256=[0-9a-f]{64}$' "$pin" ||
               { echo "incomplete $pin"; exit 1; }
           done
+      - name: Unit tests
+        run: |
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 >/dev/null
+          python3 -m pip install --quiet PyQt6
+          QT_QPA_PLATFORM=offscreen python3 -m unittest discover -s tests -v
       - name: Docs consistency (README rows, links)
         run: python3 dev/check-docs.py
       - name: Install, status and uninstall in a throwaway home

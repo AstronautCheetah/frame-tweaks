@@ -1,0 +1,68 @@
+name: Release
+# Run by hand (Actions → Release → Run workflow). Turns CHANGELOG's "## Unreleased" section into
+# the new version's notes, bumps VERSION, commits, tags vX.Y.Z (or vX.Y.Z-rc.N) and drafts a
+# GitHub release.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which part of the version to raise
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      prerelease:
+        description: Pre-release (vX.Y.Z-rc.N, only for the beta channel)
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: release
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Work out the version
+        id: v
+        env:
+          BUMP: ${{ inputs.bump }}
+          PRE: ${{ inputs.prerelease }}
+        run: |
+          IFS=. read -r major minor patch < <(sed 's/-.*//' VERSION)
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          v="$major.$minor.$patch"
+          if [ "$PRE" = true ]; then
+            n=$(git tag -l "v$v-rc.*" | wc -l); v="$v-rc.$((n + 1))"
+          fi
+          git rev-parse -q --verify "refs/tags/v$v" && { echo "v$v already exists"; exit 1; }
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: Changelog and VERSION
+        env:
+          V: ${{ steps.v.outputs.version }}
+        run: |
+          grep -q '^## Unreleased' CHANGELOG.md || { echo 'CHANGELOG.md has no "## Unreleased" section'; exit 1; }
+          awk '/^## Unreleased/{f=1; next} f && /^## /{exit} f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || { echo "the Unreleased section is empty"; exit 1; }
+          sed -i "s/^## Unreleased.*/## $V ($(date +%Y-%m-%d))/" CHANGELOG.md
+          echo "$V" > VERSION
+      - name: Commit, tag, push, draft release
+        env:
+          V: ${{ steps.v.outputs.version }}
+          PRE: ${{ inputs.prerelease }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name AstronautCheetah
+          git config user.email 189046832+AstronautCheetah@users.noreply.github.com
+          git commit -q -am "$V: release"
+          git tag -a "v$V" -m "v$V"
+          git push origin HEAD:main "v$V"
+          flags=(--draft --title "v$V" --notes-file notes.md)
+          [ "$PRE" = true ] && flags+=(--prerelease)
+          gh release create "v$V" "${flags[@]}"
