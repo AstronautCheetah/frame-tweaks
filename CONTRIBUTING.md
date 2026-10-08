@@ -56,5 +56,10 @@ remove again (like Firefox's `user.js`). Never back up files holding secrets in 
 - `dev/check-docs.py`: every tweak has a README row; relative links resolve.
 - `dev/check-pins.sh`: upstream releases newer than a tweak's `pin`. Bump a pin only after
   reading the release, in its own commit, with the new version, URL and SHA256.
-- Releases are `vX.Y.Z` tags on `main`; `get.sh` and `./install.sh update` install the newest.
- 
+- `python3 -m unittest discover -s tests`: unit tests (installer-window logic, shell helpers,
+  curvature), also in CI.
+- **Releasing:** add changes under `## Unreleased` in CHANGELOG.md as you go, then run the
+  **Release** workflow (Actions → Release → Run workflow, choose patch/minor/major). It dates the
+  section, bumps VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish.
+  Pre-releases (`vX.Y.Z-rc.N`) only reach the beta channel. Tags and pushed commits are never
+  moved or rewritten.
