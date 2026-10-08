@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Frame Tweaks
+GenericName=Tweak installer
+Comment=Install, check and remove Steam Frame desktop-mode tweaks
+Exec=env FRAME_TWEAKS_GUI=1 @REPO@/install.sh gui
+Icon=io.github.AstronautCheetah.FrameTweaks
+Terminal=false
+Categories=Utility;
+Keywords=Steam;Frame;SteamOS;VR;keyboard;dictation;wallet;
+StartupWMClass=steam-frame-tweaks

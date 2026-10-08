@@ -844,7 +844,7 @@ SERVER = f"frame-tweaks-gui-{os.getuid()}"
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("steam-frame-tweaks")
-    app.setDesktopFileName("steam-frame-tweaks")
+    app.setDesktopFileName("io.github.AstronautCheetah.FrameTweaks")
     # One window: a second launch asks the running one to come forward and exits.
     probe = QLocalSocket()
     probe.connectToServer(SERVER)

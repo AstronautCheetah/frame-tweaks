@@ -53,19 +53,18 @@ done < <(tr '\t' '\037' < components.tsv)
 
 # The installer's own app-menu entry (desktop menu and Steam's VR "+" menu).
 ensure_menu_entry() {
-    local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor"
-    mkdir -p "$apps" "$icons/256x256/apps"
-    install -m644 icons/frame-tweaks.png "$icons/256x256/apps/frame-tweaks.png"
-    cat > "$apps/steam-frame-tweaks.desktop" <<DESKTOP
-[Desktop Entry]
-Type=Application
-Name=Frame Tweaks
-Comment=Install, check and remove Steam Frame desktop-mode tweaks
-Exec=env FRAME_TWEAKS_GUI=1 $PWD/install.sh gui
-Icon=frame-tweaks
-Terminal=false
-Categories=Settings;Utility;
-DESKTOP
+    local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor" n
+    local id=io.github.AstronautCheetah.FrameTweaks
+    mkdir -p "$apps" "$HOME/.local/share/metainfo"
+    for n in 64 128 256; do
+        mkdir -p "$icons/${n}x$n/apps"
+        if [[ $n == 256 ]]; then install -m644 icons/frame-tweaks.png "$icons/256x256/apps/$id.png"
+        else install -m644 "icons/frame-tweaks-$n.png" "$icons/${n}x$n/apps/$id.png"; fi
+    done
+    install -m644 icons/frame-tweaks.png "$icons/256x256/apps/frame-tweaks.png"   # the window's own icon
+    sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" > "$apps/$id.desktop"
+    install -m644 "share/metainfo/$id.metainfo.xml" "$HOME/.local/share/metainfo/"
+    rm -f "$apps/steam-frame-tweaks.desktop"          # its old name
     update-desktop-database -q "$apps" 2>/dev/null || true
     touch "$apps" "$icons"     # Steam's "+" menu rescans on these
 }
