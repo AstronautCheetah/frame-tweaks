@@ -1,5 +1,14 @@
 name: CI
-on: [push, pull_request]
+# Once per commit on main (tag pushes point at commits already checked), plus pull requests.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+# A newer push to the same branch cancels the run it supersedes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint:
     runs-on: ubuntu-latest

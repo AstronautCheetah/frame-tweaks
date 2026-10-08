@@ -1,6 +1,6 @@
 #!/bin/bash
 source "$(dirname "$0")/../lib/common.sh"
-remove_files "$BIN/dictate" "$APPS/dictate.desktop"
+remove_files "$ICONS/256x256/apps/frame-tweaks-dictate.png" "$BIN/dictate" "$APPS/dictate.desktop"
 if [ -x "$BIN/whisper-ptt" ]; then
     say "Kept the Whisper model: whisper-frame uses it too."
 else
