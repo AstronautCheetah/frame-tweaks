@@ -30,6 +30,7 @@ FIRST*, which credits **ThrillSeeker**.
 | [Homebrew](https://brew.sh) | BSD-2-Clause | installs whisper.cpp, scrcpy, wl-clipboard |
 | [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) / Qt | GPL-3.0 / LGPL | Arrow Pad, NordVPN tray, installer window (installed with pip, not bundled) |
 | [pyopenvr](https://github.com/cmbruns/pyopenvr), OpenVR | BSD-3-Clause | Arrow Pad haptics (with SteamVR's own arm64 `libopenvr_api.so`) |
+| [VSCodium](https://github.com/VSCodium/vscodium) | MIT | vscodium tweak (Flathub) |
 | [jeepney](https://gitlab.com/takluyver/jeepney) | MIT | wallet-unlock, nordvpn-wg (D-Bus) |
 | KDE Wallet / kwallet-pam | LGPL | `wallet-unlock` derives the key the way kwallet-pam does |
 | [KDE Breeze icons](https://invent.kde.org/frameworks/breeze-icons) | LGPL-3.0 | glyphs in our menu icons and Arrow Pad toolbar |

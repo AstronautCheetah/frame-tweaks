@@ -1,15 +1,16 @@
-# id	title	depends	description
-dictation	Dictation	ydotool	Local Whisper speech-to-text on the GPU: one shortcut to record, text is typed and copied
-arrowpad	Arrow Pad	ydotool	Floating arrows/Home/End/F-keys/Ctrl pad with a dictation button; never steals focus
-whisper-frame	whisper-frame		groffta's dictation: hold Select or a mic under any floating window (shares dictation's model)
-full-keyboard	Full Keyboard (VR)		TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified)
-cursor	Mouse cursor fix		Makes the mouse pointer visible in desktop mode
-clipboard	Shared clipboard		One clipboard for desktop mode and VR floating windows (clipboard-sync, built from upstream)
-adb-scrcpy	Android Mirror		Mirror and control an Android phone: aarch64 adb + scrcpy, finds the phone automatically
-wallet	Shared KDE wallet		One wallet for desktop mode and VR, desktop unlock dialog, 4-hour auto-lock, keyring for CLI tools
+# id	title	depends	description	source (relation|url, optional)
+dictation	Dictation	ydotool	Local Whisper speech-to-text on the GPU: one shortcut to record, text is typed and copied	uses|https://github.com/ggml-org/whisper.cpp
+arrowpad	Arrow Pad	ydotool	Floating arrows/Home/End/F-keys/Ctrl pad with a dictation button; never steals focus	styled after|https://github.com/TaiKeid/steam-frame-full-keyboard
+whisper-frame	whisper-frame		groffta's dictation: hold Select or a mic under any floating window (shares dictation's model)	from|https://github.com/groffta/whisper-frame
+full-keyboard	Full Keyboard (VR)		TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified)	from|https://github.com/TaiKeid/steam-frame-full-keyboard
+cursor	Mouse cursor fix		Makes the mouse pointer visible in desktop mode	from|https://github.com/curiousjtuber/steam-frame-utils
+clipboard	Shared clipboard		One clipboard for desktop mode and VR floating windows (clipboard-sync, built from upstream)	uses|https://github.com/dnut/clipboard-sync
+adb-scrcpy	Android Mirror		Mirror and control an Android phone: aarch64 adb + scrcpy, finds the phone automatically	uses|https://github.com/Genymobile/scrcpy
+wallet	Shared KDE wallet		One wallet for desktop mode and VR, desktop unlock dialog, 4-hour auto-lock, keyring for CLI tools	approach from|https://github.com/lhns/steam-frame-nix
 signal	Signal hardening	wallet	Signal's key in the wallet instead of plaintext; quits after 15 minutes idle
 nordvpn	NordVPN (WireGuard)		NordVPN as NetworkManager connections with a tray icon; survives SteamOS updates
 firefox	Firefox privacy		Strong anti-fingerprinting (resistFingerprinting, letterboxing, WebRTC limits)
-claude-desktop	Claude Desktop		Official Linux arm64 beta, installed and updated without apt
+vscodium	VSCodium		VS Code without telemetry (Flathub, aarch64)	from|https://github.com/VSCodium/vscodium
+claude-desktop	Claude Desktop		Official Linux arm64 beta, installed and updated without apt	from|https://claude.com/download
 tools	Tools		restart-plasmashell: bring back a crashed taskbar/system tray
-ydotool	ydotool (helper)		Keystroke injection for any app; installed automatically when needed
+ydotool	ydotool (helper)		Keystroke injection for any app; installed automatically when needed	uses|https://github.com/ReimuNotMoe/ydotool

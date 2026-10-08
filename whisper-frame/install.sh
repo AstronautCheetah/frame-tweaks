@@ -21,10 +21,18 @@ else
         DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus" ./install.sh)
     echo "$VER" > "$HOME/.local/lib/whisper-frame/VERSION"
 fi
-# Our fix: restart the window mic with SteamVR (it doesn't reconnect on its own).
-mkdir -p "$HOME/.config/systemd/user/whisper-panel.service.d"
-cp "$REPO_DIR/whisper-frame/steamvr.conf" "$HOME/.config/systemd/user/whisper-panel.service.d/"
-sysctl_user daemon-reload
-sysctl_user reenable whisper-panel >/dev/null 2>&1 || true
-sysctl_user restart whisper-panel || true
-say "Hold Select until the beep, or hold the mic under a floating window, to dictate."
+# The window mic (whisper-panel) polls SteamVR's compositor for every window's position ~60
+# times a second; measured here it costs ~31% of a core across whisper-panel, vrwebhelper and
+# vrserver, enough for visible jitter. Off unless asked for.
+if [ "${WHISPER_FRAME_WINDOW_MIC:-0}" = 1 ]; then
+    mkdir -p "$HOME/.config/systemd/user/whisper-panel.service.d"
+    cp "$REPO_DIR/whisper-frame/steamvr.conf" "$HOME/.config/systemd/user/whisper-panel.service.d/"
+    sysctl_user daemon-reload
+    sysctl_user reenable whisper-panel >/dev/null 2>&1 || true
+    sysctl_user restart whisper-panel || true
+    warn "Window mic on: it costs noticeable VR performance (see whisper-frame/README.md)."
+else
+    sysctl_user disable --now whisper-panel >/dev/null 2>&1 || true
+    say "Window mic off (VR performance). Enable with: WHISPER_FRAME_WINDOW_MIC=1 ./install.sh whisper-frame"
+fi
+say "Hold the headset's Select button until the beep to dictate."
