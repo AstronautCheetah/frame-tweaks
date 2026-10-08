@@ -5,7 +5,10 @@
 #   ./install.sh install ID... | all install components (dependencies are added automatically)
 #   ./install.sh uninstall ID...     remove components
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
-#   ./install.sh update              git pull, then re-run the installer of everything installed
+#   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
+#   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
+#   ./install.sh debug-info          write a redacted report for bug reports
+#   ./install.sh check-system        are the SteamOS/SteamVR parts the tweaks rely on still there?
 #   ./install.sh list                components and what they do
 #   ./install.sh menu                (re)create the "Frame Tweaks" app-menu entry
 #   ./install.sh ID...               same as "install ID..."
@@ -15,6 +18,28 @@
 set -uo pipefail
 cd "$(dirname "$(readlink -f "$0")")" || exit 1
 VERSION=$(cat VERSION 2>/dev/null || echo dev)
+# shellcheck source=lib/common.sh
+source lib/common.sh 2>/dev/null
+set +e     # common.sh turns on -e for tweak scripts; this script checks results itself
+STATE="$HOME/.local/state/frame-tweaks"
+LOGS="$STATE/logs"
+
+# One install/uninstall/update at a time (installer window and terminal alike). The lock is on
+# fd 8; tweak scripts run with it closed, so a background process they start can't keep it.
+take_lock() {
+    mkdir -p "$STATE"
+    exec 8>"$STATE/install.lock"
+    flock -n 8 || { echo "Another Frame Tweaks install, update or removal is running; try again when it's done." >&2; exit 1; }
+}
+
+# Every changing run is logged (the last 5 are kept), for ./install.sh debug-info.
+start_log() {
+    mkdir -p "$LOGS"
+    local log; log="$LOGS/$(date +%Y%m%d-%H%M%S)-$1.log"
+    { echo "# frame-tweaks $VERSION: $*"; date; } > "$log"
+    exec > >(tee -a "$log") 2>&1
+    find "$LOGS" -name '*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
+}
 
 # components.tsv: id, title, category, depends (space-separated), description, source,
 # author, why, flags (tab-separated; see the header line)
@@ -100,7 +125,11 @@ cmd_install() {
     local id failed=()
     for id in $(with_deps "$@"); do
         bold "── $id: ${TITLE[$id]}"
-        if ! "./$id/install.sh"; then failed+=("$id"); echo "!! $id failed" >&2; fi
+        if held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]]; then
+            echo "held: left as it is (./install.sh unhold $id)"; echo; continue
+        fi
+        if ! "./$id/install.sh" 8>&-; then failed+=("$id"); echo "!! $id failed" >&2
+        else record_version "$id"; fi
         echo
     done
     [[ ${#failed[@]} -eq 0 ]] || { echo "Failed: ${failed[*]}" >&2; return 1; }
@@ -121,19 +150,23 @@ cmd_uninstall() {
             done
         done
     done
-    for id in "$@"; do bold "── removing $id"; "./$id/uninstall.sh"; echo; done
+    for id in "$@"; do bold "── removing $id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
 }
 
 cmd_update() {
+    local want=""
+    [[ ${1:-} == --to ]] && { want=${2:?"--to needs a release, e.g. v0.3.1"}; [[ $want == v* ]] || want="v$want"; }
     if [[ -d .git ]]; then
         if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
             bold "Updating the checkout"; git pull --ff-only || { echo "git pull failed; not reinstalling" >&2; exit 1; }
         else                                                # a release (tag): move to the newest
             git fetch --quiet --tags origin || { echo "couldn't reach GitHub; not updating" >&2; exit 1; }
-            local tag; tag=$(git tag -l 'v*' | sort -V | tail -1)
-            bold "Updating to $tag"; git -c advice.detachedHead=false checkout --quiet "$tag"
+            local tag; tag=${want:-$(git tag -l 'v*' | newest_tag)}
+            [ -n "$tag" ] || { echo "no release found" >&2; exit 1; }
+            git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "no release $tag" >&2; exit 1; }
+            bold "Updating to $tag ($(release_channel) channel)"; git -c advice.detachedHead=false checkout --quiet "$tag"
         fi
-        exec ./install.sh _reinstall      # re-exec so the new version of this script runs
+        FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi
     cmd_reinstall
 }
@@ -142,6 +175,7 @@ cmd_reinstall() {
     local id installed=()
     for id in "${IDS[@]}"; do status_of "$id" >/dev/null; [[ $? -ne 1 ]] && installed+=("$id"); done
     [[ ${#installed[@]} -eq 0 ]] && { echo "Nothing installed yet."; return; }
+    run_migrations "${installed[@]}"
     cmd_install "${installed[@]}"
 }
 
@@ -203,21 +237,90 @@ cmd_kdialog_gui() {
     exec konsole --separate -e bash -c "$cmd"
 }
 
-usage() { sed -n '2,15s/^# \{0,1\}//p' "$0"; }
+usage() { sed -n '2,18s/^# \{0,1\}//p' "$0"; }
+
+# ---- per-tweak versions (for migrations) and holds -------------------------------------------
+# installed/<id> records the Frame Tweaks version that last installed a tweak. A tweak's
+# optional migrate.sh runs before its install.sh when that recorded version is older, with the
+# old version as $1 (e.g. to move a setting to a new place).
+record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; }
+forget_version() { rm -f "$STATE/installed/$1"; }
+held() { [[ -f "$STATE/held/$1" ]]; }
+run_migrations() {
+    local id old
+    for id in "$@"; do
+        [[ -x ./$id/migrate.sh && -f $STATE/installed/$id ]] || continue
+        held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
+        old=$(cat "$STATE/installed/$id")
+        [[ $old != "$VERSION" ]] || continue
+        bold "── migrating $id from $old"
+        "./$id/migrate.sh" "$old" 8>&- || echo "!! $id migration failed" >&2
+    done
+}
+cmd_hold() {
+    local mode=$1; shift
+    [[ $# -gt 0 ]] || { echo "$mode what? (./install.sh list)" >&2; exit 1; }
+    check_ids "$@"; mkdir -p "$STATE/held"
+    local id
+    for id in "$@"; do
+        if [[ $mode == hold ]]; then touch "$STATE/held/$id"; echo "$id: held (updates leave it as it is)"
+        else rm -f "$STATE/held/$id"; echo "$id: updated normally again"; fi
+    done
+}
+
+# ---- diagnostics ----------------------------------------------------------------------------
+cmd_debug_info() {
+    local out; out="$HOME/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
+    {
+        echo "# Frame Tweaks debug info (user names, home path, host name, IP and e-mail addresses removed)"
+        echo "frame-tweaks: $VERSION ($(git describe --tags --always 2>/dev/null || echo no git)); channel: $(release_channel)"
+        grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release | tr '\n' ' '; echo
+        echo "steamvr: $(tr -d '\r' < /opt/steamvr/bin/version.txt 2>/dev/null || echo unknown); kernel: $(uname -r) $(uname -m)"
+        echo; echo "## status"; cmd_status 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
+        echo; echo "## held tweaks"; ls "$STATE/held" 2>/dev/null || true
+        echo; echo "## check-system"; cmd_check_system 2>&1
+        echo; echo "## failed user services"; sysctl_user --failed --no-legend --plain 2>&1 | head -20
+        local log
+        for log in $(ls -t "$LOGS"/*.log 2>/dev/null | head -2); do
+            echo; echo "## log $(basename "$log")"; sed 's/\x1b\[[0-9;]*m//g' "$log" | tail -150
+        done
+    } | sed -E -e "s|$HOME|~|g" -e "s/\b$USER\b/<user>/g" -E -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \
+             -e 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/<ip>/g' -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' \
+        > "$out"
+    echo "Wrote $out"
+    echo "Read it before sharing; attach it to a bug report: https://github.com/AstronautCheetah/frame-tweaks/issues"
+}
+
+# check-system: run each installed tweak's optional check-system.sh, which tests whether the
+# SteamOS / SteamVR internals it relies on are still there (useful after a SteamOS update).
+cmd_check_system() {
+    local id code out bad=0
+    for id in "${IDS[@]}"; do
+        [[ -x ./$id/check-system.sh ]] || continue
+        status_of "$id" >/dev/null; [[ $? -eq 1 ]] && continue
+        out=$("./$id/check-system.sh" 2>&1); code=$?
+        if [[ $code -eq 0 ]]; then printf '  \e[32m✔\e[0m %-15s %s\n' "$id" "$out"
+        else printf '  \e[33m!\e[0m %-15s %s\n' "$id" "$out"; bad=1; fi
+    done
+    return $bad
+}
 
 case ${1:-} in
     "")          if [[ ! -t 0 || -n ${FRAME_TWEAKS_GUI:-} ]] && command -v kdialog >/dev/null && [[ -n ${WAYLAND_DISPLAY:-${DISPLAY:-}} ]]; then cmd_gui
                  else usage; echo; cmd_status; fi ;;
     gui)         cmd_gui ;;
-    install)     shift; cmd_install "$@" ;;
-    uninstall|remove) shift; cmd_uninstall "$@" ;;
+    install)     shift; take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
+    uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;
     status|check) shift; cmd_status "$@" ;;
-    update)      cmd_update ;;
-    _reinstall)  cmd_reinstall ;;
+    update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
+    _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;
+    hold|unhold) cmd_hold "$@" ;;
+    debug-info)  cmd_debug_info ;;
+    check-system) cmd_check_system ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
     list)        cmd_list ;;
     menu)        ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu." ;;
     -h|--help|help) usage ;;
     --version|version) echo "$VERSION" ;;
-    *)           cmd_install "$@" ;;
+    *)           take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
 esac
