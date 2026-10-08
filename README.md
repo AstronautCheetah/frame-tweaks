@@ -46,6 +46,7 @@ if it's missing. It needs your sudo password once; if you've never set one, run 
 | 🎙️ | [**whisper-frame**](whisper-frame/) | groffta's dictation: hold the headset's Select button, or the mic under any floating window. Installed from upstream; shares dictation's model. | Dictate without menus or the desktop, straight into the window you're looking at in VR. |
 | ⌨️ | [**Arrow Pad**](arrowpad/) | Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Shift, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus. | Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop. |
 | ⌨️ | [**Full Keyboard**](full-keyboard/) | TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install). | The best in-VR keyboard so far; this installs and updates it with the rest. |
+| 🌀 | [**Curved world windows**](curvature/) | Windows you float into the world start curved, like the dashboard; Toggle Curvature still works. | SteamVR has no setting for it (world windows always start flat), so a tiny dashboard patch presses the toggle for you. Restart SteamVR once after installing. |
 | 🖱️ | [**Mouse cursor fix**](cursor/) | Makes the pointer visible in desktop mode. | KWin draws the pointer on a hardware plane that the headset's view doesn't show, so in desktop mode the mouse moves invisibly. |
 | 📋 | [**Shared clipboard**](clipboard/) | Copy in a floating VR window, paste in the desktop, and back. | The Frame's VR session and its nested desktop each have their own clipboard. This runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as steam-frame-nix does. |
 | 📱 | [**Android Mirror**](adb-scrcpy/) | Mirror and control your Android phone in a desktop window (scrcpy over wireless adb). Finds the phone's changing port automatically. | Use your phone without taking the headset off. Google ships `adb` only for x86, so this installs an aarch64 build that runs on the Frame. |
@@ -54,6 +55,7 @@ if it's missing. It needs your sudo password once; if you've never set one, run 
 | 🌐 | [**NordVPN (WireGuard)**](nordvpn/) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
 | 🕵️ | [**Firefox privacy**](firefox/) | Firefox's strongest anti-fingerprinting (the Tor Browser approach), letterboxing, WebRTC limits, daily re-randomization. | The Frame's hardware (Adreno GPU, VR-desktop screen size, touch input) is rare among browsers, so it's easy to fingerprint. |
 | 🧑‍💻 | [**VSCodium**](vscodium/) | VS Code without telemetry, from Flathub. | Coding on the headset: Flathub has the aarch64 build; pairs with Arrow Pad and dictation. |
+| 🤖 | [**Claude Code**](claude-code/) (command line) | Anthropic's coding agent in the terminal (`claude`), via Anthropic's own installer. | The native installer runs without root on arm64 and updates itself, so SteamOS updates leave it alone. |
 | 🤖 | [**Claude Desktop**](claude-desktop/) | Anthropic's official Linux arm64 beta, installed and updated without apt. | It's packaged as a `.deb` for Ubuntu/Debian. SteamOS has no apt and a read-only root, so this unpacks the arm64 build into your home folder. |
 | 🛠️ | [**Tools**](tools/) | `restart-plasmashell`: bring the taskbar and tray back after a crash. | In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session. |
 
@@ -86,6 +88,7 @@ $ ./install.sh status
   ✔ wallet          wallet locked; 5 app launcher(s) routed/gated
   ✔ signal          key in wallet; idle guard on (IDLE_MINUTES=15)
   ! nordvpn         not set up yet (run: nordvpn-wg setup)
+  ✔ claude-code     Claude Code 2.1.293 (run: claude)
   · claude-desktop  not installed
 ```
 

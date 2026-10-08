@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Curve windows floated into the world by default (steam-frame-tweaks).
+
+  sft-curvature arm       before SteamVR starts: turn on its dashboard DevTools port (127.0.0.1:8087)
+  sft-curvature restore   after SteamVR stops: put that setting back as it was
+  sft-curvature watch     while SteamVR runs: (re)inject patch.js into the dashboard
+  sft-curvature status
+
+SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only while it's stopped.
+"""
+import base64, json, os, socket, struct, sys, time, urllib.request
+from pathlib import Path
+
+SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
+STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"
+PATCH = Path(__file__).resolve().with_name("sft-curvature.js")
+PORT = 8087
+
+
+def load():
+    return json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
+
+
+def write(d):
+    tmp = SETTINGS.with_suffix(".sft-tmp")
+    tmp.write_text(json.dumps(d, indent=3) + "\n")
+    os.replace(tmp, SETTINGS)
+
+
+def arm():
+    d = load()
+    cur = d.get("VRWebHelper", {}).get("DebuggerEnabled")
+    if cur is True:
+        return                          # already on (by you or another tool): leave it alone
+    if not STATE.exists():
+        STATE.parent.mkdir(parents=True, exist_ok=True)
+        STATE.write_text(json.dumps(cur))   # null = the key wasn't there
+    d.setdefault("VRWebHelper", {})["DebuggerEnabled"] = True
+    write(d)
+
+
+def restore():
+    if not STATE.exists():
+        return
+    prev = json.loads(STATE.read_text())
+    d = load()
+    sec = d.setdefault("VRWebHelper", {})
+    if prev is None:
+        sec.pop("DebuggerEnabled", None)
+        if not sec:
+            d.pop("VRWebHelper")
+    else:
+        sec["DebuggerEnabled"] = prev
+    write(d)
+    STATE.unlink()
+
+
+# ---- minimal DevTools (WebSocket) client, stdlib only --------------------------------------
+def ws_eval(url, expr, timeout=5):
+    host, path = url.split("://", 1)[1].split("/", 1)
+    h, p = host.split(":")
+    s = socket.create_connection((h, int(p)), timeout=timeout)
+    key = base64.b64encode(os.urandom(16)).decode()
+    s.sendall(f"GET /{path} HTTP/1.1\r\nHost: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+              f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n".encode())
+    buf = b""
+    while b"\r\n\r\n" not in buf:
+        chunk = s.recv(4096)
+        if not chunk:
+            raise OSError("handshake closed")
+        buf += chunk
+    if b" 101 " not in buf.split(b"\r\n", 1)[0]:
+        raise OSError("handshake refused")
+    rest = buf.split(b"\r\n\r\n", 1)[1]
+    msg = json.dumps({"id": 1, "method": "Runtime.evaluate",
+                      "params": {"expression": expr, "returnByValue": True}}).encode()
+    mask = os.urandom(4)
+    n = len(msg)
+    head = bytes([0x81]) + (bytes([0x80 | n]) if n < 126 else
+                            bytes([0x80 | 126]) + struct.pack(">H", n) if n < 65536 else
+                            bytes([0x80 | 127]) + struct.pack(">Q", n))
+    s.sendall(head + mask + bytes(b ^ mask[i % 4] for i, b in enumerate(msg)))
+
+    def read(k):
+        nonlocal rest
+        while len(rest) < k:
+            chunk = s.recv(65536)
+            if not chunk:
+                raise OSError("closed")
+            rest += chunk
+        out, rest = rest[:k], rest[k:]
+        return out
+
+    try:
+        while True:
+            b0, b1 = read(2)
+            n = b1 & 0x7F
+            if n == 126:
+                n = struct.unpack(">H", read(2))[0]
+            elif n == 127:
+                n = struct.unpack(">Q", read(8))[0]
+            data = read(n)
+            if b0 & 0x0F == 1:
+                reply = json.loads(data)
+                if reply.get("id") == 1:
+                    r = reply.get("result", {}).get("result", {})
+                    return r.get("value", r.get("description"))
+    finally:
+        s.close()
+
+
+def systemui():
+    with urllib.request.urlopen(f"http://127.0.0.1:{PORT}/json/list", timeout=3) as r:
+        targets = json.load(r)
+    return next((t["webSocketDebuggerUrl"] for t in targets
+                 if t.get("title") == "systemui" and t.get("webSocketDebuggerUrl")), None)
+
+
+def watch():
+    expr, last = PATCH.read_text(), None
+    while True:
+        try:
+            url = systemui()
+            result = ws_eval(url, expr) if url else "waiting for the dashboard"
+        except OSError as e:
+            result = f"waiting for SteamVR's DevTools port ({e.__class__.__name__})"
+        if result != last:
+            print(result, flush=True)
+            last = result
+        time.sleep(5)
+
+
+def status():
+    try:
+        url = systemui()
+    except OSError:
+        print("port closed (SteamVR not running, or not restarted since install)")
+        return 2
+    if not url:
+        print("dashboard page not found")
+        return 2
+    print("patched" if ws_eval(url, "!!window.__sftCurvature") is True else "port open, not patched yet")
+    return 0
+
+
+if __name__ == "__main__":
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    fn = {"arm": arm, "restore": restore, "watch": watch, "status": status}.get(cmd)
+    if fn is None:
+        sys.exit(__doc__)
+    sys.exit(fn() or 0)

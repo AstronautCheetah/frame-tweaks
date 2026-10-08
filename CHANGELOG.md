@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.4 (2026-10-07)
+- New: **Curved world windows** (`curvature`). Windows you float into the world start curved;
+  Toggle Curvature still works per window. A small SteamVR dashboard patch, approach from
+  steam-frame-nix. Restart SteamVR once after installing.
+- New: **Claude Code (command line)**, above Claude Desktop, via Anthropic's native installer
+  (an existing install, e.g. Homebrew's, is left alone).
+- Arrow Pad VR: no more flicker. Two overlays, double-buffered: a new image loads into the
+  hidden one, which is shown before the old one is hidden (reloading the visible overlay blanked
+  it briefly on every hover change). Identical images aren't re-sent, laser moves no longer
+  trigger redraws, and sub-millimetre wobble of the dashboard's pose is ignored. CPU ~7% → ~1%.
+- Installer window: details and the "remove tweaks?" question open inside the window instead of
+  as separate windows (in VR, a new window opened in the dashboard, away from a world-floating
+  installer). Rows with a known problem show a short note; the details page says more and checks
+  whether upstream has released a newer version since (whisper-frame 0.2.0: performance).
+
 ## 0.2.3 (2026-10-07)
 - Arrow Pad VR: fix the invisible panel that still caught the laser. The overlay event loop
   never ended (pyopenvr returns `(result, event)`, always truthy), so the pad never drew and

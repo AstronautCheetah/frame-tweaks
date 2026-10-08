@@ -8,18 +8,20 @@ costs VR performance. Status checks run in the background so the window never fr
 Changes run in a Konsole window via ./install.sh. Styled after Full Keyboard's Graphite theme.
 """
 import html
+import json
 import os
 import re
 import shlex
 import subprocess
 import sys
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6.QtCore import QProcess, Qt, QTimer
 from PyQt6.QtGui import QCursor, QIcon
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QDialog, QGridLayout, QHBoxLayout, QLabel,
-                             QMessageBox, QPushButton, QScrollArea, QTextBrowser, QVBoxLayout,
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
+                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout,
                              QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -36,8 +38,20 @@ FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
                "firefox": "org.mozilla.firefox"}
 BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
               "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
-              "firefox": "internet-web-browser", "claude-desktop": "help-about",
+              "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
               "tools": "tools", "ydotool": "input-keyboard-virtual"}
+# Versions with a known problem: a short note on the row, a longer one atop its details, plus a
+# check whether upstream has released something newer since.
+KNOWN_ISSUES = {
+    "whisper-frame": {
+        "version": "0.2.0",
+        "short": "⚠ v0.2.0 has performance issues in VR (window mic)",
+        "long": "Version 0.2.0 has performance issues: its window mic polls the compositor about 60 "
+                "times a second, using ~31% of a CPU core and making VR judder. That's why this row is "
+                "hidden by default and the window mic is installed switched off.",
+        "latest": "https://api.github.com/repos/groffta/whisper-frame/releases/latest",
+    },
+}
 
 STYLE = """
 QWidget { background: #0b1016; color: #e8ecf0; font-size: 14px; }
@@ -66,6 +80,8 @@ QCheckBox { padding: 8px; }
 QCheckBox::indicator { width: 33px; height: 33px; }
 QScrollArea { border: none; }
 QTextBrowser { background: #11161c; border: none; border-radius: 8px; padding: 8px; }
+QLabel#issue { background: #2a2312; color: #e0b33a; border-radius: 8px; padding: 10px; }
+QLabel#notice { color: #e0b33a; }
 """
 
 
@@ -123,6 +139,20 @@ def run_label(cid):
     return "Run"
 
 
+def version_tuple(v):
+    return tuple(int(n) for n in re.findall(r"\d+", v or ""))
+
+
+def latest_release(url):
+    """Newest release tag from GitHub's API, or None (offline, rate limit, ...)."""
+    try:
+        with urllib.request.urlopen(urllib.request.Request(
+                url, headers={"Accept": "application/vnd.github+json"}), timeout=8) as r:
+            return json.load(r).get("tag_name")
+    except Exception:
+        return None
+
+
 def status_text(code_text):
     if code_text is None:
         return "checking…", "checking"
@@ -146,14 +176,18 @@ class Row(QWidget):
             self.window.show_details(self.comp)
 
 
-class Details(QDialog):
-    def __init__(self, parent, comp, state):
-        super().__init__(parent)
-        self.setWindowTitle(f"{comp['title']} — Steam Frame Tweaks")
-        self.setStyleSheet(STYLE)
-        self.resize(820, 720)
+class Details(QWidget):
+    """A page inside the main window (not a dialog: in VR each new window opens in the dashboard)."""
+
+    def __init__(self, window, comp, state):
+        super().__init__()
+        self.window, self.comp = window, comp
         lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
+        back = QPushButton("← Back")
+        back.clicked.connect(window.close_details)
+        head.addWidget(back)
         icon = QLabel()
         icon.setPixmap(row_icon(comp["id"]).pixmap(56, 56))
         head.addWidget(icon)
@@ -162,6 +196,17 @@ class Details(QDialog):
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
+
+        issue = KNOWN_ISSUES.get(comp["id"])
+        self.issue_label = None
+        if issue:
+            self.issue_label = QLabel()
+            self.issue_label.setObjectName("issue")
+            self.issue_label.setWordWrap(True)
+            self.issue_label.setOpenExternalLinks(True)
+            self.issue_label.setTextFormat(Qt.TextFormat.RichText)
+            lay.addWidget(self.issue_label)
+            self.show_issue(window.latest.get(comp["id"], "checking"))
 
         text, kind = status_text(state)
         rel, url = comp["source"].split("|", 1) if "|" in comp["source"] else ("", "")
@@ -196,12 +241,24 @@ class Details(QDialog):
         text = re.sub(r"\]\((?!https?:|#|mailto:)([^)]+)\)", lambda m: f"]({root}/{comp['id']}/{m.group(1)})", text)
         readme.setMarkdown(text)
         lay.addWidget(readme, 1)
-        close = QPushButton("Close")
-        close.clicked.connect(self.accept)
-        bottom = QHBoxLayout()
-        bottom.addStretch(1)
-        bottom.addWidget(close)
-        lay.addLayout(bottom)
+
+    def show_issue(self, latest):
+        """latest: newest upstream tag, "checking", or None when it couldn't be fetched."""
+        issue = KNOWN_ISSUES[self.comp["id"]]
+        text = "<b>⚠ Known issue.</b> " + html.escape(issue["long"], quote=False)
+        rel = issue["latest"].replace("api.github.com/repos", "github.com")
+        if latest == "checking":
+            text += "<br><span style='color:#9aa6b2'>Checking for a newer release…</span>"
+        elif latest is None:
+            text += (f"<br><span style='color:#9aa6b2'>Couldn't check for a newer release; see "
+                     f"<a style='color:#7fb2e5' href='{rel}'>its releases</a>.</span>")
+        elif version_tuple(latest) > version_tuple(issue["version"]):
+            text += (f"<br><b>Version {html.escape(latest)} is now available</b>, so this may be resolved: "
+                     f"see <a style='color:#7fb2e5' href='{rel}'>its release notes</a>, then reinstall "
+                     f"to update.")
+        else:
+            text += f"<br><span style='color:#9aa6b2'>{html.escape(latest)} is still the latest release.</span>"
+        self.issue_label.setText(text)
 
 
 class Window(QWidget):
@@ -219,6 +276,10 @@ class Window(QWidget):
         self.boxes, self.status_labels, self.wanted, self.run_buttons = {}, {}, {}, {}
         self.pool = ThreadPoolExecutor(max_workers=4)
         self.futures = {}
+        self.latest = {}              # id -> newest upstream tag (known-issue rows), None if unknown
+        self.latest_futures = {cid: self.pool.submit(latest_release, i["latest"])
+                               for cid, i in KNOWN_ISSUES.items()}
+        self.details = None
 
         top = QHBoxLayout()
         title = QLabel(f"Steam Frame Tweaks <span style='color:#6b7783;font-size:14px'>{version}</span>")
@@ -246,6 +307,9 @@ class Window(QWidget):
         hint.setObjectName("desc")
         bottom.addWidget(hint)
         bottom.addStretch(1)
+        self.notice = QLabel()
+        self.notice.setObjectName("notice")
+        bottom.addWidget(self.notice)
         apply_ = QPushButton("Apply changes")
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
@@ -254,11 +318,19 @@ class Window(QWidget):
         bottom.addWidget(apply_)
         bottom.addWidget(close)
 
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addLayout(top)
+        lay.addWidget(scroll, 1)
+        lay.addLayout(bottom)
+        self.stack = QStackedWidget()
+        self.stack.addWidget(page)
+        self.confirm_page, self.confirm_text, self.confirm_yes = self.make_confirm_page()
+        self.stack.addWidget(self.confirm_page)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(20, 16, 20, 16)
-        outer.addLayout(top)
-        outer.addWidget(scroll, 1)
-        outer.addLayout(bottom)
+        outer.addWidget(self.stack)
         QTimer(self, interval=100, timeout=self.collect).start()
         self.refresh()
 
@@ -286,6 +358,12 @@ class Window(QWidget):
         self.rebuild()
 
     def collect(self):
+        for cid, fut in list(self.latest_futures.items()):
+            if fut.done():
+                del self.latest_futures[cid]
+                self.latest[cid] = fut.result()
+                if self.details is not None and self.details.comp["id"] == cid:
+                    self.details.show_issue(self.latest[cid])
         for cid, fut in list(self.futures.items()):
             if fut.done():
                 del self.futures[cid]
@@ -347,6 +425,9 @@ class Window(QWidget):
                           (f"  <i style='color:#6b7783'>needs: {', '.join(deps)}</i>" if deps else ""))
             info.setObjectName("desc")
             info.setWordWrap(True)
+            if cid in KNOWN_ISSUES:
+                info.setText(info.text() + "<br><span style='color:#e0b33a'>"
+                             f"{html.escape(KNOWN_ISSUES[cid]['short'], quote=False)}</span>")
             link = QLabel()
             if "|" in comp["source"]:
                 rel, url = comp["source"].split("|", 1)
@@ -412,27 +493,70 @@ class Window(QWidget):
         QProcess.startDetached("bash", [str(REPO / comp["id"] / "run.sh")])
 
     def show_details(self, comp):
-        Details(self, comp, self.state.get(comp["id"])).exec()
+        self.close_details()
+        self.details = Details(self, comp, self.state.get(comp["id"]))
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
+    def close_details(self):
+        if self.details is not None:
+            self.stack.removeWidget(self.details)
+            self.details.deleteLater()
+            self.details = None
+        self.stack.setCurrentIndex(0)
+
+    # ---- in-window messages (no dialogs: in VR they'd open in the dashboard) ----------
+    def say(self, text):
+        self.notice.setText(text)
+        QTimer.singleShot(5000, lambda: self.notice.text() == text and self.notice.clear())
+
+    def make_confirm_page(self):
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        lay.addStretch(1)
+        text = QLabel()
+        text.setObjectName("title")
+        text.setWordWrap(True)
+        text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lay.addWidget(text)
+        buttons = QHBoxLayout()
+        buttons.addStretch(1)
+        no = QPushButton("Cancel")
+        no.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        yes = QPushButton("Remove them")
+        yes.setObjectName("apply")
+        buttons.addWidget(no)
+        buttons.addWidget(yes)
+        buttons.addStretch(1)
+        lay.addLayout(buttons)
+        lay.addStretch(2)
+        return page, text, yes
 
     # ---- apply --------------------------------------------------------------
     def apply(self):
         if self.futures:
-            QMessageBox.information(self, "Steam Frame Tweaks", "Still checking status; try again in a moment.")
+            self.say("Still checking status; try again in a moment.")
             return
         add = [cid for cid, b in self.boxes.items() if b.isChecked() and self.state[cid][0] != 0]
         remove = [cid for cid, b in self.boxes.items() if not b.isChecked() and self.state[cid][0] != 1]
         if not add and not remove:
-            QMessageBox.information(self, "Steam Frame Tweaks", "Nothing to change.")
+            self.say("Nothing to change.")
             return
         if remove:
-            msg = ("These installed tweaks were unticked and will be REMOVED:\n\n  "
-                   + ", ".join(remove) + "\n\nTheir settings and data are kept. Continue?")
-            if QMessageBox.warning(self, "Remove tweaks?", msg,
-                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                   QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
-                remove = []
-        if not add and not remove:
+            self.confirm_text.setText(
+                "These installed tweaks were unticked and will be <b>removed</b>:<br><br>"
+                + html.escape(", ".join(remove)) + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
+                "Their settings and data are kept.</span>")
+            try:
+                self.confirm_yes.clicked.disconnect()
+            except TypeError:
+                pass
+            self.confirm_yes.clicked.connect(lambda: (self.stack.setCurrentIndex(0), self.run_changes(add, remove)))
+            self.stack.setCurrentWidget(self.confirm_page)
             return
+        self.run_changes(add, remove)
+
+    def run_changes(self, add, remove):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
             print("would remove:", " ".join(remove) or "none")
             print("would install:", " ".join(add) or "none")

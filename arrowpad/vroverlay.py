@@ -9,6 +9,7 @@ haptics go to the controller that's pointing (an overlay being pointed at has in
 Like Full Keyboard: visible while the dashboard is, Reset puts it in front of you, +/- change
 its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that.
 """
+import hashlib
 import json
 import math
 import os
@@ -25,6 +26,8 @@ KEY = "steam-frame-tweaks.arrowpad"
 # upload crashed vrcompositor (SIGBUS). Capped size and rate keep the compositor's work small.
 MAX_TEX = (1024, 768)
 MIN_RENDER_INTERVAL = 0.2            # at most 5 texture updates a second
+SWAP_SHOW_MS, SWAP_HIDE_MS = 60, 50  # double buffering: load, show new, then hide old
+POSE_EPSILON = 0.0015                # ignore anchor jitter below 1.5 mm (and ~0.1°)
 TEX_DIR = f"/run/user/{os.getuid()}"
 MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it back
 WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.55, 0.30, 2.0, 0.05
@@ -64,11 +67,19 @@ class OverlayHost:
         openvr.init(openvr.VRApplication_Overlay)
         self.ov = openvr.VROverlay()
         self.system = openvr.VRSystem()
-        self.handle = self.ov.createOverlay(KEY, "Arrow Pad")
-        self.ov.setOverlayInputMethod(self.handle, openvr.VROverlayInputMethod_Mouse)
-        self.ov.setOverlaySortOrder(self.handle, 10)
+        # Two overlays, double-buffered: a new image loads into the hidden one, which is shown
+        # before the old one is hidden. Reloading the visible overlay blanked it for a frame or
+        # two (flicker on every hover change).
+        self.handles = [self.ov.createOverlay(KEY, "Arrow Pad"),
+                        self.ov.createOverlay(KEY + ".b", "Arrow Pad")]
+        self.front = 0                  # index of the overlay being shown
         self.width_m = float(config.get("width_m", WIDTH_DEFAULT))
-        self.ov.setOverlayWidthInMeters(self.handle, self.width_m)
+        for h in self.handles:
+            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_Mouse)
+            self.ov.setOverlaySortOrder(h, 10)
+            self.ov.setOverlayWidthInMeters(h, self.width_m)
+        self.image_hash = None          # last uploaded image, to skip identical uploads
+        self.sizes = [(0, 0), (0, 0)]   # mouse scale per overlay
         self.hover = None               # button under the laser
         self.pressed = None             # button being pressed
         self.drag = None                # (grab pixel, start transform) while dragging the panel
@@ -77,8 +88,8 @@ class OverlayHost:
         self.ticks = 0
         self._dash = False
         self.tex_slot = 0
-        self.size = (0, 0)
         self.dirty = True
+        self.swapping = False
         self.offset = config.get("vr_offset")       # pose relative to the dashboard anchor
         self.pose = None
         if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
@@ -97,12 +108,26 @@ class OverlayHost:
             self._sig = sig
             self.dirty = True
 
+    @property
+    def handle(self):
+        return self.handles[self.front]
+
+    @property
+    def size(self):
+        """Widget pixel size of the image shown (the overlays' mouse scale)."""
+        return self.sizes[self.front] if self.sizes[self.front][0] else self.sizes[self.front ^ 1]
+
     def render(self):
         now = time.monotonic()
-        if now - self.last_render < MIN_RENDER_INTERVAL:
+        if now - self.last_render < MIN_RENDER_INTERVAL or self.swapping:
             return                                   # stays dirty; drawn on a later tick
-        self.last_render = now
+        self.dirty = False
         img = self.pad.grab().toImage()
+        digest = hashlib.blake2b(img.constBits().asstring(img.sizeInBytes()), digest_size=16).digest()
+        if digest == self.image_hash:
+            return                                   # looks the same: nothing to upload
+        self.image_hash = digest
+        self.last_render = now
         w, h = img.width(), img.height()       # widget pixels: laser coordinates use these
         if img.width() > MAX_TEX[0] or img.height() > MAX_TEX[1]:
             img = img.scaled(MAX_TEX[0], MAX_TEX[1], Qt.AspectRatioMode.KeepAspectRatio,
@@ -111,13 +136,29 @@ class OverlayHost:
         self.tex_slot ^= 1
         path = f"{TEX_DIR}/arrowpad-overlay-{self.tex_slot}.png"
         img.save(path, "PNG")
-        self.ov.setOverlayFromFile(self.handle, path)
-        if (w, h) != self.size:
-            self.size = (w, h)
+        back = self.front ^ 1
+        self.ov.setOverlayFromFile(self.handles[back], path)
+        if (w, h) != self.sizes[back]:
+            self.sizes[back] = (w, h)
             scale = openvr.HmdVector2_t()
             scale.v[0], scale.v[1] = w, h
-            self.ov.setOverlayMouseScale(self.handle, scale)
-        self.dirty = False
+            self.ov.setOverlayMouseScale(self.handles[back], scale)
+        if self.visible:
+            self.swapping = True
+            QTimer.singleShot(SWAP_SHOW_MS, self.swap)   # give SteamVR time to load it
+        else:
+            self.front = back
+
+    def swap(self):
+        """Show the freshly loaded overlay on top, then hide the old one."""
+        old, new = self.front, self.front ^ 1
+        self.front = new
+        if self.visible:
+            self.ov.setOverlaySortOrder(self.handles[new], 11)
+            self.ov.setOverlaySortOrder(self.handles[old], 10)
+            self.ov.showOverlay(self.handles[new])
+            QTimer.singleShot(SWAP_HIDE_MS, lambda: self.front != old and self.ov.hideOverlay(self.handles[old]))
+        self.swapping = False
 
     # ---- placement --------------------------------------------------------
     def device_matrix(self, index):
@@ -157,7 +198,8 @@ class OverlayHost:
         if anchor is None or not self.offset:
             return False
         pose = _rigid_mul(anchor, self.offset)
-        if pose != self.pose:
+        # The anchor's reported pose wobbles slightly; moving on every wobble looked like shimmer.
+        if not self.pose or max(abs(a - b) for ra, rb in zip(pose, self.pose) for a, b in zip(ra, rb)) > POSE_EPSILON:
             self.pose = pose
             self.apply_pose()
         return True
@@ -174,7 +216,9 @@ class OverlayHost:
         return math.dist([head[r][3] for r in range(3)], [self.pose[r][3] for r in range(3)])
 
     def apply_pose(self):
-        self.ov.setOverlayTransformAbsolute(self.handle, openvr.TrackingUniverseStanding, _mat(self.pose))
+        m = _mat(self.pose)
+        for h in self.handles:
+            self.ov.setOverlayTransformAbsolute(h, openvr.TrackingUniverseStanding, m)
 
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
@@ -213,7 +257,8 @@ class OverlayHost:
 
     def set_width(self, value):
         self.width_m = round(min(WIDTH_MAX, max(WIDTH_MIN, value)), 2)
-        self.ov.setOverlayWidthInMeters(self.handle, self.width_m)
+        for h in self.handles:
+            self.ov.setOverlayWidthInMeters(h, self.width_m)
         self.save()
 
     def step_width(self, steps):
@@ -264,13 +309,23 @@ class OverlayHost:
             self._dash = bool(self.ov.isDashboardVisible())
         visible = self._dash
         if visible != self.visible:
-            (self.ov.showOverlay if visible else self.ov.hideOverlay)(self.handle)
+            if visible:
+                self.ov.showOverlay(self.handle)
+            else:
+                for h in self.handles:
+                    self.ov.hideOverlay(h)
             self.visible = visible
         if visible and self.drag is None and self.ticks % 5 == 0:
             self.follow_dashboard()             # ride along with the dashboard, ~10x a second
+        for handle in self.handles:
+            self.pump(handle)
+        if self.dirty and visible:
+            self.render()
+
+    def pump(self, handle):
         ev = openvr.VREvent_t()
         # pyopenvr returns (result, event): test the result, or this loops forever.
-        while self.ov.pollNextOverlayEvent(self.handle, ev)[0]:
+        while self.ov.pollNextOverlayEvent(handle, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
             self.last_device = dev
             if t == openvr.VREvent_MouseMove:
@@ -287,6 +342,7 @@ class OverlayHost:
                 if b is not None:
                     self.pressed = b
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
+                    self.dirty = True
                 elif not self.pad.pinned:
                     # Grab: the panel follows the controller rigidly, like Full Keyboard's grip
                     # grab. (Moving it by laser coordinates on the panel ran away.)
@@ -298,6 +354,7 @@ class OverlayHost:
                 if self.pressed is not None:
                     self.send(self.pressed, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
                     self.pressed = None
+                    self.dirty = True
                 if self.drag is not None:
                     self.drag = None
                     if self.distance_from_head() > MAX_DISTANCE:
@@ -305,9 +362,6 @@ class OverlayHost:
                     else:
                         self.remember_offset()     # the new spot, relative to the dashboard
                     self.save()
-            self.dirty = True
-        if self.dirty and visible:
-            self.render()
 
     def drag_follow(self):
         """While grabbed: overlay = controller now x (controller at grab)^-1 x overlay at grab."""
@@ -319,7 +373,8 @@ class OverlayHost:
 
     def close(self):
         try:
-            self.ov.destroyOverlay(self.handle)
+            for h in self.handles:
+                self.ov.destroyOverlay(h)
             openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:
             pass
