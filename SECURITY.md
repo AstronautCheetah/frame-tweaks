@@ -24,6 +24,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv) | Types through ydotool. In VR: a SteamVR overlay. **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST |
 | full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
 | curvature | `~/.local/share/frame-tweaks/curvature`, user units `sft-vr-debugger`, `sft-curvature`, a `steamvr.service` drop-in | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects a small script into the dashboard. Any program running as you could use that port too |
+| screen-reader | One setting in `~/.config/kaccessrc` (its previous value is restored on removal) | Reads what's on screen (accessibility interface) and speaks it |
 | clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
 | cursor | `~/.config/environment.d/` (one variable for KWin) | – |
@@ -32,6 +33,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | nordvpn | `nordvpn-wg`, tray app, KDE autostart entry | **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`) |
 | homebrew | `/home/linuxbrew` | **Needs sudo once** to create that folder |
+| memcap | `~/.local/bin/capped`, `~/.config/frame-tweaks/memcap.conf`, a systemd drop-in for VSCodium's Flatpak scope | Starts capped apps in their own systemd scope |
 | tools | `~/.local/bin/restart-plasmashell` | – |
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
