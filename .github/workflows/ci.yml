@@ -52,6 +52,11 @@ jobs:
           sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 >/dev/null
           python3 -m pip install --quiet PyQt6
           QT_QPA_PLATFORM=offscreen python3 -m unittest discover -s tests -v
+      - name: AppStream metadata and desktop entry
+        run: |
+          sudo apt-get install -y appstream desktop-file-utils >/dev/null
+          appstreamcli validate --no-net share/metainfo/*.metainfo.xml
+          for f in share/applications/*.desktop; do sed 's|@REPO@|/opt/x|' "$f" > "/tmp/$(basename "$f")"; desktop-file-validate "/tmp/$(basename "$f")"; done
       - name: Docs consistency (README rows, links, generated tables)
         run: |
           python3 dev/check-docs.py

@@ -52,6 +52,8 @@ jobs:
           [ -s notes.md ] || { echo "the Unreleased section is empty"; exit 1; }
           sed -i "s/^## Unreleased.*/## $V ($(date +%Y-%m-%d))/" CHANGELOG.md
           echo "$V" > VERSION
+          type=""; case "$V" in *-*) type=' type="development"' ;; esac
+          sed -i "s|  <releases>|  <releases>\n    <release version=\"$V\" date=\"$(date +%Y-%m-%d)\"$type/>|" share/metainfo/*.metainfo.xml
       - name: Commit, tag, push, draft release
         env:
           V: ${{ steps.v.outputs.version }}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.AstronautCheetah.FrameTweaks</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Frame Tweaks</name>
+  <summary>Install, check and remove tweaks for the Steam Frame's desktop mode</summary>
+  <developer id="io.github.astronautcheetah">
+    <name>AstronautCheetah</name>
+  </developer>
+  <description>
+    <p>
+      A checklist installer of home-folder-only tweaks for the Valve Steam Frame: the keys the
+      Steam keyboard lacks, local dictation, curved world windows, one clipboard and one KDE
+      wallet for desktop mode and VR, menu icons for Steam's "+" menu, and optional app setups.
+    </p>
+    <ul>
+      <li>Everything installs into your home folder, so SteamOS updates don't undo it</li>
+      <li>Every tweak installs, checks and removes on its own</li>
+      <li>Upstream downloads are pinned to recorded checksums</li>
+    </ul>
+    <p>Not affiliated with or endorsed by Valve.</p>
+  </description>
+  <launchable type="desktop-id">io.github.AstronautCheetah.FrameTweaks.desktop</launchable>
+  <url type="homepage">https://github.com/AstronautCheetah/frame-tweaks</url>
+  <url type="bugtracker">https://github.com/AstronautCheetah/frame-tweaks/issues</url>
+  <url type="vcs-browser">https://github.com/AstronautCheetah/frame-tweaks</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Tweaks grouped by category, each with its status and an Open button</caption>
+      <image>https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/docs/images/installer.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A tweak's details page</caption>
+      <image>https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/docs/images/details.png</image>
+    </screenshot>
+  </screenshots>
+  <categories>
+    <category>Settings</category>
+    <category>Utility</category>
+  </categories>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.3.1" date="2026-10-07"/>
+    <release version="0.3.0" date="2026-10-07"/>
+  </releases>
+</component>
