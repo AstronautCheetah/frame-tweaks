@@ -9,9 +9,10 @@ haptics go to the controller that's pointing (an overlay being pointed at has in
 Like Full Keyboard: visible while the dashboard is, Reset puts it in front of you, +/- change
 its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that.
 """
-import ctypes
 import json
 import math
+import os
+import time
 
 import openvr
 from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt, QTimer
@@ -19,6 +20,12 @@ from PyQt6.QtGui import QImage, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton
 
 KEY = "steam-frame-tweaks.arrowpad"
+# The texture goes to SteamVR as a PNG file (SetOverlayFromFile), not SetOverlayRaw: on the Frame
+# raw uploads never showed (an invisible panel that still caught the laser), and a 2.5 MB raw
+# upload crashed vrcompositor (SIGBUS). Capped size and rate keep the compositor's work small.
+MAX_TEX = (1024, 768)
+MIN_RENDER_INTERVAL = 0.2            # at most 5 texture updates a second
+TEX_DIR = f"/run/user/{os.getuid()}"
 MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it back
 WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.55, 0.30, 2.0, 0.05
 # Placement like Full Keyboard: anchored to Steam's dashboard (its main panel while visible, else
@@ -66,6 +73,10 @@ class OverlayHost:
         self.pressed = None             # button being pressed
         self.drag = None                # (grab pixel, start transform) while dragging the panel
         self.last_device = None         # controller behind the latest laser event
+        self.last_render = 0.0
+        self.ticks = 0
+        self._dash = False
+        self.tex_slot = 0
         self.size = (0, 0)
         self.dirty = True
         self.offset = config.get("vr_offset")       # pose relative to the dashboard anchor
@@ -73,19 +84,34 @@ class OverlayHost:
         if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         self.visible = False
-        QTimer(pad, interval=11, timeout=self.poll).start()      # ~90 Hz event pump
+        QTimer(pad, interval=22, timeout=self.poll).start()      # ~45 Hz event pump
         QTimer(pad, interval=100, timeout=self.mark_dirty).start()   # state changes (mic etc.)
 
     # ---- rendering ------------------------------------------------------
     def mark_dirty(self):
-        self.dirty = True
+        """Periodic check: redraw only when something visible changed (mic colour, modifiers,
+        layer, pin, language), so SteamVR doesn't reload the image for nothing."""
+        p = self.pad
+        sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale)
+        if sig != getattr(self, "_sig", None):
+            self._sig = sig
+            self.dirty = True
 
     def render(self):
-        img = self.pad.grab().toImage().convertToFormat(QImage.Format.Format_RGBA8888)
-        w, h = img.width(), img.height()
-        data = bytes(img.constBits().asstring(img.sizeInBytes()))
-        buf = (ctypes.c_char * len(data)).from_buffer_copy(data)
-        self.ov.setOverlayRaw(self.handle, buf, w, h, 4)
+        now = time.monotonic()
+        if now - self.last_render < MIN_RENDER_INTERVAL:
+            return                                   # stays dirty; drawn on a later tick
+        self.last_render = now
+        img = self.pad.grab().toImage()
+        w, h = img.width(), img.height()       # widget pixels: laser coordinates use these
+        if img.width() > MAX_TEX[0] or img.height() > MAX_TEX[1]:
+            img = img.scaled(MAX_TEX[0], MAX_TEX[1], Qt.AspectRatioMode.KeepAspectRatio,
+                             Qt.TransformationMode.SmoothTransformation)
+        # Alternate between two files so SteamVR reloads the image each time.
+        self.tex_slot ^= 1
+        path = f"{TEX_DIR}/arrowpad-overlay-{self.tex_slot}.png"
+        img.save(path, "PNG")
+        self.ov.setOverlayFromFile(self.handle, path)
         if (w, h) != self.size:
             self.size = (w, h)
             scale = openvr.HmdVector2_t()
@@ -233,14 +259,18 @@ class OverlayHost:
         self.dirty = True
 
     def poll(self):
-        visible = bool(self.ov.isDashboardVisible())
+        self.ticks += 1
+        if self.ticks % 9 == 1:                 # dashboard open? ~5x a second is plenty
+            self._dash = bool(self.ov.isDashboardVisible())
+        visible = self._dash
         if visible != self.visible:
             (self.ov.showOverlay if visible else self.ov.hideOverlay)(self.handle)
             self.visible = visible
-        if visible and self.drag is None:
-            self.follow_dashboard()             # ride along with the dashboard
+        if visible and self.drag is None and self.ticks % 5 == 0:
+            self.follow_dashboard()             # ride along with the dashboard, ~10x a second
         ev = openvr.VREvent_t()
-        while self.ov.pollNextOverlayEvent(self.handle, ev):
+        # pyopenvr returns (result, event): test the result, or this loops forever.
+        while self.ov.pollNextOverlayEvent(self.handle, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
             self.last_device = dev
             if t == openvr.VREvent_MouseMove:
@@ -290,6 +320,7 @@ class OverlayHost:
     def close(self):
         try:
             self.ov.destroyOverlay(self.handle)
+            openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:
             pass
 
