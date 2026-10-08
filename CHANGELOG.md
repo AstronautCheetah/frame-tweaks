@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+- Uninstalling Dictation, Wallet, Arrow Pad, NordVPN or Android Mirror now also removes its
+  menu icon (found by the install test).
+- ydotool: a service that fails to start is reported as a warning instead of failing the
+  install silently.
+- Install test covers ydotool, Dictation and Wallet too, with a fake network (fixtures for the
+  Whisper model and the Arch package).
+- CI runs once per commit on main (not again for each release tag) and cancels superseded runs.
+
 ## 0.3.1 (2026-10-07)
 - Menu icons: no longer fails on a fresh home folder that has no icon theme folder yet
   (found by the new install test in CI).

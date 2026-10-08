@@ -9,30 +9,54 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO=$PWD
-DEFAULT=(cursor tools curvature menu-icons homebrew)
+DEFAULT=(cursor tools curvature menu-icons homebrew ydotool dictation wallet)
 TWEAKS=("${@:-${DEFAULT[@]}}")
 # Settings uninstall deliberately keeps (relative to the fake home), per tweak.
 # tools: the shared "~/.local/bin on PATH" setup (ensure_path) stays; other tweaks rely on it.
-declare -A KEEP=([curvature]="" [menu-icons]="" [cursor]="" [tools]=".bashrc .config/environment.d/10-local-bin.conf" [homebrew]="")
+# dictation, wallet: settings they promise to keep, the shared PATH setup, shared dependencies.
+PATHSET=".bashrc .config/environment.d/10-local-bin.conf"
+YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.service"   # a dependency other tweaks share
+declare -A KEEP=([curvature]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
+                 [dictation]="$PATHSET .config/dictate.conf $YDOTOOL" [wallet]="$PATHSET")
 
-work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"' EXIT
 stubs="$work/stubs"; mkdir -p "$stubs"
-for cmd in systemctl flatpak brew kdialog notify-send nmcli kwriteconfig6 qdbus gtk-launch sudo; do
+for cmd in systemctl flatpak brew kdialog notify-send nmcli kwriteconfig6 qdbus qdbus6 busctl gtk-launch sudo gpgv; do
     cat > "$stubs/$cmd" <<STUB
 #!/bin/bash
 echo "$cmd \$*" >> "$work/calls.log"
 case "$cmd \$1 \$2" in "systemctl --user is-active"*|"systemctl is-active"*) exit 3 ;; esac
+case "$cmd \$1" in "flatpak info"|"busctl "*) exit 1 ;; esac    # nothing installed / running
 case "$cmd" in brew) [ "\$1" = --version ] && echo "Homebrew 0.0-test"; [ "\$1" = shellenv ] && echo ":";
                      [ "\$1" = --prefix ] && echo /home/linuxbrew/.linuxbrew; [ "\$1" = list ] && true ;; esac
 exit 0
 STUB
     chmod +x "$stubs/$cmd"
 done
-cat > "$stubs/curl" <<'STUB'
+# A fake network: curl serves fixtures for the URLs the tested tweaks fetch, refuses the rest.
+# (gpgv above is a stand-in too: the fixture package isn't signed. alarm_fetch's real signature
+# check is exercised separately, against a real package, when pins or keys change.)
+fx="$work/fixtures"; mkdir -p "$fx/pkg/usr/bin"
+printf '#!/bin/sh\nexit 0\n' > "$fx/pkg/usr/bin/ydotool"; cp "$fx/pkg/usr/bin/ydotool" "$fx/pkg/usr/bin/ydotoold"
+chmod +x "$fx/pkg/usr/bin/"*
+(cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" usr)
+echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
+head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"
+cat > "$stubs/curl" <<STUB
 #!/bin/bash
-echo "test: no network in dev/test-tweaks.sh (curl $*)" >&2; exit 7
+out=""; url=""
+while [ \$# -gt 0 ]; do case "\$1" in -o) out=\$2; shift ;; http*) url=\$1 ;; esac; shift; done
+case "\$url" in
+    */aarch64/*/)                  src=$fx/listing.html ;;
+    */ydotool-*.pkg.tar.xz)        src=$fx/ydotool.pkg.tar.xz ;;
+    */ydotool-*.pkg.tar.xz.sig)    src=$fx/sig ;;
+    *huggingface.co/*ggml-*.bin)   src=$fx/model.bin ;;
+    *) echo "test: no network (curl \$url)" >&2; exit 7 ;;
+esac
+if [ -n "\$out" ]; then cp "\$src" "\$out"; else cat "\$src"; fi
 STUB
 chmod +x "$stubs/curl"
+touch "$work/uinput"     # stands in for /dev/uinput
 
 snapshot() { (cd "$1" && find . -mindepth 1 \( -type f -o -type l \) | sort); }
 fail=0
@@ -40,13 +64,21 @@ for t in "${TWEAKS[@]}"; do
     home="$work/home-$t"; mkdir -p "$home/.local/share/applications" "$home/.config" "$home/.local/bin"
     # homebrew's checks look for the real binary path; give it a fake one
     run() { env -i HOME="$home" PATH="$stubs:/usr/bin:/bin" USER="test" BREW_BIN="$stubs/brew" \
-            FRAME_TWEAKS_YES=1 bash "$REPO/$t/$1" >>"$work/$t.log" 2>&1; }
+            FRAME_TWEAKS_YES=1 FRAME_TWEAKS_UINPUT="$work/uinput" bash "$REPO/$t/$1" >>"$work/$t.log" 2>&1; }
+    # The shared Python venv (wallet's tools): pre-seeded with a stand-in jeepney instead of pip.
+    if [ "$t" = wallet ]; then
+        python3 -m venv "$home/.local/share/frame-tweaks/venv"
+        sp=$("$home/.local/share/frame-tweaks/venv/bin/python" -c 'import site; print(site.getsitepackages()[0])')
+        mkdir -p "$sp/jeepney" && : > "$sp/jeepney/__init__.py"
+    fi
     before=$(snapshot "$home")
     marker="$work/marker"; touch "$marker"; sleep 1
     step=install
     if run install.sh && { step=status; run status.sh; rc=$?; [ $rc -ne 1 ]; } && step=uninstall && run uninstall.sh; then
         after=$(snapshot "$home")
-        left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <(printf '%s\n' ${KEEP[$t]:-} | sed 's|^|./|') || true)
+        # (caches that desktop tools regenerate don't count)
+        left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <(printf '%s\n' ${KEEP[$t]:-} | sed 's|^|./|') |
+               grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$' || true)
         outside=$(find /tmp /var/tmp "$REPO" -newer "$marker" -type f 2>/dev/null |
                   grep -v "^$work/" | grep -v "^$REPO/\.git/" | grep -v "^/tmp/claude" || true)
         if [ -n "$left" ]; then

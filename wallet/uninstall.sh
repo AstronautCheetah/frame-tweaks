@@ -12,6 +12,6 @@ if [ -n "$REAL_GH" ] && [ -f "$BIN/gh" ]; then
             git config --global --replace-all "credential.$h.helper" "!$REAL_GH auth git-credential" "^!.*gh auth git-credential$"
     done
 fi
-remove_files "$HOME/.config/systemd/user/wallet-lock-sync.service" "$APPS/wallet-lock.desktop" "$BIN/gh" "$BIN/with-keyring" "$BIN/wallet-unlock" "$BIN/wallet-gate" "$BIN/wallet-launcher" "$BIN/frame-outer-bus"
+remove_files "$ICONS/256x256/apps/frame-tweaks-lock.png" "$HOME/.config/systemd/user/wallet-lock-sync.service" "$APPS/wallet-lock.desktop" "$BIN/gh" "$BIN/with-keyring" "$BIN/wallet-unlock" "$BIN/wallet-gate" "$BIN/wallet-launcher" "$BIN/frame-outer-bus"
 say "Kept KWalletManager (flatpak uninstall org.kde.kwalletmanager) and the wallet itself. gh tokens stay in the wallet."
 warn "Signal still needs the wallet: keep its kwallet6 setting (see signal/README.md)."
