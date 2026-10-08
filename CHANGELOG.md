@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.7 (2026-10-07)
+- Wallet: fix "correct password refused" for good. The dialog judged success by the Secret
+  Service "Locked" flag, which stays True after a pamOpen unlock; it now checks whether
+  ksecretd has the wallet open.
+- New **whisper-frame** tweak: groffta's Select-button and window-mic dictation, installed from
+  upstream releases, with a drop-in that restarts the window mic with SteamVR.
+- Dictation shares whisper-frame's model (`ggml-small-q8_0.bin`) and its bundled whisper-cli:
+  no duplicate models or engines (removes the old `small.en`/`base.en` models); `DICTATE_LANG`.
+
 ## 0.1.6 (2026-10-07)
 - Wallet: one unlock route. `wallet-lock-sync` now replaces ksecretd's own password prompt
   (which floats in VR and blocks every other unlock while open) with our dialog on the same
