@@ -14,7 +14,12 @@ working in.
 
 Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
 - **Arrow Pad** (`arrowpad --desktop`): inside desktop mode.
-- **Arrow Pad (VR window)** (`arrowpad --vr`): its own floating window in VR.
+- **Arrow Pad (VR window)** (`arrowpad --vr`): a **native SteamVR overlay**, like Full
+  Keyboard. Visible while the dashboard is; point and pull the trigger to type. **Reset** puts it
+  in front of you, **−/+** change its width in 5 cm steps (0.30–2 m), drag the panel to move it,
+  **Pin** stops that. It never takes keyboard focus, so keys reach the app you were using; a
+  floating *window* couldn't do that (gamescope gives clicked windows focus and ignores requests
+  to hand it back).
 
 They're separate instances, so you can have both. Each remembers its own position.
 
@@ -31,13 +36,13 @@ position** (bottom centre), **−** / **+** (size, 0.6×–2×) and ✕ close. *
 the panel or toolbar background. Position, size and pin state are remembered per window.
 
 **Controller haptics, like Full Keyboard:** a light tick when the laser moves onto a key and a
-click when you press one, on the hand doing the pointing (the one moving its controller). It
-uses SteamVR Input with Full Keyboard's values; the toolbar and dragging don't pulse. Needs
-SteamVR running; otherwise the pad works without it.
+click when you press one, on the controller that's pointing (the overlay events say which).
+Full Keyboard's values; the toolbar and dragging don't pulse. SteamVR only delivers haptics to
+the app with input focus, which an overlay has while you point at it; the desktop pad, an
+ordinary window, may not get them.
 
-**Sizing:** the pad keeps its proportions, and **+**/**−** change its size in steps (0.6×–2×),
-remembered per window. In VR it draws at 1× and fixes its window size, because the VR session's
-virtual screen runs at 1.5×, and Steam would otherwise stretch the window and open gaps.
+**Sizing:** the pad keeps its proportions. In desktop mode **+**/**−** change the key size
+(0.6×–2×); in VR they change the overlay's physical width (5 cm steps), like Full Keyboard.
 
 **Labels follow your keyboard language:** the pad reads KDE's current layout (re-checked every
 few seconds) and uses the legends printed on that language's keyboards: German *Strg, Entf,

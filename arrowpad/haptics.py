@@ -16,12 +16,12 @@ PRESS = (0.025, 150, 1.0)
 
 
 class Haptics:
-    def __init__(self):
+    def __init__(self, already_initialised=False):
         self.ok = False
         try:
             import openvr
             self.vr_mod = openvr
-            self.system = openvr.init(openvr.VRApplication_Overlay)
+            self.system = openvr.VRSystem() if already_initialised else openvr.init(openvr.VRApplication_Overlay)
             self.input = openvr.VRInput()
             self.input.setActionManifestPath(str(VR_DIR / "actions.json"))
             self.set = self.input.getActionSetHandle("/actions/arrowpad")
@@ -57,18 +57,24 @@ class Haptics:
                 best, speed = hand, s
         return best
 
-    def pulse(self, kind):
+    def pulse(self, kind, device=None):
+        """device: tracked-device index that caused it (overlay events say which); else guess."""
         if not self.ok:
             return
         try:
             duration, freq, amp = HOVER if kind == "hover" else PRESS
-            hand = self.pointing_hand()
+            vr = self.vr_mod
+            if device is not None and device != vr.k_unTrackedDeviceIndexInvalid:
+                role = self.system.getControllerRoleForTrackedDeviceIndex(device)
+                hand = "left" if role == vr.TrackedControllerRole_LeftHand else "right"
+            else:
+                hand = self.pointing_hand()
             self.input.updateActionState([self.active])
             self.input.triggerHapticVibrationAction(self.out[hand], 0, duration, freq,
                                                     amp, self.vr_mod.k_ulInvalidInputValueHandle)
             # Direct pulse, not tied to input focus. Duration in microseconds (max 3999);
             # strength comes from the length, so scale it by amplitude.
-            idx = self.pointing_index()
+            idx = device if device not in (None, self.vr_mod.k_unTrackedDeviceIndexInvalid) else self.pointing_index()
             if idx != self.vr_mod.k_unTrackedDeviceIndexInvalid:
                 self.system.triggerHapticPulse(idx, 0, int(min(3999, duration * 1e6) * max(0.25, amp)))
         except Exception:

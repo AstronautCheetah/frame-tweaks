@@ -14,6 +14,7 @@ if [ ! -x "$VENV/bin/python" ] || ! "$VENV/bin/python" -c 'import PyQt6' 2>/dev/
 fi
 install -m644 "$REPO_DIR/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/arrowpad.py"
 install -m644 "$REPO_DIR/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/haptics.py"
+install -m644 "$REPO_DIR/arrowpad/vroverlay.py" "$HOME/.local/share/arrowpad/vroverlay.py"
 mkdir -p "$HOME/.local/share/arrowpad/vr"
 install -m644 "$REPO_DIR"/arrowpad/vr/*.json "$HOME/.local/share/arrowpad/vr/"
 

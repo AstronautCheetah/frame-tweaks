@@ -51,10 +51,10 @@ def pick_display(argv):
 
 TARGET = pick_display(sys.argv)
 if TARGET == "vr":
-    # The VR display is a 1280x720 virtual screen at 1.5x (Xft.dpi 144). Draw at 1x and keep
-    # the window a fixed size, so Steam can't stretch it (which opened big gaps between keys).
+    # VR mode is a native SteamVR overlay (vroverlay.py), drawn off-screen: a floating window
+    # would take keyboard focus when clicked, so its keys would go to itself.
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
-    os.environ.pop("QT_SCALE_FACTOR", None)
 
 from PyQt6.QtCore import QEvent, QObject, QPoint, QRectF, QSize, Qt, QTimer  # noqa: E402
 from PyQt6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPainterPath  # noqa: E402
@@ -228,13 +228,15 @@ class ArrowPad(QWidget):
         self.lang = "en"
         self.drag_offset = None
         cfg = self.load_config()
-        self.scale = cfg.get("scale", scale)
+        self.cfg = cfg
+        self.overlay = None
+        self.scale = cfg.get("scale", 1.5 if TARGET == "vr" else scale)   # VR: texture sharpness
         self.pinned = cfg.get("pinned", False)
 
         outer = QVBoxLayout(self)
         outer.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)   # window = content size
         self.outer = outer
-        self.haptics = Haptics() if Haptics else None
+        self.haptics = None
         self.hover_filter = HoverHaptics(self)
         # toolbar: pin, reset position, smaller, larger ......... close
         bar = QHBoxLayout()
@@ -249,8 +251,8 @@ class ArrowPad(QWidget):
         outer.addLayout(bar)
         self.tools["pin"].clicked.connect(self.toggle_pin)
         self.tools["reset"].clicked.connect(self.reset_position)
-        self.tools["smaller"].clicked.connect(lambda: self.set_scale(self.scale - SCALE_STEP))
-        self.tools["larger"].clicked.connect(lambda: self.set_scale(self.scale + SCALE_STEP))
+        self.tools["smaller"].clicked.connect(lambda: self.resize_step(-1))
+        self.tools["larger"].clicked.connect(lambda: self.resize_step(+1))
         self.tools["close"].clicked.connect(self.close)
 
         grid = QGridLayout()
@@ -271,10 +273,18 @@ class ArrowPad(QWidget):
         self.update_language()
         QTimer(self, interval=500, timeout=self.refresh_mic).start()
         QTimer(self, interval=3000, timeout=self.update_language).start()
-        if cfg.get("pos"):
-            self.move(QPoint(*cfg["pos"]))
+        if TARGET == "vr":
+            from vroverlay import OverlayHost
+            self.overlay = OverlayHost(self, cfg)
+            if Haptics:
+                self.haptics = Haptics(already_initialised=True)
         else:
-            QTimer.singleShot(0, self.reset_position)
+            if Haptics:
+                self.haptics = Haptics()
+            if cfg.get("pos"):
+                self.move(QPoint(*cfg["pos"]))
+            else:
+                QTimer.singleShot(0, self.reset_position)
 
     def tool_button(self, name, tip):
         b = QPushButton()
@@ -312,6 +322,13 @@ class ArrowPad(QWidget):
             b.setIconSize(QSize(round(key * 0.45), round(key * 0.45)))
         self.relabel()
         self.adjustSize()
+
+    def resize_step(self, steps):
+        """+/-: in VR the overlay's width (5 cm steps, like Full Keyboard); else key size."""
+        if self.overlay:
+            self.overlay.step_width(steps)
+        else:
+            self.set_scale(self.scale + steps * SCALE_STEP)
 
     def set_scale(self, value):
         self.scale = round(min(SCALE_MAX, max(SCALE_MIN, value)), 2)
@@ -397,6 +414,9 @@ class ArrowPad(QWidget):
 
     def reset_position(self):
         """Bottom centre of the screen, like Full Keyboard's recenter (size is kept)."""
+        if self.overlay:
+            self.overlay.reset_position()
+            return
         screen = (self.screen() or QApplication.primaryScreen()).availableGeometry()
         self.adjustSize()
         self.move(screen.x() + (screen.width() - self.width()) // 2,
@@ -404,9 +424,11 @@ class ArrowPad(QWidget):
         self.save_config()
 
     # ---- input ----------------------------------------------------------
-    def pulse(self, kind):
+    def pulse(self, kind, device=None):
+        if device is None and self.overlay is not None:
+            device = self.overlay.last_device      # the controller that just pressed
         if self.haptics:
-            self.haptics.pulse(kind)
+            self.haptics.pulse(kind, device)
 
     def on_press(self, r, c):
         self.pulse("press")
@@ -494,14 +516,16 @@ class ArrowPad(QWidget):
 
     def save_config(self):
         try:
-            CONFIG.write_text(json.dumps({"pos": [self.x(), self.y()], "scale": self.scale,
-                                          "pinned": self.pinned}))
+            self.cfg.update({"pos": [self.x(), self.y()], "scale": self.scale, "pinned": self.pinned})
+            CONFIG.write_text(json.dumps(self.cfg))
         except OSError:
             pass
 
     def closeEvent(self, ev):
         self.save_config()
         self.release_all_mods()   # never leave a modifier stuck down
+        if self.overlay:
+            self.overlay.close()
         if self.haptics:
             self.haptics.close()
         super().closeEvent(ev)
@@ -516,7 +540,7 @@ class HoverHaptics(QObject):
         self.pad = pad
 
     def eventFilter(self, obj, ev):
-        if ev.type() == QEvent.Type.Enter:
+        if ev.type() == QEvent.Type.Enter and self.pad.overlay is None:
             self.pad.pulse("hover")
         return False
 

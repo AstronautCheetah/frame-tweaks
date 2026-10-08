@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9 (2026-10-07)
+- Arrow Pad VR mode is now a **native SteamVR overlay** (like Full Keyboard): keys reach the app
+  you were using (a floating window took focus when clicked), haptics go to the pointing
+  controller, Reset/−/+ place and size it in metres, drag to move, Pin to lock.
+
 ## 0.1.8 (2026-10-07)
 - whisper-frame: window mic **off by default**. It polls SteamVR's compositor ~60x/s per window,
   measured at ~31% of a CPU core (itself + vrwebhelper + vrserver), causing VR jitter.
