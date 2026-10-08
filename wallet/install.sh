@@ -55,7 +55,10 @@ flatpak info org.signal.Signal >/dev/null 2>&1 && apps+=(org.signal.Signal)
 [ -f "$APPS/com.anthropic.Claude.desktop" ] && apps+=(com.anthropic.Claude)
 # --gate: open through our unlock dialog first, so these never trigger ksecretd's own
 # prompt (the one that floats in VR and blocks every other unlock while it's open).
-"$BIN/wallet-launcher" --gate "${apps[@]}"
+if ! "$BIN/wallet-launcher" --gate "${apps[@]}"; then
+    warn "Couldn't put the password gate on all of: ${apps[*]}. Those without a menu entry yet"
+    warn "aren't gated; once they're installed, run: wallet-launcher --gate <app-id>"
+fi
 cat <<MSG
 
 Add other wallet-using apps with:  wallet-launcher <app-id>   (--electron for Electron apps)

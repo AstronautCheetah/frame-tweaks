@@ -50,4 +50,6 @@ jobs:
       - name: Docs consistency (README rows, links)
         run: python3 dev/check-docs.py
       - name: Install, status and uninstall in a throwaway home
-        run: dev/test-tweaks.sh
+        run: |
+          sudo apt-get install -y libarchive-tools     # bsdtar, as on SteamOS
+          dev/test-tweaks.sh
