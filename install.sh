@@ -7,7 +7,7 @@
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update              git pull, then re-run the installer of everything installed
 #   ./install.sh list                components and what they do
-#   ./install.sh menu                (re)create the "Steam Frame Tweaks" app-menu entry
+#   ./install.sh menu                (re)create the "Frame Tweaks" app-menu entry
 #   ./install.sh ID...               same as "install ID..."
 #
 # Everything installs into your home directory; nothing touches SteamOS's read-only system
@@ -34,7 +34,7 @@ ensure_menu_entry() {
     cat > "$apps/steam-frame-tweaks.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
-Name=Steam Frame Tweaks
+Name=Frame Tweaks
 Comment=Install, check and remove Steam Frame desktop-mode tweaks
 Exec=env FRAME_TWEAKS_GUI=1 $PWD/install.sh gui
 Icon=frame-tweaks
@@ -126,7 +126,13 @@ cmd_uninstall() {
 
 cmd_update() {
     if [[ -d .git ]]; then
-        bold "Updating the checkout"; git pull --ff-only || { echo "git pull failed; not reinstalling" >&2; exit 1; }
+        if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
+            bold "Updating the checkout"; git pull --ff-only || { echo "git pull failed; not reinstalling" >&2; exit 1; }
+        else                                                # a release (tag): move to the newest
+            git fetch --quiet --tags origin || { echo "couldn't reach GitHub; not updating" >&2; exit 1; }
+            local tag; tag=$(git tag -l 'v*' | sort -V | tail -1)
+            bold "Updating to $tag"; git -c advice.detachedHead=false checkout --quiet "$tag"
+        fi
         exec ./install.sh _reinstall      # re-exec so the new version of this script runs
     fi
     cmd_reinstall
@@ -145,7 +151,7 @@ cmd_gui() {
     # NordVPN tray. Offer to set it up; otherwise fall back to kdialog's plain checklist.
     local qt="$HOME/.local/share/arrowpad/venv"
     if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
-       kdialog --title "Steam Frame Tweaks" --yesno "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist."; then
+       kdialog --title "Frame Tweaks" --yesno "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist."; then
         python3 -m venv "$qt" && "$qt/bin/pip" install -q PyQt6 ||
             kdialog --sorry "Couldn't install PyQt6; using the simple checklist."
     fi
@@ -167,7 +173,7 @@ cmd_kdialog_gui() {
         args+=("$id" "${TITLE[$id]}: ${DESC[$id]}" "$([[ $st -ne 1 ]] && echo on || echo off)")
     done
     local picked
-    picked=$(kdialog --title "Steam Frame Tweaks $VERSION" --geometry 900x560 --separate-output \
+    picked=$(kdialog --title "Frame Tweaks $VERSION" --geometry 900x560 --separate-output \
         --checklist "Tick what you want installed. Unticking an installed tweak removes it." "${args[@]}") || exit 0
     local add=() del=()
     for id in "${IDS[@]}"; do
@@ -210,7 +216,7 @@ case ${1:-} in
     _reinstall)  cmd_reinstall ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
     list)        cmd_list ;;
-    menu)        ensure_menu_entry; echo "Added 'Steam Frame Tweaks' to the app menu." ;;
+    menu)        ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu." ;;
     -h|--help|help) usage ;;
     --version|version) echo "$VERSION" ;;
     *)           cmd_install "$@" ;;

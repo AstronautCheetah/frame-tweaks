@@ -31,7 +31,7 @@ desktop layout there; that depends on the SteamOS build and isn't documented. If
 does nothing in VR:
 
 - **Dictate:** use the 🎤 on the [Arrow Pad](../arrowpad/) (desktop or VR), the ▶ Dictate
-  button in Steam Frame Tweaks, or hold the headset's **Select** button with
+  button in Frame Tweaks, or hold the headset's **Select** button with
   [whisper-frame](../whisper-frame/) installed.
 - **Lock Wallet:** the **Lock Wallet** entry in the "+" menu or the desktop menu, or
   `wallet-unlock --lock` in a terminal. The wallet also locks itself after 4 hours.

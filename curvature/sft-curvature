@@ -5,6 +5,7 @@
   sft-curvature restore   after SteamVR stops: put that setting back as it was
   sft-curvature watch     while SteamVR runs: (re)inject patch.js into the dashboard
   sft-curvature status
+  sft-curvature check     is SteamVR's dashboard code still what the patch expects?
 
 SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only while it's stopped.
 """
@@ -15,6 +16,17 @@ SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
 STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"
 PATCH = Path(__file__).resolve().with_name("sft-curvature.js")
 PORT = 8087
+DASHBOARD = Path("/opt/steamvr/resources/webinterface/dashboard")
+CHECK_FILE = Path(f"/run/user/{os.getuid()}/sft-curvature.status")
+# What patch.js relies on in SteamVR's dashboard code. If an update changes any of it, the
+# patch is not injected (and status says so) instead of poking at code it doesn't understand.
+EXPECTED = {
+    "the curvature component": 'componentName="curvature"',
+    "ToggleCurvature()": "ToggleCurvature(){this.m_bCurveOverride=!this.shouldCurve}",
+    "world windows flat by default": "default:return!1",
+    "EDockLocation.World = 4": 'e[e.World=4]="World"',
+    "window.FrameStore": "window.FrameStore=",
+}
 
 
 def load():
@@ -116,8 +128,25 @@ def systemui():
                  if t.get("title") == "systemui" and t.get("webSocketDebuggerUrl")), None)
 
 
+def check_dashboard():
+    """Missing pieces of EXPECTED in SteamVR's dashboard code ([] = compatible)."""
+    try:
+        code = "".join(f.read_text(errors="replace") for f in DASHBOARD.glob("*.js"))
+    except OSError:
+        return ["SteamVR's dashboard files"]
+    return [name for name, marker in EXPECTED.items() if marker not in code]
+
+
 def watch():
     expr, last = PATCH.read_text(), None
+    missing = check_dashboard()
+    if missing:
+        msg = "SteamVR changed (missing: " + ", ".join(missing) + "); patch disabled"
+        CHECK_FILE.write_text(msg + "\n")
+        print(msg, flush=True)
+        while True:                     # stay idle until SteamVR (and this service) restarts
+            time.sleep(3600)
+    CHECK_FILE.unlink(missing_ok=True)
     while True:
         try:
             url = systemui()
@@ -131,6 +160,9 @@ def watch():
 
 
 def status():
+    if CHECK_FILE.exists():
+        print(CHECK_FILE.read_text().strip())
+        return 2
     try:
         url = systemui()
     except OSError:
@@ -145,7 +177,9 @@ def status():
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"arm": arm, "restore": restore, "watch": watch, "status": status}.get(cmd)
+    fn = {"arm": arm, "restore": restore, "watch": watch, "status": status,
+          "check": lambda: print("compatible" if not check_dashboard() else
+                                 "missing: " + ", ".join(check_dashboard())) or bool(check_dashboard())}.get(cmd)
     if fn is None:
         sys.exit(__doc__)
     sys.exit(fn() or 0)

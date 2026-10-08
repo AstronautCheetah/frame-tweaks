@@ -7,4 +7,4 @@ App-menu icons, 256×256 PNG, installed into `~/.local/share/icons/hicolor` beca
   Noto Color Emoji microphone (SIL Open Font License 1.1).
 - The others: white glyphs from KDE's Breeze icon theme (LGPL-3.0) on colored tiles:
   `smartphone` (Android Mirror), `input-keyboard` (Arrow Pad), `network-vpn` (NordVPN),
-  `configure` (Steam Frame Tweaks).
+  `configure` (Frame Tweaks).

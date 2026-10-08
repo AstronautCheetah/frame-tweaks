@@ -11,6 +11,33 @@ protect against.
 | nordvpn | NordVPN access token, WireGuard private key | The token is used once and never stored. The private key lives in root-only NetworkManager files and `~/.config/nordvpn-wg/private_key` (mode 600). |
 | firefox | Firefox prefs only | No access to saved logins. Set Firefox's **Primary Password** to encrypt them. |
 
+## What each tweak changes on your system
+
+Everything lives in your home folder unless the table says otherwise. Removing a tweak
+(`./install.sh uninstall <id>`) undoes the changes listed and keeps your settings and data.
+
+| Tweak | Files and services | Unusual access (why) |
+|---|---|---|
+| dictation | `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard` | Microphone while recording; types through ydotool |
+| whisper-frame | Upstream's own installer (user services `whisper-ptt`, `whisper-panel`), pinned release | Microphone; listens for the headset's Select button |
+| arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv) | Types through ydotool. In VR: a SteamVR overlay. **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST |
+| full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
+| curvature | `~/.local/share/frame-tweaks/curvature`, user units `sft-vr-debugger`, `sft-curvature`, a `steamvr.service` drop-in | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects a small script into the dashboard. Any program running as you could use that port too |
+| clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |
+| adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
+| cursor | `~/.config/environment.d/` (one variable for KWin) | – |
+| wallet | `wallet-unlock`, `wallet-launcher`, `wallet-gate`, user service `wallet-lock-sync`, `kwalletrc` setting; rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`) | Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); moves the GitHub CLI token into the wallet |
+| signal | `signal-guard`, a Flatpak override for Signal, Signal's `config.json` | Quits Signal when idle; key in the wallet |
+| firefox | Preferences in Firefox's profile (`user.js`) | – |
+| nordvpn | `nordvpn-wg`, tray app, KDE autostart entry | **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`) |
+| homebrew | `/home/linuxbrew` | **Needs sudo once** to create that folder |
+| menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
+| tools | `~/.local/bin/restart-plasmashell` | – |
+| ydotool | `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
+| vscodium, signal, firefox | Flathub apps | – |
+| claude-code / claude-desktop | `~/.local/bin/claude` / `~/.local/opt/claude-desktop` | Anthropic's installer / Anthropic's apt index |
+| Installer window (VR) | – | **Claims the controller's A, B and Y** through SteamVR Input while the laser is over the window |
+
 **Threat model.** These tweaks protect against *casual* access: someone else picking up the
 headset (e.g. children on a shared, password-less SteamOS login) can't open Signal, Firefox
 or Android Mirror, or read Signal's database, while the wallet is locked. They don't protect
@@ -22,9 +49,17 @@ password. Until you set one (KWalletManager → *Change Password*), nothing abov
 protected. Avoid changing it while a second wallet service is running (see
 [wallet/README.md](wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
-**Downloads** are verified where the publisher provides checksums: Claude Desktop (SHA256
-from Anthropic's apt index) and Full Keyboard (release `SHA256SUMS`). Arch Linux ARM packages
-come over HTTP from the official mirror, as pacman would fetch them, but without pacman's
-signature check. Homebrew and Flathub packages are verified by those tools.
+**Downloads.**
+- **Pinned upstream releases** (Full Keyboard, whisper-frame): each tweak's `pin` file records
+  the exact version and SHA256; the download must match it, so a changed or replaced upstream
+  file is refused. Pins move only in a reviewed commit (`dev/check-pins.sh`).
+- **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors where
+  possible and are always checked against Arch Linux ARM's build key (`lib/keys/`,
+  fingerprint `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking.
+- **Claude Desktop:** SHA256 from Anthropic's apt index over HTTPS. **Claude Code:** Anthropic's
+  own installer over HTTPS.
+- **Homebrew and Flathub** packages are verified by those tools.
+- **This project:** `get.sh` and `./install.sh update` install the newest release tag, not
+  the moving `main` branch.
 
 Found a problem? Please open a private security advisory on GitHub rather than a public issue.

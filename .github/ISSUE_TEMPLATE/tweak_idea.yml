@@ -1,0 +1,16 @@
+name: Tweak idea
+description: Suggest a new tweak or an improvement
+labels: [idea]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem on the Frame?
+      description: What's hard or impossible today, in desktop mode or VR?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: Link existing projects that solve it; we'd rather install or credit them than copy.

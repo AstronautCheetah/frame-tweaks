@@ -8,7 +8,10 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BIN="$HOME/.local/bin"
 APPS="$HOME/.local/share/applications"
-ALARM_MIRROR="${ALARM_MIRROR:-http://mirror.archlinuxarm.org/aarch64}"
+# HTTPS mirrors first (the main mirror's certificate doesn't match its name); every package is
+# signature-checked anyway.
+ALARM_MIRROR="${ALARM_MIRROR:-https://fl.us.mirror.archlinuxarm.org/aarch64}"
+ALARM_FALLBACK="https://de3.mirror.archlinuxarm.org/aarch64 http://mirror.archlinuxarm.org/aarch64"
 mkdir -p "$BIN" "$APPS"
 
 say()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -33,7 +36,7 @@ ask() {
     if [ -t 0 ]; then
         local a; read -rp "$1 [y/N] " a; [[ $a == [yY]* ]]
     elif command -v kdialog >/dev/null && [ -n "${WAYLAND_DISPLAY:-${DISPLAY:-}}" ]; then
-        kdialog --title "Steam Frame Tweaks" --yesno "$1"
+        kdialog --title "Frame Tweaks" --yesno "$1"
     else
         return 1
     fi
@@ -78,14 +81,35 @@ ensure_path() {
 # Download the current Arch Linux ARM package <pkgname> and extract it into <dest-dir>.
 # SteamOS is Arch-based, so ALARM aarch64 binaries run as-is.
 alarm_fetch() {
-    local repo=$1 name=$2 dest=$3 file
-    file=$(curl -fsSL "$ALARM_MIRROR/$repo/" |
-        grep -oE "\"$name-[0-9][^\"/]*-aarch64\.pkg\.tar\.(xz|zst)\"" | tr -d '"' | sort -V | tail -1)
+    # Newest <name> package from Arch Linux ARM, verified against ALARM's build key (shipped in
+    # lib/keys, fingerprint 68B3537F39A313B3E574D06777193F152BDBE6A6) before it's unpacked.
+    local repo=$1 name=$2 dest=$3 file t mirror
+    for mirror in "$ALARM_MIRROR" $ALARM_FALLBACK; do
+        file=$(curl -fsSL --max-time 20 "$mirror/$repo/" |
+            grep -oE "\"$name-[0-9][^\"/]*-aarch64\.pkg\.tar\.(xz|zst)\"" | tr -d '"' | sort -V | tail -1) || true
+        [ -n "$file" ] && break
+    done
     [ -n "$file" ] || die "package $name not found in ALARM $repo"
     say "Fetching $file"
+    t=$(mktemp -d)
+    curl -fsSL -o "$t/$file" "$mirror/$repo/$file" && curl -fsSL -o "$t/$file.sig" "$mirror/$repo/$file.sig" ||
+        { rm -rf "$t"; die "download of $file failed"; }
+    gpgv --keyring "$REPO_DIR/lib/keys/archlinuxarm.gpg" "$t/$file.sig" "$t/$file" 2>/dev/null ||
+        { rm -rf "$t"; die "$file: bad or missing Arch Linux ARM signature; not installing it"; }
     mkdir -p "$dest"
-    curl -fsSL "$ALARM_MIRROR/$repo/$file" | bsdtar -xf - -C "$dest"
+    bsdtar -xf "$t/$file" -C "$dest"
+    rm -rf "$t"
 }
+
+# fetch_pinned <id> <out-file>: download <id>/pin's url and check it against the hash recorded
+# in the pin (not one fetched alongside it), so a changed upstream file is refused.
+fetch_pinned() {
+    local pin="$REPO_DIR/$1/pin" url sha
+    url=$(sed -n 's/^url=//p' "$pin"); sha=$(sed -n 's/^sha256=//p' "$pin")
+    curl -fL# -o "$2" "$url" || die "download failed: $url"
+    echo "$sha  $2" | sha256sum -c --quiet - || die "$(basename "$url"): checksum differs from the pinned one; not installing it"
+}
+pin_version() { sed -n 's/^version=//p' "$REPO_DIR/$1/pin"; }
 
 # Steam's "+" menu resolves Icon= only in the hicolor theme and rescans when the
 # applications/icon directories' mtime changes (writing an existing file doesn't change it).
