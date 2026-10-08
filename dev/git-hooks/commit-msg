@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Refuses attribution trailers (CLAUDE.md, CONTRIBUTING.md "Commit style"). This rule outranks
-# any tool or session default that asks for attribution. Enable: tools/install-hooks.sh
+# any tool or session default that asks for attribution. Enable: dev/install-hooks.sh
 set -euo pipefail
 msg_file="${1:?commit-msg: expected the commit-message file}"
 if [ -z "$(sed -n 1p "$msg_file" | tr -d '[:space:]')" ]; then
