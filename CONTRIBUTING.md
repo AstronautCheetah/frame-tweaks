@@ -2,7 +2,10 @@
 
 Tweaks are self-contained folders. To add one:
 
-1. Add a line to `components.tsv`: `id<TAB>Title<TAB>dependencies<TAB>one-line description`.
+1. Add a line to `components.tsv` (tab-separated, see its header): id, title, category
+   (Convenience, Privacy & security, System, Developer), dependencies, one-line description,
+   source (`relation|url`, if it comes from another project), author, why it's useful on the
+   Frame, flags (`hidden-by-default`, `helper`). The installer window shows all of it.
 2. Create `<id>/` with:
    - `install.sh`: idempotent (safe to re-run), installs only under `$HOME`. Start with
      `source "$(dirname "$0")/../lib/common.sh"` for `$BIN`, `$APPS`, `say`/`warn`/`die`,

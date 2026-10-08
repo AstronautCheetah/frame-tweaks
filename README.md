@@ -61,9 +61,12 @@ Each folder's README covers usage, settings, how it works, and the gotchas we hi
 
 ## Using the installer
 
-**Steam Frame Tweaks** in the app menu (desktop or VR "+" menu) opens the installer window:
-one row per tweak with its live status and a link to the project it comes from, tick to install, untick to remove, **Hide** rows you
-don't need (hidden ones are never removed) and **Show hidden** to bring them back. It uses
+**Steam Frame Tweaks** in the app menu (desktop or VR "+" menu) opens the installer window.
+Tweaks are grouped by category (convenience first, developer tools last), each with its live
+status and a link to the project it comes from. Tick to install, untick to remove, **click a
+row** for details (what it is, why it's included, who made it, its README), **Hide** rows you
+don't need (never removed) and **Show hidden** to bring them back. whisper-frame starts hidden
+while its window mic costs VR performance. It uses
 PyQt6, set up on first use (shared with Arrow Pad); without it you get a simple checklist.
 
 ```text

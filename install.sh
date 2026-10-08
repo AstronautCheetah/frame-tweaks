@@ -16,11 +16,12 @@ set -uo pipefail
 cd "$(dirname "$(readlink -f "$0")")" || exit 1
 VERSION=$(cat VERSION 2>/dev/null || echo dev)
 
-# components.tsv: id <TAB> title <TAB> depends (space-separated) <TAB> description
+# components.tsv: id, title, category, depends (space-separated), description, source,
+# author, why, flags (tab-separated; see the header line)
 declare -A TITLE DEPS DESC
 IDS=()
 # (Tabs become \x1f first: read merges empty fields between whitespace separators like tab.)
-while IFS=$'\x1f' read -r id title deps desc _source; do
+while IFS=$'\x1f' read -r id title _category deps desc _rest; do
     [[ -z $id || $id == \#* ]] && continue
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc
 done < <(tr '\t' '\037' < components.tsv)

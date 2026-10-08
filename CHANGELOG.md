@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 (2026-10-07)
+- Installer window: tweaks grouped by category (Convenience → Privacy & security → System →
+  Developer); click any row (or ⓘ) for details: what it is, why it's included, who made it,
+  source, status and its README; status checks run in the background (the window used to freeze
+  for ~1 s, longer under load); checkboxes 50% bigger.
+- whisper-frame is hidden by default (not removed) while its window mic costs VR performance;
+  unhiding it is remembered.
+- NordVPN status no longer makes a network call.
+- components.tsv gains category, author, why and flags columns.
+
 ## 0.1.9 (2026-10-07)
 - Arrow Pad VR mode is now a **native SteamVR overlay** (like Full Keyboard): keys reach the app
   you were using (a floating window took focus when clicked), haptics go to the pointing
