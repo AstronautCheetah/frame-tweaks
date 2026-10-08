@@ -272,7 +272,7 @@ class ArrowPad(QWidget):
         self.apply_scale()
         self.update_language()
         QTimer(self, interval=500, timeout=self.refresh_mic).start()
-        QTimer(self, interval=3000, timeout=self.update_language).start()
+        QTimer(self, interval=15000, timeout=self.update_language).start()   # layouts rarely change
         if TARGET == "vr":
             from vroverlay import OverlayHost
             self.overlay = OverlayHost(self, cfg)

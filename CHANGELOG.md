@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3 (2026-10-07)
+- Arrow Pad VR: fix the invisible panel that still caught the laser. The overlay event loop
+  never ended (pyopenvr returns `(result, event)`, always truthy), so the pad never drew and
+  burned a full CPU core. Also: textures go to SteamVR as PNG files instead of `SetOverlayRaw`,
+  which never displayed on the Frame, and a 2.5 MB raw upload in testing crashed vrcompositor
+  (SIGBUS). Texture size and update rate are capped, it redraws only on visible changes, polls
+  at ~45 Hz, and disconnects from SteamVR cleanly on exit.
+
 ## 0.2.2 (2026-10-07)
 - Arrow Pad VR: placed and anchored like Full Keyboard: just below Steam's dashboard (main
   panel, else the dashboard bar), top edge 6 cm below, 24 cm toward you, 50° from upright, and
