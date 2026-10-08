@@ -20,8 +20,14 @@ from PyQt6.QtWidgets import QApplication, QPushButton
 
 KEY = "steam-frame-tweaks.arrowpad"
 MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it back
-WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.45, 0.30, 2.0, 0.05
-FORWARD, BELOW, TILT_DEG = 0.55, 0.30, 25     # reset: in front of you, below eye level, tilted up
+WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.55, 0.30, 2.0, 0.05
+# Placement like Full Keyboard: anchored to Steam's dashboard (its main panel while visible, else
+# the dashboard bar), top edge 6 cm below its bottom centre, 24 cm toward you, tilted back 50°.
+# The pad keeps that offset *relative to the dashboard*, so it follows the dashboard around
+# (recentering, moving it, a re-centred play space), as Full Keyboard does.
+DASHBOARD = ("valve.steam.gamepadui.main", "valve.steam.gamepadui.bar")
+GAP_BELOW, TOWARD_VIEWER, PITCH_DEG = 0.06, 0.24, 50
+FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of the headset
 
 
 def _rigid_mul(a, b):
@@ -62,10 +68,9 @@ class OverlayHost:
         self.last_device = None         # controller behind the latest laser event
         self.size = (0, 0)
         self.dirty = True
-        self.pose = config.get("vr_pose")
-        if self.pose and self.distance_from_head() <= MAX_DISTANCE:
-            self.apply_pose()
-        else:
+        self.offset = config.get("vr_offset")       # pose relative to the dashboard anchor
+        self.pose = None
+        if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         self.visible = False
         QTimer(pad, interval=11, timeout=self.poll).start()      # ~90 Hz event pump
@@ -97,6 +102,45 @@ class OverlayHost:
         m = poses[index].mDeviceToAbsoluteTracking.m
         return [[m[r][c] for c in range(4)] for r in range(3)]
 
+    def dashboard_anchor(self):
+        """Bottom centre of the visible dashboard (main panel, else the bar) as a rigid 3x4
+        transform with its scale removed; None if neither is available."""
+        for key in DASHBOARD:
+            try:
+                h = self.ov.findOverlay(key)
+                if key.endswith(".main") and not self.ov.isOverlayVisible(h):
+                    continue      # hidden main panel keeps a stale transform (Full Keyboard's note)
+                scale = self.ov.getOverlayMouseScale(h)
+                at = openvr.HmdVector2_t()
+                at.v[0], at.v[1] = scale.v[0] / 2, 0.0          # bottom centre (origin bottom-left)
+                r = self.ov.getTransformForOverlayCoordinates(h, openvr.TrackingUniverseStanding, at)
+                m = (r.m if hasattr(r, "m") else r[-1].m)
+                rows = [[m[i][j] for j in range(4)] for i in range(3)]
+                for c in range(3):                               # normalise the scaled basis
+                    n = math.sqrt(sum(rows[i][c] ** 2 for i in range(3))) or 1.0
+                    for i in range(3):
+                        rows[i][c] /= n
+                return rows
+            except Exception:
+                continue
+        return None
+
+    def follow_dashboard(self):
+        """Pose = dashboard anchor x stored offset. False if there's no anchor."""
+        anchor = self.dashboard_anchor()
+        if anchor is None or not self.offset:
+            return False
+        pose = _rigid_mul(anchor, self.offset)
+        if pose != self.pose:
+            self.pose = pose
+            self.apply_pose()
+        return True
+
+    def remember_offset(self):
+        anchor = self.dashboard_anchor()
+        if anchor is not None and self.pose:
+            self.offset = _rigid_mul(_rigid_inv(anchor), self.pose)
+
     def distance_from_head(self):
         head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
         if head is None or not self.pose:
@@ -107,23 +151,38 @@ class OverlayHost:
         self.ov.setOverlayTransformAbsolute(self.handle, openvr.TrackingUniverseStanding, _mat(self.pose))
 
     def reset_position(self):
-        """In front of you, below eye level, facing you, tilted back like a tabletop keyboard."""
-        pose = self.system.getDeviceToAbsoluteTrackingPose(openvr.TrackingUniverseStanding, 0, 1)[0]
-        m = pose.mDeviceToAbsoluteTracking.m
-        pos = [m[0][3], m[1][3], m[2][3]]
-        fx, fz = -m[0][2], -m[2][2]                       # headset forward, flattened
-        n = math.hypot(fx, fz) or 1.0
-        fx, fz = fx / n, fz / n
-        center = [pos[0] + fx * FORWARD, pos[1] - BELOW, pos[2] + fz * FORWARD]
-        z = [-fx, 0.0, -fz]                               # overlay normal points back at you
-        x = [-z[2], 0.0, z[0]]                            # right = up x z
-        t = math.radians(TILT_DEG)                        # tilt: rotate y/z about x
-        y = [z[0] * math.sin(t), math.cos(t), z[2] * math.sin(t)]
-        z = [z[0] * math.cos(t), -math.sin(t), z[2] * math.cos(t)]
-        self.pose = [[x[0], y[0], z[0], center[0]],
-                     [x[1], y[1], z[1], center[1]],
-                     [x[2], y[2], z[2], center[2]]]
+        """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
+        anchor = self.dashboard_anchor()
+        h_m = self.width_m * (self.size[1] / self.size[0] if self.size[0] else 0.8)
+        t = math.radians(PITCH_DEG)
+        if anchor is not None:
+            # Upright frame from the anchor: its left-right axis, true vertical, and "toward you"
+            # horizontal. (The dashboard bar is tilted back like a tray; Full Keyboard pitches
+            # 50° from upright regardless of what it's anchored to.)
+            ax = [anchor[0][0], 0.0, anchor[2][0]]
+            n = math.hypot(ax[0], ax[2]) or 1.0
+            ax = [ax[0] / n, 0.0, ax[2] / n]
+            ay = [0.0, 1.0, 0.0]
+            az = [-ax[2], 0.0, ax[0]]                           # = ax x up, horizontal
+            if az[0] * anchor[0][2] + az[2] * anchor[2][2] < 0:   # point it toward the viewer
+                az = [-az[0], 0.0, -az[2]]
+                ax = [-ax[0], 0.0, -ax[2]]
+            org = [anchor[i][3] for i in range(3)]
+        else:
+            head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
+            fx, fz = -head[0][2], -head[2][2]
+            n = math.hypot(fx, fz) or 1.0
+            fx, fz = fx / n, fz / n
+            az, ay, ax = [-fx, 0.0, -fz], [0.0, 1.0, 0.0], [fz, 0.0, -fx]
+            org = [head[0][3] + fx * FORWARD, head[1][3] - BELOW + GAP_BELOW, head[2][3] + fz * FORWARD]
+        # tilt back: rotate about the anchor's x axis so the top leans away from you
+        y = [ay[i] * math.cos(t) - az[i] * math.sin(t) for i in range(3)]
+        z = [ay[i] * math.sin(t) + az[i] * math.cos(t) for i in range(3)]
+        # top edge GAP_BELOW under the anchor, centre TOWARD_VIEWER closer to you
+        centre = [org[i] - ay[i] * GAP_BELOW - y[i] * (h_m / 2) + az[i] * TOWARD_VIEWER for i in range(3)]
+        self.pose = [[ax[i], y[i], z[i], centre[i]] for i in range(3)]
         self.apply_pose()
+        self.remember_offset()
         self.save()
 
     def set_width(self, value):
@@ -136,7 +195,8 @@ class OverlayHost:
 
     def save(self):
         self.config["width_m"] = self.width_m
-        self.config["vr_pose"] = self.pose
+        self.config["vr_offset"] = self.offset
+        self.config.pop("vr_pose", None)      # absolute poses go stale when the play space moves
         self.pad.save_config()
 
     # ---- input -------------------------------------------------------------
@@ -177,6 +237,8 @@ class OverlayHost:
         if visible != self.visible:
             (self.ov.showOverlay if visible else self.ov.hideOverlay)(self.handle)
             self.visible = visible
+        if visible and self.drag is None:
+            self.follow_dashboard()             # ride along with the dashboard
         ev = openvr.VREvent_t()
         while self.ov.pollNextOverlayEvent(self.handle, ev):
             t, dev = ev.eventType, ev.trackedDeviceIndex
@@ -210,6 +272,8 @@ class OverlayHost:
                     self.drag = None
                     if self.distance_from_head() > MAX_DISTANCE:
                         self.reset_position()
+                    else:
+                        self.remember_offset()     # the new spot, relative to the dashboard
                     self.save()
             self.dirty = True
         if self.dirty and visible:
