@@ -8,7 +8,12 @@ DIR=${FRAME_TWEAKS_DIR:-$HOME/frame-tweaks}
 [ -z "${FRAME_TWEAKS_DIR:-}" ] && [ -d "$HOME/steam-frame-tweaks/.git" ] && DIR=$HOME/steam-frame-tweaks   # its old name
 
 # Install the newest release (a vX.Y.Z tag), not whatever is on main right now.
-TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | sort -V | tail -1)
+# Stable releases only (vX.Y.Z); FRAME_TWEAKS_CHANNEL=beta also takes pre-releases (vX.Y.Z-rc1),
+# ranked below the release they lead up to ("-" → "~" sorts before the final version).
+pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
+[ "${FRAME_TWEAKS_CHANNEL:-stable}" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | grep -E "$pattern" |
+      sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1)
 [ -n "$TAG" ] || { echo "Couldn't find a release of $REPO" >&2; exit 1; }
 if [ -d "$DIR/.git" ]; then
     echo "Updating $DIR to $TAG"

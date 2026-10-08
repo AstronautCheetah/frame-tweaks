@@ -230,11 +230,17 @@ def schedule_lock():
     hours = os.environ.get("WALLET_LOCK_HOURS", "4")
     env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}",
                DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
-    subprocess.run(["systemctl", "--user", "stop", "wallet-autolock.timer"], env=env,
-                   stderr=subprocess.DEVNULL)
-    subprocess.run(["systemd-run", "--user", "--quiet", "--unit=wallet-autolock",
-                    f"--on-active={hours}h", os.path.abspath(sys.argv[0]), "--lock"],
-                   env=env, stderr=subprocess.DEVNULL)
+    # Clear the previous timer *and* its service: a failed earlier run left a unit with this name
+    # behind, and systemd-run then refused the name, silently, so nothing locked the wallet.
+    for cmd in (["stop", "wallet-autolock.timer", "wallet-autolock.service"],
+                ["reset-failed", "wallet-autolock.timer", "wallet-autolock.service"]):
+        subprocess.run(["systemctl", "--user", *cmd], env=env, stderr=subprocess.DEVNULL)
+    r = subprocess.run(["systemd-run", "--user", "--quiet", "--unit=wallet-autolock",
+                        f"--on-active={hours}h", os.path.abspath(sys.argv[0]), "--lock"],
+                       env=env, capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"wallet-unlock: couldn't schedule the auto-lock: {r.stderr.strip()}", file=sys.stderr, flush=True)
+        return "?"
     return hours
 
 

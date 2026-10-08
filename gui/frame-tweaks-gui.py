@@ -121,6 +121,36 @@ def update_check(cid):
     return None
 
 
+STABLE_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+ANY_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.]+))?$")
+
+
+def release_channel():
+    c = os.environ.get("FRAME_TWEAKS_CHANNEL") or ""
+    if not c:
+        try:
+            c = (CONF / "channel").read_text().strip()
+        except OSError:
+            pass
+    return "beta" if c == "beta" else "stable"
+
+
+def newest_release(tags, channel="stable"):
+    """Newest tag (without the leading v): stable vX.Y.Z only, or with pre-releases on beta,
+    where vX.Y.Z-rc1 ranks below vX.Y.Z."""
+    pattern = ANY_TAG if channel == "beta" else STABLE_TAG
+    ok = [t for t in tags if pattern.match(t)]
+    return max(ok, key=release_key)[1:] if ok else None
+
+
+def release_key(tag):
+    """Sort key for "v1.2.0" / "1.2.0-rc1": a pre-release sorts below its final version."""
+    m = ANY_TAG.match(tag if tag.startswith("v") else "v" + tag)
+    if not m:
+        return (0, 0, 0, False, "")
+    return (int(m[1]), int(m[2]), int(m[3]), m[4] is None, m[4] or "")
+
+
 def self_update_check():
     """Newest vX.Y.Z tag of this repo on GitHub, if newer than VERSION (needs git access)."""
     try:
@@ -129,10 +159,10 @@ def self_update_check():
                              env={**os.environ, "GIT_TERMINAL_PROMPT": "0"}).stdout
     except (OSError, subprocess.TimeoutExpired):
         return None
-    tags = [line.rsplit("/v", 1)[-1] for line in out.splitlines() if "refs/tags/v" in line]
-    newest = max(tags, key=version_tuple, default=None)
+    tags = [line.rsplit("/", 1)[-1] for line in out.splitlines() if "refs/tags/v" in line]
+    newest = newest_release(tags, release_channel())
     current = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
-    return newest if newest and version_tuple(newest) > version_tuple(current) else None
+    return newest if newest and release_key(newest) > release_key(current) else None
 
 
 def read_set(path):

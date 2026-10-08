@@ -109,6 +109,19 @@ fetch_pinned() {
     curl -fL# -o "$2" "$url" || die "download failed: $url"
     echo "$sha  $2" | sha256sum -c --quiet - || die "$(basename "$url"): checksum differs from the pinned one; not installing it"
 }
+# newest_tag: the newest release tag from the tag names on stdin. Stable (vX.Y.Z) only, unless
+# the channel is beta (FRAME_TWEAKS_CHANNEL=beta, or "beta" in ~/.config/steam-frame-tweaks/channel),
+# which adds pre-releases (vX.Y.Z-rc1) ranked below their final version.
+release_channel() {
+    local c=${FRAME_TWEAKS_CHANNEL:-}
+    [ -n "$c" ] || c=$(cat "$HOME/.config/steam-frame-tweaks/channel" 2>/dev/null || true)
+    [ "$c" = beta ] && echo beta || echo stable
+}
+newest_tag() {
+    local pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
+    [ "$(release_channel)" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+    grep -E "$pattern" | sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1
+}
 pin_version() { sed -n 's/^version=//p' "$REPO_DIR/$1/pin"; }
 
 # Steam's "+" menu resolves Icon= only in the hicolor theme and rescans when the
