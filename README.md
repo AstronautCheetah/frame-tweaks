@@ -57,6 +57,7 @@ if it's missing. It needs your sudo password once; if you've never set one, run 
 | 🧑‍💻 | [**VSCodium**](vscodium/) | VS Code without telemetry, from Flathub. | Coding on the headset: Flathub has the aarch64 build; pairs with Arrow Pad and dictation. |
 | 🤖 | [**Claude Code**](claude-code/) (command line) | Anthropic's coding agent in the terminal (`claude`), via Anthropic's own installer. | The native installer runs without root on arm64 and updates itself, so SteamOS updates leave it alone. |
 | 🤖 | [**Claude Desktop**](claude-desktop/) | Anthropic's official Linux arm64 beta, installed and updated without apt. | It's packaged as a `.deb` for Ubuntu/Debian. SteamOS has no apt and a read-only root, so this unpacks the arm64 build into your home folder. |
+| 🍺 | [**Homebrew**](homebrew/) | The package manager several tweaks install their programs with, into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates; Homebrew installs outside it. Other tweaks offer to install it when needed; this row shows it and installs it up front. |
 | 🛠️ | [**Tools**](tools/) | `restart-plasmashell`: bring the taskbar and tray back after a crash. | In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session. |
 
 Each folder's README covers usage, settings, how it works, and the gotchas we hit.

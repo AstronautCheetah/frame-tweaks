@@ -35,5 +35,11 @@ projects you borrow from.
 A short imperative first line (`arrowpad: fix overlay flicker`), then an optional body saying
 why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assisted-by`,
 `Generated-by` or "Generated with [...]" lines, whatever a tool or agent suggests. Run
-`tools/install-hooks.sh` once after cloning; the hooks and CI enforce it. Agents: see
+`dev/install-hooks.sh` once after cloning; the hooks and CI enforce it. Agents: see
 [CLAUDE.md](CLAUDE.md).
+
+## Working in parallel
+
+`main` is the only branch. When more than one session works on the repo, each uses its own
+worktree (`dev/agent-worktree.sh add <slug>`) and publishes with `dev/safe-push.sh`. See
+[docs/claude/parallel-work.md](docs/claude/parallel-work.md).

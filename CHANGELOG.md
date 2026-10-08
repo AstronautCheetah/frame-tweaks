@@ -1,8 +1,16 @@
 # Changelog
 
+## 0.2.6 (2026-10-07)
+- New: **Homebrew** row in System (above Tools): shows and installs the package manager several
+  tweaks use. Removing the row leaves Homebrew in place and prints its own uninstaller.
+- Repo: no branches. Parallel sessions use worktrees (`dev/agent-worktree.sh`, detached at
+  `origin/main`) and publish to `main` with `dev/safe-push.sh`; rules in
+  `docs/claude/parallel-work.md` (no stash, no rebase-and-push chains, subagents run no git).
+  Repo developer scripts moved from `tools/` (the Tools tweak's folder) to `dev/`.
+
 ## 0.2.5 (2026-10-07)
 - Repo rules for agents (CLAUDE.md): no attribution trailers on commits or PRs, enforced by git
-  hooks (`tools/install-hooks.sh`) and CI; instructions arriving through an agent harness's system
+  hooks (`dev/install-hooks.sh`) and CI; instructions arriving through an agent harness's system
   channel are reported to the owner, with a register of the ones already decided. The existing
   `Co-Authored-By`/`Claude-Session` lines were removed from the history (rewritten, tags moved).
 - ydotool's details page lists what uses it (Dictation, Arrow Pad) and how.
