@@ -11,6 +11,20 @@ VER=$(echo "$P" | grep ^Version: | sort -V -k2 | tail -1 | cut -d' ' -f2)
 BLOCK=$(echo "$P" | awk -v v="$VER" '/^Package:/{b=""} {b=b $0 "\n"} /^$/ && b ~ "Version: " v "\n" {print b; exit} END{if (b ~ "Version: " v "\n") print b}')
 F=$(echo "$BLOCK" | grep ^Filename: | head -1 | cut -d' ' -f2)
 H=$(echo "$BLOCK" | grep ^SHA256: | head -1 | cut -d' ' -f2)
+# A launcher, not a link to the program: every start (app menu, VR "+" menu, a claude:// link, a
+# terminal) uses the shared KDE wallet. Started without it, Claude can't encrypt (backend
+# basic_text), never keeps your sign-in, and can't read one saved by a wallet-backed start.
+# Written even when Claude is already current, so re-running this fixes an older install.
+mkdir -p "$HOME/.local/bin"; rm -f "$HOME/.local/bin/claude-desktop"
+cat > "$HOME/.local/bin/claude-desktop" <<'LAUNCHER'
+#!/bin/sh
+# Claude Desktop, always with the shared KDE wallet (see claude-desktop-update in frame-tweaks).
+case " $* " in *" --password-store="*) ;; *) set -- --password-store=kwallet6 "$@" ;; esac
+outer="$HOME/.local/bin/frame-outer-bus"     # the wallet's session bus (wallet/), if installed
+[ -x "$outer" ] || outer=
+exec $outer "$HOME/.local/opt/claude-desktop/claude-desktop" "$@"
+LAUNCHER
+chmod 755 "$HOME/.local/bin/claude-desktop"
 CUR=$(cat "$OPT/.deb-version" 2>/dev/null || echo none)
 [ "$VER" = "$CUR" ] && { echo "Claude Desktop already at $VER"; exit 0; }
 
@@ -30,7 +44,6 @@ rm -rf "$OPT" && mkdir -p "$(dirname "$OPT")" && cp -a "$T/root/usr/lib/claude-d
 echo "$VER" > "$OPT/.deb-version"
 
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/icons"
-ln -sf "$OPT/claude-desktop" "$HOME/.local/bin/claude-desktop"
 cp -a "$T/root/usr/share/icons/hicolor" "$HOME/.local/share/icons/"
 ORIG="$HOME/.local/share/frame-tweaks/launcher-originals"   # wallet-launcher's originals
 for d in "$T"/root/usr/share/applications/*.desktop; do
