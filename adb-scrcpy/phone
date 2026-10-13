@@ -5,8 +5,15 @@
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 [ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
-c=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;' | grep -F "${PHONE_NAME:-}" | head -1)
-[ -z "$c" ] && { notify-send -a Phone "Phone not found" "Is Wireless debugging on, on the same Wi-Fi?"; exit 1; }
+all=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;')
+c=$(echo "$all" | grep -F "${PHONE_NAME:-}" | head -1)
+if [ -z "$c" ]; then
+    # Name the phones that *are* advertising, so a wrong phone or a wrong PHONE_NAME is obvious.
+    seen=$(echo "$all" | sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u | paste -sd, - | sed 's/,/, /g')
+    msg="Is Wireless debugging on (Developer options, in the phone's Owner profile), on the same Wi-Fi?"
+    [ -n "$seen" ] && msg="$msg Seen instead: $seen."
+    notify-send -a Phone "${PHONE_NAME:-Phone} not found" "$msg"; exit 1
+fi
 dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
 adb connect "$dev" >/dev/null
 # With "Memory caps" installed, scrcpy runs inside its memory limit.
