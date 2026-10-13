@@ -20,13 +20,7 @@ install -m644 "$REPO_DIR"/arrowpad/vr/*.json "$HOME/.local/share/arrowpad/vr/"
 
 # Controller haptics: SteamVR Input through the openvr bindings, using SteamVR's own
 # arm64 library (the wheel only bundles an x86 one).
-VR_LIB=/opt/steamvr/bin/linuxarm64/libopenvr_api.so
-if [ -f "$VR_LIB" ]; then
-    "$VENV/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' ||
-        "$VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" openvr
-    OVR=$("$VENV/bin/python" -c 'import importlib.util,os; print(os.path.dirname(importlib.util.find_spec("openvr").origin))')
-    ln -sf "$VR_LIB" "$OVR/libopenvr_api_64.so"
-else
+if ! ensure_openvr "$VENV"; then
     warn "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
 fi
 cat > "$BIN/arrowpad" <<EOS

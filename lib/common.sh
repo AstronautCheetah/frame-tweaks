@@ -162,6 +162,18 @@ ensure_tweaks_venv() {
     fi
 }
 
+# ensure_openvr <venv>: the openvr bindings in that venv, on SteamVR's own arm64 library (the
+# wheel only bundles an x86 one). Returns 1 (and changes nothing) without SteamVR's library.
+VR_LIB=/opt/steamvr/bin/linuxarm64/libopenvr_api.so
+ensure_openvr() {
+    [ -f "$VR_LIB" ] || return 1
+    "$1/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' ||
+        "$1/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" openvr
+    local ovr
+    ovr=$("$1/bin/python" -c 'import importlib.util,os; print(os.path.dirname(importlib.util.find_spec("openvr").origin))')
+    ln -sf "$VR_LIB" "$ovr/libopenvr_api_64.so"
+}
+
 # install_py_tool <src> : install a Python tool into ~/.local/bin, running on the shared venv.
 install_py_tool() {
     sed "1s|.*|#!$TWEAKS_VENV/bin/python|" "$1" > "$BIN/$(basename "$1")"

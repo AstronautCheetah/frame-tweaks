@@ -1,10 +1,11 @@
 # Changelog
 
 ## Unreleased
-- **Android Mirror keeps up with the phone better:** it streams 1280 pixels at 4 Mbit/s (was 1920
-  at 8), as much as VR shows; settable in `~/.config/phone.conf`.
-- **Android Mirror: the joystick scrolls the phone** (it went to the click layer and was lost):
-  it's passed on as the phone's scroll wheel.
+- **Android Mirror keeps up with the phone better:** it streams 1024 pixels at 2 Mbit/s (was 1920
+  at 8), still sharp in VR; settable in `~/.config/phone.conf`.
+- **Android Mirror: the joystick scrolls the phone** while the laser rests on it. SteamVR
+  doesn't hand the joystick to the click layer, so it's read from the controller model's
+  thumbstick, the way Arrow Pad reads the grips.
 - **An upright window docked in the dashboard has a standard window's height** (the upright
   mirror came out over 2 m tall unless you floated it).
 - **Fixed: laser clicks on the upright Android Mirror landed at its left edge.** The Steam session
