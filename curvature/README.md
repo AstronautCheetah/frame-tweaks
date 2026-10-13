@@ -9,8 +9,8 @@ for you on every window you float, so they start curved like the dashboard.
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
-> - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via [VR dashboard patching](../vr-dashboard/)
-> - **Unusual access:** Through [VR dashboard patching](../vr-dashboard/): SteamVR's dashboard DevTools port while SteamVR runs
+> - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR dashboard patching (helper)
+> - **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs
 > - **Undo:** `./install.sh uninstall curvature`
 <!-- /generated:glance -->
 
