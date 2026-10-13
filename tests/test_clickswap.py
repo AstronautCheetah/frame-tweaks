@@ -24,7 +24,8 @@ class ClickSwapTest(unittest.TestCase):
         time.sleep(1.5)
         os.environ["ARROWPAD_CLICK_DISPLAY"] = display
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-        sys.argv = ["arrowpad.py", "--desktop"]
+        sys.argv = ["arrowpad.py"]           # no target: needs no running desktop or VR session
+        os.environ.pop("DISPLAY", None)
         sys.path.insert(0, str(ROOT / "arrowpad"))
         spec = importlib.util.spec_from_file_location("ap", ROOT / "arrowpad" / "arrowpad.py")
         ap = importlib.util.module_from_spec(spec)
