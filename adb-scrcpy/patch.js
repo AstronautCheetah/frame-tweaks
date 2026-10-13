@@ -13,9 +13,8 @@
 // requires: overlay picture size | GetOverlayMouseScale(
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-rotate', VERSION = 5, WORLD = 4;
+  const NAME = 'phone-rotate', VERSION = 6, WORLD = 4;
   const LONG_M = 0.8;                  // long side of a turned window, metres (a standard one: 0.98 wide)
-  const SETTLE_MS = 800;               // while the phone turns, the window passes through other sizes
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -55,25 +54,20 @@
     return f.activePage?.size?.latestContentSize;
   };
   const upright = new WeakSet();       // floating windows seen upright: these get the override
-  const shapes = new WeakMap();        // frame -> {w, h, since}
   let set = 0;
   const timer = setInterval(() => {
     try {
-      const t = Date.now();
       for (const f of FS.frames ?? []) {
         if (!f?.size) continue;
         const c = f.docking?.dockLocation === WORLD ? pictureSize(f) : null;
         if (f.docking?.dockLocation !== WORLD || !c?.unWidth || !c?.unHeight) {
           if (heights.has(f)) { heights.delete(f); nudge(f); }       // docked: the dashboard's size
-          upright.delete(f); shapes.delete(f);
+          upright.delete(f);
           continue;
         }
-        const s = shapes.get(f);
-        if (!s || s.w !== c.unWidth || s.h !== c.unHeight) {
-          shapes.set(f, { w: c.unWidth, h: c.unHeight, since: t });
-          continue;
-        }
-        if (t - s.since < SETTLE_MS) continue;
+        // Every shape at once, also the ones it passes through while turning: a moment of
+        // in-between size beats a second of the wrong one.
+        const s = { w: c.unWidth, h: c.unHeight };
         if (s.h > s.w) upright.add(f);
         if (!upright.has(f)) continue;
         const perMetre = 1 / (f.activePage.size.mainPanelWorldScaleIgnoringResizing || 1);
@@ -86,7 +80,7 @@
         }
       }
     } catch (e) { /* the dashboard changed: leave it */ }
-  }, 250);
+  }, 50);
 
   all[NAME] = {
     version: VERSION,

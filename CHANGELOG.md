@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Turning the phone resizes the mirror at once** (was about a second later): phone-fit and the
+  dashboard patch check 20 times a second, and the patch no longer waits for the shape to settle.
 - **Android Mirror starts upright at a sensible size** (0.8 m tall), and turning the phone just
   turns the window (0.8 m long side either way): SteamVR starts every floating window as wide as a
   standard one and keeps that width, so the upright phone came up over 2 m tall. The dashboard

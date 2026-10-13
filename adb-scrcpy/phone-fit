@@ -126,8 +126,14 @@ def main():
     if not x.has_root_property("GAMESCOPE_FOCUSABLE_WINDOWS"):
         return                                         # desktop mode: KWin sizes it normally
     started, seen = time.monotonic(), False
+    windows, scanned, checked = [], 0.0, 0.0
+    # Checked 20 times a second, so a turned phone is reshaped at once (finding the windows walks
+    # the whole window tree: only every 2 s; asking whether scrcpy still runs: every 2 s).
     while True:
-        for w in x.scrcpy_windows():
+        now = time.monotonic()
+        if now - scanned > 2:
+            windows, scanned = x.scrcpy_windows(), now
+        for w in windows:
             seen = True
             hints, cw, ch = x.shape(w)
             if not hints.flags & P_ASPECT or hints.min_ax <= 0 or hints.min_ay <= 0:
@@ -135,10 +141,11 @@ def main():
             tw, th = fit(hints.min_ax, hints.min_ay, long_side)
             if (cw, ch) != (tw, th) or (hints.min_w, hints.min_h, hints.max_w, hints.max_h) != (tw, th, tw, th):
                 x.set_size(w, hints, tw, th)
-        if not scrcpy_running() and (seen or time.monotonic() - started > 60):
-            return
-        time.sleep(0.5)
-
+        if now - checked > 2:
+            checked = now
+            if not scrcpy_running() and (seen or now - started > 60):
+                return
+        time.sleep(0.05)
 
 if __name__ == "__main__":
     main()
