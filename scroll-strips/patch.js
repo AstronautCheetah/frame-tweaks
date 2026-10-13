@@ -1,7 +1,7 @@
 // steam-frame-tweaks scroll-strips: big scroll strips beside each floating window, easy to hit with
 // the laser. Drag along a strip to scroll (like dragging a scroll bar); tap near either end to
 // page. Scrolling goes to the window you last clicked (SteamVR gives the dashboard no way to
-// scroll a particular window), through vr-dashboard's sftScroll binding (ydotool's mouse wheel).
+// scroll a particular window), through vr-dashboard's sftScroll binding (a mouse wheel via XTest).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard. Settings:
 // window.__sftPatchConfig["scroll-strips"] = {vertical: "right"|"left"|"off",
 //   horizontal: "top"|"bottom"|"off", thickness: metres, gap: metres}. Sizes are real metres (the
@@ -13,7 +13,8 @@
 // requires: frame panel height | latestMeasuredPanelWorldHeight
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'scroll-strips', VERSION = 2, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 4, WORLD = 4;
+  const stats = { downs: 0, moves: 0, ups: 0, sent: 0, noBinding: 0 };   // for diagnosis
   const NOTCHES_PER_LENGTH = 40;     // a drag along the whole strip scrolls this many wheel notches
   const PAGE = 10;                   // notches for a tap near an end
   const all = (window.__sftPatches ??= {});
@@ -73,9 +74,16 @@
   };
 
   let drag = null;
-  const send = (dx, dy) => { try { window.sftScroll?.(JSON.stringify({ dx, dy })); } catch (e) {} };
+  const send = (dx, dy) => {
+    if (typeof window.sftScroll !== 'function') { stats.noBinding++; return; }
+    try { window.sftScroll(JSON.stringify({ dx, dy })); stats.sent++; } catch (e) {}
+  };
+  const IDLE_END_MS = 800;           // the laser's release doesn't always arrive: end after this still
   const onMove = (ev) => {
     if (!drag) return;
+    stats.moves++;
+    clearTimeout(drag.idle);
+    drag.idle = setTimeout(() => onUp(), IDLE_END_MS);
     const pos = drag.axis === 'y' ? ev.clientY : ev.clientX;
     drag.moved = Math.max(drag.moved, Math.abs(pos - drag.start));
     const want = Math.trunc(((pos - drag.start) / drag.length) * NOTCHES_PER_LENGTH);
@@ -87,9 +95,12 @@
     }
   };
   const onUp = (ev) => {
+    stats.ups++;
     window.removeEventListener('mousemove', onMove, true);
     window.removeEventListener('mouseup', onUp, true);
+    window.removeEventListener('pointerup', onUp, true);
     const d = drag; drag = null;
+    if (d) clearTimeout(d.idle);
     if (!d || d.moved > d.length * 0.03) return;
     const at = (d.start - d.from) / d.length;                    // a tap: near an end pages
     if (at < 0.25) d.axis === 'y' ? send(0, PAGE) : send(-PAGE, 0);
@@ -104,11 +115,14 @@
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: PANEL_ORIGIN, inputFocusParams: { bCanTakeKeyboardFocus: false },
       hide_lasermouse_when_clicking: false },
       el('div', { style, onMouseDown: (ev) => {
+        stats.downs++;
+        if (drag) onUp();                         // a new press ends any drag still open
         const r = ev.currentTarget.getBoundingClientRect();
         drag = { axis, start: axis === 'y' ? ev.clientY : ev.clientX, from: axis === 'y' ? r.top : r.left,
                  length: axis === 'y' ? r.height : r.width, sent: 0, moved: 0 };
         window.addEventListener('mousemove', onMove, true);
         window.addEventListener('mouseup', onUp, true);
+        window.addEventListener('pointerup', onUp, true);
       } }));
   };
 
@@ -142,6 +156,6 @@
   const refresh = () => movers().forEach((m) => { try { m.forceUpdate(); } catch (e) {} });
   refresh();
   all[NAME] = { version: VERSION, stop: () => { proto.renderFloatingFrame = orig; refresh(); },
-                configChanged: refresh };
+                configChanged: refresh, stats };
   return 'patched';
 })()

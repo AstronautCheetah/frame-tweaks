@@ -101,8 +101,8 @@ LAYERS = {
     # Tools: screen snip, dictation and more shortcuts, in the arrow and navigation keys' places.
     "tools": [
         ["Tools", "Tab", "Bksp", "Del", "RMB", "MMB"],
-        ["Fn", "Snip", "🎤", "Launcher", "Redo", "Esc"],
-        ["Ctrl", "Find", "Save", "Enter", "Unstick", "Copy"],
+        ["Fn", "Snip", "🎤", "Launcher", "Save", "Esc"],
+        ["Ctrl", "Find", "Redo", "Enter", "Unstick", "Copy"],
         ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
 }
