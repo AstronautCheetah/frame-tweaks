@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Signal uses the standard Wallet apps protections; Signal guard is retired.** Its two jobs
+  are now Password first and a Close-after timer, like any app's (15 minutes, or your Signal
+  guard setting, carried over). Its headset-off option is now **Headset off**, for any app with
+  a timer. Reinstall the Signal tweak (↻) to switch over.
 - **Password first no longer disappears:** re-wrapping an app's menu entry (after an app update,
   or when another tweak adds its app) dropped the wallet-password gate, which is how Claude
   Desktop lost it. `wallet-launcher` now keeps it unless told `--no-gate`. Signal shows it as

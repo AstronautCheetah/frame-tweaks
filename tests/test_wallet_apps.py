@@ -95,19 +95,22 @@ class Timers(unittest.TestCase):
 
     def test_settings_files(self):
         t = Path(tempfile.mkdtemp())
-        guard = t / "signal-guard"
-        with mock.patch.multiple(at, CONF=t / "app-timers.conf", SIGNAL_CONF=t / "signal-guard.conf",
-                                 SIGNAL_GUARD=guard):
+        with mock.patch.multiple(at, CONF=t / "app-timers.conf", SIGNAL_CONF=t / "signal-guard.conf"):
             at.set_timer("org.notes", 30)
             at.set_timer("org.other", 10)
             at.set_timer("org.other", 0)                     # removed
-            self.assertEqual(at.all_timers(), {"org.notes": 30})
-            guard.touch()                                    # Signal guard installed: its own file
-            (t / "signal-guard.conf").write_text("# signal-guard settings\nIDLE_MINUTES=15\nLOCK_ON_HEADSET_OFF=0\n")
-            at.set_timer("org.signal.Signal", 60)
-            self.assertIn("IDLE_MINUTES=60\nLOCK_ON_HEADSET_OFF=0", (t / "signal-guard.conf").read_text())
-            self.assertEqual(at.all_timers(), {"org.notes": 30, "org.signal.Signal": 60})
-            self.assertNotIn("Signal", (t / "app-timers.conf").read_text())
+            at.set_headset("org.notes", True)
+            at.set_timer("org.notes", 60)                    # changing the time keeps headset
+            self.assertEqual(at.read_conf(), {"org.notes": {"minutes": 60, "headset": True}})
+            # Signal guard's settings carry over once, then the timer is Signal's like any app's.
+            (t / "signal-guard.conf").write_text("# signal-guard settings\nIDLE_MINUTES=20\nLOCK_ON_HEADSET_OFF=1\n")
+            at.import_signal_guard()
+            self.assertEqual(at.read_conf()["org.signal.Signal"], {"minutes": 20, "headset": True})
+            at.set_timer("org.signal.Signal", 0)
+            (t / "signal-guard.conf").unlink()
+            at.set_timer("org.x", 5)
+            at.import_signal_guard()                         # no old settings: the 15-minute default
+            self.assertEqual(at.read_conf()["org.signal.Signal"]["minutes"], 15)
 
     def test_scope_names(self):
         pat = at.scope_pattern("org.notes")

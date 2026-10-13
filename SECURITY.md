@@ -29,7 +29,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
 | cursor | `~/.config/environment.d/` (one variable for KWin) | – |
 | wallet | `wallet-unlock`, `wallet-launcher`, `wallet-gate`, user service `wallet-lock-sync`, `kwalletrc` setting; rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`) | Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); moves the GitHub CLI token into the wallet |
-| signal | `signal-guard`, a Flatpak override for Signal, Signal's `config.json` | Quits Signal when idle; key in the wallet |
+| signal | Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json` | Asks for the wallet password first; quits Signal when idle; key in the wallet |
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | nordvpn | `nordvpn-wg`, tray app, KDE autostart entry | **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`) |
 | homebrew | `/home/linuxbrew` | **Needs sudo once** to create that folder |

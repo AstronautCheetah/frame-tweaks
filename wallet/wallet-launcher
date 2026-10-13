@@ -42,7 +42,7 @@ BACKUP_DIR = HOME / ".local/share/frame-tweaks/launcher-originals"
 OLD_BACKUP_DIR = APPS / ".wallet-launcher-originals"
 WRAPPER = str(HOME / ".local/bin/frame-outer-bus")
 GATE = str(HOME / ".local/bin/wallet-gate")
-GUARD = str(HOME / ".local/bin/signal-guard")   # signal/: kept when an entry is rebuilt
+GUARD = str(HOME / ".local/bin/signal-guard")   # retired (app-timers + --gate); dropped on rebuild
 TALK = ["--talk-name=org.kde.kwalletd6", "--talk-name=org.freedesktop.secrets"]
 
 
@@ -64,7 +64,7 @@ def source_for(app_id):
     sys.exit(f"wallet-launcher: no desktop entry found for {app_id}")
 
 
-def rewrite_exec(cmd, app_id, electron, shared=True, gate=False, guard=False):
+def rewrite_exec(cmd, app_id, electron, shared=True, gate=False):
     args = shlex.split(cmd)
     while args and args[0] in (GATE, WRAPPER, GUARD, "--"):   # re-run on an already wrapped entry
         args = args[1:]
@@ -76,7 +76,7 @@ def rewrite_exec(cmd, app_id, electron, shared=True, gate=False, guard=False):
         args = args[:idx] + extra + [app_id] + (["--password-store=kwallet6"] if electron else []) + args[idx + 1:]
     elif electron:
         args = args[:1] + ["--password-store=kwallet6"] + args[1:]
-    out = ([GATE] if gate else []) + ([WRAPPER] if shared else []) + ([GUARD, "--"] if guard else []) + args
+    out = ([GATE] if gate else []) + ([WRAPPER] if shared else []) + args
     # Field codes (%U, @@u) must stay unquoted.
     return " ".join(a if re.fullmatch(r"%[a-zA-Z]|@@[a-z]?", a) else shlex.quote(a) for a in out)
 
@@ -92,7 +92,6 @@ def add(app_id, electron, shared=True, gate=None):
     src = source_for(app_id)
     lines = src.read_text().splitlines()
     current = APPS / f"{app_id}.desktop"
-    guard = current.exists() and GUARD in current.read_text()   # keep signal-guard if present
     if gate is None:
         gate = current.exists() and f"{MARK}=true" in current.read_text() and GATE in current.read_text()
     # Re-applying (e.g. after an app update) keeps --password-store, even if not asked again.
@@ -104,7 +103,7 @@ def add(app_id, electron, shared=True, gate=None):
     out = []
     for line in lines:
         if line.startswith("Exec="):
-            line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate, guard)
+            line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate)
         elif line.startswith("DBusActivatable=") and shared:
             line = "DBusActivatable=false"   # otherwise the desktop starts it over its own bus
         elif line.startswith(MARK + "="):

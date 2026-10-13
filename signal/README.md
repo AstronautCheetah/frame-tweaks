@@ -8,8 +8,8 @@ unencrypted on disk. This tweak makes it use **KDE Wallet** instead:
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `signal-guard`, a Flatpak override for Signal, Signal's `config.json`
-> - **Unusual access:** Quits Signal when idle; key in the wallet
+> - **Changes:** Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json`
+> - **Unusual access:** Asks for the wallet password first; quits Signal when idle; key in the wallet
 > - **Undo:** `./install.sh uninstall signal` (Signal keeps using the wallet: switching back would lock you out of its data)
 <!-- /generated:glance -->
 
@@ -28,30 +28,19 @@ by itself over two launches: the first adds the wallet-encrypted key (keeping th
 plaintext one until it's confirmed), the second deletes the plaintext key. The installer
 runs both launches for you, then checks the result.
 
-## Unlock and idle lock (`signal-guard`)
-Signal Desktop has no lock of its own (Signal has declined to add one), so the Signal
-launcher runs `signal-guard`. First it runs [`wallet-unlock`](../wallet/#unlocking-from-the-desktop-wallet-unlock):
-if the wallet is locked, you get a password dialog on the desktop, and Signal doesn't start
-without it. Then it watches for inactivity. It quits Signal (gracefully) after
-**15 minutes** without keyboard, mouse or controller input. Reopening Signal then needs
-the wallet, so if the wallet is locked you're asked for its password.
+## Password first and idle lock (Wallet apps)
+Signal Desktop has no lock of its own (Signal has declined to add one), so Signal gets the
+wallet's standard protections, set in the installer window's **🔑 Wallet apps** page:
 
-```sh
-signal-guard --status          # guard state and current idle time
-```
+- **Password first:** if the wallet is locked, you get the
+  [`wallet-unlock`](../wallet/#unlocking-from-the-desktop-wallet-unlock) password dialog, and
+  Signal doesn't start without it.
+- **Close after 15 minutes** without keyboard, mouse or controller input (`app-timers`), so
+  reopening Signal needs the wallet again. **Headset off** can also quit it ~10 s after the
+  headset is taken off. Both are adjustable there, like for any other app.
 
-`~/.config/signal-guard.conf`:
-```sh
-IDLE_MINUTES=15
-LOCK_ON_HEADSET_OFF=0   # 1 = also quit Signal ~10 s after the headset is taken off
-```
-
-- Idle is measured from `/dev/input` directly (the `input` group, as SteamOS sets up), so it
-  works whether you're in desktop mode or VR. Constantly chattering sensors (the `als*`
-  magnetometer) are ignored.
-- The headset check reads the proximity sensor (`vcnl4000`), as documented by
-  [steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils#proximity-sensor).
-- Only launches from the menu entry are guarded; `flatpak run org.signal.Signal` isn't.
+These replaced `signal-guard`, which did both for Signal alone; reinstalling the Signal tweak
+switches over and carries its settings (`~/.config/signal-guard.conf`) into the timer.
 
 ## How secure is it?
 The key is only as protected as your wallet. SteamOS's stock `kdewallet` has an
@@ -69,7 +58,7 @@ Signal's warning about "experimental" backends mainly concerns GNOME libsecret o
 other desktops. On KDE, kwallet6 is the native, intended backend.
 
 ## Credits
-Headset-off detection uses the proximity sensor as documented by [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils#proximity-sensor). Signal is a trademark of Signal Technology Foundation; not affiliated. See also [CREDITS.md](../CREDITS.md).
+Signal is a trademark of Signal Technology Foundation; not affiliated. See also [CREDITS.md](../CREDITS.md).
 
 ---
 Check: `./install.sh status signal` · Remove: `./install.sh uninstall signal`
