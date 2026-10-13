@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip narration: Pause / Resume**, and the panel sits relative to the dashboard (it
+  starts beside Arrow Pad, under the dashboard bar, follows the dashboard, and remembers where you
+  drag it).
 - **Screen snip: the narration panel is its own VR panel** (drawn like Arrow Pad and Full Keyboard)
   instead of a window: a compact size, no place in the dashboard (no more flicker with Back to the
   previous window), movable by its top bar.

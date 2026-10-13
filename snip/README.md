@@ -9,8 +9,10 @@ Select a rectangle of the window you're using, then:
   OCR) and copies that.
 - **Narrate**: reads the text aloud ([Piper](https://github.com/rhasspy/piper), offline), at
   the speed set under it (**−** / **+**, 0.75× to 2×, remembered). The snip pops out into a panel
-  of its own in front of you (drawn like Arrow Pad, not a window, so it takes no place in the
-  dashboard) with **■ Stop** / **▶ Again**, speed, and **Close**; drag its top bar to move it. The
+  of its own (drawn like Arrow Pad, not a window, so it takes no place in the dashboard) with
+  **■ Stop** / **▶ Again**, **⏸ Pause** / **▶ Resume**, speed, and **Close**. It starts beside
+  Arrow Pad's place under the dashboard and follows the dashboard; drag its top bar to move it,
+  and it remembers the spot (relative to the dashboard) for next time. The
   full-screen snip goes away, so you can carry on with anything else while it reads. A speed change applies at
   once (it reads sentence by sentence and restarts the current one).
 
