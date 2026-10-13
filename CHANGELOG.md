@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror's "Phone not found" names the phones it did see**, and says Wireless debugging
+  lives in Developer options in the phone's Owner profile (a different phone on the same Wi-Fi
+  was easy to mistake for yours).
 - **Arrow Pad VR's mic button showed the previous dictation state:** the redraw could run before
   the button was recoloured, so the first tap didn't turn it red and it stayed yellow after the
   text arrived. It now goes red while recording, yellow while transcribing, then back to normal.
