@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips scroll (for real this time).** In VR the Steam session takes pointer input only
+  from the lasers, so injected mouse wheels never arrived. The desktop now scrolls with real wheel
+  steps through its own Remote Desktop portal (KDE asks once), other windows with arrow keys /
+  PgUp-PgDn. The top strip bends with curved windows.
 - **Scroll strips for the window docked in the dashboard** (the desktop): strips now hang from each
   window panel's edge anchors, drawn by a component of their own, so docked and floating windows
   both get them.

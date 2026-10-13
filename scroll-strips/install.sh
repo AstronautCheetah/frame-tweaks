@@ -1,6 +1,10 @@
 #!/bin/bash
-# Big scroll strips beside floating windows (vr-dashboard; scrolls with XTest wheel clicks).
+# Big scroll strips beside windows (vr-dashboard). The desktop scrolls through its Remote Desktop
+# portal (KDE asks once); other windows with arrow keys (ydotool).
 source "$(dirname "$0")/../lib/common.sh"
+# Windows other than the desktop scroll with arrow keys through ydotool.
+[ -x "$BIN/ydotool" ] || "$REPO_DIR/ydotool/install.sh"
+mkdir -p "$HOME/.local/state/frame-tweaks"
 # Settings (the installer window edits them; kept on uninstall).
 [ -f "$HOME/.config/frame-tweaks/scroll-strips.json" ] || {
     mkdir -p "$HOME/.config/frame-tweaks"
