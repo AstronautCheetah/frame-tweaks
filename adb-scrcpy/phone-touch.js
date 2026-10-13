@@ -3,7 +3,9 @@
 // upright phone landed at the window's left edge). So a see-through layer of ours covers the mirror
 // window and takes the laser instead: where you press, drag and let go goes to phone-touch (through
 // its sftPhoneTouch binding), which sends them to the phone as touches. The layer is there only
-// while phone-touch runs (it sets window.__sftPhoneTouchAlive every 2 s).
+// while phone-touch runs (it sets window.__sftPhoneTouchAlive every 2 s). A gear below the window's
+// lower-left corner opens its settings beside it (picture, smoothness, joystick speed; saved by
+// phone-touch in ~/.config/phone.conf, which it hands back as window.__sftPhoneTouchConf).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
 // requires: panel anchors | GetPanelAnchorID(e){
 // requires: frame panel height | latestMeasuredPanelLocalHeight
@@ -12,9 +14,9 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 3, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 4, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
-  const TOP_CENTER = 1;                       // panel anchor
+  const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
   const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0 };
   const all = (window.__sftPatches ??= {});
@@ -140,9 +142,97 @@
           } })));
   };
 
+  // ---- the gear and its settings panel ----
+  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.30;       // sizes, metres
+  const OPTIONS = [
+    ['Picture', [['Sharp', { PHONE_MAX_SIZE: '1280', PHONE_BIT_RATE: '4M' }],
+                 ['Balanced', { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M' }],
+                 ['Light', { PHONE_MAX_SIZE: '800', PHONE_BIT_RATE: '1500K' }]], true],
+    ['Smoothness', [['60 fps', { PHONE_MAX_FPS: '60' }], ['30 fps', { PHONE_MAX_FPS: '30' }]], true],
+    ['Joystick scrolling', [['Slow', { PHONE_STICK_SPEED: '8' }], ['Medium', { PHONE_STICK_SPEED: '15' }],
+                            ['Fast', { PHONE_STICK_SPEED: '25' }]], false],
+  ];
+  const settingsOpen = new Set();               // frame IDs whose panel is showing
+  let pending = false;                          // a picture change waits for "Restart stream"
+  let inst = null;
+  const redraw = () => { try { inst?.forceUpdate(); } catch (e) {} };
+  const call = (req) => { try { window.sftPhoneTouch(JSON.stringify(req)); } catch (e) {} };
+  const hueOf = () => {
+    try {
+      const h = window.VRSettingsState?.settings?.get('/settings/camera/monochromeTintHue');
+      if (typeof h === 'number' && isFinite(h)) return Math.round(((h % 1) + 1) % 1 * 360);
+    } catch (e) {}
+    return 210;
+  };
+  const GEAR_SVG = 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1' +
+    'l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1' +
+    'l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z';
+  const gear = (f, k, H, id) => {
+    const h = hueOf(), px = 64, size = GEAR_M * k;
+    const isOpen = settingsOpen.has(f.frameID);
+    return el(XFORM, { key: `${f.frameID}-sft-gear`, parent_id: id,
+                       translation: { x: size / 2, y: -(H / 2 + GAP_M * k + size / 2), z: LIFT_M * k } },
+      el(PANEL, { key: `${f.frameID}-sft-gear-p`, width: size, interactive: true, only_visible_with_laser: false,
+        debug_name: 'SftPhoneGear', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        el('div', { style: { width: `${px}px`, height: `${px}px`, borderRadius: '50%', boxSizing: 'border-box',
+                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                             background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
+                             border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
+                    onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
+          el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
+            el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))));
+  };
+  const settings = (f, k, id) => {
+    const h = hueOf(), conf = window.__sftPhoneTouchConf || {};
+    const chosen = (vals) => Object.entries(vals).every(([key, v]) => conf[key] === v);
+    const button = (label, on, onClick, wide) => el('div', { key: label, onClick, style: {
+      flex: wide ? '1 1 100%' : '1 1 0', padding: '12px 6px', margin: '4px', borderRadius: '10px', textAlign: 'center',
+      fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
+      background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
+      border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}` } }, label);
+    const rows = [];
+    for (const [title, choices, restart] of OPTIONS) {
+      rows.push(el('div', { key: `t-${title}`, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, title));
+      rows.push(el('div', { key: `r-${title}`, style: { display: 'flex' } },
+        ...choices.map(([label, vals]) => button(label, chosen(vals), () => {
+          if (chosen(vals)) return;
+          window.__sftPhoneTouchConf = { ...conf, ...vals };    // shown at once; phone-touch confirms
+          if (restart) pending = true;
+          call({ a: 'set', conf: vals });
+          redraw();
+        }))));
+    }
+    rows.push(el('div', { key: 'restart', style: { display: 'flex', marginTop: '14px' } },
+      button(pending ? 'Restart stream to apply' : 'Restart stream', pending,
+             () => { pending = false; call({ a: 'restart' }); redraw(); }, true)));
+    const pxW = 400;
+    return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
+                       translation: { x: -(GAP_M * k + SETTINGS_M * k / 2), z: LIFT_M * k } },
+      el(PANEL, { key: `${f.frameID}-sft-set-p`, width: SETTINGS_M * k, interactive: true, only_visible_with_laser: false,
+        debug_name: 'SftPhoneSettings', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        el('div', { style: { width: `${pxW}px`, boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',
+                             background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`,
+                             color: '#e8ecf0', fontFamily: 'inherit' } },
+          el('div', { style: { display: 'flex', alignItems: 'center' } },
+            el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, 'Android Mirror'),
+            el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+                        style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
+          ...rows,
+          el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
+             'Picture and smoothness apply when the stream restarts; joystick speed at once.'))));
+  };
+  const extras = (f) => {
+    const page = f.activePage, sz = page?.size;
+    const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
+    const id = typeof page?.GetPanelAnchorID === 'function' && page.GetPanelAnchorID(CENTER_LEFT);
+    if (!H || !Hw || !id) return [];
+    const k = H / Hw;
+    return [gear(f, k, H, id), settingsOpen.has(f.frameID) ? settings(f, k, id) : null];
+  };
+
   class SftPhoneTouch extends Base {
-    componentDidMount() { mounted++; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
-    componentWillUnmount() { mounted--; clearInterval(this.timer); }
+    componentDidMount() { mounted++; inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
+    componentWillUnmount() { mounted--; if (inst === this) inst = null; clearInterval(this.timer); }
     render() {
       try {
         if (!alive() || !learn()) return null;
@@ -150,7 +240,7 @@
         for (const f of FS.frames ?? []) {
           if (f?.title !== TITLE) continue;
           const dock = f.docking?.dockLocation;
-          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(layer(f));
+          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(layer(f), ...extras(f));
         }
         return out.filter(Boolean).length ? out.filter(Boolean) : null;
       } catch (e) { return null; }

@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror settings in VR:** a gear below the mirror's lower-left corner opens picture
+  (Sharp / Balanced / Light), smoothness (60 / 30 fps) and joystick speed; *Restart stream*
+  applies picture changes without closing the mirror.
 - **Android Mirror keeps up with the phone better:** it streams 1024 pixels at 2 Mbit/s (was 1920
   at 8), still sharp in VR; settable in `~/.config/phone.conf`.
 - **Android Mirror: the joystick scrolls the phone** while the laser rests on it. SteamVR
