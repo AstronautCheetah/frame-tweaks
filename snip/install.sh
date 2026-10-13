@@ -11,6 +11,16 @@ if ! "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
     "$QT_VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" PyQt6 || die "couldn't install PyQt6"
 fi
 
+# The narration panel is its own SteamVR overlay (like Arrow Pad): the openvr bindings, on
+# SteamVR's own arm64 library (the wheel only bundles an x86 one). Without them it's a window.
+VR_LIB=/opt/steamvr/bin/linuxarm64/libopenvr_api.so
+if [ -f "$VR_LIB" ]; then
+    "$QT_VENV/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' ||
+        "$QT_VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" openvr
+    OVR=$("$QT_VENV/bin/python" -c 'import importlib.util,os; print(os.path.dirname(importlib.util.find_spec("openvr").origin))')
+    ln -sf "$VR_LIB" "$OVR/libopenvr_api_64.so"
+fi
+
 # OCR: Tesseract from Homebrew (with its English data).
 need_brew
 brew list tesseract >/dev/null 2>&1 || { say "Installing Tesseract (OCR)"; brew install tesseract || die "brew install tesseract failed"; }

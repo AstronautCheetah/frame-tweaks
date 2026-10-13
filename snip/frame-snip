@@ -5,6 +5,7 @@ its text (OCR), or read its text aloud (Narrate).
   frame-snip            capture the window the Steam session has focused (the desktop, or a
                         window you floated) and open the selection window
   frame-snip FILE       select from an image file instead (for testing)
+  frame-snip --narrate IMAGE TEXT   (internal) the narration panel: reads TEXT aloud beside IMAGE
 
 Drag a rectangle with the laser (or mouse), then pick an action. Esc or right-click cancels.
 The selection window opens on the Steam session's display, so it shows up as a VR window.
@@ -23,11 +24,15 @@ import tempfile
 import time
 from pathlib import Path
 
-os.environ["QT_QPA_PLATFORM"] = "xcb"
-os.environ["DISPLAY"] = ":0"                    # the Steam session: every VR window lives here
+NARRATE = len(sys.argv) > 1 and sys.argv[1] == "--narrate"
+if NARRATE:      # the narration panel draws itself into its own SteamVR overlay (like Arrow Pad)
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
+else:
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
+    os.environ["DISPLAY"] = ":0"                # the Steam session: every VR window lives here
 
-from PyQt6.QtCore import QObject, QProcess, QRect, Qt, QTimer, pyqtSignal        # noqa: E402
-from PyQt6.QtGui import QColor, QImage, QPainter, QPen, QPixmap                   # noqa: E402
+from PyQt6.QtCore import QEvent, QObject, QPoint, QPointF, QProcess, QRect, Qt, QTimer, pyqtSignal  # noqa: E402
+from PyQt6.QtGui import QColor, QImage, QMouseEvent, QPainter, QPen, QPixmap      # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,  # noqa: E402
                              QWidget)
 
@@ -265,17 +270,35 @@ class NarrationWindow(QWidget):
              " min-width: 70px; }"
              "QPushButton:hover { background: #355b7a; } QPushButton:disabled { color: #3a434d; }")
 
-    def __init__(self, image, text, speed):
+    PANEL_STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 22px; }"
+                   "QPushButton { background: #232a32; font-weight: 600; padding: 12px 20px; border-radius: 10px;"
+                   " min-width: 50px; }"
+                   "QPushButton:disabled { color: #3a434d; }")
+
+    def __init__(self, image, text, speed, panel=False):
         super().__init__()
         self.setWindowTitle("Screen snip: narrating")
-        self.setStyleSheet(self.STYLE)
+        self.setStyleSheet(self.PANEL_STYLE if panel else self.STYLE)
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(40, 30, 40, 30)
-        # The Steam session shows every window as a 1920x1080 panel, so fill it: the snip as large
-        # as fits above the controls.
+        if panel:
+            # Its own VR panel (NarrationOverlay): compact, with a bar to move it by.
+            lay.setContentsMargins(18, 10, 18, 16)
+            self.handle = QLabel("⠿  Screen snip  ·  drag here to move")
+            self.handle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.handle.setStyleSheet("color: #9aa6b2; font-size: 18px; padding: 6px;"
+                                      " background: #161c23; border-radius: 8px;")
+            lay.addWidget(self.handle)
+            box = (860, 440)
+        else:
+            # The Steam session shows every window as a 1920x1080 panel, so fill it: the snip as
+            # large as fits above the controls.
+            lay.setContentsMargins(40, 30, 40, 30)
+            self.handle = None
+            box = (1840, 800)
         pic = QLabel()
-        pm = QPixmap.fromImage(image).scaled(1840, 800, Qt.AspectRatioMode.KeepAspectRatio,
-                                             Qt.TransformationMode.SmoothTransformation)
+        pm = QPixmap.fromImage(image)
+        if pm.width() > box[0] or pm.height() > box[1] or not panel:
+            pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         pic.setPixmap(pm)
         pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(pic, 1)
@@ -306,7 +329,11 @@ class NarrationWindow(QWidget):
         self.narrator.progress.connect(lambda i, n: self.state.setText(f"Reading aloud: part {i + 1} of {n}"))
         self.narrator.finished.connect(self.done)
         self.narrator.start()
-        self.resize(1920, 1080)
+        if panel:
+            self.setFixedWidth(max(700, min(900, pm.width() + 36)))
+            self.adjustSize()
+        else:
+            self.resize(1920, 1080)
 
     def show_speed(self):
         self.speed_label.setText(f"{self.speed:g}×")
@@ -339,6 +366,162 @@ class NarrationWindow(QWidget):
     def closeEvent(self, ev):
         self.narrator.cleanup()
         super().closeEvent(ev)
+
+
+class NarrationOverlay(QObject):
+    """Shows a widget as its own SteamVR overlay, the way Arrow Pad does: laser clicks reach its
+    buttons; a press elsewhere (its top bar, say) carries it with the controller until released.
+    It redraws only when the widget changes, behind a cover overlay so a reload doesn't blink."""
+    WIDTH_M = 0.6
+
+    def __init__(self, widget):
+        super().__init__()
+        import openvr
+        self.vr, self.w = openvr, widget
+        openvr.init(openvr.VRApplication_Overlay)
+        self.ov, self.system = openvr.VROverlay(), openvr.VRSystem()
+        key = f"frame-tweaks.snip.narration.{os.getpid()}"
+        self.h = self.ov.createOverlay(key, "Screen snip")
+        self.cover = self.ov.createOverlay(key + ".cover", "Screen snip")
+        self.ov.setOverlayInputMethod(self.h, openvr.VROverlayInputMethod_Mouse)
+        self.ov.setOverlaySortOrder(self.h, 10)
+        self.ov.setOverlaySortOrder(self.cover, 11)
+        for o in (self.h, self.cover):
+            self.ov.setOverlayWidthInMeters(o, self.WIDTH_M)
+        self.place_in_front()
+        self.tex_dir = Path(tempfile.mkdtemp(prefix="snip-panel-"))
+        self.n, self.last_digest, self.cover_path, self.pressed, self.drag = 0, None, None, None, None
+        self.render()
+        self.ov.showOverlay(self.h)
+        QTimer(self, interval=22, timeout=self.poll).start()
+        QTimer(self, interval=200, timeout=self.render).start()
+
+    def matrix(self, rows):
+        m = self.vr.HmdMatrix34_t()
+        for i in range(3):
+            for j in range(4):
+                m.m[i][j] = rows[i][j]
+        return m
+
+    def device_pose(self, index):
+        poses = self.system.getDeviceToAbsoluteTrackingPose(self.vr.TrackingUniverseStanding, 0, index + 1)
+        if index >= len(poses) or not poses[index].bPoseIsValid:
+            return None
+        m = poses[index].mDeviceToAbsoluteTracking.m
+        return [[m[r][c] for c in range(4)] for r in range(3)]
+
+    def place_in_front(self):
+        """0.65 m ahead of the headset, a little below eye level, upright, facing you."""
+        head = self.device_pose(self.vr.k_unTrackedDeviceIndex_Hmd)
+        if head is None:
+            fx, fz, pos = 0.0, -1.0, [0.0, 1.4, 0.0]
+        else:
+            fx, fz = -head[0][2], -head[2][2]
+            n = (fx * fx + fz * fz) ** 0.5 or 1.0
+            fx, fz, pos = fx / n, fz / n, [head[r][3] for r in range(3)]
+        x_axis, z_axis = [-fz, 0.0, fx], [-fx, 0.0, -fz]
+        centre = [pos[0] + fx * 0.65, pos[1] - 0.15, pos[2] + fz * 0.65]
+        self.pose = [[x_axis[i], (0.0, 1.0, 0.0)[i], z_axis[i], centre[i]] for i in range(3)]
+        self.apply_pose()
+
+    def apply_pose(self):
+        m = self.matrix(self.pose)
+        for o in (self.h, self.cover):
+            self.ov.setOverlayTransformAbsolute(o, self.vr.TrackingUniverseStanding, m)
+
+    def render(self):
+        img = self.w.grab().toImage()
+        digest = hash(bytes(img.constBits().asstring(img.sizeInBytes())))
+        if digest == self.last_digest:
+            return
+        self.last_digest = digest
+        self.n += 1
+        path = str(self.tex_dir / f"panel-{self.n}.png")      # new name each time (SteamVR caches by name)
+        img.save(path, "PNG")
+        covered = self.cover_path is not None
+        if covered:
+            self.ov.showOverlay(self.cover)                   # the old picture on top while it reloads
+        self.ov.setOverlayFromFile(self.h, path)
+        scale = self.vr.HmdVector2_t()
+        scale.v[0], scale.v[1] = img.width(), img.height()
+        self.ov.setOverlayMouseScale(self.h, scale)
+        QTimer.singleShot(120 if covered else 0, lambda: self.uncover(path))
+
+    def uncover(self, path):
+        self.ov.hideOverlay(self.cover)
+        self.ov.setOverlayFromFile(self.cover, path)
+        old, self.cover_path = self.cover_path, path
+        if old and old != path:
+            Path(old).unlink(missing_ok=True)
+
+    def to_widget(self, mouse):
+        return QPoint(int(mouse.x), int(self.w.height() - mouse.y))
+
+    def send(self, target, etype, pos, buttons):
+        local = target.mapFrom(self.w, pos) if target is not self.w else pos
+        QApplication.sendEvent(target, QMouseEvent(etype, QPointF(local), QPointF(pos), Qt.MouseButton.LeftButton,
+                                                   buttons, Qt.KeyboardModifier.NoModifier))
+
+    def button_at(self, pos):
+        t = self.w.childAt(pos)
+        while t is not None and not isinstance(t, QPushButton):
+            t = t.parentWidget()
+        return t
+
+    def poll(self):
+        vr, ev = self.vr, self.vr.VREvent_t()
+        while self.ov.pollNextOverlayEvent(self.h, ev)[0]:
+            t, dev = ev.eventType, ev.trackedDeviceIndex
+            if t == vr.VREvent_MouseButtonDown:
+                pos = self.to_widget(ev.data.mouse)
+                b = self.button_at(pos)
+                if b is not None:
+                    self.pressed = b
+                    self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
+                else:                                          # elsewhere: carry the panel
+                    ctrl = self.device_pose(dev)
+                    if ctrl is not None:
+                        self.drag = (dev, self.relative(ctrl, self.pose))
+            elif t == vr.VREvent_MouseButtonUp:
+                pos = self.to_widget(ev.data.mouse)
+                if self.pressed is not None:
+                    self.send(self.pressed, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
+                    self.pressed = None
+                self.drag = None
+        if self.drag is not None:
+            ctrl = self.device_pose(self.drag[0])
+            if ctrl is not None:
+                self.pose = self.compose(ctrl, self.drag[1])
+                self.apply_pose()
+
+    @staticmethod
+    def compose(a, b):
+        return [[sum(a[i][k] * b[k][j] for k in range(3)) + (a[i][3] if j == 3 else 0) for j in range(4)] for i in range(3)]
+
+    @staticmethod
+    def relative(a, b):
+        """a^-1 * b for rigid 3x4 transforms."""
+        rt = [[a[k][i] for k in range(3)] for i in range(3)]
+        t = [-sum(rt[i][k] * a[k][3] for k in range(3)) for i in range(3)]
+        inv = [rt[i] + [t[i]] for i in range(3)]
+        return NarrationOverlay.compose(inv, b)
+
+    def close(self):
+        try:
+            for o in (self.h, self.cover):
+                self.ov.destroyOverlay(o)
+            self.vr.shutdown()
+        except Exception:
+            pass
+        shutil.rmtree(self.tex_dir, ignore_errors=True)
+
+
+def vr_panel_available():
+    try:
+        import openvr  # noqa: F401
+        return True
+    except Exception:
+        return False
 
 
 # ---- selection window -----------------------------------------------------------------------
@@ -565,14 +748,38 @@ class Snip(QWidget):
         if not PIPER.exists() or not VOICE.exists():
             notify("Narrate needs Piper", "Reinstall 'Speech engine' in Frame Tweaks")
             return self.close()
-        # Pop the snip out into its own small window that reads it aloud, and give the rest of
-        # VR back: the full-screen selection window closes.
-        self.popout = NarrationWindow(snip, text, self.speed)
-        self.popout.show()
+        # Pop the snip out and give the rest of VR back: the full-screen selection window closes.
+        # In VR it's a panel of its own (a separate process, drawn like Arrow Pad); else a window.
+        if vr_panel_available():
+            d = Path(tempfile.mkdtemp(prefix="snip-narrate-in-"))
+            snip.save(str(d / "snip.png"))
+            (d / "text.txt").write_text(text)
+            subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--narrate",
+                              str(d / "snip.png"), str(d / "text.txt")], start_new_session=True)
+        else:
+            self.popout = NarrationWindow(snip, text, self.speed)
+            self.popout.show()
         self.close()
 
 
+def narrate_panel(image_path, text_path):
+    """The narration panel process (frame-snip --narrate): its own SteamVR overlay."""
+    app = QApplication(sys.argv[:1])
+    image, text = QImage(image_path), Path(text_path).read_text()
+    shutil.rmtree(Path(image_path).parent, ignore_errors=True)
+    w = NarrationWindow(image, text, load_speed(), panel=True)
+    w.show()
+    overlay = NarrationOverlay(w)
+    w.destroyed.connect(app.quit)
+    w.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+    code = app.exec()
+    overlay.close()
+    return code
+
+
 def main():
+    if NARRATE:
+        return narrate_panel(sys.argv[2], sys.argv[3])
     app = QApplication(sys.argv[:1])
     try:
         image = QImage(sys.argv[1]) if len(sys.argv) > 1 else capture_focused()
