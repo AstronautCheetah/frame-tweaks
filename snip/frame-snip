@@ -324,6 +324,7 @@ class NarrationWindow(QWidget):
     def __init__(self, image, text, speed, panel=False):
         super().__init__()
         self.panel, self.speed, self.narrator, self.collapsed = panel, speed, None, False
+        self.toggled = False                     # the last resize was Collapse/Expand (see pivot)
         self.setWindowTitle("Screen snip: narrating")
         self.setStyleSheet(self.PANEL_STYLE if panel else self.STYLE)
         outer = QVBoxLayout(self)
@@ -345,7 +346,6 @@ class NarrationWindow(QWidget):
             lay.setContentsMargins(40, 30, 40, 30)
         self.pic = QLabel()                       # the snip (or, after Paste, the pasted text)
         self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.pic.setWordWrap(True)
         lay.addWidget(self.pic, 1)
         self.state = QLabel("Preparing…")
         self.state.setStyleSheet("color: #9aa6b2;")
@@ -389,11 +389,13 @@ class NarrationWindow(QWidget):
         close.clicked.connect(self.close)
         row2.addWidget(close)
         if panel:
-            collapse = QPushButton(" Collapse")
+            collapse = QPushButton("Collapse ")
             collapse.setIcon(breeze("collapse"))
             collapse.setIconSize(QSize(30, 30))
+            collapse.setLayoutDirection(Qt.LayoutDirection.RightToLeft)      # icon on the right
             collapse.clicked.connect(self.collapse)
             row2.addWidget(collapse)
+            self.collapse_button = collapse
         lay.addLayout(row2)
         # Collapsed: just Expand, with a margin to grab the panel by.
         self.mini = QWidget()
@@ -405,6 +407,7 @@ class NarrationWindow(QWidget):
         expand.setToolTip("Expand")
         expand.setStyleSheet("min-width: 0px; padding: 10px;")
         expand.clicked.connect(self.expand)
+        self.expand_button = expand
         mini.addWidget(expand)
         self.mini.hide()
         outer.addWidget(self.mini)
@@ -436,6 +439,7 @@ class NarrationWindow(QWidget):
         if self.view == "text" or self.image is None:
             shown = self.text if len(self.text) <= 600 else self.text[:600].rstrip() + " …"
             self.pic.setPixmap(QPixmap())
+            self.pic.setWordWrap(True)
             self.pic.setText(shown)
             self.pic.setStyleSheet("background: #161c23; border-radius: 8px; padding: 14px;"
                                    " font-size: 20px; color: #e8ecf0;")
@@ -448,6 +452,8 @@ class NarrationWindow(QWidget):
             if pm.width() > box[0] or pm.height() > box[1] or not self.panel:
                 pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             self.pic.setText("")
+            # (a word-wrapping label measures its height from its text alone: 0 for an image)
+            self.pic.setWordWrap(False)
             self.pic.setStyleSheet("")
             self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.pic.setMinimumWidth(0)
@@ -496,13 +502,27 @@ class NarrationWindow(QWidget):
             self.full.setFixedWidth(w)
             self.setFixedSize(w, self.full.sizeHint().height())
 
+    def pivot(self):
+        """Where the Collapse / Expand icon is (widget pixels): the overlay keeps that point still
+        when the panel collapses or expands, so the icon stays under the laser."""
+        b = self.expand_button if self.collapsed else getattr(self, "collapse_button", None)
+        if b is None:
+            return None
+        if b is self.collapse_button:                   # its icon, at the right end
+            p = b.mapTo(self, QPoint(b.width() - 20 - 15, b.height() // 2))
+        else:
+            p = b.mapTo(self, QPoint(b.width() // 2, b.height() // 2))
+        return p
+
     def collapse(self):
+        self.toggled = True
         self.collapsed = True
         self.full.hide()
         self.mini.show()
         self.fit()
 
     def expand(self):
+        self.toggled = True
         self.collapsed = False
         self.mini.hide()
         self.full.show()
@@ -656,6 +676,8 @@ class NarrationOverlay(QObject):
         """Pose = dashboard anchor x the remembered offset (follows the dashboard when it moves)."""
         if self.drag is not None or not getattr(self, "offset", None):
             return False
+        if getattr(self, "height_px", 0) and (self.w.width(), self.w.height()) != (self.width_px, self.height_px):
+            return True                       # a resize is pending: render() places it (pivot / top edge)
         a = self.anchor()
         if a is None:
             return False
@@ -729,15 +751,28 @@ class NarrationOverlay(QObject):
 
     def render(self):
         if self.w.width() != self.width_px or self.w.height() != getattr(self, "height_px", 0):
-            old_h, new_h = getattr(self, "height_px", 0) * self.M_PER_PX, self.w.height() * self.M_PER_PX
-            top = None
-            if getattr(self, "pose", None) and old_h:          # keep the top edge where it was
-                top = [[c[0], c[1], c[2], c[3] + c[1] * old_h / 2] for c in self.pose]
-                self.pose = [[t[0], t[1], t[2], t[3] - t[1] * new_h / 2] for t in top]
+            k = self.M_PER_PX
+            old_w, old_h = self.width_px, getattr(self, "height_px", 0)
+            new_w, new_h = self.w.width(), self.w.height()
+            moved = False
+            if getattr(self, "pose", None) and old_h:
+                pv, old_pv = self.w.pivot(), getattr(self, "last_pivot", None)
+                if getattr(self.w, "toggled", False) and pv is not None and old_pv is not None:
+                    # Collapse / Expand: the icon's point stays where it was.
+                    a = (old_pv.x() - old_w / 2 - (pv.x() - new_w / 2)) * k     # along the panel's x
+                    b = (old_pv.y() - old_h / 2 - (pv.y() - new_h / 2)) * k     # pixels down = -y
+                    self.pose = [[c[0], c[1], c[2], c[3] + c[0] * a - c[1] * b] for c in self.pose]
+                else:                                       # otherwise the top edge stays
+                    self.pose = [[c[0], c[1], c[2], c[3] + c[1] * (old_h - new_h) * k / 2] for c in self.pose]
+                moved = True
+            self.w.toggled = False
             self.size_m()
-            self.height_px = self.w.height()
-            if top is not None:
+            self.height_px = new_h
+            if moved:
                 self.apply_pose()
+                if self.offset:                             # (follow() works from the offset)
+                    self.save_offset()
+        self.last_pivot = self.w.pivot()
         img = self.w.grab().toImage()
         digest = hash(bytes(img.constBits().asstring(img.sizeInBytes())))
         if digest == self.last_digest:

@@ -5,12 +5,13 @@
 // It only switches the way a click on that window's dashboard button does (switchToFrameInternal).
 // requires: window.Dashboard | window.Dashboard=
 // requires: Dashboard.switchToFrameInternal() | switchToFrameInternal(e,t,r){
+// requires: Dashboard.autoSwitchOverlayIfNeeded() | autoSwitchOverlayIfNeeded(){
 // requires: window.DashboardStore | window.DashboardStore=
 // requires: DashboardStore.activeFrame | get activeFrame(){
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'float-return', VERSION = 3, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
+  const NAME = 'float-return', VERSION = 4, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -64,6 +65,33 @@
     last = a ? { id, dock } : last;
   };
   const timer = setInterval(() => { try { tick(); } catch (e) { /* dashboard changed: stay idle */ } }, 200);
-  all[NAME] = { version: VERSION, stop: () => clearInterval(timer), get returned() { return returned; } };
+  // When the shown window closes, the dashboard picks what to show next itself (usually Steam,
+  // which then flashes before tick() above corrects it). Make that choice ours: the window before.
+  const hadOwnAuto = Object.prototype.hasOwnProperty.call(D, 'autoSwitchOverlayIfNeeded');
+  const origAuto = D.autoSwitchOverlayIfNeeded;
+  if (typeof origAuto === 'function') {
+    D.autoSwitchOverlayIfNeeded = function (...args) {
+      try {
+        if (!DS.activeFrame && last && last.dock === DASH && !FS.GetFrame(last.id)) {
+          const prev = [...history].reverse().find((x) => x !== last.id && dockOf(x) === DASH);
+          if (prev != null && D.switchToFrameInternal(FS.GetFrame(prev), undefined, 'sft-float-return-closed')) {
+            history = history.filter((x) => x !== last.id);
+            returned++;
+            last = { id: prev, dock: DASH };
+            closed = null;
+            return undefined;
+          }
+        }
+      } catch (e) { /* fall back to the dashboard's own choice */ }
+      return origAuto.apply(this, args);
+    };
+  }
+  all[NAME] = { version: VERSION, get returned() { return returned; },
+    stop: () => {
+      clearInterval(timer);
+      if (typeof origAuto === 'function') {
+        if (hadOwnAuto) D.autoSwitchOverlayIfNeeded = origAuto; else delete D.autoSwitchOverlayIfNeeded;
+      }
+    } };
   return 'patched';
 })()
