@@ -288,7 +288,11 @@ def components():
 
 def status(cid):
     """(code, text): 0 ok, 1 not installed, 2 needs attention."""
-    r = subprocess.run([str(REPO / cid / "status.sh")], capture_output=True, text=True)
+    try:
+        # (a check that never returns would hold a worker for good; four of them, every status)
+        r = subprocess.run([str(REPO / cid / "status.sh")], capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        return 2, "status check didn't finish (took over a minute)"
     text = r.stdout.strip().split(None, 1)[-1] if r.stdout.strip() else ""
     return r.returncode, text
 
@@ -682,8 +686,9 @@ class WalletApps(QWidget):
             proc.start(str(WALLET_UNLOCK), [])
             self.wallet_state.setText("Waiting for the wallet password (look for the dialog)…")
         else:
-            subprocess.run([str(WALLET_UNLOCK), "--lock"], capture_output=True, timeout=20)
-            self.show_wallet_state()
+            proc = QProcess(self)                   # (not waited for here: the window stays usable)
+            proc.finished.connect(lambda *_: self.show_wallet_state())
+            proc.start(str(WALLET_UNLOCK), ["--lock"])
 
     def fill(self):
         while self.rows.count():
@@ -1399,6 +1404,33 @@ class Window(QWidget):
 SERVER = f"frame-tweaks-gui-{os.getuid()}"
 
 
+def watch_for_hangs(log_dir):
+    """If the window stops responding (its event loop stalls 10 s), write where every thread is
+    to log_dir/gui-hang-<time>.log: the next freeze leaves a clue instead of nothing."""
+    import faulthandler
+    import threading
+    beat = [time.monotonic()]
+    QTimer(QApplication.instance(), interval=1000, timeout=lambda: beat.__setitem__(0, time.monotonic())).start()
+
+    def watch():
+        reported = False
+        while True:
+            time.sleep(2)
+            stalled = time.monotonic() - beat[0]
+            if stalled > 10 and not reported:
+                try:
+                    log_dir.mkdir(parents=True, exist_ok=True)
+                    with open(log_dir / time.strftime("gui-hang-%Y%m%d-%H%M%S.log"), "w") as f:
+                        f.write(f"The installer window's event loop stalled for {stalled:.0f} s. Threads:\n")
+                        faulthandler.dump_traceback(f, all_threads=True)
+                except OSError:
+                    pass
+                reported = True
+            elif stalled < 3:
+                reported = False
+    threading.Thread(target=watch, daemon=True, name="hang-watch").start()
+
+
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("steam-frame-tweaks")
@@ -1413,6 +1445,7 @@ def main():
     QLocalServer.removeServer(SERVER)
     server = QLocalServer()
     server.listen(SERVER)
+    watch_for_hangs(Path.home() / ".local/state/frame-tweaks/logs")
     w = Window()
     server.newConnection.connect(lambda: (server.nextPendingConnection(), w.showNormal(),
                                           w.raise_(), w.activateWindow()))

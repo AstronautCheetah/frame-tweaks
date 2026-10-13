@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror turns with the phone without shrinking:** SteamVR keeps a floating window's
+  width when its shape changes, so turning the phone sideways left a thin strip. A small dashboard
+  patch scales a window whose picture turns, so its long side stays as long.
+- **Screen snip from Steam's "+" menu works:** Steam starts it as a game, and the selection window
+  then took no laser input; it now starts itself again as a plain program, like Arrow Pad's key.
+- **The installer window records a freeze:** if it stops responding for 10 s, where it was stuck
+  goes to `~/.local/state/frame-tweaks/logs/gui-hang-*.log`. A status check can no longer hang
+  for good (1 minute limit), and Lock now no longer waits on the wallet.
 - **New Accessibility group** in the installer window: Dictation, whisper-frame, Arrow Pad, Screen
   snip and Screen reader moved there from Convenience.
 - **Android Mirror: no more black bars beside an upright phone.** The window has to fit inside

@@ -28,10 +28,15 @@ Mirror and control an Android phone in a desktop window.
 The Steam session makes every app window 1920×1080, so a phone held upright used to show with
 wide black bars. `phone-fit` (started by `phone`) gives the mirror window the phone screen's
 shape (485×1080 upright, 1920×862 sideways, for a 20:9 phone: it has to fit inside the 1920×1080
-screen, or it's shown as 1920×1080 with black bars anyway; in VR both come out about the same size) and follows it when you rotate
+screen, or it's shown as 1920×1080 with black bars anyway) and follows it when you rotate
 the phone: scrcpy reports the screen's shape to the window system, and a window with a fixed
 size keeps it, so its VR panel takes that shape. In desktop mode it does nothing; KWin sizes
 the window normally there.
+
+SteamVR keeps a floating window's width when its shape changes, so turning the phone sideways
+used to shrink the window to a strip as wide as the upright phone. A small dashboard patch
+(`patch.js`, installed when the [VR windows](../vr-dashboard/) helper is) scales a window whose
+picture turns, so its long side stays as long: the window just turns.
 
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,
