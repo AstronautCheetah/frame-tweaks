@@ -1,8 +1,6 @@
 #!/bin/bash
-# Big scroll strips beside floating windows (vr-dashboard; scrolling via ydotool).
+# Big scroll strips beside floating windows (vr-dashboard; scrolls with XTest wheel clicks).
 source "$(dirname "$0")/../lib/common.sh"
-# Scrolling goes through ydotool's virtual mouse wheel.
-[ -x "$BIN/ydotool" ] || "$REPO_DIR/ydotool/install.sh"
 # Settings (the installer window edits them; kept on uninstall).
 [ -f "$HOME/.config/frame-tweaks/scroll-strips.json" ] || {
     mkdir -p "$HOME/.config/frame-tweaks"
