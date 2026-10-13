@@ -4,21 +4,28 @@
 // scroll a particular window), through vr-dashboard's sftScroll binding (ydotool's mouse wheel).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard. Settings:
 // window.__sftPatchConfig["scroll-strips"] = {vertical: "right"|"left"|"off",
-//   horizontal: "top"|"bottom"|"off", thickness: metres (local), gap: metres}.
+//   horizontal: "top"|"bottom"|"off", thickness: metres, gap: metres}. Sizes are real metres (the
+// floating window's own space); the page elements stay small, so the dashboard's layout is unchanged.
+// (Version 1 used the window's scaled local size and big page elements: strips far too big and far
+// away, and the Steam bar drawn too large.)
 // requires: UndockedOverlay.renderFloatingFrame | renderFloatingFrame(){
 // requires: the grab handle panel | debug_name:"GrabHandle",origin:
-// requires: frame panel height | latestMeasuredPanelLocalHeight
+// requires: frame panel height | latestMeasuredPanelWorldHeight
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'scroll-strips', VERSION = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 2, WORLD = 4;
   const NOTCHES_PER_LENGTH = 40;     // a drag along the whole strip scrolls this many wheel notches
   const PAGE = 10;                   // notches for a tap near an end
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
   const FS = window.FrameStore;
-  const cfg = () => ({ vertical: 'right', horizontal: 'top', thickness: 0.12, gap: 0.03,
-                       ...(window.__sftPatchConfig?.[NAME] ?? {}) });
+  const cfg = () => {
+    const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
+    c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
+    c.gap = Math.min(0.1, Math.max(0, Number(c.gap) || 0.015));
+    return c;
+  };
 
   const movers = () => {
     const rootEl = document.getElementById('root');
@@ -89,10 +96,10 @@
     else if (at > 0.75) d.axis === 'y' ? send(0, -PAGE) : send(PAGE, 0);
   };
   const strip = (axis, length_m, thick_m) => {
-    const px = 60, lenPx = Math.round(px * length_m / thick_m);
+    const px = 16, lenPx = Math.min(600, Math.round(px * length_m / thick_m));   // small page elements
     const style = { width: `${axis === 'y' ? px : lenPx}px`, height: `${axis === 'y' ? lenPx : px}px`,
       background: 'rgba(40, 50, 62, 0.55)', borderRadius: `${px / 2}px`, boxSizing: 'border-box',
-      border: '3px solid rgba(127, 178, 229, 0.55)' };
+      border: '1px solid rgba(127, 178, 229, 0.6)' };
     return el(PANEL, { width: axis === 'y' ? thick_m : length_m, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: PANEL_ORIGIN, inputFocusParams: { bCanTakeKeyboardFocus: false },
       hide_lasermouse_when_clicking: false },
@@ -109,7 +116,7 @@
     const tree = orig.call(this);
     try {
       const f = this.props.frame, page = f?.activePage;
-      const H = page?.size?.latestMeasuredPanelLocalHeight, c = page?.size?.latestContentSize;
+      const H = page?.size?.latestMeasuredPanelWorldHeight, c = page?.size?.latestContentSize;
       if (!H || !c?.unHeight || f.docking.dockLocation !== WORLD || !learn(tree)) return tree;
       const W = H * c.unWidth / c.unHeight, o = cfg(), t = o.thickness, g = o.gap;
       const extra = [];
