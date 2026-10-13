@@ -1,95 +1,101 @@
-// steam-frame-tweaks phone-rotate: a floating window that rotates (the Android Mirror when you turn
-// the phone) keeps its size, just turned. SteamVR keeps a floating window's width when its shape
-// changes, so an upright phone turned sideways shrank to a thin strip as wide as the upright one.
-// When a window's picture turns (upright <-> sideways, same shape), this scales it so its long
-// side stays as long as before.
-// A floating window also starts as wide as a standard one whatever its shape, so an upright phone
-// started over 2 m tall: an upright window first seen taller than UPRIGHT_M is scaled down to it.
+// steam-frame-tweaks phone-rotate: an upright floating window (the Android Mirror) comes up at a
+// sensible size, and turning it (the phone sideways and back) just turns it.
+// SteamVR starts every floating window as wide as a standard one whatever its shape, so an upright
+// phone came up over 2 m tall; and it keeps a window's width when its shape changes, so turning
+// the phone sideways shrank it to a strip. For a floating window that has been upright, this sets
+// the panel height the dashboard's own override uses (size.mainPanelHeightOverride, as theater
+// mode does), so its long side is LONG_M: upright, LONG_M tall; sideways, LONG_M wide. Resizing
+// it with its handle still works on top of that.
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
-// requires: UndockedOverlay.startFloatingWindowMove | startFloatingWindowMove(e){
-// requires: floating transform state | this.setState({xfTransform:r})
+// requires: the frame's panel height override | resize_main_panel_height:g.size.mainPanelHeightOverride
+// requires: override from component props | null!=this.componentProps.forcedUniformDashboardHeight
+// requires: component props from the frame's props | get componentProps(){
+// requires: overlay picture size | GetOverlayMouseScale(
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-rotate', VERSION = 2, WORLD = 4;
+  const NAME = 'phone-rotate', VERSION = 5, WORLD = 4;
+  const LONG_M = 0.8;                  // long side of a turned window, metres (a standard one: 0.98 wide)
+  const SETTLE_MS = 800;               // while the phone turns, the window passes through other sizes
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
   const FS = window.FrameStore;
-  if (!FS) return 'not patched: dashboard objects missing';
+  if (!FS?.frames) return 'not patched: dashboard objects missing';
 
-  // The React components that float windows, by frame.
-  const movers = () => {
-    const out = new Map();
-    const rootEl = document.getElementById('root') ?? document.body.firstElementChild;
-    const key = rootEl && Object.keys(rootEl).find((k) => k.startsWith('__reactContainer$'));
-    if (!key) return out;
-    const stack = [rootEl[key]];
-    let n = 0;
-    while (stack.length && n++ < 50000) {
-      const fb = stack.pop();
-      const s = fb.stateNode;
-      if (s && typeof s.startFloatingWindowMove === 'function' && s.props?.frame) out.set(s.props.frame, s);
-      if (fb.sibling) stack.push(fb.sibling);
-      if (fb.child) stack.push(fb.child);
-    }
-    return out;
+  // frame -> panel height (local units) for its size component's override. Each window's size
+  // component holds its componentProps as a MobX computed value (made from the class's getter
+  // when the window was created): wrap that value's derivation, per window.
+  const heights = new WeakMap();
+  const wrapped = new Map();           // size component -> its original derivation (for stop)
+  const wrap = (f) => {
+    const size = f.size;
+    if (!size || wrapped.has(size)) return true;
+    const admin = Object.getOwnPropertySymbols(size).map((k) => size[k]).find((v) => v?.values_?.get);
+    const cv = admin?.values_.get('componentProps');
+    if (typeof cv?.derivation !== 'function') return false;
+    const orig = cv.derivation;
+    cv.derivation = function () {
+      const p = orig.call(this);
+      const h = heights.get(f);
+      return h === undefined ? p : { ...p, forcedUniformDashboardHeight: h };
+    };
+    wrapped.set(size, { cv, orig });
+    return true;
   };
+  // The override is computed from the frame's (observable) props: a fresh copy makes it look again.
+  const nudge = (f) => { try { f.props = { ...f.props }; } catch (e) { /* changed */ } };
 
-  // frame -> {stable, cand, since}: its picture's settled size, and a new one until it settles
-  // (while the phone turns, the window passes through other sizes for a moment).
-  const SETTLE_MS = 1200;
-  const last = new WeakMap();
-  const UPRIGHT_M = 0.8;               // starting height of an upright window (a standard one: 0.55)
-  const sized = new WeakSet();
-  const floatedAt = new WeakMap();     // (its size is measured again once it floats: wait a moment)
-  let turned = 0, shrunk = 0;
+  // The window's picture size, from its overlay (the page's latestContentSize is only read again
+  // when something else changes, so it can stay at the old shape after the phone turns).
+  const pictureSize = (f) => {
+    try {
+      const m = VRHTML.VROverlay.GetOverlayMouseScale(VRHTML.VROverlay.FindOverlay(f.activePage.summonOverlayKey));
+      if (m?.x > 0 && m?.y > 0) return { unWidth: m.x, unHeight: m.y };
+    } catch (e) { /* no overlay */ }
+    return f.activePage?.size?.latestContentSize;
+  };
+  const upright = new WeakSet();       // floating windows seen upright: these get the override
+  const shapes = new WeakMap();        // frame -> {w, h, since}
+  let set = 0;
   const timer = setInterval(() => {
     try {
-      let found = null;
+      const t = Date.now();
       for (const f of FS.frames ?? []) {
-        const c = f?.activePage?.size?.latestContentSize;
-        if (f && f.docking?.dockLocation !== WORLD) {      // docked: floating it again starts afresh
-          floatedAt.delete(f); sized.delete(f);
+        if (!f?.size) continue;
+        const c = f.docking?.dockLocation === WORLD ? pictureSize(f) : null;
+        if (f.docking?.dockLocation !== WORLD || !c?.unWidth || !c?.unHeight) {
+          if (heights.has(f)) { heights.delete(f); nudge(f); }       // docked: the dashboard's size
+          upright.delete(f); shapes.delete(f);
+          continue;
         }
-        if (!c?.unWidth || !c?.unHeight || f.docking?.dockLocation !== WORLD) continue;
-        const cur = { w: c.unWidth, h: c.unHeight }, t = Date.now();
-        if (!floatedAt.has(f)) floatedAt.set(f, t);
-        if (!sized.has(f) && t - floatedAt.get(f) > 1000) {   // first sight: an upright window far too tall
-          const hw = f.activePage.size.latestMeasuredPanelWorldHeight;     // (without our scale)
-          found ??= movers();
-          const s = found.get(f), xf = s?.state?.xfTransform;
-          if (hw > 0 && xf) {
-            sized.add(f);
-            const sc = xf.scale ?? { x: 1, y: 1, z: 1 };
-            if (cur.h > cur.w && hw > UPRIGHT_M * 1.05 && Math.abs(sc.x - 1) < 1e-3 && !f.docking.beingDragged) {
-              const k = UPRIGHT_M / hw;
-              s.setState({ xfTransform: { ...xf, scale: { x: k, y: k, z: k } } });
-              shrunk++;
-            }
-          }
+        const s = shapes.get(f);
+        if (!s || s.w !== c.unWidth || s.h !== c.unHeight) {
+          shapes.set(f, { w: c.unWidth, h: c.unHeight, since: t });
+          continue;
         }
-        const st = last.get(f) ?? { stable: cur, cand: cur, since: t };
-        last.set(f, st);
-        if (cur.w !== st.cand.w || cur.h !== st.cand.h) { st.cand = cur; st.since = t; }
-        if (t - st.since < SETTLE_MS || (st.cand.w === st.stable.w && st.cand.h === st.stable.h)) continue;
-        const was = st.stable, now = st.cand;
-        st.stable = now;
-        // A turn: upright <-> sideways, the same shape turned (aspect ratios within 5% of inverse).
-        const turnedShape = (was.w > was.h) !== (now.w > now.h) &&
-                            Math.abs((was.w / was.h) * (now.w / now.h) - 1) < 0.05;
-        if (!turnedShape) continue;
-        found ??= movers();
-        const s = found.get(f), xf = s?.state?.xfTransform;
-        if (!xf || f.docking.beingDragged) continue;
-        // The width (in metres) stays: scale so the long side does instead.
-        const k = Math.max(1, was.h / was.w) / Math.max(1, now.h / now.w);
-        const sc = xf.scale ?? { x: 1, y: 1, z: 1 };
-        s.setState({ xfTransform: { ...xf, scale: { x: sc.x * k, y: sc.y * k, z: sc.z * k } } });
-        turned++;
+        if (t - s.since < SETTLE_MS) continue;
+        if (s.h > s.w) upright.add(f);
+        if (!upright.has(f)) continue;
+        const perMetre = 1 / (f.activePage.size.mainPanelWorldScaleIgnoringResizing || 1);
+        const want = LONG_M * Math.min(1, s.h / s.w) * perMetre;
+        const have = heights.get(f);
+        if ((have === undefined || Math.abs(have - want) > want * 0.01) && wrap(f)) {
+          heights.set(f, want);
+          nudge(f);
+          set++;
+        }
       }
     } catch (e) { /* the dashboard changed: leave it */ }
   }, 250);
 
-  all[NAME] = { version: VERSION, stats: () => ({ turned, shrunk }), stop: () => clearInterval(timer) };
+  all[NAME] = {
+    version: VERSION,
+    stats: () => ({ set }),
+    stop: () => {
+      clearInterval(timer);
+      for (const { cv, orig } of wrapped.values()) cv.derivation = orig;
+      for (const f of FS.frames ?? []) if (heights.has(f)) nudge(f);
+    },
+  };
   return 'patched';
 })();

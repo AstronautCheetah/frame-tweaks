@@ -1,16 +1,18 @@
 # Changelog
 
 ## Unreleased
-- **Android Mirror starts upright at a sensible size** (0.8 m tall): SteamVR starts every floating
-  window as wide as a standard one, so the upright phone came up over 2 m tall.
+- **Android Mirror starts upright at a sensible size** (0.8 m tall), and turning the phone just
+  turns the window (0.8 m long side either way): SteamVR starts every floating window as wide as a
+  standard one and keeps that width, so the upright phone came up over 2 m tall. The dashboard
+  patch now sets the panel height through the dashboard's own override (scaling the window was
+  ignored).
+- **Fixed: scroll strips the wrong length after a window changed shape** (the phone mirror turned):
+  they now read the window's current size from its overlay, not the dashboard's stale copy.
 - **Grab guard also hears keys that skip the input devices** (faked by an X program, or typed
   through libei like Full Keyboard), so its log can name where a stray Right Ctrl came from.
 - **Grab guard** (new, System): desktop mode takes every key and click after a Right Ctrl press,
   and other windows (this installer too) just stop responding. Grab guard notices, shows a
   notification saying to tap Right Ctrl once, and logs which device sent it.
-- **Android Mirror turns with the phone without shrinking:** SteamVR keeps a floating window's
-  width when its shape changes, so turning the phone sideways left a thin strip. A small dashboard
-  patch scales a window whose picture turns, so its long side stays as long.
 - **Screen snip from Steam's "+" menu works:** Steam starts it as a game, and the selection window
   then took no laser input; it now starts itself again as a plain program, like Arrow Pad's key.
 - **The installer window records a freeze:** if it stops responding for 10 s, where it was stuck

@@ -33,12 +33,12 @@ the phone: scrcpy reports the screen's shape to the window system, and a window 
 size keeps it, so its VR panel takes that shape. In desktop mode it does nothing; KWin sizes
 the window normally there.
 
-SteamVR keeps a floating window's width when its shape changes, so turning the phone sideways
-used to shrink the window to a strip as wide as the upright phone. A small dashboard patch
-(`patch.js`, installed when the [VR windows](../vr-dashboard/) helper is) scales a window whose
-picture turns, so its long side stays as long: the window just turns. It also starts an upright window at
-0.8 m tall: SteamVR starts every floating window as wide as a standard one, so the upright phone
-used to come up over 2 m tall.
+SteamVR starts every floating window as wide as a standard one whatever its shape (so the upright
+phone came up over 2 m tall), and keeps that width when its shape changes (so turning the phone
+sideways shrank it to a strip). A small dashboard patch (`patch.js`, installed when the
+[VR windows](../vr-dashboard/) helper is) gives a floating window that has been upright a long
+side of 0.8 m, through the dashboard's own panel-height override: upright it's 0.8 m tall,
+sideways 0.8 m wide, so turning the phone just turns the window.
 
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,

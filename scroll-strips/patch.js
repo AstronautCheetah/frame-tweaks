@@ -19,7 +19,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 10, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 11, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -162,9 +162,19 @@
         window.addEventListener('pointerup', onUp, true);
       } }));
   };
+  // The window's picture size, from its overlay: the page's latestContentSize is only read again
+  // when something else changes, so after a phone mirror turned it kept the old shape (strips the
+  // wrong length).
+  const pictureSize = (page) => {
+    try {
+      const m = VRHTML.VROverlay.GetOverlayMouseScale(VRHTML.VROverlay.FindOverlay(page.summonOverlayKey));
+      if (m?.x > 0 && m?.y > 0) return { unWidth: m.x, unHeight: m.y };
+    } catch (e) { /* no overlay */ }
+    return page?.size?.latestContentSize;
+  };
   const stripsFor = (f) => {
     const page = f?.activePage, sz = page?.size;
-    const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = sz?.latestContentSize;
+    const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = page && pictureSize(page);
     if (!H || !Hw || !c?.unHeight || typeof page.GetPanelAnchorID !== 'function') return [];
     const o = cfg(), k = H / Hw;                 // anchor units per metre (the panel's own scale)
     // The desktop scrolls through its own portal; other windows get keys (see vr-dashboard).
