@@ -22,7 +22,8 @@ Select a rectangle of the window you're using, then:
 Start it from **Arrow Pad**: the **Tools** key, then **Snip** (the dashed rectangle). Or from
 the app menu: **Screen snip**. It freezes a picture of the window the Steam session has focused
 (the desktop, or a window you floated) and shows it in a new window: drag a rectangle with the
-laser, then pick an action. **Esc** or a right-click cancels.
+laser, adjust it with its **handles** (corners and edges) or drag it from inside to move it,
+then pick an action. Dragging outside it starts a new one. **Esc** or a right-click cancels.
 
 ## Why these tools
 SteamOS ships no screenshot tool, and KDE's Spectacle or Flameshot can't select a region of a
