@@ -102,7 +102,7 @@ LAYERS = {
         ["Esc", "Snip", "🎤", "Launcher", "RMB", "MMB"],
         ["Fn", "Undo", "Redo", "Find", "Save", "Tools"],
         ["Ctrl", "Cut", "Copy", "Paste", "All", "Del"],
-        ["Alt", "Super", "Tab", "Bksp", "Enter", "PrtSc"],
+        ["Alt", "Super", "Tab", "Bksp", "Enter", "Unstick"],
     ],
 }
 # Key legends as printed on physical keyboards of each language (others keep English).
@@ -122,7 +122,7 @@ LAYOUT_LANG = {"de": "de", "at": "de", "ch": "de", "fr": "fr", "be": "fr", "ca":
                "es": "es", "latam": "es", "it": "it"}
 # Clipboard keys show icons (language-neutral), like Full Keyboard's copy/paste buttons.
 BREEZE = Path("/usr/share/icons/breeze-dark")
-ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
+ICONS = {"Unstick": "edit-clear", "Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
          "All": "edit-select-all", "pin": "window-unpin", "pin_on": "window-pin", "reset": "crosshairs",
          "RMB": "input-mouse-click-right", "MMB": "input-mouse-click-middle",
          "smaller": "zoom-out", "larger": "zoom-in", "close": "window-close", "Snip": "select-rectangular",
@@ -133,6 +133,7 @@ TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = tran
         "Redo": "Redo (Ctrl+Shift+Z)", "Find": "Find (Ctrl+F)", "Save": "Save (Ctrl+S)",
         "Tools": "Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)",
         "Snip": "Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud",
+        "Unstick": "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this",
         "RMB": "Right click: your next click becomes a right click",
         "Launcher": "Open the desktop's application menu (taps Super)",
         "Super": "Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand",
@@ -235,7 +236,9 @@ class Ydotool:
         crash can't send the release). Same sequence as lib/common.sh's clear_stuck_modifiers:
         full press+release each, Super and Alt around F24 so it isn't a lone tap (no menu opens)."""
         F24 = 194
-        for code in (42, 54, 29, 97):                      # Shift, Ctrl (both sides)
+        # Shift (both sides), left Ctrl. Never Right Ctrl: in the nested desktop it toggles KWin's
+        # input grab ("Press right control to grab input"), which upsets windows and clicks.
+        for code in (42, 54, 29):
             self.key(code, True)
             self.key(code, False)
         for code in (56, 125):                             # Alt, Super
@@ -752,7 +755,7 @@ class ArrowPad(QWidget):
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             b.setToolTip(TIPS.get(name, ""))
-            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip") else None
+            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip", "Unstick") else None
             if icon:
                 b.setIcon(icon)
                 b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike
@@ -953,6 +956,8 @@ class ArrowPad(QWidget):
             self.relabel()
         elif name == "Snip":
             self.snip()
+        elif name == "Unstick":
+            self.unstick()
         elif name in MOUSE:
             self.toggle_click(name)
         elif name == "🎤":
@@ -994,6 +999,17 @@ class ArrowPad(QWidget):
             if s != "off":
                 self.yd.key(KEY[m], False)
                 self.mod_state[m] = "off"
+
+    # ---- stuck keys -----------------------------------------------------
+    def unstick(self):
+        """The desktop can miss a key's release (focus moved to another VR window while it was
+        held) and keep acting as if Shift, Ctrl, Alt or Super were down: send each one a full
+        press and release, and let go of the pad's own modifiers."""
+        self.release_all_mods()
+        self.yd.clear_stuck_modifiers()
+        self.restyle()
+        subprocess.Popen(["notify-send", "-a", "Arrow Pad", "Keys released",
+                          "Shift, Ctrl, Alt and Super were pressed and let go."], start_new_session=True)
 
     # ---- screen snip (snip/ tweak) --------------------------------------
     def snip(self):
