@@ -255,6 +255,7 @@ QPushButton { background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 #2c333b, s
 QPushButton:hover { background: #3d4855; }
 QPushButton:checked { background: #355b7a; }
 QPushButton#apply { background: #355b7a; font-weight: 600; }
+QPushButton#apply:disabled { background: #161c23; color: #3a434d; }
 QPushButton#info { padding: 6px 10px; }
 QPushButton#info:disabled { color: #3a434d; }
 QWidget#timer { background: transparent; }
@@ -819,6 +820,7 @@ class Window(QWidget):
         apply_ = QPushButton("Apply changes")
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
+        self.apply_button = apply_
         close = QPushButton("Close")
         close.clicked.connect(self.close)
         bottom.addWidget(apply_)
@@ -928,6 +930,7 @@ class Window(QWidget):
                         box.blockSignals(True)
                         box.setChecked(self.state[cid][0] != 1)
                         box.blockSignals(False)
+                self.update_apply()
 
     # ---- layout -----------------------------------------------------------------
     def rebuild(self, *_):
@@ -970,7 +973,7 @@ class Window(QWidget):
             state = self.state.get(cid)
             box.setChecked(self.wanted.get(cid, state[0] != 1 if state else False))
             box.setToolTip("Tick to install, untick to remove")
-            box.toggled.connect(lambda on, c=cid: self.wanted.__setitem__(c, on))
+            box.toggled.connect(lambda on, c=cid: (self.wanted.__setitem__(c, on), self.update_apply()))
             self.boxes[cid] = box
             icon = QLabel()
             icon.setPixmap(row_icon(cid).pixmap(40, 40))
@@ -1036,6 +1039,7 @@ class Window(QWidget):
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
         self.grid.addStretch(1)
+        self.update_apply()
 
     def show_status(self, cid):
         """Status text, plus an Update link when upstream has a newer version."""
@@ -1154,14 +1158,30 @@ class Window(QWidget):
         return page, text, yes
 
     # ---- apply --------------------------------------------------------------
+    def pending_changes(self):
+        """(install, remove): ticked but not installed, unticked but installed. Rows whose status
+        isn't known yet don't count; a tweak with a warning is reinstalled with its ↻ button."""
+        known = [c["id"] for c in self.rows if self.state.get(c["id"]) is not None]
+        want = {cid: self.wanted.get(cid, self.state[cid][0] != 1) for cid in known}
+        return ([cid for cid, on in want.items() if on and self.state[cid][0] == 1],
+                [cid for cid, on in want.items() if not on and self.state[cid][0] != 1])
+
+    def update_apply(self):
+        """Apply changes is dimmed while there's nothing to change."""
+        button = getattr(self, "apply_button", None)
+        if button is None:
+            return
+        add, remove = self.pending_changes()
+        button.setEnabled(bool(add or remove))
+        button.setToolTip(("Install: " + ", ".join(add) if add else "") + ("; " if add and remove else "")
+                          + ("Remove: " + ", ".join(remove) if remove else "") or "Nothing to change: tick or untick a tweak first")
+
     def apply(self):
         if self.futures:
             self.say("Still checking status; try again in a moment.")
             return
         # From what you ticked (self.wanted), so rows in collapsed or hidden categories count too.
-        want = {c["id"]: self.wanted.get(c["id"], self.state[c["id"]][0] != 1) for c in self.rows}
-        add = [cid for cid, on in want.items() if on and self.state[cid][0] != 0]
-        remove = [cid for cid, on in want.items() if not on and self.state[cid][0] != 1]
+        add, remove = self.pending_changes()
         if not add and not remove:
             self.say("Nothing to change.")
             return

@@ -87,5 +87,16 @@ class Manifest(unittest.TestCase):
             self.assertIn(c["category"], {"Convenience", "VR windows", "Privacy & security", "System", "Developer"})
 
 
+
+class PendingChanges(unittest.TestCase):
+    def test_only_real_changes_count(self):
+        w = gui.Window.__new__(gui.Window)
+        w.rows = [{"id": i} for i in ("a", "b", "c", "d")]
+        w.state = {"a": (0, "ok"), "b": (1, "missing"), "c": (2, "warning"), "d": None}   # d: still checking
+        w.wanted = {}
+        self.assertEqual(w.pending_changes(), ([], []))          # nothing ticked differently
+        w.wanted = {"b": True, "a": False, "c": True, "d": True}
+        self.assertEqual(w.pending_changes(), (["b"], ["a"]))    # c only has a warning: not a change
+
 if __name__ == "__main__":
     unittest.main()

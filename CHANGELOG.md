@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Apply changes is dimmed when there's nothing to change** (its tooltip lists what it would
+  install or remove). Only real changes count: a ticked tweak that's installed with a warning is
+  no longer reinstalled by Apply; use its ↻ button.
 - **Pick up when floating:** the click that puts the window down could land on Return to
   Dashboard (the laser stays on that button) and dock it again; that's now ignored while you hold
   the window and for 1.5 s after. Light clicks put it down reliably (smaller trigger movement
