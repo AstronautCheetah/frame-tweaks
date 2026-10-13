@@ -93,6 +93,17 @@ class Timers(unittest.TestCase):
         self.assertEqual(gui.timer_text(0), "Never")
         self.assertEqual(gui.timer_text(120), "2 h")
 
+    def test_wallet_state_line(self):
+        now = 1_000_000.0
+        self.assertIn("locked", gui.wallet_state_text({"state": "locked"}, now))
+        t = gui.wallet_state_text({"state": "unlocked", "unlocked_at": now - 31 * 60,
+                                   "locks_at": now + 3 * 3600 + 5 * 60, "idle_close_minutes": 240}, now)
+        self.assertIn("for 31 min", t)
+        self.assertIn("in 3 h 5 min", t)
+        self.assertIn("4 h unused", t)
+        self.assertIn("No automatic lock", gui.wallet_state_text({"state": "unlocked"}, now))
+        self.assertIn("unknown", gui.wallet_state_text(None, now))
+
     def test_settings_files(self):
         t = Path(tempfile.mkdtemp())
         with mock.patch.multiple(at, CONF=t / "app-timers.conf", SIGNAL_CONF=t / "signal-guard.conf"):

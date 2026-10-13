@@ -15,6 +15,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -46,6 +47,7 @@ BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-past
 # Wallet apps page (wallet/wallet-launcher): apps that open with the shared KDE wallet.
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
 APP_TIMERS = Path.home() / ".local/bin/app-timers"
+WALLET_UNLOCK = Path.home() / ".local/bin/wallet-unlock"
 TIMER_STEPS = [0, 5, 10, 15, 30, 60, 120, 240]          # minutes; 0 = never close
 LAUNCHERS = Path.home() / ".local/share/applications"
 FLATPAK_APPS = [Path.home() / ".local/share/flatpak/exports/share/applications",
@@ -106,6 +108,39 @@ def app_timers():
             except ValueError:
                 pass
     return timers
+
+
+def span_text(seconds):
+    """3 h 5 min / 12 min / under a minute."""
+    m = int(seconds // 60)
+    if m < 1:
+        return "under a minute"
+    h, m = divmod(m, 60)
+    return f"{h} h {m} min" if h and m else f"{h} h" if h else f"{m} min"
+
+
+def wallet_state_text(info, now):
+    """The status line atop Wallet apps, from wallet-unlock --info."""
+    if info is None:
+        return "<span style='color:#9aa6b2'>Wallet state unknown (is the Wallet tweak installed?)</span>"
+    if info["state"] == "locked":
+        return ("<b style='color:#5cc77a'>🔒 Wallet locked.</b> Protected apps ask for the password "
+                "before they open.")
+    parts = ["<b style='color:#e0b33a'>🔓 Wallet open</b>"]
+    if info.get("unlocked_at"):
+        parts.append(f"for {span_text(now - info['unlocked_at'])}")
+    text = " ".join(parts) + "."
+    if info.get("locks_at"):
+        at = time.strftime("%H:%M", time.localtime(info["locks_at"]))
+        text += f" Locks by itself at <b>{at}</b> (in {span_text(max(0, info['locks_at'] - now))})"
+        if info.get("idle_close_minutes"):
+            text += f", or sooner after {timer_text(info['idle_close_minutes'])} unused"
+        text += "."
+    elif info.get("idle_close_minutes"):
+        text += f" Locks by itself after {timer_text(info['idle_close_minutes'])} unused."
+    else:
+        text += " <span style='color:#e0b33a'>No automatic lock is scheduled.</span>"
+    return text
 
 
 def timer_text(minutes):
@@ -509,6 +544,28 @@ class WalletApps(QWidget):
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
+        why = QLabel(
+            "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker "
+            "to pick up, and it gets passed around to family and friends. But the apps you use in it "
+            "can still hold sensitive things, like messages, notes and signed-in accounts. Here you "
+            "can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the "
+            "whole headset: the wallet is unlocked once when you need it, and locks again by itself.")
+        why.setWordWrap(True)
+        lay.addWidget(why)
+        # Wallet state: open or locked, since when, when it locks by itself; Lock / Unlock.
+        status_row = QHBoxLayout()
+        self.wallet_state = QLabel()
+        self.wallet_state.setWordWrap(True)
+        self.wallet_state.setTextFormat(Qt.TextFormat.RichText)
+        status_row.addWidget(self.wallet_state, 1)
+        self.wallet_toggle = QPushButton()
+        self.wallet_toggle.clicked.connect(self.toggle_wallet)
+        status_row.addWidget(self.wallet_toggle)
+        lay.addLayout(status_row)
+        self.wallet_locked = None
+        self.state_timer = QTimer(self, interval=30000, timeout=self.show_wallet_state)
+        self.state_timer.start()
+        self.show_wallet_state()
         about = QLabel(
             "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop "
             "mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also "
@@ -531,6 +588,33 @@ class WalletApps(QWidget):
         scroll.setWidget(self.body)
         lay.addWidget(scroll, 1)
         self.fill()
+
+    def show_wallet_state(self):
+        try:
+            r = subprocess.run([str(WALLET_UNLOCK), "--info"], capture_output=True, text=True, timeout=10)
+            info = json.loads(r.stdout)
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            info = None
+        self.wallet_locked = None if info is None else info["state"] == "locked"
+        self.wallet_state.setText(wallet_state_text(info, time.time()))
+        self.wallet_toggle.setVisible(info is not None)
+        self.wallet_toggle.setText("🔓 Unlock…" if self.wallet_locked else "🔒 Lock now")
+        self.wallet_toggle.setToolTip("Asks for the wallet password" if self.wallet_locked else
+                                      "Lock the wallet now: protected apps need the password again")
+
+    def toggle_wallet(self):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: wallet-unlock", "" if self.wallet_locked else "--lock")
+            return
+        if self.wallet_locked:
+            # The password dialog opens on this display; the window stays usable meanwhile.
+            proc = QProcess(self)
+            proc.finished.connect(lambda *_: self.show_wallet_state())
+            proc.start(str(WALLET_UNLOCK), [])
+            self.wallet_state.setText("Waiting for the wallet password (look for the dialog)…")
+        else:
+            subprocess.run([str(WALLET_UNLOCK), "--lock"], capture_output=True, timeout=20)
+            self.show_wallet_state()
 
     def fill(self):
         while self.rows.count():
