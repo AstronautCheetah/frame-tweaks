@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip: crop handles.** Adjust the rectangle by its corners and edges, or drag it to move
+  it, before choosing Copy, Save, Copy text or Narrate.
 - **Screen snip** (new): select a rectangle of the window you're using, then Copy, Save, Copy
   text (Tesseract OCR) or Narrate (reads it aloud with Piper, offline). Works on the desktop and
   on floated VR windows.

@@ -138,10 +138,12 @@ class Snip(QWidget):
         super().__init__()
         self.setWindowTitle("Screen snip")
         self.image, self.pix = image, QPixmap.fromImage(image)
-        self.start = self.end = None
+        self.start = self.end = None              # a new rectangle being drawn
+        self.sel = None                           # the selection, once drawn (adjustable)
+        self.drag = None
         self.player = None
         self.setCursor(Qt.CursorShape.CrossCursor)
-        self.hint = QLabel("Drag a rectangle to snip  ·  Esc or right-click cancels", self)
+        self.hint = QLabel("Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels", self)
         self.hint.setStyleSheet("background: rgba(11,16,22,220); color: #e8ecf0; font-size: 22px;"
                                 "padding: 10px 18px; border-radius: 10px;")
         self.hint.adjustSize()
@@ -165,12 +167,27 @@ class Snip(QWidget):
         self.resize(self.pix.size())
         self.hint.move((self.width() - self.hint.width()) // 2, 24)
 
-    # selection
+    # selection: draw a rectangle, then adjust it with the handles (or drag it from inside)
+    HANDLE = 30                                   # px: handle size, big enough for the laser
+
     def selection(self):
+        if self.sel is not None:
+            return self.sel
         if not self.start or not self.end:
             return QRect()
         r = QRect(self.start, self.end).normalized()
         return r if r.width() >= MIN_SIZE and r.height() >= MIN_SIZE else QRect()
+
+    def handles(self):
+        """name -> square: corners and edge midpoints of the selection ("tl", "tc", ... "br")."""
+        r = self.sel
+        if r is None:
+            return {}
+        xs = {"l": r.left(), "c": r.center().x(), "r": r.right()}
+        ys = {"t": r.top(), "m": r.center().y(), "b": r.bottom()}
+        h = self.HANDLE
+        return {v + u: QRect(xs[u] - h // 2, ys[v] - h // 2, h, h)
+                for v in "tmb" for u in "lcr" if v + u != "mc"}
 
     def scale_to_image(self):
         return self.image.width() / max(1, self.width()), self.image.height() / max(1, self.height())
@@ -180,34 +197,73 @@ class Snip(QWidget):
         sx, sy = self.scale_to_image()
         return self.image.copy(round(r.x() * sx), round(r.y() * sy), round(r.width() * sx), round(r.height() * sy))
 
+    def place_bar(self):
+        r = self.sel
+        x = min(max(0, r.center().x() - self.bar.width() // 2), self.width() - self.bar.width())
+        below = r.bottom() + self.HANDLE
+        y = below if below + self.bar.height() <= self.height() else max(0, r.top() - self.HANDLE - self.bar.height())
+        self.bar.move(x, y)
+        self.bar.show()
+        self.bar.raise_()
+
     def mousePressEvent(self, ev):
         if ev.button() == Qt.MouseButton.RightButton:
             return self.close()
-        if self.bar.isVisible() and self.bar.geometry().contains(ev.position().toPoint()):
-            return
-        self.start = self.end = ev.position().toPoint()
+        p = ev.position().toPoint()
+        self.drag = None
+        if self.sel is not None:
+            for name, sq in self.handles().items():
+                if sq.adjusted(-6, -6, 6, 6).contains(p):
+                    self.drag = ("resize", name, QRect(self.sel))
+                    break
+            else:
+                if self.sel.contains(p):
+                    self.drag = ("move", p, QRect(self.sel))
+        if self.drag is None:                     # outside: start a new selection
+            self.sel = None
+            self.start = self.end = p
+            self.drag = ("new",)
         self.bar.hide()
         self.update()
 
     def mouseMoveEvent(self, ev):
-        if self.start is not None and not self.bar.isVisible():
-            self.end = ev.position().toPoint()
-            self.update()
+        if not self.drag:
+            return
+        p = ev.position().toPoint()
+        bounds = self.rect()
+        if self.drag[0] == "new":
+            self.end = p
+        elif self.drag[0] == "move":
+            r = QRect(self.drag[2])
+            r.translate(p - self.drag[1])
+            r.moveLeft(min(max(0, r.left()), bounds.width() - r.width()))
+            r.moveTop(min(max(0, r.top()), bounds.height() - r.height()))
+            self.sel = r
+        else:
+            name, r = self.drag[1], QRect(self.drag[2])
+            x, y = min(max(0, p.x()), bounds.width() - 1), min(max(0, p.y()), bounds.height() - 1)
+            if name[1] == "l":
+                r.setLeft(min(x, r.right() - MIN_SIZE))
+            if name[1] == "r":
+                r.setRight(max(x, r.left() + MIN_SIZE))
+            if name[0] == "t":
+                r.setTop(min(y, r.bottom() - MIN_SIZE))
+            if name[0] == "b":
+                r.setBottom(max(y, r.top() + MIN_SIZE))
+            self.sel = r
+        self.update()
 
     def mouseReleaseEvent(self, ev):
-        if self.start is None or self.bar.isVisible():
+        if not self.drag:
             return
-        self.end = ev.position().toPoint()
-        r = self.selection()
-        if r.isNull():
+        if self.drag[0] == "new":
+            self.end = ev.position().toPoint()
+            r = self.selection()
+            self.sel = None if r.isNull() else r
             self.start = self.end = None
-        else:
-            # The action bar under the selection (above it if there's no room below).
-            x = min(max(0, r.center().x() - self.bar.width() // 2), self.width() - self.bar.width())
-            y = r.bottom() + 16 if r.bottom() + 16 + self.bar.height() <= self.height() else max(0, r.top() - 16 - self.bar.height())
-            self.bar.move(x, y)
-            self.bar.show()
-            self.bar.raise_()
+        self.drag = None
+        if self.sel is not None:
+            self.place_bar()
         self.update()
 
     def keyPressEvent(self, ev):
@@ -225,6 +281,10 @@ class Snip(QWidget):
                                             round(r.width() * sx), round(r.height() * sy)))   # ...but the snip
             p.setPen(QPen(QColor("#7fb2e5"), 3))
             p.drawRect(r)
+            p.setPen(QPen(QColor("#0b1016"), 2))
+            p.setBrush(QColor("#7fb2e5"))
+            for sq in self.handles().values():
+                p.drawRoundedRect(sq, 6, 6)
         self.hint.setVisible(r.isNull())
 
     # actions
