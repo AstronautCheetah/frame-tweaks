@@ -84,25 +84,26 @@ MOUSE = ("RMB", "MMB")       # toggles: the next click becomes a right / middle 
 CHORDS = {"Copy": "C", "Paste": "V", "Cut": "X", "Undo": "Z", "All": "A",   # Ctrl + key(s)
           "Redo": ("Shift", "Z"), "Find": "F", "Save": "S"}
 LAYERS = {
+    # Keys found on more than one layer keep their place on all of them (Tools, Esc, Fn, the
+    # modifiers, R/M, and the clipboard keys); only the rest change.
     "nav": [
-        ["Esc", "Tab", "Bksp", "Del", "RMB", "MMB"],
-        ["Fn", "Home", "↑", "End", "PgUp", "Tools"],
+        ["Tools", "Tab", "Bksp", "Del", "RMB", "MMB"],
+        ["Fn", "Home", "↑", "End", "PgUp", "Esc"],
         ["Ctrl", "←", "↓", "→", "PgDn", "Copy"],
         ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
     "fn": [
-        ["F1", "F2", "F3", "F4", "RMB", "MMB"],
-        ["Fn", "F5", "F6", "F7", "F8", "Tools"],
-        ["Ctrl", "F9", "F10", "F11", "F12", "Copy"],
-        ["Alt", "Super", "Ins", "PrtSc", "Launcher", "Paste"],
+        ["Tools", "F1", "F2", "F3", "RMB", "MMB"],
+        ["Fn", "F4", "F5", "F6", "F7", "Esc"],
+        ["Ctrl", "F8", "F9", "F10", "F11", "Copy"],
+        ["Alt", "Super", "F12", "Ins", "PrtSc", "Paste"],
     ],
-    # Tools: snip, dictation and editing shortcuts. Esc, R/M and the modifiers stay where they
-    # are on every layer.
+    # Tools: screen snip, dictation and more shortcuts, in the arrow and navigation keys' places.
     "tools": [
-        ["Esc", "Snip", "🎤", "Launcher", "RMB", "MMB"],
-        ["Fn", "Undo", "Redo", "Find", "Save", "Tools"],
-        ["Ctrl", "Cut", "Copy", "Paste", "All", "Del"],
-        ["Alt", "Super", "Tab", "Bksp", "Enter", "Unstick"],
+        ["Tools", "Tab", "Bksp", "Del", "RMB", "MMB"],
+        ["Fn", "Snip", "🎤", "Launcher", "Redo", "Esc"],
+        ["Ctrl", "Find", "Save", "Enter", "Unstick", "Copy"],
+        ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
 }
 # Key legends as printed on physical keyboards of each language (others keep English).

@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad: keys keep their places across layers.** Tools is top-left and Esc at the end of the
+  second row; Tools, Esc, Fn, the modifiers, R/M and the clipboard keys sit in the same spot on
+  the main, Fn and Tools layers (the Tools-only keys take the arrow and navigation keys' places).
 - **Scroll strips** (new, VR windows): big strips beside each floating window (right and top by
   default) to drag-scroll with the laser, or tap near an end to page. They scroll the window you
   last clicked. Side and thickness in the row's ⚙ Settings. VR dashboard patching gained patch
