@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: laser clicks on the upright Android Mirror landed at its left edge.** The Steam session
+  maps the laser wrongly on a window narrower than its screen. Now a see-through layer over the
+  mirror (a dashboard patch) takes the laser, and `phone-touch` sends your presses, drags and
+  long-presses to the phone as touches through a second, control-only scrcpy server, so they land
+  where you aim, upright or sideways, curved or flat. The mirror window is now titled
+  "Android Mirror" (the patches recognise it by that).
 - **Turning the phone resizes the mirror at once** (was about a second later): phone-fit and the
   dashboard patch check 20 times a second, and the patch no longer waits for the shape to settle.
 - **Android Mirror starts upright at a sensible size** (0.8 m tall), and turning the phone just

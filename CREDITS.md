@@ -27,7 +27,7 @@ FIRST*, which credits **ThrillSeeker**.
 | [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) | see upstream | clipboard (built from upstream source, not bundled; approach from steam-frame-nix's `clipboardSync`) |
 | [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and OpenAI's Whisper models | MIT | dictation (via Homebrew; models from Hugging Face) |
 | [ydotool](https://github.com/ReimuNotMoe/ydotool) | AGPL-3.0 | dictation, Arrow Pad (Arch Linux ARM package, not modified) |
-| [scrcpy](https://github.com/Genymobile/scrcpy) | Apache-2.0 | Android Mirror (Homebrew) |
+| [scrcpy](https://github.com/Genymobile/scrcpy) | Apache-2.0 | Android Mirror (Homebrew); phone-touch speaks its server's control protocol |
 | Android `adb` (android-tools) | Apache-2.0 | Android Mirror (Arch Linux ARM package) |
 | [Arch Linux ARM](https://archlinuxarm.org) packages | various | adb, ydotool and libraries |
 | [Homebrew](https://brew.sh) | BSD-2-Clause | [homebrew](homebrew/) row; installs whisper.cpp, scrcpy, wl-clipboard, Rust (to build clipboard-sync) |

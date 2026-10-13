@@ -26,7 +26,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | screen-reader | One setting in `~/.config/kaccessrc` (its previous value is restored on removal) | Reads what's on screen (accessibility interface) and speaks it |
 | full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
 | clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |
-| adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
+| adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
 | cursor | `~/.config/environment.d/` (one variable for KWin) | – |
 | vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. Any program running as you could use that port too |
 | curvature | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
