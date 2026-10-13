@@ -106,5 +106,28 @@ class DoubleClick(unittest.TestCase):
         self.assertEqual(sent, [("press", "Ctrl"), ("press", "Left"), ("release", "Left"), ("release", "Ctrl")])
 
 
+class FollowBar(unittest.TestCase):
+    def test_switching_steam_and_desktop_tabs_keeps_the_pad_still(self):
+        # The main panel shows on the Steam tab and hides on the Desktop tab; the bar stays.
+        v = load()
+        o = v.OverlayHost.__new__(v.OverlayHost)
+        o.apply_pose = lambda: None
+        anchors = {v.DASHBOARD_BAR: [[1, 0, 0, 0.0], [0, 1, 0, 1.2], [0, 0, 1, -1.0]],
+                   v.DASHBOARD_MAIN: [[1, 0, 0, 0.0], [0, 1, 0, 1.5], [0, 0, 1, -1.4]]}
+        main_visible = [True]
+        o.dashboard_anchor = lambda keys=v.FOLLOW: next(
+            anchors[k] for k in keys if k != v.DASHBOARD_MAIN or main_visible[0])
+        o.pose = [[1, 0, 0, 0.1], [0, 1, 0, 0.9], [0, 0, 1, -0.7]]
+        o.remember_offset()
+        o.follow_dashboard()
+        steam_tab = [row[:] for row in o.pose]
+        main_visible[0] = False
+        o.pose = None
+        o.follow_dashboard()
+        for a, b in zip(o.pose, steam_tab):
+            for x, y in zip(a, b):
+                self.assertAlmostEqual(x, y, places=9)
+
+
 if __name__ == "__main__":
     unittest.main()
