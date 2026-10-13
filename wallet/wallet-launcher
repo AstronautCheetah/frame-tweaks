@@ -31,6 +31,9 @@ HOME = Path.home()
 APPS = HOME / ".local/share/applications"
 SOURCES = [HOME / ".local/share/flatpak/exports/share/applications",
            Path("/var/lib/flatpak/exports/share/applications")]
+# System apps (read-only partition): wrapped by an override of the same name in APPS, which
+# --remove deletes again. Checked last.
+SYSTEM_SOURCES = [Path("/usr/local/share/applications"), Path("/usr/share/applications")]
 MARK = "X-FrameTweaks-Wallet"
 # Outside APPS: Steam's "+" menu also lists entries in subfolders of APPS (duplicates).
 BACKUP_DIR = HOME / ".local/share/frame-tweaks/launcher-originals"
@@ -51,6 +54,9 @@ def source_for(app_id):
             return d / f"{app_id}.desktop"
     if own.exists():                          # host app with its own entry (e.g. Claude Desktop)
         return own
+    for d in SYSTEM_SOURCES:
+        if (d / f"{app_id}.desktop").exists():
+            return d / f"{app_id}.desktop"
     sys.exit(f"wallet-launcher: no desktop entry found for {app_id}")
 
 

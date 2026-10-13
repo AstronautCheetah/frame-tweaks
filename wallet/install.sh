@@ -2,7 +2,8 @@
 # One KDE wallet for both sessions (steam-frame-nix approach) + KWalletManager.
 source "$(dirname "$0")/../lib/common.sh"
 ensure_path
-install -m755 "$REPO_DIR/wallet/frame-outer-bus" "$REPO_DIR/wallet/wallet-launcher" "$REPO_DIR/wallet/wallet-gate" "$BIN/"
+install -m755 "$REPO_DIR/wallet/frame-outer-bus" "$REPO_DIR/wallet/wallet-launcher" "$REPO_DIR/wallet/wallet-gate" \
+    "$REPO_DIR/wallet/app-timers" "$BIN/"
 ensure_tweaks_venv
 install_py_tool "$REPO_DIR/wallet/wallet-unlock"
 install -m755 "$REPO_DIR/wallet/with-keyring" "$BIN/"
@@ -14,6 +15,11 @@ cp "$REPO_DIR/wallet/wallet-lock-sync.service" "$HOME/.config/systemd/user/"
 sysctl_user daemon-reload
 sysctl_user enable --now wallet-lock-sync
 sysctl_user restart wallet-lock-sync
+# App timers (set in the installer window's Wallet apps page): idle while none are set.
+cp "$REPO_DIR/wallet/app-timers.service" "$HOME/.config/systemd/user/"
+sysctl_user daemon-reload
+sysctl_user enable --now app-timers
+sysctl_user restart app-timers
 install_icon frame-tweaks-lock
 install_desktop "$REPO_DIR/wallet/wallet-lock.desktop"
 

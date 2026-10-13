@@ -1,0 +1,285 @@
+#!/usr/bin/env python3
+"""app-timers: close apps after a set time with no activity, so reopening them needs the
+(password-protected) wallet again. Signal guard's idle timer, for any app.
+
+  app-timers --list                 app-id and minutes, one per line (Signal's included)
+  app-timers --set APP-ID MINUTES   set a timer (0 = none); also what the installer window uses
+  app-timers --status               what's running and how long you've been idle
+  app-timers --run                  the watcher (the app-timers user service runs this)
+
+No activity means no input on any keyboard, mouse or controller (read from /dev/input, so it
+counts in both the desktop and VR sessions), the same rule as Signal guard. Apps are found by
+the systemd scope they run in (app-flatpak-<id>-….scope, app-<id>-….scope), however they were
+started, and asked to quit (SIGTERM, which Electron apps handle as a normal quit).
+Timers live in ~/.config/frame-tweaks/app-timers.conf ("app-id = minutes"); Signal's stays
+in ~/.config/signal-guard.conf (IDLE_MINUTES), where Signal guard reads it.
+"""
+import os
+import re
+import select
+import shlex
+import shutil
+import signal
+import struct
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+CONF = Path.home() / ".config/frame-tweaks/app-timers.conf"
+SIGNAL_CONF = Path.home() / ".config/signal-guard.conf"
+SIGNAL_GUARD = Path.home() / ".local/bin/signal-guard"
+SIGNAL_ID = "org.signal.Signal"
+STATE = Path(f"/run/user/{os.getuid()}/app-timers.idle")
+CGROUP_ROOT = Path("/sys/fs/cgroup")
+IGNORE_DEVICES = re.compile(r"^(als\d+)")      # sensors that report constantly by themselves
+EV_KEY, EV_REL, EV_ABS = 1, 2, 3
+EVENT = "llHHi"
+EVENT_SIZE = struct.calcsize(EVENT)
+
+
+# ---- settings ------------------------------------------------------------------------------
+def signal_guarded():
+    return SIGNAL_GUARD.exists()
+
+
+def read_conf():
+    timers = {}
+    if CONF.exists():
+        for line in CONF.read_text().splitlines():
+            m = re.match(r"\s*([\w.@-]+)\s*=\s*(\d+(?:\.\d+)?)\s*$", line)
+            if m and float(m[2]) > 0:
+                timers[m[1]] = float(m[2])
+    return timers
+
+
+def signal_minutes():
+    if SIGNAL_CONF.exists():
+        m = re.search(r"^\s*IDLE_MINUTES\s*=\s*(\d+(?:\.\d+)?)", SIGNAL_CONF.read_text(), re.M)
+        if m:
+            return float(m[1])
+    return 15.0                                 # Signal guard's default
+
+
+def all_timers():
+    timers = read_conf()
+    if signal_guarded():
+        timers[SIGNAL_ID] = signal_minutes()
+    return timers
+
+
+def set_timer(app_id, minutes):
+    if app_id == SIGNAL_ID and signal_guarded():
+        if minutes <= 0:
+            sys.exit("Signal guard always closes Signal when idle; set a longer time instead")
+        text = SIGNAL_CONF.read_text() if SIGNAL_CONF.exists() else "# signal-guard settings\n"
+        line = f"IDLE_MINUTES={minutes:g}"
+        text, n = re.subn(r"^\s*IDLE_MINUTES\s*=.*$", line, text, flags=re.M)
+        SIGNAL_CONF.write_text(text if n else text.rstrip("\n") + "\n" + line + "\n")
+        return
+    timers = read_conf()
+    if minutes > 0:
+        timers[app_id] = minutes
+    else:
+        timers.pop(app_id, None)
+    CONF.parent.mkdir(parents=True, exist_ok=True)
+    CONF.write_text("# app-id = minutes without activity before the app is closed (app-timers)\n"
+                    + "".join(f"{a} = {m:g}\n" for a, m in sorted(timers.items())))
+
+
+# ---- finding an app's processes --------------------------------------------------------------
+def scope_pattern(app_id):
+    # Flatpak: app-flatpak-<id>-<pid>.scope. Launched by Steam or the desktop: app-<id>-<n>.scope,
+    # or app-<launcher>-<id>@<random>.service (KDE).
+    return re.compile(rf"/app-(?:flatpak-|[\w.]+-)?{re.escape(app_id)}(?:-\d+\.scope|@\w*\.service)$")
+
+
+def app_cgroups(app_id):
+    """cgroup directories the app is running in (empty when it isn't running)."""
+    pat, found = scope_pattern(app_id), set()
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit():
+            continue
+        try:
+            cg = (d / "cgroup").read_text().strip().split("::", 1)[-1]
+        except OSError:
+            continue
+        if pat.search(cg):
+            found.add(CGROUP_ROOT / cg.lstrip("/"))
+    return found
+
+
+# Host programs whose menu command is a launcher script, not the program itself.
+KNOWN_PROGRAMS = {"com.anthropic.Claude": str(Path.home() / ".local/opt/claude-desktop/claude-desktop")}
+WRAPPERS = ("wallet-gate", "frame-outer-bus", "signal-guard", "--", "env")
+
+
+def host_program(app_id):
+    """The program a non-Flatpak app runs (from its menu entry), or None."""
+    if app_id in KNOWN_PROGRAMS:
+        return KNOWN_PROGRAMS[app_id]
+    for d in (Path.home() / ".local/share/applications", Path("/usr/share/applications")):
+        f = d / f"{app_id}.desktop"
+        if f.exists():
+            m = re.search(r"^Exec=(.+)$", f.read_text(errors="replace"), re.M)
+            try:
+                args = shlex.split(m[1]) if m else []
+            except ValueError:
+                return None
+            while args and (os.path.basename(args[0]) in WRAPPERS or "=" in args[0]):
+                args = args[1:]
+            if not args or os.path.basename(args[0]) == "flatpak":
+                return None                 # Flatpaks are found by their scope
+            prog = shutil.which(os.path.expanduser(args[0]))
+            return os.path.realpath(prog) if prog else None
+    return None
+
+
+def host_main_pids(app_id):
+    """Apps opened from desktop mode share the desktop's cgroup: find the app's main process by
+    its program instead (one whose parent isn't the same program: Electron's helpers are)."""
+    prog = host_program(app_id)
+    if not prog:
+        return []
+    exe = {}
+    for d in Path("/proc").iterdir():
+        if d.name.isdigit():
+            try:
+                exe[int(d.name)] = (os.readlink(d / "exe"), int((d / "stat").read_text().rsplit(")", 1)[1].split()[1]))
+            except (OSError, ValueError, IndexError):
+                pass
+    return [pid for pid, (path, ppid) in exe.items()
+            if path == prog and exe.get(ppid, ("", 0))[0] != prog]
+
+
+def app_pids(app_id):
+    pids = []
+    for cg in app_cgroups(app_id):
+        try:
+            pids += [int(p) for p in (cg / "cgroup.procs").read_text().split()]
+        except OSError:
+            pass
+    return pids or host_main_pids(app_id)
+
+
+def quit_app(app_id, minutes):
+    pids = app_pids(app_id)
+    for pid in pids:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+    if pids:
+        subprocess.run(["notify-send", "-a", "App timers", f"{app_name(app_id)} closed",
+                        f"No activity for {minutes:g} minutes."], stderr=subprocess.DEVNULL)
+    return bool(pids)
+
+
+def app_name(app_id):
+    for d in (Path.home() / ".local/share/applications", Path("/var/lib/flatpak/exports/share/applications"),
+              Path.home() / ".local/share/flatpak/exports/share/applications", Path("/usr/share/applications")):
+        f = d / f"{app_id}.desktop"
+        if f.exists():
+            m = re.search(r"^Name=(.+)$", f.read_text(errors="replace"), re.M)
+            if m:
+                return m[1].strip()
+    return app_id
+
+
+# ---- activity ------------------------------------------------------------------------------
+def input_devices():
+    devs = []
+    for blk in Path("/proc/bus/input/devices").read_text().split("\n\n"):
+        name = re.search(r'N: Name="([^"]*)"', blk)
+        ev = re.search(r"H: Handlers=.*\b(event\d+)", blk)
+        if name and ev and not IGNORE_DEVICES.match(name[1]):
+            devs.append(f"/dev/input/{ev[1]}")
+    return devs
+
+
+def has_user_input(data):
+    for i in range(0, len(data) - EVENT_SIZE + 1, EVENT_SIZE):
+        if struct.unpack_from(EVENT, data, i)[2] in (EV_KEY, EV_REL, EV_ABS):
+            return True
+    return False
+
+
+def run():
+    fds, last_scan, last_input, last_check = {}, 0.0, time.monotonic(), 0.0
+    conf_mtime, timers = None, {}
+    closed = set()                     # closed for this idle stretch: not again until input
+    while True:
+        now = time.monotonic()
+        try:
+            mtime = CONF.stat().st_mtime
+        except OSError:
+            mtime = 0
+        if mtime != conf_mtime:
+            conf_mtime, timers = mtime, read_conf()
+            if signal_guarded():
+                timers.pop(SIGNAL_ID, None)        # Signal guard's job
+        if not timers:                 # nothing to time: don't even watch input
+            for f in fds.values():
+                os.close(f)
+            fds.clear()
+            time.sleep(10)
+            last_input = time.monotonic()
+            continue
+        if now - last_scan > 30:       # hot-plugged devices
+            for path in input_devices():
+                if path not in fds:
+                    try:
+                        fds[path] = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+                    except OSError:
+                        pass
+            last_scan = now
+        ready, _, _ = select.select(list(fds.values()), [], [], 2)
+        for fd in ready:
+            try:
+                if has_user_input(os.read(fd, EVENT_SIZE * 64)):
+                    last_input = time.monotonic()
+                    closed.clear()
+            except OSError:            # unplugged
+                for p, f in list(fds.items()):
+                    if f == fd:
+                        os.close(f)
+                        del fds[p]
+        now = time.monotonic()
+        idle = now - last_input
+        try:
+            STATE.write_text(str(int(idle)))
+        except OSError:
+            pass
+        if now - last_check < 15:      # finding processes costs a /proc scan: 4x a minute
+            continue
+        last_check = now
+        for app_id, minutes in timers.items():
+            if app_id not in closed and idle >= minutes * 60 and app_pids(app_id):
+                quit_app(app_id, minutes)
+                closed.add(app_id)
+
+
+def main():
+    a = sys.argv[1:]
+    if a[:1] == ["--list"]:
+        for app_id, minutes in sorted(all_timers().items()):
+            print(f"{app_id} {minutes:g}")
+    elif a[:1] == ["--set"] and len(a) == 3:
+        try:
+            minutes = float(a[2])
+        except ValueError:
+            sys.exit("minutes must be a number")
+        set_timer(a[1], max(0.0, minutes))
+    elif a[:1] == ["--status"]:
+        idle = STATE.read_text() if STATE.exists() else "?"
+        print(f"idle {idle}s")
+        for app_id, minutes in sorted(all_timers().items()):
+            print(f"  {app_id}: {minutes:g} min, {'running' if app_pids(app_id) else 'not running'}")
+    elif a[:1] == ["--run"]:
+        run()
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    main()

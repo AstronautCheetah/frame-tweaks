@@ -16,6 +16,19 @@ launcher approach (`keyring.enable`), without needing Nix:
 > - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the KDE settings it changed)
 <!-- /generated:glance -->
 
+**In the installer window: 🔑 Wallet apps** (top bar) lists the protected apps, each with a
+**Password first** switch and **Remove**, and every other installed app (Flatpaks from any
+source, such as Discover; system apps; your own launchers) with a **Protect** button. Electron
+and Chromium-based apps are detected and told to use the wallet.
+
+**Close after** (per protected app) quits the app after that long with no keyboard, mouse or
+controller input, so opening it again needs the wallet again: Signal guard's idle timer, for any
+app. The `app-timers` user service does it; timers are in `~/.config/frame-tweaks/app-timers.conf`
+(`app-id = minutes`), except Signal's, which stays in `~/.config/signal-guard.conf`. Apps are
+found by their systemd scope (every Flatpak; other apps started from the VR "+" menu or Steam),
+else by their program (other apps started from desktop mode). `app-timers --status` shows what
+it sees.
+
 ```sh
 ./install.sh wallet
 wallet-launcher --list            # apps currently routed to the shared wallet
@@ -26,7 +39,9 @@ wallet-launcher --remove org.example.App
 - **`wallet-launcher`** writes an override menu entry (`~/.local/share/applications/<id>.desktop`)
   whose command runs through `frame-outer-bus`. For Flatpaks it also adds
   `--talk-name=org.kde.kwalletd6 --talk-name=org.freedesktop.secrets`. Host-app
-  originals are backed up in `~/.local/share/applications/.wallet-launcher-originals/`.
+  originals are backed up in `~/.local/share/frame-tweaks/launcher-originals/`. A system app
+  (`/usr/share/applications`, read-only) gets an override of the same name, which `--remove`
+  deletes so the system entry shows again.
 - **`frame-outer-bus <cmd>`** runs a command on the outer session's D-Bus **and** runtime dir.
   It keeps the window on the display it was launched from by pinning `WAYLAND_DISPLAY`
   as an absolute path.
