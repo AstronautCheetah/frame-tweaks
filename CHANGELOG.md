@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Grab guard** (new, System): desktop mode takes every key and click after a Right Ctrl press,
+  and other windows (this installer too) just stop responding. Grab guard notices, shows a
+  notification saying to tap Right Ctrl once, and logs which device sent it.
 - **Android Mirror turns with the phone without shrinking:** SteamVR keeps a floating window's
   width when its shape changes, so turning the phone sideways left a thin strip. A small dashboard
   patch scales a window whose picture turns, so its long side stays as long.

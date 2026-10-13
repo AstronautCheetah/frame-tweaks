@@ -23,8 +23,8 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | whisper-frame | Upstream's own installer (user services `whisper-ptt`, `whisper-panel`), pinned release | Microphone; listens for the headset's Select button |
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv) | Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST |
 | snip | `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |
-| full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
 | screen-reader | One setting in `~/.config/kaccessrc` (its previous value is restored on removal) | Reads what's on screen (accessibility interface) and speaks it |
+| full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
 | clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
 | cursor | `~/.config/environment.d/` (one variable for KWin) | – |
@@ -43,6 +43,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned), `~/.config/speech-dispatcher/speechd.conf` (backed up, restored on uninstall) | None beyond your home folder |
+| grab-guard | `grab-guard`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs` | **Reads every keyboard's key presses** (only to notice Right Ctrl; nothing else is kept) |
 | vscodium | Flathub app (`com.vscodium.codium`) | – |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads Anthropic's installer over HTTPS |
 | claude-desktop | `~/.local/opt/claude-desktop`, `claude-desktop-update`, menu entry | Checks against the SHA256 in Anthropic's apt index |
