@@ -453,12 +453,16 @@ class OverlayHost:
             cursor = ev.data.mouse.cursorIndex if t in (
                 openvr.VREvent_MouseMove, openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp) else 0
             if t in (openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp):
-                m = ev.data.mouse
-                self.log_input(f"{'down' if t == openvr.VREvent_MouseButtonDown else 'up  '} overlay "
-                               f"{self.handles.index(handle) if handle in self.handles else '?'} (front "
-                               f"{self.front}) laser {cursor} device {dev} raw ({m.x:.1f}, {m.y:.1f}) "
-                               f"size {self.size} -> {self.to_widget(m).x()},{self.to_widget(m).y()} "
-                               f"on {self.describe(self.button_at(self.to_widget(m)))}")
+                try:                            # diagnostics must never break input handling
+                    m = ev.data.mouse
+                    handles = getattr(self, "handles", [])
+                    pos = self.to_widget(m)
+                    self.log_input(f"{'down' if t == openvr.VREvent_MouseButtonDown else 'up  '} overlay "
+                                   f"{handles.index(handle) if handle in handles else '?'} (front "
+                                   f"{self.front}) laser {cursor} device {dev} raw ({m.x:.1f}, {m.y:.1f}) "
+                                   f"size {self.size} -> {pos.x()},{pos.y()} on {self.describe(self.button_at(pos))}")
+                except Exception:
+                    pass
                 # Backstop: a press (or release) of the same laser within 60 ms of the previous
                 # one is the same click seen by the other overlay. Real taps are far slower.
                 now = time.monotonic()
