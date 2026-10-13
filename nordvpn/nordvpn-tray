@@ -177,6 +177,15 @@ class Tray:
 
 
 def main():
+    # One tray only. Autostart starts it, and KDE's session restore used to start a second copy
+    # at login; whichever comes second finds the lock held and quietly exits.
+    import fcntl
+    lock = open(f"/run/user/{os.getuid()}/nordvpn-tray.lock", "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        sys.exit(0)
+    main.lock = lock                     # held until the process exits
     app = QApplication(sys.argv)
     app.setApplicationName("nordvpn-tray")
     app.setQuitOnLastWindowClosed(False)

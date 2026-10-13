@@ -2,6 +2,19 @@
 
 ## Unreleased
 - **Arrow Pad VR crashed on clicks** (a segfault inside SteamVR's PollNextOverlayEvent after the
+  double-tap fix switched overlays' input modes on every redraw), and taps could still count twice.
+  It's back to a single overlay whose input mode never changes; to keep reload flicker down it no
+  longer redraws just because the laser hovers over another key (the hover tick is still felt).
+- **Arrow Pad VR showed an old picture after reinstalling:** SteamVR caches overlay images by file
+  name, and the pad reused two fixed names. Every image now gets a new name; old ones are deleted.
+- **Arrow Pad uninstall** removes all its program files (it left vroverlay.py, haptics.py and the
+  SteamVR input files behind).
+- **NordVPN tray started twice at login** (autostart plus KDE's session restore): the tray now runs
+  once (a second copy exits), and installing excludes it from session restore (restored on removal).
+- **Claude Desktop couldn't use the KDE wallet:** its launcher lacked `--password-store=kwallet6`, so
+  its login didn't persist and secrets fell back to plain text. wallet-launcher now adds it for
+  Claude Desktop and keeps it when the launcher is re-applied after an update.
+- **Arrow Pad VR crashed on clicks** (a segfault inside SteamVR's PollNextOverlayEvent after the
   double-tap fix changed overlays' input modes on every redraw), so a frozen pad was left behind
   and taps still sometimes counted twice. Laser input now goes to one invisible input overlay that
   never changes; the two image overlays only show the picture.

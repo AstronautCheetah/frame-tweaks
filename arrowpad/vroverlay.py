@@ -9,6 +9,7 @@ haptics go to the controller that's pointing (an overlay being pointed at has in
 Like Full Keyboard: visible while the dashboard is, Reset puts it in front of you, +/- change
 its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that.
 """
+import glob
 import hashlib
 import json
 import math
@@ -119,30 +120,23 @@ class OverlayHost:
         openvr.init(openvr.VRApplication_Overlay)
         self.ov = openvr.VROverlay()
         self.system = openvr.VRSystem()
-        # Two overlays, double-buffered: a new image loads into the hidden one, which is shown
-        # before the old one is hidden. Reloading the visible overlay blanked it for a frame or
-        # two (flicker on every hover change).
-        self.handles = [self.ov.createOverlay(KEY, "Arrow Pad"),
-                        self.ov.createOverlay(KEY + ".b", "Arrow Pad")]
-        self.front = 0                  # index of the overlay being shown
+        # ONE overlay, set up once: input mode, sort order and flags never change afterwards.
+        # (Two double-buffered overlays avoided reload flicker, but swapping them made SteamVR
+        # deliver a held press again to the newly shown one, so taps counted twice; switching
+        # their input modes on the fly crashed SteamVR's client inside PollNextOverlayEvent, and
+        # a separate transparent input overlay got no laser input at all.) Flicker is kept down
+        # by redrawing only when something really changes (see set_hover / mark_dirty).
+        self.input_handle = self.ov.createOverlay(KEY, "Arrow Pad")
+        self.handles = [self.input_handle]
+        self.front = 0
         self.width_m = float(config.get("width_m", WIDTH_DEFAULT))
-        # Laser input goes to a third, invisible overlay on top that never changes, never swaps
-        # and keeps its input mode for life; the two image overlays take no input. (Swapping input
-        # between the image overlays made SteamVR deliver a held press again to the newly shown
-        # one, so taps counted twice, and changing input modes on the fly crashed SteamVR's
-        # client library inside PollNextOverlayEvent.)
-        for h in self.handles:
-            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_None)
-            self.ov.setOverlaySortOrder(h, 10)
-            self.ov.setOverlayWidthInMeters(h, self.width_m)
-        self.input_handle = self.ov.createOverlay(KEY + ".input", "Arrow Pad input")
         self.ov.setOverlayInputMethod(self.input_handle, openvr.VROverlayInputMethod_Mouse)
-        self.ov.setOverlaySortOrder(self.input_handle, 12)
+        self.ov.setOverlaySortOrder(self.input_handle, 10)
         self.ov.setOverlayWidthInMeters(self.input_handle, self.width_m)
         # One pointer per laser, like Full Keyboard: hold a modifier with one hand and press a key
         # with the other. Events then say which laser (cursorIndex) they came from.
         self.ov.setOverlayFlag(self.input_handle, openvr.VROverlayFlags_MultiCursor, True)
-        self.input_size = (0, 0)        # widget pixels the input overlay's mouse scale is set to
+        self.input_size = (0, 0)        # widget pixels the mouse scale is set to
         self.last_button_time = {}             # event type -> time: drops a click seen twice
         self.image_hash = None          # last uploaded image, to skip identical uploads
         self.hover = None               # button under the laser
@@ -190,15 +184,9 @@ class OverlayHost:
         return self.input_size
 
     def set_input_size(self, w, h):
-        """The input overlay gets a transparent image of the pad's proportions (so its height
-        matches) and mouse coordinates in widget pixels."""
+        """Mouse coordinates in widget pixels."""
         if (w, h) == self.input_size:
             return
-        clear = QImage(w, h, QImage.Format.Format_ARGB32)
-        clear.fill(0x01000000)               # practically invisible, but a real texture
-        path = f"{TEX_DIR}/arrowpad-input-{w}x{h}.png"
-        clear.save(path, "PNG")
-        self.ov.setOverlayFromFile(self.input_handle, path)
         scale = openvr.HmdVector2_t()
         scale.v[0], scale.v[1] = w, h
         self.ov.setOverlayMouseScale(self.input_handle, scale)
@@ -219,32 +207,24 @@ class OverlayHost:
         if img.width() > MAX_TEX[0] or img.height() > MAX_TEX[1]:
             img = img.scaled(MAX_TEX[0], MAX_TEX[1], Qt.AspectRatioMode.KeepAspectRatio,
                              Qt.TransformationMode.SmoothTransformation)
-        # Alternate between two files so SteamVR reloads the image each time.
-        self.tex_slot ^= 1
-        path = f"{TEX_DIR}/arrowpad-overlay-{self.tex_slot}.png"
+        # A new file name for every image: SteamVR caches overlay images by path, so reusing a
+        # name (this used to alternate between two fixed names) could keep showing an image an
+        # older pad wrote there, even after reinstalling. Older files are deleted.
+        self.tex_slot += 1
+        path = f"{TEX_DIR}/arrowpad-overlay-{os.getpid()}-{self.tex_slot}.png"
         # Light compression: half the encode time (~7 ms instead of ~15); the file lives in RAM
         # (/run), so its larger size costs nothing. A direct GPU texture, as Full Keyboard uses,
         # would need an OpenGL context, which here only exists through Gamescope's WSI layer.
         img.save(path, "PNG", 90)
-        back = self.front ^ 1
-        self.ov.setOverlayFromFile(self.handles[back], path)
+        self.ov.setOverlayFromFile(self.input_handle, path)
         self.set_input_size(w, h)
-        if self.visible:
-            self.swapping = True
-            QTimer.singleShot(SWAP_SHOW_MS, self.swap)   # give SteamVR time to load it
-        else:
-            self.front = back
-
-    def swap(self):
-        """Show the freshly loaded image overlay, then hide the old one (input isn't involved)."""
-        old, new = self.front, self.front ^ 1
-        self.front = new
-        if self.visible:
-            self.ov.setOverlaySortOrder(self.handles[new], 11)
-            self.ov.setOverlaySortOrder(self.handles[old], 10)
-            self.ov.showOverlay(self.handles[new])
-            QTimer.singleShot(SWAP_HIDE_MS, lambda: self.front != old and self.ov.hideOverlay(self.handles[old]))
-        self.swapping = False
+        for old in glob.glob(f"{TEX_DIR}/arrowpad-overlay-*.png"):
+            if old != path and old != getattr(self, "_last_path", None):
+                try:
+                    os.remove(old)
+                except OSError:
+                    pass
+        self._last_path = path
 
     # ---- placement --------------------------------------------------------
     def device_matrix(self, index):
@@ -303,8 +283,7 @@ class OverlayHost:
 
     def apply_pose(self):
         m = _mat(self.pose)
-        for h in self.handles + [self.input_handle]:
-            self.ov.setOverlayTransformAbsolute(h, openvr.TrackingUniverseStanding, m)
+        self.ov.setOverlayTransformAbsolute(self.input_handle, openvr.TrackingUniverseStanding, m)
 
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
@@ -343,8 +322,7 @@ class OverlayHost:
 
     def set_width(self, value):
         self.width_m = round(min(WIDTH_MAX, max(WIDTH_MIN, value)), 2)
-        for h in self.handles + [self.input_handle]:
-            self.ov.setOverlayWidthInMeters(h, self.width_m)
+        self.ov.setOverlayWidthInMeters(self.input_handle, self.width_m)
         self.save()
 
     def step_width(self, steps):
@@ -384,10 +362,10 @@ class OverlayHost:
         if button is not None:
             button.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, True)
             QApplication.sendEvent(button, QEvent(QEvent.Type.Enter))   # hover haptic filter
-            button.update()
             if button.property("tool") != "true":
                 self.pad.pulse("hover", device)
-        self.dirty = True
+        # No redraw for hover: every reload of the single overlay can blink, so the image only
+        # changes on presses and state changes; hovering is felt (haptic tick), not drawn.
 
     def poll(self):
         self.ticks += 1
@@ -396,11 +374,9 @@ class OverlayHost:
         visible = self._dash
         if visible != self.visible:
             if visible:
-                self.ov.showOverlay(self.handle)
                 self.ov.showOverlay(self.input_handle)
             else:
-                for h in self.handles + [self.input_handle]:
-                    self.ov.hideOverlay(h)
+                self.ov.hideOverlay(self.input_handle)
                 # Like Full Keyboard: closing the dashboard releases our input (a pending
                 # right/middle-click toggle would otherwise change a click you can't see coming).
                 self.hovered_devices.clear()
@@ -610,8 +586,7 @@ class OverlayHost:
 
     def close(self):
         try:
-            for h in self.handles + [self.input_handle]:
-                self.ov.destroyOverlay(h)
+            self.ov.destroyOverlay(self.input_handle)
             openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:
             pass
