@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips sit a little behind the window** (3 cm), so SteamVR's own buttons at the
+  window's edge, like Enter Gamepad Mode above it, draw in front instead of through the top strip.
 - **Fixed: Copy image didn't paste** (e.g. into OnlyOffice). The Shared clipboard tweak's
   clipboard-sync shares text only and put the last text back over a copied image a moment later;
   it's now built with a small patch that leaves a clipboard without text alone, and starting it

@@ -6,7 +6,7 @@
 // pointer input only from the lasers, so a mouse wheel can't be injected; keys can).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard. Settings:
 // window.__sftPatchConfig["scroll-strips"] = {vertical: "right"|"left"|"off",
-//   horizontal: "top"|"bottom"|"off", thickness: metres, gap: metres}. Sizes are real metres (the
+//   horizontal: "top"|"bottom"|"off", thickness: metres, gap: metres, back: metres}. Sizes are real metres (the
 // floating window's own space); the page elements stay small, so the dashboard's layout is unchanged.
 // (Version 1 used the window's scaled local size and big page elements: strips far too big and far
 // away, and the Steam bar drawn too large.)
@@ -19,7 +19,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 9, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 10, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -48,9 +48,12 @@
   const Base = Object.getPrototypeOf(D.constructor);
   if (!Base?.prototype?.isReactComponent) return 'not patched: no React component class';
   const cfg = () => {
-    const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
+    const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
     c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
     c.gap = Math.min(0.1, Math.max(0, Number(c.gap) || 0.015));
+    // Set back a little behind the window's plane, so SteamVR's own buttons by the window's edge
+    // (e.g. Enter Gamepad Mode above it) draw in front instead of through the strip.
+    c.back = Math.min(0.2, Math.max(0, Number(c.back ?? 0.03) || 0));
     return c;
   };
 
@@ -168,19 +171,19 @@
     const target = /^KDE Wayland Compositor/.test(f.title ?? '') ? 'desktop' : 'window';
     // A curved window: bend the horizontal strip around the same origin as the window.
     const curveId = f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : undefined;
-    const W = H * c.unWidth / c.unHeight, t = o.thickness * k, g = o.gap * k, out = [];
+    const W = H * c.unWidth / c.unHeight, t = o.thickness * k, g = o.gap * k, z = -o.back * k, out = [];
     const at = (anchor, translation, child) => {
       const id = page.GetPanelAnchorID(anchor);
       return id ? el(XFORM, { key: `${f.frameID}-${anchor}`, parent_id: id, translation }, child) : null;
     };
     if (o.vertical !== 'off') {
       const left = o.vertical === 'left';
-      out.push(at(left ? ANCHOR.CenterLeft : ANCHOR.CenterRight, { x: (left ? -1 : 1) * (g + t / 2) },
+      out.push(at(left ? ANCHOR.CenterLeft : ANCHOR.CenterRight, { x: (left ? -1 : 1) * (g + t / 2), z },
                   strip(`${f.frameID}-y`, 'y', H, t, target)));
     }
     if (o.horizontal !== 'off') {
       const bottom = o.horizontal === 'bottom';
-      out.push(at(bottom ? ANCHOR.BottomCenter : ANCHOR.TopCenter, { y: (bottom ? -1 : 1) * (g + t / 2) },
+      out.push(at(bottom ? ANCHOR.BottomCenter : ANCHOR.TopCenter, { y: (bottom ? -1 : 1) * (g + t / 2), z },
                   strip(`${f.frameID}-x`, 'x', W, t, target, curveId)));
     }
     return out.filter(Boolean);
