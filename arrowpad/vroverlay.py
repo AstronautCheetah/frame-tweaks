@@ -25,7 +25,7 @@ KEY = "steam-frame-tweaks.arrowpad"
 # raw uploads never showed (an invisible panel that still caught the laser), and a 2.5 MB raw
 # upload crashed vrcompositor (SIGBUS). Capped size and rate keep the compositor's work small.
 MAX_TEX = (1024, 768)
-MIN_RENDER_INTERVAL = 0.2            # at most 5 texture updates a second
+MIN_RENDER_INTERVAL = 0.15           # at most ~7 texture updates a second
 SWAP_SHOW_MS, SWAP_HIDE_MS = 60, 50  # double buffering: load, show new, then hide old
 DEPTH_GAIN = 3.0                     # dragging: push/pull moves the pad 3x as far; up/down/sideways 1:1
 DEPTH_MIN, DEPTH_MAX = 0.25, 3.5     # dragging: keep the pad this far from your head (m, horizontally)
@@ -62,6 +62,56 @@ def _mat(rows):
     return m
 
 
+class GripReader:
+    """Grip squeezes, read the way Full Keyboard reads them: the Frame's dashboard hides grip
+    actions and legacy controller state from apps, but the controller model's "button_grip"
+    part still moves. Its rotation from the rest pose, in degrees, with Full Keyboard's latch:
+    held from 1.0°, released below 0.5°, armed only after a released sample."""
+
+    def __init__(self):
+        self.sys, self.rm, self.inp = openvr.VRSystem(), openvr.VRRenderModels(), openvr.VRInput()
+        self.hands = []
+        for hand, role in (("left", openvr.TrackedControllerRole_LeftHand),
+                           ("right", openvr.TrackedControllerRole_RightHand)):
+            self.hands.append({"role": role, "path": self.inp.getInputSourceHandle(f"/user/hand/{hand}"),
+                               "armed": False, "held": False, "device": None})
+
+    @staticmethod
+    def _angle(a, b):
+        tr = sum(a.m[r][c] * b.m[r][c] for r in range(3) for c in range(3))
+        return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1) / 2))))
+
+    def poll(self):
+        """[(device, held, just_pressed)] for each connected controller."""
+        out = []
+        for h in self.hands:
+            try:
+                d = self.sys.getTrackedDeviceIndexForControllerRole(h["role"])
+                if d == openvr.k_unTrackedDeviceIndexInvalid or not self.sys.isTrackedDeviceConnected(d):
+                    h.update(armed=False, held=False, device=None)
+                    continue
+                if d != h["device"]:
+                    h.update(armed=False, held=False, device=d)
+                model = self.sys.getStringTrackedDeviceProperty(d, openvr.Prop_RenderModelName_String)
+                mode = openvr.RenderModel_ControllerMode_State_t()
+                ok1, cur = self.rm.getComponentStateForDevicePath(model, "button_grip", h["path"], mode)
+                ok2, rest = self.rm.getComponentState(model, "button_grip", openvr.VRControllerState_t(), mode)
+                if not (ok1 and ok2):
+                    h.update(armed=False, held=False)
+                    continue
+                a = self._angle(rest.mTrackingToComponentRenderModel, cur.mTrackingToComponentRenderModel)
+            except Exception:
+                h.update(armed=False, held=False)
+                continue
+            if not h["armed"]:
+                h["armed"] = a < 0.5
+                continue
+            held = a >= (0.5 if h["held"] else 1.0)
+            out.append((d, held, held and not h["held"]))
+            h["held"] = held
+        return out
+
+
 class OverlayHost:
     def __init__(self, pad, config):
         self.pad = pad
@@ -84,11 +134,20 @@ class OverlayHost:
                                           else openvr.VROverlayInputMethod_None)
             self.ov.setOverlaySortOrder(h, 10)
             self.ov.setOverlayWidthInMeters(h, self.width_m)
+            # One pointer per laser, like Full Keyboard: hold a modifier with one hand and press a
+            # key with the other. Events then say which laser (cursorIndex) they came from.
+            self.ov.setOverlayFlag(h, openvr.VROverlayFlags_MultiCursor, True)
         self.last_button_time = {}             # event type -> time: drops a click seen twice
         self.image_hash = None          # last uploaded image, to skip identical uploads
         self.sizes = [(0, 0), (0, 0)]   # mouse scale per overlay
         self.hover = None               # button under the laser
-        self.pressed = None             # button being pressed
+        self.pressed = {}               # laser (cursor index) -> button it's pressing
+        self.hovered_devices = set()    # controllers whose laser is on the pad
+        self.grip_drag = False          # the current drag is a grip squeeze (ends on release)
+        try:
+            self.grips = GripReader()
+        except Exception:
+            self.grips = None
         self.drag = None                # (device, offset, controller start, depth axis) while dragging
         self.last_device = None         # controller behind the latest laser event
         self.last_render = 0.0
@@ -143,7 +202,10 @@ class OverlayHost:
         # Alternate between two files so SteamVR reloads the image each time.
         self.tex_slot ^= 1
         path = f"{TEX_DIR}/arrowpad-overlay-{self.tex_slot}.png"
-        img.save(path, "PNG")
+        # Light compression: half the encode time (~7 ms instead of ~15); the file lives in RAM
+        # (/run), so its larger size costs nothing. A direct GPU texture, as Full Keyboard uses,
+        # would need an OpenGL context, which here only exists through Gamescope's WSI layer.
+        img.save(path, "PNG", 90)
         back = self.front ^ 1
         self.ov.setOverlayFromFile(self.handles[back], path)
         if (w, h) != self.sizes[back]:
@@ -333,6 +395,9 @@ class OverlayHost:
                     self.ov.hideOverlay(h)
                 # Like Full Keyboard: closing the dashboard releases our input (a pending
                 # right/middle-click toggle would otherwise change a click you can't see coming).
+                self.hovered_devices.clear()
+                if self.drag is not None:
+                    self.end_drag()
                 if self.pad.click_swap.armed:
                     self.pad.click_swap.disarm("dashboard closed")
                 # ...and lets go of held modifiers: a locked Super or Ctrl would otherwise turn
@@ -340,6 +405,14 @@ class OverlayHost:
                 self.pad.release_all_mods()
                 self.pad.restyle()
             self.visible = visible
+        grips = self.grips.poll() if (self.grips and visible) else []
+        self.gripping = {d for d, held, _ in grips if held}
+        for d, held, pressed in grips:
+            # Squeeze while that controller's laser is on the pad: grab it (keys included).
+            if pressed and d in self.hovered_devices and self.drag is None and not self.pad.pinned:
+                self.start_drag(d, grip=True)
+        if self.drag is not None and self.grip_drag and self.drag[0] not in self.gripping:
+            self.end_drag()
         if self.drag is not None:
             self.drag_follow()                  # every tick, not just on laser moves
         elif visible and self.ticks % 5 == 0:
@@ -354,50 +427,73 @@ class OverlayHost:
         # pyopenvr returns (result, event): test the result, or this loops forever.
         while self.ov.pollNextOverlayEvent(handle, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
+            cursor = ev.data.mouse.cursorIndex if t in (
+                openvr.VREvent_MouseMove, openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp) else 0
             if t in (openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp):
-                # Backstop: a press (or release) within 60 ms of the previous one is the same
-                # click seen by the other overlay. Real taps are far slower than 60 ms.
+                # Backstop: a press (or release) of the same laser within 60 ms of the previous
+                # one is the same click seen by the other overlay. Real taps are far slower.
                 now = time.monotonic()
-                if now - self.last_button_time.get(t, -1.0) < 0.06:
+                if now - self.last_button_time.get((t, cursor), -1.0) < 0.06:
                     continue
-                self.last_button_time[t] = now
+                self.last_button_time[(t, cursor)] = now
+            if t == openvr.VREvent_FocusLeave:
+                if dev == openvr.k_unTrackedDeviceIndexInvalid:
+                    self.hovered_devices.clear()
+                else:
+                    self.hovered_devices.discard(dev)
+                continue
             self.last_device = dev
             if t == openvr.VREvent_MouseMove:
                 pos = self.to_widget(ev.data.mouse)
+                self.hovered_devices.add(dev)
                 if self.drag is not None:
                     self.drag_follow()
                 else:
                     self.set_hover(self.button_at(pos), dev)
-                    if self.pressed is not None:
-                        self.send(self.pressed, QEvent.Type.MouseMove, pos, Qt.MouseButton.LeftButton)
+                    if cursor in self.pressed:
+                        self.send(self.pressed[cursor], QEvent.Type.MouseMove, pos, Qt.MouseButton.LeftButton)
             elif t == openvr.VREvent_MouseButtonDown:
                 pos = self.to_widget(ev.data.mouse)
                 b = self.button_at(pos)
+                if dev in getattr(self, "gripping", ()) or self.drag is not None:
+                    continue                    # squeezing to grab: a trigger pull doesn't also type
                 if b is not None:
-                    self.pressed = b
+                    self.pressed[cursor] = b
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
                     self.dirty = True
                 elif not self.pad.pinned:
-                    # Grab: the panel follows the controller rigidly, like Full Keyboard's grip
-                    # grab. (Moving it by laser coordinates on the panel ran away.)
-                    ctrl = self.device_matrix(dev)
-                    if ctrl is not None:
-                        self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose),
-                                     [ctrl[r][3] for r in range(3)], self.depth_axis())
+                    # Trigger on the background also grabs (until the trigger is released).
+                    self.start_drag(dev, grip=False)
             elif t == openvr.VREvent_MouseButtonUp:
                 pos = self.to_widget(ev.data.mouse)
-                if self.pressed is not None:
-                    self.send(self.pressed, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
-                    self.pressed = None
+                b = self.pressed.pop(cursor, None)
+                if b is not None:
+                    self.send(b, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
                     self.dirty = True
-                if self.drag is not None:
-                    self.drag = None
-                    if self.distance_from_head() > MAX_DISTANCE:
-                        self.reset_position()
-                    else:
-                        self.remember_offset()     # the new spot, relative to the dashboard
-                        self.ease_level()
-                    self.save()
+                if self.drag is not None and not self.grip_drag and self.drag[0] == dev:
+                    self.end_drag()
+
+    def start_drag(self, dev, grip):
+        """Grab: the panel follows the controller rigidly, like Full Keyboard's grab. (Moving it
+        by laser coordinates on the panel ran away.)"""
+        ctrl = self.device_matrix(dev)
+        if ctrl is None:
+            return
+        for c, b in list(self.pressed.items()):        # a grab cancels presses in progress
+            self.send(b, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
+        self.pressed.clear()
+        self.grip_drag = grip
+        self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose),
+                     [ctrl[r][3] for r in range(3)], self.depth_axis())
+
+    def end_drag(self):
+        self.drag, self.grip_drag = None, False
+        if self.distance_from_head() > MAX_DISTANCE:
+            self.reset_position()
+        else:
+            self.remember_offset()     # the new spot, relative to the dashboard
+            self.ease_level()
+        self.save()
 
     # ---- after a grab: ease a slight sideways lean level (Full Keyboard does this) -----------
     LEVEL_MAX_DEG, LEVEL_MS, LEVEL_STEPS = 5.0, 500, 20

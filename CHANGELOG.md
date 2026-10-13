@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad, more Full Keyboard:** keys drawn its way (a side, a face that travels down when
+  pressed, hover gradient); Graphite and Midnight themes and haptic strength in a ⚙ settings
+  page; the Steam Frame logo on Super and a SteamOS key (opens the app menu) on the Fn layer; in VR,
+  grip-to-grab anywhere on the pad and two-handed modifiers (hold Ctrl with one laser, press with
+  the other). Redraws are quicker (lighter PNG compression, up to ~7 a second).
+- **Claude Desktop** updated to 2.31226.1.
 - **Arrow Pad VR: a tap could count twice.** Both of the pad's double-buffered overlays took laser
   input, so for ~50 ms per redraw a click reached both: one tap locked a modifier (a locked Super
   turns every click into Super+click) or toggled R/M on and off. Only the front overlay takes input
