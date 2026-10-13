@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- **New Accessibility group** in the installer window: Dictation, whisper-frame, Arrow Pad, Screen
+  snip and Screen reader moved there from Convenience.
+- **Screen snip works on floating VR windows:** the selection opens right where the window floats
+  (a small dashboard patch, with the VR windows helper), instead of in the dashboard.
+- **Android Mirror reconnects by itself** when the wireless connection dies (e.g. after the phone
+  switches profile or address), instead of showing a frozen picture: it checks the phone answers
+  every 5 s and reconnects at its current address.
 - **Scroll strips sit a little behind the window** (3 cm), so SteamVR's own buttons at the
   window's edge, like Enter Gamepad Mode above it, draw in front instead of through the top strip.
 - **Fixed: Copy image didn't paste** (e.g. into OnlyOffice). The Shared clipboard tweak's

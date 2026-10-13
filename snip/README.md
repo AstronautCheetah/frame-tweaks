@@ -12,14 +12,18 @@ Select a rectangle of the window you're using, then:
   of its own (drawn like Arrow Pad, not a window, so it takes no place in the dashboard) with
   **■ Stop** / **▶ Again**, **⏸ Pause** / **▶ Resume**, **Show text** / **Show image** (the
   snip's image, or the text read from it), speed, **Copy image**, **Copy text**, **Paste** (read
-  the clipboard's text instead; it's shown in place of the snip), **Close** and **Collapse** (down
-  to just an Expand icon, with a margin to grab it by, right where the Collapse icon was; reading
-  carries on). It starts beside
+  the clipboard's text instead; it's shown in place of the snip), **Close** and **Collapse** (at
+  either end of the bottom row: down to just an Expand icon, with a margin to grab it by, right
+  where the Collapse icon you used was; reading carries on). It starts beside
   Arrow Pad's place under the dashboard and follows the dashboard; drag its top bar to move it,
   and it remembers the spot (relative to the dashboard) for next time. Narrating another snip
   while it's open reuses it, in place. The
   full-screen snip goes away, so you can carry on with anything else while it reads. A speed change applies at
   once (it reads sentence by sentence and restarts the current one).
+
+In VR, snipping a **floating window** opens the selection right where that window floats (a
+small dashboard patch, `patch.js`, installed when the [VR windows](../vr-dashboard/) helper is;
+without it the selection opens in the dashboard).
 
 <!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
 > **At a glance**

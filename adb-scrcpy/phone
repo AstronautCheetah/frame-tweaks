@@ -5,21 +5,61 @@
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 [ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
-all=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;')
-c=$(echo "$all" | grep -F "${PHONE_NAME:-}" | head -1)
-if [ -z "$c" ]; then
+
+# find_phone: sets dev=address:port of the advertised phone, or returns 1.
+find_phone() {
+    all=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;')
+    c=$(echo "$all" | grep -F "${PHONE_NAME:-}" | head -1)
+    [ -n "$c" ] || return 1
+    dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
+}
+if ! find_phone; then
     # Name the phones that *are* advertising, so a wrong phone or a wrong PHONE_NAME is obvious.
     seen=$(echo "$all" | sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u | paste -sd, - | sed 's/,/, /g')
     msg="Is Wireless debugging on (Developer options, in the phone's Owner profile), on the same Wi-Fi?"
     [ -n "$seen" ] && msg="$msg Seen instead: $seen."
     notify-send -a Phone "${PHONE_NAME:-Phone} not found" "$msg"; exit 1
 fi
-dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
-adb connect "$dev" >/dev/null
 # With "Memory caps" installed, scrcpy runs inside its memory limit.
 cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" scrcpy --)
 MAX=1920
-# In VR, shape the window like the phone (upright or sideways) and follow its rotation;
-# without it the Steam session makes the window 1920x1080, with black bars beside a portrait phone.
-[ -x "$HOME/.local/bin/phone-fit" ] && setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
-exec "${cap[@]}" scrcpy -s "$dev" --video-bit-rate=8M --max-size="$MAX" "$@"
+
+# A wireless connection can die without scrcpy noticing (the phone changed network or address,
+# e.g. after switching profile): the picture just freezes. Check the phone answers every 5 s;
+# after 3 misses, close the frozen mirror and reconnect at the phone's current address.
+alive() { timeout 4 adb -s "$dev" shell true >/dev/null 2>&1; }
+while :; do
+    adb connect "$dev" >/dev/null
+    # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
+    # without it the Steam session makes the window 1920x1080, with black bars beside a portrait
+    # phone. (It ends with scrcpy, so it's started again with each reconnect.)
+    if [ -x "$HOME/.local/bin/phone-fit" ] && ! pgrep -u "$(id -u)" -x phone-fit >/dev/null; then
+        setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
+    fi
+    "${cap[@]}" scrcpy -s "$dev" --video-bit-rate=8M --max-size="$MAX" "$@" &
+    pid=$! misses=0
+    while kill -0 "$pid" 2>/dev/null; do
+        sleep 5
+        if alive; then misses=0; else misses=$((misses + 1)); fi
+        [ "$misses" -ge 3 ] && break
+    done
+    if ! kill -0 "$pid" 2>/dev/null; then
+        wait "$pid"; code=$?
+        # Closed by you (or the phone was unplugged/turned off on purpose): done. scrcpy also
+        # stops by itself when it notices the connection dropped: reconnect then.
+        [ "$code" -eq 0 ] || alive && exit "$code"
+    else
+        kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null       # frozen
+    fi
+    adb disconnect "$dev" >/dev/null 2>&1
+    notify-send -a Phone "Phone connection lost" "Reconnecting…"
+    found=
+    for _ in $(seq 12); do                             # up to a minute
+        if find_phone && adb connect "$dev" >/dev/null && alive; then found=1; break; fi
+        sleep 5
+    done
+    if [ -z "$found" ]; then
+        notify-send -a Phone "Phone not found" "Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
+        exit 1
+    fi
+done
