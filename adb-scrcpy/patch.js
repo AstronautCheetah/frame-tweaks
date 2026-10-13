@@ -5,7 +5,8 @@
 // the phone sideways shrank it to a strip. For a floating window that has been upright, this sets
 // the panel height the dashboard's own override uses (size.mainPanelHeightOverride, as theater
 // mode does), so its long side is LONG_M: upright, LONG_M tall; sideways, LONG_M wide. Resizing
-// it with its handle still works on top of that.
+// it with its handle still works on top of that. Docked in the dashboard, an upright window gets
+// a standard window's height (it too was made as wide as a standard one).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
 // requires: the frame's panel height override | resize_main_panel_height:g.size.mainPanelHeightOverride
 // requires: override from component props | null!=this.componentProps.forcedUniformDashboardHeight
@@ -13,8 +14,9 @@
 // requires: overlay picture size | GetOverlayMouseScale(
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-rotate', VERSION = 6, WORLD = 4;
+  const NAME = 'phone-rotate', VERSION = 7, DASH = 1, WORLD = 4;
   const LONG_M = 0.8;                  // long side of a turned window, metres (a standard one: 0.98 wide)
+  const DOCKED_M = 0.554;              // an upright window in the dashboard: a standard one's height
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -59,21 +61,30 @@
     try {
       for (const f of FS.frames ?? []) {
         if (!f?.size) continue;
-        const c = f.docking?.dockLocation === WORLD ? pictureSize(f) : null;
-        if (f.docking?.dockLocation !== WORLD || !c?.unWidth || !c?.unHeight) {
-          if (heights.has(f)) { heights.delete(f); nudge(f); }       // docked: the dashboard's size
+        const dock = f.docking?.dockLocation;
+        const c = dock === WORLD || dock === DASH ? pictureSize(f) : null;
+        let want;
+        if (c?.unWidth && c?.unHeight) {
+          const s = { w: c.unWidth, h: c.unHeight };
+          const perMetre = 1 / (f.activePage.size.mainPanelWorldScaleIgnoringResizing || 1);
+          if (dock === WORLD) {
+            // Every shape at once, also the ones it passes through while turning: a moment of
+            // in-between size beats a second of the wrong one.
+            if (s.h > s.w) upright.add(f);
+            if (upright.has(f)) want = LONG_M * Math.min(1, s.h / s.w) * perMetre;
+          } else {
+            // Docked: the dashboard makes it as wide as a standard window, so an upright one came
+            // out over 2 m tall. Give it a standard window's height; sideways is left alone.
+            upright.delete(f);
+            if (s.h > s.w) want = DOCKED_M * perMetre;
+          }
+        } else {
           upright.delete(f);
-          continue;
         }
-        // Every shape at once, also the ones it passes through while turning: a moment of
-        // in-between size beats a second of the wrong one.
-        const s = { w: c.unWidth, h: c.unHeight };
-        if (s.h > s.w) upright.add(f);
-        if (!upright.has(f)) continue;
-        const perMetre = 1 / (f.activePage.size.mainPanelWorldScaleIgnoringResizing || 1);
-        const want = LONG_M * Math.min(1, s.h / s.w) * perMetre;
         const have = heights.get(f);
-        if ((have === undefined || Math.abs(have - want) > want * 0.01) && wrap(f)) {
+        if (want === undefined) {
+          if (have !== undefined) { heights.delete(f); nudge(f); }   // the dashboard's own size
+        } else if ((have === undefined || Math.abs(have - want) > want * 0.01) && wrap(f)) {
           heights.set(f, want);
           nudge(f);
           set++;

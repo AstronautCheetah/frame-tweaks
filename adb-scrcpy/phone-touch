@@ -120,11 +120,24 @@ class Phone:
             self.server.terminate()
             self.server = None
 
-    def touch(self, action, u, v, sideways):
+    def point(self, u, v, sideways):
         """u, v: 0..1 across and down the picture as you see it; sideways: the phone is turned."""
         w, h = self.size[::-1] if sideways else self.size
-        x, y = round(min(1, max(0, u)) * (w - 1)), round(min(1, max(0, v)) * (h - 1))
-        msg = struct.pack(">BBqiiHHHII", 2, action, FINGER, x, y, w, h, 0 if action == UP else 0xFFFF, 0, 0)
+        return round(min(1, max(0, u)) * (w - 1)), round(min(1, max(0, v)) * (h - 1)), w, h
+
+    def touch(self, action, u, v, sideways):
+        x, y, w, h = self.point(u, v, sideways)
+        self.send(struct.pack(">BBqiiHHHII", 2, action, FINGER, x, y, w, h, 0 if action == UP else 0xFFFF, 0, 0),
+                  retry=action != MOVE)
+
+    def scroll(self, u, v, sideways, dx, dy):
+        """A mouse wheel at u, v: dx, dy in notches, + = right / down (as a page's wheel event)."""
+        x, y, w, h = self.point(u, v, sideways)
+        # scrcpy's fixed point: -1..1 carries -16..16 notches; Android's + scrolls up / right.
+        fix = lambda n: max(-0x8000, min(0x7FFF, round(max(-16, min(16, n)) / 16 * 0x8000)))
+        self.send(struct.pack(">BiiHHhhI", 3, x, y, w, h, fix(dx), fix(-dy), 0), retry=False)
+
+    def send(self, msg, retry):
         with self.lock:
             for attempt in (1, 2):
                 try:
@@ -135,7 +148,7 @@ class Phone:
                 except OSError as e:
                     log("reconnecting:", e)
                     self.close()
-                    if attempt == 2 or action == MOVE:
+                    if attempt == 2 or not retry:
                         return
 
 
@@ -174,8 +187,11 @@ def serve(phone, sd):
                 if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") == BINDING:
                     try:
                         req = json.loads(m["params"].get("payload") or "{}")
-                        action = {"down": DOWN, "move": MOVE, "up": UP}[req["a"]]
-                        phone.touch(action, float(req["u"]), float(req["v"]), float(req["w"]) > float(req["h"]))
+                        at = (float(req["u"]), float(req["v"]), float(req["w"]) > float(req["h"]))
+                        if req["a"] == "scroll":
+                            phone.scroll(*at, float(req.get("dx", 0)), float(req.get("dy", 0)))
+                        else:
+                            phone.touch({"down": DOWN, "move": MOVE, "up": UP}[req["a"]], *at)
                     except (KeyError, ValueError, TypeError) as e:
                         log("bad call:", e)
             ws.send({"id": n + 1, "method": "Runtime.evaluate", "params": {"expression": "window.__sftPhoneTouchAlive = 0"}})

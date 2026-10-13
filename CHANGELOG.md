@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror: the joystick scrolls the phone** (it went to the click layer and was lost):
+  it's passed on as the phone's scroll wheel.
+- **An upright window docked in the dashboard has a standard window's height** (the upright
+  mirror came out over 2 m tall unless you floated it).
 - **Fixed: laser clicks on the upright Android Mirror landed at its left edge.** The Steam session
   maps the laser wrongly on a window narrower than its screen. Now a see-through layer over the
   mirror (a dashboard patch) takes the laser, and `phone-touch` sends your presses, drags and

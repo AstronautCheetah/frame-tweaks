@@ -12,11 +12,11 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 1, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 2, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1;                       // panel anchor
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
-  const stats = { downs: 0, moves: 0, ups: 0 };
+  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null };
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -83,6 +83,17 @@
     send('up', ev);
     touch = null;
   };
+  // The joystick scrolls the window under the laser: here, our layer. Pass it on as the phone's
+  // scroll wheel, in notches (a wheel notch is 100 page pixels here, or 1 line or page).
+  const onWheel = (ev, size) => {
+    stats.wheels++;
+    stats.lastWheel = [ev.deltaMode, ev.deltaX, ev.deltaY];
+    const notch = ev.deltaMode === 0 ? 100 : 1, r = ev.currentTarget.getBoundingClientRect();
+    try {
+      window.sftPhoneTouch(JSON.stringify({ a: 'scroll', u: (ev.clientX - r.left) / r.width, v: (ev.clientY - r.top) / r.height,
+                                            dx: ev.deltaX / notch, dy: ev.deltaY / notch, w: size.w, h: size.h }));
+    } catch (e) {}
+  };
   const layer = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = page && pictureSize(page);
@@ -97,6 +108,7 @@
         debug_name: 'SftPhoneTouch', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false },
         ...(curveId ? { curvature_origin_id: curveId } : {}) },
         el('div', { style: { width: `${pxW}px`, height: `${pxH}px`, background: 'rgba(0, 0, 0, 0)' },
+          onWheel: (ev) => onWheel(ev, c),
           onMouseDown: (ev) => {
             stats.downs++;
             if (touch) onUp(ev);                    // a new press ends a touch whose let-go went missing
