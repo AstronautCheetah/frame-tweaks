@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip: Narrate pops out and has a speed control.** Narrate opens a small window with the
+  snip and its controls (Stop / Again, speed, Close) and gives VR back; the speed (0.75x to 2x,
+  under the Narrate button) is remembered and applies at once.
 - **Scroll strips work like joysticks:** press, drag away from that point to scroll (farther =
   faster, back past it reverses), let go to stop; the strip shows where you pressed. They scroll
   with arrow keys everywhere, the desktop included (its Remote Desktop portal accepted wheel steps

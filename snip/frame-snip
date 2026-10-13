@@ -13,6 +13,7 @@ clipboard tweak carries it to VR windows).
 """
 import ctypes
 import ctypes.util
+import json
 import os
 import re
 import shutil
@@ -25,9 +26,10 @@ from pathlib import Path
 os.environ["QT_QPA_PLATFORM"] = "xcb"
 os.environ["DISPLAY"] = ":0"                    # the Steam session: every VR window lives here
 
-from PyQt6.QtCore import QRect, Qt, QTimer                                        # noqa: E402
+from PyQt6.QtCore import QObject, QProcess, QRect, Qt, QTimer, pyqtSignal        # noqa: E402
 from PyQt6.QtGui import QColor, QImage, QPainter, QPen, QPixmap                   # noqa: E402
-from PyQt6.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QWidget  # noqa: E402
+from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,  # noqa: E402
+                             QWidget)
 
 HOME = Path.home()
 RUN = Path(f"/run/user/{os.getuid()}")
@@ -120,16 +122,223 @@ def ocr(img):
     return re.sub(r"\n{3,}", "\n\n", text)
 
 
-def speak(text):
-    """Start reading text aloud; returns the player process (to stop it), or None."""
-    if not PIPER.exists() or not VOICE.exists():
-        return None
-    wav = Path(tempfile.mkdtemp()) / "narrate.wav"
-    r = subprocess.run([str(PIPER), "--model", str(VOICE), "--config", f"{VOICE}.json", "--output_file", str(wav)],
-                       input=text.replace("\n", " "), capture_output=True, text=True)
-    if r.returncode != 0 or not wav.exists():
-        return None
-    return subprocess.Popen(["pw-play", str(wav)], start_new_session=True)
+# ---- narration ------------------------------------------------------------------------------
+SETTINGS = HOME / ".config/frame-tweaks/snip.json"
+SPEEDS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+
+
+def load_speed():
+    try:
+        v = float(json.loads(SETTINGS.read_text()).get("speed", 1.0))
+    except (OSError, ValueError, AttributeError):
+        v = 1.0
+    return min(SPEEDS, key=lambda x: abs(x - v))
+
+
+def save_speed(v):
+    try:
+        conf = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
+    except (OSError, ValueError):
+        conf = {}
+    conf["speed"] = v
+    SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+    SETTINGS.write_text(json.dumps(conf) + "\n")
+
+
+def sentences(text):
+    """Speakable chunks: sentences, long ones split at commas, short ones joined."""
+    parts = [p.strip() for p in re.split(r"(?<=[.!?:;])\s+|\n{2,}", text.replace("\r", "")) if p.strip()]
+    out = []
+    for part in parts:
+        part = re.sub(r"\s+", " ", part)
+        while len(part) > 300:                              # very long: break at a comma or space
+            cut = max(part.rfind(", ", 0, 300), part.rfind(" ", 0, 300))
+            cut = cut if cut > 100 else 300
+            out.append(part[:cut + 1].strip())
+            part = part[cut + 1:].strip()
+        if out and len(out[-1]) < 40:
+            out[-1] = f"{out[-1]} {part}"
+        else:
+            out.append(part)
+    return out
+
+
+class Narrator(QObject):
+    """Reads text aloud with Piper, a sentence at a time (the next one is prepared while one plays),
+    so it starts quickly and a speed change applies at once (the current sentence restarts)."""
+    progress = pyqtSignal(int, int)          # sentence index, count
+    finished = pyqtSignal()
+
+    def __init__(self, text, speed):
+        super().__init__()
+        self.parts, self.speed = sentences(text), speed
+        self.dir = Path(tempfile.mkdtemp(prefix="snip-narrate-"))
+        self.wavs = {}                       # index -> (speed, path) synthesized
+        self.synth = None                    # (index, speed, QProcess) being synthesized
+        self.player = None
+        self.i = 0
+        self.stopped = False
+
+    def start(self):
+        self._synth(self.i)
+
+    def _synth(self, i):
+        if i >= len(self.parts) or self.synth or (i in self.wavs and self.wavs[i][0] == self.speed):
+            return
+        out = self.dir / f"{i}-{self.speed}.wav"
+        proc = QProcess(self)
+        speed = self.speed
+        proc.finished.connect(lambda *_: self._synthesized(i, speed, out, proc))
+        proc.start(str(PIPER), ["--model", str(VOICE), "--config", f"{VOICE}.json", "--output_file", str(out),
+                                "--length_scale", f"{1 / speed:.3f}"])
+        proc.write(self.parts[i].encode())
+        proc.closeWriteChannel()
+        self.synth = (i, speed, proc)
+
+    def _synthesized(self, i, speed, out, proc):
+        self.synth = None
+        proc.deleteLater()
+        if self.stopped:
+            return
+        if speed == self.speed and out.exists():
+            self.wavs[i] = (speed, out)
+        if self.player is None:
+            self._play()
+        self._synth(self.i + 1 if self.player is not None else self.i)
+
+    def _play(self):
+        if self.stopped:
+            return
+        if self.i >= len(self.parts):
+            self.finished.emit()
+            return
+        w = self.wavs.get(self.i)
+        if not w or w[0] != self.speed:
+            self._synth(self.i)              # not ready yet: plays when it is
+            return
+        self.progress.emit(self.i, len(self.parts))
+        self.player = QProcess(self)
+        self.player.finished.connect(self._played)
+        self.player.start("pw-play", [str(w[1])])
+        self._synth(self.i + 1)
+
+    def _played(self, *_):
+        if self.player:
+            self.player.deleteLater()
+        self.player = None
+        if self.stopped:
+            return
+        self.i += 1
+        self._play()
+
+    def set_speed(self, speed):
+        """New speed: the current sentence starts again at it."""
+        self.speed = speed
+        if self.player:
+            p, self.player = self.player, None
+            p.finished.disconnect()
+            p.kill()
+            p.waitForFinished(500)
+            p.deleteLater()
+        self._play()
+
+    def again(self):
+        self.stopped, self.i = False, 0
+        self._play()
+
+    def stop(self):
+        self.stopped = True
+        for p in (self.player, self.synth[2] if self.synth else None):
+            if p is not None:
+                p.kill()
+                p.waitForFinished(500)
+
+    def cleanup(self):
+        self.stop()
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+
+class NarrationWindow(QWidget):
+    """The snip, popped out, with the narration's controls; the rest of VR stays usable."""
+    STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 20px; }"
+             "QPushButton { background: #232a32; font-weight: 600; padding: 10px 16px; border-radius: 10px; }"
+             "QPushButton:hover { background: #355b7a; } QPushButton:disabled { color: #3a434d; }")
+
+    def __init__(self, image, text, speed):
+        super().__init__()
+        self.setWindowTitle("Screen snip: narrating")
+        self.setStyleSheet(self.STYLE)
+        lay = QVBoxLayout(self)
+        pic = QLabel()
+        pm = QPixmap.fromImage(image)
+        if pm.width() > 900 or pm.height() > 600:
+            pm = pm.scaled(900, 600, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        pic.setPixmap(pm)
+        pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lay.addWidget(pic)
+        self.state = QLabel("Preparing…")
+        self.state.setStyleSheet("color: #9aa6b2;")
+        lay.addWidget(self.state)
+        row = QHBoxLayout()
+        self.toggle = QPushButton("■ Stop")
+        self.toggle.clicked.connect(self.stop_or_again)
+        row.addWidget(self.toggle)
+        row.addStretch(1)
+        self.speed = speed
+        self.slower, self.faster = QPushButton("−"), QPushButton("+")
+        self.speed_label = QLabel()
+        self.speed_label.setMinimumWidth(70)
+        self.speed_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.slower.clicked.connect(lambda: self.step(-1))
+        self.faster.clicked.connect(lambda: self.step(1))
+        for w in (QLabel("Speed"), self.slower, self.speed_label, self.faster):
+            row.addWidget(w)
+        row.addStretch(1)
+        close = QPushButton("Close")
+        close.clicked.connect(self.close)
+        row.addWidget(close)
+        lay.addLayout(row)
+        self.show_speed()
+        self.narrator = Narrator(text, speed)
+        self.narrator.progress.connect(lambda i, n: self.state.setText(f"Reading aloud: part {i + 1} of {n}"))
+        self.narrator.finished.connect(self.done)
+        self.narrator.start()
+        # A fixed size keeps this window its own shape in VR (the Steam session otherwise makes
+        # every window 1920x1080).
+        self.adjustSize()
+        self.setFixedSize(self.sizeHint())
+
+    def show_speed(self):
+        self.speed_label.setText(f"{self.speed:g}×")
+        self.slower.setEnabled(self.speed > SPEEDS[0])
+        self.faster.setEnabled(self.speed < SPEEDS[-1])
+
+    def step(self, d):
+        i = min(max(0, SPEEDS.index(self.speed) + d), len(SPEEDS) - 1)
+        self.speed = SPEEDS[i]
+        self.show_speed()
+        save_speed(self.speed)
+        if not self.narrator.stopped:
+            self.narrator.set_speed(self.speed)
+
+    def done(self):
+        self.state.setText("Finished.")
+        self.toggle.setText("▶ Again")
+
+    def stop_or_again(self):
+        if self.narrator.stopped or self.toggle.text().startswith("▶"):
+            self.narrator.speed = self.speed
+            self.toggle.setText("■ Stop")
+            self.state.setText("Reading aloud…")
+            self.narrator.again()
+        else:
+            self.narrator.stop()
+            self.state.setText("Stopped.")
+            self.toggle.setText("▶ Again")
+
+    def closeEvent(self, ev):
+        self.narrator.cleanup()
+        super().closeEvent(ev)
 
 
 # ---- selection window -----------------------------------------------------------------------
@@ -141,7 +350,6 @@ class Snip(QWidget):
         self.start = self.end = None              # a new rectangle being drawn
         self.sel = None                           # the selection, once drawn (adjustable)
         self.drag = None
-        self.player = None
         self.setCursor(Qt.CursorShape.CrossCursor)
         self.hint = QLabel("Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels", self)
         self.hint.setStyleSheet("background: rgba(11,16,22,220); color: #e8ecf0; font-size: 22px;"
@@ -155,13 +363,34 @@ class Snip(QWidget):
             "QPushButton:hover { background: #355b7a; }")
         lay = QHBoxLayout(self.bar)
         lay.setContentsMargins(10, 10, 10, 10)
+        self.speed = load_speed()
         for label, fn in (("Copy", self.copy_image), ("Save", self.save), ("Copy text", self.copy_text),
                           ("Narrate", self.narrate), ("Cancel", self.close)):
             b = QPushButton(label)
             b.clicked.connect(fn)
-            lay.addWidget(b)
-            if label == "Narrate":
-                self.narrate_button = b
+            if label != "Narrate":
+                lay.addWidget(b, 0, Qt.AlignmentFlag.AlignTop)
+                continue
+            # Narrate, with its reading speed underneath
+            cell = QVBoxLayout()
+            cell.setSpacing(6)
+            cell.addWidget(b)
+            speeds = QHBoxLayout()
+            self.speed_down, self.speed_up = QPushButton("−"), QPushButton("+")
+            self.speed_text = QLabel()
+            self.speed_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.speed_text.setStyleSheet("background: transparent; color: #e8ecf0; font-size: 20px;")
+            self.speed_text.setMinimumWidth(70)
+            for w, step in ((self.speed_down, -1), (self.speed_up, 1)):
+                w.setStyleSheet("min-width: 44px; max-width: 44px; padding: 6px 0px; font-size: 22px;")
+                w.clicked.connect(lambda _=False, st=step: self.step_speed(st))
+            speeds.addWidget(self.speed_down)
+            speeds.addWidget(self.speed_text, 1)
+            speeds.addWidget(self.speed_up)
+            cell.addLayout(speeds)
+            lay.addLayout(cell)
+            self.narrate_button = b
+        self.show_speed()
         self.bar.adjustSize()
         self.bar.hide()
         self.resize(self.pix.size())
@@ -316,28 +545,31 @@ class Snip(QWidget):
             notify("Text copied" if ok else "Couldn't copy the text", text)
         self.close()
 
+    def show_speed(self):
+        self.speed_text.setText(f"{self.speed:g}×")
+        self.speed_down.setEnabled(self.speed > SPEEDS[0])
+        self.speed_up.setEnabled(self.speed < SPEEDS[-1])
+
+    def step_speed(self, d):
+        self.speed = SPEEDS[min(max(0, SPEEDS.index(self.speed) + d), len(SPEEDS) - 1)]
+        save_speed(self.speed)
+        self.show_speed()
+
     def narrate(self):
-        if self.player:                                       # pressed again: stop
-            return self.close()
-        text = ocr(self.snipped())
+        snip = self.snipped()
+        text = ocr(snip)
         if not text:
             notify("No text found in the snip" if text == "" else "Narrate needs Tesseract",
                    "" if text == "" else "Reinstall Screen snip in Frame Tweaks")
             return self.close()
-        self.narrate_button.setText("■ Stop")
-        QApplication.processEvents()
-        self.player = speak(text)
-        if not self.player:
+        if not PIPER.exists() or not VOICE.exists():
             notify("Narrate needs Piper", "Reinstall 'Speech engine' in Frame Tweaks")
             return self.close()
-        # Stay open while it reads (Stop / Esc / Cancel end it); close when it's done.
-        self.watch = QTimer(self, interval=300, timeout=lambda: self.player.poll() is not None and self.close())
-        self.watch.start()
-
-    def closeEvent(self, ev):
-        if self.player and self.player.poll() is None:
-            self.player.terminate()
-        super().closeEvent(ev)
+        # Pop the snip out into its own small window that reads it aloud, and give the rest of
+        # VR back: the full-screen selection window closes.
+        self.popout = NarrationWindow(snip, text, self.speed)
+        self.popout.show()
+        self.close()
 
 
 def main():
