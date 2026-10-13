@@ -101,10 +101,11 @@ alarm_fetch() {
     rm -rf "$t"
 }
 
-# fetch_pinned <id> <out-file>: download <id>/pin's url and check it against the hash recorded
-# in the pin (not one fetched alongside it), so a changed upstream file is refused.
+# fetch_pinned <id> <out-file> [pin-name]: download <id>/pin's (or <id>/<pin-name>'s) url and
+# check it against the hash recorded in the pin (not one fetched alongside it), so a changed
+# upstream file is refused.
 fetch_pinned() {
-    local pin="$REPO_DIR/$1/pin" url sha
+    local pin="$REPO_DIR/$1/${3:-pin}" url sha
     url=$(sed -n 's/^url=//p' "$pin"); sha=$(sed -n 's/^sha256=//p' "$pin")
     curl -fL# -o "$2" "$url" || die "download failed: $url"
     echo "$sha  $2" | sha256sum -c --quiet - || die "$(basename "$url"): checksum differs from the pinned one; not installing it"

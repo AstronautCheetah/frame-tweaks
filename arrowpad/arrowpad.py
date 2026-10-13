@@ -77,23 +77,32 @@ KEY = {
     "Shift": 42, "Ctrl": 29, "Alt": 56, "Super": 125,
     "PrtSc": 99, "Menu": 127,
     **{f"F{n}": c for n, c in zip(range(1, 11), range(59, 69))}, "F11": 87, "F12": 88,
-    "A": 30, "C": 46, "V": 47, "X": 45, "Z": 44,
+    "A": 30, "C": 46, "V": 47, "X": 45, "Z": 44, "F": 33, "S": 31,
 }
 MODIFIERS = ("Ctrl", "Alt", "Super")
 MOUSE = ("RMB", "MMB")       # toggles: the next click becomes a right / middle click
-CHORDS = {"Copy": "C", "Paste": "V", "Cut": "X", "Undo": "Z", "All": "A"}  # Ctrl + key
+CHORDS = {"Copy": "C", "Paste": "V", "Cut": "X", "Undo": "Z", "All": "A",   # Ctrl + key(s)
+          "Redo": ("Shift", "Z"), "Find": "F", "Save": "S"}
 LAYERS = {
     "nav": [
         ["Esc", "Tab", "Bksp", "Del", "RMB", "MMB"],
-        ["Fn", "Home", "↑", "End", "PgUp", "🎤"],
+        ["Fn", "Home", "↑", "End", "PgUp", "Tools"],
         ["Ctrl", "←", "↓", "→", "PgDn", "Copy"],
         ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
     "fn": [
         ["F1", "F2", "F3", "F4", "RMB", "MMB"],
-        ["Fn", "F5", "F6", "F7", "F8", "🎤"],
+        ["Fn", "F5", "F6", "F7", "F8", "Tools"],
         ["Ctrl", "F9", "F10", "F11", "F12", "Copy"],
         ["Alt", "Super", "Ins", "PrtSc", "Launcher", "Paste"],
+    ],
+    # Tools: snip, dictation and editing shortcuts. Esc, R/M and the modifiers stay where they
+    # are on every layer.
+    "tools": [
+        ["Esc", "Snip", "🎤", "Launcher", "RMB", "MMB"],
+        ["Fn", "Undo", "Redo", "Find", "Save", "Tools"],
+        ["Ctrl", "Cut", "Copy", "Paste", "All", "Del"],
+        ["Alt", "Super", "Tab", "Bksp", "Enter", "PrtSc"],
     ],
 }
 # Key legends as printed on physical keyboards of each language (others keep English).
@@ -116,10 +125,14 @@ BREEZE = Path("/usr/share/icons/breeze-dark")
 ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
          "All": "edit-select-all", "pin": "window-unpin", "pin_on": "window-pin", "reset": "crosshairs",
          "RMB": "input-mouse-click-right", "MMB": "input-mouse-click-middle",
-         "smaller": "zoom-out", "larger": "zoom-in", "close": "window-close"}
+         "smaller": "zoom-out", "larger": "zoom-in", "close": "window-close", "Snip": "select-rectangular",
+         "Redo": "edit-redo", "Find": "edit-find", "Save": "document-save"}
 TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types",
         "Copy": "Copy (Ctrl+C)", "Paste": "Paste (Ctrl+V)", "Cut": "Cut (Ctrl+X)",
         "All": "Select all (Ctrl+A)", "Undo": "Undo (Ctrl+Z)", "Fn": "F1–F12 layer (tap again to go back)",
+        "Redo": "Redo (Ctrl+Shift+Z)", "Find": "Find (Ctrl+F)", "Save": "Save (Ctrl+S)",
+        "Tools": "Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)",
+        "Snip": "Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud",
         "RMB": "Right click: your next click becomes a right click",
         "Launcher": "Open the desktop's application menu (taps Super)",
         "Super": "Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand",
@@ -739,7 +752,7 @@ class ArrowPad(QWidget):
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             b.setToolTip(TIPS.get(name, ""))
-            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher") else None
+            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip") else None
             if icon:
                 b.setIcon(icon)
                 b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike
@@ -782,8 +795,8 @@ class ArrowPad(QWidget):
             name = self.name_at(r, c)
             if name in MODIFIERS:
                 state = self.mod_state[name]
-            elif name == "Fn":
-                state = "locked" if self.layer == "fn" else "off"
+            elif name in ("Fn", "Tools"):
+                state = "locked" if self.layer == {"Fn": "fn", "Tools": "tools"}[name] else "off"
             elif name in MOUSE:
                 state = "locked" if self.click_swap.armed == name else "off"
             elif name == "🎤":
@@ -934,9 +947,12 @@ class ArrowPad(QWidget):
                 self.toggle_mod(name)
         elif name == "Launcher":
             self.yd.tap(KEY["Super"])
-        elif name == "Fn":
-            self.layer = "fn" if self.layer == "nav" else "nav"
+        elif name in ("Fn", "Tools"):
+            target = {"Fn": "fn", "Tools": "tools"}[name]
+            self.layer = target if self.layer != target else "nav"
             self.relabel()
+        elif name == "Snip":
+            self.snip()
         elif name in MOUSE:
             self.toggle_click(name)
         elif name == "🎤":
@@ -944,7 +960,8 @@ class ArrowPad(QWidget):
             QTimer.singleShot(300, self.restyle)
         elif name in CHORDS:
             ctrl_held = self.mod_state["Ctrl"] != "off"
-            codes = ([] if ctrl_held else [KEY["Ctrl"]]) + [KEY[CHORDS[name]]]
+            keys = CHORDS[name] if isinstance(CHORDS[name], tuple) else (CHORDS[name],)
+            codes = ([] if ctrl_held else [KEY["Ctrl"]]) + [KEY[k] for k in keys]
             self.yd.tap(*codes)
             self.release_oneshots()
         elif name in KEY:
@@ -977,6 +994,16 @@ class ArrowPad(QWidget):
             if s != "off":
                 self.yd.key(KEY[m], False)
                 self.mod_state[m] = "off"
+
+    # ---- screen snip (snip/ tweak) --------------------------------------
+    def snip(self):
+        tool = Path.home() / ".local/bin/frame-snip"
+        if tool.exists():
+            # Its own process and session: the selection window opens on the Steam session's display.
+            subprocess.Popen([str(tool)], start_new_session=True)
+        else:
+            subprocess.Popen(["notify-send", "-a", "Arrow Pad", "Screen snip isn't installed",
+                              "Tick 'Screen snip' in Frame Tweaks to use this button."], start_new_session=True)
 
     # ---- dictation ------------------------------------------------------
     @staticmethod

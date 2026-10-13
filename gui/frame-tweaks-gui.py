@@ -37,7 +37,7 @@ BREEZE = Path("/usr/share/icons/breeze-dark")
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
 ROW_ICON = {"dictation": "frame-tweaks-dictate", "arrowpad": "frame-tweaks-arrowpad",
             "adb-scrcpy": "frame-tweaks-phone", "nordvpn": "frame-tweaks-nordvpn",
-            "wallet": "frame-tweaks-lock"}
+            "wallet": "frame-tweaks-lock", "snip": "frame-tweaks-snip"}
 FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
                "firefox": "org.mozilla.firefox"}
 BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
