@@ -71,11 +71,19 @@ def rewrite_exec(cmd, app_id, electron, shared=True, gate=False, guard=False):
     return " ".join(a if re.fullmatch(r"%[a-zA-Z]|@@[a-z]?", a) else shlex.quote(a) for a in out)
 
 
+# Electron apps that read the wallet only when told the password store explicitly. Without it,
+# Claude Desktop ran with "safeStorage not available": no saved login, secrets in plain text.
+KNOWN_ELECTRON = {"com.anthropic.Claude"}
+
+
 def add(app_id, electron, shared=True, gate=False):
     src = source_for(app_id)
     lines = src.read_text().splitlines()
     current = APPS / f"{app_id}.desktop"
     guard = current.exists() and GUARD in current.read_text()   # keep signal-guard if present
+    # Re-applying (e.g. after an app update) keeps --password-store, even if not asked again.
+    electron = electron or app_id in KNOWN_ELECTRON or (
+        current.exists() and "--password-store=kwallet6" in current.read_text())
     if src.parent == APPS and src.name == f"{app_id}.desktop":
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         (BACKUP_DIR / src.name).write_text("\n".join(lines) + "\n")

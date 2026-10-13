@@ -18,6 +18,11 @@ install_icon frame-tweaks-nordvpn
 install_desktop "$REPO_DIR/nordvpn/nordvpn-tray.desktop"
 mkdir -p "$HOME/.config/autostart"
 sed "s|@BIN@|$BIN|g" "$REPO_DIR/nordvpn/nordvpn-tray.desktop" > "$HOME/.config/autostart/nordvpn-tray.desktop"
+# Autostart starts the tray; KDE's session restore must not start a second copy at login.
+save_kconfig nordvpn ksmserverrc General excludeApps          # restored on uninstall
+excl=$(kreadconfig6 --file ksmserverrc --group General --key excludeApps)
+case ",$excl," in *,nordvpn-tray,*) ;; *)
+    kwriteconfig6 --file ksmserverrc --group General --key excludeApps "${excl:+$excl,}nordvpn-tray" ;; esac
 
 say "Installed. Now run:  nordvpn-wg setup   (asks for your NordVPN access token once)"
 say "The tray icon starts with desktop mode (or launch 'NordVPN Tray' now)."
