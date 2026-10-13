@@ -26,7 +26,11 @@ missing=$(LD_LIBRARY_PATH="$LIB" ldd "$LIB/adb.bin" | grep 'not found' || true)
 [ -z "$missing" ] || die "adb still has missing libraries:\n$missing"
 "$BIN/adb" version | sed -n 1,2p
 
-install -m755 "$REPO_DIR/adb-scrcpy/phone" "$REPO_DIR/adb-scrcpy/phone-fit" "$REPO_DIR/adb-scrcpy/phone-touch" "$BIN/"
+install -m755 "$REPO_DIR/adb-scrcpy/phone" "$REPO_DIR/adb-scrcpy/phone-fit" "$BIN/"
+# phone-touch reads the joystick through SteamVR (openvr): it runs on the shared venv.
+ensure_tweaks_venv
+ensure_openvr "$TWEAKS_VENV" || say "SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
+install_py_tool "$REPO_DIR/adb-scrcpy/phone-touch"
 install_icon frame-tweaks-phone
 # Renamed from "Phone Mirror" (it only works with Android). Keep a password gate if it had one.
 gated=""

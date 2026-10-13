@@ -13,11 +13,14 @@ Steam session's input at all.
   phone-touch DEVICE      DEVICE: the phone's adb address (ip:port); runs until scrcpy exits
 
 The layer appears only while this runs: it calls in through the dashboard's DevTools port
-(127.0.0.1:8087, opened by the VR windows helper) and says it's alive every 2 s.
+(127.0.0.1:8087, opened by the VR windows helper) and says it's alive every 2 s. While the laser
+rests on the mirror, the joystick scrolls the phone (read from the controller model, see Sticks):
+SteamVR doesn't pass the joystick's scrolling to the layer.
 """
 import importlib.machinery
 import importlib.util
 import json
+import math
 import os
 import random
 import re
@@ -152,6 +155,85 @@ class Phone:
                         return
 
 
+class Sticks:
+    """The controllers' thumbsticks, read the way Arrow Pad reads the grips: SteamVR doesn't hand the
+    dashboard (or a background program) the joystick on the Frame, but the controller model's
+    "thumbstick" part still tilts. Its rotation from rest: about 20 degrees at full travel, up/down
+    about the part's x axis, left/right mostly about its z axis."""
+    FULL_DEG = 20.0
+
+    def __init__(self):
+        import openvr                             # in the shared venv (see install.sh); None without
+        self.vr = openvr
+        openvr.init(openvr.VRApplication_Background)
+        self.sys, self.rm, self.inp = openvr.VRSystem(), openvr.VRRenderModels(), openvr.VRInput()
+        self.mode = openvr.RenderModel_ControllerMode_State_t()
+        self.hands = [(role, self.inp.getInputSourceHandle(f"/user/hand/{hand}")) for hand, role in
+                      (("left", openvr.TrackedControllerRole_LeftHand), ("right", openvr.TrackedControllerRole_RightHand))]
+
+    def tilt(self):
+        """(right, up) of the stick pushed furthest, each -1..1; (0, 0) when none is."""
+        best = (0.0, 0.0)
+        for role, path in self.hands:
+            try:
+                d = self.sys.getTrackedDeviceIndexForControllerRole(role)
+                if d == self.vr.k_unTrackedDeviceIndexInvalid or not self.sys.isTrackedDeviceConnected(d):
+                    continue
+                model = self.sys.getStringTrackedDeviceProperty(d, self.vr.Prop_RenderModelName_String)
+                ok1, cur = self.rm.getComponentStateForDevicePath(model, "thumbstick", path, self.mode)
+                ok2, rest = self.rm.getComponentState(model, "thumbstick", self.vr.VRControllerState_t(), self.mode)
+            except Exception:
+                continue
+            if not (ok1 and ok2):
+                continue
+            x, _, z = rotation_vector(cur.mTrackingToComponentRenderModel.m, rest.mTrackingToComponentRenderModel.m)
+            t = (max(-1.0, min(1.0, -z / self.FULL_DEG * 1.2)), max(-1.0, min(1.0, -x / self.FULL_DEG)))
+            if max(map(abs, t)) > max(map(abs, best)):
+                best = t
+        return best
+
+
+def rotation_vector(a, b):
+    """Rotation from b to a (3x4 matrices, rotation part), as axis x angle in degrees."""
+    r = [[sum(a[i][k] * b[j][k] for k in range(3)) for j in range(3)] for i in range(3)]
+    angle = math.acos(max(-1.0, min(1.0, (r[0][0] + r[1][1] + r[2][2] - 1) / 2)))
+    if angle < 1e-6:
+        return 0.0, 0.0, 0.0
+    k = math.degrees(angle) / (2 * math.sin(angle))
+    return (r[2][1] - r[1][2]) * k, (r[0][2] - r[2][0]) * k, (r[1][0] - r[0][1]) * k
+
+
+def stick_rate(t, dead=0.2, top=15.0):
+    """Wheel notches a second for a stick tilt t (-1..1): none in the dead zone, then faster
+    the further it's pushed."""
+    m = (abs(t) - dead) / (1 - dead)
+    return 0.0 if m <= 0 else math.copysign(top * m ** 1.6, t)
+
+
+def scroll_with_sticks(phone, state):
+    """While the laser is on the mirror (and not pressing), the joystick scrolls the phone there:
+    up/down or left/right, whichever it's pushed more."""
+    try:
+        sticks = Sticks()
+    except Exception as e:                        # no openvr, or SteamVR isn't running
+        log("no joystick scrolling:", e)
+        return
+    tick = 1 / 30
+    while scrcpy_running():
+        time.sleep(tick)
+        at = state.get("hover")
+        if not at or state.get("pressed") or time.monotonic() - state.get("since", 0) > 60:
+            continue
+        right, up = sticks.tilt()
+        if abs(up) >= abs(right):
+            dy = -stick_rate(up) * tick           # stick up: scroll up (the wheel's "up")
+            dx = 0.0
+        else:
+            dx, dy = stick_rate(right) * tick, 0.0
+        if dx or dy:
+            phone.scroll(*at, dx, dy)
+
+
 def dashboard():
     loader = importlib.machinery.SourceFileLoader("sft_dashboard", str(DASHBOARD))
     spec = importlib.util.spec_from_loader("sft_dashboard", loader)
@@ -160,7 +242,7 @@ def dashboard():
     return mod
 
 
-def serve(phone, sd):
+def serve(phone, sd, state):
     """Take the layer's calls from the dashboard page; tell it every 2 s that we're here."""
     while scrcpy_running():
         try:
@@ -187,7 +269,13 @@ def serve(phone, sd):
                 if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") == BINDING:
                     try:
                         req = json.loads(m["params"].get("payload") or "{}")
+                        if req["a"] == "leave":
+                            state["hover"] = None
+                            continue
                         at = (float(req["u"]), float(req["v"]), float(req["w"]) > float(req["h"]))
+                        state.update(hover=at, since=time.monotonic(), pressed=req["a"] in ("down", "move"))
+                        if req["a"] == "hover":
+                            continue
                         if req["a"] == "scroll":
                             phone.scroll(*at, float(req.get("dx", 0)), float(req.get("dy", 0)))
                         else:
@@ -225,7 +313,9 @@ def main():
             phone.connect()                       # now, so the first tap isn't slow
         except OSError as e:
             log("phone:", e)                      # tried again at the first touch
-        serve(phone, dashboard())
+        state = {}                                # where the laser is on the mirror (from the layer)
+        threading.Thread(target=scroll_with_sticks, args=(phone, state), daemon=True).start()
+        serve(phone, dashboard(), state)
     finally:
         phone.close()
         try:

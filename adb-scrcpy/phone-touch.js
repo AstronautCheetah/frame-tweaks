@@ -12,11 +12,11 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 2, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 3, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1;                       // panel anchor
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
-  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null };
+  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0 };
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -94,6 +94,24 @@
                                             dx: ev.deltaX / notch, dy: ev.deltaY / notch, w: size.w, h: size.h }));
     } catch (e) {}
   };
+  // Where the laser rests (no press): phone-touch scrolls there with the joystick, which SteamVR
+  // doesn't pass to the layer. At most 10 a second; and when it leaves.
+  let lastHover = 0;
+  const onHover = (ev, size) => {
+    if (touch || Date.now() - lastHover < 100) return;
+    lastHover = Date.now();
+    stats.hovers++;
+    const r = ev.currentTarget.getBoundingClientRect();
+    try {
+      window.sftPhoneTouch(JSON.stringify({ a: 'hover', u: (ev.clientX - r.left) / r.width, v: (ev.clientY - r.top) / r.height,
+                                            w: size.w, h: size.h }));
+    } catch (e) {}
+  };
+  const onLeave = () => {
+    stats.leaves++;
+    lastHover = 0;
+    try { window.sftPhoneTouch(JSON.stringify({ a: 'leave' })); } catch (e) {}
+  };
   const layer = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = page && pictureSize(page);
@@ -109,6 +127,8 @@
         ...(curveId ? { curvature_origin_id: curveId } : {}) },
         el('div', { style: { width: `${pxW}px`, height: `${pxH}px`, background: 'rgba(0, 0, 0, 0)' },
           onWheel: (ev) => onWheel(ev, c),
+          onMouseMove: (ev) => onHover(ev, c),
+          onMouseLeave: onLeave,
           onMouseDown: (ev) => {
             stats.downs++;
             if (touch) onUp(ev);                    // a new press ends a touch whose let-go went missing

@@ -61,3 +61,21 @@ class Touch(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Joystick(unittest.TestCase):
+    def rot_x(self, deg):
+        c, s = pt.math.cos(pt.math.radians(deg)), pt.math.sin(pt.math.radians(deg))
+        return [[1, 0, 0, 0], [0, c, -s, 0], [0, s, c, 0]]
+
+    def test_rotation_vector_reads_the_tilt(self):
+        rest = self.rot_x(0)
+        x, y, z = pt.rotation_vector(self.rot_x(-20), rest)
+        self.assertAlmostEqual(x, -20, places=3)
+        self.assertEqual((round(y, 6), round(z, 6)), (0, 0))
+        self.assertEqual(pt.rotation_vector(rest, rest), (0.0, 0.0, 0.0))
+
+    def test_rate_has_a_dead_zone_and_keeps_the_sign(self):
+        self.assertEqual(pt.stick_rate(0.15), 0.0)
+        self.assertEqual(pt.stick_rate(-1.0), -15.0)
+        self.assertLess(pt.stick_rate(0.5), pt.stick_rate(0.9))
