@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips follow SteamVR's Camera Color Tint** (their border, knob and pressed colour use its
+  hue, and change when you change it).
 - **Screen snip: Narrate pops out and has a speed control.** Narrate opens a small window with the
   snip and its controls (Stop / Again, speed, Close) and gives VR back; the speed (0.75x to 2x,
   under the Narrate button) is remembered and applies at once.
