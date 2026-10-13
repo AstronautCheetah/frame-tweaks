@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: 🧩
+name: VR dashboard patching (helper)
+group: helper
+what: Lets the VR windows tweaks (Curved world windows, Back to the previous window) adjust SteamVR's dashboard. Installed automatically.
+why: SteamVR's dashboard is a web page with no settings for these behaviours; each VR windows tweak is a small patch this injects while SteamVR runs.
+changes: `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in
+access: **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. Any program running as you could use that port too
+survives-updates: Yes; after a SteamVR update it checks SteamVR's dashboard code and switches off each patch whose code changed
+undo: `./install.sh uninstall vr-dashboard` (after the VR windows tweaks)

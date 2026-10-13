@@ -84,7 +84,7 @@ class Manifest(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         for c in rows:
             self.assertTrue((ROOT / c["id"] / "install.sh").exists(), c["id"])
-            self.assertIn(c["category"], {"Convenience", "Privacy & security", "System", "Developer"})
+            self.assertIn(c["category"], {"Convenience", "VR windows", "Privacy & security", "System", "Developer"})
 
 
 if __name__ == "__main__":

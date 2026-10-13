@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
-"""Curve windows floated into the world by default (steam-frame-tweaks).
+"""SteamVR dashboard patches (steam-frame-tweaks): the shared part of Curved world windows,
+Back to the previous window, and any later dashboard tweak.
 
-  sft-curvature arm       before SteamVR starts: turn on its dashboard DevTools port (127.0.0.1:8087)
-  sft-curvature restore   after SteamVR stops: put that setting back as it was
-  sft-curvature watch     while SteamVR runs: (re)inject patch.js into the dashboard
-  sft-curvature status
-  sft-curvature check     is SteamVR's dashboard code still what the patch expects?
+  sft-dashboard arm       before SteamVR starts: turn on its dashboard DevTools port (127.0.0.1:8087)
+  sft-dashboard restore   after SteamVR stops: put that setting back as it was
+  sft-dashboard watch     while SteamVR runs: inject every patch in patches/ (again after a
+                          dashboard reload); a patch whose file is removed is stopped
+  sft-dashboard status [NAME]   is the port open, is NAME (or every patch) injected?
+  sft-dashboard check     is SteamVR's dashboard code still what the patches expect?
 
+A patch is patches/NAME.js: an expression that registers itself as window.__sftPatches[NAME]
+= {version, stop}. Header lines "// requires: what | exact text" name pieces of SteamVR's
+dashboard code it relies on; if an update changes any of them, that patch isn't injected (and
+status says so) instead of poking at code it doesn't understand.
 SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only while it's stopped.
 """
-import base64, json, os, socket, struct, sys, time, urllib.request
+import base64, json, os, re, socket, struct, sys, time, urllib.request
 from pathlib import Path
 
 SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
 STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"
-PATCH = Path(__file__).resolve().with_name("sft-curvature.js")
+PATCHES = Path(__file__).resolve().parent / "patches"
 PORT = 8087
 DASHBOARD = Path("/opt/steamvr/resources/webinterface/dashboard")
-CHECK_FILE = Path(f"/run/user/{os.getuid()}/sft-curvature.status")
-# What patch.js relies on in SteamVR's dashboard code. If an update changes any of it, the
-# patch is not injected (and status says so) instead of poking at code it doesn't understand.
-EXPECTED = {
-    "the curvature component": 'componentName="curvature"',
-    "ToggleCurvature()": "ToggleCurvature(){this.m_bCurveOverride=!this.shouldCurve}",
-    "world windows flat by default": "default:return!1",
-    "EDockLocation.World = 4": 'e[e.World=4]="World"',
-    "window.FrameStore": "window.FrameStore=",
-}
+CHECK_FILE = Path(f"/run/user/{os.getuid()}/sft-dashboard.status")
+BASE = {"window.FrameStore": "window.FrameStore="}     # every patch starts from FrameStore
 
 
 def load():
@@ -128,29 +126,58 @@ def systemui():
                  if t.get("title") == "systemui" and t.get("webSocketDebuggerUrl")), None)
 
 
-def check_dashboard():
-    """Missing pieces of EXPECTED in SteamVR's dashboard code ([] = compatible)."""
+def patches():
+    return {p.stem: p for p in sorted(PATCHES.glob("*.js"))}
+
+
+def requires(path):
+    req = dict(BASE)
+    for m in re.finditer(r"^// requires: (.+?) \| (.+)$", path.read_text(), re.M):
+        req[m[1]] = m[2]
+    return req
+
+
+def dashboard_code():
     try:
-        code = "".join(f.read_text(errors="replace") for f in DASHBOARD.glob("*.js"))
+        return "".join(f.read_text(errors="replace") for f in DASHBOARD.glob("*.js"))
     except OSError:
+        return None
+
+
+def missing(path, code):
+    """Pieces of SteamVR's dashboard code the patch needs but can't find ([] = compatible)."""
+    if code is None:
         return ["SteamVR's dashboard files"]
-    return [name for name, marker in EXPECTED.items() if marker not in code]
+    return [name for name, marker in requires(path).items() if marker not in code]
+
+
+def stop_expr(name):
+    return f"window.__sftPatches?.[{json.dumps(name)}]?.stop?.(); delete window.__sftPatches?.[{json.dumps(name)}]; 'stopped'"
 
 
 def watch():
-    expr, last = PATCH.read_text(), None
-    missing = check_dashboard()
-    if missing:
-        msg = "SteamVR changed (missing: " + ", ".join(missing) + "); patch disabled"
-        CHECK_FILE.write_text(msg + "\n")
-        print(msg, flush=True)
-        while True:                     # stay idle until SteamVR (and this service) restarts
-            time.sleep(3600)
-    CHECK_FILE.unlink(missing_ok=True)
+    code, last, injected = dashboard_code(), None, set()
     while True:
+        found = patches()
+        bad = {n: missing(p, code) for n, p in found.items()}
+        CHECK_FILE.write_text("".join(f"{n}: SteamVR changed (missing: {', '.join(m)}); off\n"
+                                      for n, m in bad.items() if m))
         try:
             url = systemui()
-            result = ws_eval(url, expr) if url else "waiting for the dashboard"
+            if not url:
+                result = "waiting for the dashboard"
+            else:
+                results = []
+                for n in sorted(injected - set(found)):          # its tweak was removed
+                    ws_eval(url, stop_expr(n))
+                    injected.discard(n)
+                for n, p in found.items():
+                    if bad[n]:
+                        results.append(f"{n}: off (SteamVR changed)")
+                        continue
+                    results.append(f"{n}: {ws_eval(url, p.read_text())}")
+                    injected.add(n)
+                result = "; ".join(results) or "no patches installed"
         except OSError as e:
             result = f"waiting for SteamVR's DevTools port ({e.__class__.__name__})"
         if result != last:
@@ -159,10 +186,14 @@ def watch():
         time.sleep(5)
 
 
-def status():
-    if CHECK_FILE.exists():
-        print(CHECK_FILE.read_text().strip())
-        return 2
+def status(name=None):
+    if name and name not in patches():
+        print(f"{name}: not installed")
+        return 1
+    for line in (CHECK_FILE.read_text().splitlines() if CHECK_FILE.exists() else []):
+        if name is None or line.startswith(f"{name}:"):
+            print(line)
+            return 2
     try:
         url = systemui()
     except OSError:
@@ -171,15 +202,27 @@ def status():
     if not url:
         print("dashboard page not found")
         return 2
-    print("patched" if ws_eval(url, "!!window.__sftCurvature") is True else "port open, not patched yet")
-    return 0
+    names = [name] if name else list(patches())
+    ok = True
+    for n in names:
+        on = ws_eval(url, f"!!window.__sftPatches?.[{json.dumps(n)}]") is True
+        print(f"{n}: {'patched' if on else 'port open, not patched yet'}")
+        ok = ok and on
+    return 0 if ok else 2
+
+
+def check():
+    code = dashboard_code()
+    bad = {n: missing(p, code) for n, p in patches().items()}
+    bad = {n: m for n, m in bad.items() if m}
+    print("compatible" if not bad else "; ".join(f"{n} missing: {', '.join(m)}" for n, m in bad.items()))
+    return bool(bad)
 
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"arm": arm, "restore": restore, "watch": watch, "status": status,
-          "check": lambda: print("compatible" if not check_dashboard() else
-                                 "missing: " + ", ".join(check_dashboard())) or bool(check_dashboard())}.get(cmd)
+    fn = {"arm": arm, "restore": restore, "watch": watch, "check": check,
+          "status": lambda: status(sys.argv[2] if len(sys.argv) > 2 else None)}.get(cmd)
     if fn is None:
         sys.exit(__doc__)
     sys.exit(fn() or 0)

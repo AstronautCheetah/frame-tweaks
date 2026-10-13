@@ -236,3 +236,34 @@ remove_files() {
 }
 
 export QT_VENV="$HOME/.local/share/arrowpad/venv"   # PyQt6, shared by arrowpad and nordvpn-tray
+
+# --- SteamVR dashboard patches (vr-dashboard/) ---------------------------------------------
+# A VR windows tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
+VR_DASHBOARD="$HOME/.local/share/frame-tweaks/vr-dashboard"
+install_dashboard_patch() {    # install_dashboard_patch NAME FILE
+    [ -x "$VR_DASHBOARD/sft-dashboard" ] || "$REPO_DIR/vr-dashboard/install.sh" || return 1
+    mkdir -p "$VR_DASHBOARD/patches"
+    install -m644 "$2" "$VR_DASHBOARD/patches/$1.js"
+    if sysctl_user is-active --quiet sft-dashboard.service; then
+        say "Active now (the dashboard picks it up within a few seconds)."
+    elif sysctl_user is-active --quiet steamvr.service; then
+        say "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
+    else
+        say "Active from the next SteamVR start."
+    fi
+}
+remove_dashboard_patch() {     # remove_dashboard_patch NAME: the watcher stops it in the dashboard
+    remove_files "$VR_DASHBOARD/patches/$1.js"
+}
+dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
+    [ -f "$VR_DASHBOARD/patches/$1.js" ] || status_missing "not installed"
+    sysctl_user is-active --quiet steamvr.service || status_ok "installed (active while SteamVR runs)"
+    local s
+    s=$(timeout 8 "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null) || true
+    case "$s" in
+        *": patched") status_ok "$2" ;;
+        *port*closed*) status_warn "waiting for a SteamVR restart (reboot once)" ;;
+        *) status_warn "${s:-not responding}" ;;
+    esac
+}
+

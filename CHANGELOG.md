@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- **New VR windows group** in the installer window, with **Back to the previous window** (new):
+  after you float the window the dashboard is showing out into the world, the dashboard goes
+  back to the window it showed before (after 1 s) instead of an empty space. Tick or untick it
+  to switch it on or off. **Curved world windows** moved into the group. Both are small patches
+  run by a shared helper, **VR dashboard patching** (it took over `sft-curvature`'s DevTools-port
+  setup; installing either tweak moves an existing setup over). Each patch is switched off
+  by itself if a SteamVR update changes the dashboard code it relies on.
 - **Wallet apps explains why** (a headset without a password can still keep sensitive apps
   behind the wallet's) and **shows the wallet's state** at the top: open or locked, for how long,
   when it locks by itself, with a Lock now / Unlock button. `wallet-unlock --info` reports it.
