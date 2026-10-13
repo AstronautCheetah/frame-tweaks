@@ -122,7 +122,7 @@ LAYOUT_LANG = {"de": "de", "at": "de", "ch": "de", "fr": "fr", "be": "fr", "ca":
                "es": "es", "latam": "es", "it": "it"}
 # Clipboard keys show icons (language-neutral), like Full Keyboard's copy/paste buttons.
 BREEZE = Path("/usr/share/icons/breeze-dark")
-ICONS = {"Unstick": "edit-clear", "Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
+ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
          "All": "edit-select-all", "pin": "window-unpin", "pin_on": "window-pin", "reset": "crosshairs",
          "RMB": "input-mouse-click-right", "MMB": "input-mouse-click-middle",
          "smaller": "zoom-out", "larger": "zoom-in", "close": "window-close", "Snip": "select-rectangular",
@@ -755,7 +755,7 @@ class ArrowPad(QWidget):
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             b.setToolTip(TIPS.get(name, ""))
-            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip", "Unstick") else None
+            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip") else None
             if icon:
                 b.setIcon(icon)
                 b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike

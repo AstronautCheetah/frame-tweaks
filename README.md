@@ -144,7 +144,7 @@ $ ./install.sh status
 | Curved world windows "waiting for a SteamVR restart" | Reboot once after installing; SteamVR opens the port it needs only when it starts. |
 | Apps show without icons in Steam's "+" menu | Install **Menu icons** (re-run it after installing new apps), then reopen the menu. |
 | "Another Frame Tweaks install … is running" | Wait for the other install window to finish; the lock is released when it exits. |
-| Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often: focus moved to another VR window while the key was down). On Arrow Pad: **Tools → Unstick** (the eraser). Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
+| Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often: focus moved to another VR window while the key was down). On Arrow Pad: **Tools → Unstick**. Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
 | Windows and clicks in the desktop act strangely; its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a keyboard (Arrow Pad has no Right Ctrl) to turn it off. |
 | Something else | Installer window → **Diagnostics** (or `./install.sh debug-info`), and [open an issue](https://github.com/AstronautCheetah/frame-tweaks/issues/new/choose) with the report. |
 
