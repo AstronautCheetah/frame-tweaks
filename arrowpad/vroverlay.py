@@ -36,9 +36,13 @@ MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it 
 WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.55, 0.30, 2.0, 0.05
 # Placement like Full Keyboard: anchored to Steam's dashboard (its main panel while visible, else
 # the dashboard bar), top edge 6 cm below its bottom centre, 24 cm toward you, tilted back 50°.
-# The pad keeps that offset *relative to the dashboard*, so it follows the dashboard around
-# (recentering, moving it, a re-centred play space), as Full Keyboard does.
-DASHBOARD = ("valve.steam.gamepadui.main", "valve.steam.gamepadui.bar")
+# The pad keeps that offset *relative to the dashboard bar*, so it follows the dashboard around
+# (recentering, moving it, a re-centred play space), as Full Keyboard does. It follows the bar,
+# not the main panel: the main panel is hidden while the Desktop tab is showing, so following
+# "main if visible, else bar" made the pad jump each time you switched between Steam and Desktop.
+DASHBOARD_MAIN, DASHBOARD_BAR = "valve.steam.gamepadui.main", "valve.steam.gamepadui.bar"
+FOLLOW = (DASHBOARD_BAR, DASHBOARD_MAIN)       # what the pad rides along with
+PLACE = (DASHBOARD_MAIN, DASHBOARD_BAR)        # what Reset puts it beneath
 GAP_BELOW, TOWARD_VIEWER, PITCH_DEG = 0.06, 0.24, 50
 FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of the headset
 
@@ -155,8 +159,15 @@ class OverlayHost:
         self.tex_slot = 0
         self.dirty = True
         self.swapping = False
-        self.offset = config.get("vr_offset")       # pose relative to the dashboard anchor
+        self.offset = config.get("vr_offset")       # pose relative to the dashboard bar
         self.pose = None
+        if self.offset and config.get("vr_anchor") != "bar":
+            # Saved by an older version, relative to the main panel whenever it was showing.
+            old = self.dashboard_anchor(PLACE)
+            if old is not None:
+                self.pose = _rigid_mul(old, self.offset)
+                self.remember_offset()
+                self.pose = None
         if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         self.visible = False
@@ -236,10 +247,10 @@ class OverlayHost:
         m = poses[index].mDeviceToAbsoluteTracking.m
         return [[m[r][c] for c in range(4)] for r in range(3)]
 
-    def dashboard_anchor(self):
-        """Bottom centre of the visible dashboard (main panel, else the bar) as a rigid 3x4
-        transform with its scale removed; None if neither is available."""
-        for key in DASHBOARD:
+    def dashboard_anchor(self, keys=FOLLOW):
+        """Bottom centre of the first available dashboard part in keys (the main panel counts
+        only while visible) as a rigid 3x4 transform with its scale removed; None if none is."""
+        for key in keys:
             try:
                 h = self.ov.findOverlay(key)
                 if key.endswith(".main") and not self.ov.isOverlayVisible(h):
@@ -288,7 +299,7 @@ class OverlayHost:
 
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
-        anchor = self.dashboard_anchor()
+        anchor = self.dashboard_anchor(PLACE)
         h_m = self.width_m * (self.size[1] / self.size[0] if self.size[0] else 0.8)
         t = math.radians(PITCH_DEG)
         if anchor is not None:
@@ -332,6 +343,7 @@ class OverlayHost:
     def save(self):
         self.config["width_m"] = self.width_m
         self.config["vr_offset"] = self.offset
+        self.config["vr_anchor"] = "bar"
         self.config.pop("vr_pose", None)      # absolute poses go stale when the play space moves
         self.pad.save_config()
 

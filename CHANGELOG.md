@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad VR jumped when switching between the Steam and Desktop tabs:** it followed Steam's main
+  panel when that was showing and the dashboard bar otherwise, and the Desktop tab hides the main
+  panel, so it effectively kept two positions. It now follows the bar on both tabs. A position saved
+  by an older version is converted once. Reset still puts it beneath the main panel.
 - **Arrow Pad VR flickered after clicks:** every press and release reloaded the overlay image, and
   each reload blinks. Presses no longer redraw it (they're felt as a haptic click); it redraws only
   when something visible changes (modifiers, Fn, R/M, mic, pin, settings, theme), with normally
