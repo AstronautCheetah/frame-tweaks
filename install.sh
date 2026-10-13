@@ -4,6 +4,7 @@
 #   ./install.sh                     graphical checklist (in desktop mode), else this help
 #   ./install.sh install ID... | all install components (dependencies are added automatically)
 #   ./install.sh uninstall ID...     remove components
+#   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
 #   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
@@ -151,6 +152,16 @@ cmd_uninstall() {
         done
     done
     for id in "$@"; do bold "── removing $id"; stop_processes "$id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+}
+
+# Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:
+# it's back a moment later.
+cmd_reinstall_ids() {
+    [[ $# -eq 0 ]] && { echo "reinstall what?" >&2; exit 1; }
+    check_ids "$@"
+    local id
+    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    cmd_install "$@"
 }
 
 cmd_update() {
@@ -339,6 +350,7 @@ case ${1:-} in
     gui)         cmd_gui ;;
     install)     shift; take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
     uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;
+    reinstall)   shift; take_lock; start_log reinstall "$@"; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
     status|check) shift; cmd_status "$@" ;;
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
     _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;

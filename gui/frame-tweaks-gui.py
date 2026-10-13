@@ -79,6 +79,8 @@ QPushButton:hover { background: #3d4855; }
 QPushButton:checked { background: #355b7a; }
 QPushButton#apply { background: #355b7a; font-weight: 600; }
 QPushButton#info { padding: 6px 10px; }
+QPushButton#again { padding: 0px 10px 3px 10px; font-size: 24px; font-weight: 600; }
+QPushButton#again:disabled { color: #3a434d; }
 QPushButton#run { background: #2f6b46; font-weight: 600; min-width: 92px; }
 QPushButton#run:hover { background: #3c8a5a; }
 QPushButton#run:disabled { background: #161c23; color: #3a434d; }
@@ -360,6 +362,7 @@ class Window(QWidget):
         self.rows = components()
         self.state = {}               # id -> (code, text); missing = still checking
         self.boxes, self.status_labels, self.wanted, self.run_buttons = {}, {}, {}, {}
+        self.again_buttons = {}
         self.pool = ThreadPoolExecutor(max_workers=4)
         self.futures = {}
         self.latest = {}              # id -> newest upstream tag (known-issue rows), None if unknown
@@ -514,6 +517,7 @@ class Window(QWidget):
                     label.style().unpolish(label)
                     label.style().polish(label)
                     self.update_run(cid)
+                    self.update_again(cid)
                     box = self.boxes.get(cid)
                     if box is not None and cid not in self.wanted:
                         box.blockSignals(True)
@@ -535,7 +539,7 @@ class Window(QWidget):
         n_hidden += len(hidden_cats)
         self.show_hidden.setText(f"Show hidden ({n_hidden})")
         self.show_hidden.setEnabled(n_hidden > 0 or showing)
-        self.boxes, self.status_labels, self.run_buttons = {}, {}, {}
+        self.boxes, self.status_labels, self.run_buttons, self.again_buttons = {}, {}, {}, {}
         category = None
         for comp in self.rows:
             cid = comp["id"]
@@ -603,6 +607,11 @@ class Window(QWidget):
             details.setObjectName("info")
             details.setToolTip("Details: what it is, why it's included, who made it")
             details.clicked.connect(lambda _=False, c=comp: self.show_details(c))
+            again = QPushButton("↻")
+            again.setObjectName("again")
+            again.clicked.connect(lambda _=False, c=cid: self.run_reinstall(c))
+            self.again_buttons[cid] = again
+            self.update_again(cid)
             hide = QPushButton("Unhide" if is_hidden else "Hide")
             hide.setToolTip("Show this tweak in the list again" if is_hidden else
                             "Hide this tweak from the list (doesn't remove it)")
@@ -615,8 +624,9 @@ class Window(QWidget):
                 g.addWidget(link, 2, 2)
             g.addWidget(st, 0, 3, 3, 1)
             g.addWidget(run, 0, 4, 3, 1)
-            g.addWidget(details, 0, 5, 3, 1)
-            g.addWidget(hide, 0, 6, 3, 1)
+            g.addWidget(again, 0, 5, 3, 1)
+            g.addWidget(details, 0, 6, 3, 1)
+            g.addWidget(hide, 0, 7, 3, 1)
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
@@ -646,6 +656,28 @@ class Window(QWidget):
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
+
+    def run_reinstall(self, cid):
+        """Remove one tweak and install it again in one go (stops its running programs first)."""
+        cmd = "./install.sh reinstall " + shlex.quote(cid)
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run:", cmd)
+            return
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp 'Press Enter to close…'"
+        self.proc = QProcess(self)
+        self.proc.finished.connect(lambda *_: self.refresh())
+        self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
+
+    def update_again(self, cid):
+        """The ↻ Reinstall button: only for installed tweaks."""
+        button = self.again_buttons.get(cid)
+        if button is None:
+            return
+        state = self.state.get(cid)
+        installed = state is not None and state[0] != 1
+        button.setEnabled(installed)
+        button.setToolTip("Reinstall: remove it and install it again in one step (settings kept)"
+                          if installed else "Reinstall (available once it's installed)")
 
     def update_run(self, cid):
         """Run/Open/... for installed tweaks with something to launch, Help otherwise."""

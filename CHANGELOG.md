@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **↻ Reinstall button** on each installed tweak in the installer window, and
+  `./install.sh reinstall ID...`: stops its programs, removes it and installs it again in one step
+  (also for a tweak others depend on, such as ydotool).
+- **Arrow Pad's uninstall keeps your settings** (`~/.config/arrowpad.json`: VR position, size,
+  theme), as the installer window promises; a reinstall no longer resets them.
 - **Arrow Pad VR still blinked when a toggle key changed (modifiers, Fn, R/M, mic, pin):** a
   display-only cover panel now shows the previous image on top while the pad loads the new one,
   then steps aside. It never takes laser input, so taps still go to the one input overlay.

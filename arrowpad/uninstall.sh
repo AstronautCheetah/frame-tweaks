@@ -10,5 +10,5 @@ if pgrep -f "^$HOME/.local/share/arrowpad/venv/bin/python $HOME/.local/share/arr
     clear_stuck_modifiers
     say "stopped a running Arrow Pad"
 fi
-remove_files "$ICONS/256x256/apps/frame-tweaks-arrowpad.png" "$BIN/arrowpad" "$APPS/arrowpad.desktop" "$APPS/arrowpad-vr.desktop" "$HOME/.config/arrowpad-vr.json" "$HOME/.local/share/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/vroverlay.py" "$HOME/.local/share/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/vr" "$HOME/.local/share/arrowpad/__pycache__" "$HOME/.config/arrowpad.json"
+remove_files "$ICONS/256x256/apps/frame-tweaks-arrowpad.png" "$BIN/arrowpad" "$APPS/arrowpad.desktop" "$APPS/arrowpad-vr.desktop" "$HOME/.local/share/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/vroverlay.py" "$HOME/.local/share/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/vr" "$HOME/.local/share/arrowpad/__pycache__"
 [ -x "$BIN/nordvpn-tray" ] || remove_files "$QT_VENV"

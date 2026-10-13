@@ -108,6 +108,7 @@ Categories fold, and rows or whole categories can be hidden (never removed). Row
 ./install.sh update --to v0.3.1 go to a specific release (roll back)
 ./install.sh hold wallet        keep a tweak as it is during updates (unhold to undo)
 ./install.sh uninstall nordvpn  remove one (keeps its settings)
+./install.sh reinstall arrowpad remove and install again in one step (also the ↻ button)
 ./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
 ./install.sh debug-info         a redacted report for bug reports
 ./install.sh list

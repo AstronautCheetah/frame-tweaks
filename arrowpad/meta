@@ -8,4 +8,4 @@ why: Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and 
 changes: `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
 access: Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
 survives-updates: Yes (everything is in your home folder)
-undo: `./install.sh uninstall arrowpad`
+undo: `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)

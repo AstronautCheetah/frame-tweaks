@@ -10,7 +10,7 @@ working in.
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
 > - **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
 > - **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
-> - **Undo:** `./install.sh uninstall arrowpad`
+> - **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)
 <!-- /generated:glance -->
 
 ```
