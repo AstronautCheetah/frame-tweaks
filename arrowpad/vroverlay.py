@@ -126,20 +126,25 @@ class OverlayHost:
                         self.ov.createOverlay(KEY + ".b", "Arrow Pad")]
         self.front = 0                  # index of the overlay being shown
         self.width_m = float(config.get("width_m", WIDTH_DEFAULT))
-        # Only the overlay on top takes laser input; the other is set to None until it swaps in.
-        # (Both took input at first, so for ~50 ms per redraw a click reached both overlays and
-        # counted twice: a single tap locked a modifier or toggled R/M twice.)
-        for i, h in enumerate(self.handles):
-            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_Mouse if i == 0
-                                          else openvr.VROverlayInputMethod_None)
+        # Laser input goes to a third, invisible overlay on top that never changes, never swaps
+        # and keeps its input mode for life; the two image overlays take no input. (Swapping input
+        # between the image overlays made SteamVR deliver a held press again to the newly shown
+        # one, so taps counted twice, and changing input modes on the fly crashed SteamVR's
+        # client library inside PollNextOverlayEvent.)
+        for h in self.handles:
+            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_None)
             self.ov.setOverlaySortOrder(h, 10)
             self.ov.setOverlayWidthInMeters(h, self.width_m)
-            # One pointer per laser, like Full Keyboard: hold a modifier with one hand and press a
-            # key with the other. Events then say which laser (cursorIndex) they came from.
-            self.ov.setOverlayFlag(h, openvr.VROverlayFlags_MultiCursor, True)
+        self.input_handle = self.ov.createOverlay(KEY + ".input", "Arrow Pad input")
+        self.ov.setOverlayInputMethod(self.input_handle, openvr.VROverlayInputMethod_Mouse)
+        self.ov.setOverlaySortOrder(self.input_handle, 12)
+        self.ov.setOverlayWidthInMeters(self.input_handle, self.width_m)
+        # One pointer per laser, like Full Keyboard: hold a modifier with one hand and press a key
+        # with the other. Events then say which laser (cursorIndex) they came from.
+        self.ov.setOverlayFlag(self.input_handle, openvr.VROverlayFlags_MultiCursor, True)
+        self.input_size = (0, 0)        # widget pixels the input overlay's mouse scale is set to
         self.last_button_time = {}             # event type -> time: drops a click seen twice
         self.image_hash = None          # last uploaded image, to skip identical uploads
-        self.sizes = [(0, 0), (0, 0)]   # mouse scale per overlay
         self.hover = None               # button under the laser
         self.pressed = {}               # laser (cursor index) -> button it's pressing
         self.hovered_devices = set()    # controllers whose laser is on the pad
@@ -181,8 +186,23 @@ class OverlayHost:
 
     @property
     def size(self):
-        """Widget pixel size of the image shown (the overlays' mouse scale)."""
-        return self.sizes[self.front] if self.sizes[self.front][0] else self.sizes[self.front ^ 1]
+        """Widget pixel size of the pad: the input overlay's mouse scale."""
+        return self.input_size
+
+    def set_input_size(self, w, h):
+        """The input overlay gets a transparent image of the pad's proportions (so its height
+        matches) and mouse coordinates in widget pixels."""
+        if (w, h) == self.input_size:
+            return
+        clear = QImage(w, h, QImage.Format.Format_ARGB32)
+        clear.fill(0x01000000)               # practically invisible, but a real texture
+        path = f"{TEX_DIR}/arrowpad-input-{w}x{h}.png"
+        clear.save(path, "PNG")
+        self.ov.setOverlayFromFile(self.input_handle, path)
+        scale = openvr.HmdVector2_t()
+        scale.v[0], scale.v[1] = w, h
+        self.ov.setOverlayMouseScale(self.input_handle, scale)
+        self.input_size = (w, h)
 
     def render(self):
         now = time.monotonic()
@@ -208,29 +228,16 @@ class OverlayHost:
         img.save(path, "PNG", 90)
         back = self.front ^ 1
         self.ov.setOverlayFromFile(self.handles[back], path)
-        if (w, h) != self.sizes[back]:
-            self.sizes[back] = (w, h)
-            scale = openvr.HmdVector2_t()
-            scale.v[0], scale.v[1] = w, h
-            self.ov.setOverlayMouseScale(self.handles[back], scale)
+        self.set_input_size(w, h)
         if self.visible:
             self.swapping = True
             QTimer.singleShot(SWAP_SHOW_MS, self.swap)   # give SteamVR time to load it
         else:
-            self.set_input(back)
             self.front = back
 
-    def set_input(self, front):
-        """Laser input goes to `front` only."""
-        for i, h in enumerate(self.handles):
-            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_Mouse if i == front
-                                          else openvr.VROverlayInputMethod_None)
-
     def swap(self):
-        """Show the freshly loaded overlay on top, then hide the old one. Input moves to the new
-        one at the same moment, so a click never reaches both."""
+        """Show the freshly loaded image overlay, then hide the old one (input isn't involved)."""
         old, new = self.front, self.front ^ 1
-        self.set_input(new)
         self.front = new
         if self.visible:
             self.ov.setOverlaySortOrder(self.handles[new], 11)
@@ -296,7 +303,7 @@ class OverlayHost:
 
     def apply_pose(self):
         m = _mat(self.pose)
-        for h in self.handles:
+        for h in self.handles + [self.input_handle]:
             self.ov.setOverlayTransformAbsolute(h, openvr.TrackingUniverseStanding, m)
 
     def reset_position(self):
@@ -336,7 +343,7 @@ class OverlayHost:
 
     def set_width(self, value):
         self.width_m = round(min(WIDTH_MAX, max(WIDTH_MIN, value)), 2)
-        for h in self.handles:
+        for h in self.handles + [self.input_handle]:
             self.ov.setOverlayWidthInMeters(h, self.width_m)
         self.save()
 
@@ -390,8 +397,9 @@ class OverlayHost:
         if visible != self.visible:
             if visible:
                 self.ov.showOverlay(self.handle)
+                self.ov.showOverlay(self.input_handle)
             else:
-                for h in self.handles:
+                for h in self.handles + [self.input_handle]:
                     self.ov.hideOverlay(h)
                 # Like Full Keyboard: closing the dashboard releases our input (a pending
                 # right/middle-click toggle would otherwise change a click you can't see coming).
@@ -417,8 +425,7 @@ class OverlayHost:
             self.drag_follow()                  # every tick, not just on laser moves
         elif visible and self.ticks % 5 == 0:
             self.follow_dashboard()             # ride along with the dashboard, ~10x a second
-        for handle in self.handles:
-            self.pump(handle)
+        self.pump(self.input_handle)            # the only overlay that takes laser input
         if self.dirty and visible:
             self.render()
 
@@ -603,7 +610,7 @@ class OverlayHost:
 
     def close(self):
         try:
-            for h in self.handles:
+            for h in self.handles + [self.input_handle]:
                 self.ov.destroyOverlay(h)
             openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:

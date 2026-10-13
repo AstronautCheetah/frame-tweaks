@@ -71,7 +71,7 @@ class DoubleClick(unittest.TestCase):
         o.ov = types.SimpleNamespace(pollNextOverlayEvent=poll)
         o.last_button_time, o.pressed, o.drag, o.dirty = {}, {}, None, False
         o.hovered_devices, o.grip_drag = set(), False
-        o.sizes, o.front = [(100, 100), (100, 100)], 0
+        o.input_size, o.front = (100, 100), 0
         o.pad = types.SimpleNamespace(pinned=True)
         sent = []
         o.button_at = lambda pos: "Super"
