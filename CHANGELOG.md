@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror keeps up with the phone better:** it streams 1280 pixels at 4 Mbit/s (was 1920
+  at 8), as much as VR shows; settable in `~/.config/phone.conf`.
 - **Android Mirror: the joystick scrolls the phone** (it went to the click layer and was lost):
   it's passed on as the phone's scroll wheel.
 - **An upright window docked in the dashboard has a standard window's height** (the upright

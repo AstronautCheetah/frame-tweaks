@@ -23,6 +23,9 @@ Mirror and control an Android phone in a desktop window.
   it's switched on, so `phone` looks it up via mDNS, connects and starts scrcpy.
   Extra args go to scrcpy, e.g. `phone --turn-screen-off`.
   With several phones around, set `PHONE_NAME="Pixel 9"` in `~/.config/phone.conf`.
+  The stream is 1280 pixels on its long side at up to 4 Mbit/s and 60 frames a second, enough for
+  VR and light on the wireless link (a heavier stream falls behind the phone); change it there
+  with `PHONE_MAX_SIZE=`, `PHONE_BIT_RATE=` and `PHONE_MAX_FPS=`.
 
 ## In VR: shaped like the phone
 The Steam session makes every app window 1920×1080, so a phone held upright used to show with
