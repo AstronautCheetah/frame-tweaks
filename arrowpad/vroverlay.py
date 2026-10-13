@@ -317,6 +317,11 @@ class OverlayHost:
             else:
                 for h in self.handles:
                     self.ov.hideOverlay(h)
+                # Like Full Keyboard: closing the dashboard releases our input (a pending
+                # right/middle-click toggle would otherwise change a click you can't see coming).
+                if self.pad.click_swap.armed:
+                    self.pad.click_swap.disarm("dashboard closed")
+                    self.pad.restyle()
             self.visible = visible
         if self.drag is not None:
             self.drag_follow()                  # every tick, not just on laser moves
@@ -367,7 +372,51 @@ class OverlayHost:
                         self.reset_position()
                     else:
                         self.remember_offset()     # the new spot, relative to the dashboard
+                        self.ease_level()
                     self.save()
+
+    # ---- after a grab: ease a slight sideways lean level (Full Keyboard does this) -----------
+    LEVEL_MAX_DEG, LEVEL_MS, LEVEL_STEPS = 5.0, 500, 20
+
+    def roll(self):
+        """Sideways lean in radians, measured in the pad's own plane: turning the pad about its
+        normal by this angle (rotate_about_normal) makes its left-right edge horizontal."""
+        return math.atan2(self.pose[1][0], self.pose[1][1])
+
+    def ease_level(self):
+        """A lean under 5° eases level over 500 ms, keeping the forward tilt; bigger ones stay."""
+        if not self.pose:
+            return
+        r = self.roll()
+        if abs(r) < 1e-3 or abs(math.degrees(r)) > self.LEVEL_MAX_DEG:
+            return
+        step = r / self.LEVEL_STEPS
+        self._level_left = self.LEVEL_STEPS
+
+        def tick():
+            if self.drag is not None or self._level_left <= 0 or not self.pose:
+                timer.stop()
+                return
+            self.rotate_about_normal(step)
+            self._level_left -= 1
+            if self._level_left == 0:
+                timer.stop()
+                self.remember_offset()
+                self.save()
+
+        timer = QTimer(self.pad, interval=self.LEVEL_MS // self.LEVEL_STEPS, timeout=tick)
+        timer.start()
+        self._level_timer = timer
+
+    def rotate_about_normal(self, angle):
+        """Turn the pad in its own plane (about its normal, the z column) by `angle` radians."""
+        x = [self.pose[i][0] for i in range(3)]
+        y = [self.pose[i][1] for i in range(3)]
+        c, s_ = math.cos(angle), math.sin(angle)
+        for i in range(3):
+            self.pose[i][0] = c * x[i] - s_ * y[i]
+            self.pose[i][1] = s_ * x[i] + c * y[i]
+        self.apply_pose()
 
     def depth_axis(self):
         """Horizontal unit vector from the head toward the pad (the push/pull direction)."""

@@ -52,7 +52,7 @@ jobs:
           ! grep -vE '^(#|$|[A-Za-z0-9_.-]+==[0-9][0-9A-Za-z.]*$)' lib/python-constraints.txt   # exact versions only
       - name: Unit tests
         run: |
-          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 >/dev/null
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 xvfb libxtst6 >/dev/null
           python3 -m pip install --quiet PyQt6
           QT_QPA_PLATFORM=offscreen python3 -m unittest discover -s tests -v
       - name: AppStream metadata and desktop entry

@@ -216,8 +216,12 @@ class ClickSwap:
     the chosen button. Laser and mouse clicks don't pass through any input device we can read,
     so this grabs the pointer on the Steam session's X display (:0, which holds every floating
     window and the desktop) for one click, then replays it there with XTEST. One click, then
-    it's released; also released after TIMEOUT seconds, or when toggled off."""
-    TIMEOUT = 20
+    it's released; also after TIMEOUT seconds, when toggled off, and (like Full Keyboard, which
+    releases its input when the dashboard closes) when the pad is hidden. Scroll-wheel "buttons"
+    pass straight through. Every step is logged to LOG for diagnosis."""
+    TIMEOUT = 10
+    RELEASE_WAIT = 1.5            # a press whose release never reaches us is replayed anyway
+    LOG = RUN / "arrowpad-clicks.log"
     BUTTONS = {"RMB": 3, "MMB": 2}
 
     def __init__(self, on_done):
@@ -228,6 +232,16 @@ class ClickSwap:
         self.press = None
         self.timer = QTimer(interval=15, timeout=self.poll)
         self.deadline = 0.0
+        self.press_time = 0.0
+
+    def log(self, msg):
+        try:
+            if self.LOG.exists() and self.LOG.stat().st_size > 200_000:
+                self.LOG.replace(self.LOG.with_suffix(".log.1"))
+            with open(self.LOG, "a") as f:
+                f.write(f"{time.strftime('%H:%M:%S')} {msg}\n")
+        except OSError:
+            pass
 
     def _open(self):
         if self.dpy:
@@ -248,7 +262,8 @@ class ClickSwap:
         x.XFlush.argtypes = [C.c_void_p]
         t.XTestFakeMotionEvent.argtypes = [C.c_void_p, C.c_int, C.c_int, C.c_int, C.c_ulong]
         t.XTestFakeButtonEvent.argtypes = [C.c_void_p, C.c_uint, C.c_int, C.c_ulong]
-        display = ":0" if Path("/tmp/.X11-unix/X0").exists() else os.environ.get("DISPLAY", "")
+        display = os.environ.get("ARROWPAD_CLICK_DISPLAY") or (      # override: tests only
+            ":0" if Path("/tmp/.X11-unix/X0").exists() else os.environ.get("DISPLAY", ""))
         self.dpy = x.XOpenDisplay(display.encode())
         self.x, self.t = x, t
         return bool(self.dpy)
@@ -256,27 +271,47 @@ class ClickSwap:
     def arm(self, which):
         """Toggle `which` ("RMB"/"MMB"); arming one disarms the other. Returns the armed one."""
         if self.armed == which:
-            self.disarm()
+            self.disarm("toggled off")
             return None
-        self.disarm()
+        self.disarm(f"switched to {which}")
         if not self._open():
             return None
-        root = self.x.XDefaultRootWindow(self.dpy)
-        # owner_events False, ButtonPress|ButtonRelease, async pointer and keyboard
-        if self.x.XGrabPointer(self.dpy, root, 0, (1 << 2) | (1 << 3), 1, 1, 0, 0, 0) != 0:
+        r = self.grab()
+        if r != 0:
+            self.log(f"{which}: couldn't grab the pointer (result {r}); nothing changed")
             return None
-        self.x.XFlush(self.dpy)
+        self.log(f"{which}: armed, waiting up to {self.TIMEOUT} s for a click")
         self.armed, self.press = which, None
         self.deadline = time.monotonic() + self.TIMEOUT
         self.timer.start()
         return which
 
-    def disarm(self):
+    def grab(self):
+        root = self.x.XDefaultRootWindow(self.dpy)
+        # owner_events False, ButtonPress|ButtonRelease, async pointer and keyboard
+        r = self.x.XGrabPointer(self.dpy, root, 0, (1 << 2) | (1 << 3), 1, 1, 0, 0, 0)
+        self.x.XFlush(self.dpy)
+        return r
+
+    def ungrab(self):
+        self.x.XUngrabPointer(self.dpy, 0)
+        self.x.XFlush(self.dpy)
+
+    def disarm(self, why=None):
         if self.armed and self.dpy:
-            self.x.XUngrabPointer(self.dpy, 0)
-            self.x.XFlush(self.dpy)
+            self.ungrab()
+            if why:
+                self.log(f"{self.armed}: cancelled ({why})")
         self.armed, self.press = None, None
         self.timer.stop()
+
+    def replay(self, button, x=None, y=None):
+        """Send a press+release of `button` (at x, y) to whatever is under the pointer."""
+        if x is not None:
+            self.t.XTestFakeMotionEvent(self.dpy, -1, x, y, 0)
+        self.t.XTestFakeButtonEvent(self.dpy, button, 1, 0)
+        self.t.XTestFakeButtonEvent(self.dpy, button, 0, 0)
+        self.x.XFlush(self.dpy)
 
     def poll(self):
         try:
@@ -286,8 +321,12 @@ class ClickSwap:
             self.on_done()
 
     def _poll(self):
-        if time.monotonic() > self.deadline:
-            self.disarm()
+        now = time.monotonic()
+        if self.press is not None and now - self.press_time > self.RELEASE_WAIT:
+            self.finish("release never arrived")
+            return
+        if now > self.deadline:
+            self.disarm(f"no click within {self.TIMEOUT} s")
             self.on_done()
             return
         ev = (self.C.c_long * 24)()
@@ -299,19 +338,105 @@ class ClickSwap:
             # x, y, x_root, y_root, state, button (64-bit: longs/pointers are 8 bytes)
             base = 8 * 8 // 4                                 # int index after the 8 long-sized fields
             x_root, y_root, button = ints[base + 2], ints[base + 3], ints[base + 5]
+            if button >= 4:
+                # Scroll wheel (4-7): not a click. Let it through: ungrab, replay, grab again.
+                if etype == 4:
+                    self.ungrab()
+                    self.replay(button)
+                    if self.grab() != 0:
+                        self.disarm("couldn't grab again after a scroll")
+                        self.on_done()
+                        return
+                continue
             if etype == 4:                                     # ButtonPress
-                self.press = (x_root, y_root, button)
+                self.press, self.press_time = (x_root, y_root, button), time.monotonic()
             elif etype == 5 and self.press is not None:        # ButtonRelease: replay as chosen
-                px, py, _ = self.press
-                which = self.armed
-                self.disarm()
-                b = self.BUTTONS[which]
-                self.t.XTestFakeMotionEvent(self.dpy, -1, px, py, 0)
-                self.t.XTestFakeButtonEvent(self.dpy, b, 1, 0)
-                self.t.XTestFakeButtonEvent(self.dpy, b, 0, 0)
-                self.x.XFlush(self.dpy)
-                self.on_done()
+                self.finish()
                 return
+
+    def finish(self, note=""):
+        px, py, orig = self.press
+        which = self.armed
+        self.disarm()
+        self.replay(self.BUTTONS[which], px, py)
+        self.log(f"{which}: button {orig} at {px},{py} replayed as button {self.BUTTONS[which]}"
+                 + (f" ({note})" if note else ""))
+        self.on_done()
+
+
+def drawn_icon(name, px=96, color=THEME["legend"]):
+    """Full Keyboard's vector icons, redrawn with QPainter: same 24-unit coordinates, 1.8-unit
+    round strokes, so the toolbar and clipboard keys match it exactly. None for names it doesn't
+    draw. Ported from TaiKeid/steam-frame-full-keyboard src/panel.cpp under the MIT License:
+    Copyright (c) 2026 TaiKeid and contributors. Permission is hereby granted, free of charge,
+    to any person obtaining a copy of this software and associated documentation files, to deal
+    in the Software without restriction, subject to including this copyright and permission
+    notice in all copies or substantial portions. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
+    WARRANTY OF ANY KIND (full text: https://github.com/TaiKeid/steam-frame-full-keyboard/blob/main/LICENSE)."""
+    from PyQt6.QtGui import QPen, QPixmap
+    pm = QPixmap(px, px)
+    pm.fill(Qt.GlobalColor.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
+    p.translate(px / 2, px / 2)
+    p.scale(px / 24, px / 24)
+    p.setPen(QPen(QColor(color), 1.8, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
+                  Qt.PenJoinStyle.RoundJoin))
+    path = QPainterPath()
+
+    def line(x1, y1, x2, y2):
+        path.moveTo(x1, y1)
+        path.lineTo(x2, y2)
+
+    def pin(off):
+        nonlocal path
+        if off:
+            p.rotate(0.65 * 180 / 3.141592653589793)
+        line(-5, -9, 5, -9)
+        line(-4, -9, -4, -1)
+        line(4, -9, 4, -1)
+        path.moveTo(-4, -1)
+        path.lineTo(-8, 3)
+        path.lineTo(8, 3)
+        path.lineTo(4, -1)
+        line(0, 3, 0, 10)
+        if off:
+            p.drawPath(path)
+            p.rotate(-0.65 * 180 / 3.141592653589793)
+            path = QPainterPath()
+            line(-10, -10, 10, 10)
+
+    if name in ("pin_on", "pin"):
+        pin(name == "pin")                                   # "pin" = not pinned: tilted, crossed out
+    elif name == "reset":                                     # Recenter
+        path.addEllipse(QRectF(-7, -7, 14, 14))
+        line(-11, 0, -5, 0); line(5, 0, 11, 0); line(0, -11, 0, -5); line(0, 5, 0, 11)
+    elif name in ("smaller", "larger"):                       # ScaleDown / ScaleUp
+        path.addEllipse(QRectF(-11, -11, 16, 16))
+        line(3, 3, 10, 10); line(-7, -3, 1, -3)
+        if name == "larger":
+            line(-3, -7, -3, 1)
+    elif name == "close":
+        line(-7, -7, 7, 7); line(7, -7, -7, 7)
+    elif name == "Copy":
+        path.addRoundedRect(QRectF(-3, -3, 13, 14), 2, 2)
+        path.moveTo(4, -6); path.lineTo(4, -9); path.lineTo(-10, -9); path.lineTo(-10, 5); path.lineTo(-6, 5)
+    elif name == "Paste":
+        path.moveTo(-5, -8); path.lineTo(-9, -8); path.lineTo(-9, 11); path.lineTo(9, 11)
+        path.lineTo(9, -8); path.lineTo(5, -8)
+        path.addRoundedRect(QRectF(-5, -11, 10, 6), 2, 2)
+        line(-4, 0, 4, 0); line(-4, 5, 2, 5)
+    else:
+        p.end()
+        return None
+    p.drawPath(path)
+    p.end()
+    return QIcon(pm)
+
+
+def icon_for(name):
+    """Full Keyboard's drawn icon where it has one, else Breeze's."""
+    return drawn_icon(name) or (breeze_icon(ICONS[name]) if name in ICONS else None)
 
 
 def breeze_icon(name):
@@ -399,7 +524,7 @@ class ArrowPad(QWidget):
         b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         b.setProperty("tool", "true")
         b.setToolTip(tip)
-        icon = breeze_icon(ICONS[name])
+        icon = icon_for(name)
         if icon:
             b.setIcon(icon)
         else:
@@ -451,7 +576,7 @@ class ArrowPad(QWidget):
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             b.setToolTip(TIPS.get(name, ""))
-            icon = breeze_icon(ICONS[name]) if name in CHORDS or name in MOUSE else None
+            icon = icon_for(name) if name in CHORDS or name in MOUSE else None
             if icon:
                 b.setIcon(icon)
                 b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike
@@ -501,7 +626,7 @@ class ArrowPad(QWidget):
             self.set_state(b, state)
         # Pin shows its state by icon, like Full Keyboard (no highlight behind it).
         pin = self.tools["pin"]
-        icon = breeze_icon(ICONS["pin_on" if self.pinned else "pin"])
+        icon = icon_for("pin_on" if self.pinned else "pin")
         if icon and pin.property("pinned") != self.pinned:
             pin.setIcon(icon)
             pin.setProperty("pinned", self.pinned)
@@ -633,6 +758,7 @@ class ArrowPad(QWidget):
         if self.isVisible():
             self.save_config()
             self.release_all_mods()
+            self.click_swap.disarm("pad hidden")
             self.hide()
         else:
             self.show()

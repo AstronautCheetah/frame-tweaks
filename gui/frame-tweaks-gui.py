@@ -442,7 +442,8 @@ class Window(QWidget):
                                          "up": lambda: self.move_focus(-1),
                                          "down": lambda: self.move_focus(+1)})
             if self.vr_buttons.ok:
-                QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.underMouse())).start()
+                self._laser = (None, 0.0)
+                QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.laser_over_window())).start()
         self.refresh()
 
     # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
@@ -751,6 +752,18 @@ class Window(QWidget):
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", cmd])
 
     # ---- controller buttons in VR (vrbuttons.py): B back, Y home, A tick ----------
+    def laser_over_window(self):
+        """True while the laser is really on this window: the pointer is inside it and has moved
+        in the last 3 s (a laser always jitters). Qt's hover state alone can stay set after the
+        laser leaves for the dashboard, which would keep A/B/Y claimed from other apps."""
+        import time
+        pos = QCursor.pos()
+        last, since = self._laser
+        if pos != last:
+            self._laser = (pos, time.monotonic())
+            since = time.monotonic()
+        return self.isVisible() and self.frameGeometry().contains(pos) and time.monotonic() - since < 3
+
     def go_back(self):
         if self.details is not None:
             self.close_details()
