@@ -65,8 +65,7 @@ class Attrs(ctypes.Structure):
 
 
 def capture_focused():
-    """The focused window of the Steam session (gamescope's GAMESCOPE_FOCUSED_WINDOW): (QImage, its
-    title or "")."""
+    """The focused window of the Steam session (gamescope's GAMESCOPE_FOCUSED_WINDOW) as a QImage."""
     x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
     x.XOpenDisplay.restype = ctypes.c_void_p
     x.XGetImage.restype = ctypes.c_void_p
@@ -93,13 +92,7 @@ def capture_focused():
     xi = XImage.from_address(img)
     data = ctypes.string_at(xi.data, xi.bytes_per_line * xi.height)
     q = QImage(data, xi.width, xi.height, xi.bytes_per_line, QImage.Format.Format_RGB32).copy()
-    title = ""
-    utf8, name = x.XInternAtom(d, b"UTF8_STRING", 0), x.XInternAtom(d, b"_NET_WM_NAME", 0)
-    if x.XGetWindowProperty(d, win, ctypes.c_ulong(name), 0, 1024, 0, ctypes.c_ulong(utf8), ctypes.byref(rtype),
-                            ctypes.byref(fmt), ctypes.byref(n), ctypes.byref(after), ctypes.byref(prop)) == 0 and prop:
-        title = ctypes.string_at(prop, n.value).decode(errors="replace")
-        x.XFree(prop)
-    return q, title                            # (the X image is freed when this short-lived tool exits)
+    return q                                   # (the X image is freed when this short-lived tool exits)
 
 
 # ---- actions ------------------------------------------------------------------------------
@@ -1004,11 +997,9 @@ def vr_panel_available():
 
 # ---- selection window -----------------------------------------------------------------------
 class Snip(QWidget):
-    def __init__(self, image, source=""):
+    def __init__(self, image):
         super().__init__()
-        # The snipped window's title after " · ": in VR, snip's dashboard patch (patch.js) opens
-        # this where that window floats.
-        self.setWindowTitle(f"Screen snip · {source}" if source else "Screen snip")
+        self.setWindowTitle("Screen snip")
         self.image, self.pix = image, QPixmap.fromImage(image)
         self.start = self.end = None              # a new rectangle being drawn
         self.sel = None                           # the selection, once drawn (adjustable)
@@ -1291,14 +1282,14 @@ def main():
         return narrate_panel(sys.argv[2], sys.argv[3])
     app = QApplication(sys.argv[:1])
     try:
-        image, source = (QImage(sys.argv[1]), "") if len(sys.argv) > 1 else capture_focused()
+        image = QImage(sys.argv[1]) if len(sys.argv) > 1 else capture_focused()
     except RuntimeError as e:
         notify("Couldn't take a snip", str(e))
         return 1
     if image.isNull():
         notify("Couldn't take a snip", "empty picture")
         return 1
-    w = Snip(image, source)
+    w = Snip(image)
     w.showFullScreen()
     w.activateWindow()
     return app.exec()

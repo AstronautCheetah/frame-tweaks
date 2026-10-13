@@ -7,8 +7,12 @@ keeps it, and in VR each window is its own panel, so the panel takes the phone's
 already tells the window system the phone screen's shape (its aspect-ratio hint) and updates it
 when the phone rotates; this follows that hint.
 
-  phone-fit [LONG_SIDE]   watch scrcpy's windows on this display until scrcpy exits
-                          (LONG_SIDE: window size of the phone's long side, default 1920)
+  phone-fit [WIDTH]       watch scrcpy's windows on this display until scrcpy exits
+                          (WIDTH: of the 16:9 screen the window must fit in, default 1920)
+
+The window must fit inside the Steam session's 1920x1080 screen: a taller one (an upright phone
+at 862x1920) is still shown as 1920x1080, black bars and all. So an upright phone is 485x1080
+and a sideways one 1920x862; in VR the two come out about the same size.
 
 Only on gamescope (the VR/Steam session): in desktop mode KWin sizes windows normally, and a
 fixed size would stop you resizing it there.
@@ -20,7 +24,7 @@ import subprocess
 import sys
 import time
 
-LONG = 1920                    # default long side: phone's --max-size
+LONG = 1920                    # the screen's width (its height is 9/16 of it)
 P_MIN_SIZE, P_MAX_SIZE, P_ASPECT = 16, 32, 128
 
 
@@ -42,10 +46,10 @@ class Attrs(ctypes.Structure):          # XWindowAttributes: only the size is re
 
 
 def fit(ax, ay, long_side=LONG):
-    """Window size with the phone screen's shape (ax:ay), its long side long_side."""
-    if ax >= ay:
-        return long_side, max(1, round(long_side * ay / ax))
-    return max(1, round(long_side * ax / ay)), long_side
+    """Largest window with the phone screen's shape (ax:ay) inside a 16:9 screen long_side wide."""
+    w, h = long_side, round(long_side * 9 / 16)
+    s = min(w / ax, h / ay)
+    return max(1, min(w, round(ax * s))), max(1, min(h, round(ay * s)))
 
 
 class X:
