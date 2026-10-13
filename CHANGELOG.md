@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Claude Desktop kept signing you out:** some starts reached no wallet (Chromium's `basic_text`
+  fallback), so the sign-in was never saved, and one saved by a wallet-backed start couldn't be
+  read. `~/.local/bin/claude-desktop` is now a launcher that always uses the shared KDE wallet, however
+  Claude is started (app menu, VR "+" menu, `claude://` links, a terminal). Its status check
+  warns when the running Claude couldn't reach the wallet.
 - **↻ Reinstall button** on each installed tweak in the installer window, and
   `./install.sh reinstall ID...`: stops its programs, removes it and installs it again in one step
   (also for a tweak others depend on, such as ydotool).
