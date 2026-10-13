@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad VR flickered after clicks:** every press and release reloaded the overlay image, and
+  each reload blinks. Presses no longer redraw it (they're felt as a haptic click); it redraws only
+  when something visible changes (modifiers, Fn, R/M, mic, pin, settings, theme), with normally
+  compressed images again so SteamVR loads them faster.
 - **Stuck modifiers:** when Arrow Pad starts, and when the installer stops or uninstalls it, the
   desktop is made to forget any Ctrl/Alt/Super/Shift a crashed pad left "held" (a full press and
   release each; Super and Alt around F24, so no menu opens). A stuck one used to add itself to

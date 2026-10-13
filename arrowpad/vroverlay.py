@@ -169,7 +169,7 @@ class OverlayHost:
         layer, pin, language), so SteamVR doesn't reload the image for nothing."""
         p = self.pad
         sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale,
-               p.click_swap.armed)
+               p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"))
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             self.dirty = True
@@ -212,10 +212,11 @@ class OverlayHost:
         # older pad wrote there, even after reinstalling. Older files are deleted.
         self.tex_slot += 1
         path = f"{TEX_DIR}/arrowpad-overlay-{os.getpid()}-{self.tex_slot}.png"
-        # Light compression: half the encode time (~7 ms instead of ~15); the file lives in RAM
-        # (/run), so its larger size costs nothing. A direct GPU texture, as Full Keyboard uses,
-        # would need an OpenGL context, which here only exists through Gamescope's WSI layer.
-        img.save(path, "PNG", 90)
+        # Normal compression (~35 KB): SteamVR loads a small file faster, so the panel's blink on
+        # reload is shorter; our ~15 ms to encode is the cheaper side. (A direct GPU texture, as
+        # Full Keyboard uses, needs an OpenGL context, which here only exists through Gamescope's
+        # WSI layer.)
+        img.save(path, "PNG")
         self.ov.setOverlayFromFile(self.input_handle, path)
         self.set_input_size(w, h)
         for old in glob.glob(f"{TEX_DIR}/arrowpad-overlay-*.png"):
@@ -475,8 +476,10 @@ class OverlayHost:
                     continue                    # squeezing to grab: a trigger pull doesn't also type
                 if b is not None:
                     self.pressed[cursor] = b
+                    # No redraw for the press itself: each reload of the overlay blinks, and the
+                    # press is felt (haptic click). State changes (modifiers, layer, R/M, mic, pin,
+                    # settings) still redraw through mark_dirty.
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
-                    self.dirty = True
                 elif not self.pad.pinned:
                     # Trigger on the background also grabs (until the trigger is released).
                     self.start_drag(dev, grip=False)
@@ -485,7 +488,6 @@ class OverlayHost:
                 b = self.pressed.pop(cursor, None)
                 if b is not None:
                     self.send(b, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
-                    self.dirty = True
                 if self.drag is not None and not self.grip_drag and self.drag[0] == dev:
                     self.end_drag()
 
