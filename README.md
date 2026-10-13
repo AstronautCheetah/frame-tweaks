@@ -90,6 +90,7 @@ Installed automatically when a tweak needs them; listed so you can see and manag
 | 🧩 | [**VR dashboard patching**](vr-dashboard/) (helper) | Lets the VR windows tweaks (Curved world windows, Back to the previous window) adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR windows tweak is a small patch this injects while SteamVR runs. |
 | 🍺 | [**Homebrew**](homebrew/) | The package manager several tweaks install their programs with, into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates; Homebrew installs outside it. Other tweaks offer to install it when needed; this row shows it and installs it up front. |
 | ⌨️ | [**ydotool**](ydotool/) (helper) | The virtual keyboard Dictation and Arrow Pad type through. Installed automatically. | Under KDE Wayland ordinary programs can't send keystrokes to other apps; ydotool goes through the kernel's `/dev/uinput`. |
+| 🗣️ | [**Speech engine**](speech/) (helper) | Gives the Frame a voice: Piper (offline, natural) for Screen snip's Narrate, and espeak-ng for Orca and other apps that speak through speech-dispatcher. Installed automatically. | SteamOS ships speech-dispatcher and its espeak-ng module, but not espeak-ng itself, so nothing can speak (the Screen reader's Orca was silent). |
 <!-- /generated:helper -->
 
 Each folder's README covers usage, settings, how it works and the gotchas we hit.

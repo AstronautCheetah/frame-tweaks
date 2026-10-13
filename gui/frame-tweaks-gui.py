@@ -43,7 +43,7 @@ FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
 BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
               "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
               "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
-              "tools": "tools", "float-return": "go-previous", "float-grab": "transform-move", "vr-dashboard": "applications-system", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
+              "tools": "tools", "speech": "audio-speakers-symbolic", "float-return": "go-previous", "float-grab": "transform-move", "vr-dashboard": "applications-system", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
 # Wallet apps page (wallet/wallet-launcher): apps that open with the shared KDE wallet.
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
 APP_TIMERS = Path.home() / ".local/bin/app-timers"

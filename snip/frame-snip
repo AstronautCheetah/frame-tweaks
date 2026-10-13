@@ -31,7 +31,7 @@ from PyQt6.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QWid
 
 HOME = Path.home()
 RUN = Path(f"/run/user/{os.getuid()}")
-DATA = HOME / ".local/share/frame-tweaks/snip"
+DATA = HOME / ".local/share/frame-tweaks/speech"     # the Speech engine helper (speech/)
 PIPER = DATA / "piper/piper"
 VOICE = DATA / "voice.onnx"
 SAVE_DIR = HOME / "Pictures/Screenshots"
@@ -328,7 +328,7 @@ class Snip(QWidget):
         QApplication.processEvents()
         self.player = speak(text)
         if not self.player:
-            notify("Narrate needs Piper", "Reinstall Screen snip in Frame Tweaks")
+            notify("Narrate needs Piper", "Reinstall 'Speech engine' in Frame Tweaks")
             return self.close()
         # Stay open while it reads (Stop / Esc / Cancel end it); close when it's done.
         self.watch = QTimer(self, interval=300, timeout=lambda: self.player.poll() is not None and self.close())
