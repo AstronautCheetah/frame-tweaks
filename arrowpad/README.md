@@ -31,7 +31,9 @@ Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
   background and hold the trigger to carry it with your controller (like Full Keyboard's grab),
   and **push or pull the controller to send it further away or bring it closer**: that motion
   is amplified 3×, while up/down and side to side move it 1:1 (kept 0.25–3.5 m from you),
-  **Pin** stops that (its icon shows the state: a pin when pinned, a crossed-out pin when not, like Full Keyboard). Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
+  **Pin** stops that (its icon shows the state: an upright pin when pinned, a tilted, crossed-out
+  pin when not, drawn exactly like Full Keyboard's). After a grab, a sideways lean under 5° eases
+  level over half a second, as in Full Keyboard. Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
   floating *window* couldn't do that (gamescope gives clicked windows focus and ignores requests
   to hand it back).
 
@@ -65,7 +67,9 @@ Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, Re
 
 - **🖱R / 🖱M (right / middle click):** tap one and your **next click anywhere** (laser or
   mouse, on any floating window or the desktop) becomes a right or middle click; the key lights
-  up until then. Only one can be on; tap it again to cancel (it also cancels itself after 20 s).
+  up until then. Only one can be on; tap it again to cancel. It also cancels itself after 10 s
+  and when the dashboard closes (like Full Keyboard, the pad lets go of input then), and
+  scrolling passes straight through. What happened is logged in `/run/user/$UID/arrowpad-clicks.log`.
   It works by catching that one click on the Steam session's display and replaying it as the
   other button, because laser clicks don't pass through anything else the pad can see.
 - **Modifiers** (Ctrl, Alt, Super): tap = one-shot (applies to the next key,

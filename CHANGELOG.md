@@ -1,6 +1,15 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad right/middle-click toggles:** a scroll while one was armed was swallowed and turned
+  into a right/middle click (the controller's scroll is mouse "buttons" 4/5); scrolling now passes
+  through. Toggles also cancel when the dashboard closes and after 10 s (was 20), a press whose
+  release never arrives is replayed after 1.5 s, and every step is logged
+  (`/run/user/$UID/arrowpad-clicks.log`). Tested on a private X display (`tests/test_clickswap.py`).
+- **Arrow Pad looks:** Full Keyboard's own toolbar and copy/paste icons (ported, MIT), including
+  its pin on/off icons; a slight sideways lean eases level after a grab, as in Full Keyboard.
+- **Installer window in VR:** A/B/Y and the D-pad are claimed only while the laser is really on
+  the window (pointer inside it and moving), not just while Qt thinks it's hovered.
 - **Pinned:** clipboard-sync builds a pinned commit; the Whisper model is fetched from a pinned
   Hugging Face revision and checked against its SHA256 (it was the moving `main` branch,
   unchecked); Python packages install at exact versions (`lib/python-constraints.txt`).
