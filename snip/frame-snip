@@ -102,14 +102,30 @@ def nested_wayland():
     return None
 
 
+def wl_tool(name):
+    """wl-copy / wl-paste: on PATH, or Homebrew's (not always on a launcher's PATH)."""
+    return shutil.which(name) or next((p for p in ("/home/linuxbrew/.linuxbrew/bin/" + name,) if os.path.exists(p)), None)
+
+
 def to_clipboard(data, mime):
     sock = nested_wayland()
-    if not sock or not shutil.which("wl-copy"):
+    if not sock or not wl_tool("wl-copy"):
         return False
     env = dict(os.environ, WAYLAND_DISPLAY=sock)
-    p = subprocess.Popen(["wl-copy", "--type", mime], stdin=subprocess.PIPE, env=env, start_new_session=True)
+    p = subprocess.Popen([wl_tool("wl-copy"), "--type", mime], stdin=subprocess.PIPE, env=env, start_new_session=True)
     p.communicate(data)
     return p.returncode == 0
+
+
+def from_clipboard():
+    """The desktop clipboard's text (wl-paste), or None."""
+    sock = nested_wayland()
+    if not sock or not wl_tool("wl-paste"):
+        return None
+    r = subprocess.run([wl_tool("wl-paste"), "--no-newline", "--type", "text"], capture_output=True,
+                       env=dict(os.environ, WAYLAND_DISPLAY=sock), timeout=5)
+    text = r.stdout.decode(errors="replace").strip() if r.returncode == 0 else ""
+    return text or None
 
 
 def notify(title, body=""):
@@ -320,8 +336,9 @@ class NarrationWindow(QWidget):
             # The Steam session shows every window as a 1920x1080 panel, so fill it: the snip as
             # large as fits above the controls.
             lay.setContentsMargins(40, 30, 40, 30)
-        self.pic = QLabel()
+        self.pic = QLabel()                       # the snip (or, after Paste, the pasted text)
         self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.pic.setWordWrap(True)
         lay.addWidget(self.pic, 1)
         self.state = QLabel("Preparing…")
         self.state.setStyleSheet("color: #9aa6b2;")
@@ -342,15 +359,26 @@ class NarrationWindow(QWidget):
         self.faster.clicked.connect(lambda: self.step(1))
         for w in (QLabel("Speed"), self.slower, self.speed_label, self.faster):
             row.addWidget(w)
-        row.addStretch(1)
+        lay.addLayout(row)
+        # Second row: the text itself, and the panel.
+        row2 = QHBoxLayout()
+        copy = QPushButton("Copy text")
+        copy.setToolTip("Put the text being read on the clipboard")
+        copy.clicked.connect(self.copy_text)
+        paste = QPushButton("Paste")
+        paste.setToolTip("Read the clipboard's text instead")
+        paste.clicked.connect(self.paste_text)
+        row2.addWidget(copy)
+        row2.addWidget(paste)
+        row2.addStretch(1)
         if panel:
             collapse = QPushButton("▾ Collapse")
             collapse.clicked.connect(self.collapse)
-            row.addWidget(collapse)
+            row2.addWidget(collapse)
         close = QPushButton("Close")
         close.clicked.connect(self.close)
-        row.addWidget(close)
-        lay.addLayout(row)
+        row2.addWidget(close)
+        lay.addLayout(row2)
         # Collapsed: just Expand, with a margin to grab the panel by.
         self.mini = QWidget()
         mini = QHBoxLayout(self.mini)
@@ -364,15 +392,33 @@ class NarrationWindow(QWidget):
         self.load(image, text)
 
     def load(self, image, text):
-        """Read a (new) snip: stops what was being read, keeps the panel and its place."""
+        """Read a (new) snip: stops what was being read, keeps the panel and its place. image None:
+        show the text itself (pasted text)."""
         if self.narrator is not None:
             self.narrator.cleanup()
-        box = (860, 440) if self.panel else (1840, 800)
-        pm = QPixmap.fromImage(image)
-        if pm.width() > box[0] or pm.height() > box[1] or not self.panel:
-            pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.pic.setPixmap(pm)
-        self.pic_width = pm.width()
+        self.text = text
+        if image is None:
+            shown = text if len(text) <= 600 else text[:600].rstrip() + " …"
+            self.pic.setPixmap(QPixmap())
+            self.pic.setText(shown)
+            self.pic.setStyleSheet("background: #161c23; border-radius: 8px; padding: 14px;"
+                                   " font-size: 20px; color: #e8ecf0;")
+            self.pic.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+            self.pic_width = 820 if self.panel else 1800
+            if self.panel:
+                self.pic.setFixedWidth(self.pic_width)
+        else:
+            box = (860, 440) if self.panel else (1840, 800)
+            pm = QPixmap.fromImage(image)
+            if pm.width() > box[0] or pm.height() > box[1] or not self.panel:
+                pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            self.pic.setText("")
+            self.pic.setStyleSheet("")
+            self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.pic.setMinimumWidth(0)
+            self.pic.setMaximumWidth(16777215)
+            self.pic.setPixmap(pm)
+            self.pic_width = pm.width()
         self.state.setText("Preparing…")
         self.toggle.setText("■ Stop")
         self.pause_button.setText("⏸ Pause")
@@ -382,6 +428,17 @@ class NarrationWindow(QWidget):
         self.narrator.finished.connect(self.done)
         self.narrator.start()
         self.expand() if self.collapsed else self.fit()
+
+    def copy_text(self):
+        ok = to_clipboard(self.text.encode(), "text/plain;charset=utf-8")
+        self.state.setText("Text copied to the clipboard." if ok else "Couldn't copy (is desktop mode running?)")
+
+    def paste_text(self):
+        text = from_clipboard()
+        if not text:
+            self.state.setText("The clipboard has no text.")
+            return
+        self.load(None, text)
 
     def fit(self):
         if not self.panel:
