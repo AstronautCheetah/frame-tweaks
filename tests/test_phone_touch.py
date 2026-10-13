@@ -41,6 +41,18 @@ class Touch(unittest.TestCase):
         t, action, _, x, y, _, _, pressure, _, _ = sent(p)
         self.assertEqual((action, x, y, pressure), (pt.UP, 0, 2399, 0))
 
+    def test_scroll_is_scrcpys_21_byte_wheel(self):
+        p = phone()
+        p.scroll(0.5, 0.5, False, 0, 1)                 # a notch down
+        msg = p.sock.sendall.call_args[0][0]
+        self.assertEqual(len(msg), 21)
+        self.assertEqual(struct.unpack(">BiiHHhhI", msg), (3, 540, 1200, 1080, 2400, 0, -2048, 0))
+
+    def test_scroll_is_capped_at_16_notches(self):
+        p = phone()
+        p.scroll(0, 0, False, 40, -40)
+        self.assertEqual(struct.unpack(">BiiHHhhI", p.sock.sendall.call_args[0][0])[5:7], (0x7FFF, 0x7FFF))
+
     def test_screen_size_takes_the_override(self):
         out = mock.Mock(stdout="Physical size: 1344x2992\nOverride size: 1080x2400\n")
         with mock.patch.object(pt, "adb", return_value=out):
