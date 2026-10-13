@@ -1,0 +1,6 @@
+# Piper (offline text-to-speech, used by Narrate): this release's aarch64 build, checked against
+# this SHA256 (computed from the downloaded file; the release publishes none). Bump with dev/check-pins.sh.
+version=2023.11.14-2
+url=https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz
+sha256=fea0fd2d87c54dbc7078d0f878289f404bd4d6eea6e7444a77835d1537ab88eb
+latest=https://api.github.com/repos/rhasspy/piper/releases/latest

@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip** (new): select a rectangle of the window you're using, then Copy, Save, Copy
+  text (Tesseract OCR) or Narrate (reads it aloud with Piper, offline). Works on the desktop and
+  on floated VR windows.
+- **Arrow Pad: Tools layer.** A Tools key (where Dictation was) opens a layer with Snip,
+  Dictation, Launcher, Undo/Redo, Find, Save, Cut/Copy/Paste/All and more; tap it again to go back.
 - **Apply changes is dimmed when there's nothing to change** (its tooltip lists what it would
   install or remove). Only real changes count: a ticked tweak that's installed with a warning is
   no longer reinstalled by Apply; use its ↻ button.

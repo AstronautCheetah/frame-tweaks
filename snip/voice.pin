@@ -1,0 +1,6 @@
+# Piper voice en_US-ljspeech-medium (LJ Speech dataset: public domain), from this exact
+# Hugging Face revision, checked against Hugging Face's SHA256.
+version=375a0fe641dea077c2a47b4e9a056d6da521eed3
+url=https://huggingface.co/rhasspy/piper-voices/resolve/375a0fe641dea077c2a47b4e9a056d6da521eed3/en/en_US/ljspeech/medium/en_US-ljspeech-medium.onnx
+sha256=6f52a751e2349abe7a76735eb09dc1875298c77ea2342ffd2fef79ff81b87f22
+latest=https://huggingface.co/api/models/rhasspy/piper-voices/revision/main

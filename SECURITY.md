@@ -22,6 +22,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | dictation | `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard` | Microphone while recording; types through ydotool |
 | whisper-frame | Upstream's own installer (user services `whisper-ptt`, `whisper-panel`), pinned release | Microphone; listens for the headset's Select button |
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv) | Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST |
+| snip | `frame-snip`, Piper and a voice in `~/.local/share/frame-tweaks/snip` (checksum-pinned), Tesseract (Homebrew), an app-menu entry | Reads the picture of the window you're using (only when you start a snip) |
 | full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
 | screen-reader | One setting in `~/.config/kaccessrc` (its previous value is restored on removal) | Reads what's on screen (accessibility interface) and speaks it |
 | clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |

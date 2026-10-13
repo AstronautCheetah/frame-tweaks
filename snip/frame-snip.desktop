@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Screen snip
+Comment=Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud
+Exec=@BIN@/frame-snip
+Icon=frame-tweaks-snip
+Categories=Utility;

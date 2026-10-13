@@ -1,0 +1,300 @@
+#!/usr/bin/env python3
+"""frame-snip: screenshot a rectangle of the window you're using, then copy it, save it, copy
+its text (OCR), or read its text aloud (Narrate).
+
+  frame-snip            capture the window the Steam session has focused (the desktop, or a
+                        window you floated) and open the selection window
+  frame-snip FILE       select from an image file instead (for testing)
+
+Drag a rectangle with the laser (or mouse), then pick an action. Esc or right-click cancels.
+The selection window opens on the Steam session's display, so it shows up as a VR window.
+Tools: Tesseract (OCR, Homebrew), Piper (speech, offline), wl-copy (clipboard; the Shared
+clipboard tweak carries it to VR windows).
+"""
+import ctypes
+import ctypes.util
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+os.environ["QT_QPA_PLATFORM"] = "xcb"
+os.environ["DISPLAY"] = ":0"                    # the Steam session: every VR window lives here
+
+from PyQt6.QtCore import QRect, Qt, QTimer                                        # noqa: E402
+from PyQt6.QtGui import QColor, QImage, QPainter, QPen, QPixmap                   # noqa: E402
+from PyQt6.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QWidget  # noqa: E402
+
+HOME = Path.home()
+RUN = Path(f"/run/user/{os.getuid()}")
+DATA = HOME / ".local/share/frame-tweaks/snip"
+PIPER = DATA / "piper/piper"
+VOICE = DATA / "voice.onnx"
+SAVE_DIR = HOME / "Pictures/Screenshots"
+TESSERACT = shutil.which("tesseract") or "/home/linuxbrew/.linuxbrew/bin/tesseract"
+MIN_SIZE = 8                                    # px: smaller drags are taps, not selections
+
+
+# ---- capture ------------------------------------------------------------------------------
+class XImage(ctypes.Structure):
+    _fields_ = [("width", ctypes.c_int), ("height", ctypes.c_int), ("xoffset", ctypes.c_int),
+                ("format", ctypes.c_int), ("data", ctypes.c_void_p), ("byte_order", ctypes.c_int),
+                ("bitmap_unit", ctypes.c_int), ("bitmap_bit_order", ctypes.c_int), ("bitmap_pad", ctypes.c_int),
+                ("depth", ctypes.c_int), ("bytes_per_line", ctypes.c_int), ("bits_per_pixel", ctypes.c_int)]
+
+
+class Attrs(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int), ("width", ctypes.c_int), ("height", ctypes.c_int),
+                ("rest", ctypes.c_char * 256)]
+
+
+def capture_focused():
+    """The focused window of the Steam session (gamescope's GAMESCOPE_FOCUSED_WINDOW) as a QImage."""
+    x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
+    x.XOpenDisplay.restype = ctypes.c_void_p
+    x.XGetImage.restype = ctypes.c_void_p
+    x.XInternAtom.restype = ctypes.c_ulong
+    x.XDefaultRootWindow.restype = ctypes.c_ulong
+    d = ctypes.c_void_p(x.XOpenDisplay(b":0"))
+    if not d.value:
+        raise RuntimeError("can't open the Steam session's display")
+    root = ctypes.c_ulong(x.XDefaultRootWindow(d))
+    atom = x.XInternAtom(d, b"GAMESCOPE_FOCUSED_WINDOW", 1)
+    rtype, fmt, n, after = ctypes.c_ulong(), ctypes.c_int(), ctypes.c_ulong(), ctypes.c_ulong()
+    prop = ctypes.c_void_p()
+    if not atom or x.XGetWindowProperty(d, root, ctypes.c_ulong(atom), 0, 1, 0, ctypes.c_ulong(6),   # XA_CARDINAL
+                                        ctypes.byref(rtype), ctypes.byref(fmt), ctypes.byref(n),
+                                        ctypes.byref(after), ctypes.byref(prop)) != 0 or not n.value:
+        raise RuntimeError("no focused window")
+    win = ctypes.c_ulong(ctypes.cast(prop, ctypes.POINTER(ctypes.c_ulong))[0])
+    x.XFree(prop)
+    a = Attrs()
+    x.XGetWindowAttributes(d, win, ctypes.byref(a))
+    img = x.XGetImage(d, win, 0, 0, a.width, a.height, ctypes.c_ulong(0xFFFFFFFF), 2)        # ZPixmap
+    if not img:
+        raise RuntimeError("couldn't read the window's picture")
+    xi = XImage.from_address(img)
+    data = ctypes.string_at(xi.data, xi.bytes_per_line * xi.height)
+    q = QImage(data, xi.width, xi.height, xi.bytes_per_line, QImage.Format.Format_RGB32).copy()
+    return q                                   # (the X image is freed when this short-lived tool exits)
+
+
+# ---- actions ------------------------------------------------------------------------------
+def nested_wayland():
+    """The desktop's Wayland socket (wl-copy talks to it from any session)."""
+    for s in [RUN / "nested_plasma/wayland-0", *RUN.glob("*/wayland-0"), RUN / "wayland-0"]:
+        if s.is_socket():
+            return str(s)
+    return None
+
+
+def to_clipboard(data, mime):
+    sock = nested_wayland()
+    if not sock or not shutil.which("wl-copy"):
+        return False
+    env = dict(os.environ, WAYLAND_DISPLAY=sock)
+    p = subprocess.Popen(["wl-copy", "--type", mime], stdin=subprocess.PIPE, env=env, start_new_session=True)
+    p.communicate(data)
+    return p.returncode == 0
+
+
+def notify(title, body=""):
+    subprocess.run(["notify-send", "-a", "Screen snip", title, body[:300]], stderr=subprocess.DEVNULL)
+
+
+def ocr(img):
+    """Text in the image (Tesseract), or None if Tesseract isn't installed."""
+    if not Path(TESSERACT).exists():
+        return None
+    with tempfile.TemporaryDirectory() as t:
+        path = Path(t) / "snip.png"
+        # Small screen text reads better at 2x.
+        img.scaled(img.width() * 2, img.height() * 2, Qt.AspectRatioMode.KeepAspectRatio,
+                   Qt.TransformationMode.SmoothTransformation).save(str(path))
+        r = subprocess.run([TESSERACT, str(path), "-", "--psm", "3"], capture_output=True, text=True)
+    text = re.sub(r"[ \t]+\n", "\n", r.stdout).strip()
+    return re.sub(r"\n{3,}", "\n\n", text)
+
+
+def speak(text):
+    """Start reading text aloud; returns the player process (to stop it), or None."""
+    if not PIPER.exists() or not VOICE.exists():
+        return None
+    wav = Path(tempfile.mkdtemp()) / "narrate.wav"
+    r = subprocess.run([str(PIPER), "--model", str(VOICE), "--config", f"{VOICE}.json", "--output_file", str(wav)],
+                       input=text.replace("\n", " "), capture_output=True, text=True)
+    if r.returncode != 0 or not wav.exists():
+        return None
+    return subprocess.Popen(["pw-play", str(wav)], start_new_session=True)
+
+
+# ---- selection window -----------------------------------------------------------------------
+class Snip(QWidget):
+    def __init__(self, image):
+        super().__init__()
+        self.setWindowTitle("Screen snip")
+        self.image, self.pix = image, QPixmap.fromImage(image)
+        self.start = self.end = None
+        self.player = None
+        self.setCursor(Qt.CursorShape.CrossCursor)
+        self.hint = QLabel("Drag a rectangle to snip  ·  Esc or right-click cancels", self)
+        self.hint.setStyleSheet("background: rgba(11,16,22,220); color: #e8ecf0; font-size: 22px;"
+                                "padding: 10px 18px; border-radius: 10px;")
+        self.hint.adjustSize()
+        self.bar = QWidget(self)
+        self.bar.setStyleSheet(
+            "QWidget { background: rgba(11,16,22,235); border-radius: 12px; }"
+            "QPushButton { background: #232a32; color: #e8ecf0; font-size: 22px; font-weight: 600;"
+            " padding: 14px 22px; border-radius: 10px; min-width: 120px; }"
+            "QPushButton:hover { background: #355b7a; }")
+        lay = QHBoxLayout(self.bar)
+        lay.setContentsMargins(10, 10, 10, 10)
+        for label, fn in (("Copy", self.copy_image), ("Save", self.save), ("Copy text", self.copy_text),
+                          ("Narrate", self.narrate), ("Cancel", self.close)):
+            b = QPushButton(label)
+            b.clicked.connect(fn)
+            lay.addWidget(b)
+            if label == "Narrate":
+                self.narrate_button = b
+        self.bar.adjustSize()
+        self.bar.hide()
+        self.resize(self.pix.size())
+        self.hint.move((self.width() - self.hint.width()) // 2, 24)
+
+    # selection
+    def selection(self):
+        if not self.start or not self.end:
+            return QRect()
+        r = QRect(self.start, self.end).normalized()
+        return r if r.width() >= MIN_SIZE and r.height() >= MIN_SIZE else QRect()
+
+    def scale_to_image(self):
+        return self.image.width() / max(1, self.width()), self.image.height() / max(1, self.height())
+
+    def snipped(self):
+        r = self.selection()
+        sx, sy = self.scale_to_image()
+        return self.image.copy(round(r.x() * sx), round(r.y() * sy), round(r.width() * sx), round(r.height() * sy))
+
+    def mousePressEvent(self, ev):
+        if ev.button() == Qt.MouseButton.RightButton:
+            return self.close()
+        if self.bar.isVisible() and self.bar.geometry().contains(ev.position().toPoint()):
+            return
+        self.start = self.end = ev.position().toPoint()
+        self.bar.hide()
+        self.update()
+
+    def mouseMoveEvent(self, ev):
+        if self.start is not None and not self.bar.isVisible():
+            self.end = ev.position().toPoint()
+            self.update()
+
+    def mouseReleaseEvent(self, ev):
+        if self.start is None or self.bar.isVisible():
+            return
+        self.end = ev.position().toPoint()
+        r = self.selection()
+        if r.isNull():
+            self.start = self.end = None
+        else:
+            # The action bar under the selection (above it if there's no room below).
+            x = min(max(0, r.center().x() - self.bar.width() // 2), self.width() - self.bar.width())
+            y = r.bottom() + 16 if r.bottom() + 16 + self.bar.height() <= self.height() else max(0, r.top() - 16 - self.bar.height())
+            self.bar.move(x, y)
+            self.bar.show()
+            self.bar.raise_()
+        self.update()
+
+    def keyPressEvent(self, ev):
+        if ev.key() == Qt.Key.Key_Escape:
+            self.close()
+
+    def paintEvent(self, ev):
+        p = QPainter(self)
+        p.drawPixmap(self.rect(), self.pix)
+        p.fillRect(self.rect(), QColor(0, 0, 0, 110))            # dim everything...
+        r = self.selection()
+        if not r.isNull():
+            sx, sy = self.scale_to_image()
+            p.drawPixmap(r, self.pix, QRect(round(r.x() * sx), round(r.y() * sy),
+                                            round(r.width() * sx), round(r.height() * sy)))   # ...but the snip
+            p.setPen(QPen(QColor("#7fb2e5"), 3))
+            p.drawRect(r)
+        self.hint.setVisible(r.isNull())
+
+    # actions
+    def copy_image(self):
+        from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
+        buf = QByteArray()
+        b = QBuffer(buf)
+        b.open(QIODevice.OpenModeFlag.WriteOnly)
+        self.snipped().save(b, "PNG")
+        ok = to_clipboard(bytes(buf), "image/png")
+        notify("Snip copied" if ok else "Couldn't copy the snip", "" if ok else "wl-copy or the desktop isn't available")
+        self.close()
+
+    def save(self):
+        SAVE_DIR.mkdir(parents=True, exist_ok=True)
+        path = SAVE_DIR / time.strftime("Snip_%Y-%m-%d_%H-%M-%S.png")
+        ok = self.snipped().save(str(path))
+        notify("Snip saved" if ok else "Couldn't save the snip", str(path))
+        self.close()
+
+    def copy_text(self):
+        text = ocr(self.snipped())
+        if text is None:
+            notify("Copy text needs Tesseract", "Reinstall Screen snip in Frame Tweaks")
+        elif not text:
+            notify("No text found in the snip")
+        else:
+            ok = to_clipboard(text.encode(), "text/plain;charset=utf-8")
+            notify("Text copied" if ok else "Couldn't copy the text", text)
+        self.close()
+
+    def narrate(self):
+        if self.player:                                       # pressed again: stop
+            return self.close()
+        text = ocr(self.snipped())
+        if not text:
+            notify("No text found in the snip" if text == "" else "Narrate needs Tesseract",
+                   "" if text == "" else "Reinstall Screen snip in Frame Tweaks")
+            return self.close()
+        self.narrate_button.setText("■ Stop")
+        QApplication.processEvents()
+        self.player = speak(text)
+        if not self.player:
+            notify("Narrate needs Piper", "Reinstall Screen snip in Frame Tweaks")
+            return self.close()
+        # Stay open while it reads (Stop / Esc / Cancel end it); close when it's done.
+        self.watch = QTimer(self, interval=300, timeout=lambda: self.player.poll() is not None and self.close())
+        self.watch.start()
+
+    def closeEvent(self, ev):
+        if self.player and self.player.poll() is None:
+            self.player.terminate()
+        super().closeEvent(ev)
+
+
+def main():
+    app = QApplication(sys.argv[:1])
+    try:
+        image = QImage(sys.argv[1]) if len(sys.argv) > 1 else capture_focused()
+    except RuntimeError as e:
+        notify("Couldn't take a snip", str(e))
+        return 1
+    if image.isNull():
+        notify("Couldn't take a snip", "empty picture")
+        return 1
+    w = Snip(image)
+    w.showFullScreen()
+    w.activateWindow()
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
