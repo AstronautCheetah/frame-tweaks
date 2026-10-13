@@ -1,5 +1,6 @@
-"""curvature/sft-curvature: settings arm/restore and the SteamVR compatibility check."""
+"""vr-dashboard/sft-dashboard: settings arm/restore and each patch's SteamVR compatibility check."""
 import importlib.machinery
+import importlib.util
 import json
 import tempfile
 import unittest
@@ -7,7 +8,10 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-sft = importlib.machinery.SourceFileLoader("sft", str(ROOT / "curvature" / "sft-curvature")).load_module()
+_l = importlib.machinery.SourceFileLoader("sft", str(ROOT / "vr-dashboard" / "sft-dashboard"))
+sft = importlib.util.module_from_spec(importlib.util.spec_from_loader("sft", _l))
+_l.exec_module(sft)
+PATCHES = {"curvature": ROOT / "curvature" / "patch.js", "float-return": ROOT / "float-return" / "patch.js"}
 
 
 class ArmRestore(unittest.TestCase):
@@ -36,13 +40,19 @@ class ArmRestore(unittest.TestCase):
 
 
 class DashboardCheck(unittest.TestCase):
-    def test_detects_missing_markers(self):
-        with tempfile.TemporaryDirectory() as d:
-            (Path(d) / "a.js").write_text("".join(sft.EXPECTED.values()))
-            with mock.patch.object(sft, "DASHBOARD", Path(d)):
-                self.assertEqual(sft.check_dashboard(), [])
-                (Path(d) / "a.js").write_text("nothing here")
-                self.assertEqual(sorted(sft.check_dashboard()), sorted(sft.EXPECTED))
+    def test_each_patch_detects_missing_markers(self):
+        for name, path in PATCHES.items():
+            req = sft.requires(path)
+            self.assertGreater(len(req), 2, name)                  # its own "// requires:" lines
+            self.assertEqual(sft.missing(path, "".join(req.values())), [], name)
+            self.assertEqual(sorted(sft.missing(path, "nothing here")), sorted(req), name)
+            self.assertEqual(sft.missing(path, None), ["SteamVR's dashboard files"])
+
+    @unittest.skipUnless(sft.DASHBOARD.is_dir(), "SteamVR isn't installed here")
+    def test_patches_match_the_installed_steamvr(self):
+        code = sft.dashboard_code()
+        for name, path in PATCHES.items():
+            self.assertEqual(sft.missing(path, code), [], name)
 
 
 if __name__ == "__main__":

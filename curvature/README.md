@@ -9,8 +9,8 @@ for you on every window you float, so they start curved like the dashboard.
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
-> - **Changes:** `~/.local/share/frame-tweaks/curvature`, user units `sft-vr-debugger`, `sft-curvature`, a `steamvr.service` drop-in
-> - **Unusual access:** **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects a small script into the dashboard. Any program running as you could use that port too
+> - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via [VR dashboard patching](../vr-dashboard/)
+> - **Unusual access:** Through [VR dashboard patching](../vr-dashboard/): SteamVR's dashboard DevTools port while SteamVR runs
 > - **Undo:** `./install.sh uninstall curvature`
 <!-- /generated:glance -->
 
@@ -26,27 +26,13 @@ re-docked).
 the patch needs only when it starts; `./install.sh status curvature` says when it's waiting.
 
 ## How it works
-- SteamVR's dashboard is a web page (`systemui`) in its own web helper. With the setting
-  `VRWebHelper/DebuggerEnabled` it opens Chrome DevTools on `127.0.0.1:8087`.
-- `sft-vr-debugger.service` turns that setting on **just before each SteamVR start**, and a
-  `steamvr.service` drop-in puts it back as it was **when SteamVR stops** (SteamVR rewrites
-  its settings file from memory, so it can only be changed while stopped). A value you set to
-  `true` yourself is left alone.
-- `sft-curvature.service` runs while SteamVR does and injects [`patch.js`](patch.js) (re-checked
-  every 5 s, so it survives a dashboard reload). The patch checks windows a few times a second;
-  for a world-docked window with no curvature choice yet, it calls the stock
-  `ToggleCurvature()`. Nothing else in the dashboard is changed.
-- Files: `~/.local/share/frame-tweaks/curvature/`, `~/.config/systemd/user/sft-*.service`,
-  `~/.config/systemd/user/steamvr.service.d/sft-curvature.conf`. Home folder only.
-
-**Security:** the DevTools port listens on `127.0.0.1` only, while SteamVR runs. Any program
-running as your user could use it to change the dashboard, which such a program could do
-anyway. SteamOS's **Developer Mode** may forward it to your network; keep Developer Mode off
-unless you need it.
-
-**With steam-frame-nix:** if you use its dashboard patches, its
-[window curvature](https://github.com/lhns/steam-frame-nix/blob/main/docs/window-curvature.md)
-module (adjustable curvature per window) works alongside this; both use the same port.
+- It's one small patch, [`patch.js`](patch.js), injected into SteamVR's dashboard by
+  [VR dashboard patching](../vr-dashboard/) (installed with it; it also runs
+  [Back to the previous window](../float-return/) if you install that). The patch checks windows
+  a few times a second; for a world-docked window with no curvature choice yet, it calls the
+  stock `ToggleCurvature()`. Nothing else in the dashboard is changed.
+- Untick it in the installer window (or `./install.sh uninstall curvature`) and it stops in the
+  running dashboard within a few seconds; windows keep the curvature they have.
 
 ## Credits
 The approach (SteamVR's dashboard DevTools port, set only while SteamVR runs, and how the
