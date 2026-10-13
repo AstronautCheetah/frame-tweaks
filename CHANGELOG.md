@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips: fixed size, place and the Steam bar.** They were sized from the window's scaled
+  measurements (about 2.7x too big and far out) and used large page elements, which made the
+  dashboard draw the Steam bar too big. Now real-world sizes (thickness 2.5 / 4 / 6 cm) and small
+  page elements.
 - **Arrow Pad: keys keep their places across layers.** Tools is top-left and Esc at the end of the
   second row; Tools, Esc, Fn, the modifiers, R/M and the clipboard keys sit in the same spot on
   the main, Fn and Tools layers (the Tools-only keys take the arrow and navigation keys' places).

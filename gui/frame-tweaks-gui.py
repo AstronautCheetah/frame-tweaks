@@ -532,10 +532,10 @@ class Details(QWidget):
 class ScrollStripSettings(QWidget):
     """Scroll strips: side and thickness (~/.config/frame-tweaks/scroll-strips.json)."""
     CONF = Path.home() / ".config/frame-tweaks/scroll-strips.json"
-    DEFAULTS = {"vertical": "right", "horizontal": "top", "thickness": 0.12}
+    DEFAULTS = {"vertical": "right", "horizontal": "top", "thickness": 0.04}
     OPTIONS = [("vertical", "Vertical strip (scrolls up and down)", [("right", "Right"), ("left", "Left"), ("off", "Off")]),
                ("horizontal", "Horizontal strip (scrolls sideways)", [("top", "Top"), ("bottom", "Bottom"), ("off", "Off")]),
-               ("thickness", "Thickness", [(0.08, "Thin"), (0.12, "Medium"), (0.18, "Thick")])]
+               ("thickness", "Thickness", [(0.025, "Thin"), (0.04, "Medium"), (0.06, "Thick")])]
 
     def __init__(self, window):
         super().__init__()
