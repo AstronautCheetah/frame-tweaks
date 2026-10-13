@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """app-timers: close apps after a set time with no activity, so reopening them needs the
-(password-protected) wallet again. Signal guard's idle timer, for any app.
+(password-protected) wallet again. (This replaced Signal guard's idle timer; it works for any app.)
 
-  app-timers --list                 app-id and minutes, one per line (Signal's included)
+  app-timers --list                 app-id, minutes and "headset" if set, one per line
   app-timers --set APP-ID MINUTES   set a timer (0 = none); also what the installer window uses
+  app-timers --headset APP-ID on|off   also close it ~10 s after the headset is taken off
   app-timers --status               what's running and how long you've been idle
   app-timers --run                  the watcher (the app-timers user service runs this)
+  app-timers --import-signal-guard  take over Signal guard's settings (Signal's installer does)
 
 No activity means no input on any keyboard, mouse or controller (read from /dev/input, so it
-counts in both the desktop and VR sessions), the same rule as Signal guard. Apps are found by
-the systemd scope they run in (app-flatpak-<id>-….scope, app-<id>-….scope), however they were
-started, and asked to quit (SIGTERM, which Electron apps handle as a normal quit).
-Timers live in ~/.config/frame-tweaks/app-timers.conf ("app-id = minutes"); Signal's stays
-in ~/.config/signal-guard.conf (IDLE_MINUTES), where Signal guard reads it.
+counts in both the desktop and VR sessions). Apps are found by the systemd scope they run in
+(app-flatpak-<id>-….scope, app-<id>-….scope), however they were started, else by their
+program, and asked to quit (SIGTERM, which Electron apps handle as a normal quit).
+Timers live in ~/.config/frame-tweaks/app-timers.conf: "app-id = minutes [headset]".
 """
+import glob
 import os
 import re
 import select
@@ -27,8 +29,7 @@ import time
 from pathlib import Path
 
 CONF = Path.home() / ".config/frame-tweaks/app-timers.conf"
-SIGNAL_CONF = Path.home() / ".config/signal-guard.conf"
-SIGNAL_GUARD = Path.home() / ".local/bin/signal-guard"
+SIGNAL_CONF = Path.home() / ".config/signal-guard.conf"     # Signal guard's, read once to migrate
 SIGNAL_ID = "org.signal.Signal"
 STATE = Path(f"/run/user/{os.getuid()}/app-timers.idle")
 CGROUP_ROOT = Path("/sys/fs/cgroup")
@@ -36,55 +37,58 @@ IGNORE_DEVICES = re.compile(r"^(als\d+)")      # sensors that report constantly 
 EV_KEY, EV_REL, EV_ABS = 1, 2, 3
 EVENT = "llHHi"
 EVENT_SIZE = struct.calcsize(EVENT)
+# Headset proximity sensor (vcnl4000), as documented by curiousjtuber/steam-frame-utils.
+PROX = glob.glob("/sys/bus/iio/devices/iio:device*/in_proximity_raw")
+HEADSET_OFF_GRACE = 10          # seconds off-head before closing
 
 
 # ---- settings ------------------------------------------------------------------------------
-def signal_guarded():
-    return SIGNAL_GUARD.exists()
-
-
 def read_conf():
+    """app-id -> {"minutes": float, "headset": bool}."""
     timers = {}
     if CONF.exists():
         for line in CONF.read_text().splitlines():
-            m = re.match(r"\s*([\w.@-]+)\s*=\s*(\d+(?:\.\d+)?)\s*$", line)
+            m = re.match(r"\s*([\w.@-]+)\s*=\s*(\d+(?:\.\d+)?)\s*(headset)?\s*$", line)
             if m and float(m[2]) > 0:
-                timers[m[1]] = float(m[2])
+                timers[m[1]] = {"minutes": float(m[2]), "headset": bool(m[3])}
     return timers
 
 
-def signal_minutes():
-    if SIGNAL_CONF.exists():
-        m = re.search(r"^\s*IDLE_MINUTES\s*=\s*(\d+(?:\.\d+)?)", SIGNAL_CONF.read_text(), re.M)
-        if m:
-            return float(m[1])
-    return 15.0                                 # Signal guard's default
-
-
-def all_timers():
-    timers = read_conf()
-    if signal_guarded():
-        timers[SIGNAL_ID] = signal_minutes()
-    return timers
+def write_conf(timers):
+    CONF.parent.mkdir(parents=True, exist_ok=True)
+    CONF.write_text("# app-id = minutes without activity before the app is closed [headset: also when\n"
+                    "# the headset is taken off]. Set in the installer window (Wallet apps) or app-timers.\n"
+                    + "".join(f"{a} = {t['minutes']:g}{' headset' if t['headset'] else ''}\n"
+                              for a, t in sorted(timers.items())))
 
 
 def set_timer(app_id, minutes):
-    if app_id == SIGNAL_ID and signal_guarded():
-        if minutes <= 0:
-            sys.exit("Signal guard always closes Signal when idle; set a longer time instead")
-        text = SIGNAL_CONF.read_text() if SIGNAL_CONF.exists() else "# signal-guard settings\n"
-        line = f"IDLE_MINUTES={minutes:g}"
-        text, n = re.subn(r"^\s*IDLE_MINUTES\s*=.*$", line, text, flags=re.M)
-        SIGNAL_CONF.write_text(text if n else text.rstrip("\n") + "\n" + line + "\n")
-        return
     timers = read_conf()
     if minutes > 0:
-        timers[app_id] = minutes
+        timers[app_id] = {"minutes": minutes, "headset": timers.get(app_id, {}).get("headset", False)}
     else:
         timers.pop(app_id, None)
-    CONF.parent.mkdir(parents=True, exist_ok=True)
-    CONF.write_text("# app-id = minutes without activity before the app is closed (app-timers)\n"
-                    + "".join(f"{a} = {m:g}\n" for a, m in sorted(timers.items())))
+    write_conf(timers)
+
+
+def set_headset(app_id, on):
+    timers = read_conf()
+    if app_id not in timers:
+        sys.exit(f"{app_id} has no timer: set one first")
+    timers[app_id]["headset"] = on
+    write_conf(timers)
+
+
+def import_signal_guard():
+    """Signal guard's IDLE_MINUTES / LOCK_ON_HEADSET_OFF become Signal's timer, once."""
+    timers = read_conf()
+    if SIGNAL_ID in timers:
+        return
+    text = SIGNAL_CONF.read_text() if SIGNAL_CONF.exists() else ""
+    m = re.search(r"^\s*IDLE_MINUTES\s*=\s*(\d+(?:\.\d+)?)", text, re.M)
+    timers[SIGNAL_ID] = {"minutes": float(m[1]) if m else 15.0,
+                         "headset": bool(re.search(r"^\s*LOCK_ON_HEADSET_OFF\s*=\s*1", text, re.M))}
+    write_conf(timers)
 
 
 # ---- finding an app's processes --------------------------------------------------------------
@@ -111,7 +115,7 @@ def app_cgroups(app_id):
 
 # Host programs whose menu command is a launcher script, not the program itself.
 KNOWN_PROGRAMS = {"com.anthropic.Claude": str(Path.home() / ".local/opt/claude-desktop/claude-desktop")}
-WRAPPERS = ("wallet-gate", "frame-outer-bus", "signal-guard", "--", "env")
+WRAPPERS = ("wallet-gate", "frame-outer-bus", "signal-guard", "--", "env")   # (signal-guard: older entries)
 
 
 def host_program(app_id):
@@ -162,7 +166,7 @@ def app_pids(app_id):
     return pids or host_main_pids(app_id)
 
 
-def quit_app(app_id, minutes):
+def quit_app(app_id, why):
     pids = app_pids(app_id)
     for pid in pids:
         try:
@@ -171,7 +175,7 @@ def quit_app(app_id, minutes):
             pass
     if pids:
         subprocess.run(["notify-send", "-a", "App timers", f"{app_name(app_id)} closed",
-                        f"No activity for {minutes:g} minutes."], stderr=subprocess.DEVNULL)
+                        why], stderr=subprocess.DEVNULL)
     return bool(pids)
 
 
@@ -204,10 +208,21 @@ def has_user_input(data):
     return False
 
 
+def headset_worn():
+    if not PROX:
+        return True
+    try:
+        raw = float(Path(PROX[0]).read_text())
+    except (OSError, ValueError):
+        return True
+    return raw > 14             # SteamVR's rule: worn while raw > prox_far * 0.8; prox_far is ~17-18
+
+
 def run():
     fds, last_scan, last_input, last_check = {}, 0.0, time.monotonic(), 0.0
     conf_mtime, timers = None, {}
     closed = set()                     # closed for this idle stretch: not again until input
+    off_since = None                   # headset taken off at (monotonic), for "headset" timers
     while True:
         now = time.monotonic()
         try:
@@ -216,8 +231,6 @@ def run():
             mtime = 0
         if mtime != conf_mtime:
             conf_mtime, timers = mtime, read_conf()
-            if signal_guarded():
-                timers.pop(SIGNAL_ID, None)        # Signal guard's job
         if not timers:                 # nothing to time: don't even watch input
             for f in fds.values():
                 os.close(f)
@@ -250,31 +263,47 @@ def run():
             STATE.write_text(str(int(idle)))
         except OSError:
             pass
+        on_head = [a for a, t in timers.items() if t["headset"]]
+        if on_head:
+            if headset_worn():
+                off_since = None
+            else:
+                off_since = off_since or now
+                if now - off_since >= HEADSET_OFF_GRACE:
+                    for app_id in on_head:
+                        if app_pids(app_id):
+                            quit_app(app_id, "The headset was taken off.")
+                    off_since = float("inf")          # once per time it's taken off
         if now - last_check < 15:      # finding processes costs a /proc scan: 4x a minute
             continue
         last_check = now
-        for app_id, minutes in timers.items():
-            if app_id not in closed and idle >= minutes * 60 and app_pids(app_id):
-                quit_app(app_id, minutes)
+        for app_id, t in timers.items():
+            if app_id not in closed and idle >= t["minutes"] * 60 and app_pids(app_id):
+                quit_app(app_id, f"No activity for {t['minutes']:g} minutes.")
                 closed.add(app_id)
 
 
 def main():
     a = sys.argv[1:]
     if a[:1] == ["--list"]:
-        for app_id, minutes in sorted(all_timers().items()):
-            print(f"{app_id} {minutes:g}")
+        for app_id, t in sorted(read_conf().items()):
+            print(f"{app_id} {t['minutes']:g}" + (" headset" if t["headset"] else ""))
     elif a[:1] == ["--set"] and len(a) == 3:
         try:
             minutes = float(a[2])
         except ValueError:
             sys.exit("minutes must be a number")
         set_timer(a[1], max(0.0, minutes))
+    elif a[:1] == ["--headset"] and len(a) == 3 and a[2] in ("on", "off"):
+        set_headset(a[1], a[2] == "on")
+    elif a[:1] == ["--import-signal-guard"]:
+        import_signal_guard()
     elif a[:1] == ["--status"]:
         idle = STATE.read_text() if STATE.exists() else "?"
         print(f"idle {idle}s")
-        for app_id, minutes in sorted(all_timers().items()):
-            print(f"  {app_id}: {minutes:g} min, {'running' if app_pids(app_id) else 'not running'}")
+        for app_id, t in sorted(read_conf().items()):
+            print(f"  {app_id}: {t['minutes']:g} min{', and headset off' if t['headset'] else ''}, "
+                  f"{'running' if app_pids(app_id) else 'not running'}")
     elif a[:1] == ["--run"]:
         run()
     else:

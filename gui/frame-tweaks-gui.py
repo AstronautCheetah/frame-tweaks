@@ -88,21 +88,21 @@ def protected_apps():
         cmd = e.get("Exec", "")
         apps.append({"id": f.stem, "name": e.get("Name", f.stem), "icon": e.get("Icon", ""),
                      "shared": "/.local/bin/frame-outer-bus" in cmd, "gate": "/.local/bin/wallet-gate" in cmd,
-                     "electron": "--password-store=kwallet6" in cmd, "guard": "/.local/bin/signal-guard" in cmd})
+                     "electron": "--password-store=kwallet6" in cmd})
     return sorted(apps, key=lambda a: a["name"].lower())
 
 
 def app_timers():
-    """app-id -> minutes of no activity before app-timers closes it (Signal's included)."""
+    """app-id -> (minutes of no activity before app-timers closes it, also on headset off)."""
     if not APP_TIMERS.exists():
         return {}
     out = subprocess.run([str(APP_TIMERS), "--list"], capture_output=True, text=True).stdout
     timers = {}
     for line in out.splitlines():
         parts = line.split()
-        if len(parts) == 2:
+        if len(parts) in (2, 3):
             try:
-                timers[parts[0]] = float(parts[1])
+                timers[parts[0]] = (float(parts[1]), parts[2:] == ["headset"])
             except ValueError:
                 pass
     return timers
@@ -515,7 +515,7 @@ class WalletApps(QWidget):
             "told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for "
             "the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the "
             "app after that long with no activity (no keyboard, mouse or controller input), so opening it "
-            "again needs the wallet again, like Signal's guard.")
+            "again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off.")
         about.setWordWrap(True)
         about.setObjectName("desc")
         lay.addWidget(about)
@@ -542,26 +542,19 @@ class WalletApps(QWidget):
         self.rows.addWidget(self.heading(f"Protected ({len(protected)})"))
         for a in protected:
             what = ((["shared wallet"] if a["shared"] else []) + (["Electron told to use it"] if a["electron"] else [])
-                    + (["Signal guard: unlocks the wallet first, quits when idle"] if a["guard"] else []))
+)
             note = " · ".join(what) or "password only (keeps its own session)"
             if a["id"] in WALLET_OWNERS:
                 note += f"<br><span style='color:#6b7783'>Set up by the {WALLET_OWNERS[a['id']]} tweak: " \
                         "reinstalling it (↻) adds it back if removed here.</span>"
             gate = QCheckBox("Password first")
-            if a["guard"]:
-                # Signal guard unlocks the wallet (asking for the password) before Signal opens.
-                gate.setText("Password first (Signal guard)")
-                gate.setChecked(True)
-                gate.setEnabled(False)
-                gate.setToolTip("Always on: Signal guard asks for the wallet password before Signal opens")
-            else:
-                gate.setChecked(a["gate"])
-                gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
-                gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
+            gate.setChecked(a["gate"])
+            gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
+            gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
             remove = QPushButton("Remove")
             remove.setToolTip("Open it the way it opened before (its original launcher)")
             remove.clicked.connect(lambda _=False, a=a: self.run(["--remove", a["id"]], f"{a['name']}: removed"))
-            controls = [self.timer_control(a, timers.get(a["id"], 0))] if APP_TIMERS.exists() else []
+            controls = [self.timer_control(a, *timers.get(a["id"], (0, False)))] if APP_TIMERS.exists() else []
             self.rows.addWidget(self.row(a, note, controls + [gate, remove]))
         candidates = wallet_candidates({a["id"] for a in protected})
         self.rows.addWidget(self.heading(f"Add an app ({len(candidates)} installed apps)"))
@@ -600,7 +593,7 @@ class WalletApps(QWidget):
             g.addWidget(b)
         return w
 
-    def timer_control(self, app, minutes):
+    def timer_control(self, app, minutes, headset):
         """Close after: [−] 15 min [+]  (steppers, not a drop-down: in VR a drop-down's list
         opens as a separate window in the dashboard)."""
         box = QWidget()
@@ -613,8 +606,7 @@ class WalletApps(QWidget):
         value = QLabel(timer_text(minutes))
         value.setMinimumWidth(64)
         value.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # Signal guard always closes Signal when idle: it can be made longer, not switched off.
-        floor = 5 if app["id"] == "org.signal.Signal" and app.get("guard") else 0
+        floor = 0
         less, more = QPushButton("−"), QPushButton("+")
         for b, step in ((less, -1), (more, 1)):
             b.setObjectName("info")
@@ -625,6 +617,14 @@ class WalletApps(QWidget):
         box.setToolTip("Quit the app after this long with no keyboard, mouse or controller input")
         for w in (label, less, value, more):
             lay.addWidget(w)
+        off = QCheckBox("Headset off")
+        off.setChecked(headset)
+        off.setEnabled(minutes > 0)
+        off.setToolTip("Also quit it about 10 s after the headset is taken off" if minutes else
+                       "Set a Close after time first")
+        off.toggled.connect(lambda on: self.set_headset(app, on))
+        lay.addSpacing(10)
+        lay.addWidget(off)
         return box
 
     def set_timer(self, app, minutes):
@@ -635,6 +635,18 @@ class WalletApps(QWidget):
         self.notice.setText(html.escape(
             (f"{app['name']}: closes after {timer_text(minutes)} with no activity" if minutes else
              f"{app['name']}: no timer") if r.returncode == 0 else
+            f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
+        QTimer.singleShot(0, self.fill)
+
+    def set_headset(self, app, on):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: app-timers --headset", app["id"], "on" if on else "off")
+            return
+        r = subprocess.run([str(APP_TIMERS), "--headset", app["id"], "on" if on else "off"],
+                           capture_output=True, text=True)
+        self.notice.setText(html.escape(
+            (f"{app['name']}: " + ("also closes when the headset is taken off" if on else
+                                   "no longer closes when the headset is taken off")) if r.returncode == 0 else
             f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
         QTimer.singleShot(0, self.fill)
 

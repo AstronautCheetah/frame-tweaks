@@ -22,9 +22,10 @@ source, such as Discover; system apps; your own launchers) with a **Protect** bu
 and Chromium-based apps are detected and told to use the wallet.
 
 **Close after** (per protected app) quits the app after that long with no keyboard, mouse or
-controller input, so opening it again needs the wallet again: Signal guard's idle timer, for any
-app. The `app-timers` user service does it; timers are in `~/.config/frame-tweaks/app-timers.conf`
-(`app-id = minutes`), except Signal's, which stays in `~/.config/signal-guard.conf`. Apps are
+controller input, so opening it again needs the wallet again (this replaced Signal's own guard).
+**Headset off** also quits it ~10 s after the headset is taken off (the proximity sensor, as
+documented by [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils#proximity-sensor)). The `app-timers` user service does it; timers are in `~/.config/frame-tweaks/app-timers.conf`
+(`app-id = minutes [headset]`). Apps are
 found by their systemd scope (every Flatpak; other apps started from the VR "+" menu or Steam),
 else by their program (other apps started from desktop mode). `app-timers --status` shows what
 it sees.

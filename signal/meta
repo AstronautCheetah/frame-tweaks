@@ -3,9 +3,9 @@
 emoji: 🔐
 name: Signal hardening
 group: extras
-what: Signal's database key in the wallet instead of plain text; Signal quits after 15 minutes idle, and reopening needs the wallet password.
+what: Signal's database key in the wallet instead of plain text; it asks for the wallet password first and quits after 15 minutes idle (both adjustable in Wallet apps).
 why: A headset gets passed around: shared with family, often without a SteamOS login password. Flathub Signal otherwise keeps its key in plain text.
-changes: `signal-guard`, a Flatpak override for Signal, Signal's `config.json`
-access: Quits Signal when idle; key in the wallet
+changes: Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json`
+access: Asks for the wallet password first; quits Signal when idle; key in the wallet
 survives-updates: Yes (everything is in your home folder)
 undo: `./install.sh uninstall signal` (Signal keeps using the wallet: switching back would lock you out of its data)
