@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Pick up when floating:** the click that puts the window down could land on Return to
+  Dashboard (the laser stays on that button) and dock it again; that's now ignored while you hold
+  the window and for 1.5 s after. Light clicks put it down reliably (smaller trigger movement
+  counts, checked more often, and any click on the dashboard page counts).
 - **Pick up when floating** (new, VR windows): "Float in World" also picks the window up for
   placing, as grabbing its bar does; your next click, or letting go of the trigger you're still
   holding, puts it down. One click instead of two.

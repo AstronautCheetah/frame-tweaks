@@ -14,7 +14,9 @@ grabbing that bar does: it follows your controller until you put it down.
 <!-- /generated:glance -->
 
 - **Put it down** with your next click, or by letting go of the trigger if you're still holding
-  the click that pressed Float in World.
+  the click that pressed Float in World. The laser stays on the button that is now **Return to
+  Dashboard**; while you hold the window and for 1.5 s after, that button is ignored for it, so
+  the click that puts it down can't send it back. (Press it again afterwards to dock it.)
 - It follows the controller that pressed the button.
 - Switch it on or off by ticking **Pick up when floating** in the installer window's
   **VR windows** group. It works well with [Back to the previous window](../float-return/).
