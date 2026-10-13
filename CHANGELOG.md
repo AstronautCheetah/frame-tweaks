@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip narration: one panel, and Collapse / Expand.** Narrating another snip while the
+  panel is open reads it there, in place; Collapse shrinks the panel to an Expand button (reading
+  carries on), keeping its top edge where it was.
 - **Screen snip narration: Pause / Resume**, and the panel sits relative to the dashboard (it
   starts beside Arrow Pad, under the dashboard bar, follows the dashboard, and remembers where you
   drag it).
