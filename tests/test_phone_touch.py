@@ -79,3 +79,23 @@ class Joystick(unittest.TestCase):
         self.assertEqual(pt.stick_rate(0.15), 0.0)
         self.assertEqual(pt.stick_rate(-1.0), -15.0)
         self.assertLess(pt.stick_rate(0.5), pt.stick_rate(0.9))
+
+
+class Settings(unittest.TestCase):
+    def test_write_keeps_other_lines_and_replaces_ours(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            conf = Path(d) / "phone.conf"
+            conf.write_text('PHONE_NAME="My phone"\n# note\nPHONE_MAX_SIZE=1280\nPHONE_MAX_SIZE=800\n')
+            pt.write_conf({"PHONE_MAX_SIZE": "1024", "PHONE_STICK_SPEED": "25", "EVIL": "x", "PHONE_MAX_FPS": "7"}, conf)
+            self.assertEqual(conf.read_text(),
+                             'PHONE_NAME="My phone"\n# note\nPHONE_MAX_SIZE=1024\nPHONE_STICK_SPEED=25\n')
+            got = pt.read_conf(conf)
+            self.assertEqual((got["PHONE_MAX_SIZE"], got["PHONE_STICK_SPEED"], got["PHONE_MAX_FPS"]), ("1024", "25", "60"))
+
+    def test_read_ignores_unknown_values(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            conf = Path(d) / "phone.conf"
+            conf.write_text("PHONE_BIT_RATE=$(rm -rf ~)\n")
+            self.assertEqual(pt.read_conf(conf)["PHONE_BIT_RATE"], "2M")

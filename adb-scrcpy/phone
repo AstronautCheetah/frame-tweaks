@@ -33,7 +33,19 @@ STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHON
 # e.g. after switching profile): the picture just freezes. Check the phone answers every 5 s;
 # after 3 misses, close the frozen mirror and reconnect at the phone's current address.
 alive() { timeout 4 adb -s "$dev" shell true >/dev/null 2>&1; }
+# The mirror's gear panel (in VR) changes the settings above and asks for a restart (SIGUSR1):
+# scrcpy starts again, reading ~/.config/phone.conf afresh.
+PIDFILE="/run/user/$(id -u)/sft-phone.pid"
+echo $$ > "$PIDFILE"
+trap '[ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
+restart=
+trap 'restart=1; kill "$pid" 2>/dev/null' USR1
 while :; do
+    if [ -n "$restart" ]; then
+        restart=
+        [ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
+        STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHONE_MAX_FPS:-60}
+    fi
     adb connect "$dev" >/dev/null
     # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
     # without it the Steam session makes the window 1920x1080, with black bars beside a portrait
@@ -52,10 +64,15 @@ while :; do
         --window-title="Android Mirror" "$@" &
     pid=$! misses=0
     while kill -0 "$pid" 2>/dev/null; do
-        sleep 5
+        sleep 5 & wait $!                      # (a restart request interrupts the wait)
+        [ -n "$restart" ] && break
         if alive; then misses=0; else misses=$((misses + 1)); fi
         [ "$misses" -ge 3 ] && break
     done
+    if [ -n "$restart" ]; then
+        kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
+        continue                               # same phone, new settings
+    fi
     if ! kill -0 "$pid" 2>/dev/null; then
         wait "$pid"; code=$?
         # Closed by you (or the phone was unplugged/turned off on purpose): done. scrcpy also

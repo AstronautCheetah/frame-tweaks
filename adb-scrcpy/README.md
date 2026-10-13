@@ -25,7 +25,7 @@ Mirror and control an Android phone in a desktop window.
   With several phones around, set `PHONE_NAME="Pixel 9"` in `~/.config/phone.conf`.
   The stream is 1024 pixels on its long side at up to 2 Mbit/s and 60 frames a second, enough for
   VR and light on the wireless link (a heavier stream falls behind the phone); change it there
-  with `PHONE_MAX_SIZE=`, `PHONE_BIT_RATE=` and `PHONE_MAX_FPS=`.
+  with `PHONE_MAX_SIZE=`, `PHONE_BIT_RATE=` and `PHONE_MAX_FPS=`, or with the gear in VR.
 
 ## In VR: shaped like the phone
 The Steam session makes every app window 1920×1080, so a phone held upright used to show with
@@ -59,6 +59,12 @@ While the laser rests on the mirror, the joystick scrolls the phone (up/down or 
 the further you push). SteamVR doesn't pass the joystick to the layer, so `phone-touch` reads it
 the way Arrow Pad reads the grips: from the tilt of the controller model's thumbstick part
 (through SteamVR's openvr library, installed into the shared Python venv).
+
+**Settings in VR:** the gear below the mirror's lower-left corner opens its settings beside it:
+picture (Sharp 1280 px at 4 Mbit/s, Balanced 1024 px at 2 Mbit/s, Light 800 px at 1.5 Mbit/s),
+smoothness (60 or 30 frames a second) and joystick scrolling speed. They're saved in
+`~/.config/phone.conf` (only those lines; the rest of the file is kept). *Restart stream* starts
+scrcpy again with the new picture settings, without closing the mirror.
 
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,
