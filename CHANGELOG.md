@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Pick up when floating** (new, VR windows): "Float in World" also picks the window up for
+  placing, as grabbing its bar does; your next click, or letting go of the trigger you're still
+  holding, puts it down. One click instead of two.
 - **Android Mirror in VR takes the phone's shape and follows its rotation** (`phone-fit`): no
   more wide black bars beside a phone held upright. The Steam session makes app windows
   1920×1080, but keeps a window that declares a fixed size, so the mirror window is sized to the

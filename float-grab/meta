@@ -1,0 +1,11 @@
+# Docs metadata: README tables, SECURITY table and the "At a glance" box are generated from
+# this (dev/gen-docs.py). One "key: value" per line.
+emoji: ✋
+name: Pick up when floating
+group: core
+what: "Float in World" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down.
+why: Floating a window and then grabbing its bar to place it takes two clicks; this makes it one.
+changes: One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper)
+access: Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs
+survives-updates: Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+undo: `./install.sh uninstall float-grab` (or untick it in the installer window)
