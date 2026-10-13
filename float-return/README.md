@@ -4,6 +4,10 @@ When you **float the window the dashboard is showing** out into the world, Steam
 empty space in the dashboard where it was. With this tweak, after **2.5 seconds** the dashboard
 shows the window you had before, the same as clicking that window's button in the dashboard bar.
 
+The same when the window the dashboard shows is **closed** (a finished or cancelled
+[Screen snip](../snip/), say): instead of falling back to Steam, the dashboard goes back to the
+window before it (Steam may show for a moment first).
+
 <!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
 > **At a glance**
 >

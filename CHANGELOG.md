@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Back to the previous window** also covers closing: when the window the dashboard shows is
+  closed (a cancelled Screen snip, say), it goes back to the window before it instead of Steam.
 - **Screen snip: crop handles.** Adjust the rectangle by its corners and edges, or drag it to move
   it, before choosing Copy, Save, Copy text or Narrate.
 - **Screen snip** (new): select a rectangle of the window you're using, then Copy, Save, Copy

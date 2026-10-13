@@ -3,7 +3,7 @@
 emoji: ↩️
 name: Back to the previous window
 group: core
-what: After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space.
+what: After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam.
 why: SteamVR leaves the dashboard empty where the floated window was; this switches back the way a click on that window's dashboard button does.
 changes: One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-return.js`), via VR dashboard patching (helper)
 access: Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs

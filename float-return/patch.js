@@ -1,6 +1,7 @@
 // steam-frame-tweaks float-return: after you float the window the dashboard is showing out into
 // the world, the dashboard goes back (after 2.5 s) to the window it showed before, instead of
-// leaving an empty space. Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
+// leaving an empty space. And when the window it shows is closed (a finished Screen snip, say),
+// it goes back to the one before that instead of falling back to Steam. Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
 // It only switches the way a click on that window's dashboard button does (switchToFrameInternal).
 // requires: window.Dashboard | window.Dashboard=
 // requires: Dashboard.switchToFrameInternal() | switchToFrameInternal(e,t,r){
@@ -9,7 +10,7 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'float-return', VERSION = 2, DASH = 1, WORLD = 4, DELAY_MS = 2500;
+  const NAME = 'float-return', VERSION = 3, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -19,8 +20,25 @@
   let history = [];        // windows shown in the dashboard, most recent last (frame IDs)
   let last = null;         // what the dashboard showed on the previous check: {id, dock}
   let pending = null;      // {from: the floated window, at: when}
+  let closed = null;       // {gone: the closed window, at: when}
   let returned = 0;
   const tick = () => {
+    // The shown window was closed (checked first: the dashboard's own fallback, usually Steam,
+    // mustn't count as "the window before"). Shortly after, go back to the window before it.
+    if (last && last.dock === DASH && !FS.GetFrame(last.id) && !closed) {
+      closed = { gone: last.id, at: Date.now() };
+      history = history.filter((x) => x !== last.id);
+    }
+    if (closed) {
+      if (Date.now() - closed.at < CLOSED_DELAY_MS) return;
+      const prev = [...history].reverse().find((x) => dockOf(x) === DASH);
+      closed = null;
+      last = null;
+      pending = null;
+      if (prev != null && DS.activeFrame?.frameID !== prev &&
+          D.switchToFrameInternal(FS.GetFrame(prev), undefined, 'sft-float-return-closed')) returned++;
+      return;
+    }
     const a = DS.activeFrame, id = a?.frameID, dock = a?.docking?.dockLocation;
     if (a && dock === DASH) {
       if (history[history.length - 1] !== id) {
