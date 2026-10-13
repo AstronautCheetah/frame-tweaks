@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip narration: Copy text and Paste.** Copy puts the text being read on the clipboard;
+  Paste reads the clipboard's text instead (shown in place of the snip). The panel's buttons are on
+  two rows, so they no longer overlap on narrow panels.
 - **Screen snip narration: one panel, and Collapse / Expand.** Narrating another snip while the
   panel is open reads it there, in place; Collapse shrinks the panel to an Expand button (reading
   carries on), keeping its top edge where it was.

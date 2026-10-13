@@ -10,7 +10,9 @@ Select a rectangle of the window you're using, then:
 - **Narrate**: reads the text aloud ([Piper](https://github.com/rhasspy/piper), offline), at
   the speed set under it (**−** / **+**, 0.75× to 2×, remembered). The snip pops out into a panel
   of its own (drawn like Arrow Pad, not a window, so it takes no place in the dashboard) with
-  **■ Stop** / **▶ Again**, **⏸ Pause** / **▶ Resume**, speed, **▾ Collapse** (down to just an
+  **■ Stop** / **▶ Again**, **⏸ Pause** / **▶ Resume**, speed, **Copy text** (the text it's
+  reading, to the clipboard), **Paste** (read the clipboard's text instead; it's shown in place of
+  the snip), **▾ Collapse** (down to just an
   Expand button, with a margin to grab it by; reading carries on) and **Close**. It starts beside
   Arrow Pad's place under the dashboard and follows the dashboard; drag its top bar to move it,
   and it remembers the spot (relative to the dashboard) for next time. Narrating another snip
