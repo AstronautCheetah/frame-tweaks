@@ -24,6 +24,14 @@ Mirror and control an Android phone in a desktop window.
   Extra args go to scrcpy, e.g. `phone --turn-screen-off`.
   With several phones around, set `PHONE_NAME="Pixel 9"` in `~/.config/phone.conf`.
 
+## In VR: shaped like the phone
+The Steam session makes every app window 1920×1080, so a phone held upright used to show with
+wide black bars. `phone-fit` (started by `phone`) gives the mirror window the phone screen's
+shape (862×1920 upright, 1920×862 sideways, for a 20:9 phone) and follows it when you rotate
+the phone: scrcpy reports the screen's shape to the window system, and a window with a fixed
+size keeps it, so its VR panel takes that shape. In desktop mode it does nothing; KWin sizes
+the window normally there.
+
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,
 then promptly run `adb pair <ip>:<pairing-port> <code>`. The code dies when the
