@@ -19,12 +19,25 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 8, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 9, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
   const TICK_MS = 50, TAP_MS = 300, HOLD_STILL_MS = 3000;
-  const IDLE_BG = 'rgba(40, 50, 62, 0.55)', ACTIVE_BG = 'rgba(53, 91, 122, 0.8)';
+  // Colours follow SteamVR's Camera Color Tint (/settings/camera/monochromeTintHue, 0..1); blue
+  // when it can't be read.
+  const hue = () => {
+    try {
+      const h = window.VRSettingsState?.settings?.get('/settings/camera/monochromeTintHue');
+      if (typeof h === 'number' && isFinite(h)) return ((h % 1) + 1) % 1 * 360;
+    } catch (e) {}
+    return 210;
+  };
+  const colors = () => {
+    const h = Math.round(hue());
+    return { idle: `hsla(${h}, 18%, 20%, 0.6)`, active: `hsla(${h}, 45%, 34%, 0.85)`,
+             border: `hsla(${h}, 60%, 68%, 0.65)`, knob: `hsl(${h}, 65%, 68%)`, origin: 'rgba(232, 236, 240, 0.35)' };
+  };
   const PAGE = 10;                   // notches for a tap near an end
   const stats = { downs: 0, moves: 0, ups: 0, sent: 0, noBinding: 0 };   // for diagnosis
   const all = (window.__sftPatches ??= {});
@@ -108,7 +121,7 @@
     if (!d) return;
     clearInterval(d.timer);
     d.knob?.remove(); d.origin?.remove();
-    if (d.el) d.el.style.background = IDLE_BG;
+    if (d.el) d.el.style.background = colors().idle;
     if (Date.now() - d.t0 > TAP_MS || d.moved > d.length * 0.03) return;
     const at = (d.start - d.from) / d.length;                    // a quick tap near an end: a page
     if (at < 0.25) d.axis === 'y' ? send(d.target, 0, 0, 1) : send(d.target, -PAGE, 0);
@@ -125,8 +138,8 @@
   const strip = (key, axis, length, thick, target, curveId) => {   // sizes in the anchor's units
     const px = 16, lenPx = Math.min(600, Math.round(px * length / thick));   // small page elements
     const style = { width: `${axis === 'y' ? px : lenPx}px`, height: `${axis === 'y' ? lenPx : px}px`,
-      background: IDLE_BG, position: 'relative', borderRadius: `${px / 2}px`, boxSizing: 'border-box',
-      border: '1px solid rgba(127, 178, 229, 0.6)' };
+      background: colors().idle, position: 'relative', borderRadius: `${px / 2}px`, boxSizing: 'border-box',
+      border: `1px solid ${colors().border}` };
     return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false },
       ...(curveId ? { curvature_origin_id: curveId } : {}) },
@@ -135,11 +148,11 @@
         if (drag) onUp();                         // a new press ends any drag still open
         const el = ev.currentTarget, r = el.getBoundingClientRect();
         const start = axis === 'y' ? ev.clientY : ev.clientX, from = axis === 'y' ? r.top : r.left;
-        el.style.background = ACTIVE_BG;
+        el.style.background = colors().active;
         drag = { axis, target, el, start, from, length: axis === 'y' ? r.height : r.width, offset: 0, moved: 0,
                  carry: 0, t0: Date.now(), lastMove: Date.now(),
-                 origin: dot(el, axis, start - from, 'rgba(232, 236, 240, 0.35)', 10),
-                 knob: dot(el, axis, start - from, '#7fb2e5', 14) };
+                 origin: dot(el, axis, start - from, colors().origin, 10),
+                 knob: dot(el, axis, start - from, colors().knob, 14) };
         drag.timer = setInterval(tick, TICK_MS);
         window.addEventListener('mousemove', onMove, true);
         window.addEventListener('mouseup', onUp, true);
