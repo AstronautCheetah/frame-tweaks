@@ -19,7 +19,7 @@ PATHSET=".bashrc .config/environment.d/10-local-bin.conf"
 YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.service"   # a dependency other tweaks share
 VRDASH=".local/share/frame-tweaks/vr-dashboard/sft-dashboard .config/systemd/user/sft-vr-debugger.service .config/systemd/user/sft-dashboard.service .config/systemd/user/steamvr.service.d/sft-dashboard.conf"   # shared by the VR windows tweaks
 # memcap keeps your limits file; KDE settings files stay (only the changed keys are restored).
-declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [scroll-strips]="$VRDASH .config/frame-tweaks/scroll-strips.json" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
+declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [scroll-strips]="$VRDASH $YDOTOOL .config/frame-tweaks/scroll-strips.json" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
                  [dictation]="$PATHSET .config/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
                  [memcap]="$PATHSET .config/frame-tweaks/memcap.conf" [screen-reader]=".config/kaccessrc")
 
@@ -78,7 +78,7 @@ for t in "${TWEAKS[@]}"; do
     run() { env -i HOME="$home" PATH="$stubs:/usr/bin:/bin" USER="test" BREW_BIN="$stubs/brew" \
             FRAME_TWEAKS_YES=1 FRAME_TWEAKS_UINPUT="$work/uinput" bash "$REPO/$t/$1" >>"$work/$t.log" 2>&1; }
     # The shared Python venv (wallet's tools): pre-seeded with a stand-in jeepney instead of pip.
-    if [ "$t" = wallet ]; then
+    if [[ " wallet vr-dashboard curvature float-return float-grab scroll-strips " == *" $t "* ]]; then
         python3 -m venv "$home/.local/share/frame-tweaks/venv"
         sp=$("$home/.local/share/frame-tweaks/venv/bin/python" -c 'import site; print(site.getsitepackages()[0])')
         mkdir -p "$sp/jeepney" && : > "$sp/jeepney/__init__.py"

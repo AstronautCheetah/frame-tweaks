@@ -11,7 +11,7 @@ Back to the previous window, and any later dashboard tweak.
 
 A patch's settings, if any, are ~/.config/frame-tweaks/NAME.json, handed to the page as
 window.__sftPatchConfig[NAME]. Patches can ask for actions the page can't do itself through
-bindings this service registers on the page (sftScroll: mouse-wheel scrolling via XTest on :0).
+bindings this service registers on the page (sftScroll: scrolling; see scroll() below).
 
 A patch is patches/NAME.js: an expression that registers itself as window.__sftPatches[NAME]
 = {version, stop}. Header lines "// requires: what | exact text" name pieces of SteamVR's
@@ -141,42 +141,127 @@ def ws_eval(url, expr, timeout=5):
 
 
 # ---- page -> here: actions a patch asks for (window.<binding>(json)) ------------------------
-class XWheel:
-    """Mouse-wheel clicks through XTest on the Steam session's display (:0): they go to the window
-    gamescope has focused. (ydotool's virtual wheel doesn't reach app windows there.)"""
+# Scrolling. Injected pointer input (XTest, ydotool's wheel) never reaches windows in the Steam
+# session: in VR gamescope takes pointer input only from the lasers. Keyboard input does arrive.
+# So: the desktop scrolls with real wheel steps through its own Remote Desktop portal (KDE asks
+# you once; a restore token remembers the answer), and other windows scroll with the arrow keys
+# (PgUp/PgDn for a page) through ydotool, to the window you last clicked.
+STATE_DIR = Path.home() / ".local/state/frame-tweaks"
+PORTAL_TOKEN = STATE_DIR / "remote-desktop.token"
+YDOTOOL = Path.home() / ".local/bin/ydotool"
+YDOTOOL_SOCKET = f"/run/user/{os.getuid()}/.ydotool_socket"
+KEY = {"up": 103, "down": 108, "left": 105, "right": 106, "pgup": 104, "pgdn": 109}
+
+
+def desktop_bus():
+    """The nested desktop's session bus address (from its plasmashell), or None."""
+    for d in Path("/proc").iterdir():
+        try:
+            if d.name.isdigit() and (d / "comm").read_text().strip() == "plasmashell":
+                for item in (d / "environ").read_bytes().split(b"\0"):
+                    if item.startswith(b"DBUS_SESSION_BUS_ADDRESS="):
+                        return item.split(b"=", 1)[1].decode()
+        except OSError:
+            continue
+    return None
+
+
+class DesktopScroll:
+    """Wheel steps inside the KDE desktop through org.freedesktop.portal.RemoteDesktop."""
 
     def __init__(self):
-        import ctypes, ctypes.util
-        self.x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
-        self.t = ctypes.cdll.LoadLibrary(ctypes.util.find_library("Xtst") or "libXtst.so.6")
-        self.x.XOpenDisplay.restype = ctypes.c_void_p
-        self.d = ctypes.c_void_p(self.x.XOpenDisplay(b":0"))
-        if not self.d.value:
-            raise OSError("can't open display :0")
+        from jeepney import DBusAddress, MatchRule, new_method_call
+        from jeepney.io.blocking import open_dbus_connection
+        self.new_method_call, self.MatchRule = new_method_call, MatchRule
+        self.bus = desktop_bus()
+        if not self.bus:
+            raise OSError("desktop session bus not found (is desktop mode running?)")
+        self.conn = open_dbus_connection(self.bus)
+        self.portal = DBusAddress("/org/freedesktop/portal/desktop", bus_name="org.freedesktop.portal.Desktop",
+                                  interface="org.freedesktop.portal.RemoteDesktop")
+        self.session = None
+        self.n = 0
 
-    def clicks(self, button, n):
-        for _ in range(n):
-            self.t.XTestFakeButtonEvent(self.d, button, 1, 0)
-            self.t.XTestFakeButtonEvent(self.d, button, 0, 0)
-        self.x.XFlush(self.d)
+    def _request(self, method, signature, args, timeout=120):
+        """Call a portal method that answers with a Request's Response signal; return its results."""
+        self.n += 1
+        token = f"sft{os.getpid()}_{self.n}"
+        sender = self.conn.unique_name.lstrip(":").replace(".", "_")
+        path = f"/org/freedesktop/portal/desktop/request/{sender}/{token}"
+        rule = self.MatchRule(type="signal", interface="org.freedesktop.portal.Request", member="Response", path=path)
+        from jeepney.bus_messages import message_bus
+        self.conn.send_and_get_reply(message_bus.AddMatch(rule))
+        with self.conn.filter(rule) as queue:
+            opts = dict(args[-1])
+            opts["handle_token"] = ("s", token)
+            self.conn.send_and_get_reply(self.new_method_call(self.portal, method, signature, (*args[:-1], opts)))
+            msg = self.conn.recv_until_filtered(queue, timeout=timeout)
+        code, results = msg.body
+        if code != 0:
+            raise OSError(f"{method}: the portal said no (code {code})")
+        return results
+
+    def start(self):
+        res = self._request("CreateSession", "a{sv}", ({"session_handle_token": ("s", f"sfts{os.getpid()}")},))
+        self.session = res["session_handle"][1]
+        sel = {"types": ("u", 2), "persist_mode": ("u", 2)}                  # pointer; until revoked
+        try:
+            sel["restore_token"] = ("s", PORTAL_TOKEN.read_text().strip())
+        except OSError:
+            pass
+        self._request("SelectDevices", "oa{sv}", (self.session, sel))
+        res = self._request("Start", "osa{sv}", (self.session, "", {}))   # KDE asks the first time
+        if "restore_token" in res:
+            STATE_DIR.mkdir(parents=True, exist_ok=True)
+            PORTAL_TOKEN.write_text(res["restore_token"][1])
+
+    def steps(self, axis, n):
+        if self.session is None:
+            self.start()
+        self.conn.send_and_get_reply(self.new_method_call(
+            self.portal, "NotifyPointerAxisDiscrete", "oa{sv}ui", (self.session, {}, axis, n)))
 
 
-_wheel = None
+_desktop = None
+
+
+def keys(name, n):
+    if n > 0 and YDOTOOL.exists():
+        seq = [f"{KEY[name]}:1", f"{KEY[name]}:0"] * n
+        subprocess.run([str(YDOTOOL), "key", *seq], env=dict(os.environ, YDOTOOL_SOCKET=YDOTOOL_SOCKET),
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
 
 
 def scroll(req):
-    """Scroll strips: mouse-wheel notches to the window the Steam session has focused."""
-    global _wheel
+    """Scroll strips: {dx, dy (+ = right / up, wheel notches), page (+1 up / -1 down, a tap),
+    target: "desktop" | "window"}."""
+    global _desktop
     dx, dy = (max(-60, min(60, int(req.get(k, 0)))) for k in ("dx", "dy"))
-    if not (dx or dy):
+    page = int(req.get("page", 0))
+    if req.get("target") == "desktop":
+        for attempt in (1, 2):                 # a restarted desktop has a new bus: reconnect once
+            try:
+                if _desktop is None or _desktop.bus != desktop_bus():
+                    _desktop = DesktopScroll()
+                # The portal's discrete axis: + = down / right, the opposite of the wheel's +y.
+                if page:
+                    _desktop.steps(0, -10 * page)
+                if dy:
+                    _desktop.steps(0, -dy)
+                if dx:
+                    _desktop.steps(1, dx)
+                return
+            except (OSError, TimeoutError, KeyError, ValueError):
+                _desktop = None
+                if attempt == 2:
+                    raise
         return
-    if _wheel is None:
-        _wheel = XWheel()
-    # X buttons: 4 up, 5 down, 6 left, 7 right (+dy = up, +dx = right)
+    if page:
+        keys("pgup" if page > 0 else "pgdn", 1)
     if dy:
-        _wheel.clicks(4 if dy > 0 else 5, abs(dy))
+        keys("up" if dy > 0 else "down", abs(dy))
     if dx:
-        _wheel.clicks(7 if dx > 0 else 6, abs(dx))
+        keys("right" if dx > 0 else "left", abs(dx))
 
 
 BINDINGS = {"sftScroll": scroll}

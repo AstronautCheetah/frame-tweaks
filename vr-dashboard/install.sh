@@ -6,7 +6,11 @@ source "$(dirname "$0")/../lib/common.sh"
 D="$HOME/.local/share/frame-tweaks/vr-dashboard"
 U="$HOME/.config/systemd/user"
 mkdir -p "$D/patches" "$U/steamvr.service.d"
-install -m755 "$REPO_DIR/vr-dashboard/sft-dashboard" "$D/sft-dashboard"
+# On the shared Python venv (jeepney, for the desktop's Remote Desktop portal: scroll strips).
+ensure_tweaks_venv
+mkdir -p "$HOME/.local/state/frame-tweaks"      # the service may write here (ReadWritePaths needs it)
+sed "1s|.*|#!$TWEAKS_VENV/bin/python|" "$REPO_DIR/vr-dashboard/sft-dashboard" > "$D/sft-dashboard"
+chmod 755 "$D/sft-dashboard"
 
 # Older versions: this lived inside Curved world windows (sft-curvature). Move its patch over.
 OLD="$HOME/.local/share/frame-tweaks/curvature"
@@ -49,13 +53,13 @@ PartOf=steamvr.service
 ExecStart=$D/sft-dashboard watch
 Restart=on-failure
 RestartSec=10
-# Sandboxing: reads SteamVR's dashboard files and the patches, talks to 127.0.0.1:8087,
-# writes one status file.
+# Sandboxing: reads SteamVR's dashboard files and the patches, talks to 127.0.0.1:8087, writes
+# one status file and the scroll portal's restore token. No private /tmp: the desktop's D-Bus
+# socket (for its Remote Desktop portal, scroll strips) lives there.
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=%t
-PrivateTmp=yes
+ReadWritePaths=%t %h/.local/state/frame-tweaks
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 IPAddressAllow=localhost
 IPAddressDeny=any
