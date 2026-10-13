@@ -1,0 +1,223 @@
+#!/usr/bin/env python3
+"""phone-touch: in VR, laser clicks on the phone mirror land where you aim.
+
+The Steam session's compositor (gamescope) maps the laser wrongly on a window narrower than its
+1920x1080 screen: it adds the gap it would leave beside the window if it were centred on that
+screen, so on the upright phone (485 wide) every click landed at the left edge. phone-fit makes
+the window that narrow, so instead of the window taking the laser, a see-through layer over it in
+SteamVR's dashboard does (the dashboard patch phone-touch.js): it reports where you press, drag and
+let go, and this sends those to the phone as touches, the way scrcpy itself does: through a second
+scrcpy server on the phone with only its control channel (no video), so nothing passes through the
+Steam session's input at all.
+
+  phone-touch DEVICE      DEVICE: the phone's adb address (ip:port); runs until scrcpy exits
+
+The layer appears only while this runs: it calls in through the dashboard's DevTools port
+(127.0.0.1:8087, opened by the VR windows helper) and says it's alive every 2 s.
+"""
+import importlib.machinery
+import importlib.util
+import json
+import os
+import random
+import re
+import select
+import shutil
+import socket
+import struct
+import subprocess
+import sys
+import threading
+import time
+from pathlib import Path
+
+DASHBOARD = Path.home() / ".local/share/frame-tweaks/vr-dashboard/sft-dashboard"
+BINDING = "sftPhoneTouch"
+JAR = "/data/local/tmp/sft-phone-touch.jar"     # scrcpy deletes its own copy once it has started
+PIDFILE = Path(f"/run/user/{os.getuid()}/sft-phone-touch.pid")
+DOWN, UP, MOVE = 0, 1, 2
+FINGER = -2                                     # scrcpy's "generic finger" pointer id
+
+
+def log(*a):
+    print("phone-touch:", *a, file=sys.stderr, flush=True)
+
+
+def adb(dev, *args, **kw):
+    return subprocess.run(["adb", "-s", dev, *args], capture_output=True, text=True, timeout=20, **kw)
+
+
+def scrcpy_running():
+    return subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "scrcpy"], stdout=subprocess.DEVNULL).returncode == 0
+
+
+def scrcpy_server():
+    """(version, path of the server file) of the installed scrcpy: the two must match."""
+    exe = shutil.which("scrcpy") or "/home/linuxbrew/.linuxbrew/bin/scrcpy"
+    out = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=10).stdout
+    m = re.match(r"scrcpy (\S+)", out)
+    jar = os.environ.get("SCRCPY_SERVER_PATH") or Path(os.path.realpath(exe)).parent.parent / "share/scrcpy/scrcpy-server"
+    if not m or not Path(jar).is_file():
+        sys.exit("phone-touch: can't find scrcpy's server")
+    return m.group(1), str(jar)
+
+
+def screen_size(dev):
+    """The phone screen's size in pixels, upright (an "Override size" from `wm size` wins)."""
+    sizes = re.findall(r"(\d+)x(\d+)", adb(dev, "shell", "wm", "size").stdout)
+    if not sizes:
+        raise OSError("no screen size")
+    w, h = map(int, sizes[-1])
+    return min(w, h), max(w, h)
+
+
+class Phone:
+    """A control-only scrcpy server on the phone and the connection to it."""
+
+    def __init__(self, dev):
+        self.dev, self.sock, self.server, self.port = dev, None, None, None
+        self.version, self.jar = scrcpy_server()
+        self.lock = threading.Lock()
+
+    def connect(self):
+        self.close()
+        self.size = screen_size(self.dev)
+        r = adb(self.dev, "push", self.jar, JAR)
+        if r.returncode:
+            raise OSError(f"push: {r.stderr.strip()}")
+        scid = random.randrange(1, 0x7FFFFFFF)
+        self.server = subprocess.Popen(
+            ["adb", "-s", self.dev, "shell", f"CLASSPATH={JAR}", "app_process", "/", "com.genymobile.scrcpy.Server",
+             self.version, f"scid={scid:08x}", "log_level=warn", "video=false", "audio=false", "control=true",
+             "tunnel_forward=true", "clipboard_autosync=false", "cleanup=false", "power_on=false",
+             "send_device_meta=false"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        port = adb(self.dev, "forward", "tcp:0", f"localabstract:scrcpy_{scid:08x}").stdout.strip()
+        if not port.isdigit():
+            raise OSError("adb forward failed")
+        self.port = port
+        for _ in range(100):       # the tunnel accepts before the server listens: wait for its first byte
+            try:
+                s = socket.create_connection(("127.0.0.1", int(port)), timeout=3)
+                if s.recv(1) == b"\0":
+                    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                    s.settimeout(3)
+                    self.sock = s
+                    return
+                s.close()
+            except OSError:
+                pass
+            time.sleep(0.1)
+        raise OSError("the phone's server didn't answer")
+
+    def close(self):
+        if self.sock:
+            self.sock.close()
+            self.sock = None
+        if self.port:
+            adb(self.dev, "forward", "--remove", f"tcp:{self.port}")
+            self.port = None
+        if self.server:
+            self.server.terminate()
+            self.server = None
+
+    def touch(self, action, u, v, sideways):
+        """u, v: 0..1 across and down the picture as you see it; sideways: the phone is turned."""
+        w, h = self.size[::-1] if sideways else self.size
+        x, y = round(min(1, max(0, u)) * (w - 1)), round(min(1, max(0, v)) * (h - 1))
+        msg = struct.pack(">BBqiiHHHII", 2, action, FINGER, x, y, w, h, 0 if action == UP else 0xFFFF, 0, 0)
+        with self.lock:
+            for attempt in (1, 2):
+                try:
+                    if not self.sock:
+                        self.connect()
+                    self.sock.sendall(msg)
+                    return
+                except OSError as e:
+                    log("reconnecting:", e)
+                    self.close()
+                    if attempt == 2 or action == MOVE:
+                        return
+
+
+def dashboard():
+    loader = importlib.machinery.SourceFileLoader("sft_dashboard", str(DASHBOARD))
+    spec = importlib.util.spec_from_loader("sft_dashboard", loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+    return mod
+
+
+def serve(phone, sd):
+    """Take the layer's calls from the dashboard page; tell it every 2 s that we're here."""
+    while scrcpy_running():
+        try:
+            url = sd.systemui()
+            if not url:
+                time.sleep(3)
+                continue
+            ws = sd.Ws(url, timeout=2)
+            ws.send({"id": 1, "method": "Runtime.addBinding", "params": {"name": BINDING}})
+            n, beat = 1, 0.0
+            while True:
+                now = time.monotonic()
+                if now - beat > 2:
+                    if not scrcpy_running():
+                        break
+                    n += 1
+                    ws.send({"id": n, "method": "Runtime.evaluate",
+                             "params": {"expression": "window.__sftPhoneTouchAlive = Date.now()"}})
+                    beat = now
+                # Wait for a message without a timeout cutting one in half.
+                if not ws.rest and not select.select([ws.s], [], [], 0.5)[0]:
+                    continue
+                m = ws.recv()
+                if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") == BINDING:
+                    try:
+                        req = json.loads(m["params"].get("payload") or "{}")
+                        action = {"down": DOWN, "move": MOVE, "up": UP}[req["a"]]
+                        phone.touch(action, float(req["u"]), float(req["v"]), float(req["w"]) > float(req["h"]))
+                    except (KeyError, ValueError, TypeError) as e:
+                        log("bad call:", e)
+            ws.send({"id": n + 1, "method": "Runtime.evaluate", "params": {"expression": "window.__sftPhoneTouchAlive = 0"}})
+            ws.close()
+            return
+        except (OSError, ValueError) as e:
+            log("dashboard:", e)
+            time.sleep(3)
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    if not DASHBOARD.is_file():
+        return                                    # no VR windows helper: no layer to talk to
+    # One at a time: a reconnect (new address) replaces the one before.
+    try:
+        old = int(PIDFILE.read_text())
+        if old != os.getpid():
+            os.kill(old, 15)
+    except (OSError, ValueError):
+        pass
+    PIDFILE.write_text(str(os.getpid()))
+    phone = Phone(sys.argv[1])
+    try:
+        for _ in range(30):                       # scrcpy may still be starting
+            if scrcpy_running():
+                break
+            time.sleep(1)
+        try:
+            phone.connect()                       # now, so the first tap isn't slow
+        except OSError as e:
+            log("phone:", e)                      # tried again at the first touch
+        serve(phone, dashboard())
+    finally:
+        phone.close()
+        try:
+            if PIDFILE.read_text() == str(os.getpid()):
+                PIDFILE.unlink()
+        except OSError:
+            pass
+
+
+if __name__ == "__main__":
+    main()

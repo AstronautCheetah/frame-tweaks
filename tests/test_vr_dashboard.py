@@ -13,7 +13,8 @@ sft = importlib.util.module_from_spec(importlib.util.spec_from_loader("sft", _l)
 _l.exec_module(sft)
 PATCHES = {"curvature": ROOT / "curvature" / "patch.js", "float-return": ROOT / "float-return" / "patch.js",
            "float-grab": ROOT / "float-grab" / "patch.js",
-           "scroll-strips": ROOT / "scroll-strips" / "patch.js"}
+           "scroll-strips": ROOT / "scroll-strips" / "patch.js",
+           "phone-rotate": ROOT / "adb-scrcpy" / "patch.js", "phone-touch": ROOT / "adb-scrcpy" / "phone-touch.js"}
 
 
 class ArmRestore(unittest.TestCase):

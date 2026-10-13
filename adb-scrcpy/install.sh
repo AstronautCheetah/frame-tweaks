@@ -26,7 +26,7 @@ missing=$(LD_LIBRARY_PATH="$LIB" ldd "$LIB/adb.bin" | grep 'not found' || true)
 [ -z "$missing" ] || die "adb still has missing libraries:\n$missing"
 "$BIN/adb" version | sed -n 1,2p
 
-install -m755 "$REPO_DIR/adb-scrcpy/phone" "$REPO_DIR/adb-scrcpy/phone-fit" "$BIN/"
+install -m755 "$REPO_DIR/adb-scrcpy/phone" "$REPO_DIR/adb-scrcpy/phone-fit" "$REPO_DIR/adb-scrcpy/phone-touch" "$BIN/"
 install_icon frame-tweaks-phone
 # Renamed from "Phone Mirror" (it only works with Android). Keep a password gate if it had one.
 gated=""
@@ -38,8 +38,10 @@ if [ -n "$gated" ] && [ -x "$BIN/wallet-launcher" ]; then "$BIN/wallet-launcher"
 # VR windows helper, which the VR windows tweaks install).
 if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
     install_dashboard_patch phone-rotate "$REPO_DIR/adb-scrcpy/patch.js"
+    # ... and laser clicks on it land where you aim (see phone-touch).
+    install_dashboard_patch phone-touch "$REPO_DIR/adb-scrcpy/phone-touch.js"
 else
-    say "In VR, the window keeps its width when the phone turns (install a VR windows tweak to keep its size)."
+    say "In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR windows tweak to fix both)."
 fi
 cat <<MSG
 Done. One-time pairing: on the phone open Developer options → Wireless debugging →

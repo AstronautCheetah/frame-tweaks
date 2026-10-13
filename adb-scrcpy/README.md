@@ -6,7 +6,7 @@ Mirror and control an Android phone in a desktop window.
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher
+> - **Changes:** `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone
 > - **Unusual access:** Network connection to your phone's wireless debugging; pairing keys in `~/.android`
 > - **Undo:** `./install.sh uninstall adb-scrcpy`
 <!-- /generated:glance -->
@@ -39,6 +39,17 @@ sideways shrank it to a strip). A small dashboard patch (`patch.js`, installed w
 [VR windows](../vr-dashboard/) helper is) gives a floating window that has been upright a long
 side of 0.8 m, through the dashboard's own panel-height override: upright it's 0.8 m tall,
 sideways 0.8 m wide, so turning the phone just turns the window.
+
+## In VR: clicks land where you aim
+The Steam session maps the laser wrongly on a window narrower than its 1920×1080 screen: it
+adds the gap it would leave beside the window if it were centred, so on the upright phone every
+click landed at the window's left edge. So a see-through layer over the mirror window (a second
+dashboard patch, `phone-touch.js`) takes the laser instead and reports where you press, drag and
+let go. `phone-touch` (started by `phone`) sends those to the phone as touches, the way scrcpy
+does: it starts a second scrcpy server on the phone with only its control channel (no video;
+its copy is kept at `/data/local/tmp/sft-phone-touch.jar`, since scrcpy deletes its own), so
+nothing goes through the Steam session's input. The layer is there only while `phone-touch`
+runs, and covers only the window titled "Android Mirror", the title `phone` gives it.
 
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,
