@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""grab-guard: tell you when desktop mode has grabbed all input, and which device did it.
+
+Desktop mode on the Frame is a nested KWin running as a window of the Steam session. A Right Ctrl
+press toggles its input grab: while grabbed (its title says "...to ungrab input"), every key
+and click goes to the desktop, so other windows (Frame Tweaks, floating windows) stop
+responding. This watches for that and shows a notification saying how to undo it (tap Right
+Ctrl), and logs which input device sent the Right Ctrl, so a stray source can be found.
+It never sends a key itself.
+
+  grab-guard --run      the watcher (the grab-guard user service runs this)
+  grab-guard --status   grabbed or not, and the last log lines
+"""
+import os
+import re
+import select
+import struct
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+LOG = Path.home() / ".local/state/frame-tweaks/logs/grab-guard.log"
+EV_KEY, KEY_RIGHTCTRL = 1, 97
+EVENT = "llHHi"
+EVENT_SIZE = struct.calcsize(EVENT)
+TITLE = re.compile(r'"(KDE Wayland Compositor[^"]*)"')
+
+
+def desktop_title():
+    """The nested desktop's window title on the Steam session's display, or None."""
+    try:
+        out = subprocess.run(["xwininfo", "-root", "-tree"], capture_output=True, text=True, timeout=5,
+                             env={**os.environ, "DISPLAY": ":0"}).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    m = TITLE.search(out)
+    return m[1] if m else None
+
+
+def grabbed(title):
+    return bool(title) and "ungrab" in title
+
+
+def keyboards():
+    """{"/dev/input/eventN": device name} for devices with keys."""
+    devs = {}
+    for blk in Path("/proc/bus/input/devices").read_text().split("\n\n"):
+        name = re.search(r'N: Name="([^"]*)"', blk)
+        ev = re.search(r"H: Handlers=.*\b(event\d+)", blk)
+        if name and ev and re.search(r"B: KEY=[0-9a-f ]*[1-9a-f]", blk):
+            devs[f"/dev/input/{ev[1]}"] = name[1]
+    return devs
+
+
+def log(line):
+    LOG.parent.mkdir(parents=True, exist_ok=True)
+    with open(LOG, "a") as f:
+        f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + line + "\n")
+
+
+def notify(title, body):
+    subprocess.run(["notify-send", "-a", "Desktop input", "-u", "critical", title, body],
+                   stderr=subprocess.DEVNULL)
+
+
+def run():
+    fds, names, last_scan = {}, {}, 0.0
+    last_rctrl = None                     # (monotonic time, device name)
+    was = grabbed(desktop_title())
+    last_check = 0.0
+    while True:
+        now = time.monotonic()
+        if now - last_scan > 30:          # hot-plugged keyboards (Bluetooth)
+            for path, name in keyboards().items():
+                if path not in fds:
+                    try:
+                        fds[path] = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+                        names[fds[path]] = name
+                    except OSError:
+                        pass
+            last_scan = now
+        ready, _, _ = select.select(list(fds.values()), [], [], 1)
+        for fd in ready:
+            try:
+                data = os.read(fd, EVENT_SIZE * 64)
+            except OSError:               # unplugged
+                for p, f in list(fds.items()):
+                    if f == fd:
+                        os.close(f)
+                        del fds[p]
+                continue
+            for i in range(0, len(data) - EVENT_SIZE + 1, EVENT_SIZE):
+                _, _, etype, code, value = struct.unpack_from(EVENT, data, i)
+                if etype == EV_KEY and code == KEY_RIGHTCTRL and value == 1:
+                    last_rctrl = (time.monotonic(), names.get(fd, "?"))
+        now = time.monotonic()
+        if now - last_check < 1:
+            continue
+        last_check = now
+        title = desktop_title()
+        if title is None:
+            continue
+        is_grabbed = grabbed(title)
+        if is_grabbed != was:
+            source = (f"Right Ctrl from {last_rctrl[1]} {now - last_rctrl[0]:.1f} s before"
+                      if last_rctrl and now - last_rctrl[0] < 10 else
+                      "no Right Ctrl seen from a real keyboard (an injected one, e.g. a virtual keyboard?)")
+            log(("GRABBED" if is_grabbed else "released") + f": {source}")
+            if is_grabbed:
+                notify("Desktop mode took all input",
+                       "Other windows won't respond until you tap Right Ctrl on a keyboard once. "
+                       f"({source})")
+            was = is_grabbed
+
+
+def main():
+    if sys.argv[1:] == ["--run"]:
+        run()
+    elif sys.argv[1:] == ["--status"]:
+        t = desktop_title()
+        print("desktop mode not running" if t is None else
+              "GRABBED: tap Right Ctrl to release" if grabbed(t) else "not grabbed")
+        if LOG.exists():
+            print("".join(LOG.read_text().splitlines(True)[-5:]), end="")
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    main()
