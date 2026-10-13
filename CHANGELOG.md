@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: the narration panel's image disappeared** after Show text (and for a later snip).
+- **No Steam flash after a snip:** when the shown window closes, Back to the previous window now
+  makes the dashboard's own choice of what to show next, so it goes straight back to the desktop
+  (or wherever the snip came from).
+- **Collapse keeps its icon in place:** the icon is on the right of the button, and collapsing or
+  expanding keeps it exactly where it was.
 - **Screen snip narration: Show text / Show image and Copy image.** The panel shows the snip's
   image or the text read from it; Copy image sits beside Copy text; Close and Collapse swapped,
   Collapse has a large icon, and the collapsed panel is just an Expand icon.

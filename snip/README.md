@@ -13,7 +13,8 @@ Select a rectangle of the window you're using, then:
   **■ Stop** / **▶ Again**, **⏸ Pause** / **▶ Resume**, **Show text** / **Show image** (the
   snip's image, or the text read from it), speed, **Copy image**, **Copy text**, **Paste** (read
   the clipboard's text instead; it's shown in place of the snip), **Close** and **Collapse** (down
-  to just an Expand icon, with a margin to grab it by; reading carries on). It starts beside
+  to just an Expand icon, with a margin to grab it by, right where the Collapse icon was; reading
+  carries on). It starts beside
   Arrow Pad's place under the dashboard and follows the dashboard; drag its top bar to move it,
   and it remembers the spot (relative to the dashboard) for next time. Narrating another snip
   while it's open reuses it, in place. The

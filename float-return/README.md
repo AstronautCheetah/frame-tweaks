@@ -6,7 +6,7 @@ shows the window you had before, the same as clicking that window's button in th
 
 The same when the window the dashboard shows is **closed** (a finished or cancelled
 [Screen snip](../snip/), say): instead of falling back to Steam, the dashboard goes back to the
-window before it (Steam may show for a moment first).
+window before it, without Steam showing in between.
 
 <!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
 > **At a glance**
