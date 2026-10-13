@@ -33,6 +33,7 @@ else:
     os.environ["DISPLAY"] = ":0"                # the Steam session: every VR window lives here
 
 from PyQt6.QtCore import QEvent, QObject, QPoint, QPointF, QProcess, QRect, Qt, QTimer, pyqtSignal  # noqa: E402
+from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
 from PyQt6.QtGui import QColor, QImage, QMouseEvent, QPainter, QPen, QPixmap      # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,  # noqa: E402
                              QWidget)
@@ -44,6 +45,7 @@ PIPER = DATA / "piper/piper"
 VOICE = DATA / "voice.onnx"
 SAVE_DIR = HOME / "Pictures/Screenshots"
 TESSERACT = shutil.which("tesseract") or "/home/linuxbrew/.linuxbrew/bin/tesseract"
+PANEL_SOCKET = f"frame-snip-narration-{os.getuid()}"   # the open narration panel takes new snips here
 MIN_SIZE = 8                                    # px: smaller drags are taps, not selections
 
 
@@ -284,44 +286,43 @@ class Narrator(QObject):
 
 
 class NarrationWindow(QWidget):
-    """The snip, popped out, with the narration's controls; the rest of VR stays usable."""
+    """The snip, popped out, with the narration's controls; the rest of VR stays usable. As a VR
+    panel it can collapse to just an Expand button, and take a new snip in place (load)."""
     STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 30px; }"
              "QPushButton { background: #232a32; font-weight: 600; padding: 16px 28px; border-radius: 12px;"
              " min-width: 70px; }"
              "QPushButton:hover { background: #355b7a; } QPushButton:disabled { color: #3a434d; }")
-
     PANEL_STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 22px; }"
                    "QPushButton { background: #232a32; font-weight: 600; padding: 12px 20px; border-radius: 10px;"
                    " min-width: 50px; }"
                    "QPushButton:disabled { color: #3a434d; }")
+    MINI_MARGIN = 14                              # around Expand: something to grab it by
 
     def __init__(self, image, text, speed, panel=False):
         super().__init__()
+        self.panel, self.speed, self.narrator, self.collapsed = panel, speed, None, False
         self.setWindowTitle("Screen snip: narrating")
         self.setStyleSheet(self.PANEL_STYLE if panel else self.STYLE)
-        lay = QVBoxLayout(self)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        self.full = QWidget()
+        outer.addWidget(self.full)
+        lay = QVBoxLayout(self.full)
         if panel:
             # Its own VR panel (NarrationOverlay): compact, with a bar to move it by.
             lay.setContentsMargins(18, 10, 18, 16)
-            self.handle = QLabel("⠿  Screen snip  ·  drag here to move")
-            self.handle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.handle.setStyleSheet("color: #9aa6b2; font-size: 18px; padding: 6px;"
-                                      " background: #161c23; border-radius: 8px;")
-            lay.addWidget(self.handle)
-            box = (860, 440)
+            handle = QLabel("⠿  Screen snip  ·  drag here to move")
+            handle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            handle.setStyleSheet("color: #9aa6b2; font-size: 18px; padding: 6px;"
+                                 " background: #161c23; border-radius: 8px;")
+            lay.addWidget(handle)
         else:
             # The Steam session shows every window as a 1920x1080 panel, so fill it: the snip as
             # large as fits above the controls.
             lay.setContentsMargins(40, 30, 40, 30)
-            self.handle = None
-            box = (1840, 800)
-        pic = QLabel()
-        pm = QPixmap.fromImage(image)
-        if pm.width() > box[0] or pm.height() > box[1] or not panel:
-            pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        pic.setPixmap(pm)
-        pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lay.addWidget(pic, 1)
+        self.pic = QLabel()
+        self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lay.addWidget(self.pic, 1)
         self.state = QLabel("Preparing…")
         self.state.setStyleSheet("color: #9aa6b2;")
         lay.addWidget(self.state)
@@ -333,30 +334,79 @@ class NarrationWindow(QWidget):
         self.pause_button.clicked.connect(self.pause_or_resume)
         row.addWidget(self.pause_button)
         row.addStretch(1)
-        self.speed = speed
         self.slower, self.faster = QPushButton("−"), QPushButton("+")
         self.speed_label = QLabel()
-        self.speed_label.setMinimumWidth(110)
+        self.speed_label.setMinimumWidth(110 if not panel else 70)
         self.speed_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.slower.clicked.connect(lambda: self.step(-1))
         self.faster.clicked.connect(lambda: self.step(1))
         for w in (QLabel("Speed"), self.slower, self.speed_label, self.faster):
             row.addWidget(w)
         row.addStretch(1)
+        if panel:
+            collapse = QPushButton("▾ Collapse")
+            collapse.clicked.connect(self.collapse)
+            row.addWidget(collapse)
         close = QPushButton("Close")
         close.clicked.connect(self.close)
         row.addWidget(close)
         lay.addLayout(row)
+        # Collapsed: just Expand, with a margin to grab the panel by.
+        self.mini = QWidget()
+        mini = QHBoxLayout(self.mini)
+        mini.setContentsMargins(*[self.MINI_MARGIN] * 4)
+        expand = QPushButton("▸ Expand")
+        expand.clicked.connect(self.expand)
+        mini.addWidget(expand)
+        self.mini.hide()
+        outer.addWidget(self.mini)
         self.show_speed()
-        self.narrator = Narrator(text, speed)
+        self.load(image, text)
+
+    def load(self, image, text):
+        """Read a (new) snip: stops what was being read, keeps the panel and its place."""
+        if self.narrator is not None:
+            self.narrator.cleanup()
+        box = (860, 440) if self.panel else (1840, 800)
+        pm = QPixmap.fromImage(image)
+        if pm.width() > box[0] or pm.height() > box[1] or not self.panel:
+            pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.pic.setPixmap(pm)
+        self.pic_width = pm.width()
+        self.state.setText("Preparing…")
+        self.toggle.setText("■ Stop")
+        self.pause_button.setText("⏸ Pause")
+        self.pause_button.setEnabled(True)
+        self.narrator = Narrator(text, self.speed)
         self.narrator.progress.connect(lambda i, n: self.state.setText(f"Reading aloud: part {i + 1} of {n}"))
         self.narrator.finished.connect(self.done)
         self.narrator.start()
-        if panel:
-            self.setFixedWidth(max(700, min(900, pm.width() + 36)))
-            self.adjustSize()
-        else:
+        self.expand() if self.collapsed else self.fit()
+
+    def fit(self):
+        if not self.panel:
             self.resize(1920, 1080)
+            return
+        self.setMinimumSize(0, 0)
+        self.setMaximumSize(16777215, 16777215)
+        if self.collapsed:
+            self.setFixedSize(self.mini.sizeHint())
+        else:
+            w = max(700, min(900, self.pic_width + 36))
+            self.full.setFixedWidth(w)
+            self.setFixedSize(w, self.full.sizeHint().height())
+
+    def collapse(self):
+        self.collapsed = True
+        self.full.hide()
+        self.mini.show()
+        self.fit()
+
+    def expand(self):
+        self.collapsed = False
+        self.mini.hide()
+        self.full.show()
+        self.fit()
 
     def show_speed(self):
         self.speed_label.setText(f"{self.speed:g}×")
@@ -415,6 +465,7 @@ class NarrationOverlay(QObject):
     buttons; a press elsewhere (its top bar, say) carries it with the controller until released.
     It redraws only when the widget changes, behind a cover overlay so a reload doesn't blink."""
     WIDTH_M = 0.6
+    M_PER_PX = 0.6 / 880                         # constant scale: a collapsed panel is small too
 
     def __init__(self, widget):
         super().__init__()
@@ -428,8 +479,8 @@ class NarrationOverlay(QObject):
         self.ov.setOverlayInputMethod(self.h, openvr.VROverlayInputMethod_Mouse)
         self.ov.setOverlaySortOrder(self.h, 10)
         self.ov.setOverlaySortOrder(self.cover, 11)
-        for o in (self.h, self.cover):
-            self.ov.setOverlayWidthInMeters(o, self.WIDTH_M)
+        self.width_px = 0
+        self.size_m()
         self.drag = None
         self.offset = self.load_offset()            # the panel relative to the dashboard bar
         if not (self.offset and self.follow()):
@@ -441,6 +492,28 @@ class NarrationOverlay(QObject):
         self.ov.showOverlay(self.h)
         QTimer(self, interval=22, timeout=self.poll).start()
         QTimer(self, interval=200, timeout=self.render).start()
+
+    def size_m(self):
+        """Overlay width from the widget's (constant metres per pixel); True if it changed."""
+        if self.w.width() == self.width_px:
+            return False
+        self.width_px = self.w.width()
+        for o in (self.h, self.cover):
+            self.ov.setOverlayWidthInMeters(o, self.width_px * self.M_PER_PX)
+        return True
+
+    def height_m(self):
+        return self.w.height() * self.M_PER_PX
+
+    # The panel is placed by its top edge (top centre), so it keeps its place when it changes
+    # size (collapse / expand, a new snip); the overlay itself is positioned by its centre.
+    def centre_from_top(self, top):
+        h = self.height_m() / 2
+        return [[top[i][0], top[i][1], top[i][2], top[i][3] - top[i][1] * h] for i in range(3)]
+
+    def top_from_centre(self, c):
+        h = self.height_m() / 2
+        return [[c[i][0], c[i][1], c[i][2], c[i][3] + c[i][1] * h] for i in range(3)]
 
     def matrix(self, rows):
         m = self.vr.HmdMatrix34_t()
@@ -486,7 +559,7 @@ class NarrationOverlay(QObject):
         a = self.anchor()
         if a is None:
             return False
-        pose = self.compose(a, self.offset)
+        pose = self.centre_from_top(self.compose(a, self.offset))
         if not getattr(self, "pose", None) or max(abs(x - y) for r1, r2 in zip(pose, self.pose) for x, y in zip(r1, r2)) > 0.0015:
             self.pose = pose
             self.apply_pose()
@@ -494,7 +567,7 @@ class NarrationOverlay(QObject):
 
     def load_offset(self):
         try:
-            off = json.loads(SETTINGS.read_text()).get("panel_offset")
+            off = json.loads(SETTINGS.read_text()).get("panel_top")
             return off if isinstance(off, list) and len(off) == 3 else None
         except (OSError, ValueError, AttributeError):
             return None
@@ -503,12 +576,13 @@ class NarrationOverlay(QObject):
         a = self.anchor()
         if a is None:
             return
-        self.offset = self.relative(a, self.pose)
+        self.offset = self.relative(a, self.top_from_centre(self.pose))
         try:
             conf = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
         except (OSError, ValueError):
             conf = {}
-        conf["panel_offset"] = self.offset
+        conf.pop("panel_offset", None)                # (older versions kept the centre)
+        conf["panel_top"] = self.offset
         SETTINGS.parent.mkdir(parents=True, exist_ok=True)
         SETTINGS.write_text(json.dumps(conf) + "\n")
 
@@ -554,6 +628,16 @@ class NarrationOverlay(QObject):
             self.ov.setOverlayTransformAbsolute(o, self.vr.TrackingUniverseStanding, m)
 
     def render(self):
+        if self.w.width() != self.width_px or self.w.height() != getattr(self, "height_px", 0):
+            old_h, new_h = getattr(self, "height_px", 0) * self.M_PER_PX, self.w.height() * self.M_PER_PX
+            top = None
+            if getattr(self, "pose", None) and old_h:          # keep the top edge where it was
+                top = [[c[0], c[1], c[2], c[3] + c[1] * old_h / 2] for c in self.pose]
+                self.pose = [[t[0], t[1], t[2], t[3] - t[1] * new_h / 2] for t in top]
+            self.size_m()
+            self.height_px = self.w.height()
+            if top is not None:
+                self.apply_pose()
         img = self.w.grab().toImage()
         digest = hash(bytes(img.constBits().asstring(img.sizeInBytes())))
         if digest == self.last_digest:
@@ -880,8 +964,17 @@ class Snip(QWidget):
             d = Path(tempfile.mkdtemp(prefix="snip-narrate-in-"))
             snip.save(str(d / "snip.png"))
             (d / "text.txt").write_text(text)
-            subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--narrate",
-                              str(d / "snip.png"), str(d / "text.txt")], start_new_session=True)
+            # A panel already open reads this one instead, where it is; otherwise start one.
+            sock = QLocalSocket()
+            sock.connectToServer(PANEL_SOCKET)
+            if sock.waitForConnected(500):
+                sock.write(json.dumps({"image": str(d / "snip.png"), "text": str(d / "text.txt")}).encode())
+                sock.flush()
+                sock.waitForBytesWritten(1000)
+                sock.disconnectFromServer()
+            else:
+                subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--narrate",
+                                  str(d / "snip.png"), str(d / "text.txt")], start_new_session=True)
         else:
             self.popout = NarrationWindow(snip, text, self.speed)
             self.popout.show()
@@ -896,9 +989,32 @@ def narrate_panel(image_path, text_path):
     w = NarrationWindow(image, text, load_speed(), panel=True)
     w.show()
     overlay = NarrationOverlay(w)
+    # Later snips come here (one panel, in its place) instead of opening another.
+    QLocalServer.removeServer(PANEL_SOCKET)
+    server = QLocalServer()
+    server.listen(PANEL_SOCKET)
+
+    def take_snip():
+        conn = server.nextPendingConnection()
+        if conn is None:
+            return
+        def read():
+            if not conn.waitForReadyRead(1000) and not conn.bytesAvailable():
+                return
+            try:
+                req = json.loads(bytes(conn.readAll()).decode())
+                img, txt = QImage(req["image"]), Path(req["text"]).read_text()
+                shutil.rmtree(Path(req["image"]).parent, ignore_errors=True)
+                w.load(img, txt)
+            except (OSError, ValueError, KeyError):
+                pass
+            conn.disconnectFromServer()
+        QTimer.singleShot(0, read)
+    server.newConnection.connect(take_snip)
     w.destroyed.connect(app.quit)
     w.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
     code = app.exec()
+    server.close()
     overlay.close()
     return code
 
