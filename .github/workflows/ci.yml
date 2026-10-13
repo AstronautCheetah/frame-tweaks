@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
-      - name: Refresh the package index (the runner image's can be stale: 404s)
+      - name: Refresh the package index (a stale runner index gives 404s)
         run: sudo apt-get update -qq
       - name: ShellCheck
         run: |
