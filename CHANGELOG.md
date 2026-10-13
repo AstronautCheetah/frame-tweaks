@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip narration: Show text / Show image and Copy image.** The panel shows the snip's
+  image or the text read from it; Copy image sits beside Copy text; Close and Collapse swapped,
+  Collapse has a large icon, and the collapsed panel is just an Expand icon.
 - **Screen snip narration: Copy text and Paste.** Copy puts the text being read on the clipboard;
   Paste reads the clipboard's text instead (shown in place of the snip). The panel's buttons are on
   two rows, so they no longer overlap on narrow panels.

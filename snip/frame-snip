@@ -34,7 +34,8 @@ else:
 
 from PyQt6.QtCore import QEvent, QObject, QPoint, QPointF, QProcess, QRect, Qt, QTimer, pyqtSignal  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
-from PyQt6.QtGui import QColor, QImage, QMouseEvent, QPainter, QPen, QPixmap      # noqa: E402
+from PyQt6.QtCore import QSize                                                    # noqa: E402
+from PyQt6.QtGui import QColor, QIcon, QImage, QMouseEvent, QPainter, QPen, QPixmap  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,  # noqa: E402
                              QWidget)
 
@@ -115,6 +116,12 @@ def to_clipboard(data, mime):
     p = subprocess.Popen([wl_tool("wl-copy"), "--type", mime], stdin=subprocess.PIPE, env=env, start_new_session=True)
     p.communicate(data)
     return p.returncode == 0
+
+
+def breeze(name):
+    """A Breeze icon (largest SVG), or an empty icon."""
+    hits = sorted(Path("/usr/share/icons/breeze-dark").glob(f"*/*/{name}.svg"))
+    return QIcon(str(hits[-1])) if hits else QIcon()
 
 
 def from_clipboard():
@@ -350,6 +357,10 @@ class NarrationWindow(QWidget):
         self.pause_button = QPushButton("⏸ Pause")
         self.pause_button.clicked.connect(self.pause_or_resume)
         row.addWidget(self.pause_button)
+        self.view_button = QPushButton("Show text")
+        self.view_button.setToolTip("Switch between the snip's image and the text read from it")
+        self.view_button.clicked.connect(self.toggle_view)
+        row.addWidget(self.view_button)
         row.addStretch(1)
         self.slower, self.faster = QPushButton("−"), QPushButton("+")
         self.speed_label = QLabel()
@@ -362,28 +373,37 @@ class NarrationWindow(QWidget):
         lay.addLayout(row)
         # Second row: the text itself, and the panel.
         row2 = QHBoxLayout()
+        self.copy_image_button = QPushButton("Copy image")
+        self.copy_image_button.setToolTip("Put the snip's image on the clipboard")
+        self.copy_image_button.clicked.connect(self.copy_image)
         copy = QPushButton("Copy text")
         copy.setToolTip("Put the text being read on the clipboard")
         copy.clicked.connect(self.copy_text)
         paste = QPushButton("Paste")
         paste.setToolTip("Read the clipboard's text instead")
         paste.clicked.connect(self.paste_text)
-        row2.addWidget(copy)
-        row2.addWidget(paste)
+        for b in (self.copy_image_button, copy, paste):
+            row2.addWidget(b)
         row2.addStretch(1)
-        if panel:
-            collapse = QPushButton("▾ Collapse")
-            collapse.clicked.connect(self.collapse)
-            row2.addWidget(collapse)
         close = QPushButton("Close")
         close.clicked.connect(self.close)
         row2.addWidget(close)
+        if panel:
+            collapse = QPushButton(" Collapse")
+            collapse.setIcon(breeze("collapse"))
+            collapse.setIconSize(QSize(30, 30))
+            collapse.clicked.connect(self.collapse)
+            row2.addWidget(collapse)
         lay.addLayout(row2)
         # Collapsed: just Expand, with a margin to grab the panel by.
         self.mini = QWidget()
         mini = QHBoxLayout(self.mini)
         mini.setContentsMargins(*[self.MINI_MARGIN] * 4)
-        expand = QPushButton("▸ Expand")
+        expand = QPushButton()
+        expand.setIcon(breeze("expand"))
+        expand.setIconSize(QSize(36, 36))
+        expand.setToolTip("Expand")
+        expand.setStyleSheet("min-width: 0px; padding: 10px;")
         expand.clicked.connect(self.expand)
         mini.addWidget(expand)
         self.mini.hide()
@@ -393,32 +413,14 @@ class NarrationWindow(QWidget):
 
     def load(self, image, text):
         """Read a (new) snip: stops what was being read, keeps the panel and its place. image None:
-        show the text itself (pasted text)."""
+        pasted text (shown as text)."""
         if self.narrator is not None:
             self.narrator.cleanup()
-        self.text = text
-        if image is None:
-            shown = text if len(text) <= 600 else text[:600].rstrip() + " …"
-            self.pic.setPixmap(QPixmap())
-            self.pic.setText(shown)
-            self.pic.setStyleSheet("background: #161c23; border-radius: 8px; padding: 14px;"
-                                   " font-size: 20px; color: #e8ecf0;")
-            self.pic.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-            self.pic_width = 820 if self.panel else 1800
-            if self.panel:
-                self.pic.setFixedWidth(self.pic_width)
-        else:
-            box = (860, 440) if self.panel else (1840, 800)
-            pm = QPixmap.fromImage(image)
-            if pm.width() > box[0] or pm.height() > box[1] or not self.panel:
-                pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-            self.pic.setText("")
-            self.pic.setStyleSheet("")
-            self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.pic.setMinimumWidth(0)
-            self.pic.setMaximumWidth(16777215)
-            self.pic.setPixmap(pm)
-            self.pic_width = pm.width()
+        self.image, self.text = image, text
+        self.view = "image" if image is not None else "text"
+        self.view_button.setEnabled(image is not None)
+        self.copy_image_button.setEnabled(image is not None)
+        self.show_view()
         self.state.setText("Preparing…")
         self.toggle.setText("■ Stop")
         self.pause_button.setText("⏸ Pause")
@@ -428,6 +430,47 @@ class NarrationWindow(QWidget):
         self.narrator.finished.connect(self.done)
         self.narrator.start()
         self.expand() if self.collapsed else self.fit()
+
+    def show_view(self):
+        """The snip's image, or the text (OCR'd or pasted)."""
+        if self.view == "text" or self.image is None:
+            shown = self.text if len(self.text) <= 600 else self.text[:600].rstrip() + " …"
+            self.pic.setPixmap(QPixmap())
+            self.pic.setText(shown)
+            self.pic.setStyleSheet("background: #161c23; border-radius: 8px; padding: 14px;"
+                                   " font-size: 20px; color: #e8ecf0;")
+            self.pic.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+            self.pic_width = 820 if self.panel else 1800
+            self.pic.setFixedWidth(self.pic_width)
+        else:
+            box = (860, 440) if self.panel else (1840, 800)
+            pm = QPixmap.fromImage(self.image)
+            if pm.width() > box[0] or pm.height() > box[1] or not self.panel:
+                pm = pm.scaled(*box, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            self.pic.setText("")
+            self.pic.setStyleSheet("")
+            self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.pic.setMinimumWidth(0)
+            self.pic.setMaximumWidth(16777215)
+            self.pic.setPixmap(pm)
+            self.pic_width = pm.width()
+        self.view_button.setText("Show image" if self.view == "text" else "Show text")
+
+    def toggle_view(self):
+        self.view = "text" if self.view == "image" else "image"
+        self.show_view()
+        self.fit()
+
+    def copy_image(self):
+        if self.image is None:
+            return
+        from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
+        buf = QByteArray()
+        b = QBuffer(buf)
+        b.open(QIODevice.OpenModeFlag.WriteOnly)
+        self.image.save(b, "PNG")
+        ok = to_clipboard(bytes(buf), "image/png")
+        self.state.setText("Image copied to the clipboard." if ok else "Couldn't copy (is desktop mode running?)")
 
     def copy_text(self):
         ok = to_clipboard(self.text.encode(), "text/plain;charset=utf-8")
@@ -449,7 +492,7 @@ class NarrationWindow(QWidget):
         if self.collapsed:
             self.setFixedSize(self.mini.sizeHint())
         else:
-            w = max(700, min(900, self.pic_width + 36))
+            w = max(780, min(900, self.pic_width + 36))
             self.full.setFixedWidth(w)
             self.setFixedSize(w, self.full.sizeHint().height())
 
