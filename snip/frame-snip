@@ -26,7 +26,8 @@ import time
 from pathlib import Path
 
 NARRATE = len(sys.argv) > 1 and sys.argv[1] == "--narrate"
-if NARRATE:      # the narration panel draws itself into its own SteamVR overlay (like Arrow Pad)
+XCLIP = len(sys.argv) > 1 and sys.argv[1] == "--x-clipboard"
+if NARRATE or XCLIP:      # the narration panel draws itself into its own SteamVR overlay (like Arrow Pad)
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
 else:
     os.environ["QT_QPA_PLATFORM"] = "xcb"
@@ -122,6 +123,99 @@ def breeze(name):
     """A Breeze icon (largest SVG), or an empty icon."""
     hits = sorted(Path("/usr/share/icons/breeze-dark").glob(f"*/*/{name}.svg"))
     return QIcon(str(hits[-1])) if hits else QIcon()
+
+
+def x_clipboard_owner(folder):
+    """frame-snip --x-clipboard DIR: own the desktop's X clipboard (:2) and offer the files in DIR
+    (clip.png, clip.bmp, clip.html) as image/png, image/bmp and text/html, until something else is
+    copied. Some apps (OnlyOffice) don't take an image offered as PNG alone, which is all wl-copy
+    can do; KWin passes the X clipboard on to Wayland apps too. No focus needed, unlike Wayland."""
+    folder = Path(folder)
+    files = {"image/png": "clip.png", "image/bmp": "clip.bmp", "text/html": "clip.html"}
+    data = {k: (folder / v).read_bytes() for k, v in files.items() if (folder / v).exists()}
+    shutil.rmtree(folder, ignore_errors=True)
+    auth = next(iter(sorted(RUN.glob("nested_plasma/xauth_*"))), None)
+    if auth:
+        os.environ["XAUTHORITY"] = str(auth)
+    x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
+    x.XOpenDisplay.restype = ctypes.c_void_p
+    x.XInternAtom.restype = ctypes.c_ulong
+    x.XCreateSimpleWindow.restype = ctypes.c_ulong
+    x.XDefaultRootWindow.restype = ctypes.c_ulong
+    x.XGetSelectionOwner.restype = ctypes.c_ulong
+    d = ctypes.c_void_p(x.XOpenDisplay(b":2"))
+    if not d.value:
+        return 1
+    atom = lambda n: x.XInternAtom(d, n.encode(), 0)
+    win = x.XCreateSimpleWindow(d, ctypes.c_ulong(x.XDefaultRootWindow(d)), 0, 0, 1, 1, 0, 0, 0)
+    CLIP, TARGETS, TIMESTAMP, XA_ATOM, XA_INTEGER = atom("CLIPBOARD"), atom("TARGETS"), atom("TIMESTAMP"), 4, 19
+    offers = {atom(k): v for k, v in data.items()}
+    x.XSetSelectionOwner(d, ctypes.c_ulong(CLIP), ctypes.c_ulong(win), ctypes.c_ulong(0))
+    if x.XGetSelectionOwner(d, ctypes.c_ulong(CLIP)) != win:
+        return 1
+
+    class Req(ctypes.Structure):                      # XSelectionRequestEvent
+        _fields_ = [("type", ctypes.c_int), ("serial", ctypes.c_ulong), ("send_event", ctypes.c_int),
+                    ("display", ctypes.c_void_p), ("owner", ctypes.c_ulong), ("requestor", ctypes.c_ulong),
+                    ("selection", ctypes.c_ulong), ("target", ctypes.c_ulong), ("property", ctypes.c_ulong),
+                    ("time", ctypes.c_ulong)]
+
+    class Note(ctypes.Structure):                     # XSelectionEvent
+        _fields_ = [("type", ctypes.c_int), ("serial", ctypes.c_ulong), ("send_event", ctypes.c_int),
+                    ("display", ctypes.c_void_p), ("requestor", ctypes.c_ulong), ("selection", ctypes.c_ulong),
+                    ("target", ctypes.c_ulong), ("property", ctypes.c_ulong), ("time", ctypes.c_ulong),
+                    ("pad", ctypes.c_char * 64)]
+
+    ev = (ctypes.c_char * 256)()
+    while True:
+        x.XNextEvent(d, ev)
+        etype = ctypes.c_int.from_buffer(ev).value
+        if etype == 29:                               # SelectionClear: something else was copied
+            return 0
+        if etype != 30:                               # SelectionRequest
+            continue
+        r = Req.from_buffer(ev)
+        prop = r.property or r.target
+        if r.target == TARGETS:
+            atoms = (ctypes.c_ulong * (len(offers) + 2))(TARGETS, TIMESTAMP, *offers)
+            x.XChangeProperty(d, ctypes.c_ulong(r.requestor), ctypes.c_ulong(prop), ctypes.c_ulong(XA_ATOM),
+                              32, 0, atoms, len(atoms))
+        elif r.target == TIMESTAMP:
+            t = (ctypes.c_ulong * 1)(0)
+            x.XChangeProperty(d, ctypes.c_ulong(r.requestor), ctypes.c_ulong(prop), ctypes.c_ulong(XA_INTEGER), 32, 0, t, 1)
+        elif r.target in offers:
+            blob = offers[r.target]
+            x.XChangeProperty(d, ctypes.c_ulong(r.requestor), ctypes.c_ulong(prop), ctypes.c_ulong(r.target),
+                              8, 0, ctypes.c_char_p(blob), len(blob))
+        else:
+            prop = 0                                  # can't give that
+        note = Note(type=31, send_event=1, display=d, requestor=r.requestor, selection=r.selection,
+                    target=r.target, property=prop, time=r.time)
+        x.XSendEvent(d, ctypes.c_ulong(r.requestor), 0, 0, ctypes.byref(note))
+        x.XFlush(d)
+
+
+def copy_image_everywhere(image):
+    """Put an image on the clipboard in the formats apps look for (PNG, BMP, an HTML <img>), via an
+    X clipboard owner on the desktop; plain wl-copy (PNG only) if that can't start."""
+    from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
+    import base64
+    def encoded(fmt):
+        buf = QByteArray()
+        b = QBuffer(buf)
+        b.open(QIODevice.OpenModeFlag.WriteOnly)
+        image.save(b, fmt)
+        return bytes(buf)
+    png = encoded("PNG")
+    if not list(RUN.glob("nested_plasma/xauth_*")):
+        return to_clipboard(png, "image/png")
+    d = Path(tempfile.mkdtemp(prefix="snip-clip-"))
+    (d / "clip.png").write_bytes(png)
+    (d / "clip.bmp").write_bytes(encoded("BMP"))
+    (d / "clip.html").write_bytes(f'<img src="data:image/png;base64,{base64.b64encode(png).decode()}">'.encode())
+    subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--x-clipboard", str(d)], start_new_session=True,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return True
 
 
 def from_clipboard():
@@ -382,20 +476,43 @@ class NarrationWindow(QWidget):
         paste = QPushButton("Paste")
         paste.setToolTip("Read the clipboard's text instead")
         paste.clicked.connect(self.paste_text)
-        for b in (self.copy_image_button, copy, paste):
-            row2.addWidget(b)
-        row2.addStretch(1)
+        # Collapse at both ends (icon only on the left), so it can be collapsed toward either side;
+        # the copy buttons centred between equal-width ends.
+        left, right = QWidget(), QWidget()
+        left_lay, right_lay = QHBoxLayout(left), QHBoxLayout(right)
+        for l in (left_lay, right_lay):
+            l.setContentsMargins(0, 0, 0, 0)
         close = QPushButton("Close")
         close.clicked.connect(self.close)
-        row2.addWidget(close)
+        right_lay.addWidget(close)
+        self.collapse_buttons = []
         if panel:
+            collapse_left = QPushButton()
+            collapse_left.setIcon(breeze("collapse"))
+            collapse_left.setIconSize(QSize(30, 30))
+            collapse_left.setToolTip("Collapse")
+            collapse_left.setStyleSheet("min-width: 0px; padding: 11px 12px;")
+            collapse_left.clicked.connect(lambda: self.collapse(collapse_left))
+            left_lay.addWidget(collapse_left)
+            left_lay.addStretch(1)
             collapse = QPushButton("Collapse ")
             collapse.setIcon(breeze("collapse"))
             collapse.setIconSize(QSize(30, 30))
             collapse.setLayoutDirection(Qt.LayoutDirection.RightToLeft)      # icon on the right
-            collapse.clicked.connect(self.collapse)
-            row2.addWidget(collapse)
-            self.collapse_button = collapse
+            collapse.clicked.connect(lambda: self.collapse(collapse))
+            right_lay.addWidget(collapse)
+            self.collapse_buttons = [collapse_left, collapse]
+        self.collapse_button = self.collapse_buttons[-1] if panel else None    # the one last used
+        row2.addWidget(left)
+        row2.addStretch(1)
+        for b in (self.copy_image_button, copy, paste):
+            row2.addWidget(b)
+        row2.addStretch(1)
+        row2.addWidget(right)
+        for b in (self.copy_image_button, copy, paste, close) + ((collapse,) if panel else ()):
+            b.setStyleSheet("padding: 12px 14px; font-size: 20px;")        # (a narrower row)
+        self.row2, self.left_end, self.right_end = row2, left, right
+        self.ensurePolished()
         lay.addLayout(row2)
         # Collapsed: just Expand, with a margin to grab the panel by.
         self.mini = QWidget()
@@ -470,12 +587,7 @@ class NarrationWindow(QWidget):
     def copy_image(self):
         if self.image is None:
             return
-        from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
-        buf = QByteArray()
-        b = QBuffer(buf)
-        b.open(QIODevice.OpenModeFlag.WriteOnly)
-        self.image.save(b, "PNG")
-        ok = to_clipboard(bytes(buf), "image/png")
+        ok = copy_image_everywhere(self.image)
         self.state.setText("Image copied to the clipboard." if ok else "Couldn't copy (is desktop mode running?)")
 
     def copy_text(self):
@@ -498,23 +610,27 @@ class NarrationWindow(QWidget):
         if self.collapsed:
             self.setFixedSize(self.mini.sizeHint())
         else:
-            w = max(780, min(900, self.pic_width + 36))
+            # (styled sizes are known once shown: the left end as wide as the right centres the middle)
+            self.left_end.setMinimumWidth(self.right_end.sizeHint().width())
+            w = max(780, min(900, self.pic_width + 36), self.row2.sizeHint().width() + 36)
             self.full.setFixedWidth(w)
             self.setFixedSize(w, self.full.sizeHint().height())
 
     def pivot(self):
         """Where the Collapse / Expand icon is (widget pixels): the overlay keeps that point still
         when the panel collapses or expands, so the icon stays under the laser."""
-        b = self.expand_button if self.collapsed else getattr(self, "collapse_button", None)
+        b = self.expand_button if self.collapsed else self.collapse_button
         if b is None:
             return None
-        if b is self.collapse_button:                   # its icon, at the right end
-            p = b.mapTo(self, QPoint(b.width() - 20 - 15, b.height() // 2))
+        if b is self.collapse_buttons[-1]:              # its icon, at the right end
+            p = b.mapTo(self, QPoint(b.width() - 14 - 15, b.height() // 2))       # (padding, half the icon)
         else:
             p = b.mapTo(self, QPoint(b.width() // 2, b.height() // 2))
         return p
 
-    def collapse(self):
+    def collapse(self, button=None):
+        """button: the Collapse used (left or right); Expand comes back to it, its icon in place."""
+        self.collapse_button = button or self.collapse_button
         self.toggled = True
         self.collapsed = True
         self.full.hide()
@@ -618,8 +734,8 @@ class NarrationOverlay(QObject):
         if self.w.width() == self.width_px:
             return False
         self.width_px = self.w.width()
-        for o in (self.h, self.cover):
-            self.ov.setOverlayWidthInMeters(o, self.width_px * self.M_PER_PX)
+        # (the cover keeps the old size and place until the new picture is up: see render)
+        self.ov.setOverlayWidthInMeters(self.h, self.width_px * self.M_PER_PX)
         return True
 
     def height_m(self):
@@ -744,13 +860,20 @@ class NarrationOverlay(QObject):
         self.pose = [[x_axis[i], (0.0, 1.0, 0.0)[i], z_axis[i], centre[i]] for i in range(3)]
         self.apply_pose()
 
-    def apply_pose(self):
+    def apply_pose(self, cover=True):
         m = self.matrix(self.pose)
-        for o in (self.h, self.cover):
+        for o in (self.h, self.cover) if cover else (self.h,):
             self.ov.setOverlayTransformAbsolute(o, self.vr.TrackingUniverseStanding, m)
 
     def render(self):
-        if self.w.width() != self.width_px or self.w.height() != getattr(self, "height_px", 0):
+        resized = self.w.width() != self.width_px or self.w.height() != getattr(self, "height_px", 0)
+        if resized and self.cover_path is not None:
+            # A new size (Collapse / Expand, a new snip): the old picture stretched to the new size
+            # flickered like static. Show the old one (cover: old size and place) and hide the
+            # panel until its new picture has loaded.
+            self.ov.showOverlay(self.cover)
+            self.ov.hideOverlay(self.h)
+        if resized:
             k = self.M_PER_PX
             old_w, old_h = self.width_px, getattr(self, "height_px", 0)
             new_w, new_h = self.w.width(), self.w.height()
@@ -769,13 +892,13 @@ class NarrationOverlay(QObject):
             self.size_m()
             self.height_px = new_h
             if moved:
-                self.apply_pose()
+                self.apply_pose(cover=False)
                 if self.offset:                             # (follow() works from the offset)
                     self.save_offset()
         self.last_pivot = self.w.pivot()
         img = self.w.grab().toImage()
         digest = hash(bytes(img.constBits().asstring(img.sizeInBytes())))
-        if digest == self.last_digest:
+        if digest == self.last_digest and not resized:
             return
         self.last_digest = digest
         self.n += 1
@@ -791,8 +914,11 @@ class NarrationOverlay(QObject):
         QTimer.singleShot(120 if covered else 0, lambda: self.uncover(path))
 
     def uncover(self, path):
+        self.ov.showOverlay(self.h)
         self.ov.hideOverlay(self.cover)
         self.ov.setOverlayFromFile(self.cover, path)
+        self.ov.setOverlayWidthInMeters(self.cover, self.width_px * self.M_PER_PX)
+        self.apply_pose()
         old, self.cover_path = self.cover_path, path
         if old and old != path:
             Path(old).unlink(missing_ok=True)
@@ -1046,13 +1172,8 @@ class Snip(QWidget):
 
     # actions
     def copy_image(self):
-        from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
-        buf = QByteArray()
-        b = QBuffer(buf)
-        b.open(QIODevice.OpenModeFlag.WriteOnly)
-        self.snipped().save(b, "PNG")
-        ok = to_clipboard(bytes(buf), "image/png")
-        notify("Snip copied" if ok else "Couldn't copy the snip", "" if ok else "wl-copy or the desktop isn't available")
+        ok = copy_image_everywhere(self.snipped())
+        notify("Snip copied" if ok else "Couldn't copy the snip", "" if ok else "the desktop isn't available")
         self.close()
 
     def save(self):
@@ -1155,6 +1276,8 @@ def narrate_panel(image_path, text_path):
 
 
 def main():
+    if XCLIP:
+        return x_clipboard_owner(sys.argv[2])
     if NARRATE:
         return narrate_panel(sys.argv[2], sys.argv[3])
     app = QApplication(sys.argv[:1])

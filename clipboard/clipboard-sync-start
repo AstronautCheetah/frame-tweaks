@@ -1,0 +1,5 @@
+#!/bin/bash
+# Start clipboard-sync, stopping any already running: one left over from a desktop session that
+# was restarted kept syncing too, and two of them fight over every copy.
+pkill -u "$(id -u)" -x clipboard-sync 2>/dev/null || true
+exec "$(dirname "$(readlink -f "$0")")/clipboard-sync" "$@"
