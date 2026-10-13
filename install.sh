@@ -263,7 +263,7 @@ stop_processes() {
         echo "stopped $id's running programs"
         # A stopped pad can't release keys it held down: make sure no modifier stays pressed.
         [[ $id == arrowpad && -x $BIN/ydotool ]] &&
-            YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket" "$BIN/ydotool" key 125:0 29:0 56:0 42:0 2>/dev/null || true
+            clear_stuck_modifiers
     fi
 }
 
