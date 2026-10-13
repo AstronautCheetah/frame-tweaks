@@ -36,7 +36,9 @@ the window normally there.
 SteamVR keeps a floating window's width when its shape changes, so turning the phone sideways
 used to shrink the window to a strip as wide as the upright phone. A small dashboard patch
 (`patch.js`, installed when the [VR windows](../vr-dashboard/) helper is) scales a window whose
-picture turns, so its long side stays as long: the window just turns.
+picture turns, so its long side stays as long: the window just turns. It also starts an upright window at
+0.8 m tall: SteamVR starts every floating window as wide as a standard one, so the upright phone
+used to come up over 2 m tall.
 
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,

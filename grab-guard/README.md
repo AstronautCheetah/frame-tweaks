@@ -10,15 +10,17 @@ except the desktop window's title ("Press right control to **ungrab** input").
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
 > - **Changes:** `grab-guard`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs`
-> - **Unusual access:** **Reads every keyboard's key presses** (only to notice Right Ctrl; nothing else is kept)
+> - **Unusual access:** **Reads every keyboard's key presses**, and the Steam session's display's (only to notice Right Ctrl; nothing else is kept)
 > - **Undo:** `./install.sh uninstall grab-guard`
 <!-- /generated:glance -->
 
 **Fix:** a small watcher (`grab-guard`, a user service) checks that title every second. When
 the grab turns on it shows a notification: tap **Right Ctrl** on a keyboard once to release it.
-It also logs which input device sent the Right Ctrl (a Bluetooth keyboard, the virtual keyboard
-that Arrow Pad and Dictation type through, a controller…), so a stray source can be tracked
-down: `~/.local/state/frame-tweaks/logs/grab-guard.log`, or `grab-guard --status`.
+It also logs where the Right Ctrl came from, so a stray source can be tracked down: which input
+device sent it (a Bluetooth keyboard, the virtual keyboard that Arrow Pad and Dictation type
+through, a controller…), and how the Steam session's display got it (also keys that never pass
+through an input device: faked by an X program (XTest), or typed through libei, as Full
+Keyboard does): `~/.local/state/frame-tweaks/logs/grab-guard.log`, or `grab-guard --status`.
 
 ```sh
 ./install.sh grab-guard
