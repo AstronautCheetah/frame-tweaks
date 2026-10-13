@@ -205,6 +205,10 @@ class OverlayHost:
                p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"))
         if sig != getattr(self, "_sig", None):
             self._sig = sig
+            # Colour the buttons for this state *before* the redraw: the pad's own mic refresh
+            # runs on a slower timer, and a redraw that beat it showed the previous colour (no
+            # red on the first tap, yellow left behind after the text arrived).
+            p.restyle()
             self.dirty = True
 
     @property

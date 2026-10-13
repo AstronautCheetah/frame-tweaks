@@ -129,5 +129,27 @@ class FollowBar(unittest.TestCase):
                 self.assertAlmostEqual(x, y, places=9)
 
 
+class MicColour(unittest.TestCase):
+    def test_buttons_are_recoloured_before_the_redraw(self):
+        v = load()
+        o = v.OverlayHost.__new__(v.OverlayHost)
+        calls = []
+        pad = types.SimpleNamespace(
+            layer="nav", mod_state={}, pinned=False, lang="us", scale=1.0, haptic_level=1,
+            cfg={}, click_swap=types.SimpleNamespace(armed=None),
+            settings_page=types.SimpleNamespace(isVisible=lambda: False),
+            restyle=lambda: calls.append(("restyle", o.dirty)))
+        o.pad, o.dirty = pad, False
+        for state in ("idle", "recording", "transcribing", "idle"):
+            pad.dictation_state = lambda s=state: s
+            o.mark_dirty()
+            self.assertEqual(calls[-1], ("restyle", False))     # recoloured, then marked for redraw
+            self.assertTrue(o.dirty)
+            o.dirty = False
+        o.mark_dirty()                                             # nothing changed: no redraw
+        self.assertFalse(o.dirty)
+        self.assertEqual(len(calls), 4)
+
+
 if __name__ == "__main__":
     unittest.main()

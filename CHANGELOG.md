@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad VR's mic button showed the previous dictation state:** the redraw could run before
+  the button was recoloured, so the first tap didn't turn it red and it stayed yellow after the
+  text arrived. It now goes red while recording, yellow while transcribing, then back to normal.
 - **Claude Desktop kept signing you out:** some starts reached no wallet (Chromium's `basic_text`
   fallback), so the sign-in was never saved, and one saved by a wallet-backed start couldn't be
   read. `~/.local/bin/claude-desktop` is now a launcher that always uses the shared KDE wallet, however
