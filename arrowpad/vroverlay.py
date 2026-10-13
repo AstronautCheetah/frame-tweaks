@@ -422,6 +422,29 @@ class OverlayHost:
         if self.dirty and visible:
             self.render()
 
+    INPUT_LOG = f"{TEX_DIR}/arrowpad-input.log"
+
+    def log_input(self, msg):
+        """Presses and releases as SteamVR reports them and where they land (for diagnosis)."""
+        try:
+            if os.path.exists(self.INPUT_LOG) and os.path.getsize(self.INPUT_LOG) > 200_000:
+                os.replace(self.INPUT_LOG, self.INPUT_LOG + ".1")
+            with open(self.INPUT_LOG, "a") as f:
+                f.write(f"{time.strftime('%H:%M:%S')}.{int(time.time() * 1000) % 1000:03d} {msg}\n")
+        except OSError:
+            pass
+
+    def describe(self, w):
+        if w is None:
+            return "nothing"
+        for r, c, b in self.pad.buttons:
+            if b is w:
+                return f"key {self.pad.name_at(r, c)!r} (row {r}, col {c})"
+        for name, b in self.pad.tools.items():
+            if b is w:
+                return f"tool {name!r}"
+        return f"{type(w).__name__} {w.text()!r}"
+
     def pump(self, handle):
         ev = openvr.VREvent_t()
         # pyopenvr returns (result, event): test the result, or this loops forever.
@@ -430,6 +453,12 @@ class OverlayHost:
             cursor = ev.data.mouse.cursorIndex if t in (
                 openvr.VREvent_MouseMove, openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp) else 0
             if t in (openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp):
+                m = ev.data.mouse
+                self.log_input(f"{'down' if t == openvr.VREvent_MouseButtonDown else 'up  '} overlay "
+                               f"{self.handles.index(handle) if handle in self.handles else '?'} (front "
+                               f"{self.front}) laser {cursor} device {dev} raw ({m.x:.1f}, {m.y:.1f}) "
+                               f"size {self.size} -> {self.to_widget(m).x()},{self.to_widget(m).y()} "
+                               f"on {self.describe(self.button_at(self.to_widget(m)))}")
                 # Backstop: a press (or release) of the same laser within 60 ms of the previous
                 # one is the same click seen by the other overlay. Real taps are far slower.
                 now = time.monotonic()
