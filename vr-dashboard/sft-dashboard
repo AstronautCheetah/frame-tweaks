@@ -154,14 +154,22 @@ KEY = {"up": 103, "down": 108, "left": 105, "right": 106, "pgup": 104, "pgdn": 1
 
 
 def desktop_bus():
-    """The nested desktop's session bus address (from its plasmashell), or None."""
-    for d in Path("/proc").iterdir():
+    """The nested desktop's session bus address, or None: the newest /tmp/dbus-* socket with KWin
+    on it. (Reading plasmashell's environment would be simpler, but a service may not.)"""
+    from jeepney import DBusAddress, new_method_call
+    from jeepney.io.blocking import open_dbus_connection
+    dbus = DBusAddress("/org/freedesktop/DBus", bus_name="org.freedesktop.DBus", interface="org.freedesktop.DBus")
+    socks = sorted(Path("/tmp").glob("dbus-*"), key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
+    for sock in socks:
+        if not sock.is_socket():
+            continue
+        address = f"unix:path={sock}"
         try:
-            if d.name.isdigit() and (d / "comm").read_text().strip() == "plasmashell":
-                for item in (d / "environ").read_bytes().split(b"\0"):
-                    if item.startswith(b"DBUS_SESSION_BUS_ADDRESS="):
-                        return item.split(b"=", 1)[1].decode()
-        except OSError:
+            with open_dbus_connection(address) as conn:
+                reply = conn.send_and_get_reply(new_method_call(dbus, "NameHasOwner", "s", ("org.kde.KWin",)), timeout=2)
+                if reply.body[0]:
+                    return address
+        except Exception:
             continue
     return None
 
@@ -241,7 +249,7 @@ def scroll(req):
     if req.get("target") == "desktop":
         for attempt in (1, 2):                 # a restarted desktop has a new bus: reconnect once
             try:
-                if _desktop is None or _desktop.bus != desktop_bus():
+                if _desktop is None:                 # found once; again only after an error
                     _desktop = DesktopScroll()
                 # The portal's discrete axis: + = down / right, the opposite of the wheel's +y.
                 if page:
