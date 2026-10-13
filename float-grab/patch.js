@@ -1,6 +1,8 @@
 // steam-frame-tweaks float-grab: "Float in World" also picks the window up, as grabbing the bar
 // under it does, so you place it in one go. It's let go by your next click, or by releasing the
-// trigger if you're still holding the click that floated it.
+// trigger if you're still holding the click that floated it. While it's held, and briefly after,
+// "Return to Dashboard" (the button that replaced Float in World under the laser) is ignored for
+// that window, so the click that puts it down can't dock it again.
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard. It calls the dashboard's
 // own drag (UndockedOverlay.startFloatingWindowMove / endFloatingWindowMove), with the controller
 // that pressed the button (the dashboard's primary device), encoded the way SteamVR's laser
@@ -13,8 +15,9 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'float-grab', VERSION = 1, DASH = 1, WORLD = 4;
-  const RELEASE_DEG = 6;            // trigger moved this far from where it was: a click ended or began
+  const NAME = 'float-grab', VERSION = 2, DASH = 1, WORLD = 4;
+  const RELEASE_DEG = 2;            // trigger moved this far from where it was: a click ended or began
+  const NO_REDOCK_MS = 1500;        // after putting it down, ignore Return to Dashboard this long
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -55,11 +58,15 @@
   };
 
   let grabbed = 0, active = null;     // active: {frame, mover, hand, trigger0, timer}
+  let noRedock = { frame: null, until: 0 };
+  const onPageClick = () => finish();  // a laser click on the dashboard page itself
   const finish = () => {
     if (!active) return;
     clearInterval(active.timer);
+    window.removeEventListener('mousedown', onPageClick, true);
     const a = active;
     active = null;
+    noRedock = { frame: a.frame, until: Date.now() + NO_REDOCK_MS };
     try { if (a.frame.docking.beingDragged) a.mover.endFloatingWindowMove(); } catch (e) { /* changed */ }
   };
   const pickUp = (f, h) => {
@@ -74,13 +81,14 @@
       s.startFloatingWindowMove(ev);
       grabbed++;
       const t0 = trigger(h);
+      window.addEventListener('mousedown', onPageClick, true);
       active = { frame: f, mover: s, hand: h, trigger0: t0, timer: setInterval(() => {
         try {
           if (!f.docking.beingDragged) return finish();           // ended by a click (mouseup)
           const t = trigger(h);
           if (t0 && t && degreesBetween(t0, t) >= RELEASE_DEG) finish();   // trigger let go / pressed
         } catch (e) { finish(); }
-      }, 30) };
+      }, 15) };
     }, 40);
   };
 
@@ -93,6 +101,11 @@
       const orig = d.SetDockLocation;
       d.SetDockLocation = function (loc, ...rest) {
         const from = d.dockLocation, dragging = d.beingDragged;
+        if (loc === DASH && from === WORLD &&
+            ((active && active.frame === f) || (noRedock.frame === f && Date.now() < noRedock.until))) {
+          finish();
+          return undefined;                     // the put-down click hit Return to Dashboard: ignore it
+        }
         const r = orig.call(this, loc, ...rest);
         try {
           if (from === DASH && loc === WORLD && !dragging && !active) {
