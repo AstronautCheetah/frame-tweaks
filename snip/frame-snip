@@ -260,8 +260,9 @@ class Narrator(QObject):
 
 class NarrationWindow(QWidget):
     """The snip, popped out, with the narration's controls; the rest of VR stays usable."""
-    STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 20px; }"
-             "QPushButton { background: #232a32; font-weight: 600; padding: 10px 16px; border-radius: 10px; }"
+    STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 30px; }"
+             "QPushButton { background: #232a32; font-weight: 600; padding: 16px 28px; border-radius: 12px;"
+             " min-width: 70px; }"
              "QPushButton:hover { background: #355b7a; } QPushButton:disabled { color: #3a434d; }")
 
     def __init__(self, image, text, speed):
@@ -269,13 +270,15 @@ class NarrationWindow(QWidget):
         self.setWindowTitle("Screen snip: narrating")
         self.setStyleSheet(self.STYLE)
         lay = QVBoxLayout(self)
+        lay.setContentsMargins(40, 30, 40, 30)
+        # The Steam session shows every window as a 1920x1080 panel, so fill it: the snip as large
+        # as fits above the controls.
         pic = QLabel()
-        pm = QPixmap.fromImage(image)
-        if pm.width() > 900 or pm.height() > 600:
-            pm = pm.scaled(900, 600, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        pm = QPixmap.fromImage(image).scaled(1840, 800, Qt.AspectRatioMode.KeepAspectRatio,
+                                             Qt.TransformationMode.SmoothTransformation)
         pic.setPixmap(pm)
         pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lay.addWidget(pic)
+        lay.addWidget(pic, 1)
         self.state = QLabel("Preparing…")
         self.state.setStyleSheet("color: #9aa6b2;")
         lay.addWidget(self.state)
@@ -287,7 +290,7 @@ class NarrationWindow(QWidget):
         self.speed = speed
         self.slower, self.faster = QPushButton("−"), QPushButton("+")
         self.speed_label = QLabel()
-        self.speed_label.setMinimumWidth(70)
+        self.speed_label.setMinimumWidth(110)
         self.speed_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.slower.clicked.connect(lambda: self.step(-1))
         self.faster.clicked.connect(lambda: self.step(1))
@@ -303,10 +306,7 @@ class NarrationWindow(QWidget):
         self.narrator.progress.connect(lambda i, n: self.state.setText(f"Reading aloud: part {i + 1} of {n}"))
         self.narrator.finished.connect(self.done)
         self.narrator.start()
-        # A fixed size keeps this window its own shape in VR (the Steam session otherwise makes
-        # every window 1920x1080).
-        self.adjustSize()
-        self.setFixedSize(self.sizeHint())
+        self.resize(1920, 1080)
 
     def show_speed(self):
         self.speed_label.setText(f"{self.speed:g}×")
