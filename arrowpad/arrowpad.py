@@ -904,6 +904,8 @@ class ArrowPad(QWidget):
 
     def on_release(self, r, c):
         name = self.name_at(r, c)
+        if self.overlay is not None:
+            self.overlay.log_input(f"     released {name!r} (row {r}, col {c})")
         if name in MODIFIERS:
             chord = self.mod_pressing.pop(name, False)
             if self.mod_state[name] == "held":
@@ -1049,6 +1051,14 @@ def signal_running(command):
 
 
 def main():
+    # A crash in native code (ctypes, Qt, OpenVR) kills the pad without a Python traceback; keep
+    # one in a file so a bug report can say where it happened.
+    try:
+        import faulthandler
+        main.crash_log = open(RUN / f"arrowpad-{TARGET}-crash.log", "a")
+        faulthandler.enable(file=main.crash_log, all_threads=True)
+    except OSError:
+        pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--scale", type=float, default=float(os.environ.get("ARROWPAD_SCALE", 1.0)),
                     help="button size multiplier (default 1.0)")

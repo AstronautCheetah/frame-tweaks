@@ -127,6 +127,7 @@ cmd_install() {
         if held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]]; then
             echo "held: left as it is (./install.sh unhold $id)"; echo; continue
         fi
+        stop_processes "$id"            # a reinstall must not leave the old copy running
         if ! "./$id/install.sh" 8>&-; then failed+=("$id"); echo "!! $id failed" >&2
         else record_version "$id"; fi
         echo
@@ -149,7 +150,7 @@ cmd_uninstall() {
             done
         done
     done
-    for id in "$@"; do bold "── removing $id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
 }
 
 cmd_update() {
@@ -238,6 +239,33 @@ cmd_kdialog_gui() {
 }
 
 usage() { sed -n '2,18s/^# \{0,1\}//p' "$0"; }
+
+# ---- stopping a tweak's programs ------------------------------------------------------------
+# <id>/processes lists the programs a tweak runs (pgrep -f patterns, ~ = $HOME). They're
+# stopped before the tweak is uninstalled or reinstalled, so an old copy can't keep running.
+stop_processes() {
+    local id=$1 pat pids n=0
+    [[ -f ./$id/processes ]] || return 0
+    while IFS= read -r pat; do
+        [[ -z $pat || $pat == \#* ]] && continue
+        pat=${pat//\~/$HOME}
+        pids=$(pgrep -f -- "$pat" | grep -vx "$$" || true)
+        [[ -n $pids ]] || continue
+        # shellcheck disable=SC2086
+        kill $pids 2>/dev/null || true
+        for _ in 1 2 3 4 5 6; do pgrep -f -- "$pat" >/dev/null || break; sleep 0.5; done
+        pids=$(pgrep -f -- "$pat" || true)
+        # shellcheck disable=SC2086
+        [[ -z $pids ]] || kill -9 $pids 2>/dev/null || true      # didn't stop within 3 s
+        n=$((n + 1))
+    done < "./$id/processes"
+    if [[ $n -gt 0 ]]; then
+        echo "stopped $id's running programs"
+        # A stopped pad can't release keys it held down: make sure no modifier stays pressed.
+        [[ $id == arrowpad && -x $BIN/ydotool ]] &&
+            YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket" "$BIN/ydotool" key 125:0 29:0 56:0 42:0 2>/dev/null || true
+    fi
+}
 
 # ---- per-tweak versions (for migrations) and holds -------------------------------------------
 # installed/<id> records the Frame Tweaks version that last installed a tweak. A tweak's

@@ -44,6 +44,12 @@ why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assist
 worktree (`dev/agent-worktree.sh add <slug>`) and publishes with `dev/safe-push.sh`. See
 [docs/claude/parallel-work.md](docs/claude/parallel-work.md).
 
+## Running programs (`<tweak>/processes`)
+
+If a tweak starts programs that keep running, list them in `processes` (one `pgrep -f`
+pattern per line, `~` for the home folder). The installer stops them before uninstalling or
+reinstalling the tweak.
+
 ## Docs metadata (`<tweak>/meta`)
 
 Every tweak has a `meta` file: emoji, name, group (core / extras / helper), what you get, why,

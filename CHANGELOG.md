@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Uninstalling or reinstalling a tweak stops its running programs first** (listed in
+  `<tweak>/processes`: Arrow Pad, NordVPN tray, clipboard-sync, Full Keyboard), so an old copy
+  can't keep running after a reinstall; Arrow Pad's held keys are released.
+- Arrow Pad keeps a crash traceback in `/run/user/$UID/arrowpad-<target>-crash.log`.
 - **Arrow Pad, more Full Keyboard:** keys drawn its way (a side, a face that travels down when
   pressed, hover gradient); Graphite and Midnight themes and haptic strength in a ⚙ settings
   page; the Steam Frame logo on Super and a SteamOS key (opens the app menu) on the Fn layer; in VR,
