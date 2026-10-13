@@ -7,8 +7,11 @@ Select a rectangle of the window you're using, then:
 - **Save**: to `~/Pictures/Screenshots/Snip_<date>_<time>.png`.
 - **Copy text**: reads the text in it ([Tesseract](https://github.com/tesseract-ocr/tesseract)
   OCR) and copies that.
-- **Narrate**: reads the text aloud ([Piper](https://github.com/rhasspy/piper), offline).
-  Press **■ Stop** to stop.
+- **Narrate**: reads the text aloud ([Piper](https://github.com/rhasspy/piper), offline), at
+  the speed set under it (**−** / **+**, 0.75× to 2×, remembered). The snip pops out into a small
+  window of its own with **■ Stop** / **▶ Again**, speed, and **Close**, and the full-screen snip
+  goes away, so you can carry on with anything else while it reads. A speed change applies at
+  once (it reads sentence by sentence and restarts the current one).
 
 <!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
 > **At a glance**
