@@ -60,9 +60,11 @@ protected. Avoid changing it while a second wallet service is running (see
 [wallet/README.md](wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
 **Downloads.**
-- **Pinned upstream releases** (Full Keyboard, whisper-frame): each tweak's `pin` file records
-  the exact version and SHA256; the download must match it, so a changed or replaced upstream
-  file is refused. Pins move only in a reviewed commit (`dev/check-pins.sh`).
+- **Pinned upstream releases** (Full Keyboard, whisper-frame, the Whisper model): each tweak's
+  `pin` file records the exact version and SHA256; the download must match it, so a changed or
+  replaced upstream file is refused. **clipboard-sync** is built from a pinned commit with its
+  own lock file. **Python packages** (PyQt6, openvr, jeepney) are installed at the exact versions
+  in `lib/python-constraints.txt`. Pins move only in a reviewed commit (`dev/check-pins.sh`).
 - **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors where
   possible and are always checked against Arch Linux ARM's build key (`lib/keys/`,
   fingerprint `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking.

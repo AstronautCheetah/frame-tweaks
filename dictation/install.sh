@@ -23,7 +23,7 @@ MODELS="$HOME/.local/share/whisper"; MODEL=ggml-small-q8_0.bin
 mkdir -p "$MODELS"
 if [ ! -f "$MODELS/$MODEL" ]; then
     say "Downloading Whisper model $MODEL (shared with whisper-frame)"
-    curl -fL# -o "$MODELS/$MODEL.part" "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL"
+    fetch_pinned dictation "$MODELS/$MODEL.part"     # pinned revision and SHA256 (dictation/pin)
     mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
 fi
 # Models older versions downloaded; the shared one replaces them.

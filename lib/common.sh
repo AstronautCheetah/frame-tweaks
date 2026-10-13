@@ -157,7 +157,7 @@ ensure_tweaks_venv() {
     if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
         say "Creating Python venv with jeepney"
         python3 -m venv "$TWEAKS_VENV"
-        "$TWEAKS_VENV/bin/pip" install -q jeepney
+        "$TWEAKS_VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" jeepney
     fi
 }
 

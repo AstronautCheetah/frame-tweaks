@@ -1,0 +1,6 @@
+# Pinned upstream source: builds this exact commit (its Cargo.lock pins the Rust dependencies,
+# used via --locked). Bump with dev/check-pins.sh after reviewing the new commits.
+version=0.2.0+138a59b
+url=https://github.com/dnut/clipboard-sync
+rev=138a59b8f3044dd9e7dcccd9607bbbb48c14bae6
+latest=https://api.github.com/repos/dnut/clipboard-sync/commits/HEAD

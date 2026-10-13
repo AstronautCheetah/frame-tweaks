@@ -32,9 +32,17 @@ class Pins(unittest.TestCase):
     def test_every_pin_is_complete(self):
         for pin in ROOT.glob("*/pin"):
             fields = dict(l.split("=", 1) for l in pin.read_text().splitlines() if "=" in l and not l.startswith("#"))
-            self.assertRegex(fields.get("sha256", ""), r"^[0-9a-f]{64}$", pin)
             self.assertTrue(fields.get("url", "").startswith("https://"), pin)
-            self.assertIn(fields.get("version", "?"), fields["url"], pin)
+            if "rev" in fields:                       # a git commit
+                self.assertRegex(fields["rev"], r"^[0-9a-f]{40}$", pin)
+            else:                                     # a file, at a versioned URL
+                self.assertRegex(fields.get("sha256", ""), r"^[0-9a-f]{64}$", pin)
+                self.assertIn(fields.get("version", "?"), fields["url"], pin)
+
+    def test_python_constraints_are_exact(self):
+        for line in (ROOT / "lib" / "python-constraints.txt").read_text().splitlines():
+            if line.strip() and not line.startswith("#"):
+                self.assertRegex(line, r"^[A-Za-z0-9_.-]+==[0-9][0-9A-Za-z.]*$")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+- **Pinned:** clipboard-sync builds a pinned commit; the Whisper model is fetched from a pinned
+  Hugging Face revision and checked against its SHA256 (it was the moving `main` branch,
+  unchecked); Python packages install at exact versions (`lib/python-constraints.txt`).
+  `dev/check-pins.sh` reports newer versions of all of them.
+- **Claude Desktop updater:** refuses while Claude Desktop is open (it used to close it without
+  asking); `claude-desktop-update --restart` to do it anyway; downloads retry.
+
 ## 0.4.0 (2026-10-08)
 - **Release channels:** updates and `get.sh` take stable `vX.Y.Z` releases only (pre-releases
   used to win over their final version); `beta` in `~/.config/steam-frame-tweaks/channel` opts

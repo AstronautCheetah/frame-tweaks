@@ -42,11 +42,12 @@ jobs:
           ./install.sh list
           ./install.sh _deps all
           ./install.sh _deps signal | grep -q '^wallet signal'
-          # every pinned download names a version, a URL and a SHA256
+          # every pin names a version, an https URL, and a SHA256 (files) or a commit (git)
           for pin in */pin; do
-            grep -qE '^version=.+' "$pin" && grep -qE '^url=https://' "$pin" && grep -qE '^sha256=[0-9a-f]{64}$' "$pin" ||
-              { echo "incomplete $pin"; exit 1; }
+            grep -qE '^version=.+' "$pin" && grep -qE '^url=https://' "$pin" &&
+              grep -qE '^(sha256=[0-9a-f]{64}|rev=[0-9a-f]{40})$' "$pin" || { echo "incomplete $pin"; exit 1; }
           done
+          ! grep -vE '^(#|$|[A-Za-z0-9_.-]+==[0-9][0-9A-Za-z.]*$)' lib/python-constraints.txt   # exact versions only
       - name: Unit tests
         run: |
           sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 >/dev/null

@@ -10,7 +10,7 @@ VENV="$HOME/.local/share/arrowpad/venv"
 if [ ! -x "$VENV/bin/python" ] || ! "$VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
     say "Creating Python venv with PyQt6 (~280 MB)"
     python3 -m venv "$VENV"
-    "$VENV/bin/pip" install -q --upgrade PyQt6
+    "$VENV/bin/pip" install -q --upgrade -c "$REPO_DIR/lib/python-constraints.txt" PyQt6
 fi
 install -m644 "$REPO_DIR/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/arrowpad.py"
 install -m644 "$REPO_DIR/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/haptics.py"
@@ -23,7 +23,7 @@ install -m644 "$REPO_DIR"/arrowpad/vr/*.json "$HOME/.local/share/arrowpad/vr/"
 VR_LIB=/opt/steamvr/bin/linuxarm64/libopenvr_api.so
 if [ -f "$VR_LIB" ]; then
     "$VENV/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' ||
-        "$VENV/bin/pip" install -q openvr
+        "$VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" openvr
     OVR=$("$VENV/bin/python" -c 'import importlib.util,os; print(os.path.dirname(importlib.util.find_spec("openvr").origin))')
     ln -sf "$VR_LIB" "$OVR/libopenvr_api_64.so"
 else
