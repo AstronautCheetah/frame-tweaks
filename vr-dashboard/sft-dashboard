@@ -221,6 +221,8 @@ class DesktopScroll:
         res = self._request("Start", "osa{sv}", (self.session, "", {}))   # KDE asks the first time
         if "restore_token" in res:
             STATE_DIR.mkdir(parents=True, exist_ok=True)
+            PORTAL_TOKEN.touch(mode=0o600)
+            PORTAL_TOKEN.chmod(0o600)                  # a remote-control grant: yours only
             PORTAL_TOKEN.write_text(res["restore_token"][1])
 
     def steps(self, axis, n):
