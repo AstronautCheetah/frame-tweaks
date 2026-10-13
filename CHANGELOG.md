@@ -3,8 +3,9 @@
 ## Unreleased
 - **New Accessibility group** in the installer window: Dictation, whisper-frame, Arrow Pad, Screen
   snip and Screen reader moved there from Convenience.
-- **Screen snip works on floating VR windows:** the selection opens right where the window floats
-  (a small dashboard patch, with the VR windows helper), instead of in the dashboard.
+- **Android Mirror: no more black bars beside an upright phone.** The window has to fit inside
+  the 1920×1080 screen (485×1080 upright), or the Steam session shows it as 1920×1080 anyway;
+  upright and sideways now come out about the same size in VR.
 - **Android Mirror reconnects by itself** when the wireless connection dies (e.g. after the phone
   switches profile or address), instead of showing a frozen picture: it checks the phone answers
   every 5 s and reconnects at its current address.

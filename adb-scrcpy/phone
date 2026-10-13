@@ -33,7 +33,7 @@ while :; do
     # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
     # without it the Steam session makes the window 1920x1080, with black bars beside a portrait
     # phone. (It ends with scrcpy, so it's started again with each reconnect.)
-    if [ -x "$HOME/.local/bin/phone-fit" ] && ! pgrep -u "$(id -u)" -x phone-fit >/dev/null; then
+    if [ -x "$HOME/.local/bin/phone-fit" ] && ! pgrep -u "$(id -u)" -f "bin/phone-fit" >/dev/null; then
         setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
     fi
     "${cap[@]}" scrcpy -s "$dev" --video-bit-rate=8M --max-size="$MAX" "$@" &

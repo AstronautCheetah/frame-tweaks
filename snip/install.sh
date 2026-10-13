@@ -33,11 +33,7 @@ sed "1s|.*|#!$QT_VENV/bin/python|" "$REPO_DIR/snip/frame-snip" > "$BIN/frame-sni
 chmod 755 "$BIN/frame-snip"
 install_icon frame-tweaks-snip
 install_desktop "$REPO_DIR/snip/frame-snip.desktop"
-# In VR, a snip of a floating window opens where it floats (a dashboard patch; needs the VR
-# windows helper, which Back to the previous window and the other VR windows tweaks install).
-if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
-    install_dashboard_patch snip-float "$REPO_DIR/snip/patch.js"
-else
-    say "Snips of floating VR windows open in the dashboard (install a VR windows tweak to open them in place)."
-fi
+# (0.4.1 briefly floated the selection over a floating window: less usable than snipping its copy
+# in the dashboard. Remove that patch if it's there.)
+[ -f "$VR_DASHBOARD/patches/snip-float.js" ] && remove_dashboard_patch snip-float
 say "Done: Arrow Pad's Tools key, then Snip (or 'Screen snip' in the app menu) starts a snip."
