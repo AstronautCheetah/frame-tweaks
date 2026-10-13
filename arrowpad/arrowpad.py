@@ -217,6 +217,20 @@ class Ydotool:
         self._emit(EV_KEY, code, 1 if down else 0)
         self._emit(EV_SYN, SYN_REPORT, 0)
 
+    def clear_stuck_modifiers(self):
+        """At start: make the desktop forget modifiers a previous pad may have left "held" (a
+        crash can't send the release). Same sequence as lib/common.sh's clear_stuck_modifiers:
+        full press+release each, Super and Alt around F24 so it isn't a lone tap (no menu opens)."""
+        F24 = 194
+        for code in (42, 54, 29, 97):                      # Shift, Ctrl (both sides)
+            self.key(code, True)
+            self.key(code, False)
+        for code in (56, 125):                             # Alt, Super
+            self.key(code, True)
+            self.key(F24, True)
+            self.key(F24, False)
+            self.key(code, False)
+
     def tap(self, *codes):
         for c in codes:
             self.key(c, True)
@@ -1081,6 +1095,7 @@ def main():
         app.setWindowIcon(QIcon(str(ICON)))
     try:
         yd = Ydotool(args.socket)
+        yd.clear_stuck_modifiers()
     except OSError as e:
         sys.exit(f"arrowpad: cannot reach ydotoold at {args.socket}: {e}\n"
                  "Start it with: systemctl --user start ydotoold")

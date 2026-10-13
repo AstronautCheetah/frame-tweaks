@@ -210,6 +210,18 @@ restore_kconfig() {
     rm -f "$rec"; say "restored KDE settings changed by $1"
 }
 
+# clear_stuck_modifiers: make the desktop forget modifiers our virtual keyboard may have left
+# "held" (a program that crashes while holding Ctrl/Alt/Super/Shift can't send the release, and
+# the Steam session then adds it to every key). A release alone is dropped when the kernel
+# already thinks the key is up, so each gets a full press+release; Super and Alt wrap F24 (bound
+# to nothing) so the release isn't a lone tap that opens the app menu or a menu bar.
+CLEAR_MODIFIERS="42:1 42:0 54:1 54:0 29:1 29:0 97:1 97:0 56:1 194:1 194:0 56:0 125:1 194:1 194:0 125:0"
+clear_stuck_modifiers() {
+    [ -x "$BIN/ydotool" ] || return 0
+    # shellcheck disable=SC2086
+    YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket" "$BIN/ydotool" key $CLEAR_MODIFIERS 2>/dev/null || true
+}
+
 # --- status.sh helpers: print one line, exit 0 = installed/OK, 1 = not installed, 2 = needs attention
 status_ok()      { printf 'ok       %s\n' "$*"; exit 0; }
 status_missing() { printf 'missing  %s\n' "$*"; exit 1; }

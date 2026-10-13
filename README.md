@@ -138,6 +138,7 @@ $ ./install.sh status
 | Curved world windows "waiting for a SteamVR restart" | Reboot once after installing; SteamVR opens the port it needs only when it starts. |
 | Apps show without icons in Steam's "+" menu | Install **Menu icons** (re-run it after installing new apps), then reopen the menu. |
 | "Another Frame Tweaks install … is running" | Wait for the other install window to finish; the lock is released when it exits. |
+| Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | Turn Caps Lock off, then exit and re-enter desktop mode (it resets the desktop's keyboard state). Arrow Pad also clears modifiers it may have left held whenever it starts. |
 | Something else | Installer window → **Diagnostics** (or `./install.sh debug-info`), and [open an issue](https://github.com/AstronautCheetah/frame-tweaks/issues/new/choose) with the report. |
 
 ## Things worth knowing about the Frame

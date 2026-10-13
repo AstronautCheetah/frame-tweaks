@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Stuck modifiers:** when Arrow Pad starts, and when the installer stops or uninstalls it, the
+  desktop is made to forget any Ctrl/Alt/Super/Shift a crashed pad left "held" (a full press and
+  release each; Super and Alt around F24, so no menu opens). A stuck one used to add itself to
+  every key until desktop mode was restarted.
 - **Arrow Pad VR crashed on clicks** (a segfault inside SteamVR's PollNextOverlayEvent after the
   double-tap fix switched overlays' input modes on every redraw), and taps could still count twice.
   It's back to a single overlay whose input mode never changes; to keep reload flicker down it no
@@ -14,10 +18,6 @@
 - **Claude Desktop couldn't use the KDE wallet:** its launcher lacked `--password-store=kwallet6`, so
   its login didn't persist and secrets fell back to plain text. wallet-launcher now adds it for
   Claude Desktop and keeps it when the launcher is re-applied after an update.
-- **Arrow Pad VR crashed on clicks** (a segfault inside SteamVR's PollNextOverlayEvent after the
-  double-tap fix changed overlays' input modes on every redraw), so a frozen pad was left behind
-  and taps still sometimes counted twice. Laser input now goes to one invisible input overlay that
-  never changes; the two image overlays only show the picture.
 - **Uninstalling or reinstalling a tweak stops its running programs first** (listed in
   `<tweak>/processes`: Arrow Pad, NordVPN tray, clipboard-sync, Full Keyboard), so an old copy
   can't keep running after a reinstall; Arrow Pad's held keys are released.
