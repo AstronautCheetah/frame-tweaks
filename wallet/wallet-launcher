@@ -16,6 +16,8 @@ Approach from lhns/steam-frame-nix (docs/launchers.md, `keyring.enable`).
   wallet-launcher --electron some.electron.App             # also --password-store=kwallet6
   wallet-launcher --gate org.mozilla.firefox               # also require the wallet password
   wallet-launcher --gate --no-shared android-mirror         # password only, keep the app's own bus
+  wallet-launcher --no-gate org.mozilla.firefox            # stop requiring it (re-running without
+                                                           # either keeps what the entry has)
   wallet-launcher --remove org.signal.Signal               # restore the original entry
   wallet-launcher --reapply android-mirror                  # rebuild from the original, same flags
   wallet-launcher --list
@@ -52,11 +54,13 @@ def source_for(app_id):
     for d in SOURCES:
         if (d / f"{app_id}.desktop").exists():
             return d / f"{app_id}.desktop"
-    if own.exists():                          # host app with its own entry (e.g. Claude Desktop)
+    system = next((d / f"{app_id}.desktop" for d in SYSTEM_SOURCES if (d / f"{app_id}.desktop").exists()), None)
+    # Host app with its own entry (e.g. Claude Desktop); but our own override of a system app
+    # isn't an original: rebuild it from the system entry.
+    if own.exists() and not (system and f"{MARK}=true" in own.read_text()):
         return own
-    for d in SYSTEM_SOURCES:
-        if (d / f"{app_id}.desktop").exists():
-            return d / f"{app_id}.desktop"
+    if system:
+        return system
     sys.exit(f"wallet-launcher: no desktop entry found for {app_id}")
 
 
@@ -82,11 +86,15 @@ def rewrite_exec(cmd, app_id, electron, shared=True, gate=False, guard=False):
 KNOWN_ELECTRON = {"com.anthropic.Claude"}
 
 
-def add(app_id, electron, shared=True, gate=False):
+def add(app_id, electron, shared=True, gate=None):
+    """gate: True/False to set it, None to keep what the current entry has (re-wrapping after an
+    app update, or another tweak adding its app, must not silently drop the password gate)."""
     src = source_for(app_id)
     lines = src.read_text().splitlines()
     current = APPS / f"{app_id}.desktop"
     guard = current.exists() and GUARD in current.read_text()   # keep signal-guard if present
+    if gate is None:
+        gate = current.exists() and f"{MARK}=true" in current.read_text() and GATE in current.read_text()
     # Re-applying (e.g. after an app update) keeps --password-store, even if not asked again.
     electron = electron or app_id in KNOWN_ELECTRON or (
         current.exists() and "--password-store=kwallet6" in current.read_text())
@@ -143,6 +151,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("apps", nargs="*")
     ap.add_argument("--electron", action="store_true", help="also pass --password-store=kwallet6")
+    ap.add_argument("--no-gate", action="store_true", help="stop requiring the wallet password")
     ap.add_argument("--gate", action="store_true",
                     help="require the wallet password (wallet-unlock) before starting the app")
     ap.add_argument("--no-shared", action="store_true",
@@ -169,7 +178,7 @@ def main():
             shared, gate = flags_of(app)
             add(app, "--password-store=kwallet6" in (APPS / f"{app}.desktop").read_text(), shared, gate)
         else:
-            add(app, a.electron, not a.no_shared, a.gate)
+            add(app, a.electron, not a.no_shared, True if a.gate else False if a.no_gate else None)
     os.system("update-desktop-database -q ~/.local/share/applications 2>/dev/null")
     os.utime(APPS)   # Steam's "+" menu rescans when this directory's mtime changes
 

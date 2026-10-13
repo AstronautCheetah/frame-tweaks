@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Password first no longer disappears:** re-wrapping an app's menu entry (after an app update,
+  or when another tweak adds its app) dropped the wallet-password gate, which is how Claude
+  Desktop lost it. `wallet-launcher` now keeps it unless told `--no-gate`. Signal shows it as
+  provided by Signal guard. Re-wrapping a protected system app no longer treats the override as
+  the original.
 - **🔑 Wallet apps in the installer window:** choose which apps open with the shared KDE wallet.
   It lists every installed app (Flatpaks from any source, system apps, your own launchers),
   detects Electron/Chromium apps, and has a Password-first switch, a **Close after** timer and

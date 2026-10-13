@@ -69,6 +69,10 @@ class SystemApp(unittest.TestCase):
             self.assertIn("X-FrameTweaks-Wallet=true", text)
             self.assertIn(f"Exec={wl.GATE} {wl.WRAPPER} dolphin %u", text)
             self.assertIn("DBusActivatable=false", text)
+            wl.add("org.kde.dolphin", electron=False)           # re-wrapped (app update): gate kept
+            self.assertIn(wl.GATE, (apps / "org.kde.dolphin.desktop").read_text())
+            wl.add("org.kde.dolphin", electron=False, gate=False)
+            self.assertNotIn(wl.GATE, (apps / "org.kde.dolphin.desktop").read_text())
             wl.remove("org.kde.dolphin")
             self.assertFalse((apps / "org.kde.dolphin.desktop").exists())     # system entry shows again
             self.assertTrue((sysd / "org.kde.dolphin.desktop").exists())

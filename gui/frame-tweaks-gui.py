@@ -548,9 +548,16 @@ class WalletApps(QWidget):
                 note += f"<br><span style='color:#6b7783'>Set up by the {WALLET_OWNERS[a['id']]} tweak: " \
                         "reinstalling it (↻) adds it back if removed here.</span>"
             gate = QCheckBox("Password first")
-            gate.setChecked(a["gate"])
-            gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
-            gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
+            if a["guard"]:
+                # Signal guard unlocks the wallet (asking for the password) before Signal opens.
+                gate.setText("Password first (Signal guard)")
+                gate.setChecked(True)
+                gate.setEnabled(False)
+                gate.setToolTip("Always on: Signal guard asks for the wallet password before Signal opens")
+            else:
+                gate.setChecked(a["gate"])
+                gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
+                gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
             remove = QPushButton("Remove")
             remove.setToolTip("Open it the way it opened before (its original launcher)")
             remove.clicked.connect(lambda _=False, a=a: self.run(["--remove", a["id"]], f"{a['name']}: removed"))
@@ -632,7 +639,7 @@ class WalletApps(QWidget):
         QTimer.singleShot(0, self.fill)
 
     def set_gate(self, app, on):
-        args = (["--gate"] if on else []) + ([] if app["shared"] else ["--no-shared"]) + [app["id"]]
+        args = (["--gate"] if on else ["--no-gate"]) + ([] if app["shared"] else ["--no-shared"]) + [app["id"]]
         self.run(args, f"{app['name']}: " + ("asks for the wallet password first" if on else
                                              "opens without asking for the password"))
 
