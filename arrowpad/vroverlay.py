@@ -27,7 +27,7 @@ KEY = "steam-frame-tweaks.arrowpad"
 # upload crashed vrcompositor (SIGBUS). Capped size and rate keep the compositor's work small.
 MAX_TEX = (1024, 768)
 MIN_RENDER_INTERVAL = 0.15           # at most ~7 texture updates a second
-SWAP_SHOW_MS, SWAP_HIDE_MS = 60, 50  # double buffering: load, show new, then hide old
+COVER_MS = 120                       # how long the cover hides a reload (the blink is shorter)
 DEPTH_GAIN = 3.0                     # dragging: push/pull moves the pad 3x as far; up/down/sideways 1:1
 DEPTH_MIN, DEPTH_MAX = 0.25, 3.5     # dragging: keep the pad this far from your head (m, horizontally)
 POSE_EPSILON = 0.0015                # ignore anchor jitter below 1.5 mm (and ~0.1°)
@@ -129,7 +129,8 @@ class OverlayHost:
         # deliver a held press again to the newly shown one, so taps counted twice; switching
         # their input modes on the fly crashed SteamVR's client inside PollNextOverlayEvent, and
         # a separate transparent input overlay got no laser input at all.) Flicker is kept down
-        # by redrawing only when something really changes (see set_hover / mark_dirty).
+        # by redrawing only when something really changes (see set_hover / mark_dirty), and the
+        # reload that remains is hidden behind the cover overlay (see render).
         self.input_handle = self.ov.createOverlay(KEY, "Arrow Pad")
         self.handles = [self.input_handle]
         self.front = 0
@@ -141,6 +142,17 @@ class OverlayHost:
         # with the other. Events then say which laser (cursorIndex) they came from.
         self.ov.setOverlayFlag(self.input_handle, openvr.VROverlayFlags_MultiCursor, True)
         self.input_size = (0, 0)        # widget pixels the mouse scale is set to
+        # The cover: display only (no input method, so it never takes laser input), drawn above
+        # the pad and holding the previous image. While the pad reloads a new image, which
+        # blinks, the cover shows the old one on top; then it steps aside and loads the new one
+        # out of sight, ready for the next change.
+        try:
+            self.cover = self.ov.createOverlay(KEY + ".cover", "Arrow Pad")
+            self.ov.setOverlaySortOrder(self.cover, 11)
+            self.ov.setOverlayWidthInMeters(self.cover, self.width_m)
+        except Exception:
+            self.cover = None
+        self.cover_path = None          # image the cover holds (None until its first load)
         self.last_button_time = {}             # event type -> time: drops a click seen twice
         self.image_hash = None          # last uploaded image, to skip identical uploads
         self.hover = None               # button under the laser
@@ -175,6 +187,16 @@ class OverlayHost:
         QTimer(pad, interval=100, timeout=self.mark_dirty).start()   # state changes (mic etc.)
 
     # ---- rendering ------------------------------------------------------
+    def uncover(self, path):
+        """The pad shows the new image now: hide the cover and load that image into it."""
+        try:
+            self.ov.hideOverlay(self.cover)
+            self.ov.setOverlayFromFile(self.cover, path)
+            self.cover_path = path
+        except Exception:
+            pass
+        self.swapping = False
+
     def mark_dirty(self):
         """Periodic check: redraw only when something visible changed (mic colour, modifiers,
         layer, pin, language), so SteamVR doesn't reload the image for nothing."""
@@ -228,10 +250,16 @@ class OverlayHost:
         # Full Keyboard uses, needs an OpenGL context, which here only exists through Gamescope's
         # WSI layer.)
         img.save(path, "PNG")
+        covered = self.cover is not None and self.cover_path is not None
+        if covered:
+            self.ov.showOverlay(self.cover)          # old image on top while the pad reloads
+            self.swapping = True
         self.ov.setOverlayFromFile(self.input_handle, path)
         self.set_input_size(w, h)
+        if self.cover is not None:
+            QTimer.singleShot(COVER_MS if covered else 0, lambda: self.uncover(path))
         for old in glob.glob(f"{TEX_DIR}/arrowpad-overlay-*.png"):
-            if old != path and old != getattr(self, "_last_path", None):
+            if old not in (path, getattr(self, "_last_path", None), self.cover_path):
                 try:
                     os.remove(old)
                 except OSError:
@@ -296,6 +324,8 @@ class OverlayHost:
     def apply_pose(self):
         m = _mat(self.pose)
         self.ov.setOverlayTransformAbsolute(self.input_handle, openvr.TrackingUniverseStanding, m)
+        if getattr(self, "cover", None) is not None:
+            self.ov.setOverlayTransformAbsolute(self.cover, openvr.TrackingUniverseStanding, m)
 
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
@@ -335,6 +365,8 @@ class OverlayHost:
     def set_width(self, value):
         self.width_m = round(min(WIDTH_MAX, max(WIDTH_MIN, value)), 2)
         self.ov.setOverlayWidthInMeters(self.input_handle, self.width_m)
+        if self.cover is not None:
+            self.ov.setOverlayWidthInMeters(self.cover, self.width_m)
         self.save()
 
     def step_width(self, steps):
@@ -390,6 +422,8 @@ class OverlayHost:
                 self.ov.showOverlay(self.input_handle)
             else:
                 self.ov.hideOverlay(self.input_handle)
+                if self.cover is not None:
+                    self.ov.hideOverlay(self.cover)
                 # Like Full Keyboard: closing the dashboard releases our input (a pending
                 # right/middle-click toggle would otherwise change a click you can't see coming).
                 self.hovered_devices.clear()
@@ -601,6 +635,8 @@ class OverlayHost:
     def close(self):
         try:
             self.ov.destroyOverlay(self.input_handle)
+            if self.cover is not None:
+                self.ov.destroyOverlay(self.cover)
             openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:
             pass

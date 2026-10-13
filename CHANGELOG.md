@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad VR still blinked when a toggle key changed (modifiers, Fn, R/M, mic, pin):** a
+  display-only cover panel now shows the previous image on top while the pad loads the new one,
+  then steps aside. It never takes laser input, so taps still go to the one input overlay.
 - **Arrow Pad VR jumped when switching between the Steam and Desktop tabs:** it followed Steam's main
   panel when that was showing and the dashboard bar otherwise, and the Desktop tab hides the main
   panel, so it effectively kept two positions. It now follows the bar on both tabs. A position saved
