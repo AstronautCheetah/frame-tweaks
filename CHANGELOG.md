@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad VR crashed on clicks** (a segfault inside SteamVR's PollNextOverlayEvent after the
+  double-tap fix changed overlays' input modes on every redraw), so a frozen pad was left behind
+  and taps still sometimes counted twice. Laser input now goes to one invisible input overlay that
+  never changes; the two image overlays only show the picture.
 - **Uninstalling or reinstalling a tweak stops its running programs first** (listed in
   `<tweak>/processes`: Arrow Pad, NordVPN tray, clipboard-sync, Full Keyboard), so an old copy
   can't keep running after a reinstall; Arrow Pad's held keys are released.
