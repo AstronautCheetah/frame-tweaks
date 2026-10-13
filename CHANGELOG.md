@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **Arrow Pad VR: a tap could count twice.** Both of the pad's double-buffered overlays took laser
+  input, so for ~50 ms per redraw a click reached both: one tap locked a modifier (a locked Super
+  turns every click into Super+click) or toggled R/M on and off. Only the front overlay takes input
+  now, and a repeat within 60 ms is dropped. Closing the dashboard also releases held modifiers.
+- **Arrow Pad uninstall:** `--quit` no longer needs a display (it crashed when run from the
+  installer), and any pad still running is stopped, so a reinstall really runs the new version.
 - **Arrow Pad right/middle-click toggles:** a scroll while one was armed was swallowed and turned
   into a right/middle click (the controller's scroll is mouse "buttons" 4/5); scrolling now passes
   through. Toggles also cancel when the dashboard closes and after 10 s (was 20), a press whose

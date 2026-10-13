@@ -45,5 +45,44 @@ class Level(unittest.TestCase):
                 self.assertAlmostEqual(o.pose[i][2], z[i], places=9)     # same normal: tilt kept
 
 
+class DoubleClick(unittest.TestCase):
+    def test_click_reaching_both_overlays_counts_once(self):
+        v = load()
+        ov = types.SimpleNamespace(
+            VREvent_MouseMove=300, VREvent_MouseButtonDown=301, VREvent_MouseButtonUp=302)
+
+        class Ev:
+            def __init__(self):
+                self.eventType = 0
+                self.trackedDeviceIndex = 1
+                self.data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=10, y=10))
+        v.openvr.VREvent_t = Ev
+        for k in ("VREvent_MouseMove", "VREvent_MouseButtonDown", "VREvent_MouseButtonUp"):
+            setattr(v.openvr, k, getattr(ov, k))
+        queues = {"A": [301, 302], "B": [301, 302]}      # one physical click, seen by both
+
+        def poll(handle, ev):
+            if queues[handle]:
+                ev.eventType = queues[handle].pop(0)
+                return (True, ev)
+            return (False, ev)
+        o = v.OverlayHost.__new__(v.OverlayHost)
+        o.ov = types.SimpleNamespace(pollNextOverlayEvent=poll)
+        o.last_button_time, o.pressed, o.drag, o.dirty = {}, None, None, False
+        o.sizes, o.front = [(100, 100), (100, 100)], 0
+        o.pad = types.SimpleNamespace(pinned=True)
+        sent = []
+        o.button_at = lambda pos: "Super"
+        o.send = lambda w, etype, pos, buttons: sent.append(etype)
+        v.QEvent = types.SimpleNamespace(Type=types.SimpleNamespace(
+            MouseButtonPress="press", MouseButtonRelease="release", MouseMove="move"))
+        v.Qt = types.SimpleNamespace(MouseButton=types.SimpleNamespace(LeftButton=1, NoButton=0))
+        v.QPoint = lambda x, y: (x, y)
+        o.save = lambda: None
+        o.pump("A")
+        o.pump("B")
+        self.assertEqual(sent, ["press", "release"])
+
+
 if __name__ == "__main__":
     unittest.main()

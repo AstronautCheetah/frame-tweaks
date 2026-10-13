@@ -76,10 +76,15 @@ class OverlayHost:
                         self.ov.createOverlay(KEY + ".b", "Arrow Pad")]
         self.front = 0                  # index of the overlay being shown
         self.width_m = float(config.get("width_m", WIDTH_DEFAULT))
-        for h in self.handles:
-            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_Mouse)
+        # Only the overlay on top takes laser input; the other is set to None until it swaps in.
+        # (Both took input at first, so for ~50 ms per redraw a click reached both overlays and
+        # counted twice: a single tap locked a modifier or toggled R/M twice.)
+        for i, h in enumerate(self.handles):
+            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_Mouse if i == 0
+                                          else openvr.VROverlayInputMethod_None)
             self.ov.setOverlaySortOrder(h, 10)
             self.ov.setOverlayWidthInMeters(h, self.width_m)
+        self.last_button_time = {}             # event type -> time: drops a click seen twice
         self.image_hash = None          # last uploaded image, to skip identical uploads
         self.sizes = [(0, 0), (0, 0)]   # mouse scale per overlay
         self.hover = None               # button under the laser
@@ -150,11 +155,20 @@ class OverlayHost:
             self.swapping = True
             QTimer.singleShot(SWAP_SHOW_MS, self.swap)   # give SteamVR time to load it
         else:
+            self.set_input(back)
             self.front = back
 
+    def set_input(self, front):
+        """Laser input goes to `front` only."""
+        for i, h in enumerate(self.handles):
+            self.ov.setOverlayInputMethod(h, openvr.VROverlayInputMethod_Mouse if i == front
+                                          else openvr.VROverlayInputMethod_None)
+
     def swap(self):
-        """Show the freshly loaded overlay on top, then hide the old one."""
+        """Show the freshly loaded overlay on top, then hide the old one. Input moves to the new
+        one at the same moment, so a click never reaches both."""
         old, new = self.front, self.front ^ 1
+        self.set_input(new)
         self.front = new
         if self.visible:
             self.ov.setOverlaySortOrder(self.handles[new], 11)
@@ -321,7 +335,10 @@ class OverlayHost:
                 # right/middle-click toggle would otherwise change a click you can't see coming).
                 if self.pad.click_swap.armed:
                     self.pad.click_swap.disarm("dashboard closed")
-                    self.pad.restyle()
+                # ...and lets go of held modifiers: a locked Super or Ctrl would otherwise turn
+                # every click you make with the dashboard closed into Super/Ctrl+click.
+                self.pad.release_all_mods()
+                self.pad.restyle()
             self.visible = visible
         if self.drag is not None:
             self.drag_follow()                  # every tick, not just on laser moves
@@ -337,6 +354,13 @@ class OverlayHost:
         # pyopenvr returns (result, event): test the result, or this loops forever.
         while self.ov.pollNextOverlayEvent(handle, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
+            if t in (openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp):
+                # Backstop: a press (or release) within 60 ms of the previous one is the same
+                # click seen by the other overlay. Real taps are far slower than 60 ms.
+                now = time.monotonic()
+                if now - self.last_button_time.get(t, -1.0) < 0.06:
+                    continue
+                self.last_button_time[t] = now
             self.last_device = dev
             if t == openvr.VREvent_MouseMove:
                 pos = self.to_widget(ev.data.mouse)
