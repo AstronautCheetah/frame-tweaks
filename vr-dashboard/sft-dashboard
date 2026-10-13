@@ -9,13 +9,17 @@ Back to the previous window, and any later dashboard tweak.
   sft-dashboard status [NAME]   is the port open, is NAME (or every patch) injected?
   sft-dashboard check     is SteamVR's dashboard code still what the patches expect?
 
+A patch's settings, if any, are ~/.config/frame-tweaks/NAME.json, handed to the page as
+window.__sftPatchConfig[NAME]. Patches can ask for actions the page can't do itself through
+bindings this service registers on the page (sftScroll: mouse-wheel scrolling via ydotool).
+
 A patch is patches/NAME.js: an expression that registers itself as window.__sftPatches[NAME]
 = {version, stop}. Header lines "// requires: what | exact text" name pieces of SteamVR's
 dashboard code it relies on; if an update changes any of them, that patch isn't injected (and
 status says so) instead of poking at code it doesn't understand.
 SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only while it's stopped.
 """
-import base64, json, os, re, socket, struct, sys, time, urllib.request
+import base64, json, os, re, socket, struct, subprocess, sys, threading, time, urllib.request
 from pathlib import Path
 
 SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
@@ -24,6 +28,7 @@ PATCHES = Path(__file__).resolve().parent / "patches"
 PORT = 8087
 DASHBOARD = Path("/opt/steamvr/resources/webinterface/dashboard")
 CHECK_FILE = Path(f"/run/user/{os.getuid()}/sft-dashboard.status")
+CONF_DIR = Path.home() / ".config/frame-tweaks"      # patch settings: NAME.json (set in the installer window)
 BASE = {"window.FrameStore": "window.FrameStore="}     # every patch starts from FrameStore
 
 
@@ -66,57 +71,112 @@ def restore():
 
 
 # ---- minimal DevTools (WebSocket) client, stdlib only --------------------------------------
-def ws_eval(url, expr, timeout=5):
-    host, path = url.split("://", 1)[1].split("/", 1)
-    h, p = host.split(":")
-    s = socket.create_connection((h, int(p)), timeout=timeout)
-    key = base64.b64encode(os.urandom(16)).decode()
-    s.sendall(f"GET /{path} HTTP/1.1\r\nHost: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
-              f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n".encode())
-    buf = b""
-    while b"\r\n\r\n" not in buf:
-        chunk = s.recv(4096)
-        if not chunk:
-            raise OSError("handshake closed")
-        buf += chunk
-    if b" 101 " not in buf.split(b"\r\n", 1)[0]:
-        raise OSError("handshake refused")
-    rest = buf.split(b"\r\n\r\n", 1)[1]
-    msg = json.dumps({"id": 1, "method": "Runtime.evaluate",
-                      "params": {"expression": expr, "returnByValue": True}}).encode()
-    mask = os.urandom(4)
-    n = len(msg)
-    head = bytes([0x81]) + (bytes([0x80 | n]) if n < 126 else
-                            bytes([0x80 | 126]) + struct.pack(">H", n) if n < 65536 else
-                            bytes([0x80 | 127]) + struct.pack(">Q", n))
-    s.sendall(head + mask + bytes(b ^ mask[i % 4] for i, b in enumerate(msg)))
+class Ws:
+    """One WebSocket connection to a DevTools target (text frames, client-side masking)."""
 
-    def read(k):
-        nonlocal rest
-        while len(rest) < k:
-            chunk = s.recv(65536)
+    def __init__(self, url, timeout=5):
+        host, path = url.split("://", 1)[1].split("/", 1)
+        h, p = host.split(":")
+        self.s = socket.create_connection((h, int(p)), timeout=timeout)
+        key = base64.b64encode(os.urandom(16)).decode()
+        self.s.sendall(f"GET /{path} HTTP/1.1\r\nHost: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+                       f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n".encode())
+        buf = b""
+        while b"\r\n\r\n" not in buf:
+            chunk = self.s.recv(4096)
+            if not chunk:
+                raise OSError("handshake closed")
+            buf += chunk
+        if b" 101 " not in buf.split(b"\r\n", 1)[0]:
+            raise OSError("handshake refused")
+        self.rest = buf.split(b"\r\n\r\n", 1)[1]
+
+    def send(self, obj):
+        msg = json.dumps(obj).encode()
+        mask, n = os.urandom(4), len(msg)
+        head = bytes([0x81]) + (bytes([0x80 | n]) if n < 126 else
+                                bytes([0x80 | 126]) + struct.pack(">H", n) if n < 65536 else
+                                bytes([0x80 | 127]) + struct.pack(">Q", n))
+        self.s.sendall(head + mask + bytes(b ^ mask[i % 4] for i, b in enumerate(msg)))
+
+    def _read(self, k):
+        while len(self.rest) < k:
+            chunk = self.s.recv(65536)
             if not chunk:
                 raise OSError("closed")
-            rest += chunk
-        out, rest = rest[:k], rest[k:]
+            self.rest += chunk
+        out, self.rest = self.rest[:k], self.rest[k:]
         return out
 
-    try:
+    def recv(self):
+        """The next text message, as JSON."""
         while True:
-            b0, b1 = read(2)
+            b0, b1 = self._read(2)
             n = b1 & 0x7F
             if n == 126:
-                n = struct.unpack(">H", read(2))[0]
+                n = struct.unpack(">H", self._read(2))[0]
             elif n == 127:
-                n = struct.unpack(">Q", read(8))[0]
-            data = read(n)
+                n = struct.unpack(">Q", self._read(8))[0]
+            data = self._read(n)
+            if b0 & 0x0F == 8:
+                raise OSError("closed by the page")
             if b0 & 0x0F == 1:
-                reply = json.loads(data)
-                if reply.get("id") == 1:
-                    r = reply.get("result", {}).get("result", {})
-                    return r.get("value", r.get("description"))
+                return json.loads(data)
+
+    def close(self):
+        self.s.close()
+
+
+def ws_eval(url, expr, timeout=5):
+    ws = Ws(url, timeout)
+    try:
+        ws.send({"id": 1, "method": "Runtime.evaluate", "params": {"expression": expr, "returnByValue": True}})
+        while True:
+            reply = ws.recv()
+            if reply.get("id") == 1:
+                r = reply.get("result", {}).get("result", {})
+                return r.get("value", r.get("description"))
     finally:
-        s.close()
+        ws.close()
+
+
+# ---- page -> here: actions a patch asks for (window.<binding>(json)) ------------------------
+YDOTOOL = Path.home() / ".local/bin/ydotool"
+YDOTOOL_SOCKET = f"/run/user/{os.getuid()}/.ydotool_socket"
+
+
+def scroll(req):
+    """Scroll strips: mouse-wheel notches to the window the Steam session has focused."""
+    dx, dy = (max(-60, min(60, int(req.get(k, 0)))) for k in ("dx", "dy"))
+    if (dx or dy) and YDOTOOL.exists():
+        subprocess.run([str(YDOTOOL), "mousemove", "-w", "-x", str(dx), "-y", str(dy)],
+                       env=dict(os.environ, YDOTOOL_SOCKET=YDOTOOL_SOCKET),
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+
+
+BINDINGS = {"sftScroll": scroll}
+
+
+def listen():
+    """Keep a connection to the dashboard page with the bindings registered, and act on calls."""
+    while True:
+        try:
+            url = systemui()
+            if not url:
+                time.sleep(3)
+                continue
+            ws = Ws(url, timeout=None)
+            for i, name in enumerate(BINDINGS):
+                ws.send({"id": i + 1, "method": "Runtime.addBinding", "params": {"name": name}})
+            while True:
+                m = ws.recv()
+                if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") in BINDINGS:
+                    try:
+                        BINDINGS[m["params"]["name"]](json.loads(m["params"].get("payload") or "{}"))
+                    except (ValueError, TypeError, OSError, subprocess.SubprocessError):
+                        pass
+        except (OSError, ValueError):
+            time.sleep(3)
 
 
 def systemui():
@@ -155,8 +215,21 @@ def stop_expr(name):
     return f"window.__sftPatches?.[{json.dumps(name)}]?.stop?.(); delete window.__sftPatches?.[{json.dumps(name)}]; 'stopped'"
 
 
+def config_expr(name, path):
+    """window.__sftPatchConfig[NAME] = patches/NAME.json, and tell the patch if it changed."""
+    try:
+        conf = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    n, c = json.dumps(name), json.dumps(conf)
+    return (f"(() => {{ const all = (window.__sftPatchConfig ??= {{}}); const c = {c};"
+            f" if (JSON.stringify(all[{n}]) !== JSON.stringify(c)) {{ all[{n}] = c;"
+            f" window.__sftPatches?.[{n}]?.configChanged?.(); }} }})()")
+
+
 def watch():
     code, last, injected = dashboard_code(), None, set()
+    threading.Thread(target=listen, daemon=True).start()
     while True:
         found = patches()
         bad = {n: missing(p, code) for n, p in found.items()}
@@ -175,6 +248,9 @@ def watch():
                     if bad[n]:
                         results.append(f"{n}: off (SteamVR changed)")
                         continue
+                    conf = config_expr(n, CONF_DIR / f"{n}.json")
+                    if conf:
+                        ws_eval(url, conf)
                     results.append(f"{n}: {ws_eval(url, p.read_text())}")
                     injected.add(n)
                 result = "; ".join(results) or "no patches installed"

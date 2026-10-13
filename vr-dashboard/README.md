@@ -1,7 +1,7 @@
 # VR dashboard patching (helper)
 
 The shared part of the **VR windows** tweaks ([Curved world windows](../curvature/),
-[Back to the previous window](../float-return/), [Pick up when floating](../float-grab/)). Installed automatically with them; each of
+[Back to the previous window](../float-return/), [Pick up when floating](../float-grab/), [Scroll strips](../scroll-strips/)). Installed automatically with them; each of
 those tweaks is one small patch, which you switch on or off by ticking it in the installer window.
 
 <!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->

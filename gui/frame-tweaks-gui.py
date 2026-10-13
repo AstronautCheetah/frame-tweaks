@@ -43,7 +43,7 @@ FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
 BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
               "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
               "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
-              "tools": "tools", "speech": "audio-speakers-symbolic", "float-return": "go-previous", "float-grab": "transform-move", "vr-dashboard": "applications-system", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
+              "tools": "tools", "speech": "audio-speakers-symbolic", "float-return": "go-previous", "float-grab": "transform-move", "scroll-strips": "transform-browse", "vr-dashboard": "applications-system", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
 # Wallet apps page (wallet/wallet-launcher): apps that open with the shared KDE wallet.
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
 APP_TIMERS = Path.home() / ".local/bin/app-timers"
@@ -527,6 +527,73 @@ class Details(QWidget):
         else:
             text += f"<br><span style='color:#9aa6b2'>{html.escape(latest)} is still the latest release.</span>"
         self.issue_label.setText(text)
+
+
+class ScrollStripSettings(QWidget):
+    """Scroll strips: side and thickness (~/.config/frame-tweaks/scroll-strips.json)."""
+    CONF = Path.home() / ".config/frame-tweaks/scroll-strips.json"
+    DEFAULTS = {"vertical": "right", "horizontal": "top", "thickness": 0.12}
+    OPTIONS = [("vertical", "Vertical strip (scrolls up and down)", [("right", "Right"), ("left", "Left"), ("off", "Off")]),
+               ("horizontal", "Horizontal strip (scrolls sideways)", [("top", "Top"), ("bottom", "Bottom"), ("off", "Off")]),
+               ("thickness", "Thickness", [(0.08, "Thin"), (0.12, "Medium"), (0.18, "Thick")])]
+
+    def __init__(self, window):
+        super().__init__()
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        head = QHBoxLayout()
+        back = QPushButton("← Back")
+        back.clicked.connect(window.go_back)
+        head.addWidget(back)
+        title = QLabel("Scroll strips")
+        title.setObjectName("title")
+        head.addWidget(title, 1)
+        lay.addLayout(head)
+        about = QLabel("Big strips beside each floating window. Drag along one to scroll; tap near an end "
+                       "to page. They scroll the window you last clicked.")
+        about.setObjectName("desc")
+        about.setWordWrap(True)
+        lay.addWidget(about)
+        try:
+            self.conf = {**self.DEFAULTS, **json.loads(self.CONF.read_text())}
+        except (OSError, ValueError):
+            self.conf = dict(self.DEFAULTS)
+        for key, label, choices in self.OPTIONS:
+            lab = QLabel(label)
+            lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
+            lay.addWidget(lab)
+            row = QHBoxLayout()
+            for value, text in choices:
+                b = QPushButton(text)
+                b.setCheckable(True)
+                b.setChecked(self.conf.get(key) == value)
+                b.setMinimumWidth(130)
+                b.setStyleSheet("QPushButton:checked { background: #355b7a; font-weight: 600; }")
+                b.clicked.connect(lambda _=False, k=key, v=value: self.choose(k, v))
+                row.addWidget(b)
+                setattr(self, f"b_{key}_{text}", b)
+            row.addStretch(1)
+            lay.addLayout(row)
+        self.notice = QLabel()
+        self.notice.setObjectName("notice")
+        lay.addWidget(self.notice)
+        lay.addStretch(1)
+
+    def choose(self, key, value):
+        self.conf[key] = value
+        for k, _, choices in self.OPTIONS:
+            if k == key:
+                for v, text in choices:
+                    getattr(self, f"b_{k}_{text}").setChecked(v == value)
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would save:", json.dumps(self.conf))
+            return
+        self.CONF.parent.mkdir(parents=True, exist_ok=True)
+        self.CONF.write_text(json.dumps(self.conf) + "\n")
+        self.notice.setText("Saved: the strips change within a few seconds.")
+
+
+SETTINGS_PAGES = {"scroll-strips": ScrollStripSettings}     # the row's button opens these
 
 
 class WalletApps(QWidget):
@@ -1096,6 +1163,14 @@ class Window(QWidget):
         state = self.state.get(cid)
         installed = state is not None and state[0] != 1
         label = run_label(cid)
+        if cid in SETTINGS_PAGES:
+            button.setText("⚙ Settings")
+            button.setProperty("help", "false")
+            button.style().unpolish(button)
+            button.style().polish(button)
+            button.setEnabled(installed)
+            button.setToolTip("Settings" if installed else "Settings (tick it and Apply first)")
+            return
         button.setText(("▶ " + label) if label else "Help")
         button.setProperty("help", "false" if label else "true")
         button.style().unpolish(button)
@@ -1105,6 +1180,12 @@ class Window(QWidget):
                           else label and f"{label}" or "Nothing to launch: how to use it")
 
     def run(self, comp):
+        if comp["id"] in SETTINGS_PAGES:
+            self.close_details()
+            self.details = SETTINGS_PAGES[comp["id"]](self)      # a page: Back and B return to the list
+            self.stack.addWidget(self.details)
+            self.stack.setCurrentWidget(self.details)
+            return
         label = run_label(comp["id"])
         if label is None:
             self.show_details(comp)
