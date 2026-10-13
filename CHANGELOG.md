@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Speech engine (helper, new): the Screen reader's Orca can speak.** SteamOS has speech-dispatcher
+  and its espeak-ng module but not espeak-ng, so Orca was silent. The espeak-ng inside Piper's
+  download is now wired into speech-dispatcher (a user `speechd.conf`, restored on uninstall).
+  Piper and its voice moved here from Screen snip; Screen snip and Screen reader depend on it.
 - **Back to the previous window** also covers closing: when the window the dashboard shows is
   closed (a cancelled Screen snip, say), it goes back to the window before it instead of Steam.
 - **Screen snip: crop handles.** Adjust the rectangle by its corners and edges, or drag it to move

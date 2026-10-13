@@ -14,7 +14,7 @@ Select a rectangle of the window you're using, then:
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-> - **Changes:** `frame-snip`, Piper and a voice in `~/.local/share/frame-tweaks/snip` (checksum-pinned), Tesseract (Homebrew), an app-menu entry
+> - **Changes:** `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
 > - **Unusual access:** Reads the picture of the window you're using (only when you start a snip)
 > - **Undo:** `./install.sh uninstall snip` (keeps Tesseract and your snips in `~/Pictures/Screenshots`)
 <!-- /generated:glance -->
@@ -31,10 +31,10 @@ VR window. So the snip window is a small PyQt program (shared with Arrow Pad) th
 window's picture straight from the Steam session's display, the way Flameshot-style tools
 freeze the screen. Copy text uses **Tesseract** (Apache-2.0, from Homebrew). Narrate uses
 **Piper** (MIT), a fast offline neural voice, with the **LJ Speech** voice (its dataset is public
-domain). Both are pinned by checksum (`pin`, `voice.pin`, `voice-config.pin`).
+domain), installed by the [Speech engine](../speech/) helper and pinned by checksum.
 
-SteamOS's own speech engine (speech-dispatcher, which the [Screen reader](../screen-reader/)'s
-Orca uses) has no voice installed: its espeak-ng module is there but espeak-ng isn't.
+The same helper gives SteamOS's speech-dispatcher a voice (it has none of its own), which the
+[Screen reader](../screen-reader/)'s Orca uses.
 
 ---
 Check: `./install.sh status snip` · Remove: `./install.sh uninstall snip`

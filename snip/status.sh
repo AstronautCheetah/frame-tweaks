@@ -1,6 +1,6 @@
 #!/bin/bash
 source "$(dirname "$0")/../lib/common.sh"
-D="$HOME/.local/share/frame-tweaks/snip"
+D="$HOME/.local/share/frame-tweaks/speech"
 [ -x "$BIN/frame-snip" ] || status_missing "not installed"
 command -v tesseract >/dev/null || [ -x /home/linuxbrew/.linuxbrew/bin/tesseract ] ||
     status_warn "Tesseract missing: Copy text and Narrate won't work (reinstall)"
