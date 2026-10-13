@@ -17,6 +17,7 @@ import select
 import struct
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -53,6 +54,37 @@ def keyboards():
     return devs
 
 
+X_RIGHT_CTRL = 105                       # evdev 97 + 8
+x_rctrl = [None]                         # (monotonic time, X input device) of the last one
+
+
+def watch_x_keys():
+    """Right Ctrl as the Steam session's display gets it, from any source: also keys that never
+    pass through a kernel input device (XTest from an X program; libei, which Full Keyboard and
+    the Steam client can type through, arrives as the xwayland keyboard)."""
+    while True:
+        try:
+            names = {}
+            out = subprocess.run(["xinput", "list", "--short"], capture_output=True, text=True, timeout=5,
+                                 env={**os.environ, "DISPLAY": ":0"}).stdout
+            for m in re.finditer(r"↳ (.+?)\s+id=(\d+)", out):
+                names[m[2]] = m[1].strip()
+            p = subprocess.Popen(["xinput", "test-xi2", "--root"], stdout=subprocess.PIPE, text=True,
+                                 stderr=subprocess.DEVNULL, env={**os.environ, "DISPLAY": ":0"})
+            kind = dev = None
+            for line in p.stdout:
+                if line.startswith("EVENT type"):
+                    kind, dev = ("RawKeyPress" in line), None
+                elif kind and line.strip().startswith("device:"):          # "device: 3 (9)": (source)
+                    m = re.search(r"\((\d+)\)", line)
+                    dev = m[1] if m else line.split()[1]
+                elif kind and line.strip().startswith("detail:") and line.split()[1] == str(X_RIGHT_CTRL):
+                    x_rctrl[0] = (time.monotonic(), names.get(dev, f"X device {dev}"))
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        time.sleep(5)                    # the display went away (session restart): try again
+
+
 def log(line):
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with open(LOG, "a") as f:
@@ -67,6 +99,7 @@ def notify(title, body):
 def run():
     fds, names, last_scan = {}, {}, 0.0
     last_rctrl = None                     # (monotonic time, device name)
+    threading.Thread(target=watch_x_keys, daemon=True).start()
     was = grabbed(desktop_title())
     last_check = 0.0
     while True:
@@ -103,9 +136,15 @@ def run():
             continue
         is_grabbed = grabbed(title)
         if is_grabbed != was:
-            source = (f"Right Ctrl from {last_rctrl[1]} {now - last_rctrl[0]:.1f} s before"
-                      if last_rctrl and now - last_rctrl[0] < 10 else
-                      "no Right Ctrl seen from a real keyboard (an injected one, e.g. a virtual keyboard?)")
+            parts = []
+            if last_rctrl and now - last_rctrl[0] < 10:
+                parts.append(f"Right Ctrl from {last_rctrl[1]} {now - last_rctrl[0]:.1f} s before")
+            xr = x_rctrl[0]
+            if xr and now - xr[0] < 10:
+                parts.append(f"the display got Right Ctrl from {xr[1]} {now - xr[0]:.1f} s before"
+                             + (" (XTest: an X program faked it)" if "XTEST" in xr[1] else
+                                "" if parts else " (not from a kernel device: libei, e.g. Full Keyboard or Steam)"))
+            source = "; ".join(parts) or "no Right Ctrl seen at all"
             log(("GRABBED" if is_grabbed else "released") + f": {source}")
             if is_grabbed:
                 notify("Desktop mode took all input",

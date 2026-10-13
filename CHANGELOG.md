@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror starts upright at a sensible size** (0.8 m tall): SteamVR starts every floating
+  window as wide as a standard one, so the upright phone came up over 2 m tall.
+- **Grab guard also hears keys that skip the input devices** (faked by an X program, or typed
+  through libei like Full Keyboard), so its log can name where a stray Right Ctrl came from.
 - **Grab guard** (new, System): desktop mode takes every key and click after a Right Ctrl press,
   and other windows (this installer too) just stop responding. Grab guard notices, shows a
   notification saying to tap Right Ctrl once, and logs which device sent it.

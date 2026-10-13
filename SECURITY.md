@@ -43,7 +43,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned), `~/.config/speech-dispatcher/speechd.conf` (backed up, restored on uninstall) | None beyond your home folder |
-| grab-guard | `grab-guard`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs` | **Reads every keyboard's key presses** (only to notice Right Ctrl; nothing else is kept) |
+| grab-guard | `grab-guard`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs` | **Reads every keyboard's key presses**, and the Steam session's display's (only to notice Right Ctrl; nothing else is kept) |
 | vscodium | Flathub app (`com.vscodium.codium`) | – |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads Anthropic's installer over HTTPS |
 | claude-desktop | `~/.local/opt/claude-desktop`, `claude-desktop-update`, menu entry | Checks against the SHA256 in Anthropic's apt index |
