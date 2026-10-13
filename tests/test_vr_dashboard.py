@@ -12,7 +12,8 @@ _l = importlib.machinery.SourceFileLoader("sft", str(ROOT / "vr-dashboard" / "sf
 sft = importlib.util.module_from_spec(importlib.util.spec_from_loader("sft", _l))
 _l.exec_module(sft)
 PATCHES = {"curvature": ROOT / "curvature" / "patch.js", "float-return": ROOT / "float-return" / "patch.js",
-           "float-grab": ROOT / "float-grab" / "patch.js"}
+           "float-grab": ROOT / "float-grab" / "patch.js",
+           "scroll-strips": ROOT / "scroll-strips" / "patch.js"}
 
 
 class ArmRestore(unittest.TestCase):

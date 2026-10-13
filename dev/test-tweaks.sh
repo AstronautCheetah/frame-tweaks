@@ -8,7 +8,7 @@
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
 cd "$(dirname "$0")/.."
-DEFAULT=(cursor tools vr-dashboard curvature float-return float-grab menu-icons homebrew ydotool dictation wallet memcap)
+DEFAULT=(cursor tools vr-dashboard curvature float-return float-grab scroll-strips menu-icons homebrew ydotool dictation wallet memcap)
 # Screen reader needs Orca and KDE's config tools (the Frame has them, CI doesn't).
 command -v orca >/dev/null && command -v kreadconfig6 >/dev/null && DEFAULT+=(screen-reader)
 TWEAKS=("${@:-${DEFAULT[@]}}")
@@ -19,7 +19,7 @@ PATHSET=".bashrc .config/environment.d/10-local-bin.conf"
 YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.service"   # a dependency other tweaks share
 VRDASH=".local/share/frame-tweaks/vr-dashboard/sft-dashboard .config/systemd/user/sft-vr-debugger.service .config/systemd/user/sft-dashboard.service .config/systemd/user/steamvr.service.d/sft-dashboard.conf"   # shared by the VR windows tweaks
 # memcap keeps your limits file; KDE settings files stay (only the changed keys are restored).
-declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
+declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [scroll-strips]="$VRDASH $YDOTOOL .config/frame-tweaks/scroll-strips.json" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
                  [dictation]="$PATHSET .config/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
                  [memcap]="$PATHSET .config/frame-tweaks/memcap.conf" [screen-reader]=".config/kaccessrc")
 

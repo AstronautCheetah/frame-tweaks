@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips** (new, VR windows): big strips beside each floating window (right and top by
+  default) to drag-scroll with the laser, or tap near an end to page. They scroll the window you
+  last clicked. Side and thickness in the row's ⚙ Settings. VR dashboard patching gained patch
+  settings (`~/.config/frame-tweaks/NAME.json`) and page-to-service calls (`sftScroll`).
 - **Fixed: Arrow Pad and the installer could switch the desktop into input-grab mode.** Their
   stuck-key cleanup pressed Right Ctrl, which in the nested desktop toggles KWin's input grab
   ("Press right control to ungrab input"), so windows and clicks behaved oddly after Arrow Pad
