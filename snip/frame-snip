@@ -1275,7 +1275,28 @@ def narrate_panel(image_path, text_path):
     return code
 
 
+def started_by_steam():
+    """Started from Steam's "+" menu: Steam runs it as a game, with its overlay hooked in, and in
+    VR the selection window then took no laser input. True if so (and it started itself again
+    as a plain program, as Arrow Pad's Snip key does)."""
+    if not (os.environ.get("SteamGameId") or os.environ.get("SteamAppId")) or os.environ.get("SFT_SNIP_PLAIN"):
+        return False
+    env = {k: v for k, v in os.environ.items()
+           if not k.startswith(("Steam", "STEAM_", "SteamOverlay", "ENABLE_VK_LAYER"))}
+    pre = [p for p in os.environ.get("LD_PRELOAD", "").replace(":", " ").split() if "gameoverlay" not in p]
+    env.pop("LD_PRELOAD", None)
+    if pre:
+        env["LD_PRELOAD"] = ":".join(pre)
+    env["SFT_SNIP_PLAIN"] = "1"
+    subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), *sys.argv[1:]], env=env,
+                     start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL)
+    return True
+
+
 def main():
+    if started_by_steam():
+        return 0
     if XCLIP:
         return x_clipboard_owner(sys.argv[2])
     if NARRATE:

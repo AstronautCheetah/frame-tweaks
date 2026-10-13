@@ -34,6 +34,13 @@ grep -qs wallet-gate "$APPS/phone-mirror.desktop" && gated=1
 rm -f "$APPS/phone-mirror.desktop" "$LAUNCHER_ORIGINALS/phone-mirror.desktop"
 install_desktop "$REPO_DIR/adb-scrcpy/android-mirror.desktop"
 if [ -n "$gated" ] && [ -x "$BIN/wallet-launcher" ]; then "$BIN/wallet-launcher" --gate --no-shared android-mirror; fi
+# In VR, turning the phone turns the window without shrinking it (a dashboard patch; needs the
+# VR windows helper, which the VR windows tweaks install).
+if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
+    install_dashboard_patch phone-rotate "$REPO_DIR/adb-scrcpy/patch.js"
+else
+    say "In VR, the window keeps its width when the phone turns (install a VR windows tweak to keep its size)."
+fi
 cat <<MSG
 Done. One-time pairing: on the phone open Developer options → Wireless debugging →
 "Pair device with pairing code", then within the minute run:
