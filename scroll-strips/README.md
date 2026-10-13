@@ -22,12 +22,13 @@ vertical one on the **right** and a horizontal one on **top**.
   under the desktop's mouse pointer.
 - **Settings** (the row's ⚙ button in the installer window): which side each strip is on (or off),
   and how thick they are.
-- Docked windows (in the dashboard) don't get strips yet; float a window to use them.
+- The window docked in the dashboard (the desktop, say) gets strips too, while the dashboard is open.
 
 ## How it works
-A patch, [`patch.js`](patch.js), injected by [VR dashboard patching](../vr-dashboard/), adds two
-panels to the dashboard's own drawing of each floating window (next to the bar under it), sized
-from the window's measured height and shape. A drag on a strip calls `sftScroll`, a function the
+A patch, [`patch.js`](patch.js), injected by [VR dashboard patching](../vr-dashboard/), mounts a
+small component in the dashboard's scene that draws two panels per window, hung from the window
+panel's own edge anchors (so they follow it, docked or floating) and sized from its measured
+height and shape. A drag on a strip calls `sftScroll`, a function the
 helper's service registers on the dashboard page; the service turns it into mouse-wheel notches
 as mouse-wheel clicks through XTest on the Steam session's display (ydotool's virtual wheel doesn't reach app windows there).
 

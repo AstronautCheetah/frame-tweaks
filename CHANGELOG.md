@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips for the window docked in the dashboard** (the desktop): strips now hang from each
+  window panel's edge anchors, drawn by a component of their own, so docked and floating windows
+  both get them.
 - **Scroll strips scroll now.** ydotool's virtual wheel never reached app windows; the strips now
   send wheel clicks through XTest on the Steam session's display. A drag also ends if the laser's
   release goes missing.

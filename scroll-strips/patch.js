@@ -1,4 +1,5 @@
-// steam-frame-tweaks scroll-strips: big scroll strips beside each floating window, easy to hit with
+// steam-frame-tweaks scroll-strips: big scroll strips beside each window (the one docked in the
+// dashboard and every floating one), easy to hit with
 // the laser. Drag along a strip to scroll (like dragging a scroll bar); tap near either end to
 // page. Scrolling goes to the window you last clicked (SteamVR gives the dashboard no way to
 // scroll a particular window), through vr-dashboard's sftScroll binding (a mouse wheel via XTest).
@@ -8,19 +9,28 @@
 // floating window's own space); the page elements stay small, so the dashboard's layout is unchanged.
 // (Version 1 used the window's scaled local size and big page elements: strips far too big and far
 // away, and the Steam bar drawn too large.)
-// requires: UndockedOverlay.renderFloatingFrame | renderFloatingFrame(){
-// requires: the grab handle panel | debug_name:"GrabHandle",origin:
-// requires: frame panel height | latestMeasuredPanelWorldHeight
+// requires: panel anchors | GetPanelAnchorID(e){
+// requires: frame panel height | latestMeasuredPanelLocalHeight
+// requires: window.Dashboard | window.Dashboard=
+// requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'scroll-strips', VERSION = 4, WORLD = 4;
-  const stats = { downs: 0, moves: 0, ups: 0, sent: 0, noBinding: 0 };   // for diagnosis
+  // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
+  // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
+  // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
+  const NAME = 'scroll-strips', VERSION = 6, DASH = 1, WORLD = 4;
+  const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const NOTCHES_PER_LENGTH = 40;     // a drag along the whole strip scrolls this many wheel notches
   const PAGE = 10;                   // notches for a tap near an end
+  const IDLE_END_MS = 800;           // the laser's release doesn't always arrive: end after this still
+  const stats = { downs: 0, moves: 0, ups: 0, sent: 0, noBinding: 0 };   // for diagnosis
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
-  const FS = window.FrameStore;
+  const FS = window.FrameStore, DS = window.DashboardStore, D = window.Dashboard;
+  if (!FS || !DS || !D) return 'not patched: dashboard objects missing';
+  const Base = Object.getPrototypeOf(D.constructor);
+  if (!Base?.prototype?.isReactComponent) return 'not patched: no React component class';
   const cfg = () => {
     const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
     c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
@@ -28,49 +38,32 @@
     return c;
   };
 
-  const movers = () => {
+  // The dashboard's panel and transform components, found among its rendered fibers.
+  const fibers = () => {
     const rootEl = document.getElementById('root');
     const key = rootEl && Object.keys(rootEl).find((k) => k.startsWith('__reactContainer$'));
-    const out = [], stack = key ? [rootEl[key]] : [];
-    while (stack.length) {
-      const fb = stack.pop();
-      if (fb.stateNode && typeof fb.stateNode.renderFloatingFrame === 'function') out.push(fb.stateNode);
+    return key ? [rootEl[key]] : [];
+  };
+  let PANEL = null, XFORM = null, SAMPLE = null;
+  const learn = () => {
+    const stack = fibers();
+    while (stack.length && !(PANEL && XFORM)) {
+      const fb = stack.pop(), p = fb.memoizedProps;
+      if (p && typeof p === 'object' && typeof fb.type === 'function') {
+        if (!PANEL && 'debug_name' in p && 'width' in p && 'interactive' in p) PANEL = fb.type;
+        if (!XFORM && 'parent_id' in p && 'translation' in p && !('width' in p)) XFORM = fb.type;
+      }
       if (fb.sibling) stack.push(fb.sibling);
       if (fb.child) stack.push(fb.child);
     }
-    return out;
+    return PANEL && XFORM;
   };
-  const found = movers();
-  if (!found.length) return 'waiting: no floating window yet';
-  const proto = Object.getPrototypeOf(found[0]);
-  const orig = proto.renderFloatingFrame;
-
-  // React elements are plain objects: make ours by copying the shape of one the dashboard made.
-  let SAMPLE = null, PANEL = null, PANEL_ORIGIN = null, XFORM = null;
   const el = (type, props, ...children) => {
     const e = Object.assign({}, SAMPLE, { type, key: props?.key ?? null,
       props: Object.assign({}, props, children.length ? { children: children.length === 1 ? children[0] : children } : {}) });
     if ('_store' in e) e._store = {};
+    if ('ref' in e && !('ref' in (props ?? {}))) e.ref = null;
     return e;
-  };
-  const walk = (node, fn) => {
-    if (!node || typeof node !== 'object') return;
-    if (Array.isArray(node)) return node.forEach((n) => walk(n, fn));
-    fn(node);
-    walk(node.props?.children, fn);
-  };
-  const learn = (tree) => {             // the panel and transform components, from the stock tree
-    if (PANEL) return true;
-    let handle = null, xform = null;
-    walk(tree, (n) => {
-      if (n.props?.onMouseDown && n.props?.width === 350) handle = n;            // the grab handle
-      if (!xform && n.props && 'parent_id' in n.props && 'translation' in n.props) xform = n;
-    });
-    if (!handle || !xform) return false;
-    const inner = handle.type(handle.props);                                      // -> its panel
-    if (!inner?.props || !('width' in inner.props)) return false;
-    SAMPLE = tree; PANEL = inner.type; PANEL_ORIGIN = inner.props.origin; XFORM = xform.type;
-    return true;
   };
 
   let drag = null;
@@ -78,7 +71,6 @@
     if (typeof window.sftScroll !== 'function') { stats.noBinding++; return; }
     try { window.sftScroll(JSON.stringify({ dx, dy })); stats.sent++; } catch (e) {}
   };
-  const IDLE_END_MS = 800;           // the laser's release doesn't always arrive: end after this still
   const onMove = (ev) => {
     if (!drag) return;
     stats.moves++;
@@ -94,7 +86,7 @@
       drag.axis === 'y' ? send(0, -step) : send(step, 0);
     }
   };
-  const onUp = (ev) => {
+  const onUp = () => {
     stats.ups++;
     window.removeEventListener('mousemove', onMove, true);
     window.removeEventListener('mouseup', onUp, true);
@@ -106,14 +98,13 @@
     if (at < 0.25) d.axis === 'y' ? send(0, PAGE) : send(-PAGE, 0);
     else if (at > 0.75) d.axis === 'y' ? send(0, -PAGE) : send(PAGE, 0);
   };
-  const strip = (axis, length_m, thick_m) => {
-    const px = 16, lenPx = Math.min(600, Math.round(px * length_m / thick_m));   // small page elements
+  const strip = (key, axis, length, thick) => {         // length and thickness in the anchor's units
+    const px = 16, lenPx = Math.min(600, Math.round(px * length / thick));   // small page elements
     const style = { width: `${axis === 'y' ? px : lenPx}px`, height: `${axis === 'y' ? lenPx : px}px`,
       background: 'rgba(40, 50, 62, 0.55)', borderRadius: `${px / 2}px`, boxSizing: 'border-box',
       border: '1px solid rgba(127, 178, 229, 0.6)' };
-    return el(PANEL, { width: axis === 'y' ? thick_m : length_m, interactive: true, only_visible_with_laser: false,
-      debug_name: `SftScroll${axis.toUpperCase()}`, origin: PANEL_ORIGIN, inputFocusParams: { bCanTakeKeyboardFocus: false },
-      hide_lasermouse_when_clicking: false },
+    return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
+      debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
       el('div', { style, onMouseDown: (ev) => {
         stats.downs++;
         if (drag) onUp();                         // a new press ends any drag still open
@@ -125,37 +116,71 @@
         window.addEventListener('pointerup', onUp, true);
       } }));
   };
-
-  proto.renderFloatingFrame = function () {
-    const tree = orig.call(this);
-    try {
-      const f = this.props.frame, page = f?.activePage;
-      const H = page?.size?.latestMeasuredPanelWorldHeight, c = page?.size?.latestContentSize;
-      if (!H || !c?.unHeight || f.docking.dockLocation !== WORLD || !learn(tree)) return tree;
-      const W = H * c.unWidth / c.unHeight, o = cfg(), t = o.thickness, g = o.gap;
-      const extra = [];
-      // The window panel's origin is its bottom centre (mainPanelOrigin for world windows).
-      if (o.vertical !== 'off') {
-        const x = (o.vertical === 'left' ? -1 : 1) * (W / 2 + g + t / 2);
-        extra.push(el(XFORM, { key: 'sft-scroll-y', parent_id: this.m_sPushedOriginID, translation: { x, y: 0 } }, strip('y', H, t)));
-      }
-      if (o.horizontal !== 'off') {
-        const y = o.horizontal === 'bottom' ? -(g + t) : H + g;
-        extra.push(el(XFORM, { key: 'sft-scroll-x', parent_id: this.m_sPushedOriginID, translation: { x: 0, y } }, strip('x', W, t)));
-      }
-      let added = false;
-      walk(tree, (n) => {                          // beside the window, inside its grab/push node
-        if (added || !n.props || !('base_distance' in n.props)) return;
-        const kids = n.props.children;
-        n.props = Object.assign({}, n.props, { children: [...(Array.isArray(kids) ? kids : [kids]), ...extra] });
-        added = true;
-      });
-    } catch (e) { /* dashboard changed: show it as stock */ }
-    return tree;
+  const stripsFor = (f) => {
+    const page = f?.activePage, sz = page?.size;
+    const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = sz?.latestContentSize;
+    if (!H || !Hw || !c?.unHeight || typeof page.GetPanelAnchorID !== 'function') return [];
+    const o = cfg(), k = H / Hw;                 // anchor units per metre (the panel's own scale)
+    const W = H * c.unWidth / c.unHeight, t = o.thickness * k, g = o.gap * k, out = [];
+    const at = (anchor, translation, child) => {
+      const id = page.GetPanelAnchorID(anchor);
+      return id ? el(XFORM, { key: `${f.frameID}-${anchor}`, parent_id: id, translation }, child) : null;
+    };
+    if (o.vertical !== 'off') {
+      const left = o.vertical === 'left';
+      out.push(at(left ? ANCHOR.CenterLeft : ANCHOR.CenterRight, { x: (left ? -1 : 1) * (g + t / 2) },
+                  strip(`${f.frameID}-y`, 'y', H, t)));
+    }
+    if (o.horizontal !== 'off') {
+      const bottom = o.horizontal === 'bottom';
+      out.push(at(bottom ? ANCHOR.BottomCenter : ANCHOR.TopCenter, { y: (bottom ? -1 : 1) * (g + t / 2) },
+                  strip(`${f.frameID}-x`, 'x', W, t)));
+    }
+    return out.filter(Boolean);
   };
-  const refresh = () => movers().forEach((m) => { try { m.forceUpdate(); } catch (e) {} });
-  refresh();
-  all[NAME] = { version: VERSION, stop: () => { proto.renderFloatingFrame = orig; refresh(); },
-                configChanged: refresh, stats };
+
+  class SftScrollStrips extends Base {
+    componentDidMount() { this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
+    componentWillUnmount() { clearInterval(this.timer); }
+    render() {
+      try {
+        if (!learn()) return null;
+        const out = [];
+        for (const f of FS.frames ?? []) {
+          const dock = f?.docking?.dockLocation;
+          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(...stripsFor(f));
+        }
+        return out.length ? out : null;
+      } catch (e) { return null; }
+    }
+  }
+
+  // Mount ours as the last child of the dashboard app's scene-graph root (<vsg-app>), after its
+  // existing children, so nothing already there moves. (window.Dashboard itself is a MobX observer,
+  // whose reactive render can't be wrapped once mounted.)
+  let app = null;
+  for (const stack = fibers(); stack.length;) {
+    const fb = stack.pop();
+    if (fb.stateNode && typeof fb.stateNode.toggleDebugPointer === 'function') { app = fb.stateNode; break; }
+    if (fb.sibling) stack.push(fb.sibling);
+    if (fb.child) stack.push(fb.child);
+  }
+  if (!app) return 'not patched: dashboard app component not found';
+  const hadOwnRender = Object.prototype.hasOwnProperty.call(app, 'render');
+  const origRender = app.render;
+  app.render = function (...args) {
+    const tree = origRender.apply(this, args);
+    const kids = tree?.props?.children;
+    if (!tree || typeof tree !== 'object' || !Array.isArray(kids)) return tree;
+    SAMPLE ??= tree;
+    return Object.assign({}, tree, { props: Object.assign({}, tree.props,
+      { children: [...kids, el(SftScrollStrips, { key: 'sft-scroll-strips' })] }) });
+  };
+  try { app.forceUpdate(); } catch (e) {}
+  all[NAME] = {
+    version: VERSION, stats,
+    stop: () => { if (hadOwnRender) app.render = origRender; else delete app.render; try { app.forceUpdate(); } catch (e) {} },
+    configChanged: () => {},                                // ours re-renders twice a second anyway
+  };
   return 'patched';
 })()
