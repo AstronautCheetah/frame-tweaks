@@ -12,6 +12,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -42,6 +43,147 @@ BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-past
               "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
               "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
               "tools": "tools", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
+# Wallet apps page (wallet/wallet-launcher): apps that open with the shared KDE wallet.
+WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
+APP_TIMERS = Path.home() / ".local/bin/app-timers"
+TIMER_STEPS = [0, 5, 10, 15, 30, 60, 120, 240]          # minutes; 0 = never close
+LAUNCHERS = Path.home() / ".local/share/applications"
+FLATPAK_APPS = [Path.home() / ".local/share/flatpak/exports/share/applications",
+                Path("/var/lib/flatpak/exports/share/applications")]
+FLATPAK_ROOTS = [Path.home() / ".local/share/flatpak/app", Path("/var/lib/flatpak/app")]
+SYSTEM_APPS = [Path("/usr/local/share/applications"), Path("/usr/share/applications")]
+WALLET_MARK = "X-FrameTweaks-Wallet=true"
+# Menu entries that aren't apps with secrets: Steam game shortcuts, SteamVR's link handler, the
+# wallet's own Lock entry.
+NOT_WALLET_APP = re.compile(r"steam://|/vrurlhandler\b|wallet-unlock")
+# Entries a tweak sets up itself (removing one here lasts until that tweak is reinstalled).
+WALLET_OWNERS = {"org.signal.Signal": "Signal", "com.anthropic.Claude": "Claude Desktop",
+                 "android-mirror": "Android Mirror", "org.kde.kwalletmanager": "Wallet"}
+
+
+def desktop_entry(path):
+    """Keys of a .desktop file's [Desktop Entry] group (unlocalised)."""
+    keys, section = {}, None
+    try:
+        lines = Path(path).read_text(errors="replace").splitlines()
+    except OSError:
+        return keys
+    for line in lines:
+        if line.startswith("["):
+            section = line.strip()
+        elif section == "[Desktop Entry]" and "=" in line and not line.startswith("#"):
+            k, v = line.split("=", 1)
+            keys.setdefault(k.strip(), v.strip())
+    return keys
+
+
+def protected_apps():
+    """Apps wallet-launcher has wrapped: id, name, icon and which protections are on."""
+    apps = []
+    for f in sorted(LAUNCHERS.glob("*.desktop")):
+        text = f.read_text(errors="replace")
+        if WALLET_MARK not in text:
+            continue
+        e = desktop_entry(f)
+        cmd = e.get("Exec", "")
+        apps.append({"id": f.stem, "name": e.get("Name", f.stem), "icon": e.get("Icon", ""),
+                     "shared": "/.local/bin/frame-outer-bus" in cmd, "gate": "/.local/bin/wallet-gate" in cmd,
+                     "electron": "--password-store=kwallet6" in cmd, "guard": "/.local/bin/signal-guard" in cmd})
+    return sorted(apps, key=lambda a: a["name"].lower())
+
+
+def app_timers():
+    """app-id -> minutes of no activity before app-timers closes it (Signal's included)."""
+    if not APP_TIMERS.exists():
+        return {}
+    out = subprocess.run([str(APP_TIMERS), "--list"], capture_output=True, text=True).stdout
+    timers = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) == 2:
+            try:
+                timers[parts[0]] = float(parts[1])
+            except ValueError:
+                pass
+    return timers
+
+
+def timer_text(minutes):
+    if not minutes:
+        return "Never"
+    return f"{minutes / 60:g} h" if minutes >= 60 else f"{minutes:g} min"
+
+
+def timer_step(minutes, step, floor=0):
+    """The next/previous preset from minutes (a custom value snaps to its neighbour)."""
+    if step > 0:
+        nxt = [m for m in TIMER_STEPS if m > minutes]
+        return nxt[0] if nxt else TIMER_STEPS[-1]
+    prev = [m for m in TIMER_STEPS if m < minutes and m >= floor]
+    return prev[-1] if prev else max(floor, TIMER_STEPS[0])
+
+
+def is_electron(app):
+    """Electron (and Chromium-based) apps ship resources.pak next to their program; they must be
+    told to use the wallet. Flatpaks: looked up in the app's files; others: from Exec's program."""
+    if app["kind"] == "Flatpak":
+        for root in FLATPAK_ROOTS:
+            files = root / app["id"] / "current" / "active" / "files"
+            for pattern in ("resources.pak", "*/resources.pak", "*/*/resources.pak", "lib/*/resources.pak"):
+                if any(files.glob(pattern)):
+                    return True
+        return False
+    try:
+        args = shlex.split(app.get("exec", ""))
+    except ValueError:
+        return False
+    while args and (args[0] == "env" or "=" in args[0]):
+        args = args[1:]
+    prog = args and shutil.which(os.path.expanduser(args[0]))
+    if not prog:
+        return False
+    d = Path(os.path.realpath(prog)).parent
+    return (d / "resources.pak").exists() or (d.parent / "resources.pak").exists()
+
+
+def wallet_candidates(protected_ids):
+    """Every installed app shown in menus (Flatpak, your own launchers, the system's) that isn't
+    protected yet. An app with entries in several places counts once (the one menus use)."""
+    seen = {}
+    for kind, dirs in (("Your app", [LAUNCHERS]), ("Flatpak", FLATPAK_APPS), ("System app", SYSTEM_APPS)):
+        for d in dirs:
+            for f in sorted(d.glob("*.desktop")) if d.is_dir() else []:
+                if f.stem in seen:
+                    continue
+                e = desktop_entry(f)
+                seen[f.stem] = None          # hidden or not: this entry is what menus see
+                if (f.stem in protected_ids or e.get("Type", "Application") != "Application"
+                        or e.get("NoDisplay") == "true" or e.get("Hidden") == "true" or "Exec" not in e
+                        or NOT_WALLET_APP.search(e["Exec"])):
+                    continue
+                if kind == "Your app" and any((d2 / f.name).exists() for d2 in FLATPAK_APPS):
+                    kind_here = "Flatpak"    # your override of a Flatpak's entry
+                else:
+                    kind_here = kind
+                seen[f.stem] = {"id": f.stem, "name": e.get("Name", f.stem), "icon": e.get("Icon", ""),
+                                "kind": kind_here, "exec": e.get("Exec", "")}
+    return sorted((a for a in seen.values() if a), key=lambda a: a["name"].lower())
+
+
+def app_icon(name):
+    if not name:
+        return QIcon()
+    if name.startswith("/"):
+        return QIcon(name)
+    for base in (Path.home() / ".local/share/icons/hicolor",
+                 Path.home() / ".local/share/flatpak/exports/share/icons/hicolor", FLATPAK_ICONS):
+        hits = sorted(base.glob(f"*/apps/{name}.png"), key=lambda p: p.parent.parent.name) + \
+            sorted(base.glob(f"scalable/apps/{name}.svg"))
+        if hits:
+            return QIcon(str(hits[-1]))
+    return QIcon.fromTheme(name)
+
+
 # Versions with a known problem: a short note on the row, a longer one atop its details, plus a
 # check whether upstream has released something newer since.
 KNOWN_ISSUES = {
@@ -79,6 +221,8 @@ QPushButton:hover { background: #3d4855; }
 QPushButton:checked { background: #355b7a; }
 QPushButton#apply { background: #355b7a; font-weight: 600; }
 QPushButton#info { padding: 6px 10px; }
+QPushButton#info:disabled { color: #3a434d; }
+QWidget#timer { background: transparent; }
 QPushButton#again { padding: 0px 10px 3px 10px; font-size: 24px; font-weight: 600; }
 QPushButton#again:disabled { color: #3a434d; }
 QPushButton#run { background: #2f6b46; font-weight: 600; min-width: 92px; }
@@ -349,6 +493,159 @@ class Details(QWidget):
         self.issue_label.setText(text)
 
 
+class WalletApps(QWidget):
+    """Choose which apps open with the shared KDE wallet (wallet-launcher), inside the window."""
+
+    def __init__(self, window):
+        super().__init__()
+        self.window = window
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        head = QHBoxLayout()
+        back = QPushButton("← Back")
+        back.clicked.connect(window.go_back)
+        head.addWidget(back)
+        title = QLabel("Wallet apps")
+        title.setObjectName("title")
+        head.addWidget(title, 1)
+        lay.addLayout(head)
+        about = QLabel(
+            "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop "
+            "mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also "
+            "told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for "
+            "the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the "
+            "app after that long with no activity (no keyboard, mouse or controller input), so opening it "
+            "again needs the wallet again, like Signal's guard.")
+        about.setWordWrap(True)
+        about.setObjectName("desc")
+        lay.addWidget(about)
+        self.notice = QLabel()
+        self.notice.setObjectName("notice")
+        self.notice.setWordWrap(True)
+        lay.addWidget(self.notice)
+        self.body = QWidget()
+        self.rows = QVBoxLayout(self.body)
+        self.rows.setSpacing(8)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self.body)
+        lay.addWidget(scroll, 1)
+        self.fill()
+
+    def fill(self):
+        while self.rows.count():
+            item = self.rows.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        protected = protected_apps()
+        timers = app_timers()
+        self.rows.addWidget(self.heading(f"Protected ({len(protected)})"))
+        for a in protected:
+            what = ((["shared wallet"] if a["shared"] else []) + (["Electron told to use it"] if a["electron"] else [])
+                    + (["Signal guard: unlocks the wallet first, quits when idle"] if a["guard"] else []))
+            note = " · ".join(what) or "password only (keeps its own session)"
+            if a["id"] in WALLET_OWNERS:
+                note += f"<br><span style='color:#6b7783'>Set up by the {WALLET_OWNERS[a['id']]} tweak: " \
+                        "reinstalling it (↻) adds it back if removed here.</span>"
+            gate = QCheckBox("Password first")
+            gate.setChecked(a["gate"])
+            gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
+            gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
+            remove = QPushButton("Remove")
+            remove.setToolTip("Open it the way it opened before (its original launcher)")
+            remove.clicked.connect(lambda _=False, a=a: self.run(["--remove", a["id"]], f"{a['name']}: removed"))
+            controls = [self.timer_control(a, timers.get(a["id"], 0))] if APP_TIMERS.exists() else []
+            self.rows.addWidget(self.row(a, note, controls + [gate, remove]))
+        candidates = wallet_candidates({a["id"] for a in protected})
+        self.rows.addWidget(self.heading(f"Add an app ({len(candidates)} installed apps)"))
+        for a in candidates:
+            electron = is_electron(a)
+            note = f"{a['kind']} · {a['id']}" + (" · Electron app: will be told to use the wallet" if electron else "")
+            add = QPushButton("Protect")
+            add.setObjectName("run")
+            add.clicked.connect(lambda _=False, a=a, el=electron: self.run(
+                (["--electron"] if el else []) + [a["id"]], f"{a['name']}: protected. Reopen it if it's running."))
+            self.rows.addWidget(self.row(a, note, [add]))
+        self.rows.addStretch(1)
+
+    @staticmethod
+    def heading(text):
+        label = QLabel(text.upper())
+        label.setStyleSheet("color: #7fb2e5; font-weight: 600; letter-spacing: 1px; margin-top: 8px;")
+        return label
+
+    @staticmethod
+    def row(app, note, buttons):
+        w = QWidget()
+        w.setObjectName("row")
+        w.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        g = QHBoxLayout(w)
+        g.setContentsMargins(12, 8, 12, 8)
+        g.setSpacing(14)
+        icon = QLabel()
+        icon.setPixmap(app_icon(app["icon"]).pixmap(32, 32))
+        g.addWidget(icon)
+        text = QLabel(f"<b>{html.escape(app['name'], quote=False)}</b><br>"
+                      f"<span style='color:#9aa6b2;font-size:13px'>{note}</span>")
+        text.setWordWrap(True)
+        g.addWidget(text, 1)
+        for b in buttons:
+            g.addWidget(b)
+        return w
+
+    def timer_control(self, app, minutes):
+        """Close after: [−] 15 min [+]  (steppers, not a drop-down: in VR a drop-down's list
+        opens as a separate window in the dashboard)."""
+        box = QWidget()
+        box.setObjectName("timer")
+        lay = QHBoxLayout(box)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(4)
+        label = QLabel("Close after")
+        label.setObjectName("desc")
+        value = QLabel(timer_text(minutes))
+        value.setMinimumWidth(64)
+        value.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Signal guard always closes Signal when idle: it can be made longer, not switched off.
+        floor = 5 if app["id"] == "org.signal.Signal" and app.get("guard") else 0
+        less, more = QPushButton("−"), QPushButton("+")
+        for b, step in ((less, -1), (more, 1)):
+            b.setObjectName("info")
+            b.setToolTip("Shorter" if step < 0 else "Longer")
+            b.clicked.connect(lambda _=False, st=step: self.set_timer(app, timer_step(minutes, st, floor)))
+        less.setEnabled(minutes > floor)
+        more.setEnabled(minutes < TIMER_STEPS[-1])
+        box.setToolTip("Quit the app after this long with no keyboard, mouse or controller input")
+        for w in (label, less, value, more):
+            lay.addWidget(w)
+        return box
+
+    def set_timer(self, app, minutes):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: app-timers --set", app["id"], minutes)
+            return
+        r = subprocess.run([str(APP_TIMERS), "--set", app["id"], f"{minutes:g}"], capture_output=True, text=True)
+        self.notice.setText(html.escape(
+            (f"{app['name']}: closes after {timer_text(minutes)} with no activity" if minutes else
+             f"{app['name']}: no timer") if r.returncode == 0 else
+            f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
+        QTimer.singleShot(0, self.fill)
+
+    def set_gate(self, app, on):
+        args = (["--gate"] if on else []) + ([] if app["shared"] else ["--no-shared"]) + [app["id"]]
+        self.run(args, f"{app['name']}: " + ("asks for the wallet password first" if on else
+                                             "opens without asking for the password"))
+
+    def run(self, args, done):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: wallet-launcher", " ".join(args))
+            return
+        r = subprocess.run([str(WALLET_LAUNCHER)] + args, capture_output=True, text=True)
+        self.notice.setText(html.escape(done if r.returncode == 0 else
+                                        f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
+        QTimer.singleShot(0, self.fill)
+
+
 class Window(QWidget):
     def __init__(self):
         super().__init__()
@@ -385,6 +682,11 @@ class Window(QWidget):
         self.show_hidden.setCheckable(True)
         self.show_hidden.toggled.connect(self.rebuild)
         top.addWidget(self.show_hidden)
+        self.wallet_button = QPushButton("🔑 Wallet apps")
+        self.wallet_button.setToolTip("Choose which apps open with the shared KDE wallet")
+        self.wallet_button.clicked.connect(self.show_wallet_apps)
+        self.wallet_button.setVisible(WALLET_LAUNCHER.exists())
+        top.addWidget(self.wallet_button)
         diag = QPushButton("Diagnostics")
         diag.setToolTip("Save a report for a bug report (user names and paths removed)")
         diag.clicked.connect(self.save_diagnostics)
@@ -489,7 +791,7 @@ class Window(QWidget):
             if fut.done():
                 del self.latest_futures[cid]
                 self.latest[cid] = fut.result()
-                if self.details is not None and self.details.comp["id"] == cid:
+                if getattr(self.details, "comp", {}).get("id") == cid:
                     self.details.show_issue(self.latest[cid])
         if self.self_update is not None and self.self_update.done():
             newest, self.self_update = self.self_update.result(), None
@@ -705,6 +1007,12 @@ class Window(QWidget):
     def show_details(self, comp):
         self.close_details()
         self.details = Details(self, comp, self.state.get(comp["id"]))
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
+    def show_wallet_apps(self):
+        self.close_details()
+        self.details = WalletApps(self)        # a page like Details: Back and B return to the list
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 

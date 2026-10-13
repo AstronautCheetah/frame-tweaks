@@ -1,0 +1,19 @@
+[Unit]
+Description=Close apps after a set time with no activity (app-timers, Frame Tweaks)
+
+[Service]
+ExecStart=%h/.local/bin/app-timers --run
+Restart=on-failure
+RestartSec=5
+# Reads input devices and /proc, sends a quit (TERM) to your own apps, shows a notification.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=%t
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=default.target

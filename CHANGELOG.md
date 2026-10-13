@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **🔑 Wallet apps in the installer window:** choose which apps open with the shared KDE wallet.
+  It lists every installed app (Flatpaks from any source, system apps, your own launchers),
+  detects Electron/Chromium apps, and has a Password-first switch, a **Close after** timer and
+  Remove for each protected app. The timer (new `app-timers` service) quits the app after that
+  long with no input, like Signal guard does for Signal. `wallet-launcher` can now wrap system
+  apps too.
 - **Android Mirror's "Phone not found" names the phones it did see**, and says Wireless debugging
   lives in Developer options in the phone's Owner profile (a different phone on the same Wi-Fi
   was easy to mistake for yours).
