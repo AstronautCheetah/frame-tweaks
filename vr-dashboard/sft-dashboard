@@ -141,98 +141,13 @@ def ws_eval(url, expr, timeout=5):
 
 
 # ---- page -> here: actions a patch asks for (window.<binding>(json)) ------------------------
-# Scrolling. Injected pointer input (XTest, ydotool's wheel) never reaches windows in the Steam
-# session: in VR gamescope takes pointer input only from the lasers. Keyboard input does arrive.
-# So: the desktop scrolls with real wheel steps through its own Remote Desktop portal (KDE asks
-# you once; a restore token remembers the answer), and other windows scroll with the arrow keys
-# (PgUp/PgDn for a page) through ydotool, to the window you last clicked.
-STATE_DIR = Path.home() / ".local/state/frame-tweaks"
-PORTAL_TOKEN = STATE_DIR / "remote-desktop.token"
+# Scrolling. Injected pointer input (XTest, ydotool's wheel, the desktop's Remote Desktop portal)
+# never visibly scrolls anything in the Steam session: in VR gamescope takes pointer input only from
+# the lasers. Keyboard input does arrive, so the strips scroll with the arrow keys (PgUp/PgDn for a
+# page), through ydotool, in the window you last clicked (the desktop included).
 YDOTOOL = Path.home() / ".local/bin/ydotool"
 YDOTOOL_SOCKET = f"/run/user/{os.getuid()}/.ydotool_socket"
 KEY = {"up": 103, "down": 108, "left": 105, "right": 106, "pgup": 104, "pgdn": 109}
-
-
-def desktop_bus():
-    """The nested desktop's session bus address, or None: the newest /tmp/dbus-* socket with KWin
-    on it. (Reading plasmashell's environment would be simpler, but a service may not.)"""
-    from jeepney import DBusAddress, new_method_call
-    from jeepney.io.blocking import open_dbus_connection
-    dbus = DBusAddress("/org/freedesktop/DBus", bus_name="org.freedesktop.DBus", interface="org.freedesktop.DBus")
-    socks = sorted(Path("/tmp").glob("dbus-*"), key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
-    for sock in socks:
-        if not sock.is_socket():
-            continue
-        address = f"unix:path={sock}"
-        try:
-            with open_dbus_connection(address) as conn:
-                reply = conn.send_and_get_reply(new_method_call(dbus, "NameHasOwner", "s", ("org.kde.KWin",)), timeout=2)
-                if reply.body[0]:
-                    return address
-        except Exception:
-            continue
-    return None
-
-
-class DesktopScroll:
-    """Wheel steps inside the KDE desktop through org.freedesktop.portal.RemoteDesktop."""
-
-    def __init__(self):
-        from jeepney import DBusAddress, MatchRule, new_method_call
-        from jeepney.io.blocking import open_dbus_connection
-        self.new_method_call, self.MatchRule = new_method_call, MatchRule
-        self.bus = desktop_bus()
-        if not self.bus:
-            raise OSError("desktop session bus not found (is desktop mode running?)")
-        self.conn = open_dbus_connection(self.bus)
-        self.portal = DBusAddress("/org/freedesktop/portal/desktop", bus_name="org.freedesktop.portal.Desktop",
-                                  interface="org.freedesktop.portal.RemoteDesktop")
-        self.session = None
-        self.n = 0
-
-    def _request(self, method, signature, args, timeout=120):
-        """Call a portal method that answers with a Request's Response signal; return its results."""
-        self.n += 1
-        token = f"sft{os.getpid()}_{self.n}"
-        sender = self.conn.unique_name.lstrip(":").replace(".", "_")
-        path = f"/org/freedesktop/portal/desktop/request/{sender}/{token}"
-        rule = self.MatchRule(type="signal", interface="org.freedesktop.portal.Request", member="Response", path=path)
-        from jeepney.bus_messages import message_bus
-        self.conn.send_and_get_reply(message_bus.AddMatch(rule))
-        with self.conn.filter(rule) as queue:
-            opts = dict(args[-1])
-            opts["handle_token"] = ("s", token)
-            self.conn.send_and_get_reply(self.new_method_call(self.portal, method, signature, (*args[:-1], opts)))
-            msg = self.conn.recv_until_filtered(queue, timeout=timeout)
-        code, results = msg.body
-        if code != 0:
-            raise OSError(f"{method}: the portal said no (code {code})")
-        return results
-
-    def start(self):
-        res = self._request("CreateSession", "a{sv}", ({"session_handle_token": ("s", f"sfts{os.getpid()}")},))
-        self.session = res["session_handle"][1]
-        sel = {"types": ("u", 2), "persist_mode": ("u", 2)}                  # pointer; until revoked
-        try:
-            sel["restore_token"] = ("s", PORTAL_TOKEN.read_text().strip())
-        except OSError:
-            pass
-        self._request("SelectDevices", "oa{sv}", (self.session, sel))
-        res = self._request("Start", "osa{sv}", (self.session, "", {}))   # KDE asks the first time
-        if "restore_token" in res:
-            STATE_DIR.mkdir(parents=True, exist_ok=True)
-            PORTAL_TOKEN.touch(mode=0o600)
-            PORTAL_TOKEN.chmod(0o600)                  # a remote-control grant: yours only
-            PORTAL_TOKEN.write_text(res["restore_token"][1])
-
-    def steps(self, axis, n):
-        if self.session is None:
-            self.start()
-        self.conn.send_and_get_reply(self.new_method_call(
-            self.portal, "NotifyPointerAxisDiscrete", "oa{sv}ui", (self.session, {}, axis, n)))
-
-
-_desktop = None
 
 
 def keys(name, n):
@@ -243,29 +158,9 @@ def keys(name, n):
 
 
 def scroll(req):
-    """Scroll strips: {dx, dy (+ = right / up, wheel notches), page (+1 up / -1 down, a tap),
-    target: "desktop" | "window"}."""
-    global _desktop
+    """Scroll strips: {dx, dy (steps; + = right / up), page (+1 up / -1 down)}."""
     dx, dy = (max(-60, min(60, int(req.get(k, 0)))) for k in ("dx", "dy"))
     page = int(req.get("page", 0))
-    if req.get("target") == "desktop":
-        for attempt in (1, 2):                 # a restarted desktop has a new bus: reconnect once
-            try:
-                if _desktop is None:                 # found once; again only after an error
-                    _desktop = DesktopScroll()
-                # The portal's discrete axis: + = down / right, the opposite of the wheel's +y.
-                if page:
-                    _desktop.steps(0, -10 * page)
-                if dy:
-                    _desktop.steps(0, -dy)
-                if dx:
-                    _desktop.steps(1, dx)
-                return
-            except (OSError, TimeoutError, KeyError, ValueError):
-                _desktop = None
-                if attempt == 2:
-                    raise
-        return
     if page:
         keys("pgup" if page > 0 else "pgdn", 1)
     if dy:

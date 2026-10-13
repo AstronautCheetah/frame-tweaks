@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips work like joysticks:** press, drag away from that point to scroll (farther =
+  faster, back past it reverses), let go to stop; the strip shows where you pressed. They scroll
+  with arrow keys everywhere, the desktop included (its Remote Desktop portal accepted wheel steps
+  but nothing scrolled, so it's no longer used and its saved permission is removed).
 - **Scroll strips scroll (for real this time).** In VR the Steam session takes pointer input only
   from the lasers, so injected mouse wheels never arrived. The desktop now scrolls with real wheel
   steps through its own Remote Desktop portal (KDE asks once), other windows with arrow keys /

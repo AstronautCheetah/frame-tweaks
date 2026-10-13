@@ -549,8 +549,9 @@ class ScrollStripSettings(QWidget):
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
-        about = QLabel("Big strips beside each floating window. Drag along one to scroll; tap near an end "
-                       "to page. They scroll the window you last clicked.")
+        about = QLabel("Big strips beside each window. Press one and drag away from that point to scroll "
+                       "(farther = faster; let go to stop); tap near an end to page. They scroll the "
+                       "window you last clicked.")
         about.setObjectName("desc")
         about.setWordWrap(True)
         lay.addWidget(about)
