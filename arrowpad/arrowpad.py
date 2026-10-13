@@ -829,6 +829,10 @@ def main():
     ap.add_argument("--vr", action="store_true", help="open as a floating VR window")
     args = ap.parse_args()
 
+    # Hand "quit"/"toggle" to a running pad before any window code starts: --quit must work
+    # from anywhere (an uninstall in a terminal can't open desktop mode's display).
+    if signal_running("quit" if args.quit else "toggle") or args.quit:
+        return
     app = QApplication(sys.argv)
     app.setApplicationName("arrowpad")
     # Taskbar/window icon instead of the generic X11 logo; the desktop file name lets
@@ -836,8 +840,6 @@ def main():
     app.setDesktopFileName("arrowpad-vr" if TARGET == "vr" else "arrowpad")
     if ICON.exists():
         app.setWindowIcon(QIcon(str(ICON)))
-    if signal_running("quit" if args.quit else "toggle") or args.quit:
-        return
     try:
         yd = Ydotool(args.socket)
     except OSError as e:
