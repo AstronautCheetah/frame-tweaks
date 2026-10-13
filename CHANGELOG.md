@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: Arrow Pad and the installer could switch the desktop into input-grab mode.** Their
+  stuck-key cleanup pressed Right Ctrl, which in the nested desktop toggles KWin's input grab
+  ("Press right control to ungrab input"), so windows and clicks behaved oddly after Arrow Pad
+  started or was reinstalled. Right Ctrl is no longer pressed.
+- **Arrow Pad: Unstick key** (Tools layer, replaces PrtSc there): when the desktop acts as if
+  Shift, Ctrl, Alt or Super is held, it presses and releases each.
 - **Speech engine (helper, new): the Screen reader's Orca can speak.** SteamOS has speech-dispatcher
   and its espeak-ng module but not espeak-ng, so Orca was silent. The espeak-ng inside Piper's
   download is now wired into speech-dispatcher (a user `speechd.conf`, restored on uninstall).

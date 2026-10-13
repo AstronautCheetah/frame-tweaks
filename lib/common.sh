@@ -216,7 +216,9 @@ restore_kconfig() {
 # the Steam session then adds it to every key). A release alone is dropped when the kernel
 # already thinks the key is up, so each gets a full press+release; Super and Alt wrap F24 (bound
 # to nothing) so the release isn't a lone tap that opens the app menu or a menu bar.
-CLEAR_MODIFIERS="42:1 42:0 54:1 54:0 29:1 29:0 97:1 97:0 56:1 194:1 194:0 56:0 125:1 194:1 194:0 125:0"
+# Never Right Ctrl (97): in the nested desktop it toggles KWin's input grab ("Press right control
+# to grab input"), which changes how windows and clicks behave. Nothing types Right Ctrl here.
+CLEAR_MODIFIERS="42:1 42:0 54:1 54:0 29:1 29:0 56:1 194:1 194:0 56:0 125:1 194:1 194:0 125:0"
 clear_stuck_modifiers() {
     [ -x "$BIN/ydotool" ] || return 0
     # shellcheck disable=SC2086
