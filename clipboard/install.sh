@@ -9,7 +9,8 @@ if ! command -v cargo >/dev/null; then
 fi
 say "Building clipboard-sync from https://github.com/dnut/clipboard-sync (a few minutes)"
 CARGO_HOME="$HOME/.local/share/frame-tweaks/cargo" \
-    cargo install --locked --force --git https://github.com/dnut/clipboard-sync --root "$ROOT"
+    cargo install --locked --force --git "$(sed -n 's/^url=//p' "$REPO_DIR/clipboard/pin")" \
+        --rev "$(sed -n 's/^rev=//p' "$REPO_DIR/clipboard/pin")" --root "$ROOT"
 ln -sf "$ROOT/bin/clipboard-sync" "$BIN/clipboard-sync"
 
 # Start with the desktop session (KDE autostart): it must run with the nested desktop's

@@ -1,20 +1,33 @@
 #!/usr/bin/env bash
-# For maintainers: compare each <tweak>/pin with upstream's latest release. To bump a pin,
-# read the release notes and diff, then update version, url and sha256 (the sha256 from the
-# release's SHA256SUMS, or computed from the downloaded file) in one reviewed commit.
+# For maintainers: compare pinned upstream versions with what upstream has now.
+#  - <tweak>/pin with a release tag (latest= GitHub releases API), a git commit (rev=, latest=
+#    commits API) or a Hugging Face revision (latest= .../revision/main)
+#  - lib/python-constraints.txt against PyPI
+# To bump: read the release notes / diff, then update the pin (version, url, sha256 or rev) in
+# one reviewed commit. The sha256 comes from the release's SHA256SUMS, Hugging Face's file
+# listing, or the downloaded file.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 for pin in */pin; do
     id=${pin%/pin}
-    cur=$(sed -n 's/^version=//p' "$pin")
-    api=$(sed -n 's/^latest=//p' "$pin")
-    tag=$(curl -fsSL --max-time 10 "$api" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | sed -n 1p) || tag=""
-    latest=${tag#v}
-    if [ -z "$latest" ]; then
-        echo "$id: pinned $cur; couldn't reach upstream"
-    elif [ "$latest" = "$cur" ]; then
-        echo "$id: pinned $cur (latest)"
-    else
-        echo "$id: pinned $cur; upstream has $latest ($(dirname "$api" | sed 's|api.github.com/repos|github.com|')/tag/$tag)"
+    cur=$(sed -n 's/^version=//p' "$pin"); api=$(sed -n 's/^latest=//p' "$pin")
+    json=$(curl -fsSL --max-time 15 "$api" 2>/dev/null) || { echo "$id: pinned $cur; couldn't reach upstream"; continue; }
+    if grep -q '^rev=' "$pin"; then                    # git commit
+        new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
+        [ "$new" = "$(sed -n 's/^rev=//p' "$pin")" ] && echo "$id: pinned $cur (latest commit)" ||
+            echo "$id: pinned $cur; upstream HEAD is ${new:0:7}"
+    elif [[ $api == *huggingface.co* ]]; then           # model repository revision
+        new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
+        [[ $new == "$cur"* ]] && echo "$id: pinned $cur (latest revision)" ||
+            echo "$id: pinned $cur; repository is now at ${new:0:8} (the model file may be unchanged)"
+    else                                               # GitHub release
+        tag=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])' <<<"$json"); latest=${tag#v}
+        [ "$latest" = "$cur" ] && echo "$id: pinned $cur (latest)" || echo "$id: pinned $cur; upstream has $latest"
     fi
 done
+while IFS='=' read -r pkg ver; do
+    [[ -z $pkg || $pkg == \#* ]] && continue
+    pkg=${pkg%=}
+    new=$(curl -fsSL --max-time 15 "https://pypi.org/pypi/$pkg/json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["info"]["version"])') || new="?"
+    [ "$new" = "$ver" ] && echo "pypi $pkg: pinned $ver (latest)" || echo "pypi $pkg: pinned $ver; PyPI has $new"
+done < <(sed 's/==/=/' lib/python-constraints.txt)

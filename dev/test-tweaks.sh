@@ -8,7 +8,6 @@
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
 cd "$(dirname "$0")/.."
-REPO=$PWD
 DEFAULT=(cursor tools curvature menu-icons homebrew ydotool dictation wallet memcap)
 # Screen reader needs Orca and KDE's config tools (the Frame has them, CI doesn't).
 command -v orca >/dev/null && command -v kreadconfig6 >/dev/null && DEFAULT+=(screen-reader)
@@ -24,6 +23,10 @@ declare -A KEEP=([curvature]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [
                  [memcap]="$PATHSET .config/frame-tweaks/memcap.conf" [screen-reader]=".config/kaccessrc")
 
 work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"' EXIT
+# Run from a copy of the repo, so pins can point at the fixtures below without any checksum
+# bypass in the real scripts.
+REPO="$work/repo"; mkdir -p "$REPO"
+tar -C "$PWD" --exclude=./.git --exclude=./references --exclude=./tmp -cf - . | tar -C "$REPO" -xf -
 stubs="$work/stubs"; mkdir -p "$stubs"
 # KDE's config tools are real when present (they only write into the fake home), else stubbed.
 stub_cmds=(systemctl flatpak brew kdialog notify-send nmcli qdbus qdbus6 busctl gtk-launch sudo gpgv)
@@ -49,6 +52,7 @@ chmod +x "$fx/pkg/usr/bin/"*
 (cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" usr)
 echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
 head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"
+sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/dictation/pin"
 cat > "$stubs/curl" <<STUB
 #!/bin/bash
 out=""; url=""

@@ -1,0 +1,7 @@
+# Exact versions for the Python packages the tweaks install with pip (used as a constraints
+# file: `pip install -c lib/python-constraints.txt <package>`). dev/check-pins.sh reports newer ones.
+PyQt6==6.11.0
+PyQt6-Qt6==6.11.2
+PyQt6_sip==13.13.0
+openvr==2.12.1401
+jeepney==0.9.0

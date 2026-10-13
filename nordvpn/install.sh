@@ -10,7 +10,7 @@ QT_VENV="$HOME/.local/share/arrowpad/venv"
 if ! "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
     say "Creating Python venv with PyQt6 (~280 MB, shared with arrowpad)"
     python3 -m venv "$QT_VENV"
-    "$QT_VENV/bin/pip" install -q PyQt6
+    "$QT_VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" PyQt6
 fi
 sed "1s|.*|#!$QT_VENV/bin/python|" "$REPO_DIR/nordvpn/nordvpn-tray" > "$BIN/nordvpn-tray"
 chmod 755 "$BIN/nordvpn-tray"
