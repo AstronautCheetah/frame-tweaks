@@ -8,9 +8,10 @@ Select a rectangle of the window you're using, then:
 - **Copy text**: reads the text in it ([Tesseract](https://github.com/tesseract-ocr/tesseract)
   OCR) and copies that.
 - **Narrate**: reads the text aloud ([Piper](https://github.com/rhasspy/piper), offline), at
-  the speed set under it (**−** / **+**, 0.75× to 2×, remembered). The snip pops out into a window of its own (the
-  snip shown large) with **■ Stop** / **▶ Again**, speed, and **Close**, and the full-screen snip
-  goes away, so you can carry on with anything else while it reads. A speed change applies at
+  the speed set under it (**−** / **+**, 0.75× to 2×, remembered). The snip pops out into a panel
+  of its own in front of you (drawn like Arrow Pad, not a window, so it takes no place in the
+  dashboard) with **■ Stop** / **▶ Again**, speed, and **Close**; drag its top bar to move it. The
+  full-screen snip goes away, so you can carry on with anything else while it reads. A speed change applies at
   once (it reads sentence by sentence and restarts the current one).
 
 <!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->

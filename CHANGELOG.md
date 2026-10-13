@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Screen snip: the narration panel is its own VR panel** (drawn like Arrow Pad and Full Keyboard)
+  instead of a window: a compact size, no place in the dashboard (no more flicker with Back to the
+  previous window), movable by its top bar.
 - **Scroll strips follow SteamVR's Camera Color Tint** (their border, knob and pressed colour use its
   hue, and change when you change it).
 - **Screen snip: Narrate pops out and has a speed control.** Narrate opens a small window with the
