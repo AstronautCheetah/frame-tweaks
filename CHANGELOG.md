@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips scroll now.** ydotool's virtual wheel never reached app windows; the strips now
+  send wheel clicks through XTest on the Steam session's display. A drag also ends if the laser's
+  release goes missing.
+- **Arrow Pad:** Save and Redo swapped places on the Tools layer.
 - **Scroll strips: fixed size, place and the Steam bar.** They were sized from the window's scaled
   measurements (about 2.7x too big and far out) and used large page elements, which made the
   dashboard draw the Steam bar too big. Now real-world sizes (thickness 2.5 / 4 / 6 cm) and small
