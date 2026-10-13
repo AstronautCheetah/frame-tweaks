@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Wallet apps explains why** (a headset without a password can still keep sensitive apps
+  behind the wallet's) and **shows the wallet's state** at the top: open or locked, for how long,
+  when it locks by itself, with a Lock now / Unlock button. `wallet-unlock --info` reports it.
 - **Signal uses the standard Wallet apps protections; Signal guard is retired.** Its two jobs
   are now Password first and a Close-after timer, like any app's (15 minutes, or your Signal
   guard setting, carried over). Its headset-off option is now **Headset off**, for any app with

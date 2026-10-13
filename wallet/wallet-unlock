@@ -7,6 +7,7 @@ pops up as a floating VR window on the Steam session's display.
                            Schedules an automatic lock after WALLET_LOCK_HOURS (default 4).
   wallet-unlock --lock     lock it now
   wallet-unlock --status   print locked / unlocked
+  wallet-unlock --info     JSON: state, when it was unlocked, when it locks (installer window)
   wallet-unlock --watch    run by wallet-lock-sync.service:
                            - when the wallet is closed (KWalletManager's Close, idle timeout),
                              really lock it (kwalletd6's close leaves ksecretd unlocked);
@@ -20,6 +21,7 @@ PBKDF2-SHA512 over the wallet's salt, and hands it to ksecretd's pamOpen on the
 outer session bus. The password and key never appear on a command line.
 """
 import hashlib
+import json
 import os
 import subprocess
 import sys
@@ -38,6 +40,8 @@ SECRETS = DBusAddress("/org/freedesktop/secrets", bus_name="org.freedesktop.secr
 COLLECTION = f"/org/freedesktop/secrets/collection/{WALLET}"
 KSECRETD = DBusAddress("/ksecretd", bus_name="org.kde.ksecretd", interface="org.kde.KWallet")
 KWALLETD = DBusAddress("/modules/kwalletd6", bus_name="org.kde.kwalletd6", interface="org.kde.KWallet")
+# When the wallet was unlocked and when the auto-lock fires (cleared by locking, and by a reboot).
+SESSION = Path(f"/run/user/{os.getuid()}/wallet-session.json")
 
 
 def bus():
@@ -99,6 +103,42 @@ def lock(conn):
         call(conn, new_method_call(KWALLETD, "close", "sb", (WALLET, True)))
     except Exception:
         pass
+    SESSION.unlink(missing_ok=True)
+
+
+def session():
+    try:
+        return json.loads(SESSION.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def timer_lock_time():
+    """When the running auto-lock timer fires (its start + WALLET_LOCK_HOURS), else None."""
+    env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}", DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
+    r = subprocess.run(["systemctl", "--user", "show", "--timestamp=unix", "-p", "ActiveEnterTimestamp",
+                        "-p", "ActiveState", "wallet-autolock.timer"], env=env, capture_output=True, text=True)
+    props = dict(line.split("=", 1) for line in r.stdout.splitlines() if "=" in line)
+    started = props.get("ActiveEnterTimestamp", "").lstrip("@")
+    if props.get("ActiveState") != "active" or not started.isdigit():
+        return None
+    return int(started) + float(os.environ.get("WALLET_LOCK_HOURS", "4")) * 3600
+
+
+def idle_close_minutes():
+    """kwalletd also closes (we then lock) the wallet after this long unused, if enabled."""
+    conf = Path.home() / ".config/kwalletrc"
+    text = conf.read_text() if conf.exists() else ""
+    group = text.split("[Wallet]", 1)[1].split("\n[", 1)[0] if "[Wallet]" in text else ""
+    if "Close When Idle=true" not in group:
+        return None
+    for line in group.splitlines():
+        if line.startswith("Idle Timeout="):
+            try:
+                return int(line.split("=", 1)[1])
+            except ValueError:
+                return None
+    return None
 
 
 def x_env(display):
@@ -241,6 +281,17 @@ def schedule_lock():
     if r.returncode != 0:
         print(f"wallet-unlock: couldn't schedule the auto-lock: {r.stderr.strip()}", file=sys.stderr, flush=True)
         return "?"
+    s = session()
+    now = time.time()
+    s.setdefault("unlocked", now)         # an app reopening the open wallet only moves the lock
+    try:
+        s["locks"] = now + float(hours) * 3600
+    except ValueError:
+        s.pop("locks", None)
+    try:
+        SESSION.write_text(json.dumps(s))
+    except OSError:
+        pass
     return hours
 
 
@@ -311,6 +362,13 @@ def main():
     with bus() as conn:
         if arg == "--status":
             print("locked" if is_locked(conn) else "unlocked")
+        elif arg == "--info":
+            locked = is_locked(conn)
+            s = {} if locked else session()
+            if not locked and "locks" not in s:     # unlocked before times were recorded
+                s["locks"] = timer_lock_time()
+            print(json.dumps({"state": "locked" if locked else "unlocked", "unlocked_at": s.get("unlocked"),
+                              "locks_at": s.get("locks"), "idle_close_minutes": idle_close_minutes()}))
         elif arg == "--lock":
             lock(conn)
             print("locked" if is_locked(conn) else "still unlocked?")
