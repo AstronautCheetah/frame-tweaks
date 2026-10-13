@@ -1,4 +1,4 @@
-# Signal: encrypted key storage
+# Signal: key in the wallet
 
 The Flathub build of Signal Desktop asks on every launch whether to use the
 **plaintext** password store. Choosing it leaves the key to your message database

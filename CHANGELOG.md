@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Back to the previous window** waits 2.5 s (was 1 s), and installing a VR windows tweak waits
+  for its patch to be active before showing its status (it showed "not patched yet").
+- **Signal hardening is now "Signal: key in the wallet"**, which is what's left of it: Password
+  first and Close after are set in Wallet apps.
 - **New VR windows group** in the installer window, with **Back to the previous window** (new):
   after you float the window the dashboard is showing out into the world, the dashboard goes
   back to the window it showed before (after 1 s) instead of an empty space. Tick or untick it

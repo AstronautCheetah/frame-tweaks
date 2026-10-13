@@ -245,7 +245,13 @@ install_dashboard_patch() {    # install_dashboard_patch NAME FILE
     mkdir -p "$VR_DASHBOARD/patches"
     install -m644 "$2" "$VR_DASHBOARD/patches/$1.js"
     if sysctl_user is-active --quiet sft-dashboard.service; then
-        say "Active now (the dashboard picks it up within a few seconds)."
+        # The watcher looks every 5 s: wait for it, so the status shown next is the real one.
+        local _
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+            "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null | grep -q ": patched$" && break
+            sleep 1
+        done
+        say "Active now."
     elif sysctl_user is-active --quiet steamvr.service; then
         say "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
     else
