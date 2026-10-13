@@ -22,8 +22,14 @@ sees both.
 ./install.sh clipboard
 ```
 
-- Built from **upstream source** with Rust (Homebrew), so re-running the install picks up
-  upstream changes. The first build takes a few minutes.
+- Built from **upstream source** with Rust (Homebrew), at the commit pinned in `pin`. The first
+  build takes a few minutes.
+- One small change is applied before building, [`keep-images.patch`](keep-images.patch):
+  clipboard-sync shares text only, and when you copied an image (e.g. Copy image in the screen
+  snip) it saw "no text" as a change and put the last text back everywhere a moment later,
+  so the image never pasted. With the patch it leaves a clipboard without text alone.
+- Only one copy runs: starting it (desktop login, Restart) stops any left over from a desktop
+  session that was restarted, which otherwise kept syncing too.
 - Starts with desktop mode via KDE autostart (`~/.config/autostart/clipboard-sync.desktop`).
   It needs the desktop session's environment: started from VR or a user service, it wouldn't
   see the desktop's clipboard.

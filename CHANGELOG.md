@@ -1,6 +1,16 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: Copy image didn't paste** (e.g. into OnlyOffice). The Shared clipboard tweak's
+  clipboard-sync shares text only and put the last text back over a copied image a moment later;
+  it's now built with a small patch that leaves a clipboard without text alone, and starting it
+  stops any copy left over from a restarted desktop (two were running). Copy image now also
+  offers PNG, BMP and HTML, so more apps accept it.
+- **Narration panel: Collapse on both sides.** An icon-only Collapse at the bottom left, besides
+  the one at the right; Expand comes back with the icon you used in place, so it can tuck away
+  toward either side. Copy image, Copy text and Paste are centred.
+- **Fixed: a static-like flicker over Collapse** while the panel changed size (the old picture
+  was briefly stretched to the new size).
 - **Fixed: the narration panel's image disappeared** after Show text (and for a later snip).
 - **No Steam flash after a snip:** when the shown window closes, Back to the previous window now
   makes the dashboard's own choice of what to show next, so it goes straight back to the desktop
