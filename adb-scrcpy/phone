@@ -18,4 +18,8 @@ dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
 adb connect "$dev" >/dev/null
 # With "Memory caps" installed, scrcpy runs inside its memory limit.
 cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" scrcpy --)
-exec "${cap[@]}" scrcpy -s "$dev" --video-bit-rate=8M --max-size=1920 "$@"
+MAX=1920
+# In VR, shape the window like the phone (upright or sideways) and follow its rotation;
+# without it the Steam session makes the window 1920x1080, with black bars beside a portrait phone.
+[ -x "$HOME/.local/bin/phone-fit" ] && setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
+exec "${cap[@]}" scrcpy -s "$dev" --video-bit-rate=8M --max-size="$MAX" "$@"

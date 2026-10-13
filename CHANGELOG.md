@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Android Mirror in VR takes the phone's shape and follows its rotation** (`phone-fit`): no
+  more wide black bars beside a phone held upright. The Steam session makes app windows
+  1920×1080, but keeps a window that declares a fixed size, so the mirror window is sized to the
+  phone screen's shape that scrcpy reports, and resized when the phone rotates.
 - **Back to the previous window** waits 2.5 s (was 1 s), and installing a VR windows tweak waits
   for its patch to be active before showing its status (it showed "not patched yet").
 - **Signal hardening is now "Signal: key in the wallet"**, which is what's left of it: Password

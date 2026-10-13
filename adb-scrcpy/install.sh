@@ -26,7 +26,7 @@ missing=$(LD_LIBRARY_PATH="$LIB" ldd "$LIB/adb.bin" | grep 'not found' || true)
 [ -z "$missing" ] || die "adb still has missing libraries:\n$missing"
 "$BIN/adb" version | sed -n 1,2p
 
-install -m755 "$REPO_DIR/adb-scrcpy/phone" "$BIN/phone"
+install -m755 "$REPO_DIR/adb-scrcpy/phone" "$REPO_DIR/adb-scrcpy/phone-fit" "$BIN/"
 install_icon frame-tweaks-phone
 # Renamed from "Phone Mirror" (it only works with Android). Keep a password gate if it had one.
 gated=""

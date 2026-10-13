@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""phone-fit: in VR, shape the phone mirror's window like the phone, and follow its rotation.
+
+The Steam session's compositor (gamescope) makes every app window 1920x1080, so a phone held
+upright showed with wide black bars. A window that declares a fixed size (min size = max size)
+keeps it, and in VR each window is its own panel, so the panel takes the phone's shape. scrcpy
+already tells the window system the phone screen's shape (its aspect-ratio hint) and updates it
+when the phone rotates; this follows that hint.
+
+  phone-fit [LONG_SIDE]   watch scrcpy's windows on this display until scrcpy exits
+                          (LONG_SIDE: window size of the phone's long side, default 1920)
+
+Only on gamescope (the VR/Steam session): in desktop mode KWin sizes windows normally, and a
+fixed size would stop you resizing it there.
+"""
+import ctypes
+import ctypes.util
+import os
+import subprocess
+import sys
+import time
+
+LONG = 1920                    # default long side: phone's --max-size
+P_MIN_SIZE, P_MAX_SIZE, P_ASPECT = 16, 32, 128
+
+
+class SizeHints(ctypes.Structure):
+    _fields_ = [("flags", ctypes.c_long), ("x", ctypes.c_int), ("y", ctypes.c_int),
+                ("w", ctypes.c_int), ("h", ctypes.c_int), ("min_w", ctypes.c_int), ("min_h", ctypes.c_int),
+                ("max_w", ctypes.c_int), ("max_h", ctypes.c_int), ("inc_w", ctypes.c_int), ("inc_h", ctypes.c_int),
+                ("min_ax", ctypes.c_int), ("min_ay", ctypes.c_int), ("max_ax", ctypes.c_int), ("max_ay", ctypes.c_int),
+                ("base_w", ctypes.c_int), ("base_h", ctypes.c_int), ("gravity", ctypes.c_int)]
+
+
+class ClassHint(ctypes.Structure):
+    _fields_ = [("name", ctypes.c_void_p), ("cls", ctypes.c_void_p)]      # freed with XFree
+
+
+class Attrs(ctypes.Structure):          # XWindowAttributes: only the size is read
+    _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int), ("width", ctypes.c_int), ("height", ctypes.c_int),
+                ("rest", ctypes.c_char * 256)]
+
+
+def fit(ax, ay, long_side=LONG):
+    """Window size with the phone screen's shape (ax:ay), its long side long_side."""
+    if ax >= ay:
+        return long_side, max(1, round(long_side * ay / ax))
+    return max(1, round(long_side * ax / ay)), long_side
+
+
+class X:
+    def __init__(self):
+        self.x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
+        self.x.XOpenDisplay.restype = ctypes.c_void_p
+        self.x.XInternAtom.restype = ctypes.c_ulong
+        self.x.XDefaultRootWindow.restype = ctypes.c_ulong
+        self.x.XListProperties.restype = ctypes.c_void_p       # (default int would cut 64-bit pointers)
+        self.d = ctypes.c_void_p(self.x.XOpenDisplay(None))
+        if not self.d.value:
+            sys.exit("phone-fit: no X display")
+        self.root = ctypes.c_ulong(self.x.XDefaultRootWindow(self.d))
+        # A window can vanish between listing and asking about it: ignore those X errors. (Kept
+        # on self: the callback must outlive this call.)
+        self.on_error = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p)(lambda d, e: 0)
+        self.x.XSetErrorHandler(self.on_error)
+
+    def has_root_property(self, name):
+        atom = self.x.XInternAtom(self.d, name.encode(), 1)     # only_if_exists
+        if not atom:
+            return False
+        n = ctypes.c_int()
+        props = self.x.XListProperties(self.d, self.root, ctypes.byref(n))
+        found = bool(props) and any(ctypes.cast(props, ctypes.POINTER(ctypes.c_ulong))[i] == atom for i in range(n.value))
+        if props:
+            self.x.XFree(ctypes.c_void_p(props))
+        return found
+
+    def scrcpy_windows(self):
+        out, stack = [], [self.root.value]
+        while stack:
+            w = stack.pop()
+            r, p, kids, n = ctypes.c_ulong(), ctypes.c_ulong(), ctypes.POINTER(ctypes.c_ulong)(), ctypes.c_uint()
+            if not self.x.XQueryTree(self.d, ctypes.c_ulong(w), ctypes.byref(r), ctypes.byref(p), ctypes.byref(kids), ctypes.byref(n)):
+                continue
+            stack += [kids[i] for i in range(n.value)]
+            if kids:
+                self.x.XFree(kids)
+            ch = ClassHint()
+            if self.x.XGetClassHint(self.d, ctypes.c_ulong(w), ctypes.byref(ch)):
+                if ch.cls and ctypes.string_at(ch.cls) == b"scrcpy":
+                    out.append(w)
+                for ptr in (ch.name, ch.cls):
+                    if ptr:
+                        self.x.XFree(ctypes.c_void_p(ptr))
+        return out
+
+    def shape(self, w):
+        """(hints, current width, current height) of window w."""
+        h, sup = SizeHints(), ctypes.c_long()
+        if not self.x.XGetWMNormalHints(self.d, ctypes.c_ulong(w), ctypes.byref(h), ctypes.byref(sup)):
+            h.flags = 0
+        a = Attrs()
+        self.x.XGetWindowAttributes(self.d, ctypes.c_ulong(w), ctypes.byref(a))
+        return h, a.width, a.height
+
+    def set_size(self, w, hints, width, height):
+        hints.flags |= P_MIN_SIZE | P_MAX_SIZE
+        hints.min_w = hints.max_w = width
+        hints.min_h = hints.max_h = height
+        self.x.XSetWMNormalHints(self.d, ctypes.c_ulong(w), ctypes.byref(hints))
+        self.x.XResizeWindow(self.d, ctypes.c_ulong(w), width, height)
+        self.x.XFlush(self.d)
+
+
+def scrcpy_running():
+    return subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "scrcpy"], stdout=subprocess.DEVNULL).returncode == 0
+
+
+def main():
+    long_side = int(sys.argv[1]) if len(sys.argv) > 1 else LONG
+    x = X()
+    if not x.has_root_property("GAMESCOPE_FOCUSABLE_WINDOWS"):
+        return                                         # desktop mode: KWin sizes it normally
+    started, seen = time.monotonic(), False
+    while True:
+        for w in x.scrcpy_windows():
+            seen = True
+            hints, cw, ch = x.shape(w)
+            if not hints.flags & P_ASPECT or hints.min_ax <= 0 or hints.min_ay <= 0:
+                continue                               # scrcpy hasn't said the phone's shape yet
+            tw, th = fit(hints.min_ax, hints.min_ay, long_side)
+            if (cw, ch) != (tw, th) or (hints.min_w, hints.min_h, hints.max_w, hints.max_h) != (tw, th, tw, th):
+                x.set_size(w, hints, tw, th)
+        if not scrcpy_running() and (seen or time.monotonic() - started > 60):
+            return
+        time.sleep(0.5)
+
+
+if __name__ == "__main__":
+    main()
