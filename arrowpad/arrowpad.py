@@ -93,7 +93,7 @@ LAYERS = {
         ["F1", "F2", "F3", "F4", "RMB", "MMB"],
         ["Fn", "F5", "F6", "F7", "F8", "🎤"],
         ["Ctrl", "F9", "F10", "F11", "F12", "Copy"],
-        ["Alt", "Super", "Ins", "PrtSc", "Menu", "Paste"],
+        ["Alt", "Super", "Ins", "PrtSc", "Launcher", "Paste"],
     ],
 }
 # Key legends as printed on physical keyboards of each language (others keep English).
@@ -121,8 +121,11 @@ TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = tran
         "Copy": "Copy (Ctrl+C)", "Paste": "Paste (Ctrl+V)", "Cut": "Cut (Ctrl+X)",
         "All": "Select all (Ctrl+A)", "Undo": "Undo (Ctrl+Z)", "Fn": "F1–F12 layer (tap again to go back)",
         "RMB": "Right click: your next click becomes a right click",
+        "Launcher": "Open the desktop's application menu (taps Super)",
+        "Super": "Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand",
         "MMB": "Middle click: your next click becomes a middle click",
-        **{m: f"{m}: tap = next key only, double-tap = lock" for m in MODIFIERS}}
+        **{m: f"{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
+           for m in MODIFIERS if m != "Super"}}
 DOUBLE_TAP = 0.4
 SCALE_MIN, SCALE_MAX, SCALE_STEP = 0.6, 2.0, 0.1
 RUN = Path(f"/run/user/{os.getuid()}")
@@ -130,10 +133,19 @@ CONFIG = Path.home() / f".config/arrowpad{'-vr' if TARGET == 'vr' else ''}.json"
 SERVER_NAME = f"arrowpad-{os.getuid()}-{TARGET}"   # desktop and VR pads are separate instances
 ICON = Path.home() / ".local/share/icons/hicolor/256x256/apps/frame-tweaks-arrowpad.png"
 
-# Full Keyboard's "Graphite" theme (TaiKeid/steam-frame-full-keyboard, MIT).
-THEME = {"surface": "#0b1016", "surface_radius": 20, "key_top": "#2c333b", "key_middle": "#232a32",
-         "key_bottom": "#1c232a", "key_side": "#0c1015", "legend": "#ffffff", "key_radius": 8,
-         "key_depth": 3.5, "hover": "#3d4855", "latched": "#355b7a"}
+# Full Keyboard's two themes (TaiKeid/steam-frame-full-keyboard share/framekeyboard/themes, MIT).
+THEMES = {
+    "graphite": {"name": "Graphite", "surface": "#0b1016", "surface_radius": 20, "key_top": "#2c333b",
+                 "key_middle": "#232a32", "key_bottom": "#1c232a", "key_side_top": "#141a21",
+                 "key_side_bottom": "#0c1015", "legend": "#ffffff", "key_radius": 8, "key_depth": 3.5,
+                 "key_press_travel": 3, "press_duration_ms": 80, "hover": "#3d4855", "latched": "#355b7a"},
+    "midnight": {"name": "Midnight", "surface": "#20242c", "surface_radius": 20, "key_top": "#505d72",
+                 "key_middle": "#455063", "key_bottom": "#374252", "key_side_top": "#293241",
+                 "key_side_bottom": "#191f29", "legend": "#ffffff", "key_radius": 8, "key_depth": 3.5,
+                 "key_press_travel": 3, "press_duration_ms": 80, "hover": "#687c99", "latched": "#387d8d"},
+}
+THEME = dict(THEMES["graphite"])        # the current theme; set_theme() switches it in place
+HAPTIC_LEVELS = {"off": 0.0, "light": 0.5, "normal": 1.0}
 
 
 def stylesheet(scale):
@@ -143,7 +155,7 @@ def stylesheet(scale):
             f"stop:0.5 {t['key_middle']}, stop:1 {t['key_bottom']})")
     return f"""
 QPushButton {{ color: {t['legend']}; background: {grad}; border: none; border-radius: {r}px;
-               border-bottom: {d}px solid {t['key_side']}; padding: 0; }}
+               border-bottom: {d}px solid {t['key_side_bottom']}; padding: 0; }}
 QPushButton:hover {{ background: {t['hover']}; }}
 QPushButton:pressed {{ background: {t['key_bottom']}; border-bottom-width: 1px; margin-top: {d - 1}px; }}
 QPushButton[state="oneshot"] {{ background: {t['latched']}; }}
@@ -154,6 +166,7 @@ QPushButton[state="busy"]    {{ background: #d9a400; color: black; }}
 QPushButton[tool="true"] {{ background: {t['key_bottom']}; border-bottom: none; }}
 QPushButton[tool="true"]:hover {{ background: {t['hover']}; }}
 QPushButton[tool="true"][state="locked"] {{ background: {t['latched']}; border: none; }}
+QLabel {{ color: {t['legend']}; }}
 """
 
 
@@ -406,7 +419,38 @@ def drawn_icon(name, px=96, color=THEME["legend"]):
             path = QPainterPath()
             line(-10, -10, 10, 10)
 
-    if name in ("pin_on", "pin"):
+    if name in ("Super", "Launcher"):               # filled logos: SteamFrame / SteamOS
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(color))
+        if name == "Super":                         # traced from a 194-unit mark, as in Full Keyboard
+            p.scale(24 / 194, 24 / 194)
+            p.translate(-225.5, -225.5)
+            path.moveTo(131.5, 128.5); path.lineTo(319.5, 128.5); path.lineTo(322.5, 131.5)
+            path.lineTo(322.5, 176); path.lineTo(176, 176); path.lineTo(176, 322.5)
+            path.lineTo(131.5, 322.5); path.lineTo(128.5, 319.5); path.lineTo(128.5, 131.5)
+            path.closeSubpath()
+            path.moveTo(322.5, 322.5)
+            path.arcTo(QRectF(322.5 - 128, 322.5 - 128, 256, 256), 180, -90)
+            path.closeSubpath()
+        else:                                       # concentric dot and half ring
+            path.addEllipse(QRectF(-9, -6, 12, 12))
+            path.moveTo(-3, -12)
+            path.arcTo(QRectF(-15, -12, 24, 24), 90, -180)
+            path.lineTo(-3, 7.8)
+            path.arcTo(QRectF(-10.8, -7.8, 15.6, 15.6), 270, 180)
+            path.closeSubpath()
+        p.drawPath(path)
+        p.end()
+        return QIcon(pm)
+    if name == "settings":                          # gear: 32 points, flat-tipped teeth
+        import math as _m
+        for i in range(32):
+            a = i * _m.pi / 16
+            rad = 11 if i % 4 < 2 else 8.5
+            (path.moveTo if i == 0 else path.lineTo)(rad * _m.cos(a), rad * _m.sin(a))
+        path.closeSubpath()
+        path.addEllipse(QRectF(-3.5, -3.5, 7, 7))
+    elif name in ("pin_on", "pin"):
         pin(name == "pin")                                   # "pin" = not pinned: tilted, crossed out
     elif name == "reset":                                     # Recenter
         path.addEllipse(QRectF(-7, -7, 14, 14))
@@ -439,6 +483,88 @@ def icon_for(name):
     return drawn_icon(name) or (breeze_icon(ICONS[name]) if name in ICONS else None)
 
 
+class KeyButton(QPushButton):
+    """A key drawn the way Full Keyboard draws one: a darker side, and a fixed-size face that
+    travels down by key_press_travel when pressed (over press_duration_ms), with a hover
+    gradient. State (property "state"): off, oneshot/held/locked (latched), active, busy."""
+
+    def __init__(self, pad):
+        super().__init__()
+        self.pad = pad
+        self._amount = 0.0
+        from PyQt6.QtCore import QVariantAnimation
+        self.anim = QVariantAnimation(self)
+        self.anim.valueChanged.connect(self._set_amount)
+        self.pressed.connect(lambda: self._animate(1.0))
+        self.released.connect(lambda: self._animate(0.0))
+
+    def _set_amount(self, v):
+        self._amount = float(v)
+        self.update()
+
+    def _animate(self, target):
+        self.anim.stop()
+        self.anim.setDuration(int(THEME["press_duration_ms"]))
+        self.anim.setStartValue(self._amount)
+        self.anim.setEndValue(target)
+        self.anim.start()
+
+    def paintEvent(self, ev):
+        from PyQt6.QtGui import QLinearGradient, QPen
+        t, sc = THEME, self.pad.scale
+        w, h = self.width(), self.height()
+        depth, travel, r = t["key_depth"] * sc, t["key_press_travel"] * sc, t["key_radius"] * sc
+        face_h = h - depth
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(Qt.PenStyle.NoPen)
+
+        def grad(rect, a, b, c=None):
+            g = QLinearGradient(rect.topLeft(), rect.bottomLeft())
+            g.setColorAt(0, QColor(a))
+            if c is None:
+                g.setColorAt(1, QColor(b))
+            else:
+                g.setColorAt(.5, QColor(b))
+                g.setColorAt(1, QColor(c))
+            return g
+        side = QRectF(0, travel, w, face_h + depth - travel)
+        p.setBrush(grad(side, t["key_side_top"], t["key_side_bottom"]))
+        p.drawRoundedRect(side, r, r)
+        # In VR the image is a snapshot, so a held key shows fully down even between frames.
+        amount = 1.0 if self.isDown() else self._amount
+        face = QRectF(0, amount * travel, w, face_h)
+        state = self.property("state") or "off"
+        fills = {"active": "#c0392b", "busy": "#d9a400"}
+        if state in fills:
+            p.setBrush(QColor(fills[state]))
+        elif state in ("oneshot", "held", "locked"):
+            p.setBrush(QColor(t["latched"]))
+        elif self.underMouse():
+            p.setBrush(grad(face, t["hover"], t["key_middle"], t["key_bottom"]))
+        else:
+            p.setBrush(grad(face, t["key_top"], t["key_middle"], t["key_bottom"]))
+        if state == "locked":                    # locked: outlined, so it's never mistaken for a tap
+            p.setPen(QPen(QColor("#8fb8dd"), 2 * sc))
+        p.drawRoundedRect(face.adjusted(sc, sc, -sc, -sc) if state == "locked" else face, r, r)
+        p.setPen(QColor("black" if state == "busy" else t["legend"]))
+        p.setFont(self.font())
+        icon, text = self.icon(), self.text()
+        if not icon.isNull():
+            isz = self.iconSize()
+            gap = 4 * sc if text else 0
+            tw = p.fontMetrics().horizontalAdvance(text) if text else 0
+            x0 = face.center().x() - (isz.width() + gap + tw) / 2
+            pm = icon.pixmap(isz)
+            p.drawPixmap(int(x0), int(face.center().y() - isz.height() / 2), pm)
+            if text:
+                p.drawText(QRectF(x0 + isz.width() + gap, face.top(), tw + 2, face.height()),
+                           Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft, text)
+        elif text:
+            p.drawText(face, Qt.AlignmentFlag.AlignCenter, text)
+        p.end()
+
+
 def breeze_icon(name):
     hits = sorted(BREEZE.glob(f"*/*/{name}.svg"))
     return QIcon(str(hits[-1])) if hits else None
@@ -464,6 +590,9 @@ class ArrowPad(QWidget):
         self.overlay = None
         self.scale = cfg.get("scale", 1.5 if TARGET == "vr" else scale)   # VR: texture sharpness
         self.pinned = cfg.get("pinned", False)
+        THEME.update(THEMES.get(cfg.get("theme", "graphite"), THEMES["graphite"]))
+        self.haptic_level = cfg.get("haptics", "normal") if cfg.get("haptics") in HAPTIC_LEVELS else "normal"
+        self.mod_pressing = {}          # modifier held down by a laser -> used in a chord yet?
 
         outer = QVBoxLayout(self)
         outer.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)   # window = content size
@@ -473,7 +602,8 @@ class ArrowPad(QWidget):
         # toolbar: pin, reset position, smaller, larger ......... close
         bar = QHBoxLayout()
         self.tools = {}
-        for name, tip in (("pin", "Pin: stop accidental moves"), ("reset", "Reset position"),
+        for name, tip in (("settings", "Settings: theme and haptics"),
+                          ("pin", "Pin: stop accidental moves"), ("reset", "Reset position"),
                           ("smaller", "Smaller"), ("larger", "Larger")):
             self.tools[name] = self.tool_button(name, tip)
             bar.addWidget(self.tools[name])
@@ -483,6 +613,7 @@ class ArrowPad(QWidget):
         self.click_swap = ClickSwap(self.restyle)
         outer.addLayout(bar)
         self.tools["pin"].clicked.connect(self.toggle_pin)
+        self.tools["settings"].clicked.connect(self.toggle_settings)
         self.tools["reset"].clicked.connect(self.reset_position)
         self.tools["smaller"].clicked.connect(lambda: self.resize_step(-1))
         self.tools["larger"].clicked.connect(lambda: self.resize_step(+1))
@@ -493,14 +624,19 @@ class ArrowPad(QWidget):
         self.buttons = []
         for r, row in enumerate(LAYERS["nav"]):
             for c, _ in enumerate(row):
-                b = QPushButton()
+                b = KeyButton(self)
                 b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 b.pressed.connect(lambda r=r, c=c: self.on_press(r, c))
                 b.released.connect(lambda r=r, c=c: self.on_release(r, c))
                 b.installEventFilter(self.hover_filter)
                 grid.addWidget(b, r, c)
                 self.buttons.append((r, c, b))
-        outer.addLayout(grid)
+        self.keys_page = QWidget()
+        self.keys_page.setLayout(grid)
+        outer.addWidget(self.keys_page)
+        self.settings_page = self.make_settings_page()
+        self.settings_page.hide()
+        outer.addWidget(self.settings_page)
 
         self.apply_scale()
         self.update_language()
@@ -528,7 +664,8 @@ class ArrowPad(QWidget):
         if icon:
             b.setIcon(icon)
         else:
-            b.setText({"pin": "📌", "reset": "⌖", "smaller": "−", "larger": "+", "close": "✕"}[name])
+            b.setText({"pin": "📌", "reset": "⌖", "smaller": "−", "larger": "+", "close": "✕",
+                       "settings": "⚙"}[name])
         return b
 
     # ---- looks ----------------------------------------------------------
@@ -553,7 +690,19 @@ class ArrowPad(QWidget):
         for _, _, b in self.buttons:
             b.setFixedSize(key, key)
             b.setIconSize(QSize(round(key * 0.45), round(key * 0.45)))
+        for b in self.setting_buttons.values():
+            b.setFixedHeight(round(key * 0.8))
+            f = QFont(QApplication.font())
+            f.setPixelSize(round(key * 0.28))
+            b.setFont(f)
+        for lab in self.setting_labels:
+            f = QFont(QApplication.font())
+            f.setPixelSize(round(key * 0.26))
+            lab.setFont(f)
         self.relabel()
+        self.keys_page.adjustSize()
+        # Same size as the keys, so the VR panel keeps its shape when settings open.
+        self.settings_page.setFixedSize(self.keys_page.sizeHint())
         self.adjustSize()
 
     def resize_step(self, steps):
@@ -576,7 +725,7 @@ class ArrowPad(QWidget):
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             b.setToolTip(TIPS.get(name, ""))
-            icon = icon_for(name) if name in CHORDS or name in MOUSE else None
+            icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher") else None
             if icon:
                 b.setIcon(icon)
                 b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike
@@ -611,6 +760,10 @@ class ArrowPad(QWidget):
         return LAYERS[self.layer][r][c]
 
     def restyle(self):
+        for (title, key), b in getattr(self, "setting_buttons", {}).items():
+            chosen = (title == "Theme" and THEME["name"] == THEMES[key]["name"]) or \
+                     (title == "Haptics" and self.haptic_level == key)
+            self.set_state(b, "locked" if chosen else "off")
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
             if name in MODIFIERS:
@@ -654,6 +807,56 @@ class ArrowPad(QWidget):
             self.drag_offset = None
             self.save_config()
 
+    # ---- settings (theme, haptic strength), like Full Keyboard's settings menu ----------------
+    def make_settings_page(self):
+        from PyQt6.QtWidgets import QLabel
+        page = QWidget()
+        lay = QVBoxLayout(page)
+        lay.setContentsMargins(0, 0, 0, 0)
+        self.setting_buttons, self.setting_labels = {}, []
+        for title, options in (("Theme", [(k, v["name"]) for k, v in THEMES.items()]),
+                               ("Haptics", [(k, k.capitalize()) for k in HAPTIC_LEVELS])):
+            lab = QLabel(title)
+            self.setting_labels.append(lab)
+            lay.addWidget(lab)
+            row = QHBoxLayout()
+            for key, label in options:
+                b = KeyButton(self)
+                b.setText(label)
+                b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                b.clicked.connect(lambda _=False, t=title, k=key: self.choose_setting(t, k))
+                self.setting_buttons[(title, key)] = b
+                row.addWidget(b)
+            lay.addLayout(row)
+        lay.addStretch(1)
+        done = KeyButton(self)
+        done.setText("Done")
+        done.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        done.clicked.connect(self.toggle_settings)
+        self.setting_buttons[("", "done")] = done
+        lay.addWidget(done)
+        return page
+
+    def toggle_settings(self):
+        showing = self.settings_page.isVisible()
+        self.settings_page.setVisible(not showing)
+        self.keys_page.setVisible(showing)
+        self.set_state(self.tools["settings"], "off" if showing else "locked")
+        self.restyle()
+
+    def choose_setting(self, title, key):
+        if title == "Theme":
+            THEME.update(THEMES[key])
+            self.cfg["theme"] = key
+            self.setStyleSheet(stylesheet(self.scale))
+            self.update()
+        else:
+            self.haptic_level = key
+            self.cfg["haptics"] = key
+            self.pulse("press")              # feel the new strength
+        self.restyle()
+        self.save_config()
+
     def toggle_click(self, which):
         self.click_swap.arm(which)
         self.restyle()
@@ -678,19 +881,43 @@ class ArrowPad(QWidget):
     def pulse(self, kind, device=None):
         if device is None and self.overlay is not None:
             device = self.overlay.last_device      # the controller that just pressed
-        if self.haptics:
-            self.haptics.pulse(kind, device)
+        strength = HAPTIC_LEVELS.get(self.haptic_level, 1.0)
+        if self.haptics and strength > 0:
+            self.haptics.pulse(kind, device, strength)
 
     def on_press(self, r, c):
         self.pulse("press")
         name = self.name_at(r, c)
-        if name in KEY and name not in MODIFIERS:
+        if name in MODIFIERS:
+            # Two hands, like Full Keyboard: a modifier is down while a laser holds it, so a key
+            # pressed with the other hand gets it. Released after that, it was only a chord.
+            if self.mod_state[name] == "off":
+                self.yd.key(KEY[name], True)
+                self.mod_state[name] = "held"
+                self.restyle()
+            self.mod_pressing[name] = False
+            return
+        for m in self.mod_pressing:
+            self.mod_pressing[m] = True        # used in a chord
+        if name in KEY:
             self.yd.key(KEY[name], True)
 
     def on_release(self, r, c):
         name = self.name_at(r, c)
         if name in MODIFIERS:
-            self.toggle_mod(name)
+            chord = self.mod_pressing.pop(name, False)
+            if self.mod_state[name] == "held":
+                if chord:                        # held for a key from the other hand: done
+                    self.mod_state[name] = "off"
+                    self.yd.key(KEY[name], False)
+                else:                            # a plain tap: one-shot (it's already down)
+                    self.mod_state[name] = "oneshot"
+                    self.mod_tapped[name] = time.monotonic()
+                self.restyle()
+            else:
+                self.toggle_mod(name)
+        elif name == "Launcher":
+            self.yd.tap(KEY["Super"])
         elif name == "Fn":
             self.layer = "fn" if self.layer == "nav" else "nav"
             self.relabel()
@@ -723,12 +950,13 @@ class ArrowPad(QWidget):
 
     def release_oneshots(self):
         for m, s in self.mod_state.items():
-            if s == "oneshot":
+            if s == "oneshot" and m not in self.mod_pressing:
                 self.mod_state[m] = "off"
                 self.yd.key(KEY[m], False)
         self.restyle()
 
     def release_all_mods(self):
+        self.mod_pressing.clear()
         for m, s in self.mod_state.items():
             if s != "off":
                 self.yd.key(KEY[m], False)
@@ -773,7 +1001,8 @@ class ArrowPad(QWidget):
 
     def save_config(self):
         try:
-            self.cfg.update({"pos": [self.x(), self.y()], "scale": self.scale, "pinned": self.pinned})
+            self.cfg.update({"pos": [self.x(), self.y()], "scale": self.scale, "pinned": self.pinned,
+                             "haptics": self.haptic_level})
             CONFIG.write_text(json.dumps(self.cfg))
         except OSError:
             pass

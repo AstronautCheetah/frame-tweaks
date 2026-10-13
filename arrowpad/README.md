@@ -9,7 +9,7 @@ working in.
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
 > - **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
-> - **Unusual access:** Types through ydotool. In VR: a SteamVR overlay. **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
+> - **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
 > - **Undo:** `./install.sh uninstall arrowpad`
 <!-- /generated:glance -->
 
@@ -18,7 +18,7 @@ working in.
  Esc   Tab   Bksp  Del   🖱R    🖱M          F1    F2    F3   F4    🖱R   🖱M
  Fn    Home   ↑    End   PgUp   🎤          Fn    F5    F6   F7    F8    🎤
  Ctrl   ←     ↓     →    PgDn   Copy        Ctrl  F9    F10  F11   F12   Copy
- Alt   Super Undo  Cut   All    Paste       Alt   Super Ins  PrtSc Menu  Paste
+ Alt   Super Undo  Cut   All    Paste       Alt   Super Ins  PrtSc SteamOS Paste
 ```
 
 Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
@@ -76,8 +76,16 @@ Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, Re
   then releases), **double-tap = lock** (outlined) until tapped again. A held modifier
   also applies to mouse clicks (Ctrl+click, Alt+click).
 - **Hold to repeat**: holding a button holds the key, so the app's key repeat applies.
-- **Fn** swaps the keys to the F-key layer (F1–F12, Insert, PrintScreen, Menu); Fn stays lit
-  while it's on, and tapping it again swaps back.
+- **Fn** swaps the keys to the F-key layer (F1–F12, Insert, PrintScreen and the **SteamOS key**,
+  which taps Super to open the desktop's app menu, as on Full Keyboard); Fn stays lit while it's
+  on, and tapping it again swaps back. Super shows the Steam Frame logo.
+- **Two hands (VR), like Full Keyboard:** hold Ctrl, Alt or Super with one controller's laser and
+  press a key with the other: the modifier applies to that key and lets go when you release it.
+- **Grip to grab (VR), like Full Keyboard:** squeeze the grip while that controller points
+  anywhere on the pad (keys included) and move your hand; let go to drop it. A squeeze never
+  types. Holding the trigger on the pad's background still works too.
+- **⚙ Settings:** Full Keyboard's two themes (Graphite, Midnight) and haptic strength (off, light,
+  normal), remembered per pad.
 - **Copy / Paste / Cut / Undo / Select all** (icons) send the Ctrl shortcuts.
 - **🎤** toggles [dictation](../dictation/): red while recording, yellow while transcribing. The text
   goes to the focused app, because the pad never takes focus.

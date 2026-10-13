@@ -55,10 +55,11 @@ class DoubleClick(unittest.TestCase):
             def __init__(self):
                 self.eventType = 0
                 self.trackedDeviceIndex = 1
-                self.data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=10, y=10))
+                self.data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=10, y=10, cursorIndex=0))
         v.openvr.VREvent_t = Ev
         for k in ("VREvent_MouseMove", "VREvent_MouseButtonDown", "VREvent_MouseButtonUp"):
             setattr(v.openvr, k, getattr(ov, k))
+        v.openvr.VREvent_FocusLeave, v.openvr.k_unTrackedDeviceIndexInvalid = 304, 2 ** 32 - 1
         queues = {"A": [301, 302], "B": [301, 302]}      # one physical click, seen by both
 
         def poll(handle, ev):
@@ -68,7 +69,8 @@ class DoubleClick(unittest.TestCase):
             return (False, ev)
         o = v.OverlayHost.__new__(v.OverlayHost)
         o.ov = types.SimpleNamespace(pollNextOverlayEvent=poll)
-        o.last_button_time, o.pressed, o.drag, o.dirty = {}, None, None, False
+        o.last_button_time, o.pressed, o.drag, o.dirty = {}, {}, None, False
+        o.hovered_devices, o.grip_drag = set(), False
         o.sizes, o.front = [(100, 100), (100, 100)], 0
         o.pad = types.SimpleNamespace(pinned=True)
         sent = []
@@ -82,6 +84,26 @@ class DoubleClick(unittest.TestCase):
         o.pump("A")
         o.pump("B")
         self.assertEqual(sent, ["press", "release"])
+
+        # Two lasers (cursors 0 and 1): both presses count, each released separately.
+        sent.clear()
+        o.last_button_time = {}             # a new scenario, not a duplicate of the click above
+        order = iter([(301, 0, "Ctrl"), (301, 1, "Left"), (302, 1, None), (302, 0, None)])
+        held = []
+
+        def poll2(handle, ev):
+            nxt = next(order, None)
+            if nxt is None:
+                return (False, ev)
+            ev.eventType, ev.data.mouse.cursorIndex, btn = nxt
+            if btn:
+                held.append(btn)
+            return (True, ev)
+        o.ov = types.SimpleNamespace(pollNextOverlayEvent=poll2)
+        o.button_at = lambda pos: held[-1]
+        o.send = lambda w, etype, pos, buttons: sent.append((etype, w))
+        o.pump("A")
+        self.assertEqual(sent, [("press", "Ctrl"), ("press", "Left"), ("release", "Left"), ("release", "Ctrl")])
 
 
 if __name__ == "__main__":

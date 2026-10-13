@@ -57,12 +57,14 @@ class Haptics:
                 best, speed = hand, s
         return best
 
-    def pulse(self, kind, device=None):
-        """device: tracked-device index that caused it (overlay events say which); else guess."""
-        if not self.ok:
+    def pulse(self, kind, device=None, strength=1.0):
+        """device: tracked-device index that caused it (overlay events say which); else guess.
+        strength: 0-1, scales amplitude (the settings' Light / Normal)."""
+        if not self.ok or strength <= 0:
             return
         try:
             duration, freq, amp = HOVER if kind == "hover" else PRESS
+            amp *= strength
             vr = self.vr_mod
             if device is not None and device != vr.k_unTrackedDeviceIndexInvalid:
                 role = self.system.getControllerRoleForTrackedDeviceIndex(device)
