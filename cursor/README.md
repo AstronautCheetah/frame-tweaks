@@ -13,7 +13,7 @@ makes KWin draw it into the frame itself.
 <!-- /generated:glance -->
 
 ```sh
-./install.sh cursor     # then reboot
+./install.sh install cursor     # then reboot
 env | grep KWIN         # in a desktop-mode terminal: KWIN_FORCE_SW_CURSOR=1
 ```
 

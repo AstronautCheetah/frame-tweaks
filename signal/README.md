@@ -14,7 +14,7 @@ unencrypted on disk. This tweak makes it use **KDE Wallet** instead:
 <!-- /generated:glance -->
 
 ```sh
-./install.sh signal
+./install.sh install signal
 signal/check          # verify: "OK: database key is encrypted via kwallet6"
 ```
 

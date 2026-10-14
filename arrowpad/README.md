@@ -40,7 +40,7 @@ Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
 They're separate instances, so you can have both. Each remembers its own position.
 
 ```sh
-./install.sh arrowpad
+./install.sh install arrowpad
 arrowpad --desktop       # launch; run again to hide/show it (bind this to a shortcut)
 arrowpad --scale 1.5     # bigger buttons (or ARROWPAD_SCALE=1.5)
 arrowpad --quit

@@ -13,7 +13,7 @@ The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the d
 <!-- /generated:glance -->
 
 ```sh
-./install.sh dictation
+./install.sh install dictation
 ```
 
 ## Use

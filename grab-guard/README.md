@@ -23,7 +23,7 @@ through an input device: faked by an X program (XTest), or typed through libei, 
 Keyboard does): `~/.local/state/frame-tweaks/logs/grab-guard.log`, or `grab-guard --status`.
 
 ```sh
-./install.sh grab-guard
+./install.sh install grab-guard
 ```
 
 It never sends a key itself: sending Right Ctrl is exactly what flips the grab, and Frame

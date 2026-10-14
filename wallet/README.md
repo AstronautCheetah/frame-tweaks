@@ -31,7 +31,7 @@ else by their program (other apps started from desktop mode). `app-timers --stat
 it sees.
 
 ```sh
-./install.sh wallet
+./install.sh install wallet
 wallet-launcher --list            # apps currently routed to the shared wallet
 wallet-launcher org.example.App   # add one (--electron adds --password-store=kwallet6)
 wallet-launcher --remove org.example.App

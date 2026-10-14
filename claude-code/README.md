@@ -13,7 +13,7 @@ the folder you start it in and runs commands there, asking first.
 <!-- /generated:glance -->
 
 ```sh
-./install.sh claude-code
+./install.sh install claude-code
 claude          # in any terminal; the first run logs in through your browser
 ```
 

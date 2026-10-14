@@ -15,7 +15,7 @@ lets you see it, and install it up front.
 <!-- /generated:glance -->
 
 ```sh
-./install.sh homebrew
+./install.sh install homebrew
 brew install <program>      # anything from https://formulae.brew.sh
 brew upgrade                # update everything it installed
 ```

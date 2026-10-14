@@ -15,7 +15,7 @@ built-in protection, `privacy.resistFingerprinting` (RFP, the Tor Browser approa
 <!-- /generated:glance -->
 
 ```sh
-./install.sh firefox            # then restart Firefox
+./install.sh install firefox            # then restart Firefox
 firefox/install.sh --remove     # take it out again
 ```
 

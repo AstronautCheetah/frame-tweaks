@@ -13,7 +13,7 @@ stall VR: **Whisper** (dictation), **scrcpy** (Android Mirror) and **VSCodium**.
 <!-- /generated:glance -->
 
 ```sh
-./install.sh memcap
+./install.sh install memcap
 nano ~/.config/frame-tweaks/memcap.conf     # adjust the limits
 ```
 
@@ -25,7 +25,7 @@ nano ~/.config/frame-tweaks/memcap.conf     # adjust the limits
 
 Above the first limit the kernel slows the app and reclaims its memory; at the second it's
 stopped (the rest of the headset keeps running). Changes apply the next time the app starts
-(VSCodium: re-run `./install.sh memcap` after editing).
+(VSCodium: re-run `./install.sh install memcap` after editing).
 
 ## How it works
 - `capped <profile> -- command` runs a command in its own systemd scope with that profile's

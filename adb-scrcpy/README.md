@@ -7,12 +7,12 @@ Mirror and control an Android phone in a desktop window.
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
 > - **Changes:** `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone
-> - **Unusual access:** Network connection to your phone's wireless debugging; pairing keys in `~/.android`
+> - **Unusual access:** Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037)
 > - **Undo:** `./install.sh uninstall adb-scrcpy`
 <!-- /generated:glance -->
 
 ```sh
-./install.sh adb-scrcpy
+./install.sh install adb-scrcpy
 ```
 
 - **adb for aarch64**: Google only ships x86 platform-tools, so the installer takes
