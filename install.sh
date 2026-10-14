@@ -259,7 +259,7 @@ cmd_kdialog_gui() {
     exec konsole --separate -e bash -c "$cmd"
 }
 
-usage() { sed -n '2,18s/^# \{0,1\}//p' "$0"; }
+usage() { sed -n '2,/^#   \.\/install\.sh ID\.\.\./s/^# \{0,1\}//p' "$0"; }   # (the header, to the last command)
 
 # ---- stopping a tweak's programs ------------------------------------------------------------
 # <id>/processes lists the programs a tweak runs (pgrep -f patterns, ~ = $HOME). They're
