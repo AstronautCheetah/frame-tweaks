@@ -488,7 +488,7 @@ class NarrationWindow(QWidget):
         self.collapse_buttons = []
         if panel:
             collapse_left = QPushButton()
-            collapse_left.setIcon(breeze("collapse"))
+            collapse_left.setIcon(breeze("expand"))      # (Breeze's "expand" is the down chevron)
             collapse_left.setIconSize(QSize(30, 30))
             collapse_left.setToolTip("Collapse")
             collapse_left.setStyleSheet("min-width: 0px; padding: 11px 12px;")
@@ -496,7 +496,7 @@ class NarrationWindow(QWidget):
             left_lay.addWidget(collapse_left)
             left_lay.addStretch(1)
             collapse = QPushButton("Collapse ")
-            collapse.setIcon(breeze("collapse"))
+            collapse.setIcon(breeze("expand"))
             collapse.setIconSize(QSize(30, 30))
             collapse.setLayoutDirection(Qt.LayoutDirection.RightToLeft)      # icon on the right
             collapse.clicked.connect(lambda: self.collapse(collapse))
@@ -519,7 +519,7 @@ class NarrationWindow(QWidget):
         mini = QHBoxLayout(self.mini)
         mini.setContentsMargins(*[self.MINI_MARGIN] * 4)
         expand = QPushButton()
-        expand.setIcon(breeze("expand"))
+        expand.setIcon(breeze("collapse"))                # (and its "collapse" the up chevron)
         expand.setIconSize(QSize(36, 36))
         expand.setToolTip("Expand")
         expand.setStyleSheet("min-width: 0px; padding: 10px;")
