@@ -28,9 +28,32 @@
   Android or Claude uses their own Spanish wording ("Flotar en el mundo", "Preferencias del
   sistema", "Depuración inalámbrica").
 
+- **Packs you trusted need trusting once more** (**🧩 Packs → Trust…**): trust now also covers a
+  pack's links and which of its files can run, and two different packs can no longer share a
+  fingerprint.
+- **A failed removal says so:** a tweak whose uninstall fails is reported like a failed install
+  ("!! … failed"), keeps its version record, and stops the window's Apply before it installs
+  anything else.
+- **NordVPN's ↻ Reinstall keeps your setup:** its connections, key and locations stay, and the VPN
+  stays connected (removing it still deletes them).
+
 ### Removed
 - **Recline** is set aside for now (not offered while it's tested). Installed, it stays until
   you remove it.
+
+### Security
+- **An update takes only a release signed with Frame Tweaks' SSH release key, on a tag that
+  carries its own name.** A PGP-signed tag was checked against your own GPG keyring instead,
+  and an older signed release could have come back under a newer one's name.
+- **A pack can't stop your whole session:** a manifest's `processes:` written as text instead of
+  a list made the installer stop every program matching each of its letters. Settings files are
+  written quoted (a value with a space in it ran a command when the file was read), a pack's
+  settings file has to stay under `~/.config`, and `mods trust NAME` refuses a name two packs share.
+- **Android Mirror's pairing code** no longer goes on adb's command line, where any program could
+  read it.
+- **The diagnostics report** removes the whole phone name, also one with `( ) + ?` in it.
+- **VR dashboard patching** can't reach a running SteamVR from outside your own setup any more (a
+  test's throwaway home stopped the live dashboard's patches).
 
 ### Fixed
 - **Arrow Pad's Collapse didn't keep the chevron under the laser** when pressed (the button's
@@ -59,9 +82,52 @@
   language the installer found when it opened it. It now passes on its own, and checks the
   statuses again when the language changes.
 
+- **Unticking Arrow Pad, Screen snip or NordVPN deleted the installer window's own Python** while
+  it ran, and its next start offered the 280 MB download again.
+- **Closing the installer window stopped an install** running in its Konsole. Offline, ⟳ Check
+  for updates said "up to date"; beta users weren't offered betas (the channel was read from the
+  wrong folder); ▶ ran for real in a dry run.
+- **App timers could quit the wrong programs,** the desktop session's own among them: an app
+  started through a shell or Python was found by that program.
+- **Wallet apps:** protecting an app replaced your own edit of its menu entry; reinstalling a
+  tweak whose app you'd protected failed; Password first could be skipped for an app started
+  over D-Bus; some Electron apps didn't start; the gh token's move could stop the install.
+- **Arrow Pad kept a key held down** after a grab, the dashboard closing or Close (it went on
+  repeating in your app), and crashed after ydotoold restarted, on 🎤 without Dictation and
+  after a language change. Its VR panel was mirrored without a dashboard, and the German, French
+  and Italian key legends didn't show.
+- **Dictation could start recording by itself** when a recording had ended on its own, and type
+  what it heard into your window five minutes later.
+- **Screen snip:** "Read it again" took two presses; a speed change while paused went silent; a
+  clipboard that didn't answer crashed the panel.
+- **Android Mirror** took "Pixel 9 Pro" for a saved "Pixel 9", could wait for ever looking for
+  phones, kept its splash up after a reconnect, and used much of a processor core for joystick
+  scrolling.
+- **Firefox privacy** couldn't be removed after a `user.js` without a final newline, and half a
+  marked block could delete your own prefs.
+- **Shared clipboard** left about 350 MB of build files behind; **Desktop Recovery** didn't
+  restart a frozen taskbar.
+- **VR environment tweaks:** "Gap 0 cm" gave 1.5 cm; installing in VR said the patches were active
+  when SteamVR needed a restart; an unreadable note could leave SteamVR's DevTools port on after
+  uninstalling; one malformed call stopped scrolling and VR settings until SteamVR restarted.
+- **Speech engine** downloaded the English voice again (without its fallback) when only the
+  engine had been chosen.
+- **`./install.sh install all`** skipped migrations; **get.sh** stopped without a word when it
+  found no release; `FRAME_TWEAKS_LANGUAGE=en_US` didn't mean English.
+
 ### For contributors
 - **dev/i18n-terms.py** collects the official wording of other software (SteamVR, Steam, Android,
   Claude Desktop, KDE) for a language's glossary, and checks a translation against it.
+- **dev/check.sh** runs every check CI runs, on any Linux PC (CI now calls it, step by step); a
+  check whose tool is missing is skipped with a hint. CONTRIBUTING.md starts with what needs a
+  Frame and what doesn't, the setup, a glossary and the environment variables. A pull-request
+  template, a **Works on my Frame** issue form and `.editorconfig`.
+- **CI checks what it missed:** the sourced shell libraries, every pin, each pack's manifests one
+  by one. `dev/test-tweaks.sh` runs without network and catches writes into its copy of the repo.
+  The tests clean up after themselves and no longer touch a running session (a mirror's pid
+  file, the language the window announces, the user's systemd).
+- **Manifests are read more strictly:** what YAML readers read differently (keys like `on:`,
+  `? `, `:` or `#` inside `[...]`, tabs) is refused with its line number (docs/mods.md, "The YAML").
 
 ## 0.6.1 (2026-10-14)
 
