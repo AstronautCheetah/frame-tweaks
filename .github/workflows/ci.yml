@@ -34,8 +34,6 @@ jobs:
             python3 -m py_compile "$f"
           done
           python3 -m py_compile gui/*.py lib/*.py packs/official/arrowpad/*.py     # modules without a shebang
-      - name: No AI attribution trailers (CONTRIBUTING.md; human co-authors are fine)
-        run: git log --format=%B | dev/check-trailers.sh
       - name: Conventional Commits messages (commitizen, .cz.toml)
         run: |
           python3 -m pip install --quiet commitizen

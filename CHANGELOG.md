@@ -81,6 +81,8 @@
 - **Migrations ran when going back to an older release;** they now run only on the way up.
 
 ### For contributors
+- Attribution lines in commits are up to each contributor; the hooks refuse tool attribution
+  only for those who opt in (`git config frame-tweaks.refuseToolTrailers true`).
 - Commit messages follow Conventional Commits, checked by commitizen in the commit-msg hook and
   CI (`.cz.toml`, `dev/check-commit-msg.sh`).
 - `components.tsv`, the `meta` and `processes` files and the `# label:` lines are gone (all in

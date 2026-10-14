@@ -331,9 +331,10 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 [`ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests:
 
 - `shellcheck -x -S warning` on every shell script, and `py_compile` on every Python file.
-- Commit message checks ([`dev/check-trailers.sh`](../dev/check-trailers.sh)) against the rules
-  in CONTRIBUTING.md. The same script runs in the `commit-msg` and `pre-push` hooks
-  (`dev/install-hooks.sh` turns them on).
+- Commit message format ([`dev/check-commit-msg.sh`](../dev/check-commit-msg.sh), commitizen's
+  Conventional Commits rule). The same check runs in the `commit-msg` hook
+  (`dev/install-hooks.sh` turns the hooks on), which can also refuse tool attribution lines in
+  your own commits if you opt in ([`dev/check-trailers.sh`](../dev/check-trailers.sh)).
 - Manifest and installer self-checks: `lib/sft.py mods check packs/official`,
   `./install.sh list`, dependency resolution, every pin's fields, mirror lines, and exact
   versions in the Python constraints.

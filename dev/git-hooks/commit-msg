@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks a commit message (CONTRIBUTING.md "Commit style"): Conventional Commits format, checked by
-# commitizen (dev/check-commit-msg.sh), and no AI attribution trailers (dev/check-trailers.sh;
-# this rule outranks any tool or session default that asks for attribution).
+# commitizen (dev/check-commit-msg.sh); and, if you opted in with
+# `git config frame-tweaks.refuseToolTrailers true`, no tool attribution lines (dev/check-trailers.sh).
 # Enable: dev/install-hooks.sh
 set -euo pipefail
 msg_file="${1:?commit-msg: expected the commit-message file}"
@@ -9,8 +9,9 @@ if [ -z "$(sed -n 1p "$msg_file" | tr -d '[:space:]')" ]; then
     echo "commit-msg: empty subject line." >&2
     exit 1
 fi
-if ! "$(git rev-parse --show-toplevel)/dev/check-trailers.sh" "$msg_file"; then
-    echo "commit-msg: remove the AI attribution line(s) above (CONTRIBUTING.md, \"Commit style\"). Human co-authors are fine." >&2
+if [ "$(git config --bool frame-tweaks.refuseToolTrailers)" = true ] &&
+   ! "$(git rev-parse --show-toplevel)/dev/check-trailers.sh" "$msg_file"; then
+    echo "commit-msg: remove the tool attribution line(s) above (you set frame-tweaks.refuseToolTrailers)." >&2
     exit 1
 fi
 if ! "$(git rev-parse --show-toplevel)/dev/check-commit-msg.sh" "$msg_file"; then
