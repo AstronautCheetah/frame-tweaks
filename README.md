@@ -80,8 +80,7 @@ tweaks) rely on that tool's checks. Details: [SECURITY.md](SECURITY.md#what-each
 
 > **What some tweaks can do on your Frame.** VR dashboard patching turns on SteamVR's dashboard
 > DevTools port while SteamVR runs (any program on the Frame could use it). Arrow Pad and
-> Dictation type through a virtual keyboard (`/dev/uinput`), and Grab guard reads key presses
-> to spot one key. Each tweak's access is listed in [SECURITY.md](SECURITY.md#what-each-tweak-changes-on-your-system)
+> Dictation type through a virtual keyboard (`/dev/uinput`). Each tweak's access is listed in [SECURITY.md](SECURITY.md#what-each-tweak-changes-on-your-system)
 > and on its details page in the installer window, so you can check before you tick it.
 
 ## What's included
@@ -146,7 +145,6 @@ them.
 | 🖼️ | [**Menu icons**](packs/official/menu-icons/) | Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu. | Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme. |
 | ⌨️ | [**ydotool**](packs/official/ydotool/) (helper) | The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them. | On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one. |
 | 🗣️ | [**Speech engine**](packs/official/speech/) (helper) | A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip. | SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent. |
-| 🔓 | [**Grab guard**](packs/official/grab-guard/) | A notification when desktop mode has taken all input, so other windows stop responding, telling you how to undo it. | A Right Ctrl press makes the Frame's desktop mode take every key and click. Nothing on screen says so except its window title, so everything else just seems frozen. |
 
 ### Developer
 
@@ -285,7 +283,7 @@ What stays:
 | Apps show without icons in Steam's "+" menu | Install **Menu icons** (re-run it after installing new apps), then reopen the menu. |
 | "Another Frame Tweaks install, update or removal is running" | Wait for the other install window to finish; the lock is released when it closes. |
 | Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often because focus moved to another VR window while the key was down). On Arrow Pad: **Tools → Unstick**. Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
-| Windows and clicks in the desktop act strangely, and its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a physical keyboard (Arrow Pad has no Right Ctrl) to turn it off. **Grab guard** warns you when this happens. |
+| Windows and clicks in the desktop act strangely, and its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a physical keyboard (Arrow Pad has no Right Ctrl) to turn it off. |
 | Something else | Installer window → **Diagnostics** (or `./install.sh debug-info`), and [open an issue](https://github.com/AstronautCheetah/frame-tweaks/issues/new/choose) with the report. |
 
 ### Where the logs are
@@ -293,7 +291,7 @@ What stays:
 - **Installs, updates and removals:** one log each in `~/.local/state/frame-tweaks/logs/` (the
   last five are kept).
 - **The tweaks' background services:** the user journal, for example
-  `journalctl --user -u sft-dashboard` (also `grab-guard`, `ydotoold`, `wallet-lock-sync`,
+  `journalctl --user -u sft-dashboard` (also `ydotoold`, `wallet-lock-sync`,
   `app-timers`).
 - **SteamVR drivers, Recline included:** `~/.local/share/Steam/logs/vrserver.txt`.
 
