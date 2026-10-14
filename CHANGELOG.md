@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 (2026-10-14)
 
 ### Added
 - **Packs: add your own tweaks without changing Frame Tweaks.** Every tweak is now a folder in a
