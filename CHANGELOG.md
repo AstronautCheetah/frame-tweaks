@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: reinstalling VR windows removed other tweaks' dashboard patches** (Android Mirror's
+  size and touch layer, so it came up huge with no gear): a reinstall now keeps them.
+- **Scroll strips: the gear and its settings sit as far back as the strips.**
 - **Scroll strips settings in VR:** a gear where the two strips meet opens their settings beside
   the window: sides, thickness, gap, set-back and colour (the passthrough tint, or a hue of your
   own). The VR windows helper's service saves them (new `sftConfig` call; reinstall VR windows).

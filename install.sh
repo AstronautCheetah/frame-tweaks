@@ -151,7 +151,9 @@ cmd_uninstall() {
             done
         done
     done
-    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
+    # dashboard patches of the tweaks that use the VR windows helper.)
+    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
 }
 
 # Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:

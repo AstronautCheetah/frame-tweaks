@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 14, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 15, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -279,7 +279,7 @@
     if (!id) return [];
     const isOpen = settingsOpen.has(f.frameID), size = Math.max(t, GEAR_M * k * 0.8);
     const out = [el(XFORM, { key: `${f.frameID}-sgear`, parent_id: id,
-                            translation: { x: side * (g + t / 2), y: (bottom ? -1 : 1) * (H / 2 + g + t / 2) } },
+                            translation: { x: side * (g + t / 2), y: (bottom ? -1 : 1) * (H / 2 + g + t / 2), z: -o.back * k } },
       el(PANEL, { key: `${f.frameID}-sgear-p`, width: size, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftScrollGear', origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
         el('div', { style: { width: '64px', height: '64px', borderRadius: '50%', boxSizing: 'border-box', display: 'flex',
@@ -314,7 +314,7 @@
       button('reset', 'Reset to defaults', false, () => save(DEFAULTS))));
     if (saveNote) rows.push(el('div', { key: 'note', style: { fontSize: '15px', color: '#e0b060', margin: '8px 4px 0' } }, saveNote));
     const P = PANEL_M * k;
-    out.push(el(XFORM, { key: `${f.frameID}-sset`, parent_id: id, translation: { x: side * (g + t + g + P / 2), z: 0.002 * k } },
+    out.push(el(XFORM, { key: `${f.frameID}-sset`, parent_id: id, translation: { x: side * (g + t + g + P / 2), z: -o.back * k } },     // as far back as the strips
       el(PANEL, { key: `${f.frameID}-sset-p`, width: P, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftScrollSettings', origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
         el('div', { style: { width: '460px', boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',

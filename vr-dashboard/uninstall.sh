@@ -19,8 +19,15 @@ if [ -f "$HOME/.local/state/steam-frame-tweaks/vr-debugger.prev" ] && sysctl_use
     install -m755 "$D/sft-dashboard" "$R"
     printf '[Service]\nExecStopPost=-%s restore\nExecStopPost=-/bin/rm -f %s %s\n' \
         "$R" "$U/steamvr.service.d/sft-dashboard.conf" "$R" > "$U/steamvr.service.d/sft-dashboard.conf"
-    remove_files "$D" "$U/sft-vr-debugger.service" "$U/sft-dashboard.service"
+    remove_files "$U/sft-vr-debugger.service" "$U/sft-dashboard.service"
 else
-    remove_files "$D" "$U/sft-vr-debugger.service" "$U/sft-dashboard.service" "$U/steamvr.service.d/sft-dashboard.conf"
+    remove_files "$U/sft-vr-debugger.service" "$U/sft-dashboard.service" "$U/steamvr.service.d/sft-dashboard.conf"
+fi
+# A reinstall keeps patches/: other tweaks installed theirs there (Android Mirror's, say) and
+# wouldn't be reinstalled to put them back. A real uninstall removes everything.
+if [ -n "${FRAME_TWEAKS_REINSTALL:-}" ] && [ -d "$D/patches" ]; then
+    find "$D" -mindepth 1 -maxdepth 1 ! -name patches -exec rm -rf {} +
+else
+    remove_files "$D"
 fi
 sysctl_user daemon-reload
