@@ -51,13 +51,13 @@ rm -f "$APPS/phone-mirror.desktop" "$LAUNCHER_ORIGINALS/phone-mirror.desktop"
 install_desktop "$TWEAK_DIR/android-mirror.desktop"
 if [ -n "$gated" ] && [ -x "$BIN/wallet-launcher" ]; then "$BIN/wallet-launcher" --gate --no-shared android-mirror; fi
 # In VR, turning the phone turns the window without shrinking it (a dashboard patch; needs the
-# VR windows helper, which the VR windows tweaks install).
+# VR environment helper, which the VR environment tweaks install).
 if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
     install_dashboard_patch phone-rotate "$TWEAK_DIR/patch.js"
     # ... and laser clicks on it land where you aim (see phone-touch).
     install_dashboard_patch phone-touch "$TWEAK_DIR/phone-touch.js"
 else
-    say "In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR windows tweak to fix both)."
+    say "In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both)."
 fi
 cat <<MSG
 Done. One-time pairing: on the phone open Developer options → Wireless debugging →

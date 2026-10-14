@@ -79,7 +79,7 @@ for t in "${TWEAKS[@]}"; do
     run() { env -i HOME="$home" PATH="$stubs:/usr/bin:/bin" USER="test" BREW_BIN="$stubs/brew" \
             FRAME_TWEAKS_YES=1 FRAME_TWEAKS_UINPUT="$work/uinput" FRAME_TWEAKS_LIB="$REPO/lib" bash "$(tdir "$2")/$1" >>"$work/$t.log" 2>&1; }
     read -ra deps <<<"$(sft deps "$t")"
-    # The shared Python venv (wallet's tools, the VR windows helper): pre-seeded with a stand-in
+    # The shared Python venv (wallet's tools, the VR environment helper): pre-seeded with a stand-in
     # jeepney instead of pip.
     venv=
     for d in "$t" "${deps[@]}"; do

@@ -110,7 +110,7 @@ Installed automatically when a tweak needs them; listed so you can see and manag
 <!-- generated:helper (dev/gen-docs.py, from each tweak's meta) -->
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
-| 🧩 | [**VR dashboard patching**](packs/official/vr-dashboard/) (helper) 🧪 | Lets the VR windows tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips) and Android Mirror adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR windows tweak is a small patch this injects while SteamVR runs. |
+| 🧩 | [**VR dashboard patching**](packs/official/vr-dashboard/) (helper) 🧪 | Lets the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips) and Android Mirror adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR environment tweak is a small patch this injects while SteamVR runs. |
 | 🍺 | [**Homebrew**](packs/official/homebrew/) | The package manager several tweaks install their programs with, into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates; Homebrew installs outside it. Other tweaks offer to install it when needed; this row shows it and installs it up front. |
 | ⌨️ | [**ydotool**](packs/official/ydotool/) (helper) | The virtual keyboard Dictation and Arrow Pad type through. Installed automatically. | Under KDE Wayland ordinary programs can't send keystrokes to other apps; ydotool goes through the kernel's `/dev/uinput`. |
 | 🗣️ | [**Speech engine**](packs/official/speech/) (helper) | Gives the Frame a voice: Piper (offline, natural) for Screen snip's Narrate, and espeak-ng for Orca and other apps that speak through speech-dispatcher. Installed automatically. | SteamOS ships speech-dispatcher and its espeak-ng module, but not espeak-ng itself, so nothing can speak (the Screen reader's Orca was silent). |
@@ -153,7 +153,7 @@ Everything the installer window does has a command too (the window uses the same
 ./install.sh settings scroll-strips color=blue thickness=5   change them (also: --reset)
 ./install.sh settings adb-scrcpy PHONE_MAX_FPS=90             (Android Mirror's stream)
 ./install.sh hide nordvpn       hide a row in the window (unhide to show it again)
-./install.sh hide-group "VR windows"   hide a whole group (unhide-group)
+./install.sh hide-group "VR environment"   hide a whole group (unhide-group)
 ./install.sh wallet lock        the shared wallet: lock, unlock, status
 ./install.sh wallet-apps        apps using the wallet (wallet-launcher: add, --remove, --gate…)
 ./install.sh timers             close-after timers (app-timers: --set APP MINUTES, --headset…)

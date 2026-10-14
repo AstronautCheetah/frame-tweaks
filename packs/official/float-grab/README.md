@@ -1,7 +1,7 @@
 ---
 title: Pick up when floating
 emoji: ✋
-category: VR windows
+category: VR environment
 tier: core
 summary: >-
   "Float in World" also picks the window up for placing, like grabbing its bar; your next click
@@ -52,7 +52,7 @@ grabbing that bar does: it follows your controller until you put it down.
   the click that puts it down can't send it back. (Press it again afterwards to dock it.)
 - It follows the controller that pressed the button.
 - Switch it on or off by ticking **Pick up when floating** in the installer window's
-  **VR windows** group. It works well with [Back to the previous window](../float-return/).
+  **VR environment** group. It works well with [Back to the previous window](../float-return/).
 - **Restart SteamVR once** if [VR dashboard patching](../vr-dashboard/) was installed with it.
 
 ## How it works

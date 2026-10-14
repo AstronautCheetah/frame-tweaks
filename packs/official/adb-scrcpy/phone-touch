@@ -15,7 +15,7 @@ Steam session's input at all.
                           isn't one this was tested with; `phone` then shows a plain window
 
 The layer appears only while this runs: it calls in through the dashboard's DevTools port
-(127.0.0.1:8087, opened by the VR windows helper) and says it's alive every 2 s. While the laser
+(127.0.0.1:8087, opened by the VR environment helper) and says it's alive every 2 s. While the laser
 rests on the mirror, the joystick scrolls the phone (read from the controller model, see Sticks):
 SteamVR doesn't pass the joystick's scrolling to the layer.
 """
@@ -434,7 +434,7 @@ def main():
     if sys.argv[1] == "--check":
         sys.exit(check())
     if not DASHBOARD.is_file():
-        return                                    # no VR windows helper: no layer to talk to
+        return                                    # no VR environment helper: no layer to talk to
     # One at a time: a reconnect (new address) replaces the one before.
     old = running(PIDFILE, "phone-touch")
     if old and old != os.getpid():

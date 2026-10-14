@@ -20,12 +20,12 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from PyQt6.QtCore import QProcess, Qt, QTimer
+from PyQt6.QtCore import QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
-from PyQt6.QtGui import QCursor, QIcon
+from PyQt6.QtGui import QCursor, QDesktopServices, QIcon
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
-                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout,
-                             QWidget)
+                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
+                             QVBoxLayout, QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "lib"))
@@ -164,6 +164,38 @@ def readme_links(text, comp):
     return re.sub(r"\]\((?!https?:|#|mailto:|file:)([^)]+)\)", lambda m: f"]({target(m.group(1))})", text)
 
 
+COPY_LINK = re.compile(r"""(<a\b[^>]*?\bhref=(["'])((?:https?|file):[^"']+)\2[^>]*>.*?</a>)""", re.S)
+
+
+def with_copy(text):
+    """Rich text with a 📋 after each web or file link, which copies the link instead of opening it."""
+    return COPY_LINK.sub(lambda m: f"{m.group(1)}&nbsp;<a href={m.group(2)}copy:{m.group(3)}{m.group(2)} "
+                         "style='text-decoration:none' title='Copy the link'>📋</a>", text)
+
+
+def md_text(text):
+    """A manifest's text as rich text: escaped, with its [Markdown links](https://…) made links."""
+    return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r"<a style='color:#7fb2e5' href='\2'>\1</a>",
+                  html.escape(text, quote=False))
+
+
+def follow_link(url):
+    """What clicking a link does: copy:<url> puts the link on the clipboard, anything else opens."""
+    if url.startswith("copy:"):
+        QApplication.clipboard().setText(url[5:])
+        QToolTip.showText(QCursor.pos(), "Link copied")
+    else:
+        QDesktopServices.openUrl(QUrl(url))
+
+
+def link_label(label):
+    """A QLabel whose links (shown with with_copy) open or copy through follow_link."""
+    label.setTextFormat(Qt.TextFormat.RichText)
+    label.setOpenExternalLinks(False)
+    label.linkActivated.connect(follow_link)
+    return label
+
+
 def row_icon(cid):
     """The row's icon, from its manifest's icon: an installed Flatpak's own icon, then a picture
     in the tweak's folder, then a Breeze theme icon."""
@@ -268,18 +300,17 @@ class Details(QWidget):
             self.issue_label = QLabel()
             self.issue_label.setObjectName("issue")
             self.issue_label.setWordWrap(True)
-            self.issue_label.setOpenExternalLinks(True)
-            self.issue_label.setTextFormat(Qt.TextFormat.RichText)
+            link_label(self.issue_label)
             lay.addWidget(self.issue_label)
             self.show_issue(window.latest.get(comp["id"], "checking"))
 
         text, kind = status_text(state)
         rel, url = comp["source"].split("|", 1) if "|" in comp["source"] else ("", "")
-        facts = [("What it is", html.escape(comp["what"], quote=False)),
-                 ("Why it's included", html.escape(comp["why"], quote=False)),
-                 ("Made by", html.escape(comp["author"], quote=False))]
+        facts = [("What it is", md_text(comp["what"])),
+                 ("Why it's included", md_text(comp["why"])),
+                 ("Made by", md_text(comp["author"]))]
         if comp["experimental"]:
-            facts.append(("🧪 Experimental", f"<span style='color:#e0b33a'>{html.escape(comp['experimental'], quote=False)}</span>"))
+            facts.append(("🧪 Experimental", f"<span style='color:#e0b33a'>{md_text(comp['experimental'])}</span>"))
         if url:
             facts.append(("Source", f"{html.escape(rel)} <a style='color:#7fb2e5' href='{url}'>{url}</a>"))
         if comp["deps"]:
@@ -294,16 +325,16 @@ class Details(QWidget):
                           f"Frame Tweaks</span>" + (f" (used instead of {html.escape(comp['replaced'])}'s)"
                                                     if comp["replaced"] else "")
                           + f"<br><a style='color:#7fb2e5' href='{comp['readme'].as_uri()}'>{html.escape(str(comp['dir']))}</a>"))
-        summary = QLabel("<table cellspacing=6>" + "".join(
+        summary = link_label(QLabel())
+        summary.setText(with_copy("<table cellspacing=6>" + "".join(
             f"<tr><td style='color:#6b7783;padding-right:12px' valign=top><b>{k}</b></td><td>{v}</td></tr>"
-            for k, v in facts) + "</table>")
+            for k, v in facts) + "</table>"))
         summary.setWordWrap(True)
-        summary.setOpenExternalLinks(True)
-        summary.setTextFormat(Qt.TextFormat.RichText)
         lay.addWidget(summary)
 
         readme = QTextBrowser()
-        readme.setOpenExternalLinks(True)
+        readme.setOpenLinks(False)
+        readme.anchorClicked.connect(lambda u: follow_link(u.toString()))
         readme.document().setDefaultStyleSheet(
             "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
         try:
@@ -311,7 +342,7 @@ class Details(QWidget):
         except (OSError, manifest.ManifestError):
             text = "_No README._"
         readme.setMarkdown(readme_links(text, comp))
-        readme.setMarkdown(text)
+        readme.setHtml(with_copy(readme.toHtml()))
         lay.addWidget(readme, 1)
 
     def show_issue(self, latest):
@@ -330,7 +361,7 @@ class Details(QWidget):
                      f"to update.")
         else:
             text += f"<br><span style='color:#9aa6b2'>{html.escape(latest)} is still the latest release.</span>"
-        self.issue_label.setText(text)
+        self.issue_label.setText(with_copy(text))
 
 
 class SettingsPage(QWidget):
@@ -652,9 +683,9 @@ class Window(QWidget):
                 short = url.split("://", 1)[-1].removeprefix("github.com/").rstrip("/")
                 if url.startswith("https://github.com/"):
                     short = "/".join(short.split("/")[:2])      # owner/repo; the link has the rest
-                link.setText(f"<span style='color:#6b7783'>{html.escape(rel)}</span> "
-                             f"<a style='color:#7fb2e5' href='{url}'>{html.escape(short)} ↗</a>")
-                link.setOpenExternalLinks(True)
+                link_label(link).setText(with_copy(
+                    f"<span style='color:#6b7783'>{html.escape(rel)}</span> "
+                    f"<a style='color:#7fb2e5' href='{url}'>{html.escape(short)} ↗</a>"))
                 link.setToolTip(f"Open {url}")
             text, kind = status_text(state)
             st = QLabel(text)

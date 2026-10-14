@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **📋 next to every link** in the installer window (sources, documentation, known issues and
+  each tweak's README) copies the link instead of opening it.
+- **The "VR windows" group is now "VR environment".** If you had folded or hidden it, it stays
+  that way.
+- **Fixed: links in a tweak's README on its details page** pointed nowhere when they were
+  relative, and Markdown links in its "What it is" and "Why" showed as raw text.
 - **Packs: add your own tweaks without changing Frame Tweaks.** Every tweak is now a folder in a
   pack, described by the YAML front matter of its README.md; Frame Tweaks' own tweaks are the
   official pack (`packs/official/`, moved from the top folder) and load the same way. Put other

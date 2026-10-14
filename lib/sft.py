@@ -13,7 +13,7 @@ Command line (through ./install.sh):
   sft.py mods trust|untrust PACK        use a user's pack (it runs as you), or stop using it
   sft.py mods check FOLDER              check a pack or a single tweak folder, using nothing
   sft.py hide|unhide ID...              hide a row in the installer window (or show it again)
-  sft.py hide-group|unhide-group NAME   the same for a whole group (e.g. "VR windows")
+  sft.py hide-group|unhide-group NAME   the same for a whole group (e.g. "VR environment")
   sft.py info ID                        what the installer window's details page shows
   sft.py run-label ID                   the Run button's label (nothing if the tweak has none)
   sft.py settings ID                    current settings, and what each can be set to
@@ -248,9 +248,13 @@ def component(cid):
     return next((c for c in components() if c["id"] == cid), None)
 
 
+# Groups that were renamed: folded or hidden under the old name stays folded or hidden.
+RENAMED_CATEGORIES = {"VR windows": "VR environment"}
+
+
 def read_set(path):
     try:
-        return {line.strip() for line in path.read_text().splitlines() if line.strip()}
+        return {RENAMED_CATEGORIES.get(s, s) for line in path.read_text().splitlines() if (s := line.strip())}
     except OSError:
         return set()
 

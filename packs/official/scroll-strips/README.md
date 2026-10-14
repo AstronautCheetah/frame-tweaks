@@ -1,7 +1,7 @@
 ---
 title: Scroll strips
 emoji: 📜
-category: VR windows
+category: VR environment
 tier: core
 summary: >-
   Big scroll strips beside windows (docked or floating), easy to grab with the laser: drag to
@@ -134,7 +134,7 @@ vertical one on the **right** and a horizontal one on **top**.
   default) opens them beside the window: which side each strip is on (or off), thickness, gap
   from the window, how far it's set back, and colour (follow the passthrough's Camera Color Tint,
   or pick a hue), plus *Reset to defaults*. They apply to every window at once and are saved in
-  `~/.config/frame-tweaks/scroll-strips.json` (through the VR windows helper's service).
+  `~/.config/frame-tweaks/scroll-strips.json` (through the VR environment helper's service).
 - **Settings in the installer window** (the row's ⚙ button): side and thickness.
 - The window docked in the dashboard (the desktop, say) gets strips too, while the dashboard is open.
 

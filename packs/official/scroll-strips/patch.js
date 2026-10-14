@@ -221,7 +221,7 @@
     if (typeof window.sftConfig === 'function') {
       try { window.sftConfig(JSON.stringify({ name: NAME, config: raw })); saveNote = ''; } catch (e) {}
     } else {
-      saveNote = 'Not saved: reinstall VR windows (vr-dashboard) to keep settings.';
+      saveNote = 'Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings.';
     }
     redraw();
   };
