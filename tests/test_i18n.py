@@ -177,9 +177,38 @@ class MenusAndDashboard(unittest.TestCase):
                                           'msgid "Colour"\nmsgstr "Color"\n\nmsgid "Off"\nmsgstr "Desactivado"\n')
 
     def test_desktop(self):
-        out = i18n.desktop("[Desktop Entry]\nName=Lock Wallet\nComment=Untranslated\nExec=x\n", self.d)
-        self.assertEqual(out.splitlines(), ["[Desktop Entry]", "Name=Lock Wallet", "Name[es_419]=Bloquear cartera",
-                                            "Name[es]=Bloquear cartera", "Comment=Untranslated", "Exec=x"])
+        en = i18n.Catalogue([], self.d)
+        out = i18n.desktop("[Desktop Entry]\nName=Lock Wallet\nComment=Untranslated\nExec=x\n", self.d, en)
+        self.assertEqual(out.splitlines(), ["[Desktop Entry]", "Name=Lock Wallet", "X-Frame-Tweaks-Name=Lock Wallet",
+                                            "Name[es_419]=Bloquear cartera", "Name[es]=Bloquear cartera",
+                                            "Comment=Untranslated", "X-Frame-Tweaks-Comment=Untranslated", "Exec=x"])
+        es = i18n.Catalogue(["es"], self.d)
+        self.assertIn("Name=Bloquear cartera", i18n.desktop("Name=Lock Wallet\n", self.d, es).splitlines())
+        again = i18n.desktop(out, self.d, es)                     # (installed again: no duplicates)
+        self.assertEqual(again.count("Name[es]="), 1)
+        self.assertIn("Name=Bloquear cartera", again.splitlines())
+
+    def test_relabel_when_the_language_changes(self):
+        """Only Frame Tweaks' entries, every group (actions too), the English kept."""
+        apps = self.d / "apps"
+        apps.mkdir()
+        en = i18n.Catalogue([], self.d)
+        mine = apps / "wallet-lock.desktop"
+        mine.write_text(i18n.desktop("[Desktop Entry]\nName=Lock Wallet\n\n[Desktop Action x]\nName=Off\n", self.d, en))
+        other = apps / "other.desktop"
+        other.write_text("[Desktop Entry]\nName=Lock Wallet\n")
+        es = i18n.Catalogue(["es"], self.d)
+        with mock.patch.object(i18n, "CATALOGUE", es), mock.patch.object(i18n, "APPS", apps):
+            self.assertEqual(i18n.menus((apps,)), [mine])
+            self.assertEqual(i18n.menus((apps,)), [])             # (nothing changed: not written)
+        lines = mine.read_text().splitlines()
+        self.assertIn("Name=Bloquear cartera", lines)
+        self.assertIn("Name=Desactivado", lines)
+        self.assertIn("X-Frame-Tweaks-Name=Lock Wallet", lines)
+        self.assertEqual(other.read_text(), "[Desktop Entry]\nName=Lock Wallet\n")
+        with mock.patch.object(i18n, "CATALOGUE", en):
+            self.assertTrue(i18n.relabel(mine))
+        self.assertIn("Name=Lock Wallet", mine.read_text().splitlines())
 
     def test_dashboard_table(self):
         import importlib.machinery
