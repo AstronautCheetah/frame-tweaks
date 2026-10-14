@@ -77,16 +77,29 @@ def changes(m):
     return "\n".join(lines)
 
 
+def licence(m):
+    """The project's licence, as its pin names it (license=, license_file=): "[MIT](url)", or one
+    link per licence of a choice ("[MIT](…) or [Apache-2.0](…)")."""
+    f = ROOT / m["dir"] / "pin"
+    pin = dict(line.split("=", 1) for line in f.read_text().splitlines() if "=" in line) if f.is_file() else {}
+    if not (pin.get("license") and pin.get("license_file")):
+        return "its own licence"
+    names, urls = pin["license"].split(" (")[0].split(" or "), pin["license_file"].split()
+    return " or ".join(f"[{n}]({u})" for n, u in zip(names, urls)) if len(names) == len(urls) else \
+        f"[{' or '.join(names)}]({urls[0]})"
+
+
 def upstream(i, m):
-    """The installed project's own README, after a footer line and a separator."""
+    """The installed project's own README, after a footer line (whose it is, and its licence: a
+    copy carries its copyright and licence) and a separator."""
     owner, repo, ref = m["upstream"].split("/")[3:6]
     copy = ROOT / m["dir"] / "upstream.md"
     if not copy.is_file():
         sys.exit(f"{copy.relative_to(ROOT)} is missing: run dev/fetch-upstream-readmes.py {i}")
     return (f"---\n\n*The rest of this page is [{owner}/{repo}](https://github.com/{owner}/{repo})'s own "
-            f"README at `{ref[:12]}`, as its author wrote it (only links and heading levels adjusted), "
-            f"included for its instructions and credits. Everything above is Frame Tweaks'.*\n\n"
-            + copy.read_text().strip())
+            f"README at `{ref[:12]}`, © its authors, under {licence(m)}, as its author wrote it (only links "
+            f"and heading levels adjusted), included for its instructions and credits. Everything above "
+            f"is Frame Tweaks'.*\n\n" + copy.read_text().strip())
 
 
 def put(text, name, body, path):

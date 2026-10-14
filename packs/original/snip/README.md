@@ -152,8 +152,8 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 [Tesseract](https://github.com/tesseract-ocr/tesseract) (Apache-2.0, from Homebrew) reads the
 text. [Piper](https://github.com/rhasspy/piper) (MIT) speaks it, with the
 [LJ Speech](https://keithito.com/LJ-Speech-Dataset/) voice (dataset in the public domain). Some
-button icons are [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons) (LGPL-3.0), from
-SteamOS's own icon theme. See also [CREDITS.md](../../../CREDITS.md).
+button icons, and its menu icon, are [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons)
+(LGPL-3.0-or-later), from SteamOS's own icon theme ([icons/README.md](../../../icons/README.md)). See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status snip` · Remove: `./install.sh uninstall snip`

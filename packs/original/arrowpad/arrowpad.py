@@ -439,15 +439,34 @@ class ClickSwap:
         self.on_done()
 
 
+# drawn_icon below is ported from TaiKeid/steam-frame-full-keyboard (src/panel.cpp, release
+# 0.6.0), under its licence:
+#
+# MIT License
+#
+# Copyright (c) 2026 TaiKeid and contributors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 def drawn_icon(name, px=96, color=THEME["legend"]):
     """Full Keyboard's vector icons, redrawn with QPainter: same 24-unit coordinates, 1.8-unit
     round strokes, so the toolbar and clipboard keys match it exactly. None for names it doesn't
-    draw. Ported from TaiKeid/steam-frame-full-keyboard src/panel.cpp under the MIT License:
-    Copyright (c) 2026 TaiKeid and contributors. Permission is hereby granted, free of charge,
-    to any person obtaining a copy of this software and associated documentation files, to deal
-    in the Software without restriction, subject to including this copyright and permission
-    notice in all copies or substantial portions. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
-    WARRANTY OF ANY KIND (full text: https://github.com/TaiKeid/steam-frame-full-keyboard/blob/main/LICENSE)."""
+    draw. (Ported from Full Keyboard: its MIT licence is above.)"""
     from PyQt6.QtGui import QPen, QPixmap
     pm = QPixmap(px, px)
     pm.fill(Qt.GlobalColor.transparent)

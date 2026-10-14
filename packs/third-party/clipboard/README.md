@@ -100,7 +100,7 @@ Check: `./install.sh status clipboard` · Remove: `./install.sh uninstall clipbo
 <!-- generated:upstream (dev/gen-docs.py, from upstream.md) -->
 ---
 
-*The rest of this page is [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync)'s own README at `138a59b8f304`, as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
+*The rest of this page is [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync)'s own README at `138a59b8f304`, © its authors, under [MIT](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/MIT.txt) or [Apache-2.0](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Apache-2.0.txt), as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
 
 ## Clipboard Sync
 
