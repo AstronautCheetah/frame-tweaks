@@ -100,6 +100,16 @@ class PhonePick(unittest.TestCase):
         self.assertIn("adb pair 10.0.0.5:37001 123456", log)
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
 
+    def test_failed_connection_can_forget_the_phone(self):
+        code, log, conf = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n',
+                                         choose="forget", extra={
+            "adb": 'echo "adb $*" >> "$HOME/log"; [ "$1" = connect ] && echo "failed to connect to $2"; exit 0'})
+        self.assertEqual(code, 0)
+        self.assertIn("Forget Pixel 9", log)
+        self.assertNotIn("PHONE_NAME", conf)
+        self.assertIn("PHONE_MAX_FPS=90", conf)                    # other settings kept
+        self.assertNotIn("scrcpy", log)
+
     def test_splash_then_a_message_saying_why(self):
         """No phone in sight: the splash shows, then closes, and an error dialog explains."""
         code, log, _ = self.run_phone([], env={"PHONE_NO_SPLASH": ""}, extra={
