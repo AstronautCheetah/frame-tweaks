@@ -256,6 +256,8 @@ install_desktop() {
     fi
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS"
+    # (its name in the keyboard's language, as for every entry: install.sh ensure_menu_language)
+    sysctl_user start --no-block frame-tweaks-menus.service 2>/dev/null || true
 }
 
 # pip_pinned <venv> <package>...: install at the tested versions (lib/python-constraints.txt).
