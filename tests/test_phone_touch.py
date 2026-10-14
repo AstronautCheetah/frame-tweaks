@@ -59,6 +59,57 @@ class Touch(unittest.TestCase):
             self.assertEqual(pt.screen_size("d"), (1080, 2400))
 
 
+class PhoneNotAnswering(unittest.TestCase):
+    """A phone that stops answering (a Wi-Fi link gone quiet) is tried again at the next touch;
+    it used to end phone-touch, taking the layer and the joystick with it."""
+    def test_adb_timing_out_is_an_oserror(self):
+        with mock.patch.object(pt.subprocess, "run", side_effect=pt.subprocess.TimeoutExpired("adb", 20)):
+            self.assertRaises(OSError, pt.adb, "d", "shell", "wm", "size")
+
+    def test_touch_and_scroll_without_an_answer_are_dropped(self):
+        p = phone()
+        p.sock = None
+        with mock.patch.object(pt.subprocess, "run", side_effect=pt.subprocess.TimeoutExpired("adb", 20)), \
+                mock.patch.object(pt, "log"):
+            p.touch(pt.DOWN, 0.5, 0.5, sideways=False)
+            p.scroll(0.5, 0.5, False, 0, 1)
+        self.assertIsNone(p.sock)
+
+    def test_first_touch_connects_when_the_first_connection_failed(self):
+        """(Before it learnt the screen size: the touch failed on the missing size.)"""
+        with mock.patch.object(pt, "scrcpy_server", return_value=("5.0.1", "/x")):
+            p = pt.Phone("10.0.0.2:5555")
+
+        def connect():
+            p.size, p.sock = (1080, 2400), mock.Mock()
+        with mock.patch.object(p, "connect", side_effect=connect):
+            p.touch(pt.DOWN, 0.5, 0.25, sideways=False)
+        self.assertEqual(sent(p), (2, 0, -2, 540, 600, 1080, 2400, 0xFFFF, 0, 0))
+
+
+class Replaced(unittest.TestCase):
+    def test_the_one_replaced_cleans_up(self):
+        """A reconnect's phone-touch stops the one before (SIGTERM): that one removes its tunnel
+        and stops its server first, as when scrcpy closes (it ended on the spot)."""
+        import signal
+        import tempfile
+        handlers, the_phone = {}, mock.Mock()
+
+        def serve(*a):
+            handlers[signal.SIGTERM](signal.SIGTERM, None)      # the next one's SIGTERM arrives
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "sft-dashboard").touch()
+            with mock.patch.object(pt.sys, "argv", ["phone-touch", "10.0.0.2:5555"]), \
+                    mock.patch.object(pt, "DASHBOARD", Path(d) / "sft-dashboard"), \
+                    mock.patch.object(pt, "PIDFILE", Path(d) / "pid"), \
+                    mock.patch.object(pt.signal, "signal", side_effect=handlers.__setitem__), \
+                    mock.patch.object(pt, "Phone", return_value=the_phone), \
+                    mock.patch.object(pt, "scrcpy_running", return_value=True), \
+                    mock.patch.object(pt.threading, "Thread"), mock.patch.object(pt, "dashboard"), \
+                    mock.patch.object(pt, "serve", side_effect=serve):
+                self.assertRaises(SystemExit, pt.main)
+            self.assertFalse((Path(d) / "pid").exists())
+        the_phone.close.assert_called_once()
 
 
 class Joystick(unittest.TestCase):
@@ -77,6 +128,22 @@ class Joystick(unittest.TestCase):
         self.assertEqual(pt.stick_rate(0.15), 0.0)
         self.assertEqual(pt.stick_rate(-1.0), -15.0)
         self.assertLess(pt.stick_rate(0.5), pt.stick_rate(0.9))
+
+    def test_scrcpy_is_looked_for_every_2_s_not_every_tick(self):
+        """(A pgrep takes some 20 ms of processor time: 30 a second took a good part of a core.)"""
+        import types
+        clock = [1000.0]
+        fake_time = types.SimpleNamespace(monotonic=lambda: clock[0], sleep=lambda s: clock.__setitem__(0, clock[0] + s))
+        looks = []
+
+        def running():
+            looks.append(clock[0])
+            return clock[0] < 1010                          # the mirror closes after 10 s
+        with mock.patch.object(pt, "time", fake_time), mock.patch.object(pt, "Sticks"), \
+                mock.patch.object(pt, "scrcpy_running", side_effect=running):
+            pt.scroll_with_sticks(phone(), {})
+        self.assertLessEqual(len(looks), 7)                 # (it was every 1/30 s: 300 times)
+        self.assertGreaterEqual(clock[0], 1010)             # and it still stops with the mirror
 
 
 class Settings(unittest.TestCase):
