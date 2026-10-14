@@ -50,7 +50,7 @@ else:
 from PyQt6.QtCore import (QEvent, QObject, QPoint, QPointF, QProcess, QProcessEnvironment, QRect, Qt, QTimer,
                           pyqtSignal)  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
-from PyQt6.QtCore import QSize                                                    # noqa: E402
+from PyQt6.QtCore import QRectF, QSize                                            # noqa: E402
 from PyQt6.QtGui import QColor, QIcon, QImage, QMouseEvent, QPainter, QPen, QPixmap  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel, QPushButton,  # noqa: E402
                              QVBoxLayout, QWidget)
@@ -618,11 +618,13 @@ class NarrationWindow(QWidget):
              "QPushButton { background: #232a32; font-weight: 600; padding: 16px 28px; border-radius: 12px;"
              " min-width: 70px; }"
              "QPushButton:hover { background: #355b7a; } QPushButton:disabled { color: #3a434d; }")
-    PANEL_STYLE = ("QWidget { background: #0b1016; color: #e8ecf0; font-size: 22px; }"
+    # (the VR panel: its own background is a rounded rectangle, paintEvent, like Arrow Pad's)
+    PANEL_STYLE = ("QWidget { background: transparent; color: #e8ecf0; font-size: 22px; }"
                    "QPushButton { background: #232a32; font-weight: 600; padding: 12px 20px; border-radius: 10px;"
                    " min-width: 50px; }"
                    "QPushButton:disabled { color: #3a434d; }")
     MINI_MARGIN = 14                              # around Expand: something to grab it by
+    PANEL_BG, PANEL_RADIUS = QColor("#0b1016"), 20    # Arrow Pad's surface colour and corner radius
 
     def __init__(self, image, text, speed, panel=False):
         super().__init__()
@@ -632,6 +634,8 @@ class NarrationWindow(QWidget):
         if i18n is not None:          # (the installer window announces a new language: no polling)
             i18n.follow_announcements(self, self.retranslate)
         self.setStyleSheet(self.PANEL_STYLE if panel else self.STYLE)
+        if panel:     # rounded corners: the panel's picture is transparent outside them, as Arrow Pad's
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         self.full = QWidget()
@@ -769,6 +773,15 @@ class NarrationWindow(QWidget):
         self.narrator.finished.connect(self.done)
         self.narrator.start()
         self.expand() if self.collapsed else self.fit()
+
+    def paintEvent(self, ev):
+        if not self.panel:
+            return super().paintEvent(ev)
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(self.PANEL_BG)
+        p.drawRoundedRect(QRectF(self.rect()), self.PANEL_RADIUS, self.PANEL_RADIUS)
 
     def retranslate(self):
         """The installer window switched language: the tooltips and labels here follow (a state
