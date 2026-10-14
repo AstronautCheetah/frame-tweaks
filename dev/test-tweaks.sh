@@ -102,7 +102,8 @@ for t in "${TWEAKS[@]}"; do
         # (caches that desktop tools regenerate don't count)
         left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <({ printf '%s\n' $PATHSET; sft test-keeps "$t"; } | sed 's|^|./|') |
                grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$|^\./\.cache/' |
-               grep -vE '^\./\.local/state/frame-tweaks/alarm/' || true)   # (kept on purpose: no downgrades)
+               grep -vE '^\./\.local/state/frame-tweaks/alarm/' |    # (kept on purpose: no downgrades)
+               grep -vE '^\./\.local/share/frame-tweaks/i18n/' || true)    # (translations: shared by tweaks' programs)
         outside=$(find /tmp /var/tmp "$REPO" -newer "$marker" -type f 2>/dev/null |
                   grep -v "^$work/" | grep -v "^$REPO/\.git/" | { if [ -n "${TEST_IGNORE:-}" ]; then grep -vE "$TEST_IGNORE"; else cat; fi; } || true)
         if [ -n "$left" ]; then
