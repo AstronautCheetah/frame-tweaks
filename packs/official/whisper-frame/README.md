@@ -33,7 +33,7 @@ undo: "`./install.sh uninstall whisper-frame`"
 [groffta/whisper-frame](https://github.com/groffta/whisper-frame) adds two ways to dictate,
 typed into the focused window:
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

@@ -29,7 +29,7 @@ undo: "`./install.sh uninstall clipboard`"
 clipboards**, so copying in a floating VR window and pasting in the desktop (or back) doesn't
 work.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

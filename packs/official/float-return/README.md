@@ -42,7 +42,7 @@ The same when the window the dashboard shows is **closed** (a finished or cancel
 [Screen snip](../snip/), say): instead of falling back to Steam, the dashboard goes back to the
 window before it, without Steam showing in between.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed

@@ -33,7 +33,7 @@ The Flathub build of Signal Desktop asks on every launch whether to use the
 **plaintext** password store. Choosing it leaves the key to your message database
 unencrypted on disk. This tweak makes it use **KDE Wallet** instead:
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

@@ -36,7 +36,7 @@ Normally **Float in World** leaves the window where it was, and you then grab th
 to place it. With this tweak, Float in World **picks the window up right away**, exactly as
 grabbing that bar does: it follows your controller until you put it down.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed

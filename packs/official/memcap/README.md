@@ -32,7 +32,7 @@ test:
 Heavy apps get a memory limit, so one runaway process can't use up the Frame's memory and
 stall VR: **Whisper** (dictation), **scrcpy** (Android Mirror) and **VSCodium**.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

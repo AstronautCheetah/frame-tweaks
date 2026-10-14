@@ -1,13 +1,12 @@
 # Roadmap
 
 Ideas from comparing Frame Tweaks with maintained SteamOS projects: Decky Loader, EmuDeck,
-ProtonUp-Qt, Jovian-NixOS and denis-g's optimization guide (reviewed 2026-10-07). Where we're already ahead: a security page with a
-per-tweak change list, pinned checksums for upstream downloads, an install/uninstall test, and
-issue forms.
+ProtonUp-Qt, Jovian-NixOS and denis-g's optimization guide (reviewed 2026-10-07), each credited
+next to the idea it inspired.
 
 ## Reliability
-- [x] **Release tags:** skip pre-release tags (`v1.2.0-rc1`) when picking the newest release;
-  today `sort -V` ranks them above `v1.2.0`. Optional opt-in beta channel. *(Decky, EmuDeck)*
+- [x] **Release tags:** skip pre-release tags (`v1.2.0-rc1`) when picking the newest release
+  (`sort -V` alone ranks them above `v1.2.0`). Optional opt-in beta channel. *(Decky, EmuDeck)*
 - [x] **One run at a time:** a lock so the installer window and the terminal can't install at
   once. *(EmuDeck)*
 - [x] **Backups:** copy any user file a tweak edits (Firefox `user.js`, Signal `config.json`,
@@ -20,8 +19,9 @@ issue forms.
 
 ## Support and diagnostics
 - [x] **Logs:** keep the last five runs' logs in `~/.local/state/frame-tweaks/`. *(EmuDeck)*
-- [x] **`./install.sh debug-info`** and a "Save diagnostics" button: versions, status, recent
-  logs, with user names and paths removed, zipped for a bug report; the bug form asks for it.
+- [x] **`./install.sh debug-info`** and a **Diagnostics** button: versions, status, recent
+  logs and services' log lines, with user names and paths removed, in one text file for a bug
+  report; the bug form asks for it.
   *(Decky, EmuDeck)*
 - [x] **Crash dialog** in the installer window with the error and a "copy for bug report"
   button; single-instance lock. *(ProtonUp-Qt)*
@@ -31,7 +31,7 @@ issue forms.
   *(Decky, optimization guide)*
 
 ## Engineering
-- [x] **Unit tests** (pytest, offscreen Qt) for the installer window's logic: versions, status
+- [x] **Unit tests** (unittest, offscreen Qt) for the installer window's logic: versions, status
   parsing, update checks. *(ProtonUp-Qt)*
 - [x] **Release workflow:** a manual GitHub Action that bumps the version, tags, and drafts
   release notes from the changelog. *(Decky)*
@@ -55,5 +55,6 @@ issue forms.
   limits, so one app can't freeze the headset. *(Jovian-NixOS)*
 
 ## Not adopting
-- Decky's root service and PR-build "testing" channel, EmuDeck's `git reset --hard` updates,
-  the guide's root-only tweaks (SDWEAK, Btrfs, pacman with read-only off).
+- A root service, a channel of pull-request builds, updates that reset the checkout
+  (`git reset --hard`), and root-only tweaks (SDWEAK, Btrfs, pacman with read-only off): each
+  fits other projects, but not a home-folder-only installer.

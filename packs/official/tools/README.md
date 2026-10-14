@@ -25,7 +25,7 @@ Frame's nested desktop session it isn't a systemd service, so nothing restarts i
 automatically. It must be launched with the session's own environment and D-Bus (taken
 from `ksmserver`), which is what this script does.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

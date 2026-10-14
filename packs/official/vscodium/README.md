@@ -21,7 +21,7 @@ undo: "`./install.sh uninstall vscodium`"
 [VSCodium](https://vscodium.com) is VS Code built from Microsoft's open-source code without
 their telemetry and branding. Installed from Flathub (aarch64).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

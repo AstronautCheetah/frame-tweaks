@@ -27,7 +27,7 @@ undo: "`./install.sh uninstall grab-guard`"
 the desktop: Frame Tweaks, floating windows and the rest stop responding, and nothing says why
 except the desktop window's title ("Press right control to **ungrab** input").
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

@@ -29,7 +29,7 @@ SteamOS includes **speech-dispatcher** (the service Orca and other apps speak th
 [Screen reader](../screen-reader/)'s Orca is silent. This helper fixes that, and provides the
 voice for [Screen snip](../snip/)'s **Narrate**. It's installed automatically with them.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

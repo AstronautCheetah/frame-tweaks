@@ -41,7 +41,7 @@ flat, and there's no setting to change that: the curvature rule is hard-coded (c
 dashboard, theater per setting, flat in the world). This tweak presses **Toggle Curvature**
 for you on every window you float, so they start curved like the dashboard.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed

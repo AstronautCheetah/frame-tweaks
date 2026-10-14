@@ -23,8 +23,6 @@ and one KDE wallet for both sessions, and more: pick what you want from a checkl
 > and in the installer window before you tick it.
 
 Not affiliated with or endorsed by Valve. Steam and Steam Frame are trademarks of Valve.
-Parts of this project were written with the help of AI coding assistants; changes are reviewed
-and tested on one Steam Frame.
 
 ## Requirements
 
@@ -51,7 +49,7 @@ It installs the newest release into `~/frame-tweaks`, adds **Frame Tweaks** to t
 
 ```sh
 git clone https://github.com/AstronautCheetah/frame-tweaks ~/frame-tweaks
-less ~/frame-tweaks/get.sh        # 30 lines: finds the newest release tag, clones it, opens the installer
+less ~/frame-tweaks/get.sh        # short: finds the newest release tag, clones it, opens the installer
 ~/frame-tweaks/get.sh
 ```
 </details>
@@ -64,7 +62,7 @@ Tweaks update catches up; nothing else is affected.
 
 <p align="center"><img src="docs/images/arrowpad.png" width="300" alt="Arrow Pad: arrows, Home/End, PgUp/PgDn, Esc, Tab, Ctrl/Alt/Super, right/middle click, clipboard keys and a dictation button"></p>
 
-<!-- generated:core (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:core (dev/gen-docs.py, from each tweak's README front matter) -->
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
 | ⌨️ | [**Dictation**](packs/official/dictation/) | Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut or the Arrow Pad's 🎤 to start/stop; the text is typed into the focused app, copied, and logged. | Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough to transcribe locally, so nothing leaves the headset. |
@@ -72,7 +70,7 @@ Tweaks update catches up; nothing else is affected.
 | ⌨️ | [**Arrow Pad**](packs/official/arrowpad/) | Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super, right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus. | Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop. |
 | ✂️ | [**Screen snip**](packs/official/snip/) | Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or read it aloud (Narrate). Arrow Pad's Tools layer has a button for it. | SteamOS has no screenshot tool, and none of the usual ones can select a region inside VR. |
 | 🔊 | [**Screen reader**](packs/official/screen-reader/) | KDE's screen reader (Orca, part of SteamOS) reads the desktop aloud; Meta+Alt+S toggles it. | Orca ships with SteamOS but is off, and its switch is buried in System Settings; this turns it on for desktop mode. |
-| ⌨️ | [**Full Keyboard**](packs/official/full-keyboard/) (VR) | TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install). | The best in-VR keyboard so far; this installs and updates it with the rest. |
+| ⌨️ | [**Full Keyboard**](packs/official/full-keyboard/) (VR) | TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install). | A full-size keyboard in VR, with every key the desktop needs; this installs and updates it with the rest. |
 | 📋 | [**Shared clipboard**](packs/official/clipboard/) | Copy in a floating VR window, paste in the desktop, and back. | The Frame's VR session and its nested desktop each have their own clipboard. This runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as steam-frame-nix does. |
 | 🖱️ | [**Mouse cursor fix**](packs/official/cursor/) | Makes the pointer visible in desktop mode. | KWin draws the pointer on a hardware plane that the headset's view doesn't show, so in desktop mode the mouse moves invisibly. |
 | 🌀 | [**Curved world windows**](packs/official/curvature/) 🧪 | Windows you float into the world start curved, like the dashboard; Toggle Curvature still works. | SteamVR has no setting for it (world windows always start flat), so a tiny dashboard patch presses the toggle for you. Restart SteamVR once after installing. |
@@ -90,7 +88,7 @@ Tweaks update catches up; nothing else is affected.
 
 <details><summary>Android mirroring, Signal and Firefox hardening, NordVPN, VSCodium, Claude. One person's setup, packaged so others can use it.</summary>
 
-<!-- generated:extras (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:extras (dev/gen-docs.py, from each tweak's README front matter) -->
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
 | 📱 | [**Android Mirror**](packs/official/adb-scrcpy/) 🧪 | Mirror and control your Android phone in a desktop window (scrcpy over wireless adb). Finds the phone's changing port automatically. | Use your phone without taking the headset off. Google ships `adb` only for x86, so this installs an aarch64 build that runs on the Frame. |
@@ -108,7 +106,7 @@ Tweaks update catches up; nothing else is affected.
 
 Installed automatically when a tweak needs them; listed so you can see and manage them.
 
-<!-- generated:helper (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:helper (dev/gen-docs.py, from each tweak's README front matter) -->
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
 | 🧩 | [**VR dashboard patching**](packs/official/vr-dashboard/) (helper) 🧪 | Lets the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips) and Android Mirror adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR environment tweak is a small patch this injects while SteamVR runs. |
@@ -280,11 +278,19 @@ launchers, two-session know-how), [curiousjtuber/steam-frame-utils](https://gith
 - New tweaks are folders with `install.sh` / `status.sh` / `uninstall.sh`; see
   [CONTRIBUTING.md](CONTRIBUTING.md).
 - What touches secrets, and the threat model: [SECURITY.md](SECURITY.md).
-- [MIT](LICENSE). Changes: [CHANGELOG.md](CHANGELOG.md).
+- [MIT](LICENSE), except the icons made from KDE Breeze and Noto Color Emoji (their own
+  licences; [icons/README.md](icons/README.md)). Changes: [CHANGELOG.md](CHANGELOG.md).
+- How it works and why: [docs/DESIGN.md](docs/DESIGN.md); plans: [docs/roadmap.md](docs/roadmap.md).
 
 ## Tested on
 
 SteamOS 0.4.5 (build 20261007.6125817), SteamVR build 1791331621, kernel 6.18, one Steam
-Frame. SteamOS and SteamVR updates can break tweaks that rely on their internals (the VR
-windows tweaks check SteamVR's dashboard code and switch themselves off if it changed). Reports from other
+Frame. SteamOS and SteamVR updates can break tweaks that rely on their internals (the VR environment
+tweaks check SteamVR's dashboard code and switch themselves off if it changed). Reports from other
 headsets and versions are welcome: open an issue with `./install.sh status` output.
+
+## AI use
+
+Much of the code here was written with AI coding assistance. I review every change, test it on
+my own Steam Frame, and take responsibility for what ships, so please report anything that
+looks wrong.

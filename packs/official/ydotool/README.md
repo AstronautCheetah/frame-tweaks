@@ -27,7 +27,7 @@ test: {offline: true}
 Keystroke injection via the kernel's uinput: the only way for ordinary programs to type
 into any app under KDE Wayland. Installed automatically by `dictation` and `arrowpad`.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

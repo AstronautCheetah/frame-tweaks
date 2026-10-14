@@ -24,7 +24,7 @@ Anthropic ships Claude Desktop for Linux as an apt package for Ubuntu/Debian (x8
 arm64). SteamOS has no apt and a read-only root, so this unpacks the arm64 `.deb`
 into `~/.local/opt/claude-desktop`, after verifying its SHA256 against Anthropic's repo index.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

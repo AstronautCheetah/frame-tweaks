@@ -83,7 +83,7 @@ undo: "`./install.sh uninstall adb-scrcpy`"
 
 Mirror and control an Android phone in a desktop window.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
