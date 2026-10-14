@@ -4,12 +4,20 @@ import importlib.machinery
 import io
 import importlib.util
 import os
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+# (as test_00_english.py does, for when this file runs alone: English, and the language the window
+# announces as it's imported kept from the real programs, which would follow it)
+for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
+             "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(tempfile.mkdtemp(), "language"),
+             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(tempfile.mkdtemp(), "language")}.items():
+    os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")
 gui = importlib.util.module_from_spec(spec)
@@ -59,6 +67,27 @@ class Lists(unittest.TestCase):
         apps = {a["id"]: a for a in wp.wallet_candidates(set())}
         self.assertTrue(wp.is_electron(apps["org.notes"]))
         self.assertFalse(wp.is_electron(apps["org.kde.dolphin"]))
+
+    def test_owner_titles_follow_the_language(self):
+        # ("Set up by the “Android Mirror” tweak" stayed in the language the window opened in)
+        import i18n
+        english = i18n.CATALOGUE
+        try:
+            i18n.CATALOGUE = i18n.Catalogue(["es_419"])
+            if i18n._("Android Mirror") == "Android Mirror":
+                self.skipTest("no Spanish title to switch to")
+            gui.sft.load(refresh=True)
+            self.assertEqual(wp.wallet_owners()["android-mirror"], i18n._("Android Mirror"))
+        finally:
+            i18n.CATALOGUE = english
+            gui.sft.load(refresh=True)
+        self.assertEqual(wp.wallet_owners()["android-mirror"], "Android Mirror")
+
+    def test_broken_launcher_link(self):
+        # (a link to a menu entry that's gone: the page still opens)
+        (self.own / "gone.desktop").symlink_to(self.own / "nowhere" / "gone.desktop")
+        self.assertEqual([a["id"] for a in wp.protected_apps()], ["org.editor"])
+        self.assertNotIn("gone", {a["id"] for a in wp.wallet_candidates({"org.editor"})})
 
 
 class SystemApp(unittest.TestCase):
@@ -150,6 +179,52 @@ class LockHours(unittest.TestCase):
             wp.set_lock_hours(8)
             self.assertEqual(wp.lock_hours(), 8)
             self.assertEqual((d / "wallet.conf").read_text(), "OTHER=1\nWALLET_LOCK_HOURS=8\n")
+
+    def test_dry_run_saves_nothing(self):
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.object(wp, "LOCK_CONF", d / "wallet.conf"), contextlib.redirect_stdout(io.StringIO()) as out, \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}):
+            wp.WalletApps.step_hours(mock.Mock(), +1)         # the + beside the auto-lock time
+        self.assertFalse((d / "wallet.conf").exists())
+        self.assertIn("would save: WALLET_LOCK_HOURS=6", out.getvalue())
+
+
+class Background(unittest.TestCase):
+    """🔓 Unlock… (wallet-unlock, waiting for its password) keeps running when the page is
+    closed, and its end leaves the closed page alone (that showed the error page)."""
+    def test_unlock_outlives_the_page(self):
+        from PyQt6.QtCore import QCoreApplication, QEvent, QProcess
+        from PyQt6.QtWidgets import QApplication, QWidget
+        app = QApplication.instance() or QApplication([])
+        t = Path(tempfile.mkdtemp())
+        unlock = t / "wallet-unlock"           # (a stand-in: locked, and unlocks after a moment)
+        unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked"}\'; exit; }\n'
+                          f"sleep 0.5; touch {t}/unlocked\n")
+        unlock.chmod(0o755)
+
+        class Window(QWidget):
+            def go_back(self):
+                pass
+        errors = []
+        with mock.patch.multiple(wp, WALLET_UNLOCK=unlock, APP_TIMERS=t / "none", LAUNCHERS=t / "apps",
+                                 FLATPAK_APPS=[], SYSTEM_APPS=[], FLATPAK_ROOTS=[], LOCK_CONF=t / "wallet.conf"), \
+                mock.patch.object(sys, "excepthook", lambda *a: errors.append(a[1])), mock.patch.dict(os.environ):
+            os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+            window = Window()
+            page = wp.WalletApps(window)
+            page.setParent(window)
+            page.toggle_wallet()                   # 🔓 Unlock…
+            page.deleteLater()                     # ← Back
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+            running = lambda: [p for p in window.findChildren(QProcess) if p.state() != QProcess.ProcessState.NotRunning]
+            for _ in range(200):
+                app.processEvents()                # (its finished signal, once it's done)
+                if (t / "unlocked").exists() and not running():
+                    break
+                time.sleep(0.05)
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        self.assertTrue((t / "unlocked").exists())
+        self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

@@ -1,14 +1,23 @@
 """Pure logic of the installer window (no window is opened). Run: python3 -m unittest -v"""
+import contextlib
 import importlib.util
+import io
 import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+# (as test_00_english.py does, for when this file runs alone: English, and the language the window
+# announces as it's imported kept from the real programs, which would follow it)
+for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
+             "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(tempfile.mkdtemp(), "language"),
+             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(tempfile.mkdtemp(), "language")}.items():
+    os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")
 gui = importlib.util.module_from_spec(spec)
@@ -33,11 +42,31 @@ class Versions(unittest.TestCase):
         self.assertEqual(gui.newest_release(["v1.0.0", "v1.1.0-rc1"], "beta"), "1.1.0-rc1")
         self.assertEqual(gui.newest_release(["v1.1.0-rc1", "v1.1.0"], "beta"), "1.1.0")
 
+    def test_prerelease_numbers_count_as_numbers(self):
+        # (the Release workflow tags vX.Y.Z-rc.N; ./install.sh update takes the newest by sort -V)
+        self.assertLess(gui.release_key("v1.2.0-rc.9"), gui.release_key("v1.2.0-rc.10"))
+        self.assertLess(gui.release_key("v1.2.0-rc.10"), gui.release_key("v1.2.0"))
+        self.assertEqual(gui.newest_release(["v1.2.0-rc.9", "v1.2.0-rc.10", "v1.1.0"], "beta"), "1.2.0-rc.10")
+        out = "x\trefs/tags/v1.2.0-rc.9\ny\trefs/tags/v1.2.0-rc.10\n"
+        fake = subprocess.CompletedProcess([], 0, stdout=out)
+        with mock.patch.object(gui.subprocess, "run", return_value=fake), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": "beta"}):
+            with mock.patch.object(gui, "current_release", return_value="1.2.0-rc.10"):
+                self.assertEqual(gui.self_update_check(), "")       # (not "1.2.0-rc.9 available")
+            with mock.patch.object(gui, "current_release", return_value="1.2.0-rc.9"):
+                self.assertEqual(gui.self_update_check(), "1.2.0-rc.10")
+
     def test_channel(self):
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": "beta"}):
             self.assertEqual(gui.release_channel(), "beta")
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": "anything"}):
             self.assertEqual(gui.release_channel(), "stable")
+        # (or "beta" in ~/.config/frame-tweaks/channel: where README says, and lib/common.sh reads it)
+        self.assertEqual(gui.CHANNEL, Path.home() / ".config/frame-tweaks/channel")
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": ""}), \
+                mock.patch.object(gui, "CHANNEL", Path(d) / "channel"):
+            (Path(d) / "channel").write_text("beta\n")
+            self.assertEqual(gui.release_channel(), "beta")
 
     def test_self_update_check(self):
         out = "x\trefs/tags/v0.1.0\ny\trefs/tags/v99.0.0\nz\trefs/tags/v100.0.0-rc1\n"
@@ -45,6 +74,21 @@ class Versions(unittest.TestCase):
         with mock.patch.object(gui.subprocess, "run", return_value=fake), \
                 mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": "stable"}):
             self.assertEqual(gui.self_update_check(), "99.0.0")
+
+    def test_check_offline_isnt_up_to_date(self):
+        from concurrent.futures import Future
+        offline = subprocess.CompletedProcess([], 128, stdout="", stderr="fatal: unable to access")
+        with mock.patch.object(gui.subprocess, "run", return_value=offline):
+            self.assertIsNone(gui.self_update_check())
+        done = Future()
+        done.set_result(None)
+        w = gui.Window.__new__(gui.Window)                 # ⟳ Check for updates, then the answer
+        w.latest_futures, w.update_futures, w.futures, w.self_update, w.update_state = {}, {}, {}, done, "checking"
+        w.set_update_state, w.say = mock.Mock(), mock.Mock()
+        w.collect()
+        w.set_update_state.assert_called_once_with("check")
+        self.assertNotIn("up to date", w.say.call_args[0][0])
+        self.assertNotEqual(w.say.call_args[1].get("good"), True)
 
 
 class Status(unittest.TestCase):
@@ -99,6 +143,88 @@ class PendingChanges(unittest.TestCase):
         w.wanted = {"b": True, "a": False, "c": True, "d": True}
         self.assertEqual(w.pending_changes(), (["b"], ["a"]))    # c only has a warning: not a change
 
+
+class DryRun(unittest.TestCase):
+    """FRAME_TWEAKS_DRY_RUN=1: the window says what it would run, and runs nothing."""
+    def test_run_button(self):
+        comp = next(c for c in gui.components() if gui.run_label(c["id"]) and c["id"] not in gui.PAGES)
+        w = gui.Window.__new__(gui.Window)
+        with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            w.run(comp)
+        qprocess.startDetached.assert_not_called()
+        self.assertIn("would run: bash", out.getvalue())
+
+
+class Terminal(unittest.TestCase):
+    """Apply, ↻ and Update run in a Konsole window of their own: closing the installer window,
+    which kills its QProcess, mustn't take that terminal, and the install in it, along."""
+    def test_terminal_outlives_the_window(self):
+        from PyQt6.QtCore import QProcess
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            konsole = d / "konsole"          # (a stand-in: runs what -e says, as the terminal would)
+            konsole.write_text('#!/bin/bash\nexport TERMINAL=$$\nwhile [ "$1" != -e ]; do shift; done\nshift\n"$@"\n')
+            konsole.chmod(0o755)
+            with mock.patch.dict(os.environ, {"PATH": f"{d}:{os.environ['PATH']}"}):
+                proc = QProcess()
+                # (the "install" gets to the end only while its terminal is still there)
+                gui.in_terminal(proc, f'sleep 1; kill -0 "$TERMINAL" && touch {d}/done')
+                self.assertTrue(proc.waitForStarted(5000))
+                time.sleep(0.3)
+                proc.kill()                      # what closing the window does to it
+                proc.waitForFinished(5000)
+            for _ in range(100):
+                if (d / "done").exists():
+                    break
+                time.sleep(0.1)
+            self.assertTrue((d / "done").exists())
+
+
+class PageActions(unittest.TestCase):
+    """A settings action (the Speech engine's Apply: a download) keeps running when its page is
+    closed, its end leaves the closed page alone (that showed the error page), and the page
+    opened again meanwhile doesn't start a second one."""
+    def test_back_during_an_action(self):
+        from PyQt6.QtCore import QCoreApplication, QEvent
+        from PyQt6.QtWidgets import QApplication, QLabel, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        errors = []
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "act.sh").write_text(f"echo run >> {d}/runs; sleep 0.5; touch {d}/done; echo Done\n")
+            spec = {"file": d / "x.json", "format": "json", "about": "", "note": "", "options": [],
+                    "actions": [], "checkboxes": set(), "swatches": set(), "include": []}
+            with mock.patch.dict(gui.sft.SETTINGS, {"x-test": spec}), mock.patch.dict(os.environ), \
+                    mock.patch.object(sys, "excepthook", lambda *a: errors.append(a[1])):
+                os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+                window = QWidget()
+
+                def page():
+                    p = QWidget(window)
+                    section = gui.SettingsSection("x-test", QLabel(p))
+                    section.setParent(p)
+                    return p, section
+                first, section = page()
+                section.act({"dir": d, "script": "act.sh"})
+                first.deleteLater()              # ← Back
+                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+                again, section = page()
+                section.act({"dir": d, "script": "act.sh"})
+                running = lambda: [p for p in window.findChildren(gui.QProcess)
+                                   if p.state() != gui.QProcess.ProcessState.NotRunning]
+                for _ in range(200):
+                    self.app.processEvents()     # (its finished signal, once it's done)
+                    if (d / "done").exists() and not running():
+                        break
+                    time.sleep(0.05)
+                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+            self.assertTrue((d / "done").exists())
+            self.assertEqual((d / "runs").read_text(), "run\n")
+            self.assertEqual(errors, [])
+
 class Links(unittest.TestCase):
     """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
     def test_with_copy(self):
@@ -121,6 +247,20 @@ class Links(unittest.TestCase):
         html = page.findChild(QTextBrowser).toHtml()
         self.assertIn("copy:https://github.com/", html)
         self.assertNotIn('href="../', html)
+
+    def test_link_to_a_heading_scrolls_there(self):
+        from PyQt6.QtCore import QUrl
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        text = "See [Build from source](#build-from-source).\n\n" + "Filler.\n\n" * 80 + "## Build From Source\n\nHere.\n"
+        view = gui.readme_browser(text, {"official": True, "id": None, "dir": gui.REPO})
+        view.resize(400, 200)
+        view.show()
+        self.app.processEvents()
+        with mock.patch.object(gui, "follow_link") as follow:
+            view.anchorClicked.emit(QUrl("#build-from-source"))
+        follow.assert_not_called()                   # (not handed to the desktop as "#build-from-source")
+        self.assertGreater(view.verticalScrollBar().value(), 0)
 
 
 class PacksPage(unittest.TestCase):

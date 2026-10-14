@@ -11,6 +11,7 @@ import subprocess
 import time
 from pathlib import Path
 
+from PyQt6 import sip
 from PyQt6.QtCore import QProcess, Qt, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout,
@@ -34,8 +35,10 @@ WALLET_MARK = "X-FrameTweaks-Wallet=true"
 # Menu entries that aren't apps with secrets: Steam game shortcuts, SteamVR's link handler, the
 # wallet's own Lock entry.
 NOT_WALLET_APP = re.compile(r"steam://|/vrurlhandler\b|wallet-unlock")
-# Entries a tweak sets up itself (removing one here lasts until that tweak is reinstalled).
-WALLET_OWNERS = {app: c["title"] for c in components() for app in c["wallet_apps"]}   # (wallet_apps: in manifests)
+# Entries a tweak sets up itself (removing one here lasts until that tweak is reinstalled): app
+# id -> that tweak's title, looked up as the page fills (in the window's language of the moment).
+def wallet_owners():
+    return {app: c["title"] for c in components() for app in c["wallet_apps"]}   # (wallet_apps: in manifests)
 
 
 def desktop_entry(path):
@@ -58,7 +61,10 @@ def protected_apps():
     """Apps wallet-launcher has wrapped: id, name, icon and which protections are on."""
     apps = []
     for f in sorted(LAUNCHERS.glob("*.desktop")):
-        text = f.read_text(errors="replace")
+        try:
+            text = f.read_text(errors="replace")
+        except OSError:                     # (a broken link, say)
+            continue
         if WALLET_MARK not in text:
             continue
         e = desktop_entry(f)
@@ -343,21 +349,25 @@ class WalletApps(QWidget):
         self.wallet_toggle.setToolTip(_("Asks for the wallet password") if self.wallet_locked else
                                       _("Lock the wallet now: protected apps need the password again"))
 
+    def wallet_unlock(self, args, then):
+        """wallet-unlock with args, in the background; then() when it's done, if this page is still
+        open. (The window's process, not the page's: going Back mustn't stop an unlock waiting
+        for its password.)"""
+        proc = QProcess(self.window)
+        proc.finished.connect(lambda *_: (proc.deleteLater(), sip.isdeleted(self) or then()))
+        proc.start(str(WALLET_UNLOCK), args)
+
     def extend_timer(self):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: wallet-unlock --schedule-lock")
             return
-        proc = QProcess(self)
-        proc.finished.connect(lambda *_: self.show_wallet_state())
-        proc.start(str(WALLET_UNLOCK), ["--schedule-lock"])
+        self.wallet_unlock(["--schedule-lock"], self.show_wallet_state)
 
     def toggle_autolock(self, on):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: wallet-unlock --autolock", "on" if on else "off")
             return
-        proc = QProcess(self)
-        proc.finished.connect(lambda *_: (self.show_hours(), self.show_wallet_state()))
-        proc.start(str(WALLET_UNLOCK), ["--autolock", "on" if on else "off"])
+        self.wallet_unlock(["--autolock", "on" if on else "off"], lambda: (self.show_hours(), self.show_wallet_state()))
 
     def show_hours(self):
         on = autolock_on()
@@ -372,7 +382,11 @@ class WalletApps(QWidget):
         h = lock_hours()
         options = [x for x in LOCK_STEPS if (x < h if direction < 0 else x > h)]
         if options:
-            set_lock_hours(options[-1] if direction < 0 else options[0])
+            hours = options[-1] if direction < 0 else options[0]
+            if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+                print(f"would save: WALLET_LOCK_HOURS={hours:g}")
+                return
+            set_lock_hours(hours)
         self.show_hours()
         self.show_wallet_state()
 
@@ -382,14 +396,10 @@ class WalletApps(QWidget):
             return
         if self.wallet_locked:
             # The password dialog opens on this display; the window stays usable meanwhile.
-            proc = QProcess(self)
-            proc.finished.connect(lambda *_: self.show_wallet_state())
-            proc.start(str(WALLET_UNLOCK), [])
+            self.wallet_unlock([], self.show_wallet_state)
             self.wallet_state.setText(_("Waiting for the wallet password (look for the dialog)…"))
         else:
-            proc = QProcess(self)                   # (not waited for here: the window stays usable)
-            proc.finished.connect(lambda *_: self.show_wallet_state())
-            proc.start(str(WALLET_UNLOCK), ["--lock"])
+            self.wallet_unlock(["--lock"], self.show_wallet_state)   # (not waited for: the window stays usable)
 
     def fill(self):
         while self.rows.count():
@@ -398,15 +408,16 @@ class WalletApps(QWidget):
                 item.widget().deleteLater()
         protected = protected_apps()
         timers = app_timers()
+        owners = wallet_owners()
         self.rows.addWidget(self.heading(_("Protected ({n})").format(n=len(protected))))
         for a in protected:
             what = (([_("shared wallet")] if a["shared"] else []) + ([_("Electron told to use it")] if a["electron"] else [])
 )
             note = " · ".join(what) or _("password only (keeps its own session)")
-            if a["id"] in WALLET_OWNERS:
+            if a["id"] in owners:
                 note += "<br><span style='color:#6b7783'>" + _(
                     "Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here.").format(
-                    tweak=WALLET_OWNERS[a["id"]]) + "</span>"
+                    tweak=owners[a["id"]]) + "</span>"
             gate = QCheckBox(_("Password first"))
             gate.setChecked(a["gate"])
             gate.setToolTip(_("Ask for the wallet password before the app opens (when the wallet is locked)"))
