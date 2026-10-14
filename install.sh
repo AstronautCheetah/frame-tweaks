@@ -90,7 +90,7 @@ ensure_menu_entry() {
         else install -m644 "icons/frame-tweaks-$n.png" "$icons/${n}x$n/apps/$id.png"; fi
     done
     install -m644 icons/frame-tweaks.png "$icons/256x256/apps/frame-tweaks.png"   # the window's own icon
-    sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" > "$apps/$id.desktop"
+    sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" | python3 lib/i18n.py desktop > "$apps/$id.desktop"
     install -m644 "share/metainfo/$id.metainfo.xml" "$HOME/.local/share/metainfo/"
     rm -f "$apps/steam-frame-tweaks.desktop"          # its old name
     update-desktop-database -q "$apps" 2>/dev/null || true

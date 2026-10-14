@@ -247,11 +247,12 @@ install_icon() {
 # wrapper's original and the wrapper is re-applied, so the gate isn't silently dropped.
 install_desktop() {
     local name; name=$(basename "$1")
+    # (with its name and comment in each translated language: lib/i18n.py desktop)
     if [ -f "$LAUNCHER_ORIGINALS/$name" ] && [ -x "$BIN/wallet-launcher" ]; then
-        sed "s|@BIN@|$BIN|g" "$1" | write_file "$LAUNCHER_ORIGINALS/$name"
+        sed "s|@BIN@|$BIN|g" "$1" | python3 "$REPO_DIR/lib/i18n.py" desktop | write_file "$LAUNCHER_ORIGINALS/$name"
         "$BIN/wallet-launcher" --reapply "${name%.desktop}" >/dev/null
     else
-        sed "s|@BIN@|$BIN|g" "$1" | write_file "$APPS/$name"
+        sed "s|@BIN@|$BIN|g" "$1" | python3 "$REPO_DIR/lib/i18n.py" desktop | write_file "$APPS/$name"
     fi
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS"

@@ -20,13 +20,16 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 17;
+  const NAME = 'scroll-strips', VERSION = 18;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
   const TICK_MS = 50, TAP_MS = 300, HOLD_STILL_MS = 3000;
   // Colours follow SteamVR's Camera Color Tint (/settings/camera/monochromeTintHue, 0..1; blue
   // when it can't be read), unless the settings (the gear) pick a hue of their own (color: 0..1).
+  // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
+  const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;
+  const lang = () => window.__sftI18n?.lang ?? null;
   const tintHue = () => {
     try {
       const h = window.VRSettingsState?.settings?.get('/settings/camera/monochromeTintHue');
@@ -210,12 +213,12 @@
   const DEFAULTS = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, color: 'tint', haptics: true };
   const SWATCHES = [0, 0.08, 0.15, 0.33, 0.5, 0.58, 0.67, 0.75, 0.83, 0.92];   // hues, as the tint's 0..1
   const OPTIONS = [
-    ['Vertical strip', 'vertical', [['Right', 'right'], ['Left', 'left'], ['Off', 'off']]],
-    ['Horizontal strip', 'horizontal', [['Top', 'top'], ['Bottom', 'bottom'], ['Off', 'off']]],
-    ['Thickness (cm)', 'thickness', [2, 2.5, 3, 4, 5, 6, 8].map((v) => [String(v), v / 100])],
-    ['Gap from the window (cm)', 'gap', [0, 1, 1.5, 2, 3, 5].map((v) => [String(v), v / 100])],
-    ['Set back behind the window (cm)', 'back', [0, 1, 2, 3, 5].map((v) => [String(v), v / 100])],
-    ['Haptics', 'haptics', [['On', true], ['Off', false]]],
+    [N('Vertical strip'), 'vertical', [[N('Right'), 'right'], [N('Left'), 'left'], [N('Off'), 'off']]],
+    [N('Horizontal strip'), 'horizontal', [[N('Top'), 'top'], [N('Bottom'), 'bottom'], [N('Off'), 'off']]],
+    [N('Thickness (cm)'), 'thickness', [2, 2.5, 3, 4, 5, 6, 8].map((v) => [String(v), v / 100])],
+    [N('Gap from the window (cm)'), 'gap', [0, 1, 1.5, 2, 3, 5].map((v) => [String(v), v / 100])],
+    [N('Set back behind the window (cm)'), 'back', [0, 1, 2, 3, 5].map((v) => [String(v), v / 100])],
+    [N('Haptics'), 'haptics', [[N('On'), true], [N('Off'), false]]],
   ];
   const GEAR_M = 0.045, PANEL_M = 0.34;
   const settingsOpen = new Set();
@@ -226,7 +229,7 @@
     if (typeof window.sftConfig === 'function') {
       try { window.sftConfig(JSON.stringify({ name: NAME, config: raw })); saveNote = ''; } catch (e) {}
     } else {
-      saveNote = 'Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings.';
+      saveNote = N('Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings.');
     }
     redraw();
   };
@@ -263,21 +266,21 @@
     const rows = [];
     const title = (key, text) => el('div', { key, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, text);
     for (const [text, key, choices] of OPTIONS) {
-      rows.push(title(`t-${key}`, text));
+      rows.push(title(`t-${key}`, T(text)));
       rows.push(el('div', { key: `r-${key}`, style: { display: 'flex', flexWrap: 'wrap' } },
-        ...choices.map(([label, value]) => button(label, label, raw[key] === value,
+        ...choices.map(([label, value]) => button(label, T(label), raw[key] === value,
                                                   () => raw[key] !== value && save({ [key]: value })))));
     }
-    rows.push(title('t-color', 'Colour'));
+    rows.push(title('t-color', T('Colour')));
     rows.push(el('div', { key: 'r-color', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center' } },
-      button('tint', 'Passthrough tint', raw.color === 'tint', () => raw.color !== 'tint' && save({ color: 'tint' })),
+      button('tint', T('Passthrough tint'), raw.color === 'tint', () => raw.color !== 'tint' && save({ color: 'tint' })),
       ...SWATCHES.map((v) => el('div', { key: `c${v}`, onClick: () => save({ color: v }), style: {
         width: '40px', height: '40px', margin: '5px', borderRadius: '50%', boxSizing: 'border-box',
         background: `hsl(${Math.round(v * 360)}, 60%, 55%)`,
         border: raw.color === v ? '4px solid #fff' : '2px solid rgba(255, 255, 255, 0.25)' } }))));
     rows.push(el('div', { key: 'reset', style: { display: 'flex', marginTop: '14px' } },
-      button('reset', 'Reset to defaults', false, () => save(DEFAULTS))));
-    if (saveNote) rows.push(el('div', { key: 'note', style: { fontSize: '15px', color: '#e0b060', margin: '8px 4px 0' } }, saveNote));
+      button('reset', T('Reset to defaults'), false, () => save(DEFAULTS))));
+    if (saveNote) rows.push(el('div', { key: 'note', style: { fontSize: '15px', color: '#e0b060', margin: '8px 4px 0' } }, T(saveNote)));
     const P = PANEL_M * k;
     out.push(el(XFORM, { key: `${f.frameID}-sset`, parent_id: id, translation: { x: side * (g + t + g + P / 2), z: -o.back * k } },     // as far back as the strips
       el(PANEL, { key: `${f.frameID}-sset-p`, width: P, interactive: true, only_visible_with_laser: false,
@@ -286,17 +289,17 @@
         el('div', { style: { zoom: 0.62, width: '460px', boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`, color: '#e8ecf0' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
-            el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, 'Scroll strips'),
+            el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Scroll strips')),
             el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
-             'For every window. Changes show at once.')))));
+             T('For every window. Changes show at once.'))))));
     return out;
   };
   const gearFor = (f) => {
     const sz = f?.activePage?.size;
-    return cached(JSON.stringify(['gear', f.frameID, sz?.latestMeasuredPanelLocalHeight, sz?.latestMeasuredPanelWorldHeight,
+    return cached(JSON.stringify(['gear', lang(), f.frameID, sz?.latestMeasuredPanelLocalHeight, sz?.latestMeasuredPanelWorldHeight,
                                   f.activePage?.GetPanelAnchorID?.(ANCHOR.CenterRight) ?? null, cfg(),
                                   window.__sftPatchConfig?.[NAME] ?? null, hue(), settingsOpen.has(f.frameID), saveNote]),
                   () => settingsFor(f));

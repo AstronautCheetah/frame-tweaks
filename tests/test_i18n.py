@@ -4,6 +4,7 @@ as the fallback, and the template holds both the marked code text and the manife
 import os
 import subprocess
 import sys
+import json
 import tempfile
 import textwrap
 import unittest
@@ -164,6 +165,42 @@ class Shell(unittest.TestCase):
         env["FRAME_TWEAKS_LANG_RESOLVED"] = "en"                # (a script started by one that found none)
         out = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True).stdout
         self.assertEqual(out.splitlines()[0], "Fetching a 'b'")
+
+
+class MenusAndDashboard(unittest.TestCase):
+    """Menu entries get Name[lang]= lines at install; the dashboard patches get their text from
+    sft-dashboard (window.__sftI18n), for T(...) / N(...) in their JS."""
+    def setUp(self):
+        self.d = Path(tempfile.mkdtemp())
+        self.addCleanup(subprocess.run, ["rm", "-rf", str(self.d)])
+        (self.d / "es_419.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Lock Wallet"\nmsgstr "Bloquear cartera"\n\n'
+                                          'msgid "Colour"\nmsgstr "Color"\n\nmsgid "Off"\nmsgstr "Desactivado"\n')
+
+    def test_desktop(self):
+        out = i18n.desktop("[Desktop Entry]\nName=Lock Wallet\nComment=Untranslated\nExec=x\n", self.d)
+        self.assertEqual(out.splitlines(), ["[Desktop Entry]", "Name=Lock Wallet", "Name[es_419]=Bloquear cartera",
+                                            "Name[es]=Bloquear cartera", "Comment=Untranslated", "Exec=x"])
+
+    def test_dashboard_table(self):
+        import importlib.machinery
+        import importlib.util
+        loader = importlib.machinery.SourceFileLoader("sd", str(ROOT / "packs/original/vr-dashboard/sft-dashboard"))
+        sd = importlib.util.module_from_spec(importlib.util.spec_from_loader("sd", loader))
+        loader.exec_module(sd)
+        js = self.d / "p.js"
+        js.write_text("const T = (s) => s, N = (s) => s;\nconst O = [[N('Off'), 'off']];\nel('div', {}, T('Colour'), 'Other');\n")
+        cat = i18n.Catalogue(["es"], self.d)
+        with mock.patch.object(sd, "i18n", mock.Mock(CATALOGUE=cat, refresh=lambda: False)), \
+                mock.patch.object(sd, "_", cat.gettext):
+            expr = sd.i18n_expr({"p": js})
+        table = json.loads(expr.split(" = ", 1)[1].rsplit(";", 1)[0])
+        self.assertEqual(table, {"lang": "es_419", "t": {"Off": "Desactivado", "Colour": "Color"}})
+
+    def test_patch_text_in_template(self):
+        pot = (ROOT / "locale/frame-tweaks.pot").read_text()
+        self.assertIn('msgid "Vertical strip"', pot)                # scroll-strips' VR panel
+        self.assertIn('msgid "Restart stream"', pot)                # Android Mirror's VR panel
+        self.assertIn('msgid "Lock Wallet"', pot)                   # a menu entry
 
 
 class Template(unittest.TestCase):
