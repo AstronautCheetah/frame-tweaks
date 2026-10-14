@@ -21,13 +21,37 @@ if [ ! -x "$D/piper/piper" ] || [ "$(cat "$D/piper/.version" 2>/dev/null)" != "$
     [ -x "$D/piper/piper" ] || die "the Piper download didn't contain piper/piper"
     pin_version speech > "$D/piper/.version"
 fi
+chmod +x "$D/piper/espeak-ng" 2>/dev/null || true      # (Piper's archive ships it without the x bit)
+
+# The settings (Frame Tweaks window → ⚙ Settings, or ./install.sh settings speech): which engine
+# Narrate uses and which language. voices.tsv lists the languages (dev/speech-voices.py).
+CONF="$HOME/.config/frame-tweaks/speech.conf"
+lang=en_US engine=piper
+[ -f "$CONF" ] && { lang=$(sed -n 's/^SPEECH_LANGUAGE=//p' "$CONF" | tr -d "\"'" | tail -1); engine=$(sed -n 's/^SPEECH_ENGINE=//p' "$CONF" | tr -d "\"'" | tail -1); }
+row=$(awk -F'\t' -v l="${lang:-en_US}" '$1 == l' "$TWEAK_DIR/voices.tsv")
+[ -n "$row" ] || { warn "speech: unknown language '$lang'; using English (US)"; lang=en_US; row=$(awk -F'\t' '$1 == "en_US"' "$TWEAK_DIR/voices.tsv"); }
+IFS=$'\t' read -r _ label voice_file voice_sha json_sha espeak_voice <<< "$row"
 voice_rev=$(sed -n 's/^version=//p' "$TWEAK_DIR/voice.pin")
-if [ "$(cat "$D/voice.version" 2>/dev/null)" != "$voice_rev" ]; then
-    say "Downloading the voice (about 60 MB)"
-    fetch_pinned speech "$D/voice.onnx.part" voice.pin && mv "$D/voice.onnx.part" "$D/voice.onnx"
-    fetch_pinned speech "$D/voice.onnx.json.part" voice-config.pin && mv "$D/voice.onnx.json.part" "$D/voice.onnx.json"
-    echo "$voice_rev" > "$D/voice.version"
+# English (US) is voice.pin's (with Frame Tweaks' copy if Hugging Face lost it); the others come
+# from the same revision of rhasspy/piper-voices, checked against voices.tsv's SHA256s.
+want="$voice_rev"; [ "$lang" = en_US ] || want="$voice_rev:$voice_file"
+if [ "$(cat "$D/voice.version" 2>/dev/null)" != "$want" ]; then
+    say "Downloading the $label voice (about 60 MB)"
+    if [ "$lang" = en_US ]; then
+        fetch_pinned speech "$D/voice.onnx.part" voice.pin
+        fetch_pinned speech "$D/voice.onnx.json.part" voice-config.pin
+    else
+        base="https://huggingface.co/rhasspy/piper-voices/resolve/$voice_rev/$(python3 -c 'import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))' "$voice_file")"
+        { curl -fL# -o "$D/voice.onnx.part" "$base" && sha_ok "$voice_sha" "$D/voice.onnx.part"; } ||
+            die "the $label voice didn't download, or isn't the expected file; nothing changed"
+        { curl -fsSL -o "$D/voice.onnx.json.part" "$base.json" && sha_ok "$json_sha" "$D/voice.onnx.json.part"; } ||
+            die "the $label voice's settings didn't download, or aren't the expected file; nothing changed"
+    fi
+    mv "$D/voice.onnx.part" "$D/voice.onnx" && mv "$D/voice.onnx.json.part" "$D/voice.onnx.json"
+    echo "$want" > "$D/voice.version"
 fi
+# What Narrate reads (frame-snip): the engine, and eSpeak NG's voice for this language.
+printf 'engine=%s\nespeak_voice=%s\nlanguage=%s\n' "${engine:-piper}" "$espeak_voice" "$lang" > "$D/narrate.conf"
 
 # speech-dispatcher: its espeak-ng module, run with Piper's espeak-ng library and voice data.
 write_file "$D/sd_espeak-ng" 755 <<WRAP
@@ -48,7 +72,8 @@ cp /etc/speech-dispatcher/modules/espeak-ng.conf "$C/modules/espeak-ng.conf"
       sed 's|^Include "clients/|Include "/etc/speech-dispatcher/clients/|' 
   echo "# Frame Tweaks (speech): espeak-ng from Piper's download"
   echo "AddModule \"espeak-ng\" \"$D/sd_espeak-ng\" \"espeak-ng.conf\""
-  echo "DefaultModule espeak-ng"; } > "$C/speechd.conf"
+  echo "DefaultModule espeak-ng"
+  echo "DefaultLanguage \"${lang%%_*}\""; } > "$C/speechd.conf"
 # A running speech-dispatcher keeps its old (voiceless) setup: let the next client start it anew.
 pkill -u "$(id -u)" -x speech-dispatcher 2>/dev/null || true
-say "Speech ready: Orca and other speech-dispatcher apps use espeak-ng; Narrate uses Piper."
+say "Speech ready ($label): Narrate uses $([ "$engine" = espeak-ng ] && echo "eSpeak NG" || echo Piper); speech-dispatcher apps use eSpeak NG."
