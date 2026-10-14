@@ -18,6 +18,9 @@ ensure_openvr "$QT_VENV" || true
 # OCR: Tesseract from Homebrew (with its English data).
 need_brew
 brew list tesseract >/dev/null 2>&1 || { say "Installing Tesseract (OCR)"; brew install tesseract || die "brew install tesseract failed"; }
+# Copy text, the narration panel's Paste and the image-copy fallback use wl-copy / wl-paste.
+command -v wl-copy >/dev/null || brew list wl-clipboard >/dev/null 2>&1 ||
+    { say "Installing wl-clipboard"; brew install wl-clipboard || die "brew install wl-clipboard failed"; }
 
 # Narrate: Piper and its voice come from the Speech engine helper (speech/).
 [ -x "$HOME/.local/share/frame-tweaks/speech/piper/piper" ] || "$(tweak_dir speech)/install.sh"
