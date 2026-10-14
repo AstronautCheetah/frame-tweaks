@@ -1,5 +1,6 @@
 """Shell helpers in lib/common.sh. Run: python3 -m unittest -v"""
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -30,7 +31,9 @@ class NewestTag(unittest.TestCase):
 
 class Pins(unittest.TestCase):
     def test_every_pin_is_complete(self):
-        for pin in ROOT.glob("*/pin"):
+        pins = [*ROOT.glob("packs/*/*/pin"), *ROOT.glob("packs/*/*/*.pin")]
+        self.assertTrue(pins)                         # (tweaks moved into packs/: found where they are)
+        for pin in pins:
             fields = dict(l.split("=", 1) for l in pin.read_text().splitlines() if "=" in l and not l.startswith("#"))
             self.assertTrue(fields.get("url", "").startswith("https://"), pin)
             if "rev" in fields:                       # a git commit
@@ -43,6 +46,24 @@ class Pins(unittest.TestCase):
         for line in (ROOT / "lib" / "python-constraints.txt").read_text().splitlines():
             if line.strip() and not line.startswith("#"):
                 self.assertRegex(line, r"^[A-Za-z0-9_.-]+==[0-9][0-9A-Za-z.]*$")
+
+
+@unittest.skipUnless(shutil.which("kwriteconfig6") and shutil.which("kreadconfig6"), "needs KDE's config tools")
+class KConfig(unittest.TestCase):
+    """save_kconfig / restore_kconfig: the keys go back as they were, a value (even one that looks
+    like an option, -0.4) or unset. In a throwaway config folder; nothing is told over D-Bus."""
+
+    def test_values_and_unset_keys_come_back(self):
+        script = """f=frame-tweaks-testrc
+            kwriteconfig6 --file $f --group Mouse --key Accel -- -0.4
+            save_kconfig t $f Mouse Accel Speed
+            kwriteconfig6 --file $f --group Mouse --key Accel 1; kwriteconfig6 --file $f --group Mouse --key Speed 3
+            restore_kconfig t >/dev/null
+            echo "$(kreadconfig6 --file $f --group Mouse --key Accel) $(kreadconfig6 --file $f --group Mouse --key Speed --default unset)"
+        """
+        with tempfile.TemporaryDirectory() as home:
+            out = sh(script, XDG_CONFIG_HOME=f"{home}/.config", DBUS_SESSION_BUS_ADDRESS="disabled:")
+        self.assertEqual(out, "-0.4 unset")
 
 
 if __name__ == "__main__":

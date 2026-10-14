@@ -1,9 +1,14 @@
 """install.sh's own state, in a throwaway home with a trusted test pack whose one tweak ("probe")
 only logs to a file there: installed/<id> records the version, migrate.sh runs (with the old
 version) only when that record is older, hold/unhold and held tweaks being left alone during
-updates (FRAME_TWEAKS_UPDATING=1), and the lock refusing a second run."""
+updates (FRAME_TWEAKS_UPDATING=1), the lock refusing a second run, the last five logs kept (and
+tweaks' own logs left alone), a failed uninstall reported, and debug-info's report without names
+and addresses. systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
+whatever HOME is."""
 import fcntl
 import os
+import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -55,14 +60,34 @@ class InstallState(unittest.TestCase):
         (d / "README.md").write_text(README)
         for name, body in SCRIPTS.items():
             (d / name).write_text(f"#!/bin/bash\n{body}\n")
+        self.stubs = t / "stubs"
+        self.stubs.mkdir()
+        self.stub("systemctl", 'case " $* " in *" is-active "*) exit 3 ;; esac')    # (nothing runs)
         self.env = {"HOME": str(self.home), "USER": os.environ.get("USER", "u"), "LANG": "C.UTF-8",
-                    "PATH": os.pathsep.join([os.path.dirname(shutil.which("flock")), "/usr/bin", "/bin"]),
+                    "PATH": os.pathsep.join([str(self.stubs), os.path.dirname(shutil.which("flock")), "/usr/bin", "/bin"]),
                     "FRAME_TWEAKS_PACKS": str(self.pack)}
+        self.trust()
+        self.state = self.home / ".local/state/frame-tweaks"
+        self.record = self.state / "installed/probe"
+
+    def stub(self, name, body):
+        (self.stubs / name).write_text(f"#!/bin/bash\n{body}\n")
+        (self.stubs / name).chmod(0o755)
+
+    def trust(self):
+        """(again after changing the probe: trust is for the pack's files as they are)"""
         r = subprocess.run(["python3", str(ROOT / "lib/sft.py"), "mods", "trust", str(self.pack)],
                            env=self.env, capture_output=True, text=True, timeout=60)
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.state = self.home / ".local/state/frame-tweaks"
-        self.record = self.state / "installed/probe"
+
+    def only_the_probe(self):
+        """Turn the official packs off, for commands that would otherwise run all their tweaks'
+        scripts (install all, debug-info's status), and make sure the probe is all that's left."""
+        off = self.home / ".config/frame-tweaks/installer/off-packs"
+        off.parent.mkdir(parents=True, exist_ok=True)
+        off.write_text("integrations\noriginal\nthird-party\n")
+        r = self.sh("_deps", "all")
+        self.assertEqual(r.stdout.split(), ["probe"], r.stdout + r.stderr)
 
     def sh(self, *args, **extra):
         return subprocess.run([str(ROOT / "install.sh"), *args], env={**self.env, **extra}, stdin=subprocess.DEVNULL,
@@ -162,6 +187,57 @@ class InstallState(unittest.TestCase):
         r = self.sh("install", "probe")                           # released: runs again
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.log(), ["install"])
+
+    def test_the_last_five_logs_are_kept_and_others_left_alone(self):
+        logs = self.state / "logs"
+        (logs / "mytweak").mkdir(parents=True)
+        theirs = [logs / "links.log", logs / "mytweak/20250101-000000.log"]     # (a tweak's own, dated)
+        ours = [logs / f"2026010{i}-000000-{i}-install.log" for i in range(1, 8)]
+        for n, p in enumerate(theirs + ours):                # (oldest first)
+            p.write_text("x\n")
+            os.utime(p, (1767225600 + n, 1767225600 + n))
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        kept = sorted(p.name for p in logs.glob("[0-9]*-*.log"))
+        self.assertEqual(kept[:-1], [p.name for p in ours[3:]])   # (the four newest, then this run's)
+        for p in theirs:
+            self.assertTrue(p.exists(), p)
+
+    def test_install_all_migrates_too(self):
+        self.only_the_probe()
+        self.installed_at("0.0.1")
+        r = self.sh("install", "all")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["migrate 0.0.1", "install"])
+
+    def test_a_failed_uninstall_is_reported_and_keeps_the_record(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        (self.pack / "probe/uninstall.sh").write_text('#!/bin/bash\necho uninstall >> "$HOME/probe.log"; exit 1\n')
+        self.trust()
+        r = self.sh("uninstall", "probe")
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Failed: probe", r.stdout)                    # (the log has stderr too)
+        self.assertEqual(self.log(), ["install", "uninstall"])
+        self.assertEqual(self.record.read_text(), VERSION + "\n")     # (still installed)
+
+    def test_debug_info_removes_names_and_addresses(self):
+        """Here from a log of an earlier run, which the report includes."""
+        self.only_the_probe()
+        host, phone = "frame-bob", "Galaxy S24+ (Bob)"      # (+ and ( ) mean something to sed -E)
+        self.stub("hostname", f"echo {host}")
+        (self.home / ".config/frame-tweaks/phone.conf").write_text(f"PHONE_NAME={shlex.quote(phone)}\n")
+        logs = self.state / "logs"
+        logs.mkdir(parents=True)
+        (logs / "20260101-000000-1-install.log").write_text(
+            f"Connecting to {phone}…\nalice@{host}:{self.home}/x$ adb connect 192.168.1.23:37011\n"
+            "bluetooth aa:bb:cc:dd:ee:0f, fe80::1c2b:3aff:fe4d:5e6f%wlan0, mail bob.smith@example.com\n")
+        r = self.sh("debug-info", USER="alice")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        report = Path(re.search(r"^Wrote (.+)$", r.stdout, re.M)[1]).read_text()
+        self.assertIn("Connecting to <phone>…", report)
+        self.assertIn("<user>@<host>:~/x$ adb connect <ip>:37011", report)
+        self.assertIn("bluetooth <mac>, <ipv6>%wlan0, mail <email>", report)
+        for secret in (phone, host, str(self.home), "alice", "192.168", "example.com"):
+            self.assertNotIn(secret, report)
 
 
 if __name__ == "__main__":

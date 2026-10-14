@@ -64,8 +64,9 @@ start_log() {
     # (tee without the lock's fd 8: holding it, tee kept the lock after `update` re-runs this
     # script for its second stage, which then found "another install running" and stopped.)
     exec > >(tee -a "$log" 8>&-) 2>&1
-    # (Only the installer's own logs, named by date: tweaks keep theirs here too, e.g. a tweak's own *.log.)
-    find "$LOGS" -name '[0-9]*-*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
+    # (Only the installer's own logs, named by date and not in a folder: tweaks keep theirs here too,
+    # e.g. a tweak's own *.log or a folder of its dated logs.)
+    find "$LOGS" -maxdepth 1 -name '[0-9]*-*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
 }
 
 # The tweaks, from the packs (lib/sft.py registry: the official packs and the user's trusted
@@ -230,7 +231,15 @@ cmd_uninstall() {
             done
         done
     done
-    for id in "$@"; do bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    local failed=()
+    for id in "$@"; do
+        bold "── $(t 'removing %s' "$id")"; stop_processes "$id"
+        # (As with install: a failure is reported, and the version record stays with what's left.)
+        if bash "${DIR[$id]}/uninstall.sh" 8>&-; then forget_version "$id"
+        else failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2; fi
+        echo
+    done
+    [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
 }
 
 # Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:
@@ -417,9 +426,9 @@ cmd_report() {
 
 cmd_debug_info() {
     local out; out="$HOME/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
-    # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed.
+    # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed -E ("Galaxy S24+ (Bob)").
     local phone; phone=$(bash -c '. "$HOME/.config/frame-tweaks/phone.conf" 2>/dev/null; printf %s "${PHONE_NAME:-}"' |
-                         sed 's/[][\.*^$/&|]/\\&/g')       # (read as phone does: it's shell-quoted)
+                         sed 's/[][\.*^$/&|(){}+?]/\\&/g')       # (read as phone does: it's shell-quoted)
     {
         echo "# Frame Tweaks debug info (user names, home path, host and phone names, IP, MAC and e-mail addresses removed)"
         echo "frame-tweaks: $FT_BUILD (release $VERSION); channel: $(release_channel)"
@@ -474,7 +483,8 @@ case ${1:-} in
     "")          if [[ ! -t 0 || -n ${FRAME_TWEAKS_GUI:-} ]] && command -v kdialog >/dev/null && [[ -n ${WAYLAND_DISPLAY:-${DISPLAY:-}} ]]; then cmd_gui
                  else usage; echo; cmd_status; fi ;;
     gui)         cmd_gui ;;
-    install)     shift; take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
+    # ("all" is every tweak, for the migrations as for the installs)
+    install)     shift; take_lock; start_log install "$@"; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; run_migrations "$@"; cmd_install "$@" ;;
     uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;
     reinstall)   shift; take_lock; start_log reinstall "$@"; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
     status|check) shift; cmd_status "$@" ;;
@@ -503,5 +513,5 @@ case ${1:-} in
                  else ensure_menu_entry; echo "$(t "Added 'Frame Tweaks' to the app menu.")"; fi ;;
     -h|--help|help) usage ;;
     --version|version) echo "$FT_BUILD" ;;
-    *)           take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
+    *)           take_lock; start_log install "$@"; [[ $1 == all ]] && set -- "${IDS[@]}"; run_migrations "$@"; cmd_install "$@" ;;
 esac
