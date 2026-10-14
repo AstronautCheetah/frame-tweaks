@@ -32,7 +32,7 @@ LANGUAGE="${DICTATE_LANG:-en}"     # the shared model is multilingual: say which
 WHISPER="$HOME/.local/lib/whisper-frame/whisper-cli"
 [ -x "$WHISPER" ] || WHISPER=$(command -v whisper-cli)
 # Vocabulary hint so Whisper spells these words correctly.
-PROMPT="${DICTATE_PROMPT:-Claude Code, SteamOS, Steam Frame, KDE Plasma.}"
+PROMPT="${DICTATE_PROMPT:-SteamOS, Steam Frame, SteamVR, KDE Plasma.}"
 MAX_SECONDS="${DICTATE_MAX_SECONDS:-300}"
 # Fixed path: launcher, shortcut and terminal see different XDG_RUNTIME_DIRs.
 STATE=$RUN/dictate

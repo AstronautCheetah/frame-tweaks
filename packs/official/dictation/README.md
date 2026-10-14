@@ -34,7 +34,7 @@ test:
 Speech-to-text that runs entirely on the Frame: whisper.cpp on the GPU (Vulkan).
 The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the device.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
