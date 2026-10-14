@@ -61,10 +61,11 @@ the way Arrow Pad reads the grips: from the tilt of the controller model's thumb
 (through SteamVR's openvr library, installed into the shared Python venv).
 
 **Settings in VR:** the gear below the mirror's lower-left corner opens its settings beside it:
-picture (Sharp 1280 px at 4 Mbit/s, Balanced 1024 px at 2 Mbit/s, Light 800 px at 1.5 Mbit/s),
-smoothness (60 or 30 frames a second) and joystick scrolling speed. They're saved in
+picture size (720 to 1920 pixels on the long side), bit rate (1 to 8 Mbit/s), frame rate (30, 60,
+or one of the Steam Frame's refresh rates, 72 to 144) and joystick scrolling speed. They're saved in
 `~/.config/phone.conf` (only those lines; the rest of the file is kept). *Restart stream* starts
-scrcpy again with the new picture settings, without closing the mirror.
+scrcpy again with the new picture settings, without closing the mirror. The
+[scroll strips](../scroll-strips/) beside the mirror scroll the phone through `phone-touch` too.
 
 ## One-time pairing
 On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,

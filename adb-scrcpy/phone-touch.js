@@ -14,11 +14,11 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 4, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 5, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
-  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0 };
+  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, trail: [] };
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -73,6 +73,9 @@
   };
   const onMove = (ev) => {
     if (!touch) return;
+    // No button held: the let-go went missing (it happens with the laser). End the touch there,
+    // or the joystick, which waits for the touch to end, would stay off.
+    if (ev.buttons === 0) { stats.lostUps++; return onUp(ev); }
     stats.moves++;
     send('move', ev);
   };
@@ -99,8 +102,11 @@
   // Where the laser rests (no press): phone-touch scrolls there with the joystick, which SteamVR
   // doesn't pass to the layer. At most 10 a second; and when it leaves.
   let lastHover = 0;
+  const mark = (what) => { stats.trail.push([what, Date.now() % 1e6]); if (stats.trail.length > 60) stats.trail.shift(); };
   const onHover = (ev, size) => {
+    if (touch && ev.buttons === 0) { stats.lostUps++; onUp(ev); }
     if (touch || Date.now() - lastHover < 100) return;
+    if (!lastHover) mark('hover');
     lastHover = Date.now();
     stats.hovers++;
     const r = ev.currentTarget.getBoundingClientRect();
@@ -111,6 +117,7 @@
   };
   const onLeave = () => {
     stats.leaves++;
+    mark('leave');
     lastHover = 0;
     try { window.sftPhoneTouch(JSON.stringify({ a: 'leave' })); } catch (e) {}
   };
@@ -133,6 +140,7 @@
           onMouseLeave: onLeave,
           onMouseDown: (ev) => {
             stats.downs++;
+            mark('down');
             if (touch) onUp(ev);                    // a new press ends a touch whose let-go went missing
             touch = { rect: ev.currentTarget.getBoundingClientRect(), size: c };
             send('down', ev);
@@ -143,14 +151,15 @@
   };
 
   // ---- the gear and its settings panel ----
-  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.30;       // sizes, metres
+  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.34;       // sizes, metres
+  // [title, key, [[label, value]...], needs a stream restart]: the real settings (scrcpy's
+  // --max-size, --video-bit-rate, --max-fps); frame rates are the Steam Frame's refresh rates.
   const OPTIONS = [
-    ['Picture', [['Sharp', { PHONE_MAX_SIZE: '1280', PHONE_BIT_RATE: '4M' }],
-                 ['Balanced', { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M' }],
-                 ['Light', { PHONE_MAX_SIZE: '800', PHONE_BIT_RATE: '1500K' }]], true],
-    ['Smoothness', [['60 fps', { PHONE_MAX_FPS: '60' }], ['30 fps', { PHONE_MAX_FPS: '30' }]], true],
-    ['Joystick scrolling', [['Slow', { PHONE_STICK_SPEED: '8' }], ['Medium', { PHONE_STICK_SPEED: '15' }],
-                            ['Fast', { PHONE_STICK_SPEED: '25' }]], false],
+    ['Picture size (long side, pixels)', 'PHONE_MAX_SIZE', ['720', '800', '1024', '1280', '1600', '1920'].map((v) => [v, v]), true],
+    ['Bit rate (Mbit/s)', 'PHONE_BIT_RATE',
+     [['1', '1M'], ['1.5', '1500K'], ['2', '2M'], ['3', '3M'], ['4', '4M'], ['6', '6M'], ['8', '8M']], true],
+    ['Frame rate (fps, at most)', 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
+    ['Joystick scrolling', 'PHONE_STICK_SPEED', [['Slow', '8'], ['Medium', '15'], ['Fast', '25']], false],
   ];
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
@@ -184,28 +193,27 @@
   };
   const settings = (f, k, id) => {
     const h = hueOf(), conf = window.__sftPhoneTouchConf || {};
-    const chosen = (vals) => Object.entries(vals).every(([key, v]) => conf[key] === v);
     const button = (label, on, onClick, wide) => el('div', { key: label, onClick, style: {
-      flex: wide ? '1 1 100%' : '1 1 0', padding: '12px 6px', margin: '4px', borderRadius: '10px', textAlign: 'center',
-      fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
+      flex: wide ? '1 1 100%' : '1 0 auto', minWidth: '58px', padding: '11px 6px', margin: '4px', borderRadius: '10px',
+      textAlign: 'center', fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
       background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
       border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}` } }, label);
     const rows = [];
-    for (const [title, choices, restart] of OPTIONS) {
-      rows.push(el('div', { key: `t-${title}`, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, title));
-      rows.push(el('div', { key: `r-${title}`, style: { display: 'flex' } },
-        ...choices.map(([label, vals]) => button(label, chosen(vals), () => {
-          if (chosen(vals)) return;
-          window.__sftPhoneTouchConf = { ...conf, ...vals };    // shown at once; phone-touch confirms
+    for (const [title, key, choices, restart] of OPTIONS) {
+      rows.push(el('div', { key: `t-${key}`, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, title));
+      rows.push(el('div', { key: `r-${key}`, style: { display: 'flex', flexWrap: 'wrap' } },
+        ...choices.map(([label, value]) => button(label, conf[key] === value, () => {
+          if (conf[key] === value) return;
+          window.__sftPhoneTouchConf = { ...conf, [key]: value };    // shown at once; phone-touch confirms
           if (restart) pending = true;
-          call({ a: 'set', conf: vals });
+          call({ a: 'set', conf: { [key]: value } });
           redraw();
         }))));
     }
     rows.push(el('div', { key: 'restart', style: { display: 'flex', marginTop: '14px' } },
       button(pending ? 'Restart stream to apply' : 'Restart stream', pending,
              () => { pending = false; call({ a: 'restart' }); redraw(); }, true)));
-    const pxW = 400;
+    const pxW = 460;
     return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
                        translation: { x: -(GAP_M * k + SETTINGS_M * k / 2), z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-set-p`, width: SETTINGS_M * k, interactive: true, only_visible_with_laser: false,
