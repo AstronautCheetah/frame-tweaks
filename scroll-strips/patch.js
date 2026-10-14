@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 15, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 16, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -317,7 +317,8 @@
     out.push(el(XFORM, { key: `${f.frameID}-sset`, parent_id: id, translation: { x: side * (g + t + g + P / 2), z: -o.back * k } },     // as far back as the strips
       el(PANEL, { key: `${f.frameID}-sset-p`, width: P, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftScrollSettings', origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
-        el('div', { style: { width: '460px', boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',
+        // (zoom: drawn smaller in the shared page, so it fits; it's shown at the same size in VR)
+        el('div', { style: { zoom: 0.62, width: '460px', boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`, color: '#e8ecf0' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, 'Scroll strips'),
@@ -336,6 +337,8 @@
                   () => settingsFor(f));
   };
 
+  const AREA = { position: 'absolute', left: '0px', bottom: '0px', width: '920px' };
+
   class SftScrollStrips extends Base {
     componentDidMount() { inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
     componentWillUnmount() { clearInterval(this.timer); }
@@ -347,7 +350,11 @@
           const dock = f?.docking?.dockLocation;
           if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(...stripsFor(f), ...gearFor(f));
         }
-        return out.length ? out : null;
+        // Our pieces are drawn from one shared page (1860 x 2048). Placed after the dashboard's
+        // own content, they moved whenever it changed size (its buttons grow under the laser),
+        // which showed as jitter. So they sit in a fixed corner: the bottom left (the Android
+        // Mirror's layer has the right).
+        return out.length ? el('div', { key: 'sft-scroll-strips-area', style: AREA }, ...out) : null;
       } catch (e) { return null; }
     }
   }

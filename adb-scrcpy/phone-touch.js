@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 8, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 9, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
@@ -264,9 +264,10 @@
                        translation: { x: -(GAP_M * k + SETTINGS_M * k / 2), z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-set-p`, width: SETTINGS_M * k, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftPhoneSettings', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        // (zoom: drawn smaller in the shared page, so it fits; it's shown at the same size in VR)
         el('div', { style: { width: `${pxW}px`, boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`,
-                             color: '#e8ecf0', fontFamily: 'inherit' } },
+                             color: '#e8ecf0', fontFamily: 'inherit', zoom: 0.62, textAlign: 'left' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, 'Android Mirror'),
             el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
@@ -294,6 +295,8 @@
   const extras = (f) => cached(JSON.stringify(['extras', ...sizes(f), settingsOpen.has(f.frameID), pending, hueOf(),
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
+  const AREA = { position: 'absolute', right: '0px', bottom: '0px', width: '920px', textAlign: 'right' };
+
   class SftPhoneTouch extends Base {
     componentDidMount() {
       mounted++; inst = this;
@@ -309,7 +312,12 @@
           const dock = f.docking?.dockLocation;
           if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(layer(f), ...extras(f));
         }
-        return out.filter(Boolean).length ? out.filter(Boolean) : null;
+        const parts = out.filter(Boolean);
+        // Our pieces are drawn from one shared page (1860 x 2048). Placed after the dashboard's
+        // own content, they moved whenever it changed size (its buttons grow under the laser),
+        // which showed as jitter, and a tall settings panel ran off the page's bottom. So they
+        // sit in a fixed corner of their own: the bottom right (the scroll strips have the left).
+        return parts.length ? el('div', { key: 'sft-phone-touch-area', style: AREA }, ...parts) : null;
       } catch (e) { return null; }
     }
   }

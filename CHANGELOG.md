@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: scroll strips, gears and settings panels jittering, and the bottom of a settings panel
+  missing.** They're drawn from the dashboard's one shared page, placed after its own content, so
+  they moved whenever that changed size (its buttons grow under the laser), and a tall panel ran
+  off the page. They now sit in fixed corners of the page, and the settings panels are drawn
+  smaller there (same size in VR).
 - **Fixed: reinstalling VR windows removed other tweaks' dashboard patches** (Android Mirror's
   size and touch layer, so it came up huge with no gear): a reinstall now keeps them.
 - **Scroll strips: the gear and its settings sit as far back as the strips.**
