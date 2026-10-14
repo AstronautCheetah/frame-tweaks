@@ -165,8 +165,13 @@ while :; do
         why="Couldn't connect to ${PHONE_NAME:-the phone}. adb said: $out
 
 If the phone forgot the Frame (or it's a new phone), pair them again."
-        choice=$(ask "Android Mirror" "$why" pair "Pair it again" close "Close"); r=$?
+        choice=$(ask "Android Mirror" "$why" pair "Pair it again" forget "Forget ${PHONE_NAME:-this phone}" close "Close"); r=$?
         [ $r -eq 2 ] && fail "Couldn't connect to ${PHONE_NAME:-the phone}" "$why See Android Mirror's README for adb pair."
+        if [ "$choice" = forget ]; then          # stop connecting to it by default (phone --forget)
+            [ -f "$CONF" ] && sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
+            kdialog --title "Android Mirror" --msgbox "Forgot ${PHONE_NAME:-the phone}. Next time, Android Mirror takes the phone in sight, or asks which if there are several." 2>/dev/null
+            exit 0
+        fi
         [ "$choice" = pair ] || exit 1
         pair_phone "$dev"
         splash "Connecting to ${PHONE_NAME:-the phone}…"

@@ -136,7 +136,8 @@ once).
 
 Later, if Android Mirror can't connect because the phone forgot the Frame (or it's a new phone),
 it offers **Pair it again**: open *Pair device with pairing code* on the phone, and enter the
-six-digit code when asked. No terminal needed.
+six-digit code when asked. No terminal needed. Or **Forget** the phone, so Android Mirror stops
+choosing it by default.
 
 ## Use
 1. On the phone, turn on *Wireless debugging*.
