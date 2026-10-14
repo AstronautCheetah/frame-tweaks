@@ -92,6 +92,33 @@ def span_text(seconds):
     return f"{h} h {m} min" if h and m else f"{h} h" if h else f"{m} min"
 
 
+LOCK_CONF = Path.home() / ".config/frame-tweaks/wallet.conf"
+DEFAULT_LOCK_HOURS = 4
+LOCK_STEPS = (1, 2, 3, 4, 6, 8, 12, 24)
+
+
+def lock_hours():
+    """The auto-lock length in hours, as wallet-unlock reads it (wallet.conf, default 4)."""
+    try:
+        for line in LOCK_CONF.read_text().splitlines():
+            if line.startswith("WALLET_LOCK_HOURS="):
+                v = float(line.split("=", 1)[1].strip().strip('"'))
+                if v > 0:
+                    return v
+    except (OSError, ValueError):
+        pass
+    return DEFAULT_LOCK_HOURS
+
+
+def set_lock_hours(hours):
+    """Save it for wallet-unlock (other lines in wallet.conf are kept). Takes effect at the next
+    unlock or Extend timer."""
+    lines = LOCK_CONF.read_text().splitlines() if LOCK_CONF.exists() else []
+    lines = [ln for ln in lines if not ln.startswith("WALLET_LOCK_HOURS=")] + [f"WALLET_LOCK_HOURS={hours:g}"]
+    LOCK_CONF.parent.mkdir(parents=True, exist_ok=True)
+    LOCK_CONF.write_text("\n".join(lines) + "\n")
+
+
 def wallet_state_text(info, now):
     """The status line atop Wallet apps, from wallet-unlock --info."""
     if info is None:
@@ -224,10 +251,29 @@ class WalletApps(QWidget):
         self.wallet_state.setWordWrap(True)
         self.wallet_state.setTextFormat(Qt.TextFormat.RichText)
         status_row.addWidget(self.wallet_state, 1)
+        self.extend = QPushButton("⏱ Extend timer")
+        self.extend.clicked.connect(self.extend_timer)
+        status_row.addWidget(self.extend)
         self.wallet_toggle = QPushButton()
         self.wallet_toggle.clicked.connect(self.toggle_wallet)
         status_row.addWidget(self.wallet_toggle)
         lay.addLayout(status_row)
+        # How long an unlock lasts (wallet.conf; wallet-unlock reads it). Buttons, not a drop-down:
+        # a pop-up list opens as a window of its own in VR.
+        hours_row = QHBoxLayout()
+        hours_label = QLabel("Auto-lock after unlocking:")
+        hours_label.setObjectName("desc")
+        hours_row.addWidget(hours_label)
+        self.shorter = QPushButton("−")
+        self.shorter.clicked.connect(lambda: self.step_hours(-1))
+        self.hours_text = QLabel()
+        self.longer = QPushButton("+")
+        self.longer.clicked.connect(lambda: self.step_hours(+1))
+        for w in (self.shorter, self.hours_text, self.longer):
+            hours_row.addWidget(w)
+        hours_row.addStretch(1)
+        lay.addLayout(hours_row)
+        self.show_hours()
         self.wallet_locked = None
         self.state_timer = QTimer(self, interval=30000, timeout=self.show_wallet_state)
         self.state_timer.start()
@@ -264,9 +310,33 @@ class WalletApps(QWidget):
         self.wallet_locked = None if info is None else info["state"] == "locked"
         self.wallet_state.setText(wallet_state_text(info, time.time()))
         self.wallet_toggle.setVisible(info is not None)
+        self.extend.setVisible(info is not None and not self.wallet_locked)
+        self.extend.setToolTip(f"Start the {timer_text(lock_hours() * 60)} countdown to the auto-lock again, from now")
         self.wallet_toggle.setText("🔓 Unlock…" if self.wallet_locked else "🔒 Lock now")
         self.wallet_toggle.setToolTip("Asks for the wallet password" if self.wallet_locked else
                                       "Lock the wallet now: protected apps need the password again")
+
+    def extend_timer(self):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: wallet-unlock --schedule-lock")
+            return
+        proc = QProcess(self)
+        proc.finished.connect(lambda *_: self.show_wallet_state())
+        proc.start(str(WALLET_UNLOCK), ["--schedule-lock"])
+
+    def show_hours(self):
+        h = lock_hours()
+        self.hours_text.setText(f"<b>{timer_text(h * 60)}</b>" + ("" if h == DEFAULT_LOCK_HOURS else " (default 4 h)"))
+        self.shorter.setEnabled(h > LOCK_STEPS[0])
+        self.longer.setEnabled(h < LOCK_STEPS[-1])
+
+    def step_hours(self, direction):
+        h = lock_hours()
+        options = [x for x in LOCK_STEPS if (x < h if direction < 0 else x > h)]
+        if options:
+            set_lock_hours(options[-1] if direction < 0 else options[0])
+        self.show_hours()
+        self.show_wallet_state()
 
     def toggle_wallet(self):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):

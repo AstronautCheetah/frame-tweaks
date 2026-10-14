@@ -12,6 +12,8 @@
   window too. Arrow Pad's shows its main and Tools layers.
 
 ### Changed
+- **Wallet apps: ⏱ Extend timer** (next to Lock now) restarts the auto-lock countdown, and
+  **Auto-lock after unlocking** sets its length (1–24 h; default 4 h).
 - **Wallet apps is the Shared KDE wallet row's button** (🔑 Wallet apps) instead of a button at
   the top; its page still locks and unlocks the wallet. **Diagnostics** moved next to Apply
   changes.

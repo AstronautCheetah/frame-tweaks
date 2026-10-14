@@ -109,7 +109,7 @@ display, so it appears as a **floating VR window**, which may not take clicks or
 `wallet-unlock` asks in a normal dialog on *your* display instead:
 
 ```sh
-wallet-unlock            # dialog if locked; then auto-locks after WALLET_LOCK_HOURS (4)
+wallet-unlock            # dialog if locked; then auto-locks after 4 h (set on the Wallet apps page)
 wallet-unlock --status   # locked / unlocked
 wallet-unlock --lock     # lock now
 ```
