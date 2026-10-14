@@ -36,6 +36,7 @@ import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, se
 from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
 import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
+from i18n import _, ngettext  # noqa: E402  (translations: locale/README.md)
 from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
@@ -344,10 +345,10 @@ class ReadmePage(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
-        back = QPushButton("← Back")
+        back = QPushButton(_("← Back"))
         back.clicked.connect(window.go_back)
         head.addWidget(back)
-        title = QLabel("About Frame Tweaks")
+        title = QLabel(_("About Frame Tweaks"))
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
@@ -367,7 +368,7 @@ class Details(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
-        back = QPushButton("← Back")
+        back = QPushButton(_("← Back"))
         back.clicked.connect(window.close_details)
         head.addWidget(back)
         icon = QLabel()
@@ -459,7 +460,7 @@ class SettingsSection(QWidget):
         lay.addWidget(about)
         self.conf = sft.read_settings(cid)
         self.buttons, self.checks = {}, {}
-        for key, label, choices, _ in self.spec["options"]:
+        for key, label, choices, _default in self.spec["options"]:
             if key in self.spec["checkboxes"]:          # on / off: one tick box
                 box = QCheckBox(label)
                 box.setStyleSheet("font-weight: 600; margin-top: 14px;")
@@ -472,7 +473,7 @@ class SettingsSection(QWidget):
             lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
             lay.addWidget(lab)
             grid = QGridLayout()                     # (wraps: a long list of choices fits the page)
-            per_row = 7 if all(len(t) <= 8 for t, _ in choices) else 4
+            per_row = 7 if all(len(t) <= 8 for t, _value in choices) else 4
             for n, (text, value) in enumerate(choices):
                 b = QPushButton(text)
                 b.setCheckable(True)
@@ -484,7 +485,7 @@ class SettingsSection(QWidget):
                 self.buttons[(key, text)] = (b, value)
             grid.setColumnStretch(per_row, 1)
             lay.addLayout(grid)
-        reset = QPushButton("Reset to defaults")
+        reset = QPushButton(_("Reset to defaults"))
         reset.clicked.connect(self.reset)
         lay.addWidget(reset)
         self.actions = []
@@ -516,7 +517,7 @@ class SettingsSection(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", " ".join(cmd))
             return
-        for _, b, _ in self.actions:
+        for _a, b, _note in self.actions:
             b.setEnabled(False)
         self.notice.setText("Working… (a download can take a minute)")
         proc = QProcess(self)
@@ -528,7 +529,7 @@ class SettingsSection(QWidget):
             lines = [l for l in lines if l and "#" not in l[:3]]          # (not curl's progress bar)
             ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
             self.notice.setText(("" if ok else "Didn't work: ") + (lines[-1] if lines else "Done."))
-            for _, b, _ in self.actions:
+            for _a, b, _note in self.actions:
                 b.setEnabled(True)
             self.show_actions()
         proc.finished.connect(done)
@@ -536,7 +537,7 @@ class SettingsSection(QWidget):
         self.action_proc = proc
 
     def show_choices(self):
-        for (key, _), (b, value) in self.buttons.items():
+        for (key, _text), (b, value) in self.buttons.items():
             b.setChecked(self.conf.get(key) == value)
         for key, (box, on) in self.checks.items():
             box.setChecked(self.conf.get(key) == on)
@@ -570,7 +571,7 @@ class SettingsPage(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
-        back = QPushButton("← Back")
+        back = QPushButton(_("← Back"))
         back.clicked.connect(window.go_back)
         head.addWidget(back)
         title = QLabel(next((c["title"] for c in components() if c["id"] == cid), cid))
@@ -644,11 +645,11 @@ class Window(QWidget):
         self.show_hidden.setCheckable(True)
         self.show_hidden.toggled.connect(self.rebuild)
         top.addWidget(self.show_hidden)
-        packs = QPushButton("🧩 Packs")
+        packs = QPushButton(_("🧩 Packs"))
         packs.setToolTip("Where the tweaks come from; add other people's (docs/mods.md)")
         packs.clicked.connect(self.show_packs)
         top.addWidget(packs)
-        refresh = QPushButton("Refresh")
+        refresh = QPushButton(_("Refresh"))
         refresh.clicked.connect(self.refresh)
         top.addWidget(refresh)
 
@@ -674,19 +675,19 @@ class Window(QWidget):
         bottom.addWidget(self.update_button)
         self.release_at_start = current_release()
         self.set_update_state("check")
-        about = QPushButton("📖 README")
+        about = QPushButton(_("📖 README"))
         about.setToolTip("What Frame Tweaks is, how to install, update and remove it, common issues")
         about.clicked.connect(self.show_readme)
         bottom.addWidget(about)
-        diag = QPushButton("Diagnostics")
+        diag = QPushButton(_("Diagnostics"))
         diag.setToolTip("Save a report for a bug report (user names and paths removed)")
         diag.clicked.connect(self.save_diagnostics)
         bottom.addWidget(diag)
-        apply_ = QPushButton("Apply changes")
+        apply_ = QPushButton(_("Apply changes"))
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
         self.apply_button = apply_
-        close = QPushButton("Close")
+        close = QPushButton(_("Close"))
         close.clicked.connect(self.close)
         bottom.addWidget(apply_)
         bottom.addWidget(close)
@@ -922,7 +923,7 @@ class Window(QWidget):
         label = self.status_labels.get(cid)
         if label is None:
             return
-        text, _ = status_text(self.state.get(cid))
+        text, _kind = status_text(self.state.get(cid))
         text = html.escape(text, quote=False)
         if cid in self.updates:
             cur, new = self.updates[cid]
@@ -1117,9 +1118,9 @@ class Window(QWidget):
         lay.addWidget(text)
         buttons = QHBoxLayout()
         buttons.addStretch(1)
-        no = QPushButton("Cancel")
+        no = QPushButton(_("Cancel"))
         no.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        yes = QPushButton("Remove them")
+        yes = QPushButton(_("Remove them"))
         yes.setObjectName("apply")
         buttons.addWidget(no)
         buttons.addWidget(yes)
@@ -1149,12 +1150,12 @@ class Window(QWidget):
 
     def apply(self):
         if self.futures:
-            self.say("Still checking status; try again in a moment.")
+            self.say(_("Still checking status; try again in a moment."))
             return
         # From what you ticked (self.wanted), so rows in collapsed or hidden categories count too.
         add, remove = self.pending_changes()
         if not add and not remove:
-            self.say("Nothing to change.")
+            self.say(_("Nothing to change."))
             return
         if remove:
             self.confirm_text.setText(
@@ -1256,19 +1257,19 @@ class Window(QWidget):
     def make_error_page(self):
         page = QWidget()
         lay = QVBoxLayout(page)
-        head = QLabel("Something went wrong in the installer window")
+        head = QLabel(_("Something went wrong in the installer window"))
         head.setObjectName("title")
         lay.addWidget(head)
-        hint = QLabel("Copy the details into a bug report. The window keeps working: go back and try again.")
+        hint = QLabel(_("Copy the details into a bug report. The window keeps working: go back and try again."))
         hint.setObjectName("desc")
         lay.addWidget(hint)
         text = QTextBrowser()
         lay.addWidget(text, 1)
         buttons = QHBoxLayout()
-        copy = QPushButton("Copy for bug report")
+        copy = QPushButton(_("Copy for bug report"))
         copy.clicked.connect(lambda: (QApplication.clipboard().setText(text.toPlainText()),
                                       copy.setText("Copied")))
-        back = QPushButton("← Back")
+        back = QPushButton(_("← Back"))
         back.clicked.connect(lambda: (copy.setText("Copy for bug report"), self.stack.setCurrentIndex(0)))
         buttons.addWidget(back)
         buttons.addStretch(1)

@@ -28,6 +28,8 @@ jobs:
       - name: Programs are replaced, not written into (lib/common.sh write_file)
         run: |
           ! grep -nE '(>|\bcp\b[^|]*) *"\$(BIN|HOME/\.local/bin)/' packs/*/*/*.sh lib/common.sh | grep -v write_file
+      - name: Translation template is current (dev/i18n.py; locale/README.md)
+        run: python3 dev/i18n.py check
       - name: Python syntax
         run: |
           for f in $(grep -lE '^#!/usr/bin/env python3' -r --exclude-dir=.git .); do
