@@ -4,16 +4,18 @@ emoji: 🔐
 category: Privacy & security
 tier: core
 summary: >-
-  One password-protected wallet for desktop mode and VR, with an unlock dialog, auto-lock and
-  password-gated apps
+  Password-protect the apps you choose (messages, sign-ins), with one wallet that locks
+  itself; shared by desktop mode and VR
 what: >-
-  One KDE wallet shared by desktop mode *and* VR, an unlock dialog that appears where you are, an
-  auto-lock (4 hours unless you change it), a **Lock Wallet** button, apps that ask for the
-  wallet password before they open, and a keyring for terminal tools such as `gh`.
+  Puts the apps you choose behind one password: they ask for the KDE wallet's password before
+  they open, and the wallet locks itself again after a while (4 hours unless you change it). The
+  same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet**
+  button, and a keyring for terminal tools such as `gh`.
 why: >-
-  The Frame runs two sessions (VR and a nested desktop), so apps get two separate wallets that
-  can overwrite each other, the wallet's own password prompt floats in VR, and terminal tools find
-  no keyring at all. SteamOS's stock wallet also has no password.
+  Frames are often left without a password or shared with family, yet some apps hold private
+  things. This protects just those apps, without locking the whole headset. It also fixes the
+  Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's
+  logins.
 author: Frame Tweaks; launcher approach from lhns/steam-frame-nix
 source:
   relation: approach from
@@ -41,9 +43,9 @@ test:
 # Shared KDE wallet
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-One KDE wallet shared by desktop mode *and* VR, an unlock dialog that appears where you are, an auto-lock (4 hours unless you change it), a **Lock Wallet** button, apps that ask for the wallet password before they open, and a keyring for terminal tools such as `gh`.
+Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`.
 
-**Why on a Steam Frame:** The Frame runs two sessions (VR and a nested desktop), so apps get two separate wallets that can overwrite each other, the wallet's own password prompt floats in VR, and terminal tools find no keyring at all. SteamOS's stock wallet also has no password.
+**Why on a Steam Frame:** Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins.
 <!-- /generated:intro -->
 
 ## Install
@@ -64,12 +66,19 @@ These apps are set up for you, if installed: KWalletManager, Signal and Claude D
 use the shared wallet and ask for its password first.
 
 ## Use
-**Unlock:** the **Unlock** button on this tweak's row, or just open an app that has **Password first** on. A small
-"Unlock wallet" dialog appears on the screen you're using. After you unlock, the wallet locks
-itself again after 4 hours (you can change this, see below).
+**Protect an app:** press **🔑 Wallet apps** on this tweak's row in the Frame Tweaks window, find
+the app under **Add an app** and press **Protect**. With **Password first** on, it asks for the
+wallet password before it opens whenever the wallet is locked. **Close after** can also quit it
+when you leave it alone, so the next person who picks up the headset meets the password again.
+Signal is protected this way as soon as you install the [Signal tweak](../signal/).
 
-**Lock:** the **Lock Wallet** entry in the desktop menu and the VR "+" menu. You can also put it
-on a controller button: see [Dictate and Lock Wallet on a controller button](../../../docs/controller-shortcuts.md).
+**Unlock:** open a protected app, or use **🔓 Unlock…** on the Wallet apps page. A small "Unlock
+wallet" dialog appears on the screen you're using. The wallet then locks itself again after
+4 hours, unless you change that or turn **Auto-lock** off (see below).
+
+**Lock:** the **Lock Wallet** entry in the desktop menu and the VR "+" menu, or **🔒 Lock now**
+on the Wallet apps page. You can also put it on a controller button: see
+[Dictate and Lock Wallet on a controller button](../../../docs/controller-shortcuts.md).
 
 ### The Wallet apps page
 The **🔑 Wallet apps** button on this tweak's row in the Frame Tweaks window opens a page with:
@@ -77,8 +86,10 @@ The **🔑 Wallet apps** button on this tweak's row in the Frame Tweaks window o
 - **The wallet's state:** open or locked, since when, and when it locks by itself.
 - **🔒 Lock now** / **🔓 Unlock…**, and **⏱ Extend timer**, which starts the auto-lock countdown
   again from now.
-- **Auto-lock after unlocking:** − / + between 1 and 24 hours (default 4 hours). The new time
-  counts from the next unlock or the next **Extend timer**.
+- **Auto-lock:** ticked by default. Untick it and the wallet stays unlocked until you lock it:
+  no countdown, and KDE's own lock after 4 hours unused is turned off too.
+- **After unlocking:** − / + between 1 and 24 hours (default 4 hours). The new time counts from
+  the next unlock or the next **Extend timer**.
 - **Protected** apps, each with:
   - **Password first:** if the wallet is locked, the app asks for the wallet password before it
     opens, and doesn't open without it.

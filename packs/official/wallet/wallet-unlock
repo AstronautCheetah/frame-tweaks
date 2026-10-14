@@ -7,6 +7,8 @@ pops up as a floating VR window on the Steam session's display.
                            Schedules an automatic lock after the hours set on the installer window's
                            Wallet apps page (wallet.conf; WALLET_LOCK_HOURS overrides; default 4).
   wallet-unlock --lock     lock it now
+  wallet-unlock --schedule-lock     start the auto-lock countdown again (Extend timer)
+  wallet-unlock --autolock on|off   whether it locks itself at all (timer and idle close)
   wallet-unlock --status   print locked / unlocked
   wallet-unlock --info     JSON: state, when it was unlocked, when it locks (installer window)
   wallet-unlock --watch    run by wallet-lock-sync.service:
@@ -284,8 +286,59 @@ def lock_hours():
     return "4"
 
 
+def conf_value(key):
+    try:
+        for ln in LOCK_CONF.read_text().splitlines():
+            if ln.startswith(key + "="):
+                return ln.split("=", 1)[1].strip().strip('"')
+    except OSError:
+        pass
+    return None
+
+
+def autolock_on():
+    """Whether the wallet locks itself (Wallet apps page's Auto-lock box; on unless turned off)."""
+    return (os.environ.get("WALLET_AUTOLOCK") or conf_value("WALLET_AUTOLOCK") or "1") != "0"
+
+
+def set_autolock(conn, on):
+    """Turn both automatic locks on or off: the timer after an unlock, and kwalletd's close
+    after being unused (kwalletrc Close When Idle; the Idle Timeout itself is kept)."""
+    lines = LOCK_CONF.read_text().splitlines() if LOCK_CONF.exists() else []
+    lines = [ln for ln in lines if not ln.startswith("WALLET_AUTOLOCK=")] + [f"WALLET_AUTOLOCK={1 if on else 0}"]
+    LOCK_CONF.parent.mkdir(parents=True, exist_ok=True)
+    LOCK_CONF.write_text("\n".join(lines) + "\n")
+    subprocess.run(["kwriteconfig6", "--file", "kwalletrc", "--group", "Wallet", "--key", "Close When Idle",
+                    "true" if on else "false"], stderr=subprocess.DEVNULL)
+    for addr in (KWALLETD, KSECRETD):          # re-read kwalletrc now
+        try:
+            call(conn, new_method_call(addr, "reconfigure"))
+        except Exception:
+            pass
+    if not on or is_locked(conn):
+        stop_lock_timer()
+        return None
+    return schedule_lock()
+
+
+def stop_lock_timer():
+    env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}", DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
+    for cmd in (["stop", "wallet-autolock.timer", "wallet-autolock.service"],
+                ["reset-failed", "wallet-autolock.timer", "wallet-autolock.service"]):
+        subprocess.run(["systemctl", "--user", *cmd], env=env, stderr=subprocess.DEVNULL)
+    s = session()
+    s.pop("locks", None)
+    try:
+        SESSION.write_text(json.dumps(s))
+    except OSError:
+        pass
+
+
 def schedule_lock():
-    """(Re)start a transient systemd timer that locks the wallet later."""
+    """(Re)start a transient systemd timer that locks the wallet later; None with auto-lock off."""
+    if not autolock_on():
+        stop_lock_timer()
+        return None
     hours = lock_hours()
     env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}",
                DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
@@ -333,7 +386,8 @@ def watch():
             body = msg.body
             if member == "walletOpened" and body and body[0] == WALLET:
                 # Unlocked by any route: the 4-hour auto-lock counts from now.
-                print(f"{time.strftime('%T')} wallet opened -> auto-lock in {schedule_lock()} h", flush=True)
+                hours = schedule_lock()
+                print(f"{time.strftime('%T')} wallet opened -> " + (f"auto-lock in {hours} h" if hours else "auto-lock off"), flush=True)
                 continue
             if member == "allWalletsClosed" or (member == "walletClosed" and body and body[0] == WALLET):
                 try:
@@ -388,7 +442,7 @@ def main():
                 s["locks"] = timer_lock_time()
             print(json.dumps({"state": "locked" if locked else "unlocked", "unlocked_at": s.get("unlocked"),
                               "locks_at": s.get("locks"), "idle_close_minutes": idle_close_minutes(),
-                              "lock_hours": float(lock_hours())}))
+                              "lock_hours": float(lock_hours()), "autolock": autolock_on()}))
         elif arg == "--lock":
             lock(conn)
             if not is_locked(conn):
@@ -397,15 +451,20 @@ def main():
         elif arg == "--watch":
             pass
         elif arg == "--schedule-lock":
-            print(f"wallet locks in {schedule_lock()} h")
+            hours = schedule_lock()
+            print(f"wallet locks in {hours} h" if hours else "auto-lock is off: the wallet stays unlocked until you lock it")
+        elif arg == "--autolock" and len(sys.argv) > 2 and sys.argv[2] in ("on", "off"):
+            hours = set_autolock(conn, sys.argv[2] == "on")
+            print("auto-lock off" if sys.argv[2] == "off" else
+                  f"auto-lock on" + (f": the wallet locks in {hours} h" if hours else ""))
         elif arg:
             sys.exit(__doc__)
         elif not is_locked(conn):
             print("Wallet already unlocked.")
         elif unlock(conn):
             hours = schedule_lock()
-            print(f"Wallet unlocked; it locks again in {hours} h.")
-            notify(f"Wallet unlocked for {hours} hours")
+            print(f"Wallet unlocked; it locks again in {hours} h." if hours else "Wallet unlocked (auto-lock is off).")
+            notify(f"Wallet unlocked for {hours} hours" if hours else "Wallet unlocked")
         else:
             print("Wallet still locked.", file=sys.stderr)
             sys.exit(1)
