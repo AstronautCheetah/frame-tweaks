@@ -36,6 +36,20 @@ class Sessions(unittest.TestCase):
         with mock.patch.object(browser, "proc_cmd", return_value=["/usr/bin/konsole"]):
             self.assertFalse(native(1, {}))
 
+    def test_default_app_asks_as_desktop_mode_first(self):
+        """The VR session doesn't read KDE's defaults (a folder would open in Kate there)."""
+        def fake(*args, env=None):
+            if args[:2] == ("query", "default") and args[2] == "inode/directory":
+                return "org.kde.dolphin.desktop" if env and env.get("XDG_CURRENT_DESKTOP") == "KDE" else "org.kde.kate.desktop"
+            return ""
+        with mock.patch.object(browser, "xdg_mime", side_effect=fake):
+            self.assertEqual(browser.target_app(str(Path(__file__).parent)), "org.kde.dolphin.desktop")
+            self.assertEqual(browser.target_app("file://" + str(Path(__file__).parent)), "org.kde.dolphin.desktop")
+
+    def test_web_links_go_to_the_browser(self):
+        with mock.patch.object(browser, "default_browser", return_value="b.desktop"):
+            self.assertEqual(browser.target_app("https://example.com/x"), "b.desktop")
+
     def test_session_env_takes_the_display_keys(self):
         ref = {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0", "DISPLAY": ":2", "OTHER": "x"}
         own = {"XDG_CURRENT_DESKTOP": "gamescope", "DISPLAY": ":0", "XDG_DESKTOP_PORTAL_DIR": "/g", "HOME": "/h"}
