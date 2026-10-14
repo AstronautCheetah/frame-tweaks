@@ -98,10 +98,11 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
 - **Unstick** (Tools layer): if the desktop acts as if Shift, Ctrl, Alt or Super were still
   held down, tap this. It presses and releases each of them.
 
-Key labels follow your keyboard language. The pad reads KDE's current layout (every 15 seconds)
-and uses the legends printed on that language's keyboards: German *Strg, Entf, Einfg, Pos1,
-Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian *Canc, Inizio,
-Pag↑*. Other layouts get the English legends.
+Key labels follow Frame Tweaks' language: the one chosen in the installer window's ⚙, else your
+keyboard's when the pad opens; they switch when the window's language changes. They use the
+legends printed on that language's keyboards: German *Strg, Entf, Einfg, Pos1, Bild↑*, French
+*Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian *Canc, Inizio, Pag↑*. Other
+languages get the English legends.
 
 ### Moving and sizing
 
@@ -147,6 +148,7 @@ From a terminal:
 arrowpad --desktop       # open in desktop mode; run again to hide or show it
 arrowpad --vr            # open the VR panel; run again to re-centre it
 arrowpad --scale 1.5     # bigger keys in desktop mode (or ARROWPAD_SCALE=1.5)
+arrowpad --fold          # collapse a running pad to its chevron, or expand it
 arrowpad --quit          # close it (add --desktop or --vr to pick which)
 ```
 
@@ -172,8 +174,9 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
 
 ## Good to know
 
-- Closing the dashboard lets go of any Ctrl, Alt or Super the VR panel had on, so your clicks
-  don't turn into Ctrl+clicks while it's out of sight.
+- Closing the dashboard lets go of any Ctrl, Alt or Super the VR panel had on, and of any key a
+  laser is holding down, so your clicks don't turn into Ctrl+clicks, nor a key keep repeating,
+  while it's out of sight.
 - **Arrow Pad** (the desktop one) needs desktop mode to be running.
 - Controller haptics need SteamVR's own arm64 OpenVR library. Without it, the pad works without
   haptics, and the VR panel can't start.

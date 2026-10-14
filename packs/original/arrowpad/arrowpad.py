@@ -147,6 +147,16 @@ SEED_LEGENDS = {
     "it": {"Del": "Canc", "Enter": "Invio", "Home": "Inizio", "End": "Fine", "PgUp": "Pag↑",
            "PgDn": "Pag↓", "PrtSc": "Stamp", "Shift": "Maiusc"},
 }
+
+
+def seed_language():
+    """The language for SEED_LEGENDS: the translation's, else the one wanted (a language with no
+    translation file has no catalogue, so a German keyboard got the English legends)."""
+    if i18n is None:
+        return None
+    return i18n.CATALOGUE.language or next(iter(i18n.wanted_languages()), None)
+
+
 # Clipboard keys show icons (language-neutral), like Full Keyboard's copy/paste buttons.
 BREEZE = Path("/usr/share/icons/breeze-dark")
 ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
@@ -226,12 +236,28 @@ class Ydotool:
     datagrams on its unix socket and replays them on a uinput device."""
 
     def __init__(self, path):
+        self.path = path
+        self.connect()
+
+    def connect(self):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-        self.sock.connect(path)
+        self.sock.connect(self.path)
 
     def _emit(self, type_, code, value):
         t = time.time()
-        self.sock.send(struct.pack("llHHi", int(t), int((t % 1) * 1_000_000), type_, code, value))
+        event = struct.pack("llHHi", int(t), int((t % 1) * 1_000_000), type_, code, value)
+        try:
+            self.sock.send(event)
+        except OSError:
+            # ydotoold was restarted (ydotool's ▶ Restart): this socket still points at the old
+            # one. Connect again; if it isn't back yet, the key is lost, not the pad (an error
+            # here, inside a button's handler, would abort it).
+            try:
+                self.sock.close()
+                self.connect()
+                self.sock.send(event)
+            except OSError:
+                pass
 
     def key(self, code, down):
         self._emit(EV_KEY, code, 1 if down else 0)
@@ -623,15 +649,18 @@ class ArrowPad(QWidget):
         self.mod_state = {m: "off" for m in MODIFIERS}   # off | oneshot | locked
         self.mod_tapped = {m: 0.0 for m in MODIFIERS}
         self.layer = "nav"
+        self.seed_lang = seed_language()
         self.drag_offset = None
         cfg = self.load_config()
         self.cfg = cfg
         self.overlay = None
-        self.scale = cfg.get("scale", 1.5 if TARGET == "vr" else scale)   # VR: texture sharpness
+        # VR: texture sharpness. Desktop: --scale / ARROWPAD_SCALE when given, else the saved size.
+        self.scale = cfg.get("scale", 1.5) if TARGET == "vr" else scale or cfg.get("scale", 1.0)
         self.pinned = cfg.get("pinned", False)
         THEME.update(THEMES.get(cfg.get("theme", "graphite"), THEMES["graphite"]))
         self.haptic_level = cfg.get("haptics", "normal") if cfg.get("haptics") in HAPTIC_LEVELS else "normal"
         self.mod_pressing = {}          # modifier held down by a laser -> used in a chord yet?
+        self.held = {}                  # (row, col) -> the key its press sent (the layer can change)
 
         outer = QVBoxLayout(self)
         outer.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)   # window = content size
@@ -807,13 +836,14 @@ class ArrowPad(QWidget):
             return pgettext("key legend", WORDS[name])
         if name in LEGENDS:
             legend = pgettext("key legend", name)
-            if legend == name and i18n is not None and i18n.CATALOGUE.language:
-                legend = SEED_LEGENDS.get(i18n.CATALOGUE.language.split("_")[0], {}).get(name, name)
+            if legend == name and self.seed_lang:
+                legend = SEED_LEGENDS.get(self.seed_lang.split("_")[0], {}).get(name, name)
             return legend
         return name
 
     def retranslate(self):
         """The installer window switched language: the keys, tooltips and settings in it too."""
+        self.seed_lang = seed_language()
         self.setWindowTitle(_("Arrow Pad (VR)") if TARGET == "vr" else _("Arrow Pad"))
         for name, b in self.tools.items():
             b.setToolTip(_(TOOL_TIPS[name]))
@@ -987,7 +1017,7 @@ class ArrowPad(QWidget):
 
     def on_press(self, r, c):
         self.pulse("press")
-        name = self.name_at(r, c)
+        name = self.held[(r, c)] = self.name_at(r, c)
         if name in MODIFIERS:
             # Two hands, like Full Keyboard: a modifier is down while a laser holds it, so a key
             # pressed with the other hand gets it. Released after that, it was only a chord.
@@ -1003,7 +1033,9 @@ class ArrowPad(QWidget):
             self.yd.key(KEY[name], True)
 
     def on_release(self, r, c):
-        name = self.name_at(r, c)
+        # The key that was pressed: another laser may have switched the layer meanwhile (holding ↓
+        # through a tap on Tools released Redo, and left ↓ held down).
+        name = self.held.pop((r, c), None) or self.name_at(r, c)
         if self.overlay is not None:
             self.overlay.log_input(f"     released {name!r} (row {r}, col {c})")
         if name in MODIFIERS:
@@ -1031,8 +1063,7 @@ class ArrowPad(QWidget):
         elif name in MOUSE:
             self.toggle_click(name)
         elif name == "🎤":
-            subprocess.Popen([str(Path.home() / ".local/bin/dictate")], start_new_session=True)
-            QTimer.singleShot(300, self.restyle)
+            self.dictate()
         elif name in CHORDS:
             ctrl_held = self.mod_state["Ctrl"] != "off"
             keys = CHORDS[name] if isinstance(CHORDS[name], tuple) else (CHORDS[name],)
@@ -1042,6 +1073,24 @@ class ArrowPad(QWidget):
         elif name in KEY:
             self.yd.key(KEY[name], False)
             self.release_oneshots()
+
+    def let_go(self, button):
+        """The VR overlay took a press back (a grab, the dashboard closing, Close): let go of what
+        it holds down, its key or a modifier it pressed, without what a release would do (a chord,
+        a layer, dictation…). Its release came off the key, which isn't a click: on_release won't run."""
+        for r, c, b in self.buttons:
+            if b is not button or (r, c) not in self.held:
+                continue
+            name = self.held.pop((r, c))
+            if name in MODIFIERS:
+                self.mod_pressing.pop(name, None)
+                if self.mod_state[name] == "held":
+                    self.mod_state[name] = "off"
+                    self.yd.key(KEY[name], False)
+                    self.restyle()
+            elif name in KEY:
+                self.yd.key(KEY[name], False)
+                self.release_oneshots()
 
     def toggle_mod(self, name):
         now, state = time.monotonic(), self.mod_state[name]
@@ -1093,6 +1142,17 @@ class ArrowPad(QWidget):
                              start_new_session=True)
 
     # ---- dictation ------------------------------------------------------
+    def dictate(self):
+        """🎤: start or stop Dictation (dictation/ tweak), if it's installed."""
+        tool = Path.home() / ".local/bin/dictate"
+        if tool.exists():
+            subprocess.Popen([str(tool)], start_new_session=True)
+            QTimer.singleShot(300, self.restyle)
+        else:
+            subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Dictation isn't installed"),
+                              _("Tick 'Dictation' in Frame Tweaks to use this button.")],
+                             start_new_session=True)
+
     @staticmethod
     def dictation_state():
         """recording / transcribing / idle, from dictate's pid files."""
@@ -1188,7 +1248,8 @@ def main():
     except OSError:
         pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--scale", type=float, default=float(os.environ.get("ARROWPAD_SCALE", 1.0)),
+    # (None when not given: the saved size. argparse converts a string default with type=.)
+    ap.add_argument("--scale", type=float, default=os.environ.get("ARROWPAD_SCALE") or None,
                     help=_("button size multiplier (default 1.0)"))
     ap.add_argument("--socket", default=default_socket(), help=_("ydotoold socket path"))
     ap.add_argument("--quit", action="store_true", help=_("close a running pad"))
