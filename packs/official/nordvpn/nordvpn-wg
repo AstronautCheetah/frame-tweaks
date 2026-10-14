@@ -2,8 +2,8 @@
 """nordvpn-wg: NordVPN (NordLynx/WireGuard) as ordinary NetworkManager connections.
 
 Survives SteamOS updates: nothing is installed into /usr; the connections live in
-/etc/NetworkManager/system-connections, which updates keep. Toggle them from the
-network icon in the system tray, or from here.
+/etc/NetworkManager/system-connections, which updates keep. Switch them from the
+NordVPN tray icon (nordvpn-tray), or from here.
 
   nordvpn-wg setup                    one-time: asks for your NordVPN access token
                                       (Nord Account → NordVPN → Access token), fetches

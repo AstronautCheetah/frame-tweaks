@@ -4,12 +4,15 @@ emoji: ⌨️
 category: Convenience
 tier: core
 summary: >-
-  TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified)
+  TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release
 what: >-
-  TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install).
+  TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with
+  arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the
+  headset.
 why: >-
-  A full-size keyboard in VR, with every key the desktop needs; this installs and updates it
-  with the rest.
+  Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys.
+  This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with
+  the rest of Frame Tweaks.
 author: TaiKeid (steam-frame-full-keyboard)
 source:
   relation: from
@@ -18,8 +21,9 @@ icon: {theme: input-keyboard}
 run: {label: Open}
 processes: [/framekeyboard( |$)]
 changes: >-
-  Upstream's own installer into `~/.local/share/framekeyboard`, pinned release
-access: A SteamVR overlay; types through its own input path
+  A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with
+  `~/.local/bin/framekeyboard` and an app-menu entry
+access: A SteamVR overlay; types into the app you're using
 survives_updates: Yes (everything is in your home folder)
 undo: >-
   `./install.sh uninstall full-keyboard` (keeps its settings in `~/.config/framekeyboard`)
@@ -28,38 +32,56 @@ upstream_readme: https://raw.githubusercontent.com/TaiKeid/steam-frame-full-keyb
 # Full Keyboard (VR)
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install).
+TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset.
 
-**Why on a Steam Frame:** A full-size keyboard in VR, with every key the desktop needs; this installs and updates it with the rest.
+**Why on a Steam Frame:** Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks.
 <!-- /generated:intro -->
 
-[TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)
-(MIT): a full-size VR keyboard for the Frame's dashboard and local apps, typed with
-the controller lasers. It has arrows, F-keys, a numpad, Ctrl/Alt, Copy/Paste, haptics,
-grab-to-move, and many languages. It's a separate app (the system keyboard button
-still opens Steam's).
+## Install
 
+Tick it in the Frame Tweaks window, or:
 
 ```sh
-./install.sh install full-keyboard    # latest release, SHA256-verified, then its own installer
+./install.sh install full-keyboard
 ```
 
-Launch **Full Keyboard** from the dashboard's app launcher. Launching again recenters it.
-Re-run the install to update; the upstream installer keeps the previous release for rollback.
+This downloads the release Frame Tweaks has pinned (version 0.6.0), checks it against the
+SHA256 recorded in the [pin file](pin), then runs Full Keyboard's own installer. Nothing else to
+do.
 
-**Which keyboard when?** See the [keyboard guide](../arrowpad/README.md#which-keyboard-when).
+## Use
+
+With the VR session running, open **Full Keyboard** from the dashboard's app launcher. Focus a
+text field, then type with the controller laser. Opening it again re-centres it. It's a separate
+app: the system keyboard button still opens Steam's keyboard. The full guide is TaiKeid's, below
+the line at the end of this page.
+
+Not sure which keyboard to use? See the [keyboard guide](../arrowpad/README.md#which-keyboard-when).
+
+## Good to know
+
+- **Updates** come with Frame Tweaks: when a newer Full Keyboard has been checked and pinned,
+  the Frame Tweaks window offers the update. Close the keyboard first (from its toolbar); install
+  and uninstall both stop if it's running. Full Keyboard's installer keeps the previous release
+  for rollback.
+- Uninstalling removes every installed release, but keeps your settings, layouts and themes in
+  `~/.config/framekeyboard`.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** Upstream's own installer into `~/.local/share/framekeyboard`, pinned release
-- **Unusual access:** A SteamVR overlay; types through its own input path
+- **Changes:** A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry
+- **Unusual access:** A SteamVR overlay; types into the app you're using
 - **Undo:** `./install.sh uninstall full-keyboard` (keeps its settings in `~/.config/framekeyboard`)
 <!-- /generated:changes -->
 
 ## Credits
-Full Keyboard is [TaiKeid](https://github.com/TaiKeid/steam-frame-full-keyboard)'s (MIT). The checksum-then-install pattern follows [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils)' `install-full-keyboard.sh`. See also [CREDITS.md](../../../CREDITS.md).
+
+Full Keyboard is by [TaiKeid](https://github.com/TaiKeid/steam-frame-full-keyboard) (MIT).
+Frame Tweaks only downloads, checks and installs it. The checksum-then-install pattern follows
+[curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils)'
+`install-full-keyboard.sh`. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status full-keyboard` · Remove: `./install.sh uninstall full-keyboard`

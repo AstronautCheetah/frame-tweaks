@@ -146,6 +146,22 @@ other YAML tools and to whoever reads it:
 
 `./install.sh mods check <folder>` checks a tweak or a whole pack without using it.
 
+### The README's text
+
+Write it for someone deciding whether to tick the tweak, in this order (the official tweaks and
+[`examples/hello-pack/`](../examples/hello-pack/) follow it):
+
+1. `# Title`, then what it is (`what`) and **Why on a Steam Frame:** (`why`).
+2. A screenshot, if it has a window.
+3. `## Install`: tick it in the window, or `./install.sh install <id>`, and any step after
+   (a reboot, a SteamVR restart).
+4. `## Use`, then if needed `## Settings`, `## How it works`, `## Good to know`.
+5. `## What it changes`: the `survives_updates`, `changes`, `access` and `undo` facts.
+6. `## Credits`, then a `---` line and `Check: … · Remove: …`.
+
+The installer window shows `what` and `why` above the README already. In the official pack,
+`dev/gen-docs.py` writes parts 1 and 5 from the front matter.
+
 ## The scripts
 
 The installer runs each script with `bash`, from any folder; they don't need to be executable.

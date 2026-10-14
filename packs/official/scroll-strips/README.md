@@ -9,14 +9,17 @@ summary: >-
 what: >-
   Big scroll strips beside each window, docked in the dashboard or floating (right and top by
   default), easy to grab with the laser. Press and drag away from that point to scroll, faster
-  the farther you go; let go to stop. Position and thickness are set in the installer window.
-why: Desktop scroll bars are sized for a mouse and hard to hit with a laser.
+  the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear
+  beside each window in VR.
+why: >-
+  In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin
+  and hard to hit.
 author: Frame Tweaks
 depends: [vr-dashboard, ydotool]
 experimental: >-
-  Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks
-  that code each time SteamVR starts and switches itself off if it changed (shown in its status)
-  until a Frame Tweaks update catches up.
+  Relies on SteamVR's internal dashboard code, which Valve can change in any update. Each time
+  SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown
+  in its status) until a Frame Tweaks update catches up.
 icon: {theme: transform-browse}
 settings:
   file: ~/.config/frame-tweaks/scroll-strips.json
@@ -93,10 +96,10 @@ access: >-
   Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs;
   scrolls with ydotool's arrow keys
 survives_updates: >-
-  Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that
-  changed
+  Yes; after a SteamVR update it checks SteamVR's dashboard code and stays off if it no longer
+  fits
 undo: >-
-  `./install.sh uninstall scroll-strips` (or untick it in the installer window; settings are
+  `./install.sh uninstall scroll-strips` (or untick it in the Frame Tweaks window; settings are
   kept)
 test:
   offline: true
@@ -105,52 +108,85 @@ test:
 # Scroll strips
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Position and thickness are set in the installer window.
+Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR.
 
-**Why on a Steam Frame:** Desktop scroll bars are sized for a mouse and hard to hit with a laser.
+**Why on a Steam Frame:** In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit.
 <!-- /generated:intro -->
 
-Scroll bars in desktop apps are sized for a mouse, which makes them hard to hit with a laser.
-This puts **big scroll strips beside each window you float in the world**: by default a
-vertical one on the **right** and a horizontal one on **top**.
+## Install
+Tick it in the Frame Tweaks window, or:
 
+```sh
+./install.sh install scroll-strips
+```
 
-- **Use a strip like a joystick:** press it, then drag away from where you pressed. The farther you
-  drag, the faster it scrolls; drag back past that point to reverse; **let go to stop**. While
-  you hold it, the strip lights up and shows where you pressed and where you are.
+It brings [VR dashboard patching](../vr-dashboard/) and [ydotool](../ydotool/) (which sends the
+scroll keys) with it if they aren't installed yet. **If SteamVR was running when VR dashboard
+patching was installed, restart SteamVR once** (rebooting is easiest): SteamVR opens the local
+port the patch needs only when it starts. `./install.sh status scroll-strips` says when it's
+waiting for that.
+
+## Use
+Every window floating in the world gets a vertical strip on its **right** and a horizontal one
+on **top** (you can change both). So does the window shown in the dashboard, while the
+dashboard is open.
+
+- **Use a strip like a joystick:** press it, then drag away from where you pressed. The farther
+  you drag, the faster it scrolls; drag back past that point to reverse; **let go to stop**.
+  While you hold it, the strip lights up and shows where you pressed and where you are.
 - **Tap near an end** to scroll a page that way.
-- **What scrolls:** the window you last clicked (the desktop: the app you last clicked in it),
-  with the arrow keys (PgUp / PgDn for a page). If a text field has focus, the keys move its
-  cursor instead, so click the page or list first. Why keys: in VR the Steam session takes
-  pointer input only from the lasers, so an injected mouse wheel never arrives (we tried XTest,
-  ydotool and the desktop's Remote Desktop portal); keyboard input does.
+- **What scrolls:** the window you last clicked (for the desktop, the app you last clicked in
+  it). The strips scroll with the arrow keys (Page Up / Page Down for a page), so if a text
+  field has focus, the keys move its cursor instead: click the page or list first.
 - **Curved windows:** the top (or bottom) strip bends with the window.
-- **The Android Mirror** is scrolled through its own helper (it sends the phone a scroll wheel),
-  since the Steam session never sees that window clicked.
-- **Settings in VR:** the gear where the two strips meet (by the window's top-right corner, by
-  default) opens them beside the window: which side each strip is on (or off), thickness, gap
-  from the window, how far it's set back, and colour (follow the passthrough's Camera Color Tint,
-  or pick a hue), plus *Reset to defaults*. They apply to every window at once and are saved in
-  `~/.config/frame-tweaks/scroll-strips.json` (through the VR environment helper's service).
-- **Settings in the installer window** (the row's ⚙ button): side and thickness.
-- The window docked in the dashboard (the desktop, say) gets strips too, while the dashboard is open.
+- **Android Mirror:** with [Android Mirror](../adb-scrcpy/) running, its strips scroll the
+  phone itself, as a scroll wheel would.
+
+## Settings
+Two places, same settings, saved in `~/.config/frame-tweaks/scroll-strips.json`. They apply to
+every window at once.
+
+- **In VR:** the gear where the two strips meet (by the window's top-right corner, by default)
+  opens a settings panel beside the window. Changes show at once; *Reset to defaults* puts
+  everything back.
+- **In the Frame Tweaks window:** the ⚙ on its row (or `./install.sh settings scroll-strips`).
+  Changes show in VR within a few seconds.
+
+| Setting | Choices | Default |
+|---|---|---|
+| Vertical strip | right, left, off | right |
+| Horizontal strip | top, bottom, off | top |
+| Thickness | 2 to 8 cm | 4 cm |
+| Gap from the window | 0 to 5 cm | 1.5 cm |
+| Set back behind the window | 0 to 5 cm | 3 cm |
+| Colour | the passthrough's Camera Color Tint, or one of ten hues | the tint |
+
+Setting the strips back a little keeps SteamVR's own buttons by the window's edge drawn in
+front of them. Uninstalling keeps your settings.
 
 ## How it works
-A patch, [`patch.js`](patch.js), injected by [VR dashboard patching](../vr-dashboard/), mounts a
-small component in the dashboard's scene that draws two panels per window, hung from the window
-panel's own edge anchors (so they follow it, docked or floating) and sized from its measured
-height and shape. A drag on a strip calls `sftScroll`, a function the
-helper's service registers on the dashboard page; the service sends the arrow keys with
-[ydotool](../ydotool/).
+A patch, [`patch.js`](patch.js), injected by [VR dashboard patching](../vr-dashboard/), draws
+two panels per window in the dashboard's 3D scene. They hang from the window's own edges, so
+they follow it, docked or floating, and are sized from its measured height and shape. A drag on
+a strip asks the helper's service to send arrow keys with [ydotool](../ydotool/).
+
+Why keys and not a scroll wheel: in VR the Steam session takes pointer input only from the
+lasers, so a scroll wheel sent by another program doesn't reach the app. Keyboard input does.
+For Android Mirror the scroll goes through the mirror's own touch helper instead, because the
+Steam session never sees that window clicked.
+
+## Good to know
+- If the laser stays completely still on a held strip for 3 seconds, the strip stops scrolling,
+  as if you had let go (so a lost release can't leave it scrolling).
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
-- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and stays off if it no longer fits
 - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json`
-- **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks that code each time SteamVR starts and switches itself off if it changed (shown in its status) until a Frame Tweaks update catches up.
+- **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. Each time SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown in its status) until a Frame Tweaks update catches up.
 - **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys
-- **Undo:** `./install.sh uninstall scroll-strips` (or untick it in the installer window; settings are kept)
+- **Undo:** `./install.sh uninstall scroll-strips` (or untick it in the Frame Tweaks window; settings are kept)
 <!-- /generated:changes -->
 
 ---

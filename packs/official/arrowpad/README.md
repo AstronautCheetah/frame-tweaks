@@ -4,11 +4,12 @@ emoji: ⌨️
 category: Accessibility
 tier: core
 summary: >-
-  Floating arrows/Home/End/F-keys/Ctrl pad with a dictation button; never steals focus
+  Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never
+  steals focus
 what: >-
-  Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super,
-  right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own
-  VR window; never steals focus.
+  A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super,
+  right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It
+  opens in desktop mode or as its own VR panel, and never takes focus from the app you're using.
 why: >-
   Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen
   keyboards don't work under the Frame's Wayland desktop.
@@ -21,29 +22,50 @@ icon: {file: frame-tweaks-arrowpad.png}
 run: {label: Open}
 processes: [^~/.local/share/arrowpad/venv/bin/python ~/.local/share/arrowpad/arrowpad.py]
 changes: >-
-  `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
+  `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two
+  app-menu entries
 access: >-
   Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from
-  its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display
-  (`:0`) for one click** (max 20 s) and replay it with XTEST
+  its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam
+  display (`:0`) for one click** (at most 10 s) and replay it with XTEST
 survives_updates: Yes (everything is in your home folder)
 undo: >-
-  `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)
+  `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json` and
+  `~/.config/arrowpad-vr.json`)
 ---
 # Arrow Pad
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super, right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus.
+A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super, right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It opens in desktop mode or as its own VR panel, and never takes focus from the app you're using.
 
 **Why on a Steam Frame:** Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop.
 <!-- /generated:intro -->
 
-A compact, always-on-top pad for desktop mode with the keys Steam's on-screen
-keyboard lacks. It never steals focus, so whatever you tap goes to the app you're
-working in.
-
-
 ![Arrow Pad, main layer](screenshot.png) ![Arrow Pad, Tools layer](screenshot-tools.png)
+
+## Install
+
+Tick it in the Frame Tweaks window, or:
+
+```sh
+./install.sh install arrowpad
+```
+
+It sets up [ydotool](../ydotool/) (the helper it types through) and a private copy of PyQt6
+(about 280 MB). Nothing else to do: open it from the app menu.
+
+## Use
+
+There are two menu entries. Both work from the desktop's app menu and from Steam's VR "+" menu:
+
+- **Arrow Pad** opens the pad inside desktop mode, as an always-on-top window.
+- **Arrow Pad (VR window)** opens it as its own SteamVR panel, like Full Keyboard. It shows
+  while the dashboard is open; point at a key and pull the trigger to press it.
+
+They're separate, so you can have both open. Each remembers its own place, size and settings.
+Neither takes keyboard focus, so whatever you press goes to the app you were using.
+
+### The keys
 
 ```
  main layer                         Fn layer                           Tools layer
@@ -53,115 +75,136 @@ working in.
  Alt   Super Undo  Cut  All   Paste  Alt   Super F12  Ins   PrtSc Paste  Alt   Super Undo   Cut   All     Paste
 ```
 
-Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
-- **Arrow Pad** (`arrowpad --desktop`): inside desktop mode.
-- **Arrow Pad (VR window)** (`arrowpad --vr`): a **native SteamVR overlay**, like Full
-  Keyboard. Visible while the dashboard is; point and pull the trigger to type. It sits **just
-  below Steam's dashboard** (its main panel, or the dashboard bar when that's what's showing),
-  tilted back 50°, and **follows the dashboard** when it moves or the play space is re-centred,
-  using Full Keyboard's placement. **Reset** puts it back there, **−/+** change its width in 5 cm steps (0.30–2 m), point at the panel's
-  background and hold the trigger to carry it with your controller (like Full Keyboard's grab),
-  and **push or pull the controller to send it further away or bring it closer**: that motion
-  is amplified 3×, while up/down and side to side move it 1:1 (kept 0.25–3.5 m from you),
-  **Pin** stops that (its icon shows the state: an upright pin when pinned, a tilted, crossed-out
-  pin when not, drawn exactly like Full Keyboard's). After a grab, a sideways lean under 5° eases
-  level over half a second, as in Full Keyboard. Launching it again (menu or ▶ Open) recenters it in front of you. It never takes keyboard focus, so keys reach the app you were using; a
-  floating *window* couldn't do that (gamescope gives clicked windows focus and ignores requests
-  to hand it back).
+- **Fn** and **Tools** switch to another layer. The key stays lit while that layer is showing;
+  tap it again to go back.
+- **Ctrl, Alt, Super:** tap once and it applies to the next key only. Double-tap to lock it
+  (it gets an outline) until you tap it again. A modifier that's on also applies to mouse
+  clicks (Ctrl+click, Alt+click). Super shows the Steam Frame logo.
+- **Two hands (VR):** hold Ctrl, Alt or Super with one controller's laser and press a key with
+  the other. The modifier applies to that key and lets go when you release it.
+- **Hold to repeat:** holding a key holds it down, so the app's own key repeat works.
+- **Copy, Paste, Cut, Undo, Select all** (icons) send Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z and
+  Ctrl+A. On the Tools layer, **Find**, **Redo** and **Save** send Ctrl+F, Ctrl+Shift+Z and
+  Ctrl+S.
+- **🖱R / 🖱M (right / middle click):** tap one, and your **next click anywhere** (laser or
+  mouse, on a floating window or the desktop) becomes a right or middle click. The key stays lit
+  until then. Only one can be on; tap it again to cancel. It also cancels itself after 10 s, and
+  when the pad is hidden or the dashboard closes. Scrolling passes straight through.
+- **🎤** (Tools layer) starts and stops [Dictation](../dictation/), if it's installed. It turns
+  red while recording and yellow while transcribing. The text goes to the app you're using.
+- **Snip** (Tools layer, the dashed rectangle) starts a [Screen snip](../snip/), if it's
+  installed.
+- **Launcher** (Tools layer, the SteamOS logo) taps Super, which opens the desktop's app menu.
+- **Unstick** (Tools layer): if the desktop acts as if Shift, Ctrl, Alt or Super were still
+  held down, tap this. It presses and releases each of them.
 
-They're separate instances, so you can have both. Each remembers its own position.
+Key labels follow your keyboard language. The pad reads KDE's current layout (every 15 seconds)
+and uses the legends printed on that language's keyboards: German *Strg, Entf, Einfg, Pos1,
+Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian *Canc, Inizio,
+Pag↑*. Other layouts get the English legends.
 
-```sh
-./install.sh install arrowpad
-arrowpad --desktop       # launch; run again to hide/show it (bind this to a shortcut)
-arrowpad --scale 1.5     # bigger buttons (or ARROWPAD_SCALE=1.5)
-arrowpad --quit
-```
+### Moving and sizing
 
-**Looks and handles like Full Keyboard:** its Graphite theme (dark panel, gradient keycaps,
-latched-blue modifiers) and a toolbar with 📌 **pin** (stops accidental moves), ⌖ **reset
-position** (bottom centre), **−** / **+** (size, 0.6×–2×) and ✕ close. **Grab to move:** drag
-the panel or toolbar background. Position, size and pin state are remembered per window.
+The toolbar above the keys has, from left to right: ⚙ **Settings**, 📌 **Pin**, ⌖ **Reset
+position**, **−** / **+** (size) and, on the right, ✕ **Close**. Pin stops accidental moves;
+its icon shows whether it's on (an upright pin) or off (tilted and crossed out).
 
-**Controller haptics, like Full Keyboard:** a light tick when the laser moves onto a key and a
-click when you press one, on the controller that's pointing (the overlay events say which).
-Full Keyboard's values; the toolbar and dragging don't pulse. SteamVR only delivers haptics to
-the app with input focus, which an overlay has while you point at it; the desktop pad, an
-ordinary window, may not get them.
+**In desktop mode:** drag the pad's background to move it. **−** / **+** change the key size
+(0.6× to 2×). Reset puts it at the bottom centre of the screen. Opening Arrow Pad again (from
+the menu, a shortcut, or `arrowpad --desktop`) hides it, and once more shows it, so a keyboard
+shortcut can summon it.
 
-**Sizing:** the pad keeps its proportions. In desktop mode **+**/**−** change the key size
-(0.6×–2×); in VR they change the overlay's physical width (5 cm steps), like Full Keyboard.
+**In VR:** the panel sits just below Steam's dashboard, tilted back 50°, and follows the
+dashboard when you move it or re-centre. Reset puts it back there, and opening it again from the
+menu re-centres it too. **−** / **+** change its width in 5 cm steps (0.30 to 2 m). To move it,
+squeeze the grip while that controller points anywhere on the pad (a squeeze never types), or
+hold the trigger on the pad's background, then move your hand. Pushing the controller away or
+pulling it closer moves the pad three times as far, so you can send it further off without
+walking; up, down and sideways move it one to one. It stays between 0.25 and 3.5 m from you.
+When you let go, a slight sideways lean (under 5°) eases level.
 
-**Labels follow your keyboard language:** the pad reads KDE's current layout (re-checked every
-few seconds) and uses the legends printed on that language's keyboards: German *Strg, Entf,
-Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, RePág*, Italian
-*Canc, Inizio, Pag↑*; English otherwise. Copy, paste, cut, undo and select-all are icons.
-
-- **🖱R / 🖱M (right / middle click):** tap one and your **next click anywhere** (laser or
-  mouse, on any floating window or the desktop) becomes a right or middle click; the key lights
-  up until then. Only one can be on; tap it again to cancel. It also cancels itself after 10 s
-  and when the dashboard closes (like Full Keyboard, the pad lets go of input then), and
-  scrolling passes straight through. What happened is logged in `/run/user/$UID/arrowpad-clicks.log`.
-  It works by catching that one click on the Steam session's display and replaying it as the
-  other button, because laser clicks don't pass through anything else the pad can see.
-- **Modifiers** (Ctrl, Alt, Super): tap = one-shot (applies to the next key,
-  then releases), **double-tap = lock** (outlined) until tapped again. A held modifier
-  also applies to mouse clicks (Ctrl+click, Alt+click).
-- **Hold to repeat**: holding a button holds the key, so the app's key repeat applies.
-- **Fn** swaps the keys to the F-key layer (F1–F12, Insert, PrintScreen and the **SteamOS key**,
-  which taps Super to open the desktop's app menu, as on Full Keyboard); Fn stays lit while it's
-  on, and tapping it again swaps back. Super shows the Steam Frame logo.
-- **Two hands (VR), like Full Keyboard:** hold Ctrl, Alt or Super with one controller's laser and
-  press a key with the other: the modifier applies to that key and lets go when you release it.
-- **Grip to grab (VR), like Full Keyboard:** squeeze the grip while that controller points
-  anywhere on the pad (keys included) and move your hand; let go to drop it. A squeeze never
-  types. Holding the trigger on the pad's background still works too.
-- **⚙ Settings:** Full Keyboard's two themes (Graphite, Midnight) and haptic strength (off, light,
-  normal), remembered per pad.
-- **Copy / Paste / Cut / Undo / Select all** (icons) send the Ctrl shortcuts.
-- **🎤** (Tools layer: **Tools**, then 🎤) toggles [dictation](../dictation/): red while
-  recording, yellow while transcribing. The text goes to the focused app, because the pad never
-  takes focus.
-- **Toggle, don't duplicate**: launching again hides/shows the running pad. The
-  position is remembered in `~/.config/arrowpad.json`.
-
-## Which keyboard when?
+### Which keyboard when?
 
 | Situation | Best tool |
 |---|---|
-| Typing text in VR, dashboard or floating app windows | [Full Keyboard](../full-keyboard/) (laser typing, full layout) |
-| Quick text entry anywhere | Steam keyboard (Steam + X). Hold **Shift** for ←/→ |
-| Navigating / editing in desktop-mode apps (arrows, selection, shortcuts, F-keys) | **Arrow Pad** |
+| Typing text in VR, in the dashboard or floating app windows | [Full Keyboard](../full-keyboard/) (laser typing, full layout) |
+| Quick text entry anywhere | Steam's keyboard (Steam + X). Hold **Shift** for ←/→ |
+| Navigating and editing in desktop-mode apps (arrows, selection, shortcuts, F-keys) | **Arrow Pad** |
 | Lots of text | [Dictation](../dictation/) (**Tools → 🎤** on the pad, or its shortcut) |
-| Nix user who wants arrows/Esc/Ctrl inside Steam's own VR keyboard, plus swipe | [steam-frame-nix VR keyboard](https://github.com/lhns/steam-frame-nix/blob/main/docs/keyboard.md) |
+| Nix users who want arrows, Esc and Ctrl inside Steam's own VR keyboard, plus swipe | [steam-frame-nix VR keyboard](https://github.com/lhns/steam-frame-nix/blob/main/docs/keyboard.md) |
 
-## Ideas borrowed
-- Look, toolbar, pin, recenter and size buttons: from [Full Keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)
-  (its Graphite theme colours, MIT). Toolbar and clipboard icons: KDE Breeze.
-- One-shot / double-tap-lock modifiers and the F-key layer: from steam-frame-nix's VR
-  keyboard patch and Full Keyboard.
-- Copy/Paste buttons and "launch again recenters instead of duplicating": from Full Keyboard.
+## Settings
+
+⚙ on the toolbar opens the settings: Full Keyboard's two themes (**Graphite**, **Midnight**) and
+the controller haptics (**Off**, **Light**, **Normal**). Each pad remembers its own, with its
+place and size, in `~/.config/arrowpad.json` (desktop) or `~/.config/arrowpad-vr.json` (VR).
+
+From a terminal:
+
+```sh
+arrowpad --desktop       # open in desktop mode; run again to hide or show it
+arrowpad --vr            # open the VR panel; run again to re-centre it
+arrowpad --scale 1.5     # bigger keys in desktop mode (or ARROWPAD_SCALE=1.5)
+arrowpad --quit          # close it (add --desktop or --vr to pick which)
+```
 
 ## How it works
-- Runs under XWayland with the X11 "doesn't accept input focus" hint, which KWin
-  honours. Native Wayland has no equivalent for ordinary windows.
-- Sends real key down/up events by writing `struct input_event` datagrams straight to
-  `ydotoold`'s socket (no subprocess per key).
-- Single instance via a `QLocalServer` socket (`arrowpad-$UID`).
-- PyQt6 in a private venv (`~/.local/share/arrowpad/venv`, ~280 MB), because SteamOS
-  ships no Python GUI bindings.
+
+- **Desktop mode:** the pad runs under XWayland with the X11 "doesn't accept input focus" hint,
+  which KWin honours. Native Wayland has no equivalent for ordinary windows.
+- **VR:** the pad is drawn off-screen and shown as a native SteamVR overlay, like Full Keyboard.
+  A floating window wouldn't do: the Steam session gives a clicked window focus, so the keys
+  would go to the pad itself.
+- **Keys:** real key down/up events, written straight to `ydotoold`'s socket.
+- **Right/middle click:** laser clicks don't pass through anything else the pad can see, so it
+  grabs the pointer on the Steam session's display for that one click and replays it as the
+  other button. Each step is logged in `/run/user/$UID/arrowpad-clicks.log`.
+- **Haptics:** a light tick when the laser moves onto a key and a click when you press one, on
+  the controller that's pointing, with Full Keyboard's values. SteamVR only sends haptics to the
+  app that has input focus, which the VR panel has while you point at it; the desktop pad, an
+  ordinary window, may not get them.
+- **Grip:** the dashboard hides the grip button from apps, so the pad reads it the way Full
+  Keyboard does: from how far the grip part of the controller's 3D model has moved.
+- **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
+  Python GUI toolkit. The [NordVPN](../nordvpn/) tray and Screen snip use the same one.
+
+## Good to know
+
+- Closing the dashboard lets go of any Ctrl, Alt or Super the VR panel had on, so your clicks
+  don't turn into Ctrl+clicks while it's out of sight.
+- **Arrow Pad** (the desktop one) needs desktop mode to be running.
+- Controller haptics need SteamVR's own arm64 OpenVR library. Without it, the pad works without
+  haptics, and the VR panel can't start.
+- If a crash ever happens, `/run/user/$UID/arrowpad-desktop-crash.log` or
+  `arrowpad-vr-crash.log` says where.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
-- **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
-- **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)
+- **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two app-menu entries
+- **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam display (`:0`) for one click** (at most 10 s) and replay it with XTEST
+- **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json` and `~/.config/arrowpad-vr.json`)
 <!-- /generated:changes -->
 
 ## Credits
-Look, toolbar, pin/recenter/size controls and haptic values from [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard) (MIT); one-shot modifiers and the F-key layer from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s VR keyboard (Apache-2.0). Icons: KDE Breeze (LGPL-3.0). Haptics via [pyopenvr](https://github.com/cmbruns/pyopenvr) (BSD). See also [CREDITS.md](../../../CREDITS.md).
+
+- [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)
+  (MIT): the look (its Graphite and Midnight theme colours and key drawing), the toolbar (pin,
+  recenter, size), the copy/paste keys, relaunch to toggle or recenter, the haptic values, the
+  placement under the dashboard, grip reading, easing a lean level after a grab, and letting go
+  of input when the dashboard closes. The toolbar, copy/paste, Super and Launcher icons are
+  ported from its `src/panel.cpp` (Copyright (c) 2026 TaiKeid and contributors, MIT; the notice
+  is in `arrowpad.py`).
+- [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s VR keyboard (Apache-2.0):
+  the idea of one-shot and locked modifiers and an F-key layer. No code copied.
+- The other key icons are [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons)
+  (LGPL-3.0), loaded from SteamOS's own icon theme.
+- [pyopenvr](https://github.com/cmbruns/pyopenvr) (BSD-3-Clause) for the VR panel and haptics;
+  [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) (GPL-3.0) draws the pad;
+  [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) types.
+
+See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status arrowpad` · Remove: `./install.sh uninstall arrowpad`

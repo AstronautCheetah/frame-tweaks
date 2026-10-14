@@ -15,6 +15,10 @@
 - **whisper-frame and Screen reader** are no longer offered.
 
 ### Changed
+- **Every tweak's README reads the same way:** what it is and why on a Steam Frame, how to
+  install and use it, then what it changes on your system (this was the "At a glance" box), and
+  credits. Each was checked against the code; the main README now opens with what Frame Tweaks
+  is and why.
 - **Wallet apps: ⏱ Extend timer** (next to Lock now) restarts the auto-lock countdown, and
   **Auto-lock after unlocking** sets its length (1–24 h; default 4 h).
 - **Wallet apps is the Shared KDE wallet row's button** (🔑 Wallet apps) instead of a button at
@@ -22,6 +26,10 @@
   changes.
 
 ### Fixed
+- **Uninstalling Arrow Pad or the NordVPN tray broke Screen snip** (they share a Python setup);
+  now the last one removes it. Screen snip installs `wl-clipboard`, which its Copy text and
+  Paste need.
+- **The installer's log cleanup deleted Grab guard's log.**
 - **Open packs folder** opened Kate when the installer window was floating in VR: folders and
   files now open in their default app as desktop mode sets it (Dolphin), wherever it's running.
 - **A tweak's README on its details page** showed in a smaller font than the rest of the window.

@@ -18,9 +18,9 @@ source:
   url: https://github.com/new-waifu/Recline-VR
 experimental: >-
   Hooks into SteamVR's driver interface, and (for the room view) into the Frame's camera service.
-  It checks those internals each time SteamVR starts and turns the affected part off if they
-  changed (the room view looks tilted while reclined, or the driver doesn't load; shown in its
-  status) until Recline-VR catches up.
+  Recline-VR checks those internals each time SteamVR starts and turns the affected part off if
+  they changed (the driver doesn't load, or the room view looks tilted while reclined; its panel
+  and `reclinectl status` say so) until Recline-VR catches up.
 icon: {theme: go-down-skip}
 settings:
   file: ~/.config/frame-tweaks/recline.conf
@@ -45,8 +45,9 @@ access: >-
   Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the
   room-view fix, also inside the Frame's camera service
 survives_updates: >-
-  Yes (everything is in your home folder); after a SteamVR update it checks SteamVR's internals
-  and turns off what changed. Reinstalling needs SteamOS's compiler and CMake
+  Yes (everything is in your home folder); after a SteamVR update Recline-VR checks SteamVR's
+  internals and turns off what changed. Reinstalling needs SteamOS's compiler, CMake, git and
+  Vulkan headers
 undo: "`./install.sh uninstall recline`, then restart SteamVR"
 upstream_readme: https://raw.githubusercontent.com/new-waifu/Recline-VR/ee7d4b3cf1ce49904117bbcf623680b2171d3d83/README.md
 ---
@@ -58,56 +59,66 @@ Lie back and keep playing. Press one button (or a controller shortcut) and the d
 **Why on a Steam Frame:** SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you.
 <!-- /generated:intro -->
 
-Use VR **lying down or reclined**. [Recline-VR](https://github.com/new-waifu/Recline-VR) by
-new-waifu rotates the whole tracked world, not just your heading: press **Recline recenter**
-and the direction you're looking becomes level and forward, at a chosen eye height. Every
-tracked device moves together, so your hands stay attached. **Reset to normal** puts it back.
-
+## Install
+Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install recline
 ```
 
-**Then restart SteamVR** (reboot is easiest, or `steamvr restart`): SteamVR loads drivers only
-when it starts. Installing builds Recline-VR on the Frame (under a minute) and runs its tests.
+Installing downloads [Recline-VR](https://github.com/new-waifu/Recline-VR) by new-waifu, builds
+it on the Frame and runs its tests (it says "under a minute"; nothing is installed if a test
+fails). **Then restart SteamVR** (rebooting is easiest, or `steamvr restart`): SteamVR loads
+drivers only when it starts.
 
-## Using it
+## Use
 - **The Recline panel** in the SteamVR dashboard: *Recline recenter*, *Reset to normal*,
   rotation (*Full* or *Level only*) and eye height.
 - **Controller shortcuts** (right controller, hold grip + trigger + bumper): **Y** reclines,
-  **X** resets, **A** shows the panel. They work while a game runs. Change them from the panel
-  (*Edit controller bindings*).
+  **X** resets, **A** shows the panel. They work while a game runs, but not while the
+  dashboard is open. Change them from the panel (*Edit controller bindings*).
 - **It undoes itself** when you sit up, get up, move away or take the headset off, because
   SteamVR's boundary is only right without it. The recline is never kept across SteamVR
   restarts.
 - **Command line:** `~/.local/share/recline-vr/reclinectl status` (also `recenter`, `reset`).
 
-## Good to know
-- **The boundary** is drawn un-rotated, so it looks tilted while you're reclined.
-- **Room view (passthrough)** stays aligned through a small library Recline-VR adds to the
-  Frame's camera service. Don't want that? Set **Keep the room view aligned** to *No* in its
-  settings (the ⚙ on its row, or `./install.sh settings recline`), reinstall and restart
-  SteamVR; the room view then looks tilted while you're reclined.
-- **Not loading?** Check that SteamVR's safe mode hasn't disabled it (SteamVR settings →
-  Startup) and look for `[recline]` in `~/.local/share/Steam/logs/vrserver.txt`.
+Recline-VR's own description of every panel option is below the line at the end of this page.
 
-## How it's installed
+## Settings
+One setting, in the ⚙ on its row in the Frame Tweaks window (or
+`./install.sh settings recline`):
+
+- **Keep the room view aligned while reclined** (default *Yes*). The room view (passthrough)
+  stays level through a small library Recline-VR adds to the Frame's camera service. Set it to
+  *No* to leave that library out; the room view then looks tilted while you're reclined.
+
+It applies when you reinstall Recline; then restart SteamVR. Recline's own options (rotation,
+eye height, controller shortcuts) are on its panel in VR.
+
+## How it works
 - [`pin`](pin) names the exact Recline-VR commit (release v1.2.0). The installer clones it,
-  checks it's that commit, builds it with SteamOS's own CMake, compiler and Vulkan headers
-  in `~/.cache/frame-tweaks/recline-build`, runs its unit tests, then runs Recline-VR's own
-  installer (`DEST=~/.local/share/recline-vr`). If the commit is gone upstream, it uses Frame
-  Tweaks' copy of that source, checked against its SHA256.
-- It refuses to build without the Vulkan headers: the panel would fall back to a way of
-  drawing that has crashed SteamVR's compositor on the Frame.
+  checks it's that commit, builds it with SteamOS's own CMake, compiler and Vulkan headers in
+  a temporary folder, runs its unit tests, then runs Recline-VR's own installer into
+  `~/.local/share/recline-vr`. If the commit is gone upstream, it uses Frame Tweaks' copy of
+  that source, checked against its SHA256.
+- It refuses to install a build without the Vulkan headers: the panel would fall back to a way
+  of drawing that has crashed SteamVR's compositor on the Frame.
 - Uninstalling resets any recline, unregisters the panel and the driver, and removes
   `~/.local/share/recline-vr`. It keeps your panel options (`~/.config/recline-vr`).
+
+## Good to know
+- **The boundary** is drawn un-rotated, so it looks tilted while you're reclined.
+- **Not loading?** Check that SteamVR's safe mode hasn't turned it off (SteamVR settings →
+  Startup) and look for `[recline]` in `~/.local/share/Steam/logs/vrserver.txt`.
+- **Uninstall while SteamVR runs** if you can: the panel can only be unregistered then.
+  Otherwise SteamVR may still list it.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
-- **Survives SteamOS updates:** Yes (everything is in your home folder); after a SteamVR update it checks SteamVR's internals and turns off what changed. Reinstalling needs SteamOS's compiler and CMake
+- **Survives SteamOS updates:** Yes (everything is in your home folder); after a SteamVR update Recline-VR checks SteamVR's internals and turns off what changed. Reinstalling needs SteamOS's compiler, CMake, git and Vulkan headers
 - **Changes:** Recline-VR built from source into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR
-- **🧪 Experimental:** Hooks into SteamVR's driver interface, and (for the room view) into the Frame's camera service. It checks those internals each time SteamVR starts and turns the affected part off if they changed (the room view looks tilted while reclined, or the driver doesn't load; shown in its status) until Recline-VR catches up.
+- **🧪 Experimental:** Hooks into SteamVR's driver interface, and (for the room view) into the Frame's camera service. Recline-VR checks those internals each time SteamVR starts and turns the affected part off if they changed (the driver doesn't load, or the room view looks tilted while reclined; its panel and `reclinectl status` say so) until Recline-VR catches up.
 - **Unusual access:** Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the room-view fix, also inside the Frame's camera service
 - **Undo:** `./install.sh uninstall recline`, then restart SteamVR
 <!-- /generated:changes -->
