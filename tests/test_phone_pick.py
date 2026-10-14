@@ -39,9 +39,11 @@ class PhonePick(unittest.TestCase):
         for name, body in scripts.items():
             (stubs / name).write_text(f"#!/bin/bash\n{body}\n")
             (stubs / name).chmod(0o755)
+        (home / "run").mkdir(exist_ok=True)      # (its pid file and scrcpy's log: not a running mirror's)
         env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or "",
-               "PHONE_NO_SPLASH": "1", **(env or {})}       # (the splash has a test of its own)
-        r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30)
+               "XDG_RUNTIME_DIR": str(home / "run"), "PHONE_NO_SPLASH": "1", **(env or {})}   # (the splash has a test of its own)
+        r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30,
+                           stdin=subprocess.DEVNULL)
         f = home / ".config/frame-tweaks/phone.conf"
         conf_text = f.read_text() if f.exists() else ""
         return r.returncode, log.read_text(), conf_text
@@ -56,6 +58,7 @@ class PhonePick(unittest.TestCase):
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
         self.assertIn("PHONE_NAME=Pixel\\ 9", conf)
         self.assertNotIn("kdialog", log)
+        self.assertTrue((Path(self.tmp.name) / "run/phone-scrcpy.log").exists())   # in the session's runtime folder
 
     def test_several_phones_ask_and_remember_the_choice(self):
         phones = [("Pixel 9", "10.0.0.5", 4000), ("Galaxy S30", "10.0.0.6", 5000)]
@@ -95,10 +98,53 @@ class PhonePick(unittest.TestCase):
             "avahi-browse": f'''case "$*" in *pairing*) echo '{pairing}';; *) printf '%s\\n' '{advert("Pixel 9", "10.0.0.5", 4000)}';; esac''',
             "kdialog": 'echo "kdialog $*" >> "$HOME/log"; case "$*" in *--inputbox*) echo 123456;; *) echo "$CHOOSE";; esac',
             "adb": 'echo "adb $*" >> "$HOME/log"; case "$1" in connect) [ -f "$HOME/paired" ] && echo "connected to $2" || echo "failed to connect to $2";; '
-                   'pair) touch "$HOME/paired"; echo "Successfully paired to $2";; esac; exit 0'})
+                   'pair) printf "Enter pairing code: "; read -r c; echo "code $c" >> "$HOME/log"; touch "$HOME/paired"; echo "Successfully paired to $2";; esac; exit 0'})
         self.assertIn("Pair it again", log)
-        self.assertIn("adb pair 10.0.0.5:37001 123456", log)
+        self.assertIn("adb pair 10.0.0.5:37001\n", log)            # the code isn't on its command line,
+        self.assertIn("code 123456", log)                          # it's typed in
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+
+    def test_a_phone_named_like_another_isnt_taken_for_it(self):
+        """The remembered "Pixel 9" isn't "Pixel 9 Pro" (it was matched as part of the name)."""
+        phones = [("Pixel 9 Pro", "10.0.0.7", 4100), ("Pixel 9", "10.0.0.5", 4000)]
+        code, log, _ = self.run_phone(phones, conf='PHONE_NAME="Pixel 9"\n')
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertNotIn("10.0.0.7", log)
+        code, log, _ = self.run_phone(phones[:1], conf='PHONE_NAME="Pixel 9"\n', choose="")
+        self.assertIn("Use Pixel 9 Pro instead", log)              # not in sight: wait, or use the other
+        self.assertNotIn("scrcpy", log)
+
+    def test_a_look_on_the_wifi_that_never_ends_is_cut_short(self):
+        """avahi-browse can wait for an answer for ever (a mirror once waited a day): each look
+        has a time limit, and what it found by then counts."""
+        code, log, _ = self.run_phone([], conf='PHONE_NAME="Pixel 9"\n', extra={
+            "avahi-browse": f"printf '%s\\n' '{advert('Pixel 9', '10.0.0.5', 4000)}'; exec /usr/bin/sleep 60",
+            # (records the limit asked for, then keeps 1 s of it)
+            "timeout": 'echo "timeout $1 $2" >> "$HOME/log"; shift; exec /usr/bin/timeout 1 "$@"'})
+        self.assertIn("timeout 10 avahi-browse", log)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+
+    def test_splash_closes_once_a_reconnected_mirror_is_up(self):
+        """After a reconnect (or a restart), the splash went on showing "Starting the mirror…"
+        for as long as the mirror ran."""
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\n', env={"PHONE_NO_SPLASH": ""}, extra={
+            # each splash its own D-Bus name
+            "kdialog": 'echo "kdialog $*" >> "$HOME/log"; case "$*" in *--progressbar*) n=$(( $(cat "$HOME/n" 2>/dev/null || echo 0) + 1 )); '
+                       'echo $n > "$HOME/n"; echo "org.kde.kdialog-$n /ProgressDialog";; esac',
+            "qdbus6": 'echo "qdbus6 $*" >> "$HOME/log"',
+            # the first mirror loses the phone (it stops answering until reconnected); the second runs a moment
+            "scrcpy": 'if [ ! -f "$HOME/dropped" ]; then /usr/bin/sleep 0.3; touch "$HOME/dropped"; exit 1; fi; '
+                      'echo "mirror up" >> "$HOME/log"; /usr/bin/sleep 1.5; echo "mirror closed" >> "$HOME/log"',
+            "adb": 'echo "adb $*" >> "$HOME/log"; case "$1 $3" in "connect "*) [ -f "$HOME/dropped" ] && touch "$HOME/back"; echo "connected to $2";; '
+                   '*shell*) [ ! -f "$HOME/dropped" ] || [ -f "$HOME/back" ];; esac'})
+        self.assertEqual(code, 0)
+        lines = log.splitlines()
+        self.assertTrue(any("Reconnecting" in l for l in lines))
+        last = [l for l in lines if "--progressbar" in l][-1]
+        self.assertIn("Connecting to Pixel 9", last)
+        n = sum("--progressbar" in l for l in lines)
+        close = lines.index(f"qdbus6 org.kde.kdialog-{n} /ProgressDialog close")
+        self.assertLess(close, lines.index("mirror closed"))         # gone while the mirror runs
 
     def test_failed_connection_can_forget_the_phone(self):
         code, log, conf = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n',
@@ -149,6 +195,18 @@ class PhonePick(unittest.TestCase):
                                       extra={"phone-touch": '[ "$1" = --check ] && exit 1', "phone-fit": "exit 0"})
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
         self.assertNotIn("phone-fit", log)                         # no narrow window: clicks land right
+        self.assertNotIn("phone-touch 10.0.0.5", log)
+
+    def test_steamvr_update_that_turns_its_patch_off_gets_a_plain_window(self):
+        """vr-dashboard switched the layer's patch off: the narrow window had no layer to take the
+        clicks, so they landed at its left edge."""
+        (Path(self.tmp.name) / "run").mkdir()
+        (Path(self.tmp.name) / "run/sft-dashboard.status").write_text(
+            "phone-touch: SteamVR changed (missing: frame panel height); off\n")
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], env={"DISPLAY": ":0"},
+                                      extra={"phone-touch": "exit 0", "phone-fit": "exit 0"})
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertNotIn("phone-fit", log)
         self.assertNotIn("phone-touch 10.0.0.5", log)
 
 

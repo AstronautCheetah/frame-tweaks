@@ -2,6 +2,9 @@
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 [ -x "$BIN/adb" ] || status_missing "$(t 'adb not installed')"
 "$BIN/adb" version >/dev/null 2>&1 || status_warn "$(t 'adb installed but does not run (re-run ./install.sh adb-scrcpy)')"
+# (adb comes first in install.sh: an install that stopped later has it, but no Android Mirror to open)
+[ -x "$BIN/phone" ] && [ -f "$APPS/android-mirror.desktop" ] ||
+    status_warn "$(t 'phone launcher or its menu entry missing (re-run ./install.sh adb-scrcpy)')"
 command -v scrcpy >/dev/null || [ -x /home/linuxbrew/.linuxbrew/bin/scrcpy ] || status_warn "$(t 'scrcpy missing (brew install scrcpy)')"
 # phone-touch (the VR extras) only runs with the scrcpy major version it was tested with.
 exe=$(command -v scrcpy || echo /home/linuxbrew/.linuxbrew/bin/scrcpy)

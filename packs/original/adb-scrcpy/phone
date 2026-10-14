@@ -18,13 +18,15 @@ fi
 # shellcheck source=/dev/null
 [ -f "$CONF" ] && . "$CONF"
 
-# advertised: the phones on the Wi-Fi with Wireless debugging on, one mDNS line each.
-advertised() { avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;'; }
+# advertised: the phones on the Wi-Fi with Wireless debugging on, one mDNS line each. (A look
+# takes a second or two; avahi-browse once went on waiting for an answer for a day, and this with it.)
+advertised() { timeout 10 avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;'; }
 names_in() { sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u; }
-# find_phone: sets dev=address:port of the chosen phone (PHONE_NAME), or returns 1.
+# find_phone: sets dev=address:port of the chosen phone (PHONE_NAME, the whole name: "Pixel 9"
+# isn't "Pixel 9 Pro"), or returns 1.
 find_phone() {
     all=$(advertised)
-    c=$(echo "$all" | grep -F "\"name=" | grep -F "${PHONE_NAME:-}" | head -1)
+    c=$(echo "$all" | grep -F "\"name=${PHONE_NAME:-}\"" | head -1)
     [ -n "$c" ] || return 1
     dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
 }
@@ -61,7 +63,7 @@ cancelled() { [ ${#SPLASH[@]} -eq 2 ] && [ "$(qdbus6 "${SPLASH[@]}" wasCancelled
 fail() {
     splash_end
     notify-send -a Phone "$1" "$2"
-    command -v kdialog >/dev/null && kdialog --title "Android Mirror: $1" --error "$2" 2>/dev/null
+    command -v kdialog >/dev/null && kdialog --title "$(t 'Android Mirror: %s' "$1")" --error "$2" 2>/dev/null
     exit 1
 }
 trap 'splash_end' EXIT
@@ -71,7 +73,7 @@ pair_phone() {
     local ip=${1%:*} where="" code out
     splash "$(t 'On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…')"
     for _ in $(seq 60); do
-        where=$(avahi-browse -rtp _adb-tls-pairing._tcp 2>/dev/null | grep '^=' | grep ';IPv4;' |
+        where=$(timeout 10 avahi-browse -rtp _adb-tls-pairing._tcp 2>/dev/null | grep '^=' | grep ';IPv4;' |
                 awk -F';' -v ip="$ip" '$8 == ip {print $8 ":" $9; exit}')
         [ -n "$where" ] && break
         cancelled && exit 0
@@ -80,7 +82,8 @@ pair_phone() {
     splash_end
     [ -n "$where" ] || fail "$(t "The phone didn't offer pairing")" "$(t 'Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again.')"
     code=$(kdialog --title "$(t 'Android Mirror: pair with %s' "${PHONE_NAME:-$(t 'the phone')}")" --inputbox "$(t 'The six-digit pairing code the phone shows:')" 2>/dev/null) || exit 0
-    out=$(adb pair "$where" "$code" 2>&1)
+    # (the code on adb's input, which asks for it: not on its command line, which any program can read)
+    out=$(printf '%s\n' "$code" | adb pair "$where" 2>&1); out=${out#Enter pairing code: }
     grep -qi "successfully paired" <<< "$out" || fail "$(t "Pairing didn't work")" "$(t "adb said: %s
 
 Check the code and try again (a new code appears each time the phone's pairing dialog opens)." "$out")"
@@ -146,13 +149,16 @@ STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHON
 # after 3 misses, close the frozen mirror and reconnect at the phone's current address.
 alive() { timeout 4 adb -s "$dev" shell true >/dev/null 2>&1; }
 # The mirror's gear panel (in VR) changes the settings above and asks for a restart (SIGUSR1):
-# scrcpy starts again, reading ~/.config/frame-tweaks/phone.conf afresh.
-PIDFILE="/run/user/$(id -u)/sft-phone.pid"
+# scrcpy starts again, reading ~/.config/frame-tweaks/phone.conf afresh. (In the session's
+# runtime folder, like adb's socket. The tests give it their own: their runs once removed the
+# pid file of a mirror that was running.)
+RUN=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+PIDFILE="$RUN/sft-phone.pid"
 echo $$ > "$PIDFILE"
 trap 'splash_end; [ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
 restart=
 trap 'restart=1; kill "$pid" 2>/dev/null' USR1
-SCRCPY_LOG="/run/user/$(id -u)/phone-scrcpy.log"          # what scrcpy said, for a failure message
+SCRCPY_LOG="$RUN/phone-scrcpy.log"                         # what scrcpy said, for a failure message
 first=1
 while :; do
     if [ -n "$restart" ]; then
@@ -188,10 +194,13 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
     # The Steam session puts laser clicks on so narrow a window at its left edge: phone-touch
     # takes them from a layer over the window instead and sends them to the phone as touches.
     # (Desktop mode or no VR environment helper: it just exits. A reconnect replaces it.) With a
-    # scrcpy it wasn't tested with, neither runs: a plain 16:9 window, where clicks land right.
+    # scrcpy it wasn't tested with, or with its layer's patch switched off by vr-dashboard after a
+    # SteamVR update (a line in its status file), neither runs: a plain 16:9 window, where clicks
+    # land right.
     extras=1
     if [ -x "$HOME/.local/bin/phone-touch" ] && [ "${DISPLAY:-}" = ":0" ]; then
         "$HOME/.local/bin/phone-touch" --check 2>/dev/null || extras=
+        grep -qs '^phone-touch:' "$RUN/sft-dashboard.status" && extras=
     fi
     if [ -n "$extras" ] && [ -x "$HOME/.local/bin/phone-fit" ] && ! pgrep -u "$(id -u)" -f "bin/phone-fit" >/dev/null; then
         setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
@@ -204,8 +213,9 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
     "${cap[@]}" scrcpy -s "$dev" --video-bit-rate="$BIT_RATE" --max-size="$STREAM_MAX" --max-fps="$MAX_FPS" \
         --window-title="Android Mirror" "$@" >"$SCRCPY_LOG" 2>&1 &
     pid=$! misses=0
-    if [ -n "$first" ]; then             # the splash stays until the mirror has been up a moment
-        for _ in 1 2 3 4 5 6; do sleep 0.5; kill -0 "$pid" 2>/dev/null || break; done
+    # The splash stays until the mirror has been up a moment (after a reconnect or a restart too).
+    for _ in 1 2 3 4 5 6; do sleep 0.5; kill -0 "$pid" 2>/dev/null || break; done
+    if [ -n "$first" ]; then
         if ! kill -0 "$pid" 2>/dev/null && wait "$pid"; then exit 0; fi       # closed straight away
         if ! kill -0 "$pid" 2>/dev/null; then
             fail "$(t "The mirror didn't start")" "$(t 'scrcpy stopped straight away. It said:
@@ -214,9 +224,9 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
 
 If the phone asked to allow USB debugging or screen sharing, allow it and try again.' "$(tail -n 6 "$SCRCPY_LOG")")"
         fi
-        splash_end
         first=
     fi
+    splash_end
     while kill -0 "$pid" 2>/dev/null; do
         sleep 5 & wait $!                      # (a restart request interrupts the wait)
         [ -n "$restart" ] && break

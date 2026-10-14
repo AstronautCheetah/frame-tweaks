@@ -28,6 +28,7 @@ import random
 import re
 import select
 import shutil
+import signal
 import socket
 import struct
 import subprocess
@@ -67,7 +68,12 @@ def log(*a):
 
 
 def adb(dev, *args, **kw):
-    return subprocess.run(["adb", "-s", dev, *args], capture_output=True, text=True, timeout=20, **kw)
+    # A phone that doesn't answer in time is an OSError, like one that refuses: the callers try
+    # again later. (TimeoutExpired isn't one, and it ended phone-touch, or its joystick thread.)
+    try:
+        return subprocess.run(["adb", "-s", dev, *args], capture_output=True, text=True, timeout=20, **kw)
+    except subprocess.TimeoutExpired:
+        raise OSError(f"adb {args[0]}: no answer within 20 s") from None
 
 
 def scrcpy_running():
@@ -185,24 +191,24 @@ class Phone:
         return round(min(1, max(0, u)) * (w - 1)), round(min(1, max(0, v)) * (h - 1)), w, h
 
     def touch(self, action, u, v, sideways):
-        x, y, w, h = self.point(u, v, sideways)
-        self.send(struct.pack(">BBqiiHHHII", 2, action, FINGER, x, y, w, h, 0 if action == UP else 0xFFFF, 0, 0),
-                  retry=action != MOVE)
+        self.send(lambda: struct.pack(">BBqiiHHHII", 2, action, FINGER, *self.point(u, v, sideways),
+                                      0 if action == UP else 0xFFFF, 0, 0), retry=action != MOVE)
 
     def scroll(self, u, v, sideways, dx, dy):
         """A mouse wheel at u, v: dx, dy in notches, + = right / down (as a page's wheel event)."""
-        x, y, w, h = self.point(u, v, sideways)
         # scrcpy's fixed point: -1..1 carries -16..16 notches; Android's + scrolls up / right.
         fix = lambda n: max(-0x8000, min(0x7FFF, round(max(-16, min(16, n)) / 16 * 0x8000)))
-        self.send(struct.pack(">BiiHHhhI", 3, x, y, w, h, fix(dx), fix(-dy), 0), retry=False)
+        self.send(lambda: struct.pack(">BiiHHhhI", 3, *self.point(u, v, sideways), fix(dx), fix(-dy), 0), retry=False)
 
-    def send(self, msg, retry):
+    def send(self, message, retry):
+        """message(): the bytes, made once connected (they carry the screen size connect() reads,
+        so a first connection that failed is made at the first touch, as main() expects)."""
         with self.lock:
             for attempt in (1, 2):
                 try:
                     if not self.sock:
                         self.connect()
-                    self.sock.sendall(msg)
+                    self.sock.sendall(message())
                     return
                 except OSError as e:
                     log("reconnecting:", e)
@@ -220,7 +226,7 @@ CHOICES = {"PHONE_MAX_SIZE": ("720", "800", "1024", "1280", "1600", "1920"),
            "PHONE_MAX_FPS": ("30", "60", "72", "80", "90", "96", "108", "120", "144"),
            "PHONE_STICK_SPEED": ("8", "15", "25")}
 DEFAULTS = {"PHONE_MAX_SIZE": "1024", "PHONE_BIT_RATE": "2M", "PHONE_MAX_FPS": "60", "PHONE_STICK_SPEED": "15"}
-PHONE_PIDFILE = Path(f"/run/user/{os.getuid()}/sft-phone.pid")      # written by `phone`
+PHONE_PIDFILE = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}") / "sft-phone.pid"   # written by `phone` (same folder)
 
 
 def read_conf(path=CONF):
@@ -347,9 +353,15 @@ def scroll_with_sticks(phone, state):
     except Exception as e:                        # no openvr, or SteamVR isn't running
         log("no joystick scrolling:", e)
         return
-    tick = 1 / 30
-    while scrcpy_running():
+    tick, checked = 1 / 30, 0.0
+    while True:
         time.sleep(tick)
+        # Whether scrcpy still runs: every 2 s, as serve() asks (a pgrep takes some 20 ms of
+        # processor time; 30 a second took a good part of a core for as long as the mirror ran).
+        if time.monotonic() - checked > 2:
+            if not scrcpy_running():
+                return
+            checked = time.monotonic()
         at = state.get("hover")
         quiet = time.monotonic() - state.get("since", 0)
         # (A press with no drag or let-go for 3 s: its let-go went missing, don't wait for it.)
@@ -447,7 +459,9 @@ def main():
         sys.exit(check())
     if not DASHBOARD.is_file():
         return                                    # no VR environment helper: no layer to talk to
-    # One at a time: a reconnect (new address) replaces the one before.
+    # One at a time: a reconnect (new address) replaces the one before. The one replaced cleans
+    # up as when scrcpy closes (Python's own SIGTERM ends it at once, leaving its tunnel in adb).
+    signal.signal(signal.SIGTERM, lambda *a: sys.exit(0))
     old = running(PIDFILE, "phone-touch")
     if old and old != os.getpid():
         try:
