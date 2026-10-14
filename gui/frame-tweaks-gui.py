@@ -38,6 +38,17 @@ import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
 import i18n  # noqa: E402
 from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md)
+# The window follows the keyboard itself (not the language ./install.sh found when it started it),
+# and whatever it runs (status checks, installs, Run) gets the window's language.
+i18n.INHERIT = False
+i18n.CATALOGUE = i18n.Catalogue()
+
+
+def pass_language():
+    os.environ["FRAME_TWEAKS_LANG_RESOLVED"] = i18n.CATALOGUE.language or "en"
+
+
+pass_language()
 from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
@@ -769,6 +780,7 @@ class Window(QWidget):
         """Every 5 s: has the keyboard's language changed (lib/i18n.py)? Then the window's text
         follows, once you're back on the list (an open page isn't pulled away from you)."""
         if self.stack.currentIndex() == 0 and self.details is None and i18n.refresh():
+            pass_language()
             self.retranslate()
 
     def retranslate(self):
@@ -784,7 +796,7 @@ class Window(QWidget):
         self.show_hidden.blockSignals(False)
         if self.update_newest and self.update_state == "update":
             self.show_newest(self.update_newest)
-        self.rebuild()
+        self.refresh()                                   # (statuses again, in the new language)
 
     # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
     def hidden(self):

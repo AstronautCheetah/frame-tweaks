@@ -12,6 +12,11 @@ python3 dev/i18n.py import es_419 /tmp/es      # checked, then put into locale/e
 python3 dev/i18n.py stats
 ```
 
+A **review pass** (after the glossary or the official terms changed): `export LANG DIR --all`
+gives every text with its `"current"` translation; the answer files hold the revised (or
+unchanged) text for every id. Run `dev/i18n-terms.py LANG` first, so the official terms are
+current, and `dev/i18n-terms.py LANG --check` after the import.
+
 `import` leaves out an answer that loses a placeholder (`%s`, `{name}`), an HTML tag, a newline,
 or the spaces at either end, and lists it: fix the answer file and import again. Then read the
 result in the window (`FRAME_TWEAKS_LANGUAGE=es_419 ./install.sh gui`) and in a terminal

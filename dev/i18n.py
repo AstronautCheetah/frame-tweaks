@@ -10,7 +10,8 @@
                            new text untranslated; removed text kept as #~ comments)
   dev/i18n.py stats        how much of each language is translated
   dev/i18n.py export LANG DIR [--size N] [--all]
-                           the texts LANG.po hasn't translated yet (--all: every text), as
+                           the texts LANG.po hasn't translated yet (--all: every text, with its
+                           current translation, for a review pass), as
                            JSON files of N entries (default 150) in DIR: part-01.json, … for a
                            translator or a translation helper (locale/BATCH.md)
   dev/i18n.py import LANG DIR
@@ -262,13 +263,16 @@ def problems(msgid, msgstr):
 
 
 def export(lang, outdir, size=150, every=False):
-    done = {k for k, v in i18n.parse_po((LOCALE / f"{lang}.po").read_text()).items()} if (LOCALE / f"{lang}.po").exists() else set()
+    done = i18n.parse_po((LOCALE / f"{lang}.po").read_text()) if (LOCALE / f"{lang}.po").exists() else {}
     rows = []
     for ctx, msgid, plural, block in entries_of(template()):
         if msgid == "" or (not every and (ctx, msgid) in done):
             continue
         where = [w for l in block.splitlines() if l.startswith("#:") for w in l[2:].split()]
-        rows.append({"id": len(rows) + 1, "ctx": ctx, "msgid": msgid, "plural": plural, "where": where})
+        row = {"id": len(rows) + 1, "ctx": ctx, "msgid": msgid, "plural": plural, "where": where}
+        if (ctx, msgid) in done:                      # (--all: a second pass revises what's there)
+            row["current"] = done[(ctx, msgid)] if plural else done[(ctx, msgid)][0]
+        rows.append(row)
     outdir.mkdir(parents=True, exist_ok=True)
     parts = [rows[i:i + size] for i in range(0, len(rows), size)]
     for n, part in enumerate(parts, 1):

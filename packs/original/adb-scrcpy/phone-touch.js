@@ -15,7 +15,7 @@
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
   const NAME = 'phone-touch', VERSION = 11;
-  const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
+  const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
   const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;
@@ -229,7 +229,7 @@
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`,
                              color: '#e8ecf0', fontFamily: 'inherit', zoom: 0.62, textAlign: 'left' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
-            el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, 'Android Mirror'),
+            el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Android Mirror')),
             el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,

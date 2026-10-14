@@ -625,7 +625,7 @@ class ArrowPad(QWidget):
                          | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setWindowTitle("Arrow Pad" + (" (VR)" if TARGET == "vr" else ""))
+        self.setWindowTitle(_("Arrow Pad (VR)") if TARGET == "vr" else _("Arrow Pad"))
         self.yd = yd
         self.mod_state = {m: "off" for m in MODIFIERS}   # off | oneshot | locked
         self.mod_tapped = {m: 0.0 for m in MODIFIERS}
@@ -1027,7 +1027,7 @@ class ArrowPad(QWidget):
         self.release_all_mods()
         self.yd.clear_stuck_modifiers()
         self.restyle()
-        subprocess.Popen(["notify-send", "-a", "Arrow Pad", _("Keys released"),
+        subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Keys released"),
                           _("Shift, Ctrl, Alt and Super were pressed and let go.")], start_new_session=True)
 
     # ---- screen snip (snip/ tweak) --------------------------------------
@@ -1037,7 +1037,7 @@ class ArrowPad(QWidget):
             # Its own process and session: the selection window opens on the Steam session's display.
             subprocess.Popen([str(tool)], start_new_session=True)
         else:
-            subprocess.Popen(["notify-send", "-a", "Arrow Pad", _("Screen snip isn't installed"),
+            subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Screen snip isn't installed"),
                               _("Tick 'Screen snip + Narrate' in Frame Tweaks to use this button.")],
                              start_new_session=True)
 

@@ -92,6 +92,19 @@ class Language(unittest.TestCase):
             self.assertEqual(i18n.wanted_languages(), ["de"])
 
 
+class Inherited(unittest.TestCase):
+    def test_a_program_speaks_its_parents_language(self):
+        """FRAME_TWEAKS_LANG_RESOLVED (the window's or a script's choice) wins over the keyboard,
+        except in the installer window itself (INHERIT = False)."""
+        with mock.patch.object(i18n, "keyboard_language", lambda: "de"), mock.patch.object(i18n, "INHERIT", True):
+            with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "es_419"}, clear=True):
+                self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
+                with mock.patch.object(i18n, "INHERIT", False):
+                    self.assertEqual(i18n.wanted_languages(), ["de"])
+            with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "en"}, clear=True):
+                self.assertEqual(i18n.wanted_languages(), [])
+
+
 class Keyboard(unittest.TestCase):
     """The active keyboard's language: Steam's VR keyboard (VR session) or KDE's layout (desktop),
     looked at no more than once every 5 s."""

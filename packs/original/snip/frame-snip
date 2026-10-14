@@ -281,7 +281,7 @@ def from_clipboard():
 
 
 def notify(title, body=""):
-    subprocess.run(["notify-send", "-a", "Screen snip", title, body[:300]], stderr=subprocess.DEVNULL)
+    subprocess.run(["notify-send", "-a", _("Screen snip + Narrate"), title, body[:300]], stderr=subprocess.DEVNULL)
 
 
 def ocr(img):
