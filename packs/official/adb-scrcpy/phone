@@ -1,7 +1,7 @@
 #!/bin/bash
 # Find an Android phone's current wireless-ADB port via mDNS, connect, and mirror it with scrcpy.
 # The port changes every time Wireless debugging is toggled, so it's looked up fresh each run.
-# The phone to use is remembered in ~/.config/frame-tweaks/phone.conf (PHONE_NAME="Pixel 9"): taken by itself
+# The phone to use is remembered in ~/.config/frame-tweaks/phone.conf (PHONE_NAME="My phone"): taken by itself
 # when only one is advertising, chosen from a list when there are several (phone --pick: choose
 # again). When it isn't in sight you can wait for it or use another one.
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).

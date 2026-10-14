@@ -4,59 +4,77 @@ emoji: 🤖
 category: Developer
 tier: extras
 summary: >-
-  Anthropic's coding agent in the terminal (claude), installed into your home folder
+  Anthropic's coding agent for the terminal (`claude`), installed into your home folder
 what: >-
-  Anthropic's coding agent in the terminal (`claude`), via Anthropic's own installer.
+  Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's
+  own installer.
 why: >-
-  The native installer runs without root on arm64 and updates itself, so SteamOS updates leave
-  it alone.
+  Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts
+  everything in your home folder, so SteamOS updates leave it alone.
 author: Anthropic
 source: {relation: from, url: https://code.claude.com/docs/en/setup}
 icon: {theme: utilities-terminal}
 run: {label: Open}
 changes: "`~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer)"
-access: Downloads Anthropic's installer over HTTPS
+access: Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS
 survives_updates: Yes (everything is in your home folder)
-undo: "`./install.sh uninstall claude-code`"
+undo: >-
+  `./install.sh uninstall claude-code` (keeps your login and settings in `~/.claude` and
+  `~/.claude.json`)
 ---
 # Claude Code (command line)
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Anthropic's coding agent in the terminal (`claude`), via Anthropic's own installer.
+Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer.
 
-**Why on a Steam Frame:** The native installer runs without root on arm64 and updates itself, so SteamOS updates leave it alone.
+**Why on a Steam Frame:** Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone.
 <!-- /generated:intro -->
 
-Anthropic's coding agent in the terminal: `claude` in Konsole. It reads and edits files in
-the folder you start it in and runs commands there, asking first.
+## Install
 
+Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install claude-code
-claude          # in any terminal; the first run logs in through your browser
 ```
 
-Installed with [Anthropic's native installer](https://code.claude.com/docs/en/setup)
-(`curl -fsSL https://claude.ai/install.sh | bash`) into `~/.local/bin/claude`, which
-updates itself. Linux arm64 is supported, and it lives in your home folder, so SteamOS updates
-leave it alone. If `claude` is already installed another way (for example Homebrew's
-`claude-code` cask), the installer leaves it as it is.
+This downloads [Anthropic's installer](https://code.claude.com/docs/en/setup) and runs it. It
+installs `claude` into `~/.local/bin`, which Frame Tweaks adds to your PATH. If `claude` is
+already installed another way (for example with Homebrew), it's left as it is.
 
-**▶ Open** starts it in a new Konsole window in your home folder.
+## Use
 
-Remove: `./install.sh uninstall claude-code` (keeps `~/.claude` and your login).
+Open a terminal (Konsole) and run:
+
+```sh
+claude
+```
+
+The first time, it asks you to log in with your Claude account in a browser. Claude Code works on
+the files in the folder you start it in: it can read and edit them and run commands there. By
+default, it asks for your permission first.
+
+**▶ Open** in the Frame Tweaks window starts it in a new Konsole window, in your home folder.
+When you quit Claude Code, that window stays open with a normal shell.
+
+## Good to know
+
+- Claude Code installed this way keeps itself up to date (Anthropic's installer sets that up).
+- Uninstalling removes the program but keeps your login and settings. If you installed it with
+  Homebrew instead, uninstalling this tweak tells you the `brew` command to remove it.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
 - **Changes:** `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer)
-- **Unusual access:** Downloads Anthropic's installer over HTTPS
-- **Undo:** `./install.sh uninstall claude-code`
+- **Unusual access:** Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS
+- **Undo:** `./install.sh uninstall claude-code` (keeps your login and settings in `~/.claude` and `~/.claude.json`)
 <!-- /generated:changes -->
 
 ## Credits
-Made by [Anthropic](https://www.anthropic.com/claude-code). This tweak only runs Anthropic's installer.
+[Claude Code](https://www.anthropic.com/claude-code) is made by Anthropic. This tweak only runs
+Anthropic's installer. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status claude-code` · Remove: `./install.sh uninstall claude-code`

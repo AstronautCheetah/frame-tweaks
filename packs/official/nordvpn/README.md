@@ -15,14 +15,17 @@ author: Frame Tweaks; uses NordVPN's servers and API
 icon: {file: frame-tweaks-nordvpn.png}
 run: {label: Tray}
 processes: [^~/.local/share/arrowpad/venv/bin/python ~/.local/bin/nordvpn-tray]
-changes: "`nordvpn-wg`, tray app, KDE autostart entry"
+changes: >-
+  `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart
+  entry, `~/.config/nordvpn-wg` (your WireGuard key and locations)
 access: >-
-  **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`)
+  **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's
+  D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key
 survives_updates: >-
   Yes (its connections live in NetworkManager's settings, which updates keep)
 undo: "`./install.sh uninstall nordvpn`"
 ---
-# NordVPN that survives SteamOS updates
+# NordVPN (WireGuard)
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates.
@@ -30,68 +33,80 @@ NordVPN servers in several countries as built-in network connections, with a tra
 **Why on a Steam Frame:** The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs.
 <!-- /generated:intro -->
 
-Installers that put NordVPN's own app into `/usr` (e.g. scripts that unlock the read-only
-root and use pacman) lose it at **every SteamOS update**, because the update replaces the
-whole system partition. Your settings in `/var` and `/etc` remain, but `nordvpn` is gone.
-
-
-This uses NordVPN's WireGuard servers (NordLynx) as ordinary **NetworkManager** connections
-instead. They live in `/etc/NetworkManager/system-connections`, which updates keep, and
-nothing is installed system-wide.
+## Install
+You need a NordVPN subscription. Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install nordvpn
-nordvpn-wg setup        # once: paste your access token into the hidden prompt
 ```
 
-Get the token at Nord Account → **NordVPN** → scroll to **Advanced settings** → **Get access
-token** → verify by email → **Generate new token** (a 30-day token is enough). It's shown only
-once. Paste it into the hidden prompt with Ctrl+Shift+V. It's used once to fetch your
-WireGuard key and isn't stored. (The "Service credentials" username/password are for
-OpenVPN/IKEv2, which SteamOS's NetworkManager doesn't support.)
+Then, once, in a terminal (Konsole in desktop mode):
+
+```sh
+nordvpn-wg setup
+```
+
+It asks for a NordVPN **access token** in a hidden prompt: nothing shows while you paste (in
+Konsole, Ctrl+Shift+V), then press Enter. To get a token, sign in to your Nord Account on the
+web, open **NordVPN**, find **Get access token** (under advanced settings), confirm by email
+and generate one. It's shown only once, and a short-lived one is enough. Don't put it in a file
+or on a command line: `nordvpn-wg` uses it once to fetch your WireGuard key and doesn't save it.
+Your NordVPN username and password ("service credentials") aren't used.
+
+Setup then creates a connection for each default location: US, CA, GB, NL, CH, DE and JP.
 
 ## Use
-SteamOS on the Frame has **no Plasma network applet**, so the installer adds a **NordVPN tray
-icon** (`nordvpn-tray`, autostarts with desktop mode): grey = disconnected, green = connected,
-yellow = working. Click it to pick a location, disconnect, show your public IP, or re-pick
-the least-loaded servers. Or from a terminal:
+SteamOS on the Frame has no network applet in the desktop's taskbar, so this adds a **NordVPN
+tray icon**, which starts with desktop mode (or use **Tray** on this tweak's row). Grey means
+disconnected, green connected, yellow working. Click it for a menu: pick a location, disconnect,
+show your public IP, or pick the least-loaded servers again.
+
+From a terminal:
 
 ```sh
 nordvpn-wg list          # locations; ● = connected
 nordvpn-wg up US         # connect (disconnects any other NordVPN location)
 nordvpn-wg status        # connected? public IP and location
-nordvpn-wg down
-nordvpn-wg add FR IT     # more locations (codes: nordvpn-wg countries)
+nordvpn-wg down          # disconnect
+nordvpn-wg add FR IT     # more locations (country codes: nordvpn-wg countries)
 nordvpn-wg remove JP
-nordvpn-wg refresh       # re-pick the least loaded server for every location
+nordvpn-wg refresh       # pick the least-loaded server again for every location
 ```
 
-Default locations: US, CA, GB, NL, CH, DE, JP (edit `~/.config/nordvpn-wg/locations`).
+Your locations are listed in `~/.config/nordvpn-wg/locations`.
 
-## Notes
-- Each location is pinned to the server that was least loaded when it was created. Run
-  `nordvpn-wg refresh` now and then (an active connection is reconnected to its new server).
-- While connected, DNS goes only to NordVPN's resolvers (103.86.96.100 / 103.86.99.100).
-- NordLynx is IPv4-only; IPv6 is disabled on the tunnel. On a network that has IPv6, IPv6
-  traffic bypasses the VPN (check: `ip -6 addr show scope global`). There's no kill switch: if the
-  tunnel drops, traffic goes out normally.
-- Connections are saved through NetworkManager's D-Bus API (`AddConnection2`), because this
-  NetworkManager's `nmcli` can't set WireGuard peers and `nmcli connection import`
-  connects immediately.
-- The private key lives in the system connection files (root-only) and in
-  `~/.config/nordvpn-wg/private_key` (mode 600, for adding locations later).
+## How it works
+NordVPN's own Linux app installs into `/usr`, on SteamOS's read-only system partition, which
+every SteamOS update replaces. Instead, `nordvpn-wg` uses NordVPN's WireGuard servers (NordLynx)
+as ordinary **NetworkManager** connections, named "NordVPN <country>". NetworkManager keeps them
+in `/etc/NetworkManager/system-connections`, which updates keep, and nothing is installed into
+the system.
+
+Connections are created through NetworkManager's D-Bus API, so the private key never appears on
+a command line or in a temporary file, and creating one doesn't connect it.
+
+## Good to know
+- Each location uses the server that was least loaded when it was created. Run
+  `nordvpn-wg refresh` now and then; an active connection reconnects to its new server.
+- While connected, DNS goes to NordVPN's resolvers (103.86.96.100 and 103.86.99.100).
+- **IPv4 only:** IPv6 is turned off on the tunnel. On a network that has IPv6, IPv6 traffic goes
+  around the VPN (check with `ip -6 addr show scope global`).
+- **No kill switch:** if the tunnel drops, traffic goes out normally.
+- Your WireGuard private key is stored in the connection files (readable only by root) and in
+  `~/.config/nordvpn-wg/private_key` (readable only by you), so locations can be added later.
+  Removing the tweak deletes both, along with the connections.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)
-- **Changes:** `nordvpn-wg`, tray app, KDE autostart entry
-- **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`)
+- **Changes:** `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry, `~/.config/nordvpn-wg` (your WireGuard key and locations)
+- **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key
 - **Undo:** `./install.sh uninstall nordvpn`
 <!-- /generated:changes -->
 
 ## Credits
-Uses NordVPN's public server API and NordLynx (WireGuard). NordVPN is a trademark of Nord Security; this project isn't affiliated with it. See also [CREDITS.md](../../../CREDITS.md).
+Uses NordVPN's public server API and NordLynx (WireGuard). D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). NordVPN is a trademark of Nord Security; this project isn't affiliated with it. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status nordvpn` · Remove: `./install.sh uninstall nordvpn`

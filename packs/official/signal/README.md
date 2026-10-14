@@ -7,11 +7,12 @@ summary: >-
   Signal's database key in the wallet instead of plain text (an existing plain-text key is moved
   over)
 what: >-
-  Signal's database key in the wallet instead of plain text (an existing plain-text key is moved
-  over). Password first and Close after are set in Wallet apps.
+  Signal Desktop keeps the key to your message database in the KDE wallet instead of a
+  plain-text file (an existing plain-text key is moved over), and asks for the wallet password
+  before it opens.
 why: >-
-  A headset gets passed around: shared with family, often without a SteamOS login password.
-  Flathub Signal otherwise keeps its key in plain text.
+  A headset gets passed around, often without a SteamOS login password, and Flathub's Signal
+  otherwise keeps its database key in plain text.
 author: Frame Tweaks
 depends: [wallet]
 icon: {flatpak: org.signal.Signal, theme: dialog-messages}
@@ -30,59 +31,65 @@ undo: >-
 # Signal: key in the wallet
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Signal's database key in the wallet instead of plain text (an existing plain-text key is moved over). Password first and Close after are set in Wallet apps.
+Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens.
 
-**Why on a Steam Frame:** A headset gets passed around: shared with family, often without a SteamOS login password. Flathub Signal otherwise keeps its key in plain text.
+**Why on a Steam Frame:** A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text.
 <!-- /generated:intro -->
 
-The Flathub build of Signal Desktop asks on every launch whether to use the
-**plaintext** password store. Choosing it leaves the key to your message database
-unencrypted on disk. This tweak makes it use **KDE Wallet** instead:
-
+## Install
+Install Signal from Flathub first (Discover, or `flatpak install flathub org.signal.Signal`).
+Then tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install signal
-signal/check          # verify: "OK: database key is encrypted via kwallet6"
 ```
 
-It sets `SIGNAL_PASSWORD_STORE=kwallet6` as a per-user Flatpak override (same as
-doing it in Flatseal), so the startup warning goes away and Signal stores its database
-key in your wallet. It also gives Signal a [wallet launcher](../wallet/), so it uses the
-same wallet whether you start it from the desktop or from VR.
+It installs the [Shared KDE wallet](../wallet/) tweak too, if needed. If Signal already has a
+plain-text key, the installer moves it into the wallet for you: Signal does this by itself over
+two launches, so the installer starts and closes Signal twice (about 20 seconds each), then
+checks the result. To check again later:
 
-**Already using Signal with plaintext?** The installer handles it. Signal migrates
-by itself over two launches: the first adds the wallet-encrypted key (keeping the
-plaintext one until it's confirmed), the second deletes the plaintext key. The installer
-runs both launches for you, then checks the result.
+```sh
+packs/official/signal/check   # "OK: database key is encrypted via kwallet6; ..."
+```
 
-## Password first and idle lock (Wallet apps)
-Signal Desktop has no lock of its own (Signal has declined to add one), so Signal gets the
-wallet's standard protections, set in the installer window's **🔑 Wallet apps** page:
+Set a wallet password if you haven't yet (KWalletManager → *kdewallet* → *Change Password*):
+the key is only as safe as the wallet, and SteamOS's stock wallet has none.
 
-- **Password first:** if the wallet is locked, you get the
-  [`wallet-unlock`](../wallet/#unlocking-from-the-desktop-wallet-unlock) password dialog, and
-  Signal doesn't start without it.
-- **Close after 15 minutes** without keyboard, mouse or controller input (`app-timers`), so
-  reopening Signal needs the wallet again. **Headset off** can also quit it ~10 s after the
-  headset is taken off. Both are adjustable there, like for any other app.
+## Use
+Open Signal as usual, from the desktop or the VR "+" menu. Both use the same wallet. If the
+wallet is locked, a small "Unlock wallet" dialog asks for its password first, and Signal
+doesn't open without it.
 
-These replaced `signal-guard`, which did both for Signal alone; reinstalling the Signal tweak
-switches over and carries its settings (`~/.config/signal-guard.conf`) into the timer.
+Signal Desktop has no lock of its own, so it gets the wallet's protections instead. Change them
+on the **🔑 Wallet apps** page (the button on the Shared KDE wallet row in the Frame Tweaks
+window):
 
-## How secure is it?
-The key is only as protected as your wallet. SteamOS's stock `kdewallet` has an
-**empty password**, so set one ([wallet](../wallet/#security-set-a-wallet-password)). With a password, you'll be
-asked for it once per session when Signal (or another app) first opens the wallet.
-Set it in KWalletManager (*kdewallet → Change Password*). The [wallet](../wallet/) installer
-makes the wallet close after 4 hours unused.
+- **Password first:** on.
+- **Close after:** Signal quits after **15 minutes** (unless you had already set a time) with
+  no keyboard, mouse or controller input, so opening it again needs the wallet again.
+- **Headset off:** off by default; turn it on to also quit Signal about 10 seconds after the
+  headset is taken off.
 
-**What this does and doesn't protect against:** with the wallet locked and Signal not running,
-Signal's database can't be decrypted, so someone picking up the headset can't open it. But the
-wallet stays unlocked for 4 hours after you unlock it, so within that window Signal
-reopens without a password (`wallet-unlock --lock` locks it early). It's protection against casual
-access, not against someone who can use desktop mode while you're unlocked.
-Signal's warning about "experimental" backends mainly concerns GNOME libsecret on
-other desktops. On KDE, kwallet6 is the native, intended backend.
+## How it works
+Flathub's Signal asks at every start whether to keep its database key in plain text. This tweak
+sets `SIGNAL_PASSWORD_STORE=kwallet6` as a per-user Flatpak override (the same as doing it in
+Flatseal), so Signal stops asking and keeps the key in KDE Wallet. It also gives Signal a
+[wallet launcher](../wallet/#how-it-works) with **Password first**, so it uses the same wallet
+from the desktop and from VR.
+
+Signal's warning about "experimental" password stores is mainly about GNOME's keyring on other
+desktops. On KDE, kwallet6 is the native one.
+
+## Good to know
+- **What it protects against:** with the wallet locked and Signal closed, Signal's database
+  can't be decrypted, so someone who picks up the headset can't read your messages. But while
+  the wallet is unlocked (4 hours after you unlock it, unless you change that), Signal opens
+  without a password. Lock the wallet early with **Lock Wallet**. This protects against casual
+  access, not against someone using the headset while the wallet is unlocked.
+- **Uninstalling keeps the wallet setting.** Signal's key now lives in the wallet; switching
+  Signal back to plain text would lock you out of your messages. Password first and the Close
+  after timer also stay: change them on the Wallet apps page.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes

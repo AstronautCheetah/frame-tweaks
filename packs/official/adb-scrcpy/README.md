@@ -4,13 +4,13 @@ emoji: 📱
 category: Convenience
 tier: extras
 summary: >-
-  Mirror and control an Android phone: aarch64 adb + scrcpy, finds the phone automatically
+  See and control your Android phone in a window, over Wi-Fi, without taking the headset off
 what: >-
-  Mirror and control your Android phone in a desktop window (scrcpy over wireless adb). Finds
-  the phone's changing port automatically.
+  Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi
+  (scrcpy with Android's wireless debugging). It finds the phone on the network by itself.
 why: >-
-  Use your phone without taking the headset off. Google ships `adb` only for x86, so this
-  installs an aarch64 build that runs on the Frame.
+  Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's
+  ARM processor, so this installs a build that does; in VR, the window takes the phone's shape.
 author: "Genymobile (scrcpy), Android platform tools, Frame Tweaks launcher"
 source: {relation: uses, url: https://github.com/Genymobile/scrcpy}
 experimental: >-
@@ -79,88 +79,122 @@ access: >-
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall adb-scrcpy`"
 ---
-# Android Mirror: wireless adb + scrcpy
+# Android Mirror
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Mirror and control your Android phone in a desktop window (scrcpy over wireless adb). Finds the phone's changing port automatically.
+Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself.
 
-**Why on a Steam Frame:** Use your phone without taking the headset off. Google ships `adb` only for x86, so this installs an aarch64 build that runs on the Frame.
+**Why on a Steam Frame:** Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape.
 <!-- /generated:intro -->
 
-Mirror and control an Android phone in a desktop window.
-
+## Install
+Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install adb-scrcpy
 ```
 
-- **adb for aarch64**: Google only ships x86 platform-tools, so the installer takes
-  `adb` from Arch Linux ARM plus the few libraries SteamOS lacks or has too old
-  (protobuf, fmt, abseil, libusb). They're kept private in `~/.local/lib/android-tools`.
-- **scrcpy** from Homebrew.
-- **`phone`** / *Android Mirror* launcher: wireless debugging picks a new port every time
-  it's switched on, so `phone` looks it up via mDNS, connects and starts scrcpy.
-  Extra args go to scrcpy, e.g. `phone --turn-screen-off`.
-- **Which phone:** with one phone advertising, it's taken and remembered (`PHONE_NAME` in
-  `~/.config/frame-tweaks/phone.conf`); with several, a list asks which. When the remembered phone isn't in
-  sight, you can wait for it (up to 3 minutes, while you turn on Wireless debugging) or use one
-  that is. To choose again: Android Mirror's **Choose phone…** (right-click its menu entry) or
-  `phone --pick`.
-  The stream is 1024 pixels on its long side at up to 2 Mbit/s and 60 frames a second, enough for
-  VR and light on the wireless link (a heavier stream falls behind the phone); change it there
-  with `PHONE_MAX_SIZE=`, `PHONE_BIT_RATE=` and `PHONE_MAX_FPS=`, or with the gear in VR.
+It installs [Homebrew](../homebrew/) first if you don't have it (that needs your sudo password
+once).
 
-## In VR: shaped like the phone
-The Steam session makes every app window 1920×1080, so a phone held upright used to show with
-wide black bars. `phone-fit` (started by `phone`) gives the mirror window the phone screen's
-shape (485×1080 upright, 1920×862 sideways, for a 20:9 phone: it has to fit inside the 1920×1080
-screen, or it's shown as 1920×1080 with black bars anyway) and follows it when you rotate
-the phone: scrcpy reports the screen's shape to the window system, and a window with a fixed
-size keeps it, so its VR panel takes that shape. In desktop mode it does nothing; KWin sizes
-the window normally there.
+**Then pair your phone, once:**
 
-SteamVR starts every floating window as wide as a standard one whatever its shape (so the upright
-phone came up over 2 m tall), and keeps that width when its shape changes (so turning the phone
-sideways shrank it to a strip). A small dashboard patch (`patch.js`, installed when the
-[VR environment](../vr-dashboard/) helper is) gives a floating window that has been upright a long
-side of 0.8 m, through the dashboard's own panel-height override: upright it's 0.8 m tall,
-sideways 0.8 m wide, so turning the phone just turns the window. Docked in the dashboard, an
-upright window gets a standard window's height.
+1. On the phone, turn on Developer options, then open *Developer options → Wireless debugging →
+   Pair device with pairing code*. The phone must be on the same Wi-Fi as the Frame.
+2. On the Frame, in a terminal, run this straight away with the address, port and code the
+   phone shows (the code stops working when that dialog closes):
 
-## In VR: clicks land where you aim
-The Steam session maps the laser wrongly on a window narrower than its 1920×1080 screen: it
-adds the gap it would leave beside the window if it were centred, so on the upright phone every
-click landed at the window's left edge. So a see-through layer over the mirror window (a second
-dashboard patch, `phone-touch.js`) takes the laser instead and reports where you press, drag and
-let go. `phone-touch` (started by `phone`) sends those to the phone as touches, the way scrcpy
-does: it starts a second scrcpy server on the phone with only its control channel (no video;
-its copy is kept at `/data/local/tmp/sft-phone-touch.jar`, since scrcpy deletes its own), so
-nothing goes through the Steam session's input. The layer is there only while `phone-touch`
-runs, and covers only the window titled "Android Mirror", the title `phone` gives it.
+   ```sh
+   adb pair <ip>:<pairing-port> <code>
+   ```
 
-While the laser rests on the mirror, the joystick scrolls the phone (up/down or sideways, faster
-the further you push). SteamVR doesn't pass the joystick to the layer, so `phone-touch` reads it
-the way Arrow Pad reads the grips: from the tilt of the controller model's thumbstick part
-(through SteamVR's openvr library, installed into the shared Python venv).
+## Use
+1. On the phone, turn on *Wireless debugging*.
+2. Open **Android Mirror** from the app menu (or press **Open** on its row in Frame Tweaks, or
+   run `phone` in a terminal).
 
-**Settings in VR:** the gear below the mirror's lower-left corner opens its settings beside it:
-picture size (720 to 1920 pixels on the long side), bit rate (1 to 8 Mbit/s), frame rate (30, 60,
-or one of the Steam Frame's refresh rates, 72 to 144) and joystick scrolling speed. They're saved in
-`~/.config/frame-tweaks/phone.conf` (only those lines; the rest of the file is kept). *Restart stream* starts
-scrcpy again with the new picture settings, without closing the mirror; *Reset to defaults*
-removes those lines again. The
-[scroll strips](../scroll-strips/) beside the mirror scroll the phone through `phone-touch` too.
+The phone's screen opens in a window; click and type in it as on the phone. Close the window
+to stop.
 
-## One-time pairing
-On the phone: *Developer options → Wireless debugging → Pair device with pairing code*,
-then promptly run `adb pair <ip>:<pairing-port> <code>`. The code dies when the
-dialog closes.
+**Which phone:** if only one phone is advertising wireless debugging, Android Mirror uses it and
+remembers it. If there are several, it asks which. If the remembered phone isn't there, it
+offers to wait for it (up to 3 minutes, while you turn on Wireless debugging) or to use one
+that is. To choose again, right-click Android Mirror in the app menu and pick **Choose phone…**,
+or run `phone --pick`.
 
-## Always-on VPN (e.g. Proton on GrapheneOS)
-The phone may display its VPN address (like `10.2.0.2`), which you can't reach. It still
-advertises its real LAN address over mDNS, and that's what `phone` uses. Check with
-`avahi-browse -rt _adb-tls-connect._tcp`. If the phone isn't visible at all, enable
-the VPN's "allow LAN connections" option.
+Anything you add after `phone` goes to scrcpy, for example `phone --turn-screen-off` to keep
+the phone's own screen dark while you mirror it.
+
+### In VR
+Opened from VR, the mirror gets a few extras (they need the
+[VR dashboard patching helper](../vr-dashboard/), which the VR environment tweaks install):
+
+- **Shaped like the phone:** the window is upright when the phone is upright and sideways when
+  it's sideways, and keeps a sensible size when you turn the phone.
+- **Clicks land where you aim** with the laser, and you can drag.
+- **Joystick scrolling:** while the laser rests on the mirror, push the joystick to scroll the
+  phone (further means faster). The [scroll strips](../scroll-strips/) beside the window scroll
+  it too.
+- **A gear** below the window's lower-left corner opens its settings beside it (see
+  [Settings](#settings)). *Restart stream* applies picture changes without closing the mirror;
+  *Reset to defaults* puts them back.
+
+## Settings
+Change these with the **⚙ Settings** button on its row in Frame Tweaks, with the gear in VR, or in
+`~/.config/frame-tweaks/phone.conf`:
+
+| Setting | Default | Choices |
+|---|---|---|
+| Picture size (long side, `PHONE_MAX_SIZE`) | 1024 pixels | 720 to 1920 |
+| Bit rate (`PHONE_BIT_RATE`) | 2 Mbit/s | 1 to 8 |
+| Frame rate (at most, `PHONE_MAX_FPS`) | 60 | 30, 60, or one of the Frame's refresh rates, 72 to 144 |
+| Joystick scrolling (`PHONE_STICK_SPEED`) | Medium | Slow, Medium, Fast |
+
+The defaults are enough for VR and keep the Wi-Fi link light; a heavier stream can fall
+behind the phone. Picture size, bit rate and frame rate apply the next time the mirror starts
+(or after *Restart stream* in VR); joystick speed applies at once. The chosen phone is saved in
+the same file (`PHONE_NAME`).
+
+## How it works
+- **adb for the Frame:** Google only ships `adb` (Android's debugging tool) for x86 PCs. The
+  installer takes the ARM build from Arch Linux ARM, signature-checked, plus the few libraries
+  SteamOS lacks or has too old (protobuf, fmt, abseil, libusb). They're kept private in
+  `~/.local/lib/android-tools`, so nothing else on the system uses them.
+- **adb's server is private:** it listens on a socket file only your user can open, instead of
+  the usual network port 5037 that any program on the Frame could use to reach a connected
+  phone.
+- **scrcpy** (the program that shows and controls the phone) comes from Homebrew.
+- **Finding the phone:** wireless debugging picks a new port each time it's turned on. `phone`
+  looks the phone up on the local network (mDNS), connects, and starts scrcpy.
+- **Reconnecting:** `phone` checks every 5 seconds that the phone still answers. If the
+  connection drops, it closes the frozen picture and reconnects (for up to a minute).
+- **In VR**, `phone-fit` gives the window the phone screen's shape. The Steam session makes
+  every app window 1920×1080, so an upright phone would otherwise sit between wide black bars.
+  A dashboard patch (`patch.js`) keeps the window's long side at 0.8 m, so turning the phone
+  turns the window instead of shrinking it.
+- **Clicks in VR:** the Steam session puts laser clicks on so narrow a window at its left edge.
+  So a second dashboard patch (`phone-touch.js`) puts a see-through layer over the window
+  titled "Android Mirror". `phone-touch` sends what you do on it to the phone as touches,
+  through a second, control-only scrcpy server on the phone (kept at
+  `/data/local/tmp/sft-phone-touch.jar`). It reads the joystick from SteamVR (its openvr
+  library, installed into Frame Tweaks' shared Python environment).
+
+## Good to know
+- **Wireless debugging** works only on the phone's main (owner) profile, and only while the
+  phone and the Frame are on the same Wi-Fi.
+- **An always-on VPN on the phone:** the phone may show its VPN address, which the Frame can't
+  reach. It still announces its real local address on the network, and that's what `phone`
+  uses. If the phone isn't found at all, turn on the VPN's option to allow local network (LAN)
+  connections. To see what the phone announces: `avahi-browse -rt _adb-tls-connect._tcp`.
+- **The VR extras switch themselves off** after a scrcpy or SteamVR update they weren't tested
+  with; the mirror then works as a plain 16:9 window. For a new scrcpy version, the status line
+  says so.
+- If you install a VR environment tweak after this one, reinstall Android Mirror to add its VR
+  extras.
+- With [Memory caps](../memcap/) installed, scrcpy runs inside a memory limit.
+- **Your pairing keys** are plain files in `~/.android`. Anyone who can use your account can use
+  them to reach the phone while its wireless debugging is on. Removing the tweak keeps them, and
+  keeps scrcpy (`brew uninstall scrcpy` removes it) and your settings.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
@@ -173,7 +207,9 @@ the VPN's "allow LAN connections" option.
 <!-- /generated:changes -->
 
 ## Credits
-[scrcpy](https://github.com/Genymobile/scrcpy) (Apache-2.0); `adb` from Android's platform tools (Apache-2.0) as packaged by [Arch Linux ARM](https://archlinuxarm.org). See also [CREDITS.md](../../../CREDITS.md).
+[scrcpy](https://github.com/Genymobile/scrcpy) by Genymobile (Apache-2.0); `adb` from Android's
+platform tools (Apache-2.0), as packaged by [Arch Linux ARM](https://archlinuxarm.org). See
+also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status adb-scrcpy` · Remove: `./install.sh uninstall adb-scrcpy`

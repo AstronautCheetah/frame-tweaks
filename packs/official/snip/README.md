@@ -8,9 +8,10 @@ summary: >-
   it aloud
 what: >-
   Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or
-  read it aloud (Narrate). Arrow Pad's Tools layer has a button for it.
+  have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it.
 why: >-
-  SteamOS has no screenshot tool, and none of the usual ones can select a region inside VR.
+  SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a
+  window floating in VR.
 author: "Frame Tweaks (OCR: Tesseract; speech: Piper)"
 source:
   relation: uses
@@ -19,68 +20,117 @@ depends: [homebrew, speech]
 icon: {file: frame-tweaks-snip.png}
 run: {label: Snip}
 changes: >-
-  `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine
-  helper
+  `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the
+  Speech engine helper
 access: Reads the picture of the window you're using (only when you start a snip)
 survives_updates: Yes (everything is in your home folder and Homebrew)
 undo: >-
-  `./install.sh uninstall snip` (keeps Tesseract and your snips in `~/Pictures/Screenshots`)
+  `./install.sh uninstall snip` (keeps Tesseract, your settings in
+  `~/.config/frame-tweaks/snip.json` and your snips in `~/Pictures/Screenshots`)
 ---
 # Screen snip
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or read it aloud (Narrate). Arrow Pad's Tools layer has a button for it.
+Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it.
 
-**Why on a Steam Frame:** SteamOS has no screenshot tool, and none of the usual ones can select a region inside VR.
+**Why on a Steam Frame:** SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR.
 <!-- /generated:intro -->
 
-Select a rectangle of the window you're using, then:
+## Install
 
-- **Copy**: the picture, to the clipboard (desktop and, with [Shared clipboard](../clipboard/),
-  VR windows).
+Tick it in the Frame Tweaks window, or:
+
+```sh
+./install.sh install snip
+```
+
+It installs Tesseract (the text reader) from [Homebrew](../homebrew/), and Piper (the voice)
+through the [Speech engine](../speech/) helper. Nothing else to do.
+
+## Use
+
+Start a snip from [Arrow Pad](../arrowpad/): the **Tools** key, then **Snip** (the dashed
+rectangle). Or open **Screen snip** from the app menu.
+
+It takes a still picture of the window the Steam session has focused (the desktop, or a window
+you floated) and shows it full size:
+
+1. Drag a rectangle with the laser.
+2. Adjust it with its **handles** (corners and edges), or drag it from inside to move it.
+   Dragging outside it starts a new one.
+3. Pick an action from the bar next to it. **Esc**, a right-click or **Cancel** closes it.
+
+The actions:
+
+- **Copy**: the picture, to the clipboard. With [Shared clipboard](../clipboard/) installed,
+  you can paste it into VR windows too.
 - **Save**: to `~/Pictures/Screenshots/Snip_<date>_<time>.png`.
-- **Copy text**: reads the text in it ([Tesseract](https://github.com/tesseract-ocr/tesseract)
-  OCR) and copies that.
-- **Narrate**: reads the text aloud ([Piper](https://github.com/rhasspy/piper), offline), at
-  the speed set under it (**−** / **+**, 0.75× to 2×, remembered). The snip pops out into a panel
-  of its own (drawn like Arrow Pad, not a window, so it takes no place in the dashboard) with
-  **■ Stop** / **▶ Again**, **⏸ Pause** / **▶ Resume**, **Show text** / **Show image** (the
-  snip's image, or the text read from it), speed, **Copy image**, **Copy text**, **Paste** (read
-  the clipboard's text instead; it's shown in place of the snip), **Close** and **Collapse** (at
-  either end of the bottom row: down to just an Expand icon, with a margin to grab it by, right
-  where the Collapse icon you used was; reading carries on). It starts beside
-  Arrow Pad's place under the dashboard and follows the dashboard; drag its top bar to move it,
-  and it remembers the spot (relative to the dashboard) for next time. Narrating another snip
-  while it's open reuses it, in place. The
-  full-screen snip goes away, so you can carry on with anything else while it reads. A speed change applies at
-  once (it reads sentence by sentence and restarts the current one).
+- **Copy text**: reads the text in it and copies that.
+- **Narrate**: reads the text aloud, offline, at the speed set under the button (**−** / **+**,
+  0.75× to 2×).
 
+### The narration panel
 
-Start it from **Arrow Pad**: the **Tools** key, then **Snip** (the dashed rectangle). Or from
-the app menu: **Screen snip**. It freezes a picture of the window the Steam session has focused
-(the desktop, or a window you floated) and shows it in a new window: drag a rectangle with the
-laser, adjust it with its **handles** (corners and edges) or drag it from inside to move it,
-then pick an action. Dragging outside it starts a new one. **Esc** or a right-click cancels.
+Narrate closes the full-size picture and pops the snip out into a panel of its own, so you can
+carry on with anything else while it reads. In VR it's a SteamVR panel (drawn like Arrow Pad, so
+it doesn't take a place in the dashboard); it starts under the dashboard and follows it. Drag its
+top bar to move it; it remembers the spot for next time.
 
-## Why these tools
-SteamOS ships no screenshot tool, and KDE's Spectacle or Flameshot can't select a region of a
-VR window. So the snip window is a small PyQt program (shared with Arrow Pad) that reads the
-window's picture straight from the Steam session's display, the way Flameshot-style tools
-freeze the screen. Copy text uses **Tesseract** (Apache-2.0, from Homebrew). Narrate uses
-**Piper** (MIT), a fast offline neural voice, with the **LJ Speech** voice (its dataset is public
-domain), installed by the [Speech engine](../speech/) helper and pinned by checksum.
+The panel has:
 
-The same helper gives SteamOS's speech-dispatcher a voice (it has none of its own), which KDE's
-screen reader, Orca, uses.
+- **■ Stop** / **▶ Again** and **⏸ Pause** / **▶ Resume**.
+- **Speed** **−** / **+**. A change applies at once: it reads sentence by sentence and starts
+  the current sentence again.
+- **Show text** / **Show image**: the snip's picture, or the text read from it.
+- **Copy image** and **Copy text**.
+- **Paste**: read the clipboard's text instead. It's shown in place of the snip.
+- **Close**, and **Collapse** at either end of the bottom row. Collapse shrinks the panel to a
+  single Expand icon, right where you pressed it; reading carries on.
+
+Narrating another snip while the panel is open reuses it, where it is.
+
+## Settings
+
+The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks/snip.json`.
+
+## How it works
+
+- The snip window is a small PyQt program (it shares Arrow Pad's PyQt6 copy). It reads the
+  focused window's picture straight from the Steam session's display, and opens on that display
+  so it shows up in VR.
+- **Copy text** and **Narrate** read the text with
+  [Tesseract](https://github.com/tesseract-ocr/tesseract), using its English data, on a
+  picture scaled up 2× (small screen text reads better that way).
+- **Narrate** speaks with [Piper](https://github.com/rhasspy/piper), an offline neural voice,
+  with the LJ Speech voice. The Speech engine helper installs both, pinned by checksum. That
+  helper also gives SteamOS's speech-dispatcher a voice (it has none of its own), which KDE's
+  screen reader, Orca, uses.
+- **Copy** offers the picture as PNG, BMP and HTML, because some apps don't take a PNG alone.
+
+## Good to know
+
+- Copying needs desktop mode to be running: the clipboard lives there.
+- **Copy text** and the panel's **Paste** use `wl-copy` and `wl-paste` from Homebrew's
+  `wl-clipboard`. [Dictation](../dictation/) installs it; without it, run
+  `brew install wl-clipboard`.
+- Without SteamVR's OpenVR library, the narration panel opens as an ordinary window instead.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
+- **Changes:** `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
 - **Unusual access:** Reads the picture of the window you're using (only when you start a snip)
-- **Undo:** `./install.sh uninstall snip` (keeps Tesseract and your snips in `~/Pictures/Screenshots`)
+- **Undo:** `./install.sh uninstall snip` (keeps Tesseract, your settings in `~/.config/frame-tweaks/snip.json` and your snips in `~/Pictures/Screenshots`)
 <!-- /generated:changes -->
+
+## Credits
+
+[Tesseract](https://github.com/tesseract-ocr/tesseract) (Apache-2.0, from Homebrew) reads the
+text. [Piper](https://github.com/rhasspy/piper) (MIT) speaks it, with the
+[LJ Speech](https://keithito.com/LJ-Speech-Dataset/) voice (dataset in the public domain). Some
+button icons are [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons) (LGPL-3.0), from
+SteamOS's own icon theme. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status snip` · Remove: `./install.sh uninstall snip`

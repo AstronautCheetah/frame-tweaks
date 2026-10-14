@@ -4,7 +4,9 @@ emoji: 🛠️
 category: System
 tier: core
 summary: "restart-plasmashell: bring back a crashed taskbar/system tray"
-what: "`restart-plasmashell`: bring the taskbar and tray back after a crash."
+what: >-
+  `restart-plasmashell`: brings the desktop-mode taskbar and system tray back after a crash, with
+  one button.
 why: >-
   In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to
   be relaunched inside that session.
@@ -20,16 +22,37 @@ test: {offline: true}
 # Tools
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-`restart-plasmashell`: bring the taskbar and tray back after a crash.
+`restart-plasmashell`: brings the desktop-mode taskbar and system tray back after a crash, with one button.
 
 **Why on a Steam Frame:** In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session.
 <!-- /generated:intro -->
 
-## `restart-plasmashell`
-Brings back the desktop-mode taskbar and system tray when `plasmashell` crashes. In the
-Frame's nested desktop session it isn't a systemd service, so nothing restarts it
-automatically. It must be launched with the session's own environment and D-Bus (taken
-from `ksmserver`), which is what this script does.
+## Install
+Tick it in the Frame Tweaks window, or:
+
+```sh
+./install.sh install tools
+```
+
+## Use
+If the taskbar or system tray in desktop mode disappears (Plasma's `plasmashell` crashed), press
+**Restart taskbar** on this tweak's row, or run in a terminal:
+
+```sh
+restart-plasmashell
+```
+
+If `plasmashell` is still running, it's closed and started again, so this also helps when the
+taskbar is frozen rather than gone.
+
+## How it works
+In the Frame's nested desktop, `plasmashell` isn't a systemd service, so nothing restarts it
+after a crash. It also has to be started with the desktop session's own environment and D-Bus.
+`restart-plasmashell` copies them from the session manager (`ksmserver`) and starts
+`plasmashell` with them. Its output goes to `/run/user/<your user id>/plasmashell.log`.
+
+## Good to know
+- It only works while desktop mode is running; otherwise it says it found no Plasma session.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes

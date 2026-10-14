@@ -22,7 +22,7 @@ fi
 MODELS="$HOME/.local/share/whisper"; MODEL=ggml-small-q8_0.bin
 mkdir -p "$MODELS"
 if [ ! -f "$MODELS/$MODEL" ]; then
-    say "Downloading Whisper model $MODEL (shared with whisper-frame)"
+    say "Downloading Whisper model $MODEL"
     fetch_pinned dictation "$MODELS/$MODEL.part"     # pinned revision and SHA256 (dictation/pin)
     mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
 fi

@@ -3,68 +3,86 @@ title: Shared clipboard
 emoji: 📋
 category: Convenience
 tier: core
-summary: >-
-  One clipboard for desktop mode and VR floating windows (clipboard-sync, built from upstream)
-what: "Copy in a floating VR window, paste in the desktop, and back."
+summary: One clipboard for desktop mode and VR floating windows
+what: >-
+  Copy text in a floating VR window and paste it in the desktop, and the other way round. It
+  runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source.
 why: >-
-  The Frame's VR session and its nested desktop each have their own clipboard. This runs
-  [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as
-  steam-frame-nix does.
+  The Frame's VR session and its desktop mode each have their own clipboard, so text copied in
+  one can't be pasted in the other.
 author: dnut (clipboard-sync); approach from lhns/steam-frame-nix
 source: {relation: uses, url: https://github.com/dnut/clipboard-sync}
 icon: {theme: edit-paste}
 run: {label: Restart}
 processes: [^~/.local/bin/clipboard-sync]
 changes: >-
-  `clipboard-sync` built from source (with a temporary, pinned Rust toolchain), KDE autostart
-  entry
+  `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary,
+  pinned Rust toolchain), a KDE autostart entry
 access: Reads and writes both sessions' clipboards
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall clipboard`"
 upstream_readme: https://raw.githubusercontent.com/dnut/clipboard-sync/138a59b8f3044dd9e7dcccd9607bbbb48c14bae6/README.md
 ---
-# Clipboard: one clipboard for desktop mode and VR windows
+# Shared clipboard
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Copy in a floating VR window, paste in the desktop, and back.
+Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source.
 
-**Why on a Steam Frame:** The Frame's VR session and its nested desktop each have their own clipboard. This runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as steam-frame-nix does.
+**Why on a Steam Frame:** The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other.
 <!-- /generated:intro -->
 
-**Problem:** the Frame runs two sessions: Steam/VR (its floating windows live on X display
-`:0`) and the nested Plasma desktop (its own Wayland and X `:2`). They have **separate
-clipboards**, so copying in a floating VR window and pasting in the desktop (or back) doesn't
-work.
-
-
-**Fix:** [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) watches every X11 and
-Wayland clipboard it can reach and keeps them in sync. Started with the desktop session, it
-sees both.
+## Install
+Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install clipboard
 ```
 
-- Built from **upstream source**, at the commit pinned in `pin`, with a pinned Rust toolchain
-  (`rust.pin`) set up in a temporary folder for the build and deleted afterwards (about 600 MB
-  while it builds, nothing after). The build takes a minute or two. Older versions used
-  Homebrew's Rust, which stays installed (3.4 GB with its LLVM): if you don't use it,
+It builds clipboard-sync from source, which takes a few minutes and about 600 MB of temporary
+space; the build files are deleted afterwards. If desktop mode is running, it starts right away;
+otherwise it starts the next time you open desktop mode.
+
+## Use
+Nothing to do: copy text as usual in a floating VR window or in the desktop, and paste it in the
+other.
+
+It runs while desktop mode is running. If copying stops working, press **Restart** on its row
+in the Frame Tweaks window.
+
+## How it works
+The Frame runs two sessions side by side: Steam and VR (where floating windows live), and the
+desktop, which runs nested inside it with its own displays. Each has its own clipboard.
+[clipboard-sync](https://github.com/dnut/clipboard-sync) watches every X11 and Wayland clipboard
+it can reach and copies new text to the others. Started with the desktop session, it can reach
+both.
+
+- **Built from source**, at the clipboard-sync commit pinned in [`pin`](pin), with the Rust
+  toolchain pinned in [`rust.pin`](rust.pin). Rust is set up in a temporary folder for the build
+  and deleted afterwards.
+- **One small change** is applied before building, [`keep-images.patch`](keep-images.patch).
+  clipboard-sync shares text only. Without the patch, copying an image (for example **Copy
+  image** in [Screen snip](../snip/)) looked like "no text" to it, so it put the last text back
+  a moment later and the image never pasted. With the patch, a clipboard without text is left
+  alone.
+- **Starts with desktop mode** through KDE autostart
+  (`~/.config/autostart/clipboard-sync.desktop`). It needs the desktop session's environment;
+  started from VR or as a background service, it wouldn't see the desktop's clipboard.
+- **Only one copy runs:** starting it (at desktop login, or with Restart) first stops any copy
+  that is still running, for example from a desktop session that was restarted.
+
+## Good to know
+- Only text is shared. Images and files stay on the clipboard where you copied them.
+- The status line warns if it isn't running, if more than one copy is running, or if your build
+  doesn't have the image patch yet (reinstall it to fix that).
+- If you have Homebrew's Rust installed and don't use it yourself, installing or removing this
+  tweak reminds you that you can free about 3.4 GB with
   `brew uninstall rust && brew autoremove`.
-- One small change is applied before building, [`keep-images.patch`](keep-images.patch):
-  clipboard-sync shares text only, and when you copied an image (e.g. Copy image in the screen
-  snip) it saw "no text" as a change and put the last text back everywhere a moment later,
-  so the image never pasted. With the patch it leaves a clipboard without text alone.
-- Only one copy runs: starting it (desktop login, Restart) stops any left over from a desktop
-  session that was restarted, which otherwise kept syncing too.
-- Starts with desktop mode via KDE autostart (`~/.config/autostart/clipboard-sync.desktop`).
-  It needs the desktop session's environment: started from VR or a user service, it wouldn't
-  see the desktop's clipboard.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `clipboard-sync` built from source (with a temporary, pinned Rust toolchain), KDE autostart entry
+- **Changes:** `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry
 - **Unusual access:** Reads and writes both sessions' clipboards
 - **Undo:** `./install.sh uninstall clipboard`
 <!-- /generated:changes -->
@@ -72,7 +90,9 @@ sees both.
 ## Credits
 This is the approach of [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s
 `clipboardSync` module (Apache-2.0), done without Nix; the tool is
-[dnut/clipboard-sync](https://github.com/dnut/clipboard-sync). See also [CREDITS.md](../../../CREDITS.md).
+[dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) (MIT or Apache-2.0). It's built
+with [Rust](https://www.rust-lang.org) (rustup; MIT or Apache-2.0). See also
+[CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status clipboard` · Remove: `./install.sh uninstall clipboard`

@@ -10,8 +10,8 @@ what: >-
   Windows you float into the world start curved, like the dashboard; Toggle Curvature still
   works.
 why: >-
-  SteamVR has no setting for it (world windows always start flat), so a tiny dashboard patch
-  presses the toggle for you. Restart SteamVR once after installing.
+  On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no
+  setting to change that. This presses its Toggle Curvature button for you on each one.
 author: Frame Tweaks (approach from lhns/steam-frame-nix)
 source:
   relation: idea from
@@ -19,9 +19,9 @@ source:
     https://github.com/lhns/steam-frame-nix/blob/main/docs/window-curvature.md
 depends: [vr-dashboard]
 experimental: >-
-  Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks
-  that code each time SteamVR starts and switches itself off if it changed (shown in its status)
-  until a Frame Tweaks update catches up.
+  Relies on SteamVR's internal dashboard code, which Valve can change in any update. Each time
+  SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown
+  in its status) until a Frame Tweaks update catches up.
 icon: {theme: object-rotate-right}
 changes: >-
   One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR
@@ -29,9 +29,9 @@ changes: >-
 access: >-
   Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs
 survives_updates: >-
-  Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that
-  changed
-undo: "`./install.sh uninstall curvature`"
+  Yes; after a SteamVR update it checks SteamVR's dashboard code and stays off if it no longer
+  fits
+undo: "`./install.sh uninstall curvature` (or untick it in the Frame Tweaks window)"
 test: {offline: true}
 ---
 # Curved world windows
@@ -39,43 +39,47 @@ test: {offline: true}
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 Windows you float into the world start curved, like the dashboard; Toggle Curvature still works.
 
-**Why on a Steam Frame:** SteamVR has no setting for it (world windows always start flat), so a tiny dashboard patch presses the toggle for you. Restart SteamVR once after installing.
+**Why on a Steam Frame:** On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one.
 <!-- /generated:intro -->
 
-When you **float a window in the world** (detach it from the dashboard), SteamVR shows it
-flat, and there's no setting to change that: the curvature rule is hard-coded (curved in the
-dashboard, theater per setting, flat in the world). This tweak presses **Toggle Curvature**
-for you on every window you float, so they start curved like the dashboard.
-
-
-It stays your choice: toggle a window flat and it stays flat. Moving it back into the
-dashboard and out again curves it again (SteamVR resets the toggle when a window is
-re-docked).
+## Install
+Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install curvature
 ```
 
-**Restart SteamVR once after installing** (reboot is easiest). SteamVR opens the local port
-the patch needs only when it starts; `./install.sh status curvature` says when it's waiting.
+It brings [VR dashboard patching](../vr-dashboard/) with it if that isn't installed yet. **If
+SteamVR was running when that helper was installed, restart SteamVR once** (rebooting is
+easiest): SteamVR opens the local port the patch needs only when it starts.
+`./install.sh status curvature` says when it's waiting for that.
+
+## Use
+Nothing to do: **float a window in the world** (move it out of the dashboard) and it starts
+curved.
+
+- It stays your choice: press **Toggle Curvature** to make a window flat and it stays flat.
+- Moving a window back into the dashboard and out again curves it again (SteamVR forgets the
+  toggle when a window is docked).
+- Untick it and it stops in the running dashboard within a few seconds; windows keep the
+  curvature they have.
 
 ## How it works
-- It's one small patch, [`patch.js`](patch.js), injected into SteamVR's dashboard by
-  [VR dashboard patching](../vr-dashboard/) (installed with it; it also runs
-  [Back to the previous window](../float-return/) if you install that). The patch checks windows
-  a few times a second; for a world-docked window with no curvature choice yet, it calls the
-  stock `ToggleCurvature()`. Nothing else in the dashboard is changed.
-- Untick it in the installer window (or `./install.sh uninstall curvature`) and it stops in the
-  running dashboard within a few seconds; windows keep the curvature they have.
+SteamVR's rule for curving windows is fixed in its dashboard code: curved in the dashboard,
+theater mode as set, flat in the world, unless you've pressed Toggle Curvature. This tweak is
+one small patch, [`patch.js`](patch.js), injected into the dashboard by
+[VR dashboard patching](../vr-dashboard/). A few times a second it looks for a window in the
+world that is flat and that you haven't toggled yet, and calls the dashboard's own
+`ToggleCurvature()` on it. Nothing else in the dashboard is changed.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
-- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and stays off if it no longer fits
 - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR dashboard patching (helper)
-- **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks that code each time SteamVR starts and switches itself off if it changed (shown in its status) until a Frame Tweaks update catches up.
+- **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. Each time SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown in its status) until a Frame Tweaks update catches up.
 - **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs
-- **Undo:** `./install.sh uninstall curvature`
+- **Undo:** `./install.sh uninstall curvature` (or untick it in the Frame Tweaks window)
 <!-- /generated:changes -->
 
 ## Credits

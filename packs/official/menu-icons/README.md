@@ -4,7 +4,7 @@ emoji: 🖼️
 category: System
 tier: core
 summary: >-
-  Icons for Konsole, System Settings and other apps that show blank in Steam's VR + menu
+  Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu
 what: >-
   Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu.
 why: >-
@@ -30,23 +30,32 @@ Icons for Konsole, System Settings and other apps that show blank in Steam's VR 
 **Why on a Steam Frame:** Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme.
 <!-- /generated:intro -->
 
-Steam's VR **"+" menu** looks up app icons only in the *hicolor* theme (and `pixmaps`), so
-apps whose icon only KDE's Breeze theme has show up blank: **Konsole**, **System Settings**,
-and a few others (Remote Desktop/SSH viewers, Avahi, Emoji Selector, …).
-
-
-This copies those icons from Breeze into `~/.local/share/icons/hicolor/scalable/apps/`, for
-Konsole and System Settings always, and for every other app in the menu whose icon is missing
-from hicolor but present in Breeze. Desktop mode keeps showing Breeze's icons (hicolor is only
-the fallback theme), so nothing changes there.
+## Install
+Tick it in the Frame Tweaks window, or:
 
 ```sh
-./install.sh install menu-icons      # re-run after installing new apps
+./install.sh install menu-icons
 ```
 
-Steam notices on its own (it rescans when the applications folder changes); reopen the menu.
-Removing the tweak deletes exactly the icons it copied (listed in
-`~/.local/share/frame-tweaks/menu-icons.list`).
+Then reopen the "+" menu. **Install it again after installing new apps**, so their icons are
+added too.
+
+## How it works
+Steam's VR "+" menu looks up app icons only in the *hicolor* icon theme (and the `pixmaps`
+folders). Apps whose icon only KDE's Breeze theme has, such as **Konsole** and **System
+Settings**, show a blank icon there.
+
+This copies those icons from your system's Breeze theme into
+`~/.local/share/icons/hicolor/scalable/apps/`: for Konsole and System Settings, and for every
+other app in the menu whose icon is in Breeze but missing from hicolor. Desktop mode keeps
+showing Breeze's icons (hicolor is only the fallback theme), so nothing changes there.
+
+Afterwards it touches the applications folder, which makes Steam rescan its "+" menu.
+
+## Good to know
+- Removing the tweak deletes exactly the icons it copied (they're listed in
+  `~/.local/share/frame-tweaks/menu-icons.list`).
+- Icons that hicolor already has, from the system, a Flatpak or you, are left alone.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
