@@ -13,7 +13,7 @@ includes, to read windows, menus and text aloud.
 <!-- /generated:glance -->
 
 ```sh
-./install.sh screen-reader
+./install.sh install screen-reader
 ```
 
 - **Meta+Alt+S** turns it on or off at any time.

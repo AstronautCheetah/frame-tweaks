@@ -321,7 +321,7 @@ dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
     s=$(timeout 8 "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null) || true
     case "$s" in
         *": patched") status_ok "$2" ;;
-        *port*closed*) status_warn "waiting for a SteamVR restart (reboot once)" ;;
+        *port*closed*) status_warn "waiting for a SteamVR restart (restart SteamVR or reboot once)" ;;
         *) status_warn "${s:-not responding}" ;;
     esac
 }

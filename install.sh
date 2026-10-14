@@ -3,7 +3,7 @@
 #
 #   ./install.sh                     graphical checklist (in desktop mode), else this help
 #   ./install.sh install ID... | all install components (dependencies are added automatically)
-#   ./install.sh uninstall ID...     remove components
+#   ./install.sh uninstall ID... | all  remove components (settings kept)
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
@@ -28,7 +28,7 @@ set -uo pipefail
 cd "$(dirname "$(readlink -f "$0")")" || exit 1
 VERSION=$(cat VERSION 2>/dev/null || echo dev)
 # shellcheck source=lib/common.sh
-source lib/common.sh 2>/dev/null
+source lib/common.sh
 set +e     # common.sh turns on -e for tweak scripts; this script checks results itself
 STATE="$HOME/.local/state/frame-tweaks"
 LOGS="$STATE/logs"
@@ -150,6 +150,15 @@ cmd_install() {
 
 cmd_uninstall() {
     [[ $# -eq 0 ]] && { echo "uninstall what?" >&2; exit 1; }
+    if [[ $1 == all ]]; then           # everything installed, each tweak before what it depends on
+        local i all=() order
+        mapfile -t order < <(with_deps "${IDS[@]}")
+        for (( i=${#order[@]}-1; i>=0; i-- )); do
+            status_of "${order[i]}" >/dev/null; [[ $? -ne 1 ]] && all+=("${order[i]}")
+        done
+        [[ ${#all[@]} -eq 0 ]] && { echo "Nothing installed."; return; }
+        set -- "${all[@]}"
+    fi
     check_ids "$@"
     local id other d
     for id in "$@"; do

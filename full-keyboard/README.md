@@ -16,7 +16,7 @@ still opens Steam's).
 <!-- /generated:glance -->
 
 ```sh
-./install.sh full-keyboard    # latest release, SHA256-verified, then its own installer
+./install.sh install full-keyboard    # latest release, SHA256-verified, then its own installer
 ```
 
 Launch **Full Keyboard** from the dashboard's app launcher. Launching again recenters it.

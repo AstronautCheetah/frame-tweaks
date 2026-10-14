@@ -16,13 +16,13 @@ typed into the focused window:
 - **Hold the mic under any floating window** (it appears at each window's bottom-right).
 
 ```sh
-./install.sh whisper-frame
+./install.sh install whisper-frame
 ```
 
 **The window mic is off by default.** It tracks every floating window by polling SteamVR's
 compositor about 60 times a second; measured on a Frame that costs about 31% of a CPU core
 (whisper-panel itself plus extra work in vrwebhelper and vrserver), which showed up as jitter
-when turning the head. Turn it on with `WHISPER_FRAME_WINDOW_MIC=1 ./install.sh whisper-frame`.
+when turning the head. Turn it on with `WHISPER_FRAME_WINDOW_MIC=1 ./install.sh install whisper-frame`.
 The Select-button dictation costs nothing while idle.
 
 This installs whisper-frame's **latest upstream release** (checksum-verified, with its own

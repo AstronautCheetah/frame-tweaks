@@ -8,16 +8,33 @@ and one KDE wallet for both sessions, and more: pick what you want from a checkl
 
 <p align="center"><img src="docs/images/installer.png" width="720" alt="The Frame Tweaks installer window: tweaks grouped by category, each with its status and an Open button"></p>
 
-- **Home folder only.** Nothing touches SteamOS's read-only system, so updates don't undo it
-  and nothing needs `steamos-readonly disable` (Homebrew's one-time setup is the only sudo).
+- **Lives in your home folder.** Nothing touches SteamOS's read-only system, so updates don't
+  undo it and nothing needs `steamos-readonly disable`. Two exceptions: Homebrew's one-time
+  setup creates `/home/linuxbrew` (the only sudo), and NordVPN adds NetworkManager connections.
 - **Pick and choose; remove cleanly.** Every tweak installs, checks and removes on its own,
   and removing keeps your settings.
 - **Verified downloads.** Upstream releases are pinned to recorded checksums and Arch Linux ARM
   packages are signature-checked; see [what each tweak changes](SECURITY.md#what-each-tweak-changes-on-your-system).
 
+> **What some tweaks can do on your Frame.** VR dashboard patching turns on SteamVR's dashboard
+> DevTools port while SteamVR runs (any program on the Frame could use it), Arrow Pad and
+> dictation type through a virtual keyboard (`/dev/uinput`), and Grab guard reads key presses
+> to spot one key. Each tweak's access is listed in [SECURITY.md](SECURITY.md#what-each-tweak-changes-on-your-system),
+> and in the installer window before you tick it.
+
 Not affiliated with or endorsed by Valve. Steam and Steam Frame are trademarks of Valve.
-Parts of this project were written with the help of AI coding assistants; every change is
-reviewed and tested on a Frame.
+Parts of this project were written with the help of AI coding assistants; changes are reviewed
+and tested on one Steam Frame.
+
+## Requirements
+
+- A **Valve Steam Frame** in **desktop mode** (SteamOS 0.4.x; other SteamOS devices
+  aren't tested, and the VR tweaks need the Frame's SteamVR).
+- A network connection, and `git` (SteamOS has it).
+- Disk space: a few MB for most tweaks; Arrow Pad's and the installer window's Python setup
+  takes about 280 MB, Homebrew a few hundred MB, and Whisper models 150–500 MB each.
+- Some tweaks need **SteamVR restarted (or a reboot)** once after installing: the installer
+  says which.
 
 ## Quick start
 
@@ -89,7 +106,7 @@ Installed automatically when a tweak needs them; listed so you can see and manag
 <!-- generated:helper (dev/gen-docs.py, from each tweak's meta) -->
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
-| 🧩 | [**VR dashboard patching**](vr-dashboard/) (helper) | Lets the VR windows tweaks (Curved world windows, Back to the previous window) adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR windows tweak is a small patch this injects while SteamVR runs. |
+| 🧩 | [**VR dashboard patching**](vr-dashboard/) (helper) | Lets the VR windows tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips) and Android Mirror adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR windows tweak is a small patch this injects while SteamVR runs. |
 | 🍺 | [**Homebrew**](homebrew/) | The package manager several tweaks install their programs with, into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates; Homebrew installs outside it. Other tweaks offer to install it when needed; this row shows it and installs it up front. |
 | ⌨️ | [**ydotool**](ydotool/) (helper) | The virtual keyboard Dictation and Arrow Pad type through. Installed automatically. | Under KDE Wayland ordinary programs can't send keystrokes to other apps; ydotool goes through the kernel's `/dev/uinput`. |
 | 🗣️ | [**Speech engine**](speech/) (helper) | Gives the Frame a voice: Piper (offline, natural) for Screen snip's Narrate, and espeak-ng for Orca and other apps that speak through speech-dispatcher. Installed automatically. | SteamOS ships speech-dispatcher and its espeak-ng module, but not espeak-ng itself, so nothing can speak (the Screen reader's Orca was silent). |
@@ -109,6 +126,7 @@ Categories fold, and rows or whole categories can be hidden (never removed). Row
 
 ```text
 ./install.sh                    installer window (desktop mode), or help + status (terminal)
+./install.sh uninstall all      remove every tweak (settings kept; see "Remove everything")
 ./install.sh install signal     install (adds dependencies: wallet)
 ./install.sh status             health check, changes nothing
 ./install.sh update             move to the newest release and re-run what's installed
@@ -145,10 +163,22 @@ Updates follow stable releases. To also get pre-releases, put `beta` in
 $ ./install.sh status
   ✔ dictation       dictate ready (whisper-frame's engine, shared small model)
   ✔ arrowpad        arrowpad installed
-  ! curvature       waiting for a SteamVR restart (reboot once)
+  ! curvature       waiting for a SteamVR restart (restart SteamVR or reboot once)
   ✔ wallet          wallet locked; 5 app launcher(s) routed/gated
   · claude-desktop  not installed
 ```
+
+## Remove everything
+
+```sh
+cd ~/frame-tweaks && ./install.sh uninstall all     # every tweak, dependents first
+rm -f ~/.local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
+rm -rf ~/frame-tweaks ~/.config/frame-tweaks ~/.local/state/frame-tweaks   # settings and logs
+```
+
+Homebrew stays (other programs may live in it); its own uninstaller is in
+[homebrew/](homebrew/). Settings a tweak kept in their usual places (e.g. `~/.config/phone.conf`,
+`~/.config/dictate.conf`) are listed by its uninstaller as it runs.
 
 ## Common issues
 
@@ -159,7 +189,7 @@ $ ./install.sh status
 | The mouse pointer is invisible in desktop mode | Install **Mouse cursor fix**, then reboot (it takes effect at the next desktop-mode start). |
 | Taskbar or tray disappeared | ▶ **Restart taskbar** on the Tools row (`restart-plasmashell`). |
 | Wallet password refused, or a second password prompt floats in VR | Only one unlock prompt can be open: close the other, then use **Unlock** on the Wallet row. See [wallet](wallet/#one-unlock-route-our-dialog-never-ksecretds-prompt). |
-| Curved world windows "waiting for a SteamVR restart" | Reboot once after installing; SteamVR opens the port it needs only when it starts. |
+| Curved world windows "waiting for a SteamVR restart" | Restart SteamVR (or reboot) once after installing; SteamVR opens the port it needs only when it starts. |
 | Apps show without icons in Steam's "+" menu | Install **Menu icons** (re-run it after installing new apps), then reopen the menu. |
 | "Another Frame Tweaks install … is running" | Wait for the other install window to finish; the lock is released when it exits. |
 | Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often: focus moved to another VR window while the key was down). On Arrow Pad: **Tools → Unstick**. Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
@@ -215,7 +245,7 @@ launchers, two-session know-how), [curiousjtuber/steam-frame-utils](https://gith
 
 ## Tested on
 
-SteamOS 0.4.5 (build 20261006.6173745), SteamVR build 1791331621, kernel 6.18, one Steam
-Frame. SteamOS and SteamVR updates can break tweaks that rely on their internals (curvature
-checks SteamVR's dashboard code and switches itself off if it changed). Reports from other
+SteamOS 0.4.5 (build 20261007.6125817), SteamVR build 1791331621, kernel 6.18, one Steam
+Frame. SteamOS and SteamVR updates can break tweaks that rely on their internals (the VR
+windows tweaks check SteamVR's dashboard code and switch themselves off if it changed). Reports from other
 headsets and versions are welcome: open an issue with `./install.sh status` output.

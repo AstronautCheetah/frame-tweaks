@@ -18,7 +18,7 @@ instead. They live in `/etc/NetworkManager/system-connections`, which updates ke
 nothing is installed system-wide.
 
 ```sh
-./install.sh nordvpn
+./install.sh install nordvpn
 nordvpn-wg setup        # once: paste your access token into the hidden prompt
 ```
 

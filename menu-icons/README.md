@@ -18,7 +18,7 @@ from hicolor but present in Breeze. Desktop mode keeps showing Breeze's icons (h
 the fallback theme), so nothing changes there.
 
 ```sh
-./install.sh menu-icons      # re-run after installing new apps
+./install.sh install menu-icons      # re-run after installing new apps
 ```
 
 Steam notices on its own (it rescans when the applications folder changes); reopen the menu.

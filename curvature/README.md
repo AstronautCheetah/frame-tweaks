@@ -19,7 +19,7 @@ dashboard and out again curves it again (SteamVR resets the toggle when a window
 re-docked).
 
 ```sh
-./install.sh curvature
+./install.sh install curvature
 ```
 
 **Restart SteamVR once after installing** (reboot is easiest). SteamVR opens the local port

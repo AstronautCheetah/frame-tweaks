@@ -19,7 +19,7 @@ Wayland clipboard it can reach and keeps them in sync. Started with the desktop 
 sees both.
 
 ```sh
-./install.sh clipboard
+./install.sh install clipboard
 ```
 
 - Built from **upstream source** with Rust (Homebrew), at the commit pinned in `pin`. The first

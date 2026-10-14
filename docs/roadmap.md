@@ -1,8 +1,7 @@
 # Roadmap
 
 Ideas from comparing Frame Tweaks with maintained SteamOS projects: Decky Loader, EmuDeck,
-ProtonUp-Qt, Jovian-NixOS and denis-g's optimization guide (reviewed 2026-10-07; local clones in
-the gitignored `references/` folder). Where we're already ahead: a security page with a
+ProtonUp-Qt, Jovian-NixOS and denis-g's optimization guide (reviewed 2026-10-07). Where we're already ahead: a security page with a
 per-tweak change list, pinned checksums for upstream downloads, an install/uninstall test, and
 issue forms.
 
@@ -58,4 +57,3 @@ issue forms.
 ## Not adopting
 - Decky's root service and PR-build "testing" channel, EmuDeck's `git reset --hard` updates,
   the guide's root-only tweaks (SDWEAK, Btrfs, pacman with read-only off).
-- Jovian-NixOS doesn't accept contributions written largely with AI help; don't send it ours.

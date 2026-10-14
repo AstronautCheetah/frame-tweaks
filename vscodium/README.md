@@ -12,7 +12,7 @@ their telemetry and branding. Installed from Flathub (aarch64).
 <!-- /generated:glance -->
 
 ```sh
-./install.sh vscodium
+./install.sh install vscodium
 ```
 
 - Extensions come from [Open VSX](https://open-vsx.org) (most popular ones are there, e.g.

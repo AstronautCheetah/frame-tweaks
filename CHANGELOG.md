@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- **README:** what some tweaks can do on your Frame (the DevTools port, the virtual keyboard, key
+  monitoring), Requirements, and Remove everything (new `./install.sh uninstall all`); the
+  "home folder only" claim names its two exceptions (Homebrew, NordVPN).
+- **SECURITY.md** now matches the code: any local program (Flatpaks included) can use the
+  dashboard's DevTools port; the wallet gates menu entries, not the apps themselves; the actual
+  sandboxing of each service; NordVPN's key file and adb's pairing keys as the plain-text
+  exceptions; how downloads, Python packages and tags are (and aren't) verified.
+- Tweak READMEs use `./install.sh install <id>` (`./install.sh wallet` is now the wallet command).
 - **Fixed: `./install.sh update` (and the installer window's Update) stopped halfway** with
   "Another Frame Tweaks install… is running": its own log writer kept the install lock when it
   restarted itself for the second stage.

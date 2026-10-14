@@ -8,7 +8,8 @@ protect against.
 | wallet | KDE wallet (`kwalletd6`/`ksecretd`) | `wallet-unlock` derives the wallet key (PBKDF2-SHA512, as kwallet-pam does) and hands it to `ksecretd` over D-Bus; the password and key never appear on a command line or on disk. |
 | wallet (`gh`) | GitHub CLI token | Moved from `~/.config/gh/hosts.yml` (plain text) into the wallet. |
 | signal | Signal's database key | Stored in the wallet (Electron safeStorage, `v11`). Signal's data is only as safe as the wallet password. |
-| nordvpn | NordVPN access token, WireGuard private key | The token is used once and never stored. The private key lives in root-only NetworkManager files and `~/.config/nordvpn-wg/private_key` (mode 600). |
+| nordvpn | NordVPN access token, WireGuard private key | The token is used once and never stored. The private key lives in root-only NetworkManager files and `~/.config/nordvpn-wg/private_key` (mode 600). That file is the one plain-text secret here: adding locations must work without unlocking the wallet. It only lets someone use your NordVPN account, not read your traffic. |
+| adb-scrcpy | adb pairing keys (`~/.android/adbkey`) | adb's own plain files (mode 600), as on any computer. While the phone has wireless debugging on, they let a program running as you control it. |
 | firefox | Firefox prefs only | No access to saved logins. Set Firefox's **Primary Password** to encrypt them. |
 
 ## What each tweak changes on your system
@@ -26,9 +27,9 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | screen-reader | One setting in `~/.config/kaccessrc` (its previous value is restored on removal) | Reads what's on screen (accessibility interface) and speaks it |
 | full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
 | clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |
-| adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` |
+| adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037) |
 | cursor | `~/.config/environment.d/` (one variable for KWin) | – |
-| vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. Any program running as you could use that port too |
+| vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame (sandboxed Flatpak apps included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed |
 | curvature | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | float-return | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-return.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | float-grab | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
@@ -50,16 +51,27 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y** through SteamVR Input while the laser is over the window |
 
-**Our background services are sandboxed** with systemd's options (no new privileges, read-only
-system, read-only or limited home, private `/tmp`, restricted address families; the curvature
-watcher may only reach `localhost`). `systemd-analyze --user security <unit>` shows the result.
-Upstream services (whisper-frame's) are left as their authors ship them.
+**Our background services are sandboxed** with systemd's options: no new privileges, a
+read-only system and home folder except the folders each one writes, and restricted address
+families. `ydotoold` also has a private `/tmp` and no network; `sft-dashboard` may only reach
+`localhost`. `wallet-lock-sync` is lighter (it shows the unlock dialog on either desktop): your
+home folder, `/run/user` and `/tmp` stay writable. `systemd-analyze --user security <unit>`
+shows the result. Upstream services (whisper-frame's) are left as their authors ship them.
+
+**Local programs.** Some tweaks open things on the Frame itself that any program running there
+can use (a Flatpak's sandbox doesn't stop it): SteamVR's dashboard DevTools port (VR dashboard
+patching, while SteamVR runs) and `ydotool`'s virtual keyboard. If you run software you don't
+trust, don't install those tweaks; they're marked in the table above.
 
 **Threat model.** These tweaks protect against *casual* access: someone else picking up the
-headset (e.g. children on a shared, password-less SteamOS login) can't open Signal, Firefox
-or Android Mirror, or read Signal's database, while the wallet is locked. They don't protect
-against someone who can use desktop mode while the wallet is unlocked (4 hours after you
-unlock it, or until `wallet-unlock --lock`), or against malware running as your user.
+headset (e.g. children on a shared, password-less SteamOS login) finds the apps you protected
+asking for the wallet password when opened from the menu, and can't read Signal's database or
+the secrets in the wallet while it's locked. Only the menu entries ask: the apps themselves
+still run if started another way (`flatpak run`, a terminal), and their own data (Firefox's
+profile without a Primary Password, Android Mirror's pairing keys) isn't encrypted by the
+wallet. Nothing here protects against someone who can use desktop mode while the wallet is
+unlocked (4 hours after you unlock it, or until `wallet-unlock --lock`), or against malware
+running as your user.
 
 **Set a wallet password.** SteamOS seeds every Frame with the same stock wallet, and it has no
 password. Until you set one (KWalletManager → *Change Password*), nothing above is really
@@ -72,13 +84,19 @@ protected. Avoid changing it while a second wallet service is running (see
   replaced upstream file is refused. **clipboard-sync** is built from a pinned commit with its
   own lock file. **Python packages** (PyQt6, openvr, jeepney) are installed at the exact versions
   in `lib/python-constraints.txt`. Pins move only in a reviewed commit (`dev/check-pins.sh`).
-- **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors where
-  possible and are always checked against Arch Linux ARM's build key (`lib/keys/`,
-  fingerprint `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking.
+- **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors only and
+  are checked against Arch Linux ARM's build key (`lib/keys/`, fingerprint
+  `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking. The signed package's
+  own name must match, and a version older than one installed before is refused, so a mirror
+  can't swap in a different or outdated package.
 - **Claude Desktop:** SHA256 from Anthropic's apt index over HTTPS. **Claude Code:** Anthropic's
   own installer over HTTPS.
-- **Homebrew and Flathub** packages are verified by those tools.
+- **Homebrew's installer** is pinned to a reviewed commit and checked against its SHA256
+  (`homebrew/pin`) before it runs with your sudo password; Homebrew and Flathub then verify the
+  packages they install.
+- **Python packages** are pinned by version, not by hash: they rely on PyPI's HTTPS.
 - **This project:** `get.sh` and `./install.sh update` install the newest release tag, not
-  the moving `main` branch.
+  the moving `main` branch. Tags
+  aren't signed yet: `get.sh` trusts GitHub's HTTPS.
 
 Found a problem? Please open a private security advisory on GitHub rather than a public issue.

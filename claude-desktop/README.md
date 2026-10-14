@@ -14,7 +14,7 @@ into `~/.local/opt/claude-desktop`, after verifying its SHA256 against Anthropic
 <!-- /generated:glance -->
 
 ```sh
-./install.sh claude-desktop
+./install.sh install claude-desktop
 claude-desktop-update     # later: fetch a newer version if there is one
 ```
 
