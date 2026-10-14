@@ -22,6 +22,7 @@ def _patches():
 
 
 PATCHES = _patches()
+PATCHES_AND_LIB = {**PATCHES, "lib": ROOT / "vr-dashboard" / "lib.js"}
 
 
 class ArmRestore(unittest.TestCase):
@@ -57,7 +58,7 @@ class DashboardCheck(unittest.TestCase):
             self.assertTrue(path.is_file(), path)
 
     def test_each_patch_detects_missing_markers(self):
-        for name, path in PATCHES.items():
+        for name, path in PATCHES_AND_LIB.items():
             req = sft.requires(path)
             self.assertGreater(len(req), 2, name)                  # its own "// requires:" lines
             self.assertEqual(sft.missing(path, "".join(req.values())), [], name)
@@ -67,7 +68,7 @@ class DashboardCheck(unittest.TestCase):
     @unittest.skipUnless(sft.DASHBOARD.is_dir(), "SteamVR isn't installed here")
     def test_patches_match_the_installed_steamvr(self):
         code = sft.dashboard_code()
-        for name, path in PATCHES.items():
+        for name, path in PATCHES_AND_LIB.items():
             self.assertEqual(sft.missing(path, code), [], name)
 
 

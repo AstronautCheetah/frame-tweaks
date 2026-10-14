@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 16, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 17;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -48,10 +48,11 @@
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
-  const FS = window.FrameStore, DS = window.DashboardStore, D = window.Dashboard;
-  if (!FS || !DS || !D) return 'not patched: dashboard objects missing';
-  const Base = Object.getPrototypeOf(D.constructor);
-  if (!Base?.prototype?.isReactComponent) return 'not patched: no React component class';
+  const FS = window.FrameStore, DS = window.DashboardStore, L = window.__sftLib;
+  if (!FS || !DS) return 'not patched: dashboard objects missing';
+  if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
+  const { el } = L, DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
+  let PANEL = null, XFORM = null;                   // the dashboard's panel / transform (L.components)
   const cfg = () => {
     const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
     c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
@@ -60,34 +61,6 @@
     // (e.g. Enter Gamepad Mode above it) draw in front instead of through the strip.
     c.back = Math.min(0.2, Math.max(0, Number(c.back ?? 0.03) || 0));
     return c;
-  };
-
-  // The dashboard's panel and transform components, found among its rendered fibers.
-  const fibers = () => {
-    const rootEl = document.getElementById('root');
-    const key = rootEl && Object.keys(rootEl).find((k) => k.startsWith('__reactContainer$'));
-    return key ? [rootEl[key]] : [];
-  };
-  let PANEL = null, XFORM = null, SAMPLE = null;
-  const learn = () => {
-    const stack = fibers();
-    while (stack.length && !(PANEL && XFORM)) {
-      const fb = stack.pop(), p = fb.memoizedProps;
-      if (p && typeof p === 'object' && typeof fb.type === 'function') {
-        if (!PANEL && 'debug_name' in p && 'width' in p && 'interactive' in p) PANEL = fb.type;
-        if (!XFORM && 'parent_id' in p && 'translation' in p && !('width' in p)) XFORM = fb.type;
-      }
-      if (fb.sibling) stack.push(fb.sibling);
-      if (fb.child) stack.push(fb.child);
-    }
-    return PANEL && XFORM;
-  };
-  const el = (type, props, ...children) => {
-    const e = Object.assign({}, SAMPLE, { type, key: props?.key ?? null,
-      props: Object.assign({}, props, children.length ? { children: children.length === 1 ? children[0] : children } : {}) });
-    if ('_store' in e) e._store = {};
-    if ('ref' in e && !('ref' in (props ?? {}))) e.ref = null;
-    return e;
   };
 
   // A strip works like a joystick: press to set a centre, drag away from it to scroll (the farther,
@@ -181,23 +154,11 @@
   // The window's picture size, from its overlay: the page's latestContentSize is only read again
   // when something else changes, so after a phone mirror turned it kept the old shape (strips the
   // wrong length).
-  // The same pieces while nothing they show has changed: the dashboard redraws often (each time
-  // the laser crosses one of SteamVR's buttons), and fresh pieces, even identical ones, make it
-  // send them to SteamVR again, which showed as jitter.
-  const memo = new Map();
-  const cached = (key, make) => {
-    if (memo.has(key)) return memo.get(key);
-    const v = make();
-    memo.set(key, v);
-    if (memo.size > 40) memo.delete(memo.keys().next().value);
-    return v;
-  };
+  // The same pieces while nothing they show has changed (see L.memo).
+  const cached = L.memo();
   const pictureSize = (page) => {
-    try {
-      const m = VRHTML.VROverlay.GetOverlayMouseScale(VRHTML.VROverlay.FindOverlay(page.summonOverlayKey));
-      if (m?.x > 0 && m?.y > 0) return { unWidth: m.x, unHeight: m.y };
-    } catch (e) { /* no overlay */ }
-    return page?.size?.latestContentSize;
+    const p = L.pictureSize(page);
+    return p && { unWidth: p.w, unHeight: p.h };
   };
   const buildStrips = (f) => {
     const page = f?.activePage, sz = page?.size;
@@ -253,8 +214,7 @@
   ];
   const GEAR_M = 0.045, PANEL_M = 0.34;
   const settingsOpen = new Set();
-  let inst = null, saveNote = '';
-  const redraw = () => { try { inst?.forceUpdate(); } catch (e) {} };
+  let saveNote = '', redraw = () => {};
   const save = (changes) => {
     const raw = { ...DEFAULTS, ...(window.__sftPatchConfig?.[NAME] ?? {}), ...changes };
     (window.__sftPatchConfig ??= {})[NAME] = raw;                 // shown at once
@@ -337,53 +297,25 @@
                   () => settingsFor(f));
   };
 
-  const AREA = { position: 'absolute', left: '0px', bottom: '0px', width: '920px' };
-
-  class SftScrollStrips extends Base {
-    componentDidMount() { inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
-    componentWillUnmount() { clearInterval(this.timer); }
-    render() {
-      try {
-        if (!learn()) return null;
-        const out = [];
-        for (const f of FS.frames ?? []) {
-          const dock = f?.docking?.dockLocation;
-          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(...stripsFor(f), ...gearFor(f));
-        }
-        // Our pieces are drawn from one shared page (1860 x 2048). Placed after the dashboard's
-        // own content, they moved whenever it changed size (its buttons grow under the laser),
-        // which showed as jitter. So they sit in a fixed corner: the bottom left (the Android
-        // Mirror's layer has the right).
-        return out.length ? el('div', { key: 'sft-scroll-strips-area', style: AREA }, ...out) : null;
-      } catch (e) { return null; }
+  // Drawn as the last child of the dashboard app, in the page's bottom-left corner (L.mount; the
+  // Android Mirror's pieces have the right).
+  const render = () => {
+    const c = L.components();
+    if (!c) return null;
+    ({ PANEL, XFORM } = c);
+    const out = [];
+    for (const f of FS.frames ?? []) {
+      const dock = f?.docking?.dockLocation;
+      if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(...stripsFor(f), ...gearFor(f));
     }
-  }
-
-  // Mount ours as the last child of the dashboard app's scene-graph root (<vsg-app>), after its
-  // existing children, so nothing already there moves. (window.Dashboard itself is a MobX observer,
-  // whose reactive render can't be wrapped once mounted.)
-  let app = null;
-  for (const stack = fibers(); stack.length;) {
-    const fb = stack.pop();
-    if (fb.stateNode && typeof fb.stateNode.toggleDebugPointer === 'function') { app = fb.stateNode; break; }
-    if (fb.sibling) stack.push(fb.sibling);
-    if (fb.child) stack.push(fb.child);
-  }
-  if (!app) return 'not patched: dashboard app component not found';
-  const hadOwnRender = Object.prototype.hasOwnProperty.call(app, 'render');
-  const origRender = app.render;
-  app.render = function (...args) {
-    const tree = origRender.apply(this, args);
-    const kids = tree?.props?.children;
-    if (!tree || typeof tree !== 'object' || !Array.isArray(kids)) return tree;
-    SAMPLE ??= tree;
-    return Object.assign({}, tree, { props: Object.assign({}, tree.props,
-      { children: [...kids, el(SftScrollStrips, { key: 'sft-scroll-strips' })] }) });
+    return out;
   };
-  try { app.forceUpdate(); } catch (e) {}
+  const mounted = L.mount('sft-scroll-strips', render, 'left');
+  if (!mounted) return 'not patched: dashboard app component not found';
+  redraw = mounted.redraw;
   all[NAME] = {
     version: VERSION, stats,
-    stop: () => { if (hadOwnRender) app.render = origRender; else delete app.render; try { app.forceUpdate(); } catch (e) {} },
+    stop: () => { mounted.stop(); onUp(); },
     configChanged: () => {},                                // ours re-renders twice a second anyway
   };
   return 'patched';

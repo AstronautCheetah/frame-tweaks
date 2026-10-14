@@ -17,31 +17,20 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'float-grab', VERSION = 2, DASH = 1, WORLD = 4;
+  const NAME = 'float-grab', VERSION = 3;
   const RELEASE_DEG = 2;            // trigger moved this far from where it was: a click ended or began
   const NO_REDOCK_MS = 1500;        // after putting it down, ignore Return to Dashboard this long
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
-  const FS = window.FrameStore, V = window.VRHTML;
+  const FS = window.FrameStore, V = window.VRHTML, L = window.__sftLib;
   if (!FS || !V?.VROverlay?.GetPrimaryDashboardDevice) return 'not patched: dashboard objects missing';
+  if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
+  const DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
 
   // The React component that floats frame f (exists once the window is in the world).
-  const mover = (f) => {
-    const rootEl = document.getElementById('root') ?? document.body.firstElementChild;
-    const key = rootEl && Object.keys(rootEl).find((k) => k.startsWith('__reactContainer$'));
-    if (!key) return null;
-    const stack = [rootEl[key]];
-    let n = 0;
-    while (stack.length && n++ < 50000) {
-      const fb = stack.pop();
-      const s = fb.stateNode;
-      if (s && typeof s.startFloatingWindowMove === 'function' && s.props?.frame === f) return s;
-      if (fb.sibling) stack.push(fb.sibling);
-      if (fb.child) stack.push(fb.child);
-    }
-    return null;
-  };
+  const mover = (f) => L.walk((fb) => typeof fb.stateNode?.startFloatingWindowMove === 'function' &&
+                                     fb.stateNode.props?.frame === f)?.stateNode ?? null;
   const hand = () => {           // 'left' / 'right' for the controller pointing at the dashboard
     const role = V.VRSystem.GetControllerRoleForTrackedDeviceIndex(V.VROverlay.GetPrimaryDashboardDevice());
     return role === 1 ? 'left' : role === 2 ? 'right' : null;
