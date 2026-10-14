@@ -84,7 +84,7 @@ undo: "`./install.sh uninstall hello-frame`"
 |---|---|
 | `title` | Its name in the list. |
 | `emoji` | Its emoji in the README tables. |
-| `category` | Its group in the list: an existing one (Accessibility, Convenience, VR windows, Privacy & security, System, Developer) or a new one. |
+| `category` | Its group in the list: an existing one (Accessibility, Convenience, VR environment, Privacy & security, System, Developer) or a new one. |
 | `tier` | `core` (a fix for the Frame), `extras` (an app setup) or `helper` (something other tweaks need). |
 | `summary` | One line, shown in the list and in `./install.sh list`. |
 | `what`, `why` | Its details page. |
@@ -188,7 +188,7 @@ That gives you `$TWEAK_DIR` (the tweak's own folder: use it for its files), `$BI
 | `alarm_fetch REPO NAME DEST` | An Arch Linux ARM package, signature-checked, unpacked into DEST. `runs_here BINARY` says whether it can run on SteamOS. |
 | `need_brew` | Homebrew, installed if needed (with the user's consent). |
 | `ensure_tweaks_venv`, `install_py_tool FILE` | A Python program in `~/.local/bin`, run on Frame Tweaks' shared venv. `pip_pinned VENV PKG` installs packages at tested versions. |
-| `install_dashboard_patch NAME FILE`, `remove_dashboard_patch NAME`, `dashboard_patch_status NAME TEXT` | A SteamVR dashboard patch (see the VR windows tweaks; depend on `vr-dashboard`). |
+| `install_dashboard_patch NAME FILE`, `remove_dashboard_patch NAME`, `dashboard_patch_status NAME TEXT` | A SteamVR dashboard patch (see the VR environment tweaks; depend on `vr-dashboard`). |
 | `sysctl_user ...` | `systemctl --user`, also from a desktop-mode shell. |
 | `tweak_dir ID` | Another tweak's folder, to run its scripts. |
 

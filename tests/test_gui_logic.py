@@ -85,7 +85,7 @@ class Manifest(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         for c in rows:
             self.assertTrue((c["dir"] / "install.sh").exists(), c["id"])
-            self.assertIn(c["category"], {"Accessibility", "Convenience", "VR windows", "Privacy & security", "System", "Developer"})
+            self.assertIn(c["category"], {"Accessibility", "Convenience", "VR environment", "Privacy & security", "System", "Developer"})
 
 
 
@@ -98,6 +98,30 @@ class PendingChanges(unittest.TestCase):
         self.assertEqual(w.pending_changes(), ([], []))          # nothing ticked differently
         w.wanted = {"b": True, "a": False, "c": True, "d": True}
         self.assertEqual(w.pending_changes(), (["b"], ["a"]))    # c only has a warning: not a change
+
+class Links(unittest.TestCase):
+    """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
+    def test_with_copy(self):
+        out = gui.with_copy("<a href='https://x.org/a?b=1'>x</a> and <a href=\"file:///tmp/r.md\">r</a> "
+                            "<a href='update'>Update</a>")
+        self.assertIn("href='copy:https://x.org/a?b=1'", out)
+        self.assertIn('href="copy:file:///tmp/r.md"', out)
+        self.assertNotIn("copy:update", out)
+        self.assertNotIn("copy:copy:", gui.with_copy(out))      # a 📋 isn't given one of its own
+        self.assertEqual(gui.md_text("runs [x](https://e.org/a) & <b>"),
+                         "runs <a style='color:#7fb2e5' href='https://e.org/a'>x</a> &amp; &lt;b&gt;")
+
+    def test_copy_and_details_page(self):
+        from PyQt6.QtWidgets import QApplication, QTextBrowser
+        self.app = QApplication.instance() or QApplication([])
+        gui.follow_link("copy:https://example.com/x#y")
+        self.assertEqual(QApplication.clipboard().text(), "https://example.com/x#y")
+        window = mock.Mock(latest={})
+        page = gui.Details(window, gui.component("clipboard"), None)
+        html = page.findChild(QTextBrowser).toHtml()
+        self.assertIn("copy:https://github.com/", html)
+        self.assertNotIn('href="../', html)
+
 
 class PacksPage(unittest.TestCase):
     """The Packs page lists a user's pack as not trusted; Trust… asks once more, then uses it."""

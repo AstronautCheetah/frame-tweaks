@@ -343,7 +343,7 @@ remove_files() {
 export QT_VENV="$HOME/.local/share/arrowpad/venv"   # PyQt6, shared by arrowpad and nordvpn-tray
 
 # --- SteamVR dashboard patches (packs/official/vr-dashboard/) ---------------------------------------------
-# A VR windows tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
+# A VR environment tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
 VR_DASHBOARD="$HOME/.local/share/frame-tweaks/vr-dashboard"
 install_dashboard_patch() {    # install_dashboard_patch NAME FILE
     [ -x "$VR_DASHBOARD/sft-dashboard" ] || "$(tweak_dir vr-dashboard)/install.sh" || return 1

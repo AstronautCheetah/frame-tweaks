@@ -109,7 +109,7 @@ while :; do
     # phone. (It ends with scrcpy, so it's started again with each reconnect.)
     # The Steam session puts laser clicks on so narrow a window at its left edge: phone-touch
     # takes them from a layer over the window instead and sends them to the phone as touches.
-    # (Desktop mode or no VR windows helper: it just exits. A reconnect replaces it.) With a
+    # (Desktop mode or no VR environment helper: it just exits. A reconnect replaces it.) With a
     # scrcpy it wasn't tested with, neither runs: a plain 16:9 window, where clicks land right.
     extras=1
     if [ -x "$HOME/.local/bin/phone-touch" ] && [ "${DISPLAY:-}" = ":0" ]; then

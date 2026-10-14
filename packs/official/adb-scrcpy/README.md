@@ -125,7 +125,7 @@ the window normally there.
 SteamVR starts every floating window as wide as a standard one whatever its shape (so the upright
 phone came up over 2 m tall), and keeps that width when its shape changes (so turning the phone
 sideways shrank it to a strip). A small dashboard patch (`patch.js`, installed when the
-[VR windows](../vr-dashboard/) helper is) gives a floating window that has been upright a long
+[VR environment](../vr-dashboard/) helper is) gives a floating window that has been upright a long
 side of 0.8 m, through the dashboard's own panel-height override: upright it's 0.8 m tall,
 sideways 0.8 m wide, so turning the phone just turns the window. Docked in the dashboard, an
 upright window gets a standard window's height.

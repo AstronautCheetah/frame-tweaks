@@ -1,7 +1,7 @@
 ---
 title: Back to the previous window
 emoji: ↩️
-category: VR windows
+category: VR environment
 tier: core
 summary: >-
   After you float a window out of the dashboard, the dashboard shows the window it showed before
@@ -53,7 +53,7 @@ window before it, without Steam showing in between.
 <!-- /generated:glance -->
 
 - Switch it on or off by ticking **Back to the previous window** in the installer window's
-  **VR windows** group (it stops in the running dashboard within a few seconds).
+  **VR environment** group (it stops in the running dashboard within a few seconds).
 - It only acts right after a float: if you dock the window again within that time, or pick
   another window yourself, it does nothing. Floating a window you opened from a world window,
   or one with nothing shown before it, also leaves the dashboard as it is.

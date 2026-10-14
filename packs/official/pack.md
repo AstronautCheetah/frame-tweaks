@@ -2,7 +2,7 @@
 name: Frame Tweaks
 author: Frame Tweaks
 api: 1
-categories: [Accessibility, Convenience, VR windows, Privacy & security, System, Developer]
+categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Developer]
 order:
   - dictation
   - whisper-frame

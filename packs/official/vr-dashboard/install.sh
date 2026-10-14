@@ -1,5 +1,5 @@
 #!/bin/bash
-# SteamVR dashboard patching: the shared part of the VR windows tweaks (Curved world windows,
+# SteamVR dashboard patching: the shared part of the VR environment tweaks (Curved world windows,
 # Back to the previous window). Turns on the dashboard's local DevTools port while SteamVR runs
 # and injects each installed tweak's patch; installing or removing a tweak adds or removes its patch.
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
@@ -42,7 +42,7 @@ UNIT
 # While SteamVR runs: inject the patches (and again after a dashboard reload).
 cat > "$U/sft-dashboard.service" <<UNIT
 [Unit]
-Description=SteamVR dashboard patches: VR windows tweaks (Frame Tweaks)
+Description=SteamVR dashboard patches: VR environment tweaks (Frame Tweaks)
 After=steamvr.service
 PartOf=steamvr.service
 

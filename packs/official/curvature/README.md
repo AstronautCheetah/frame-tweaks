@@ -1,7 +1,7 @@
 ---
 title: Curved world windows
 emoji: 🌀
-category: VR windows
+category: VR environment
 tier: core
 summary: >-
   Windows you float into the world start curved, like the dashboard (Toggle Curvature still

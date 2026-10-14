@@ -16,7 +16,7 @@
 #   ./install.sh settings ID [KEY=VALUE... | --reset]   show or change its settings (scroll-strips, adb-scrcpy)
 #   ./install.sh mods [trust|untrust PACK | check FOLDER]   packs of tweaks (docs/mods.md)
 #   ./install.sh hide|unhide ID...   hide a row in the installer window (or show it again)
-#   ./install.sh hide-group|unhide-group NAME   the same for a whole group, e.g. "VR windows"
+#   ./install.sh hide-group|unhide-group NAME   the same for a whole group, e.g. "VR environment"
 #   ./install.sh wallet lock|unlock|status      the shared KDE wallet (wallet-unlock)
 #   ./install.sh wallet-apps [ARGS]  apps that use the wallet (wallet-launcher; --help for its options)
 #   ./install.sh timers [ARGS]       close-after timers for apps (app-timers; --help for its options)
@@ -200,7 +200,7 @@ cmd_reinstall_ids() {
     check_ids "$@"
     local id
     # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
-    # dashboard patches of the tweaks that use the VR windows helper.)
+    # dashboard patches of the tweaks that use the VR environment helper.)
     for id in "$@"; do bold "── removing $id"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
     cmd_install "$@"
 }
