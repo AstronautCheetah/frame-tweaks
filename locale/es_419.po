@@ -105,7 +105,7 @@ msgid "Still checking status; try again in a moment."
 msgstr ""
 "Todavía se está revisando el estado; vuelve a intentarlo en un momento."
 
-#: gui/frame-tweaks-gui.py:1230 install.sh:293
+#: gui/frame-tweaks-gui.py:1230 install.sh:319
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
 
@@ -143,12 +143,12 @@ msgstr "Copiar para informe de error"
 msgid "Copied"
 msgstr "Copiado"
 
-#: gui/frame-tweaks-gui.py:155 install.sh:313
+#: gui/frame-tweaks-gui.py:155 install.sh:339
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 "Presiona Enter para cerrar, o presiona el botón X que flota abajo para cerrar."
 
-#: gui/frame-tweaks-gui.py:156 install.sh:312
+#: gui/frame-tweaks-gui.py:156 install.sh:338
 msgid "Press Enter to close…"
 msgstr "Presiona Enter para cerrar…"
 
@@ -164,7 +164,7 @@ msgstr "Enlace copiado"
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:305 install.sh:155 lib/common.sh:407 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:305 install.sh:181 lib/common.sh:409 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
 msgid "not installed"
 msgstr "no instalado"
 
@@ -295,7 +295,7 @@ msgstr "Restablecer valores predeterminados"
 msgid "Working… (a download can take a minute)"
 msgstr "Trabajando… (una descarga puede tardar un minuto)"
 
-#: gui/frame-tweaks-gui.py:561 packs/original/snip/frame-snip:572 install.sh:179
+#: gui/frame-tweaks-gui.py:561 packs/original/snip/frame-snip:572 install.sh:205
 msgid "Done."
 msgstr "Listo."
 
@@ -772,57 +772,57 @@ msgstr "menos de un minuto"
 msgid "{h} h {m} min"
 msgstr "{h} h {m} min"
 
-#: install.sh:141
+#: install.sh:167
 msgid "(experimental)"
 msgstr "(experimental)"
 
-#: install.sh:143
+#: install.sh:169
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 "(experimental: depende de partes internas de SteamVR; consulta ./install.sh info ID)"
 
-#: install.sh:163
+#: install.sh:189
 msgid "install what? (./install.sh list)"
 msgstr "¿instalar qué? (./install.sh list)"
 
-#: install.sh:174 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
+#: install.sh:200 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
 msgid "%s failed"
 msgstr "%s falló"
 
-#: install.sh:178
+#: install.sh:204
 msgid "Failed: %s"
 msgstr "Falló: %s"
 
-#: install.sh:183
+#: install.sh:209
 msgid "uninstall what?"
 msgstr "¿desinstalar qué?"
 
-#: install.sh:190
+#: install.sh:216
 msgid "Nothing installed."
 msgstr "No hay nada instalado."
 
-#: install.sh:200
+#: install.sh:226
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 
-#: install.sh:205 install.sh:216
+#: install.sh:231 install.sh:242
 msgid "removing %s"
 msgstr "quitando %s"
 
-#: install.sh:211
+#: install.sh:237
 msgid "reinstall what?"
 msgstr "¿reinstalar qué?"
 
-#: install.sh:222
+#: install.sh:248
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr "--to necesita una versión, p. ej. v0.3.1"
 
-#: install.sh:225
+#: install.sh:251
 msgid "Updating the checkout"
 msgstr "Actualizando la copia local"
 
-#: install.sh:229
+#: install.sh:255
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
@@ -830,104 +830,104 @@ msgstr ""
 "Esta copia local y la rama main de GitHub se separaron. Si no tienes trabajo local que\n"
 "conservar: git reset --hard @{upstream}"
 
-#: install.sh:232
+#: install.sh:258
 msgid "git pull failed; not reinstalling"
 msgstr "git pull falló; no se reinstala"
 
-#: install.sh:236
+#: install.sh:262
 msgid "couldn't reach GitHub; not updating"
 msgstr "no se pudo conectar con GitHub; no se actualiza"
 
-#: install.sh:238
+#: install.sh:264
 msgid "no release found"
 msgstr "no se encontró ninguna versión"
 
-#: install.sh:239
+#: install.sh:265
 msgid "no release %s"
 msgstr "no existe la versión %s"
 
-#: install.sh:241
+#: install.sh:267
 msgid "Updating to %s (%s channel)"
 msgstr "Actualizando a %s (canal %s)"
 
-#: install.sh:251
+#: install.sh:277
 msgid "Nothing installed yet."
 msgstr "Todavía no hay nada instalado."
 
-#: install.sh:254
+#: install.sh:280
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 "Revisando las partes de SteamOS/SteamVR de las que dependen los ajustes"
 
-#: install.sh:263
+#: install.sh:289
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 "¿Configurar la ventana completa del instalador? Necesita PyQt6 (unos 280 MB, compartido con Arrow Pad y la bandeja de NordVPN).\\n\\nNo = usar la lista simple."
 
-#: install.sh:265
+#: install.sh:291
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr "No se pudo instalar PyQt6; se usará la lista simple."
 
-#: install.sh:286
+#: install.sh:312
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 "Marca lo que quieras instalar. Desmarcar un ajuste instalado lo quita."
 
-#: install.sh:298
+#: install.sh:324
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 "No se seleccionó nada, así que no se quitará nada. Para quitar todo, usa: %s"
 
-#: install.sh:301
+#: install.sh:327
 msgid "Remove tweaks?"
 msgstr "¿Quitar ajustes?"
 
-#: install.sh:302
+#: install.sh:328
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 "Estos ajustes instalados se desmarcaron y se QUITARÁN:\\n\\n  %s\\n\\n¿Continuar?"
 
-#: install.sh:340
+#: install.sh:366
 msgid "stopped %s's running programs"
 msgstr "se detuvieron los programas en ejecución de %s"
 
-#: install.sh:363
+#: install.sh:389
 msgid "%s migration failed"
 msgstr "falló la migración de %s"
 
-#: install.sh:368
+#: install.sh:394
 msgid "%s what? (./install.sh list)"
 msgstr "¿%s qué? (./install.sh list)"
 
-#: install.sh:372
+#: install.sh:398
 msgid "%s: held (updates leave it as it is)"
 msgstr "%s: retenido (las actualizaciones no lo cambian)"
 
-#: install.sh:373
+#: install.sh:399
 msgid "%s: updated normally again"
 msgstr "%s: se actualiza normalmente otra vez"
 
-#: install.sh:414
+#: install.sh:440
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
 
-#: install.sh:448
+#: install.sh:474
 msgid "run what?"
 msgstr "¿ejecutar qué?"
 
-#: install.sh:449
+#: install.sh:475
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
-#: install.sh:459
+#: install.sh:485
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr "Se quitó 'Frame Tweaks' del menú de apps."
 
-#: install.sh:460
+#: install.sh:486
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr "Se agregó 'Frame Tweaks' al menú de apps."
 
@@ -959,66 +959,66 @@ msgstr "modo escritorio"
 msgid "Fetching %s"
 msgstr "Descargando %s"
 
-#: lib/common.sh:267
+#: lib/common.sh:269
 msgid ""
 "The tested versions of %s don't install on this Python (%s); trying the newest."
 msgstr ""
 "Las versiones probadas de %s no se instalan en este Python (%s); probando la más reciente."
 
-#: lib/common.sh:275
+#: lib/common.sh:277
 msgid "Creating Python venv with jeepney"
 msgstr "Creando el venv de Python con jeepney"
 
-#: lib/common.sh:325
+#: lib/common.sh:327
 msgid "restored %s"
 msgstr "se restauró %s"
 
-#: lib/common.sh:326
+#: lib/common.sh:328
 msgid "removed %s (it didn't exist before)"
 msgstr "se quitó %s (no existía antes)"
 
-#: lib/common.sh:350
+#: lib/common.sh:352
 msgid "restored KDE settings changed by %s"
 msgstr "se restauró la configuración de KDE que cambió %s"
 
-#: lib/common.sh:376
+#: lib/common.sh:378
 msgid "removed %s"
 msgstr "se quitó %s"
 
-#: lib/common.sh:396
+#: lib/common.sh:398
 msgid "Active now."
 msgstr "Activo ahora."
 
-#: lib/common.sh:398
+#: lib/common.sh:400
 msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
 msgstr ""
 "Activo desde el próximo inicio de SteamVR (reinicia el equipo, o reinicia SteamVR desde su menú)."
 
-#: lib/common.sh:400
+#: lib/common.sh:402
 msgid "Active from the next SteamVR start."
 msgstr "Activo desde el próximo inicio de SteamVR."
 
-#: lib/common.sh:408
+#: lib/common.sh:410
 msgid "installed (active while SteamVR runs)"
 msgstr "instalado (activo mientras SteamVR está en ejecución)"
 
-#: lib/common.sh:413
+#: lib/common.sh:415
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 "esperando un reinicio de SteamVR (reinicia SteamVR o el equipo una vez)"
 
-#: lib/common.sh:414
+#: lib/common.sh:416
 msgid "not responding"
 msgstr "no responde"
 
-#: lib/common.sh:430
+#: lib/common.sh:432
 msgid ""
 "release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 "la versión %s no está firmada con la clave de versiones de Frame Tweaks; se continúa (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 
-#: lib/common.sh:434
+#: lib/common.sh:436
 msgid "This can mean it was tampered with. Check %s"
 msgstr "Esto puede significar que fue alterada. Revisa %s"
 

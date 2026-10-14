@@ -73,7 +73,8 @@ Two places choose their language differently:
   `Name[es_419]=…` lines, for a system set to that language) and its English
   (`X-Frame-Tweaks-Name=…`); its plain `Name=` is put in the keyboard's language at install and
   again whenever Steam saves a new keyboard layout (a systemd path unit,
-  `frame-tweaks-menus.path`, runs `i18n.py menus`; nothing polls). Reinstall a tweak after its
+  `frame-tweaks-menus.path`, runs `i18n.py menus`; nothing polls). The entries are shared by VR
+  and desktop mode, so Steam's VR keyboard decides for both. Reinstall a tweak after its
   translation changes.
 - **The ⚙ panels in SteamVR's dashboard** (scroll strips, Android Mirror) follow the keyboard
   like the window: vr-dashboard's `sft-dashboard` sends their text in the current language
