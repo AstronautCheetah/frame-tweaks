@@ -312,6 +312,56 @@ class PreferencesPage(unittest.TestCase):
                 self.assertEqual(gui.sft.uninstall_settings(), "keep")
                 self.assertFalse(buttons["Remove its settings too"].isChecked())
 
+    def test_deleting_what_uninstalled_tweaks_left(self):
+        """Only tweaks known not to be installed: one still being checked counts as installed."""
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            home = Path(d)
+            for p in (".config/arrowpad.json", ".config/frame-tweaks/snip.json", ".config/frame-tweaks/dictate.conf"):
+                (home / p).parent.mkdir(parents=True, exist_ok=True)
+                (home / p).write_text("{}")
+            with mock.patch.object(Path, "home", lambda: home):
+                window = mock.Mock()
+                window.state = {"arrowpad": (1, "not installed"), "snip": (0, "ok")}       # (dictation: not known yet)
+                page = gui.Preferences(window)
+                buttons = {b.text(): b for b in page.findChildren(QPushButton)}
+                buttons["Delete settings left by uninstalled tweaks…"].click()
+                self.assertFalse(page.leftovers.isHidden())
+                self.assertIn("Arrow Pad: ~/.config/arrowpad.json", page.leftovers.text.text())
+                self.assertNotIn("snip.json", page.leftovers.text.text())
+                self.assertNotIn("dictate.conf", page.leftovers.text.text())
+                page.leftovers.yes.click()
+                self.assertFalse((home / ".config/arrowpad.json").exists())
+                self.assertTrue((home / ".config/frame-tweaks/snip.json").exists())
+                self.assertTrue((home / ".config/frame-tweaks/dictate.conf").exists())
+                window.say.assert_called_with("Deleted 1 setting.", good=True)
+                buttons["Delete settings left by uninstalled tweaks…"].click()          # nothing left now
+                window.say.assert_called_with("No settings left behind by uninstalled tweaks.", good=True)
+
+    def test_uninstall_frame_tweaks_asks_then_hands_over(self):
+        from PyQt6.QtWidgets import QApplication, QCheckBox, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        window = mock.Mock()
+        page = gui.Preferences(window)
+        buttons = {b.text(): b for b in page.findChildren(QPushButton)}
+        boxes = {b.text(): b for b in page.findChildren(QCheckBox)}
+        self.assertTrue(boxes["Uninstall every tweak first"].isChecked())
+        boxes["Uninstall every tweak first"].setChecked(False)
+        boxes["Delete the settings too"].setChecked(True)
+        buttons["Uninstall Frame Tweaks…"].click()
+        self.assertIn("The tweaks stay installed.", page.leaving.text.text())
+        self.assertIn("Settings are deleted.", page.leaving.text.text())
+        window.uninstall_self.assert_not_called()                     # (asked first)
+        page.leaving.yes.click()
+        window.uninstall_self.assert_called_once_with(keep_tweaks=True, settings="remove")
+
+    def test_window_runs_uninstall_self_as_planned(self):
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(out):
+            gui.Window.uninstall_self(mock.Mock(), keep_tweaks=False, settings="keep")
+        self.assertEqual(out.getvalue().strip(), "would run: ./install.sh uninstall-self --keep-settings")
+
 
 if __name__ == "__main__":
     unittest.main()

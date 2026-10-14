@@ -9,7 +9,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 import i18n  # (lib/ is on the path)
-from i18n import _, N_
+from i18n import _, N_, ngettext
 import sft
 
 WINDOW = sft.CONF / "window.json"
@@ -111,6 +111,29 @@ class Preferences(QWidget):
             self.uninstall_buttons[value] = b
         grid.addStretch(1)
         rows.addLayout(grid)
+        # Settings kept earlier by tweaks no longer installed (./install.sh forget-settings).
+        forget = QPushButton(_("Delete settings left by uninstalled tweaks…"))
+        forget.clicked.connect(lambda: self.list_leftovers())
+        rows.addWidget(forget, 0, Qt.AlignmentFlag.AlignLeft)
+        self.leftovers = self.ask_box(rows, _("Delete them"), lambda: self.delete_leftovers())
+
+        # Frame Tweaks itself (./install.sh uninstall-self, in a terminal, as installs are).
+        rows.addWidget(self.heading(_("Uninstalling Frame Tweaks")))
+        self.drop_tweaks = QCheckBox(_("Uninstall every tweak first"))
+        self.drop_tweaks.setChecked(True)
+        rows.addWidget(self.drop_tweaks)
+        rows.addWidget(self.about(_("Off: they stay installed and keep working, but nothing updates them, and "
+                                    "removing them later takes Frame Tweaks again.")))
+        self.drop_settings = QCheckBox(_("Delete the settings too"))
+        self.drop_settings.setChecked(sft.uninstall_settings() == "remove")
+        rows.addWidget(self.drop_settings)
+        rows.addWidget(self.about(_("Frame Tweaks' own, and those of the tweaks it uninstalls or uninstalled "
+                                    "before. Off: they stay, for an install later.")))
+        leave = QPushButton(_("Uninstall Frame Tweaks…"))
+        leave.setObjectName("danger")
+        leave.clicked.connect(lambda: self.ask_uninstall_self())
+        rows.addWidget(leave, 0, Qt.AlignmentFlag.AlignLeft)
+        self.leaving = self.ask_box(rows, _("Uninstall"), lambda: self.uninstall_self(), danger=True)
 
         rows.addWidget(self.heading(_("This window")))
         prefs = window_prefs()
@@ -125,6 +148,80 @@ class Preferences(QWidget):
             text.setContentsMargins(34, 0, 0, 6)
             rows.addWidget(text)
         rows.addStretch(1)
+
+    def about(self, text):
+        a = QLabel(html.escape(text))
+        a.setObjectName("desc")
+        a.setWordWrap(True)
+        a.setContentsMargins(34, 0, 0, 6)
+        return a
+
+    def ask_box(self, rows, yes_label, on_yes, danger=False):
+        """A question shown in place (hidden until asked): its text, Cancel and a yes button."""
+        box = QWidget()
+        box.setObjectName("ask")
+        lay = QVBoxLayout(box)
+        box.text = QLabel()
+        box.text.setWordWrap(True)
+        box.text.setTextFormat(Qt.TextFormat.PlainText)
+        lay.addWidget(box.text)
+        buttons = QHBoxLayout()
+        no = QPushButton(_("Cancel"))
+        no.clicked.connect(box.hide)
+        box.yes = QPushButton(yes_label)
+        box.yes.setObjectName("danger" if danger else "apply")
+        box.yes.clicked.connect(on_yes)
+        buttons.addWidget(no)
+        buttons.addWidget(box.yes)
+        buttons.addStretch(1)
+        lay.addLayout(buttons)
+        box.hide()
+        rows.addWidget(box)
+        return box
+
+    def installed(self):
+        """The tweaks that are (or may be) installed: any whose status isn't known yet counts."""
+        state = getattr(self.window, "state", {}) or {}
+        return {c["id"] for c in sft.components() if (state.get(c["id"]) or (0,))[0] != 1}
+
+    def list_leftovers(self):
+        self.found = sft.leftover_settings(self.installed())
+        if not self.found:
+            self.leftovers.hide()
+            self.window.say(_("No settings left behind by uninstalled tweaks."), good=True)
+            return
+        self.leftovers.text.setText(_("Delete these settings? Their tweaks aren't installed.") + "\n\n" + "\n".join(
+            f"{sft.translated(c)['title']}: {p}" for c, p in self.found))
+        self.leftovers.show()
+
+    def delete_leftovers(self):
+        failed = []
+        for _c, p in self.found:
+            try:
+                sft.remove_setting(p)
+            except OSError:
+                failed.append(p)
+        self.leftovers.hide()
+        if failed:
+            self.window.say(_("Couldn't delete: {paths}").format(paths=", ".join(failed)))
+        else:
+            self.window.say(ngettext("Deleted {n} setting.", "Deleted {n} settings.", len(self.found)).format(
+                n=len(self.found)), good=True)
+
+    def ask_uninstall_self(self):
+        lines = [_("Uninstall Frame Tweaks?"), ""]
+        lines.append(_("Every tweak is uninstalled first.") if self.drop_tweaks.isChecked()
+                     else _("The tweaks stay installed."))
+        lines.append(_("Settings are deleted.") if self.drop_settings.isChecked() else _("Settings are kept."))
+        lines.append(_("Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); "
+                       "this window closes, and a terminal shows each step.").format(folder=sft.REPO))
+        self.leaving.text.setText("\n".join(lines))
+        self.leaving.show()
+
+    def uninstall_self(self):
+        self.leaving.hide()
+        self.window.uninstall_self(keep_tweaks=not self.drop_tweaks.isChecked(),
+                                   settings="remove" if self.drop_settings.isChecked() else "keep")
 
     def heading(self, text):
         h = QLabel(text)

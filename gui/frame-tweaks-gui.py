@@ -87,6 +87,9 @@ QPushButton:hover { background: #3d4855; }
 QPushButton:checked { background: #355b7a; }
 QPushButton#apply { background: #355b7a; font-weight: 600; }
 QPushButton#apply:disabled { background: #161c23; color: #3a434d; }
+QPushButton#danger { background: #7a2e2e; font-weight: 600; }
+QPushButton#danger:hover { background: #963838; }
+QWidget#ask { background: #141b23; border: 1px solid #2a3542; border-radius: 8px; }
 QPushButton#info { padding: 6px 10px; }
 QPushButton#info:disabled { color: #3a434d; }
 QWidget#timer { background: transparent; }
@@ -1348,6 +1351,22 @@ class Window(QWidget):
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
         in_terminal(self.proc, cmd)
+
+    def uninstall_self(self, keep_tweaks, settings):
+        """⚙ Preferences → Uninstall Frame Tweaks: ./install.sh uninstall-self in a terminal, and this
+        window closes (it runs from the folder and the Python setup that go)."""
+        flags = (["--keep-tweaks"] if keep_tweaks else []) + [f"--{settings}-settings"]
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
+            print("would run: ./install.sh uninstall-self " + " ".join(flags))
+            return
+        cmd = f"cd {shlex.quote(str(REPO))} && ./install.sh uninstall-self {' '.join(flags)}; echo; read -rp {close_prompt()}"
+        # (detached: it must outlive this window, which quits at once)
+        ok, _pid = QProcess.startDetached("bash", ["-c", 'exec konsole --separate -e bash -c "$1" >/dev/null 2>&1',
+                                                  "konsole", cmd])
+        if ok:
+            QApplication.instance().quit()
+        else:
+            self.say(_("Couldn't open a terminal: run ./install.sh uninstall-self in {folder}").format(folder=REPO))
 
     def eventFilter(self, obj, ev):
         """In VR: a haptic tick when the laser moves onto a button or tick box, a firmer pulse
