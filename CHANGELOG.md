@@ -2,8 +2,16 @@
 
 ## Unreleased
 
+### Added
+- **Screenshots on details pages:** pictures in a tweak's README now show in the installer
+  window too. Arrow Pad's shows its main and Tools layers.
+
 ### Fixed
+- **Open packs folder** opened Kate when the installer window was floating in VR: folders and
+  files now open in their default app as desktop mode sets it (Dolphin), wherever it's running.
 - **A tweak's README on its details page** showed in a smaller font than the rest of the window.
+- **Arrow Pad's README** showed an old layout; it now shows the three layers, and Dictation's
+  README points to **Tools → 🎤**.
 
 ## 0.6.0 (2026-10-14)
 

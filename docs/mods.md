@@ -57,7 +57,8 @@ when one replaces another.
 
 A tweak's `README.md` starts with a block of YAML between two `---` lines. Everything Frame
 Tweaks knows about the tweak comes from there. The rest of the file is its documentation,
-shown on its details page.
+shown on its details page, pictures included: `![Alt text](screenshot.png)` with a path relative
+to the README shows the file from the tweak's folder (wide ones are scaled to fit).
 
 ```yaml
 ---

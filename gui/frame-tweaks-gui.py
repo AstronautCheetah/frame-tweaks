@@ -16,13 +16,14 @@ import shlex
 import subprocess
 import sys
 import time
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6.QtCore import QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
-from PyQt6.QtGui import QCursor, QDesktopServices, QIcon
+from PyQt6.QtGui import QCursor, QDesktopServices, QIcon, QImage
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
                              QVBoxLayout, QWidget)
@@ -162,7 +163,18 @@ def readme_links(text, comp):
             rel = posixpath.normpath(f"packs/official/{comp['id']}/{link}")
             return GITHUB.rsplit("/tree/", 1)[0] + "/blob/main/" + rel
         return (comp["dir"] / link).resolve().as_uri()
+    # Pictures from the local copy (the window can't fetch web images), links to GitHub.
+    text = re.sub(r"!\[([^\]]*)\]\((?!https?:|file:)([^)\s]+)\)",
+                  lambda m: f"![{m.group(1)}]({(comp['dir'] / m.group(2)).resolve().as_uri()})", text)
     return re.sub(r"\]\((?!https?:|#|mailto:|file:)([^)]+)\)", lambda m: f"]({target(m.group(1))})", text)
+
+
+def fit_images(text, width=860):
+    """Rich text whose local pictures wider than width are shown at that width."""
+    def fit(m):
+        img = QImage(urllib.parse.unquote(m.group(1)[7:]))
+        return m.group(0) if img.isNull() or img.width() <= width else f'<img src="{m.group(1)}" width="{width}" />'
+    return re.sub(r'<img src="(file://[^"]+)"[^>]*>', fit, text)
 
 
 COPY_LINK = re.compile(r"""(<a\b[^>]*?\bhref=(["'])((?:https?|file):[^"']+)\2[^>]*>.*?</a>)""", re.S)
@@ -181,13 +193,16 @@ def md_text(text):
 
 
 def follow_link(url):
-    """What clicking a link does: copy:<url> puts the link on the clipboard; a web link goes to the
-    default browser in whichever session it's running (lib/browser.py); anything else opens."""
+    """What clicking a link does: copy:<url> puts the link on the clipboard; a web link or a file
+    goes to its default app in whichever session that's running (lib/browser.py); anything else
+    opens the usual way."""
     if url.startswith("copy:"):
         QApplication.clipboard().setText(url[5:])
         QToolTip.showText(QCursor.pos(), "Link copied")
     elif url.startswith(("https:", "http:")) and (note := browser.open_url(url)):
         QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
+    elif url.startswith("file:") and (note := browser.open_path(url)):
+        QToolTip.showText(QCursor.pos(), note)
     else:
         QDesktopServices.openUrl(QUrl(url))
 
@@ -347,7 +362,7 @@ class Details(QWidget):
             text = "_No README._"
         readme.setMarkdown(readme_links(text, comp))
         # (toHtml() pins the font it saw; dropping it keeps the window's stylesheet font.)
-        readme.setHtml(re.sub(r'<body style="[^"]*">', "<body>", with_copy(readme.toHtml()), count=1))
+        readme.setHtml(re.sub(r'<body style="[^"]*">', "<body>", fit_images(with_copy(readme.toHtml())), count=1))
         lay.addWidget(readme, 1)
 
     def show_issue(self, latest):
