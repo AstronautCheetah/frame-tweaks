@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import json
+import shutil
 import tempfile
 import textwrap
 import unittest
@@ -103,8 +104,10 @@ class Inherited(unittest.TestCase):
     def test_a_program_speaks_its_parents_language(self):
         """FRAME_TWEAKS_LANG_RESOLVED (the window's or a script's choice) wins over the keyboard,
         except in the installer window itself (INHERIT = False)."""
+        none = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, none, True)
         with mock.patch.object(i18n, "keyboard_language", lambda: "de"), mock.patch.object(i18n, "INHERIT", True), \
-                mock.patch.object(i18n, "ANNOUNCED", Path(tempfile.mkdtemp()) / "none"):     # (no window open)
+                mock.patch.object(i18n, "ANNOUNCED", none / "none"):     # (no window open)
             with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "es_419"}, clear=True):
                 self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
                 with mock.patch.object(i18n, "INHERIT", False):
@@ -325,6 +328,7 @@ class Template(unittest.TestCase):
     def test_manifest_text_is_translated_on_load(self):
         """A tweak's title comes out translated (sft.load), its id and files unchanged."""
         d = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, d, True)
         (d / "de.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Arrow Pad"\nmsgstr "Pfeiltasten"\n', encoding="utf-8")
         import sft
         with mock.patch.object(i18n, "CATALOGUE", i18n.Catalogue(["de"], d)):

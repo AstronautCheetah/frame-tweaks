@@ -8,8 +8,10 @@ import unittest
 os.environ["FRAME_TWEAKS_LANGUAGE"] = "en"
 os.environ["FRAME_TWEAKS_KEYBOARD"] = "0"
 # (the window announces its language to running programs: not to the real ones from a test)
-os.environ["FRAME_TWEAKS_ANNOUNCE_FILE"] = os.path.join(tempfile.mkdtemp(), "language")
-os.environ["FRAME_TWEAKS_PREFERENCE_FILE"] = os.path.join(tempfile.mkdtemp(), "language")   # (⚙ Preferences)
+# (in folders removed when the tests end)
+_ANNOUNCED, _PREFERRED = tempfile.TemporaryDirectory(), tempfile.TemporaryDirectory()
+os.environ["FRAME_TWEAKS_ANNOUNCE_FILE"] = os.path.join(_ANNOUNCED.name, "language")
+os.environ["FRAME_TWEAKS_PREFERENCE_FILE"] = os.path.join(_PREFERRED.name, "language")   # (⚙ Preferences)
 
 
 class English(unittest.TestCase):
