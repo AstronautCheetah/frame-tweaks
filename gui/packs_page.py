@@ -8,6 +8,7 @@ from PyQt6.QtGui import QCursor
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QToolTip, QVBoxLayout, QWidget
 
 import browser  # (lib/ is on the path)
+from i18n import _  # (translations: locale/README.md)
 import sft
 
 STATE = {"official": ("Comes with Frame Tweaks", "#5cc77a"),
@@ -23,13 +24,13 @@ class Packs(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
-        back = QPushButton("← Back")
+        back = QPushButton(_("← Back"))
         back.clicked.connect(window.go_back)
         head.addWidget(back)
-        title = QLabel("Packs")
+        title = QLabel(_("Packs"))
         title.setObjectName("title")
         head.addWidget(title, 1)
-        folder = QPushButton("Open packs folder")
+        folder = QPushButton(_("Open packs folder"))
         folder.setToolTip(str(sft.USER_PACKS))
         folder.clicked.connect(self.open_folder)
         head.addWidget(folder)
@@ -86,15 +87,15 @@ class Packs(QWidget):
             g.addWidget(info, 1)
             if p["state"] != "official":
                 if p["state"] == "trusted":
-                    b = QPushButton("Stop using")
+                    b = QPushButton(_("Stop using"))
                     b.setToolTip("Its tweaks leave the list; installed ones stay until you uninstall them")
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.trust(d, False))
                 elif self.confirming == p["dir"]:
-                    b = QPushButton("Yes: it runs as me")
+                    b = QPushButton(_("Yes: it runs as me"))
                     b.setToolTip("Trust this pack's current files")
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.trust(d, True))
                 else:
-                    b = QPushButton("Trust…")
+                    b = QPushButton(_("Trust…"))
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.confirm(d))
                 g.addWidget(b)
             self.rows.addWidget(row)

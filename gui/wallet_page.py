@@ -16,6 +16,8 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout,
                              QWidget)
 
+from i18n import _  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
+
 from sft import components  # (the tweaks: which one set up an app; lib/ is on the path)
 
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
@@ -243,10 +245,10 @@ class WalletApps(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
-        back = QPushButton("← Back")
+        back = QPushButton(_("← Back"))
         back.clicked.connect(window.go_back)
         head.addWidget(back)
-        title = QLabel("Wallet apps")
+        title = QLabel(_("Wallet apps"))
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
@@ -264,7 +266,7 @@ class WalletApps(QWidget):
         self.wallet_state.setWordWrap(True)
         self.wallet_state.setTextFormat(Qt.TextFormat.RichText)
         status_row.addWidget(self.wallet_state, 1)
-        self.extend = QPushButton("⏱ Extend timer")
+        self.extend = QPushButton(_("⏱ Extend timer"))
         self.extend.clicked.connect(self.extend_timer)
         status_row.addWidget(self.extend)
         self.wallet_toggle = QPushButton()
@@ -274,11 +276,11 @@ class WalletApps(QWidget):
         # How long an unlock lasts (wallet.conf; wallet-unlock reads it). Buttons, not a drop-down:
         # a pop-up list opens as a window of its own in VR.
         hours_row = QHBoxLayout()
-        self.autolock = QCheckBox("Auto-lock")
+        self.autolock = QCheckBox(_("Auto-lock"))
         self.autolock.setToolTip("Lock the wallet by itself: a set time after unlocking, or after 4 h unused")
         self.autolock.clicked.connect(self.toggle_autolock)
         hours_row.addWidget(self.autolock)
-        hours_label = QLabel("after unlocking:")
+        hours_label = QLabel(_("after unlocking:"))
         hours_label.setObjectName("desc")
         hours_row.addWidget(hours_label)
         self.shorter = QPushButton("−")
@@ -398,11 +400,11 @@ class WalletApps(QWidget):
             if a["id"] in WALLET_OWNERS:
                 note += f"<br><span style='color:#6b7783'>Set up by the “{WALLET_OWNERS[a['id']]}” tweak: " \
                         "reinstalling it (↻) adds it back if removed here.</span>"
-            gate = QCheckBox("Password first")
+            gate = QCheckBox(_("Password first"))
             gate.setChecked(a["gate"])
             gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
             gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
-            remove = QPushButton("Remove")
+            remove = QPushButton(_("Remove"))
             remove.setToolTip("Open it the way it opened before (its original launcher)")
             remove.clicked.connect(lambda _=False, a=a: self.run(["--remove", a["id"]], f"{a['name']}: removed"))
             controls = [self.timer_control(a, *timers.get(a["id"], (0, False)))] if APP_TIMERS.exists() else []
@@ -412,7 +414,7 @@ class WalletApps(QWidget):
         for a in candidates:
             electron = is_electron(a)
             note = f"{a['kind']} · {a['id']}" + (" · Electron app: will be told to use the wallet" if electron else "")
-            add = QPushButton("Protect")
+            add = QPushButton(_("Protect"))
             add.setObjectName("run")
             add.clicked.connect(lambda _=False, a=a, el=electron: self.run(
                 (["--electron"] if el else []) + [a["id"]], f"{a['name']}: protected. Reopen it if it's running."))
@@ -452,7 +454,7 @@ class WalletApps(QWidget):
         lay = QHBoxLayout(box)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(4)
-        label = QLabel("Close after")
+        label = QLabel(_("Close after"))
         label.setObjectName("desc")
         value = QLabel(timer_text(minutes))
         value.setMinimumWidth(64)
@@ -468,7 +470,7 @@ class WalletApps(QWidget):
         box.setToolTip("Quit the app after this long with no keyboard, mouse or controller input")
         for w in (label, less, value, more):
             lay.addWidget(w)
-        off = QCheckBox("Headset off")
+        off = QCheckBox(_("Headset off"))
         off.setChecked(headset)
         off.setEnabled(minutes > 0)
         off.setToolTip("Also quit it about 10 s after the headset is taken off" if minutes else

@@ -46,6 +46,16 @@ it was written. If you'd rather your own commits never pick up a tool's attribut
 `git config frame-tweaks.refuseToolTrailers true` makes the hooks refuse them
 (`dev/check-trailers.sh`).
 
+## Translations
+
+Text the installer window shows goes through gettext (`lib/i18n.py`): wrap it as `_("…")`, use
+`ngettext(one, many, n)` for counts and `pgettext(context, "…")` when the same English word needs
+different translations. Build text with placeholders inside the translated string
+(`_("{n} tweaks installed").format(n=n)`), not by joining pieces, so translators see whole
+sentences. A tweak's title, summary, what, why and settings labels are translated
+automatically. After changing marked text, run `dev/i18n.py extract` (CI checks the template is
+current). Translators: see [locale/README.md](locale/README.md).
+
 ## Pinned downloads
 
 For a download from another project, add a `pin` file (`version=`, `url=`, `sha256=` or

@@ -167,6 +167,10 @@
 - **Migrations ran when going back to an older release;** they now run only on the way up.
 
 ### For contributors
+- **Translations can be contributed:** gettext `.po` files in `locale/` (template
+  `locale/frame-tweaks.pot`, made by `dev/i18n.py`; guide in `locale/README.md`). The window's
+  buttons and labels and the official tweaks' names, descriptions and settings are ready to
+  translate; untranslated text stays English.
 - A settings page can include another tweak's settings (`include:`), and a row with both a Run
   action and settings shows a ⚙ beside Run.
 - Settings can have tick boxes (`checkbox: true` on a two-choice option) and buttons that run one

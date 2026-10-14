@@ -32,6 +32,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manifest  # noqa: E402
+import i18n  # noqa: E402
+from i18n import _  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -62,6 +64,7 @@ TRUSTED = CONF / "trusted-packs"                    # "<folder>\t<sha256 of its 
 # a user's packs need trusting first (they run as you), and a tweak of theirs may take the place
 # of one with the same id only by saying `replaces: true`.
 OFFICIAL = REPO / "packs/official"
+OFFICIAL_PACKS = [OFFICIAL]                 # (dev/i18n.py: the packs whose text is in the template)
 USER_PACKS = Path.home() / ".local/share/frame-tweaks/packs"
 API = 1                                             # the newest pack api this version knows
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -72,6 +75,28 @@ OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "r
 # upstream_readme: the README of the project a tweak installs, at the version it pins
 # (dev/fetch-upstream-readmes.py copies it into upstream.md; dev/gen-docs.py appends it).
 UPSTREAM_README = re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/[^/]+/\S+\.md$")
+
+
+def translated(c):
+    """A tweak's manifest text in the user's language (lib/i18n.py; the msgids are the English
+    text, which dev/i18n.py puts in the template). Ids, files and values stay as they are."""
+    if i18n.CATALOGUE.language is None:
+        return c
+    c = dict(c)
+    for k in ("title", "desc", "what", "why", "run_label", "category"):
+        if isinstance(c.get(k), str):
+            c[k] = _(c[k])
+    st = c.get("settings")
+    if st:
+        st = dict(st)
+        for k in ("about", "note"):
+            if isinstance(st.get(k), str):
+                st[k] = _(st[k])
+        st["options"] = [dict(o, title=_(o["title"]), choices=[dict(ch, label=_(ch["label"])) for ch in o.get("choices", [])])
+                         for o in st.get("options", [])]
+        st["actions"] = [dict(a, label=_(a["label"]), about=_(a.get("about", ""))) for a in st.get("actions", [])]
+        c["settings"] = st
+    return c
 
 
 def pack_dirs():
@@ -276,6 +301,7 @@ def load(refresh=False):
             problems.append(f"{i}: needs {', '.join(x for x in comps[i]['deps'] if x not in comps)}, which no pack has")
             del comps[i]
     rows = sorted(comps.values(), key=lambda c: cats.index(c["category"]))     # stable: pack order within
+    rows = [translated(c) for c in rows]
     _CACHE.update(components=rows, packs=packs, problems=problems)
     return _CACHE
 
