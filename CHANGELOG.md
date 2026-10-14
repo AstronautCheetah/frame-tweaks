@@ -36,6 +36,9 @@
   anything else.
 - **NordVPN's ↻ Reinstall keeps your setup:** its connections, key and locations stay, and the VPN
   stays connected (removing it still deletes them).
+- **Two more services are sandboxed:** app timers can't write your home folder any more, and the
+  unit that relabels the menu entries in your keyboard's language can write only Frame Tweaks'
+  menu folders (no network, a private `/tmp`).
 
 ### Removed
 - **Recline** is set aside for now (not offered while it's tested). Installed, it stays until
@@ -54,6 +57,9 @@
 - **The diagnostics report** removes the whole phone name, also one with `( ) + ?` in it.
 - **VR dashboard patching** can't reach a running SteamVR from outside your own setup any more (a
   test's throwaway home stopped the live dashboard's patches).
+- **Running the install command again** on a Frame that has Frame Tweaks updates it as
+  `./install.sh update` does, signature check included: it used to move to the newest release
+  without the check, and without running the installed tweaks' installers again.
 
 ### Fixed
 - **Arrow Pad's Collapse didn't keep the chevron under the laser** when pressed (the button's
@@ -128,6 +134,12 @@
   file, the language the window announces, the user's systemd).
 - **Manifests are read more strictly:** what YAML readers read differently (keys like `on:`,
   `? `, `:` or `#` inside `[...]`, tabs) is refused with its line number (docs/mods.md, "The YAML").
+- **Licences, in full:** `dev/draw-icons.py` draws the Breeze-based menu icons (their source, as
+  Breeze's licence asks: it reproduces them exactly), and icons/README.md says which glyph and
+  colour each is; the Breeze icons' licence is LGPL-3.0-or-later (LICENSES/ renamed to match);
+  Arrow Pad's icons ported from Full Keyboard carry its whole MIT notice; the upstream READMEs
+  reproduced on Full Keyboard's and Shared clipboard's pages say whose they are and their
+  licence. CI runs on Ubuntu 24.04 by name, not whatever "latest" is.
 
 ## 0.6.1 (2026-10-14)
 
