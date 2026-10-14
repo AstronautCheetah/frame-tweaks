@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **Arrow Pad: Collapse / Expand,** a chevron left of Close, as on Screen snip's panel: the pad
+  folds to just the chevron, which stays under the pointer (or the laser, in VR), and it
+  remembers being folded.
 - **⚙ Preferences** in the window, left of Show hidden: the language (follow the keyboard, or
   choose one for every Frame Tweaks program), haptic ticks on the window's buttons, its controller
   buttons in VR, and whether it looks for a new release when it opens.

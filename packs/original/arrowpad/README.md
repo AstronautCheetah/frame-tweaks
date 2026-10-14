@@ -106,8 +106,10 @@ Pag↑*. Other layouts get the English legends.
 ### Moving and sizing
 
 The toolbar above the keys has, from left to right: ⚙ **Settings**, 📌 **Pin**, ⌖ **Reset
-position**, **−** / **+** (size) and, on the right, ✕ **Close**. Pin stops accidental moves;
-its icon shows whether it's on (an upright pin) or off (tilted and crossed out).
+position**, **−** / **+** (size) and, on the right, ⌄ **Collapse** and ✕ **Close**. Pin stops
+accidental moves; its icon shows whether it's on (an upright pin) or off (tilted and crossed out).
+Collapse folds the pad down to just its chevron, ⌃ **Expand**, which stays where it was, under
+the pointer or the laser, as on Screen snip's panel; the pad remembers it next time.
 
 **In desktop mode:** drag the pad's background to move it. **−** / **+** change the key size
 (0.6× to 2×). Reset puts it at the bottom centre of the screen. Opening Arrow Pad again (from

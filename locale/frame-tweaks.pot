@@ -173,11 +173,11 @@ msgstr ""
 msgid "hidden"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:338 packs/original/snip/frame-snip:695 packs/original/snip/frame-snip:700
+#: gui/frame-tweaks-gui.py:338 packs/original/arrowpad/arrowpad.py:173 packs/original/snip/frame-snip:695 packs/original/snip/frame-snip:700
 msgid "Collapse"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:338 packs/original/snip/frame-snip:726
+#: gui/frame-tweaks-gui.py:338 packs/original/arrowpad/arrowpad.py:173 packs/original/snip/frame-snip:726
 msgid "Expand"
 msgstr ""
 
@@ -1998,43 +1998,43 @@ msgstr ""
 msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1032
+#: packs/original/arrowpad/arrowpad.py:1079
 msgid "Keys released"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1033
+#: packs/original/arrowpad/arrowpad.py:1080
 msgid "Shift, Ctrl, Alt and Super were pressed and let go."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1042
+#: packs/original/arrowpad/arrowpad.py:1089
 msgid "Screen snip isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1043
+#: packs/original/arrowpad/arrowpad.py:1090
 msgid "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1143
+#: packs/original/arrowpad/arrowpad.py:1190
 msgid "button size multiplier (default 1.0)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1144
+#: packs/original/arrowpad/arrowpad.py:1191
 msgid "ydotoold socket path"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1145
+#: packs/original/arrowpad/arrowpad.py:1192
 msgid "close a running pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1146
+#: packs/original/arrowpad/arrowpad.py:1193
 msgid "open in desktop mode (even from the VR menu)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1147
+#: packs/original/arrowpad/arrowpad.py:1194
 msgid "open as a floating VR window"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1165
+#: packs/original/arrowpad/arrowpad.py:1212
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
@@ -2208,7 +2208,7 @@ msgid ""
 "{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:171 packs/original/arrowpad/arrowpad.py:838
+#: packs/original/arrowpad/arrowpad.py:171 packs/original/arrowpad/arrowpad.py:885
 msgid "Pin: stop accidental moves"
 msgstr ""
 
@@ -2228,51 +2228,51 @@ msgstr ""
 msgid "Smaller"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:175
+#: packs/original/arrowpad/arrowpad.py:176
 msgctxt "key legend"
 msgid "Tools"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:175
+#: packs/original/arrowpad/arrowpad.py:176
 msgctxt "key legend"
 msgid "Unstick"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:176
+#: packs/original/arrowpad/arrowpad.py:177
 msgctxt "key legend"
 msgid "Launcher"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:176
+#: packs/original/arrowpad/arrowpad.py:177
 msgctxt "key legend"
 msgid "Snip"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:186
+#: packs/original/arrowpad/arrowpad.py:187
 msgid "Graphite"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:190
+#: packs/original/arrowpad/arrowpad.py:191
 msgid "Midnight"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:197
+#: packs/original/arrowpad/arrowpad.py:198
 msgid "Light"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:197
+#: packs/original/arrowpad/arrowpad.py:198
 msgid "Normal"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:197 packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
+#: packs/original/arrowpad/arrowpad.py:198 packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:198 packs/original/scroll-strips/patch.js:221
+#: packs/original/arrowpad/arrowpad.py:199 packs/original/scroll-strips/patch.js:221
 msgid "Haptics"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:198
+#: packs/original/arrowpad/arrowpad.py:199
 msgid "Theme"
 msgstr ""
 
@@ -2280,19 +2280,19 @@ msgstr ""
 msgid "arrowpad: desktop mode isn't running"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:616 packs/original/arrowpad/arrowpad.py:769 packs/original/arrowpad/arrowpad.py:1032 packs/original/arrowpad/arrowpad.py:1042 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+#: packs/original/arrowpad/arrowpad.py:621 packs/original/arrowpad/arrowpad.py:815 packs/original/arrowpad/arrowpad.py:1079 packs/original/arrowpad/arrowpad.py:1089 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:616 packs/original/arrowpad/arrowpad.py:769
+#: packs/original/arrowpad/arrowpad.py:621 packs/original/arrowpad/arrowpad.py:815
 msgid "Arrow Pad (VR)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:838
+#: packs/original/arrowpad/arrowpad.py:885
 msgid "Pinned: tap to allow moving"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:884
+#: packs/original/arrowpad/arrowpad.py:931
 msgid "Done"
 msgstr ""
 

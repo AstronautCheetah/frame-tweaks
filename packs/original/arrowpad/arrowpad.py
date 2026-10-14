@@ -169,7 +169,8 @@ TIPS = {"🎤": N_("Dictation: tap to start (red), tap again to stop; yellow = t
         **{m: N_("{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand")
            for m in MODIFIERS if m != "Super"}}
 TOOL_TIPS = {"settings": N_("Settings: theme and haptics"), "pin": N_("Pin: stop accidental moves"),
-             "reset": N_("Reset position"), "smaller": N_("Smaller"), "larger": N_("Larger"), "close": N_("Close")}
+             "reset": N_("Reset position"), "smaller": N_("Smaller"), "larger": N_("Larger"), "close": N_("Close"),
+             "fold": N_("Collapse"), "unfold": N_("Expand")}
 # Keys whose legend is a word rather than a key name (translated where shown).
 # (context "key legend": a translation short enough for a key, e.g. "Herram." for Herramientas)
 WORDS = {"Tools": NP_("key legend", "Tools"), "Unstick": NP_("key legend", "Unstick"),
@@ -497,6 +498,10 @@ def drawn_icon(name, px=96, color=THEME["legend"]):
             line(-3, -7, -3, 1)
     elif name == "close":
         line(-7, -7, 7, 7); line(7, -7, -7, 7)
+    elif name == "fold":                                      # (ours) Collapse: a down chevron, as Screen snip's
+        line(-8, -3, 0, 5); line(0, 5, 8, -3)
+    elif name == "unfold":                                    # (ours) Expand: an up chevron
+        line(-8, 3, 0, -5); line(0, -5, 8, 3)
     elif name == "Copy":
         path.addRoundedRect(QRectF(-3, -3, 13, 14), 2, 2)
         path.moveTo(4, -6); path.lineTo(4, -9); path.lineTo(-10, -9); path.lineTo(-10, 5); path.lineTo(-6, 5)
@@ -640,6 +645,10 @@ class ArrowPad(QWidget):
             self.tools[name] = self.tool_button(name, _(TOOL_TIPS[name]))
             bar.addWidget(self.tools[name])
         bar.addStretch(1)
+        # Collapse / Expand (chevrons, as on Screen snip's panel), left of Close.
+        self.collapsed, self.toggled, self.settings_were_open = False, False, False
+        self.tools["fold"] = self.tool_button("fold", _(TOOL_TIPS["fold"]))
+        bar.addWidget(self.tools["fold"])
         self.tools["close"] = self.tool_button("close", _(TOOL_TIPS["close"]))
         bar.addWidget(self.tools["close"])
         self.click_swap = ClickSwap(self.restyle)
@@ -650,6 +659,7 @@ class ArrowPad(QWidget):
         self.tools["smaller"].clicked.connect(lambda: self.resize_step(-1))
         self.tools["larger"].clicked.connect(lambda: self.resize_step(+1))
         self.tools["close"].clicked.connect(self.close)
+        self.tools["fold"].clicked.connect(self.toggle_collapsed)
 
         grid = QGridLayout()
         self.grid = grid
@@ -686,6 +696,8 @@ class ArrowPad(QWidget):
                 self.move(QPoint(*cfg["pos"]))
             else:
                 QTimer.singleShot(0, self.reset_position)
+        if cfg.get("collapsed"):
+            self.toggle_collapsed(place=False)       # (as it was left; it opens where it was)
 
     def tool_button(self, name, tip):
         b = QPushButton()
@@ -736,6 +748,40 @@ class ArrowPad(QWidget):
         # Same size as the keys, so the VR panel keeps its shape when settings open.
         self.settings_page.setFixedSize(self.keys_page.sizeHint())
         self.adjustSize()
+        if not self.collapsed:
+            self.expanded_size = self.size()      # (the VR panel's metres per pixel come from it)
+
+    def show_fold(self):
+        b = self.tools["fold"]
+        b.setIcon(icon_for("unfold" if self.collapsed else "fold"))
+        b.setToolTip(_(TOOL_TIPS["unfold" if self.collapsed else "fold"]))
+
+    def toggle_collapsed(self, place=True):
+        """Collapse to just the chevron (now Expand), or back. Its icon stays where it was, under
+        the pointer: the window moves (in VR, the overlay moves the panel: vroverlay.render)."""
+        fold = self.tools["fold"]
+        before = fold.mapToGlobal(fold.rect().center())
+        self.collapsed = not self.collapsed
+        self.toggled = place
+        if self.collapsed:
+            self.settings_were_open = self.settings_page.isVisible()
+        for name, b in self.tools.items():
+            if name != "fold":
+                b.setVisible(not self.collapsed)
+        self.keys_page.setVisible(not self.collapsed and not self.settings_were_open)
+        self.settings_page.setVisible(not self.collapsed and self.settings_were_open)
+        self.show_fold()
+        self.adjustSize()
+        self.layout().activate()
+        if place and not self.overlay:
+            self.move(self.pos() + before - fold.mapToGlobal(fold.rect().center()))
+        self.cfg["collapsed"] = self.collapsed
+        self.save_config()
+
+    def pivot(self):
+        """The chevron's centre (widget pixels): the VR panel keeps it still on Collapse / Expand."""
+        fold = self.tools["fold"]
+        return fold.mapTo(self, fold.rect().center())
 
     def resize_step(self, steps):
         """+/-: in VR the overlay's width (5 cm steps, like Full Keyboard); else key size."""
@@ -769,6 +815,7 @@ class ArrowPad(QWidget):
         self.setWindowTitle(_("Arrow Pad (VR)") if TARGET == "vr" else _("Arrow Pad"))
         for name, b in self.tools.items():
             b.setToolTip(_(TOOL_TIPS[name]))
+        self.show_fold()
         showing = self.settings_page.isVisible()
         old, self.settings_page = self.settings_page, self.make_settings_page()
         self.outer.replaceWidget(old, self.settings_page)
