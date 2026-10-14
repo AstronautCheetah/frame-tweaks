@@ -49,7 +49,8 @@ for pin in packs/*/*/pin packs/*/*/*.pin; do
         rm -rf "$work/src"
         new=$(sha256sum "$work/$name" | cut -c1-64)
         if [ "$new" != "$(val mirror_sha256 "$pin")" ]; then
-            sed -i "s/^mirror_sha256=.*/mirror_sha256=$new/" "$pin"
+            if grep -q '^mirror_sha256=' "$pin"; then sed -i "s/^mirror_sha256=.*/mirror_sha256=$new/" "$pin"
+            else sed -i "/^mirror=/a mirror_sha256=$new" "$pin"; fi      # (a new pin's first copy)
             echo "$pin: mirror_sha256 written; commit it"
         fi
     fi

@@ -1,0 +1,9 @@
+# Pinned upstream source: builds this exact commit (the v1.2.0 release tag). Bump with
+# dev/bump-pin.py recline after reading the release notes and the changes.
+version=1.2.0
+url=https://github.com/new-waifu/Recline-VR
+rev=ee7d4b3cf1ce49904117bbcf623680b2171d3d83
+latest=https://api.github.com/repos/new-waifu/Recline-VR/releases/latest
+mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/recline-vr-ee7d4b3.tar.gz
+mirror_sha256=c7b233ae23af55099f2e0456190a55a33438d3bfa993790e047cf9e18f412d14
+license=MIT (new-waifu/Recline-VR; includes the OpenVR SDK loader and headers, BSD-3-Clause, and DejaVu Sans Mono glyphs; full notices in its THIRD_PARTY.md)

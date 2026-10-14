@@ -13,7 +13,7 @@ for pin in packs/*/*/pin packs/*/*/*.pin; do
     id=${pin#packs/*/}; id=${id%/pin}; id=${id%.pin}
     cur=$(sed -n 's/^version=//p' "$pin"); api=$(sed -n 's/^latest=//p' "$pin")
     json=$(curl -fsSL --max-time 15 "$api" 2>/dev/null) || { echo "$id: pinned $cur; couldn't reach upstream"; continue; }
-    if grep -q '^rev=' "$pin"; then                    # git commit
+    if grep -q '^rev=' "$pin" && [[ $api != */releases/* ]]; then    # git commit (else: a release's)
         new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
         [ "$new" = "$(sed -n 's/^rev=//p' "$pin")" ] && echo "$id: pinned $cur (latest commit)" ||
             echo "$id: pinned $cur; upstream HEAD is ${new:0:7}"

@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- **Recline** (new, VR environment, 🧪): use VR lying down or reclined. One button (or a
+  controller shortcut) makes your view level and forward; it undoes itself when you get up.
+  Builds [new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) v1.2.0 from its pinned
+  source; restart SteamVR after installing. A setting leaves out its room-view fix, which adds a
+  library to the Frame's camera service.
+- For maintainers: a git-commit pin can follow upstream's releases (`latest=` a releases URL);
+  `dev/mirror-pins.sh` now adds `mirror_sha256=` to a pin that has none yet.
 - **Fixed: links in the installer window failed with "Firefox is already running, but is not
   responding"** when the window was floating in VR and the browser was open in desktop mode.
   A web link now goes to your default browser (whichever it is) in the session where it's

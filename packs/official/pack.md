@@ -18,6 +18,7 @@ order:
   - float-return
   - float-grab
   - scroll-strips
+  - recline
   - wallet
   - signal
   - firefox
