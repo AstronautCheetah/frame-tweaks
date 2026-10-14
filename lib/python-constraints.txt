@@ -1,5 +1,7 @@
 # Exact versions for the Python packages the tweaks install with pip (used as a constraints
-# file: `pip install -c lib/python-constraints.txt <package>`). dev/check-pins.sh reports newer ones.
+# file through lib/common.sh pip_pinned, which falls back to the newest versions, with a warning,
+# only when these can't be installed on this Python). dev/check-pins.sh reports newer ones;
+# dev/bump-pin.py python moves to them.
 PyQt6==6.11.0
 PyQt6-Qt6==6.11.2
 PyQt6_sip==13.13.0

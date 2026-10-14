@@ -84,18 +84,23 @@ protected. Avoid changing it while a second wallet service is running (see
   replaced upstream file is refused. **clipboard-sync** is built from a pinned commit with its
   own lock file, using a pinned `rustup-init` (checked against its SHA256) that installs a
   pinned Rust toolchain for the build only. **Python packages** (PyQt6, openvr, jeepney) are
-  installed at the exact versions in `lib/python-constraints.txt`. Pins move only in a reviewed commit (`dev/check-pins.sh`).
+  installed at the exact versions in `lib/python-constraints.txt`. Pins move only in a reviewed
+  commit (`dev/check-pins.sh`, `dev/bump-pin.py`); a weekly GitHub check
+  (`dev/check-upstream.sh`) reports pinned files that changed or vanished upstream.
 - **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors only and
   are checked against Arch Linux ARM's build key (`lib/keys/`, fingerprint
   `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking. The signed package's
   own name must match, and a version older than one installed before is refused, so a mirror
-  can't swap in a different or outdated package.
+  can't swap in a different or outdated package. A new build is installed only if it runs on
+  SteamOS's libraries; otherwise the working copy you have is kept.
 - **Claude Desktop:** SHA256 from Anthropic's apt index over HTTPS. **Claude Code:** Anthropic's
   own installer over HTTPS.
 - **Homebrew's installer** is pinned to a reviewed commit and checked against its SHA256
   (`homebrew/pin`) before it runs with your sudo password; Homebrew and Flathub then verify the
   packages they install.
-- **Python packages** are pinned by version, not by hash: they rely on PyPI's HTTPS.
+- **Python packages** are pinned by version, not by hash: they rely on PyPI's HTTPS. If the
+  pinned versions can't be installed on your Python (say, after a SteamOS update), the installer
+  warns and installs PyPI's newest versions instead.
 - **This project:** `get.sh` and `./install.sh update` install the newest release tag, not
   the moving `main` branch. Tags
   aren't signed yet: `get.sh` trusts GitHub's HTTPS.

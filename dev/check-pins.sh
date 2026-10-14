@@ -26,8 +26,14 @@ for pin in */pin */*.pin; do
         [ "$tc" = "$pinned" ] && echo "$id: Rust $pinned (latest stable)" || echo "$id: Rust $pinned; stable is ${tc:-?}"
     elif [[ $api == *huggingface.co* ]]; then           # model repository revision
         new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
-        [[ $new == "$cur"* ]] && echo "$id: pinned $cur (latest revision)" ||
-            echo "$id: pinned $cur; repository is now at ${new:0:8} (the model file may be unchanged)"
+        if [[ $new == "$cur"* ]]; then echo "$id: pinned $cur (latest revision)"
+        else   # the repository moved on; has our file? (big files: their sha256 is in a header)
+            url=$(sed -n 's/^url=//p' "$pin"); main=${url/\/resolve\/$cur\//\/resolve\/main\/}
+            sha=$(curl -fsSIL --max-time 15 "$main" | tr -d '\r"' | sed -n 's/^x-linked-etag: *\([0-9a-f]\{64\}\)$/\1/Ip' | tail -1)
+            [ -n "$sha" ] || sha=$(curl -fsSL --max-time 60 "$main" | sha256sum | cut -c1-64)
+            [ "$sha" = "$(sed -n 's/^sha256=//p' "$pin")" ] && echo "$id: pinned ${cur:0:8} (the file is unchanged at ${new:0:8})" ||
+                echo "$id: pinned ${cur:0:8}; the file changed at ${new:0:8}"
+        fi
     else                                               # GitHub release
         tag=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])' <<<"$json"); latest=${tag#v}
         [ "$latest" = "$cur" ] && echo "$id: pinned $cur (latest)" || echo "$id: pinned $cur; upstream has $latest"

@@ -102,8 +102,26 @@ What CI runs, and what to run before sending a change:
   `tests/test_vr_dashboard.py` automatically; one that can be tested offline belongs in
   `dev/test-tweaks.sh`'s default list.
 
-Maintainers also run `dev/check-pins.sh` (upstream releases newer than a tweak's `pin`; bump a
-pin only after reading the release, in its own commit, with the new version, URL and SHA256).
+### Keeping up with upstream (maintainers)
+
+A weekly workflow (**Upstream check**, `dev/check-upstream.sh`) keeps one issue labelled
+`upstream-check` up to date, so nobody has to remember to look:
+
+- 🔴 **Needs attention:** a pinned download vanished or changed, an Arch Linux ARM package we
+  install is gone or needs a newer glibc than SteamOS has, or Homebrew's scrcpy moved to a major
+  version Android Mirror's VR extras weren't tested with (they switch themselves off meanwhile).
+- 🟡 **Worth a look:** newer versions to try (`dev/check-pins.sh`'s list, and anything newer than
+  `lib/tested-versions`).
+
+To take a newer version: read upstream's changes (`dev/bump-pin.py` prints the link), run
+`dev/bump-pin.py <tweak>` (or `python`), test (the VR tweaks in the headset too), then commit it
+on its own. After testing a newer scrcpy, android-tools or ydotool, update `lib/tested-versions`
+(and for a new scrcpy major version, `SCRCPY_TESTED` in `adb-scrcpy/phone-touch`).
+
+What happens when nobody does: installed tweaks keep working (nothing updates itself). Fresh
+installs fall back where they can (newest Python packages if the pinned ones won't install; the
+working adb/ydotool if a new build won't run), and 🧪 experimental tweaks switch themselves off
+after a SteamVR change they don't recognise.
 
 ## Releasing (maintainers)
 

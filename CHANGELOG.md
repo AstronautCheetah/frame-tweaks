@@ -1,6 +1,20 @@
 # Changelog
 
 ## Unreleased
+- **Fewer surprises when upstream moves on:**
+  - **Weekly upstream check** (a GitHub workflow): one issue lists what changed or vanished
+    upstream (pinned downloads, Arch Linux ARM packages, Homebrew's scrcpy) and newer versions to
+    take; `dev/bump-pin.py` moves a pin (version, URL, checksum) in one command.
+  - **Android Mirror with an untested scrcpy** (a new major version from Homebrew): its VR
+    extras switch themselves off, with a one-time notice, and the window stays a plain 16:9
+    one where laser clicks land right, instead of taps silently going nowhere. Its status
+    says so.
+  - **adb and ydotool:** a new Arch Linux ARM build that needs newer system libraries than
+    SteamOS has is no longer installed over a working one.
+  - **Python packages:** if the pinned versions can't be installed (say, SteamOS moved to a
+    newer Python), the newest ones are installed instead, with a warning.
+  - **🧪 Experimental** marks the tweaks that rely on SteamVR's internals (the VR windows tweaks
+    and Android Mirror's VR extras), in the README, the installer window and `./install.sh list`.
 - The installer window's Wallet apps page and its helpers moved into `gui/wallet_page.py` (the
   window's file was over 1,400 lines).
 - **Dashboard patches share one helper file** (`vr-dashboard/lib.js`, injected first): finding
