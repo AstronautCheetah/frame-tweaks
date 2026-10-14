@@ -333,8 +333,8 @@ cmd_hold() {
 cmd_debug_info() {
     local out; out="$HOME/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
     # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed.
-    local phone; phone=$(sed -n 's/^PHONE_NAME=["'"'"']\{0,1\}\([^"'"'"']*\).*/\1/p' "$HOME/.config/phone.conf" 2>/dev/null | tail -1 |
-                         sed 's/[][\.*^$/&|]/\\&/g')
+    local phone; phone=$(bash -c '. "$HOME/.config/phone.conf" 2>/dev/null; printf %s "${PHONE_NAME:-}"' |
+                         sed 's/[][\.*^$/&|]/\\&/g')       # (read as phone does: it's shell-quoted)
     {
         echo "# Frame Tweaks debug info (user names, home path, host and phone names, IP, MAC and e-mail addresses removed)"
         echo "frame-tweaks: $VERSION ($(git describe --tags --always 2>/dev/null || echo no git)); channel: $(release_channel)"

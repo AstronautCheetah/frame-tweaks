@@ -1,40 +1,75 @@
 #!/bin/bash
 # Find an Android phone's current wireless-ADB port via mDNS, connect, and mirror it with scrcpy.
 # The port changes every time Wireless debugging is toggled, so it's looked up fresh each run.
-# Pick a phone by its name in ~/.config/phone.conf:  PHONE_NAME="Pixel 9" (set on first use if
-# only one phone is advertising).
+# The phone to use is remembered in ~/.config/phone.conf (PHONE_NAME="Pixel 9"): taken by itself
+# when only one is advertising, chosen from a list when there are several (phone --pick: choose
+# again). When it isn't in sight you can wait for it or use another one.
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 [ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
 
-# find_phone: sets dev=address:port of the advertised phone, or returns 1.
+CONF="$HOME/.config/phone.conf"
+# advertised: the phones on the Wi-Fi with Wireless debugging on, one mDNS line each.
+advertised() { avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;'; }
+names_in() { sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u; }
+# find_phone: sets dev=address:port of the chosen phone (PHONE_NAME), or returns 1.
 find_phone() {
-    all=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;')
-    c=$(echo "$all" | grep -F "${PHONE_NAME:-}" | head -1)
+    all=$(advertised)
+    c=$(echo "$all" | grep -F "\"name=" | grep -F "${PHONE_NAME:-}" | head -1)
     [ -n "$c" ] || return 1
     dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
 }
-# Without a PHONE_NAME, don't just take whichever phone advertises first: with one in sight,
-# remember it (the next runs connect only to that one); with several, ask which.
-if [ -z "${PHONE_NAME:-}" ]; then
-    names=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;' |
-            sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u)
-    if [ "$(printf '%s\n' "$names" | grep -c .)" -gt 1 ]; then
-        notify-send -a Phone "Which phone?" "Several are advertising: $(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g'). Set PHONE_NAME=\"…\" in ~/.config/phone.conf."
+# remember NAME: the phone to use from now on (PHONE_NAME in phone.conf; other lines kept).
+remember() {
+    PHONE_NAME=$1
+    touch "$CONF"
+    sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
+    printf 'PHONE_NAME=%q\n' "$PHONE_NAME" >> "$CONF"
+}
+# ask TITLE TEXT TAG LABEL...: a list to choose from (kdialog, on the display you're using);
+# prints the chosen tag; returns 1 if closed, 2 without kdialog.
+ask() {
+    local title=$1 text=$2; shift 2
+    command -v kdialog >/dev/null || return 2
+    kdialog --title "$title" --menu "$text" "$@" 2>/dev/null
+}
+# wait_for NAME: up to 3 minutes for it to show up (Wireless debugging turned on, back on the Wi-Fi).
+wait_for() {
+    notify-send -a Phone "Waiting for $1" "Turn on Wireless debugging (Developer options, in the phone's Owner profile), on the same Wi-Fi. Waiting up to 3 minutes."
+    for _ in $(seq 36); do find_phone && return 0; sleep 5; done
+    notify-send -a Phone "$1 didn't appear" "Open Android Mirror again when its Wireless debugging is on."
+    return 1
+}
+pick=; [ "${1:-}" = --pick ] && { pick=1; shift; }       # phone --pick: choose the phone again
+names=$(advertised | names_in)
+count=$(printf '%s\n' "$names" | grep -c .)
+if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
+    # No phone chosen yet (or choosing again): one in sight is taken (and remembered); several, you choose.
+    if [ "$count" -eq 0 ]; then
+        notify-send -a Phone "No phone found" "Is Wireless debugging on (Developer options, in the phone's Owner profile), on the same Wi-Fi?"
         exit 1
-    fi
-    if [ -n "$names" ] && printf '%s' "$names" | grep -qv '["$`\\]'; then
-        PHONE_NAME=$names
-        printf 'PHONE_NAME="%s"\n' "$PHONE_NAME" >> "$HOME/.config/phone.conf"
-        notify-send -a Phone "Android Mirror" "Connecting to $PHONE_NAME from now on (PHONE_NAME in ~/.config/phone.conf)."
+    elif [ "$count" -eq 1 ] && [ -z "$pick" ]; then
+        remember "$names"
+        notify-send -a Phone "Android Mirror" "Connecting to $PHONE_NAME from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
+    else
+        mapfile -t list <<< "$names"
+        args=(); for n in "${list[@]}"; do args+=("$n" "$n"); done
+        chosen=$(ask "Android Mirror" "Which phone?" "${args[@]}")
+        [ -n "$chosen" ] || { [ -z "${PHONE_NAME:-}" ] && notify-send -a Phone "Which phone?" "Several are advertising: $(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g'). Run: phone --pick"; exit 1; }
+        remember "$chosen"
     fi
 fi
 if ! find_phone; then
-    # Name the phones that *are* advertising, so a wrong phone or a wrong PHONE_NAME is obvious.
-    seen=$(echo "$all" | sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u | paste -sd, - | sed 's/,/, /g')
-    msg="Is Wireless debugging on (Developer options, in the phone's Owner profile), on the same Wi-Fi?"
-    [ -n "$seen" ] && msg="$msg Seen instead: $seen."
-    notify-send -a Phone "${PHONE_NAME:-Phone} not found" "$msg"; exit 1
+    # The chosen phone isn't in sight: wait for it, or use one that is.
+    mapfile -t list <<< "$names"
+    # (no other phone in sight, or no kdialog: just wait)
+    args=(@wait "Wait for $PHONE_NAME"); for n in "${list[@]}"; do [ -n "$n" ] && args+=("$n" "Use $n instead"); done
+    if [ "$count" -eq 0 ]; then chosen=@wait; else chosen=$(ask "Android Mirror" "$PHONE_NAME isn't on the Wi-Fi with Wireless debugging on." "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
+    case "$chosen" in
+        "") exit 1 ;;                                       # closed: do nothing
+        @wait) wait_for "$PHONE_NAME" || exit 1 ;;
+        *) remember "$chosen"; find_phone || { notify-send -a Phone "$chosen not found" "It stopped advertising; try again."; exit 1; } ;;
+    esac
 fi
 # With "Memory caps" installed, scrcpy runs inside its memory limit.
 cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" scrcpy --)
