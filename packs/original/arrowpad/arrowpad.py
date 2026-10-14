@@ -659,7 +659,9 @@ class ArrowPad(QWidget):
         self.tools["smaller"].clicked.connect(lambda: self.resize_step(-1))
         self.tools["larger"].clicked.connect(lambda: self.resize_step(+1))
         self.tools["close"].clicked.connect(self.close)
-        self.tools["fold"].clicked.connect(self.toggle_collapsed)
+        # (a lambda: clicked passes `checked` (False), which would land in place= and skip
+        # keeping the chevron under the laser)
+        self.tools["fold"].clicked.connect(lambda: self.toggle_collapsed())
 
         grid = QGridLayout()
         self.grid = grid
