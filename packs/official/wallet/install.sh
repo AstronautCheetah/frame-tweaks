@@ -44,7 +44,7 @@ flatpak install -y --noninteractive flathub org.kde.kwalletmanager
 IDLE=${WALLET_IDLE_MINUTES:-240}
 save_kconfig wallet kwalletrc Wallet "Close When Idle" "Idle Timeout"     # restored on uninstall
 # (Unless auto-lock was turned off on the Wallet apps page: then it stays off.)
-autolock=$(sed -n 's/^WALLET_AUTOLOCK=//p' "$HOME/.config/frame-tweaks/wallet.conf" 2>/dev/null | tail -1)
+autolock=$(sed -n 's/^WALLET_AUTOLOCK=//p' "$HOME/.config/frame-tweaks/wallet.conf" 2>/dev/null | tail -1 || true)
 kwriteconfig6 --file kwalletrc --group Wallet --key "Close When Idle" "$([ "$autolock" = 0 ] && echo false || echo true)"
 kwriteconfig6 --file kwalletrc --group Wallet --key "Idle Timeout" "$IDLE"
 # Reconfigure only wallet services that are already running: calling one on the desktop's
