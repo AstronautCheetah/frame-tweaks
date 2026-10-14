@@ -5,7 +5,7 @@
 source "$(dirname "$0")/../lib/common.sh"
 D="$HOME/.local/share/frame-tweaks/vr-dashboard"
 U="$HOME/.config/systemd/user"
-mkdir -p "$D/patches" "$U/steamvr.service.d"
+mkdir -p "$D/patches" "$U/steamvr.service.d" "$HOME/.config/frame-tweaks"
 install -m755 "$REPO_DIR/vr-dashboard/sft-dashboard" "$D/sft-dashboard"
 
 # Older versions: this lived inside Curved world windows (sft-curvature). Move its patch over.
@@ -54,7 +54,8 @@ RestartSec=10
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=%t
+# %h/.config/frame-tweaks: settings saved from a gear panel in VR (sftConfig).
+ReadWritePaths=%t %h/.config/frame-tweaks
 PrivateTmp=yes
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 IPAddressAllow=localhost
