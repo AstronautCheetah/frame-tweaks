@@ -110,6 +110,8 @@ doesn't review or sandbox other people's packs.
   pinned versions can't be installed on your Python (say, after a SteamOS update), the installer
   warns and installs PyPI's newest versions instead.
 - **This project:** `get.sh` and `./install.sh update` install the newest release tag, not
-  the moving `main` branch. Tags aren't signed yet: `get.sh` trusts GitHub's HTTPS.
+  the moving `main` branch. Release tags are signed: an update checks the new release's
+  signature against the release key your copy already has (`dev/release-signers`) and refuses an
+  unsigned or wrongly signed one. The first install (`get.sh`) trusts GitHub's HTTPS.
 
 Found a problem? Please open a private security advisory on GitHub rather than a public issue.

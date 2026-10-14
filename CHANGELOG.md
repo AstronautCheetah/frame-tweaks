@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Signed releases:** release tags are signed, and `./install.sh update` refuses a release that
+  isn't signed by the key your copy already trusts.
+- **⟳ Check for updates** in the window, next to README: it becomes **⬇ Update to …**, then
+  **↻ Restart** once the new version is in place.
 - **📖 README** next to Diagnostics shows Frame Tweaks' own README in the window.
 - **Screen snip's narration panel: grip to carry it,** as on Arrow Pad and Full Keyboard: squeeze
   while pointing at it, let go to put it down.
@@ -23,6 +27,8 @@
 - **whisper-frame, Screen reader and Memory caps** are no longer offered.
 
 ### Changed
+- **The main README lists the tweaks by category**, as the window does.
+- **Screen snip's narration panel:** Collapse shows a down chevron, Expand an up one.
 - **The Shared KDE wallet and Firefox privacy rows lead with what they're for:** password-protect
   the apps you choose; make Firefox harder to track.
 - **Every tweak's README reads the same way:** what it is and why on a Steam Frame, how to
