@@ -8,7 +8,8 @@ summary: >-
 what: >-
   TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install).
 why: >-
-  The best in-VR keyboard so far; this installs and updates it with the rest.
+  A full-size keyboard in VR, with every key the desktop needs; this installs and updates it
+  with the rest.
 author: TaiKeid (steam-frame-full-keyboard)
 source:
   relation: from
@@ -31,7 +32,7 @@ the controller lasers. It has arrows, F-keys, a numpad, Ctrl/Alt, Copy/Paste, ha
 grab-to-move, and many languages. It's a separate app (the system keyboard button
 still opens Steam's).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
