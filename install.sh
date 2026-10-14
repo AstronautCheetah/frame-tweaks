@@ -266,7 +266,11 @@ keep: git reset --hard @{upstream}")" >&2
             [ -n "$tag" ] || { echo "$(t 'no release found')" >&2; exit 1; }
             git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "$(t 'no release %s' "$tag")" >&2; exit 1; }
             verify_release "$PWD" "$tag" || exit 1
-            bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"; git -c advice.detachedHead=false checkout --quiet "$tag"
+            bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"
+            # (refs/tags/: the tag just verified, even if a branch has its name. A failed checkout,
+            # local changes in the way say, stops here: the tree is the old one or half switched.)
+            git -c advice.detachedHead=false checkout --quiet "refs/tags/$tag" ||
+                { echo "$(t 'git checkout failed; not reinstalling')" >&2; exit 1; }
         fi
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi

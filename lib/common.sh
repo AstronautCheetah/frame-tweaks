@@ -424,7 +424,12 @@ verify_release() {
     [[ -f $1/dev/release-signers ]] || return 0
     local signers; signers=$(mktemp)
     cp "$1/dev/release-signers" "$signers"
-    if git -C "$1" -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$signers" verify-tag "$2" 2>/dev/null; then
+    # An SSH signature only (git checks a PGP or X.509 one against the user's own keyrings, not
+    # this file), on a tag that carries the name asked for (so an older signed release can't come
+    # back under a newer one's name).
+    if [[ $(git -C "$1" for-each-ref --format='%(tag)' "refs/tags/$2" 2>/dev/null) == "$2" ]] &&
+       git -C "$1" -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$signers" -c gpg.program=false \
+           -c gpg.x509.program=false verify-tag "refs/tags/$2" 2>/dev/null; then
         rm -f "$signers"; echo "Release $2: signature verified."; return 0
     fi
     rm -f "$signers"
