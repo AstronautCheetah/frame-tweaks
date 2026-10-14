@@ -696,6 +696,56 @@ class NarrationWindow(QWidget):
         super().closeEvent(ev)
 
 
+class GripReader:
+    """Grip squeezes, read as Arrow Pad and Full Keyboard read them (the Frame's dashboard hides
+    grip actions from apps, but the controller model's "button_grip" part still moves): its
+    rotation from the rest pose, held from 1.0°, released below 0.5°, armed after a release."""
+
+    def __init__(self, openvr):
+        self.vr = openvr
+        self.sys, self.rm, self.inp = openvr.VRSystem(), openvr.VRRenderModels(), openvr.VRInput()
+        self.hands = [{"role": role, "path": self.inp.getInputSourceHandle(f"/user/hand/{hand}"),
+                       "armed": False, "held": False, "device": None}
+                      for hand, role in (("left", openvr.TrackedControllerRole_LeftHand),
+                                         ("right", openvr.TrackedControllerRole_RightHand))]
+
+    @staticmethod
+    def _angle(a, b):
+        import math
+        tr = sum(a.m[r][c] * b.m[r][c] for r in range(3) for c in range(3))
+        return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1) / 2))))
+
+    def poll(self):
+        """[(device, held, just_pressed)] for each connected controller."""
+        vr, out = self.vr, []
+        for h in self.hands:
+            try:
+                d = self.sys.getTrackedDeviceIndexForControllerRole(h["role"])
+                if d == vr.k_unTrackedDeviceIndexInvalid or not self.sys.isTrackedDeviceConnected(d):
+                    h.update(armed=False, held=False, device=None)
+                    continue
+                if d != h["device"]:
+                    h.update(armed=False, held=False, device=d)
+                model = self.sys.getStringTrackedDeviceProperty(d, vr.Prop_RenderModelName_String)
+                mode = vr.RenderModel_ControllerMode_State_t()
+                ok1, cur = self.rm.getComponentStateForDevicePath(model, "button_grip", h["path"], mode)
+                ok2, rest = self.rm.getComponentState(model, "button_grip", vr.VRControllerState_t(), mode)
+                if not (ok1 and ok2):
+                    h.update(armed=False, held=False)
+                    continue
+                a = self._angle(rest.mTrackingToComponentRenderModel, cur.mTrackingToComponentRenderModel)
+            except Exception:
+                h.update(armed=False, held=False)
+                continue
+            if not h["armed"]:
+                h["armed"] = a < 0.5
+                continue
+            held = a >= (0.5 if h["held"] else 1.0)
+            out.append((d, held, held and not h["held"]))
+            h["held"] = held
+        return out
+
+
 class NarrationOverlay(QObject):
     """Shows a widget as its own SteamVR overlay, the way Arrow Pad does: laser clicks reach its
     buttons; a press elsewhere (its top bar, say) carries it with the controller until released.
@@ -718,6 +768,12 @@ class NarrationOverlay(QObject):
         self.width_px = 0
         self.size_m()
         self.drag = None
+        self.grip_drag = False                      # the current carry is a grip squeeze
+        self.hovered = set()                        # controllers whose laser is on the panel
+        try:
+            self.grips = GripReader(openvr)
+        except Exception:
+            self.grips = None
         self.offset = self.load_offset()            # the panel relative to the dashboard bar
         if not (self.offset and self.follow()):
             self.place_default()
@@ -941,6 +997,16 @@ class NarrationOverlay(QObject):
         vr, ev = self.vr, self.vr.VREvent_t()
         while self.ov.pollNextOverlayEvent(self.h, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
+            if t == vr.VREvent_FocusLeave:
+                if dev == vr.k_unTrackedDeviceIndexInvalid:
+                    self.hovered.clear()
+                else:
+                    self.hovered.discard(dev)
+                continue
+            if t == vr.VREvent_MouseMove:
+                self.hovered.add(dev)
+            if t == vr.VREvent_MouseButtonDown and self.drag is not None:
+                continue                                       # carrying it by the grip: no clicks
             if t == vr.VREvent_MouseButtonDown:
                 pos = self.to_widget(ev.data.mouse)
                 b = self.button_at(pos)
@@ -956,9 +1022,24 @@ class NarrationOverlay(QObject):
                 if self.pressed is not None:
                     self.send(self.pressed, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
                     self.pressed = None
-                if self.drag is not None:
+                if self.drag is not None and not self.grip_drag:
                     self.drag = None
                     self.save_offset()                     # remembered relative to the dashboard
+        # Grip to carry it, as on Arrow Pad and Full Keyboard: squeeze while that controller's
+        # laser is on the panel (buttons included), let go to put it down.
+        grips = self.grips.poll() if self.grips else []
+        held = {d for d, h, _ in grips if h}
+        for d, _, pressed in grips:
+            if pressed and d in self.hovered and self.drag is None:
+                ctrl = self.device_pose(d)
+                if ctrl is not None:
+                    if self.pressed is not None:           # a squeeze cancels a press in progress
+                        self.send(self.pressed, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
+                        self.pressed = None
+                    self.drag, self.grip_drag = (d, self.relative(ctrl, self.pose)), True
+        if self.drag is not None and self.grip_drag and self.drag[0] not in held:
+            self.drag, self.grip_drag = None, False
+            self.save_offset()
         if self.drag is not None:
             ctrl = self.device_pose(self.drag[0])
             if ctrl is not None:
