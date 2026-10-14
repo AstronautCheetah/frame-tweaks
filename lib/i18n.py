@@ -205,6 +205,23 @@ def announce(language):
         pass
 
 
+def announced():
+    """The language the installer window shows now, if it's open (it withdraws it on closing)."""
+    try:
+        return ANNOUNCED.read_text().strip() or None
+    except OSError:
+        return None
+
+
+def withdraw():
+    """The installer window closes: no language announced any more."""
+    if not os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+        try:
+            ANNOUNCED.unlink()
+        except OSError:
+            pass
+
+
 def follow_announcements(owner, changed):
     """A Qt program: when the installer window announces another language, switch to it and call
     changed() to show the new text. owner: a QObject that keeps the watcher alive."""
@@ -236,17 +253,19 @@ INHERIT = True
 
 
 def wanted_languages():
-    """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the parent's choice, the one
-    chosen in ⚙ Preferences, the active keyboard's, then gettext's usual variables; each also
-    without its region (de_AT → de)."""
+    """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the one chosen in ⚙ Preferences,
+    (for a program) the installer window's while it's open, then the parent's choice, the active
+    keyboard's, then gettext's usual variables; each also without its region (de_AT → de)."""
     if os.environ.get("FRAME_TWEAKS_LANGUAGE", "").split(".")[0] in ("en", "C", "POSIX"):
         return []                                     # (English, whatever the keyboard or session)
-    parent = os.environ.get("FRAME_TWEAKS_LANG_RESOLVED", "") if INHERIT else ""
-    if parent and not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
-        return [] if parent == "en" else [parent, parent.split("_")[0]]
-    chosen = preference()
-    if chosen != "keyboard" and not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
-        return [] if chosen == "en" else [chosen, chosen.split("_")[0]]
+    if not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
+        chosen = preference()
+        # the one chosen in Preferences; else, for a program, the installer window's while it's
+        # open (so a program started now matches it), then what its parent passed on
+        shown = (announced() or os.environ.get("FRAME_TWEAKS_LANG_RESOLVED", "")) if INHERIT else ""
+        pick = chosen if chosen != "keyboard" else shown
+        if pick:
+            return [] if pick == "en" else [pick, pick.split("_")[0]]
     names = []
     kb = keyboard_language()
     for var in ("FRAME_TWEAKS_LANGUAGE", "keyboard", "LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):

@@ -289,6 +289,8 @@ class OverlayHost:
             a = (old_pv.x() - old_w / 2 - (pv.x() - w / 2)) * k     # along the panel's x
             b = (old_pv.y() - old_h / 2 - (pv.y() - h / 2)) * k     # pixels down = -y
             self.pose = [[c[0], c[1], c[2], c[3] + c[0] * a - c[1] * b] for c in self.pose]
+            self.log_input(f"fold: {last} -> {(w, h)}, chevron {old_pv.x()},{old_pv.y()} -> {pv.x()},{pv.y()} px, "
+                           f"panel moved {a:+.3f} m across, {-b:+.3f} m up")
             self.apply_pose()
             self.remember_offset()
             self.save()
@@ -444,6 +446,8 @@ class OverlayHost:
         # changes on presses and state changes; hovering is felt (haptic tick), not drawn.
 
     def poll(self):
+        if getattr(self, "closed", False):
+            return
         self.ticks += 1
         if self.ticks % 9 == 1:                 # dashboard open? ~5x a second is plenty
             self._dash = bool(self.ov.isDashboardVisible())
@@ -509,7 +513,7 @@ class OverlayHost:
     def pump(self, handle):
         ev = openvr.VREvent_t()
         # pyopenvr returns (result, event): test the result, or this loops forever.
-        while self.ov.pollNextOverlayEvent(handle, ev)[0]:
+        while not getattr(self, "closed", False) and self.ov.pollNextOverlayEvent(handle, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
             cursor = ev.data.mouse.cursorIndex if t in (
                 openvr.VREvent_MouseMove, openvr.VREvent_MouseButtonDown, openvr.VREvent_MouseButtonUp) else 0
@@ -664,6 +668,11 @@ class OverlayHost:
         self.apply_pose()
 
     def close(self):
+        """Disconnect from SteamVR. Close is pressed from inside pump(): no more events are read
+        after this (reading them from a closed connection crashed the pad on Close)."""
+        if getattr(self, "closed", False):
+            return
+        self.closed = True
         try:
             self.ov.destroyOverlay(self.input_handle)
             if self.cover is not None:

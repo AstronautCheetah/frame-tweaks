@@ -159,13 +159,28 @@ def tr_tip(w, tip):
     w.setAccessibleName(_(tip))
 
 
+def tr_text(w, text, suffix="", **values):
+    """A label's or button's text in the user's language, kept in English too (with its values)
+    so it can follow a change of language (retranslate). Returns w."""
+    w.setProperty("tr_text", text)
+    w.setProperty("tr_values", json.dumps(values))
+    w.setProperty("tr_suffix", suffix)
+    w.setText(_(text).format(**values) + suffix if values else _(text) + suffix)
+    return w
+
+
 def retranslate_tips(root):
+    """Every tr_tip / tr_text under root, again in the current language."""
     from PyQt6.QtWidgets import QWidget
     for w in [root, *root.findChildren(QWidget)]:
         tip = w.property("tr_tip")
         if tip:
             w.setToolTip(_(tip))
             w.setAccessibleName(_(tip))
+        text = w.property("tr_text")
+        if text:
+            values = json.loads(w.property("tr_values") or "{}")
+            w.setText((_(text).format(**values) if values else _(text)) + (w.property("tr_suffix") or ""))
 
 
 # A plain gear (Breeze's "configure" is sliders): the same shape as Scroll strips' gear in VR.
@@ -514,10 +529,10 @@ class SpeechConfig(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(18, 16, 18, 16)
         head = QHBoxLayout()
-        b = QPushButton(_("← Back"))
+        b = tr_text(QPushButton(), N_("← Back"))
         b.clicked.connect(back)
         head.addWidget(b)
-        title = QLabel(_("Narrate's voice"))
+        title = tr_text(QLabel(), N_("Narrate's voice"))
         title.setStyleSheet("font-size: 22px; font-weight: 600;")
         head.addWidget(title, 1)
         lay.addLayout(head)
@@ -538,7 +553,7 @@ class SpeechConfig(QWidget):
             grid.addWidget(self.choice("SPEECH_LANGUAGE", r[0], r[1]), n // 4, n % 4)
         lay.addLayout(grid)
         foot = QHBoxLayout()
-        self.apply = QPushButton(_("Apply"))
+        self.apply = tr_text(QPushButton(), N_("Apply"))
         tr_tip(self.apply, N_("Download the chosen language's voice if needed, and switch"))
         self.apply.clicked.connect(self.run_apply)
         foot.addWidget(self.apply)
@@ -568,7 +583,7 @@ class SpeechConfig(QWidget):
         engine, lang = speech_settings()
         for (key, value), b in self.buttons.items():
             b.setChecked(value == (engine if key == "SPEECH_ENGINE" else lang))
-        self.state.setText(_("Changes apply when you press Apply."))
+        tr_text(self.state, N_("Changes apply when you press Apply."))
 
     def pick(self, key, value):
         save_speech_setting(key, value)
@@ -577,10 +592,10 @@ class SpeechConfig(QWidget):
     def run_apply(self):
         apply_cmd = DATA / "apply"
         if not apply_cmd.exists():
-            self.state.setText(_("Reinstall the Speech engine in Frame Tweaks first."))
+            tr_text(self.state, N_("Reinstall the Speech engine in Frame Tweaks first."))
             return
         self.apply.setEnabled(False)
-        self.state.setText(_("Applying… (a new language downloads its voice, about 60 MB)"))
+        tr_text(self.state, N_("Applying… (a new language downloads its voice, about 60 MB)"))
         proc = QProcess(self)
         proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
 
@@ -633,7 +648,7 @@ class NarrationWindow(QWidget):
         self.pic = QLabel()                       # the snip (or, after Paste, the pasted text)
         self.pic.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(self.pic, 1)
-        self.state = QLabel(_("Preparing…"))
+        self.state = tr_text(QLabel(), N_("Preparing…"))
         self.state.setStyleSheet("color: #9aa6b2;")
         lay.addWidget(self.state)
         row = QHBoxLayout()
@@ -645,7 +660,7 @@ class NarrationWindow(QWidget):
         icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
         self.pause_button.clicked.connect(self.pause_or_resume)
         row.addWidget(self.pause_button)
-        self.view_button = QPushButton(_("Show text"))
+        self.view_button = tr_text(QPushButton(), N_("Show text"))
         tr_tip(self.view_button, N_("Switch between the snip's image and the text read from it"))
         self.view_button.clicked.connect(self.toggle_view)
         row.addWidget(self.view_button)
@@ -656,15 +671,15 @@ class NarrationWindow(QWidget):
         self.speed_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.slower.clicked.connect(lambda: self.step(-1))
         self.faster.clicked.connect(lambda: self.step(1))
-        for w in (QLabel(_("Speed")), self.slower, self.speed_label, self.faster):
+        for w in (tr_text(QLabel(), N_("Speed")), self.slower, self.speed_label, self.faster):
             row.addWidget(w)
         lay.addLayout(row)
         # Second row: the text itself, and the panel.
         row2 = QHBoxLayout()
-        self.copy_image_button = QPushButton(_("Copy image"))
+        self.copy_image_button = tr_text(QPushButton(), N_("Copy image"))
         tr_tip(self.copy_image_button, N_("Put the snip's image on the clipboard"))
         self.copy_image_button.clicked.connect(self.copy_image)
-        copy = QPushButton(_("Copy text"))
+        copy = tr_text(QPushButton(), N_("Copy text"))
         tr_tip(copy, N_("Put the text being read on the clipboard"))
         copy.clicked.connect(self.copy_text)
         paste = QPushButton()
@@ -697,7 +712,7 @@ class NarrationWindow(QWidget):
             collapse_left.clicked.connect(lambda: self.collapse(collapse_left))
             left_lay.addWidget(collapse_left)
             left_lay.addStretch(1)
-            collapse = QPushButton(_("Collapse") + " ")
+            collapse = tr_text(QPushButton(), N_("Collapse"), " ")
             collapse.setIcon(breeze("expand"))
             collapse.setIconSize(QSize(30, 30))
             collapse.setLayoutDirection(Qt.LayoutDirection.RightToLeft)      # icon on the right
@@ -745,12 +760,12 @@ class NarrationWindow(QWidget):
         self.view_button.setEnabled(image is not None)
         self.copy_image_button.setEnabled(image is not None)
         self.show_view()
-        self.state.setText(_("Preparing…"))
+        tr_text(self.state, N_("Preparing…"))
         icon_button(self.toggle, "media-playback-stop", N_("Stop"))
         icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
         self.pause_button.setEnabled(True)
         self.narrator = Narrator(text, self.speed)
-        self.narrator.progress.connect(lambda i, n: self.state.setText(_("Reading aloud: part {part} of {count}").format(part=i + 1, count=n)))
+        self.narrator.progress.connect(lambda i, n: tr_text(self.state, N_("Reading aloud: part {part} of {count}"), part=i + 1, count=n))
         self.narrator.finished.connect(self.done)
         self.narrator.start()
         self.expand() if self.collapsed else self.fit()
@@ -799,16 +814,16 @@ class NarrationWindow(QWidget):
         if self.image is None:
             return
         ok = copy_image_everywhere(self.image)
-        self.state.setText(_("Image copied to the clipboard.") if ok else _("Couldn't copy (is desktop mode running?)"))
+        tr_text(self.state, N_("Image copied to the clipboard.") if ok else N_("Couldn't copy (is desktop mode running?)"))
 
     def copy_text(self):
         ok = to_clipboard(self.text.encode(), "text/plain;charset=utf-8")
-        self.state.setText(_("Text copied to the clipboard.") if ok else _("Couldn't copy (is desktop mode running?)"))
+        tr_text(self.state, N_("Text copied to the clipboard.") if ok else N_("Couldn't copy (is desktop mode running?)"))
 
     def paste_text(self):
         text = from_clipboard()
         if not text:
-            self.state.setText(_("The clipboard has no text."))
+            tr_text(self.state, N_("The clipboard has no text."))
             return
         self.load(None, text)
 
@@ -896,10 +911,10 @@ class NarrationWindow(QWidget):
             if self.narrator.paused:                     # a new speed carries on reading
                 self.narrator.paused = False
                 icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
-                self.state.setText(_("Reading aloud…"))
+                tr_text(self.state, N_("Reading aloud…"))
 
     def done(self):
-        self.state.setText(_("Finished."))
+        tr_text(self.state, N_("Finished."))
         icon_button(self.toggle, "media-playlist-repeat", N_("Read it again"))
         self.pause_button.setEnabled(False)
 
@@ -907,23 +922,23 @@ class NarrationWindow(QWidget):
         if self.narrator.paused:
             self.narrator.resume()
             icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
-            self.state.setText(_("Reading aloud…"))
+            tr_text(self.state, N_("Reading aloud…"))
         else:
             self.narrator.pause()
             icon_button(self.pause_button, "media-playback-start", N_("Resume"))
-            self.state.setText(_("Paused."))
+            tr_text(self.state, N_("Paused."))
 
     def stop_or_again(self):
         if self.narrator.stopped or self.toggle.text().startswith("▶"):
             self.narrator.speed = self.speed
             icon_button(self.toggle, "media-playback-stop", N_("Stop"))
-            self.state.setText(_("Reading aloud…"))
+            tr_text(self.state, N_("Reading aloud…"))
             icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
             self.pause_button.setEnabled(True)
             self.narrator.again()
         else:
             self.narrator.stop()
-            self.state.setText(_("Stopped."))
+            tr_text(self.state, N_("Stopped."))
             icon_button(self.toggle, "media-playlist-repeat", N_("Read it again"))
             icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
             self.pause_button.setEnabled(False)

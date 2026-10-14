@@ -96,7 +96,8 @@ class Inherited(unittest.TestCase):
     def test_a_program_speaks_its_parents_language(self):
         """FRAME_TWEAKS_LANG_RESOLVED (the window's or a script's choice) wins over the keyboard,
         except in the installer window itself (INHERIT = False)."""
-        with mock.patch.object(i18n, "keyboard_language", lambda: "de"), mock.patch.object(i18n, "INHERIT", True):
+        with mock.patch.object(i18n, "keyboard_language", lambda: "de"), mock.patch.object(i18n, "INHERIT", True), \
+                mock.patch.object(i18n, "ANNOUNCED", Path(tempfile.mkdtemp()) / "none"):     # (no window open)
             with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "es_419"}, clear=True):
                 self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
                 with mock.patch.object(i18n, "INHERIT", False):
@@ -123,6 +124,16 @@ class PreferenceAndAnnouncement(unittest.TestCase):
             self.assertEqual(i18n.wanted_languages(), [])
             i18n.set_preference("keyboard")
             self.assertEqual(i18n.wanted_languages(), ["de"])
+
+    def test_a_program_started_now_matches_the_open_window(self):
+        """Arrow Pad started with an old FRAME_TWEAKS_LANG_RESOLVED while the window shows English:
+        English. Once the window has closed (withdraw), the parent's and the keyboard's count again."""
+        with mock.patch.object(i18n, "keyboard_language", lambda: "de"), mock.patch.object(i18n, "INHERIT", True), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "es_419"}, clear=True):
+            i18n._write(i18n.ANNOUNCED, "en\n")
+            self.assertEqual(i18n.wanted_languages(), [])
+            i18n.withdraw()
+            self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
 
     def test_programs_follow_the_window(self):
         """The window announces; a Qt program watching switches (inotify, no polling)."""

@@ -14,6 +14,12 @@ body:
       placeholder: e.g. arrowpad, wallet, curvature
     validations:
       required: true
+  - type: input
+    id: version
+    attributes:
+      label: Frame Tweaks version
+      description: Filled in when you come here from **🐞 Report a problem** in the installer window.
+      placeholder: e.g. 0.6.1
   - type: textarea
     id: what
     attributes:
@@ -26,7 +32,7 @@ body:
     attributes:
       label: Diagnostics report
       description: |
-        In the installer window press **Diagnostics** (or run `./install.sh debug-info` in the
+        In the installer window press **🐞 Report a problem** (or run `./install.sh report` in the
         Frame Tweaks folder). It saves `~/frame-tweaks-debug-….txt` with versions, status and
         recent logs, with user names, paths and IP addresses removed. Read it, then drag it here.
     validations:

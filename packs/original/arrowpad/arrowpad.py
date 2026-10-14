@@ -1190,13 +1190,14 @@ def main():
                     help=_("button size multiplier (default 1.0)"))
     ap.add_argument("--socket", default=default_socket(), help=_("ydotoold socket path"))
     ap.add_argument("--quit", action="store_true", help=_("close a running pad"))
+    ap.add_argument("--fold", action="store_true", help=_("collapse a running pad to its chevron, or expand it"))
     ap.add_argument("--desktop", action="store_true", help=_("open in desktop mode (even from the VR menu)"))
     ap.add_argument("--vr", action="store_true", help=_("open as a floating VR window"))
     args = ap.parse_args()
 
     # Hand "quit"/"toggle" to a running pad before any window code starts: --quit must work
     # from anywhere (an uninstall in a terminal can't open desktop mode's display).
-    if signal_running("quit" if args.quit else "toggle") or args.quit:
+    if signal_running("quit" if args.quit else "fold" if args.fold else "toggle") or args.quit or args.fold:
         return
     app = QApplication(sys.argv)
     app.setApplicationName("arrowpad")
@@ -1224,6 +1225,8 @@ def main():
         if cmd == "quit":
             pad.close()
             app.quit()
+        elif cmd == "fold":
+            pad.toggle_collapsed()
         else:
             pad.toggle_visible()
     server.newConnection.connect(on_client)
