@@ -189,7 +189,7 @@ $ ./install.sh status
 
 ```sh
 cd ~/frame-tweaks && ./install.sh uninstall all     # every tweak, dependents first
-rm -f ~/.local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
+./install.sh menu --remove                          # its app-menu entry and icons
 rm -rf ~/frame-tweaks ~/.config/frame-tweaks ~/.local/state/frame-tweaks   # settings and logs
 ```
 
