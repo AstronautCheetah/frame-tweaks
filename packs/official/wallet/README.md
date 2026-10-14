@@ -54,7 +54,7 @@ launcher approach (`keyring.enable`), without needing Nix:
 > - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the KDE settings it changed)
 <!-- /generated:glance -->
 
-**In the installer window: 🔑 Wallet apps** (top bar) lists the protected apps, each with a
+**In the installer window: 🔑 Wallet apps** (the button on this tweak's row) lists the protected apps, each with a
 **Password first** switch and **Remove**, and every other installed app (Flatpaks from any
 source, such as Discover; system apps; your own launchers) with a **Protect** button. Electron
 and Chromium-based apps are detected and told to use the wallet.
