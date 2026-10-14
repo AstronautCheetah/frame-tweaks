@@ -3,9 +3,9 @@ title: Claude Desktop
 emoji: 🤖
 category: Developer
 tier: extras
-summary: "Anthropic's Claude Desktop app for Linux (arm64 beta), installed without apt"
+summary: "Anthropic's Claude Desktop app for Linux (arm64), installed without apt"
 what: >-
-  Claude Desktop, Anthropic's official Linux app (arm64 beta), installed into your home folder and
+  Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and
   updated with one command.
 why: >-
   Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system
@@ -28,7 +28,7 @@ undo: >-
 # Claude Desktop
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Claude Desktop, Anthropic's official Linux app (arm64 beta), installed into your home folder and updated with one command.
+Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command.
 
 **Why on a Steam Frame:** Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead.
 <!-- /generated:intro -->

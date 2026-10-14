@@ -95,7 +95,6 @@ to use it:
   desktop's Wayland socket itself (shortcuts and launchers don't always say where it is).
 - Whisper runs with `DISABLE_GAMESCOPE_WSI=1`, which keeps the Steam session's graphics layer
   out of its way.
-- With [Memory caps](../memcap/) installed, Whisper runs inside its memory limit.
 - If the GPU build of whisper.cpp from groffta's
   [whisper-frame](https://github.com/groffta/whisper-frame) is already installed, Dictation uses
   it and shares its model file, instead of installing a second copy.

@@ -22,7 +22,6 @@ order:
   - firefox
   - nordvpn
   - homebrew
-  - memcap
   - tools
   - menu-icons
   - ydotool
@@ -32,9 +31,9 @@ order:
   - claude-code
   - claude-desktop
 ---
-# Frame Tweaks: the official pack
+The fixes and app setups that come with Frame Tweaks: each one tested on a Steam Frame and
+installed into your home folder, so it survives SteamOS updates and comes off cleanly.
 
-The tweaks that come with Frame Tweaks. They're loaded the same way as any other pack (see
-[docs/mods.md](../../docs/mods.md)): one folder per tweak, each described by the front matter of
-its README.md. This file sets the order of the categories and of the tweaks in the installer
-window, the README and `./install.sh list`.
+How it's loaded: like any other pack (see [docs/mods.md](../../docs/mods.md)), one folder per
+tweak, each described by the front matter of its README.md. This file sets the order of the
+categories and of the tweaks in the installer window, the README and `./install.sh list`.

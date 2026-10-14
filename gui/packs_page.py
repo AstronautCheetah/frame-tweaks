@@ -76,6 +76,7 @@ class Packs(QWidget):
                                                 if mine and c["replaced"] else ""))
             info = QLabel(f"<b>{html.escape(p['name'])}</b>"
                           + (f" <span style='color:#6b7783'>by {html.escape(p['author'])}</span>" if p["author"] else "")
+                          + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
                           + f"<br><span style='color:{colour}'>{text}</span>"
                           + f"<br><span style='color:#6b7783'>{html.escape(str(p['dir']))}</span>"
                           + (f"<br>{len(p['tweaks'])} tweaks" if p["state"] == "official" else

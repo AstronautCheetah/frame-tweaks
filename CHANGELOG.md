@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Android Mirror: Forget phone** in its settings: it stops connecting to the remembered phone
+  by default (`phone --forget`). Its README now lists what to turn on in the phone, and what
+  Wireless debugging allows.
+- **Wallet apps: Auto-lock** can be turned off: the wallet then stays unlocked until you lock it.
+- **Each pack shows a short description** on the Packs page and in `./install.sh mods`.
 - **Every row shows a tick box**, empty when the tweak isn't installed, so it's clear where to
   click.
 - **Tweaks that install another project show its own README** below ours, after a separator,
@@ -12,9 +17,11 @@
   window too. Arrow Pad's shows its main and Tools layers.
 
 ### Removed
-- **whisper-frame and Screen reader** are no longer offered.
+- **whisper-frame, Screen reader and Memory caps** are no longer offered.
 
 ### Changed
+- **The Shared KDE wallet and Firefox privacy rows lead with what they're for:** password-protect
+  the apps you choose; make Firefox harder to track.
 - **Every tweak's README reads the same way:** what it is and why on a Steam Frame, how to
   install and use it, then what it changes on your system (this was the "At a glance" box), and
   credits. Each was checked against the code; the main README now opens with what Frame Tweaks
@@ -26,6 +33,8 @@
   changes.
 
 ### Fixed
+- **Mouse cursor fix said "active after the next reboot"** when it was already active (the check
+  looked at the installer window's session, not desktop mode's).
 - **Uninstalling Arrow Pad or the NordVPN tray broke Screen snip** (they share a Python setup);
   now the last one removes it. Screen snip installs `wl-clipboard`, which its Copy text and
   Paste need.

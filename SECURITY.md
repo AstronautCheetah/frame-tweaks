@@ -38,7 +38,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | nordvpn | `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry, `~/.config/nordvpn-wg` (your WireGuard key and locations) | **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key |
 | homebrew | `/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew` | **Needs your sudo password once**, to create `/home/linuxbrew` |
-| memcap | `~/.local/bin/capped`, `~/.config/frame-tweaks/memcap.conf`, a systemd drop-in for VSCodium's Flatpak scope | Starts capped apps in their own systemd scope |
 | tools | `~/.local/bin/restart-plasmashell` | – |
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool` and `ydotoold` in `~/.local/bin` (Arch Linux ARM package, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
