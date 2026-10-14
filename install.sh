@@ -30,6 +30,7 @@ cd "$(dirname "$(readlink -f "$0")")" || exit 1
 VERSION=$(cat VERSION 2>/dev/null || echo dev)
 # shellcheck source=lib/common.sh
 source lib/common.sh
+FT_BUILD=$(ft_version)        # what to show: VERSION plus the commit, between releases
 set +e     # common.sh turns on -e for tweak scripts; this script checks results itself
 STATE="$HOME/.local/state/frame-tweaks"
 LOGS="$STATE/logs"
@@ -56,7 +57,7 @@ take_lock() {
 start_log() {
     mkdir -p "$LOGS"
     local log; log="$LOGS/$(date +%Y%m%d-%H%M%S)-$$-$1.log"
-    { echo "# frame-tweaks $VERSION: $*"; date; } > "$log"
+    { echo "# frame-tweaks $FT_BUILD: $*"; date; } > "$log"
     # (tee without the lock's fd 8: holding it, tee kept the lock after `update` re-runs this
     # script for its second stage, which then found "another install running" and stopped.)
     exec > >(tee -a "$log" 8>&-) 2>&1
@@ -123,7 +124,7 @@ check_ids() {
 }
 
 cmd_list() {
-    bold "frame-tweaks $VERSION"
+    bold "frame-tweaks $FT_BUILD"
     local id
     for id in "${IDS[@]}"; do
         printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ (experimental)}"
@@ -260,7 +261,7 @@ cmd_kdialog_gui() {
         args+=("$id" "${TITLE[$id]}: ${DESC[$id]}" "$([[ $st -ne 1 ]] && echo on || echo off)")
     done
     local picked
-    picked=$(kdialog --title "Frame Tweaks $VERSION" --geometry 900x560 --separate-output \
+    picked=$(kdialog --title "Frame Tweaks $FT_BUILD" --geometry 900x560 --separate-output \
         --checklist "Tick what you want installed. Unticking an installed tweak removes it." "${args[@]}") || exit 0
     local add=() del=()
     for id in "${IDS[@]}"; do
@@ -332,7 +333,8 @@ run_migrations() {
         [[ -f ${DIR[$id]}/migrate.sh && -f $STATE/installed/$id ]] || continue
         held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
         old=$(cat "$STATE/installed/$id")
-        [[ $old != "$VERSION" ]] || continue
+        # Only from an older release: going back to an older one doesn't run them backwards.
+        [[ $old != "$VERSION" && $(printf '%s\n%s\n' "$old" "$VERSION" | sort -V | head -1) == "$old" ]] || continue
         bold "── migrating $id from $old"
         bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $id migration failed" >&2
     done
@@ -356,13 +358,25 @@ cmd_debug_info() {
                          sed 's/[][\.*^$/&|]/\\&/g')       # (read as phone does: it's shell-quoted)
     {
         echo "# Frame Tweaks debug info (user names, home path, host and phone names, IP, MAC and e-mail addresses removed)"
-        echo "frame-tweaks: $VERSION ($(git describe --tags --always 2>/dev/null || echo no git)); channel: $(release_channel)"
+        echo "frame-tweaks: $FT_BUILD (release $VERSION); channel: $(release_channel)"
         grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release | tr '\n' ' '; echo
         echo "steamvr: $(tr -d '\r' < /opt/steamvr/bin/version.txt 2>/dev/null || echo unknown); kernel: $(uname -r) $(uname -m)"
         echo; echo "## status"; cmd_status 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
         echo; echo "## held tweaks"; ls "$STATE/held" 2>/dev/null || true
         echo; echo "## check-system"; cmd_check_system 2>&1
         echo; echo "## failed user services"; sysctl_user --failed --no-legend --plain 2>&1 | head -20
+        echo; echo "## release that last installed each tweak"
+        (cd "$STATE/installed" 2>/dev/null && grep -H . -- * | sed 's/:/: /')
+        local unit id
+        for unit in "$HOME"/.config/systemd/user/*.service; do       # the tweaks' own services
+            [[ -f $unit ]] || continue
+            for id in "${!DIR[@]}"; do
+                grep -rqF "$(basename "$unit")" "${DIR[$id]}" 2>/dev/null || continue
+                echo; echo "## service $(basename "$unit") ($id), last 60 lines"
+                journalctl --user -u "$(basename "$unit")" -n 60 --no-pager -o short-iso 2>&1
+                break
+            done
+        done
         local log
         for log in $(ls -t "$LOGS"/*.log 2>/dev/null | head -2); do
             echo; echo "## log $(basename "$log")"; sed 's/\x1b\[[0-9;]*m//g' "$log" | tail -150
@@ -420,6 +434,6 @@ case ${1:-} in
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
     menu)        ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu." ;;
     -h|--help|help) usage ;;
-    --version|version) echo "$VERSION" ;;
+    --version|version) echo "$FT_BUILD" ;;
     *)           take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
 esac

@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -33,6 +34,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manifest  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
+
+
+def build_version():
+    """The exact build, as lib/common.sh ft_version says it: 0.5.0, 0.5.0+3.abc1234[-dirty]."""
+    try:
+        d = subprocess.run(["git", "-C", str(REPO), "describe", "--tags", "--match", "v[0-9]*", "--dirty"],
+                           capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        d = None
+    if not d or d.returncode != 0:
+        try:
+            return (REPO / "VERSION").read_text().strip()
+        except OSError:
+            return "dev"
+    v = d.stdout.strip().removeprefix("v")
+    m = re.fullmatch(r"(.+)-(\d+)-g([0-9a-f]+)(-dirty)?", v)
+    return f"{m[1]}+{m[2]}.{m[3]}{m[4] or ''}" if m else v
 CONF = Path.home() / ".config/frame-tweaks/installer"      # (before 0.5: ~/.config/steam-frame-tweaks)
 HIDDEN, SHOWN = CONF / "hidden", CONF / "shown"     # SHOWN: default-hidden rows you unhid
 COLLAPSED, HIDDEN_CATS = CONF / "collapsed-categories", CONF / "hidden-categories"

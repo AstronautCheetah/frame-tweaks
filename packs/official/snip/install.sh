@@ -23,8 +23,7 @@ brew list tesseract >/dev/null 2>&1 || { say "Installing Tesseract (OCR)"; brew 
 [ -x "$HOME/.local/share/frame-tweaks/speech/piper/piper" ] || "$(tweak_dir speech)/install.sh"
 
 ensure_path
-sed "1s|.*|#!$QT_VENV/bin/python|" "$TWEAK_DIR/frame-snip" > "$BIN/frame-snip"
-chmod 755 "$BIN/frame-snip"
+sed "1s|.*|#!$QT_VENV/bin/python|" "$TWEAK_DIR/frame-snip" | write_file "$BIN/frame-snip" 755
 install_icon frame-tweaks-snip
 install_desktop "$TWEAK_DIR/frame-snip.desktop"
 # (0.4.1 briefly floated the selection over a floating window: less usable than snipping its copy

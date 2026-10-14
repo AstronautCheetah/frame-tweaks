@@ -445,7 +445,7 @@ SETTINGS_PAGES = {cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETT
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-        version = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else ""
+        version = sft.build_version()
         self.setWindowTitle(f"Frame Tweaks {version}")
         icon = ICONS / "frame-tweaks.png"
         if icon.exists():
@@ -1024,7 +1024,7 @@ class Window(QWidget):
         """sys.excepthook: show it in the window (a dialog would open elsewhere in VR)."""
         import platform
         import traceback
-        version = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "dev"
+        version = sft.build_version()
         details = (f"Frame Tweaks {version}, Python {platform.python_version()}, {platform.machine()}\n\n"
                    + "".join(traceback.format_exception(kind, value, tb)))
         self.error_text.setPlainText(details.replace(str(Path.home()), "~"))

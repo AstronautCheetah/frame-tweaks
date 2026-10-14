@@ -228,6 +228,13 @@ Frame Tweaks is built to keep working when nobody is updating it:
 | Windows and clicks in the desktop act strangely; its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a keyboard (Arrow Pad has no Right Ctrl) to turn it off. |
 | Something else | Installer window → **Diagnostics** (or `./install.sh debug-info`), and [open an issue](https://github.com/AstronautCheetah/frame-tweaks/issues/new/choose) with the report. |
 
+**Where the logs are:** each install, update or uninstall writes one to
+`~/.local/state/frame-tweaks/logs/`. The tweaks' background services log to the user journal
+(`journalctl --user -u sft-dashboard`, `grab-guard`, `ydotoold`, `wallet-lock-sync`,
+`app-timers`); SteamVR's drivers, Recline included, log to `~/.local/share/Steam/logs/vrserver.txt`.
+`./install.sh debug-info` gathers the installer logs and the services' recent lines into one
+report, with names and addresses removed; read it before you share it.
+
 ## Things worth knowing about the Frame
 
 - **Desktop mode is nested.** Plasma runs inside the Steam/VR session with its own D-Bus and

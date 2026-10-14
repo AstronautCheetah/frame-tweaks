@@ -1,0 +1,171 @@
+"""lib/common.sh's alarm_fetch with its real checks (dev/test-tweaks.sh stubs gpgv out): packages
+signed with a throwaway key, served by a stand-in curl from a temp folder, verified by the real
+gpgv against a copy of lib/ whose keys/archlinuxarm.gpg is that key. A good package is unpacked
+and its version recorded; a wrong key, a tampered or unsigned package, one that contains another
+package, or one older than the last installed (without ALARM_ALLOW_DOWNGRADE=1) is refused and
+nothing is unpacked."""
+import os
+import shutil
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+TOOLS = ("gpg", "gpgv", "bsdtar", "vercmp", "gpgconf")
+MIRROR = "http://mirror.test/aarch64"
+
+# curl stand-in: $MIRROR/<repo>/ prints the folder's listing.html, $MIRROR/<repo>/<file> -o out
+# copies the file; anything else (the fallback mirror included) fails like a 404.
+CURL = """#!/bin/bash
+out=""; url=""
+while [ $# -gt 0 ]; do case "$1" in -o) out=$2; shift ;; http*) url=$1 ;; esac; shift; done
+case $url in "$MIRROR"/*) rel=${url#"$MIRROR"/} ;; *) exit 22 ;; esac
+if [[ $rel == */ ]]; then f="$SERVE/${rel%/}/listing.html"; else f="$SERVE/$rel"; fi
+[ -f "$f" ] || exit 22
+if [ -n "$out" ]; then cp "$f" "$out"; else cat "$f"; fi
+"""
+
+
+def gen_key(gnupghome, uid):
+    gnupghome.mkdir(mode=0o700)
+    env = dict(os.environ, GNUPGHOME=str(gnupghome))
+    subprocess.run(["gpg", "--batch", "--passphrase", "", "--quick-gen-key", uid, "ed25519", "sign", "never"],
+                   env=env, check=True, capture_output=True, timeout=60)
+    return env
+
+
+class AlarmFetch(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        missing = [t for t in TOOLS if not shutil.which(t)]
+        if missing:
+            raise unittest.SkipTest(f"needs {', '.join(missing)}")
+        cls.keys = tempfile.TemporaryDirectory()
+        k = Path(cls.keys.name)
+        cls.good = gen_key(k / "good", "ALARM test <alarm@test.invalid>")
+        cls.other = gen_key(k / "other", "Someone else <other@test.invalid>")
+        cls.keyring = k / "archlinuxarm.gpg"
+        cls.keyring.write_bytes(subprocess.run(["gpg", "--batch", "--export"], env=cls.good,
+                                               check=True, capture_output=True, timeout=30).stdout)
+
+    @classmethod
+    def tearDownClass(cls):
+        for env in (cls.good, cls.other):
+            subprocess.run(["gpgconf", "--kill", "gpg-agent"], env=env, capture_output=True, timeout=30)
+        cls.keys.cleanup()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        t = Path(self.tmp.name)
+        self.home, self.serve, self.dest = t / "home", t / "serve", t / "dest"
+        self.home.mkdir()
+        (self.serve / "extra").mkdir(parents=True)
+        # A copy of lib/ (REPO_DIR is common.sh's parent folder) trusting only the test key.
+        self.repo = t / "repo"
+        shutil.copytree(ROOT / "lib", self.repo / "lib", ignore=shutil.ignore_patterns("__pycache__"))
+        shutil.copy(self.keyring, self.repo / "lib/keys/archlinuxarm.gpg")
+        self.stubs = t / "stubs"
+        self.stubs.mkdir()
+        (self.stubs / "curl").write_text(CURL)
+        (self.stubs / "curl").chmod(0o755)
+        self.seen = self.home / ".local/state/frame-tweaks/alarm/hello"
+
+    def package(self, version, pkgname="hello", key="good", sign=True):
+        """Build hello-<version>-aarch64.pkg.tar.zst (with .PKGINFO naming <pkgname>), list it."""
+        build = Path(self.tmp.name) / f"build-{version}"
+        shutil.rmtree(build, ignore_errors=True)
+        (build / "usr/bin").mkdir(parents=True)
+        (build / ".PKGINFO").write_text(f"pkgname = {pkgname}\npkgver = {version}\n")
+        (build / "usr/bin/hello").write_text(f"#!/bin/sh\necho {version}\n")
+        name = f"hello-{version}-aarch64.pkg.tar.zst"
+        pkg = self.serve / "extra" / name
+        subprocess.run(["bsdtar", "-caf", str(pkg), "-C", str(build), ".PKGINFO", "usr"], check=True, timeout=30)
+        if sign:
+            env = self.good if key == "good" else self.other
+            subprocess.run(["gpg", "--batch", "--yes", "--detach-sign", "-o", f"{pkg}.sig", str(pkg)],
+                           env=env, check=True, capture_output=True, timeout=30)
+        (self.serve / "extra/listing.html").write_text(f'<a href="{name}">{name}</a>\n')
+        return pkg
+
+    def fetch(self, **extra):
+        env = {"HOME": str(self.home), "USER": os.environ.get("USER", "u"),
+               "PATH": os.pathsep.join([str(self.stubs)] + [os.path.dirname(shutil.which(t)) for t in TOOLS]
+                                       + ["/usr/bin", "/bin"]),
+               "ALARM_MIRROR": MIRROR, "MIRROR": MIRROR, "SERVE": str(self.serve), **extra}
+        return subprocess.run(["bash", "-c", f'source "{self.repo}/lib/common.sh"; alarm_fetch extra hello "{self.dest}"'],
+                              env=env, capture_output=True, text=True, timeout=60)
+
+    def assertRefused(self, r, message):
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn(message, r.stderr)
+        self.assertEqual(list(self.dest.iterdir()) if self.dest.exists() else [], [])
+
+    def test_good_package_is_unpacked_and_its_version_recorded(self):
+        self.package("1.2-1")
+        r = self.fetch()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("echo 1.2-1", (self.dest / "usr/bin/hello").read_text())
+        self.assertEqual(self.seen.read_text(), "1.2-1\n")
+
+    def test_newest_listed_version_is_picked(self):
+        self.package("1.2-1")
+        self.package("1.10-1")
+        (self.serve / "extra/listing.html").write_text(
+            '<a href="hello-1.2-1-aarch64.pkg.tar.zst">x</a>\n<a href="hello-1.10-1-aarch64.pkg.tar.zst">x</a>\n')
+        r = self.fetch()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.seen.read_text(), "1.10-1\n")
+
+    def test_signature_by_another_key_is_refused(self):
+        self.package("1.2-1", key="other")
+        self.assertRefused(self.fetch(), "bad or missing Arch Linux ARM signature")
+        self.assertFalse(self.seen.exists())
+
+    def test_package_changed_after_signing_is_refused(self):
+        pkg = self.package("1.2-1")
+        data = bytearray(pkg.read_bytes())
+        data[len(data) // 2] ^= 0xFF                     # one byte changed, signature kept
+        pkg.write_bytes(bytes(data))
+        self.assertRefused(self.fetch(), "bad or missing Arch Linux ARM signature")
+
+    def test_missing_signature_is_refused(self):
+        self.package("1.2-1", sign=False)
+        self.assertRefused(self.fetch(), "download of hello-1.2-1-aarch64.pkg.tar.zst failed")
+
+    def test_empty_signature_is_refused(self):
+        pkg = self.package("1.2-1", sign=False)
+        pkg.with_name(pkg.name + ".sig").write_bytes(b"")
+        self.assertRefused(self.fetch(), "bad or missing Arch Linux ARM signature")
+
+    def test_signed_package_with_another_name_is_refused(self):
+        self.package("1.2-1", pkgname="evil")
+        self.assertRefused(self.fetch(), "contains package 'evil', not hello")
+        self.assertFalse(self.seen.exists())
+
+    def test_older_than_recorded_is_refused_unless_allowed(self):
+        self.seen.parent.mkdir(parents=True)
+        self.seen.write_text("2.0-1\n")
+        self.package("1.2-1")
+        self.assertRefused(self.fetch(), "hello 1.2-1 is older than the 2.0-1 installed before")
+        self.assertEqual(self.seen.read_text(), "2.0-1\n")
+        r = self.fetch(ALARM_ALLOW_DOWNGRADE="1")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertTrue((self.dest / "usr/bin/hello").exists())
+        self.assertEqual(self.seen.read_text(), "1.2-1\n")
+
+    def test_same_or_newer_than_recorded_is_fine(self):
+        self.seen.parent.mkdir(parents=True)
+        self.seen.write_text("1.2-1\n")
+        self.package("1.2-1")
+        r = self.fetch()
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_not_listed_is_refused(self):
+        (self.serve / "extra/listing.html").write_text('<a href="other-1.0-1-aarch64.pkg.tar.zst">x</a>\n')
+        self.assertRefused(self.fetch(), "package hello not found in ALARM extra")
+
+
+if __name__ == "__main__":
+    unittest.main()
