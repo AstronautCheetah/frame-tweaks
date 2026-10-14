@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.1 (2026-10-14)
 
 ### Added
 - **Español (Latinoamérica):** the first translation: the window, the installer's messages, and
