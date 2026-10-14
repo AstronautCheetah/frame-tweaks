@@ -56,6 +56,7 @@ pass_language()
 from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences page)
+from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
@@ -755,9 +756,9 @@ class Window(QWidget):
         about.setToolTip(_("What Frame Tweaks is, how to install, update and remove it, common issues"))
         about.clicked.connect(self.show_readme)
         bottom.addWidget(about)
-        diag = QPushButton(_("Diagnostics"))
-        diag.setToolTip(_("Save a report for a bug report (user names and paths removed)"))
-        diag.clicked.connect(self.save_diagnostics)
+        diag = QPushButton(_("🐞 Report a problem"))
+        diag.setToolTip(_("Save a diagnostics report (user names and paths removed) and open the bug form"))
+        diag.clicked.connect(self.show_report)
         bottom.addWidget(diag)
         apply_ = QPushButton(_("Apply changes"))
         apply_.setObjectName("apply")
@@ -1168,6 +1169,12 @@ class Window(QWidget):
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
+    def show_report(self):
+        self.close_details()
+        self.details = ReportPage(self, follow_link, self.pool, REPO)
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
     def show_prefs(self):
         self.close_details()
         self.details = Preferences(self)
@@ -1346,15 +1353,6 @@ class Window(QWidget):
         self.scroll.ensureWidgetVisible(self.row_widgets[self.focus_index], 0, 40)
 
     # ---- diagnostics and errors -------------------------------------------------
-    def save_diagnostics(self):
-        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
-            print("would run: ./install.sh debug-info")
-            return
-        r = subprocess.run([str(REPO / "install.sh"), "debug-info"], capture_output=True, text=True)
-        path = next((l.split(" ", 1)[1] for l in r.stdout.splitlines() if l.startswith("Wrote ")), None)
-        self.say(_("Saved {file}: read it, then attach it to a bug report.").format(file=path.replace(str(Path.home()), "~"))
-                 if path else _("Couldn't write the report (see {command}).").format(command="./install.sh debug-info"))
-
     def make_error_page(self):
         page = QWidget()
         lay = QVBoxLayout(page)
@@ -1372,9 +1370,13 @@ class Window(QWidget):
                                       copy.setText(_("Copied"))))
         back = QPushButton(_("← Back"))
         back.clicked.connect(lambda: (copy.setText(_("Copy for bug report")), self.stack.setCurrentIndex(0)))
+        report = QPushButton(_("🐞 Report a problem"))
+        report.setToolTip(_("Copy these details, then save a diagnostics report and open the bug form"))
+        report.clicked.connect(lambda: (QApplication.clipboard().setText(text.toPlainText()), self.show_report()))
         buttons.addWidget(back)
         buttons.addStretch(1)
         buttons.addWidget(copy)
+        buttons.addWidget(report)
         lay.addLayout(buttons)
         return page, text
 
@@ -1445,6 +1447,7 @@ def main():
     server.newConnection.connect(lambda: (server.nextPendingConnection(), w.showNormal(),
                                           w.raise_(), w.activateWindow()))
     sys.excepthook = w.show_error
+    app.aboutToQuit.connect(i18n.withdraw)          # (programs started later follow the keyboard again)
     w.show()
     sys.exit(app.exec())
 

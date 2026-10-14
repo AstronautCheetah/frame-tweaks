@@ -19,7 +19,8 @@ next to the idea it inspired.
 
 ## Support and diagnostics
 - [x] **Logs:** keep the last five runs' logs in `~/.local/state/frame-tweaks/`. *(EmuDeck)*
-- [x] **`./install.sh debug-info`** and a **Diagnostics** button: versions, status, recent
+- [x] **`./install.sh debug-info`** and a **🐞 Report a problem** button (`./install.sh report`):
+  it saves the report and opens the bug form with the version filled in. The report: versions, status, recent
   logs and services' log lines, with user names and paths removed, in one text file for a bug
   report; the bug form asks for it.
   *(Decky, EmuDeck)*

@@ -9,6 +9,7 @@
 #   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
 #   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
 #   ./install.sh debug-info          write a redacted report for bug reports
+#   ./install.sh report              the same, and the bug form's address to attach it to
 #   ./install.sh check-system        are the SteamOS/SteamVR parts the tweaks rely on still there?
 #   ./install.sh list                components and what they do
 #   ./install.sh info ID             one component's details (as in the installer window)
@@ -402,6 +403,14 @@ cmd_hold() {
 }
 
 # ---- diagnostics ----------------------------------------------------------------------------
+# Report a problem: the diagnostics report, then the bug form (version filled in) to attach it to.
+BUG_FORM="https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=bug_report.yml"
+cmd_report() {
+    cmd_debug_info
+    echo
+    t 'The bug form, with your version filled in: %s' "$BUG_FORM&version=${FT_BUILD//+/%2B}"; echo
+}
+
 cmd_debug_info() {
     local out; out="$HOME/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
     # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed.
@@ -467,6 +476,7 @@ case ${1:-} in
     _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;
     hold|unhold) cmd_hold "$@" ;;
     debug-info)  cmd_debug_info ;;
+    report)      cmd_report ;;
     check-system) cmd_check_system ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
     list)        cmd_list ;;

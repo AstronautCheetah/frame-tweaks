@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **🐞 Report a problem** (was Diagnostics): saves the diagnostics report, says where, and opens
+  the bug form with your version filled in, to attach it to; `./install.sh report` in a terminal.
+  The crash page has it too.
+- **Haptic ticks on Android Mirror's ⚙ and its settings' buttons,** and on the scroll strips' ⚙
+  panel.
+- **`arrowpad --fold`** collapses or expands a running pad (for a controller shortcut).
 - **Arrow Pad: Collapse / Expand,** a chevron left of Close, as on Screen snip's panel: the pad
   folds to just the chevron, which stays under the pointer (or the laser, in VR), and it
   remembers being folded.
@@ -22,6 +28,15 @@
   sistema", "Depuración inalámbrica").
 
 ### Fixed
+- **The scroll strips had no haptics:** SteamVR's dashboard kept an older copy of the shared
+  helpers, without the haptic call (a version number hadn't been raised). The dashboard now gets
+  each new copy of them by its content.
+- **Screen snip's panel mixed languages** after a switch: its buttons, labels and state line
+  follow now, not only the tooltips.
+- **A program opened while the window was open could start in another language** (the one it
+  was handed when started): it now takes the window's.
+- **Arrow Pad in VR crashed when closed** with its ✕ (it read SteamVR's events after
+  disconnecting).
 - **Arrow Pad in VR closed at once** after the language change above (its VR panel asked for a
   setting that had moved).
 - **Pasting a snip's image gave its HTML as text** (`<img src="data:…`) wherever the Shared

@@ -170,7 +170,9 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
 - Categories fold, and rows or whole categories can be hidden (hiding never removes anything).
 - "↑ … available · Update" appears when a newer Frame Tweaks release, or a newer version of an
   app a tweak installs, is out.
-- **Diagnostics** saves a report for bug reports, and **🧩 Packs** manages extra packs of tweaks.
+- **🐞 Report a problem** saves a diagnostics report and opens the bug form with your version
+  filled in, to attach it to; **🧩 Packs** manages extra packs of tweaks; **⚙** holds the
+  preferences (the language, and how the window behaves).
 - In VR, the controller's **B** goes back, **Y** goes to the top of the list, and **A** ticks
   the row you point at.
 
@@ -288,7 +290,7 @@ What stays:
 | "Another Frame Tweaks install, update or removal is running" | Wait for the other install window to finish; the lock is released when it closes. |
 | Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often because focus moved to another VR window while the key was down). On Arrow Pad: **Tools → Unstick**. Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
 | Windows and clicks in the desktop act strangely, and its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a physical keyboard (Arrow Pad has no Right Ctrl) to turn it off. |
-| Something else | Installer window → **Diagnostics** (or `./install.sh debug-info`), and [open an issue](https://github.com/AstronautCheetah/frame-tweaks/issues/new/choose) with the report. |
+| Something else | Installer window → **🐞 Report a problem** (or `./install.sh report`): it saves a report and opens the bug form to attach it to. |
 
 ### Where the logs are
 
@@ -299,7 +301,7 @@ What stays:
   `app-timers`).
 - **SteamVR drivers, Recline included:** `~/.local/share/Steam/logs/vrserver.txt`.
 
-`./install.sh debug-info` (or **Diagnostics**) gathers the recent install logs, the status of
+`./install.sh debug-info` (or **🐞 Report a problem**) gathers the recent install logs, the status of
 every tweak and the services' recent lines into one file in your home folder
 (`~/frame-tweaks-debug-….txt`). User, host and phone names and network addresses are removed,
 but read it before you share it.
