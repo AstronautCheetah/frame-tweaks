@@ -68,6 +68,14 @@ settings:
         - {label: Slow, value: "8"}
         - {label: Medium, value: "15"}
         - {label: Fast, value: "25"}
+  actions:
+    - label: "Forget {PHONE_NAME}"
+      script: phone
+      args: [--forget]
+      when: PHONE_NAME
+      about: >-
+        Android Mirror stops connecting to this phone by default. Next time it takes the phone in
+        sight, or asks which if there are several.
 wallet_apps: [android-mirror]
 changes: >-
   `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`,
@@ -86,6 +94,24 @@ Shows your Android phone's screen in a window you can click, type and scroll in,
 
 **Why on a Steam Frame:** Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape.
 <!-- /generated:intro -->
+
+## Requirements
+- **An Android phone with Android 11 or newer** (Wireless debugging arrived in Android 11), on
+  **the same Wi-Fi** as the Frame. Use the phone's main (owner) profile: Wireless debugging
+  isn't available in other profiles.
+- **Developer options turned on:** *Settings → About phone*, tap *Build number* seven times
+  (the menu names vary a little between phone makers).
+- **Wireless debugging turned on:** *Settings → System → Developer options → Wireless
+  debugging*. The phone asks whether to allow it on this network.
+
+> **Before you turn these on, consider what they allow.** Wireless debugging lets a paired
+> computer control the phone fully: see the screen, tap and type, install and remove apps, and
+> read files. The Frame keeps its pairing key in your home folder (`~/.android/`), so anyone who
+> gets into your Frame account could do the same while the phone's Wireless debugging is on.
+> Turn it off when you're not mirroring (pairing is remembered, so turning it back on is
+> enough), and don't leave it on on public or shared Wi-Fi. Some apps, such as banking or
+> payment apps and phones managed by an employer, refuse to run or warn while Developer
+> options are on.
 
 ## Install
 Tick it in the Frame Tweaks window, or:
@@ -180,8 +206,6 @@ the same file (`PHONE_NAME`).
   library, installed into Frame Tweaks' shared Python environment).
 
 ## Good to know
-- **Wireless debugging** works only on the phone's main (owner) profile, and only while the
-  phone and the Frame are on the same Wi-Fi.
 - **An always-on VPN on the phone:** the phone may show its VPN address, which the Frame can't
   reach. It still announces its real local address on the network, and that's what `phone`
   uses. If the phone isn't found at all, turn on the VPN's option to allow local network (LAN)
@@ -191,10 +215,8 @@ the same file (`PHONE_NAME`).
   says so.
 - If you install a VR environment tweak after this one, reinstall Android Mirror to add its VR
   extras.
-- With [Memory caps](../memcap/) installed, scrcpy runs inside a memory limit.
-- **Your pairing keys** are plain files in `~/.android`. Anyone who can use your account can use
-  them to reach the phone while its wireless debugging is on. Removing the tweak keeps them, and
-  keeps scrcpy (`brew uninstall scrcpy` removes it) and your settings.
+- **Removing the tweak** keeps your pairing keys (`~/.android`), scrcpy (`brew uninstall
+  scrcpy` removes it) and your settings.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes

@@ -147,6 +147,10 @@ def check_settings(st, cid, where):
                 vals.append(c["value"])
         if o.get("default") not in vals:
             errs.append(f"{where}: {o['key']}: the default must be one of the choices' values")
+    for a in st.get("actions", []):
+        if not (isinstance(a, dict) and isinstance(a.get("label"), str) and isinstance(a.get("script"), str)
+                and isinstance(a.get("args", []), list) and isinstance(a.get("when", ""), str)):
+            errs.append(f"{where}: each settings action needs a label and a script (args, when, about optional)")
     return errs
 
 
@@ -202,11 +206,14 @@ def read_tweak(d):
 
 def read_pack(d):
     """(info, tweak folders in order, problems)"""
-    info, probs = {"name": d.name, "author": "", "api": 1, "categories": [], "order": []}, []
+    info, probs = {"name": d.name, "author": "", "api": 1, "categories": [], "order": [], "about": ""}, []
     if (d / "pack.md").is_file():
         try:
-            data, _ = manifest.front_matter((d / "pack.md").read_text())
+            data, body = manifest.front_matter((d / "pack.md").read_text())
             info.update({k: v for k, v in data.items() if k in info})
+            # Its description: the text's first paragraph (headings skipped).
+            paras = [p.strip() for p in body.split("\n\n") if p.strip() and not p.lstrip().startswith("#")]
+            info["about"] = " ".join(paras[0].split()) if paras else ""
         except manifest.ManifestError as e:
             probs.append(f"{d.name}/pack.md: {e}")
     subs = {p.name: p for p in d.iterdir() if p.is_dir() and (p / "README.md").is_file()}
@@ -228,7 +235,8 @@ def load(refresh=False):
         official = d == OFFICIAL.resolve()
         state = "official" if official else "trusted" if trust.get(str(d)) == pack_hash(d) else (
             "changed" if str(d) in trust else "untrusted")
-        pack = dict(dir=d, name=info["name"], author=info["author"], state=state, tweaks=[f.name for f in folders])
+        pack = dict(dir=d, name=info["name"], author=info["author"], about=info["about"], state=state,
+                    tweaks=[f.name for f in folders])
         packs.append(pack)
         problems += probs
         if not isinstance(info["api"], int) or info["api"] > API:
@@ -333,11 +341,29 @@ def settings_specs():
             out[c["id"]] = {"file": Path(st["file"]).expanduser(), "format": st["format"],
                             "about": st.get("about", ""), "note": st.get("note", ""),
                             "options": [(o["key"], o["title"], [(ch["label"], ch["value"]) for ch in o["choices"]],
-                                         o["default"]) for o in st["options"]]}
+                                         o["default"]) for o in st["options"]],
+                            # Buttons that run one of the tweak's own scripts (when: shown only while
+                            # that setting has a value; {KEY} in the label shows it).
+                            "actions": [dict(a, dir=c["dir"]) for a in st.get("actions", [])]}
     return out
 
 
 SETTINGS = settings_specs()
+
+
+def raw_setting(cid, key):
+    """A setting's value as the tweak's own scripts read it (any value, not only the choices)."""
+    s = SETTINGS[cid]
+    if s["format"] == "json":
+        try:
+            return str(json.loads(s["file"].read_text()).get(key, ""))
+        except (OSError, ValueError, AttributeError):
+            return ""
+    try:   # a shell file: sourced, as the scripts do (values may be shell-quoted)
+        return subprocess.run(["bash", "-c", f'. "$1" 2>/dev/null; printf %s "${{{key}:-}}"', "_", str(s["file"])],
+                              capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
 
 
 def defaults(cid):
@@ -488,6 +514,8 @@ def mods(args):
                  "untrusted": "not trusted: not used (./install.sh mods trust NAME)",
                  "changed": "changed since you trusted it: not used until you trust it again"}[p["state"]]
         print(f"{p['name']}  ({p['dir']})  {state}")
+        if p["about"]:
+            print(f"    {p['about']}")
         if p["state"] != "official":
             for t in p["tweaks"]:
                 c = used.get(t)
