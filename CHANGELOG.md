@@ -16,6 +16,8 @@
 - **Scroll strips: haptics** from the dashboard's own effects: a tick when the laser reaches a
   strip, a firmer one on press and on a page, and light ticks while it scrolls. A **Haptics** tick
   box in its settings turns them off.
+- **Scroll strips' colours as circles** in the window's settings, the same colours as its ⚙ panel
+  in VR.
 - **Haptic ticks** on the Frame Tweaks window's buttons and on Screen snip's narration panel, as
   on Arrow Pad: a light one when the laser moves onto a button, a firmer one on a click.
 - **Signed releases:** release tags are signed, and `./install.sh update` refuses a release that

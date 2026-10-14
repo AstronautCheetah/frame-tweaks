@@ -4,36 +4,36 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: gui/frame-tweaks-gui.py:1121
+#: gui/frame-tweaks-gui.py:1137
 msgid "Cancel"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1123
+#: gui/frame-tweaks-gui.py:1139
 msgid "Remove them"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1153
+#: gui/frame-tweaks-gui.py:1169
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1158
+#: gui/frame-tweaks-gui.py:1174
 msgid "Nothing to change."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1260
+#: gui/frame-tweaks-gui.py:1276
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1263
+#: gui/frame-tweaks-gui.py:1279
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1269
+#: gui/frame-tweaks-gui.py:1285
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:348 gui/frame-tweaks-gui.py:371 gui/frame-tweaks-gui.py:574 gui/frame-tweaks-gui.py:1272 gui/packs_page.py:27 gui/wallet_page.py:248
+#: gui/frame-tweaks-gui.py:348 gui/frame-tweaks-gui.py:371 gui/frame-tweaks-gui.py:590 gui/frame-tweaks-gui.py:1288 gui/packs_page.py:27 gui/wallet_page.py:248
 msgid "← Back"
 msgstr ""
 
@@ -41,31 +41,31 @@ msgstr ""
 msgid "About Frame Tweaks"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:488
+#: gui/frame-tweaks-gui.py:504
 msgid "Reset to defaults"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:648
+#: gui/frame-tweaks-gui.py:664
 msgid "🧩 Packs"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:652
+#: gui/frame-tweaks-gui.py:668
 msgid "Refresh"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:678
+#: gui/frame-tweaks-gui.py:694
 msgid "📖 README"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:682
+#: gui/frame-tweaks-gui.py:698
 msgid "Diagnostics"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:686
+#: gui/frame-tweaks-gui.py:702
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:690
+#: gui/frame-tweaks-gui.py:706
 msgid "Close"
 msgstr ""
 

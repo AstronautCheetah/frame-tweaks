@@ -378,6 +378,8 @@ def settings_specs():
                             "actions": [dict(a, dir=c["dir"]) for a in st.get("actions", [])],
                             # Options shown as one tick box (two choices: on, then off).
                             "checkboxes": {o["key"] for o in st["options"] if o.get("checkbox")},
+                            # Options whose number choices are hues (0..1), shown as colour circles.
+                            "swatches": {o["key"] for o in st["options"] if o.get("swatches")},
                             # Other tweaks' settings shown on the same page (their own files).
                             "include": [i for i in st.get("include", []) if isinstance(i, str)]}
     return out

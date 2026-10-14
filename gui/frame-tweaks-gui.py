@@ -23,7 +23,7 @@ from pathlib import Path
 
 from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
-from PyQt6.QtGui import QCursor, QDesktopServices, QIcon, QImage
+from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontMetrics, QIcon, QImage
 from PyQt6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
                              QVBoxLayout, QWidget)
@@ -474,12 +474,28 @@ class SettingsSection(QWidget):
             lay.addWidget(lab)
             grid = QGridLayout()                     # (wraps: a long list of choices fits the page)
             per_row = 7 if all(len(t) <= 8 for t, _value in choices) else 4
+            swatches = key in self.spec["swatches"]
+            if swatches:                             # circles of colour, as the gear's panel in VR
+                per_row = 12
             for n, (text, value) in enumerate(choices):
                 b = QPushButton(text)
                 b.setCheckable(True)
                 b.setChecked(self.conf.get(key) == value)
-                b.setMinimumWidth(70)
+                bold = QFont(b.font())
+                bold.setBold(True)                   # (wide enough for the chosen one's bold text,
+                bold.setPixelSize(15)                # at STYLE's 14 px, measured before it applies)
+                b.setMinimumWidth(max(70, QFontMetrics(bold).horizontalAdvance(text) + 36))
                 b.setStyleSheet("QPushButton:checked { background: #355b7a; font-weight: 600; }")
+                if swatches and isinstance(value, (int, float)):
+                    hue = round(value * 360)
+                    b.setText("")
+                    b.setToolTip(text)
+                    b.setAccessibleName(text)
+                    b.setFixedSize(44, 44)
+                    b.setMinimumWidth(44)
+                    b.setStyleSheet(f"QPushButton {{ background: hsl({hue}, 60%, 55%); border-radius: 22px;"
+                                    f" border: 2px solid rgba(255, 255, 255, 64); padding: 0; }}"
+                                    f" QPushButton:checked {{ border: 4px solid white; }}")
                 b.clicked.connect(lambda _=False, k=key, v=value: self.choose(k, v))
                 grid.addWidget(b, n // per_row, n % per_row)
                 self.buttons[(key, text)] = (b, value)
