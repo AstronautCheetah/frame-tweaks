@@ -2131,44 +2131,44 @@ msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 "Flechas y teclas de navegación flotantes en modo escritorio; nunca roba el foco"
 
-#: packs/original/arrowpad/arrowpad.py:1025
+#: packs/original/arrowpad/arrowpad.py:1032
 msgid "Keys released"
 msgstr "Teclas liberadas"
 
-#: packs/original/arrowpad/arrowpad.py:1026
+#: packs/original/arrowpad/arrowpad.py:1033
 msgid "Shift, Ctrl, Alt and Super were pressed and let go."
 msgstr "Shift, Ctrl, Alt y Super se presionaron y se soltaron."
 
-#: packs/original/arrowpad/arrowpad.py:1035
+#: packs/original/arrowpad/arrowpad.py:1042
 msgid "Screen snip isn't installed"
 msgstr "Recorte de pantalla no está instalado"
 
-#: packs/original/arrowpad/arrowpad.py:1036
+#: packs/original/arrowpad/arrowpad.py:1043
 msgid "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."
 msgstr ""
 "Marca 'Recorte de pantalla + Narrar' en Frame Tweaks para usar este botón."
 
-#: packs/original/arrowpad/arrowpad.py:1136
+#: packs/original/arrowpad/arrowpad.py:1143
 msgid "button size multiplier (default 1.0)"
 msgstr "multiplicador del tamaño de los botones (predeterminado 1.0)"
 
-#: packs/original/arrowpad/arrowpad.py:1137
+#: packs/original/arrowpad/arrowpad.py:1144
 msgid "ydotoold socket path"
 msgstr "ruta del socket de ydotoold"
 
-#: packs/original/arrowpad/arrowpad.py:1138
+#: packs/original/arrowpad/arrowpad.py:1145
 msgid "close a running pad"
 msgstr "cierra un teclado en ejecución"
 
-#: packs/original/arrowpad/arrowpad.py:1139
+#: packs/original/arrowpad/arrowpad.py:1146
 msgid "open in desktop mode (even from the VR menu)"
 msgstr "abre en modo escritorio (incluso desde el menú de RV)"
 
-#: packs/original/arrowpad/arrowpad.py:1140
+#: packs/original/arrowpad/arrowpad.py:1147
 msgid "open as a floating VR window"
 msgstr "abre como ventana flotante de RV"
 
-#: packs/original/arrowpad/arrowpad.py:1158
+#: packs/original/arrowpad/arrowpad.py:1165
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
@@ -2350,7 +2350,7 @@ msgid ""
 msgstr ""
 "{m}: toque = solo la siguiente tecla, doble toque = bloquear; o mantenla presionada mientras presionas una tecla con la otra mano"
 
-#: packs/original/arrowpad/arrowpad.py:171 packs/original/arrowpad/arrowpad.py:831
+#: packs/original/arrowpad/arrowpad.py:171 packs/original/arrowpad/arrowpad.py:838
 msgid "Pin: stop accidental moves"
 msgstr "Fijar: evita movimientos accidentales"
 
@@ -2370,47 +2370,51 @@ msgstr "Restablecer posición"
 msgid "Smaller"
 msgstr "Más pequeño"
 
-#: packs/original/arrowpad/arrowpad.py:174
-msgid "Launcher"
-msgstr "Menú"
-
-#: packs/original/arrowpad/arrowpad.py:174 packs/original/snip/README.md
-msgid "Snip"
-msgstr "Recorte"
-
-#: packs/original/arrowpad/arrowpad.py:174
+#: packs/original/arrowpad/arrowpad.py:175
+msgctxt "key legend"
 msgid "Tools"
-msgstr "Herramientas"
+msgstr "Herram."
 
-#: packs/original/arrowpad/arrowpad.py:174
+#: packs/original/arrowpad/arrowpad.py:175
+msgctxt "key legend"
 msgid "Unstick"
 msgstr "Soltar"
 
-#: packs/original/arrowpad/arrowpad.py:184
+#: packs/original/arrowpad/arrowpad.py:176
+msgctxt "key legend"
+msgid "Launcher"
+msgstr "Menú"
+
+#: packs/original/arrowpad/arrowpad.py:176
+msgctxt "key legend"
+msgid "Snip"
+msgstr "Recorte"
+
+#: packs/original/arrowpad/arrowpad.py:186
 msgid "Graphite"
 msgstr "Grafito"
 
-#: packs/original/arrowpad/arrowpad.py:188
+#: packs/original/arrowpad/arrowpad.py:190
 msgid "Midnight"
 msgstr "Medianoche"
 
-#: packs/original/arrowpad/arrowpad.py:195
+#: packs/original/arrowpad/arrowpad.py:197
 msgid "Light"
 msgstr "Suave"
 
-#: packs/original/arrowpad/arrowpad.py:195
+#: packs/original/arrowpad/arrowpad.py:197
 msgid "Normal"
 msgstr "Normal"
 
-#: packs/original/arrowpad/arrowpad.py:195 packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
+#: packs/original/arrowpad/arrowpad.py:197 packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr "Desactivado"
 
-#: packs/original/arrowpad/arrowpad.py:196 packs/original/scroll-strips/patch.js:221
+#: packs/original/arrowpad/arrowpad.py:198 packs/original/scroll-strips/patch.js:221
 msgid "Haptics"
 msgstr "Respuesta háptica"
 
-#: packs/original/arrowpad/arrowpad.py:196
+#: packs/original/arrowpad/arrowpad.py:198
 msgid "Theme"
 msgstr "Tema"
 
@@ -2418,19 +2422,19 @@ msgstr "Tema"
 msgid "arrowpad: desktop mode isn't running"
 msgstr "arrowpad: el modo escritorio no está en ejecución"
 
-#: packs/original/arrowpad/arrowpad.py:614 packs/original/arrowpad/arrowpad.py:762 packs/original/arrowpad/arrowpad.py:1025 packs/original/arrowpad/arrowpad.py:1035 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+#: packs/original/arrowpad/arrowpad.py:616 packs/original/arrowpad/arrowpad.py:769 packs/original/arrowpad/arrowpad.py:1032 packs/original/arrowpad/arrowpad.py:1042 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr "Teclado de flechas"
 
-#: packs/original/arrowpad/arrowpad.py:614 packs/original/arrowpad/arrowpad.py:762
+#: packs/original/arrowpad/arrowpad.py:616 packs/original/arrowpad/arrowpad.py:769
 msgid "Arrow Pad (VR)"
 msgstr "Teclado de flechas (RV)"
 
-#: packs/original/arrowpad/arrowpad.py:831
+#: packs/original/arrowpad/arrowpad.py:838
 msgid "Pinned: tap to allow moving"
 msgstr "Fijado: toca para permitir moverlo"
 
-#: packs/original/arrowpad/arrowpad.py:877
+#: packs/original/arrowpad/arrowpad.py:884
 msgid "Done"
 msgstr "Listo"
 
@@ -3089,6 +3093,10 @@ msgid ""
 "Select a rectangle of the window you're using: copy it, save it, copy its text (OCR) or read it aloud"
 msgstr ""
 "Selecciona un rectángulo de la ventana que estás usando: cópialo, guárdalo, copia su texto (OCR) o léelo en voz alta"
+
+#: packs/original/snip/README.md
+msgid "Snip"
+msgstr "Recorte"
 
 #: packs/original/snip/README.md
 msgid ""
