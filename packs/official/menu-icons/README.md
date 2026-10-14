@@ -28,7 +28,7 @@ Steam's VR **"+" menu** looks up app icons only in the *hicolor* theme (and `pix
 apps whose icon only KDE's Breeze theme has show up blank: **Konsole**, **System Settings**,
 and a few others (Remote Desktop/SSH viewers, Avahi, Emoji Selector, …).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

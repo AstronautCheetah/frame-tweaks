@@ -28,7 +28,7 @@ test: {offline: true}
 remove them. Several tweaks use it, and they offer to install it when it's missing; this row
 lets you see it, and install it up front.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (it lives in /home/linuxbrew)

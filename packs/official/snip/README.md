@@ -49,7 +49,7 @@ Select a rectangle of the window you're using, then:
   full-screen snip goes away, so you can carry on with anything else while it reads. A speed change applies at
   once (it reads sentence by sentence and restarts the current one).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)

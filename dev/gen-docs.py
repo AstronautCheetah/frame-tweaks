@@ -62,7 +62,7 @@ def glance(m):
 
 
 def put(text, name, body, path):
-    begin, end = f"<!-- generated:{name} (dev/gen-docs.py, from each tweak's meta) -->", f"<!-- /generated:{name} -->"
+    begin, end = f"<!-- generated:{name} (dev/gen-docs.py, from each tweak's README front matter) -->", f"<!-- /generated:{name} -->"
     block = f"{begin}\n{body}\n{end}"
     pat = re.compile(re.escape(begin.split(" (")[0]) + r".*?" + re.escape(end), re.S)
     if pat.search(text):

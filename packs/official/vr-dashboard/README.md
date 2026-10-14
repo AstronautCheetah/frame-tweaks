@@ -39,7 +39,7 @@ The shared part of the **VR environment** tweaks ([Curved world windows](../curv
 [Back to the previous window](../float-return/), [Pick up when floating](../float-grab/), [Scroll strips](../scroll-strips/)). Installed automatically with them; each of
 those tweaks is one small patch, which you switch on or off by ticking it in the installer window.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches off each patch whose code changed

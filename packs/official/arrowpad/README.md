@@ -36,7 +36,7 @@ A compact, always-on-top pad for desktop mode with the keys Steam's on-screen
 keyboard lacks. It never steals focus, so whatever you tap goes to the app you're
 working in.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

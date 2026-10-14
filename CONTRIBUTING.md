@@ -33,18 +33,17 @@ without `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`: an unticked che
 
 [Conventional Commits](https://www.conventionalcommits.org/), checked by
 [commitizen](https://commitizen-tools.github.io/commitizen/) (`.cz.toml`): a first line
-`<type>(<scope>): <subject>` in the imperative, e.g. `fix(arrowpad): stop the overlay
-flickering`, then an optional body saying why. Types: `feat` (something new for users), `fix`,
-`docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `style`, `revert`; the scope is
-optional, usually a tweak's id (or `gui`, `installer`, `lib`, `dev`, `release`). With
-commitizen installed (`brew install commitizen` or `pipx install commitizen`), `cz commit` asks
-for each part; the commit-msg hook checks every message either way (`dev/check-commit-msg.sh`). **No AI attribution**: no `Co-authored-by` line naming an AI tool or bot (Claude,
-Anthropic, Copilot, ChatGPT, OpenAI, Gemini, Codex, Cursor, Aider, `[bot]` accounts), and no
-`Claude-Session`, `Assisted-by`, `Generated-by` or "Generated with [...]" lines, whatever a tool
-suggests. You're responsible for what you submit, however it was written. Human co-authors are
-welcome: `Co-authored-by: Jane Doe <jane@example.com>` is fine (GitHub adds those when it
-squash-merges a pull request with several authors). `dev/check-trailers.sh` is the rule; the
-hooks and CI run it.
+`<type>(<scope>): <subject>` in the imperative, under about 72 characters, e.g.
+`fix(arrowpad): stop the overlay flickering`, then an optional body saying why. Types: `feat`
+(something new for users), `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`,
+`style`, `revert`; the scope is optional, usually a tweak's id (or `gui`, `installer`, `lib`,
+`dev`, `release`). With commitizen installed (`brew install commitizen` or
+`pipx install commitizen`), `cz commit` asks for each part; the commit-msg hook checks every
+message either way (`dev/check-commit-msg.sh`).
+
+No tool attribution lines in commits (`dev/check-trailers.sh` is the rule; the hooks and CI run
+it). You're responsible for what you submit, however it was written. Human co-authors are
+welcome: `Co-authored-by: Jane Doe <jane@example.com>` is fine.
 
 ## Pinned downloads
 
@@ -102,6 +101,13 @@ installs fall back where they can (Frame Tweaks' copy of a vanished pinned downl
 Python packages if the pinned ones won't install; the working adb/ydotool if a new build won't
 run), and 🧪 experimental tweaks switch themselves off after a SteamVR change they don't
 recognise.
+
+## Working on several changes at once (maintainers)
+
+`main` is the only branch. To work on two things in parallel, `dev/agent-worktree.sh add <name>`
+makes a separate checkout under `tmp/` (a git worktree of `origin/main`), and
+`dev/safe-push.sh` publishes its commits onto `main`, replaying them if `main` moved meanwhile.
+`dev/agent-worktree.sh remove <name>` cleans up.
 
 ## Releasing (maintainers)
 

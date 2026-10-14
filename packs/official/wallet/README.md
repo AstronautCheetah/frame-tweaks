@@ -45,7 +45,7 @@ started from VR, and two daemons writing the same wallet file can overwrite each
 other. This follows [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s
 launcher approach (`keyring.enable`), without needing Nix:
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

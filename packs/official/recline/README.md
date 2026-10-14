@@ -56,7 +56,7 @@ new-waifu rotates the whole tracked world, not just your heading: press **Reclin
 and the direction you're looking becomes level and forward, at a chosen eye height. Every
 tracked device moves together, so your hands stay attached. **Reset to normal** puts it back.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder); after a SteamVR update it checks SteamVR's internals and turns off what changed. Reinstalling needs SteamOS's compiler and CMake

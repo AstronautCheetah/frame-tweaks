@@ -392,10 +392,10 @@ What isn't tested automatically:
 - **Nix.** steam-frame-nix offers declarative Home Manager modules. Frame Tweaks chose a
   checklist installer without Nix; the wallet tweak adapts steam-frame-nix's launcher approach
   instead (README, *How this compares*).
-- **A root service** (as Decky Loader has) and **root-only tweaks** (SDWEAK, Btrfs changes):
+- **A root service** and **root-only tweaks** (SDWEAK, Btrfs changes):
   nothing here runs as root apart from Homebrew's one-time folder setup (roadmap, *Not
   adopting*).
-- **`git reset --hard` updates** (as EmuDeck does): updates check out release tags, or
+- **Updates that reset the checkout** (`git reset --hard`): updates check out release tags, or
   fast-forward a developer branch, so local changes are never thrown away silently (roadmap,
   *Not adopting*).
 - **A testing channel of pull-request builds** (as Decky has): only tagged releases reach users;

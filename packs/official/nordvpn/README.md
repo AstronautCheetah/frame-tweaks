@@ -28,7 +28,7 @@ Installers that put NordVPN's own app into `/usr` (e.g. scripts that unlock the 
 root and use pacman) lose it at **every SteamOS update**, because the update replaces the
 whole system partition. Your settings in `/var` and `/etc` remain, but `nordvpn` is gone.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)

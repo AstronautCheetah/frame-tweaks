@@ -1,42 +1,8 @@
 # Changelog
 
 ## Unreleased
-- **Updates are sturdier:** `./install.sh update` and `get.sh` take GitHub's release tags as
-  they are, and a checkout of `main` that can't fast-forward says how to catch up.
-- **Frame Tweaks' copies of pinned downloads come with their licence texts** (beside each copy
-  on the `mirror` release).
-- For contributors: commit messages follow Conventional Commits, checked by commitizen in the
-  commit-msg hook and CI (`.cz.toml`, `dev/check-commit-msg.sh`; CONTRIBUTING.md).
-- **The version shows the exact build** between releases (`0.5.0+15.bca47ad`, `-dirty` with
-  local changes): `./install.sh --version`, the window title, logs and debug-info. Releases
-  still show plain `0.6.0`.
-- **Updates replace programs instead of writing into them**, so a wrapper that's running while
-  you update (adb, arrowpad, gh, the speech module, the Python tools) can't run half old, half
-  new; Android Mirror's adb is swapped in only once the new copy is complete. (`write_file` in
-  `lib/common.sh`; CI refuses the old pattern.)
-- **debug-info includes the tweaks' services' recent log lines** and which release installed
-  each tweak; the README says where every log is.
-- **New: [docs/DESIGN.md](docs/DESIGN.md)**, how Frame Tweaks works and why.
-- For developers: tests for the Arch Linux ARM package checks (real signatures, wrong package,
-  downgrade), for migrations, holds and the install lock, and for the version string.
-- **Recline** (new, VR environment, 🧪): use VR lying down or reclined. One button (or a
-  controller shortcut) makes your view level and forward; it undoes itself when you get up.
-  Builds [new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) v1.2.0 from its pinned
-  source; restart SteamVR after installing. A setting leaves out its room-view fix, which adds a
-  library to the Frame's camera service.
-- For maintainers: a git-commit pin can follow upstream's releases (`latest=` a releases URL);
-  `dev/mirror-pins.sh` now adds `mirror_sha256=` to a pin that has none yet.
-- **Fixed: links in the installer window failed with "Firefox is already running, but is not
-  responding"** when the window was floating in VR and the browser was open in desktop mode.
-  A web link now goes to your default browser (whichever it is) in the session where it's
-  running; if it isn't running, it opens in VR. A tip says where it went. (`lib/browser.py`;
-  `python3 lib/browser.py --where URL` shows the choice without opening anything.)
-- **📋 next to every link** in the installer window (sources, documentation, known issues and
-  each tweak's README) copies the link instead of opening it.
-- **The "VR windows" group is now "VR environment".** If you had folded or hidden it, it stays
-  that way.
-- **Fixed: links in a tweak's README on its details page** pointed nowhere when they were
-  relative, and Markdown links in its "What it is" and "Why" showed as raw text.
+
+### Added
 - **Packs: add your own tweaks without changing Frame Tweaks.** Every tweak is now a folder in a
   pack, described by the YAML front matter of its README.md; Frame Tweaks' own tweaks are the
   official pack (`packs/official/`, moved from the top folder) and load the same way. Put other
@@ -44,38 +10,56 @@
   or `./install.sh mods`); a changed pack needs trusting again, and a pack's tweak replaces an
   official one only if it says `replaces: true`. Guide: `docs/mods.md`; example:
   `examples/hello-pack/`.
-  - The installer window's details page now shows the same "what" and "why" as the README.
-  - For developers: `components.tsv`, the `meta` and `processes` files and the `# label:` lines
-    are gone (all in the front matter); scripts use `$TWEAK_DIR`, `tweak_dir ID` and
-    `$FRAME_TWEAKS_LIB`.
+- **Recline** (new, VR environment, 🧪): use VR lying down or reclined. One button (or a
+  controller shortcut) makes your view level and forward; it undoes itself when you get up.
+  Builds [new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) v1.2.0 from its pinned
+  source; restart SteamVR after installing. A setting leaves out its room-view fix, which adds a
+  library to the Frame's camera service.
+- **📋 next to every link** in the installer window (sources, documentation, known issues and
+  each tweak's README) copies the link instead of opening it.
+- **Android Mirror asks which phone:** with several advertising, a list to choose from (it's
+  remembered); when the remembered one isn't in sight, wait for it or use one that is. **Choose
+  phone…** on its menu entry (or `phone --pick`) chooses again.
 - **Frame Tweaks keeps its own copies of the pinned downloads** (Full Keyboard, whisper-frame,
-  the Whisper model, the voice, rustup, Homebrew's installer, clipboard-sync's source) on a
-  `mirror` release. If upstream deletes or changes a file, installs use the copy, checked
-  against the same SHA256. Piper isn't copied: it bundles espeak-ng (GPL-3.0), whose source
-  would have to be hosted with it. New README section: **If updates stop**.
+  the Whisper model, the voice, rustup, Homebrew's installer, clipboard-sync's source, Recline-VR's
+  source) on a `mirror` release, each with its licence texts. If upstream deletes or changes a
+  file, installs use the copy, checked against the same SHA256. Piper isn't copied: it bundles
+  espeak-ng (GPL-3.0), whose source would have to be hosted with it. New README section: **If
+  updates stop**.
+- **Weekly upstream check** (a GitHub workflow): one issue lists what changed or vanished
+  upstream (pinned downloads, Arch Linux ARM packages, Homebrew's scrcpy) and newer versions to
+  take; `dev/bump-pin.py` moves a pin (version, URL, checksum) in one command.
+- **🧪 Experimental** marks the tweaks that rely on SteamVR's internals (the VR environment
+  tweaks and Android Mirror's VR extras), in the README, the installer window and
+  `./install.sh list`.
+- **`./install.sh menu --remove`** takes out Frame Tweaks' own menu entry and icons (README,
+  *Remove everything*).
+- **[docs/DESIGN.md](docs/DESIGN.md):** how Frame Tweaks works and why.
+
+### Changed
+- **Web links open in your default browser where it's already running** (desktop mode or VR);
+  if it isn't running, it opens in VR, and a tip says where it went (`lib/browser.py`;
+  `python3 lib/browser.py --where URL` shows the choice without opening anything).
+- **The "VR windows" group is now "VR environment".** If you had folded or hidden it, it stays
+  that way. The details page shows the same "what" and "why" as each tweak's README.
+- **The version shows the exact build** between releases (e.g. `0.5.0+15.bca47ad`, `-dirty` with
+  local changes): `./install.sh --version`, the window title, logs and debug-info. A release
+  shows just its number.
+- **Updates replace programs instead of writing into them**, so a wrapper that's running while
+  you update (adb, arrowpad, gh, the speech module, the Python tools) can't run half old, half
+  new; Android Mirror's adb is swapped in only once the new copy is complete.
+- **Updates are sturdier:** `./install.sh update` and `get.sh` take GitHub's release tags as
+  they are, and a checkout of `main` that can't fast-forward says how to catch up.
 - **Fewer surprises when upstream moves on:**
-  - **Weekly upstream check** (a GitHub workflow): one issue lists what changed or vanished
-    upstream (pinned downloads, Arch Linux ARM packages, Homebrew's scrcpy) and newer versions to
-    take; `dev/bump-pin.py` moves a pin (version, URL, checksum) in one command.
   - **Android Mirror with an untested scrcpy** (a new major version from Homebrew): its VR
     extras switch themselves off, with a one-time notice, and the window stays a plain 16:9
-    one where laser clicks land right, instead of taps silently going nowhere. Its status
-    says so.
+    one where laser clicks land right. Its status says so.
   - **adb and ydotool:** a new Arch Linux ARM build that needs newer system libraries than
     SteamOS has is no longer installed over a working one.
   - **Python packages:** if the pinned versions can't be installed (say, SteamOS moved to a
     newer Python), the newest ones are installed instead, with a warning.
-  - **🧪 Experimental** marks the tweaks that rely on SteamVR's internals (the VR windows tweaks
-    and Android Mirror's VR extras), in the README, the installer window and `./install.sh list`.
-- The installer window's Wallet apps page and its helpers moved into `gui/wallet_page.py` (the
-  window's file was over 1,400 lines).
-- **Dashboard patches share one helper file** (`vr-dashboard/lib.js`, injected first): finding
-  the dashboard's components, drawing pieces in a fixed page corner, reusing unchanged pieces,
-  reading a window's picture size. Scroll strips, Android Mirror's two patches and Pick up when
-  floating use it instead of their own copies.
-- Fixed: installing the Firefox settings reported a failure whenever Firefox wasn't running, and
-  its status said "not applied" for profiles in Firefox's older folder (`~/.mozilla`).
-- Tests for Firefox's settings and NordVPN's status; the test run no longer prints messages.
+- **debug-info includes the tweaks' services' recent log lines** and which release installed
+  each tweak; the README says where every log is.
 - **All settings under `~/.config/frame-tweaks/`:** Android Mirror's `phone.conf` and
   Dictation's `dictate.conf` move there from `~/.config` (on the next `./install.sh` run, or
   the next time `phone` / `dictate` runs).
@@ -83,10 +67,30 @@
   with a pinned Rust toolchain in a temporary folder that's deleted afterwards. Homebrew's Rust
   from older versions stays; the installer says how to remove it (`brew uninstall rust && brew
   autoremove`).
-- **Android Mirror asks which phone:** with several advertising, a list to choose from (it's
-  remembered); when the remembered one isn't in sight, wait for it or use one that is. **Choose
-  phone…** on its menu entry (or `phone --pick`) chooses again.
+- **Dashboard patches share one helper file** (`vr-dashboard/lib.js`, injected first). Scroll
+  strips, Android Mirror's two patches and Pick up when floating use it instead of their own
+  copies.
 
+### Fixed
+- **Links in the installer window failed with "Firefox is already running, but is not
+  responding"** when the window was floating in VR and the browser was open in desktop mode.
+- **Links in a tweak's README on its details page** pointed nowhere when they were relative,
+  and Markdown links in its "What it is" and "Why" showed as raw text.
+- **Installing the Firefox settings reported a failure** whenever Firefox wasn't running, and
+  its status said "not applied" for profiles in Firefox's older folder (`~/.mozilla`).
+- **Migrations ran when going back to an older release;** they now run only on the way up.
+
+### For contributors
+- Commit messages follow Conventional Commits, checked by commitizen in the commit-msg hook and
+  CI (`.cz.toml`, `dev/check-commit-msg.sh`).
+- `components.tsv`, the `meta` and `processes` files and the `# label:` lines are gone (all in
+  each README's front matter); scripts use `$TWEAK_DIR`, `tweak_dir ID` and `$FRAME_TWEAKS_LIB`.
+- `write_file` in `lib/common.sh` replaces a file by rename; CI refuses writing into programs.
+- A git-commit pin can follow upstream's releases (`latest=` a releases URL); pins with a copy
+  list their licence texts (`license_file=`).
+- Tests: Arch Linux ARM package checks with real signatures, migrations, holds and the install
+  lock, the version string, Firefox's settings and NordVPN's status; quiet test output.
+- The installer window's Wallet apps page moved into `gui/wallet_page.py`.
 ## 0.5.0 (2026-10-14)
 - **README:** what some tweaks can do on your Frame (the DevTools port, the virtual keyboard, key
   monitoring), Requirements, and Remove everything (new `./install.sh uninstall all`); the

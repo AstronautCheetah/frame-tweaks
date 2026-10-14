@@ -24,7 +24,7 @@ undo: "`./install.sh uninstall claude-code`"
 Anthropic's coding agent in the terminal: `claude` in Konsole. It reads and edits files in
 the folder you start it in and runs commands there, asking first.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

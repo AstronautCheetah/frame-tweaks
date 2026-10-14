@@ -30,7 +30,7 @@ test:
 Turns on KDE's screen reader for desktop mode. It uses **Orca**, which SteamOS already
 includes, to read windows, menus and text aloud.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (a setting in your home folder)

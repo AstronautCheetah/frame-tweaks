@@ -29,7 +29,7 @@ VPN. (Firefox already reports Linux x86_64 on aarch64 by itself.) This turns on 
 built-in protection, `privacy.resistFingerprinting` (RFP, the Tor Browser approach), via a
 `user.js` in the default profile, so it's applied at every start and Sync can't undo it.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)

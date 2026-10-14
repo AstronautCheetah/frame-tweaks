@@ -108,7 +108,7 @@ Scroll bars in desktop apps are sized for a mouse, which makes them hard to hit 
 This puts **big scroll strips beside each window you float in the world**: by default a
 vertical one on the **right** and a horizontal one on **top**.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
