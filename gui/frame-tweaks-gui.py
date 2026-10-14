@@ -21,10 +21,10 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from PyQt6.QtCore import QProcess, Qt, QTimer, QUrl
+from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QCursor, QDesktopServices, QIcon, QImage
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
                              QVBoxLayout, QWidget)
 
@@ -659,6 +659,7 @@ class Window(QWidget):
                                          "up": lambda: self.move_focus(-1),
                                          "down": lambda: self.move_focus(+1)})
             if self.vr_buttons.ok:
+                QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
                 self._laser = (None, 0.0)
                 QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.laser_over_window())).start()
         self.refresh()
@@ -1111,6 +1112,15 @@ class Window(QWidget):
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", cmd])
+
+    def eventFilter(self, obj, ev):
+        """In VR: a haptic tick when the laser moves onto a button or tick box, a firmer pulse
+        when it's clicked (vrbuttons.py), as on Arrow Pad."""
+        t = ev.type()
+        if t in (QEvent.Type.Enter, QEvent.Type.MouseButtonPress) and isinstance(obj, QAbstractButton) \
+                and obj.isEnabled() and obj.isVisible():
+            self.vr_buttons.haptic("hover" if t == QEvent.Type.Enter else "press")
+        return False
 
     # ---- controller buttons in VR (vrbuttons.py): B back, Y home, A tick ----------
     def laser_over_window(self):
