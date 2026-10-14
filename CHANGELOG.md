@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Scroll strips settings in VR:** a gear where the two strips meet opens their settings beside
+  the window: sides, thickness, gap, set-back and colour (the passthrough tint, or a hue of your
+  own). The VR windows helper's service saves them (new `sftConfig` call; reinstall VR windows).
+- **Android Mirror: Restart stream keeps a floating mirror where it was** (the new window used to
+  open docked in the dashboard), with its settings panel still open.
 - **Fixed: scroll strips and the Android Mirror's gear and settings jittering** while the laser
   crossed SteamVR's buttons below a window: each dashboard redraw handed SteamVR fresh copies of
   them. They're now reused while nothing they show has changed.

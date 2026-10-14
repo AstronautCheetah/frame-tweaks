@@ -20,19 +20,23 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 13, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 14, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
   const TICK_MS = 50, TAP_MS = 300, HOLD_STILL_MS = 3000;
-  // Colours follow SteamVR's Camera Color Tint (/settings/camera/monochromeTintHue, 0..1); blue
-  // when it can't be read.
-  const hue = () => {
+  // Colours follow SteamVR's Camera Color Tint (/settings/camera/monochromeTintHue, 0..1; blue
+  // when it can't be read), unless the settings (the gear) pick a hue of their own (color: 0..1).
+  const tintHue = () => {
     try {
       const h = window.VRSettingsState?.settings?.get('/settings/camera/monochromeTintHue');
       if (typeof h === 'number' && isFinite(h)) return ((h % 1) + 1) % 1 * 360;
     } catch (e) {}
     return 210;
+  };
+  const hue = () => {
+    const c = window.__sftPatchConfig?.[NAME]?.color;
+    return typeof c === 'number' && isFinite(c) ? ((c % 1) + 1) % 1 * 360 : tintHue();
   };
   const colors = () => {
     const h = Math.round(hue());
@@ -235,8 +239,105 @@
                   () => buildStrips(f));
   };
 
+  // ---- the gear (where the two strips would meet) and its settings panel ----
+  // Saved through vr-dashboard's sftConfig binding into ~/.config/frame-tweaks/scroll-strips.json
+  // (the installer window's settings page writes the same file).
+  const DEFAULTS = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, color: 'tint' };
+  const SWATCHES = [0, 0.08, 0.15, 0.33, 0.5, 0.58, 0.67, 0.75, 0.83, 0.92];   // hues, as the tint's 0..1
+  const OPTIONS = [
+    ['Vertical strip', 'vertical', [['Right', 'right'], ['Left', 'left'], ['Off', 'off']]],
+    ['Horizontal strip', 'horizontal', [['Top', 'top'], ['Bottom', 'bottom'], ['Off', 'off']]],
+    ['Thickness (cm)', 'thickness', [2, 2.5, 3, 4, 5, 6, 8].map((v) => [String(v), v / 100])],
+    ['Gap from the window (cm)', 'gap', [0, 1, 1.5, 2, 3, 5].map((v) => [String(v), v / 100])],
+    ['Set back behind the window (cm)', 'back', [0, 1, 2, 3, 5].map((v) => [String(v), v / 100])],
+  ];
+  const GEAR_M = 0.045, PANEL_M = 0.34;
+  const settingsOpen = new Set();
+  let inst = null, saveNote = '';
+  const redraw = () => { try { inst?.forceUpdate(); } catch (e) {} };
+  const save = (changes) => {
+    const raw = { ...DEFAULTS, ...(window.__sftPatchConfig?.[NAME] ?? {}), ...changes };
+    (window.__sftPatchConfig ??= {})[NAME] = raw;                 // shown at once
+    if (typeof window.sftConfig === 'function') {
+      try { window.sftConfig(JSON.stringify({ name: NAME, config: raw })); saveNote = ''; } catch (e) {}
+    } else {
+      saveNote = 'Not saved: reinstall VR windows (vr-dashboard) to keep settings.';
+    }
+    redraw();
+  };
+  const GEAR_SVG = 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1' +
+    'l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1' +
+    'l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z';
+  const settingsFor = (f) => {
+    const page = f?.activePage, sz = page?.size;
+    const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
+    if (!H || !Hw || typeof page.GetPanelAnchorID !== 'function') return [];
+    const o = cfg(), raw = { ...DEFAULTS, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
+    const k = H / Hw, t = o.thickness * k, g = o.gap * k, h = Math.round(hue());
+    const left = o.vertical === 'left', bottom = o.horizontal === 'bottom', side = left ? -1 : 1;
+    const id = page.GetPanelAnchorID(left ? ANCHOR.CenterLeft : ANCHOR.CenterRight);
+    if (!id) return [];
+    const isOpen = settingsOpen.has(f.frameID), size = Math.max(t, GEAR_M * k * 0.8);
+    const out = [el(XFORM, { key: `${f.frameID}-sgear`, parent_id: id,
+                            translation: { x: side * (g + t / 2), y: (bottom ? -1 : 1) * (H / 2 + g + t / 2) } },
+      el(PANEL, { key: `${f.frameID}-sgear-p`, width: size, interactive: true, only_visible_with_laser: false,
+        debug_name: 'SftScrollGear', origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        el('div', { style: { width: '64px', height: '64px', borderRadius: '50%', boxSizing: 'border-box', display: 'flex',
+                             alignItems: 'center', justifyContent: 'center',
+                             background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
+                             border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
+                    onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
+          el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
+            el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))))];
+    if (!isOpen) return out;
+    const button = (key, label, on, onClick, extra) => el('div', { key, onClick, style: {
+      flex: '1 0 auto', minWidth: '58px', padding: '11px 6px', margin: '4px', borderRadius: '10px', textAlign: 'center',
+      fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
+      background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
+      border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}`, ...extra } }, label);
+    const rows = [];
+    const title = (key, text) => el('div', { key, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, text);
+    for (const [text, key, choices] of OPTIONS) {
+      rows.push(title(`t-${key}`, text));
+      rows.push(el('div', { key: `r-${key}`, style: { display: 'flex', flexWrap: 'wrap' } },
+        ...choices.map(([label, value]) => button(label, label, raw[key] === value,
+                                                  () => raw[key] !== value && save({ [key]: value })))));
+    }
+    rows.push(title('t-color', 'Colour'));
+    rows.push(el('div', { key: 'r-color', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center' } },
+      button('tint', 'Passthrough tint', raw.color === 'tint', () => raw.color !== 'tint' && save({ color: 'tint' })),
+      ...SWATCHES.map((v) => el('div', { key: `c${v}`, onClick: () => save({ color: v }), style: {
+        width: '40px', height: '40px', margin: '5px', borderRadius: '50%', boxSizing: 'border-box',
+        background: `hsl(${Math.round(v * 360)}, 60%, 55%)`,
+        border: raw.color === v ? '4px solid #fff' : '2px solid rgba(255, 255, 255, 0.25)' } }))));
+    rows.push(el('div', { key: 'reset', style: { display: 'flex', marginTop: '14px' } },
+      button('reset', 'Reset to defaults', false, () => save(DEFAULTS))));
+    if (saveNote) rows.push(el('div', { key: 'note', style: { fontSize: '15px', color: '#e0b060', margin: '8px 4px 0' } }, saveNote));
+    const P = PANEL_M * k;
+    out.push(el(XFORM, { key: `${f.frameID}-sset`, parent_id: id, translation: { x: side * (g + t + g + P / 2), z: 0.002 * k } },
+      el(PANEL, { key: `${f.frameID}-sset-p`, width: P, interactive: true, only_visible_with_laser: false,
+        debug_name: 'SftScrollSettings', origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        el('div', { style: { width: '460px', boxSizing: 'border-box', padding: '16px 14px', borderRadius: '18px',
+                             background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`, color: '#e8ecf0' } },
+          el('div', { style: { display: 'flex', alignItems: 'center' } },
+            el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, 'Scroll strips'),
+            el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+                        style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
+          ...rows,
+          el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
+             'For every window. Changes show at once.')))));
+    return out;
+  };
+  const gearFor = (f) => {
+    const sz = f?.activePage?.size;
+    return cached(JSON.stringify(['gear', f.frameID, sz?.latestMeasuredPanelLocalHeight, sz?.latestMeasuredPanelWorldHeight,
+                                  f.activePage?.GetPanelAnchorID?.(ANCHOR.CenterRight) ?? null, cfg(),
+                                  window.__sftPatchConfig?.[NAME] ?? null, hue(), settingsOpen.has(f.frameID), saveNote]),
+                  () => settingsFor(f));
+  };
+
   class SftScrollStrips extends Base {
-    componentDidMount() { this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
+    componentDidMount() { inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
     componentWillUnmount() { clearInterval(this.timer); }
     render() {
       try {
@@ -244,7 +345,7 @@
         const out = [];
         for (const f of FS.frames ?? []) {
           const dock = f?.docking?.dockLocation;
-          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(...stripsFor(f));
+          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(...stripsFor(f), ...gearFor(f));
         }
         return out.length ? out : null;
       } catch (e) { return null; }

@@ -169,7 +169,22 @@ def scroll(req):
         keys("right" if dx > 0 else "left", abs(dx))
 
 
-BINDINGS = {"sftScroll": scroll}
+def save_config(req):
+    """A patch's settings panel in VR saves its settings: {name, config}. Only for an installed
+    patch, a small JSON object; the next look (within 5 s) hands it to the page as usual."""
+    name, conf = req.get("name"), req.get("config")
+    if not (isinstance(name, str) and name in patches() and isinstance(conf, dict)):
+        return
+    text = json.dumps(conf)
+    if len(text) > 4096:
+        return
+    CONF_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = CONF_DIR / f".{name}.json.tmp"
+    tmp.write_text(text + "\n")
+    tmp.replace(CONF_DIR / f"{name}.json")
+
+
+BINDINGS = {"sftScroll": scroll, "sftConfig": save_config}
 
 
 def listen():

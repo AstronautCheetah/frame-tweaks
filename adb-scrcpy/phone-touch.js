@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 7, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 8, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
@@ -172,6 +172,30 @@
     ['Frame rate (fps, at most)', 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
     ['Joystick scrolling', 'PHONE_STICK_SPEED', [['Slow', '8'], ['Medium', '15'], ['Fast', '25']], false],
   ];
+  // A restart makes a new window, which the dashboard would dock. Carry the floating one's place
+  // (and its open settings) over to the new mirror window when it appears (within 20 s).
+  let carry = null;
+  const carryOver = (f) => {
+    const d = f.docking;
+    const xf = d?.m_mapLastRelativeTransformForDockLocation?.get?.(WORLD);
+    carry = { from: f.frameID, floating: d?.dockLocation === WORLD, xf, settings: settingsOpen.has(f.frameID),
+              until: Date.now() + 20000 };
+  };
+  const placeCarried = () => {
+    if (!carry) return;
+    if (Date.now() > carry.until) { carry = null; return; }
+    const f = (FS.frames ?? []).find((g) => g?.title === TITLE && g.frameID !== carry.from && g.docking);
+    if (!f) return;
+    const c = carry; carry = null;
+    if (c.settings) settingsOpen.add(f.frameID);
+    if (!c.floating || f.docking.dockLocation === WORLD) return;
+    try {
+      if (c.xf) f.docking.m_mapLastRelativeTransformForDockLocation.set(WORLD, c.xf);
+      // The dashboard's own SetDockLocation: Float grab's wrapper would pick it up in your hand.
+      const own = f.docking.__sftOrigSetDock?.orig ?? f.docking.SetDockLocation;
+      own.call(f.docking, WORLD);
+    } catch (e) { /* the dashboard changed: it stays docked */ }
+  };
   const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
@@ -234,7 +258,7 @@
         redraw();
       }),
       button(pending ? 'Restart stream to apply' : 'Restart stream', pending,
-             () => { pending = false; call({ a: 'restart' }); redraw(); })));
+             () => { pending = false; carryOver(f); call({ a: 'restart' }); redraw(); })));
     const pxW = 460;
     return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
                        translation: { x: -(GAP_M * k + SETTINGS_M * k / 2), z: LIFT_M * k } },
@@ -271,7 +295,10 @@
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
   class SftPhoneTouch extends Base {
-    componentDidMount() { mounted++; inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }
+    componentDidMount() {
+      mounted++; inst = this;
+      this.timer = setInterval(() => { try { placeCarried(); this.forceUpdate(); } catch (e) {} }, 250);
+    }
     componentWillUnmount() { mounted--; if (inst === this) inst = null; clearInterval(this.timer); }
     render() {
       try {
