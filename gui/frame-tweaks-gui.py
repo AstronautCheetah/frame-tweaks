@@ -10,6 +10,7 @@ Changes run in a Konsole window via ./install.sh. Styled after Full Keyboard's G
 import html
 import json
 import os
+import posixpath
 import re
 import shlex
 import subprocess
@@ -30,33 +31,13 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "lib"))
 sys.path.insert(0, str(REPO / "gui"))           # (its pages, e.g. wallet_page.py)
 import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
-from sft import COLLAPSED, CONF, HIDDEN_CATS, components, read_set, run_label, write_set  # noqa: E402
+from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
+import manifest  # noqa: E402
 from wallet_page import FLATPAK_ICONS, WALLET_LAUNCHER, WalletApps  # noqa: E402  (Wallet apps page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
-ROW_ICON = {"dictation": "frame-tweaks-dictate", "arrowpad": "frame-tweaks-arrowpad",
-            "adb-scrcpy": "frame-tweaks-phone", "nordvpn": "frame-tweaks-nordvpn",
-            "wallet": "frame-tweaks-lock", "snip": "frame-tweaks-snip"}
-FLATPAK_ROW = {"vscodium": "com.vscodium.codium", "signal": "org.signal.Signal",
-               "firefox": "org.mozilla.firefox"}
-BREEZE_ROW = {"whisper-frame": "audio-input-microphone", "clipboard": "edit-paste",
-              "full-keyboard": "input-keyboard", "cursor": "input-mouse", "signal": "dialog-messages",
-              "firefox": "internet-web-browser", "claude-desktop": "help-about", "claude-code": "utilities-terminal",
-              "tools": "tools", "speech": "audio-speakers-symbolic", "float-return": "go-previous", "float-grab": "transform-move", "scroll-strips": "transform-browse", "vr-dashboard": "applications-system", "homebrew": "package-x-generic", "menu-icons": "preferences-desktop-icons", "curvature": "object-rotate-right", "memcap": "memory", "screen-reader": "preferences-desktop-accessibility", "ydotool": "input-keyboard-virtual"}
-# Wallet apps page (wallet/wallet-launcher): apps that open with the shared KDE wallet.
-# Versions with a known problem: a short note on the row, a longer one atop its details, plus a
-# check whether upstream has released something newer since.
-KNOWN_ISSUES = {
-    "whisper-frame": {
-        "version": "0.2.0",
-        "short": "⚠ v0.2.0 has performance issues in VR (window mic)",
-        "long": "Version 0.2.0 has performance issues: its window mic polls the compositor about 60 "
-                "times a second, using ~31% of a CPU core and making VR judder. That's why this row is "
-                "hidden by default and the window mic is installed switched off.",
-        "latest": "https://api.github.com/repos/groffta/whisper-frame/releases/latest",
-    },
-}
+KNOWN_ISSUES = {c["id"]: c["known_issue"] for c in components() if c["known_issue"]}   # (known_issue: in its manifest)
 
 STYLE = """
 QWidget { background: #0b1016; color: #e8ecf0; font-size: 14px; }
@@ -105,7 +86,7 @@ def status(cid):
     """(code, text): 0 ok, 1 not installed, 2 needs attention."""
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
-        r = subprocess.run([str(REPO / cid / "status.sh")], capture_output=True, text=True, timeout=60)
+        r = subprocess.run(["bash", str(component(cid)["dir"] / "status.sh")], capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         return 2, "status check didn't finish (took over a minute)"
     text = r.stdout.strip().split(None, 1)[-1] if r.stdout.strip() else ""
@@ -114,7 +95,7 @@ def status(cid):
 
 def update_check(cid):
     """(installed, latest) when <id>/update-check.sh reports a newer upstream version, else None."""
-    script = REPO / cid / "update-check.sh"
+    script = component(cid)["dir"] / "update-check.sh"
     try:
         out = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=20).stdout.split()
     except (OSError, subprocess.TimeoutExpired):
@@ -170,15 +151,30 @@ def self_update_check():
 
 
 
+def readme_links(text, comp):
+    """Relative links in a README, made absolute: on GitHub for the official pack (they don't
+    resolve outside the repo), as files for a user's pack."""
+    def target(link):
+        if comp["official"]:
+            rel = posixpath.normpath(f"packs/official/{comp['id']}/{link}")
+            return GITHUB.rsplit("/tree/", 1)[0] + "/blob/main/" + rel
+        return (comp["dir"] / link).resolve().as_uri()
+    return re.sub(r"\]\((?!https?:|#|mailto:|file:)([^)]+)\)", lambda m: f"]({target(m.group(1))})", text)
+
+
 def row_icon(cid):
-    if cid in FLATPAK_ROW:
-        hits = sorted(FLATPAK_ICONS.glob(f"*/apps/{FLATPAK_ROW[cid]}.*"),
+    """The row's icon, from its manifest's icon: an installed Flatpak's own icon, then a picture
+    in the tweak's folder, then a Breeze theme icon."""
+    c = component(cid) or {"icon": {}, "dir": REPO}
+    icon = c["icon"]
+    if icon.get("flatpak"):
+        hits = sorted(FLATPAK_ICONS.glob(f"*/apps/{icon['flatpak']}.*"),
                       key=lambda p: (p.suffix == ".svg", p.parent.parent.name))
         if hits:
             return QIcon(str(hits[-1]))
-    if cid in ROW_ICON and (ICONS / f"{ROW_ICON[cid]}.png").exists():
-        return QIcon(str(ICONS / f"{ROW_ICON[cid]}.png"))
-    hits = sorted(BREEZE.glob(f"*/*/{BREEZE_ROW.get(cid, 'application-x-executable')}.svg"))
+    if icon.get("file") and (c["dir"] / icon["file"]).is_file():
+        return QIcon(str(c["dir"] / icon["file"]))
+    hits = sorted(BREEZE.glob(f"*/*/{icon.get('theme', 'application-x-executable')}.svg"))
     return QIcon(str(hits[-1])) if hits else QIcon()
 
 
@@ -277,7 +273,7 @@ class Details(QWidget):
 
         text, kind = status_text(state)
         rel, url = comp["source"].split("|", 1) if "|" in comp["source"] else ("", "")
-        facts = [("What it is", html.escape(comp["desc"], quote=False)),
+        facts = [("What it is", html.escape(comp["what"], quote=False)),
                  ("Why it's included", html.escape(comp["why"], quote=False)),
                  ("Made by", html.escape(comp["author"], quote=False))]
         if comp["experimental"]:
@@ -288,8 +284,14 @@ class Details(QWidget):
             facts.append(("Needs", ", ".join(comp["deps"]) + " (installed automatically)"))
         colour = {"ok": "#5cc77a", "warn": "#e0b33a"}.get(kind, "#9aa6b2")
         facts.append(("Status", f"<span style='color:{colour}'>{html.escape(text)}</span>"))
-        facts.append(("Documentation", f"<a style='color:#7fb2e5' href='{GITHUB}/{comp['id']}'>"
-                      f"{comp['id']}/README.md on GitHub</a>"))
+        if comp["official"]:
+            facts.append(("Documentation", f"<a style='color:#7fb2e5' href='{GITHUB}/packs/official/{comp['id']}'>"
+                          f"{comp['id']}/README.md on GitHub</a>"))
+        else:
+            facts.append(("From", f"<span style='color:#e0b33a'>the pack {html.escape(comp['pack'])}, not part of "
+                          f"Frame Tweaks</span>" + (f" (used instead of {html.escape(comp['replaced'])}'s)"
+                                                    if comp["replaced"] else "")
+                          + f"<br><a style='color:#7fb2e5' href='{comp['readme'].as_uri()}'>{html.escape(str(comp['dir']))}</a>"))
         summary = QLabel("<table cellspacing=6>" + "".join(
             f"<tr><td style='color:#6b7783;padding-right:12px' valign=top><b>{k}</b></td><td>{v}</td></tr>"
             for k, v in facts) + "</table>")
@@ -302,12 +304,11 @@ class Details(QWidget):
         readme.setOpenExternalLinks(True)
         readme.document().setDefaultStyleSheet(
             "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
-        md = REPO / comp["id"] / "README.md"
-        text = md.read_text() if md.exists() else "_No README._"
-        # Links between files point at GitHub (relative ones don't resolve outside the repo).
-        root = GITHUB.rsplit("/tree/", 1)[0] + "/blob/main"
-        text = re.sub(r"\]\(\.\./([^)#]+)", lambda m: f"]({root}/{m.group(1)}", text)
-        text = re.sub(r"\]\((?!https?:|#|mailto:)([^)]+)\)", lambda m: f"]({root}/{comp['id']}/{m.group(1)})", text)
+        try:
+            text = manifest.front_matter(comp["readme"].read_text())[1]
+        except (OSError, manifest.ManifestError):
+            text = "_No README._"
+        readme.setMarkdown(readme_links(text, comp))
         readme.setMarkdown(text)
         lay.addWidget(readme, 1)
 
@@ -557,7 +558,7 @@ class Window(QWidget):
             if fut.done():
                 del self.futures[cid]
                 self.state[cid] = fut.result()
-                if self.state[cid][0] != 1 and (REPO / cid / "update-check.sh").exists():
+                if self.state[cid][0] != 1 and (component(cid)["dir"] / "update-check.sh").exists():
                     self.update_futures[cid] = self.pool.submit(update_check, cid)
                 if cid in self.status_labels:
                     label = self.status_labels[cid]
@@ -769,7 +770,7 @@ class Window(QWidget):
         if label is None:
             self.show_details(comp)
             return
-        QProcess.startDetached("bash", [str(REPO / comp["id"] / "run.sh")])
+        QProcess.startDetached("bash", [str(comp["dir"] / "run.sh")])
 
     def show_details(self, comp):
         self.close_details()

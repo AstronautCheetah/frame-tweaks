@@ -30,9 +30,9 @@ Inside SteamVR the controllers mainly act as laser pointers, and Steam may not a
 desktop layout there; that depends on the SteamOS build and isn't documented. If the button
 does nothing in VR:
 
-- **Dictate:** use the 🎤 on the [Arrow Pad](../arrowpad/) (desktop or VR), the ▶ Dictate
+- **Dictate:** use the 🎤 on the [Arrow Pad](../packs/official/arrowpad/) (desktop or VR), the ▶ Dictate
   button in Frame Tweaks, or hold the headset's **Select** button with
-  [whisper-frame](../whisper-frame/) installed.
+  [whisper-frame](../packs/official/whisper-frame/) installed.
 - **Lock Wallet:** the **Lock Wallet** entry in the "+" menu or the desktop menu, or
   `wallet-unlock --lock` in a terminal. The wallet also locks itself after 4 hours.
 

@@ -55,7 +55,8 @@ class Status(unittest.TestCase):
         self.assertEqual(gui.status_text((1, "")), ("· not installed", "missing"))
 
     def test_update_check_parsing(self):
-        with tempfile.TemporaryDirectory() as d, mock.patch.object(gui, "REPO", Path(d)):
+        with tempfile.TemporaryDirectory() as d, \
+                mock.patch.object(gui, "component", return_value={"dir": Path(d) / "x"}):
             (Path(d) / "x").mkdir()
             script = Path(d) / "x" / "update-check.sh"
             script.write_text("echo 1.0.0 1.1.0\n")
@@ -83,7 +84,7 @@ class Manifest(unittest.TestCase):
         ids = [c["id"] for c in rows]
         self.assertEqual(len(ids), len(set(ids)))
         for c in rows:
-            self.assertTrue((ROOT / c["id"] / "install.sh").exists(), c["id"])
+            self.assertTrue((c["dir"] / "install.sh").exists(), c["id"])
             self.assertIn(c["category"], {"Accessibility", "Convenience", "VR windows", "Privacy & security", "System", "Developer"})
 
 

@@ -76,7 +76,7 @@ running as your user.
 **Set a wallet password.** SteamOS seeds every Frame with the same stock wallet, and it has no
 password. Until you set one (KWalletManager → *Change Password*), nothing above is really
 protected. Avoid changing it while a second wallet service is running (see
-[wallet/README.md](wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
+[wallet/README.md](packs/official/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
 **Downloads.**
 - **Pinned upstream releases** (Full Keyboard, whisper-frame, the Whisper model): each tweak's

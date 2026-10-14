@@ -33,7 +33,7 @@ fetch() {
 }
 
 # ---- pinned downloads ----
-for pin in */pin */*.pin; do
+for pin in packs/*/*/pin packs/*/*/*.pin; do
     [ -f "$pin" ] || continue
     url=$(sed -n 's/^url=//p' "$pin"); sha=$(sed -n 's/^sha256=//p' "$pin"); rev=$(sed -n 's/^rev=//p' "$pin")
     if [ -n "$sha" ]; then
@@ -54,7 +54,7 @@ done
 
 # ---- Frame Tweaks' copies (the "mirror" release; dev/mirror-pins.sh) ----
 if assets=$(timeout 60 gh release view mirror --json assets --jq '.assets[].name' 2>/dev/null); then
-    for pin in */pin */*.pin; do
+    for pin in packs/*/*/pin packs/*/*/*.pin; do
         m=$(sed -n 's/^mirror=//p' "$pin"); [ -n "$m" ] || continue
         grep -qxF "$(basename "$m")" <<<"$assets" ||
             red+=("\`$pin\`: Frame Tweaks' copy (\`$(basename "$m")\`) isn't on the mirror release: run \`dev/mirror-pins.sh\`")

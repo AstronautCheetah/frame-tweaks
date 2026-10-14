@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generate the docs that list tweaks, from each tweak's `meta` file (and components.tsv order):
+"""Generate the docs that list tweaks, from the official pack (packs/official: each tweak's
+README.md front matter, in pack.md's order):
 
   README.md       the Core / Extras / Helpers tables
   SECURITY.md     the "What each tweak changes on your system" rows
@@ -13,33 +14,28 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-KEYS = ("emoji", "name", "group", "what", "why", "changes", "access", "survives-updates", "undo")
-# optional: "experimental" (what relies on another program's internals and what happens when they change)
+sys.path.insert(0, str(ROOT / "lib"))
+import sft  # noqa: E402
+OFFICIAL = "packs/official"
 
 
 def tweaks():
-    ids = [l.split("\t")[0] for l in (ROOT / "components.tsv").read_text().splitlines()
-           if l.strip() and not l.startswith("#")]
     out = []
-    for i in ids:
-        meta = {}
-        for line in (ROOT / i / "meta").read_text().splitlines():
-            if line.strip() and not line.startswith("#"):
-                k, v = line.split(":", 1)
-                meta[k.strip()] = v.strip()
-        missing = [k for k in KEYS if not meta.get(k)]
-        if missing:
-            sys.exit(f"{i}/meta: missing {', '.join(missing)}")
-        if meta["group"] not in ("core", "extras", "helper"):
-            sys.exit(f"{i}/meta: group must be core, extras or helper")
-        out.append((i, meta))
+    for d in sft.read_pack(ROOT / OFFICIAL)[1]:
+        c, problems = sft.read_tweak(d)
+        if not c:
+            sys.exit("\n".join(problems))
+        out.append((c["id"], {"emoji": c["emoji"], "name": c["title"], "group": c["tier"], "what": c["what"],
+                              "why": c["why"], "changes": c["changes"], "access": c["access"],
+                              "survives-updates": c["survives_updates"], "undo": c["undo"],
+                              "experimental": c["experimental"]}))
     return out
 
 
 def link(i, name):
-    """[**Claude Code**](claude-code/) (command line): bold name, plain parenthetical."""
+    """[**Claude Code**](packs/official/claude-code/) (command line): bold name, plain parenthetical."""
     m = re.match(r"(.*?)( \(.*\))?$", name)
-    return f"[**{m[1]}**]({i}/){m[2] or ''}"
+    return f"[**{m[1]}**]({OFFICIAL}/{i}/){m[2] or ''}"
 
 
 def readme_table(rows, group):
@@ -83,7 +79,7 @@ def main():
     targets = {ROOT / "README.md": [(g, readme_table(rows, g)) for g in ("core", "extras", "helper")],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
-        targets[ROOT / i / "README.md"] = [("glance", glance(m))]
+        targets[ROOT / OFFICIAL / i / "README.md"] = [("glance", glance(m))]
     stale = []
     for path, parts in targets.items():
         old = path.read_text()

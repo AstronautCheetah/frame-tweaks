@@ -14,6 +14,7 @@
 #   ./install.sh info ID             one component's details (as in the installer window)
 #   ./install.sh run ID              its Run / Open button (e.g. open Arrow Pad)
 #   ./install.sh settings ID [KEY=VALUE... | --reset]   show or change its settings (scroll-strips, adb-scrcpy)
+#   ./install.sh mods [trust|untrust PACK | check FOLDER]   packs of tweaks (docs/mods.md)
 #   ./install.sh hide|unhide ID...   hide a row in the installer window (or show it again)
 #   ./install.sh hide-group|unhide-group NAME   the same for a whole group, e.g. "VR windows"
 #   ./install.sh wallet lock|unlock|status      the shared KDE wallet (wallet-unlock)
@@ -53,15 +54,17 @@ start_log() {
     find "$LOGS" -name '*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
 }
 
-# components.tsv: id, title, category, depends (space-separated), description, source,
-# author, why, flags (tab-separated; see the header line)
-declare -A TITLE DEPS DESC
+# The tweaks, from the packs (lib/sft.py registry: the official pack and the user's trusted
+# packs, each tweak described by its README.md front matter; see docs/mods.md).
+declare -A TITLE DEPS DESC DIR EXPERIMENTAL
 IDS=()
-# (Tabs become \x1f first: read merges empty fields between whitespace separators like tab.)
-while IFS=$'\x1f' read -r id title _category deps desc _rest; do
-    [[ -z $id || $id == \#* ]] && continue
-    IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc
-done < <(tr '\t' '\037' < components.tsv)
+while IFS=$'\x1f' read -r id title deps desc dir exp; do
+    IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
+done < <(python3 lib/sft.py registry)
+[[ ${#IDS[@]} -gt 0 ]] || { echo "No tweaks found (python3 lib/sft.py mods says why)" >&2; exit 1; }
+# Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
+FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
+export FRAME_TWEAKS_DIRS
 
 # The installer's own app-menu entry (desktop menu and Steam's VR "+" menu).
 ensure_menu_entry() {
@@ -85,7 +88,7 @@ bold() { printf '\033[1m%s\033[0m\n' "$*"; }
 is_component() { [[ -n ${TITLE[$1]:-} ]]; }
 
 # status <id>: prints the component's one-line status; returns 0 ok, 1 missing, 2 warning
-status_of() { "./$1/status.sh" 2>/dev/null; }
+status_of() { bash "${DIR[$1]}/status.sh" 2>/dev/null; }
 
 # with_deps <id>...: the ids plus their dependencies, dependencies first, no duplicates
 with_deps() {
@@ -111,9 +114,9 @@ cmd_list() {
     bold "frame-tweaks $VERSION"
     local id
     for id in "${IDS[@]}"; do
-        printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "$(grep -qs '^experimental:' "$id/meta" && echo ' (experimental)')"
+        printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ (experimental)}"
     done
-    grep -qs '^experimental:' */meta && echo "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
+    [[ " ${EXPERIMENTAL[*]} " == *1* ]] && echo "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
     return 0
 }
 
@@ -144,7 +147,7 @@ cmd_install() {
             echo "held: left as it is (./install.sh unhold $id)"; echo; continue
         fi
         stop_processes "$id"            # a reinstall must not leave the old copy running
-        if ! "./$id/install.sh" 8>&-; then failed+=("$id"); echo "!! $id failed" >&2
+        if ! bash "${DIR[$id]}/install.sh" 8>&-; then failed+=("$id"); echo "!! $id failed" >&2
         else record_version "$id"; fi
         echo
     done
@@ -175,7 +178,7 @@ cmd_uninstall() {
             done
         done
     done
-    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
 }
 
 # Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:
@@ -186,7 +189,7 @@ cmd_reinstall_ids() {
     local id
     # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
     # dashboard patches of the tweaks that use the VR windows helper.)
-    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 "./$id/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
     cmd_install "$@"
 }
 
@@ -278,13 +281,13 @@ cmd_kdialog_gui() {
 usage() { sed -n '2,/^#   \.\/install\.sh ID\.\.\./s/^# \{0,1\}//p' "$0"; }   # (the header, to the last command)
 
 # ---- stopping a tweak's programs ------------------------------------------------------------
-# <id>/processes lists the programs a tweak runs (pgrep -f patterns, ~ = $HOME). They're
-# stopped before the tweak is uninstalled or reinstalled, so an old copy can't keep running.
+# A tweak's manifest lists the programs it runs (processes: pgrep -f patterns, ~ = $HOME).
+# They're stopped before the tweak is uninstalled or reinstalled, so an old copy can't keep
+# running; then its optional stopped.sh runs (e.g. Arrow Pad releasing keys it held down).
 stop_processes() {
     local id=$1 pat pids n=0
-    [[ -f ./$id/processes ]] || return 0
     while IFS= read -r pat; do
-        [[ -z $pat || $pat == \#* ]] && continue
+        [[ -z $pat ]] && continue
         pat=${pat//\~/$HOME}
         pids=$(pgrep -f -- "$pat" | grep -vx "$$" || true)
         [[ -n $pids ]] || continue
@@ -295,13 +298,12 @@ stop_processes() {
         # shellcheck disable=SC2086
         [[ -z $pids ]] || kill -9 $pids 2>/dev/null || true      # didn't stop within 3 s
         n=$((n + 1))
-    done < "./$id/processes"
+    done < <(python3 lib/sft.py processes "$id")
     if [[ $n -gt 0 ]]; then
         echo "stopped $id's running programs"
-        # A stopped pad can't release keys it held down: make sure no modifier stays pressed.
-        [[ $id == arrowpad && -x $BIN/ydotool ]] &&
-            clear_stuck_modifiers
+        [[ -f ${DIR[$id]}/stopped.sh ]] && bash "${DIR[$id]}/stopped.sh" 8>&-
     fi
+    return 0
 }
 
 # ---- per-tweak versions (for migrations) and holds -------------------------------------------
@@ -314,12 +316,12 @@ held() { [[ -f "$STATE/held/$1" ]]; }
 run_migrations() {
     local id old
     for id in "$@"; do
-        [[ -x ./$id/migrate.sh && -f $STATE/installed/$id ]] || continue
+        [[ -f ${DIR[$id]}/migrate.sh && -f $STATE/installed/$id ]] || continue
         held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
         old=$(cat "$STATE/installed/$id")
         [[ $old != "$VERSION" ]] || continue
         bold "── migrating $id from $old"
-        "./$id/migrate.sh" "$old" 8>&- || echo "!! $id migration failed" >&2
+        bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $id migration failed" >&2
     done
 }
 cmd_hold() {
@@ -366,9 +368,9 @@ cmd_debug_info() {
 cmd_check_system() {
     local id code out bad=0
     for id in "${IDS[@]}"; do
-        [[ -x ./$id/check-system.sh ]] || continue
+        [[ -f ${DIR[$id]}/check-system.sh ]] || continue
         status_of "$id" >/dev/null; [[ $? -eq 1 ]] && continue
-        out=$("./$id/check-system.sh" 2>&1); code=$?
+        out=$(bash "${DIR[$id]}/check-system.sh" 2>&1); code=$?
         if [[ $code -eq 0 ]]; then printf '  \e[32m✔\e[0m %-15s %s\n' "$id" "$out"
         else printf '  \e[33m!\e[0m %-15s %s\n' "$id" "$out"; bad=1; fi
     done
@@ -391,10 +393,10 @@ case ${1:-} in
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
     list)        cmd_list ;;
     # The installer window's other buttons, through the same code (lib/sft.py) or tools it uses.
-    info|hide|unhide|hide-group|unhide-group|settings) python3 lib/sft.py "$@" ;;
+    info|hide|unhide|hide-group|unhide-group|settings|mods) python3 lib/sft.py "$@" ;;
     run)         shift; [[ $# -eq 1 ]] || { echo "run what?" >&2; exit 1; }; check_ids "$1"
                  [[ -n $(python3 lib/sft.py run-label "$1") ]] || { echo "$1 has nothing to run" >&2; exit 1; }
-                 setsid -f bash "./$1/run.sh" >/dev/null 2>&1 </dev/null ;;
+                 setsid -f bash "${DIR[$1]}/run.sh" >/dev/null 2>&1 </dev/null ;;
     wallet)      shift; case ${1:-} in
                      lock) exec "$HOME/.local/bin/wallet-unlock" --lock ;;
                      unlock) exec "$HOME/.local/bin/wallet-unlock" ;;

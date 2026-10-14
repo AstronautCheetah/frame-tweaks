@@ -15,7 +15,7 @@ spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweak
 gui = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gui)
 import wallet_page as wp  # noqa: E402  (the window's Wallet apps page; gui put it on sys.path)
-loader = importlib.machinery.SourceFileLoader("wl", str(ROOT / "wallet" / "wallet-launcher"))
+loader = importlib.machinery.SourceFileLoader("wl", str(ROOT / "packs/official/wallet" / "wallet-launcher"))
 wl = importlib.util.module_from_spec(importlib.util.spec_from_loader("wl", loader))
 loader.exec_module(wl)
 
@@ -84,7 +84,7 @@ class SystemApp(unittest.TestCase):
         self.assertIn("original launcher restored", out.getvalue())
 
 
-loader2 = importlib.machinery.SourceFileLoader("at", str(ROOT / "wallet" / "app-timers"))
+loader2 = importlib.machinery.SourceFileLoader("at", str(ROOT / "packs/official/wallet" / "app-timers"))
 at = importlib.util.module_from_spec(importlib.util.spec_from_loader("at", loader2))
 loader2.exec_module(at)
 

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("pf", str(ROOT / "adb-scrcpy" / "phone-fit"))
+_l = importlib.machinery.SourceFileLoader("pf", str(ROOT / "packs/official/adb-scrcpy" / "phone-fit"))
 pf = importlib.util.module_from_spec(importlib.util.spec_from_loader("pf", _l))
 _l.exec_module(pf)
 

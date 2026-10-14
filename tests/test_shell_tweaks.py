@@ -25,7 +25,7 @@ class Home(unittest.TestCase):
 
     def run_script(self, script, *args):
         env = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin", "USER": os.environ.get("USER", "u")}
-        return subprocess.run(["bash", str(ROOT / script), *args], env=env, capture_output=True, text=True, timeout=60)
+        return subprocess.run(["bash", str(ROOT / "packs/official" / script), *args], env=env, capture_output=True, text=True, timeout=60)
 
 
 class Firefox(Home):
@@ -104,11 +104,11 @@ class PinnedDownload(Home):
 
     def fetch(self, upstream, mirror=None, with_mirror=True):
         repo = self.home / "repo"
-        (repo / "x").mkdir(parents=True, exist_ok=True)
+        (repo / "packs/official/x").mkdir(parents=True, exist_ok=True)
         pin = ["url=https://up.example/f.bin", f"sha256={hashlib.sha256(self.GOOD).hexdigest()}"]
         if with_mirror:
             pin.append("mirror=https://mirror.example/f.bin")
-        (repo / "x/pin").write_text("\n".join(pin) + "\n")
+        (repo / "packs/official/x/pin").write_text("\n".join(pin) + "\n")
         files = self.home / "files"
         files.mkdir(exist_ok=True)
         for name, data in (("up", upstream), ("mirror", mirror)):

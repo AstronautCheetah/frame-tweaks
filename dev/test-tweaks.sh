@@ -9,20 +9,13 @@
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
 cd "$(dirname "$0")/.."
-DEFAULT=(cursor tools vr-dashboard curvature float-return float-grab scroll-strips menu-icons homebrew ydotool dictation wallet memcap)
-# Screen reader needs Orca and KDE's config tools (the Frame has them, CI doesn't).
-command -v orca >/dev/null && command -v kreadconfig6 >/dev/null && DEFAULT+=(screen-reader)
+# The default set: tweaks whose manifest says test: {offline: true} (and whose needs: are here).
+read -ra DEFAULT <<<"$(HOME=/nonexistent python3 lib/sft.py test-list)"
 TWEAKS=("${@:-${DEFAULT[@]}}")
-# Settings uninstall deliberately keeps (relative to the fake home), per tweak.
-# tools: the shared "~/.local/bin on PATH" setup (ensure_path) stays; other tweaks rely on it.
-# dictation, wallet: settings they promise to keep, the shared PATH setup, shared dependencies.
+# What uninstall may leave: the shared "~/.local/bin on PATH" setup (other tweaks rely on it),
+# what the tweak's dependencies installed (set up before the baseline), and the settings its
+# manifest says it keeps (test: keeps:). Caches desktop tools regenerate don't count.
 PATHSET=".bashrc .config/environment.d/10-local-bin.conf"
-YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.service"   # a dependency other tweaks share
-VRDASH=".local/share/frame-tweaks/vr-dashboard/sft-dashboard .local/share/frame-tweaks/vr-dashboard/lib.js .config/systemd/user/sft-vr-debugger.service .config/systemd/user/sft-dashboard.service .config/systemd/user/steamvr.service.d/sft-dashboard.conf"   # shared by the VR windows tweaks
-# memcap keeps your limits file; KDE settings files stay (only the changed keys are restored).
-declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [scroll-strips]="$VRDASH $YDOTOOL .config/frame-tweaks/scroll-strips.json" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
-                 [dictation]="$PATHSET .config/frame-tweaks/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
-                 [memcap]="$PATHSET .config/frame-tweaks/memcap.conf" [screen-reader]=".config/kaccessrc")
 
 work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"' EXIT
 # Run from a copy of the repo, so pins can point at the fixtures below without any checksum
@@ -55,7 +48,7 @@ printf 'pkgname = ydotool\npkgver = 1.0.4-2\n' > "$fx/pkg/.PKGINFO"
 (cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" .PKGINFO usr)
 echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
 head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"
-sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/dictation/pin"
+sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/packs/official/dictation/pin"
 cat > "$stubs/curl" <<STUB
 #!/bin/bash
 out=""; url=""
@@ -77,21 +70,32 @@ fail=0
 for t in "${TWEAKS[@]}"; do
     home="$work/home-$t"; mkdir -p "$home/.local/share/applications" "$home/.config" "$home/.local/bin"
     # homebrew's checks look for the real binary path; give it a fake one
+    tdir() { HOME=/nonexistent python3 "$REPO/lib/sft.py" dir "$1"; }
     run() { env -i HOME="$home" PATH="$stubs:/usr/bin:/bin" USER="test" BREW_BIN="$stubs/brew" \
-            FRAME_TWEAKS_YES=1 FRAME_TWEAKS_UINPUT="$work/uinput" bash "$REPO/$t/$1" >>"$work/$t.log" 2>&1; }
-    # The shared Python venv (wallet's tools): pre-seeded with a stand-in jeepney instead of pip.
-    if [[ " wallet vr-dashboard curvature float-return float-grab scroll-strips " == *" $t "* ]]; then
+            FRAME_TWEAKS_YES=1 FRAME_TWEAKS_UINPUT="$work/uinput" bash "$(tdir "$2")/$1" >>"$work/$t.log" 2>&1; }
+    read -ra deps <<<"$(HOME=/nonexistent python3 "$REPO/lib/sft.py" deps "$t")"
+    # The shared Python venv (wallet's tools, the VR windows helper): pre-seeded with a stand-in
+    # jeepney instead of pip.
+    venv=
+    for d in "$t" "${deps[@]}"; do
+        grep -qE 'ensure_tweaks_venv|install_dashboard_patch|install_py_tool' "$(tdir "$d")/install.sh" && venv=1
+    done
+    if [ -n "$venv" ]; then
         python3 -m venv "$home/.local/share/frame-tweaks/venv"
         sp=$("$home/.local/share/frame-tweaks/venv/bin/python" -c 'import site; print(site.getsitepackages()[0])')
         mkdir -p "$sp/jeepney" && : > "$sp/jeepney/__init__.py"
     fi
+    for d in "${deps[@]}"; do      # (the ones that install offline; others aren't needed here)
+        [[ " ${DEFAULT[*]} " == *" $d "* ]] || continue
+        run install.sh "$d" || { echo "FAIL $t: installing its dependency $d failed"; fail=1; continue 2; }
+    done
     before=$(snapshot "$home")
     marker="$work/marker"; touch "$marker"; sleep 1
     step=install
-    if run install.sh && { step=status; run status.sh; rc=$?; [ $rc -ne 1 ]; } && step=uninstall && run uninstall.sh; then
+    if run install.sh "$t" && { step=status; run status.sh "$t"; rc=$?; [ $rc -ne 1 ]; } && step=uninstall && run uninstall.sh "$t"; then
         after=$(snapshot "$home")
         # (caches that desktop tools regenerate don't count)
-        left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <(printf '%s\n' ${KEEP[$t]:-} | sed 's|^|./|') |
+        left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <({ printf '%s\n' $PATHSET; HOME=/nonexistent python3 "$REPO/lib/sft.py" test-keeps "$t"; } | sed 's|^|./|') |
                grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$|^\./\.cache/' |
                grep -vE '^\./\.local/state/frame-tweaks/alarm/' || true)   # (kept on purpose: no downgrades)
         outside=$(find /tmp /var/tmp "$REPO" -newer "$marker" -type f 2>/dev/null |

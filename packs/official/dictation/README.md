@@ -1,0 +1,97 @@
+---
+title: Dictation
+emoji: ⌨️
+category: Accessibility
+tier: core
+summary: >-
+  Local Whisper speech-to-text on the GPU: one shortcut to record, text is typed and copied
+what: >-
+  Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut
+  or the Arrow Pad's 🎤 to start/stop; the text is typed into the focused app, copied, and
+  logged.
+why: >-
+  Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough
+  to transcribe locally, so nothing leaves the headset.
+author: "Frame Tweaks; engine: whisper.cpp (ggml-org), model: OpenAI Whisper"
+source: {relation: uses, url: https://github.com/ggml-org/whisper.cpp}
+depends: [ydotool]
+icon: {file: frame-tweaks-dictate.png}
+run: {label: Dictate}
+changes: >-
+  `~/.local/bin/dictate`, `~/.config/frame-tweaks/dictate.conf`, Whisper model in
+  `~/.local/share/whisper`; Homebrew `wl-clipboard`
+access: Microphone while recording; types through ydotool
+survives_updates: Yes (everything is in your home folder)
+undo: >-
+  `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf` and your
+  dictation history)
+test:
+  offline: true
+  keeps: [".config/frame-tweaks/dictate.conf"]
+---
+# Dictation: local Whisper speech-to-text
+
+Speech-to-text that runs entirely on the Frame: whisper.cpp on the GPU (Vulkan).
+The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the device.
+
+<!-- generated:glance (dev/gen-docs.py, from each tweak's meta) -->
+> **At a glance**
+>
+> - **Survives SteamOS updates:** Yes (everything is in your home folder)
+> - **Changes:** `~/.local/bin/dictate`, `~/.config/frame-tweaks/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
+> - **Unusual access:** Microphone while recording; types through ydotool
+> - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf` and your dictation history)
+<!-- /generated:glance -->
+
+```sh
+./install.sh install dictation
+```
+
+## Use
+1. Bind **Dictate (toggle)** to a key in *System Settings → Keyboard → Shortcuts*
+   (and, if you like, map a controller button to that key in Steam Input).
+2. Press once: a chime means it's recording. Speak.
+3. Press again: a second chime, then within a few seconds the text is
+   - typed into the focused window,
+   - copied to the clipboard (appears in Klipper's history),
+   - appended to `~/.local/share/dictation-history.txt`.
+
+Sentences ending in `.`/`?`/`!` get a trailing space so dictations chain naturally.
+Memory: nothing stays resident; whisper loads per transcription (~70 MB RAM +
+~200 MB GPU for a few seconds). The `ydotoold` helper uses ~1.5 MB.
+
+**Taps are forgiving:** a second tap within 0.7 s is ignored (laser double-clicks), taps
+while a transcription is running are ignored with a "Still transcribing…" notice, and a
+forgotten recording stops itself after 5 minutes. Each recording uses its own file, so a new
+one can never overwrite one still being transcribed. `dictate --status` prints
+`idle` / `recording` / `transcribing`; the Arrow Pad's 🎤 shows them as normal / red / yellow.
+
+**No phantom text:** Whisper invents phrases for silence ("Thanks for watching", "Subs by …").
+Recordings whose peak stays under −40 dB count as "no speech", and those stock phrases are
+dropped when they're the whole result.
+
+## Configure: `~/.config/frame-tweaks/dictate.conf`
+See [`dictate.conf.example`](dictate.conf.example):
+- `DICTATE_PROMPT`: words Whisper should spell your way (names, jargon).
+- `DICTATE_MODEL`: e.g. `ggml-base.en-q5_1.bin` for faster, less accurate output.
+- `DICTATE_NOTYPE=1`: clipboard only, no typing.
+- `DICTATE_MAX_SECONDS=300`: auto-stop a recording after this long.
+
+## Troubleshooting
+Log: `/run/user/$UID/dictate/dictate.log`. Last recording: `/run/user/$UID/dictate/last.wav`.
+
+## How it works / gotchas
+- Recording: `pw-record` at 16 kHz mono. Typing: `ydotool` (kernel uinput) because
+  KDE Wayland doesn't let ordinary apps inject keys.
+- Desktop mode runs **nested**. Plasma's Wayland socket is under
+  `/run/user/$UID/nested_plasma/`, but apps started from shortcuts see
+  `XDG_RUNTIME_DIR=/run/user/$UID`, so `wl-copy` silently failed. The script finds the socket itself.
+- whisper.cpp's Vulkan backend crashes in the Gamescope WSI layer, so it runs with `DISABLE_GAMESCOPE_WSI=1`.
+
+**On a controller button:** see [Dictate and Lock Wallet on a controller button](../../../docs/controller-shortcuts.md).
+
+## Credits
+[whisper.cpp](https://github.com/ggml-org/whisper.cpp) (MIT) and OpenAI's Whisper models do the transcription; [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) types. Alternatives: [frame-voice](https://github.com/techieyann/frame-voice), [whisper-frame](https://github.com/groffta/whisper-frame). See also [CREDITS.md](../../../CREDITS.md).
+
+---
+Check: `./install.sh status dictation` · Remove: `./install.sh uninstall dictation`
