@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 18;
+  const NAME = 'scroll-strips', VERSION = 19;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -69,7 +69,8 @@
   // A strip works like a joystick: press to set a centre, drag away from it to scroll (the farther,
   // the faster; back across the centre reverses), let go to stop. A quick tap near an end pages.
   let drag = null;
-  const tickle = (effect) => { if (cfg().haptics !== false) L.haptic?.(effect); };   // (setting: Haptics)
+  // (setting: Haptics; the helpers looked up now, not as loaded: lib.js may have been replaced since)
+  const tickle = (name) => { const H = window.__sftLib; if (cfg().haptics !== false) H?.haptic?.(H.HAPTIC?.[name]); };
   const send = (target, dx, dy, page = 0) => {
     // The Android Mirror (with phone-touch running): scroll the phone itself, as its wheel. Keys
     // would go to the window the Steam session last saw clicked, and clicks on the mirror go to
@@ -95,7 +96,7 @@
     const steps = Math.trunc(d.carry);
     if (steps) {
       d.carry -= steps;
-      tickle(L.HAPTIC?.Sliding);                  // a light tick for each step scrolled
+      tickle('Sliding');                  // a light tick for each step scrolled
       // Drag down (or right) scrolls down (or right); the service's +dy is up.
       d.axis === 'y' ? send(d.target, 0, -steps) : send(d.target, steps, 0);
     }
@@ -121,7 +122,7 @@
     if (d.el) d.el.style.background = colors().idle;
     if (Date.now() - d.t0 > TAP_MS || d.moved > d.length * 0.03) return;
     const at = (d.start - d.from) / d.length;                    // a quick tap near an end: a page
-    if (at < 0.25 || at > 0.75) tickle(L.HAPTIC?.Snap);        // a page: a firmer one
+    if (at < 0.25 || at > 0.75) tickle('Snap');        // a page: a firmer one
     if (at < 0.25) d.axis === 'y' ? send(d.target, 0, 0, 1) : send(d.target, -PAGE, 0);
     else if (at > 0.75) d.axis === 'y' ? send(d.target, 0, 0, -1) : send(d.target, PAGE, 0);
   };
@@ -141,9 +142,9 @@
     return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false },
       ...(curveId ? { curvature_origin_id: curveId } : {}) },
-      el('div', { style, onMouseEnter: () => tickle(L.HAPTIC?.Enter), onMouseDown: (ev) => {
+      el('div', { style, onMouseEnter: () => tickle('Enter'), onMouseDown: (ev) => {
         stats.downs++;
-        tickle(L.HAPTIC?.Snap);
+        tickle('Snap');
         if (drag) onUp();                         // a new press ends any drag still open
         const el = ev.currentTarget, r = el.getBoundingClientRect();
         const start = axis === 'y' ? ev.clientY : ev.clientX, from = axis === 'y' ? r.top : r.left;
@@ -233,6 +234,8 @@
     }
     redraw();
   };
+  // Haptic ticks on the ⚙ and the settings' buttons too (the Haptics setting covers them).
+  const tap = () => ({ onMouseEnter: () => tickle('Enter'), onMouseDown: () => tickle('Snap') });
   const GEAR_SVG = 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1' +
     'l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1' +
     'l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z';
@@ -254,11 +257,11 @@
                              alignItems: 'center', justifyContent: 'center',
                              background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
                              border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
-                    onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
+                    ...tap(), onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))))];
     if (!isOpen) return out;
-    const button = (key, label, on, onClick, extra) => el('div', { key, onClick, style: {
+    const button = (key, label, on, onClick, extra) => el('div', { key, ...tap(), onClick, style: {
       flex: '1 0 auto', minWidth: '58px', padding: '11px 6px', margin: '4px', borderRadius: '10px', textAlign: 'center',
       fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
       background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
@@ -274,7 +277,7 @@
     rows.push(title('t-color', T('Colour')));
     rows.push(el('div', { key: 'r-color', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center' } },
       button('tint', T('Passthrough tint'), raw.color === 'tint', () => raw.color !== 'tint' && save({ color: 'tint' })),
-      ...SWATCHES.map((v) => el('div', { key: `c${v}`, onClick: () => save({ color: v }), style: {
+      ...SWATCHES.map((v) => el('div', { key: `c${v}`, ...tap(), onClick: () => save({ color: v }), style: {
         width: '40px', height: '40px', margin: '5px', borderRadius: '50%', boxSizing: 'border-box',
         background: `hsl(${Math.round(v * 360)}, 60%, 55%)`,
         border: raw.color === v ? '4px solid #fff' : '2px solid rgba(255, 255, 255, 0.25)' } }))));
@@ -290,7 +293,7 @@
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`, color: '#e8ecf0' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Scroll strips')),
-            el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },

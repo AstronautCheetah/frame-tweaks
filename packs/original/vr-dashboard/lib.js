@@ -6,7 +6,10 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const VERSION = 1;
+  // sft-dashboard sets __sftLibWanted to this file's hash before injecting it: a changed lib.js
+  // always replaces the one the dashboard has (a hand-kept number once wasn't bumped, and the
+  // scroll strips' haptics called a function the loaded copy didn't have).
+  const VERSION = window.__sftLibWanted ?? 2;
   if (window.__sftLib?.version === VERSION) return 'already loaded';
   const DOCK = { Dashboard: 1, World: 4 };
   // Panel anchors, for GetPanelAnchorID (a window has no Center anchor of its own).

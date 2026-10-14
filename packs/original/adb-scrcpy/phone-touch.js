@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 11;
+  const NAME = 'phone-touch', VERSION = 12;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -169,6 +169,10 @@
     } catch (e) {}
     return 210;
   };
+  // Haptic ticks on the ⚙ and the settings' buttons, as on the dashboard's own (helpers looked up
+  // now: lib.js may have been replaced since this patch loaded).
+  const buzz = (name) => { const H = window.__sftLib; H?.haptic?.(H.HAPTIC?.[name]); };
+  const tap = () => ({ onMouseEnter: () => buzz('Enter'), onMouseDown: () => buzz('Snap') });
   const GEAR_SVG = 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1' +
     'l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1' +
     'l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z';
@@ -183,13 +187,13 @@
                              display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
                              border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
-                    onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
+                    ...tap(), onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))));
   };
   const settings = (f, k, id) => {
     const h = hueOf(), conf = window.__sftPhoneTouchConf || {};
-    const button = (label, on, onClick, wide) => el('div', { key: label, onClick, style: {
+    const button = (label, on, onClick, wide) => el('div', { key: label, ...tap(), onClick, style: {
       flex: wide ? '1 1 100%' : '1 0 auto', minWidth: '58px', padding: '11px 6px', margin: '4px', borderRadius: '10px',
       textAlign: 'center', fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
       background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
@@ -230,7 +234,7 @@
                              color: '#e8ecf0', fontFamily: 'inherit', zoom: 0.62, textAlign: 'left' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Android Mirror')),
-            el('div', { onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
