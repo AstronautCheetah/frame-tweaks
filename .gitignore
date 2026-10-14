@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 /references/
-
-# Maintainer/agent working notes: kept locally, not published.
-/CLAUDE.md
-/docs/claude/
+/tmp/
+.venv/
+*.swp
+*~
