@@ -268,12 +268,26 @@ def follow_link(url):
     if url.startswith("copy:"):
         QApplication.clipboard().setText(url[5:])
         QToolTip.showText(QCursor.pos(), _("Link copied"))
-    elif url.startswith(("https:", "http:")) and (note := browser.open_url(url)):
+    elif url.startswith(("https:", "http:")) and (r := browser.launch(url)):
+        note, proc, handoff = r
         QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
+        if handoff:                                    # the browser runs there already: did it answer?
+            QTimer.singleShot(8000, lambda: browser.still_stuck(proc, url) and stuck_link(url))
     elif url.startswith("file:") and (note := browser.open_path(url)):
         QToolTip.showText(QCursor.pos(), note)
     else:
         QDesktopServices.openUrl(QUrl(url))
+
+
+def stuck_link(url):
+    """The browser in the other session didn't take the link (it can stall while desktop mode
+    isn't shown): the link goes on the clipboard instead, and the window says so."""
+    QApplication.clipboard().setText(url)
+    for w in QApplication.topLevelWidgets():
+        if hasattr(w, "say"):
+            w.say(_("The browser didn't answer, so the link is on the clipboard: paste it into the browser."))
+            return
+    QToolTip.showText(QCursor.pos(), _("The browser didn't answer: the link is on the clipboard."))
 
 
 def link_label(label):

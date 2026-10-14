@@ -62,3 +62,18 @@ class Sessions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StuckHandoff(unittest.TestCase):
+    def test_a_launch_that_never_handed_off_is_stopped(self):
+        """A browser launch still holding the link after the hand-off time is stuck ("already
+        running, but is not responding"): it's stopped, and the window puts the link on the
+        clipboard instead."""
+        import subprocess, sys, time
+        url = "https://example.com/stuck-test?x=1&y=2"
+        p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", url])
+        self.addCleanup(lambda: p.poll() is None and p.kill())
+        with mock.patch.object(browser, "log", lambda msg: None):
+            self.assertTrue(browser.still_stuck(None, url))
+            p.wait(timeout=5)
+            self.assertFalse(browser.still_stuck(None, url))      # (nothing left: it handed off)

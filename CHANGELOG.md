@@ -33,6 +33,12 @@
   you remove it.
 
 ### Fixed
+- **Arrow Pad's Collapse didn't keep the chevron under the laser** when pressed (the button's
+  click handed a "False" to the setting that keeps it in place).
+- **A link the browser in desktop mode doesn't take** (Firefox: "already running, but is not
+  responding", while desktop mode isn't shown) no longer leaves that message up: after a few
+  seconds the window stops it and puts the link on the clipboard. Links opened are logged for
+  the diagnostics report.
 - **The scroll strips had no haptics:** SteamVR's dashboard kept an older copy of the shared
   helpers, without the haptic call (a version number hadn't been raised). The dashboard now gets
   each new copy of them by its content.
