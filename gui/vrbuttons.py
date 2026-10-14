@@ -1,5 +1,5 @@
 """Steam Frame controller buttons for the installer window in VR: B = back, Y = home,
-A = tick/untick the row the laser points at.
+A = tick/untick the row the laser points at; and haptic ticks for its buttons.
 
 The window is a Steam floating window, which gets the laser as a mouse but never the
 controller's buttons. So, while the laser is over the window, this claims A, B and Y through
@@ -52,6 +52,22 @@ class VRButtons:
                     self.handlers[name]()
         except Exception:
             self.ok = False
+
+    def haptic(self, kind):
+        """A tick (hover) or a firmer pulse (press) on the controller driving the laser, as on
+        Arrow Pad and Full Keyboard. A direct pulse: SteamVR Input haptics need input focus,
+        which the dashboard has."""
+        if not self.ok:
+            return
+        try:
+            vr = self.vr
+            dev = vr.VROverlay().getPrimaryDashboardDevice()
+            if dev == vr.k_unTrackedDeviceIndexInvalid:
+                dev = vr.VRSystem().getTrackedDeviceIndexForControllerRole(vr.TrackedControllerRole_RightHand)
+            if dev != vr.k_unTrackedDeviceIndexInvalid:
+                vr.VRSystem().triggerHapticPulse(dev, 0, 1000 if kind == "hover" else 3999)
+        except Exception:
+            pass
 
     def close(self):
         if self.ok:

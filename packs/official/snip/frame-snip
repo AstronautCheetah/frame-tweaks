@@ -775,6 +775,7 @@ class NarrationOverlay(QObject):
         self.width_px = 0
         self.size_m()
         self.drag = None
+        self.hover_button = None                    # the button under the laser (for its tick)
         self.grip_drag = False                      # the current carry is a grip squeeze
         self.hovered = set()                        # controllers whose laser is on the panel
         try:
@@ -1007,6 +1008,7 @@ class NarrationOverlay(QObject):
         while self.ov.pollNextOverlayEvent(self.h, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
             if t == vr.VREvent_FocusLeave:
+                self.hover_button = None
                 if dev == vr.k_unTrackedDeviceIndexInvalid:
                     self.hovered.clear()
                 else:
@@ -1014,12 +1016,18 @@ class NarrationOverlay(QObject):
                 continue
             if t == vr.VREvent_MouseMove:
                 self.hovered.add(dev)
+                b = self.button_at(self.to_widget(ev.data.mouse))
+                if b is not self.hover_button:
+                    self.hover_button = b
+                    if b is not None and b.isEnabled():
+                        self.haptic(dev, "hover")
             if t == vr.VREvent_MouseButtonDown and self.drag is not None:
                 continue                                       # carrying it by the grip: no clicks
             if t == vr.VREvent_MouseButtonDown:
                 pos = self.to_widget(ev.data.mouse)
                 b = self.button_at(pos)
                 if b is not None:
+                    self.haptic(dev, "press")
                     self.pressed = b
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
                 else:                                          # elsewhere: carry the panel
@@ -1054,6 +1062,16 @@ class NarrationOverlay(QObject):
             if ctrl is not None:
                 self.pose = self.compose(ctrl, self.drag[1])
                 self.apply_pose()
+
+    def haptic(self, dev, kind):
+        """A tick on the controller pointing at a button, a firmer one on a press (Arrow Pad's and
+        Full Keyboard's feel). A direct pulse: SteamVR Input haptics need input focus."""
+        try:
+            us = 1000 if kind == "hover" else 3999          # 4 ms at 10 %, 25 ms at full strength
+            if dev != self.vr.k_unTrackedDeviceIndexInvalid:
+                self.system.triggerHapticPulse(dev, 0, us)
+        except Exception:
+            pass
 
     @staticmethod
     def compose(a, b):
