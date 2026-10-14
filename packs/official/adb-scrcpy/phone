@@ -38,12 +38,38 @@ ask() {
     command -v kdialog >/dev/null || return 2
     kdialog --title "$title" --menu "$text" "$@" 2>/dev/null
 }
+# The splash: a small "Android Mirror" window with what's happening, from starting until the mirror
+# shows (notifications alone go unseen in VR); a failure replaces it with a message saying why.
+# kdialog's progress dialog, steered over D-Bus. PHONE_NO_SPLASH=1: none.
+SPLASH=()
+splash() {                          # splash TEXT: show it, or change its text
+    if [ ${#SPLASH[@]} -eq 0 ]; then
+        [ -z "${PHONE_NO_SPLASH:-}" ] && command -v kdialog >/dev/null && command -v qdbus6 >/dev/null || return 0
+        read -ra SPLASH <<< "$(kdialog --title "Android Mirror" --progressbar "$1" 0 2>/dev/null)"
+        [ ${#SPLASH[@]} -eq 2 ] && qdbus6 "${SPLASH[@]}" showCancelButton true >/dev/null 2>&1
+    else
+        qdbus6 "${SPLASH[@]}" setLabelText "$1" >/dev/null 2>&1
+    fi
+}
+splash_end() { [ ${#SPLASH[@]} -eq 2 ] && qdbus6 "${SPLASH[@]}" close >/dev/null 2>&1; SPLASH=(); }
+cancelled() { [ ${#SPLASH[@]} -eq 2 ] && [ "$(qdbus6 "${SPLASH[@]}" wasCancelled 2>/dev/null)" = true ]; }
+# fail TITLE TEXT: say why it stopped (a dialog, and a notification), then stop.
+fail() {
+    splash_end
+    notify-send -a Phone "$1" "$2"
+    command -v kdialog >/dev/null && kdialog --title "Android Mirror: $1" --error "$2" 2>/dev/null
+    exit 1
+}
+trap 'splash_end' EXIT
 # wait_for NAME: up to 3 minutes for it to show up (Wireless debugging turned on, back on the Wi-Fi).
 wait_for() {
-    notify-send -a Phone "Waiting for $1" "Turn on Wireless debugging (Developer options, in the phone's Owner profile), on the same Wi-Fi. Waiting up to 3 minutes."
-    for _ in $(seq 36); do find_phone && return 0; sleep 5; done
-    notify-send -a Phone "$1 didn't appear" "Open Android Mirror again when its Wireless debugging is on."
-    return 1
+    splash "Waiting for $1: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes."
+    for _ in $(seq 36); do
+        find_phone && return 0
+        cancelled && exit 0
+        sleep 5
+    done
+    fail "$1 didn't appear" "It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
 }
 if [ "${1:-}" = --forget ]; then     # phone --forget: no remembered phone any more
     [ -f "$CONF" ] && sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
@@ -51,19 +77,20 @@ if [ "${1:-}" = --forget ]; then     # phone --forget: no remembered phone any m
     exit 0
 fi
 pick=; [ "${1:-}" = --pick ] && { pick=1; shift; }       # phone --pick: choose the phone again
+splash "Looking for your phone on the Wi-Fi…"
 names=$(advertised | names_in)
 count=$(printf '%s\n' "$names" | grep -c .)
 if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
     # No phone chosen yet (or choosing again): one in sight is taken (and remembered); several, you choose.
     if [ "$count" -eq 0 ]; then
-        notify-send -a Phone "No phone found" "Is Wireless debugging on (Developer options, in the phone's Owner profile), on the same Wi-Fi?"
-        exit 1
+        fail "No phone found" "No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README."
     elif [ "$count" -eq 1 ] && [ -z "$pick" ]; then
         remember "$names"
         notify-send -a Phone "Android Mirror" "Connecting to $PHONE_NAME from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
     else
         mapfile -t list <<< "$names"
         args=(); for n in "${list[@]}"; do args+=("$n" "$n"); done
+        splash_end
         chosen=$(ask "Android Mirror" "Which phone?" "${args[@]}")
         [ -n "$chosen" ] || { [ -z "${PHONE_NAME:-}" ] && notify-send -a Phone "Which phone?" "Several are advertising: $(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g'). Run: phone --pick"; exit 1; }
         remember "$chosen"
@@ -74,11 +101,11 @@ if ! find_phone; then
     mapfile -t list <<< "$names"
     # (no other phone in sight, or no kdialog: just wait)
     args=(@wait "Wait for $PHONE_NAME"); for n in "${list[@]}"; do [ -n "$n" ] && args+=("$n" "Use $n instead"); done
-    if [ "$count" -eq 0 ]; then chosen=@wait; else chosen=$(ask "Android Mirror" "$PHONE_NAME isn't on the Wi-Fi with Wireless debugging on." "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
+    if [ "$count" -eq 0 ]; then chosen=@wait; else splash_end; chosen=$(ask "Android Mirror" "$PHONE_NAME isn't on the Wi-Fi with Wireless debugging on." "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
     case "$chosen" in
         "") exit 1 ;;                                       # closed: do nothing
         @wait) wait_for "$PHONE_NAME" || exit 1 ;;
-        *) remember "$chosen"; find_phone || { notify-send -a Phone "$chosen not found" "It stopped advertising; try again."; exit 1; } ;;
+        *) remember "$chosen"; find_phone || fail "$chosen not found" "It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again." ;;
     esac
 fi
 # With "Memory caps" installed, scrcpy runs inside its memory limit.
@@ -98,9 +125,11 @@ alive() { timeout 4 adb -s "$dev" shell true >/dev/null 2>&1; }
 # scrcpy starts again, reading ~/.config/frame-tweaks/phone.conf afresh.
 PIDFILE="/run/user/$(id -u)/sft-phone.pid"
 echo $$ > "$PIDFILE"
-trap '[ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
+trap 'splash_end; [ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
 restart=
 trap 'restart=1; kill "$pid" 2>/dev/null' USR1
+SCRCPY_LOG="/run/user/$(id -u)/phone-scrcpy.log"          # what scrcpy said, for a failure message
+first=1
 while :; do
     if [ -n "$restart" ]; then
         restart=
@@ -108,7 +137,13 @@ while :; do
         [ -f "$CONF" ] && . "$CONF"
         STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHONE_MAX_FPS:-60}
     fi
-    adb connect "$dev" >/dev/null
+    splash "Connecting to ${PHONE_NAME:-the phone}…"
+    out=$(adb connect "$dev" 2>&1)
+    if [ -n "$first" ] && ! grep -q "connected to" <<< "$out"; then
+        fail "Couldn't connect to ${PHONE_NAME:-the phone}" "adb said: $out
+
+If the Frame isn't paired with this phone yet, pair it once: on the phone, Developer options → Wireless debugging → Pair device with pairing code; then in a terminal on the Frame: adb pair <ip>:<port> <code>. See Android Mirror's README."
+    fi
     # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
     # without it the Steam session makes the window 1920x1080, with black bars beside a portrait
     # phone. (It ends with scrcpy, so it's started again with each reconnect.)
@@ -127,9 +162,23 @@ while :; do
         setsid -f "$HOME/.local/bin/phone-touch" "$dev" >/dev/null 2>&1 </dev/null
     fi
     # The title is how the dashboard patches recognise the mirror window.
+    splash "Starting the mirror…"
     "${cap[@]}" scrcpy -s "$dev" --video-bit-rate="$BIT_RATE" --max-size="$STREAM_MAX" --max-fps="$MAX_FPS" \
-        --window-title="Android Mirror" "$@" &
+        --window-title="Android Mirror" "$@" >"$SCRCPY_LOG" 2>&1 &
     pid=$! misses=0
+    if [ -n "$first" ]; then             # the splash stays until the mirror has been up a moment
+        for _ in 1 2 3 4 5 6; do sleep 0.5; kill -0 "$pid" 2>/dev/null || break; done
+        if ! kill -0 "$pid" 2>/dev/null && wait "$pid"; then exit 0; fi       # closed straight away
+        if ! kill -0 "$pid" 2>/dev/null; then
+            fail "The mirror didn't start" "scrcpy stopped straight away. It said:
+
+$(tail -n 6 "$SCRCPY_LOG")
+
+If the phone asked to allow USB debugging or screen sharing, allow it and try again."
+        fi
+        splash_end
+        first=
+    fi
     while kill -0 "$pid" 2>/dev/null; do
         sleep 5 & wait $!                      # (a restart request interrupts the wait)
         [ -n "$restart" ] && break
@@ -150,13 +199,15 @@ while :; do
     fi
     adb disconnect "$dev" >/dev/null 2>&1
     notify-send -a Phone "Phone connection lost" "Reconnecting…"
+    splash "The connection to ${PHONE_NAME:-the phone} was lost. Reconnecting…"
     found=
     for _ in $(seq 12); do                             # up to a minute
         if find_phone && adb connect "$dev" >/dev/null && alive; then found=1; break; fi
+        cancelled && exit 0
         sleep 5
     done
+    splash_end
     if [ -z "$found" ]; then
-        notify-send -a Phone "Phone not found" "Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
-        exit 1
+        fail "Phone not found" "The connection to ${PHONE_NAME:-the phone} was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
     fi
 done
