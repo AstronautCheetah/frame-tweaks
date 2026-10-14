@@ -80,7 +80,8 @@ It's saved in `~/.config/frame-tweaks/hello-frame.conf` and used the next time i
   `uninstall.sh` removes both and keeps your settings; `status.sh` prints one line saying
   whether it's installed (`status_ok`, `status_missing` or `status_warn`).
 - `run.sh` is the Frame Tweaks window's **Greet** button (`run: {label: Greet}` in the
-  manifest).
+  manifest). It opens the menu entry (`gtk-launch hello-frame`) rather than the program itself,
+  so anything guarding that entry, such as a wallet gate, applies.
 - `hello-frame` is the program it installs: it reads the settings file and shows the
   notification. `hello-frame.desktop` is its menu entry.
 
@@ -88,6 +89,7 @@ It's saved in `~/.config/frame-tweaks/hello-frame.conf` and used the next time i
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
 - **Changes:** `~/.local/bin/hello-frame` and its app-menu entry
+- **Unusual access:** None beyond your home folder
 - **Undo:** `./install.sh uninstall hello-frame` (keeps `~/.config/frame-tweaks/hello-frame.conf`)
 
 ## Credits

@@ -5,5 +5,5 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 # Local only (no network call): status must be quick, the installer window runs it often.
 n=$(nmcli -t -f TYPE,NAME connection show | grep -c "^wireguard:NordVPN " || true)   # (0 matches: grep exits 1)
 up=$(nmcli -t -f TYPE,NAME connection show --active | sed -n 's/^wireguard:NordVPN //p' | head -1)
-if [ -n "$up" ]; then state="connected via $up"; else state="disconnected"; fi
-status_ok "$n location(s); $state"
+[ -z "$up" ] || status_ok "$(t '%s location(s); connected via %s' "$n" "$up")"
+status_ok "$(t '%s location(s); disconnected' "$n")"

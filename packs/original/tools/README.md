@@ -43,7 +43,7 @@ restart-plasmashell
 ```
 
 If `plasmashell` is still running, it's closed and started again, so this also helps when the
-taskbar is frozen rather than gone.
+taskbar is frozen rather than gone (a frozen one that doesn't close within 5 seconds is killed).
 
 ## How it works
 In the Frame's nested desktop, `plasmashell` isn't a systemd service, so nothing restarts it

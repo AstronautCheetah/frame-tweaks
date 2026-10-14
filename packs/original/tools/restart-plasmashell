@@ -6,7 +6,13 @@
 # shellcheck source=/dev/null
 source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
     t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
-pkill -x plasmashell && sleep 1
+# Stop a running one first, and wait until it's gone: a new one quits at once while the old one
+# still holds its D-Bus name. It handles SIGTERM in its event loop, so a frozen one never acts on
+# it: after 5 s it's killed.
+if pkill -u "$(id -u)" -x plasmashell; then
+    for _ in 1 2 3 4 5; do sleep 1; pgrep -u "$(id -u)" -x plasmashell >/dev/null || break; done
+    pkill -KILL -u "$(id -u)" -x plasmashell && sleep 1
+fi
 src=$(pgrep -u "$(id -u)" -x ksmserver | head -1)
 [ -n "$src" ] || { t 'No Plasma session (ksmserver) found — are you in desktop mode?' >&2; echo >&2; exit 1; }
 mapfile -d '' envs < "/proc/$src/environ"

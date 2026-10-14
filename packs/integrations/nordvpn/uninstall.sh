@@ -1,9 +1,22 @@
 #!/bin/bash
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
-if [ -x "$BIN/nordvpn-wg" ]; then "$BIN/nordvpn-wg" down >/dev/null 2>&1 || true; fi
-nmcli -t -f TYPE,NAME connection show | sed -n "s/^wireguard:\(NordVPN .*\)/\1/p" | while read -r c; do nmcli connection delete "$c" >/dev/null && say "$(t 'removed connection %s' "$c")"; done
+# A reinstall (↻, FRAME_TWEAKS_REINSTALL) only replaces the programs: it keeps your setup (the
+# connections, and your key and locations in ~/.config/nordvpn-wg, which would take a new access
+# token to set up again) and doesn't disconnect.
+keep=${FRAME_TWEAKS_REINSTALL:-}
+if [ -z "$keep" ]; then
+    if [ -x "$BIN/nordvpn-wg" ]; then "$BIN/nordvpn-wg" down >/dev/null 2>&1 || true; fi
+    # (nmcli reports one that won't go, and the uninstall goes on: with `&&` last in the loop, the
+    # last connection failing stopped it here, at every try)
+    nmcli -t -f TYPE,NAME connection show | sed -n "s/^wireguard:\(NordVPN .*\)/\1/p" | while read -r c; do
+        if nmcli connection delete "$c" >/dev/null; then say "$(t 'removed connection %s' "$c")"; fi
+    done
+fi
 pkill -f "^$QT_VENV/bin/python $BIN/nordvpn-tray" 2>/dev/null || true
 restore_kconfig nordvpn
-remove_files "$ICONS/256x256/apps/frame-tweaks-nordvpn.png" "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$APPS/nordvpn-tray.desktop" "$HOME/.config/autostart/nordvpn-tray.desktop" "$HOME/.config/nordvpn-wg"
-# The PyQt6 venv is shared with Arrow Pad and Screen snip: only the last one removes it.
-[ -x "$BIN/arrowpad" ] || [ -x "$BIN/frame-snip" ] || remove_files "$QT_VENV"
+remove_files "$ICONS/256x256/apps/frame-tweaks-nordvpn.png" "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$APPS/nordvpn-tray.desktop" "$HOME/.config/autostart/nordvpn-tray.desktop"
+if [ -n "$keep" ]; then say "$(t 'Kept your NordVPN connections and settings (~/.config/nordvpn-wg).')"
+else remove_files "$HOME/.config/nordvpn-wg"; fi
+# The PyQt6 venv is shared with Arrow Pad and Screen snip: only the last one removes it (a
+# reinstall keeps it, rather than download it again).
+[ -n "$keep" ] || [ -x "$BIN/arrowpad" ] || [ -x "$BIN/frame-snip" ] || remove_files "$QT_VENV"
