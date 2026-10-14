@@ -40,12 +40,12 @@ settings:
         - {label: "2×", value: 2.0}
   include: [speech]
 changes: >-
-  `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the
-  Speech engine helper
+  `~/.local/bin/frame-snip`, Tesseract and `wl-clipboard` (Homebrew), an app-menu entry; Piper
+  comes from the Speech engine helper
 access: Reads the picture of the window you're using (only when you start a snip)
 survives_updates: Yes (everything is in your home folder and Homebrew)
 undo: >-
-  `./install.sh uninstall snip` (keeps Tesseract, your settings in
+  `./install.sh uninstall snip` (keeps Tesseract and `wl-clipboard`, your settings in
   `~/.config/frame-tweaks/snip.json` and your snips in `~/Pictures/Screenshots`)
 ---
 # Screen snip + Narrate
@@ -142,9 +142,9 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
+- **Changes:** `~/.local/bin/frame-snip`, Tesseract and `wl-clipboard` (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
 - **Unusual access:** Reads the picture of the window you're using (only when you start a snip)
-- **Undo:** `./install.sh uninstall snip` (keeps Tesseract, your settings in `~/.config/frame-tweaks/snip.json` and your snips in `~/Pictures/Screenshots`)
+- **Undo:** `./install.sh uninstall snip` (keeps Tesseract and `wl-clipboard`, your settings in `~/.config/frame-tweaks/snip.json` and your snips in `~/Pictures/Screenshots`)
 <!-- /generated:changes -->
 
 ## Credits

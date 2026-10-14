@@ -27,7 +27,8 @@ changes: >-
   `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh`
   wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet**
   menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps'
-  menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`)
+  menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`); points git's
+  credential helper for github.com, if you have one, at that `gh`
 access: >-
   Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its
   dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for
@@ -196,7 +197,7 @@ wallet in KWalletManager, or KWallet's idle timeout, only closes `kwalletd6`'s v
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`)
+- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`); points git's credential helper for github.com, if you have one, at that `gh`
 - **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
 - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the original menu entries and the KDE settings it changed)
 <!-- /generated:changes -->

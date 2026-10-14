@@ -10,6 +10,10 @@ remove it again.
 
 <p align="center"><img src="docs/images/installer.png" width="720" alt="The Frame Tweaks installer window: tweaks grouped by category, each with its status and an Open button"></p>
 
+**Project status:** early (0.x) and changing quickly, tested on one Frame so far
+([Tested on](#tested-on)). Reports from other SteamOS and SteamVR versions help a lot, and so
+does other help: see [Contributing](#contributing).
+
 ## Why
 
 The Frame runs a full KDE Plasma desktop, but out of the box it is awkward to use from the
@@ -34,12 +38,15 @@ Not affiliated with or endorsed by Valve. Steam and Steam Frame are trademarks o
 
 You need:
 
-- A **Valve Steam Frame** in **desktop mode** (tested on SteamOS 0.4.x; other SteamOS devices
-  aren't tested, and the VR tweaks need the Frame's SteamVR).
+- A **Valve Steam Frame** in **desktop mode** (tested on SteamOS 0.4.x). The Steam Deck and
+  other SteamOS devices aren't supported: Frame Tweaks installs programs built for the Frame's
+  ARM processor, and the VR tweaks need the Frame's SteamVR.
 - A network connection, and `git` (SteamOS has it).
 - Some disk space: a few MB for most tweaks. The bigger ones: the full installer window and Arrow
   Pad share a Python setup of about 280 MB, Dictation's Whisper model is about 260 MB, and
   Homebrew (used by a few tweaks) takes several hundred MB or more, depending on what is in it.
+  VSCodium is about 245 MB, each Narrate voice about 60 MB, and building the shared clipboard
+  needs about 600 MB of temporary space.
 
 In desktop mode, open **Konsole** and run:
 
@@ -50,6 +57,9 @@ curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/
 This downloads the newest release into `~/frame-tweaks`, adds **Frame Tweaks** to the app menu
 (on the desktop and in Steam's VR "+" menu) and opens the installer window. The first time, it
 offers to set up the full window (PyQt6, about 280 MB); if you say no, you get a simpler checklist.
+Until you tick a tweak and press **Apply changes**, that's all it installs: the menu entry (with a
+small user service that keeps it in your keyboard's language) and, if you said yes, the window's
+Python setup.
 
 <details><summary>Prefer to read the script first?</summary>
 
@@ -65,18 +75,28 @@ similar). It never unlocks SteamOS's read-only system (no `steamos-readonly disa
 SteamOS updates don't undo it. The few exceptions, each only when you tick the tweak that
 needs it:
 
-- **Homebrew** asks for your sudo password once, to create `/home/linuxbrew`. This is the only
+- **Homebrew** asks for your sudo password once, to create `/home/linuxbrew` (if you never set
+  a password for your user, set one first with `passwd` in Konsole). This is the only
   time anything asks for sudo.
 - **NordVPN** adds its connections to NetworkManager (`/etc/NetworkManager/system-connections`).
 - **Shared KDE wallet** and **VSCodium** install apps from Flathub, which go into the system-wide
   Flatpak folder.
 
-Every tweak installs, checks and removes on its own, and removing one keeps your settings.
+Every tweak installs, checks and removes on its own, and removing one keeps your settings
+(NordVPN's removal also deletes its key and locations, as its page says).
 
 **Checked downloads.** Files taken from other projects' releases are pinned to a SHA256 checksum
 recorded in this repo, and Arch Linux ARM packages are checked against Arch Linux ARM's signing
 key. Programs installed through Homebrew, Flathub, pip or a vendor's own installer (the Claude
 tweaks) rely on that tool's checks. Details: [SECURITY.md](SECURITY.md#what-each-tweak-changes-on-your-system).
+
+**No telemetry.** Frame Tweaks sends nothing about you or your Frame anywhere. On its own, the
+window goes online only to look for newer releases: Frame Tweaks' own (it asks GitHub; turn this
+off in its ⚙ preferences) and, for a tweak that installs an app with its own releases, that
+app's (Claude Desktop asks Anthropic's download server). Installs and updates download what the
+tweaks need. **🐞 Report a problem** saves its report on the Frame and opens GitHub's bug form;
+nothing is sent unless you attach it. The apps the tweaks install (Signal, NordVPN, VSCodium,
+Claude…) go online as they normally do.
 
 > **What some tweaks can do on your Frame.** VR dashboard patching turns on SteamVR's dashboard
 > DevTools port while SteamVR runs (any program on the Frame could use it). Arrow Pad and
@@ -163,17 +183,18 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
 - **Click a row** for its details page: what it is, why it's there, who made it, what it changes,
   and its README.
 - The row's **▶** button opens what the tweak provides (Arrow Pad, Dictate, the NordVPN
-  tray…). Tweaks with settings have a **⚙ Settings** button instead, and the wallet's
-  row has **🔑 Wallet apps**.
+  tray…). Tweaks with settings have a **⚙ Settings** button instead, or a **⚙** beside their ▶
+  (Screen snip, Android Mirror); the wallet's row has **🔑 Wallet apps**, and a tweak with nothing
+  to open has **Help**, its details page.
 - **↻** removes a tweak and installs it again in one step, keeping its settings.
 - Categories fold, and rows or whole categories can be hidden (hiding never removes anything).
 - "↑ … available · Update" appears when a newer Frame Tweaks release, or a newer version of an
   app a tweak installs, is out.
-- **🐞 Report a problem** saves a diagnostics report and opens the bug form with your version
+- **🐞 Report a problem** saves a diagnostics report and offers the bug form, with your version
   filled in, to attach it to; **🧩 Packs** manages extra packs of tweaks; **⚙** holds the
   preferences (the language, and how the window behaves).
-- In VR, the controller's **B** goes back, **Y** goes to the top of the list, and **A** ticks
-  the row you point at.
+- In VR, the controller's **B** goes back, **Y** goes to the top of the list, the left D-pad's
+  up and down move the highlight between rows, and **A** ticks the row you point at.
 
 <p align="center"><img src="docs/images/details.png" width="640" alt="A tweak's details page: what it is, why it's included, who made it, its source and README"></p>
 
@@ -183,14 +204,16 @@ Everything the window does also works from Konsole, in `~/frame-tweaks` (the win
 same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 
 ```text
-./install.sh                    installer window (desktop mode), or help + status (terminal)
+./install.sh                    help, and every tweak's status
+./install.sh gui                the installer window (desktop mode)
 ./install.sh list               every tweak and what it does
 ./install.sh install signal     install (adds what it depends on: here, the wallet)
-./install.sh uninstall nordvpn  remove one (keeps its settings)
+./install.sh uninstall arrowpad remove one (keeps its settings)
 ./install.sh reinstall arrowpad remove and install again in one step (the ↻ button)
 ./install.sh status             health check, changes nothing
 ./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
 ./install.sh debug-info         a redacted report for bug reports
+./install.sh report             the same, and the bug form's address to attach it to
 ./install.sh info arrowpad      a tweak's details page
 ./install.sh run arrowpad       its ▶ button
 ./install.sh settings scroll-strips              show its settings and the allowed values
@@ -200,7 +223,12 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh wallet lock        the shared wallet: lock, unlock, status
 ./install.sh wallet-apps        apps using the wallet (add, --remove, --gate…; --help)
 ./install.sh timers             close-after timers (--set APP MINUTES, --headset…; --help)
+./install.sh menu               put the Frame Tweaks app-menu entry back (--remove takes it out)
+./install.sh --version          which Frame Tweaks this is
 ```
+
+`install all` and `uninstall all` take every tweak. The `wallet`, `wallet-apps` and `timers`
+commands need [Shared KDE wallet](packs/original/wallet/) installed.
 
 `./install.sh status` shows one line per tweak, for example:
 
@@ -243,15 +271,18 @@ Or, in the Frame Tweaks window: **⟳ Check for updates**, then **⬇ Update to 
 **↻ Restart** when it's done (the window also checks when it opens). This moves to the newest
 release and re-runs the installer of every tweak you have installed. It first checks that the
 release is signed by Frame Tweaks' release key and refuses one that isn't. Nothing updates on its
-own: a tweak only changes when you update.
+own: a tweak only changes when you update. (The one exception is Claude Code, which updates itself
+the way Anthropic's installer sets it up.)
 
 - **Pre-releases:** put `beta` in `~/.config/frame-tweaks/channel` to get them too.
-- **Go to a specific release** (for example, to go back): `./install.sh update --to vX.Y.Z`.
+- **Go to a specific release** (for example, to go back): `./install.sh update --to vX.Y.Z`
+  (0.6.1 or later: older releases aren't signed, so they're refused).
 - **Keep one tweak as it is** during updates: `./install.sh hold ID` (`unhold` to undo).
 
 **If updates stop.** What's installed keeps working. If another project deletes or changes a
 file a tweak downloads, the installer falls back to Frame Tweaks' own copy, checked against the
-same checksum. Python packages fall back to the newest versions if the tested ones don't
+same checksum (all but Piper, which can't be copied: it comes with espeak-ng, whose licence would
+need its source alongside). Python packages fall back to the newest versions if the tested ones don't
 install, and adb and ydotool keep the copy that works if a new build doesn't run on SteamOS.
 The first things to stop working are the 🧪 experimental tweaks, after a SteamVR update; they
 switch themselves off, and Android Mirror stays usable as a plain window.
@@ -261,14 +292,30 @@ switch themselves off, and Android Mirror stays usable as a plain window.
 ```sh
 cd ~/frame-tweaks && ./install.sh uninstall all   # every tweak, the ones that depend on others first
 ./install.sh menu --remove                        # the Frame Tweaks app-menu entry and icons
+```
+
+Then **restart SteamVR (or reboot)** before you delete anything else: VR dashboard patching puts
+SteamVR's own setting back only once SteamVR has stopped, and it keeps what it needs for that in
+`~/.local/state/frame-tweaks`. Then:
+
+```sh
 rm -rf ~/frame-tweaks ~/.config/frame-tweaks ~/.local/state/frame-tweaks \
        ~/.local/share/frame-tweaks ~/.local/share/arrowpad ~/.cache/frame-tweaks   # settings, logs, Python setups
+rm -f ~/.config/arrowpad.json ~/.config/arrowpad-vr.json   # Arrow Pad's size and place
+rm -f ~/.local/share/dictation-history.txt ~/frame-tweaks-debug-*.txt   # what you dictated; reports
 ```
+
+`uninstall all` removes the tweaks of the packs in use: turn a pack back on (or trust it again)
+first if you turned it off.
 
 What stays:
 
-- **Homebrew** (other programs may live in it). `./install.sh uninstall homebrew` prints
+- **Homebrew** (other programs may live in it), with the programs the tweaks installed through it
+  (whisper.cpp, scrcpy, Tesseract, wl-clipboard). `./install.sh uninstall homebrew` prints
   Homebrew's own uninstall command; see [homebrew](packs/original/homebrew/).
+- **KWalletManager**, the Flathub app Shared KDE wallet installs, and the Flatpak setting that
+  has Signal read its database key from the wallet (`flatpak override --user --show
+  org.signal.Signal`): the key is there, so Signal needs it to open its messages.
 - **Your data in other apps' usual places**, such as the KDE wallet itself, adb pairing keys in
   `~/.android`, or VSCodium's settings. Each tweak's uninstaller lists what it keeps as it runs.
 - The lines tweaks added to `~/.bashrc` (putting `~/.local/bin` and Homebrew on your `PATH`),
@@ -279,7 +326,7 @@ What stays:
 
 | Problem | What to do |
 |---|---|
-| Arrow Pad or Dictation types nothing | `./install.sh status ydotool`, then ▶ **Restart** on the ydotool row (or `systemctl --user restart ydotoold`). |
+| Arrow Pad or Dictation types nothing | `./install.sh status ydotool`, then ▶ **Restart** on the ydotool row (or `./install.sh run ydotool`). |
 | "Failed to initialize Wayland" when opening apps | Closing desktop mode can tear it down halfway: Steam removes the desktop's runtime folder while KWin keeps running. Exit desktop mode and open it again, or reboot. |
 | The mouse pointer is invisible in desktop mode | Install **Mouse cursor fix**, then reboot (it takes effect at the next desktop-mode start). |
 | Taskbar or tray disappeared | ▶ **Restart taskbar** on the Desktop Recovery row (or `restart-plasmashell`). |
@@ -289,7 +336,7 @@ What stays:
 | "Another Frame Tweaks install, update or removal is running" | Wait for the other install window to finish; the lock is released when it closes. |
 | Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often because focus moved to another VR window while the key was down). On Arrow Pad: **Tools → Unstick**. Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
 | Windows and clicks in the desktop act strangely, and its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a physical keyboard (Arrow Pad has no Right Ctrl) to turn it off. |
-| Something else | Installer window → **🐞 Report a problem** (or `./install.sh report`): it saves a report and opens the bug form to attach it to. |
+| Something else | Installer window → **🐞 Report a problem**: it saves a report and opens the bug form to attach it to. In a terminal, `./install.sh report` saves it and prints the form's address. |
 
 ### Where the logs are
 
@@ -302,8 +349,8 @@ What stays:
 
 `./install.sh debug-info` (or **🐞 Report a problem**) gathers the recent install logs, the status of
 every tweak and the services' recent lines into one file in your home folder
-(`~/frame-tweaks-debug-….txt`). User, host and phone names and network addresses are removed,
-but read it before you share it.
+(`~/frame-tweaks-debug-….txt`). Your user name, home folder, host and phone names, and IP, MAC
+and e-mail addresses are removed, but read it before you share it.
 
 ## Good to know about the Frame
 
@@ -343,24 +390,40 @@ and wallet launchers, two-session know-how), [curiousjtuber/steam-frame-utils](h
 (installer shape), and on whisper.cpp, scrcpy, ydotool, KDE and others. Details and licences:
 [CREDITS.md](CREDITS.md). Not affiliated with Valve or any vendor named here.
 
-## Contributing, security, licence
+## Contributing
 
-- New tweaks are folders with `install.sh`, `status.sh` and `uninstall.sh`; see
-  [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/mods.md](docs/mods.md).
-- What touches secrets, and the threat model: [SECURITY.md](SECURITY.md).
+Help is welcome, and much of it doesn't need a Frame:
+
+- **Reports from your Frame**, especially on SteamOS and SteamVR versions not listed under
+  [Tested on](#tested-on): what works, what doesn't (**🐞 Report a problem**).
+- **Translations:** [locale/README.md](locale/README.md). Latin American Spanish is the first;
+  others are welcome.
+- **Fixes and new tweaks.** A tweak is a folder with a README (whose front matter is its
+  manifest), `install.sh`, `status.sh` and `uninstall.sh`. The installer, the tweaks' scripts
+  and the installer window can all be checked on an ordinary Linux PC with one command
+  (`dev/check.sh`, the same checks CI runs). [CONTRIBUTING.md](CONTRIBUTING.md) has the setup,
+  [docs/mods.md](docs/mods.md) the tweak format, [docs/DESIGN.md](docs/DESIGN.md) how it all
+  fits together, and [docs/roadmap.md](docs/roadmap.md) what's planned.
+
+## Security and licence
+
+- What touches secrets, and the threat model: [SECURITY.md](SECURITY.md). Please report
+  security problems privately, through a
+  [security advisory](https://github.com/AstronautCheetah/frame-tweaks/security/advisories/new).
 - [MIT](LICENSE), except the icons made from KDE Breeze and Noto Color Emoji (their own
   licences; [icons/README.md](icons/README.md)). Changes: [CHANGELOG.md](CHANGELOG.md).
-- How it works and why: [docs/DESIGN.md](docs/DESIGN.md); plans: [docs/roadmap.md](docs/roadmap.md).
 
 ## Tested on
 
 SteamOS 0.4.5 (build 20261007.6125817), SteamVR build 1791331621, kernel 6.18, one Steam
 Frame. SteamOS and SteamVR updates can break tweaks that rely on their internals (the 🧪
 experimental tweaks check for this and switch themselves off). Reports from other versions are
-welcome: open an issue with your `./install.sh status` output.
+welcome: the [Works on my Frame](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=test_report.yml)
+issue form asks for what's needed.
 
 ## AI use
 
 Much of the code here was written with AI coding assistance. I review every change, test it on
 my own Steam Frame, and take responsibility for what ships, so please report anything that
-looks wrong.
+looks wrong. Contributions are held to the same standard however they were written: you're
+responsible for what you send ([CONTRIBUTING.md](CONTRIBUTING.md)).

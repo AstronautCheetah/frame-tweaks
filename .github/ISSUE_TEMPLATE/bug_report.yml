@@ -11,6 +11,7 @@ body:
     id: tweak
     attributes:
       label: Which tweak?
+      description: Or the installer window, or get.sh if Frame Tweaks didn't install.
       placeholder: e.g. arrowpad, wallet, curvature
     validations:
       required: true
@@ -34,6 +35,9 @@ body:
       description: |
         In the installer window press **🐞 Report a problem** (or run `./install.sh report` in the
         Frame Tweaks folder). It saves `~/frame-tweaks-debug-….txt` with versions, status and
-        recent logs, with user names, paths and IP addresses removed. Read it, then drag it here.
+        recent logs, with your user name, home folder, host and phone names, and IP, MAC and
+        e-mail addresses removed. Read it, then drag it here.
+        If Frame Tweaks didn't install, or its window won't open, paste what the terminal printed
+        instead.
     validations:
       required: true

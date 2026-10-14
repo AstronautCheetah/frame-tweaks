@@ -17,13 +17,16 @@ run: {label: Tray}
 processes: [^~/.local/share/arrowpad/venv/bin/python ~/.local/bin/nordvpn-tray]
 changes: >-
   `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart
-  entry, `~/.config/nordvpn-wg` (your WireGuard key and locations)
+  entry and session-restore setting (`ksmserverrc`, so the tray isn't started twice),
+  `~/.config/nordvpn-wg` (your WireGuard key and locations)
 access: >-
   **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's
   D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key
 survives_updates: >-
   Yes (its connections live in NetworkManager's settings, which updates keep)
-undo: "`./install.sh uninstall nordvpn`"
+undo: >-
+  `./install.sh uninstall nordvpn` (also deletes the connections, your key and locations; the ↻
+  reinstall keeps them)
 ---
 # NordVPN (WireGuard)
 
@@ -100,9 +103,9 @@ a command line or in a temporary file, and creating one doesn't connect it.
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)
-- **Changes:** `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry, `~/.config/nordvpn-wg` (your WireGuard key and locations)
+- **Changes:** `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry and session-restore setting (`ksmserverrc`, so the tray isn't started twice), `~/.config/nordvpn-wg` (your WireGuard key and locations)
 - **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key
-- **Undo:** `./install.sh uninstall nordvpn`
+- **Undo:** `./install.sh uninstall nordvpn` (also deletes the connections, your key and locations; the ↻ reinstall keeps them)
 <!-- /generated:changes -->
 
 ## Credits

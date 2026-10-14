@@ -18,12 +18,13 @@ uses most of what's described here.
   separated by `:`.
 - **Trust:** a pack's tweaks run as you, with your files and passwords in reach, so a new pack
   is listed but not used until you trust it: **🧩 Packs → Trust…**, or
-  `./install.sh mods trust "<pack name>"`. Trust covers the pack's files as they are then; if
-  any change (an update, or something tampering with them), the pack waits until you trust it
-  again.
+  `./install.sh mods trust "<pack name>"` (or its folder, if two packs share a name). Trust
+  covers the pack's files as they are then (names, contents, links, which ones can run); if any
+  change (an update, or something tampering with them), the pack waits until you trust it again.
 - `./install.sh mods` lists the packs, whether each is in use, and any problems.
   `./install.sh mods untrust "<pack name>"` stops using one; tweaks of it you installed stay
-  until you uninstall them.
+  until you uninstall them, which takes trusting the pack again first (Frame Tweaks only knows
+  the tweaks of packs in use).
 
 ## A pack
 
@@ -89,7 +90,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `title` | Its name in the list. |
 | `emoji` | Its emoji in the README tables. |
 | `category` | Its group in the list: an existing one (Accessibility, Convenience, VR environment, Privacy & security, System, Developer) or a new one. |
-| `tier` | `core` (a fix for the Frame), `extras` (an app setup) or `helper` (something other tweaks need). |
+| `tier` | `core` (a fix for the Frame), `extras` (an app setup) or `helper` (something other tweaks need; the README tables mark it "helper"). It describes the tweak and doesn't change how it installs. |
 | `summary` | One line, shown in the list and in `./install.sh list`. |
 | `what`, `why` | Its details page. |
 | `author` | Who made it ("Made by"). |
@@ -100,16 +101,16 @@ undo: "`./install.sh uninstall hello-frame`"
 | Key | Example | What it does |
 |---|---|---|
 | `depends` | `[ydotool]` | Tweaks installed first (from any pack in use). If one is missing, this one isn't offered. |
-| `source` | `{relation: from, url: https://…}` | The project it comes from (`from`) or uses (`uses`), linked in the list. |
+| `source` | `{relation: from, url: https://…}` | The project it's linked to in the list, and how: `from`, `uses` (the default), or a few words of your own such as `styled after`. |
 | `hidden_by_default` | `true` | Hidden in the list until you choose to show it. |
 | `experimental` | text | Marks it 🧪 and says what relies on another program's internals and what happens when they change. |
 | `icon` | `{file: icon.png}` · `{theme: face-smile}` · `{flatpak: org.app.Id}` | Its icon in the list: a picture in its folder, a Breeze icon name, or an installed Flatpak's icon (these can be combined; tried in the order flatpak, file, theme). |
-| `run` | `{label: Open}` | The list's Run button, which runs `run.sh` (the tweak needs one). |
-| `processes` | `["^~/.local/bin/my-daemon"]` | Programs it keeps running (`pgrep -f` patterns, `~` for your home folder). They're stopped before it's uninstalled or reinstalled, then `stopped.sh` runs if it has one. |
+| `run` | `{label: Open}` | The Run button's label. A tweak with a `run.sh` gets the button anyway, labelled Run. |
+| `processes` | `["^~/.local/bin/my-daemon"]` | Programs it keeps running: a list of `pgrep -f` patterns, one line each, `~` for your home folder. They're stopped before it's uninstalled or reinstalled, then `stopped.sh` runs if it has one. Anchor them (`^…`) and make them specific: whatever matches is stopped, the installer itself included if its own command line matches. |
 | `settings` | (below) | A settings page in the installer window, and `./install.sh settings ID`. |
 | `known_issue` | `{version, short, long, latest}` | A problem with an upstream version: `short` on its row, `long` on its details page, and a check whether `latest` (a GitHub releases API URL) has something newer than `version`. |
 | `wallet_apps` | `[org.signal.Signal]` | Apps it sets up to use the shared KDE wallet (the Wallet apps page says so). |
-| `test` | `{offline: true, keeps: [.config/…], needs: [orca]}` | `dev/test-tweaks.sh` installs, checks and removes it in a throwaway home folder (only official and example tweaks run in CI). `keeps`: the files its uninstall leaves on purpose; `needs`: commands it needs to be tested. |
+| `test` | `{offline: true, keeps: [.config/…], needs: [orca]}` | `dev/test-tweaks.sh` installs, checks and removes it in a throwaway home folder (it runs the official packs' and the example's tweaks, not your own pack's). `keeps`: the files its uninstall leaves on purpose; `needs`: commands it needs to be tested. |
 | `replaces` | `true` | Use it instead of the tweak with the same id in another pack. |
 | `upstream_readme` | `https://raw.githubusercontent.com/owner/repo/v1.0/README.md` | For a tweak that installs another project: that project's README at the pinned version. In the official packs, `dev/fetch-upstream-readmes.py` copies it (with its pictures) into the tweak's folder and `dev/gen-docs.py` appends it below the tweak's own README. |
 
@@ -135,16 +136,18 @@ settings:
       choices:
         - {label: "Yes", value: "yes"}
         - {label: "No", value: "no"}
+  include: [speech]                                # optional: other tweaks' settings, on this page too
   actions:                                         # optional: buttons that run a script
-    - label: "Forget {HELLO_NAME}"                  # {KEY} shows that setting's value
+    - label: "Forget {HELLO_NAME}"                  # (an illustration: hello-frame has none) {KEY}: that setting's value
       script: hello-frame                          # in the tweak's folder, run with bash
       args: [--forget]
       when: HELLO_NAME                             # shown only while that setting has a value
       about: What pressing it does.
 ```
 
-Only the listed keys are written; anything else in the file is kept. Your program reads the
-file itself (a `shell` file can be `source`d).
+Only the listed keys are written (a `shell` file's values quoted where they must be, so it can
+be `source`d); anything else in the file is kept. Your program reads the file itself. An option
+with `swatches: true` shows its choices as colour circles (their values are colours).
 
 ### The YAML
 
@@ -154,11 +157,15 @@ other YAML tools and to whoever reads it:
 - `key: value`; nested mappings and lists indented with spaces; `[a, b]` and `{k: v}` on one line.
 - Long text: `key: >-` with the text indented on the next lines (lines are joined with spaces;
   a blank line starts a new line). `|` keeps line breaks as they are.
-- **Quote** a value that starts with `` ` ``, `[`, `{`, `*`, `&`, `!`, `|`, `>`, `'`, `"`, `%`
-  or `@`, that contains `: ` or ` #`, or that YAML could read as something else: `yes`, `no`,
-  `on`, `off` (any case), dates, and numbers like `010` or `1_000`. Unquoted, these are refused,
-  with the line number, rather than guessed at.
-- No anchors (`&`), aliases (`*`) or tags (`!`).
+- **Quote** a value that starts with `` ` ``, `[`, `{`, `*`, `&`, `!`, `|`, `>`, `'`, `"`, `%`,
+  `@` or `? `, that contains `: `, or that YAML could read as something else: `yes`, `no`, `on`,
+  `off` (any case), dates, and numbers like `010` or `1_000`. Unquoted, these are refused, with
+  the line number, rather than guessed at. A ` #` starts a comment, as in YAML: quote a value
+  that should keep it.
+- Inside `[...]` and `{...}`, also quote a value that starts with `:` or `#` or holds `?`, `[` or
+  `{`, and leave no empty values (`[a, ]`).
+- Keys are plain words: not ones YAML reads as numbers, true/false or dates (`1:`, `on:`).
+- No anchors (`&`), aliases (`*`), tags (`!`) or tabs.
 
 `./install.sh mods check <folder>` checks a tweak or a whole pack without using it.
 
@@ -188,7 +195,10 @@ source "$FRAME_TWEAKS_LIB/common.sh"
 ```
 
 That gives you `$TWEAK_DIR` (the tweak's own folder: use it for its files), `$BIN`
-(`~/.local/bin`), `$APPS` (the app menu's folder) and the helpers below.
+(`~/.local/bin`), `$APPS` (the app menu's folder) and the helpers below. It also turns on
+`set -euo pipefail`: a command that fails stops the script (add `|| true` where a failure is
+fine). During the ↻ Reinstall button's uninstall, `$FRAME_TWEAKS_REINSTALL` is set (keep the
+user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
 
 - `install.sh`: installs it. It must be safe to run again, and install only into your home
   folder (SteamOS's system partition is read-only and updates wipe it). Exit non-zero on failure.
@@ -217,10 +227,13 @@ That gives you `$TWEAK_DIR` (the tweak's own folder: use it for its files), `$BI
 | `install_desktop FILE` | A `.desktop` file into the app menu (`@BIN@` becomes `~/.local/bin`). |
 | `install_icon NAME` | `NAME.png` from the tweak's folder into the icon theme (Steam's VR menu finds it). |
 | `remove_files PATH...` | Removes them, saying what went. |
+| `write_file DEST [MODE] < content` | Replaces a program (or any file) with new content by renaming a finished copy over it, so a running copy isn't changed under it. Use it, not `>` or `cp`, for anything in `~/.local/bin` (CI checks). |
+| `install_i18n` | Frame Tweaks' translations, for a program of the tweak that shows text (`locale/MARKING.md`). |
 | `backup_file TWEAK FILE`, `restore_file TWEAK FILE` | Keep a user file as it was before you changed it, and put it back on uninstall. KDE settings: `save_kconfig` / `restore_kconfig`. |
 | `fetch_pinned ID OUT [PIN]` | Downloads the file a `pin` names and checks its SHA256 (see below). |
 | `alarm_fetch REPO NAME DEST` | An Arch Linux ARM package, signature-checked, unpacked into DEST. `runs_here BINARY` says whether it can run on SteamOS. |
 | `need_brew` | Homebrew, installed if needed (with the user's consent). |
+| `ensure_openvr VENV` | The openvr bindings in that venv, on SteamVR's own arm64 library; returns 1 without SteamVR. |
 | `ensure_tweaks_venv`, `install_py_tool FILE` | A Python program in `~/.local/bin`, run on Frame Tweaks' shared venv. `pip_pinned VENV PKG` installs packages at tested versions. |
 | `install_dashboard_patch NAME FILE`, `remove_dashboard_patch NAME`, `dashboard_patch_status NAME TEXT` | A SteamVR dashboard patch (see the VR environment tweaks; depend on `vr-dashboard`). |
 | `sysctl_user ...` | `systemctl --user`, also from a desktop-mode shell. |
