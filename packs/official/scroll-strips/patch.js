@@ -54,7 +54,7 @@
   const { el } = L, DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
   let PANEL = null, XFORM = null;                   // the dashboard's panel / transform (L.components)
   const cfg = () => {
-    const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
+    const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, haptics: true, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
     c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
     c.gap = Math.min(0.1, Math.max(0, Number(c.gap) || 0.015));
     // Set back a little behind the window's plane, so SteamVR's own buttons by the window's edge
@@ -66,6 +66,7 @@
   // A strip works like a joystick: press to set a centre, drag away from it to scroll (the farther,
   // the faster; back across the centre reverses), let go to stop. A quick tap near an end pages.
   let drag = null;
+  const tickle = (effect) => { if (cfg().haptics !== false) L.haptic?.(effect); };   // (setting: Haptics)
   const send = (target, dx, dy, page = 0) => {
     // The Android Mirror (with phone-touch running): scroll the phone itself, as its wheel. Keys
     // would go to the window the Steam session last saw clicked, and clicks on the mirror go to
@@ -91,7 +92,7 @@
     const steps = Math.trunc(d.carry);
     if (steps) {
       d.carry -= steps;
-      L.haptic?.(L.HAPTIC?.Sliding);              // a light tick for each step scrolled
+      tickle(L.HAPTIC?.Sliding);                  // a light tick for each step scrolled
       // Drag down (or right) scrolls down (or right); the service's +dy is up.
       d.axis === 'y' ? send(d.target, 0, -steps) : send(d.target, steps, 0);
     }
@@ -117,7 +118,7 @@
     if (d.el) d.el.style.background = colors().idle;
     if (Date.now() - d.t0 > TAP_MS || d.moved > d.length * 0.03) return;
     const at = (d.start - d.from) / d.length;                    // a quick tap near an end: a page
-    if (at < 0.25 || at > 0.75) L.haptic?.(L.HAPTIC?.Snap);    // a page: a firmer one
+    if (at < 0.25 || at > 0.75) tickle(L.HAPTIC?.Snap);        // a page: a firmer one
     if (at < 0.25) d.axis === 'y' ? send(d.target, 0, 0, 1) : send(d.target, -PAGE, 0);
     else if (at > 0.75) d.axis === 'y' ? send(d.target, 0, 0, -1) : send(d.target, PAGE, 0);
   };
@@ -137,9 +138,9 @@
     return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false },
       ...(curveId ? { curvature_origin_id: curveId } : {}) },
-      el('div', { style, onMouseEnter: () => L.haptic?.(L.HAPTIC?.Enter), onMouseDown: (ev) => {
+      el('div', { style, onMouseEnter: () => tickle(L.HAPTIC?.Enter), onMouseDown: (ev) => {
         stats.downs++;
-        L.haptic?.(L.HAPTIC?.Snap);
+        tickle(L.HAPTIC?.Snap);
         if (drag) onUp();                         // a new press ends any drag still open
         const el = ev.currentTarget, r = el.getBoundingClientRect();
         const start = axis === 'y' ? ev.clientY : ev.clientX, from = axis === 'y' ? r.top : r.left;
@@ -206,7 +207,7 @@
   // ---- the gear (where the two strips would meet) and its settings panel ----
   // Saved through vr-dashboard's sftConfig binding into ~/.config/frame-tweaks/scroll-strips.json
   // (the installer window's settings page writes the same file).
-  const DEFAULTS = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, color: 'tint' };
+  const DEFAULTS = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, color: 'tint', haptics: true };
   const SWATCHES = [0, 0.08, 0.15, 0.33, 0.5, 0.58, 0.67, 0.75, 0.83, 0.92];   // hues, as the tint's 0..1
   const OPTIONS = [
     ['Vertical strip', 'vertical', [['Right', 'right'], ['Left', 'left'], ['Off', 'off']]],

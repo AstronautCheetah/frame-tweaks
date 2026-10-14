@@ -41,6 +41,7 @@ class SameChoicesEverywhere(unittest.TestCase):
             listed = [float(x) / 100 for x in re.search(cm, js).group(1).split(",")]
             self.assertEqual([round(v, 4) for v in listed], [round(v, 4) for v in values("scroll-strips")[key]], key)
         d = re.search(r"const DEFAULTS = \{([^}]*)\}", js).group(1)
+        d = re.sub(r"\btrue\b", "True", re.sub(r"\bfalse\b", "False", d))      # (JavaScript's booleans)
         self.assertEqual(eval("{" + re.sub(r"(\w+):", r"'\1':", d) + "}"), sft.defaults("scroll-strips"))
 
 

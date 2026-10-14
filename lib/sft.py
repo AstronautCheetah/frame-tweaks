@@ -147,6 +147,9 @@ def check_settings(st, cid, where):
                 vals.append(c["value"])
         if o.get("default") not in vals:
             errs.append(f"{where}: {o['key']}: the default must be one of the choices' values")
+    for o in opts:
+        if isinstance(o, dict) and o.get("checkbox") and len(o.get("choices") or []) != 2:
+            errs.append(f"{where}: {o.get('key')}: a checkbox option needs exactly two choices (on, then off)")
     for a in st.get("actions", []):
         if not (isinstance(a, dict) and isinstance(a.get("label"), str) and isinstance(a.get("script"), str)
                 and isinstance(a.get("args", []), list) and isinstance(a.get("when", ""), str)):
@@ -344,7 +347,9 @@ def settings_specs():
                                          o["default"]) for o in st["options"]],
                             # Buttons that run one of the tweak's own scripts (when: shown only while
                             # that setting has a value; {KEY} in the label shows it).
-                            "actions": [dict(a, dir=c["dir"]) for a in st.get("actions", [])]}
+                            "actions": [dict(a, dir=c["dir"]) for a in st.get("actions", [])],
+                            # Options shown as one tick box (two choices: on, then off).
+                            "checkboxes": {o["key"] for o in st["options"] if o.get("checkbox")}}
     return out
 
 

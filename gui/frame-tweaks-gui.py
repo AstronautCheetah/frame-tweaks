@@ -466,8 +466,16 @@ class SettingsPage(QWidget):
         about.setWordWrap(True)
         lay.addWidget(about)
         self.conf = sft.read_settings(cid)
-        self.buttons = {}
+        self.buttons, self.checks = {}, {}
         for key, label, choices, _ in self.spec["options"]:
+            if key in self.spec["checkboxes"]:          # on / off: one tick box
+                box = QCheckBox(label)
+                box.setStyleSheet("font-weight: 600; margin-top: 14px;")
+                box.setChecked(self.conf.get(key) == choices[0][1])
+                box.clicked.connect(lambda on, k=key, c=choices: self.choose(k, c[0][1] if on else c[1][1]))
+                lay.addWidget(box)
+                self.checks[key] = (box, choices[0][1])
+                continue
             lab = QLabel(label)
             lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
             lay.addWidget(lab)
@@ -525,6 +533,8 @@ class SettingsPage(QWidget):
     def show_choices(self):
         for (key, _), (b, value) in self.buttons.items():
             b.setChecked(self.conf.get(key) == value)
+        for key, (box, on) in self.checks.items():
+            box.setChecked(self.conf.get(key) == on)
 
     def choose(self, key, value):
         self.conf[key] = value
