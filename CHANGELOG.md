@@ -24,9 +24,12 @@
   window too. Arrow Pad's shows its main and Tools layers.
 
 ### Removed
-- **whisper-frame, Screen reader and Memory caps** are no longer offered.
+- **whisper-frame, Screen reader, Memory caps and Grab guard** are no longer offered.
 
 ### Changed
+- **Install, update and removal terminals in VR** also say you can close them with the X button
+  floating below the window, for when there's no keyboard.
+- **"Frame Tweaks is up to date"** shows in green.
 - **The main README lists the tweaks by category**, as the window does.
 - **Screen snip's narration panel:** Collapse shows a down chevron, Expand an up one.
 - **The Shared KDE wallet and Firefox privacy rows lead with what they're for:** password-protect
@@ -42,6 +45,8 @@
   changes.
 
 ### Fixed
+- **Screen snip's narration panel came back in the wrong place** after collapsing it with the
+  other end's Collapse button than the last one used.
 - **Mouse cursor fix said "active after the next reboot"** when it was already active (the check
   looked at the installer window's session, not desktop mode's).
 - **Uninstalling Arrow Pad or the NordVPN tray broke Screen snip** (they share a Python setup);

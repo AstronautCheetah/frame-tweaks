@@ -61,7 +61,7 @@ start_log() {
     # (tee without the lock's fd 8: holding it, tee kept the lock after `update` re-runs this
     # script for its second stage, which then found "another install running" and stopped.)
     exec > >(tee -a "$log" 8>&-) 2>&1
-    # (Only the installer's own logs, named by date: tweaks keep theirs here too, e.g. grab-guard.log.)
+    # (Only the installer's own logs, named by date: tweaks keep theirs here too, e.g. a tweak's own *.log.)
     find "$LOGS" -name '[0-9]*-*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
 }
 
@@ -306,7 +306,10 @@ cmd_kdialog_gui() {
     local cmd="cd '$PWD'"
     [[ ${#del[@]} -gt 0 ]] && cmd+=" && ./install.sh uninstall ${del[*]}"
     [[ ${#add[@]} -gt 0 ]] && cmd+=" && ./install.sh install ${add[*]}"
-    cmd+="; echo; read -rp 'Press Enter to close…'"
+    # (In VR a floating window has an X button below it: easier than a key without a keyboard.)
+    local close="Press Enter to close…"
+    [[ ${DISPLAY:-} == :0 ]] && close="Press Enter to close, or press the X button floating below to close."
+    cmd+="; echo; read -rp '$close'"
     exec konsole --separate -e bash -c "$cmd"
 }
 

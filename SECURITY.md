@@ -42,7 +42,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool` and `ydotoold` in `~/.local/bin` (Arch Linux ARM package, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall) | None beyond your home folder |
-| grab-guard | `grab-guard` in `~/.local/bin`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs` | **Reads every keyboard's key presses**, and the keys the Steam session's display receives (only to notice Right Ctrl; nothing else is kept) |
 | vscodium | Flathub app `com.vscodium.codium` (system-wide Flatpak) | VSCodium's own Flatpak permissions: all your files, the network, and running commands outside its sandbox |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS |
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |

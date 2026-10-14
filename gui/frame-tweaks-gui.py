@@ -146,6 +146,12 @@ def release_key(tag):
     return (int(m[1]), int(m[2]), int(m[3]), m[4] is None, m[4] or "")
 
 
+# How the terminal of an install, update or removal closes. In VR (the Steam session's display),
+# a floating window has an X button below it: easier than a key when there's no keyboard.
+CLOSE_PROMPT = shlex.quote("Press Enter to close" + (", or press the X button floating below to close."
+                                                     if os.environ.get("DISPLAY") == ":0" else "…"))
+
+
 def current_release():
     return (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
 
@@ -698,7 +704,7 @@ class Window(QWidget):
                     self.set_update_state("update", newest)
             elif self.update_state == "checking":
                 self.set_update_state("check")
-                self.say(f"Frame Tweaks is up to date ({current_release()}).")
+                self.say(f"✔ Frame Tweaks is up to date ({current_release()}).", good=True)
         for cid, fut in list(self.update_futures.items()):
             if fut.done():
                 del self.update_futures[cid]
@@ -864,7 +870,7 @@ class Window(QWidget):
             print("would run:", cmd)
             return
         after = "" if cid else "; echo; echo 'Close and reopen Frame Tweaks to use the new version.'"
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp 'Press Enter to close…'"
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp {CLOSE_PROMPT}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh(),
                                                cid is None and self.after_self_update()))
@@ -914,7 +920,7 @@ class Window(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp 'Press Enter to close…'"
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {CLOSE_PROMPT}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: self.refresh())
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
@@ -1019,8 +1025,11 @@ class Window(QWidget):
         self.stack.setCurrentIndex(0)
 
     # ---- in-window messages (no dialogs: in VR they'd open in the dashboard) ----------
-    def say(self, text):
-        self.notice.setText(f"<span style='color:#e0b33a'>{html.escape(text)}</span>")
+    def say(self, text, good=False):
+        """A message on the left of the bottom bar for a few seconds: green when it's good news
+        (as ✔ statuses), amber otherwise."""
+        colour = "#5cc77a" if good else "#e0b33a"
+        self.notice.setText(f"<span style='color:{colour}'>{html.escape(text)}</span>")
         shown = self.notice.text()
         QTimer.singleShot(6000, lambda: self.notice.text() == shown and self.notice.setText(self.hint_text))
 
@@ -1098,7 +1107,7 @@ class Window(QWidget):
             steps.append("./install.sh uninstall " + " ".join(remove))
         if add:
             steps.append("./install.sh install " + " ".join(add))
-        cmd = " && ".join(steps) + "; echo; read -rp 'Press Enter to close…'"
+        cmd = " && ".join(steps) + f"; echo; read -rp {CLOSE_PROMPT}"
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", cmd])

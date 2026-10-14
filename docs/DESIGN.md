@@ -321,8 +321,7 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
   `install_desktop` re-applies the wrapper when a tweak reinstalls an entry it guards.
 - **Never send Right Ctrl.** It toggles KWin's input grab on the nested desktop.
   `clear_stuck_modifiers` in `lib/common.sh` releases Shift, Ctrl, Alt and Super, but never
-  Right Ctrl. [grab-guard](../packs/official/grab-guard/) only watches for it and never sends
-  a key itself.
+  Right Ctrl.
 - **Sandboxed services.** Frame Tweaks' own user services use systemd sandboxing where it
   doesn't break them (see SECURITY.md).
 

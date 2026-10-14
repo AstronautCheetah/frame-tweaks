@@ -26,7 +26,6 @@ order:
   - menu-icons
   - ydotool
   - speech
-  - grab-guard
   - vscodium
   - claude-code
   - claude-desktop
