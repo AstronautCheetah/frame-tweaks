@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# An isolated git worktree per parallel session or agent. No branches: each worktree is a
+# A separate git worktree for each piece of work done in parallel. No branches: each worktree is a
 # detached checkout of origin/main, and its commits are published straight to main with
 # dev/safe-push.sh. Two sessions in one working tree can sweep each other's work into the
 # wrong commit (`git add`); separate worktrees remove the shared index entirely.
