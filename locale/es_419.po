@@ -141,7 +141,7 @@ msgid "Still checking status; try again in a moment."
 msgstr ""
 "Todavía se está revisando el estado; vuelve a intentarlo en un momento."
 
-#: gui/frame-tweaks-gui.py:1320 install.sh:334
+#: gui/frame-tweaks-gui.py:1320 install.sh:339
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
 
@@ -177,12 +177,12 @@ msgid ""
 msgstr ""
 "Copia estos detalles, luego guarda un informe de diagnóstico y abre el formulario de error"
 
-#: gui/frame-tweaks-gui.py:176 install.sh:354
+#: gui/frame-tweaks-gui.py:176 install.sh:359
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 "Presiona Enter para cerrar, o presiona el botón X que flota abajo para cerrar."
 
-#: gui/frame-tweaks-gui.py:177 install.sh:353
+#: gui/frame-tweaks-gui.py:177 install.sh:358
 msgid "Press Enter to close…"
 msgstr "Presiona Enter para cerrar…"
 
@@ -208,7 +208,7 @@ msgstr "El navegador no respondió: el enlace está en el portapapeles."
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:363 install.sh:184 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:363 install.sh:189 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr "no instalado"
 
@@ -339,7 +339,7 @@ msgstr "Restablecer valores predeterminados"
 msgid "Working… (a download can take a minute)"
 msgstr "Trabajando… (una descarga puede tardar un minuto)"
 
-#: gui/frame-tweaks-gui.py:626 packs/original/snip/frame-snip:609 install.sh:208
+#: gui/frame-tweaks-gui.py:626 packs/original/snip/frame-snip:609 install.sh:213
 msgid "Done."
 msgstr "Listo."
 
@@ -876,57 +876,57 @@ msgstr "se abre sin pedir la contraseña"
 msgid "under a minute"
 msgstr "menos de un minuto"
 
-#: install.sh:170
+#: install.sh:175
 msgid "(experimental)"
 msgstr "(experimental)"
 
-#: install.sh:172
+#: install.sh:177
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 "(experimental: depende de partes internas de SteamVR; consulta ./install.sh info ID)"
 
-#: install.sh:192
+#: install.sh:197
 msgid "install what? (./install.sh list)"
 msgstr "¿instalar qué? (./install.sh list)"
 
-#: install.sh:203 install.sh:239 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
+#: install.sh:208 install.sh:244 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
 msgid "%s failed"
 msgstr "%s falló"
 
-#: install.sh:207 install.sh:242
+#: install.sh:212 install.sh:247
 msgid "Failed: %s"
 msgstr "Falló: %s"
 
-#: install.sh:212
+#: install.sh:217
 msgid "uninstall what?"
 msgstr "¿desinstalar qué?"
 
-#: install.sh:219
+#: install.sh:224
 msgid "Nothing installed."
 msgstr "No hay nada instalado."
 
-#: install.sh:229
+#: install.sh:234
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 
-#: install.sh:236 install.sh:253
+#: install.sh:241 install.sh:258
 msgid "removing %s"
 msgstr "quitando %s"
 
-#: install.sh:248
+#: install.sh:253
 msgid "reinstall what?"
 msgstr "¿reinstalar qué?"
 
-#: install.sh:259
+#: install.sh:264
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr "--to necesita una versión, p. ej. v0.3.1"
 
-#: install.sh:262
+#: install.sh:267
 msgid "Updating the checkout"
 msgstr "Actualizando la copia local"
 
-#: install.sh:266
+#: install.sh:271
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
@@ -934,112 +934,112 @@ msgstr ""
 "Esta copia local y la rama main de GitHub se separaron. Si no tienes trabajo local que\n"
 "conservar: git reset --hard @{upstream}"
 
-#: install.sh:269
+#: install.sh:274
 msgid "git pull failed; not reinstalling"
 msgstr "git pull falló; no se reinstala"
 
-#: install.sh:273
+#: install.sh:278
 msgid "couldn't reach GitHub; not updating"
 msgstr "no se pudo conectar con GitHub; no se actualiza"
 
-#: install.sh:275
+#: install.sh:280
 msgid "no release found"
 msgstr "no se encontró ninguna versión"
 
-#: install.sh:276
+#: install.sh:281
 msgid "no release %s"
 msgstr "no existe la versión %s"
 
-#: install.sh:278
+#: install.sh:283
 msgid "Updating to %s (%s channel)"
 msgstr "Actualizando a %s (canal %s)"
 
-#: install.sh:282
+#: install.sh:287
 msgid "git checkout failed; not reinstalling"
 msgstr "git checkout falló; no se reinstala"
 
-#: install.sh:292
+#: install.sh:297
 msgid "Nothing installed yet."
 msgstr "Todavía no hay nada instalado."
 
-#: install.sh:295
+#: install.sh:300
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 "Revisando las partes de SteamOS/SteamVR de las que dependen los ajustes"
 
-#: install.sh:304
+#: install.sh:309
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 "¿Configurar la ventana completa del instalador? Necesita PyQt6 (unos 280 MB, compartido con el Teclado de flechas y la bandeja de NordVPN).\\n\\nNo = usar la lista simple."
 
-#: install.sh:306
+#: install.sh:311
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr "No se pudo instalar PyQt6; se usará la lista simple."
 
-#: install.sh:327
+#: install.sh:332
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 "Marca lo que quieras instalar. Desmarcar un ajuste instalado lo quita."
 
-#: install.sh:339
+#: install.sh:344
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 "No se seleccionó nada, así que no se quitará nada. Para quitar todo, usa: %s"
 
-#: install.sh:342
+#: install.sh:347
 msgid "Remove tweaks?"
 msgstr "¿Quitar ajustes?"
 
-#: install.sh:343
+#: install.sh:348
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 "Estos ajustes instalados se desmarcaron y se QUITARÁN:\\n\\n  %s\\n\\n¿Continuar?"
 
-#: install.sh:381
+#: install.sh:386
 msgid "stopped %s's running programs"
 msgstr "se detuvieron los programas en ejecución de %s"
 
-#: install.sh:404
+#: install.sh:409
 msgid "%s migration failed"
 msgstr "falló la migración de %s"
 
-#: install.sh:409
+#: install.sh:414
 msgid "%s what? (./install.sh list)"
 msgstr "¿%s qué? (./install.sh list)"
 
-#: install.sh:413
+#: install.sh:418
 msgid "%s: held (updates leave it as it is)"
 msgstr "%s: retenido (las actualizaciones no lo cambian)"
 
-#: install.sh:414
+#: install.sh:419
 msgid "%s: updated normally again"
 msgstr "%s: se actualiza normalmente otra vez"
 
-#: install.sh:424
+#: install.sh:429
 msgid "The bug form, with your version filled in: %s"
 msgstr "El formulario de error, con tu versión ya escrita: %s"
 
-#: install.sh:465
+#: install.sh:470
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
 
-#: install.sh:501
+#: install.sh:506
 msgid "run what?"
 msgstr "¿ejecutar qué?"
 
-#: install.sh:502
+#: install.sh:507
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
-#: install.sh:512
+#: install.sh:517
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr "Se quitó 'Frame Tweaks' del menú de apps."
 
-#: install.sh:513
+#: install.sh:518
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr "Se agregó 'Frame Tweaks' al menú de apps."
 
@@ -2214,56 +2214,56 @@ msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 "Flechas y teclas de navegación flotantes en modo escritorio; nunca roba el foco"
 
-#: packs/original/arrowpad/arrowpad.py:1130
+#: packs/original/arrowpad/arrowpad.py:1149
 msgid "Keys released"
 msgstr "Teclas liberadas"
 
-#: packs/original/arrowpad/arrowpad.py:1131
+#: packs/original/arrowpad/arrowpad.py:1150
 msgid "Shift, Ctrl, Alt and Super were pressed and let go."
 msgstr "Shift, Ctrl, Alt y Super se presionaron y se soltaron."
 
-#: packs/original/arrowpad/arrowpad.py:1140
+#: packs/original/arrowpad/arrowpad.py:1159
 msgid "Screen snip isn't installed"
 msgstr "Recorte de pantalla no está instalado"
 
-#: packs/original/arrowpad/arrowpad.py:1141
+#: packs/original/arrowpad/arrowpad.py:1160
 msgid "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."
 msgstr ""
 "Marca 'Recorte de pantalla + Narrar' en Frame Tweaks para usar este botón."
 
-#: packs/original/arrowpad/arrowpad.py:1152
+#: packs/original/arrowpad/arrowpad.py:1171
 msgid "Dictation isn't installed"
 msgstr "Dictado no está instalado"
 
-#: packs/original/arrowpad/arrowpad.py:1153
+#: packs/original/arrowpad/arrowpad.py:1172
 msgid "Tick 'Dictation' in Frame Tweaks to use this button."
 msgstr "Marca 'Dictado' en Frame Tweaks para usar este botón."
 
-#: packs/original/arrowpad/arrowpad.py:1253
+#: packs/original/arrowpad/arrowpad.py:1272
 msgid "button size multiplier (default 1.0)"
 msgstr "multiplicador del tamaño de los botones (predeterminado 1.0)"
 
-#: packs/original/arrowpad/arrowpad.py:1254
+#: packs/original/arrowpad/arrowpad.py:1273
 msgid "ydotoold socket path"
 msgstr "ruta del socket de ydotoold"
 
-#: packs/original/arrowpad/arrowpad.py:1255
+#: packs/original/arrowpad/arrowpad.py:1274
 msgid "close a running pad"
 msgstr "cierra un teclado en ejecución"
 
-#: packs/original/arrowpad/arrowpad.py:1256
+#: packs/original/arrowpad/arrowpad.py:1275
 msgid "collapse a running pad to its chevron, or expand it"
 msgstr "contrae un Teclado de flechas abierto a su chevrón, o lo expande"
 
-#: packs/original/arrowpad/arrowpad.py:1257
+#: packs/original/arrowpad/arrowpad.py:1276
 msgid "open in desktop mode (even from the VR menu)"
 msgstr "abre en modo escritorio (incluso desde el menú de RV)"
 
-#: packs/original/arrowpad/arrowpad.py:1258
+#: packs/original/arrowpad/arrowpad.py:1277
 msgid "open as a floating VR window"
 msgstr "abre como ventana flotante de RV"
 
-#: packs/original/arrowpad/arrowpad.py:1276
+#: packs/original/arrowpad/arrowpad.py:1295
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
@@ -2445,7 +2445,7 @@ msgid ""
 msgstr ""
 "{m}: toque = solo la siguiente tecla, doble toque = bloquear; o mantenla presionada mientras presionas una tecla con la otra mano"
 
-#: packs/original/arrowpad/arrowpad.py:181 packs/original/arrowpad/arrowpad.py:917
+#: packs/original/arrowpad/arrowpad.py:181 packs/original/arrowpad/arrowpad.py:936
 msgid "Pin: stop accidental moves"
 msgstr "Fijar: evita movimientos accidentales"
 
@@ -2517,19 +2517,19 @@ msgstr "Tema"
 msgid "arrowpad: desktop mode isn't running"
 msgstr "arrowpad: el modo escritorio no está en ejecución"
 
-#: packs/original/arrowpad/arrowpad.py:647 packs/original/arrowpad/arrowpad.py:847 packs/original/arrowpad/arrowpad.py:1130 packs/original/arrowpad/arrowpad.py:1140 packs/original/arrowpad/arrowpad.py:1152 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+#: packs/original/arrowpad/arrowpad.py:666 packs/original/arrowpad/arrowpad.py:866 packs/original/arrowpad/arrowpad.py:1149 packs/original/arrowpad/arrowpad.py:1159 packs/original/arrowpad/arrowpad.py:1171 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr "Teclado de flechas"
 
-#: packs/original/arrowpad/arrowpad.py:647 packs/original/arrowpad/arrowpad.py:847
+#: packs/original/arrowpad/arrowpad.py:666 packs/original/arrowpad/arrowpad.py:866
 msgid "Arrow Pad (VR)"
 msgstr "Teclado de flechas (RV)"
 
-#: packs/original/arrowpad/arrowpad.py:917
+#: packs/original/arrowpad/arrowpad.py:936
 msgid "Pinned: tap to allow moving"
 msgstr "Fijado: toca para permitir moverlo"
 
-#: packs/original/arrowpad/arrowpad.py:963
+#: packs/original/arrowpad/arrowpad.py:982
 msgid "Done"
 msgstr "Listo"
 

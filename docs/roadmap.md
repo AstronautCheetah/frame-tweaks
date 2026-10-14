@@ -78,6 +78,9 @@ next to the idea it inspired.
 - [ ] **Memory caps** (set aside for now) for heavy apps (Whisper, VSCodium, Android Mirror) with user-level systemd
   limits, so one app can't freeze the headset. *(Jovian-NixOS)*
 
+## Community
+- [ ] **A code of conduct,** once there are regular outside contributors.
+
 ## Not adopting
 - A root service, a channel of pull-request builds, updates that reset the checkout
   (`git reset --hard`), and root-only tweaks (SDWEAK, Btrfs, pacman with read-only off): each

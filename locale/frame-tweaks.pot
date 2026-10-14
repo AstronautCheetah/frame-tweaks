@@ -136,7 +136,7 @@ msgstr ""
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1320 install.sh:334
+#: gui/frame-tweaks-gui.py:1320 install.sh:339
 msgid "Nothing to change."
 msgstr ""
 
@@ -170,11 +170,11 @@ msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:176 install.sh:354
+#: gui/frame-tweaks-gui.py:176 install.sh:359
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:177 install.sh:353
+#: gui/frame-tweaks-gui.py:177 install.sh:358
 msgid "Press Enter to close…"
 msgstr ""
 
@@ -199,7 +199,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:363 install.sh:184 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:363 install.sh:189 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -328,7 +328,7 @@ msgstr ""
 msgid "Working… (a download can take a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:626 packs/original/snip/frame-snip:609 install.sh:208
+#: gui/frame-tweaks-gui.py:626 packs/original/snip/frame-snip:609 install.sh:213
 msgid "Done."
 msgstr ""
 
@@ -841,162 +841,162 @@ msgstr ""
 msgid "under a minute"
 msgstr ""
 
-#: install.sh:170
+#: install.sh:175
 msgid "(experimental)"
 msgstr ""
 
-#: install.sh:172
+#: install.sh:177
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 
-#: install.sh:192
+#: install.sh:197
 msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:203 install.sh:239 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
+#: install.sh:208 install.sh:244 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
 msgid "%s failed"
 msgstr ""
 
-#: install.sh:207 install.sh:242
+#: install.sh:212 install.sh:247
 msgid "Failed: %s"
 msgstr ""
 
-#: install.sh:212
+#: install.sh:217
 msgid "uninstall what?"
 msgstr ""
 
-#: install.sh:219
+#: install.sh:224
 msgid "Nothing installed."
 msgstr ""
 
-#: install.sh:229
+#: install.sh:234
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr ""
 
-#: install.sh:236 install.sh:253
+#: install.sh:241 install.sh:258
 msgid "removing %s"
 msgstr ""
 
-#: install.sh:248
+#: install.sh:253
 msgid "reinstall what?"
 msgstr ""
 
-#: install.sh:259
+#: install.sh:264
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr ""
 
-#: install.sh:262
+#: install.sh:267
 msgid "Updating the checkout"
 msgstr ""
 
-#: install.sh:266
+#: install.sh:271
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
 msgstr ""
 
-#: install.sh:269
+#: install.sh:274
 msgid "git pull failed; not reinstalling"
 msgstr ""
 
-#: install.sh:273
+#: install.sh:278
 msgid "couldn't reach GitHub; not updating"
 msgstr ""
 
-#: install.sh:275
+#: install.sh:280
 msgid "no release found"
 msgstr ""
 
-#: install.sh:276
+#: install.sh:281
 msgid "no release %s"
 msgstr ""
 
-#: install.sh:278
+#: install.sh:283
 msgid "Updating to %s (%s channel)"
 msgstr ""
 
-#: install.sh:282
+#: install.sh:287
 msgid "git checkout failed; not reinstalling"
 msgstr ""
 
-#: install.sh:292
+#: install.sh:297
 msgid "Nothing installed yet."
 msgstr ""
 
-#: install.sh:295
+#: install.sh:300
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 
-#: install.sh:304
+#: install.sh:309
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 
-#: install.sh:306
+#: install.sh:311
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr ""
 
-#: install.sh:327
+#: install.sh:332
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 
-#: install.sh:339
+#: install.sh:344
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 
-#: install.sh:342
+#: install.sh:347
 msgid "Remove tweaks?"
 msgstr ""
 
-#: install.sh:343
+#: install.sh:348
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 
-#: install.sh:381
+#: install.sh:386
 msgid "stopped %s's running programs"
 msgstr ""
 
-#: install.sh:404
+#: install.sh:409
 msgid "%s migration failed"
 msgstr ""
 
-#: install.sh:409
+#: install.sh:414
 msgid "%s what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:413
+#: install.sh:418
 msgid "%s: held (updates leave it as it is)"
 msgstr ""
 
-#: install.sh:414
+#: install.sh:419
 msgid "%s: updated normally again"
 msgstr ""
 
-#: install.sh:424
+#: install.sh:429
 msgid "The bug form, with your version filled in: %s"
 msgstr ""
 
-#: install.sh:465
+#: install.sh:470
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr ""
 
-#: install.sh:501
+#: install.sh:506
 msgid "run what?"
 msgstr ""
 
-#: install.sh:502
+#: install.sh:507
 msgid "%s has nothing to run"
 msgstr ""
 
-#: install.sh:512
+#: install.sh:517
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
-#: install.sh:513
+#: install.sh:518
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr ""
 
@@ -2076,55 +2076,55 @@ msgstr ""
 msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1130
+#: packs/original/arrowpad/arrowpad.py:1149
 msgid "Keys released"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1131
+#: packs/original/arrowpad/arrowpad.py:1150
 msgid "Shift, Ctrl, Alt and Super were pressed and let go."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1140
+#: packs/original/arrowpad/arrowpad.py:1159
 msgid "Screen snip isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1141
+#: packs/original/arrowpad/arrowpad.py:1160
 msgid "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1152
+#: packs/original/arrowpad/arrowpad.py:1171
 msgid "Dictation isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1153
+#: packs/original/arrowpad/arrowpad.py:1172
 msgid "Tick 'Dictation' in Frame Tweaks to use this button."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1253
+#: packs/original/arrowpad/arrowpad.py:1272
 msgid "button size multiplier (default 1.0)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1254
+#: packs/original/arrowpad/arrowpad.py:1273
 msgid "ydotoold socket path"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1255
+#: packs/original/arrowpad/arrowpad.py:1274
 msgid "close a running pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1256
+#: packs/original/arrowpad/arrowpad.py:1275
 msgid "collapse a running pad to its chevron, or expand it"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1257
+#: packs/original/arrowpad/arrowpad.py:1276
 msgid "open in desktop mode (even from the VR menu)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1258
+#: packs/original/arrowpad/arrowpad.py:1277
 msgid "open as a floating VR window"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1276
+#: packs/original/arrowpad/arrowpad.py:1295
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
@@ -2298,7 +2298,7 @@ msgid ""
 "{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:181 packs/original/arrowpad/arrowpad.py:917
+#: packs/original/arrowpad/arrowpad.py:181 packs/original/arrowpad/arrowpad.py:936
 msgid "Pin: stop accidental moves"
 msgstr ""
 
@@ -2370,19 +2370,19 @@ msgstr ""
 msgid "arrowpad: desktop mode isn't running"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:647 packs/original/arrowpad/arrowpad.py:847 packs/original/arrowpad/arrowpad.py:1130 packs/original/arrowpad/arrowpad.py:1140 packs/original/arrowpad/arrowpad.py:1152 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+#: packs/original/arrowpad/arrowpad.py:666 packs/original/arrowpad/arrowpad.py:866 packs/original/arrowpad/arrowpad.py:1149 packs/original/arrowpad/arrowpad.py:1159 packs/original/arrowpad/arrowpad.py:1171 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:647 packs/original/arrowpad/arrowpad.py:847
+#: packs/original/arrowpad/arrowpad.py:666 packs/original/arrowpad/arrowpad.py:866
 msgid "Arrow Pad (VR)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:917
+#: packs/original/arrowpad/arrowpad.py:936
 msgid "Pinned: tap to allow moving"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:963
+#: packs/original/arrowpad/arrowpad.py:982
 msgid "Done"
 msgstr ""
 
