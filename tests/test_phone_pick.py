@@ -31,7 +31,7 @@ class PhonePick(unittest.TestCase):
             # kdialog --title T --menu TEXT tag label...: answer $CHOOSE (empty: closed)
             "kdialog": f'echo "kdialog $*" >> {log}; [ -n "$CHOOSE" ] && echo "$CHOOSE" || exit 1',
             "notify-send": f'echo "notify $*" >> {log}',
-            "adb": f'echo "adb $*" >> {log}; [ "$1 $2" = "-s " ] || true; exit 0',
+            "adb": f'echo "adb $*" >> {log}; [ "$1" = connect ] && echo "connected to $2"; exit 0',
             "scrcpy": f'echo "scrcpy $*" >> {log}; exit 0',
             "sleep": "exit 0", "setsid": f'echo "setsid $*" >> {log}', "pgrep": "exit 1",
             **(extra or {}),
@@ -39,7 +39,8 @@ class PhonePick(unittest.TestCase):
         for name, body in scripts.items():
             (stubs / name).write_text(f"#!/bin/bash\n{body}\n")
             (stubs / name).chmod(0o755)
-        env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or "", **(env or {})}
+        env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or "",
+               "PHONE_NO_SPLASH": "1", **(env or {})}       # (the splash has a test of its own)
         r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30)
         f = home / ".config/frame-tweaks/phone.conf"
         conf_text = f.read_text() if f.exists() else ""
@@ -81,9 +82,22 @@ class PhonePick(unittest.TestCase):
     def test_missing_phone_with_none_in_sight_is_waited_for(self):
         code, log, conf = self.run_phone([], conf='PHONE_NAME="Pixel 9"\n')
         self.assertNotEqual(code, 0)                               # (fake: it never shows up)
-        self.assertIn("notify -a Phone Waiting for Pixel 9", log)
-        self.assertIn("didn't appear", log)
-        self.assertNotIn("kdialog", log)
+        self.assertIn("Pixel 9 didn't appear", log)
+        self.assertNotIn("--menu", log)                            # nothing else to choose
+        self.assertIn("--error", log)                              # it says why it stopped
+
+    def test_splash_then_a_message_saying_why(self):
+        """No phone in sight: the splash shows, then closes, and an error dialog explains."""
+        code, log, _ = self.run_phone([], env={"PHONE_NO_SPLASH": ""}, extra={
+            "kdialog": 'echo "kdialog $*" >> "$HOME/log"; case "$*" in *--progressbar*) echo "org.kde.kdialog-1 /ProgressDialog";; esac',
+            "qdbus6": 'echo "qdbus6 $*" >> "$HOME/log"'})
+        self.assertNotEqual(code, 0)
+        lines = log.splitlines()
+        self.assertIn("--progressbar", lines[0])
+        close = next(i for i, l in enumerate(lines) if l.endswith("/ProgressDialog close"))
+        error = next(i for i, l in enumerate(lines) if "--error" in l)
+        self.assertLess(close, error)                              # splash gone, then the message
+        self.assertIn("No phone found", lines[error])
 
     def test_settings_in_the_old_place_are_moved(self):
         code, log, conf = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n',
