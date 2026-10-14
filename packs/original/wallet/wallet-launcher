@@ -60,15 +60,20 @@ TALK = ["--talk-name=org.kde.kwalletd6", "--talk-name=org.freedesktop.secrets"]
 def source_for(app_id):
     own = APPS / f"{app_id}.desktop"
     backup = BACKUP_DIR / f"{app_id}.desktop"
+    # An entry there with nothing of ours is the original (add() backs it up): a host app's own
+    # (e.g. Claude Desktop), your edit of a Flatpak's or system app's, or a newer one an app's
+    # installer wrote over our wrapper (then the backup is out of date).
+    text = own.read_text() if own.exists() else ""
+    if text and not any(w in text for w in (f"{MARK}=true", WRAPPER, GATE, GUARD)):
+        return own
     if backup.exists():                       # re-run: start from the untouched original
         return backup
     for d in SOURCES:
         if (d / f"{app_id}.desktop").exists():
             return d / f"{app_id}.desktop"
     system = next((d / f"{app_id}.desktop" for d in SYSTEM_SOURCES if (d / f"{app_id}.desktop").exists()), None)
-    # Host app with its own entry (e.g. Claude Desktop); but our own override of a system app
-    # isn't an original: rebuild it from the system entry.
-    if own.exists() and not (system and f"{MARK}=true" in own.read_text()):
+    # Ours without a backup: rebuilt from itself, but an override of a system app from the system entry.
+    if own.exists() and not (system and f"{MARK}=true" in text):
         return own
     if system:
         return system
@@ -79,14 +84,15 @@ def rewrite_exec(cmd, app_id, electron, shared=True, gate=False):
     args = shlex.split(cmd)
     while args and args[0] in (GATE, WRAPPER, GUARD, "--"):   # re-run on an already wrapped entry
         args = args[1:]
-    if shared and len(args) > 1 and os.path.basename(args[0]) == "flatpak" and args[1] == "run":
+    if (shared or electron) and len(args) > 1 and os.path.basename(args[0]) == "flatpak" and args[1] == "run":
         idx = next((i for i, a in enumerate(args) if a == app_id), None)
         if idx is None:
             sys.exit(_("wallet-launcher: can't find {app_id} in: {command}").format(app_id=app_id, command=cmd))
-        extra = [t for t in TALK if t not in args]
+        extra = [t for t in TALK if t not in args] if shared else []
         args = args[:idx] + extra + [app_id] + (["--password-store=kwallet6"] if electron else []) + args[idx + 1:]
-    elif electron:
-        args = args[:1] + ["--password-store=kwallet6"] + args[1:]
+    elif electron:                            # (after env VAR=…: the program's own option)
+        i = next((i for i, a in enumerate(args) if os.path.basename(a) != "env" and "=" not in a), 0)
+        args = args[:i + 1] + ["--password-store=kwallet6"] + args[i + 1:]
     out = ([GATE] if gate else []) + ([WRAPPER] if shared else []) + args
     # Field codes (%U, @@u) must stay unquoted.
     return " ".join(a if re.fullmatch(r"%[a-zA-Z]|@@[a-z]?", a) else shlex.quote(a) for a in out)
@@ -115,8 +121,8 @@ def add(app_id, electron, shared=True, gate=None):
     for line in lines:
         if line.startswith("Exec="):
             line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate)
-        elif line.startswith("DBusActivatable=") and shared:
-            line = "DBusActivatable=false"   # otherwise the desktop starts it over its own bus
+        elif line.startswith("DBusActivatable=") and (shared or gate):
+            line = "DBusActivatable=false"   # otherwise the desktop starts it over D-Bus, not Exec=
         elif line.startswith(MARK + "="):
             continue
         out.append(line)
@@ -185,8 +191,12 @@ def main():
         if a.remove:
             remove(app)
         elif a.reapply:
+            current = APPS / f"{app}.desktop"
+            if not (current.exists() and f"{MARK}=true" in current.read_text()):
+                remove(app)          # no wrapper left to rebuild (its app was removed): the original goes back
+                continue
             shared, gate = flags_of(app)
-            add(app, "--password-store=kwallet6" in (APPS / f"{app}.desktop").read_text(), shared, gate)
+            add(app, "--password-store=kwallet6" in current.read_text(), shared, gate)
         else:
             add(app, a.electron, not a.no_shared, True if a.gate else False if a.no_gate else None)
     os.system("update-desktop-database -q ~/.local/share/applications 2>/dev/null")

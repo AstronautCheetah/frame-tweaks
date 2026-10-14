@@ -34,7 +34,10 @@ if [ -n "$REAL_GH" ]; then
     done
     if grep -q oauth_token "$HOME/.config/gh/hosts.yml" 2>/dev/null; then
         say "$(t "Moving gh's plain-text token into the wallet")"
-        "$REAL_GH" auth token | "$BIN/gh" auth login --with-token --hostname github.com
+        # (Not fatal: if the wallet stays locked or GitHub can't be reached, gh keeps the token
+        # where it was, and the rest of the install still runs.)
+        "$REAL_GH" auth token | "$BIN/gh" auth login --with-token --hostname github.com ||
+            warn "$(t 'gh token stored in plain text (re-run %s)' "./install.sh install wallet")"
     fi
 fi
 
