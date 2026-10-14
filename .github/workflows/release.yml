@@ -60,11 +60,18 @@ jobs:
           V: ${{ steps.v.outputs.version }}
           PRE: ${{ inputs.prerelease }}
           GH_TOKEN: ${{ github.token }}
+          SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
         run: |
           git config user.name AstronautCheetah
           git config user.email 189046832+AstronautCheetah@users.noreply.github.com
           git commit -q -am "chore(release): $V"
-          git tag -a "v$V" -m "v$V"
+          # Signed with the release key (an SSH key; its public half is in dev/release-signers):
+          # ./install.sh update checks it before moving to a new release.
+          [ -n "$SIGNING_KEY" ] || { echo "the RELEASE_SIGNING_KEY secret is missing (CONTRIBUTING.md, Releasing)"; exit 1; }
+          key=$(mktemp); trap 'rm -f "$key"' EXIT; chmod 600 "$key"
+          printf '%s\n' "$SIGNING_KEY" > "$key"
+          git -c gpg.format=ssh -c user.signingkey="$key" tag -s "v$V" -m "v$V"
+          git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile=dev/release-signers verify-tag "v$V"
           git push origin HEAD:main "v$V"
           flags=(--draft --title "v$V" --notes-file notes.md)
           [ "$PRE" = true ] && flags+=(--prerelease)

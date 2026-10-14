@@ -120,3 +120,19 @@ Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Rele
 (Actions → Release → Run workflow, choose patch/minor/major). It dates the section, bumps
 VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. Pre-releases
 (`vX.Y.Z-rc.N`) only reach the beta channel.
+
+**Release tags are signed** with an SSH key: the workflow signs with the private key in the
+repository secret `RELEASE_SIGNING_KEY`, and `./install.sh update` refuses a release whose tag
+isn't signed by a key listed in `dev/release-signers` *as already installed* (`verify_release`
+in `lib/common.sh`). Setting it up, once:
+
+```sh
+ssh-keygen -t ed25519 -N "" -C "Frame Tweaks releases" -f ~/frame-tweaks-release-key
+gh secret set RELEASE_SIGNING_KEY < ~/frame-tweaks-release-key
+```
+
+Put the public key (`~/frame-tweaks-release-key.pub`) in `dev/release-signers` as
+`releases namespaces="git" <type> <key>`, commit it, and keep the private key somewhere safe
+(a password manager), not on the Frame. **Changing the key:** add the new public key to
+`dev/release-signers` and release with the old one first, so installed copies learn the new key
+before a release signed with it arrives; then switch the secret.

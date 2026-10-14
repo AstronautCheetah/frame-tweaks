@@ -146,6 +146,10 @@ def release_key(tag):
     return (int(m[1]), int(m[2]), int(m[3]), m[4] is None, m[4] or "")
 
 
+def current_release():
+    return (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
+
+
 def self_update_check():
     """Newest vX.Y.Z tag of this repo on GitHub, if newer than VERSION (needs git access)."""
     try:
@@ -156,7 +160,7 @@ def self_update_check():
         return None
     tags = [line.rsplit("/", 1)[-1] for line in out.splitlines() if "refs/tags/v" in line]
     newest = newest_release(tags, release_channel())
-    current = (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
+    current = current_release()
     return newest if newest and release_key(newest) > release_key(current) else None
 
 
@@ -594,14 +598,18 @@ class Window(QWidget):
         scroll.setWidget(self.list)
 
         bottom = QHBoxLayout()
-        hint = QLabel("Tick to install, untick to remove. Click a row for details, a category to fold it.\n"
-                      "Hidden tweaks and categories are only hidden, never removed.")
-        hint.setObjectName("desc")
-        bottom.addWidget(hint)
-        bottom.addStretch(1)
-        self.notice = QLabel()
-        self.notice.setObjectName("notice")
-        bottom.addWidget(self.notice)
+        # One line on the left: how the list works, or for a few seconds a message (say()).
+        self.hint_text = ("Tick to install, untick to remove, then Apply changes. "
+                          "Click a row for details, a category to fold it.")
+        self.notice = QLabel(self.hint_text)
+        self.notice.setObjectName("desc")
+        self.notice.setWordWrap(True)
+        bottom.addWidget(self.notice, 1)
+        self.update_button = QPushButton()
+        self.update_button.clicked.connect(self.update_clicked)
+        bottom.addWidget(self.update_button)
+        self.release_at_start = current_release()
+        self.set_update_state("check")
         about = QPushButton("📖 README")
         about.setToolTip("What Frame Tweaks is, how to install, update and remove it, common issues")
         about.clicked.connect(self.show_readme)
@@ -686,6 +694,11 @@ class Window(QWidget):
                 self.self_update_label.setText(
                     f"↑ {html.escape(newest)} available · "
                     "<a style='color:#7fb2e5' href='update'>Update</a>")
+                if self.update_state in ("check", "checking"):
+                    self.set_update_state("update", newest)
+            elif self.update_state == "checking":
+                self.set_update_state("check")
+                self.say(f"Frame Tweaks is up to date ({current_release()}).")
         for cid, fut in list(self.update_futures.items()):
             if fut.done():
                 del self.update_futures[cid]
@@ -853,8 +866,47 @@ class Window(QWidget):
         after = "" if cid else "; echo; echo 'Close and reopen Frame Tweaks to use the new version.'"
         full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp 'Press Enter to close…'"
         self.proc = QProcess(self)
-        self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh()))
+        self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh(),
+                                               cid is None and self.after_self_update()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
+
+    # ---- updating Frame Tweaks itself: Check for updates → Update to X → Restart --------
+    def set_update_state(self, state, newest=None):
+        self.update_state, b = state, self.update_button
+        text, tip = {"check": ("⟳ Check for updates", "Look for a newer Frame Tweaks release"),
+                     "checking": ("Checking…", ""),
+                     "update": (f"⬇ Update to {newest}", "Install it: your tweaks are updated with it"),
+                     "restart": ("↻ Restart", "Reopen Frame Tweaks to use the new version")}[state]
+        b.setText(text)
+        b.setToolTip(tip)
+        b.setEnabled(state != "checking")
+        b.setObjectName("apply" if state in ("update", "restart") else "")
+        b.style().unpolish(b)
+        b.style().polish(b)
+
+    def update_clicked(self):
+        if self.update_state == "check":
+            self.set_update_state("checking")
+            self.self_update = self.pool.submit(self_update_check)
+        elif self.update_state == "update":
+            self.run_update(None)
+        elif self.update_state == "restart":
+            self.restart_self()
+
+    def after_self_update(self):
+        """The updater's terminal closed: Restart if a new release is in place."""
+        if current_release() != self.release_at_start:
+            self.self_update_label.setText("")
+            self.set_update_state("restart")
+
+    def restart_self(self):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would restart the window")
+            return
+        # A new window from the same session (environment kept), once this one has let go of the
+        # single-instance lock.
+        QProcess.startDetached("bash", ["-c", 'sleep 1; exec "$0" gui', str(REPO / "install.sh")])
+        QApplication.quit()
 
     def run_reinstall(self, cid):
         """Remove one tweak and install it again in one go (stops its running programs first)."""
@@ -968,8 +1020,9 @@ class Window(QWidget):
 
     # ---- in-window messages (no dialogs: in VR they'd open in the dashboard) ----------
     def say(self, text):
-        self.notice.setText(text)
-        QTimer.singleShot(5000, lambda: self.notice.text() == text and self.notice.clear())
+        self.notice.setText(f"<span style='color:#e0b33a'>{html.escape(text)}</span>")
+        shown = self.notice.text()
+        QTimer.singleShot(6000, lambda: self.notice.text() == shown and self.notice.setText(self.hint_text))
 
     def make_confirm_page(self):
         page = QWidget()

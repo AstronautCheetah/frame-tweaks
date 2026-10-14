@@ -401,3 +401,22 @@ dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
     esac
 }
 
+# verify_release DIR TAG: the checkout DIR's release TAG is signed by a key in dev/release-signers *as installed now*
+# (so a tampered release can't bring its own key). Checkouts from before signing have no such
+# file and skip this. FRAME_TWEAKS_ALLOW_UNSIGNED=1 overrides, for an emergency.
+verify_release() {
+    [[ -f $1/dev/release-signers ]] || return 0
+    local signers; signers=$(mktemp)
+    cp "$1/dev/release-signers" "$signers"
+    if git -C "$1" -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$signers" verify-tag "$2" 2>/dev/null; then
+        rm -f "$signers"; echo "Release $2: signature verified."; return 0
+    fi
+    rm -f "$signers"
+    if [[ ${FRAME_TWEAKS_ALLOW_UNSIGNED:-} == 1 ]]; then
+        echo "warning: release $2 isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)" >&2
+        return 0
+    fi
+    echo "Release $2 isn't signed by Frame Tweaks' release key, so it wasn't installed." >&2
+    echo "This can mean it was tampered with. Check https://github.com/AstronautCheetah/frame-tweaks/releases" >&2
+    return 1
+}

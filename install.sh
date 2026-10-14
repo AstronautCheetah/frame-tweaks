@@ -235,6 +235,7 @@ cmd_update() {
             local tag; tag=${want:-$(git tag -l 'v*' | newest_tag)}
             [ -n "$tag" ] || { echo "no release found" >&2; exit 1; }
             git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "no release $tag" >&2; exit 1; }
+            verify_release "$PWD" "$tag" || exit 1
             bold "Updating to $tag ($(release_channel) channel)"; git -c advice.detachedHead=false checkout --quiet "$tag"
         fi
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
