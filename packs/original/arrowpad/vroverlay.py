@@ -202,7 +202,7 @@ class OverlayHost:
         layer, pin, language), so SteamVR doesn't reload the image for nothing."""
         p = self.pad
         sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale,
-               p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"))
+               p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"), p.collapsed)
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             # Colour the buttons for this state *before* the redraw: the pad's own mic refresh
@@ -241,6 +241,7 @@ class OverlayHost:
         self.image_hash = digest
         self.last_render = now
         w, h = img.width(), img.height()       # widget pixels: laser coordinates use these
+        resized = self.fit_size(w, h)
         if img.width() > MAX_TEX[0] or img.height() > MAX_TEX[1]:
             img = img.scaled(MAX_TEX[0], MAX_TEX[1], Qt.AspectRatioMode.KeepAspectRatio,
                              Qt.TransformationMode.SmoothTransformation)
@@ -254,7 +255,7 @@ class OverlayHost:
         # Full Keyboard uses, needs an OpenGL context, which here only exists through Gamescope's
         # WSI layer.)
         img.save(path, "PNG")
-        covered = self.cover is not None and self.cover_path is not None
+        covered = self.cover is not None and self.cover_path is not None and not resized   # (old size: no cover)
         if covered:
             self.ov.showOverlay(self.cover)          # old image on top while the pad reloads
             self.swapping = True
@@ -269,6 +270,31 @@ class OverlayHost:
                 except OSError:
                     pass
         self._last_path = path
+
+    def fit_size(self, w, h):
+        """The panel's width follows the picture's (Collapse shows just the chevron): metres per
+        pixel as the expanded pad has them. On Collapse / Expand the chevron's point stays where
+        it was, under the laser (as Screen snip's panel does). True if the size changed."""
+        k = self.width_m / (self.pad.expanded_size.width() or w)
+        last = getattr(self, "last_px", None)
+        if abs(w * k - getattr(self, "shown_width", self.width_m)) > 1e-4:
+            self.shown_width = w * k
+            self.ov.setOverlayWidthInMeters(self.input_handle, self.shown_width)
+            if self.cover is not None:
+                self.ov.setOverlayWidthInMeters(self.cover, self.shown_width)
+        old_pv, pv = getattr(self, "last_pivot", None), self.pad.pivot()
+        resized = last is not None and last != (w, h)
+        if resized and self.pad.toggled and self.pose and old_pv is not None:
+            old_w, old_h = last
+            a = (old_pv.x() - old_w / 2 - (pv.x() - w / 2)) * k     # along the panel's x
+            b = (old_pv.y() - old_h / 2 - (pv.y() - h / 2)) * k     # pixels down = -y
+            self.pose = [[c[0], c[1], c[2], c[3] + c[0] * a - c[1] * b] for c in self.pose]
+            self.apply_pose()
+            self.remember_offset()
+            self.save()
+        self.pad.toggled = False
+        self.last_px, self.last_pivot = (w, h), pv
+        return resized
 
     # ---- placement --------------------------------------------------------
     def device_matrix(self, index):
@@ -368,6 +394,7 @@ class OverlayHost:
 
     def set_width(self, value):
         self.width_m = round(min(WIDTH_MAX, max(WIDTH_MIN, value)), 2)
+        self.shown_width = self.width_m                    # (only while expanded: +/- hide when collapsed)
         self.ov.setOverlayWidthInMeters(self.input_handle, self.width_m)
         if self.cover is not None:
             self.ov.setOverlayWidthInMeters(self.cover, self.width_m)

@@ -46,8 +46,14 @@ next to the idea it inspired.
   (needed for a Flatpak source later). *(ProtonUp-Qt)*
 - [x] **Controller navigation** in the installer window beyond A/B/Y: D-pad/stick moves focus.
   *(ProtonUp-Qt)*
-- [ ] **Translations** of the installer window (Qt `tr()` + a translation platform). *(Decky,
-  ProtonUp-Qt)*
+- [x] **Translations** of the installer window, the installer's messages and the tweaks' programs
+  (gettext `.po` files, locale/README.md; Latin American Spanish first). Still to come: a
+  translation platform (Weblate) once there are outside translators. *(Decky, ProtonUp-Qt)*
+- [ ] **Arrow Pad: a key's tooltip on a long hover.** When the laser rests on a key or toolbar
+  button for 5 seconds or more, show what it does (the tooltip it already has: "Right click: your
+  next click becomes a right click", "Pin: stop accidental moves"). Desktop mode shows Qt's
+  tooltips on hover already; the VR panel doesn't, since it's a picture of the pad (vroverlay.py),
+  so it needs drawing in the panel or as a small overlay beside it, and hiding when the laser moves.
 
 ## New tweak ideas
 - [ ] **Screen reader** (set aside for now): Orca autostarting in the desktop session. *(Jovian-NixOS)*

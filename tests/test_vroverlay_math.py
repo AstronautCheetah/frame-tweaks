@@ -135,7 +135,7 @@ class MicColour(unittest.TestCase):
         o = v.OverlayHost.__new__(v.OverlayHost)
         calls = []
         pad = types.SimpleNamespace(
-            layer="nav", mod_state={}, pinned=False, lang="us", scale=1.0, haptic_level=1,
+            layer="nav", mod_state={}, pinned=False, lang="us", scale=1.0, haptic_level=1, collapsed=False,
             cfg={}, click_swap=types.SimpleNamespace(armed=None),
             settings_page=types.SimpleNamespace(isVisible=lambda: False),
             restyle=lambda: calls.append(("restyle", o.dirty)))
@@ -153,3 +153,28 @@ class MicColour(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Collapse(unittest.TestCase):
+    def test_the_chevron_stays_under_the_laser(self):
+        """Collapse: the panel shrinks to the chevron (same metres per pixel) and moves so the
+        chevron is where it was; Expand puts it back."""
+        from PyQt6.QtCore import QPoint, QSize
+        v = load()
+        o = v.OverlayHost.__new__(v.OverlayHost)
+        widths = []
+        o.ov = types.SimpleNamespace(setOverlayWidthInMeters=lambda h, m: widths.append(round(m, 4)))
+        o.input_handle, o.cover, o.width_m = 1, None, 0.5
+        o.pose = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, -1.0]]
+        o.apply_pose = o.remember_offset = o.save = lambda: None
+        pad = types.SimpleNamespace(expanded_size=QSize(500, 400), toggled=False, pivot=lambda: QPoint(420, 20))
+        o.pad = pad
+        self.assertFalse(o.fit_size(500, 400))                   # (first picture: nothing to move)
+        pad.toggled, pad.pivot = True, (lambda: QPoint(30, 30))
+        self.assertTrue(o.fit_size(60, 60))
+        self.assertEqual(widths, [0.06])
+        self.assertEqual([round(o.pose[i][3], 4) for i in range(3)], [0.17, 0.18, -1.0])
+        pad.toggled, pad.pivot = True, (lambda: QPoint(420, 20))
+        o.fit_size(500, 400)
+        self.assertEqual(widths, [0.06, 0.5])
+        self.assertEqual([round(o.pose[i][3], 4) for i in range(3)], [0.0, 0.0, -1.0])
