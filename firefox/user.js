@@ -1,4 +1,4 @@
-// steam-frame-tweaks: Firefox anti-fingerprinting ("maximum" level)
+// frame-tweaks: Firefox anti-fingerprinting ("maximum" level)
 // Applied at every Firefox start; values here override the Settings UI and Sync.
 
 // Tor Browser-style fingerprinting resistance: common platform (Linux x86_64 instead

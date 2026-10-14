@@ -2,6 +2,7 @@
 import importlib.machinery
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,10 +12,16 @@ ROOT = Path(__file__).resolve().parent.parent
 _l = importlib.machinery.SourceFileLoader("sft", str(ROOT / "vr-dashboard" / "sft-dashboard"))
 sft = importlib.util.module_from_spec(importlib.util.spec_from_loader("sft", _l))
 _l.exec_module(sft)
-PATCHES = {"curvature": ROOT / "curvature" / "patch.js", "float-return": ROOT / "float-return" / "patch.js",
-           "float-grab": ROOT / "float-grab" / "patch.js",
-           "scroll-strips": ROOT / "scroll-strips" / "patch.js",
-           "phone-rotate": ROOT / "adb-scrcpy" / "patch.js", "phone-touch": ROOT / "adb-scrcpy" / "phone-touch.js"}
+def _patches():
+    """Every dashboard patch a tweak installs: install_dashboard_patch NAME FILE in its install.sh."""
+    found = {}
+    for inst in ROOT.glob("*/install.sh"):
+        for name, rel in re.findall(r'install_dashboard_patch\s+(\S+)\s+"\$REPO_DIR/([^"]+)"', inst.read_text()):
+            found[name] = ROOT / rel
+    return found
+
+
+PATCHES = _patches()
 
 
 class ArmRestore(unittest.TestCase):
@@ -43,6 +50,12 @@ class ArmRestore(unittest.TestCase):
 
 
 class DashboardCheck(unittest.TestCase):
+    def test_every_patch_is_found(self):
+        self.assertGreaterEqual(set(PATCHES), {"curvature", "float-return", "float-grab", "scroll-strips",
+                                               "phone-rotate", "phone-touch"})
+        for path in PATCHES.values():
+            self.assertTrue(path.is_file(), path)
+
     def test_each_patch_detects_missing_markers(self):
         for name, path in PATCHES.items():
             req = sft.requires(path)

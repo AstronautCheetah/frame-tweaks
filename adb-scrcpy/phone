@@ -1,7 +1,8 @@
 #!/bin/bash
 # Find an Android phone's current wireless-ADB port via mDNS, connect, and mirror it with scrcpy.
 # The port changes every time Wireless debugging is toggled, so it's looked up fresh each run.
-# Pick a phone by its name in ~/.config/phone.conf:  PHONE_NAME="Pixel 9"
+# Pick a phone by its name in ~/.config/phone.conf:  PHONE_NAME="Pixel 9" (set on first use if
+# only one phone is advertising).
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 [ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
@@ -13,6 +14,21 @@ find_phone() {
     [ -n "$c" ] || return 1
     dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
 }
+# Without a PHONE_NAME, don't just take whichever phone advertises first: with one in sight,
+# remember it (the next runs connect only to that one); with several, ask which.
+if [ -z "${PHONE_NAME:-}" ]; then
+    names=$(avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;' |
+            sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u)
+    if [ "$(printf '%s\n' "$names" | grep -c .)" -gt 1 ]; then
+        notify-send -a Phone "Which phone?" "Several are advertising: $(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g'). Set PHONE_NAME=\"…\" in ~/.config/phone.conf."
+        exit 1
+    fi
+    if [ -n "$names" ] && printf '%s' "$names" | grep -qv '["$`\\]'; then
+        PHONE_NAME=$names
+        printf 'PHONE_NAME="%s"\n' "$PHONE_NAME" >> "$HOME/.config/phone.conf"
+        notify-send -a Phone "Android Mirror" "Connecting to $PHONE_NAME from now on (PHONE_NAME in ~/.config/phone.conf)."
+    fi
+fi
 if ! find_phone; then
     # Name the phones that *are* advertising, so a wrong phone or a wrong PHONE_NAME is obvious.
     seen=$(echo "$all" | sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u | paste -sd, - | sed 's/,/, /g')

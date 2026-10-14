@@ -1,4 +1,4 @@
-// steam-frame-tweaks phone-touch: laser clicks on the Android Mirror window land where you aim.
+// frame-tweaks phone-touch: laser clicks on the Android Mirror window land where you aim.
 // The Steam session maps the laser wrongly on a window narrower than its screen (every click on the
 // upright phone landed at the window's left edge). So a see-through layer of ours covers the mirror
 // window and takes the laser instead: where you press, drag and let go goes to phone-touch (through
@@ -7,12 +7,12 @@
 // lower-left corner opens its settings beside it (picture, smoothness, joystick speed; saved by
 // phone-touch in ~/.config/phone.conf, which it hands back as window.__sftPhoneTouchConf).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
-// requires: panel anchors | GetPanelAnchorID(e){
+// requires: panel anchors | GetPanelAnchorID(
 // requires: frame panel height | latestMeasuredPanelLocalHeight
 // requires: window.Dashboard | window.Dashboard=
 // requires: overlay picture size | GetOverlayMouseScale(
-// requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
-// requires: EDockLocation.World = 4 | e[e.World=4]="World"
+// requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
+// requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
   const NAME = 'phone-touch', VERSION = 9, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)

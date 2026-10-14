@@ -138,7 +138,7 @@ Everything the installer window does has a command too (the window uses the same
 ```
 
 Updates follow stable releases. To also get pre-releases, put `beta` in
-`~/.config/steam-frame-tweaks/channel`. Every install, update and removal is logged in
+`~/.config/frame-tweaks/channel`. Every install, update and removal is logged in
 `~/.local/state/frame-tweaks/logs/`, and only one can run at a time.
 
 ```text

@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Shared helpers for steam-frame-tweaks installers. Source, don't execute.
+# Shared helpers for frame-tweaks installers. Source, don't execute.
 # Everything installs into the user's home (~/.local), so SteamOS's read-only
 # root and system updates are never touched.
 
@@ -8,10 +8,10 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BIN="$HOME/.local/bin"
 APPS="$HOME/.local/share/applications"
-# HTTPS mirrors first (the main mirror's certificate doesn't match its name); every package is
-# signature-checked anyway.
+# HTTPS mirrors only (the main mirror's certificate doesn't match its name, so it isn't used);
+# every package is signature-checked too.
 ALARM_MIRROR="${ALARM_MIRROR:-https://fl.us.mirror.archlinuxarm.org/aarch64}"
-ALARM_FALLBACK="https://de3.mirror.archlinuxarm.org/aarch64 http://mirror.archlinuxarm.org/aarch64"
+ALARM_FALLBACK="https://de3.mirror.archlinuxarm.org/aarch64"
 mkdir -p "$BIN" "$APPS"
 
 say()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -59,14 +59,41 @@ MSG
     fi
     ask "Install Homebrew now?" || die "Homebrew is required for this tweak. Install it from https://brew.sh and re-run."
     sudo -v || die "sudo failed."
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ||
-        die "Homebrew's installer failed (see above)."
+    # Homebrew's installer at a pinned commit, checked against homebrew/pin's hash before it runs.
+    local brew_installer; brew_installer=$(mktemp)
+    fetch_pinned homebrew "$brew_installer"
+    NONINTERACTIVE=1 /bin/bash "$brew_installer" || { rm -f "$brew_installer"; die "Homebrew's installer failed (see above)."; }
+    rm -f "$brew_installer"
     [ -x "$BREW" ] || die "Homebrew didn't end up in /home/linuxbrew."
     # shellcheck disable=SC2016
     grep -qs 'linuxbrew/bin/brew shellenv' "$HOME/.bashrc" ||
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.bashrc"
     eval "$("$BREW" shellenv)"
     say "Homebrew installed."
+}
+
+# Before 0.5 a few files lived under the project's old name: move them (once; install.sh runs it).
+migrate_legacy_dirs() {
+    local old="$HOME/.config/steam-frame-tweaks" f
+    if [ -d "$old" ]; then
+        mkdir -p "$HOME/.config/frame-tweaks/installer"
+        [ -f "$old/channel" ] && mv -n "$old/channel" "$HOME/.config/frame-tweaks/channel"
+        for f in "$old"/*; do [ -e "$f" ] && mv -n "$f" "$HOME/.config/frame-tweaks/installer/"; done
+        rmdir "$old" 2>/dev/null || true
+    fi
+    old="$HOME/.local/state/steam-frame-tweaks"
+    if [ -d "$old" ]; then
+        mkdir -p "$HOME/.local/state/frame-tweaks"
+        # (sft-dashboard-restore stays while a SteamVR stop hook still names it there)
+        if ! grep -qs "$old/sft-dashboard-restore" "$HOME/.config/systemd/user/steamvr.service.d/"*.conf; then
+            rm -f "$old/sft-dashboard-restore"
+        fi
+        for f in "$old"/*; do
+            [ -e "$f" ] && [ "${f##*/}" != sft-dashboard-restore ] && mv -n "$f" "$HOME/.local/state/frame-tweaks/"
+        done
+        rmdir "$old" 2>/dev/null || true
+    fi
+    return 0
 }
 
 # Make sure ~/.local/bin is on PATH for terminals and the desktop session.
@@ -96,6 +123,17 @@ alarm_fetch() {
         { rm -rf "$t"; die "download of $file failed"; }
     gpgv --keyring "$REPO_DIR/lib/keys/archlinuxarm.gpg" "$t/$file.sig" "$t/$file" 2>/dev/null ||
         { rm -rf "$t"; die "$file: bad or missing Arch Linux ARM signature; not installing it"; }
+    # The signature proves ALARM built it, not that it's the package asked for or not an older
+    # one: check the signed package's own name, and refuse a version older than the last one
+    # installed (a mirror replaying an old, vulnerable build). ALARM_ALLOW_DOWNGRADE=1 overrides.
+    local info got ver seen="$HOME/.local/state/frame-tweaks/alarm/$name"
+    info=$(bsdtar -xOf "$t/$file" .PKGINFO 2>/dev/null) || true
+    got=$(sed -n 's/^pkgname = //p' <<<"$info"); ver=$(sed -n 's/^pkgver = //p' <<<"$info")
+    [ "$got" = "$name" ] || { rm -rf "$t"; die "$file: contains package '$got', not $name; not installing it"; }
+    if [ -f "$seen" ] && [ "$(vercmp "$ver" "$(cat "$seen")")" -lt 0 ] && [ "${ALARM_ALLOW_DOWNGRADE:-}" != 1 ]; then
+        rm -rf "$t"; die "$name $ver is older than the $(cat "$seen") installed before; not installing it"
+    fi
+    mkdir -p "$(dirname "$seen")" && printf '%s\n' "$ver" > "$seen"
     mkdir -p "$dest"
     bsdtar -xf "$t/$file" -C "$dest"
     rm -rf "$t"
@@ -111,11 +149,11 @@ fetch_pinned() {
     echo "$sha  $2" | sha256sum -c --quiet - || die "$(basename "$url"): checksum differs from the pinned one; not installing it"
 }
 # newest_tag: the newest release tag from the tag names on stdin. Stable (vX.Y.Z) only, unless
-# the channel is beta (FRAME_TWEAKS_CHANNEL=beta, or "beta" in ~/.config/steam-frame-tweaks/channel),
+# the channel is beta (FRAME_TWEAKS_CHANNEL=beta, or "beta" in ~/.config/frame-tweaks/channel),
 # which adds pre-releases (vX.Y.Z-rc1) ranked below their final version.
 release_channel() {
     local c=${FRAME_TWEAKS_CHANNEL:-}
-    [ -n "$c" ] || c=$(cat "$HOME/.config/steam-frame-tweaks/channel" 2>/dev/null || true)
+    [ -n "$c" ] || c=$(cat "$HOME/.config/frame-tweaks/channel" 2>/dev/null || true)
     [ "$c" = beta ] && echo beta || echo stable
 }
 newest_tag() {

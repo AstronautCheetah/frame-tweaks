@@ -13,9 +13,9 @@ u and m.ws_eval(u, "for (const p of Object.values(window.__sftPatches ?? {})) p?
 PY
 # The port setting goes back as it was when SteamVR next stops (or now, if it isn't running).
 sysctl_user is-active --quiet steamvr.service || "$D/sft-dashboard" restore 2>/dev/null || true
-if [ -f "$HOME/.local/state/steam-frame-tweaks/vr-debugger.prev" ] && sysctl_user is-active --quiet steamvr.service; then
+if [ -f "$HOME/.local/state/frame-tweaks/vr-debugger.prev" ] && sysctl_user is-active --quiet steamvr.service; then
     # Keep only the restore step until SteamVR stops; it removes itself afterwards.
-    R="$HOME/.local/state/steam-frame-tweaks/sft-dashboard-restore"
+    R="$HOME/.local/state/frame-tweaks/sft-dashboard-restore"
     install -m755 "$D/sft-dashboard" "$R"
     printf '[Service]\nExecStopPost=-%s restore\nExecStopPost=-/bin/rm -f %s %s\n' \
         "$R" "$U/steamvr.service.d/sft-dashboard.conf" "$R" > "$U/steamvr.service.d/sft-dashboard.conf"

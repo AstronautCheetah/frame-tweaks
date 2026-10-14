@@ -10,6 +10,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -17,16 +18,28 @@ ROOT = Path(__file__).resolve().parent.parent
 @unittest.skipUnless(shutil.which("Xvfb"), "needs Xvfb")
 class ClickSwapTest(unittest.TestCase):
     def test_toggles(self):
-        display = ":%d" % (90 + os.getpid() % 50)
-        xvfb = subprocess.Popen(["Xvfb", display, "-screen", "0", "640x480x24", "-nolisten", "tcp"],
-                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.addCleanup(xvfb.terminate)
-        time.sleep(1.5)
-        os.environ["ARROWPAD_CLICK_DISPLAY"] = display
-        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-        sys.argv = ["arrowpad.py"]           # no target: needs no running desktop or VR session
+        # Xvfb picks a free display and says which (-displayfd) once it's ready: no fixed number
+        # that could collide, no guessing how long it takes to start.
+        r, w = os.pipe()
+        xvfb = subprocess.Popen(["Xvfb", "-displayfd", str(w), "-screen", "0", "640x480x24", "-nolisten", "tcp"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, pass_fds=(w,))
+        os.close(w)
+        self.addCleanup(lambda: (xvfb.terminate(), xvfb.wait(10)))
+        with os.fdopen(r) as f:
+            number = f.readline().strip()
+        if not number.isdigit():
+            self.skipTest("Xvfb didn't start")
+        display = ":" + number
+        env = mock.patch.dict(os.environ, {"ARROWPAD_CLICK_DISPLAY": display,
+                                           "QT_QPA_PLATFORM": os.environ.get("QT_QPA_PLATFORM", "offscreen")})
+        env.start()
+        self.addCleanup(env.stop)
         os.environ.pop("DISPLAY", None)
+        argv = mock.patch.object(sys, "argv", ["arrowpad.py"])   # no target: needs no running session
+        argv.start()
+        self.addCleanup(argv.stop)
         sys.path.insert(0, str(ROOT / "arrowpad"))
+        self.addCleanup(lambda: sys.path.remove(str(ROOT / "arrowpad")))
         spec = importlib.util.spec_from_file_location("ap", ROOT / "arrowpad" / "arrowpad.py")
         ap = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(ap)

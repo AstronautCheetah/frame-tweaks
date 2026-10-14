@@ -1,5 +1,5 @@
 #!/bin/bash
-# steam-frame-tweaks: install, check, update and remove desktop-mode tweaks for the Steam Frame.
+# frame-tweaks: install, check, update and remove desktop-mode tweaks for the Steam Frame.
 #
 #   ./install.sh                     graphical checklist (in desktop mode), else this help
 #   ./install.sh install ID... | all install components (dependencies are added automatically)
@@ -32,6 +32,7 @@ source lib/common.sh 2>/dev/null
 set +e     # common.sh turns on -e for tweak scripts; this script checks results itself
 STATE="$HOME/.local/state/frame-tweaks"
 LOGS="$STATE/logs"
+migrate_legacy_dirs
 
 # One install/uninstall/update at a time (installer window and terminal alike). The lock is on
 # fd 8; tweak scripts run with it closed, so a background process they start can't keep it.
@@ -105,7 +106,7 @@ check_ids() {
 }
 
 cmd_list() {
-    bold "steam-frame-tweaks $VERSION"
+    bold "frame-tweaks $VERSION"
     local id
     for id in "${IDS[@]}"; do printf '  %-15s %s\n' "$id" "${DESC[$id]}"; done
 }
@@ -320,8 +321,11 @@ cmd_hold() {
 # ---- diagnostics ----------------------------------------------------------------------------
 cmd_debug_info() {
     local out; out="$HOME/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
+    # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed.
+    local phone; phone=$(sed -n 's/^PHONE_NAME=["'"'"']\{0,1\}\([^"'"'"']*\).*/\1/p' "$HOME/.config/phone.conf" 2>/dev/null | tail -1 |
+                         sed 's/[][\.*^$/&|]/\\&/g')
     {
-        echo "# Frame Tweaks debug info (user names, home path, host name, IP and e-mail addresses removed)"
+        echo "# Frame Tweaks debug info (user names, home path, host and phone names, IP, MAC and e-mail addresses removed)"
         echo "frame-tweaks: $VERSION ($(git describe --tags --always 2>/dev/null || echo no git)); channel: $(release_channel)"
         grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release | tr '\n' ' '; echo
         echo "steamvr: $(tr -d '\r' < /opt/steamvr/bin/version.txt 2>/dev/null || echo unknown); kernel: $(uname -r) $(uname -m)"
@@ -335,6 +339,8 @@ cmd_debug_info() {
         done
     } | sed -E -e "s|$HOME|~|g" -e "s/\b$USER\b/<user>/g" -E -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \
              -e 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/<ip>/g' -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' \
+             -e 's/\b([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}\b/<mac>/g' -e 's/\b([[:xdigit:]]{1,4}:){7}[[:xdigit:]]{1,4}\b|[[:xdigit:]]{0,4}(:[[:xdigit:]]{1,4})*::([[:xdigit:]]{1,4}:)*[[:xdigit:]]{0,4}/<ipv6>/g' \
+             ${phone:+-e "s/$phone/<phone>/g"} \
         > "$out"
     echo "Wrote $out"
     echo "Read it before sharing; attach it to a bug report: https://github.com/AstronautCheetah/frame-tweaks/issues"

@@ -371,7 +371,9 @@ def main():
                               "locks_at": s.get("locks"), "idle_close_minutes": idle_close_minutes()}))
         elif arg == "--lock":
             lock(conn)
-            print("locked" if is_locked(conn) else "still unlocked?")
+            if not is_locked(conn):
+                sys.exit("wallet-unlock: the wallet is still unlocked (locking failed)")
+            print("locked")
         elif arg == "--watch":
             pass
         elif arg == "--schedule-lock":

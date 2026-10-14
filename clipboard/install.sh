@@ -30,7 +30,7 @@ cat > "$HOME/.config/autostart/clipboard-sync.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
 Name=clipboard-sync
-Comment=One clipboard for desktop mode and VR windows (steam-frame-tweaks)
+Comment=One clipboard for desktop mode and VR windows (Frame Tweaks)
 Exec=$BIN/clipboard-sync-start
 X-KDE-autostart-phase=2
 NoDisplay=true

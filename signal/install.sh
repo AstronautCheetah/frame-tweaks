@@ -24,7 +24,10 @@ if [ -f "$CFG" ] && grep -q '"key"' "$CFG"; then
     flatpak kill "$APP" 2>/dev/null || true
     for run in 1 2; do
         say "Migrating existing key: Signal launch $run/2"
-        (cd ~ && eval "setsid -f $LAUNCH" >/dev/null 2>&1 </dev/null)
+        # The menu entry's command, split into words without eval (flatpak's exported Exec has no
+        # quoting); anything quoted falls back to plain `flatpak run`.
+        if [[ $LAUNCH == *[\"\'\`\$]* ]]; then cmd=(flatpak run "$APP"); else read -ra cmd <<< "$LAUNCH"; fi
+        (cd ~ && setsid -f "${cmd[@]}" >/dev/null 2>&1 </dev/null)
         sleep 20; flatpak kill "$APP" 2>/dev/null || pkill -f "/app/Signal/signal-desktop" || true; sleep 2
     done
 fi

@@ -1,4 +1,4 @@
-// steam-frame-tweaks phone-rotate: an upright floating window (the Android Mirror) comes up at a
+// frame-tweaks phone-rotate: an upright floating window (the Android Mirror) comes up at a
 // sensible size, and turning it (the phone sideways and back) just turns it.
 // SteamVR starts every floating window as wide as a standard one whatever its shape, so an upright
 // phone came up over 2 m tall; and it keeps a window's width when its shape changes, so turning
@@ -8,11 +8,12 @@
 // it with its handle still works on top of that. Docked in the dashboard, an upright window gets
 // a standard window's height (it too was made as wide as a standard one).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
-// requires: the frame's panel height override | resize_main_panel_height:g.size.mainPanelHeightOverride
+// requires: the frame's panel height override | resize_main_panel_height:
+// requires: the height override's source | mainPanelHeightOverride
 // requires: override from component props | null!=this.componentProps.forcedUniformDashboardHeight
 // requires: component props from the frame's props | get componentProps(){
 // requires: overlay picture size | GetOverlayMouseScale(
-// requires: EDockLocation.World = 4 | e[e.World=4]="World"
+// requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
   const NAME = 'phone-rotate', VERSION = 7, DASH = 1, WORLD = 4;
   const LONG_M = 0.8;                  // long side of a turned window, metres (a standard one: 0.98 wide)
