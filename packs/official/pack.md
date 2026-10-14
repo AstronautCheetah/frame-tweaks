@@ -5,10 +5,8 @@ api: 1
 categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Developer]
 order:
   - dictation
-  - whisper-frame
   - arrowpad
   - snip
-  - screen-reader
   - full-keyboard
   - clipboard
   - adb-scrcpy

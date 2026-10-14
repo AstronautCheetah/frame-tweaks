@@ -66,10 +66,8 @@ Tweaks update catches up; nothing else is affected.
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
 | ⌨️ | [**Dictation**](packs/official/dictation/) | Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut or Arrow Pad's Tools → 🎤 to start/stop; the text is typed into the focused app, copied, and logged. | Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough to transcribe locally, so nothing leaves the headset. |
-| 🎙️ | [**whisper-frame**](packs/official/whisper-frame/) | groffta's dictation: hold the headset's Select button, or the mic under any floating window. Installed from upstream; shares dictation's model. | Dictate without menus or the desktop, straight into the window you're looking at in VR. |
 | ⌨️ | [**Arrow Pad**](packs/official/arrowpad/) | Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super, right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus. | Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop. |
 | ✂️ | [**Screen snip**](packs/official/snip/) | Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or read it aloud (Narrate). Arrow Pad's Tools layer has a button for it. | SteamOS has no screenshot tool, and none of the usual ones can select a region inside VR. |
-| 🔊 | [**Screen reader**](packs/official/screen-reader/) | KDE's screen reader (Orca, part of SteamOS) reads the desktop aloud; Meta+Alt+S toggles it. | Orca ships with SteamOS but is off, and its switch is buried in System Settings; this turns it on for desktop mode. |
 | ⌨️ | [**Full Keyboard**](packs/official/full-keyboard/) (VR) | TaiKeid's full-size VR keyboard for the dashboard and desktop (checksum-verified install). | A full-size keyboard in VR, with every key the desktop needs; this installs and updates it with the rest. |
 | 📋 | [**Shared clipboard**](packs/official/clipboard/) | Copy in a floating VR window, paste in the desktop, and back. | The Frame's VR session and its nested desktop each have their own clipboard. This runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as steam-frame-nix does. |
 | 🖱️ | [**Mouse cursor fix**](packs/official/cursor/) | Makes the pointer visible in desktop mode. | KWin draws the pointer on a hardware plane that the headset's view doesn't show, so in desktop mode the mouse moves invisibly. |
@@ -112,7 +110,7 @@ Installed automatically when a tweak needs them; listed so you can see and manag
 | 🧩 | [**VR dashboard patching**](packs/official/vr-dashboard/) (helper) 🧪 | Lets the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips) and Android Mirror adjust SteamVR's dashboard. Installed automatically. | SteamVR's dashboard is a web page with no settings for these behaviours; each VR environment tweak is a small patch this injects while SteamVR runs. |
 | 🍺 | [**Homebrew**](packs/official/homebrew/) | The package manager several tweaks install their programs with, into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates; Homebrew installs outside it. Other tweaks offer to install it when needed; this row shows it and installs it up front. |
 | ⌨️ | [**ydotool**](packs/official/ydotool/) (helper) | The virtual keyboard Dictation and Arrow Pad type through. Installed automatically. | Under KDE Wayland ordinary programs can't send keystrokes to other apps; ydotool goes through the kernel's `/dev/uinput`. |
-| 🗣️ | [**Speech engine**](packs/official/speech/) (helper) | Gives the Frame a voice: Piper (offline, natural) for Screen snip's Narrate, and espeak-ng for Orca and other apps that speak through speech-dispatcher. Installed automatically. | SteamOS ships speech-dispatcher and its espeak-ng module, but not espeak-ng itself, so nothing can speak (the Screen reader's Orca was silent). |
+| 🗣️ | [**Speech engine**](packs/official/speech/) (helper) | Gives the Frame a voice: Piper (offline, natural) for Screen snip's Narrate, and espeak-ng for Orca and other apps that speak through speech-dispatcher. Installed automatically. | SteamOS ships speech-dispatcher and its espeak-ng module, but not espeak-ng itself, so nothing can speak (KDE's screen reader, Orca, stays silent). |
 <!-- /generated:helper -->
 
 Each folder's README covers usage, settings, how it works and the gotchas we hit.
@@ -176,7 +174,7 @@ Updates follow stable releases. To also get pre-releases, put `beta` in
 
 ```text
 $ ./install.sh status
-  ✔ dictation       dictate ready (whisper-frame's engine, shared small model)
+  ✔ dictation       dictate ready (Homebrew whisper.cpp, small model)
   ✔ arrowpad        arrowpad installed
   ! curvature       waiting for a SteamVR restart (restart SteamVR or reboot once)
   ✔ wallet          wallet locked; 5 app launcher(s) routed/gated

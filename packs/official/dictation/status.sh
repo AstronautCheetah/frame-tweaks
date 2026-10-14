@@ -6,4 +6,4 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 [ -f "$HOME/.local/share/whisper/ggml-small-q8_0.bin" ] || grep -qs '^DICTATE_MODEL=' "$HOME/.config/frame-tweaks/dictate.conf" ||
     status_warn "Whisper model missing (re-run ./install.sh dictation)"
 engine=$([ -x "$HOME/.local/lib/whisper-frame/whisper-cli" ] && echo "whisper-frame's engine" || echo "Homebrew whisper.cpp")
-status_ok "dictate ready ($engine, shared small model)"
+status_ok "dictate ready ($engine, small model)"

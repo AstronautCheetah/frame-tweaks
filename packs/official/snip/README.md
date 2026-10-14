@@ -72,8 +72,8 @@ freeze the screen. Copy text uses **Tesseract** (Apache-2.0, from Homebrew). Nar
 **Piper** (MIT), a fast offline neural voice, with the **LJ Speech** voice (its dataset is public
 domain), installed by the [Speech engine](../speech/) helper and pinned by checksum.
 
-The same helper gives SteamOS's speech-dispatcher a voice (it has none of its own), which the
-[Screen reader](../screen-reader/)'s Orca uses.
+The same helper gives SteamOS's speech-dispatcher a voice (it has none of its own), which KDE's
+screen reader, Orca, uses.
 
 ---
 Check: `./install.sh status snip` · Remove: `./install.sh uninstall snip`
