@@ -1,14 +1,19 @@
 #!/bin/bash
 # Find an Android phone's current wireless-ADB port via mDNS, connect, and mirror it with scrcpy.
 # The port changes every time Wireless debugging is toggled, so it's looked up fresh each run.
-# The phone to use is remembered in ~/.config/phone.conf (PHONE_NAME="Pixel 9"): taken by itself
+# The phone to use is remembered in ~/.config/frame-tweaks/phone.conf (PHONE_NAME="Pixel 9"): taken by itself
 # when only one is advertising, chosen from a list when there are several (phone --pick: choose
 # again). When it isn't in sight you can wait for it or use another one.
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
-[ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
+CONF="$HOME/.config/frame-tweaks/phone.conf"
+# (before 0.6 it was ~/.config/phone.conf: moved here once)
+if [ ! -f "$CONF" ] && [ -f "$HOME/.config/phone.conf" ]; then
+    mkdir -p "${CONF%/*}" && mv "$HOME/.config/phone.conf" "$CONF"
+fi
+# shellcheck source=/dev/null
+[ -f "$CONF" ] && . "$CONF"
 
-CONF="$HOME/.config/phone.conf"
 # advertised: the phones on the Wi-Fi with Wireless debugging on, one mDNS line each.
 advertised() { avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;'; }
 names_in() { sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u; }
@@ -22,7 +27,7 @@ find_phone() {
 # remember NAME: the phone to use from now on (PHONE_NAME in phone.conf; other lines kept).
 remember() {
     PHONE_NAME=$1
-    touch "$CONF"
+    mkdir -p "${CONF%/*}" && touch "$CONF"
     sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
     printf 'PHONE_NAME=%q\n' "$PHONE_NAME" >> "$CONF"
 }
@@ -77,7 +82,7 @@ MAX=1920                                   # the window: fits the Steam session'
 # The stream: no larger than VR shows it (the upright window is 1080 tall). scrcpy already shows
 # only the newest picture, so a delay is pictures still on their way: the wireless connection
 # (TCP, which can't drop a late one) and the phone's encoder. Less data per second, less backlog.
-# Set any of these in ~/.config/phone.conf.
+# Set any of these in ~/.config/frame-tweaks/phone.conf.
 STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHONE_MAX_FPS:-60}
 
 # A wireless connection can die without scrcpy noticing (the phone changed network or address,
@@ -85,7 +90,7 @@ STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHON
 # after 3 misses, close the frozen mirror and reconnect at the phone's current address.
 alive() { timeout 4 adb -s "$dev" shell true >/dev/null 2>&1; }
 # The mirror's gear panel (in VR) changes the settings above and asks for a restart (SIGUSR1):
-# scrcpy starts again, reading ~/.config/phone.conf afresh.
+# scrcpy starts again, reading ~/.config/frame-tweaks/phone.conf afresh.
 PIDFILE="/run/user/$(id -u)/sft-phone.pid"
 echo $$ > "$PIDFILE"
 trap '[ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
@@ -94,7 +99,8 @@ trap 'restart=1; kill "$pid" 2>/dev/null' USR1
 while :; do
     if [ -n "$restart" ]; then
         restart=
-        [ -f "$HOME/.config/phone.conf" ] && . "$HOME/.config/phone.conf"
+        # shellcheck source=/dev/null
+        [ -f "$CONF" ] && . "$CONF"
         STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHONE_MAX_FPS:-60}
     fi
     adb connect "$dev" >/dev/null

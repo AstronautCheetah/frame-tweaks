@@ -6,7 +6,7 @@
 #   dictate            toggle
 #   dictate --status   print idle / recording / transcribing
 #
-# Settings in ~/.config/dictate.conf: DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
+# Settings in ~/.config/frame-tweaks/dictate.conf: DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
 # DICTATE_NOTYPE=1 (copy only), DICTATE_MAX_SECONDS (auto-stop, default 300).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 RUN=/run/user/$(id -u)
@@ -18,8 +18,13 @@ if [ ! -S "${XDG_RUNTIME_DIR:-$RUN}/${WAYLAND_DISPLAY:-wayland-0}" ]; then
         [ -S "$s" ] && { export WAYLAND_DISPLAY="$s"; break; }
     done
 fi
+CONF="$HOME/.config/frame-tweaks/dictate.conf"
+# (before 0.6 it was ~/.config/dictate.conf: moved here once)
+if [ ! -f "$CONF" ] && [ -f "$HOME/.config/dictate.conf" ]; then
+    mkdir -p "${CONF%/*}" && mv "$HOME/.config/dictate.conf" "$CONF"
+fi
 # shellcheck source=/dev/null
-[ -f "$HOME/.config/dictate.conf" ] && . "$HOME/.config/dictate.conf"
+[ -f "$CONF" ] && . "$CONF"
 # Same model file as whisper-frame (groffta/whisper-frame), so the two never keep two copies.
 MODEL="${DICTATE_MODEL:-$HOME/.local/share/whisper/ggml-small-q8_0.bin}"
 LANGUAGE="${DICTATE_LANG:-en}"     # the shared model is multilingual: say which language

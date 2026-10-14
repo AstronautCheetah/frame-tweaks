@@ -7,9 +7,9 @@ The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the d
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
+> - **Changes:** `~/.local/bin/dictate`, `~/.config/frame-tweaks/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
 > - **Unusual access:** Microphone while recording; types through ydotool
-> - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/dictate.conf` and your dictation history)
+> - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf` and your dictation history)
 <!-- /generated:glance -->
 
 ```sh
@@ -39,7 +39,7 @@ one can never overwrite one still being transcribed. `dictate --status` prints
 Recordings whose peak stays under −40 dB count as "no speech", and those stock phrases are
 dropped when they're the whole result.
 
-## Configure: `~/.config/dictate.conf`
+## Configure: `~/.config/frame-tweaks/dictate.conf`
 See [`dictate.conf.example`](dictate.conf.example):
 - `DICTATE_PROMPT`: words Whisper should spell your way (names, jargon).
 - `DICTATE_MODEL`: e.g. `ggml-base.en-q5_1.bin` for faster, less accurate output.

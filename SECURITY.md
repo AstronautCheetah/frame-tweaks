@@ -20,7 +20,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | Tweak | Files and services | Unusual access (why) |
 |---|---|---|
 <!-- generated:security (dev/gen-docs.py, from each tweak's meta) -->
-| dictation | `~/.local/bin/dictate`, `~/.config/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard` | Microphone while recording; types through ydotool |
+| dictation | `~/.local/bin/dictate`, `~/.config/frame-tweaks/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard` | Microphone while recording; types through ydotool |
 | whisper-frame | Upstream's own installer (user services `whisper-ptt`, `whisper-panel`), pinned release | Microphone; listens for the headset's Select button |
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv) | Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST |
 | snip | `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |

@@ -177,8 +177,8 @@ rm -rf ~/frame-tweaks ~/.config/frame-tweaks ~/.local/state/frame-tweaks   # set
 ```
 
 Homebrew stays (other programs may live in it); its own uninstaller is in
-[homebrew/](homebrew/). Settings a tweak kept in their usual places (e.g. `~/.config/phone.conf`,
-`~/.config/dictate.conf`) are listed by its uninstaller as it runs.
+[homebrew/](homebrew/). Settings a tweak kept in their usual places (e.g. `~/.config/frame-tweaks/phone.conf`,
+`~/.config/frame-tweaks/dictate.conf`) are listed by its uninstaller as it runs.
 
 ## Common issues
 

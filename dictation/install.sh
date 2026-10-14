@@ -28,7 +28,7 @@ if [ ! -f "$MODELS/$MODEL" ]; then
 fi
 # Models older versions downloaded; the shared one replaces them.
 for old in ggml-small.en-q5_1.bin ggml-base.en-q5_1.bin; do
-    if [ -f "$MODELS/$old" ] && ! grep -qs "$old" "$HOME/.config/dictate.conf"; then
+    if [ -f "$MODELS/$old" ] && ! grep -qs "$old" "$HOME/.config/frame-tweaks/dictate.conf"; then
         rm -f "$MODELS/$old" && say "Removed old model $old (replaced by the shared $MODEL)"
     fi
 done
@@ -36,6 +36,7 @@ done
 install -m755 "$REPO_DIR/dictation/dictate" "$BIN/dictate"
 install_icon frame-tweaks-dictate
 install_desktop "$REPO_DIR/dictation/dictate.desktop"
-[ -f "$HOME/.config/dictate.conf" ] || cp "$REPO_DIR/dictation/dictate.conf.example" "$HOME/.config/dictate.conf"
+mkdir -p "$HOME/.config/frame-tweaks"
+[ -f "$HOME/.config/frame-tweaks/dictate.conf" ] || cp "$REPO_DIR/dictation/dictate.conf.example" "$HOME/.config/frame-tweaks/dictate.conf"
 
 say "Done. Bind 'Dictate (toggle)' to a key (and a controller button): docs/controller-shortcuts.md"

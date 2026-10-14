@@ -17,13 +17,13 @@ def advert(name, ip, port):
 
 
 class PhonePick(unittest.TestCase):
-    def run_phone(self, phones, conf=None, choose=None, args=()):
+    def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False):
         home = Path(self.tmp.name)
         stubs = home / ".local/bin"          # (first on phone's PATH, ahead of Homebrew's real scrcpy)
         stubs.mkdir(parents=True, exist_ok=True)
-        (home / ".config").mkdir(exist_ok=True)
+        (home / ".config/frame-tweaks").mkdir(parents=True, exist_ok=True)
         if conf is not None:
-            (home / ".config/phone.conf").write_text(conf)
+            (home / (".config/phone.conf" if old_place else ".config/frame-tweaks/phone.conf")).write_text(conf)
         log = home / "log"
         log.write_text("")
         scripts = {
@@ -40,7 +40,8 @@ class PhonePick(unittest.TestCase):
             (stubs / name).chmod(0o755)
         env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or ""}
         r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30)
-        conf_text = (home / ".config/phone.conf").read_text() if (home / ".config/phone.conf").exists() else ""
+        f = home / ".config/frame-tweaks/phone.conf"
+        conf_text = f.read_text() if f.exists() else ""
         return r.returncode, log.read_text(), conf_text
 
     def setUp(self):
@@ -82,6 +83,14 @@ class PhonePick(unittest.TestCase):
         self.assertIn("notify -a Phone Waiting for Pixel 9", log)
         self.assertIn("didn't appear", log)
         self.assertNotIn("kdialog", log)
+
+    def test_settings_in_the_old_place_are_moved(self):
+        code, log, conf = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n',
+                                         old_place=True)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertIn("--max-fps=90", log)
+        self.assertIn("PHONE_MAX_FPS=90", conf)
+        self.assertFalse((Path(self.tmp.name) / ".config/phone.conf").exists())
 
     def test_pick_asks_even_with_a_remembered_phone(self):
         phones = [("Pixel 9", "10.0.0.5", 4000)]
