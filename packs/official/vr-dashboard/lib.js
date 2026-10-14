@@ -125,6 +125,16 @@
     };
   };
 
-  window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount };
+  // The dashboard's own controller haptics (what its buttons and sliders use): a tick on the
+  // controller pointing at this overlay. Optional: does nothing if SteamVR's page API changes.
+  const HAPTIC = { Enter: 1, Leave: 2, Snap: 3, Sliding: 4, SlidingEdge: 5 };
+  const haptic = (effect) => {
+    try {
+      if (typeof VRHTML !== 'undefined' && VRHTML && VRHTML.VROverlay)
+        VRHTML.VROverlay.TriggerOverlayHapticEffect(VRHTML.VROverlay.ThisOverlayHandle(), effect);
+    } catch (e) {}
+  };
+
+  window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount, HAPTIC, haptic };
   return 'loaded';
 })()

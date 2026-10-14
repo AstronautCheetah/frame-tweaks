@@ -91,6 +91,7 @@
     const steps = Math.trunc(d.carry);
     if (steps) {
       d.carry -= steps;
+      L.haptic?.(L.HAPTIC?.Sliding);              // a light tick for each step scrolled
       // Drag down (or right) scrolls down (or right); the service's +dy is up.
       d.axis === 'y' ? send(d.target, 0, -steps) : send(d.target, steps, 0);
     }
@@ -116,6 +117,7 @@
     if (d.el) d.el.style.background = colors().idle;
     if (Date.now() - d.t0 > TAP_MS || d.moved > d.length * 0.03) return;
     const at = (d.start - d.from) / d.length;                    // a quick tap near an end: a page
+    if (at < 0.25 || at > 0.75) L.haptic?.(L.HAPTIC?.Snap);    // a page: a firmer one
     if (at < 0.25) d.axis === 'y' ? send(d.target, 0, 0, 1) : send(d.target, -PAGE, 0);
     else if (at > 0.75) d.axis === 'y' ? send(d.target, 0, 0, -1) : send(d.target, PAGE, 0);
   };
@@ -135,8 +137,9 @@
     return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false },
       ...(curveId ? { curvature_origin_id: curveId } : {}) },
-      el('div', { style, onMouseDown: (ev) => {
+      el('div', { style, onMouseEnter: () => L.haptic?.(L.HAPTIC?.Enter), onMouseDown: (ev) => {
         stats.downs++;
+        L.haptic?.(L.HAPTIC?.Snap);
         if (drag) onUp();                         // a new press ends any drag still open
         const el = ev.currentTarget, r = el.getBoundingClientRect();
         const start = axis === 'y' ? ev.clientY : ev.clientX, from = axis === 'y' ? r.top : r.left;
