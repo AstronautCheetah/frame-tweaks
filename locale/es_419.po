@@ -5,431 +5,431 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: gui/frame-tweaks-gui.py:1003
+#: gui/frame-tweaks-gui.py:1005 gui/frame-tweaks-gui.py:1025
+msgid "{version} available"
+msgstr "{version} disponible"
+
+#: gui/frame-tweaks-gui.py:1006 gui/frame-tweaks-gui.py:1026
+msgid "Update"
+msgstr "Actualizar"
+
+#: gui/frame-tweaks-gui.py:1015
 msgid "Close and reopen Frame Tweaks to use the new version."
 msgstr "Cierra y vuelve a abrir Frame Tweaks para usar la nueva versión."
 
-#: gui/frame-tweaks-gui.py:1019
+#: gui/frame-tweaks-gui.py:1031
 msgid "Look for a newer Frame Tweaks release"
 msgstr "Buscar una versión más reciente de Frame Tweaks"
 
-#: gui/frame-tweaks-gui.py:1019
+#: gui/frame-tweaks-gui.py:1031
 msgid "⟳ Check for updates"
 msgstr "⟳ Buscar actualizaciones"
 
-#: gui/frame-tweaks-gui.py:1020
+#: gui/frame-tweaks-gui.py:1032
 msgid "Checking…"
 msgstr "Buscando…"
 
-#: gui/frame-tweaks-gui.py:1021
+#: gui/frame-tweaks-gui.py:1033
 msgid "⬇ Update to {version}"
 msgstr "⬇ Actualizar a {version}"
 
-#: gui/frame-tweaks-gui.py:1022
+#: gui/frame-tweaks-gui.py:1034
 msgid "Install it: your tweaks are updated with it"
 msgstr "Instálala: tus ajustes se actualizan con ella"
 
-#: gui/frame-tweaks-gui.py:1023
+#: gui/frame-tweaks-gui.py:1035
 msgid "Reopen Frame Tweaks to use the new version"
 msgstr "Vuelve a abrir Frame Tweaks para usar la nueva versión"
 
-#: gui/frame-tweaks-gui.py:1023
+#: gui/frame-tweaks-gui.py:1035
 msgid "↻ Restart"
 msgstr "↻ Reiniciar"
 
-#: gui/frame-tweaks-gui.py:104
-msgid "status check didn't finish (took over a minute)"
-msgstr "la revisión del estado no terminó (tardó más de un minuto)"
-
-#: gui/frame-tweaks-gui.py:1074
+#: gui/frame-tweaks-gui.py:1086
 msgid "Reinstall: remove it and install it again in one step (settings kept)"
 msgstr ""
 "Reinstalar: lo quita y lo vuelve a instalar en un solo paso (conserva la configuración)"
 
-#: gui/frame-tweaks-gui.py:1075
+#: gui/frame-tweaks-gui.py:1087
 msgid "Reinstall (available once it's installed)"
 msgstr "Reinstalar (disponible cuando esté instalado)"
 
-#: gui/frame-tweaks-gui.py:1091
+#: gui/frame-tweaks-gui.py:1103
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 "Elige qué apps se abren con la cartera de KDE compartida; bloquéala o desbloquéala"
 
-#: gui/frame-tweaks-gui.py:1092
+#: gui/frame-tweaks-gui.py:1104
 msgid "Tick it and Apply first"
 msgstr "Márcalo y aplica los cambios primero"
 
-#: gui/frame-tweaks-gui.py:1095
+#: gui/frame-tweaks-gui.py:1107
 msgid "⚙ Settings"
 msgstr "⚙ Configuración"
 
-#: gui/frame-tweaks-gui.py:1100
+#: gui/frame-tweaks-gui.py:1112
 msgid "Settings (tick it and Apply first)"
 msgstr "Configuración (márcalo y aplica los cambios primero)"
 
-#: gui/frame-tweaks-gui.py:1102
+#: gui/frame-tweaks-gui.py:1114
 msgid "Help"
 msgstr "Ayuda"
 
-#: gui/frame-tweaks-gui.py:1107
+#: gui/frame-tweaks-gui.py:1119
 msgid "{label} (installs first if needed: tick it and Apply)"
 msgstr ""
 "{label} (primero se instala si hace falta: márcalo y aplica los cambios)"
 
-#: gui/frame-tweaks-gui.py:1109
+#: gui/frame-tweaks-gui.py:1121
 msgid "Nothing to launch: how to use it"
 msgstr "Nada que abrir: cómo usarlo"
 
-#: gui/frame-tweaks-gui.py:1192 packs/original/snip/frame-snip:1332
+#: gui/frame-tweaks-gui.py:115
+msgid "status check didn't finish (took over a minute)"
+msgstr "la revisión del estado no terminó (tardó más de un minuto)"
+
+#: gui/frame-tweaks-gui.py:1204 packs/original/snip/frame-snip:1332
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: gui/frame-tweaks-gui.py:1194
+#: gui/frame-tweaks-gui.py:1206
 msgid "Remove them"
 msgstr "Quitarlos"
 
-#: gui/frame-tweaks-gui.py:1219
+#: gui/frame-tweaks-gui.py:1231
 msgid "Install: %s"
 msgstr "Instalar: %s"
 
-#: gui/frame-tweaks-gui.py:1220
+#: gui/frame-tweaks-gui.py:1232
 msgid "Remove: %s"
 msgstr "Quitar: %s"
 
-#: gui/frame-tweaks-gui.py:1221
+#: gui/frame-tweaks-gui.py:1233
 msgid "Nothing to change: tick or untick a tweak first"
 msgstr "Nada que cambiar: primero marca o desmarca un ajuste"
 
-#: gui/frame-tweaks-gui.py:1225
+#: gui/frame-tweaks-gui.py:1237
 msgid "Still checking status; try again in a moment."
 msgstr ""
 "Todavía se está revisando el estado; vuelve a intentarlo en un momento."
 
-#: gui/frame-tweaks-gui.py:1230 install.sh:319
+#: gui/frame-tweaks-gui.py:1242 install.sh:319
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
 
-#: gui/frame-tweaks-gui.py:1234
+#: gui/frame-tweaks-gui.py:1246
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr "Estos ajustes instalados se desmarcaron y se <b>quitarán</b>:"
 
-#: gui/frame-tweaks-gui.py:1236
+#: gui/frame-tweaks-gui.py:1248
 msgid "Their settings and data are kept."
 msgstr "Su configuración y sus datos se conservan."
 
-#: gui/frame-tweaks-gui.py:1326
+#: gui/frame-tweaks-gui.py:1338
 msgid "Saved {file}: read it, then attach it to a bug report."
 msgstr "Se guardó {file}: léelo y luego adjúntalo a un informe de error."
 
-#: gui/frame-tweaks-gui.py:1327
+#: gui/frame-tweaks-gui.py:1339
 msgid "Couldn't write the report (see {command})."
 msgstr "No se pudo escribir el informe (consulta {command})."
 
-#: gui/frame-tweaks-gui.py:1332
+#: gui/frame-tweaks-gui.py:1344
 msgid "Something went wrong in the installer window"
 msgstr "Algo salió mal en la ventana del instalador"
 
-#: gui/frame-tweaks-gui.py:1335
+#: gui/frame-tweaks-gui.py:1347
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 "Copia los detalles en un informe de error. La ventana sigue funcionando: vuelve e inténtalo de nuevo."
 
-#: gui/frame-tweaks-gui.py:1341 gui/frame-tweaks-gui.py:1345
+#: gui/frame-tweaks-gui.py:1353 gui/frame-tweaks-gui.py:1357
 msgid "Copy for bug report"
 msgstr "Copiar para informe de error"
 
-#: gui/frame-tweaks-gui.py:1343
+#: gui/frame-tweaks-gui.py:1355
 msgid "Copied"
 msgstr "Copiado"
 
-#: gui/frame-tweaks-gui.py:155 install.sh:339
+#: gui/frame-tweaks-gui.py:166 install.sh:339
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 "Presiona Enter para cerrar, o presiona el botón X que flota abajo para cerrar."
 
-#: gui/frame-tweaks-gui.py:156 install.sh:338
+#: gui/frame-tweaks-gui.py:167 install.sh:338
 msgid "Press Enter to close…"
 msgstr "Presiona Enter para cerrar…"
 
-#: gui/frame-tweaks-gui.py:233
+#: gui/frame-tweaks-gui.py:244
 msgid "Copy the link"
 msgstr "Copiar el enlace"
 
-#: gui/frame-tweaks-gui.py:253
+#: gui/frame-tweaks-gui.py:264
 msgid "Link copied"
 msgstr "Enlace copiado"
 
-#: gui/frame-tweaks-gui.py:303
+#: gui/frame-tweaks-gui.py:314
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:305 install.sh:181 lib/common.sh:409 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:316 install.sh:181 lib/common.sh:409 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
 msgid "not installed"
 msgstr "no instalado"
 
-#: gui/frame-tweaks-gui.py:319
+#: gui/frame-tweaks-gui.py:330
 msgid "hidden"
 msgstr "oculto"
 
-#: gui/frame-tweaks-gui.py:322 packs/original/snip/frame-snip:674 packs/original/snip/frame-snip:679
+#: gui/frame-tweaks-gui.py:333 packs/original/snip/frame-snip:674 packs/original/snip/frame-snip:679
 msgid "Collapse"
 msgstr "Contraer"
 
-#: gui/frame-tweaks-gui.py:322 packs/original/snip/frame-snip:705
+#: gui/frame-tweaks-gui.py:333 packs/original/snip/frame-snip:705
 msgid "Expand"
 msgstr "Expandir"
 
-#: gui/frame-tweaks-gui.py:325
+#: gui/frame-tweaks-gui.py:336
 msgid "Hide category"
 msgstr "Ocultar categoría"
 
-#: gui/frame-tweaks-gui.py:325
+#: gui/frame-tweaks-gui.py:336
 msgid "Unhide category"
 msgstr "Mostrar categoría"
 
-#: gui/frame-tweaks-gui.py:327
+#: gui/frame-tweaks-gui.py:338
 msgid "Show this category again"
 msgstr "Mostrar esta categoría otra vez"
 
-#: gui/frame-tweaks-gui.py:328
+#: gui/frame-tweaks-gui.py:339
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr "Ocultar toda la categoría de la lista (no quita nada)"
 
-#: gui/frame-tweaks-gui.py:356 gui/frame-tweaks-gui.py:379 gui/frame-tweaks-gui.py:605 gui/frame-tweaks-gui.py:1344 gui/packs_page.py:28 gui/wallet_page.py:253 packs/original/snip/frame-snip:498
+#: gui/frame-tweaks-gui.py:367 gui/frame-tweaks-gui.py:390 gui/frame-tweaks-gui.py:616 gui/frame-tweaks-gui.py:1356 gui/packs_page.py:28 gui/wallet_page.py:253 packs/original/snip/frame-snip:498
 msgid "← Back"
 msgstr "← Volver"
 
-#: gui/frame-tweaks-gui.py:359
+#: gui/frame-tweaks-gui.py:370
 msgid "About Frame Tweaks"
 msgstr "Acerca de Frame Tweaks"
 
-#: gui/frame-tweaks-gui.py:366 gui/frame-tweaks-gui.py:435
+#: gui/frame-tweaks-gui.py:377 gui/frame-tweaks-gui.py:446
 msgid "No README."
 msgstr "No hay README."
 
-#: gui/frame-tweaks-gui.py:404
+#: gui/frame-tweaks-gui.py:415
 msgid "What it is"
 msgstr "Qué es"
 
-#: gui/frame-tweaks-gui.py:405
+#: gui/frame-tweaks-gui.py:416
 msgid "Why it's included"
 msgstr "Por qué se incluye"
 
-#: gui/frame-tweaks-gui.py:406
+#: gui/frame-tweaks-gui.py:417
 msgid "Made by"
 msgstr "Creado por"
 
-#: gui/frame-tweaks-gui.py:408
+#: gui/frame-tweaks-gui.py:419
 msgid "🧪 Experimental"
 msgstr "🧪 Experimental"
 
-#: gui/frame-tweaks-gui.py:410
+#: gui/frame-tweaks-gui.py:421
 msgid "Source"
 msgstr "Fuente"
 
-#: gui/frame-tweaks-gui.py:412
+#: gui/frame-tweaks-gui.py:423
 msgid "Needs"
 msgstr "Requiere"
 
-#: gui/frame-tweaks-gui.py:412
+#: gui/frame-tweaks-gui.py:423
 msgid "{tweaks} (installed automatically)"
 msgstr "{tweaks} (se instalan automáticamente)"
 
-#: gui/frame-tweaks-gui.py:414
+#: gui/frame-tweaks-gui.py:425
 msgid "Status"
 msgstr "Estado"
 
-#: gui/frame-tweaks-gui.py:416
+#: gui/frame-tweaks-gui.py:427
 msgid "Pack"
 msgstr "Paquete"
 
-#: gui/frame-tweaks-gui.py:417
+#: gui/frame-tweaks-gui.py:428
 msgid "Documentation"
 msgstr "Documentación"
 
-#: gui/frame-tweaks-gui.py:418
+#: gui/frame-tweaks-gui.py:429
 msgid "{file} on GitHub"
 msgstr "{file} en GitHub"
 
-#: gui/frame-tweaks-gui.py:420
+#: gui/frame-tweaks-gui.py:431
 msgid "From"
 msgstr "Origen"
 
-#: gui/frame-tweaks-gui.py:421
+#: gui/frame-tweaks-gui.py:432
 msgid "the pack {pack}, not part of Frame Tweaks"
 msgstr "el paquete {pack}, no forma parte de Frame Tweaks"
 
-#: gui/frame-tweaks-gui.py:422
+#: gui/frame-tweaks-gui.py:433
 msgid "(used instead of {other}'s)"
 msgstr "(se usa en lugar del de {other})"
 
-#: gui/frame-tweaks-gui.py:443
+#: gui/frame-tweaks-gui.py:454
 msgid "⚠ Known issue."
 msgstr "⚠ Problema conocido."
 
-#: gui/frame-tweaks-gui.py:447
+#: gui/frame-tweaks-gui.py:458
 msgid "Checking for a newer release…"
 msgstr "Buscando una versión más reciente…"
 
-#: gui/frame-tweaks-gui.py:450
+#: gui/frame-tweaks-gui.py:461
 msgid "Couldn't check for a newer release; see {link}its releases{end}."
 msgstr ""
 "No se pudo buscar una versión más reciente; consulta {link}sus versiones{end}."
 
-#: gui/frame-tweaks-gui.py:453
+#: gui/frame-tweaks-gui.py:464
 msgid ""
 "<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
 msgstr ""
 "<b>La versión {version} ya está disponible</b>, así que esto podría estar resuelto: consulta {link}sus notas de la versión{end} y luego reinstala para actualizar."
 
-#: gui/frame-tweaks-gui.py:458
+#: gui/frame-tweaks-gui.py:469
 msgid "{version} is still the latest release."
 msgstr "{version} sigue siendo la versión más reciente."
 
-#: gui/frame-tweaks-gui.py:518 packs/original/adb-scrcpy/phone-touch.js:213 packs/original/scroll-strips/patch.js:282
+#: gui/frame-tweaks-gui.py:529 packs/original/adb-scrcpy/phone-touch.js:213 packs/original/scroll-strips/patch.js:282
 msgid "Reset to defaults"
 msgstr "Restablecer valores predeterminados"
 
-#: gui/frame-tweaks-gui.py:552
+#: gui/frame-tweaks-gui.py:563
 msgid "Working… (a download can take a minute)"
 msgstr "Trabajando… (una descarga puede tardar un minuto)"
 
-#: gui/frame-tweaks-gui.py:561 packs/original/snip/frame-snip:572 install.sh:205
+#: gui/frame-tweaks-gui.py:572 packs/original/snip/frame-snip:572 install.sh:205
 msgid "Done."
 msgstr "Listo."
 
-#: gui/frame-tweaks-gui.py:562 gui/wallet_page.py:502 gui/wallet_page.py:514 gui/wallet_page.py:528 packs/original/snip/frame-snip:573
+#: gui/frame-tweaks-gui.py:573 gui/wallet_page.py:502 gui/wallet_page.py:514 gui/wallet_page.py:528 packs/original/snip/frame-snip:573
 msgid "Didn't work: %s"
 msgstr "No funcionó: %s"
 
-#: gui/frame-tweaks-gui.py:583
+#: gui/frame-tweaks-gui.py:594
 msgid "Saved."
 msgstr "Guardado."
 
-#: gui/frame-tweaks-gui.py:592
+#: gui/frame-tweaks-gui.py:603
 msgid "Back to the defaults."
 msgstr "Se restablecieron los valores predeterminados."
 
-#: gui/frame-tweaks-gui.py:640
+#: gui/frame-tweaks-gui.py:651
 msgid "🔑 Wallet apps"
 msgstr "🔑 Apps de la cartera"
 
-#: gui/frame-tweaks-gui.py:703
+#: gui/frame-tweaks-gui.py:714
 msgid "🧩 Packs"
 msgstr "🧩 Paquetes"
 
-#: gui/frame-tweaks-gui.py:704
+#: gui/frame-tweaks-gui.py:715
 msgid "Where the tweaks come from; add other people's (docs/mods.md)"
 msgstr ""
 "De dónde vienen los ajustes; agrega los de otras personas (docs/mods.md)"
 
-#: gui/frame-tweaks-gui.py:707
+#: gui/frame-tweaks-gui.py:718
 msgid "Refresh"
 msgstr "Recargar"
 
-#: gui/frame-tweaks-gui.py:722
+#: gui/frame-tweaks-gui.py:733
 msgid ""
 "Tick to install, untick to remove, then Apply changes. Click a row for details, a category to fold it."
 msgstr ""
 "Marca para instalar, desmarca para quitar y luego aplica los cambios. Haz clic en una fila para ver detalles, o en una categoría para plegarla."
 
-#: gui/frame-tweaks-gui.py:732
+#: gui/frame-tweaks-gui.py:743
 msgid "📖 README"
 msgstr "📖 README"
 
-#: gui/frame-tweaks-gui.py:733
+#: gui/frame-tweaks-gui.py:744
 msgid ""
 "What Frame Tweaks is, how to install, update and remove it, common issues"
 msgstr ""
 "Qué es Frame Tweaks, cómo instalarlo, actualizarlo y quitarlo, problemas comunes"
 
-#: gui/frame-tweaks-gui.py:736
+#: gui/frame-tweaks-gui.py:747
 msgid "Diagnostics"
 msgstr "Diagnóstico"
 
-#: gui/frame-tweaks-gui.py:737
+#: gui/frame-tweaks-gui.py:748
 msgid "Save a report for a bug report (user names and paths removed)"
 msgstr ""
-"Guardar un informe para un informe de error (sin nombres de usuario ni rutas)"
+"Guardar un informe de diagnóstico para adjuntarlo a un informe de error (sin nombres de usuario ni rutas)"
 
-#: gui/frame-tweaks-gui.py:740
+#: gui/frame-tweaks-gui.py:751
 msgid "Apply changes"
 msgstr "Aplicar cambios"
 
-#: gui/frame-tweaks-gui.py:744 packs/original/arrowpad/arrowpad.py:658 packs/original/snip/frame-snip:659 packs/original/adb-scrcpy/phone:172
+#: gui/frame-tweaks-gui.py:755 packs/original/arrowpad/arrowpad.py:658 packs/original/snip/frame-snip:659 packs/original/adb-scrcpy/phone:172
 msgid "Close"
 msgstr "Cerrar"
 
-#: gui/frame-tweaks-gui.py:828
+#: gui/frame-tweaks-gui.py:840
 msgid "✔ Frame Tweaks is up to date ({version})."
 msgstr "✔ Frame Tweaks está actualizado ({version})."
 
-#: gui/frame-tweaks-gui.py:870
+#: gui/frame-tweaks-gui.py:882
 msgid "Show hidden ({n})"
 msgstr "Mostrar ocultos ({n})"
 
-#: gui/frame-tweaks-gui.py:897
+#: gui/frame-tweaks-gui.py:909
 msgid "Tick to install, untick to remove"
 msgstr "Marca para instalar, desmarca para quitar"
 
-#: gui/frame-tweaks-gui.py:906
+#: gui/frame-tweaks-gui.py:918
 msgid "(hidden)"
 msgstr "(oculto)"
 
-#: gui/frame-tweaks-gui.py:909 lib/sft.py:517
+#: gui/frame-tweaks-gui.py:921 lib/sft.py:517
 msgid "Experimental: %s"
 msgstr "Experimental: %s"
 
-#: gui/frame-tweaks-gui.py:911
+#: gui/frame-tweaks-gui.py:923
 msgid ""
 "From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 "Del paquete {pack}, no forma parte de Frame Tweaks; se usa en lugar del de {other}"
 
-#: gui/frame-tweaks-gui.py:912
+#: gui/frame-tweaks-gui.py:924
 msgid "From the pack {pack}, not part of Frame Tweaks"
 msgstr "Del paquete {pack}, no forma parte de Frame Tweaks"
 
-#: gui/frame-tweaks-gui.py:916
+#: gui/frame-tweaks-gui.py:928
 msgid "needs: %s"
 msgstr "requiere: %s"
 
-#: gui/frame-tweaks-gui.py:932
+#: gui/frame-tweaks-gui.py:944
 msgid "Open %s"
 msgstr "Abrir %s"
 
-#: gui/frame-tweaks-gui.py:948
+#: gui/frame-tweaks-gui.py:960
 msgid "Details: what it is, why it's included, who made it"
 msgstr "Detalles: qué es, por qué se incluye, quién lo creó"
 
-#: gui/frame-tweaks-gui.py:955
+#: gui/frame-tweaks-gui.py:967
 msgid "Hide"
 msgstr "Ocultar"
 
-#: gui/frame-tweaks-gui.py:955
+#: gui/frame-tweaks-gui.py:967
 msgid "Unhide"
 msgstr "Mostrar"
 
-#: gui/frame-tweaks-gui.py:956
+#: gui/frame-tweaks-gui.py:968
 msgid "Show this tweak in the list again"
 msgstr "Mostrar este ajuste en la lista otra vez"
 
-#: gui/frame-tweaks-gui.py:957
+#: gui/frame-tweaks-gui.py:969
 msgid "Hide this tweak from the list (doesn't remove it)"
 msgstr "Ocultar este ajuste de la lista (no lo quita)"
 
-#: gui/frame-tweaks-gui.py:971 gui/frame-tweaks-gui.py:1100
+#: gui/frame-tweaks-gui.py:983 gui/frame-tweaks-gui.py:1112
 msgid "Settings"
 msgstr "Configuración"
-
-#: gui/frame-tweaks-gui.py:993 gui/frame-tweaks-gui.py:1013
-msgid "{version} available"
-msgstr "{version} disponible"
-
-#: gui/frame-tweaks-gui.py:994 gui/frame-tweaks-gui.py:1014
-msgid "Update"
-msgstr "Actualizar"
 
 #: gui/packs_page.py:106
 msgid "Yes: it runs as me"
@@ -525,7 +525,8 @@ msgstr ""
 
 #: gui/wallet_page.py:139
 msgid "Wallet state unknown (is the Wallet tweak installed?)"
-msgstr "Estado de la cartera desconocido (¿está instalado el ajuste Wallet?)"
+msgstr ""
+"Estado de la cartera desconocido (¿está instalado el ajuste Cartera de KDE compartida?)"
 
 #: gui/wallet_page.py:141
 msgid "🔒 Wallet locked."
@@ -606,7 +607,7 @@ msgstr "Bloqueo automático"
 msgid ""
 "Lock the wallet by itself: a set time after unlocking, or after 4 h unused"
 msgstr ""
-"Bloquear la cartera sola: un tiempo fijo después de desbloquearla, o tras 4 h sin uso"
+"Bloquear la cartera automáticamente: un tiempo fijo después de desbloquearla, o tras 4 h sin uso"
 
 #: gui/wallet_page.py:288
 msgid "after unlocking:"
@@ -863,7 +864,7 @@ msgstr ""
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
-"¿Configurar la ventana completa del instalador? Necesita PyQt6 (unos 280 MB, compartido con Arrow Pad y la bandeja de NordVPN).\\n\\nNo = usar la lista simple."
+"¿Configurar la ventana completa del instalador? Necesita PyQt6 (unos 280 MB, compartido con el Teclado de flechas y la bandeja de NordVPN).\\n\\nNo = usar la lista simple."
 
 #: install.sh:291
 msgid "Couldn't install PyQt6; using the simple checklist."
@@ -1134,7 +1135,7 @@ msgstr ""
 #: lib/sft.py:558
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
-"{pack} viene con Frame Tweaks, así que no necesita confianza: {command}"
+"{pack} viene con Frame Tweaks, así que no hace falta confiar en él: {command}"
 
 #: lib/sft.py:561
 msgid "trusted; its tweaks are listed now"
@@ -1284,28 +1285,28 @@ msgstr ""
 msgid ""
 "Anthropic's Claude Desktop app for Linux (arm64), installed without apt"
 msgstr ""
-"La app Claude Desktop de Anthropic para Linux (arm64), instalada sin apt"
+"La app Claude para escritorio de Anthropic para Linux (arm64), instalada sin apt"
 
 #: packs/integrations/claude-desktop/README.md
 msgid "Claude Desktop"
-msgstr "Claude Desktop"
+msgstr "Claude para escritorio"
 
 #: packs/integrations/claude-desktop/README.md
 msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
-"Claude Desktop, la app oficial de Anthropic para Linux (arm64), instalada en tu carpeta personal y actualizada con un solo comando."
+"Claude para escritorio, la app oficial de Anthropic para Linux (arm64), instalada en tu carpeta personal y actualizada con un solo comando."
 
 #: packs/integrations/claude-desktop/claude-desktop-update:33
 msgid "Claude Desktop already at %s"
-msgstr "Claude Desktop ya está en %s"
+msgstr "Claude para escritorio ya está en %s"
 
 #: packs/integrations/claude-desktop/claude-desktop-update:37
 msgid ""
 "Claude Desktop %s is available, but Claude Desktop is open: quit it first,\n"
 "or run: claude-desktop-update --restart   (closes it, updates, and you reopen it)"
 msgstr ""
-"Claude Desktop %s está disponible, pero Claude Desktop está abierto: ciérralo primero,\n"
+"Claude para escritorio %s está disponible, pero Claude para escritorio está abierto: ciérralo primero,\n"
 "o ejecuta: claude-desktop-update --restart   (lo cierra, lo actualiza y tú lo vuelves a abrir)"
 
 #: packs/integrations/claude-desktop/claude-desktop-update:60
@@ -1320,21 +1321,21 @@ msgstr "Actualiza más tarde con: %s"
 msgid ""
 "Claude Desktop can't reach the KDE wallet this time, so it won't keep your sign-in: quit it and open it again"
 msgstr ""
-"Claude Desktop no puede acceder a la cartera de KDE esta vez, así que no guardará tu inicio de sesión: ciérralo y vuelve a abrirlo"
+"Claude para escritorio no puede acceder a la cartera de KDE esta vez, así que no guardará tu inicio de sesión: ciérralo y vuelve a abrirlo"
 
 #: packs/integrations/claude-desktop/status.sh:15
 msgid "Claude Desktop %s (update: claude-desktop-update)"
-msgstr "Claude Desktop %s (actualizar: claude-desktop-update)"
+msgstr "Claude para escritorio %s (actualizar: claude-desktop-update)"
 
 #: packs/integrations/claude-desktop/status.sh:4
 msgid "Claude Desktop not installed"
-msgstr "Claude Desktop no instalado"
+msgstr "Claude para escritorio no instalado"
 
 #: packs/integrations/claude-desktop/status.sh:6
 msgid ""
 "Claude Desktop starts without the KDE wallet, so sign-ins aren't kept: reinstall it"
 msgstr ""
-"Claude Desktop se inicia sin la cartera de KDE, así que no se guardan los inicios de sesión: reinstálalo"
+"Claude para escritorio se inicia sin la cartera de KDE, así que no se guardan los inicios de sesión: reinstálalo"
 
 #: packs/integrations/claude-desktop/uninstall.sh:7
 msgid "Kept your Claude settings in ~/.config/Claude."
@@ -1380,7 +1381,7 @@ msgstr ""
 msgid ""
 "The tray icon starts with desktop mode (or launch 'NordVPN Tray' now)."
 msgstr ""
-"El ícono de la bandeja se inicia con el modo escritorio (o abre 'NordVPN Tray' ahora)."
+"El ícono de la bandeja se inicia con el modo escritorio (o abre 'Bandeja de NordVPN' ahora)."
 
 #: packs/integrations/nordvpn/nordvpn-tray.desktop:3
 msgid "NordVPN Tray"
@@ -1430,7 +1431,7 @@ msgstr "Cerrar el ícono de la bandeja"
 msgid ""
 "Its icon lives in desktop mode's system tray: open desktop mode, and it starts there."
 msgstr ""
-"Su ícono vive en la bandeja del sistema del modo escritorio: abre el modo escritorio y se inicia ahí."
+"Su ícono está en la bandeja del sistema del modo escritorio: abre el modo escritorio y se iniciará ahí."
 
 #: packs/integrations/nordvpn/nordvpn-tray:234
 msgid "nordvpn-tray: no system tray available"
@@ -1608,13 +1609,13 @@ msgstr ""
 msgid ""
 "The kwallet6 setting stays: Signal's database key now lives in the wallet, and switching back would lock you out."
 msgstr ""
-"La opción kwallet6 se mantiene: la clave de la base de datos de Signal ahora vive en la cartera, y volver atrás te dejaría sin acceso."
+"La opción kwallet6 se mantiene: la clave de la base de datos de Signal ahora está en la cartera, y volver atrás te dejaría sin acceso."
 
 #: packs/integrations/vscodium/README.md
 msgid ""
 "For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR."
 msgstr ""
-"Para programar en el visor: Flathub tiene una versión para el procesador ARM del Frame, y funciona bien con Arrow Pad y Dictado para escribir en RV."
+"Para programar en el visor: Flathub tiene una versión para el procesador ARM del Frame, y funciona bien con Teclado de flechas y Dictado para escribir en RV."
 
 #: packs/integrations/vscodium/README.md
 msgid "VS Code without Microsoft's telemetry, from Flathub"
@@ -1652,7 +1653,7 @@ msgstr ""
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
 msgstr ""
-"Android Mirror deja de conectarse a este teléfono de forma predeterminada. La próxima vez toma el teléfono que encuentre, o pregunta cuál si hay varios."
+"Espejo de Android deja de conectarse a este teléfono de forma predeterminada. La próxima vez toma el teléfono que encuentre, o pregunta cuál si hay varios."
 
 #: packs/original/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
@@ -1667,7 +1668,7 @@ msgstr ""
 msgid ""
 "Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
 msgstr ""
-"La imagen y los cuadros por segundo se aplican la próxima vez que se inicia la réplica de pantalla (o con Reiniciar transmisión de su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
+"La imagen y los cuadros por segundo se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
 
 #: packs/original/adb-scrcpy/README.md
 msgid ""
@@ -1684,7 +1685,7 @@ msgstr ""
 #: packs/original/adb-scrcpy/README.md
 msgid "The phone mirror's stream and joystick scrolling."
 msgstr ""
-"La transmisión de la réplica del teléfono y el desplazamiento con joystick."
+"La transmisión del espejo del teléfono y el desplazamiento con joystick."
 
 #: packs/original/adb-scrcpy/README.md
 msgid ""
@@ -1695,10 +1696,6 @@ msgstr ""
 #: packs/original/adb-scrcpy/android-mirror.desktop:12
 msgid "Choose phone…"
 msgstr "Elegir teléfono…"
-
-#: packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
-msgid "Android Mirror"
-msgstr "Android Mirror"
 
 #: packs/original/adb-scrcpy/android-mirror.desktop:4
 msgid "Mirror and control an Android phone (scrcpy over wireless adb)"
@@ -1724,7 +1721,7 @@ msgstr ""
 msgid ""
 "SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
 msgstr ""
-"No se encontró la biblioteca OpenVR de SteamVR: no habrá desplazamiento con joystick en la réplica."
+"No se encontró la biblioteca OpenVR de SteamVR: no habrá desplazamiento con joystick en el espejo."
 
 #: packs/original/adb-scrcpy/install.sh:63
 msgid ""
@@ -1740,9 +1737,9 @@ msgid ""
 "Afterwards just launch 'Android Mirror' (or run: phone)."
 msgstr ""
 "Listo. Vinculación única: en el teléfono abre Opciones para desarrolladores → Depuración inalámbrica →\n"
-"\"Vincular dispositivo con código de vinculación\", y antes de un minuto ejecuta:\n"
+"\"Vincular dispositivo con un código de vinculación\", y antes de un minuto ejecuta:\n"
 "    adb pair <ip>:<pairing-port> <code>\n"
-"Después solo abre 'Android Mirror' (o ejecuta: phone)."
+"Después solo abre 'Espejo de Android' (o ejecuta: phone)."
 
 #: packs/original/adb-scrcpy/install.sh:7
 msgid "Installing scrcpy (Homebrew)"
@@ -1782,7 +1779,7 @@ msgstr "Lento"
 
 #: packs/original/adb-scrcpy/phone-touch.js:220
 msgid "Restart stream"
-msgstr "Reiniciar la transmisión"
+msgstr "Reiniciar transmisión"
 
 #: packs/original/adb-scrcpy/phone-touch.js:220
 msgid "Restart stream to apply"
@@ -1793,6 +1790,10 @@ msgid ""
 "Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
 "La imagen y la fluidez se aplican al reiniciar la transmisión; la velocidad del joystick, de inmediato."
+
+#: packs/original/adb-scrcpy/phone-touch:111 packs/original/adb-scrcpy/phone:52 packs/original/adb-scrcpy/phone:113 packs/original/adb-scrcpy/phone:118 packs/original/adb-scrcpy/phone:128 packs/original/adb-scrcpy/phone:172 packs/original/adb-scrcpy/phone:176 packs/original/adb-scrcpy/phone-touch.js:232 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
+msgid "Android Mirror"
+msgstr "Espejo de Android"
 
 #: packs/original/adb-scrcpy/phone-touch:111
 msgid "VR extras are off"
@@ -1806,13 +1807,13 @@ msgstr "phone-touch: no se encuentra el servidor de scrcpy"
 msgid ""
 "scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
 msgstr ""
-"scrcpy {version} no es una versión con la que se haya probado Frame Tweaks ({tested}), así que los extras de RV de la réplica están desactivados: clics apuntados con el láser y desplazamiento con joystick. Funciona como una ventana normal hasta una actualización de Frame Tweaks."
+"scrcpy {version} no es una versión con la que se haya probado Frame Tweaks ({tested}), así que los extras de RV del espejo están desactivados: clics apuntados con el láser y desplazamiento con joystick. Funciona como una ventana normal hasta una actualización de Frame Tweaks."
 
 #: packs/original/adb-scrcpy/phone:100 packs/original/adb-scrcpy/phone:176
 msgid ""
 "Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
 msgstr ""
-"Se olvidó %s. La próxima vez, Android Mirror toma el teléfono que encuentre, o pregunta cuál si hay varios."
+"Se olvidó %s. La próxima vez, Espejo de Android toma el teléfono que encuentre, o pregunta cuál si hay varios."
 
 #: packs/original/adb-scrcpy/phone:100
 msgid "the remembered phone"
@@ -1830,13 +1831,13 @@ msgstr "No se encontró ningún teléfono"
 msgid ""
 "No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README."
 msgstr ""
-"No hay ningún teléfono con la Depuración inalámbrica activada en la Wi-Fi. Actívala en las Opciones para desarrolladores del teléfono (perfil principal, misma Wi-Fi que el Frame). ¿Primera vez? Vincúlalo una vez: consulta el README de Android Mirror."
+"No hay ningún teléfono con la Depuración inalámbrica activada en la Wi-Fi. Actívala en las Opciones para desarrolladores del teléfono (perfil principal, misma Wi-Fi que el Frame). ¿Primera vez? Vincúlalo una vez: consulta el README de Espejo de Android."
 
 #: packs/original/adb-scrcpy/phone:113
 msgid ""
 "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
 msgstr ""
-"Conectando a %s de ahora en adelante. Para elegir otro: \"Elegir teléfono…\" de Android Mirror (o phone --pick)."
+"Conectando a %s de ahora en adelante. Para elegir otro: \"Elegir teléfono…\" en Espejo de Android (o phone --pick)."
 
 #: packs/original/adb-scrcpy/phone:118 packs/original/adb-scrcpy/phone:119
 msgid "Which phone?"
@@ -1900,7 +1901,7 @@ msgstr "No se pudo conectar a %s"
 
 #: packs/original/adb-scrcpy/phone:173
 msgid "See Android Mirror's README for adb pair."
-msgstr "Consulta el README de Android Mirror para adb pair."
+msgstr "Consulta el README de Espejo de Android para adb pair."
 
 #: packs/original/adb-scrcpy/phone:183
 msgid "Paired, but connecting still failed. adb said: %s"
@@ -1908,11 +1909,11 @@ msgstr "Vinculado, pero la conexión siguió fallando. adb dijo: %s"
 
 #: packs/original/adb-scrcpy/phone:203
 msgid "Starting the mirror…"
-msgstr "Iniciando la réplica…"
+msgstr "Iniciando el espejo…"
 
 #: packs/original/adb-scrcpy/phone:211
 msgid "The mirror didn't start"
-msgstr "La réplica no se inició"
+msgstr "El espejo no se inició"
 
 #: packs/original/adb-scrcpy/phone:211
 msgid ""
@@ -1948,19 +1949,19 @@ msgstr "Teléfono no encontrado"
 msgid ""
 "The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
 msgstr ""
-"Se perdió la conexión con %s y no volvió en un minuto. ¿La Depuración inalámbrica sigue activada, en la misma Wi-Fi? Abre Android Mirror de nuevo cuando lo esté."
+"Se perdió la conexión con %s y no volvió en un minuto. ¿La Depuración inalámbrica sigue activada, en la misma Wi-Fi? Abre Espejo de Android de nuevo cuando lo esté."
 
 #: packs/original/adb-scrcpy/phone:72
 msgid ""
 "On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…"
 msgstr ""
-"En el teléfono: Opciones para desarrolladores → Depuración inalámbrica → Vincular dispositivo con código de vinculación. Esperando a que muestre un código…"
+"En el teléfono: Opciones para desarrolladores → Depuración inalámbrica → Vincular dispositivo con un código de vinculación. Esperando a que muestre un código…"
 
 #: packs/original/adb-scrcpy/phone:81
 msgid ""
 "Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again."
 msgstr ""
-"Nada mostró un código de vinculación en dos minutos. En el teléfono: Opciones para desarrolladores → Depuración inalámbrica → Vincular dispositivo con código de vinculación, y luego abre Android Mirror de nuevo."
+"Nada mostró un código de vinculación en dos minutos. En el teléfono: Opciones para desarrolladores → Depuración inalámbrica → Vincular dispositivo con un código de vinculación, y luego abre Espejo de Android de nuevo."
 
 #: packs/original/adb-scrcpy/phone:81
 msgid "The phone didn't offer pairing"
@@ -1968,7 +1969,7 @@ msgstr "El teléfono no ofreció la vinculación"
 
 #: packs/original/adb-scrcpy/phone:82
 msgid "Android Mirror: pair with %s"
-msgstr "Android Mirror: vincular con %s"
+msgstr "Espejo de Android: vincular con %s"
 
 #: packs/original/adb-scrcpy/phone:82
 msgid "The six-digit pairing code the phone shows:"
@@ -2006,13 +2007,13 @@ msgstr "%s no apareció"
 msgid ""
 "It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
 msgstr ""
-"No apareció en la Wi-Fi con la Depuración inalámbrica activada. Actívala en las Opciones para desarrolladores del teléfono (perfil principal, misma Wi-Fi que el Frame) y luego abre Android Mirror de nuevo."
+"No apareció en la Wi-Fi con la Depuración inalámbrica activada. Actívala en las Opciones para desarrolladores del teléfono (perfil principal, misma Wi-Fi que el Frame) y luego abre Espejo de Android de nuevo."
 
 #: packs/original/adb-scrcpy/status.sh:11
 msgid ""
 "scrcpy %s is untested (Frame Tweaks is tested with %s.x): the mirror works, its VR laser clicks and joystick scrolling are off"
 msgstr ""
-"scrcpy %s no está probado (Frame Tweaks está probado con %s.x): la réplica funciona, pero sus clics con el láser y el desplazamiento con joystick en RV están desactivados"
+"scrcpy %s no está probado (Frame Tweaks está probado con %s.x): el espejo funciona, pero sus clics con el láser y el desplazamiento con joystick en RV están desactivados"
 
 #: packs/original/adb-scrcpy/status.sh:12
 msgid "adb %s, scrcpy%s, phone launcher"
@@ -2065,15 +2066,11 @@ msgstr "con el estilo de"
 
 #: packs/original/arrowpad/arrowpad-vr.desktop:3
 msgid "Arrow Pad (VR window)"
-msgstr "Arrow Pad (ventana de RV)"
+msgstr "Teclado de flechas (ventana de RV)"
 
 #: packs/original/arrowpad/arrowpad-vr.desktop:4
 msgid "Arrow/navigation keys as their own floating VR window"
 msgstr "Flechas y teclas de navegación en su propia ventana flotante de RV"
-
-#: packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
-msgid "Arrow Pad"
-msgstr "Arrow Pad"
 
 #: packs/original/arrowpad/arrowpad.desktop:4
 msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
@@ -2247,7 +2244,7 @@ msgstr "Desactivado"
 
 #: packs/original/arrowpad/arrowpad.py:179 packs/original/scroll-strips/patch.js:221
 msgid "Haptics"
-msgstr "Vibración"
+msgstr "Respuesta háptica"
 
 #: packs/original/arrowpad/arrowpad.py:179
 msgid "Theme"
@@ -2257,9 +2254,17 @@ msgstr "Tema"
 msgid "arrowpad: desktop mode isn't running"
 msgstr "arrowpad: el modo escritorio no está en ejecución"
 
+#: packs/original/arrowpad/arrowpad.py:628 packs/original/arrowpad/arrowpad.py:1030 packs/original/arrowpad/arrowpad.py:1040 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+msgid "Arrow Pad"
+msgstr "Teclado de flechas"
+
+#: packs/original/arrowpad/arrowpad.py:628
+msgid "Arrow Pad (VR)"
+msgstr "Teclado de flechas (RV)"
+
 #: packs/original/arrowpad/arrowpad.py:652
 msgid "Settings: theme and haptics"
-msgstr "Configuración: tema y vibración"
+msgstr "Configuración: tema y respuesta háptica"
 
 #: packs/original/arrowpad/arrowpad.py:653 packs/original/arrowpad/arrowpad.py:835
 msgid "Pin: stop accidental moves"
@@ -2287,7 +2292,8 @@ msgstr "Listo"
 
 #: packs/original/arrowpad/check-system.sh:6
 msgid "SteamVR's %s is gone: the VR pad can't start"
-msgstr "Ya no existe %s de SteamVR: el teclado de RV no puede iniciar"
+msgstr ""
+"Ya no existe %s de SteamVR: el Teclado de flechas de RV no puede iniciarse"
 
 #: packs/original/arrowpad/check-system.sh:7
 msgid "SteamVR's OpenVR library and ydotoold's socket present"
@@ -2305,13 +2311,13 @@ msgstr "Creando el venv de Python con PyQt6 (~280 MB)"
 msgid ""
 "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
 msgstr ""
-"No se encontró la biblioteca OpenVR arm64 de SteamVR: Arrow Pad funciona sin la vibración de los controles."
+"No se encontró la biblioteca OpenVR arm64 de SteamVR: el Teclado de flechas funciona sin la respuesta háptica de los controles."
 
 #: packs/original/arrowpad/install.sh:35
 msgid ""
 "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
 msgstr ""
-"Listo. Abre 'Arrow Pad' desde el menú de apps (o: arrowpad --scale 1.5)."
+"Listo. Abre 'Teclado de flechas' desde el menú de apps (o: arrowpad --scale 1.5)."
 
 #: packs/original/arrowpad/status.sh:3
 msgid "arrowpad not installed"
@@ -2327,7 +2333,7 @@ msgstr "arrowpad instalado"
 
 #: packs/original/arrowpad/uninstall.sh:11
 msgid "stopped a running Arrow Pad"
-msgstr "se cerró un Arrow Pad en ejecución"
+msgstr "se cerró un Teclado de flechas en ejecución"
 
 #: packs/original/cursor/README.md
 msgid ""
@@ -2385,19 +2391,19 @@ msgstr "Ventanas curvas en el mundo"
 msgid ""
 "On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
 msgstr ""
-"En el Frame, las ventanas que haces flotar fuera del panel siempre empiezan planas, y SteamVR no tiene una opción para cambiarlo. Esto presiona su botón Toggle Curvature por ti en cada una."
+"En el Frame, las ventanas que haces flotar fuera del menú principal siempre empiezan planas, y SteamVR no tiene una opción para cambiarlo. Esto presiona su botón Alternar curvatura por ti en cada una."
 
 #: packs/original/curvature/README.md
 msgid ""
 "Windows you float into the world start curved, like the dashboard (Toggle Curvature still works)"
 msgstr ""
-"Las ventanas que haces flotar en el mundo empiezan curvas, como el panel (Toggle Curvature sigue funcionando)"
+"Las ventanas que haces flotar en el mundo empiezan curvas, como el menú principal (Alternar curvatura sigue funcionando)"
 
 #: packs/original/curvature/README.md
 msgid ""
 "Windows you float into the world start curved, like the dashboard; Toggle Curvature still works."
 msgstr ""
-"Las ventanas que haces flotar en el mundo empiezan curvas, como el panel; Toggle Curvature sigue funcionando."
+"Las ventanas que haces flotar en el mundo empiezan curvas, como el menú principal; Alternar curvatura sigue funcionando."
 
 #: packs/original/curvature/README.md
 msgid "idea from"
@@ -2425,7 +2431,7 @@ msgstr ""
 msgid ""
 "Speech-to-text that runs on the headset itself, with whisper.cpp. Press a shortcut (or 🎤 on Arrow Pad's Tools layer) to start, press again to stop; the text is typed into the app you're using and copied to the clipboard."
 msgstr ""
-"Voz a texto que se ejecuta en el propio visor, con whisper.cpp. Presiona un atajo (o 🎤 en la capa de herramientas de Arrow Pad) para empezar y presiónalo otra vez para detener; el texto se escribe en la app que estás usando y se copia al portapapeles."
+"Voz a texto que se ejecuta en el propio visor, con whisper.cpp. Presiona un atajo (o 🎤 en la capa de herramientas del Teclado de flechas) para empezar y presiónalo otra vez para detener; el texto se escribe en la app que estás usando y se copia al portapapeles."
 
 #: packs/original/dictation/README.md
 msgid ""
@@ -2496,7 +2502,7 @@ msgstr "Se eliminó el modelo anterior %s (reemplazado por el compartido %s)"
 #: packs/original/dictation/install.sh:43
 msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
 msgstr ""
-"Listo. Asigna 'Dictate (toggle)' a una tecla (y a un botón del control): %s"
+"Listo. Asigna 'Dictar (iniciar/detener)' a una tecla (y a un botón del control): %s"
 
 #: packs/original/dictation/status.sh:3
 msgid "dictate not installed"
@@ -2597,19 +2603,19 @@ msgstr "resistFingerprinting activo"
 msgid ""
 "\"Float in World\" also picks the window up for placing, like grabbing its bar; your next click (or letting go of the trigger) puts it down"
 msgstr ""
-"\"Float in World\" también toma la ventana para colocarla, como al agarrar su barra; tu próximo clic (o soltar el gatillo) la deja"
+"\"Flotar en el mundo\" también toma la ventana para colocarla, como al agarrar su barra; tu próximo clic (o soltar el gatillo) la coloca"
 
 #: packs/original/float-grab/README.md
 msgid ""
 "\"Float in World\" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down."
 msgstr ""
-"\"Float in World\" también toma la ventana, como lo hace agarrar la barra debajo de ella, para que la coloques de una vez; tu próximo clic (o soltar el gatillo, si todavía lo mantienes presionado) la deja."
+"\"Flotar en el mundo\" también toma la ventana, como lo hace agarrar la barra debajo de ella, para que la coloques de una vez; tu próximo clic (o soltar el gatillo, si todavía lo mantienes presionado) la coloca."
 
 #: packs/original/float-grab/README.md
 msgid ""
 "In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one."
 msgstr ""
-"En SteamVR, hacer flotar una ventana y luego colocarla toma dos pasos: presionar Float in World y luego agarrar la barra debajo de la ventana. Esto lo hace en uno."
+"En SteamVR, hacer flotar una ventana y luego colocarla toma dos pasos: presionar Flotar en el mundo y luego agarrar la barra debajo de la ventana. Esto lo hace en uno solo."
 
 #: packs/original/float-grab/README.md
 msgid "Pick up when floating"
@@ -2617,19 +2623,19 @@ msgstr "Tomar al hacer flotar"
 
 #: packs/original/float-grab/status.sh:3
 msgid "Float in World picks the window up"
-msgstr "Float in World toma la ventana"
+msgstr "Flotar en el mundo toma la ventana"
 
 #: packs/original/float-return/README.md
 msgid ""
 "After you float a window out of the dashboard, the dashboard shows the window it showed before (after 2.5 s) instead of an empty space"
 msgstr ""
-"Después de que haces flotar una ventana fuera del panel, el panel muestra la ventana que mostraba antes (tras 2.5 s) en vez de un espacio vacío"
+"Después de hacer flotar una ventana fuera del menú principal, el menú principal muestra la ventana que mostraba antes (tras 2.5 s) en vez de un espacio vacío"
 
 #: packs/original/float-return/README.md
 msgid ""
 "After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam."
 msgstr ""
-"Después de que haces flotar en el mundo la ventana que muestra el panel, el panel muestra la ventana que mostraba antes (tras 2.5 s), en vez de un espacio vacío; y cuando la ventana mostrada se cierra, vuelve a la anterior en vez de a Steam."
+"Después de hacer flotar en el mundo la ventana que muestra el menú principal, el menú principal muestra la ventana que mostraba antes (tras 2.5 s), en vez de un espacio vacío; y cuando la ventana mostrada se cierra, vuelve a la anterior en vez de a Steam."
 
 #: packs/original/float-return/README.md
 msgid "Back to the previous window"
@@ -2639,7 +2645,7 @@ msgstr "Volver a la ventana anterior"
 msgid ""
 "SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
 msgstr ""
-"SteamVR deja el panel vacío donde estaba la ventana que hiciste flotar, y vuelve a Steam cuando la ventana mostrada se cierra. Esto cambia de vuelta por ti, como lo hace un clic en el botón de esa ventana en el panel."
+"SteamVR deja el menú principal vacío donde estaba la ventana que hiciste flotar, y vuelve a Steam cuando la ventana mostrada se cierra. Esto vuelve a la anterior por ti, como lo hace un clic en el botón de esa ventana en el menú principal."
 
 #: packs/original/float-return/status.sh:3
 msgid "back to the previous window after floating one"
@@ -2684,7 +2690,7 @@ msgid ""
 "Screen snip (tesseract) and anything you installed yourself live in it.\n"
 "To remove it and everything in it, use Homebrew's own uninstaller:"
 msgstr ""
-"Homebrew se dejó instalado: Dictado (wl-clipboard, whisper.cpp), Android Mirror (scrcpy),\n"
+"Homebrew se dejó instalado: Dictado (wl-clipboard, whisper.cpp), Espejo de Android (scrcpy),\n"
 "Recorte de pantalla (tesseract) y todo lo que instalaste tú están en él.\n"
 "Para quitarlo junto con todo lo que contiene, usa el desinstalador propio de Homebrew:"
 
@@ -2726,7 +2732,7 @@ msgstr "Íconos de Breeze presentes"
 msgid ""
 "Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
 msgstr ""
-"Listo. El menú \"+\" de Steam los toma solo (vuelve a abrirlo); vuelve a ejecutar después de instalar apps nuevas."
+"Listo. El menú \"+\" de Steam los detecta solo (vuelve a abrirlo); vuelve a ejecutar después de instalar apps nuevas."
 
 #: packs/original/menu-icons/menu-icons:99
 msgid "icon: {name}"
@@ -2774,7 +2780,7 @@ msgstr "Entorno de RV"
 msgid ""
 "Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR."
 msgstr ""
-"Franjas de desplazamiento grandes junto a cada ventana, acopladas en el panel o flotantes (a la derecha y arriba de forma predeterminada), fáciles de agarrar con el láser. Presiona y arrastra alejándote de ese punto para desplazarte, más rápido cuanto más lejos vayas; suelta para detener. Configúralas en la ventana de Frame Tweaks o desde un engranaje junto a cada ventana en RV."
+"Franjas de desplazamiento grandes junto a cada ventana, acopladas en el menú principal o flotantes (a la derecha y arriba de forma predeterminada), fáciles de agarrar con el láser. Presiona y arrastra alejándote de ese punto para desplazarte, más rápido cuanto más lejos vayas; suelta para detener. Configúralas en la ventana de Frame Tweaks o desde un engranaje junto a cada ventana en RV."
 
 #: packs/original/scroll-strips/README.md
 msgid ""
@@ -2808,7 +2814,7 @@ msgstr "Verde"
 
 #: packs/original/scroll-strips/README.md
 msgid "Haptics (a tick on the controller as you scroll)"
-msgstr "Vibración (un pulso en el control al desplazarte)"
+msgstr "Respuesta háptica (un pulso en el control al desplazarte)"
 
 #: packs/original/scroll-strips/README.md
 msgid "Horizontal strip (scrolls sideways)"
@@ -2896,7 +2902,7 @@ msgstr "Activado"
 msgid ""
 "Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
 msgstr ""
-"No se guardó: reinstala Parches del panel de RV (vr-dashboard) para conservar la configuración."
+"No se guardó: reinstala Parches del menú principal de RV (vr-dashboard) para conservar la configuración."
 
 #: packs/original/scroll-strips/patch.js:274 packs/original/scroll-strips/README.md
 msgid "Colour"
@@ -2932,7 +2938,7 @@ msgstr "Velocidad de lectura"
 msgid ""
 "Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it."
 msgstr ""
-"Selecciona un rectángulo de la ventana que estás usando y luego cópialo, guárdalo, copia su texto (OCR) o haz que se lea en voz alta (Narrar). La capa Herramientas de Arrow Pad tiene un botón para esto."
+"Selecciona un rectángulo de la ventana que estás usando y luego cópialo, guárdalo, copia su texto (OCR) o haz que se lea en voz alta (Narrar). La capa Herramientas del Teclado de flechas tiene un botón para esto."
 
 #: packs/original/snip/README.md
 msgid ""
@@ -2951,10 +2957,6 @@ msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
 msgstr ""
 "La velocidad se aplica en la próxima narración (o de inmediato, desde los − / + del panel)."
-
-#: packs/original/snip/frame-snip.desktop:3 packs/original/snip/README.md
-msgid "Screen snip + Narrate"
-msgstr "Recorte de pantalla + Narrar"
 
 #: packs/original/snip/frame-snip.desktop:4
 msgid ""
@@ -2978,7 +2980,7 @@ msgstr "Recorte de pantalla"
 msgid ""
 "Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
 msgstr ""
-"Arrastra un rectángulo para recortar y luego ajústalo con sus controladores  ·  Esc o clic derecho cancela"
+"Arrastra un rectángulo para recortar y luego ajústalo con sus tiradores  ·  Esc o clic derecho cancela"
 
 #: packs/original/snip/frame-snip:1331
 msgid "Copy"
@@ -3051,6 +3053,10 @@ msgstr "No se pudo hacer un recorte"
 #: packs/original/snip/frame-snip:1621
 msgid "empty picture"
 msgstr "imagen vacía"
+
+#: packs/original/snip/frame-snip:284 packs/original/snip/frame-snip.desktop:3 packs/original/snip/README.md
+msgid "Screen snip + Narrate"
+msgstr "Recorte de pantalla + Narrar"
 
 #: packs/original/snip/frame-snip:501
 msgid "Narrate's voice"
@@ -3216,11 +3222,11 @@ msgstr "Instalando %s"
 msgid ""
 "Done: Arrow Pad's Tools key, then Snip (or 'Screen snip + Narrate' in the app menu) starts a snip."
 msgstr ""
-"Listo: la tecla Herramientas de Arrow Pad y luego Snip (o 'Recorte de pantalla + Narrar' en el menú de apps) inicia un recorte."
+"Listo: la tecla Herramientas del Teclado de flechas y luego Recorte (o 'Recorte de pantalla + Narrar' en el menú de apps) inicia un recorte."
 
 #: packs/original/snip/install.sh:9
 msgid "Setting up PyQt6 (shared with Arrow Pad)"
-msgstr "Configurando PyQt6 (compartido con Arrow Pad)"
+msgstr "Configurando PyQt6 (compartido con el Teclado de flechas)"
 
 #: packs/original/snip/status.sh:6
 msgid "Tesseract missing: Copy text and Narrate won't work (reinstall)"
@@ -3314,7 +3320,7 @@ msgstr "Motor de voz (auxiliar)"
 msgid ""
 "SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent."
 msgstr ""
-"SteamOS incluye speech-dispatcher, el servicio a través del cual hablan las apps, pero ninguna voz para usar, así que Orca y otras apps que hablan se quedan en silencio."
+"SteamOS incluye speech-dispatcher, el servicio a través del cual hablan las apps, pero ninguna voz que pueda usar, así que Orca y otras apps que hablan se quedan en silencio."
 
 #: packs/original/speech/README.md
 msgid "Svenska"
@@ -3368,7 +3374,7 @@ msgstr "la descarga de Piper no contenía %s"
 
 #: packs/original/speech/install.sh:32
 msgid "speech: unknown language '%s'; using English (US)"
-msgstr "voz: idioma desconocido '%s'; se usa English (US)"
+msgstr "voz: idioma desconocido '%s'; se usa Inglés (EE. UU.)"
 
 #: packs/original/speech/install.sh:39
 msgid "Downloading the %s voice (about 60 MB)"
@@ -3459,36 +3465,36 @@ msgstr "%s instalado"
 msgid ""
 "Lets the VR environment tweaks adjust SteamVR's dashboard; installed automatically when needed"
 msgstr ""
-"Permite que los ajustes del entorno de RV modifiquen el panel de SteamVR; se instala automáticamente cuando hace falta"
+"Permite que los ajustes del entorno de RV modifiquen el menú principal de SteamVR; se instala automáticamente cuando hace falta"
 
 #: packs/original/vr-dashboard/README.md
 msgid ""
 "SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them."
 msgstr ""
-"El panel de SteamVR, el menú y espacio de ventanas que usas en el visor, no tiene opciones para estos comportamientos. Es una página web, así que pequeños parches que se le agregan mientras SteamVR se ejecuta pueden cambiarlos."
+"El menú principal de SteamVR, con el menú y el espacio de ventanas que usas en el visor, no tiene opciones para estos comportamientos. Es una página web, así que pequeños parches que se le agregan mientras SteamVR se ejecuta pueden cambiarlos."
 
 #: packs/original/vr-dashboard/README.md
 msgid ""
 "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
 msgstr ""
-"La parte compartida de los ajustes del entorno de RV (Ventanas curvas en el mundo, Volver a la ventana anterior, Agarrar al hacer flotar, Franjas de desplazamiento): pone sus pequeños parches en el panel de SteamVR mientras SteamVR se ejecuta. Android Mirror también lo usa cuando está instalado. Se instala automáticamente."
+"La parte compartida de los ajustes del entorno de RV (Ventanas curvas en el mundo, Volver a la ventana anterior, Tomar al hacer flotar, Franjas de desplazamiento): pone sus pequeños parches en el menú principal de SteamVR mientras SteamVR se ejecuta. Espejo de Android también lo usa cuando está instalado. Se instala automáticamente."
 
 #: packs/original/vr-dashboard/README.md
 msgid "VR dashboard patching (helper)"
-msgstr "Parches del panel de RV (auxiliar)"
+msgstr "Parches del menú principal de RV (auxiliar)"
 
 #: packs/original/vr-dashboard/check-system.sh:6
 msgid "SteamVR dashboard code changed (%s): those patches stay off"
 msgstr ""
-"El código del panel de SteamVR cambió (%s): esos parches quedan desactivados"
+"El código del menú principal de SteamVR cambió (%s): esos parches quedan desactivados"
 
 #: packs/original/vr-dashboard/check-system.sh:7
 msgid "SteamVR dashboard code as expected"
-msgstr "Código del panel de SteamVR como se esperaba"
+msgstr "Código del menú principal de SteamVR como se esperaba"
 
 #: packs/original/vr-dashboard/install.sh:84
 msgid "Dashboard patches active."
-msgstr "Parches del panel activos."
+msgstr "Parches del menú principal activos."
 
 #: packs/original/vr-dashboard/install.sh:86
 msgid ""
@@ -3508,7 +3514,7 @@ msgstr "{name}: no instalado"
 
 #: packs/original/vr-dashboard/sft-dashboard:361
 msgid "dashboard page not found"
-msgstr "no se encontró la página del panel"
+msgstr "no se encontró la página del menú principal"
 
 #: packs/original/vr-dashboard/sft-dashboard:368
 msgid "{name}: port open, not patched yet"
@@ -3521,7 +3527,7 @@ msgstr "esperando un reinicio de SteamVR (reinicia el equipo una vez)"
 #: packs/original/vr-dashboard/status.sh:13
 msgid "%s dashboard patch(es); DevTools port open while SteamVR runs"
 msgstr ""
-"%s parche(s) del panel; puerto de DevTools abierto mientras SteamVR está en ejecución"
+"%s parche(s) del menú principal; puerto de DevTools abierto mientras SteamVR está en ejecución"
 
 #: packs/original/vr-dashboard/status.sh:7
 msgid "installed, %s patch(es) (active while SteamVR runs)"
@@ -3640,7 +3646,7 @@ msgid ""
 msgstr ""
 "Agrega otras apps que usen la cartera con:  %s   (--electron para apps de Electron)\n"
 "La cartera de fábrica de SteamOS tiene una contraseña VACÍA. Para protegerla de verdad, abre\n"
-"KWalletManager → kdewallet → Change Password."
+"KWalletManager → kdewallet → Cambiar contraseña."
 
 #: packs/original/wallet/run.sh:4
 msgid "Lock it now with the Lock Wallet menu entry."
@@ -3760,7 +3766,7 @@ msgstr "Bloquear cartera"
 msgid ""
 "Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
 msgstr ""
-"Bloquea la cartera de KDE ahora (Signal, Firefox, Android Mirror y gh pedirán la contraseña)"
+"Bloquea la cartera de KDE ahora (Signal, Firefox, Espejo de Android y gh pedirán la contraseña)"
 
 #: packs/original/wallet/wallet-unlock:250
 msgid "Wrong password (is Caps Lock on?). Try again:"
@@ -3781,7 +3787,7 @@ msgid ""
 "\n"
 "Type the password there, or close that prompt and try again."
 msgstr ""
-"Ya hay abierta una solicitud de contraseña de la cartera de KDE (búscala en RV, cerca del panel). Mientras esté abierta, la cartera ignora este diálogo.\n"
+"Ya hay abierta una solicitud de contraseña de la cartera de KDE (búscala en RV, cerca del menú principal). Mientras esté abierta, la cartera ignora este diálogo.\n"
 "\n"
 "Escribe la contraseña ahí, o cierra esa solicitud e inténtalo de nuevo."
 
@@ -3862,7 +3868,7 @@ msgstr "Reiniciar"
 msgid ""
 "The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them."
 msgstr ""
-"El teclado virtual a través del cual escriben Dictado, Arrow Pad y Franjas de desplazamiento. Se instala automáticamente con ellos."
+"El teclado virtual a través del cual escriben Dictado, Teclado de flechas y Franjas de desplazamiento. Se instala automáticamente con ellos."
 
 #: packs/original/ydotool/README.md
 msgid "ydotool (helper)"
@@ -3950,7 +3956,7 @@ msgstr "%s: no es el commit fijado"
 #: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:22
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
-"El commit fijado de %s no está disponible en el original; se usa la copia de Frame Tweaks"
+"El commit fijado de %s no está disponible en el repositorio original; se usa la copia de Frame Tweaks"
 
 #: packs/third-party/clipboard/install.sh:63
 msgid "%s started"
@@ -4001,52 +4007,52 @@ msgstr "(libera unos 3.4 GB)"
 
 #: packs/third-party/full-keyboard/README.md
 msgid "Full Keyboard (VR)"
-msgstr "Full Keyboard (RV)"
+msgstr "Teclado completo (RV)"
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
 "Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks."
 msgstr ""
-"El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Esto instala Full Keyboard desde una versión fijada y con suma de verificación comprobada, y lo mantiene actualizado junto con el resto de Frame Tweaks."
+"El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Esto instala Teclado completo desde una versión fijada y con suma de verificación comprobada, y lo mantiene actualizado junto con el resto de Frame Tweaks."
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
 "TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset."
 msgstr ""
-"Full Keyboard de TaiKeid: un teclado completo en el que escribes con los láseres de los controles, con flechas, teclas F, teclado numérico, Ctrl/Alt y Copiar/Pegar, para el panel y las apps del visor."
+"Teclado completo de TaiKeid: un teclado de tamaño completo en el que escribes con los láseres de los controles, con flechas, teclas F, teclado numérico, Ctrl/Alt y Copiar/Pegar, para el menú principal y las apps del visor."
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
 "TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release"
 msgstr ""
-"El teclado de RV completo de TaiKeid para el panel y el escritorio, instalado desde una versión verificada"
+"El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde una versión verificada"
 
 #: packs/third-party/full-keyboard/install.sh:11
 msgid "Downloading Full Keyboard %s"
-msgstr "Descargando Full Keyboard %s"
+msgstr "Descargando Teclado completo %s"
 
 #: packs/third-party/full-keyboard/install.sh:15
 msgid ""
 "Open 'Full Keyboard' from the VR dashboard's app launcher (VR session must be running)."
 msgstr ""
-"Abre 'Full Keyboard' desde el lanzador de apps del panel de RV (la sesión de RV debe estar en ejecución)."
+"Abre 'Teclado completo' desde el lanzador de apps del menú principal de RV (la sesión de RV debe estar en ejecución)."
 
 #: packs/third-party/full-keyboard/install.sh:7
 msgid "Full Keyboard %s already installed"
-msgstr "Full Keyboard %s ya está instalado"
+msgstr "Teclado completo %s ya está instalado"
 
 #: packs/third-party/full-keyboard/install.sh:9
 msgid "Full Keyboard is running: close it from its toolbar first"
 msgstr ""
-"Full Keyboard está en ejecución: ciérralo primero desde su barra de herramientas"
+"Teclado completo está en ejecución: ciérralo primero desde su barra de herramientas"
 
 #: packs/third-party/full-keyboard/status.sh:4
 msgid "Full Keyboard not installed"
-msgstr "Full Keyboard no instalado"
+msgstr "Teclado completo no instalado"
 
 #: packs/third-party/full-keyboard/uninstall.sh:3
 msgid "Full Keyboard is running: close it first"
-msgstr "Full Keyboard está en ejecución: ciérralo primero"
+msgstr "Teclado completo está en ejecución: ciérralo primero"
 
 #: packs/third-party/full-keyboard/uninstall.sh:5
 msgid "Kept its settings in ~/.config/framekeyboard."
@@ -4064,11 +4070,11 @@ msgstr ""
 
 #: packs/third-party/recline/README.md
 msgid "Applies when you reinstall Recline, then restart SteamVR."
-msgstr "Se aplica cuando reinstalas Recline y luego reinicias SteamVR."
+msgstr "Se aplica cuando reinstalas Reclinar y luego reinicias SteamVR."
 
 #: packs/third-party/recline/README.md
 msgid "Keep the room view aligned while reclined"
-msgstr "Mantener alineada la vista de la habitación al estar reclinado"
+msgstr "Mantener alineada la vista de habitación al estar reclinado"
 
 #: packs/third-party/recline/README.md
 msgid ""
@@ -4078,23 +4084,23 @@ msgstr ""
 
 #: packs/third-party/recline/README.md
 msgid "No (the room view looks tilted while reclined)"
-msgstr "No (la vista de la habitación se ve inclinada al estar reclinado)"
+msgstr "No (la vista de habitación se ve inclinada al estar reclinado)"
 
 #: packs/third-party/recline/README.md
 msgid "Recline"
-msgstr "Recline"
+msgstr "Reclinar"
 
 #: packs/third-party/recline/README.md
 msgid ""
 "Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
 msgstr ""
-"Las opciones propias de Recline (rotación, altura de ojos, los atajos del control) están en su panel dentro del panel de SteamVR."
+"Las opciones propias de Reclinar (rotación, altura de ojos, los atajos del control) están en su panel del menú principal de SteamVR."
 
 #: packs/third-party/recline/README.md
 msgid ""
 "SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
 msgstr ""
-"El recentrado propio de SteamVR solo te gira; no puede inclinar el mundo, así que al acostarte terminas mirando el techo. Esto compila [Recline-VR](https://github.com/new-waifu/Recline-VR) desde su código fuente y lo instala por ti."
+"La opción Volver a centrar de SteamVR solo te gira; no puede inclinar el mundo, así que al acostarte terminas mirando el techo. Esto compila [Recline-VR](https://github.com/new-waifu/Recline-VR) desde su código fuente y lo instala por ti."
 
 #: packs/third-party/recline/README.md
 msgid ""
@@ -4148,53 +4154,53 @@ msgstr "Recline-VR: fallaron sus pruebas; no se instaló nada"
 msgid ""
 "Recline-VR built without Vulkan; not installing (its fallback has crashed SteamVR's compositor)"
 msgstr ""
-"Recline-VR se compiló sin Vulkan; no se instala (su alternativa ha hecho fallar el compositor de SteamVR)"
+"Recline-VR se compiló sin Vulkan; no se instala (su modo alternativo ha hecho fallar el compositor de SteamVR)"
 
 #: packs/third-party/recline/install.sh:44
 msgid ""
 "Room-view fix left out (setting); the room view will look tilted while reclined"
 msgstr ""
-"Se omitió la corrección de la vista de la habitación (opción); la vista de la habitación se verá inclinada al estar reclinado"
+"Se omitió la corrección de la vista de habitación (opción); la vista de habitación se verá inclinada al estar reclinado"
 
 #: packs/third-party/recline/install.sh:52
 msgid "Recline %s installed. Restart SteamVR to load it (reboot, or: %s)."
 msgstr ""
-"Recline %s instalado. Reinicia SteamVR para cargarlo (reinicia el equipo, o: %s)."
+"Reclinar %s instalado. Reinicia SteamVR para cargarlo (reinicia el equipo, o: %s)."
 
 #: packs/third-party/recline/install.sh:9
 msgid "can't build Recline: %s"
-msgstr "no se puede compilar Recline: %s"
+msgstr "no se puede compilar Reclinar: %s"
 
 #: packs/third-party/recline/status.sh:11
 msgid ""
 "Recline %s installed; restart SteamVR to load it (or check SteamVR's safe mode)"
 msgstr ""
-"Recline %s instalado; reinicia SteamVR para cargarlo (o revisa el modo seguro de SteamVR)"
+"Reclinar %s instalado; reinicia SteamVR para cargarlo (o revisa el modo seguro de SteamVR)"
 
 #: packs/third-party/recline/status.sh:12
 msgid "Recline %s loaded"
-msgstr "Recline %s cargado"
+msgstr "Reclinar %s cargado"
 
 #: packs/third-party/recline/status.sh:7
 msgid ""
 "Recline %s installed but its driver isn't registered (Reinstall fixes it)"
 msgstr ""
-"Recline %s instalado pero su controlador no está registrado (Reinstalar lo corrige)"
+"Reclinar %s instalado, pero su controlador no está registrado (Reinstalar lo corrige)"
 
 #: packs/third-party/recline/status.sh:8
 msgid "Recline %s installed (SteamVR isn't running)"
-msgstr "Recline %s instalado (SteamVR no está en ejecución)"
+msgstr "Reclinar %s instalado (SteamVR no está en ejecución)"
 
 #: packs/third-party/recline/uninstall.sh:11
 msgid ""
 "SteamVR isn't running, so Recline's panel couldn't be unregistered (SteamVR may still list it)"
 msgstr ""
-"SteamVR no está en ejecución, así que no se pudo quitar el registro del panel de Recline (SteamVR podría seguir mostrándolo)"
+"SteamVR no está en ejecución, así que no se pudo quitar el registro del panel de Reclinar (SteamVR podría seguir mostrándolo)"
 
 #: packs/third-party/recline/uninstall.sh:15
 msgid "Kept Recline's panel options: ~/.config/recline-vr"
 msgstr ""
-"Se conservaron las opciones del panel de Recline: ~/.config/recline-vr"
+"Se conservaron las opciones del panel de Reclinar: ~/.config/recline-vr"
 
 #: packs/third-party/recline/uninstall.sh:16
 msgid "Restart SteamVR to unload its driver (reboot, or: %s)."
@@ -4205,7 +4211,7 @@ msgstr ""
 msgid ""
 "couldn't unregister Recline's panel from SteamVR; it will report it missing"
 msgstr ""
-"no se pudo quitar el registro del panel de Recline en SteamVR; lo reportará como faltante"
+"no se pudo quitar el registro del panel de Reclinar en SteamVR; lo reportará como faltante"
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3
 msgid "Frame Tweaks"

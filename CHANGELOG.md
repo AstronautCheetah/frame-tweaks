@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **Spanish: a second pass.** Frame Tweaks' own tools and tweaks have Spanish names (Teclado de
+  flechas, Teclado completo, Espejo de Android, …), and what the text names in SteamVR, KDE,
+  Android or Claude uses their own Spanish wording ("Flotar en el mundo", "Preferencias del
+  sistema", "Depuración inalámbrica").
+
+### Fixed
+- **Status lines stayed in English** when the window was in Spanish: the window passed on the
+  language the installer found when it opened it. It now passes on its own, and checks the
+  statuses again when the language changes.
+
+### For contributors
+- **dev/i18n-terms.py** collects the official wording of other software (SteamVR, Steam, Android,
+  Claude Desktop, KDE) for a language's glossary, and checks a translation against it.
+
 ## 0.6.1 (2026-10-14)
 
 ### Added

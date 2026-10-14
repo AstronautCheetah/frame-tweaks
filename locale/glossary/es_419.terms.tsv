@@ -1,0 +1,22 @@
+# Official es_419 wording of what Frame Tweaks names in other software, from their own
+# translations (dev/i18n-terms.py; don't edit by hand). Columns: English, official,
+# source, other wordings seen, how many of our texts use it.
+English	official	source	alternatives	used
+Apply changes	Aplicar cambios	Claude Desktop		1
+Caps Lock	Bloq Mayús	Claude Desktop	Bloqueo de mayúsculas (KDE)	1
+Change Password	Cambiar contraseña	Steam		1
+Copied to clipboard	Copiado al portapapeles	Claude Desktop		1
+Copy image	Copiar imagen	Claude Desktop		1
+English (UK)	Inglés (RU)	KDE		1
+English (US)	Inglés (EE. UU.)	KDE		1
+Float in World	Flotar en el mundo	SteamVR		4
+Link copied	Enlace copiado	Steam		1
+Made by	Creado por	Claude Desktop		1
+Pair device with pairing code	Vincular dispositivo con un código de vinculación	Android		1
+Remove them	Eliminarlas	Claude Desktop		1
+Reset to defaults	Restablecer valores predeterminados	Claude Desktop		1
+Restart SteamVR	Reiniciar SteamVR	SteamVR		2
+Show text	Mostrar texto	KDE		1
+System Settings	Configuraciones del sistema	Steam	Preferencias del sistema (KDE)	2
+Text copied	Texto copiado	Claude Desktop		1
+Toggle Curvature	Alternar curvatura	SteamVR		3

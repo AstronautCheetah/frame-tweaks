@@ -25,6 +25,9 @@ marked *fuzzy* (Poedit: "Needs work"): it then isn't used until you clear the ma
 Translating a lot at once (a new language, or catching up)? [BATCH.md](BATCH.md): export the
 untranslated texts as JSON, translate them, and import them with checks. Each language keeps its
 terms and tone in [glossary/](glossary/) (Spanish: [glossary/es_419.md](glossary/es_419.md)).
+What the text names in other software (SteamVR's "Float in World", KDE's System Settings, an
+Android setting) takes that software's own wording: `dev/i18n-terms.py LANG` collects it from
+their translations into `glossary/LANG.terms.tsv`, and `--check` lists ours that differ.
 
 ## Trying it
 

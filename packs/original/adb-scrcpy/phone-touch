@@ -108,7 +108,7 @@ def check():
     try:
         STATE.mkdir(parents=True, exist_ok=True)
         seen.write_text(version + "\n")
-        subprocess.run(["notify-send", "-a", "Android Mirror", _("VR extras are off"), why], timeout=10)
+        subprocess.run(["notify-send", "-a", _("Android Mirror"), _("VR extras are off"), why], timeout=10)
     except (OSError, subprocess.SubprocessError):
         pass
     return 1

@@ -164,11 +164,21 @@ def keyboard_language():
     return _keyboard["value"]
 
 
+# A program started by another Frame Tweaks program speaks the language its parent chose
+# (FRAME_TWEAKS_LANG_RESOLVED, set by lib/i18n.sh and by the installer window), so a status line
+# matches the window that asked for it. The installer window itself sets INHERIT = False: it
+# follows the keyboard, and passes its choice on.
+INHERIT = True
+
+
 def wanted_languages():
-    """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the active keyboard's, then
-    gettext's usual variables; each also without its region (de_AT → de)."""
+    """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the parent's choice, the active
+    keyboard's, then gettext's usual variables; each also without its region (de_AT → de)."""
     if os.environ.get("FRAME_TWEAKS_LANGUAGE", "").split(".")[0] in ("en", "C", "POSIX"):
         return []                                     # (English, whatever the keyboard or session)
+    parent = os.environ.get("FRAME_TWEAKS_LANG_RESOLVED", "") if INHERIT else ""
+    if parent and not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
+        return [] if parent == "en" else [parent, parent.split("_")[0]]
     names = []
     kb = keyboard_language()
     for var in ("FRAME_TWEAKS_LANGUAGE", "keyboard", "LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
