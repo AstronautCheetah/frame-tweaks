@@ -7,17 +7,19 @@ has focus. We therefore also send the older direct pulse (IVRSystem.TriggerHapti
 which isn't tied to input focus. Optional: does nothing without SteamVR or openvr."""
 import math
 import os
+import time
 from pathlib import Path
 
 VR_DIR = Path(__file__).resolve().parent / "vr"
 # Full Keyboard's feedback: hover 4 ms at 10 % / 240 Hz, press 25 ms at full strength / 150 Hz.
 HOVER = (0.004, 240, 0.10)
 PRESS = (0.025, 150, 1.0)
+LOG = Path(f"/run/user/{os.getuid()}/arrowpad-haptics.log")
 
 
 class Haptics:
     def __init__(self, already_initialised=False):
-        self.ok = False
+        self.ok, self.retry_at = False, 0.0
         try:
             import openvr
             self.vr_mod = openvr
@@ -57,11 +59,29 @@ class Haptics:
                 best, speed = hand, s
         return best
 
+    def reconnect(self):
+        """After an error: SteamVR's interfaces again (the pad keeps its own openvr session)."""
+        vr = self.vr_mod
+        self.system, self.input = vr.VRSystem(), vr.VRInput()
+        self.input.setActionManifestPath(str(VR_DIR / "actions.json"))
+        self.set = self.input.getActionSetHandle("/actions/arrowpad")
+        self.out = {h: self.input.getActionHandle(f"/actions/arrowpad/out/haptic_{h}") for h in ("left", "right")}
+        self.active.ulActionSet = self.set
+
     def pulse(self, kind, device=None, strength=1.0):
         """device: tracked-device index that caused it (overlay events say which); else guess.
         strength: 0-1, scales amplitude (the settings' Light / Normal)."""
-        if not self.ok or strength <= 0:
+        if strength <= 0 or not hasattr(self, "vr_mod"):
             return
+        if not self.ok:              # an earlier error: try again every few seconds, not never
+            if time.monotonic() < self.retry_at:
+                return
+            try:
+                self.reconnect()
+                self.ok = True
+            except Exception as e:
+                self.failed(e)
+                return
         try:
             duration, freq, amp = HOVER if kind == "hover" else PRESS
             amp *= strength
@@ -79,8 +99,17 @@ class Haptics:
             idx = device if device not in (None, self.vr_mod.k_unTrackedDeviceIndexInvalid) else self.pointing_index()
             if idx != self.vr_mod.k_unTrackedDeviceIndexInvalid:
                 self.system.triggerHapticPulse(idx, 0, int(min(3999, duration * 1e6) * max(0.25, amp)))
-        except Exception:
-            self.ok = False    # SteamVR went away: stop trying
+        except Exception as e:
+            self.failed(e)
+
+    def failed(self, e):
+        """Note it (LOG) and pause for 5 s; one error used to switch haptics off for good."""
+        self.ok, self.retry_at = False, time.monotonic() + 5
+        try:
+            with open(LOG, "a") as f:
+                f.write(f"{time.strftime('%F %T')} haptics: {type(e).__name__}: {e}\n")
+        except OSError:
+            pass
 
     def close(self):
         if self.ok:
