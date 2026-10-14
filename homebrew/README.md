@@ -21,7 +21,7 @@ brew upgrade                # update everything it installed
 ```
 
 **Used by:** [Dictation](../dictation/) (wl-clipboard, and whisper.cpp when whisper-frame isn't installed),
-[Android Mirror](../adb-scrcpy/) (scrcpy) and the [shared clipboard](../clipboard/) (Rust, to build it). Claude Code may also have been installed
+[Android Mirror](../adb-scrcpy/) (scrcpy) and [Screen snip](../snip/) (Tesseract). Claude Code may also have been installed
 with it (`brew install --cask claude-code`).
 
 **Installing needs your sudo password once**, to create `/home/linuxbrew`. If your user has no

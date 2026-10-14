@@ -9,7 +9,7 @@ work.
 > **At a glance**
 >
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `clipboard-sync` built from source, KDE autostart entry
+> - **Changes:** `clipboard-sync` built from source (with a temporary, pinned Rust toolchain), KDE autostart entry
 > - **Unusual access:** Reads and writes both sessions' clipboards
 > - **Undo:** `./install.sh uninstall clipboard`
 <!-- /generated:glance -->
@@ -22,8 +22,11 @@ sees both.
 ./install.sh install clipboard
 ```
 
-- Built from **upstream source** with Rust (Homebrew), at the commit pinned in `pin`. The first
-  build takes a few minutes.
+- Built from **upstream source**, at the commit pinned in `pin`, with a pinned Rust toolchain
+  (`rust.pin`) set up in a temporary folder for the build and deleted afterwards (about 600 MB
+  while it builds, nothing after). The build takes a minute or two. Older versions used
+  Homebrew's Rust, which stays installed (3.4 GB with its LLVM): if you don't use it,
+  `brew uninstall rust && brew autoremove`.
 - One small change is applied before building, [`keep-images.patch`](keep-images.patch):
   clipboard-sync shares text only, and when you copied an image (e.g. Copy image in the screen
   snip) it saw "no text" as a change and put the last text back everywhere a moment later,

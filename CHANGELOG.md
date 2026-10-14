@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **The shared clipboard no longer needs Homebrew's Rust (3.4 GB with its LLVM):** it's built
+  with a pinned Rust toolchain in a temporary folder that's deleted afterwards. Homebrew's Rust
+  from older versions stays; the installer says how to remove it (`brew uninstall rust && brew
+  autoremove`).
 - **Android Mirror asks which phone:** with several advertising, a list to choose from (it's
   remembered); when the remembered one isn't in sight, wait for it or use one that is. **Choose
   phone…** on its menu entry (or `phone --pick`) chooses again.

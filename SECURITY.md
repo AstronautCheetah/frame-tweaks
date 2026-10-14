@@ -26,7 +26,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | snip | `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |
 | screen-reader | One setting in `~/.config/kaccessrc` (its previous value is restored on removal) | Reads what's on screen (accessibility interface) and speaks it |
 | full-keyboard | Upstream's own installer into `~/.local/share/framekeyboard`, pinned release | A SteamVR overlay; types through its own input path |
-| clipboard | `clipboard-sync` built from source, KDE autostart entry | Reads and writes both sessions' clipboards |
+| clipboard | `clipboard-sync` built from source (with a temporary, pinned Rust toolchain), KDE autostart entry | Reads and writes both sessions' clipboards |
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037) |
 | cursor | `~/.config/environment.d/` (one variable for KWin) | – |
 | vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame (sandboxed Flatpak apps included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed |
@@ -82,8 +82,9 @@ protected. Avoid changing it while a second wallet service is running (see
 - **Pinned upstream releases** (Full Keyboard, whisper-frame, the Whisper model): each tweak's
   `pin` file records the exact version and SHA256; the download must match it, so a changed or
   replaced upstream file is refused. **clipboard-sync** is built from a pinned commit with its
-  own lock file. **Python packages** (PyQt6, openvr, jeepney) are installed at the exact versions
-  in `lib/python-constraints.txt`. Pins move only in a reviewed commit (`dev/check-pins.sh`).
+  own lock file, using a pinned `rustup-init` (checked against its SHA256) that installs a
+  pinned Rust toolchain for the build only. **Python packages** (PyQt6, openvr, jeepney) are
+  installed at the exact versions in `lib/python-constraints.txt`. Pins move only in a reviewed commit (`dev/check-pins.sh`).
 - **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors only and
   are checked against Arch Linux ARM's build key (`lib/keys/`, fingerprint
   `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking. The signed package's

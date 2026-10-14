@@ -17,6 +17,13 @@ for pin in */pin */*.pin; do
         new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
         [ "$new" = "$(sed -n 's/^rev=//p' "$pin")" ] && echo "$id: pinned $cur (latest commit)" ||
             echo "$id: pinned $cur; upstream HEAD is ${new:0:7}"
+    elif [[ $api == *static.rust-lang.org* ]]; then     # rustup, and the Rust toolchain it installs
+        new=$(sed -n "s/^version = '\(.*\)'/\1/p" <<<"$json")
+        [ "$new" = "$cur" ] && echo "$id: rustup $cur (latest)" || echo "$id: rustup $cur; upstream has $new"
+        tc=$(curl -fsSL --max-time 15 https://static.rust-lang.org/dist/channel-rust-stable.toml 2>/dev/null |
+             grep -A1 '^\[pkg.rustc\]' | sed -n 's/^version = "\([0-9.]*\).*/\1/p')
+        pinned=$(sed -n 's/^toolchain=//p' "$pin")
+        [ "$tc" = "$pinned" ] && echo "$id: Rust $pinned (latest stable)" || echo "$id: Rust $pinned; stable is ${tc:-?}"
     elif [[ $api == *huggingface.co* ]]; then           # model repository revision
         new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
         [[ $new == "$cur"* ]] && echo "$id: pinned $cur (latest revision)" ||
