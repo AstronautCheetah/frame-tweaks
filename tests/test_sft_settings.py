@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
 import sft  # noqa: E402
 
-_l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "adb-scrcpy" / "phone-touch"))
+_l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "packs/official/adb-scrcpy" / "phone-touch"))
 pt = importlib.util.module_from_spec(importlib.util.spec_from_loader("phone_touch", _l))
 _l.exec_module(pt)
 
@@ -27,13 +27,13 @@ class SameChoicesEverywhere(unittest.TestCase):
     def test_android_mirror_gear_and_helper(self):
         self.assertEqual({k: list(v) for k, v in pt.CHOICES.items()}, values("adb-scrcpy"))
         self.assertEqual(pt.DEFAULTS, sft.defaults("adb-scrcpy"))
-        js = (ROOT / "adb-scrcpy" / "phone-touch.js").read_text()
+        js = (ROOT / "packs/official/adb-scrcpy" / "phone-touch.js").read_text()
         for key, vals in values("adb-scrcpy").items():
             for v in vals:
                 self.assertIn(f"'{v}'", js, f"{key}={v} missing from the VR panel")
 
     def test_scroll_strips_gear(self):
-        js = (ROOT / "scroll-strips" / "patch.js").read_text()
+        js = (ROOT / "packs/official/scroll-strips" / "patch.js").read_text()
         swatches = [float(x) for x in re.search(r"const SWATCHES = \[([^\]]*)\]", js).group(1).split(",")]
         self.assertEqual(swatches, [v for v in values("scroll-strips")["color"] if v != "tint"])
         for key, cm in (("thickness", r"'thickness', \[([^\]]*)\]"), ("gap", r"'gap', \[([^\]]*)\]"),

@@ -19,7 +19,7 @@ notes() {
     echo "upstream's file is gone or changed, and only after checking it against the SHA256 in its"
     echo "pin. Each file keeps its upstream licence:"
     echo
-    for pin in */pin */*.pin; do
+    for pin in packs/*/*/pin packs/*/*/*.pin; do
         [ -n "$(val mirror "$pin")" ] || continue
         echo "- \`$(basename "$(val mirror "$pin")")\` (\`$pin\`, from $(val url "$pin")): $(val license "$pin")"
     done
@@ -32,7 +32,7 @@ if ! have=$(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/nu
     have=""
 fi
 missing=0
-for pin in */pin */*.pin; do
+for pin in packs/*/*/pin packs/*/*/*.pin; do
     m=$(val mirror "$pin"); [ -n "$m" ] || continue
     name=$(basename "$m")
     grep -qxF "$name" <<<"$have" && continue

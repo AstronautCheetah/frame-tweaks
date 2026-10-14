@@ -1,3 +1,0 @@
-# Programs this tweak runs; ./install.sh stops them before uninstalling or reinstalling.
-# One pgrep -f regular expression per line, matched against the full command line; ~ = $HOME.
-~/.local/bin/grab-guard --run

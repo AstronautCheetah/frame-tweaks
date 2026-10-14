@@ -16,6 +16,8 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout,
                              QWidget)
 
+from sft import components  # (the tweaks: which one set up an app; lib/ is on the path)
+
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
 APP_TIMERS = Path.home() / ".local/bin/app-timers"
@@ -31,8 +33,7 @@ WALLET_MARK = "X-FrameTweaks-Wallet=true"
 # wallet's own Lock entry.
 NOT_WALLET_APP = re.compile(r"steam://|/vrurlhandler\b|wallet-unlock")
 # Entries a tweak sets up itself (removing one here lasts until that tweak is reinstalled).
-WALLET_OWNERS = {"org.signal.Signal": "Signal", "com.anthropic.Claude": "Claude Desktop",
-                 "android-mirror": "Android Mirror", "org.kde.kwalletmanager": "Wallet"}
+WALLET_OWNERS = {app: c["title"] for c in components() for app in c["wallet_apps"]}   # (wallet_apps: in manifests)
 
 
 def desktop_entry(path):
@@ -295,7 +296,7 @@ class WalletApps(QWidget):
 )
             note = " · ".join(what) or "password only (keeps its own session)"
             if a["id"] in WALLET_OWNERS:
-                note += f"<br><span style='color:#6b7783'>Set up by the {WALLET_OWNERS[a['id']]} tweak: " \
+                note += f"<br><span style='color:#6b7783'>Set up by the “{WALLET_OWNERS[a['id']]}” tweak: " \
                         "reinstalling it (↻) adds it back if removed here.</span>"
             gate = QCheckBox("Password first")
             gate.setChecked(a["gate"])

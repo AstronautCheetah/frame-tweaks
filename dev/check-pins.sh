@@ -8,9 +8,9 @@
 # listing, or the downloaded file.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-for pin in */pin */*.pin; do
+for pin in packs/*/*/pin packs/*/*/*.pin; do
     [ -f "$pin" ] || continue
-    id=${pin%/pin}; id=${id%.pin}
+    id=${pin#packs/*/}; id=${id%/pin}; id=${id%.pin}
     cur=$(sed -n 's/^version=//p' "$pin"); api=$(sed -n 's/^latest=//p' "$pin")
     json=$(curl -fsSL --max-time 15 "$api" 2>/dev/null) || { echo "$id: pinned $cur; couldn't reach upstream"; continue; }
     if grep -q '^rev=' "$pin"; then                    # git commit

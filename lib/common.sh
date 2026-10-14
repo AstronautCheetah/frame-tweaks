@@ -6,6 +6,18 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# The folder of the tweak whose script sourced this file (its own files), and tweak_dir <id> for
+# another tweak's: the installer passes the folders it found (FRAME_TWEAKS_DIRS, "id=folder"
+# lines, user packs included); a script run on its own falls back to the official pack.
+TWEAK_DIR="$(cd "$(dirname "${BASH_SOURCE[1]:-$0}")" && pwd)"
+tweak_dir() {
+    local line
+    while IFS= read -r line; do
+        [ "${line%%=*}" = "$1" ] && { echo "${line#*=}"; return; }
+    done <<<"${FRAME_TWEAKS_DIRS:-}"
+    echo "$REPO_DIR/packs/official/$1"
+}
+export FRAME_TWEAKS_LIB="$REPO_DIR/lib"     # (for the scripts a tweak runs in turn, wherever they are)
 BIN="$HOME/.local/bin"
 APPS="$HOME/.local/share/applications"
 # HTTPS mirrors only (the main mirror's certificate doesn't match its name, so it isn't used);
@@ -161,7 +173,8 @@ runs_here() {
 # Frame Tweaks' own copy (an asset of this repo's "mirror" release, dev/mirror-pins.sh),
 # checked against the same hash.
 fetch_pinned() {
-    local pin="$REPO_DIR/$1/${3:-pin}" url sha mirror
+    local pin url sha mirror
+    pin="$(tweak_dir "$1")/${3:-pin}"
     url=$(sed -n 's/^url=//p' "$pin"); sha=$(sed -n 's/^sha256=//p' "$pin"); mirror=$(sed -n 's/^mirror=//p' "$pin")
     if curl -fL# -o "$2" "$url" && sha_ok "$sha" "$2"; then return 0; fi
     [ -n "$mirror" ] || die "$(basename "$url"): download failed, or it differs from the pinned file; not installing it"
@@ -187,17 +200,20 @@ newest_tag() {
     [ "$(release_channel)" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
     grep -E "$pattern" | sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1
 }
-pin_version() { sed -n 's/^version=//p' "$REPO_DIR/$1/pin"; }
+pin_version() { sed -n 's/^version=//p' "$(tweak_dir "$1")/pin"; }
 
 # Steam's "+" menu resolves Icon= only in the hicolor theme and rescans when the
 # applications/icon directories' mtime changes (writing an existing file doesn't change it).
 ICONS="$HOME/.local/share/icons/hicolor"
 LAUNCHER_ORIGINALS="$HOME/.local/share/frame-tweaks/launcher-originals"
 
-# install_icon <name>: icons/<name>.png from this repo into hicolor (256x256).
+# install_icon <name>: <name>.png from the tweak's folder (or the repo's icons/) into hicolor
+# (256x256).
 install_icon() {
+    local src="$TWEAK_DIR/$1.png"
+    [ -f "$src" ] || src="$REPO_DIR/icons/$1.png"
     mkdir -p "$ICONS/256x256/apps"
-    install -m644 "$REPO_DIR/icons/$1.png" "$ICONS/256x256/apps/$1.png"
+    install -m644 "$src" "$ICONS/256x256/apps/$1.png"
     touch "$ICONS"
 }
 
@@ -326,11 +342,11 @@ remove_files() {
 
 export QT_VENV="$HOME/.local/share/arrowpad/venv"   # PyQt6, shared by arrowpad and nordvpn-tray
 
-# --- SteamVR dashboard patches (vr-dashboard/) ---------------------------------------------
+# --- SteamVR dashboard patches (packs/official/vr-dashboard/) ---------------------------------------------
 # A VR windows tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
 VR_DASHBOARD="$HOME/.local/share/frame-tweaks/vr-dashboard"
 install_dashboard_patch() {    # install_dashboard_patch NAME FILE
-    [ -x "$VR_DASHBOARD/sft-dashboard" ] || "$REPO_DIR/vr-dashboard/install.sh" || return 1
+    [ -x "$VR_DASHBOARD/sft-dashboard" ] || "$(tweak_dir vr-dashboard)/install.sh" || return 1
     mkdir -p "$VR_DASHBOARD/patches"
     install -m644 "$2" "$VR_DASHBOARD/patches/$1.js"
     if sysctl_user is-active --quiet sft-dashboard.service; then
