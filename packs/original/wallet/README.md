@@ -23,6 +23,7 @@ source:
 icon: {file: frame-tweaks-lock.png}
 run: {label: Unlock}
 wallet_apps: [org.kde.kwalletmanager]
+config: [~/.config/frame-tweaks/wallet.conf, ~/.config/frame-tweaks/app-timers.conf]
 changes: >-
   `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh`
   wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet**

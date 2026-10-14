@@ -208,7 +208,7 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh gui                the installer window (desktop mode)
 ./install.sh list               every tweak and what it does
 ./install.sh install signal     install (adds what it depends on: here, the wallet)
-./install.sh uninstall arrowpad remove one (keeps its settings)
+./install.sh uninstall arrowpad remove one (keeps its settings, unless ⚙ Preferences say to remove them)
 ./install.sh reinstall arrowpad remove and install again in one step (the ↻ button)
 ./install.sh status             health check, changes nothing
 ./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
@@ -318,7 +318,9 @@ What stays:
   has Signal read its database key from the wallet (`flatpak override --user --show
   org.signal.Signal`): the key is there, so Signal needs it to open its messages.
 - **Your data in other apps' usual places**, such as the KDE wallet itself, adb pairing keys in
-  `~/.android`, or VSCodium's settings. Each tweak's uninstaller lists what it keeps as it runs.
+  `~/.android`. Each tweak's uninstaller lists what it keeps as it runs.
+- **Each tweak's settings,** unless ⚙ Preferences → Uninstalling says to remove them (or you run
+  `./install.sh uninstall --remove-settings ID`).
 - The lines tweaks added to `~/.bashrc` (putting `~/.local/bin` and Homebrew on your `PATH`),
   and `~/.config/environment.d/10-local-bin.conf`. They are harmless; delete them by hand if you
   like.

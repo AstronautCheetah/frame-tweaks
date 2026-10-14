@@ -41,6 +41,11 @@ next to the idea it inspired.
 - [x] **SteamOS drift check** run on the device after updates: dashboard markers, paths and
   services the tweaks rely on. *(Jovian-NixOS)*
 - [x] **CI actions pinned** to commit SHAs. *(Jovian-NixOS)*
+- [ ] **On 2026-10-20: a newer Ubuntu for CI.** The workflows (`ci.yml`, `release.yml`,
+  `upstream.yml`) name `ubuntu-24.04` rather than `ubuntu-latest`, so a new Ubuntu comes in
+  when we try it. Move them to the newest image `ubuntu-latest` points to then: change one
+  workflow, check its run (shellcheck, Python, Qt offscreen tests, AppStream validation), then
+  the others.
 
 ## Packaging and UX
 - [x] **AppStream metainfo,** a reverse-DNS desktop ID and multi-size icons for the installer

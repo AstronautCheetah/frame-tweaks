@@ -12,6 +12,7 @@ os.environ["FRAME_TWEAKS_KEYBOARD"] = "0"
 _ANNOUNCED, _PREFERRED = tempfile.TemporaryDirectory(), tempfile.TemporaryDirectory()
 os.environ["FRAME_TWEAKS_ANNOUNCE_FILE"] = os.path.join(_ANNOUNCED.name, "language")
 os.environ["FRAME_TWEAKS_PREFERENCE_FILE"] = os.path.join(_PREFERRED.name, "language")   # (⚙ Preferences)
+os.environ["FRAME_TWEAKS_UNINSTALL_FILE"] = os.path.join(_PREFERRED.name, "uninstall-settings")
 
 
 class English(unittest.TestCase):

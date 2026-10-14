@@ -269,6 +269,29 @@ class Packs(unittest.TestCase):
             self.assertNotIn("hello", self.ids(), key)
             self.assertTrue(any(f"hello: {key}" in p for p in sft.load()["problems"]), key)
 
+    def test_config_lists_only_its_own_settings_places(self):
+        """config: is what an uninstall may remove (⚙ Preferences): a path below ~/.config/,
+        ~/.var/app/<app> or ~/.local/state/frame-tweaks/, never one of those folders whole, nor a
+        way out of them. The settings file counts without being listed."""
+        for bad in ("~/.config/", "~/.config", "~/.bashrc", "~/.config/../.ssh", "~/.var/app/", "~/.var/app/a/b",
+                    "~/.local/state/frame-tweaks", "/etc/x", "~/.config/~/x", ".config/x"):
+            d = self.tweak("mypack", "hello", extra=f"config: [{bad!r}]\n")
+            sft.set_trusted(d.parent, True)
+            self.assertNotIn("hello", self.ids(), bad)
+            self.assertTrue(any("hello: config" in p for p in sft.load()["problems"]), bad)
+        d = self.tweak("mypack", "hello", extra="config: [~/.config/hello.json, ~/.var/app/org.example.Hello, "
+                       "~/.local/state/frame-tweaks/hello]\nsettings:\n  file: ~/.config/frame-tweaks/hello.conf\n"
+                       "  format: shell\n  options:\n    - {key: A, title: A, default: a, choices: [{label: A, value: a}]}\n")
+        sft.set_trusted(d.parent, True)
+        self.assertEqual(self.ids()["hello"]["config"], ["~/.config/hello.json", "~/.var/app/org.example.Hello",
+                                                         "~/.local/state/frame-tweaks/hello", "~/.config/frame-tweaks/hello.conf"])
+
+    def test_official_tweaks_settings_places(self):
+        ids = self.ids()
+        self.assertEqual(ids["arrowpad"]["config"], ["~/.config/arrowpad.json", "~/.config/arrowpad-vr.json"])
+        self.assertEqual(ids["snip"]["config"], ["~/.config/frame-tweaks/snip.json"])
+        self.assertEqual(ids["claude-code"]["config"], [])      # (~/.claude holds its sign-in, history and memory)
+
     def test_trusting_by_name_needs_a_name_only_one_pack_has(self):
         """A pack can call itself anything, so `mods trust NAME` mustn't pick one of two."""
         mine = self.tweak("mypack", "hello").parent

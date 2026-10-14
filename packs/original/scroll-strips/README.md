@@ -108,7 +108,7 @@ survives_updates: >-
   fits
 undo: >-
   `./install.sh uninstall scroll-strips` (or untick it in the Frame Tweaks window; settings are
-  kept)
+  kept unless ⚙ Preferences say to remove them)
 test:
   offline: true
   keeps: [".config/frame-tweaks/scroll-strips.json"]
@@ -195,7 +195,7 @@ Steam session never sees that window clicked.
 - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json`
 - **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. Each time SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown in its status) until a Frame Tweaks update catches up.
 - **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys
-- **Undo:** `./install.sh uninstall scroll-strips` (or untick it in the Frame Tweaks window; settings are kept)
+- **Undo:** `./install.sh uninstall scroll-strips` (or untick it in the Frame Tweaks window; settings are kept unless ⚙ Preferences say to remove them)
 <!-- /generated:changes -->
 
 ---

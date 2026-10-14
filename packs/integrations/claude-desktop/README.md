@@ -15,6 +15,7 @@ source: {relation: from, url: https://claude.com/download}
 icon: {theme: help-about}
 run: {label: Open}
 wallet_apps: [com.anthropic.Claude]
+config: [~/.config/Claude]
 changes: >-
   The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in
   `~/.local/bin`, an app-menu entry and icons

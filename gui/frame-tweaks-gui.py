@@ -1323,7 +1323,8 @@ class Window(QWidget):
             self.confirm_text.setText(
                 _("These installed tweaks were unticked and will be <b>removed</b>:") + "<br><br>"
                 + html.escape(", ".join(remove)) + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
-                + _("Their settings and data are kept.") + "</span>")
+                + (_("Their settings are removed too (⚙ Preferences); their data is kept.")
+                   if sft.uninstall_settings() == "remove" else _("Their settings and data are kept.")) + "</span>")
             try:
                 self.confirm_yes.clicked.disconnect()
             except TypeError:

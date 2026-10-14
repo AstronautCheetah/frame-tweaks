@@ -20,8 +20,8 @@ Command line (through ./install.sh):
   sft.py settings ID                    current settings, and what each can be set to
   sft.py settings ID KEY=VALUE...       change them (VALUE: a listed value or its label)
   sft.py settings ID --reset            back to the defaults
-For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, test-list,
-test-keeps ID.
+For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID,
+uninstall-settings [keep|remove], test-list, test-keeps ID.
 """
 import hashlib
 import json
@@ -78,7 +78,13 @@ ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author",
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
-            "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme")
+            "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config")
+# config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
+# uninstall keeps them, or removes them when the Preferences say so (UNINSTALL_PREF). Only below
+# these roots: data kept elsewhere (adb's pairing keys, the dictation history, ~/.claude) stays.
+CONFIG_ROOTS = ("~/.config/", "~/.var/app/", "~/.local/state/frame-tweaks/")
+UNINSTALL_PREF = Path(os.environ.get("FRAME_TWEAKS_UNINSTALL_FILE")             # keep (default) | remove
+                      or Path.home() / ".config/frame-tweaks/uninstall-settings")
 # upstream_readme: the README of the project a tweak installs, at the version it pins
 # (dev/fetch-upstream-readmes.py copies it into upstream.md; dev/gen-docs.py appends it).
 UPSTREAM_README = re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/[^/]+/\S+\.md$")
@@ -182,6 +188,29 @@ def set_official(d, on):
     write_set(OFF_PACKS, off)
 
 
+def config_path_ok(c):
+    """A config: entry: a path below one of CONFIG_ROOTS, one level down at least (never a whole
+    ~/.config), without .. or a ~ inside."""
+    if not (isinstance(c, str) and "\n" not in c and "~" not in c[1:]):
+        return False
+    root = next((r for r in CONFIG_ROOTS if c.startswith(r)), None)
+    rest = Path(c[len(root):]).parts if root else ()
+    return bool(rest) and ".." not in rest and (root != "~/.var/app/" or len(rest) == 1)
+
+
+def uninstall_settings():
+    """What an uninstall does with a tweak's settings: "keep" (the default) or "remove"."""
+    try:
+        return "remove" if UNINSTALL_PREF.read_text().strip() == "remove" else "keep"
+    except OSError:
+        return "keep"
+
+
+def set_uninstall_settings(value):
+    UNINSTALL_PREF.parent.mkdir(parents=True, exist_ok=True)
+    UNINSTALL_PREF.write_text(("remove" if value == "remove" else "keep") + "\n")
+
+
 def check_settings(st, cid, where):
     errs = []
     if not isinstance(st, dict):
@@ -261,6 +290,10 @@ def read_tweak(d):
     procs = data.get("processes") or []
     if not (isinstance(procs, list) and all(isinstance(p, str) and p.strip() and "\n" not in p for p in procs)):
         errs.append(f"{where}: processes must be a list of pgrep -f patterns, e.g. [^~/.local/bin/my-daemon]")
+    conf = data.get("config") or []
+    if not (isinstance(conf, list) and all(config_path_ok(c) for c in conf)):
+        errs.append(f"{where}: config must be a list of paths of its own under {', '.join(CONFIG_ROOTS)}, "
+                    "e.g. [~/.config/my-tweak.json]")
     apps = data.get("wallet_apps") or []
     if not (isinstance(apps, list) and all(isinstance(a, str) for a in apps)):
         errs.append(f"{where}: wallet_apps must be a list of app ids")
@@ -289,6 +322,7 @@ def read_tweak(d):
         experimental=data.get("experimental") or "", icon=icon,
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() else None,
         processes=procs, settings=data.get("settings"),
+        config=list(dict.fromkeys(conf + ([data["settings"]["file"]] if data.get("settings") else []))),
         known_issue=data.get("known_issue"), wallet_apps=apps,
         upstream_readme=data.get("upstream_readme", ""),
         test=data.get("test") or {}, replaces=data.get("replaces", False),
@@ -718,6 +752,15 @@ def main(argv):
     elif cmd == "processes" and len(args) == 1:
         c = component(args[0])
         print("\n".join(c["processes"] if c else []))
+    elif cmd == "config" and len(args) == 1:  # where it keeps its settings (~ = $HOME)
+        c = component(args[0])
+        print("\n".join(c["config"] if c else []))
+    elif cmd == "uninstall-settings" and len(args) <= 1:
+        if args:
+            if args[0] not in ("keep", "remove"):
+                sys.exit(_("uninstall-settings takes keep or remove"))
+            set_uninstall_settings(args[0])
+        print(uninstall_settings())
     elif cmd == "deps" and len(args) == 1:      # what ID needs, transitively, dependencies first
         byid, out, seen = {c["id"]: c for c in components()}, [], set()
         if args[0] not in byid:

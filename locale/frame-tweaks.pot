@@ -136,7 +136,7 @@ msgstr ""
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1320 install.sh:339
+#: gui/frame-tweaks-gui.py:1320 install.sh:357
 msgid "Nothing to change."
 msgstr ""
 
@@ -145,36 +145,40 @@ msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py:1326
+msgid "Their settings are removed too (⚙ Preferences); their data is kept."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py:1327
 msgid "Their settings and data are kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1413
+#: gui/frame-tweaks-gui.py:1414
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1416
+#: gui/frame-tweaks-gui.py:1417
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1422 gui/frame-tweaks-gui.py:1426
+#: gui/frame-tweaks-gui.py:1423 gui/frame-tweaks-gui.py:1427
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1424
+#: gui/frame-tweaks-gui.py:1425
 msgid "Copied"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1428
+#: gui/frame-tweaks-gui.py:1429
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:176 install.sh:359
+#: gui/frame-tweaks-gui.py:176 install.sh:377
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:177 install.sh:358
+#: gui/frame-tweaks-gui.py:177 install.sh:376
 msgid "Press Enter to close…"
 msgstr ""
 
@@ -199,7 +203,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:363 install.sh:189 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:363 install.sh:191 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -231,7 +235,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:414 gui/frame-tweaks-gui.py:437 gui/frame-tweaks-gui.py:670 gui/frame-tweaks-gui.py:1425 gui/packs_page.py:28 gui/prefs_page.py:50 gui/report_page.py:34 gui/wallet_page.py:259 packs/original/snip/frame-snip:535
+#: gui/frame-tweaks-gui.py:414 gui/frame-tweaks-gui.py:437 gui/frame-tweaks-gui.py:670 gui/frame-tweaks-gui.py:1426 gui/packs_page.py:28 gui/prefs_page.py:51 gui/report_page.py:34 gui/wallet_page.py:259 packs/original/snip/frame-snip:535
 msgid "← Back"
 msgstr ""
 
@@ -328,7 +332,7 @@ msgstr ""
 msgid "Working… (a download can take a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:626 packs/original/snip/frame-snip:609 install.sh:213
+#: gui/frame-tweaks-gui.py:626 packs/original/snip/frame-snip:609 install.sh:215
 msgid "Done."
 msgstr ""
 
@@ -336,7 +340,7 @@ msgstr ""
 msgid "Didn't work: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:648 gui/prefs_page.py:118
+#: gui/frame-tweaks-gui.py:648 gui/prefs_page.py:144 gui/prefs_page.py:149
 msgid "Saved."
 msgstr ""
 
@@ -378,7 +382,7 @@ msgid ""
 "What Frame Tweaks is, how to install, update and remove it, common issues"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:807 gui/frame-tweaks-gui.py:1427
+#: gui/frame-tweaks-gui.py:807 gui/frame-tweaks-gui.py:1428
 msgid "🐞 Report a problem"
 msgstr ""
 
@@ -415,7 +419,7 @@ msgstr ""
 msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:984 lib/sft.py:580
+#: gui/frame-tweaks-gui.py:984 lib/sft.py:614
 msgid "Experimental: %s"
 msgstr ""
 
@@ -481,7 +485,7 @@ msgid ""
 "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, put a pack in <code>{folder}</code>, then trust it below. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 
-#: gui/packs_page.py:79 lib/sft.py:669
+#: gui/packs_page.py:79 lib/sft.py:703
 msgid "(instead of {other}'s)"
 msgstr ""
 
@@ -520,51 +524,68 @@ msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 
-#: gui/prefs_page.py:17
-msgid "Haptic ticks on this window's buttons (in VR)"
+#: gui/prefs_page.py:104
+msgid "Keep its settings"
+msgstr ""
+
+#: gui/prefs_page.py:104
+msgid "Remove its settings too"
+msgstr ""
+
+#: gui/prefs_page.py:115
+msgid "This window"
 msgstr ""
 
 #: gui/prefs_page.py:18
+msgid "Haptic ticks on this window's buttons (in VR)"
+msgstr ""
+
+#: gui/prefs_page.py:19
 msgid ""
 "A light tick when the laser moves onto a button, a firmer one on a click."
 msgstr ""
 
-#: gui/prefs_page.py:19
+#: gui/prefs_page.py:20
 msgid "Controller buttons in VR"
 msgstr ""
 
-#: gui/prefs_page.py:20
+#: gui/prefs_page.py:21
 msgid ""
 "While the laser is on this window: B goes back, Y to the top, A ticks the row it points at, the left D-pad moves through the rows. Takes effect when the window opens again."
 msgstr ""
 
-#: gui/prefs_page.py:22
+#: gui/prefs_page.py:23
 msgid "Look for a new Frame Tweaks release when this window opens"
 msgstr ""
 
-#: gui/prefs_page.py:23
+#: gui/prefs_page.py:24
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr ""
 
-#: gui/prefs_page.py:53
+#: gui/prefs_page.py:54
 msgid "Preferences"
 msgstr ""
 
-#: gui/prefs_page.py:67 packs/original/snip/frame-snip:549 packs/original/speech/README.md
+#: gui/prefs_page.py:68 packs/original/snip/frame-snip:549 packs/original/speech/README.md
 msgid "Language"
 msgstr ""
 
-#: gui/prefs_page.py:68
+#: gui/prefs_page.py:69
 msgid ""
 "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
 msgstr ""
 
-#: gui/prefs_page.py:77
+#: gui/prefs_page.py:78
 msgid "Follow the keyboard (now: {language})"
 msgstr ""
 
-#: gui/prefs_page.py:90
-msgid "This window"
+#: gui/prefs_page.py:93
+msgid "Uninstalling a tweak"
+msgstr ""
+
+#: gui/prefs_page.py:94
+msgid ""
+"Its settings: kept, so it's set up as before if you install it again, or removed with it. Removing them also signs you out of Claude Desktop, takes VSCodium's extensions, and NordVPN's key (setting it up again takes a new access token). Data stays either way: the dictation history, adb's pairing keys, Claude Code's ~/.claude."
 msgstr ""
 
 #: gui/report_page.py:37
@@ -841,166 +862,171 @@ msgstr ""
 msgid "under a minute"
 msgstr ""
 
-#: install.sh:175
+#: install.sh:177
 msgid "(experimental)"
 msgstr ""
 
-#: install.sh:177
+#: install.sh:179
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 
-#: install.sh:197
+#: install.sh:199
 msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:208 install.sh:244 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
+#: install.sh:210 install.sh:249 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
 msgid "%s failed"
 msgstr ""
 
-#: install.sh:212 install.sh:247
+#: install.sh:214 install.sh:252
 msgid "Failed: %s"
 msgstr ""
 
-#: install.sh:217
+#: install.sh:222
 msgid "uninstall what?"
 msgstr ""
 
-#: install.sh:224
+#: install.sh:229
 msgid "Nothing installed."
 msgstr ""
 
-#: install.sh:234
+#: install.sh:239
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr ""
 
-#: install.sh:241 install.sh:258
+#: install.sh:246 install.sh:276
 msgid "removing %s"
 msgstr ""
 
-#: install.sh:253
-msgid "reinstall what?"
-msgstr ""
-
-#: install.sh:264
-msgid "--to needs a release, e.g. v0.3.1"
-msgstr ""
-
-#: install.sh:267
-msgid "Updating the checkout"
+#: install.sh:265
+msgid ""
+"Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
 #: install.sh:271
+msgid "reinstall what?"
+msgstr ""
+
+#: install.sh:282
+msgid "--to needs a release, e.g. v0.3.1"
+msgstr ""
+
+#: install.sh:285
+msgid "Updating the checkout"
+msgstr ""
+
+#: install.sh:289
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
 msgstr ""
 
-#: install.sh:274
+#: install.sh:292
 msgid "git pull failed; not reinstalling"
 msgstr ""
 
-#: install.sh:278
+#: install.sh:296
 msgid "couldn't reach GitHub; not updating"
 msgstr ""
 
-#: install.sh:280
+#: install.sh:298
 msgid "no release found"
 msgstr ""
 
-#: install.sh:281
+#: install.sh:299
 msgid "no release %s"
 msgstr ""
 
-#: install.sh:283
+#: install.sh:301
 msgid "Updating to %s (%s channel)"
 msgstr ""
 
-#: install.sh:287
+#: install.sh:305
 msgid "git checkout failed; not reinstalling"
 msgstr ""
 
-#: install.sh:297
+#: install.sh:315
 msgid "Nothing installed yet."
 msgstr ""
 
-#: install.sh:300
+#: install.sh:318
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 
-#: install.sh:309
+#: install.sh:327
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 
-#: install.sh:311
+#: install.sh:329
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr ""
 
-#: install.sh:332
+#: install.sh:350
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 
-#: install.sh:344
+#: install.sh:362
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 
-#: install.sh:347
+#: install.sh:365
 msgid "Remove tweaks?"
 msgstr ""
 
-#: install.sh:348
+#: install.sh:366
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 
-#: install.sh:386
+#: install.sh:404
 msgid "stopped %s's running programs"
 msgstr ""
 
-#: install.sh:409
+#: install.sh:427
 msgid "%s migration failed"
 msgstr ""
 
-#: install.sh:414
+#: install.sh:432
 msgid "%s what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:418
+#: install.sh:436
 msgid "%s: held (updates leave it as it is)"
 msgstr ""
 
-#: install.sh:419
+#: install.sh:437
 msgid "%s: updated normally again"
 msgstr ""
 
-#: install.sh:429
+#: install.sh:447
 msgid "The bug form, with your version filled in: %s"
 msgstr ""
 
-#: install.sh:470
+#: install.sh:488
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr ""
 
-#: install.sh:506
+#: install.sh:524
 msgid "run what?"
 msgstr ""
 
-#: install.sh:507
+#: install.sh:525
 msgid "%s has nothing to run"
 msgstr ""
 
-#: install.sh:517
+#: install.sh:535
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
-#: install.sh:518
+#: install.sh:536
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr ""
 
-#: install.sh:79
+#: install.sh:81
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
 msgstr ""
 
@@ -1128,144 +1154,148 @@ msgstr ""
 msgid "Homebrew installed."
 msgstr ""
 
-#: lib/sft.py:566
+#: lib/sft.py:600
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr ""
 
-#: lib/sft.py:575 lib/sft.py:694 lib/sft.py:717 lib/sft.py:724
+#: lib/sft.py:609 lib/sft.py:728 lib/sft.py:751 lib/sft.py:767
 msgid "unknown component: %s"
 msgstr ""
 
-#: lib/sft.py:578
+#: lib/sft.py:612
 msgid "Why: %s"
 msgstr ""
 
-#: lib/sft.py:582
+#: lib/sft.py:616
 msgid "Needs: %s"
 msgstr ""
 
-#: lib/sft.py:584
+#: lib/sft.py:618
 msgid "By: %s"
 msgstr ""
 
-#: lib/sft.py:586
+#: lib/sft.py:620
 msgid "Source: %s"
 msgstr ""
 
-#: lib/sft.py:588
+#: lib/sft.py:622
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: lib/sft.py:589
+#: lib/sft.py:623
 msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr ""
 
-#: lib/sft.py:591
+#: lib/sft.py:625
 msgid "More: %s"
 msgstr ""
 
-#: lib/sft.py:594
+#: lib/sft.py:628
 msgid "Run ({label}): {command}"
 msgstr ""
 
-#: lib/sft.py:596
+#: lib/sft.py:630
 msgid "Settings: %s"
 msgstr ""
 
-#: lib/sft.py:607
+#: lib/sft.py:641
 msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr ""
 
-#: lib/sft.py:611
+#: lib/sft.py:645
 msgid "no pack {name}; see {command}"
 msgstr ""
 
-#: lib/sft.py:618
+#: lib/sft.py:652
 msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
 msgstr ""
 
-#: lib/sft.py:621
+#: lib/sft.py:655
 msgid "in use; its tweaks are listed"
 msgstr ""
 
-#: lib/sft.py:622
+#: lib/sft.py:656
 msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:627
+#: lib/sft.py:661
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
 
-#: lib/sft.py:630
+#: lib/sft.py:664
 msgid "trusted; its tweaks are listed now"
 msgstr ""
 
-#: lib/sft.py:631
+#: lib/sft.py:665
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:656
+#: lib/sft.py:690
 msgid "official: in use"
 msgstr ""
 
-#: lib/sft.py:657
+#: lib/sft.py:691
 msgid "official: turned off ({command})"
 msgstr ""
 
-#: lib/sft.py:658
+#: lib/sft.py:692
 msgid "trusted: in use"
 msgstr ""
 
-#: lib/sft.py:659
+#: lib/sft.py:693
 msgid "not trusted: not used ({command})"
 msgstr ""
 
-#: lib/sft.py:660
+#: lib/sft.py:694
 msgid "changed since you trusted it: not used until you trust it again"
 msgstr ""
 
-#: lib/sft.py:672
+#: lib/sft.py:706
 msgid "problem: %s"
 msgstr ""
 
-#: lib/sft.py:680
+#: lib/sft.py:714
 msgid "(default)"
 msgstr ""
 
-#: lib/sft.py:694
+#: lib/sft.py:728
 msgid "%s what?"
 msgstr ""
 
-#: lib/sft.py:697
+#: lib/sft.py:731
 msgid "Hidden in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:698
+#: lib/sft.py:732
 msgid "Shown in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:705
+#: lib/sft.py:739
 msgid "unknown group {name}; groups: {groups}"
 msgstr ""
 
-#: lib/sft.py:707
+#: lib/sft.py:741
 msgid "Group {name} hidden in the installer window."
 msgstr ""
 
-#: lib/sft.py:708
+#: lib/sft.py:742
 msgid "Group {name} shown in the installer window."
 msgstr ""
 
-#: lib/sft.py:747
+#: lib/sft.py:761
+msgid "uninstall-settings takes keep or remove"
+msgstr ""
+
+#: lib/sft.py:790
 msgid "{id} has no settings; these do: {ids}"
 msgstr ""
 
-#: lib/sft.py:755
+#: lib/sft.py:798
 msgid "expected KEY=VALUE, got %s"
 msgstr ""
 
-#: lib/sft.py:759
+#: lib/sft.py:802
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr ""
 
@@ -1379,10 +1409,6 @@ msgstr ""
 #: packs/integrations/claude-desktop/status.sh:6
 msgid ""
 "Claude Desktop starts without the KDE wallet, so sign-ins aren't kept: reinstall it"
-msgstr ""
-
-#: packs/integrations/claude-desktop/uninstall.sh:7
-msgid "Kept your Claude settings in ~/.config/Claude."
 msgstr ""
 
 #: packs/integrations/nordvpn/README.md
@@ -1558,12 +1584,8 @@ msgstr ""
 msgid "%s location(s); disconnected"
 msgstr ""
 
-#: packs/integrations/nordvpn/uninstall.sh:12
+#: packs/integrations/nordvpn/uninstall.sh:13
 msgid "removed connection %s"
-msgstr ""
-
-#: packs/integrations/nordvpn/uninstall.sh:18
-msgid "Kept your NordVPN connections and settings (~/.config/nordvpn-wg)."
 msgstr ""
 
 #: packs/integrations/pack.md
@@ -1678,10 +1700,6 @@ msgstr ""
 
 #: packs/integrations/vscodium/status.sh:4
 msgid "VSCodium not installed"
-msgstr ""
-
-#: packs/integrations/vscodium/uninstall.sh:4
-msgid "Kept your settings and extensions in ~/.var/app/com.vscodium.codium."
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
@@ -2038,7 +2056,7 @@ msgstr ""
 
 #: packs/original/adb-scrcpy/uninstall.sh:8
 msgid ""
-"Kept ~/.config/frame-tweaks/phone.conf, adb pairing keys (~/.android) and scrcpy (brew uninstall scrcpy)."
+"Kept adb's pairing keys (~/.android) and scrcpy (brew uninstall scrcpy)."
 msgstr ""
 
 #: packs/original/arrowpad/README.md
@@ -2614,7 +2632,7 @@ msgstr ""
 
 #: packs/original/dictation/uninstall.sh:9
 msgid ""
-"Kept ~/.config/frame-tweaks/dictate.conf and ~/.local/share/dictation-history.txt; whisper-cpp (if any) stays in Homebrew."
+"Kept your dictation history (~/.local/share/dictation-history.txt); whisper-cpp (if any) stays in Homebrew."
 msgstr ""
 
 #: packs/original/firefox/README.md
@@ -4046,10 +4064,6 @@ msgstr ""
 
 #: packs/third-party/full-keyboard/uninstall.sh:3
 msgid "Full Keyboard is running: close it first"
-msgstr ""
-
-#: packs/third-party/full-keyboard/uninstall.sh:5
-msgid "Kept its settings in ~/.config/framekeyboard."
 msgstr ""
 
 #: packs/third-party/pack.md

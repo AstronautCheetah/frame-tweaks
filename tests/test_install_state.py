@@ -2,7 +2,8 @@
 only logs to a file there: installed/<id> records the version, migrate.sh runs (with the old
 version) only when that record is older, hold/unhold and held tweaks being left alone during
 updates (FRAME_TWEAKS_UPDATING=1), the lock refusing a second run, the last five logs kept (and
-tweaks' own logs left alone), a failed uninstall reported, and debug-info's report without names
+tweaks' own logs left alone), an uninstall keeping its settings or removing them (⚙ Preferences,
+--remove-settings, and never on a reinstall), a failed uninstall reported, and debug-info's report without names
 and addresses. systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
 whatever HOME is."""
 import fcntl
@@ -33,6 +34,7 @@ access: None
 survives_updates: "Yes"
 undo: ./install.sh uninstall probe
 processes: []
+config: [~/.config/probe.conf, ~/.config/probe]
 ---
 # Probe
 """
@@ -137,6 +139,53 @@ class InstallState(unittest.TestCase):
         r = self.sh("uninstall", "probe")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertFalse(self.record.exists())
+
+    def settings_made(self):
+        (self.home / ".config/probe").mkdir(parents=True)
+        (self.home / ".config/probe/state.json").write_text("{}")
+        (self.home / ".config/probe.conf").write_text("A=1\n")
+        (self.home / ".config/other.conf").write_text("not the probe's\n")
+
+    def test_uninstall_keeps_settings_by_default(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        r = self.sh("uninstall", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        self.assertTrue((self.home / ".config/probe/state.json").exists())
+        self.assertIn("Kept its settings: ~/.config/probe.conf ~/.config/probe", r.stdout)
+        self.assertIn("--remove-settings probe", r.stdout)
+
+    def test_uninstall_removes_settings_when_the_preferences_say_so(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        p = subprocess.run(["python3", str(ROOT / "lib/sft.py"), "uninstall-settings", "remove"],
+                           env=self.env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(p.stdout.strip(), "remove", p.stderr)
+        self.assertEqual((self.home / ".config/frame-tweaks/uninstall-settings").read_text(), "remove\n")
+        r = self.sh("uninstall", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / ".config/probe.conf").exists())
+        self.assertFalse((self.home / ".config/probe").exists())
+        self.assertTrue((self.home / ".config/other.conf").exists())       # only what it lists
+        self.assertNotIn("Kept its settings", r.stdout)
+        # --keep-settings, for one run, over the preference
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        (self.home / ".config/probe.conf").write_text("A=1\n")
+        r = self.sh("uninstall", "--keep-settings", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+
+    def test_remove_settings_option_and_reinstall(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        r = self.sh("reinstall", "probe")                     # (a reinstall keeps them, whatever the preference)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        r = self.sh("uninstall", "--remove-settings", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / ".config/probe.conf").exists())
+        self.assertFalse((self.home / ".config/probe").exists())
 
     def test_hold_and_unhold(self):
         r = self.sh("hold", "probe")

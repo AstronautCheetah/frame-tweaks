@@ -112,12 +112,12 @@ class NordVPNUninstall(Home):
         self.assertTrue(self.venv.exists())                             # no 280 MB download again
         self.assertFalse((self.home / ".local/bin/nordvpn-wg").exists())   # the programs go
 
-    def test_uninstall_removes_the_setup(self):
+    def test_uninstall_removes_the_connections(self):
         r = self.run_script("nordvpn/uninstall.sh")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("nordvpn-wg down", self.calls_made())
         self.assertIn("nmcli connection delete NordVPN Japan", self.calls_made())
-        self.assertFalse(self.conf.exists())
+        self.assertTrue((self.conf / "private_key").exists())   # (its settings: install.sh keeps or removes them, ⚙ Preferences)
         self.assertFalse(self.venv.exists())
 
     def test_a_connection_that_wont_go_doesnt_stop_the_uninstall(self):
@@ -128,7 +128,6 @@ class NordVPNUninstall(Home):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("not allowed", r.stderr)
         self.assertFalse((self.home / ".local/bin/nordvpn-tray").exists())
-        self.assertFalse(self.conf.exists())
 
 
 class ClipboardBuild(Home):

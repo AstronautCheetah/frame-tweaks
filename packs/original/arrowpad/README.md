@@ -21,6 +21,7 @@ depends: [ydotool]
 icon: {file: frame-tweaks-arrowpad.png}
 run: {label: Open}
 processes: [^~/.local/share/arrowpad/venv/bin/python ~/.local/share/arrowpad/arrowpad.py]
+config: [~/.config/arrowpad.json, ~/.config/arrowpad-vr.json]
 changes: >-
   `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two
   app-menu entries

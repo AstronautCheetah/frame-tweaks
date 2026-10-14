@@ -289,5 +289,29 @@ class PacksPage(unittest.TestCase):
         gui.sft.load(refresh=True)
 
 
+
+class PreferencesPage(unittest.TestCase):
+    """⚙ Preferences → Uninstalling a tweak: the choice lands in the file ./install.sh uninstall
+    reads, and the confirmation before removing says what happens to the settings."""
+    def test_uninstall_choice(self):
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            pref = Path(d) / "uninstall-settings"
+            with mock.patch.object(gui.sft, "UNINSTALL_PREF", pref):
+                window = mock.Mock()
+                page = gui.Preferences(window)
+                buttons = {b.text(): b for b in page.findChildren(QPushButton)}
+                self.assertTrue(buttons["Keep its settings"].isChecked())       # (the default)
+                self.assertFalse(buttons["Remove its settings too"].isChecked())
+                buttons["Remove its settings too"].click()
+                self.assertEqual(pref.read_text(), "remove\n")
+                self.assertEqual(gui.sft.uninstall_settings(), "remove")
+                self.assertFalse(buttons["Keep its settings"].isChecked())
+                buttons["Keep its settings"].click()
+                self.assertEqual(gui.sft.uninstall_settings(), "keep")
+                self.assertFalse(buttons["Remove its settings too"].isChecked())
+
+
 if __name__ == "__main__":
     unittest.main()
