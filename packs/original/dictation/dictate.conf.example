@@ -7,3 +7,5 @@
 #DICTATE_MODEL="$HOME/.local/share/whisper/ggml-base.en-q5_1.bin"
 # Only copy to the clipboard, don't type into the focused window:
 #DICTATE_NOTYPE=1
+# Stop a recording you forgot after this many seconds:
+#DICTATE_MAX_SECONDS=300

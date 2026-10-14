@@ -28,7 +28,8 @@ chmod +x "$D/piper/espeak-ng" 2>/dev/null || true      # (Piper's archive ships 
 CONF="$HOME/.config/frame-tweaks/speech.conf"
 lang=en_US engine=piper
 [ -f "$CONF" ] && { lang=$(sed -n 's/^SPEECH_LANGUAGE=//p' "$CONF" | tr -d "\"'" | tail -1); engine=$(sed -n 's/^SPEECH_ENGINE=//p' "$CONF" | tr -d "\"'" | tail -1); }
-row=$(awk -F'\t' -v l="${lang:-en_US}" '$1 == l' "$TWEAK_DIR/voices.tsv")
+lang=${lang:-en_US}      # (a file without it, e.g. only the engine chosen, or reset: the default)
+row=$(awk -F'\t' -v l="$lang" '$1 == l' "$TWEAK_DIR/voices.tsv")
 [ -n "$row" ] || { warn "$(t "speech: unknown language '%s'; using English (US)" "$lang")"; lang=en_US; row=$(awk -F'\t' '$1 == "en_US"' "$TWEAK_DIR/voices.tsv"); }
 IFS=$'\t' read -r _ label voice_file voice_sha json_sha espeak_voice <<< "$row"
 voice_rev=$(sed -n 's/^version=//p' "$TWEAK_DIR/voice.pin")

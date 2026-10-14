@@ -121,9 +121,10 @@ else
     rec=$!
     echo "$rec" > "$PID"; echo "$wav" > "$CUR"
     log "start pid $rec"
-    # Safety net: stop a forgotten recording after MAX_SECONDS.
+    # Safety net: stop a forgotten recording after MAX_SECONDS (only if pw-record still runs: on
+    # a recording that already ended, the toggle would start a new one).
     ( exec 9>&-; sleep "$MAX_SECONDS"
-      if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST"; exec "$0"; fi
+      if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ] && kill -0 "$rec" 2>/dev/null; then log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST"; exec "$0"; fi
     ) >/dev/null 2>&1 &
     sleep 0.15; cue device-added
     notify "🎙 $(t 'Listening… (run again to stop)')"

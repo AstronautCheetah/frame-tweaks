@@ -308,8 +308,11 @@ def from_clipboard():
     sock = nested_wayland()
     if not sock or not wl_tool("wl-paste"):
         return None
-    r = subprocess.run([wl_tool("wl-paste"), "--no-newline", "--type", "text"], capture_output=True,
-                       env=dict(os.environ, WAYLAND_DISPLAY=sock), timeout=5)
+    try:
+        r = subprocess.run([wl_tool("wl-paste"), "--no-newline", "--type", "text"], capture_output=True,
+                           env=dict(os.environ, WAYLAND_DISPLAY=sock), timeout=5)
+    except (OSError, subprocess.TimeoutExpired):      # (a clipboard owner that doesn't answer: no text)
+        return None
     text = r.stdout.decode(errors="replace").strip() if r.returncode == 0 else ""
     return text or None
 
@@ -537,13 +540,13 @@ class SpeechConfig(QWidget):
         head.addWidget(title, 1)
         lay.addLayout(head)
         self.buttons = {}
-        lay.addWidget(self.heading(_("Narrate with")))
+        lay.addWidget(self.heading(N_("Narrate with")))
         row = QHBoxLayout()
-        for value, label in (("piper", _("Piper: natural")), ("espeak-ng", _("eSpeak NG: fast"))):
-            row.addWidget(self.choice("SPEECH_ENGINE", value, label))
+        for value, label in (("piper", N_("Piper: natural")), ("espeak-ng", N_("eSpeak NG: fast"))):
+            row.addWidget(tr_text(self.choice("SPEECH_ENGINE", value, label), label))
         row.addStretch(1)
         lay.addLayout(row)
-        lay.addWidget(self.heading(_("Language")))
+        lay.addWidget(self.heading(N_("Language")))
         grid = QGridLayout()
         try:
             rows = [l.split("\t") for l in (DATA / "voices.tsv").read_text().splitlines() if l and not l.startswith("#")]
@@ -568,7 +571,7 @@ class SpeechConfig(QWidget):
 
     @staticmethod
     def heading(text):
-        h = QLabel(text)
+        h = tr_text(QLabel(), text)
         h.setStyleSheet("color: #9aa6b2; font-size: 18px; margin-top: 10px;")
         return h
 
@@ -922,7 +925,7 @@ class NarrationWindow(QWidget):
         if not self.narrator.stopped:
             self.narrator.set_speed(self.speed)
             if self.narrator.paused:                     # a new speed carries on reading
-                self.narrator.paused = False
+                self.narrator.resume()
                 icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
                 tr_text(self.state, N_("Reading aloud…"))
 
@@ -942,7 +945,7 @@ class NarrationWindow(QWidget):
             tr_text(self.state, N_("Paused."))
 
     def stop_or_again(self):
-        if self.narrator.stopped or self.toggle.text().startswith("▶"):
+        if self.narrator.stopped or self.narrator.i >= len(self.narrator.parts):     # stopped, or read to the end
             self.narrator.speed = self.speed
             icon_button(self.toggle, "media-playback-stop", N_("Stop"))
             tr_text(self.state, N_("Reading aloud…"))
@@ -1627,6 +1630,8 @@ def narrate_panel(image_path, text_path):
                 req = json.loads(bytes(conn.readAll()).decode())
                 img, txt = QImage(req["image"]), Path(req["text"]).read_text()
                 shutil.rmtree(Path(req["image"]).parent, ignore_errors=True)
+                w.speed = load_speed()      # the speed set under Narrate (saved there), as a new panel reads
+                w.show_speed()
                 w.load(img, txt)
             except (OSError, ValueError, KeyError):
                 pass

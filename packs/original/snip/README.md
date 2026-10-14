@@ -135,8 +135,7 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 
 - Copying needs desktop mode to be running: the clipboard lives there.
 - **Copy text** and the panel's **Paste** use `wl-copy` and `wl-paste` from Homebrew's
-  `wl-clipboard`. [Dictation](../dictation/) installs it; without it, run
-  `brew install wl-clipboard`.
+  `wl-clipboard`; installing Screen snip adds it if it isn't there yet.
 - Without SteamVR's OpenVR library, the narration panel opens as an ordinary window instead.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
