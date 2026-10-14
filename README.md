@@ -121,6 +121,22 @@ Categories fold, and rows or whole categories can be hidden (never removed). Row
 ./install.sh list
 ```
 
+Everything the installer window does has a command too (the window uses the same code,
+[`lib/sft.py`](lib/sft.py), or the same tools):
+
+```text
+./install.sh info arrowpad      a tweak's details page
+./install.sh run arrowpad       its Run / Open button
+./install.sh settings scroll-strips              show its settings and the allowed values
+./install.sh settings scroll-strips color=blue thickness=5   change them (also: --reset)
+./install.sh settings adb-scrcpy PHONE_MAX_FPS=90             (Android Mirror's stream)
+./install.sh hide nordvpn       hide a row in the window (unhide to show it again)
+./install.sh hide-group "VR windows"   hide a whole group (unhide-group)
+./install.sh wallet lock        the shared wallet: lock, unlock, status
+./install.sh wallet-apps        apps using the wallet (wallet-launcher: add, --remove, --gate…)
+./install.sh timers             close-after timers (app-timers: --set APP MINUTES, --headset…)
+```
+
 Updates follow stable releases. To also get pre-releases, put `beta` in
 `~/.config/steam-frame-tweaks/channel`. Every install, update and removal is logged in
 `~/.local/state/frame-tweaks/logs/`, and only one can run at a time.

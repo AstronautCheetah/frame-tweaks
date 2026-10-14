@@ -11,6 +11,14 @@
 #   ./install.sh debug-info          write a redacted report for bug reports
 #   ./install.sh check-system        are the SteamOS/SteamVR parts the tweaks rely on still there?
 #   ./install.sh list                components and what they do
+#   ./install.sh info ID             one component's details (as in the installer window)
+#   ./install.sh run ID              its Run / Open button (e.g. open Arrow Pad)
+#   ./install.sh settings ID [KEY=VALUE... | --reset]   show or change its settings (scroll-strips, adb-scrcpy)
+#   ./install.sh hide|unhide ID...   hide a row in the installer window (or show it again)
+#   ./install.sh hide-group|unhide-group NAME   the same for a whole group, e.g. "VR windows"
+#   ./install.sh wallet lock|unlock|status      the shared KDE wallet (wallet-unlock)
+#   ./install.sh wallet-apps [ARGS]  apps that use the wallet (wallet-launcher; --help for its options)
+#   ./install.sh timers [ARGS]       close-after timers for apps (app-timers; --help for its options)
 #   ./install.sh menu                (re)create the "Frame Tweaks" app-menu entry
 #   ./install.sh ID...               same as "install ID..."
 #
@@ -361,6 +369,19 @@ case ${1:-} in
     check-system) cmd_check_system ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
     list)        cmd_list ;;
+    # The installer window's other buttons, through the same code (lib/sft.py) or tools it uses.
+    info|hide|unhide|hide-group|unhide-group|settings) python3 lib/sft.py "$@" ;;
+    run)         shift; [[ $# -eq 1 ]] || { echo "run what?" >&2; exit 1; }; check_ids "$1"
+                 [[ -n $(python3 lib/sft.py run-label "$1") ]] || { echo "$1 has nothing to run" >&2; exit 1; }
+                 setsid -f bash "./$1/run.sh" >/dev/null 2>&1 </dev/null ;;
+    wallet)      shift; case ${1:-} in
+                     lock) exec "$HOME/.local/bin/wallet-unlock" --lock ;;
+                     unlock) exec "$HOME/.local/bin/wallet-unlock" ;;
+                     status) exec "$HOME/.local/bin/wallet-unlock" --status ;;
+                     *) echo "wallet lock|unlock|status" >&2; exit 1 ;;
+                 esac ;;
+    wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
+    timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
     menu)        ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu." ;;
     -h|--help|help) usage ;;
     --version|version) echo "$VERSION" ;;
