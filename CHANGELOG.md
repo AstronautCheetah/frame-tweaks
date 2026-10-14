@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **A tweak's README on its details page** showed in a smaller font than the rest of the window.
+
 ## 0.6.0 (2026-10-14)
 
 ### Added

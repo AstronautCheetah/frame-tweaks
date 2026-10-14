@@ -346,7 +346,8 @@ class Details(QWidget):
         except (OSError, manifest.ManifestError):
             text = "_No README._"
         readme.setMarkdown(readme_links(text, comp))
-        readme.setHtml(with_copy(readme.toHtml()))
+        # (toHtml() pins the font it saw; dropping it keeps the window's stylesheet font.)
+        readme.setHtml(re.sub(r'<body style="[^"]*">', "<body>", with_copy(readme.toHtml()), count=1))
         lay.addWidget(readme, 1)
 
     def show_issue(self, latest):
