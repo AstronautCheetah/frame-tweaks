@@ -34,6 +34,15 @@ set +e     # common.sh turns on -e for tweak scripts; this script checks results
 STATE="$HOME/.local/state/frame-tweaks"
 LOGS="$STATE/logs"
 migrate_legacy_dirs
+# The tweaks moved into packs/official/ (0.6): an update leaves their old folders behind
+# holding only Python's __pycache__ (git doesn't track it).
+shopt -s nullglob
+for d in */__pycache__; do
+    d=${d%/__pycache__}
+    others=("$d"/* "$d"/.[!.]*)
+    [[ -d $d && ${#others[@]} -eq 1 ]] && rm -rf -- "$d"     # (nothing but __pycache__)
+done
+shopt -u nullglob
 
 # One install/uninstall/update at a time (installer window and terminal alike). The lock is on
 # fd 8; tweak scripts run with it closed, so a background process they start can't keep it.
@@ -107,7 +116,10 @@ with_deps() {
 
 check_ids() {
     local id
-    for id in "$@"; do is_component "$id" || { echo "unknown component: $id (see ./install.sh list)" >&2; exit 1; }; done
+    for id in "$@"; do
+        is_component "$id" ||
+            { echo "unknown component: $id (see ./install.sh list; a pack that isn't trusted: ./install.sh mods)" >&2; exit 1; }
+    done
 }
 
 cmd_list() {
@@ -316,6 +328,7 @@ held() { [[ -f "$STATE/held/$1" ]]; }
 run_migrations() {
     local id old
     for id in "$@"; do
+        is_component "$id" || continue           # (unknown ids are refused right after)
         [[ -f ${DIR[$id]}/migrate.sh && -f $STATE/installed/$id ]] || continue
         held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
         old=$(cat "$STATE/installed/$id")

@@ -29,11 +29,13 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, 
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "lib"))
+os.environ.setdefault("FRAME_TWEAKS_LIB", str(REPO / "lib"))   # (packs' scripts source the helpers through it)
 sys.path.insert(0, str(REPO / "gui"))           # (its pages, e.g. wallet_page.py)
 import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
 from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
 import manifest  # noqa: E402
 from wallet_page import FLATPAK_ICONS, WALLET_LAUNCHER, WalletApps  # noqa: E402  (Wallet apps page)
+from packs_page import Packs  # noqa: E402  (Packs page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
@@ -446,6 +448,10 @@ class Window(QWidget):
         self.wallet_button.clicked.connect(self.show_wallet_apps)
         self.wallet_button.setVisible(WALLET_LAUNCHER.exists())
         top.addWidget(self.wallet_button)
+        packs = QPushButton("🧩 Packs")
+        packs.setToolTip("Where the tweaks come from; add other people's (docs/mods.md)")
+        packs.clicked.connect(self.show_packs)
+        top.addWidget(packs)
         diag = QPushButton("Diagnostics")
         diag.setToolTip("Save a report for a bug report (user names and paths removed)")
         diag.clicked.connect(self.save_diagnostics)
@@ -623,10 +629,15 @@ class Window(QWidget):
             icon.setPixmap(row_icon(cid).pixmap(40, 40))
             name = QLabel(html.escape(comp["title"], quote=False) +
                           ("  🧪" if comp["experimental"] else "") +
+                          ("" if comp["official"] else
+                           f"  <span style='color:#e0b33a;font-size:12px'>🧩 {html.escape(comp['pack'])}</span>") +
                           ("  <span style='color:#6b7783'>(hidden)</span>" if is_hidden else ""))
             name.setObjectName("name")
             if comp["experimental"]:
                 name.setToolTip("Experimental: " + comp["experimental"])
+            if not comp["official"]:
+                name.setToolTip(f"From the pack {comp['pack']}, not part of Frame Tweaks"
+                                + (f"; used instead of {comp['replaced']}'s" if comp["replaced"] else ""))
             deps = comp["deps"]
             info = QLabel(html.escape(comp["desc"], quote=False) +
                           (f"  <i style='color:#6b7783'>needs: {', '.join(deps)}</i>" if deps else ""))
@@ -783,6 +794,23 @@ class Window(QWidget):
         self.details = WalletApps(self)        # a page like Details: Back and B return to the list
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
+
+    def show_packs(self):
+        self.close_details()
+        self.details = Packs(self)
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
+    def reload_tweaks(self):
+        """After a pack was trusted or dropped: the list, settings and known issues anew."""
+        global KNOWN_ISSUES
+        sft.load(refresh=True)
+        sft.SETTINGS = sft.settings_specs()
+        SETTINGS_PAGES.clear()
+        SETTINGS_PAGES.update({cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS})
+        KNOWN_ISSUES = {c["id"]: c["known_issue"] for c in components() if c["known_issue"]}
+        self.rows = components()
+        self.refresh()
 
     def close_details(self):
         if self.details is not None:

@@ -99,5 +99,30 @@ class PendingChanges(unittest.TestCase):
         w.wanted = {"b": True, "a": False, "c": True, "d": True}
         self.assertEqual(w.pending_changes(), (["b"], ["a"]))    # c only has a warning: not a change
 
+class PacksPage(unittest.TestCase):
+    """The Packs page lists a user's pack as not trusted; Trust… asks once more, then uses it."""
+    def test_trust_from_the_page(self):
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])     # (kept: a dropped one is gone)
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "packs").mkdir()
+            import shutil
+            shutil.copytree(ROOT / "examples/hello-pack", d / "packs" / "mine")
+            with mock.patch.object(gui.sft, "USER_PACKS", d / "packs"), \
+                    mock.patch.object(gui.sft, "TRUSTED", d / "trusted"), mock.patch.object(gui.sft, "CONF", d), \
+                    mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
+                window = mock.Mock()
+                page = gui.Packs(window)
+                buttons = lambda: {b.text(): b for b in page.findChildren(QPushButton) if b.text() != "← Back"}
+                self.assertIn("Trust…", buttons())
+                buttons()["Trust…"].click()
+                buttons()["Yes: it runs as me"].click()
+                window.reload_tweaks.assert_called_once()
+                self.assertIn("hello-frame", [c["id"] for c in gui.sft.load(refresh=True)["components"]])
+                self.assertIn("Stop using", buttons())
+        gui.sft.load(refresh=True)
+
+
 if __name__ == "__main__":
     unittest.main()

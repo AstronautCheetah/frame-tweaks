@@ -159,6 +159,18 @@ Everything the installer window does has a command too (the window uses the same
 ./install.sh timers             close-after timers (app-timers: --set APP MINUTES, --headset…)
 ```
 
+**Add your own tweaks.** Every tweak comes from a *pack*: a folder of tweak folders, each
+described by the YAML front matter of its README.md. Frame Tweaks' own are the official pack
+([`packs/official/`](packs/official/)); put other packs in `~/.local/share/frame-tweaks/packs/`
+and trust them (**🧩 Packs** in the window). A pack's tweaks run as you, so trust only packs
+from people you trust. How to write one: [docs/mods.md](docs/mods.md).
+
+```text
+./install.sh mods               packs, whether each is in use, problems
+./install.sh mods trust "My pack"     use it (again after its files change); untrust to stop
+./install.sh mods check FOLDER  check a pack or a tweak without using it
+```
+
 Updates follow stable releases. To also get pre-releases, put `beta` in
 `~/.config/frame-tweaks/channel`. Every install, update and removal is logged in
 `~/.local/state/frame-tweaks/logs/`, and only one can run at a time.
