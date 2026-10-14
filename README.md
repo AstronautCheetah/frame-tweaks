@@ -184,6 +184,21 @@ Homebrew stays (other programs may live in it); its own uninstaller is in
 [homebrew/](homebrew/). Settings a tweak kept in their usual places (e.g. `~/.config/frame-tweaks/phone.conf`,
 `~/.config/frame-tweaks/dictate.conf`) are listed by its uninstaller as it runs.
 
+## If updates stop
+
+Frame Tweaks is built to keep working when nobody is updating it:
+
+- **What's installed keeps working.** Nothing updates itself; a tweak changes only when you run
+  an update.
+- **Downloads keep working** if an upstream project deletes or changes a file: installs fall back
+  to Frame Tweaks' own copy (checked against the same SHA256). Python packages fall back to the
+  newest versions, and adb and ydotool keep the copy that works if a new build doesn't run.
+- **What stops first:** the 🧪 experimental tweaks, after a SteamVR update changes what they rely
+  on. They switch themselves off and their status says so; the rest is unaffected. Android
+  Mirror stays usable as a plain window.
+- **Staying on a release that works for you:** `./install.sh update --to vX.Y.Z` moves to a given
+  release, and `./install.sh hold ID` keeps a tweak as it is during updates.
+
 ## Common issues
 
 | Problem | What to do |

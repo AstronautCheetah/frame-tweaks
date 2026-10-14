@@ -5,7 +5,8 @@
 #
 #  Needs attention (installs would fail, or a feature would switch itself off):
 #   - a pinned download (<tweak>/pin, <tweak>/*.pin) is gone, or no longer matches its sha256;
-#     a pinned git commit is gone
+#     a pinned git commit is gone (installs then use Frame Tweaks' copy, if it has one)
+#   - Frame Tweaks' copy of a pinned download (mirror=) is missing from the "mirror" release
 #   - an Arch Linux ARM package we install is gone, or its new build needs a newer glibc or
 #     libstdc++ than SteamOS has (lib/tested-versions)
 #   - Homebrew's scrcpy moved to a major version phone-touch wasn't tested with
@@ -50,6 +51,17 @@ for pin in */pin */*.pin; do
         git -C "$g" fetch -q --depth 1 "$url" "$rev" 2>/dev/null || red+=("\`$pin\`: commit ${rev:0:7} is gone from $url")
     fi
 done
+
+# ---- Frame Tweaks' copies (the "mirror" release; dev/mirror-pins.sh) ----
+if assets=$(timeout 60 gh release view mirror --json assets --jq '.assets[].name' 2>/dev/null); then
+    for pin in */pin */*.pin; do
+        m=$(sed -n 's/^mirror=//p' "$pin"); [ -n "$m" ] || continue
+        grep -qxF "$(basename "$m")" <<<"$assets" ||
+            red+=("\`$pin\`: Frame Tweaks' copy (\`$(basename "$m")\`) isn't on the mirror release: run \`dev/mirror-pins.sh\`")
+    done
+else
+    yellow+=("Couldn't list the mirror release's files (gh not signed in, or no release yet)")
+fi
 
 # ---- Arch Linux ARM: still there, and still runs on SteamOS's libraries ----
 mirror=$(sed -n 's/^ALARM_MIRROR="${ALARM_MIRROR:-\(.*\)}"$/\1/p' lib/common.sh)

@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Frame Tweaks keeps its own copies of the pinned downloads** (Full Keyboard, whisper-frame,
+  the Whisper model, the voice, rustup, Homebrew's installer, clipboard-sync's source) on a
+  `mirror` release. If upstream deletes or changes a file, installs use the copy, checked
+  against the same SHA256. Piper isn't copied: it bundles espeak-ng (GPL-3.0), whose source
+  would have to be hosted with it. New README section: **If updates stop**.
 - **Fewer surprises when upstream moves on:**
   - **Weekly upstream check** (a GitHub workflow): one issue lists what changed or vanished
     upstream (pinned downloads, Arch Linux ARM packages, Homebrew's scrcpy) and newer versions to

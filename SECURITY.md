@@ -86,7 +86,9 @@ protected. Avoid changing it while a second wallet service is running (see
   pinned Rust toolchain for the build only. **Python packages** (PyQt6, openvr, jeepney) are
   installed at the exact versions in `lib/python-constraints.txt`. Pins move only in a reviewed
   commit (`dev/check-pins.sh`, `dev/bump-pin.py`); a weekly GitHub check
-  (`dev/check-upstream.sh`) reports pinned files that changed or vanished upstream.
+  (`dev/check-upstream.sh`) reports pinned files that changed or vanished upstream. If one
+  does, installs use Frame Tweaks' own copy (this repository's `mirror` release), held to the
+  same SHA256, so the copy can't be swapped either.
 - **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors only and
   are checked against Arch Linux ARM's build key (`lib/keys/`, fingerprint
   `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking. The signed package's

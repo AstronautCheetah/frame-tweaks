@@ -4,3 +4,5 @@ version=0.6.0
 url=https://github.com/TaiKeid/steam-frame-full-keyboard/releases/download/0.6.0/framekeyboard-0.6.0-aarch64.tar.gz
 sha256=0a8478dcd7c4c1f3509dd3a3339e0046ae81303fd071d9f7acbc1658cf22b597
 latest=https://api.github.com/repos/TaiKeid/steam-frame-full-keyboard/releases/latest
+mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/0a8478dcd7c4-framekeyboard-0.6.0-aarch64.tar.gz
+license=MIT (TaiKeid; LICENSE in the archive)

@@ -8,7 +8,8 @@
 For each pin it finds the newest version the way dev/check-pins.sh does (GitHub release, git
 commit, Hugging Face revision, rustup), downloads the file, writes the new version, URL and
 sha256 (computed here, never taken from upstream's word alone; cross-checked against a
-published <file>.sha256 when there is one), and prints what to read before committing: the
+published <file>.sha256 when there is one) and the name of Frame Tweaks' copy (mirror=; upload it
+with dev/mirror-pins.sh), and prints what to read before committing: the
 changes upstream made. Nothing is committed; test, then commit the change like any other."""
 import hashlib
 import json
@@ -100,9 +101,18 @@ def bump(path):
     if "sha256" in p:
         print(f"{path.relative_to(ROOT)}: downloading {new['url']}")
         new["sha256"] = sha256_of(new["url"])
+    if "mirror" in p:                                          # Frame Tweaks' copy: a new file name
+        base = p["mirror"].rsplit("/", 1)[0]
+        if "sha256" in p:
+            new["mirror"] = f"{base}/{new['sha256'][:12]}-{new['url'].rsplit('/', 1)[1]}"
+        else:
+            new["mirror"] = f"{base}/{p['url'].rstrip('/').rsplit('/', 1)[1]}-{new['rev'][:7]}.tar.gz"
+            new["mirror_sha256"] = ""
     write_pin(path, new)
     print(f"{path.relative_to(ROOT)}: {cur} -> {new['version']}" + (" (the file is unchanged)" if "sha256" in p and new["sha256"] == p["sha256"] else ""))
     print(f"  read before committing: {read}")
+    if "mirror" in p:
+        print("  then upload Frame Tweaks' copy: dev/mirror-pins.sh")
 
 
 def bump_python():
