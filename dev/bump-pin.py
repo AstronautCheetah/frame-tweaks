@@ -75,6 +75,12 @@ def bump(path):
         new["version"] = rev[:len(cur)]
         repo = re.search(r"huggingface\.co/(.*?)/resolve/", url)[1]
         read = f"https://huggingface.co/{repo}/commits/main"
+    elif "rev" in p and "/releases/" in latest:                # a git commit, at a release's tag
+        tag = json.loads(get(latest))["tag_name"]
+        gh = re.search(r"github\.com/repos/([^/]+/[^/]+)/", latest)[1]
+        rev = json.loads(get(f"https://api.github.com/repos/{gh}/commits/{tag}"))["sha"]
+        new["rev"], new["version"] = rev, tag.removeprefix("v")
+        read = f"https://github.com/{gh}/compare/{p['rev']}...{rev}"
     elif "rev" in p:                                           # a git commit
         rev = json.loads(get(latest))["sha"]
         gh = re.search(r"github\.com/repos/([^/]+/[^/]+)/", latest)[1]

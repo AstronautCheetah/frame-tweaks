@@ -15,6 +15,8 @@ README of the tweak that uses them; software we install or call keeps its own li
 | [techieyann/frame-voice](https://github.com/techieyann/frame-voice) | MIT | The shape of our installer: a one-line `get.sh` bootstrap, a graphical installer, and a documented uninstall. No code copied. |
 | [groffta/whisper-frame](https://github.com/groffta/whisper-frame) | MIT | Installed by [whisper-frame](packs/official/whisper-frame/) from its upstream releases (we add a SteamVR-restart fix). Our [dictation](packs/official/dictation/) shares its Whisper model and bundled whisper-cli. |
 | [Jovian-Experiments/Jovian-NixOS](https://github.com/Jovian-Experiments/Jovian-NixOS) | MIT | Ideas for [memory caps](packs/official/memcap/) (early out-of-memory handling) and the [screen reader](packs/official/screen-reader/) (Orca in the session). No code copied. |
+| [new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) | MIT (bundles OpenVR SDK parts, BSD-3-Clause) | Built from its pinned source and installed by [Recline](packs/official/recline/): lying-down / reclined VR. |
+| [RobcPeng/steam-frame-recline](https://github.com/RobcPeng/steam-frame-recline) | MIT | Not used; a similar recline project we compared before choosing Recline-VR. |
 | [gripspeak](https://github.com/gripspeak/gripspeak) | – | Not used; an alternative worth knowing. |
 
 The cursor fix was popularised by Cas and Chary XR's video *Steam Frame: 10 Things To Do
