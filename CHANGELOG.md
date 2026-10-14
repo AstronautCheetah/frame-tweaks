@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: scroll strips and the Android Mirror's gear and settings jittering** while the laser
+  crossed SteamVR's buttons below a window: each dashboard redraw handed SteamVR fresh copies of
+  them. They're now reused while nothing they show has changed.
 - **Android Mirror settings in VR:** a gear below the mirror's lower-left corner opens the real
   settings: picture size, bit rate, frame rate (30, 60 and the Steam Frame's refresh rates, 72 to
   144) and joystick speed; *Restart stream* applies them without closing the mirror, and *Reset to
