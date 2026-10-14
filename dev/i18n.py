@@ -5,14 +5,14 @@
                            (Python: _("..."), ngettext, pgettext; shell: t '...') and the
                            official tweaks' manifest text
   dev/i18n.py check        fail if the .pot is out of date (CI)
-  dev/i18n.py new LANG     start locale/LANG.po from the .pot (LANG: de, pt_BR, …)
+  dev/i18n.py new LANG     start locale/LANG.po from the .pot (LANG: de, pt_BR, es_419, …)
   dev/i18n.py update       bring every locale/*.po up to date with the .pot (translations kept;
                            new text untranslated; removed text kept as #~ comments)
   dev/i18n.py stats        how much of each language is translated
   dev/i18n.py export LANG DIR [--size N] [--all]
                            the texts LANG.po hasn't translated yet (--all: every text), as
                            JSON files of N entries (default 150) in DIR: part-01.json, … for a
-                           translator or a translation helper (docs/claude/i18n-translating.md)
+                           translator or a translation helper (locale/BATCH.md)
   dev/i18n.py import LANG DIR
                            put DIR's answers (part-01.LANG.json: {"id": "text" or [forms]}) into
                            LANG.po, after checking each keeps the placeholders, tags and spacing"""
@@ -127,8 +127,8 @@ def from_manifests():
 
     for pack in sft.OFFICIAL_PACKS:
         info, folders, _ = sft.read_pack(pack)
-        for cat in info["categories"]:
-            add(cat, f"{pack.relative_to(ROOT)}/pack.md")
+        for text in (info["name"], info["about"], *info["categories"]):
+            add(text, f"{pack.relative_to(ROOT)}/pack.md")
         for d in folders:
             c, _ = sft.read_tweak(d)
             if not c:
@@ -136,6 +136,8 @@ def from_manifests():
             where = f"{d.relative_to(ROOT)}/README.md"
             for k in ("title", "desc", "what", "why", "run_label", "category"):
                 add(c.get(k), where)
+            if "|" in c.get("source", ""):
+                add(c["source"].split("|", 1)[0], where)              # (uses, from, styled after, …)
             st = c.get("settings") or {}
             add(st.get("about"), where)
             add(st.get("note"), where)
@@ -302,7 +304,7 @@ def main():
         if not POT.exists() or POT.read_text() != text + "\n":
             sys.exit("locale/frame-tweaks.pot is out of date: run dev/i18n.py extract (and update)")
         print("translation template up to date")
-    elif cmd == "new" and len(sys.argv) > 2 and re.fullmatch(r"[a-z]{2,3}(_[A-Z]{2})?", sys.argv[2]):
+    elif cmd == "new" and len(sys.argv) > 2 and re.fullmatch(r"[a-z]{2,3}(_([A-Z]{2}|[0-9]{3}))?", sys.argv[2]):
         po = LOCALE / f"{sys.argv[2]}.po"
         if po.exists():
             sys.exit(f"{po.relative_to(ROOT)} exists: dev/i18n.py update brings it up to date")

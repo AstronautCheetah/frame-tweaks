@@ -281,7 +281,9 @@ def load(refresh=False):
         official = d in {p.resolve() for p in OFFICIAL_PACKS}
         state = ("off" if d.name in off else "official") if official else (
             "trusted" if trust.get(str(d)) == pack_hash(d) else "changed" if str(d) in trust else "untrusted")
-        pack = dict(dir=d, name=info["name"], author=info["author"], about=info["about"], state=state,
+        # (label, about: shown in the user's language for an official pack; name stays the id)
+        label, about = (_(info["name"]), _(info["about"])) if official else (info["name"], info["about"])
+        pack = dict(dir=d, name=info["name"], label=label, author=info["author"], about=about, state=state,
                     tweaks=[f.name for f in folders])
         packs.append(pack)
         problems += probs
@@ -535,7 +537,7 @@ def info(cid):
 def find_pack(name):
     """A pack by its name, folder name or folder."""
     for p in load()["packs"]:
-        if name in (p["name"], p["dir"].name, str(p["dir"])) or Path(name).expanduser().resolve() == p["dir"]:
+        if name in (p["name"], p["label"], p["dir"].name, str(p["dir"])) or Path(name).expanduser().resolve() == p["dir"]:
             return p
     sys.exit(_("no pack {name}; see {command}").format(name=repr(name), command="./install.sh mods"))
 
@@ -580,7 +582,8 @@ def mods(args):
                  "trusted": _("trusted: in use"),
                  "untrusted": _("not trusted: not used ({command})").format(command="./install.sh mods trust NAME"),
                  "changed": _("changed since you trusted it: not used until you trust it again")}[p["state"]]
-        print(f"{p['name']}  ({p['dir']})  {state}")
+        name = p["name"] if p["label"] == p["name"] else f"{p['label']} [{p['name']}]"   # ([what mods on/off take])
+        print(f"{name}  ({p['dir']})  {state}")
         if p["about"]:
             print(f"    {p['about']}")
         if p["state"] not in ("official", "off"):

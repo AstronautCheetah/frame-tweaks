@@ -236,9 +236,12 @@ def with_copy(text):
 
 
 def md_text(text):
-    """A manifest's text as rich text: escaped, with its [Markdown links](https://…) made links."""
-    return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r"<a style='color:#7fb2e5' href='\2'>\1</a>",
+    """A manifest's text as rich text: escaped, with its [Markdown links](https://…) made links,
+    **bold** bold and `code` as code."""
+    text = re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r"<a style='color:#7fb2e5' href='\2'>\1</a>",
                   html.escape(text, quote=False))
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+    return re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
 
 
 def follow_link(url):
@@ -397,6 +400,7 @@ class Details(QWidget):
 
         text, kind = status_text(state)
         rel, url = comp["source"].split("|", 1) if "|" in comp["source"] else ("", "")
+        rel = _(rel) if rel else rel                        # (uses, from, …: dev/i18n.py collects them)
         facts = [(_("What it is"), md_text(comp["what"])),
                  (_("Why it's included"), md_text(comp["why"])),
                  (_("Made by"), md_text(comp["author"]))]
@@ -409,7 +413,7 @@ class Details(QWidget):
         colour = {"ok": "#5cc77a", "warn": "#e0b33a"}.get(kind, "#9aa6b2")
         facts.append((_("Status"), f"<span style='color:{colour}'>{html.escape(text)}</span>"))
         if comp["official"]:
-            facts.append((_("Pack"), html.escape(comp["pack"])))
+            facts.append((_("Pack"), html.escape(_(comp["pack"]))))
             facts.append((_("Documentation"), f"<a style='color:#7fb2e5' href='{GITHUB}/packs/{comp['pack_dir'].name}/{comp['id']}'>"
                           + _("{file} on GitHub").format(file=f"{comp['id']}/README.md") + "</a>"))
         else:
@@ -918,6 +922,7 @@ class Window(QWidget):
             link = QLabel()
             if "|" in comp["source"]:
                 rel, url = comp["source"].split("|", 1)
+                rel = _(rel)
                 short = url.split("://", 1)[-1].removeprefix("github.com/").rstrip("/")
                 if url.startswith("https://github.com/"):
                     short = "/".join(short.split("/")[:2])      # owner/repo; the link has the rest
