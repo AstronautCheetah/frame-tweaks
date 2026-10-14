@@ -23,19 +23,18 @@ undo: >-
 ---
 # Firefox: anti-fingerprinting
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Firefox's strongest anti-fingerprinting (the Tor Browser approach), letterboxing, WebRTC limits, daily re-randomization.
+
+**Why on a Steam Frame:** The Frame's hardware (Adreno GPU, VR-desktop screen size, touch input) is rare among browsers, so it's easy to fingerprint.
+<!-- /generated:intro -->
+
 The Frame makes a browser easier to fingerprint: an **Adreno** GPU, the VR desktop's odd
 window size and touch input are rare, and the timezone gives away your location even behind a
 VPN. (Firefox already reports Linux x86_64 on aarch64 by itself.) This turns on Firefox's strongest
 built-in protection, `privacy.resistFingerprinting` (RFP, the Tor Browser approach), via a
 `user.js` in the default profile, so it's applied at every start and Sync can't undo it.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** Preferences in Firefox's profile (`user.js`)
-> - **Undo:** `./install.sh uninstall firefox`, then reset the changed preferences in `about:config` (Firefox keeps their last values)
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install firefox            # then restart Firefox
@@ -70,6 +69,14 @@ If a site breaks, use a separate Firefox profile without RFP for that site, rath
 adding per-site exceptions, which themselves make you more identifiable. For blending in
 with a large crowd, Tor Browser remains stronger than any single-browser setting.
 Adding uBlock Origin (from addons.mozilla.org) also blocks many fingerprinting scripts.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** Preferences in Firefox's profile (`user.js`)
+- **Undo:** `./install.sh uninstall firefox`, then reset the changed preferences in `about:config` (Firefox keeps their last values)
+<!-- /generated:changes -->
 
 ## Credits
 `resistFingerprinting` comes from the Tor Project's Tor Browser, upstreamed into Firefox (MPL-2.0). Results measured with [EFF Cover Your Tracks](https://coveryourtracks.eff.org). See also [CREDITS.md](../../../CREDITS.md).

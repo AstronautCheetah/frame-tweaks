@@ -104,19 +104,16 @@ test:
 ---
 # Scroll strips
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Position and thickness are set in the installer window.
+
+**Why on a Steam Frame:** Desktop scroll bars are sized for a mouse and hard to hit with a laser.
+<!-- /generated:intro -->
+
 Scroll bars in desktop apps are sized for a mouse, which makes them hard to hit with a laser.
 This puts **big scroll strips beside each window you float in the world**: by default a
 vertical one on the **right** and a horizontal one on **top**.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
-> - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json`
-> - **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks that code each time SteamVR starts and switches itself off if it changed (shown in its status) until a Frame Tweaks update catches up.
-> - **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys
-> - **Undo:** `./install.sh uninstall scroll-strips` (or untick it in the installer window; settings are kept)
-<!-- /generated:glance -->
 
 - **Use a strip like a joystick:** press it, then drag away from where you pressed. The farther you
   drag, the faster it scrolls; drag back past that point to reverse; **let go to stop**. While
@@ -145,6 +142,16 @@ panel's own edge anchors (so they follow it, docked or floating) and sized from 
 height and shape. A drag on a strip calls `sftScroll`, a function the
 helper's service registers on the dashboard page; the service sends the arrow keys with
 [ydotool](../ydotool/).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+- **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json`
+- **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks that code each time SteamVR starts and switches itself off if it changed (shown in its status) until a Frame Tweaks update catches up.
+- **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys
+- **Undo:** `./install.sh uninstall scroll-strips` (or untick it in the installer window; settings are kept)
+<!-- /generated:changes -->
 
 ---
 Check: `./install.sh status scroll-strips` · Remove: `./install.sh uninstall scroll-strips`

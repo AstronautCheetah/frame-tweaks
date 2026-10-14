@@ -24,17 +24,16 @@ test: {offline: true}
 ---
 # Menu icons
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu.
+
+**Why on a Steam Frame:** Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme.
+<!-- /generated:intro -->
+
 Steam's VR **"+" menu** looks up app icons only in the *hicolor* theme (and `pixmaps`), so
 apps whose icon only KDE's Breeze theme has show up blank: **Konsole**, **System Settings**,
 and a few others (Remote Desktop/SSH viewers, Avahi, Emoji Selector, …).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** Copies of Breeze icons in `~/.local/share/icons/hicolor`
-> - **Undo:** `./install.sh uninstall menu-icons`
-<!-- /generated:glance -->
 
 This copies those icons from Breeze into `~/.local/share/icons/hicolor/scalable/apps/`, for
 Konsole and System Settings always, and for every other app in the menu whose icon is missing
@@ -48,6 +47,14 @@ the fallback theme), so nothing changes there.
 Steam notices on its own (it rescans when the applications folder changes); reopen the menu.
 Removing the tweak deletes exactly the icons it copied (listed in
 `~/.local/share/frame-tweaks/menu-icons.list`).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** Copies of Breeze icons in `~/.local/share/icons/hicolor`
+- **Undo:** `./install.sh uninstall menu-icons`
+<!-- /generated:changes -->
 
 ## Credits
 The finding (Steam only resolves hicolor icons) and the fix, Breeze's `utilities-terminal` and

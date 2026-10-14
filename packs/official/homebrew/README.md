@@ -23,19 +23,17 @@ test: {offline: true}
 ---
 # Homebrew
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+The package manager several tweaks install their programs with, into `/home/linuxbrew`.
+
+**Why on a Steam Frame:** SteamOS's system partition is read-only and wiped by updates; Homebrew installs outside it. Other tweaks offer to install it when needed; this row shows it and installs it up front.
+<!-- /generated:intro -->
+
 [Homebrew](https://brew.sh) is a package manager that installs programs into
 `/home/linuxbrew`, outside SteamOS's read-only system partition, so SteamOS updates don't
 remove them. Several tweaks use it, and they offer to install it when it's missing; this row
 lets you see it, and install it up front.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (it lives in /home/linuxbrew)
-> - **Changes:** `/home/linuxbrew`
-> - **Unusual access:** **Needs sudo once** to create that folder
-> - **Undo:** Not removed automatically (other tweaks' programs live in it); `./install.sh uninstall homebrew` prints Homebrew's own uninstaller
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install homebrew
@@ -52,6 +50,15 @@ password yet, set one with `passwd` first. After that, Homebrew never needs sudo
 
 **Removing:** `./install.sh uninstall homebrew` leaves Homebrew in place, because other tweaks'
 programs live in it; it prints Homebrew's own uninstaller command if you really want it gone.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (it lives in /home/linuxbrew)
+- **Changes:** `/home/linuxbrew`
+- **Unusual access:** **Needs sudo once** to create that folder
+- **Undo:** Not removed automatically (other tweaks' programs live in it); `./install.sh uninstall homebrew` prints Homebrew's own uninstaller
+<!-- /generated:changes -->
 
 ## Credits
 [Homebrew](https://github.com/Homebrew/brew) (BSD-2-Clause), installed with its official

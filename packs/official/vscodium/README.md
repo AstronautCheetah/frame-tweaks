@@ -18,16 +18,15 @@ undo: "`./install.sh uninstall vscodium`"
 ---
 # VSCodium
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+VS Code without telemetry, from Flathub.
+
+**Why on a Steam Frame:** Coding on the headset: Flathub has the aarch64 build; pairs with Arrow Pad and dictation.
+<!-- /generated:intro -->
+
 [VSCodium](https://vscodium.com) is VS Code built from Microsoft's open-source code without
 their telemetry and branding. Installed from Flathub (aarch64).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** Flathub app (`com.vscodium.codium`)
-> - **Undo:** `./install.sh uninstall vscodium`
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install vscodium
@@ -38,6 +37,14 @@ their telemetry and branding. Installed from Flathub (aarch64).
 - It runs in the Flatpak sandbox: its built-in terminal is inside the sandbox. For a host shell,
   run `flatpak-spawn --host bash` in it, or set that as the terminal profile.
 - Pairs well with [Arrow Pad](../arrowpad/) and [dictation](../dictation/) for editing in VR.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** Flathub app (`com.vscodium.codium`)
+- **Undo:** `./install.sh uninstall vscodium`
+<!-- /generated:changes -->
 
 ## Credits
 VSCodium (MIT) by the VSCodium project; Flathub packaging by its maintainers. Not affiliated with

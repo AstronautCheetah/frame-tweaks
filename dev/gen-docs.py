@@ -4,7 +4,8 @@ README.md front matter, in pack.md's order):
 
   README.md       the Core / Extras / Helpers tables
   SECURITY.md     the "What each tweak changes on your system" rows
-  <tweak>/README  an "At a glance" box (survives updates, what it changes, how to undo), and
+  <tweak>/README  its opening (what it is, why on a Steam Frame), a "What it changes" section
+                  (survives updates, what it changes, unusual access, how to undo), and
                   for a tweak that installs another project, that project's own README at the end
                   (from <tweak>/upstream.md; dev/fetch-upstream-readmes.py updates it)
 
@@ -51,15 +52,19 @@ def security_rows(rows):
     return "\n".join(f"| {i} | {m['changes']} | {m['access']} |" for i, m in rows)
 
 
-def glance(m):
-    lines = ["> **At a glance**", ">",
-             f"> - **Survives SteamOS updates:** {m['survives-updates']}",
-             f"> - **Changes:** {m['changes']}"]
+def intro(m):
+    return f"{m['what']}\n\n**Why on a Steam Frame:** {m['why']}"
+
+
+def changes(m):
+    lines = ["## What it changes", "",
+             f"- **Survives SteamOS updates:** {m['survives-updates']}",
+             f"- **Changes:** {m['changes']}"]
     if m.get("experimental"):
-        lines.append(f"> - **🧪 Experimental:** {m['experimental']}")
-    if m["access"] not in ("–", "-"):
-        lines.append(f"> - **Unusual access:** {m['access']}")
-    lines.append(f"> - **Undo:** {m['undo']}")
+        lines.append(f"- **🧪 Experimental:** {m['experimental']}")
+    if m["access"] not in ("–", "-", "None"):
+        lines.append(f"- **Unusual access:** {m['access']}")
+    lines.append(f"- **Undo:** {m['undo']}")
     return "\n".join(lines)
 
 
@@ -84,9 +89,15 @@ def put(text, name, body, path):
         return pat.sub(lambda _: block, text)
     if name == "upstream":        # first run: at the end
         return text.rstrip("\n") + "\n\n" + block + "\n"
-    if name == "glance":          # first run: after the title and first paragraph
-        parts = text.split("\n\n", 2)
-        return "\n\n".join(parts[:2] + [block] + parts[2:]) if len(parts) == 3 else text + "\n\n" + block + "\n"
+    if name == "intro":           # first run: right after the title
+        m = re.search(r"^# .*\n", text, re.M)
+        return text[:m.end()] + "\n" + block + "\n" + text[m.end():] if m else block + "\n\n" + text
+    if name == "changes":         # first run: before Credits, else before the Check/Remove footer
+        for anchor in ("\n## Credits", "\n---\nCheck:"):
+            if anchor in text:
+                i = text.index(anchor)
+                return text[:i].rstrip("\n") + "\n\n" + block + "\n" + text[i:]
+        return text.rstrip("\n") + "\n\n" + block + "\n"
     sys.exit(f"{path}: no {begin.split(' (')[0]} marker")
 
 
@@ -96,12 +107,13 @@ def main():
     targets = {ROOT / "README.md": [(g, readme_table(rows, g)) for g in ("core", "extras", "helper")],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
-        targets[ROOT / OFFICIAL / i / "README.md"] = [("glance", glance(m))] + (
+        targets[ROOT / OFFICIAL / i / "README.md"] = [("intro", intro(m)), ("changes", changes(m))] + (
             [("upstream", upstream(i, m["upstream"]))] if m["upstream"] else [])
     stale = []
     for path, parts in targets.items():
         old = path.read_text()
-        new = old
+        # (The "At a glance" box became the "What it changes" section, further down.)
+        new = re.sub(r"\n?<!-- generated:glance .*?<!-- /generated:glance -->\n?", "\n", old, flags=re.S)
         for name, body in parts:
             new = put(new, name, body, path)
         if new != old:

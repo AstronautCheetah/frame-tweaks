@@ -32,19 +32,16 @@ test: {offline: true}
 ---
 # Pick up when floating
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+"Float in World" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down.
+
+**Why on a Steam Frame:** Floating a window and then grabbing its bar to place it takes two clicks; this makes it one.
+<!-- /generated:intro -->
+
 Normally **Float in World** leaves the window where it was, and you then grab the bar under it
 to place it. With this tweak, Float in World **picks the window up right away**, exactly as
 grabbing that bar does: it follows your controller until you put it down.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
-> - **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper)
-> - **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks that code each time SteamVR starts and switches itself off if it changed (shown in its status) until a Frame Tweaks update catches up.
-> - **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs
-> - **Undo:** `./install.sh uninstall float-grab` (or untick it in the installer window)
-<!-- /generated:glance -->
 
 - **Put it down** with your next click, or by letting go of the trigger if you're still holding
   the click that pressed Float in World. The laser stays on the button that is now **Return to
@@ -62,6 +59,16 @@ does), it starts the dashboard's own drag (`startFloatingWindowMove`, what the b
 floating window uses) for the controller the dashboard says is pointing at it. The drag ends the
 stock way, on a click; and because the Float in World press comes from SteamVR itself rather than
 the page, the patch also ends it when that controller's trigger moves (released, or pressed again).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches itself off if that changed
+- **Changes:** One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper)
+- **🧪 Experimental:** Relies on SteamVR's internal dashboard code, which Valve can change in any update. It checks that code each time SteamVR starts and switches itself off if it changed (shown in its status) until a Frame Tweaks update catches up.
+- **Unusual access:** Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs
+- **Undo:** `./install.sh uninstall float-grab` (or untick it in the installer window)
+<!-- /generated:changes -->
 
 ---
 Check: `./install.sh status float-grab` · Remove: `./install.sh uninstall float-grab`

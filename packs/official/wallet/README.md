@@ -38,6 +38,12 @@ test:
 ---
 # Wallet: one KDE wallet for both sessions
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+One wallet for desktop mode *and* VR, an unlock dialog that works on the desktop, 4-hour auto-lock, a **Lock Wallet** button, closing that really locks, password-gated apps, and CLI credentials (`gh`) kept out of plain-text files.
+
+**Why on a Steam Frame:** The Frame runs two sessions (VR and a nested desktop) with separate D-Bus buses, so apps get two wallets that overwrite each other. The VR-side password prompt floats in VR, and terminal tools find no keyring at all. SteamOS's stock wallet has no password.
+<!-- /generated:intro -->
+
 The Frame runs two sessions at once: Steam/VR on the outer D-Bus and the nested
 Plasma desktop on its own private bus. An app started from the desktop talks to a
 **second** `kwalletd6` on the private bus. Its secrets are invisible to the same app
@@ -45,14 +51,6 @@ started from VR, and two daemons writing the same wallet file can overwrite each
 other. This follows [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s
 launcher approach (`keyring.enable`), without needing Nix:
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, user service `wallet-lock-sync`, `kwalletrc` setting; rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`)
-> - **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); moves the GitHub CLI token into the wallet
-> - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the KDE settings it changed)
-<!-- /generated:glance -->
 
 **In the installer window: 🔑 Wallet apps** (the button on this tweak's row) lists the protected apps, each with a
 **Password first** switch and **Remove**, and every other installed app (Flatpaks from any
@@ -188,6 +186,15 @@ Caveat: apps routed to the outer bus use that session's portals and notification
 some desktop integration (e.g. a tray icon, dark-mode detection) may differ.
 
 **On a controller button:** see [Dictate and Lock Wallet on a controller button](../../../docs/controller-shortcuts.md).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, user service `wallet-lock-sync`, `kwalletrc` setting; rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`)
+- **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); moves the GitHub CLI token into the wallet
+- **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the KDE settings it changed)
+<!-- /generated:changes -->
 
 ## Credits
 The shared-wallet launcher approach is adapted from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) (Apache-2.0), reimplemented without Nix. The unlock key derivation follows KDE's kwallet-pam. D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). See also [CREDITS.md](../../../CREDITS.md).

@@ -24,17 +24,15 @@ test: {offline: true}
 ---
 # ydotool (shared helper)
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+The virtual keyboard Dictation and Arrow Pad type through. Installed automatically.
+
+**Why on a Steam Frame:** Under KDE Wayland ordinary programs can't send keystrokes to other apps; ydotool goes through the kernel's `/dev/uinput`.
+<!-- /generated:intro -->
+
 Keystroke injection via the kernel's uinput: the only way for ordinary programs to type
 into any app under KDE Wayland. Installed automatically by `dictation` and `arrowpad`.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold`
-> - **Unusual access:** **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running)
-> - **Undo:** `./install.sh uninstall ydotool`
-<!-- /generated:glance -->
 
 ## What uses it
 
@@ -56,6 +54,15 @@ example after resuming from sleep).
 - `ydotool` / `ydotoold` binaries from Arch Linux ARM → `~/.local/bin`
 - user service `ydotoold.service`, socket `/run/user/$UID/.ydotool_socket`
 - requires write access to `/dev/uinput` (the `input` group, which SteamOS grants by default)
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `ydotool`/`ydotoold` (Arch Linux ARM, signature-checked), user service `ydotoold`
+- **Unusual access:** **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running)
+- **Undo:** `./install.sh uninstall ydotool`
+<!-- /generated:changes -->
 
 ## Credits
 [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) by ReimuNotMoe, from [Arch Linux ARM](https://archlinuxarm.org)'s package, not modified. See also [CREDITS.md](../../../CREDITS.md).

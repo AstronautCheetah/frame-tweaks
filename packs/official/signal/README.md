@@ -29,18 +29,16 @@ undo: >-
 ---
 # Signal: key in the wallet
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Signal's database key in the wallet instead of plain text (an existing plain-text key is moved over). Password first and Close after are set in Wallet apps.
+
+**Why on a Steam Frame:** A headset gets passed around: shared with family, often without a SteamOS login password. Flathub Signal otherwise keeps its key in plain text.
+<!-- /generated:intro -->
+
 The Flathub build of Signal Desktop asks on every launch whether to use the
 **plaintext** password store. Choosing it leaves the key to your message database
 unencrypted on disk. This tweak makes it use **KDE Wallet** instead:
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json`
-> - **Unusual access:** Asks for the wallet password first; quits Signal when idle; key in the wallet
-> - **Undo:** `./install.sh uninstall signal` (Signal keeps using the wallet: switching back would lock you out of its data)
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install signal
@@ -85,6 +83,15 @@ reopens without a password (`wallet-unlock --lock` locks it early). It's protect
 access, not against someone who can use desktop mode while you're unlocked.
 Signal's warning about "experimental" backends mainly concerns GNOME libsecret on
 other desktops. On KDE, kwallet6 is the native, intended backend.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json`
+- **Unusual access:** Asks for the wallet password first; quits Signal when idle; key in the wallet
+- **Undo:** `./install.sh uninstall signal` (Signal keeps using the wallet: switching back would lock you out of its data)
+<!-- /generated:changes -->
 
 ## Credits
 Signal is a trademark of Signal Technology Foundation; not affiliated. See also [CREDITS.md](../../../CREDITS.md).
