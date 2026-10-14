@@ -215,6 +215,7 @@
     ['Thickness (cm)', 'thickness', [2, 2.5, 3, 4, 5, 6, 8].map((v) => [String(v), v / 100])],
     ['Gap from the window (cm)', 'gap', [0, 1, 1.5, 2, 3, 5].map((v) => [String(v), v / 100])],
     ['Set back behind the window (cm)', 'back', [0, 1, 2, 3, 5].map((v) => [String(v), v / 100])],
+    ['Haptics', 'haptics', [['On', true], ['Off', false]]],
   ];
   const GEAR_M = 0.045, PANEL_M = 0.34;
   const settingsOpen = new Set();
