@@ -42,15 +42,20 @@ from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md)
 # and whatever it runs (status checks, installs, Run) gets the window's language.
 i18n.INHERIT = False
 i18n.CATALOGUE = i18n.Catalogue()
+sft.load(refresh=True)                    # (sft read the tweaks' text on import, maybe in the
+sft.SETTINGS = sft.settings_specs()       # language this window was started with: again, in ours)
 
 
 def pass_language():
+    """What the window runs gets its language; running programs (Arrow Pad, Screen snip) hear of it."""
     os.environ["FRAME_TWEAKS_LANG_RESOLVED"] = i18n.CATALOGUE.language or "en"
+    i18n.announce(i18n.CATALOGUE.language)
 
 
 pass_language()
 from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
+from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
@@ -672,7 +677,8 @@ class Window(QWidget):
                                for cid, i in KNOWN_ISSUES.items()}
         self.details = None
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
-        self.self_update = self.pool.submit(self_update_check)
+        self.prefs = window_prefs()
+        self.self_update = self.pool.submit(self_update_check) if self.prefs["update_check"] else None
 
         self.release_at_start = current_release()
         self.update_state, self.update_newest = "check", None
@@ -689,7 +695,8 @@ class Window(QWidget):
             self.vr_buttons = VRButtons({"back": self.go_back, "home": self.go_home,
                                          "toggle": self.toggle_pointed_row,
                                          "up": lambda: self.move_focus(-1),
-                                         "down": lambda: self.move_focus(+1)})
+                                         "down": lambda: self.move_focus(+1)}
+                                        if self.prefs["controller"] else {})     # (⚙ Preferences)
             if self.vr_buttons.ok:
                 QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
                 self._laser = (None, 0.0)
@@ -707,6 +714,10 @@ class Window(QWidget):
         self.self_update_label.setObjectName("notice")
         self.self_update_label.linkActivated.connect(lambda _: self.run_update(None))
         top.addWidget(self.self_update_label)
+        prefs = QPushButton("⚙")
+        prefs.setToolTip(_("Preferences: the language, and how this window behaves"))
+        prefs.clicked.connect(self.show_prefs)
+        top.addWidget(prefs)
         self.show_hidden = QPushButton()
         self.show_hidden.setCheckable(True)
         self.show_hidden.toggled.connect(self.rebuild)
@@ -776,7 +787,7 @@ class Window(QWidget):
             self.outer.removeWidget(old)
             old.deleteLater()
 
-    def check_language(self):
+    def check_language(self, now=False):
         """Every 5 s: has the keyboard's language changed (lib/i18n.py)? Then the window's text
         follows, once you're back on the list (an open page isn't pulled away from you)."""
         if self.stack.currentIndex() == 0 and self.details is None and i18n.refresh():
@@ -1157,6 +1168,12 @@ class Window(QWidget):
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
+    def show_prefs(self):
+        self.close_details()
+        self.details = Preferences(self)
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
     def show_packs(self):
         self.close_details()
         self.details = Packs(self)
@@ -1275,7 +1292,7 @@ class Window(QWidget):
         when it's clicked (vrbuttons.py), as on Arrow Pad."""
         t = ev.type()
         if t in (QEvent.Type.Enter, QEvent.Type.MouseButtonPress) and isinstance(obj, QAbstractButton) \
-                and obj.isEnabled() and obj.isVisible():
+                and obj.isEnabled() and obj.isVisible() and self.prefs["haptics"]:
             self.vr_buttons.haptic("hover" if t == QEvent.Type.Enter else "press")
         return False
 

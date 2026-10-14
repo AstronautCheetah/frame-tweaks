@@ -2,10 +2,14 @@
 English text, so they run in English whatever this machine's keyboard or session language is
 (lib/i18n.py). Their subprocesses inherit it."""
 import os
+import tempfile
 import unittest
 
 os.environ["FRAME_TWEAKS_LANGUAGE"] = "en"
 os.environ["FRAME_TWEAKS_KEYBOARD"] = "0"
+# (the window announces its language to running programs: not to the real ones from a test)
+os.environ["FRAME_TWEAKS_ANNOUNCE_FILE"] = os.path.join(tempfile.mkdtemp(), "language")
+os.environ["FRAME_TWEAKS_PREFERENCE_FILE"] = os.path.join(tempfile.mkdtemp(), "language")   # (⚙ Preferences)
 
 
 class English(unittest.TestCase):

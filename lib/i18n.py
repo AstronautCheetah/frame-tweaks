@@ -164,6 +164,70 @@ def keyboard_language():
     return _keyboard["value"]
 
 
+# ---- the language chosen in the installer window's ⚙ Preferences, and announcing changes --------
+# PREFERENCE: "keyboard" (or none: follow the keyboard) or a language ("en", "es_419"), for every
+# Frame Tweaks program. ANNOUNCED: the installer window writes the language it shows whenever it
+# changes; Arrow Pad, Screen snip and others watch the file (follow_announcements: inotify through
+# Qt, no polling) and switch with it.
+PREFERENCE = Path(os.environ.get("FRAME_TWEAKS_PREFERENCE_FILE") or Path.home() / ".config/frame-tweaks/language")
+# (one for both sessions, not under XDG_RUNTIME_DIR, which desktop mode nests; tests use their own)
+ANNOUNCED = Path(os.environ.get("FRAME_TWEAKS_ANNOUNCE_FILE") or f"/run/user/{os.getuid()}/frame-tweaks/language")
+
+
+def preference():
+    try:
+        return PREFERENCE.read_text().strip() or "keyboard"
+    except OSError:
+        return "keyboard"
+
+
+def set_preference(value):
+    PREFERENCE.parent.mkdir(parents=True, exist_ok=True)
+    PREFERENCE.write_text(value + "\n")
+
+
+def _write(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    os.replace(tmp, path)
+
+
+def announce(language):
+    """The installer window: tell the running programs which language it shows now."""
+    value = (language or "en") + "\n"
+    if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+        return                                        # (a try-out window changes nothing)
+    try:
+        if not ANNOUNCED.exists() or ANNOUNCED.read_text() != value:
+            _write(ANNOUNCED, value)
+    except OSError:
+        pass
+
+
+def follow_announcements(owner, changed):
+    """A Qt program: when the installer window announces another language, switch to it and call
+    changed() to show the new text. owner: a QObject that keeps the watcher alive."""
+    from PyQt6.QtCore import QFileSystemWatcher
+    watcher = QFileSystemWatcher([str(ANNOUNCED.parent)] if ANNOUNCED.parent.is_dir() else [], owner)
+
+    def look(*_args):
+        global CATALOGUE
+        try:
+            lang = ANNOUNCED.read_text().strip()
+        except OSError:
+            return
+        if lang and lang != (CATALOGUE.language or "en"):
+            CATALOGUE = Catalogue([] if lang == "en" else [lang])
+            changed()
+    watcher.directoryChanged.connect(look)
+    if not watcher.directories():                       # (no window has announced yet: watch for it)
+        ANNOUNCED.parent.mkdir(parents=True, exist_ok=True)
+        watcher.addPath(str(ANNOUNCED.parent))
+    owner._language_watcher = watcher
+    return watcher
+
+
 # A program started by another Frame Tweaks program speaks the language its parent chose
 # (FRAME_TWEAKS_LANG_RESOLVED, set by lib/i18n.sh and by the installer window), so a status line
 # matches the window that asked for it. The installer window itself sets INHERIT = False: it
@@ -172,13 +236,17 @@ INHERIT = True
 
 
 def wanted_languages():
-    """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the parent's choice, the active
-    keyboard's, then gettext's usual variables; each also without its region (de_AT → de)."""
+    """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the parent's choice, the one
+    chosen in ⚙ Preferences, the active keyboard's, then gettext's usual variables; each also
+    without its region (de_AT → de)."""
     if os.environ.get("FRAME_TWEAKS_LANGUAGE", "").split(".")[0] in ("en", "C", "POSIX"):
         return []                                     # (English, whatever the keyboard or session)
     parent = os.environ.get("FRAME_TWEAKS_LANG_RESOLVED", "") if INHERIT else ""
     if parent and not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
         return [] if parent == "en" else [parent, parent.split("_")[0]]
+    chosen = preference()
+    if chosen != "keyboard" and not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
+        return [] if chosen == "en" else [chosen, chosen.split("_")[0]]
     names = []
     kb = keyboard_language()
     for var in ("FRAME_TWEAKS_LANGUAGE", "keyboard", "LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
@@ -260,6 +328,11 @@ def N_(text):
     return text
 
 
+def NP_(context, text):
+    """N_ with a context (pgettext's): the same text can be translated apart (a key legend)."""
+    return text
+
+
 def ngettext(singular, plural, n):
     return CATALOGUE.ngettext(singular, plural, n)
 
@@ -267,6 +340,19 @@ def ngettext(singular, plural, n):
 def pgettext(context, text):
     """For text that's translated differently in different places (context tells them apart)."""
     return CATALOGUE.gettext(text, context)
+
+
+# The languages' own names, for choosing one (a language without an entry shows its code).
+NAMES = {"en": "English", "es_419": "Español (Latinoamérica)", "es": "Español", "pt_BR": "Português (Brasil)",
+         "pt": "Português", "de": "Deutsch", "fr": "Français", "it": "Italiano", "nl": "Nederlands",
+         "pl": "Polski", "ru": "Русский", "uk": "Українська", "ja": "日本語", "ko": "한국어",
+         "zh_CN": "简体中文", "zh_TW": "繁體中文", "sv": "Svenska", "da": "Dansk", "fi": "Suomi",
+         "nb": "Norsk bokmål", "cs": "Čeština", "hu": "Magyar", "ro": "Română", "tr": "Türkçe", "el": "Ελληνικά"}
+
+
+def available():
+    """[(code, name)]: English and every translation there's a file for."""
+    return [("en", NAMES["en"])] + [(f.stem, NAMES.get(f.stem, f.stem)) for f in sorted(LOCALE.glob("*.po"))]
 
 
 def bash():

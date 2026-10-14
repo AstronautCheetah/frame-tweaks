@@ -26,13 +26,22 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
-    from i18n import _, N_, ngettext  # noqa: F401
+    import i18n
+    from i18n import _, N_, NP_, ngettext, pgettext  # noqa: F401
 except ImportError:                       # (not installed by Frame Tweaks: English)
+    i18n = None
+
     def _(text):
         return text
 
     def ngettext(singular, plural, n):
         return singular if n == 1 else plural
+
+    def pgettext(context, text):
+        return text
+
+    def NP_(context, text):
+        return text
     N_ = _
 
 # Must be set before Qt is imported: KWin only honours "no focus" for X11 windows.
@@ -117,21 +126,27 @@ LAYERS = {
         ["Alt", "Super", "Undo", "Cut", "All", "Paste"],
     ],
 }
-# Key legends as printed on physical keyboards of each language (others keep English).
-LABELS = {
-    "en": {"Bksp": "Bksp", "PgUp": "PgUp", "PgDn": "PgDn", "PrtSc": "PrtSc"},
+# Key legends: translated like any text, in the context "key legend" (locale/glossary: what that
+# language's keyboards print, else the ISO/IEC 9995-7 key symbol). Arrows, F-keys and the rest keep
+# their legend.
+LEGENDS = {"Esc": NP_("key legend", "Esc"), "Tab": NP_("key legend", "Tab"), "Bksp": NP_("key legend", "Bksp"),
+           "Del": NP_("key legend", "Del"), "Enter": NP_("key legend", "Enter"), "Ins": NP_("key legend", "Ins"),
+           "Home": NP_("key legend", "Home"), "End": NP_("key legend", "End"), "PgUp": NP_("key legend", "PgUp"),
+           "PgDn": NP_("key legend", "PgDn"), "PrtSc": NP_("key legend", "PrtSc"), "Menu": NP_("key legend", "Menu"),
+           "Shift": NP_("key legend", "Shift"), "Ctrl": NP_("key legend", "Ctrl"), "Alt": NP_("key legend", "Alt"),
+           "Super": NP_("key legend", "Super")}
+# The mouse keys show the first letter of the button's name (Right: R; in Spanish, Derecho: D).
+MOUSE_WORDS = {"RMB": NP_("mouse button", "Right"), "MMB": NP_("mouse button", "Middle")}
+# Legends for languages that have no translation yet (from their keyboards), until they do.
+SEED_LEGENDS = {
     "de": {"Bksp": "Rück", "Del": "Entf", "Ins": "Einfg", "Home": "Pos1", "End": "Ende",
            "PgUp": "Bild↑", "PgDn": "Bild↓", "PrtSc": "Druck", "Menu": "Menü", "Shift": "Umsch",
            "Ctrl": "Strg"},
     "fr": {"Esc": "Échap", "Bksp": "Retour", "Del": "Suppr", "Enter": "Entrée", "Ins": "Inser",
            "Home": "Début", "End": "Fin", "PgUp": "Pg↑", "PgDn": "Pg↓", "PrtSc": "Impr", "Shift": "Maj"},
-    "es": {"Bksp": "Retro", "Del": "Supr", "Enter": "Intro", "Home": "Inicio", "End": "Fin",
-           "PgUp": "RePág", "PgDn": "AvPág", "PrtSc": "ImpPt", "Menu": "Menú", "Shift": "Mayús"},
     "it": {"Del": "Canc", "Enter": "Invio", "Home": "Inizio", "End": "Fine", "PgUp": "Pag↑",
            "PgDn": "Pag↓", "PrtSc": "Stamp", "Shift": "Maiusc"},
 }
-LAYOUT_LANG = {"de": "de", "at": "de", "ch": "de", "fr": "fr", "be": "fr", "ca": "fr",
-               "es": "es", "latam": "es", "it": "it"}
 # Clipboard keys show icons (language-neutral), like Full Keyboard's copy/paste buttons.
 BREEZE = Path("/usr/share/icons/breeze-dark")
 ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": "edit-undo",
@@ -153,6 +168,8 @@ TIPS = {"🎤": N_("Dictation: tap to start (red), tap again to stop; yellow = t
         "MMB": N_("Middle click: your next click becomes a middle click"),
         **{m: N_("{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand")
            for m in MODIFIERS if m != "Super"}}
+TOOL_TIPS = {"settings": N_("Settings: theme and haptics"), "pin": N_("Pin: stop accidental moves"),
+             "reset": N_("Reset position"), "smaller": N_("Smaller"), "larger": N_("Larger"), "close": N_("Close")}
 # Keys whose legend is a word rather than a key name (translated where shown).
 WORDS = {"Tools": N_("Tools"), "Unstick": N_("Unstick"), "Snip": N_("Snip"), "Launcher": N_("Launcher")}
 DOUBLE_TAP = 0.4
@@ -199,37 +216,6 @@ QPushButton[tool="true"]:hover {{ background: {t['hover']}; }}
 QPushButton[tool="true"][state="locked"] {{ background: {t['latched']}; border: none; }}
 QLabel {{ color: {t['legend']}; }}
 """
-
-
-def kde_layout():
-    """Current KDE keyboard layout code (e.g. 'us', 'de'), from the desktop session."""
-    env = dict(os.environ)
-    src = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "ksmserver"],
-                         capture_output=True, text=True).stdout.split()
-    if src:   # the desktop's private D-Bus also works for the VR window
-        try:
-            senv = dict(kv.split("=", 1) for kv in Path(f"/proc/{src[0]}/environ").read_text().split("\0") if "=" in kv)
-            env["DBUS_SESSION_BUS_ADDRESS"] = senv.get("DBUS_SESSION_BUS_ADDRESS", env.get("DBUS_SESSION_BUS_ADDRESS", ""))
-        except OSError:
-            pass
-    try:
-        q = ["qdbus6", "org.kde.keyboard", "/Layouts", "org.kde.KeyboardLayouts."]
-        idx = int(subprocess.run(q[:3] + [q[3] + "getLayout"], env=env, capture_output=True,
-                                 text=True, timeout=2).stdout.strip())
-        out = subprocess.run(["qdbus6", "--literal"] + q[:3] + [q[3] + "getLayoutsList"], env=env,
-                             capture_output=True, text=True, timeout=2).stdout
-        codes = [c for c in __import__("re").findall(r'\(sss\) "([^"]*)"', out)]
-        if codes:
-            return codes[min(idx, len(codes) - 1)]
-    except (OSError, ValueError, subprocess.SubprocessError):
-        pass
-    try:
-        for line in (Path.home() / ".config/kxkbrc").read_text().splitlines():
-            if line.startswith("LayoutList="):
-                return line.split("=", 1)[1].split(",")[0].strip()
-    except OSError:
-        pass
-    return os.environ.get("LANG", "en")[:2]
 
 
 class Ydotool:
@@ -630,7 +616,6 @@ class ArrowPad(QWidget):
         self.mod_state = {m: "off" for m in MODIFIERS}   # off | oneshot | locked
         self.mod_tapped = {m: 0.0 for m in MODIFIERS}
         self.layer = "nav"
-        self.lang = "en"
         self.drag_offset = None
         cfg = self.load_config()
         self.cfg = cfg
@@ -649,13 +634,11 @@ class ArrowPad(QWidget):
         # toolbar: pin, reset position, smaller, larger ......... close
         bar = QHBoxLayout()
         self.tools = {}
-        for name, tip in (("settings", _("Settings: theme and haptics")),
-                          ("pin", _("Pin: stop accidental moves")), ("reset", _("Reset position")),
-                          ("smaller", _("Smaller")), ("larger", _("Larger"))):
-            self.tools[name] = self.tool_button(name, tip)
+        for name in ("settings", "pin", "reset", "smaller", "larger"):
+            self.tools[name] = self.tool_button(name, _(TOOL_TIPS[name]))
             bar.addWidget(self.tools[name])
         bar.addStretch(1)
-        self.tools["close"] = self.tool_button("close", _("Close"))
+        self.tools["close"] = self.tool_button("close", _(TOOL_TIPS["close"]))
         bar.addWidget(self.tools["close"])
         self.click_swap = ClickSwap(self.restyle)
         outer.addLayout(bar)
@@ -686,9 +669,9 @@ class ArrowPad(QWidget):
         outer.addWidget(self.settings_page)
 
         self.apply_scale()
-        self.update_language()
         QTimer(self, interval=500, timeout=self.refresh_mic).start()
-        QTimer(self, interval=15000, timeout=self.update_language).start()   # layouts rarely change
+        if i18n is not None:              # (the installer window announces a new language: no polling)
+            i18n.follow_announcements(self, self.retranslate)
         if TARGET == "vr":
             from vroverlay import OverlayHost
             self.overlay = OverlayHost(self, cfg)
@@ -767,17 +750,36 @@ class ArrowPad(QWidget):
     def label(self, name):
         if name in WORDS:
             return _(WORDS[name])
-        return LABELS.get(self.lang, {}).get(name, LABELS["en"].get(name, name))
+        if name in LEGENDS:
+            legend = pgettext("key legend", name)
+            if legend == name and i18n is not None and i18n.CATALOGUE.language:
+                legend = SEED_LEGENDS.get(i18n.CATALOGUE.language.split("_")[0], {}).get(name, name)
+            return legend
+        return name
+
+    def retranslate(self):
+        """The installer window switched language: the keys, tooltips and settings in it too."""
+        self.setWindowTitle(_("Arrow Pad (VR)") if TARGET == "vr" else _("Arrow Pad"))
+        for name, b in self.tools.items():
+            b.setToolTip(_(TOOL_TIPS[name]))
+        showing = self.settings_page.isVisible()
+        old, self.settings_page = self.settings_page, self.make_settings_page()
+        self.outer.replaceWidget(old, self.settings_page)
+        old.deleteLater()
+        self.settings_page.setVisible(showing)
+        self.relabel()
+        self.apply_scale()
 
     def relabel(self):
         key = round(52 * self.scale)
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
-            b.setToolTip(_(TIPS[name]).format(m=name) if name in TIPS else "")
+            b.setToolTip(_(TIPS[name]).format(m=self.label(name)) if name in TIPS else "")
             icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip") else None
             if icon:
                 b.setIcon(icon)
-                b.setText({"RMB": "R", "MMB": "M"}.get(name, ""))   # the two mouse icons look alike
+                # (the two mouse icons look alike: the button's initial, in the user's language)
+                b.setText(pgettext("mouse button", MOUSE_WORDS[name])[:1].upper() if name in MOUSE_WORDS else "")
                 if name in MOUSE:
                     f = QFont(QApplication.font())
                     f.setPixelSize(round(key * 0.24))
@@ -798,12 +800,6 @@ class ArrowPad(QWidget):
                 f.setPixelSize(size)
             b.setFont(f)
         self.restyle()
-
-    def update_language(self):
-        lang = LAYOUT_LANG.get(kde_layout().split("(")[0].lower(), "en")
-        if lang != self.lang:
-            self.lang = lang
-            self.relabel()
 
     def name_at(self, r, c):
         return LAYERS[self.layer][r][c]
@@ -833,7 +829,6 @@ class ArrowPad(QWidget):
             pin.setIcon(icon)
             pin.setProperty("pinned", self.pinned)
         pin.setToolTip(_("Pinned: tap to allow moving") if self.pinned else _("Pin: stop accidental moves"))
-
 
     @staticmethod
     def set_state(b, state):

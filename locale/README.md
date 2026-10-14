@@ -35,12 +35,16 @@ their translations into `glossary/LANG.terms.tsv`, and `--check` lists ours that
 FRAME_TWEAKS_LANGUAGE=de ./install.sh gui
 ```
 
-Without `FRAME_TWEAKS_LANGUAGE`, the language follows **the keyboard you're typing with**:
+Or choose it in the installer window's **⚙ Preferences** (every Frame Tweaks program follows that
+choice; kept in `~/.config/frame-tweaks/language`). Left on "Follow the keyboard", or without
+`FRAME_TWEAKS_LANGUAGE`, the language follows **the keyboard you're typing with**:
 Steam's VR keyboard in VR (its layout chosen in Steam's keyboard settings), KDE's keyboard layout
 in desktop mode. An English, QWERTY or other layout that doesn't say which language (Dvorak,
 Colemak) leaves the choice to the session (`LANGUAGE`, `LC_ALL`, `LC_MESSAGES`, then `LANG`).
 The installer window looks at the keyboard at most every 5 seconds and switches when you're on
-its list; the tweaks' programs and scripts use the language they found when they started.
+its list. It then announces the change (`/run/user/<uid>/frame-tweaks/language`): Arrow Pad and
+Screen snip, already open, switch with it (`i18n.follow_announcements`; they don't look at the
+keyboard themselves). Scripts and other programs use the language they found when they started.
 `FRAME_TWEAKS_KEYBOARD=0` turns the keyboard check off. Anything not translated shows in English.
 
 ## Keeping up

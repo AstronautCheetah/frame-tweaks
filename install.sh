@@ -98,7 +98,8 @@ ensure_menu_entry() {
     ensure_menu_language
 }
 # Menu entries in the keyboard's language (lib/i18n.py menus): a systemd path unit relabels them
-# when Steam saves its keyboard layout, so a menu opens in the language chosen before it; nothing
+# when Steam saves its keyboard layout or a language is chosen in the window's ⚙ Preferences, so a
+# menu opens in the language chosen before it; nothing
 # polls. The entries are shared by VR and desktop mode, so one keyboard decides: Steam's (the
 # unit runs in the VR session's environment). The units are rewritten only when they change.
 MENU_UNIT=frame-tweaks-menus
@@ -107,7 +108,7 @@ ensure_menu_language() {
     install_i18n
     mkdir -p "$u"
     printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
-        "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "" \
+        "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "PathChanged=%h/.config/frame-tweaks/language" "" \
         "[Install]" "WantedBy=default.target" > "$u/$MENU_UNIT.path.new"
     printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
         "[Service]" "Type=oneshot" "ExecStart=/usr/bin/python3 $py menus" > "$u/$MENU_UNIT.service.new"
