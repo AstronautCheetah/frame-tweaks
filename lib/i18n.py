@@ -256,8 +256,9 @@ def wanted_languages():
     """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the one chosen in ⚙ Preferences,
     (for a program) the installer window's while it's open, then the parent's choice, the active
     keyboard's, then gettext's usual variables; each also without its region (de_AT → de)."""
-    if os.environ.get("FRAME_TWEAKS_LANGUAGE", "").split(".")[0] in ("en", "C", "POSIX"):
-        return []                                     # (English, whatever the keyboard or session)
+    asked = os.environ.get("FRAME_TWEAKS_LANGUAGE", "").split(".")[0]
+    if asked in ("C", "POSIX") or asked.split("_")[0] == "en":
+        return []                                     # (English, en_US too, whatever the keyboard or session)
     if not os.environ.get("FRAME_TWEAKS_LANGUAGE"):
         chosen = preference()
         # the one chosen in Preferences; else, for a program, the installer window's while it's
@@ -286,13 +287,13 @@ def wanted_languages():
 
 
 def pick(languages, folder):
-    """The .po file for the first of languages that has one: its own (es_MX.po), else one for
-    the same language (es_419.po, es.po)."""
+    """The .po file for the first of languages that has one: its own (es_MX.po), else the
+    language's own (es.po), else one for it elsewhere (es_419.po)."""
     for lang in languages:
         if (folder / f"{lang}.po").is_file():
             return folder / f"{lang}.po"
         base = lang.split("_")[0]
-        near = sorted(folder.glob(f"{base}_*.po")) + ([folder / f"{base}.po"] if (folder / f"{base}.po").is_file() else [])
+        near = ([folder / f"{base}.po"] if (folder / f"{base}.po").is_file() else []) + sorted(folder.glob(f"{base}_*.po"))
         if near:
             return near[0]
     return None

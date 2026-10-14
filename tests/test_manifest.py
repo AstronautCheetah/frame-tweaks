@@ -2,6 +2,8 @@
 manifest reads the same as with PyYAML; ambiguous YAML is refused; a user's pack is used only
 once trusted (and again after it changes), may replace a tweak only by saying so, and a tweak
 missing a dependency or needing a newer pack api isn't offered."""
+import contextlib
+import io
 import os
 import sys
 import tempfile
@@ -34,9 +36,23 @@ class Reader(unittest.TestCase):
 
     def test_refuses_what_readers_disagree_on(self):
         for bad in ("a: yes", "a: Off", "a: 2026-10-14", "a: 010", "a: 1_000", "a: &x 1", "a: *x",
-                    "a: !tag x", "a: 1\na: 2", "a: b\n  c", "a: `x`", "a: x: y", "\ta: 1", "a: [1, 2"):
+                    "a: !tag x", "a: 1\na: 2", "a: b\n  c", "a: `x`", "a: x: y", "\ta: 1", "a: [1, 2",
+                    # PyYAML: 1, True, a date as keys; inf; a {x: null} or an error for ? and :; no
+                    # empty entry; the tab ends the value; the spaces past the indentation are text
+                    "1: x", "on: x", "2026-10-14: x", "a: {true: x}", "a: +.inf", "a: ? x", "a: [?x]",
+                    "a: [x?]", "a: [:x]", "a: [#x]", "a: [a, ]", "a: {k: }", "a: x\t# c", "a: =",
+                    "a: |\n  x\n     \n  y\n"):
             with self.assertRaises(manifest.ManifestError, msg=bad):
                 manifest.parse_yaml(bad)
+
+    def test_list_items_as_pyyaml_reads_them(self):
+        """A "- key: |" item's text keeps its first lines, blank or #; an item with only a
+        comment is null (not the start of a list holding the next items)."""
+        doc = "a:\n  - j: |\n\n      # not a comment\n      x\n    k: 1\nb:\n  - # nothing\n  - z\n"
+        want = {"a": [{"j": "\n# not a comment\nx\n", "k": 1}], "b": [None, "z"]}
+        self.assertEqual(manifest.parse_yaml(doc), want)
+        if yaml:
+            self.assertEqual(yaml.safe_load(doc), want)
 
     def test_values(self):
         doc = textwrap.dedent("""\
@@ -73,6 +89,21 @@ class Reader(unittest.TestCase):
         self.assertEqual(manifest.parse_yaml(manifest.dump(data)), data)
         if yaml:
             self.assertEqual(yaml.safe_load(manifest.dump(data)), data)
+
+    def test_dump_round_trips_awkward_values(self):
+        """A small pack.md (the file itself is never {...}), lists of lists, text that | can't
+        hold as it is, ? and : at the start, tabs, and floats Python writes as 1e-05."""
+        awkward = ["?x", "? x", ":x", "a?b", "=", "<<", "+.inf", "a\tb", "a\n\n", "\n", "  a\nb", "a\n  \nb",
+                   "x\n\ty", "#x\ny", "3rd", "y"]
+        for data in ({"name": "My pack", "api": 1}, {"k": [["x\ny"], [{"a": 1}]]}, {"k": [{"j": "\nx", "l": [[1]]}]},
+                     {"k": awkward, "m": {s: s for s in ("a", "b")}}, {"k": [{"v": s} for s in awkward]},
+                     {"f": [5e-05, 1e+20, -0.0, 0.025]}):
+            out = manifest.dump(data)
+            self.assertEqual(manifest.parse_yaml(out), data, out)
+            if yaml:
+                self.assertEqual(yaml.safe_load(out), data, out)
+        with self.assertRaises(ValueError):
+            manifest.dump({"f": float("inf")})            # (no form the reader takes)
 
 
 TWEAK = """\
@@ -188,6 +219,88 @@ class Packs(unittest.TestCase):
         sft.set_trusted(d.parent, True)
         self.assertNotIn("later", self.ids())
         self.assertTrue(any("newer Frame Tweaks" in p for p in sft.load()["problems"]))
+
+    def test_trust_covers_names_contents_links_and_modes(self):
+        """No two packs hash alike by moving bytes between a file and its name (an update could
+        then pass for trusted); adding a link, or making a file executable, is a change."""
+        a, b = Path(self.tmp.name) / "a", Path(self.tmp.name) / "b"
+        a.mkdir()
+        b.mkdir()
+        (a / "x").write_bytes(b"1\0y\0" + b"2")             # (one file: "x", holding 1 NUL y NUL 2)
+        (b / "x").write_bytes(b"1")
+        (b / "y").write_bytes(b"2")                       # (two: "x" and "y", same bytes in a row)
+        self.assertNotEqual(sft.pack_hash(a), sft.pack_hash(b))
+        d = self.tweak("mypack", "hello")
+        sft.set_trusted(d.parent, True)
+        self.assertIn("hello", self.ids())
+        (d.parent / "__pycache__").mkdir()                # (left out of the hash, as .git is)
+        (d.parent / "__pycache__" / "x.pyc").write_bytes(b"x")
+        self.assertIn("hello", self.ids())
+        (d.parent / "more").symlink_to(d.parent / "__pycache__")   # (a new link counts, even to a left-out folder)
+        self.assertNotIn("hello", self.ids())
+        (d.parent / "more").unlink()
+        self.assertIn("hello", self.ids())
+        os.chmod(d / "status.sh", 0o755)
+        self.assertNotIn("hello", self.ids())
+
+    def test_a_broken_pack_md_is_a_problem_not_a_crash(self):
+        """Any pack's pack.md is read, trusted or not: empty lists or wrong kinds of values must
+        not stop the official tweaks from loading."""
+        self.tweak("mypack", "hello", pack_md="---\nname: Mine\ncategories:\norder: 5\n---\n")
+        data = sft.load(refresh=True)
+        self.assertIn("arrowpad", self.ids())
+        self.assertTrue(any("categories must be a list" in p for p in data["problems"]))
+        self.assertTrue(any("order must be a list" in p for p in data["problems"]))
+        (self.user / "mypack" / "pack.md").write_bytes(b"---\nname: Caf\xe9\n---\n")   # (not UTF-8)
+        self.assertTrue(any("pack.md" in p for p in sft.load(refresh=True)["problems"]))
+
+    def test_wrong_kinds_of_values_leave_the_tweak_out(self):
+        """processes as plain text would be a pattern per letter (install.sh stops whatever matches
+        "^" or "."); source and run as text, or settings: actions: left empty, crashed the loader."""
+        bad = {"processes": "processes: ^~/.local/bin/hello-daemon\n", "source": "source: https://example.com\n",
+               "run": "run: Open\n", "settings.actions": "settings:\n  file: ~/.config/x.conf\n  format: shell\n"
+               "  options:\n    - {key: A, title: A, default: a, choices: [{label: A, value: a}]}\n  actions:\n",
+               "settings.file": "settings:\n  file: ~/.config/../.bashrc\n  format: shell\n"
+               "  options:\n    - {key: A, title: A, default: a, choices: [{label: A, value: a}]}\n"}
+        for key, extra in bad.items():
+            d = self.tweak("mypack", "hello", extra=extra)
+            (d / "run.sh").write_text("#!/bin/bash\n")
+            sft.set_trusted(d.parent, True)
+            self.assertNotIn("hello", self.ids(), key)
+            self.assertTrue(any(f"hello: {key}" in p for p in sft.load()["problems"]), key)
+
+    def test_trusting_by_name_needs_a_name_only_one_pack_has(self):
+        """A pack can call itself anything, so `mods trust NAME` mustn't pick one of two."""
+        mine = self.tweak("mypack", "hello").parent
+        self.tweak("aaa", "other", pack_md="---\nname: mypack\n---\n")      # (listed first)
+        sft.load(refresh=True)
+        with self.assertRaises(SystemExit):
+            sft.find_pack("mypack")
+        self.assertEqual(sft.find_pack(str(mine))["dir"], mine.resolve())
+
+    def test_check_reports_the_pack_md_too(self):
+        self.tweak("future", "later", pack_md="---\napi: 99\norder:\n---\n")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), self.assertRaises(SystemExit) as e:
+            sft.mods(["check", str(self.user / "future")])
+        self.assertEqual(e.exception.code, 1)
+        self.assertIn("newer Frame Tweaks", out.getvalue())
+        self.assertIn("order must be a list", out.getvalue())
+
+    def test_dependency_cycle_and_registry_lines(self):
+        """deps stops where a cycle began (as install.sh's with_deps); a summary with a line
+        break doesn't make a row of its own in the registry install.sh reads."""
+        self.tweak("mypack", "one", extra="depends: [two]\n")
+        d = self.tweak("mypack", "two", extra="depends: [one]\n")
+        (d / "README.md").write_text((d / "README.md").read_text().replace("summary: A test tweak", "summary: |\n  A\n  B"))
+        sft.set_trusted(self.user / "mypack", True)
+        sft.load(refresh=True)
+        for argv, check in ((["deps", "one"], lambda s: self.assertEqual(s.split(), ["two"])),
+                            (["registry"], lambda s: self.assertEqual(len(s.splitlines()), len(sft.components())))):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                sft.main(argv)
+            check(out.getvalue())
 
     def test_new_category_comes_after_the_official_ones(self):
         d = self.tweak("mypack", "hello", category="Games")

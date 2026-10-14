@@ -91,6 +91,13 @@ class Language(unittest.TestCase):
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANGUAGE": "de", "LANG": "C.UTF-8"}, clear=True):
             self.assertEqual(i18n.wanted_languages(), ["de"])
 
+    def test_english_by_any_name(self):
+        """FRAME_TWEAKS_LANGUAGE=en_US (or en_GB.UTF-8) is English too, not the keyboard's language."""
+        with mock.patch.object(i18n, "keyboard_language", lambda: "de"):
+            for value in ("en", "en_US", "en_GB.UTF-8"):
+                with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANGUAGE": value}, clear=True):
+                    self.assertEqual(i18n.wanted_languages(), [], value)
+
 
 class Inherited(unittest.TestCase):
     def test_a_program_speaks_its_parents_language(self):
@@ -210,6 +217,15 @@ class Keyboard(unittest.TestCase):
         self.assertEqual(i18n.pick(["es"], self.d).name, "es_419.po")
         self.assertEqual(i18n.Catalogue(["es_MX"], self.d).gettext("Close"), "Cerrar")
         self.assertIsNone(i18n.pick(["de", "fr"], self.d))
+
+    def test_the_languages_own_file_before_another_regions(self):
+        """Once there's an es.po, Spanish from Spain or Mexico uses it (locale/README.md); pt_PT
+        takes pt.po, not pt_BR.po."""
+        for f in ("es_419.po", "es.po", "pt_BR.po", "pt.po"):
+            (self.d / f).write_text('msgid ""\nmsgstr ""\n')
+        for languages, file in ((["es_ES", "es"], "es.po"), (["es_MX", "es"], "es.po"), (["es_419", "es"], "es_419.po"),
+                                (["pt_PT", "pt"], "pt.po"), (["pt_BR", "pt"], "pt_BR.po")):
+            self.assertEqual(i18n.pick(languages, self.d).name, file, languages)
 
 
 class Shell(unittest.TestCase):

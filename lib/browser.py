@@ -151,7 +151,7 @@ def matcher(keys):
     if not words:
         return lambda pid, env: False
     name = Path(words[0]).name
-    return lambda pid, env: bool(proc_cmd(pid)) and Path(proc_cmd(pid)[0]).name == name
+    return lambda pid, env: Path((proc_cmd(pid) or [""])[0]).name == name     # (read once: it may just have ended)
 
 
 def running_sessions(app_id):
@@ -233,12 +233,14 @@ def launch(url):
         return None
     app, target, env = p
     handoff = target in running_sessions(app)
+    before = {pid for pid in pids() if url in proc_cmd(pid)}   # (e.g. a browser first started with this link)
     try:
         proc = subprocess.Popen(["gtk-launch", app, url], env=env, stdin=subprocess.DEVNULL,
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     except OSError as e:
         log(f"couldn't start {app} for {url!r}: {e}")
         return None
+    proc.had_link = before                     # (still_stuck leaves those alone)
     log(f"{url!r} -> {app} in {target} (from {session_of(os.environ)}; {'hand-off' if handoff else 'new window'})")
     return _("Opened in {app} ({session})").format(app=browser_name(app), session=_(target)), proc, handoff
 
@@ -246,9 +248,11 @@ def launch(url):
 def still_stuck(proc, url):
     """After a hand-off: True if the launched copy is still up (it shows "not responding" instead
     of passing the link on); those processes (ones with this link on their command line) are
-    stopped. gtk-launch itself exits at once, so it's the browser's own processes that tell."""
+    stopped. gtk-launch itself exits at once, so it's the browser's own processes that tell. Ones
+    that had the link before the launch aren't its: the running browser, if this link started it."""
     import signal
-    stuck = [pid for pid in pids() if pid != os.getpid() and url in proc_cmd(pid)]
+    stuck = [pid for pid in pids() if pid != os.getpid() and pid not in getattr(proc, "had_link", ())
+             and url in proc_cmd(pid)]
     for pid in stuck:
         try:
             os.kill(pid, signal.SIGTERM)

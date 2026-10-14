@@ -1,7 +1,9 @@
 """lib/sft.py: the settings, hidden rows and details shared by the installer window and
 ./install.sh, and that the VR gear panels still offer the same choices."""
+import contextlib
 import importlib.machinery
 import importlib.util
+import io
 import json
 import re
 import sys
@@ -12,6 +14,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
+import i18n  # noqa: E402
 import sft  # noqa: E402
 
 _l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "packs/original/adb-scrcpy" / "phone-touch"))
@@ -100,6 +103,32 @@ class ReadWrite(unittest.TestCase):
         sft.write_settings("scroll-strips", {}, reset=True)
         self.assertEqual(json.loads(f.read_text()), {"future": 1})
 
+    def test_shell_values_can_be_sourced_and_read_back(self):
+        """A value with a space is quoted, so sourcing the file gives it whole (not a command
+        "morning"); a number a manifest lists unquoted reads back as the one chosen."""
+        f = Path(self.d.name) / "mine.conf"
+        sft.SETTINGS["mine"] = {"file": f, "format": "shell", "options": [
+            ("GREETING", "Greeting", [("Hello", "hello"), ("Good morning", "good morning")], "hello"),
+            ("SIZE", "Size", [("Small", 720), ("Big", 1280)], 720)]}
+        sft.write_settings("mine", {"GREETING": "good morning", "SIZE": 1280})
+        self.assertEqual(sft.read_settings("mine"), {"GREETING": "good morning", "SIZE": 1280})
+        self.assertEqual(sft.raw_setting("mine", "GREETING"), "good morning")
+
+    def test_json_that_isnt_a_mapping_reads_as_the_defaults(self):
+        f = sft.SETTINGS["scroll-strips"]["file"]
+        for text in ("null", "[1, 2]", '"x"'):
+            f.write_text(text)
+            self.assertEqual(sft.read_settings("scroll-strips"), sft.defaults("scroll-strips"), text)
+
+    def test_a_key_is_looked_up_never_run(self):
+        """raw_setting sources the file and looks the key up by name: the key isn't shell code."""
+        f = sft.SETTINGS["adb-scrcpy"]["file"]
+        f.write_text("PHONE_NAME='my phone'\n")
+        self.assertEqual(sft.raw_setting("adb-scrcpy", "PHONE_NAME"), "my phone")
+        mark = Path(self.d.name) / "ran"
+        self.assertEqual(sft.raw_setting("adb-scrcpy", f'X}}"; touch {mark}; echo "${{Y'), "")
+        self.assertFalse(mark.exists())
+
 
 class HiddenRows(unittest.TestCase):
     def test_hide_and_unhide_a_default_hidden_row(self):
@@ -110,6 +139,19 @@ class HiddenRows(unittest.TestCase):
                 sft.set_hidden("a", False)
                 sft.set_hidden("b", True)
                 self.assertEqual(sft.hidden(rows), {"b"})
+
+    def test_a_group_by_its_english_name_in_another_language(self):
+        """./install.sh hide-group "System" (as the README writes it) works in Spanish too, and
+        hides the group the window shows (its Spanish name)."""
+        self.addCleanup(lambda: sft.load(refresh=True))           # (the English rows again)
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "es.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "System"\nmsgstr "Sistema"\n', encoding="utf-8")
+            with mock.patch.object(i18n, "CATALOGUE", i18n.Catalogue(["es"], Path(d))), \
+                    mock.patch.object(sft, "HIDDEN_CATS", Path(d) / "hidden-categories"), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                sft.load(refresh=True)
+                sft.main(["hide-group", "System"])
+                self.assertEqual(sft.read_set(sft.HIDDEN_CATS), {"Sistema"})
 
 
 class Experimental(unittest.TestCase):
