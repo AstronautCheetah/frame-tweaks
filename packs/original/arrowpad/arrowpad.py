@@ -171,7 +171,9 @@ TIPS = {"🎤": N_("Dictation: tap to start (red), tap again to stop; yellow = t
 TOOL_TIPS = {"settings": N_("Settings: theme and haptics"), "pin": N_("Pin: stop accidental moves"),
              "reset": N_("Reset position"), "smaller": N_("Smaller"), "larger": N_("Larger"), "close": N_("Close")}
 # Keys whose legend is a word rather than a key name (translated where shown).
-WORDS = {"Tools": N_("Tools"), "Unstick": N_("Unstick"), "Snip": N_("Snip"), "Launcher": N_("Launcher")}
+# (context "key legend": a translation short enough for a key, e.g. "Herram." for Herramientas)
+WORDS = {"Tools": NP_("key legend", "Tools"), "Unstick": NP_("key legend", "Unstick"),
+         "Snip": NP_("key legend", "Snip"), "Launcher": NP_("key legend", "Launcher")}
 DOUBLE_TAP = 0.4
 SCALE_MIN, SCALE_MAX, SCALE_STEP = 0.6, 2.0, 0.1
 RUN = Path(f"/run/user/{os.getuid()}")
@@ -747,9 +749,14 @@ class ArrowPad(QWidget):
         self.apply_scale()
         self.save_config()
 
+    @property
+    def lang(self):
+        """The language the keys are shown in (the VR overlay draws again when it changes)."""
+        return i18n.CATALOGUE.language if i18n is not None else None
+
     def label(self, name):
         if name in WORDS:
-            return _(WORDS[name])
+            return pgettext("key legend", WORDS[name])
         if name in LEGENDS:
             legend = pgettext("key legend", name)
             if legend == name and i18n is not None and i18n.CATALOGUE.language:

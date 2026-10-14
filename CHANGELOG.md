@@ -19,6 +19,8 @@
   sistema", "Depuración inalámbrica").
 
 ### Fixed
+- **Arrow Pad in VR closed at once** after the language change above (its VR panel asked for a
+  setting that had moved).
 - **Pasting a snip's image gave its HTML as text** (`<img src="data:…`) wherever the Shared
   clipboard had carried it: clipboard-sync took the image's HTML form for text. It now shares only
   plain text, so the image stays an image (an update rebuilds Shared clipboard with the fix).
