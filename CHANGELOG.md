@@ -3,8 +3,15 @@
 ## Unreleased
 
 ### Added
+- **Every row shows a tick box**, empty when the tweak isn't installed, so it's clear where to
+  click.
 - **Screenshots on details pages:** pictures in a tweak's README now show in the installer
   window too. Arrow Pad's shows its main and Tools layers.
+
+### Changed
+- **Wallet apps is the Shared KDE wallet row's button** (🔑 Wallet apps) instead of a button at
+  the top; its page still locks and unlocks the wallet. **Diagnostics** moved next to Apply
+  changes.
 
 ### Fixed
 - **Open packs folder** opened Kate when the installer window was floating in VR: folders and

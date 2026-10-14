@@ -36,7 +36,7 @@ import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, se
 from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
 import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
-from wallet_page import FLATPAK_ICONS, WALLET_LAUNCHER, WalletApps  # noqa: E402  (Wallet apps page)
+from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
@@ -82,6 +82,13 @@ QScrollArea { border: none; }
 QTextBrowser { background: #11161c; border: none; border-radius: 8px; padding: 8px; }
 QLabel#issue { background: #2a2312; color: #e0b33a; border-radius: 8px; padding: 10px; }
 QLabel#notice { color: #e0b33a; }
+"""
+# Tick boxes draw an empty box when unticked, so every row shows where to click.
+_BOX = Path(__file__).resolve().parent / "images"
+STYLE += f"""
+QCheckBox::indicator:unchecked {{ image: url({_BOX}/box.svg); }}
+QCheckBox::indicator:unchecked:hover {{ image: url({_BOX}/box-hover.svg); }}
+QCheckBox::indicator:checked {{ image: url({_BOX}/box-checked.svg); }}
 """
 
 
@@ -456,6 +463,8 @@ class SettingsPage(QWidget):
 
 
 SETTINGS_PAGES = {cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS}   # the row's button opens these
+# A row whose button opens a page of its own instead (label, page): the wallet's apps.
+PAGES = {"wallet": ("🔑 Wallet apps", WalletApps)}
 
 
 class Window(QWidget):
@@ -494,19 +503,10 @@ class Window(QWidget):
         self.show_hidden.setCheckable(True)
         self.show_hidden.toggled.connect(self.rebuild)
         top.addWidget(self.show_hidden)
-        self.wallet_button = QPushButton("🔑 Wallet apps")
-        self.wallet_button.setToolTip("Choose which apps open with the shared KDE wallet")
-        self.wallet_button.clicked.connect(self.show_wallet_apps)
-        self.wallet_button.setVisible(WALLET_LAUNCHER.exists())
-        top.addWidget(self.wallet_button)
         packs = QPushButton("🧩 Packs")
         packs.setToolTip("Where the tweaks come from; add other people's (docs/mods.md)")
         packs.clicked.connect(self.show_packs)
         top.addWidget(packs)
-        diag = QPushButton("Diagnostics")
-        diag.setToolTip("Save a report for a bug report (user names and paths removed)")
-        diag.clicked.connect(self.save_diagnostics)
-        top.addWidget(diag)
         refresh = QPushButton("Refresh")
         refresh.clicked.connect(self.refresh)
         top.addWidget(refresh)
@@ -529,6 +529,10 @@ class Window(QWidget):
         self.notice = QLabel()
         self.notice.setObjectName("notice")
         bottom.addWidget(self.notice)
+        diag = QPushButton("Diagnostics")
+        diag.setToolTip("Save a report for a bug report (user names and paths removed)")
+        diag.clicked.connect(self.save_diagnostics)
+        bottom.addWidget(diag)
         apply_ = QPushButton("Apply changes")
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
@@ -805,6 +809,15 @@ class Window(QWidget):
         state = self.state.get(cid)
         installed = state is not None and state[0] != 1
         label = run_label(cid)
+        if cid in PAGES:
+            button.setText(PAGES[cid][0])
+            button.setProperty("help", "false")
+            button.style().unpolish(button)
+            button.style().polish(button)
+            button.setEnabled(installed)
+            button.setToolTip("Choose which apps open with the shared KDE wallet; lock or unlock it"
+                              if installed else "Tick it and Apply first")
+            return
         if cid in SETTINGS_PAGES:
             button.setText("⚙ Settings")
             button.setProperty("help", "false")
@@ -822,6 +835,12 @@ class Window(QWidget):
                           else label and f"{label}" or "Nothing to launch: how to use it")
 
     def run(self, comp):
+        if comp["id"] in PAGES:
+            self.close_details()
+            self.details = PAGES[comp["id"]][1](self)            # a page: Back and B return to the list
+            self.stack.addWidget(self.details)
+            self.stack.setCurrentWidget(self.details)
+            return
         if comp["id"] in SETTINGS_PAGES:
             self.close_details()
             self.details = SETTINGS_PAGES[comp["id"]](self)      # a page: Back and B return to the list
@@ -837,12 +856,6 @@ class Window(QWidget):
     def show_details(self, comp):
         self.close_details()
         self.details = Details(self, comp, self.state.get(comp["id"]))
-        self.stack.addWidget(self.details)
-        self.stack.setCurrentWidget(self.details)
-
-    def show_wallet_apps(self):
-        self.close_details()
-        self.details = WalletApps(self)        # a page like Details: Back and B return to the list
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
