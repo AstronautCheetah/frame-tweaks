@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 6, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 7, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
@@ -54,6 +54,17 @@
     if ('_store' in e) e._store = {};
     if ('ref' in e && !('ref' in (props ?? {}))) e.ref = null;
     return e;
+  };
+  // The same pieces while nothing they show has changed: the dashboard redraws often (each time
+  // the laser crosses one of SteamVR's buttons), and fresh pieces, even identical ones, make it
+  // send them to SteamVR again, which showed as jitter.
+  const memo = new Map();
+  const cached = (key, make) => {
+    if (memo.has(key)) return memo.get(key);
+    const v = make();
+    memo.set(key, v);
+    if (memo.size > 40) memo.delete(memo.keys().next().value);
+    return v;
   };
   const pictureSize = (page) => {
     try {
@@ -121,7 +132,7 @@
     lastHover = 0;
     try { window.sftPhoneTouch(JSON.stringify({ a: 'leave' })); } catch (e) {}
   };
-  const layer = (f) => {
+  const buildLayer = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = page && pictureSize(page);
     const id = c && typeof page.GetPanelAnchorID === 'function' && page.GetPanelAnchorID(TOP_CENTER);
@@ -240,7 +251,7 @@
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
              'Picture and smoothness apply when the stream restarts; joystick speed at once.'))));
   };
-  const extras = (f) => {
+  const buildExtras = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
     const id = typeof page?.GetPanelAnchorID === 'function' && page.GetPanelAnchorID(CENTER_LEFT);
@@ -248,6 +259,16 @@
     const k = H / Hw;
     return [gear(f, k, H, id), settingsOpen.has(f.frameID) ? settings(f, k, id) : null];
   };
+
+  const sizes = (f) => {
+    const sz = f.activePage?.size, c = f.activePage && pictureSize(f.activePage);
+    return [f.frameID, sz?.latestMeasuredPanelLocalHeight, sz?.latestMeasuredPanelWorldHeight, c?.w, c?.h,
+            f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : null,
+            f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
+  };
+  const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f)]), () => buildLayer(f));
+  const extras = (f) => cached(JSON.stringify(['extras', ...sizes(f), settingsOpen.has(f.frameID), pending, hueOf(),
+                                               window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
   class SftPhoneTouch extends Base {
     componentDidMount() { mounted++; inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, 500); }

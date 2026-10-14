@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 12, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 13, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -177,6 +177,17 @@
   // The window's picture size, from its overlay: the page's latestContentSize is only read again
   // when something else changes, so after a phone mirror turned it kept the old shape (strips the
   // wrong length).
+  // The same pieces while nothing they show has changed: the dashboard redraws often (each time
+  // the laser crosses one of SteamVR's buttons), and fresh pieces, even identical ones, make it
+  // send them to SteamVR again, which showed as jitter.
+  const memo = new Map();
+  const cached = (key, make) => {
+    if (memo.has(key)) return memo.get(key);
+    const v = make();
+    memo.set(key, v);
+    if (memo.size > 40) memo.delete(memo.keys().next().value);
+    return v;
+  };
   const pictureSize = (page) => {
     try {
       const m = VRHTML.VROverlay.GetOverlayMouseScale(VRHTML.VROverlay.FindOverlay(page.summonOverlayKey));
@@ -184,7 +195,7 @@
     } catch (e) { /* no overlay */ }
     return page?.size?.latestContentSize;
   };
-  const stripsFor = (f) => {
+  const buildStrips = (f) => {
     const page = f?.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = page && pictureSize(page);
     if (!H || !Hw || !c?.unHeight || typeof page.GetPanelAnchorID !== 'function') return [];
@@ -212,6 +223,16 @@
                   strip(`${f.frameID}-x`, 'x', W, t, target, curveId)));
     }
     return out.filter(Boolean);
+  };
+
+  const stripsFor = (f) => {
+    const page = f?.activePage, sz = page?.size, c = page && pictureSize(page);
+    const phone = f.title === 'Android Mirror' && typeof window.sftPhoneTouch === 'function' &&
+      Date.now() - (window.__sftPhoneTouchAlive || 0) < 6000;
+    return cached(JSON.stringify([f.frameID, f.title, sz?.latestMeasuredPanelLocalHeight, sz?.latestMeasuredPanelWorldHeight,
+                                  c?.unWidth, c?.unHeight, f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : null,
+                                  page?.GetPanelAnchorID?.(ANCHOR.CenterRight) ?? null, cfg(), hue(), phone]),
+                  () => buildStrips(f));
   };
 
   class SftScrollStrips extends Base {
