@@ -20,8 +20,9 @@ The design follows from what the Frame is:
 - **A read-only system partition that updates replace.** Anything installed into `/usr` (with
   `steamos-readonly disable` and pacman) is gone after the next SteamOS update. So every tweak
   installs into `$HOME`: `~/.local/bin`, `~/.local/share`, `~/.config`, user systemd units and
-  the app menu in `~/.local/share/applications`. The README lists the two exceptions: Homebrew
-  needs sudo once to create `/home/linuxbrew`, and NordVPN adds NetworkManager connections.
+  the app menu in `~/.local/share/applications`. The README lists the exceptions: Homebrew
+  needs sudo once to create `/home/linuxbrew`, NordVPN adds NetworkManager connections, and the
+  Flathub apps (KWalletManager, VSCodium) go into the system-wide Flatpak folder.
 - **Two sessions at once.** Steam's VR session runs on X display `:0`, where floating VR
   windows live. Desktop mode is a Plasma session nested inside it, on Wayland, with its own
   D-Bus bus and `XDG_RUNTIME_DIR`. Programs started from the desktop, from shortcuts and from
@@ -61,7 +62,8 @@ the CHANGELOG records their removal. One file per tweak means a tweak folder is
 self-contained, and can be copied into a pack or out of one.
 
 [`dev/gen-docs.py`](../dev/gen-docs.py) builds the README tables, SECURITY.md's "What each
-tweak changes" rows and each tweak's "At a glance" box from the manifests, between
+tweak changes" rows and each tweak README's intro and "What it changes" section (and a 3rd Party
+tweak's copy of its upstream README) from the manifests, between
 `<!-- generated:NAME -->` markers. CI runs it with `--check`, so the docs can't fall behind
 the manifests.
 
@@ -303,8 +305,9 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 ## Safety rules that shaped the design
 
 - **Dry runs for anything that removes.** In the installer window, an unticked row means
-  "remove". `FRAME_TWEAKS_DRY_RUN=1` makes the window, its Wallet apps page and the kdialog
-  checklist print the plan instead of running it. CONTRIBUTING.md says never to test the
+  "remove". `FRAME_TWEAKS_DRY_RUN=1` makes the window (Apply, ▶ and the Wallet apps page's
+  buttons) and the kdialog checklist print the plan instead of running it; what the window
+  saves for itself (the language chosen in ⚙, a pack trusted or turned off) is still saved. CONTRIBUTING.md says never to test the
   window or uninstall paths against a real setup without it and a stub `konsole`. The kdialog
   checklist also refuses to remove anything when nothing came back selected, so a dialog
   that fails can't wipe a setup, and it asks again before any removal.
@@ -330,21 +333,24 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 
 ## Testing and CI
 
-[`ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests:
+[`ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests. Each of
+its checks is one of [`dev/check.sh`](../dev/check.sh)'s, which a contributor runs the same way:
 
-- `shellcheck -x -S warning` on every shell script, and `py_compile` on every Python file.
+- `shellcheck -x -S warning` on every shell script (and the sourced libraries, by their
+  `# shellcheck shell=` line), and `py_compile` on every Python file.
 - Commit message format ([`dev/check-commit-msg.sh`](../dev/check-commit-msg.sh), commitizen's
   Conventional Commits rule). The same check runs in the `commit-msg` hook
   (`dev/install-hooks.sh` turns the hooks on), which can also refuse tool attribution lines in
   your own commits if you opt in ([`dev/check-trailers.sh`](../dev/check-trailers.sh)).
-- Manifest and installer self-checks: `lib/sft.py mods check packs/original`,
+- Manifest and installer self-checks: `lib/sft.py mods check` on each official pack and the example,
   `./install.sh list`, dependency resolution, every pin's fields, mirror lines, and exact
   versions in the Python constraints.
 - Unit tests (`tests/`), with Qt headless (`QT_QPA_PLATFORM=offscreen`) and Xvfb for the
   click test. They cover the manifest reader against PyYAML, pack trust and replacement,
   settings shared with the VR panels, the window's logic (versions, channels, status
   parsing), shell helpers (including the mirror fallback and `alarm_fetch`'s signature,
-  name and downgrade checks with a throwaway key), the dashboard patcher, `lib/browser.py`
+  name and downgrade checks with a throwaway key: these need Arch's `vercmp`, so they run on a
+  Frame and are skipped on CI's Ubuntu), the dashboard patcher, `lib/browser.py`
   and parts of individual tweaks.
 - AppStream metadata and desktop entry validation.
 - Docs: [`dev/check-docs.py`](../dev/check-docs.py) (every tweak has a README row, relative
@@ -352,9 +358,10 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 - [`dev/test-tweaks.sh`](../dev/test-tweaks.sh): install, status and uninstall for each tweak
   whose manifest says `test: {offline: true}`, plus the example pack, each in a throwaway home.
   It uses stand-ins for systemctl, flatpak, brew, kdialog, gpgv and others, and a fake `curl`
-  that serves fixtures and refuses every other URL. It fails if a step fails, if a tweak writes
-  outside the fake home, or if uninstall leaves files other than those the manifest's
-  `test: keeps:` lists.
+  that serves fixtures and refuses every other URL; where user namespaces allow, the whole run
+  has no network at all (`unshare -cn`). It fails if a step fails, if a tweak writes outside the
+  fake home (or into its copy of the repo), or if uninstall leaves files other than those the
+  manifest's `test: keeps:` lists.
 
 What isn't tested automatically:
 
@@ -383,14 +390,13 @@ What isn't tested automatically:
   packs in use. To remove one, trust the pack again first.
 - **Status is per tweak.** "Installed" means `status.sh` doesn't exit 1. A tweak whose
   `status.sh` is wrong is updated or skipped wrongly.
-- **Not done yet** (from [roadmap.md](roadmap.md)): rate-limit messages for update hints, and
-  translations of the installer window.
+- **Not done yet** (from [roadmap.md](roadmap.md)): rate-limit messages for update hints.
 
 ## Considered and rejected
 
 - **Installing into the system** (`steamos-readonly disable` and pacman). SteamOS updates wipe
   `/usr`, so this would need re-doing after each update. Home-folder installs, Flatpaks or
-  config in `/etc` are used instead (README, *Things worth knowing about the Frame*; roadmap,
+  config in `/etc` are used instead (README, *Good to know about the Frame*; roadmap,
   *Not adopting*).
 - **Nix.** steam-frame-nix offers declarative Home Manager modules. Frame Tweaks chose a
   checklist installer without Nix; the wallet tweak adapts steam-frame-nix's launcher approach

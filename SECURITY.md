@@ -3,10 +3,21 @@
 Several tweaks handle secrets. This page says what they touch and what they do and don't
 protect against.
 
+## Reporting a problem
+
+Please report a security problem privately, through a
+[security advisory](https://github.com/AstronautCheetah/frame-tweaks/security/advisories/new)
+(GitHub → this repository → Security → *Report a vulnerability*), not in a public issue. Say
+which tweak and Frame Tweaks version, and how to reproduce it. Fixes ship in the next release,
+so please check the newest release first. A problem in an app a tweak installs (Signal,
+NordVPN, Claude…) belongs with that app's own project, unless the tweak causes it.
+
+## Secrets the tweaks handle
+
 | Tweak | Touches | Notes |
 |---|---|---|
 | wallet | KDE wallet (`kwalletd6`/`ksecretd`) | `wallet-unlock` derives the wallet key (PBKDF2-SHA512, as kwallet-pam does) and hands it to `ksecretd` over D-Bus; the password and key never appear on a command line or on disk. |
-| wallet (`gh`) | GitHub CLI token | Moved from `~/.config/gh/hosts.yml` (plain text) into the wallet. |
+| wallet (`gh`) | GitHub CLI token | github.com's token is moved from `~/.config/gh/hosts.yml` (plain text) into the wallet. |
 | signal | Signal's database key | Stored in the wallet (Electron safeStorage, `v11`). Signal's data is only as safe as the wallet password. |
 | nordvpn | NordVPN access token, WireGuard private key | The token is used once and never stored. The private key lives in root-only NetworkManager files and `~/.config/nordvpn-wg/private_key` (mode 600). That file is the one plain-text secret here: adding locations must work without unlocking the wallet. It only lets someone use your NordVPN account, not read your traffic. |
 | adb-scrcpy | adb pairing keys (`~/.android/adbkey`) | adb's own plain files (mode 600), as on any computer. While the phone has wireless debugging on, they let a program running as you control it. |
@@ -20,9 +31,9 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | Tweak | Files and services | Unusual access (why) |
 |---|---|---|
 <!-- generated:security (dev/gen-docs.py, from each tweak's README front matter) -->
-| dictation | `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`; Homebrew's `whisper-cpp` and `wl-clipboard` | Microphone while recording; types through ydotool |
+| dictation | `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard` | Microphone while recording; types through ydotool |
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two app-menu entries | Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam display (`:0`) for one click** (at most 10 s) and replay it with XTEST |
-| snip | `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |
+| snip | `~/.local/bin/frame-snip`, Tesseract and `wl-clipboard` (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037) |
 | cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
 | vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in; SteamVR's `VRWebHelper/DebuggerEnabled` setting while SteamVR runs | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame that can reach the local network (Flatpak apps with network access included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed |
@@ -30,7 +41,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | float-return | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-return.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | float-grab | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | scroll-strips | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json` | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys |
-| wallet | `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`) | Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet |
+| wallet | `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`); points git's credential helper for github.com, if you have one, at that `gh` | Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet |
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | homebrew | `/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew` | **Needs your sudo password once**, to create `/home/linuxbrew` |
 | tools | `~/.local/bin/restart-plasmashell` | – |
@@ -38,20 +49,24 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | ydotool | `ydotool` and `ydotoold` in `~/.local/bin` (Arch Linux ARM package, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall) | None beyond your home folder |
 | signal | Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json` | Asks for the wallet password first; quits Signal when idle; key in the wallet |
-| nordvpn | `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry, `~/.config/nordvpn-wg` (your WireGuard key and locations) | **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key |
+| nordvpn | `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry and session-restore setting (`ksmserverrc`, so the tray isn't started twice), `~/.config/nordvpn-wg` (your WireGuard key and locations) | **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key |
 | vscodium | Flathub app `com.vscodium.codium` (system-wide Flatpak) | VSCodium's own Flatpak permissions: all your files, the network, and running commands outside its sandbox |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS |
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |
 | full-keyboard | A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
 | clipboard | `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry | Reads and writes both sessions' clipboards |
 <!-- /generated:security -->
-| Installer window (VR) | – | **Claims the controller's A, B and Y** through SteamVR Input while the laser is over the window |
+| Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 
-**Our background services are sandboxed** with systemd's options: no new privileges, a
-read-only system and home folder except the folders each one writes, and restricted address
-families. `ydotoold` also has a private `/tmp` and no network; `sft-dashboard` may only reach
-`localhost`. `wallet-lock-sync` is lighter (it shows the unlock dialog on either desktop): your
-home folder, `/run/user` and `/tmp` stay writable. `systemd-analyze --user security <unit>`
+**Our background services are sandboxed** with systemd's options, as far as a user's own
+services can be: no new privileges, a read-only system and restricted address families, and for
+`ydotoold`, `sft-dashboard` and `sft-vr-debugger` a read-only home folder except the folders each
+writes. `ydotoold` also has a private `/tmp` and no network. `sft-dashboard` connects only to
+SteamVR's port on `127.0.0.1` (its unit also asks for an IP filter, but systemd applies those to
+system services only). `app-timers` and `wallet-lock-sync` are lighter: your home folder stays
+writable (and `/run/user` and `/tmp` for `wallet-lock-sync`, which shows the unlock dialog on
+either desktop). Two small units aren't sandboxed: the one that relabels the menu entries in your
+keyboard's language, and the wallet's auto-lock timer. `systemd-analyze --user security <unit>`
 shows the result.
 
 **Local programs.** Some tweaks open things on the Frame itself that any program running there
@@ -77,13 +92,13 @@ protected. Avoid changing it while a second wallet service is running (see
 **Other people's packs.** Tweaks can come from packs other than the official ones (Original, Integrations and 3rd Party)
 ([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
 `~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
-and trust covers its files as they were then: if any change, it's ignored again until you
-trust it again. Tweaks from them are marked 🧩 with the pack's name, and one can take an
+and trust covers its files as they were then (their names, contents, links and which ones can
+run): if any change, it's ignored again until you trust it again. Tweaks from them are marked 🧩 with the pack's name, and one can take an
 official tweak's place only by declaring `replaces: true` (the window says so). Frame Tweaks
 doesn't review or sandbox other people's packs.
 
 **Downloads.**
-- **Pinned upstream releases** (Full Keyboard, whisper-frame, the Whisper model): each tweak's
+- **Pinned upstream releases** (Full Keyboard, Piper and its voices, the Whisper model): each tweak's
   `pin` file records the exact version and SHA256; the download must match it, so a changed or
   replaced upstream file is refused. **clipboard-sync** is built from a pinned commit with its
   own lock file, using a pinned `rustup-init` (checked against its SHA256) that installs a
@@ -92,7 +107,9 @@ doesn't review or sandbox other people's packs.
   commit (`dev/check-pins.sh`, `dev/bump-pin.py`); a weekly GitHub check
   (`dev/check-upstream.sh`) reports pinned files that changed or vanished upstream. If one
   does, installs use Frame Tweaks' own copy (this repository's `mirror` release), held to the
-  same SHA256, so the copy can't be swapped either.
+  same SHA256, so the copy can't be swapped either. Piper is the exception: it comes with
+  espeak-ng, whose licence would need its source alongside, so there's no copy of it (nor of the
+  voices for languages other than English).
 - **Arch Linux ARM packages** (adb, ydotool and libraries) come from HTTPS mirrors only and
   are checked against Arch Linux ARM's build key (`lib/keys/`, fingerprint
   `68B3 537F 39A3 13B3 E574 D067 7719 3F15 2BDB E6A6`) before unpacking. The signed package's
@@ -110,6 +127,11 @@ doesn't review or sandbox other people's packs.
 - **This project:** `get.sh` and `./install.sh update` install the newest release tag, not
   the moving `main` branch. Release tags are signed: an update checks the new release's
   signature against the release key your copy already has (`dev/release-signers`) and refuses an
-  unsigned or wrongly signed one. The first install (`get.sh`) trusts GitHub's HTTPS.
+  unsigned or wrongly signed one. Only an SSH signature by that key counts, on a tag that
+  carries its own name, so an older signed release can't come back under a newer one's name.
+  The first install (`get.sh`) trusts GitHub's HTTPS; so does running `get.sh` again on an
+  existing copy, which moves it to the newest release without the check (and without re-running
+  the tweaks' installers): update with `./install.sh update`. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
+  skips the check, for an emergency.
 
-Found a problem? Please open a private security advisory on GitHub rather than a public issue.
+Found a problem? See [Reporting a problem](#reporting-a-problem) at the top.

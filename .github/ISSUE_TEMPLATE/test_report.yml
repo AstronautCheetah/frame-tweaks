@@ -1,0 +1,31 @@
+name: Works on my Frame
+description: Which tweaks work (or don't) on your SteamOS and SteamVR versions
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks: reports from versions other than the README's "Tested on" help a lot. If
+        something is broken, the bug form is better (it asks for a diagnostics report).
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      description: |
+        The first four lines of `./install.sh debug-info`'s report (in the Frame Tweaks folder):
+        Frame Tweaks, SteamOS, SteamVR and the kernel.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: "`./install.sh status`"
+      description: What it prints, in the Frame Tweaks folder.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: What you tried
+      description: Which tweaks you used, in desktop mode or VR, and anything that behaved oddly.

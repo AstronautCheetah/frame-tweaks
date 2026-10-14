@@ -20,13 +20,14 @@ icon: {file: frame-tweaks-dictate.png}
 run: {label: Dictate}
 changes: >-
   `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry,
-  `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`;
-  Homebrew's `whisper-cpp` and `wl-clipboard`
+  `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history
+  of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's
+  `whisper-cpp` and `wl-clipboard`
 access: Microphone while recording; types through ydotool
 survives_updates: Yes (everything is in your home folder and Homebrew)
 undo: >-
   `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your
-  dictation history and Homebrew's `whisper-cpp`)
+  dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
 test:
   offline: true
   keeps: [".config/frame-tweaks/dictate.conf"]
@@ -117,9 +118,9 @@ to use it:
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`; Homebrew's `whisper-cpp` and `wl-clipboard`
+- **Changes:** `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
 - **Unusual access:** Microphone while recording; types through ydotool
-- **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your dictation history and Homebrew's `whisper-cpp`)
+- **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
 <!-- /generated:changes -->
 
 ## Credits

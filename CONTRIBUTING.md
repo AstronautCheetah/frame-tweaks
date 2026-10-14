@@ -1,43 +1,193 @@
 # Contributing
 
-Tweaks are self-contained folders in packs; Frame Tweaks' own are in three official packs:
+Thanks for helping. Reports from your Frame, translations, docs, fixes and new tweaks are all
+welcome, and much of the work doesn't need a Frame.
+
+- **Something broke?** Use **🐞 Report a problem** in the installer window: it saves a report
+  and offers the bug form to attach it to (in a terminal, `./install.sh report`).
+- **A Frame on a SteamOS or SteamVR version not under the README's "Tested on"?** Say what
+  works and what doesn't, in an issue.
+- **Translations:** [locale/README.md](locale/README.md).
+- **A fix or a new tweak:** read on. For a big change, open an issue first (**Tweak idea**), so
+  we can agree on the approach before you put the time in.
+
+## What needs a Frame, and what doesn't
+
+Frame Tweaks is shell and Python, plus a little JavaScript for the VR dashboard patches. Most of
+it runs on any Linux PC, and CI runs every check on Ubuntu (x86_64).
+
+- **Any Linux PC:** the installer (`install.sh`, `lib/`); every tweak's install, status and
+  uninstall, in a throwaway home (`dev/test-tweaks.sh`); manifests and the generated docs;
+  translations; the installer window's logic (its unit tests, and the window itself in dry-run
+  mode, below).
+- **Only a Steam Frame:** anything in VR (the dashboard patches, Arrow Pad's VR panel, the
+  window's controller buttons), the two sessions' shared wallet and clipboard, and the
+  programs the tweaks install, running for real (Dictation, Android Mirror, Screen snip…).
+
+Say in your pull request what you tested, and on what; the maintainer tests the rest on a Frame.
+
+## Words used here
+
+- **The Frame:** Valve's Steam Frame, a standalone VR headset that runs SteamOS on an ARM
+  (aarch64) processor, with a KDE Plasma *desktop mode*.
+- **The two sessions:** Steam's VR session (X display `:0`, where windows float in VR) and desktop
+  mode, a Plasma session nested inside it, with its own D-Bus and runtime folder. The *outer bus*
+  is the VR session's D-Bus.
+- **Tweak:** one row of the checklist: a folder with a README (its *manifest* is the README's
+  YAML front matter) and `install.sh`, `status.sh` and `uninstall.sh`.
+- **Pack:** a folder of tweaks. The three *official packs* (Original, Integrations, 3rd Party)
+  are in `packs/`; anyone else's needs trusting first.
+- **Helper:** a tweak others depend on, installed along with them (`tier: helper`), such as
+  ydotool. Not to be confused with the shell helpers in `lib/common.sh`.
+- **Pin:** a file recording the exact version and SHA256 of something a tweak downloads.
+- **ALARM:** Arch Linux ARM, where adb and ydotool come from (SteamOS is Arch-based).
+- **🧪 Experimental:** relies on SteamVR's internals; it checks them each time SteamVR starts and
+  switches itself off when they change.
+- **Dashboard patch:** JavaScript that VR dashboard patching puts into SteamVR's dashboard, a web
+  page, through its DevTools port.
+
+## Getting set up
+
+1. Fork the repository on GitHub, clone your fork, and turn on the hooks (they check commit
+   messages; see "Commit style"):
+
+   ```sh
+   git clone https://github.com/YOU/frame-tweaks && cd frame-tweaks
+   dev/install-hooks.sh
+   ```
+
+2. Install what the checks use: Python 3.12 or newer, ShellCheck, and PyQt6 for the installer
+   window's tests. On Ubuntu or Debian:
+
+   ```sh
+   sudo apt install shellcheck python3-venv xvfb libarchive-tools appstream desktop-file-utils
+   python3 -m venv .venv && .venv/bin/pip install -c lib/python-constraints.txt PyQt6 pyyaml
+   ```
+
+   On a minimal system (a container, say), Qt also needs `libegl1 libgl1 libxkbcommon0
+   libfontconfig1 libxtst6`. Other distributions have the same tools under similar names. On a
+   Frame, only ShellCheck is missing (`brew install shellcheck`, with the
+   [Homebrew](packs/original/homebrew/) tweak), the full installer window's Python already has
+   PyQt6 (`~/.local/share/arrowpad/venv`), and SteamOS's own `/usr/bin/python3` has PyYAML.
+
+3. Check that everything passes before you change anything: `dev/check.sh` (below).
+
+To find your way around, [docs/DESIGN.md](docs/DESIGN.md) explains how the pieces fit together
+(start with its "Layout" table), and [docs/mods.md](docs/mods.md) is the reference for a tweak's
+files, its manifest, and the helpers its scripts can use.
+
+## Checks
+
+`dev/check.sh` runs the checks CI runs, on any Linux PC; `dev/check.sh docs tests` runs just
+those. A check whose tool isn't installed is skipped, with a note saying how to get it. The
+checks:
+
+- `shell`: ShellCheck (`shellcheck -x -S warning`) on every shell script and the libraries they
+  source, and that programs in `~/.local/bin` are replaced with `write_file` (`lib/common.sh`),
+  never written into.
+- `python`: every Python file compiles, the tweaks' modules too.
+- `i18n`: the translation template is current (`dev/i18n.py extract` updates it).
+- `commits`: your commits' messages ("Commit style", below).
+- `manifests`: every manifest is valid and names its scripts (`python3 lib/sft.py mods check
+  FOLDER`), dependencies resolve, and every pin is complete ("Pinned downloads").
+- `tests`: the unit tests (`python3 -m unittest discover -s tests`). Some need PyQt6 and run
+  headless (`QT_QPA_PLATFORM=offscreen`); the click-swap test also uses Xvfb, the manifest
+  reader's is compared with PyYAML's where it's installed, and the Arch Linux ARM ones need
+  Arch's `vercmp` (a Frame has it). `dev/check.sh` finds a Python with PyQt6 (`PYTHON=…`,
+  `.venv`, then `python3`).
+- `metadata`: the AppStream metadata and the desktop entry validate.
+- `docs`: every tweak has a README row and relative links resolve (`dev/check-docs.py`), and the
+  generated README and SECURITY sections match the manifests (`dev/gen-docs.py --check`).
+- `tweaks`: install → status → uninstall of each offline-testable tweak in a throwaway home
+  (`dev/test-tweaks.sh`), without network where user namespaces allow it.
+
+A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
+`tests/test_vr_dashboard.py` automatically; one that can be tested offline says
+`test: {offline: true}` in its manifest, and `dev/test-tweaks.sh` includes it.
+
+## Trying a change
+
+- **A tweak's scripts:** `dev/test-tweaks.sh ID` installs, checks and removes it in a throwaway
+  home, with stand-ins for systemctl, flatpak, brew, kdialog and friends, and no network. It
+  fails if anything is written outside that home: on a busy machine, other programs writing into
+  `/tmp` meanwhile can trip it, so `TEST_IGNORE` (a regular expression of paths) leaves them out,
+  e.g. `TEST_IGNORE='^/tmp/adb\.' dev/test-tweaks.sh`.
+- **The installer window**, without changing anything:
+
+  ```sh
+  FRAME_TWEAKS_DRY_RUN=1 .venv/bin/python gui/frame-tweaks-gui.py
+  ```
+
+  With `FRAME_TWEAKS_DRY_RUN=1`, **Apply changes**, the ▶ buttons and the Wallet apps page
+  print what they would do instead of doing it. Never run the window without it on a setup you
+  care about: an unticked row means "remove". What the window saves for itself still saves (the
+  language chosen in ⚙, a pack trusted or turned off, hidden rows): add `HOME=$(mktemp -d)` to
+  keep even that out of your own settings. For extra safety, put a stand-in `konsole` first on
+  your `PATH` (the window runs installs in Konsole).
+- **On a Frame:** `./install.sh install ID` in your clone installs your copy of the tweak, and
+  `./install.sh status ID` checks it. (On a PC it installs too, for real, into your home folder,
+  and the Homebrew ones ask for sudo: use `dev/test-tweaks.sh` there.) `./install.sh gui` and `./install.sh menu` point the
+  app-menu entry at the clone they run in; afterwards, `~/frame-tweaks/install.sh menu` points it
+  back at your usual copy.
+
+### Environment variables
+
+| Variable | What it does |
+|---|---|
+| `FRAME_TWEAKS_DRY_RUN=1` | The installer window and the simple checklist show what they'd do instead of doing it. |
+| `FRAME_TWEAKS_PACKS=DIR:DIR` | More pack folders (trusted like any other). |
+| `FRAME_TWEAKS_LANGUAGE=es_419` | The language (`en`: English), instead of the one chosen in ⚙ or the keyboard's. |
+| `FRAME_TWEAKS_CHANNEL=beta` | Pre-releases too, for `get.sh` and updates (`beta` in `~/.config/frame-tweaks/channel` does the same for updates). |
+| `FRAME_TWEAKS_REPO=URL`, `FRAME_TWEAKS_DIR=DIR` | Where `get.sh` installs from, and into. |
+| `FRAME_TWEAKS_ALLOW_UNSIGNED=1` | Lets an update take a release the release key didn't sign: an emergency switch. |
+| `ALARM_MIRROR=URL`, `ALARM_ALLOW_DOWNGRADE=1` | The Arch Linux ARM mirror to use; allow a package older than one installed before. |
+| `TEST_IGNORE=REGEX`, `TEST_WORK=DIR` | `dev/test-tweaks.sh`: paths other programs write meanwhile; keep its work folder there. |
+
+The installer sets more for the tweaks' scripts (`FRAME_TWEAKS_LIB`, `FRAME_TWEAKS_REINSTALL`,
+`FRAME_TWEAKS_UPDATING`): [docs/mods.md](docs/mods.md), "The scripts".
+
+## Adding a tweak
+
+Tweaks are self-contained folders in packs. Frame Tweaks' own are in three official packs:
 `packs/original/` (tweaks written for Frame Tweaks), `packs/integrations/` (other projects' apps
 that Frame Tweaks fits to the Frame: a tray icon, a key in the wallet, menu entries) and
 `packs/third-party/` (other projects' apps installed as they are, from their pinned source or
-release, with their own README appended). A tweak's README.md starts with its manifest (YAML front matter), which is
-all the installer, the installer window, the docs and the tests know about it. The format, the
-scripts and the helpers they can use: [docs/mods.md](docs/mods.md). To add one:
+release, with their own README appended). A tweak's README.md starts with its manifest (YAML
+front matter), which is all the installer, the installer window, the docs and the tests know
+about it. To add one:
 
-1. Create `packs/original/<id>/` (or `packs/third-party/<id>/`) with a `README.md` (manifest, then: problem, install, use,
+1. Create `packs/PACK/ID/` with a `README.md` (manifest, then: problem, install, use,
    configuration, how it works, gotchas), `install.sh`, `uninstall.sh` and `status.sh`, plus
-   any optional scripts. [examples/hello-pack/](examples/hello-pack/) is a small complete one.
-2. Add its id to `order:` in `packs/original/pack.md`, where it belongs in the list.
-3. Run `dev/gen-docs.py` (the README tables, SECURITY.md's rows and its "At a glance" box come
-   from its manifest), then the checks CI runs (see "Checks" below).
+   any optional scripts. [examples/hello-pack/](examples/hello-pack/) is a small complete one to
+   copy, and [docs/mods.md](docs/mods.md) explains every field and helper.
+2. Add its id to `order:` in that pack's `pack.md`, where it belongs in the list (tweaks it
+   doesn't list come after, alphabetically).
+3. Run `dev/gen-docs.py` (the README tables, SECURITY.md's rows, and the intro and "What it
+   changes" section of the tweak's README come from its manifest) and `dev/i18n.py extract` (its
+   title, summary, what and why are translated). For a 3rd Party tweak with `upstream_readme:`,
+   `dev/fetch-upstream-readmes.py ID` first. Then `dev/check.sh`.
 
-House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on command lines or
-in plain-text files; verify downloads when the publisher offers checksums; credit the
-projects you borrow from.
-
-**Testing installers:** the installer window honours `FRAME_TWEAKS_DRY_RUN=1` (it prints the
-plan instead of running it). Never test the window or the uninstall paths against a real setup
-without `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`: an unticked checklist means
-"remove".
+House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on command lines or in
+plain-text files; verify downloads when the publisher offers checksums; link to other projects
+rather than copying their code, and credit the projects you borrow from (CREDITS.md and the
+tweak's README).
 
 ## Sending a change
 
-1. Fork the repository, make a branch in your fork, and open a pull request against `main`.
-   One topic per pull request; say what you tested, and on what (a Steam Frame, SteamOS version).
-2. Run `dev/install-hooks.sh` once after cloning: the hooks check commit messages (below).
-3. CI runs the checks below on every pull request. A maintainer merges with *squash* or
-   *rebase*.
+1. Push a branch to your fork and open a pull request against `main`. One topic per pull
+   request; the template asks what you tested, and on what (a Steam Frame and its SteamOS
+   version, or a PC).
+2. CI runs the checks on every pull request (GitHub asks a maintainer to approve the first run
+   from a new contributor).
+3. A maintainer merges with *squash* or *rebase*. What you send is released under the
+   project's [MIT licence](LICENSE), like the rest of it.
 
 ## Commit style
 
 [Conventional Commits](https://www.conventionalcommits.org/), checked by
 [commitizen](https://commitizen-tools.github.io/commitizen/) (`.cz.toml`): a first line
-`<type>(<scope>): <subject>` in the imperative, under about 72 characters, e.g.
-`fix(arrowpad): stop the overlay flickering`, then an optional body saying why. Types: `feat`
+`<type>(<scope>): <subject>`, e.g. `fix(arrowpad): stop the overlay flickering`, then, after a
+blank line, an optional body saying why. Keep the first line short; the body has room for the rest. Types: `feat`
 (something new for users), `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`,
 `style`, `revert`; the scope is optional, usually a tweak's id (or `gui`, `installer`, `lib`,
 `dev`, `release`). With commitizen installed (`brew install commitizen` or
@@ -73,25 +223,7 @@ Before editing a user file, call `backup_file <tweak> <file>` and `restore_file`
 (KDE settings: `save_kconfig` / `restore_kconfig`, key by key). Prefer marked blocks you can
 remove again (like Firefox's `user.js`). Never back up files holding secrets in plain text.
 
-## Checks
-
-What CI runs, and what to run before sending a change:
-
-- `shellcheck -x -S warning` on shell scripts; `python3 -m py_compile` on Python.
-- `python3 -m unittest discover -s tests`: unit tests. Some need PyQt6 (the installer window)
-  and run headless with `QT_QPA_PLATFORM=offscreen`; the click-swap test also uses `Xvfb`. Use
-  the venv the installer window sets up (`~/.local/share/arrowpad/venv/bin/python`), or
-  `pip install PyQt6` (versions in `lib/python-constraints.txt`).
-- `dev/gen-docs.py --check`: generated README/SECURITY sections match the manifests.
-- `python3 lib/sft.py mods check packs/original`: every manifest is valid and its scripts exist.
-- `dev/check-docs.py`: every tweak has a README row; relative links resolve.
-- `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home.
-- `dev/check-commit-msg.sh --all`: commit message format (above).
-- A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
-  `tests/test_vr_dashboard.py` automatically; one that can be tested offline says
-  `test: {offline: true}` in its manifest, and `dev/test-tweaks.sh` includes it.
-
-### Keeping up with upstream (maintainers)
+## Keeping up with upstream (maintainers)
 
 A weekly workflow (**Upstream check**, `dev/check-upstream.sh`) keeps one issue labelled
 `upstream-check` up to date, so nobody has to remember to look:
@@ -131,7 +263,9 @@ makes a separate checkout under `tmp/` (a git worktree of `origin/main`), and
 
 Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Release** workflow
 (Actions → Release → Run workflow, choose patch/minor/major). It dates the section, bumps
-VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. Pre-releases
+VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. The tag is what
+`get.sh` and `./install.sh update` install, so the release is out as soon as the workflow pushes
+it; the draft is only its page of notes on GitHub. Pre-releases
 (`vX.Y.Z-rc.N`) only reach the beta channel.
 
 **Release tags are signed** with an SSH key: the workflow signs with the private key in the
