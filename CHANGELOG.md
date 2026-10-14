@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: links in the installer window failed with "Firefox is already running, but is not
+  responding"** when the window was floating in VR and the browser was open in desktop mode.
+  A web link now goes to your default browser (whichever it is) in the session where it's
+  running; if it isn't running, it opens in VR. A tip says where it went. (`lib/browser.py`;
+  `python3 lib/browser.py --where URL` shows the choice without opening anything.)
 - **📋 next to every link** in the installer window (sources, documentation, known issues and
   each tweak's README) copies the link instead of opening it.
 - **The "VR windows" group is now "VR environment".** If you had folded or hidden it, it stays

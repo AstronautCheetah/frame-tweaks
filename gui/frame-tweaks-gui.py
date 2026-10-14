@@ -33,6 +33,7 @@ os.environ.setdefault("FRAME_TWEAKS_LIB", str(REPO / "lib"))   # (packs' scripts
 sys.path.insert(0, str(REPO / "gui"))           # (its pages, e.g. wallet_page.py)
 import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
 from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
+import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
 from wallet_page import FLATPAK_ICONS, WALLET_LAUNCHER, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
@@ -180,10 +181,13 @@ def md_text(text):
 
 
 def follow_link(url):
-    """What clicking a link does: copy:<url> puts the link on the clipboard, anything else opens."""
+    """What clicking a link does: copy:<url> puts the link on the clipboard; a web link goes to the
+    default browser in whichever session it's running (lib/browser.py); anything else opens."""
     if url.startswith("copy:"):
         QApplication.clipboard().setText(url[5:])
         QToolTip.showText(QCursor.pos(), "Link copied")
+    elif url.startswith(("https:", "http:")) and (note := browser.open_url(url)):
+        QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
     else:
         QDesktopServices.openUrl(QUrl(url))
 
