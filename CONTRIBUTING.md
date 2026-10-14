@@ -117,11 +117,14 @@ To take a newer version: read upstream's changes (`dev/bump-pin.py` prints the l
 `dev/bump-pin.py <tweak>` (or `python`), test (the VR tweaks in the headset too), then commit it
 on its own. After testing a newer scrcpy, android-tools or ydotool, update `lib/tested-versions`
 (and for a new scrcpy major version, `SCRCPY_TESTED` in `adb-scrcpy/phone-touch`).
+After bumping a pin that has a `mirror=` line, run `dev/mirror-pins.sh` to upload Frame Tweaks'
+copy (a new pin needs `mirror=` and `license=`, or `nomirror=` saying why it can't be copied).
 
 What happens when nobody does: installed tweaks keep working (nothing updates itself). Fresh
-installs fall back where they can (newest Python packages if the pinned ones won't install; the
-working adb/ydotool if a new build won't run), and 🧪 experimental tweaks switch themselves off
-after a SteamVR change they don't recognise.
+installs fall back where they can (Frame Tweaks' copy of a vanished pinned download; newest
+Python packages if the pinned ones won't install; the working adb/ydotool if a new build won't
+run), and 🧪 experimental tweaks switch themselves off after a SteamVR change they don't
+recognise.
 
 ## Releasing (maintainers)
 

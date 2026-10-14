@@ -46,6 +46,17 @@ jobs:
             grep -qE '^version=.+' "$pin" && grep -qE '^url=https://' "$pin" &&
               grep -qE '^(sha256=[0-9a-f]{64}|rev=[0-9a-f]{40})$' "$pin" || { echo "incomplete $pin"; exit 1; }
           done
+          # ... and Frame Tweaks' copy (mirror=, with its licence; a git commit's archive with its
+          # own sha256), or why there's none (nomirror=)
+          for pin in */pin */*.pin; do
+            if grep -q '^mirror=' "$pin"; then
+              grep -qE '^mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/[^/]+$' "$pin" &&
+                grep -qE '^license=.+' "$pin" &&
+                { grep -q '^sha256=' "$pin" || grep -qE '^mirror_sha256=[0-9a-f]{64}$' "$pin"; } || { echo "bad mirror in $pin"; exit 1; }
+            else
+              grep -qE '^nomirror=.+' "$pin" || { echo "$pin: no mirror= and no nomirror= reason"; exit 1; }
+            fi
+          done
           ! grep -vE '^(#|$|[A-Za-z0-9_.-]+==[0-9][0-9A-Za-z.]*$)' lib/python-constraints.txt   # exact versions only
       - name: Unit tests
         run: |

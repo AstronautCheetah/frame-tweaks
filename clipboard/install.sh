@@ -27,9 +27,16 @@ say "Building clipboard-sync from https://github.com/dnut/clipboard-sync (a few 
 SRC="$HOME/.local/share/frame-tweaks/src/clipboard-sync"
 rev=$(sed -n 's/^rev=//p' "$REPO_DIR/clipboard/pin")
 rm -rf "$SRC"
-git clone -q "$(sed -n 's/^url=//p' "$REPO_DIR/clipboard/pin")" "$SRC"
-git -C "$SRC" -c advice.detachedHead=false checkout -q "$rev"
-[ "$(git -C "$SRC" rev-parse HEAD)" = "$rev" ] || die "clipboard-sync: not the pinned commit"
+if git clone -q "$(sed -n 's/^url=//p' "$REPO_DIR/clipboard/pin")" "$SRC" &&
+   git -C "$SRC" -c advice.detachedHead=false checkout -q "$rev"; then
+    [ "$(git -C "$SRC" rev-parse HEAD)" = "$rev" ] || die "clipboard-sync: not the pinned commit"
+else      # gone upstream: Frame Tweaks' copy of that commit's source (dev/mirror-pins.sh)
+    warn "clipboard-sync's pinned commit isn't available upstream; using Frame Tweaks' copy"
+    rm -rf "$SRC" && mkdir -p "$SRC"
+    fetch_mirror "$(sed -n 's/^mirror=//p' "$REPO_DIR/clipboard/pin")" \
+        "$(sed -n 's/^mirror_sha256=//p' "$REPO_DIR/clipboard/pin")" "$BUILD/src.tar.gz"
+    tar -xzf "$BUILD/src.tar.gz" -C "$SRC" --strip-components=1
+fi
 git -C "$SRC" apply "$REPO_DIR/clipboard/keep-images.patch"
 echo keep-images > "$SRC/.sft-patched"
 cargo install --locked --force --path "$SRC" --root "$ROOT"

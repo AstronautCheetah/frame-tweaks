@@ -6,3 +6,5 @@ url=https://raw.githubusercontent.com/Homebrew/install/7a3f48c7e498d7df3237fd41c
 sha256=5f333bbe53bc490e51e7ccb1df8779b3dd6ee73a1a7379efda216edb08ccb148
 rev=7a3f48c7e498d7df3237fd41c30f4d492857edf4
 latest=https://api.github.com/repos/Homebrew/install/commits/HEAD
+mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/5f333bbe53bc-install.sh
+license=BSD-2-Clause (Homebrew/install)

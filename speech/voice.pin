@@ -4,3 +4,5 @@ version=375a0fe641dea077c2a47b4e9a056d6da521eed3
 url=https://huggingface.co/rhasspy/piper-voices/resolve/375a0fe641dea077c2a47b4e9a056d6da521eed3/en/en_US/ljspeech/medium/en_US-ljspeech-medium.onnx
 sha256=6f52a751e2349abe7a76735eb09dc1875298c77ea2342ffd2fef79ff81b87f22
 latest=https://huggingface.co/api/models/rhasspy/piper-voices/revision/main
+mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/6f52a751e234-en_US-ljspeech-medium.onnx
+license=MIT (rhasspy/piper-voices; trained on LJ Speech, public domain)

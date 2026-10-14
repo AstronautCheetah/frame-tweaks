@@ -157,13 +157,23 @@ runs_here() {
 
 # fetch_pinned <id> <out-file> [pin-name]: download <id>/pin's (or <id>/<pin-name>'s) url and
 # check it against the hash recorded in the pin (not one fetched alongside it), so a changed
-# upstream file is refused.
+# upstream file is refused. If upstream's file is gone or changed, the pin's mirror= is used:
+# Frame Tweaks' own copy (an asset of this repo's "mirror" release, dev/mirror-pins.sh),
+# checked against the same hash.
 fetch_pinned() {
-    local pin="$REPO_DIR/$1/${3:-pin}" url sha
-    url=$(sed -n 's/^url=//p' "$pin"); sha=$(sed -n 's/^sha256=//p' "$pin")
-    curl -fL# -o "$2" "$url" || die "download failed: $url"
-    echo "$sha  $2" | sha256sum -c --quiet - || die "$(basename "$url"): checksum differs from the pinned one; not installing it"
+    local pin="$REPO_DIR/$1/${3:-pin}" url sha mirror
+    url=$(sed -n 's/^url=//p' "$pin"); sha=$(sed -n 's/^sha256=//p' "$pin"); mirror=$(sed -n 's/^mirror=//p' "$pin")
+    if curl -fL# -o "$2" "$url" && sha_ok "$sha" "$2"; then return 0; fi
+    [ -n "$mirror" ] || die "$(basename "$url"): download failed, or it differs from the pinned file; not installing it"
+    warn "$(basename "$url") isn't available unchanged from upstream; using Frame Tweaks' copy"
+    fetch_mirror "$mirror" "$sha" "$2"
 }
+# fetch_mirror <url> <sha256> <out-file>: Frame Tweaks' copy of a pinned file, checked
+fetch_mirror() {
+    { curl -fL# -o "$3" "$1" && sha_ok "$2" "$3"; } ||
+        die "$(basename "$1"): Frame Tweaks' copy failed too (download or checksum); not installing it"
+}
+sha_ok() { [ -n "$1" ] && echo "$1  $2" | sha256sum -c --quiet - 2>/dev/null; }
 # newest_tag: the newest release tag from the tag names on stdin. Stable (vX.Y.Z) only, unless
 # the channel is beta (FRAME_TWEAKS_CHANNEL=beta, or "beta" in ~/.config/frame-tweaks/channel),
 # which adds pre-releases (vX.Y.Z-rc1) ranked below their final version.

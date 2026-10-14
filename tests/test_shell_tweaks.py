@@ -1,6 +1,7 @@
 """Shell tweaks with no other tests, run in a throwaway home with stand-ins for system tools:
 Firefox's user.js block (install, the old marker, uninstall resetting prefs.js) and NordVPN's
-status line."""
+status line; pinned downloads falling back to Frame Tweaks' copy."""
+import hashlib
 import os
 import subprocess
 import tempfile
@@ -94,6 +95,57 @@ class NordVPNStatus(Home):
         self.nmcli("wireguard:NordVPN Canada\\nwireguard:NordVPN Japan\\n", "wireguard:NordVPN Japan\\n")
         r = self.run_script("nordvpn/status.sh")
         self.assertIn("2 location(s); connected via Japan", r.stdout)
+
+
+class PinnedDownload(Home):
+    """fetch_pinned: upstream's file if it's there and unchanged, else the pin's mirror= copy,
+    held to the same sha256."""
+    GOOD = b"the pinned file\n"
+
+    def fetch(self, upstream, mirror=None, with_mirror=True):
+        repo = self.home / "repo"
+        (repo / "x").mkdir(parents=True, exist_ok=True)
+        pin = ["url=https://up.example/f.bin", f"sha256={hashlib.sha256(self.GOOD).hexdigest()}"]
+        if with_mirror:
+            pin.append("mirror=https://mirror.example/f.bin")
+        (repo / "x/pin").write_text("\n".join(pin) + "\n")
+        files = self.home / "files"
+        files.mkdir(exist_ok=True)
+        for name, data in (("up", upstream), ("mirror", mirror)):
+            if data is not None:
+                (files / name).write_bytes(data)
+        # curl -fL# -o OUT URL: copy the matching file, or fail like a 404
+        self.stub("curl", f'out=$3; case "$4" in *up.example*) f={files}/up ;; *) f={files}/mirror ;; esac\n'
+                          '[ -f "$f" ] && cp "$f" "$out" || exit 22')
+        env = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin"}
+        out = self.home / "out"
+        r = subprocess.run(["bash", "-c", f'source {ROOT}/lib/common.sh; REPO_DIR={repo}; fetch_pinned x {out}'],
+                           env=env, capture_output=True, text=True, timeout=30)
+        return r, (out.read_bytes() if out.exists() else None)
+
+    def test_upstream_file_is_used(self):
+        r, got = self.fetch(self.GOOD, mirror=b"never read")
+        self.assertEqual((r.returncode, got), (0, self.GOOD))
+        self.assertNotIn("copy", r.stderr)
+
+    def test_gone_upstream_falls_back_to_the_copy(self):
+        r, got = self.fetch(None, mirror=self.GOOD)
+        self.assertEqual((r.returncode, got), (0, self.GOOD), r.stderr)
+        self.assertIn("using Frame Tweaks' copy", r.stderr)
+
+    def test_changed_upstream_falls_back_to_the_copy(self):
+        r, got = self.fetch(b"something else", mirror=self.GOOD)
+        self.assertEqual((r.returncode, got), (0, self.GOOD), r.stderr)
+
+    def test_a_changed_copy_is_refused_too(self):
+        r, _ = self.fetch(None, mirror=b"tampered")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("not installing it", r.stderr)
+
+    def test_no_copy_no_fallback(self):
+        r, _ = self.fetch(b"something else", with_mirror=False)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("differs from the pinned file", r.stderr)
 
 
 if __name__ == "__main__":
