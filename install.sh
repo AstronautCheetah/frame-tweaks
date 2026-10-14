@@ -211,9 +211,18 @@ cmd_update() {
     [[ ${1:-} == --to ]] && { want=${2:?"--to needs a release, e.g. v0.3.1"}; [[ $want == v* ]] || want="v$want"; }
     if [[ -d .git ]]; then
         if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
-            bold "Updating the checkout"; git pull --ff-only || { echo "git pull failed; not reinstalling" >&2; exit 1; }
+            bold "Updating the checkout"
+            if ! git pull --ff-only; then
+                git fetch --quiet origin 2>/dev/null
+                if ! git merge-base --is-ancestor HEAD "@{upstream}" 2>/dev/null; then
+                    echo "This checkout and GitHub's main have gone separate ways. Without local work to" >&2
+                    echo "keep: git reset --hard @{upstream}" >&2
+                fi
+                echo "git pull failed; not reinstalling" >&2; exit 1
+            fi
         else                                                # a release (tag): move to the newest
-            git fetch --quiet --tags origin || { echo "couldn't reach GitHub; not updating" >&2; exit 1; }
+            # (--force: GitHub's tags win over local ones with the same name.)
+            git fetch --quiet --force --tags origin || { echo "couldn't reach GitHub; not updating" >&2; exit 1; }
             local tag; tag=${want:-$(git tag -l 'v*' | newest_tag)}
             [ -n "$tag" ] || { echo "no release found" >&2; exit 1; }
             git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "no release $tag" >&2; exit 1; }

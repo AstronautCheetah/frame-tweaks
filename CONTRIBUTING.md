@@ -31,8 +31,14 @@ without `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`: an unticked che
 
 ## Commit style
 
-A short imperative first line (`arrowpad: fix overlay flicker`), then an optional body saying
-why. **No AI attribution**: no `Co-authored-by` line naming an AI tool or bot (Claude,
+[Conventional Commits](https://www.conventionalcommits.org/), checked by
+[commitizen](https://commitizen-tools.github.io/commitizen/) (`.cz.toml`): a first line
+`<type>(<scope>): <subject>` in the imperative, e.g. `fix(arrowpad): stop the overlay
+flickering`, then an optional body saying why. Types: `feat` (something new for users), `fix`,
+`docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `style`, `revert`; the scope is
+optional, usually a tweak's id (or `gui`, `installer`, `lib`, `dev`, `release`). With
+commitizen installed (`brew install commitizen` or `pipx install commitizen`), `cz commit` asks
+for each part; the commit-msg hook checks every message either way (`dev/check-commit-msg.sh`). **No AI attribution**: no `Co-authored-by` line naming an AI tool or bot (Claude,
 Anthropic, Copilot, ChatGPT, OpenAI, Gemini, Codex, Cursor, Aider, `[bot]` accounts), and no
 `Claude-Session`, `Assisted-by`, `Generated-by` or "Generated with [...]" lines, whatever a tool
 suggests. You're responsible for what you submit, however it was written. Human co-authors are
@@ -44,8 +50,9 @@ hooks and CI run it.
 
 For a download from another project, add a `pin` file (`version=`, `url=`, `sha256=` or
 `rev=`, and `latest=`, how `dev/check-pins.sh` finds newer releases) and fetch it with
-`fetch_pinned`. Each pin also needs `mirror=` and `license=` (Frame Tweaks' copy, see below)
-or `nomirror=` saying why it can't be copied.
+`fetch_pinned`. Each pin also needs `mirror=`, `license=` and `license_file=` (Frame Tweaks'
+copy, its licence, and the URLs of the licence texts at the pinned version, see below) or
+`nomirror=` saying why it can't be copied.
 
 ## Changing files a tweak doesn't own
 
@@ -87,7 +94,8 @@ To take a newer version: read upstream's changes (`dev/bump-pin.py` prints the l
 on its own. After testing a newer scrcpy, android-tools or ydotool, update `lib/tested-versions`
 (and for a new scrcpy major version, `SCRCPY_TESTED` in `adb-scrcpy/phone-touch`).
 After bumping a pin that has a `mirror=` line, run `dev/mirror-pins.sh` to upload Frame Tweaks'
-copy (a new pin needs `mirror=` and `license=`, or `nomirror=` saying why it can't be copied).
+copy and its licence texts (a new pin needs `mirror=`, `license=` and `license_file=`, or
+`nomirror=` saying why it can't be copied).
 
 What happens when nobody does: installed tweaks keep working (nothing updates itself). Fresh
 installs fall back where they can (Frame Tweaks' copy of a vanished pinned download; newest

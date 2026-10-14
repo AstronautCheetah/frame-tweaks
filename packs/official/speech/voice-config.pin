@@ -5,3 +5,4 @@ sha256=141d612cc0a95ed7efc1ca936b845c2364967f2e9217c5dbfcf69fc4d6c65860
 latest=https://huggingface.co/api/models/rhasspy/piper-voices/revision/main
 mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/141d612cc0a9-en_US-ljspeech-medium.onnx.json
 license=MIT (rhasspy/piper-voices)
+license_file=https://raw.githubusercontent.com/rhasspy/piper/2023.11.14-2/LICENSE.md https://huggingface.co/rhasspy/piper-voices/resolve/375a0fe641dea077c2a47b4e9a056d6da521eed3/en/en_US/ljspeech/medium/MODEL_CARD

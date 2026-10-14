@@ -1,0 +1,8 @@
+# Commit messages follow Conventional Commits, checked by commitizen (https://commitizen-tools.github.io/commitizen/):
+#   <type>(<scope>): <subject>     e.g.  fix(arrowpad): release Shift when the pad closes
+# Types: feat, fix, docs, refactor, perf, test, build, ci, chore, style, revert. The scope is
+# optional: a tweak's id, or gui, installer, lib, dev, release. CONTRIBUTING.md, "Commit style".
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_provider = "scm"

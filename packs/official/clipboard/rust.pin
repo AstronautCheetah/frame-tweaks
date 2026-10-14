@@ -10,3 +10,4 @@ toolchain=1.99.0
 latest=https://static.rust-lang.org/rustup/release-stable.toml
 mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/15f6e4ce9f58-rustup-init
 license=Apache-2.0 or MIT (rustup)
+license_file=https://raw.githubusercontent.com/rust-lang/rustup/1.29.1/LICENSE-MIT https://raw.githubusercontent.com/rust-lang/rustup/1.29.1/LICENSE-APACHE
