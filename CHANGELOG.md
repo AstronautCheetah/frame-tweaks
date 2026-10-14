@@ -5,6 +5,9 @@
 ### Added
 - **Every row shows a tick box**, empty when the tweak isn't installed, so it's clear where to
   click.
+- **Tweaks that install another project show its own README** below ours, after a separator,
+  on GitHub and in the installer window (Full Keyboard, whisper-frame, Recline, the shared
+  clipboard).
 - **Screenshots on details pages:** pictures in a tweak's README now show in the installer
   window too. Arrow Pad's shows its main and Tools layers.
 

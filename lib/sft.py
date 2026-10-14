@@ -68,7 +68,10 @@ ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author",
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
-            "settings", "known_issue", "wallet_apps", "test", "replaces")
+            "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme")
+# upstream_readme: the README of the project a tweak installs, at the version it pins
+# (dev/fetch-upstream-readmes.py copies it into upstream.md; dev/gen-docs.py appends it).
+UPSTREAM_README = re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/[^/]+/\S+\.md$")
 
 
 def pack_dirs():
@@ -167,6 +170,9 @@ def read_tweak(d):
     for k in ("hidden_by_default", "replaces"):
         if k in data and not isinstance(data[k], bool):
             errs.append(f"{where}: {k} must be true or false")
+    if "upstream_readme" in data and not (isinstance(data["upstream_readme"], str)
+                                          and UPSTREAM_README.match(data["upstream_readme"])):
+        errs.append(f"{where}: upstream_readme must be a raw.githubusercontent.com URL of a .md file")
     icon = data.get("icon", {})
     if not (isinstance(icon, dict) and set(icon) <= {"file", "flatpak", "theme"}):
         errs.append(f"{where}: icon takes file, flatpak and theme")
@@ -186,6 +192,7 @@ def read_tweak(d):
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() else None,
         processes=data.get("processes", []), settings=data.get("settings"),
         known_issue=data.get("known_issue"), wallet_apps=data.get("wallet_apps", []),
+        upstream_readme=data.get("upstream_readme", ""),
         test=data.get("test", {}), replaces=data.get("replaces", False),
         changes=data["changes"], access=data["access"], survives_updates=data["survives_updates"],
         undo=data["undo"]), warn
