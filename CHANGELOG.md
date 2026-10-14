@@ -22,10 +22,15 @@
   language (D and C in Spanish).
 
 ### Changed
+- **Screen snip's VR panel has rounded corners,** like Arrow Pad's.
 - **Spanish: a second pass.** Frame Tweaks' own tools and tweaks have Spanish names (Teclado de
   flechas, Teclado completo, Espejo de Android, …), and what the text names in SteamVR, KDE,
   Android or Claude uses their own Spanish wording ("Flotar en el mundo", "Preferencias del
   sistema", "Depuración inalámbrica").
+
+### Removed
+- **Recline** is set aside for now (not offered while it's tested). Installed, it stays until
+  you remove it.
 
 ### Fixed
 - **The scroll strips had no haptics:** SteamVR's dashboard kept an older copy of the shared

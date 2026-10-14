@@ -6,7 +6,6 @@ categories: [Accessibility, Convenience, VR environment, Privacy & security, Sys
 order:
   - full-keyboard
   - clipboard
-  - recline
 ---
 Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each
 built or downloaded from a pinned, checked version of its source, into your home folder, and

@@ -84,7 +84,7 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1228 packs/original/snip/frame-snip:1375
+#: gui/frame-tweaks-gui.py:1228 packs/original/snip/frame-snip:1388
 msgid "Cancel"
 msgstr ""
 
@@ -162,7 +162,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:322 install.sh:183 lib/common.sh:409 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:322 install.sh:183 lib/common.sh:409 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -170,11 +170,11 @@ msgstr ""
 msgid "hidden"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:339 packs/original/arrowpad/arrowpad.py:173 packs/original/snip/frame-snip:710 packs/original/snip/frame-snip:715
+#: gui/frame-tweaks-gui.py:339 packs/original/arrowpad/arrowpad.py:173 packs/original/snip/frame-snip:714 packs/original/snip/frame-snip:719
 msgid "Collapse"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:339 packs/original/arrowpad/arrowpad.py:173 packs/original/snip/frame-snip:741
+#: gui/frame-tweaks-gui.py:339 packs/original/arrowpad/arrowpad.py:173 packs/original/snip/frame-snip:745
 msgid "Expand"
 msgstr ""
 
@@ -354,7 +354,7 @@ msgstr ""
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:767 packs/original/arrowpad/arrowpad.py:172 packs/original/snip/frame-snip:695 packs/original/adb-scrcpy/phone:172
+#: gui/frame-tweaks-gui.py:767 packs/original/arrowpad/arrowpad.py:172 packs/original/snip/frame-snip:699 packs/original/adb-scrcpy/phone:172
 msgid "Close"
 msgstr ""
 
@@ -2395,7 +2395,7 @@ msgstr ""
 msgid "Mouse cursor fix"
 msgstr ""
 
-#: packs/original/cursor/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
+#: packs/original/cursor/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
 msgid "from"
 msgstr ""
 
@@ -2783,7 +2783,7 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: packs/original/pack.md packs/original/vr-dashboard/README.md packs/original/curvature/README.md packs/original/float-return/README.md packs/original/float-grab/README.md packs/original/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
+#: packs/original/pack.md packs/original/vr-dashboard/README.md packs/original/curvature/README.md packs/original/float-return/README.md packs/original/float-grab/README.md packs/original/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md
 msgid "VR environment"
 msgstr ""
 
@@ -2979,84 +2979,84 @@ msgstr ""
 msgid "couldn't read the window's picture"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1355
+#: packs/original/snip/frame-snip:1368
 msgid "Screen snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1361
+#: packs/original/snip/frame-snip:1374
 msgid ""
 "Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1374
+#: packs/original/snip/frame-snip:1387
 msgid "Copy"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1374
+#: packs/original/snip/frame-snip:1387
 msgid "Save"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1375
+#: packs/original/snip/frame-snip:1388
 msgid "Narrate"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1529
+#: packs/original/snip/frame-snip:1542
 msgid "Couldn't copy the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1529
+#: packs/original/snip/frame-snip:1542
 msgid "Snip copied"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1529
+#: packs/original/snip/frame-snip:1542
 msgid "the desktop isn't available"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1536
+#: packs/original/snip/frame-snip:1549
 msgid "Couldn't save the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1536
+#: packs/original/snip/frame-snip:1549
 msgid "Snip saved"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1542
+#: packs/original/snip/frame-snip:1555
 msgid "Copy text needs Tesseract"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1542 packs/original/snip/frame-snip:1565
+#: packs/original/snip/frame-snip:1555 packs/original/snip/frame-snip:1578
 msgid "Reinstall Screen snip + Narrate in Frame Tweaks"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1544 packs/original/snip/frame-snip:1564
+#: packs/original/snip/frame-snip:1557 packs/original/snip/frame-snip:1577
 msgid "No text found in the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1547
+#: packs/original/snip/frame-snip:1560
 msgid "Couldn't copy the text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1547
+#: packs/original/snip/frame-snip:1560
 msgid "Text copied"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1564
+#: packs/original/snip/frame-snip:1577
 msgid "Narrate needs Tesseract"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1568
+#: packs/original/snip/frame-snip:1581
 msgid "Narrate needs Piper"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1568
+#: packs/original/snip/frame-snip:1581
 msgid "Reinstall 'Speech engine' in Frame Tweaks"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1664 packs/original/snip/frame-snip:1661
+#: packs/original/snip/frame-snip:1677 packs/original/snip/frame-snip:1674
 msgid "Couldn't take a snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1664
+#: packs/original/snip/frame-snip:1677
 msgid "empty picture"
 msgstr ""
 
@@ -3100,107 +3100,107 @@ msgstr ""
 msgid "Applying… (a new language downloads its voice, about 60 MB)"
 msgstr ""
 
-#: packs/original/snip/frame-snip:631 packs/original/snip/frame-snip:776
+#: packs/original/snip/frame-snip:633 packs/original/snip/frame-snip:789
 msgid "Screen snip: narrating"
 msgstr ""
 
-#: packs/original/snip/frame-snip:651 packs/original/snip/frame-snip:763
+#: packs/original/snip/frame-snip:655 packs/original/snip/frame-snip:767
 msgid "Preparing…"
 msgstr ""
 
-#: packs/original/snip/frame-snip:656 packs/original/snip/frame-snip:764 packs/original/snip/frame-snip:934
+#: packs/original/snip/frame-snip:660 packs/original/snip/frame-snip:768 packs/original/snip/frame-snip:947
 msgid "Stop"
 msgstr ""
 
-#: packs/original/snip/frame-snip:660 packs/original/snip/frame-snip:765 packs/original/snip/frame-snip:924 packs/original/snip/frame-snip:936 packs/original/snip/frame-snip:943 packs/original/snip/frame-snip:913
+#: packs/original/snip/frame-snip:664 packs/original/snip/frame-snip:769 packs/original/snip/frame-snip:937 packs/original/snip/frame-snip:949 packs/original/snip/frame-snip:956 packs/original/snip/frame-snip:926
 msgid "Pause"
 msgstr ""
 
-#: packs/original/snip/frame-snip:663 packs/original/snip/frame-snip:778 packs/original/snip/frame-snip:806
+#: packs/original/snip/frame-snip:667 packs/original/snip/frame-snip:791 packs/original/snip/frame-snip:819
 msgid "Show text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:664
+#: packs/original/snip/frame-snip:668
 msgid "Switch between the snip's image and the text read from it"
 msgstr ""
 
-#: packs/original/snip/frame-snip:674
+#: packs/original/snip/frame-snip:678
 msgid "Speed"
 msgstr ""
 
-#: packs/original/snip/frame-snip:679
+#: packs/original/snip/frame-snip:683
 msgid "Copy image"
 msgstr ""
 
-#: packs/original/snip/frame-snip:680
+#: packs/original/snip/frame-snip:684
 msgid "Put the snip's image on the clipboard"
 msgstr ""
 
-#: packs/original/snip/frame-snip:682 packs/original/snip/frame-snip:1374
+#: packs/original/snip/frame-snip:686 packs/original/snip/frame-snip:1387
 msgid "Copy text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:683
+#: packs/original/snip/frame-snip:687
 msgid "Put the text being read on the clipboard"
 msgstr ""
 
-#: packs/original/snip/frame-snip:686
+#: packs/original/snip/frame-snip:690
 msgid "Paste: read the clipboard's text instead"
 msgstr ""
 
-#: packs/original/snip/frame-snip:697
+#: packs/original/snip/frame-snip:701
 msgid "Snip something new: it's read here"
 msgstr ""
 
-#: packs/original/snip/frame-snip:700
+#: packs/original/snip/frame-snip:704
 msgid "Settings: Narrate's voice and language"
 msgstr ""
 
-#: packs/original/snip/frame-snip:768
+#: packs/original/snip/frame-snip:772
 msgid "Reading aloud: part {part} of {count}"
 msgstr ""
 
-#: packs/original/snip/frame-snip:778 packs/original/snip/frame-snip:806
+#: packs/original/snip/frame-snip:791 packs/original/snip/frame-snip:819
 msgid "Show image"
 msgstr ""
 
-#: packs/original/snip/frame-snip:817 packs/original/snip/frame-snip:821
+#: packs/original/snip/frame-snip:830 packs/original/snip/frame-snip:834
 msgid "Couldn't copy (is desktop mode running?)"
 msgstr ""
 
-#: packs/original/snip/frame-snip:817
+#: packs/original/snip/frame-snip:830
 msgid "Image copied to the clipboard."
 msgstr ""
 
-#: packs/original/snip/frame-snip:821
+#: packs/original/snip/frame-snip:834
 msgid "Text copied to the clipboard."
 msgstr ""
 
-#: packs/original/snip/frame-snip:826
+#: packs/original/snip/frame-snip:839
 msgid "The clipboard has no text."
 msgstr ""
 
-#: packs/original/snip/frame-snip:917
+#: packs/original/snip/frame-snip:930
 msgid "Finished."
 msgstr ""
 
-#: packs/original/snip/frame-snip:918 packs/original/snip/frame-snip:942
+#: packs/original/snip/frame-snip:931 packs/original/snip/frame-snip:955
 msgid "Read it again"
 msgstr ""
 
-#: packs/original/snip/frame-snip:925 packs/original/snip/frame-snip:935 packs/original/snip/frame-snip:914
+#: packs/original/snip/frame-snip:938 packs/original/snip/frame-snip:948 packs/original/snip/frame-snip:927
 msgid "Reading aloud…"
 msgstr ""
 
-#: packs/original/snip/frame-snip:928
+#: packs/original/snip/frame-snip:941
 msgid "Resume"
 msgstr ""
 
-#: packs/original/snip/frame-snip:929
+#: packs/original/snip/frame-snip:942
 msgid "Paused."
 msgstr ""
 
-#: packs/original/snip/frame-snip:941
+#: packs/original/snip/frame-snip:954
 msgid "Stopped."
 msgstr ""
 
@@ -3891,11 +3891,11 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:32 packs/third-party/recline/install.sh:20
+#: packs/third-party/clipboard/install.sh:32
 msgid "%s: not the pinned commit"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:22
+#: packs/third-party/clipboard/install.sh:34
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 
@@ -3999,137 +3999,6 @@ msgstr ""
 #: packs/third-party/pack.md
 msgid ""
 "Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each built or downloaded from a pinned, checked version of its source, into your home folder, and credited to its authors (their own README follows ours on each tweak's page)."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "Applies when you reinstall Recline, then restart SteamVR."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "Keep the room view aligned while reclined"
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid ""
-"Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "No (the room view looks tilted while reclined)"
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "Recline"
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid ""
-"Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid ""
-"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid ""
-"Use VR lying down or reclined; one button makes your view level and forward"
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "Yes (adds a small library to the Frame's camera service)"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:11
-msgid ""
-"SteamVR's vrpathreg, CMake, a C++ compiler and the Vulkan headers are there"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:5
-msgid "SteamVR's vrpathreg"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:7
-msgid "the Vulkan headers"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:9
-msgid "SteamOS no longer has: %s"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:17
-msgid "Fetching Recline-VR %s from %s"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:29
-msgid "Building it (under a minute) and running its tests"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:31
-msgid "Recline-VR: cmake failed"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:32
-msgid "Recline-VR: the build failed"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:33
-msgid "Recline-VR: its tests failed; nothing was installed"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:35
-msgid ""
-"Recline-VR built without Vulkan; not installing (its fallback has crashed SteamVR's compositor)"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:44
-msgid ""
-"Room-view fix left out (setting); the room view will look tilted while reclined"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:52
-msgid "Recline %s installed. Restart SteamVR to load it (reboot, or: %s)."
-msgstr ""
-
-#: packs/third-party/recline/install.sh:9
-msgid "can't build Recline: %s"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:11
-msgid ""
-"Recline %s installed; restart SteamVR to load it (or check SteamVR's safe mode)"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:12
-msgid "Recline %s loaded"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:7
-msgid ""
-"Recline %s installed but its driver isn't registered (Reinstall fixes it)"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:8
-msgid "Recline %s installed (SteamVR isn't running)"
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:11
-msgid ""
-"SteamVR isn't running, so Recline's panel couldn't be unregistered (SteamVR may still list it)"
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:15
-msgid "Kept Recline's panel options: ~/.config/recline-vr"
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:16
-msgid "Restart SteamVR to unload its driver (reboot, or: %s)."
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:8
-msgid ""
-"couldn't unregister Recline's panel from SteamVR; it will report it missing"
 msgstr ""
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3
