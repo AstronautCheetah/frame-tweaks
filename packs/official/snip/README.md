@@ -73,8 +73,9 @@ The actions:
 
 Narrate closes the full-size picture and pops the snip out into a panel of its own, so you can
 carry on with anything else while it reads. In VR it's a SteamVR panel (drawn like Arrow Pad, so
-it doesn't take a place in the dashboard); it starts under the dashboard and follows it. Drag its
-top bar to move it; it remembers the spot for next time.
+it doesn't take a place in the dashboard); it starts under the dashboard and follows it. To move it,
+squeeze the grip while pointing at it (anywhere, buttons included) and let go to put it down,
+or pull the trigger on an empty part of it and drag. It remembers the spot for next time.
 
 The panel has:
 
