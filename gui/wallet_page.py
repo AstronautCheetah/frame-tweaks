@@ -110,6 +110,17 @@ def lock_hours():
     return DEFAULT_LOCK_HOURS
 
 
+def autolock_on():
+    """Whether the wallet locks itself (WALLET_AUTOLOCK in wallet.conf; on unless 0)."""
+    try:
+        for line in LOCK_CONF.read_text().splitlines():
+            if line.startswith("WALLET_AUTOLOCK="):
+                return line.split("=", 1)[1].strip().strip('"') != "0"
+    except OSError:
+        pass
+    return True
+
+
 def set_lock_hours(hours):
     """Save it for wallet-unlock (other lines in wallet.conf are kept). Takes effect at the next
     unlock or Extend timer."""
@@ -136,6 +147,8 @@ def wallet_state_text(info, now):
         if info.get("idle_close_minutes"):
             text += f", or sooner after {timer_text(info['idle_close_minutes'])} unused"
         text += "."
+    elif info.get("autolock") is False:
+        text += " It stays unlocked until you lock it (auto-lock is off)."
     elif info.get("idle_close_minutes"):
         text += f" Locks by itself after {timer_text(info['idle_close_minutes'])} unused."
     else:
@@ -261,7 +274,11 @@ class WalletApps(QWidget):
         # How long an unlock lasts (wallet.conf; wallet-unlock reads it). Buttons, not a drop-down:
         # a pop-up list opens as a window of its own in VR.
         hours_row = QHBoxLayout()
-        hours_label = QLabel("Auto-lock after unlocking:")
+        self.autolock = QCheckBox("Auto-lock")
+        self.autolock.setToolTip("Lock the wallet by itself: a set time after unlocking, or after 4 h unused")
+        self.autolock.clicked.connect(self.toggle_autolock)
+        hours_row.addWidget(self.autolock)
+        hours_label = QLabel("after unlocking:")
         hours_label.setObjectName("desc")
         hours_row.addWidget(hours_label)
         self.shorter = QPushButton("−")
@@ -310,7 +327,9 @@ class WalletApps(QWidget):
         self.wallet_locked = None if info is None else info["state"] == "locked"
         self.wallet_state.setText(wallet_state_text(info, time.time()))
         self.wallet_toggle.setVisible(info is not None)
-        self.extend.setVisible(info is not None and not self.wallet_locked)
+        on = autolock_on() if info is None else info.get("autolock", True)
+        self.autolock.setChecked(on)
+        self.extend.setVisible(info is not None and not self.wallet_locked and on)
         self.extend.setToolTip(f"Start the {timer_text(lock_hours() * 60)} countdown to the auto-lock again, from now")
         self.wallet_toggle.setText("🔓 Unlock…" if self.wallet_locked else "🔒 Lock now")
         self.wallet_toggle.setToolTip("Asks for the wallet password" if self.wallet_locked else
@@ -324,11 +343,22 @@ class WalletApps(QWidget):
         proc.finished.connect(lambda *_: self.show_wallet_state())
         proc.start(str(WALLET_UNLOCK), ["--schedule-lock"])
 
+    def toggle_autolock(self, on):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: wallet-unlock --autolock", "on" if on else "off")
+            return
+        proc = QProcess(self)
+        proc.finished.connect(lambda *_: (self.show_hours(), self.show_wallet_state()))
+        proc.start(str(WALLET_UNLOCK), ["--autolock", "on" if on else "off"])
+
     def show_hours(self):
+        on = autolock_on()
+        for w in (self.shorter, self.longer, self.hours_text):
+            w.setEnabled(on)
         h = lock_hours()
         self.hours_text.setText(f"<b>{timer_text(h * 60)}</b>" + ("" if h == DEFAULT_LOCK_HOURS else " (default 4 h)"))
-        self.shorter.setEnabled(h > LOCK_STEPS[0])
-        self.longer.setEnabled(h < LOCK_STEPS[-1])
+        self.shorter.setEnabled(on and h > LOCK_STEPS[0])
+        self.longer.setEnabled(on and h < LOCK_STEPS[-1])
 
     def step_hours(self, direction):
         h = lock_hours()
