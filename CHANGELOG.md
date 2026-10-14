@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Screen snip + Narrate settings:** a ⚙ on Narrate's panel (engine and language, with Apply),
+  and a ⚙ beside its Snip button in the window (reading speed, engine, language).
 - **Speech engine settings:** Narrate with Piper or eSpeak NG, in one of 18 languages (each
   voice pinned and checked), from the ⚙ Settings button on its row.
 - **Android Mirror: Pair it again.** When it can't connect because the phone forgot the Frame, it
@@ -165,6 +167,8 @@
 - **Migrations ran when going back to an older release;** they now run only on the way up.
 
 ### For contributors
+- A settings page can include another tweak's settings (`include:`), and a row with both a Run
+  action and settings shows a ⚙ beside Run.
 - Settings can have tick boxes (`checkbox: true` on a two-choice option) and buttons that run one
   of the tweak's scripts (`actions:`); see docs/mods.md.
 - Attribution lines in commits are up to each contributor; the hooks refuse tool attribution

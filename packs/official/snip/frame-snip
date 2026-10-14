@@ -38,8 +38,8 @@ from PyQt6.QtCore import (QEvent, QObject, QPoint, QPointF, QProcess, QProcessEn
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
 from PyQt6.QtCore import QSize                                                    # noqa: E402
 from PyQt6.QtGui import QColor, QIcon, QImage, QMouseEvent, QPainter, QPen, QPixmap  # noqa: E402
-from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,  # noqa: E402
-                             QWidget)
+from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel, QPushButton,  # noqa: E402
+                             QVBoxLayout, QWidget)
 
 HOME = Path.home()
 RUN = Path(f"/run/user/{os.getuid()}")
@@ -136,6 +136,22 @@ def icon_button(b, icon, tip):
     b.setIconSize(QSize(30, 30))
     b.setToolTip(tip)
     b.setAccessibleName(tip)
+
+
+# A plain gear (Breeze's "configure" is sliders): the same shape as Scroll strips' gear in VR.
+GEAR_PATH = "M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"
+
+
+def gear_icon():
+    from PyQt6.QtSvg import QSvgRenderer
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 24"><path fill="#e8ecf0" '
+           f'fill-rule="evenodd" d="{GEAR_PATH}"/></svg>').encode()
+    pm = QPixmap(64, 64)
+    pm.fill(Qt.GlobalColor.transparent)
+    p = QPainter(pm)
+    QSvgRenderer(svg).render(p)
+    p.end()
+    return QIcon(pm)
 
 
 def start_snip():
@@ -435,6 +451,120 @@ class Narrator(QObject):
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
+SPEECH_CONF = HOME / ".config/frame-tweaks/speech.conf"
+
+
+def speech_settings():
+    """(engine, language) from speech.conf, as the Speech engine reads them."""
+    conf = {"SPEECH_ENGINE": "piper", "SPEECH_LANGUAGE": "en_US"}
+    try:
+        for line in SPEECH_CONF.read_text().splitlines():
+            k, eq, v = line.partition("=")
+            if eq:
+                conf[k.strip()] = v.strip().strip("'\"")
+    except OSError:
+        pass
+    return conf["SPEECH_ENGINE"], conf["SPEECH_LANGUAGE"]
+
+
+def save_speech_setting(key, value):
+    """One KEY=value line in speech.conf (other lines kept)."""
+    lines = SPEECH_CONF.read_text().splitlines() if SPEECH_CONF.exists() else []
+    lines = [l for l in lines if not l.startswith(key + "=")] + [f"{key}={value}"]
+    SPEECH_CONF.parent.mkdir(parents=True, exist_ok=True)
+    SPEECH_CONF.write_text("\n".join(lines) + "\n")
+
+
+class SpeechConfig(QWidget):
+    """Narrate's ⚙ view: engine and language (the Speech engine's settings, as in Frame Tweaks),
+    and Apply, which downloads a new language's voice and switches (DATA/apply)."""
+
+    def __init__(self, back):
+        super().__init__()
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(18, 16, 18, 16)
+        head = QHBoxLayout()
+        b = QPushButton("← Back")
+        b.clicked.connect(back)
+        head.addWidget(b)
+        title = QLabel("Narrate's voice")
+        title.setStyleSheet("font-size: 22px; font-weight: 600;")
+        head.addWidget(title, 1)
+        lay.addLayout(head)
+        self.buttons = {}
+        lay.addWidget(self.heading("Narrate with"))
+        row = QHBoxLayout()
+        for value, label in (("piper", "Piper: natural"), ("espeak-ng", "eSpeak NG: fast")):
+            row.addWidget(self.choice("SPEECH_ENGINE", value, label))
+        row.addStretch(1)
+        lay.addLayout(row)
+        lay.addWidget(self.heading("Language"))
+        grid = QGridLayout()
+        try:
+            rows = [l.split("\t") for l in (DATA / "voices.tsv").read_text().splitlines() if l and not l.startswith("#")]
+        except OSError:
+            rows = [["en_US", "English (US)"]]
+        for n, r in enumerate(rows):
+            grid.addWidget(self.choice("SPEECH_LANGUAGE", r[0], r[1]), n // 4, n % 4)
+        lay.addLayout(grid)
+        foot = QHBoxLayout()
+        self.apply = QPushButton("Apply")
+        self.apply.setToolTip("Download the chosen language's voice if needed, and switch")
+        self.apply.clicked.connect(self.run_apply)
+        foot.addWidget(self.apply)
+        self.state = QLabel()
+        self.state.setStyleSheet("color: #9aa6b2;")
+        self.state.setWordWrap(True)
+        foot.addWidget(self.state, 1)
+        lay.addLayout(foot)
+        for w in self.findChildren(QPushButton):
+            w.setStyleSheet("QPushButton { padding: 12px 14px; font-size: 20px; }"
+                            " QPushButton:checked { background: #355b7a; font-weight: 700; }")
+
+    @staticmethod
+    def heading(text):
+        h = QLabel(text)
+        h.setStyleSheet("color: #9aa6b2; font-size: 18px; margin-top: 10px;")
+        return h
+
+    def choice(self, key, value, label):
+        b = QPushButton(label)
+        b.setCheckable(True)
+        b.clicked.connect(lambda: self.pick(key, value))
+        self.buttons[(key, value)] = b
+        return b
+
+    def refresh(self):
+        engine, lang = speech_settings()
+        for (key, value), b in self.buttons.items():
+            b.setChecked(value == (engine if key == "SPEECH_ENGINE" else lang))
+        self.state.setText("Changes apply when you press Apply.")
+
+    def pick(self, key, value):
+        save_speech_setting(key, value)
+        self.refresh()
+
+    def run_apply(self):
+        apply_cmd = DATA / "apply"
+        if not apply_cmd.exists():
+            self.state.setText("Reinstall the Speech engine in Frame Tweaks first.")
+            return
+        self.apply.setEnabled(False)
+        self.state.setText("Applying… (a new language downloads its voice, about 60 MB)")
+        proc = QProcess(self)
+        proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+
+        def done(*_):
+            out = [re.sub(r"\x1b\[[0-9;]*m", "", l).strip() for l in bytes(proc.readAll()).decode(errors="replace").splitlines()]
+            out = [l for l in out if l and "#" not in l[:3]]
+            ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
+            self.state.setText(("" if ok else "Didn't work: ") + (out[-1].removeprefix("==> ") if out else "Done."))
+            self.apply.setEnabled(True)
+        proc.finished.connect(done)
+        proc.start(str(apply_cmd), [])
+        self.proc = proc
+
+
 class NarrationWindow(QWidget):
     """The snip, popped out, with the narration's controls; the rest of VR stays usable. As a VR
     panel it can collapse to just an Expand button, and take a new snip in place (load)."""
@@ -518,6 +648,10 @@ class NarrationWindow(QWidget):
         snip = QPushButton()                      # a new snip; it's read here (see load)
         icon_button(snip, "select-rectangular", "Snip something new: it's read here")
         snip.clicked.connect(start_snip)
+        gear = QPushButton()
+        icon_button(gear, "configure", "Settings: Narrate's voice and language")
+        gear.setIcon(gear_icon())
+        gear.clicked.connect(self.open_config)
         close.clicked.connect(self.close)
         right_lay.addWidget(close)
         self.collapse_buttons = []
@@ -540,11 +674,11 @@ class NarrationWindow(QWidget):
         self.collapse_button = self.collapse_buttons[-1] if panel else None    # the one last used
         row2.addWidget(left)
         row2.addStretch(1)
-        for b in (snip, self.copy_image_button, copy, paste):
+        for b in (gear, snip, self.copy_image_button, copy, paste):
             row2.addWidget(b)
         row2.addStretch(1)
         row2.addWidget(right)
-        for b in (snip, self.copy_image_button, copy, paste, close) + ((collapse,) if panel else ()):
+        for b in (gear, snip, self.copy_image_button, copy, paste, close) + ((collapse,) if panel else ()):
             b.setStyleSheet("padding: 12px 14px; font-size: 20px;")        # (a narrower row)
         self.row2, self.left_end, self.right_end = row2, left, right
         self.ensurePolished()
@@ -563,6 +697,8 @@ class NarrationWindow(QWidget):
         mini.addWidget(expand)
         self.mini.hide()
         outer.addWidget(self.mini)
+        self.config = None                        # the ⚙ settings view (built when opened)
+        self.outer = outer
         self.show_speed()
         self.load(image, text)
 
@@ -644,12 +780,31 @@ class NarrationWindow(QWidget):
         self.setMaximumSize(16777215, 16777215)
         if self.collapsed:
             self.setFixedSize(self.mini.sizeHint())
+        elif self.config is not None and self.config.isVisible():
+            w = max(780, self.full.width())
+            self.config.setFixedWidth(w)
+            self.setFixedSize(w, self.config.sizeHint().height())
         else:
             # (styled sizes are known once shown: the left end as wide as the right centres the middle)
             self.left_end.setMinimumWidth(self.right_end.sizeHint().width())
             w = max(780, min(900, self.pic_width + 36), self.row2.sizeHint().width() + 36)
             self.full.setFixedWidth(w)
             self.setFixedSize(w, self.full.sizeHint().height())
+
+    # ---- ⚙: the Speech engine's settings (the same as in Frame Tweaks: speech.conf) ----------
+    def open_config(self):
+        if self.config is None:
+            self.config = SpeechConfig(self.close_config)
+            self.outer.addWidget(self.config)
+        self.config.refresh()
+        self.full.hide()
+        self.config.show()
+        self.fit()
+
+    def close_config(self):
+        self.config.hide()
+        self.full.show()
+        self.fit()
 
     def pivot(self, b=None):
         """Where the Collapse / Expand icon is (widget pixels): the overlay keeps that point still

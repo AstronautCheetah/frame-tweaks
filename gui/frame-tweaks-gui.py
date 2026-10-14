@@ -444,23 +444,15 @@ class Details(QWidget):
         self.issue_label.setText(with_copy(text))
 
 
-class SettingsPage(QWidget):
-    """A tweak's settings (lib/sft.py SETTINGS: the same choices as ./install.sh settings and the
-    gears in VR)."""
+class SettingsSection(QWidget):
+    """One tweak's settings (lib/sft.py SETTINGS: the same choices as ./install.sh settings and the
+    gears in VR): its options, Reset, and its action buttons. notice: where it reports."""
 
-    def __init__(self, window, cid):
+    def __init__(self, cid, notice):
         super().__init__()
-        self.cid, self.spec = cid, sft.SETTINGS[cid]
+        self.cid, self.spec, self.notice = cid, sft.SETTINGS[cid], notice
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
-        head = QHBoxLayout()
-        back = QPushButton("← Back")
-        back.clicked.connect(window.go_back)
-        head.addWidget(back)
-        title = QLabel(next((c["title"] for c in components() if c["id"] == cid), cid))
-        title.setObjectName("title")
-        head.addWidget(title, 1)
-        lay.addLayout(head)
         about = QLabel(self.spec["about"])
         about.setObjectName("desc")
         about.setWordWrap(True)
@@ -479,18 +471,19 @@ class SettingsPage(QWidget):
             lab = QLabel(label)
             lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
             lay.addWidget(lab)
-            row = QHBoxLayout()
-            for text, value in choices:
+            grid = QGridLayout()                     # (wraps: a long list of choices fits the page)
+            per_row = 7 if all(len(t) <= 8 for t, _ in choices) else 4
+            for n, (text, value) in enumerate(choices):
                 b = QPushButton(text)
                 b.setCheckable(True)
                 b.setChecked(self.conf.get(key) == value)
                 b.setMinimumWidth(70)
                 b.setStyleSheet("QPushButton:checked { background: #355b7a; font-weight: 600; }")
                 b.clicked.connect(lambda _=False, k=key, v=value: self.choose(k, v))
-                row.addWidget(b)
+                grid.addWidget(b, n // per_row, n % per_row)
                 self.buttons[(key, text)] = (b, value)
-            row.addStretch(1)
-            lay.addLayout(row)
+            grid.setColumnStretch(per_row, 1)
+            lay.addLayout(grid)
         reset = QPushButton("Reset to defaults")
         reset.clicked.connect(self.reset)
         lay.addWidget(reset)
@@ -508,11 +501,6 @@ class SettingsPage(QWidget):
             lay.addLayout(row)
             self.actions.append((a, b, note))
         self.show_actions()
-        self.notice = QLabel()
-        self.notice.setObjectName("notice")
-        self.notice.setWordWrap(True)
-        lay.addWidget(self.notice)
-        lay.addStretch(1)
 
     def show_actions(self):
         for a, b, note in self.actions:
@@ -570,6 +558,49 @@ class SettingsPage(QWidget):
             return
         sft.write_settings(self.cid, {}, reset=True)
         self.notice.setText("Back to the defaults. " + self.spec["note"])
+
+
+class SettingsPage(QWidget):
+    """A tweak's settings page: its own section, then those of the tweaks its settings include
+    (Screen snip + Narrate shows the Speech engine's: same files, same choices)."""
+
+    def __init__(self, window, cid):
+        super().__init__()
+        self.cid = cid
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        head = QHBoxLayout()
+        back = QPushButton("← Back")
+        back.clicked.connect(window.go_back)
+        head.addWidget(back)
+        title = QLabel(next((c["title"] for c in components() if c["id"] == cid), cid))
+        title.setObjectName("title")
+        head.addWidget(title, 1)
+        lay.addLayout(head)
+        self.notice = QLabel()
+        self.notice.setObjectName("notice")
+        self.notice.setWordWrap(True)
+        body = QWidget()
+        col = QVBoxLayout(body)
+        col.setContentsMargins(0, 0, 8, 0)
+        self.sections = [SettingsSection(cid, self.notice)]
+        col.addWidget(self.sections[0])
+        for other in sft.SETTINGS[cid]["include"]:
+            if other not in sft.SETTINGS:
+                continue
+            head2 = QLabel(next((c["title"] for c in components() if c["id"] == other), other))
+            head2.setObjectName("title")
+            head2.setStyleSheet("margin-top: 22px;")
+            col.addWidget(head2)
+            self.sections.append(SettingsSection(other, self.notice))
+            col.addWidget(self.sections[-1])
+        col.addStretch(1)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidget(body)
+        lay.addWidget(scroll, 1)
+        lay.addWidget(self.notice)
 
 
 SETTINGS_PAGES = {cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS}   # the row's button opens these
@@ -869,9 +900,17 @@ class Window(QWidget):
                 g.addWidget(link, 2, 2)
             g.addWidget(st, 0, 3, 3, 1)
             g.addWidget(run, 0, 4, 3, 1)
-            g.addWidget(again, 0, 5, 3, 1)
-            g.addWidget(details, 0, 6, 3, 1)
-            g.addWidget(hide, 0, 7, 3, 1)
+            col = 5
+            if cid in SETTINGS_PAGES and run_label(cid):   # both a Run and settings: ⚙ beside Run
+                gear = QPushButton("⚙")
+                gear.setObjectName("info")
+                gear.setToolTip("Settings")
+                gear.clicked.connect(lambda _=False, c=cid: self.open_settings(c))
+                g.addWidget(gear, 0, col, 3, 1)
+                col += 1
+            g.addWidget(again, 0, col, 3, 1)
+            g.addWidget(details, 0, col + 1, 3, 1)
+            g.addWidget(hide, 0, col + 2, 3, 1)
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
@@ -981,7 +1020,7 @@ class Window(QWidget):
             button.setToolTip("Choose which apps open with the shared KDE wallet; lock or unlock it"
                               if installed else "Tick it and Apply first")
             return
-        if cid in SETTINGS_PAGES:
+        if cid in SETTINGS_PAGES and not label:          # (with something to run: a ⚙ beside it)
             button.setText("⚙ Settings")
             button.setProperty("help", "false")
             button.style().unpolish(button)
@@ -997,6 +1036,12 @@ class Window(QWidget):
         button.setToolTip(f"{label} (installs first if needed: tick it and Apply)" if label and not installed
                           else label and f"{label}" or "Nothing to launch: how to use it")
 
+    def open_settings(self, cid):
+        self.close_details()
+        self.details = SETTINGS_PAGES[cid](self)             # a page: Back and B return to the list
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
     def run(self, comp):
         if comp["id"] in PAGES:
             self.close_details()
@@ -1004,7 +1049,7 @@ class Window(QWidget):
             self.stack.addWidget(self.details)
             self.stack.setCurrentWidget(self.details)
             return
-        if comp["id"] in SETTINGS_PAGES:
+        if comp["id"] in SETTINGS_PAGES and not run_label(comp["id"]):
             self.close_details()
             self.details = SETTINGS_PAGES[comp["id"]](self)      # a page: Back and B return to the list
             self.stack.addWidget(self.details)
