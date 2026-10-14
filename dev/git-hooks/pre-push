@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Backstop for the commit-msg hook, which a stray -c core.hooksPath=... or --no-verify skips:
-# it refuses a push whose new commits carry an AI attribution trailer (dev/check-trailers.sh).
+# with `git config frame-tweaks.refuseToolTrailers true`, it refuses a push whose new commits carry
+# a tool attribution line (dev/check-trailers.sh). Otherwise it does nothing.
 set -euo pipefail
+[ "$(git config --bool frame-tweaks.refuseToolTrailers)" = true ] || exit 0
 zero=0000000000000000000000000000000000000000
 check="$(git rev-parse --show-toplevel)/dev/check-trailers.sh"
 while read -r _lref lsha _rref rsha; do
@@ -13,7 +15,7 @@ while read -r _lref lsha _rref rsha; do
     fi
     for c in $range; do
         if ! git log -1 --format=%B "$c" | "$check"; then
-            echo "pre-push: refusing: commit $(git rev-parse --short "$c") carries an AI attribution trailer (CONTRIBUTING.md)." >&2
+            echo "pre-push: refusing: commit $(git rev-parse --short "$c") carries a tool attribution line (you set frame-tweaks.refuseToolTrailers)." >&2
             exit 1
         fi
     done

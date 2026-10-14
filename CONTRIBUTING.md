@@ -41,9 +41,10 @@ without `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`: an unticked che
 `pipx install commitizen`), `cz commit` asks for each part; the commit-msg hook checks every
 message either way (`dev/check-commit-msg.sh`).
 
-No tool attribution lines in commits (`dev/check-trailers.sh` is the rule; the hooks and CI run
-it). You're responsible for what you submit, however it was written. Human co-authors are
-welcome: `Co-authored-by: Jane Doe <jane@example.com>` is fine.
+Co-author and attribution lines are up to you. You're responsible for what you submit, however
+it was written. If you'd rather your own commits never pick up a tool's attribution line,
+`git config frame-tweaks.refuseToolTrailers true` makes the hooks refuse them
+(`dev/check-trailers.sh`).
 
 ## Pinned downloads
 
@@ -72,7 +73,7 @@ What CI runs, and what to run before sending a change:
 - `python3 lib/sft.py mods check packs/official`: every manifest is valid and its scripts exist.
 - `dev/check-docs.py`: every tweak has a README row; relative links resolve.
 - `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home.
-- `git log --format=%B | dev/check-trailers.sh`: commit messages (above).
+- `dev/check-commit-msg.sh --all`: commit message format (above).
 - A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
   `tests/test_vr_dashboard.py` automatically; one that can be tested offline says
   `test: {offline: true}` in its manifest, and `dev/test-tweaks.sh` includes it.

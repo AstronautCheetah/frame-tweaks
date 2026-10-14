@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Refuses AI attribution in commit messages (CONTRIBUTING.md, "Commit style"); human co-authors
-# are welcome. Reads commit messages from the files given, or from stdin; prints each offending
-# line and exits 1 if there is one. Used by the commit-msg and pre-push hooks and by CI.
+# Finds tool attribution lines in commit messages; human co-authors are never flagged. Reads
+# commit messages from the files given, or from stdin; prints each such line and exits 1 if
+# there is one. Opt-in: the commit-msg and pre-push hooks run it only with
+# `git config frame-tweaks.refuseToolTrailers true` (for people who don't want them in their own
+# commits; other contributors' commits may carry them).
 #
 #   Always refused:  Claude-Session: / Assisted-by: / Generated-by: lines, "Generated with [...]"
 #   Refused when it names an AI tool or bot:  Co-authored-by: (Claude, Anthropic, Copilot,
