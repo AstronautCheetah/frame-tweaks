@@ -11,6 +11,8 @@ scrcpy server on the phone with only its control channel (no video), so nothing 
 Steam session's input at all.
 
   phone-touch DEVICE      DEVICE: the phone's adb address (ip:port); runs until scrcpy exits
+  phone-touch --check     exit 1 (and say why, once per scrcpy version) if the installed scrcpy
+                          isn't one this was tested with; `phone` then shows a plain window
 
 The layer appears only while this runs: it calls in through the dashboard's DevTools port
 (127.0.0.1:8087, opened by the VR windows helper) and says it's alive every 2 s. While the laser
@@ -40,6 +42,13 @@ JAR = "/data/local/tmp/sft-phone-touch.jar"     # scrcpy deletes its own copy on
 PIDFILE = Path(f"/run/user/{os.getuid()}/sft-phone-touch.pid")
 DOWN, UP, MOVE = 0, 1, 2
 FINGER = -2                                     # scrcpy's "generic finger" pointer id
+# scrcpy versions (major) whose control protocol this was tested with: the touch and scroll
+# messages below and the server's options. scrcpy has changed them between major versions
+# before, and a mismatch would make taps go nowhere without an error, so with any other version
+# this stays off and the mirror is a plain window. PHONE_TOUCH_ANY_SCRCPY=1 tries anyway.
+# (lib/tested-versions records the exact version; tests check the two agree.)
+SCRCPY_TESTED = ("5",)
+STATE = Path.home() / ".local/state/frame-tweaks"
 
 
 def log(*a):
@@ -63,6 +72,34 @@ def scrcpy_server():
     if not m or not Path(jar).is_file():
         sys.exit("phone-touch: can't find scrcpy's server")
     return m.group(1), str(jar)
+
+
+def tested(version):
+    return version.split(".")[0] in SCRCPY_TESTED or os.environ.get("PHONE_TOUCH_ANY_SCRCPY") == "1"
+
+
+def check():
+    """0 if the installed scrcpy is a tested one; else say so (a notification once per version)."""
+    version, _ = scrcpy_server()
+    if tested(version):
+        return 0
+    why = (f"scrcpy {version} isn't a version Frame Tweaks has been tested with "
+           f"({', '.join(v + '.x' for v in SCRCPY_TESTED)}), so the mirror's VR extras are off: aimed laser "
+           "clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update.")
+    log(why)
+    seen = STATE / "phone-touch-untested"
+    try:
+        if seen.read_text().strip() == version:
+            return 1
+    except OSError:
+        pass
+    try:
+        STATE.mkdir(parents=True, exist_ok=True)
+        seen.write_text(version + "\n")
+        subprocess.run(["notify-send", "-a", "Android Mirror", "VR extras are off", why], timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return 1
 
 
 def screen_size(dev):
@@ -394,6 +431,8 @@ def serve(phone, sd, state):
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
+    if sys.argv[1] == "--check":
+        sys.exit(check())
     if not DASHBOARD.is_file():
         return                                    # no VR windows helper: no layer to talk to
     # One at a time: a reconnect (new address) replaces the one before.

@@ -33,8 +33,20 @@ def components():
         f = (line.split("\t") + [""] * 9)[:9]
         cid, title, category, deps, desc, source, author, why, flags = f
         rows.append(dict(id=cid, title=title, category=category, deps=deps.split(), desc=desc,
-                         source=source, author=author, why=why, flags=set(flags.split(","))))
+                         source=source, author=author, why=why, flags=set(flags.split(",")),
+                         experimental=experimental(cid)))
     return rows
+
+
+def experimental(cid):
+    """<id>/meta's "experimental:" note (what relies on another program's internals), or ""."""
+    try:
+        for line in (REPO / cid / "meta").read_text().splitlines():
+            if line.startswith("experimental:"):
+                return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return ""
 
 
 def read_set(path):
@@ -212,6 +224,8 @@ def info(cid):
     lines = [f"{c['title']}  ({c['category']})", "", c["desc"]]
     if c["why"]:
         lines += ["", "Why: " + c["why"]]
+    if c["experimental"]:
+        lines += ["", "Experimental: " + c["experimental"]]
     if c["deps"]:
         lines += ["", "Needs: " + ", ".join(c["deps"])]
     if c["author"]:

@@ -14,9 +14,17 @@ alarm_fetch extra android-tools "$T/at"
 for p in "extra protobuf" "extra fmt" "extra abseil-cpp" "core libusb"; do
     alarm_fetch $p "$T/deps"
 done
-rm -rf "$LIB" && mkdir -p "$LIB"
-cp -a "$T"/deps/usr/lib/*.so* "$LIB/"
-install -m755 "$T/at/usr/bin/adb" "$LIB/adb.bin"
+NEW="$T/lib"; mkdir -p "$NEW"
+cp -a "$T"/deps/usr/lib/*.so* "$NEW/"
+install -m755 "$T/at/usr/bin/adb" "$NEW/adb.bin"
+# Swapped in only if it runs here; otherwise a working adb from before is kept.
+if missing=$(runs_here "$NEW/adb.bin" "$NEW") && LD_LIBRARY_PATH="$NEW" "$NEW/adb.bin" version >/dev/null 2>&1; then
+    rm -rf "$LIB" && mkdir -p "$(dirname "$LIB")" && cp -a "$NEW" "$LIB"
+elif [ -x "$LIB/adb.bin" ] && LD_LIBRARY_PATH="$LIB" "$LIB/adb.bin" version >/dev/null 2>&1; then
+    warn "Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: $missing"
+else
+    die "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: $missing"
+fi
 # adb's server listens on a socket file in your runtime folder instead of TCP 127.0.0.1:5037,
 # which every local program (sandboxed Flatpak apps too) could use to get a shell on a connected
 # phone. (Set ADB_SERVER_SOCKET yourself to override.) An old server on the TCP port is stopped.
@@ -28,8 +36,6 @@ export ADB_SERVER_SOCKET
 LD_LIBRARY_PATH="$HOME/.local/lib/android-tools${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" exec "$HOME/.local/lib/android-tools/adb.bin" "$@"
 EOS
 chmod +x "$BIN/adb"
-missing=$(LD_LIBRARY_PATH="$LIB" ldd "$LIB/adb.bin" | grep 'not found' || true)
-[ -z "$missing" ] || die "adb still has missing libraries:\n$missing"
 "$BIN/adb" version | sed -n 1,2p
 
 install -m755 "$REPO_DIR/adb-scrcpy/phone" "$REPO_DIR/adb-scrcpy/phone-fit" "$BIN/"

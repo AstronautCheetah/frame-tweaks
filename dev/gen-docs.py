@@ -14,6 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 KEYS = ("emoji", "name", "group", "what", "why", "changes", "access", "survives-updates", "undo")
+# optional: "experimental" (what relies on another program's internals and what happens when they change)
 
 
 def tweaks():
@@ -43,7 +44,7 @@ def link(i, name):
 
 def readme_table(rows, group):
     lines = ["| | Tweak | What you get | Why (on the Frame) |", "|---|---|---|---|"]
-    lines += [f"| {m['emoji']} | {link(i, m['name'])} | {m['what']} | {m['why']} |"
+    lines += [f"| {m['emoji']} | {link(i, m['name'])}{' 🧪' if m.get('experimental') else ''} | {m['what']} | {m['why']} |"
               for i, m in rows if m["group"] == group]
     return "\n".join(lines)
 
@@ -56,6 +57,8 @@ def glance(m):
     lines = ["> **At a glance**", ">",
              f"> - **Survives SteamOS updates:** {m['survives-updates']}",
              f"> - **Changes:** {m['changes']}"]
+    if m.get("experimental"):
+        lines.append(f"> - **🧪 Experimental:** {m['experimental']}")
     if m["access"] not in ("–", "-"):
         lines.append(f"> - **Unusual access:** {m['access']}")
     lines.append(f"> - **Undo:** {m['undo']}")

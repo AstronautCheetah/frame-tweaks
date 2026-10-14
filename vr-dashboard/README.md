@@ -9,6 +9,7 @@ those tweaks is one small patch, which you switch on or off by ticking it in the
 >
 > - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches off each patch whose code changed
 > - **Changes:** `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in
+> - **🧪 Experimental:** The base the VR windows tweaks share. They rely on SteamVR's internal dashboard code, which Valve can change in any update: each patch is checked when SteamVR starts and switched off if its code changed (shown in its status) until a Frame Tweaks update catches up.
 > - **Unusual access:** **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame (sandboxed Flatpak apps included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed
 > - **Undo:** `./install.sh uninstall vr-dashboard` (after the VR windows tweaks)
 <!-- /generated:glance -->

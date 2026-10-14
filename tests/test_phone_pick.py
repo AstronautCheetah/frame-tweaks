@@ -17,7 +17,7 @@ def advert(name, ip, port):
 
 
 class PhonePick(unittest.TestCase):
-    def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False):
+    def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False, extra=None, env=None):
         home = Path(self.tmp.name)
         stubs = home / ".local/bin"          # (first on phone's PATH, ahead of Homebrew's real scrcpy)
         stubs.mkdir(parents=True, exist_ok=True)
@@ -33,12 +33,13 @@ class PhonePick(unittest.TestCase):
             "notify-send": f'echo "notify $*" >> {log}',
             "adb": f'echo "adb $*" >> {log}; [ "$1 $2" = "-s " ] || true; exit 0',
             "scrcpy": f'echo "scrcpy $*" >> {log}; exit 0',
-            "sleep": "exit 0", "setsid": "exit 0", "pgrep": "exit 1",
+            "sleep": "exit 0", "setsid": f'echo "setsid $*" >> {log}', "pgrep": "exit 1",
+            **(extra or {}),
         }
         for name, body in scripts.items():
             (stubs / name).write_text(f"#!/bin/bash\n{body}\n")
             (stubs / name).chmod(0o755)
-        env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or ""}
+        env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or "", **(env or {})}
         r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30)
         f = home / ".config/frame-tweaks/phone.conf"
         conf_text = f.read_text() if f.exists() else ""
@@ -98,6 +99,19 @@ class PhonePick(unittest.TestCase):
         self.assertIn("--menu Which phone?", log)
         self.assertIn("PHONE_NAME=Pixel\\ 9", conf)
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+
+    def test_vr_extras_start_with_a_tested_scrcpy(self):
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], env={"DISPLAY": ":0"},
+                                      extra={"phone-touch": "exit 0", "phone-fit": "exit 0"})
+        self.assertIn("bin/phone-fit", log)
+        self.assertIn("bin/phone-touch 10.0.0.5:4000", log)
+
+    def test_untested_scrcpy_gets_a_plain_window(self):
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], env={"DISPLAY": ":0"},
+                                      extra={"phone-touch": '[ "$1" = --check ] && exit 1', "phone-fit": "exit 0"})
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertNotIn("phone-fit", log)                         # no narrow window: clicks land right
+        self.assertNotIn("phone-touch 10.0.0.5", log)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,11 @@
+# Versions of the outside programs that update on their own (Homebrew, Arch Linux ARM) that this
+# release was tested with. The weekly upstream check (dev/check-upstream.sh) opens an issue when
+# upstream moves past them; scrcpy's major version is also enforced by adb-scrcpy/phone-touch
+# (SCRCPY_TESTED); for the others, installs keep a working copy if a new build won't run here.
+scrcpy=5.0.1
+android-tools=37.0.0-5
+ydotool=1.0.4-2
+# What SteamOS provides (the Frame, build 20261007): an Arch Linux ARM build needing more is
+# flagged before anyone installs it.
+steamos-glibc=2.39
+steamos-glibcxx=3.4.34

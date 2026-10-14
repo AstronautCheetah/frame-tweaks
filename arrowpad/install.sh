@@ -10,7 +10,7 @@ VENV="$HOME/.local/share/arrowpad/venv"
 if [ ! -x "$VENV/bin/python" ] || ! "$VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
     say "Creating Python venv with PyQt6 (~280 MB)"
     python3 -m venv "$VENV"
-    "$VENV/bin/pip" install -q --upgrade -c "$REPO_DIR/lib/python-constraints.txt" PyQt6
+    pip_pinned "$VENV" PyQt6
 fi
 install -m644 "$REPO_DIR/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/arrowpad.py"
 install -m644 "$REPO_DIR/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/haptics.py"

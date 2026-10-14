@@ -59,8 +59,6 @@ class Touch(unittest.TestCase):
             self.assertEqual(pt.screen_size("d"), (1080, 2400))
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class Joystick(unittest.TestCase):
@@ -119,3 +117,43 @@ class Defaults(unittest.TestCase):
             conf.write_text('PHONE_NAME="x"\nPHONE_MAX_FPS=120\n')
             pt.reset_conf(conf)
             self.assertEqual(conf.read_text(), 'PHONE_NAME="x"\n')
+
+
+class UntestedScrcpy(unittest.TestCase):
+    """With a scrcpy major version it wasn't tested with, phone-touch stays off (once-only notice)."""
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.addCleanup(mock.patch.stopall)
+        mock.patch.object(pt, "STATE", Path(self.tmp.name)).start()
+        self.run = mock.patch.object(pt.subprocess, "run").start()
+        mock.patch.dict(pt.os.environ, {"PHONE_TOUCH_ANY_SCRCPY": ""}).start()
+
+    def check(self, version):
+        with mock.patch.object(pt, "scrcpy_server", return_value=(version, "/x")), mock.patch.object(pt, "log"):
+            return pt.check()
+
+    def test_tested_version_passes_silently(self):
+        self.assertEqual(self.check("5.2"), 0)
+        self.run.assert_not_called()
+
+    def test_untested_version_is_refused_and_notified_once(self):
+        self.assertEqual(self.check("6.0"), 1)
+        self.assertEqual(self.check("6.0"), 1)
+        self.assertEqual(self.run.call_count, 1)
+        self.assertEqual(self.run.call_args[0][0][0], "notify-send")
+        self.assertEqual(self.check("7.1"), 1)                  # a new version: told again
+        self.assertEqual(self.run.call_count, 2)
+
+    def test_override(self):
+        pt.os.environ["PHONE_TOUCH_ANY_SCRCPY"] = "1"
+        self.assertEqual(self.check("6.0"), 0)
+
+    def test_tested_versions_file_agrees(self):
+        line = next(l for l in (ROOT / "lib/tested-versions").read_text().splitlines() if l.startswith("scrcpy="))
+        self.assertIn(line.split("=")[1].split(".")[0], pt.SCRCPY_TESTED)
+
+
+if __name__ == "__main__":
+    unittest.main()
