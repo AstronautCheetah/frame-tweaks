@@ -173,8 +173,11 @@ class OpenPanel(unittest.TestCase):
                 f"assert openvr.__file__.startswith({str(vr)!r}), openvr.__file__   # (never the real one)\n"
                 f"sys.argv = ['frame-snip', '--narrate', {image!r}, {text!r}]\n"
                 f"runpy.run_path({str(SNIP)!r}, run_name='__main__')\n")
+        import PyQt6
+        # (this PyQt6 wherever it's installed: pip's --user install, as on CI, is found through HOME,
+        # and the panel's is a throwaway one)
         env = {"HOME": str(home), "PATH": str(stubs), "TMPDIR": str(t), "QT_QPA_PLATFORM": "offscreen",
-               "FRAME_TWEAKS_LANGUAGE": "en"}
+               "FRAME_TWEAKS_LANGUAGE": "en", "PYTHONPATH": str(Path(PyQt6.__file__).resolve().parent.parent)}
         out = open(t / "panel.out", "w")
         self.addCleanup(out.close)
         panel = subprocess.Popen([sys.executable, "-c", boot], env=env, stdout=out, stderr=subprocess.STDOUT)
