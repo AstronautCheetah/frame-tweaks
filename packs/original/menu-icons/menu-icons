@@ -13,6 +13,17 @@ the fallback theme), so nothing changes there.
 import configparser, os, shutil, sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 HOME = Path.home()
 DEST = HOME / ".local/share/icons/hicolor/scalable/apps"
 LIST = HOME / ".local/share/frame-tweaks/menu-icons.list"
@@ -85,7 +96,7 @@ def install():
         if d.is_dir():
             os.utime(d, None)
     for p in added:
-        print("icon:", p.stem)
+        print(_("icon: {name}").format(name=p.stem))
 
 
 def remove():

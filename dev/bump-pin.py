@@ -143,7 +143,7 @@ def main(args):
             bump_python()
             continue
         tweak, _, name = a.partition("/")
-        path = next((d for p in ("original", "third-party") if (d := ROOT / "packs" / p / tweak).is_dir()),
+        path = next((d for p in ("original", "integrations", "third-party") if (d := ROOT / "packs" / p / tweak).is_dir()),
                     ROOT / "packs/original" / tweak) / (f"{name}.pin" if name else "pin")
         if not path.is_file():
             sys.exit(f"no pin {path.relative_to(ROOT)}")

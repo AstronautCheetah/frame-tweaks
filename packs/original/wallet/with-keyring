@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # with-keyring CMD...: run a command line tool with the shared KDE wallet as its keyring
 # (Secret Service / org.freedesktop.secrets). In desktop-mode terminals the session bus
 # is the nested desktop's, which has no Secret Service, so tools like gh fall back to
@@ -7,6 +7,14 @@
 uid=$(id -u)
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
 if [ "$("$HOME/.local/bin/wallet-unlock" --status 2>/dev/null)" = locked ]; then
-    "$HOME/.local/bin/wallet-unlock" >/dev/null || { echo "with-keyring: wallet still locked" >&2; exit 1; }
+    if ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
+        # Translations (lib/i18n.sh; the copy install_i18n puts here), else English. Only here: it
+        # runs python3, and this wraps every gh call.
+        # shellcheck source=/dev/null
+        source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
+            t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
+        { echo -n "with-keyring: "; t 'wallet still locked'; echo; } >&2
+        exit 1
+    fi
 fi
 exec "$@"

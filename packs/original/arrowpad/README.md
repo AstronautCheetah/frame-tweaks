@@ -166,7 +166,7 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
 - **Grip:** the dashboard hides the grip button from apps, so the pad reads it the way Full
   Keyboard does: from how far the grip part of the controller's 3D model has moved.
 - **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
-  Python GUI toolkit. The [NordVPN](../nordvpn/) tray and Screen snip use the same one.
+  Python GUI toolkit. The [NordVPN](../../integrations/nordvpn/) tray and Screen snip use the same one.
 
 ## Good to know
 

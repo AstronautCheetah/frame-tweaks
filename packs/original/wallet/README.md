@@ -70,7 +70,7 @@ use the shared wallet and ask for its password first.
 the app under **Add an app** and press **Protect**. With **Password first** on, it asks for the
 wallet password before it opens whenever the wallet is locked. **Close after** can also quit it
 when you leave it alone, so the next person who picks up the headset meets the password again.
-Signal is protected this way as soon as you install the [Signal tweak](../signal/).
+Signal is protected this way as soon as you install the [Signal tweak](../../integrations/signal/).
 
 **Unlock:** open a protected app, or use **🔓 Unlock…** on the Wallet apps page. A small "Unlock
 wallet" dialog appears on the screen you're using. The wallet then locks itself again after

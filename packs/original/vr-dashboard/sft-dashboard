@@ -22,6 +22,17 @@ SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only 
 import base64, json, os, re, socket, struct, subprocess, sys, threading, time, urllib.request
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
 STATE = Path.home() / ".local/state/frame-tweaks/vr-debugger.prev"
 OLD_STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"   # before 0.5
@@ -302,7 +313,7 @@ def watch():
 
 def status(name=None):
     if name and name not in patches():
-        print(f"{name}: not installed")
+        print(_("{name}: not installed").format(name=name))
         return 1
     for line in (CHECK_FILE.read_text().splitlines() if CHECK_FILE.exists() else []):
         if name is None or line.startswith(f"{name}:"):
@@ -314,13 +325,14 @@ def status(name=None):
         print("port closed (SteamVR not running, or not restarted since install)")
         return 2
     if not url:
-        print("dashboard page not found")
+        print(_("dashboard page not found"))
         return 2
     names = [name] if name else list(patches())
     ok = True
     for n in names:
         on = ws_eval(url, f"!!window.__sftPatches?.[{json.dumps(n)}]") is True
-        print(f"{n}: {'patched' if on else 'port open, not patched yet'}")
+        # (": patched" and "port closed" stay English: lib/common.sh and status.sh match them)
+        print(f"{n}: patched" if on else _("{name}: port open, not patched yet").format(name=n))
         ok = ok and on
     return 0 if ok else 2
 

@@ -16,7 +16,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout,
                              QWidget)
 
-from i18n import _  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
+from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
 
 from sft import components  # (the tweaks: which one set up an app; lib/ is on the path)
 
@@ -89,9 +89,10 @@ def span_text(seconds):
     """3 h 5 min / 12 min / under a minute."""
     m = int(seconds // 60)
     if m < 1:
-        return "under a minute"
+        return _("under a minute")
     h, m = divmod(m, 60)
-    return f"{h} h {m} min" if h and m else f"{h} h" if h else f"{m} min"
+    return (_("{h} h {m} min").format(h=h, m=m) if h and m else _("{h} h").format(h=h) if h
+            else _("{m} min").format(m=m))
 
 
 LOCK_CONF = Path.home() / ".config/frame-tweaks/wallet.conf"
@@ -135,33 +136,36 @@ def set_lock_hours(hours):
 def wallet_state_text(info, now):
     """The status line atop Wallet apps, from wallet-unlock --info."""
     if info is None:
-        return "<span style='color:#9aa6b2'>Wallet state unknown (is the Wallet tweak installed?)</span>"
+        return "<span style='color:#9aa6b2'>" + _("Wallet state unknown (is the Wallet tweak installed?)") + "</span>"
     if info["state"] == "locked":
-        return ("<b style='color:#5cc77a'>🔒 Wallet locked.</b> Protected apps ask for the password "
-                "before they open.")
-    parts = ["<b style='color:#e0b33a'>🔓 Wallet open</b>"]
+        return ("<b style='color:#5cc77a'>" + _("🔒 Wallet locked.") + "</b> "
+                + _("Protected apps ask for the password before they open."))
+    bold = "<b style='color:#e0b33a'>" + _("🔓 Wallet open") + "</b>"
     if info.get("unlocked_at"):
-        parts.append(f"for {span_text(now - info['unlocked_at'])}")
-    text = " ".join(parts) + "."
+        text = _("{wallet_open} for {time}.").format(wallet_open=bold, time=span_text(now - info["unlocked_at"]))
+    else:
+        text = bold + "."
     if info.get("locks_at"):
         at = time.strftime("%H:%M", time.localtime(info["locks_at"]))
-        text += f" Locks by itself at <b>{at}</b> (in {span_text(max(0, info['locks_at'] - now))})"
+        left = span_text(max(0, info["locks_at"] - now))
         if info.get("idle_close_minutes"):
-            text += f", or sooner after {timer_text(info['idle_close_minutes'])} unused"
-        text += "."
+            text += " " + _("Locks by itself at {at} (in {time}), or sooner after {idle} unused.").format(
+                at=f"<b>{at}</b>", time=left, idle=timer_text(info["idle_close_minutes"]))
+        else:
+            text += " " + _("Locks by itself at {at} (in {time}).").format(at=f"<b>{at}</b>", time=left)
     elif info.get("autolock") is False:
-        text += " It stays unlocked until you lock it (auto-lock is off)."
+        text += " " + _("It stays unlocked until you lock it (auto-lock is off).")
     elif info.get("idle_close_minutes"):
-        text += f" Locks by itself after {timer_text(info['idle_close_minutes'])} unused."
+        text += " " + _("Locks by itself after {idle} unused.").format(idle=timer_text(info["idle_close_minutes"]))
     else:
-        text += " <span style='color:#e0b33a'>No automatic lock is scheduled.</span>"
+        text += " <span style='color:#e0b33a'>" + _("No automatic lock is scheduled.") + "</span>"
     return text
 
 
 def timer_text(minutes):
     if not minutes:
-        return "Never"
-    return f"{minutes / 60:g} h" if minutes >= 60 else f"{minutes:g} min"
+        return _("Never")
+    return _("{h} h").format(h=f"{minutes / 60:g}") if minutes >= 60 else _("{m} min").format(m=f"{minutes:g}")
 
 
 def timer_step(minutes, step, floor=0):
@@ -200,7 +204,8 @@ def wallet_candidates(protected_ids):
     """Every installed app shown in menus (Flatpak, your own launchers, the system's) that isn't
     protected yet. An app with entries in several places counts once (the one menus use)."""
     seen = {}
-    for kind, dirs in (("Your app", [LAUNCHERS]), ("Flatpak", FLATPAK_APPS), ("System app", SYSTEM_APPS)):
+    # (kind: also a key; translated where it's shown)
+    for kind, dirs in ((N_("Your app"), [LAUNCHERS]), ("Flatpak", FLATPAK_APPS), (N_("System app"), SYSTEM_APPS)):
         for d in dirs:
             for f in sorted(d.glob("*.desktop")) if d.is_dir() else []:
                 if f.stem in seen:
@@ -252,12 +257,12 @@ class WalletApps(QWidget):
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
-        why = QLabel(
+        why = QLabel(_(
             "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker "
             "to pick up, and it gets passed around to family and friends. But the apps you use in it "
             "can still hold sensitive things, like messages, notes and signed-in accounts. Here you "
             "can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the "
-            "whole headset: the wallet is unlocked once when you need it, and locks again by itself.")
+            "whole headset: the wallet is unlocked once when you need it, and locks again by itself."))
         why.setWordWrap(True)
         lay.addWidget(why)
         # Wallet state: open or locked, since when, when it locks by itself; Lock / Unlock.
@@ -277,7 +282,7 @@ class WalletApps(QWidget):
         # a pop-up list opens as a window of its own in VR.
         hours_row = QHBoxLayout()
         self.autolock = QCheckBox(_("Auto-lock"))
-        self.autolock.setToolTip("Lock the wallet by itself: a set time after unlocking, or after 4 h unused")
+        self.autolock.setToolTip(_("Lock the wallet by itself: a set time after unlocking, or after 4 h unused"))
         self.autolock.clicked.connect(self.toggle_autolock)
         hours_row.addWidget(self.autolock)
         hours_label = QLabel(_("after unlocking:"))
@@ -297,13 +302,13 @@ class WalletApps(QWidget):
         self.state_timer = QTimer(self, interval=30000, timeout=self.show_wallet_state)
         self.state_timer.start()
         self.show_wallet_state()
-        about = QLabel(
+        about = QLabel(_(
             "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop "
             "mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also "
             "told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for "
             "the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the "
             "app after that long with no activity (no keyboard, mouse or controller input), so opening it "
-            "again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off.")
+            "again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."))
         about.setWordWrap(True)
         about.setObjectName("desc")
         lay.addWidget(about)
@@ -332,10 +337,11 @@ class WalletApps(QWidget):
         on = autolock_on() if info is None else info.get("autolock", True)
         self.autolock.setChecked(on)
         self.extend.setVisible(info is not None and not self.wallet_locked and on)
-        self.extend.setToolTip(f"Start the {timer_text(lock_hours() * 60)} countdown to the auto-lock again, from now")
-        self.wallet_toggle.setText("🔓 Unlock…" if self.wallet_locked else "🔒 Lock now")
-        self.wallet_toggle.setToolTip("Asks for the wallet password" if self.wallet_locked else
-                                      "Lock the wallet now: protected apps need the password again")
+        self.extend.setToolTip(_("Start the {time} countdown to the auto-lock again, from now").format(
+            time=timer_text(lock_hours() * 60)))
+        self.wallet_toggle.setText(_("🔓 Unlock…") if self.wallet_locked else _("🔒 Lock now"))
+        self.wallet_toggle.setToolTip(_("Asks for the wallet password") if self.wallet_locked else
+                                      _("Lock the wallet now: protected apps need the password again"))
 
     def extend_timer(self):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
@@ -358,7 +364,7 @@ class WalletApps(QWidget):
         for w in (self.shorter, self.longer, self.hours_text):
             w.setEnabled(on)
         h = lock_hours()
-        self.hours_text.setText(f"<b>{timer_text(h * 60)}</b>" + ("" if h == DEFAULT_LOCK_HOURS else " (default 4 h)"))
+        self.hours_text.setText(f"<b>{timer_text(h * 60)}</b>" + ("" if h == DEFAULT_LOCK_HOURS else " " + _("(default 4 h)")))
         self.shorter.setEnabled(on and h > LOCK_STEPS[0])
         self.longer.setEnabled(on and h < LOCK_STEPS[-1])
 
@@ -379,7 +385,7 @@ class WalletApps(QWidget):
             proc = QProcess(self)
             proc.finished.connect(lambda *_: self.show_wallet_state())
             proc.start(str(WALLET_UNLOCK), [])
-            self.wallet_state.setText("Waiting for the wallet password (look for the dialog)…")
+            self.wallet_state.setText(_("Waiting for the wallet password (look for the dialog)…"))
         else:
             proc = QProcess(self)                   # (not waited for here: the window stays usable)
             proc.finished.connect(lambda *_: self.show_wallet_state())
@@ -392,32 +398,37 @@ class WalletApps(QWidget):
                 item.widget().deleteLater()
         protected = protected_apps()
         timers = app_timers()
-        self.rows.addWidget(self.heading(f"Protected ({len(protected)})"))
+        self.rows.addWidget(self.heading(_("Protected ({n})").format(n=len(protected))))
         for a in protected:
-            what = ((["shared wallet"] if a["shared"] else []) + (["Electron told to use it"] if a["electron"] else [])
+            what = (([_("shared wallet")] if a["shared"] else []) + ([_("Electron told to use it")] if a["electron"] else [])
 )
-            note = " · ".join(what) or "password only (keeps its own session)"
+            note = " · ".join(what) or _("password only (keeps its own session)")
             if a["id"] in WALLET_OWNERS:
-                note += f"<br><span style='color:#6b7783'>Set up by the “{WALLET_OWNERS[a['id']]}” tweak: " \
-                        "reinstalling it (↻) adds it back if removed here.</span>"
+                note += "<br><span style='color:#6b7783'>" + _(
+                    "Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here.").format(
+                    tweak=WALLET_OWNERS[a["id"]]) + "</span>"
             gate = QCheckBox(_("Password first"))
             gate.setChecked(a["gate"])
-            gate.setToolTip("Ask for the wallet password before the app opens (when the wallet is locked)")
+            gate.setToolTip(_("Ask for the wallet password before the app opens (when the wallet is locked)"))
             gate.toggled.connect(lambda on, a=a: self.set_gate(a, on))
             remove = QPushButton(_("Remove"))
-            remove.setToolTip("Open it the way it opened before (its original launcher)")
-            remove.clicked.connect(lambda _=False, a=a: self.run(["--remove", a["id"]], f"{a['name']}: removed"))
+            remove.setToolTip(_("Open it the way it opened before (its original launcher)"))
+            remove.clicked.connect(lambda _checked=False, a=a: self.run(
+                ["--remove", a["id"]], _("{app}: removed").format(app=a["name"])))
             controls = [self.timer_control(a, *timers.get(a["id"], (0, False)))] if APP_TIMERS.exists() else []
             self.rows.addWidget(self.row(a, note, controls + [gate, remove]))
         candidates = wallet_candidates({a["id"] for a in protected})
-        self.rows.addWidget(self.heading(f"Add an app ({len(candidates)} installed apps)"))
+        self.rows.addWidget(self.heading(ngettext("Add an app ({n} installed app)", "Add an app ({n} installed apps)",
+                                                  len(candidates)).format(n=len(candidates))))
         for a in candidates:
             electron = is_electron(a)
-            note = f"{a['kind']} · {a['id']}" + (" · Electron app: will be told to use the wallet" if electron else "")
+            note = f"{_(a['kind'])} · {a['id']}" + (" · " + _("Electron app: will be told to use the wallet")
+                                                    if electron else "")
             add = QPushButton(_("Protect"))
             add.setObjectName("run")
-            add.clicked.connect(lambda _=False, a=a, el=electron: self.run(
-                (["--electron"] if el else []) + [a["id"]], f"{a['name']}: protected. Reopen it if it's running."))
+            add.clicked.connect(lambda _checked=False, a=a, el=electron: self.run(
+                (["--electron"] if el else []) + [a["id"]],
+                _("{app}: protected. Reopen it if it's running.").format(app=a["name"])))
             self.rows.addWidget(self.row(a, note, [add]))
         self.rows.addStretch(1)
 
@@ -463,18 +474,18 @@ class WalletApps(QWidget):
         less, more = QPushButton("−"), QPushButton("+")
         for b, step in ((less, -1), (more, 1)):
             b.setObjectName("info")
-            b.setToolTip("Shorter" if step < 0 else "Longer")
+            b.setToolTip(_("Shorter") if step < 0 else _("Longer"))
             b.clicked.connect(lambda _=False, st=step: self.set_timer(app, timer_step(minutes, st, floor)))
         less.setEnabled(minutes > floor)
         more.setEnabled(minutes < TIMER_STEPS[-1])
-        box.setToolTip("Quit the app after this long with no keyboard, mouse or controller input")
+        box.setToolTip(_("Quit the app after this long with no keyboard, mouse or controller input"))
         for w in (label, less, value, more):
             lay.addWidget(w)
         off = QCheckBox(_("Headset off"))
         off.setChecked(headset)
         off.setEnabled(minutes > 0)
-        off.setToolTip("Also quit it about 10 s after the headset is taken off" if minutes else
-                       "Set a Close after time first")
+        off.setToolTip(_("Also quit it about 10 s after the headset is taken off") if minutes else
+                       _("Set a Close after time first"))
         off.toggled.connect(lambda on: self.set_headset(app, on))
         lay.addSpacing(10)
         lay.addWidget(off)
@@ -486,9 +497,9 @@ class WalletApps(QWidget):
             return
         r = subprocess.run([str(APP_TIMERS), "--set", app["id"], f"{minutes:g}"], capture_output=True, text=True)
         self.notice.setText(html.escape(
-            (f"{app['name']}: closes after {timer_text(minutes)} with no activity" if minutes else
-             f"{app['name']}: no timer") if r.returncode == 0 else
-            f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
+            (_("{app}: closes after {time} with no activity").format(app=app["name"], time=timer_text(minutes))
+             if minutes else _("{app}: no timer").format(app=app["name"])) if r.returncode == 0 else
+            _("Didn't work: %s") % (r.stderr or r.stdout).strip(), quote=False))
         QTimer.singleShot(0, self.fill)
 
     def set_headset(self, app, on):
@@ -498,15 +509,15 @@ class WalletApps(QWidget):
         r = subprocess.run([str(APP_TIMERS), "--headset", app["id"], "on" if on else "off"],
                            capture_output=True, text=True)
         self.notice.setText(html.escape(
-            (f"{app['name']}: " + ("also closes when the headset is taken off" if on else
-                                   "no longer closes when the headset is taken off")) if r.returncode == 0 else
-            f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
+            (f"{app['name']}: " + (_("also closes when the headset is taken off") if on else
+                                   _("no longer closes when the headset is taken off"))) if r.returncode == 0 else
+            _("Didn't work: %s") % (r.stderr or r.stdout).strip(), quote=False))
         QTimer.singleShot(0, self.fill)
 
     def set_gate(self, app, on):
         args = (["--gate"] if on else ["--no-gate"]) + ([] if app["shared"] else ["--no-shared"]) + [app["id"]]
-        self.run(args, f"{app['name']}: " + ("asks for the wallet password first" if on else
-                                             "opens without asking for the password"))
+        self.run(args, f"{app['name']}: " + (_("asks for the wallet password first") if on else
+                                             _("opens without asking for the password")))
 
     def run(self, args, done):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
@@ -514,5 +525,5 @@ class WalletApps(QWidget):
             return
         r = subprocess.run([str(WALLET_LAUNCHER)] + args, capture_output=True, text=True)
         self.notice.setText(html.escape(done if r.returncode == 0 else
-                                        f"Didn't work: {(r.stderr or r.stdout).strip()}", quote=False))
+                                        _("Didn't work: %s") % (r.stderr or r.stdout).strip(), quote=False))
         QTimer.singleShot(0, self.fill)

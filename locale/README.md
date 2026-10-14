@@ -3,10 +3,13 @@
 Frame Tweaks uses GNU gettext's standard message catalogues, so the usual tools work: Poedit,
 Lokalize, Weblate, or a text editor.
 
-- `frame-tweaks.pot` is the template: every text the installer window shows, and the official
-  tweaks' names, summaries, descriptions and settings. Don't edit it: `dev/i18n.py extract`
+- `frame-tweaks.pot` is the template: every text the installer window, the installer's terminal
+  messages and the tweaks' own programs show, and the official tweaks' names, summaries,
+  descriptions and settings. Don't edit it: `dev/i18n.py extract`
   makes it from the code and the tweaks' README front matter.
-- `<language>.po` (for example `de.po`, `pt_BR.po`) is one language's translation.
+- `<language>.po` (for example `de.po`, `pt_BR.po`, `es_419.po` for Latin American Spanish) is
+  one language's translation. A language without its own file uses another of the same
+  language: Spanish from Spain or Mexico (`es`, `es_MX`) uses `es_419.po` until there's an `es.po`.
 
 ## Adding a language
 
@@ -19,14 +22,23 @@ then translate the `msgstr ""` lines in your editor of choice. Leave `%s`, `%d` 
 placeholders as they are; they're filled in by the program. A text you're unsure of can be
 marked *fuzzy* (Poedit: "Needs work"): it then isn't used until you clear the mark.
 
+Translating a lot at once (a new language, or catching up)? [BATCH.md](BATCH.md): export the
+untranslated texts as JSON, translate them, and import them with checks. Each language keeps its
+terms and tone in [glossary/](glossary/) (Spanish: [glossary/es_419.md](glossary/es_419.md)).
+
 ## Trying it
 
 ```sh
 FRAME_TWEAKS_LANGUAGE=de ./install.sh gui
 ```
 
-Without `FRAME_TWEAKS_LANGUAGE`, the language comes from the session (`LANGUAGE`, `LC_ALL`,
-`LC_MESSAGES`, then `LANG`), and anything not translated shows in English.
+Without `FRAME_TWEAKS_LANGUAGE`, the language follows **the keyboard you're typing with**:
+Steam's VR keyboard in VR (its layout chosen in Steam's keyboard settings), KDE's keyboard layout
+in desktop mode. An English, QWERTY or other layout that doesn't say which language (Dvorak,
+Colemak) leaves the choice to the session (`LANGUAGE`, `LC_ALL`, `LC_MESSAGES`, then `LANG`).
+The installer window looks at the keyboard at most every 5 seconds and switches when you're on
+its list; the tweaks' programs and scripts use the language they found when they started.
+`FRAME_TWEAKS_KEYBOARD=0` turns the keyboard check off. Anything not translated shows in English.
 
 ## Keeping up
 
@@ -35,12 +47,23 @@ When the code or a tweak's text changes, `dev/i18n.py extract` refreshes the tem
 appears untranslated, and text that's gone is kept at the end as `#~` comments.
 `dev/i18n.py stats` shows how far each language is.
 
+## Marking text in the code
+
+The full rules: [MARKING.md](MARKING.md).
+
+- **Python:** `_("Text")`, `ngettext("1 tweak", "%d tweaks", n)`, `pgettext("context", "Text")`;
+  `N_("Text")` for a constant made when the program starts, then `_()` where it's shown. Values
+  go in afterwards (`_("Saved {path}").format(path=p)`), so the text stays one literal.
+- **Shell:** `t 'Text with %s' "$value"` (lib/i18n.sh, sourced by lib/common.sh), printf-style:
+  `say "$(t 'Fetching %s' "$name")"`. The text is in single quotes, or double quotes without `$`.
+- Programs a tweak installs can't see this folder: `install_i18n` (lib/common.sh) copies the
+  translations to `~/.local/share/frame-tweaks/i18n`, and the program imports or sources them
+  from there (see Arrow Pad or Android Mirror's `phone`).
+
 ## Not translated yet
 
-- The installer's messages in the terminal (`install.sh` and the tweaks' scripts) and the
-  tweaks' own programs (Arrow Pad, Screen snip + Narrate, Android Mirror's dialogs).
-- The README files.
-- Some of the window's text that's built from parts (it needs its markers adding by hand).
+- The README files, and the tweaks' menu entries (`.desktop` files).
+- The text in SteamVR's dashboard from the VR environment tweaks (the scroll strips' and Android
+  Mirror's ⚙ panels).
 
-These are the next steps; contributions that mark more text with `_()` are welcome
-(CONTRIBUTING.md, "Translations").
+Contributions that mark more text are welcome (CONTRIBUTING.md, "Translations").

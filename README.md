@@ -132,9 +132,9 @@ them.
 | | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
 | 🔐 | [**Shared KDE wallet**](packs/original/wallet/) | Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`. | Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins. |
-| 🔐 | [**Signal: key in the wallet**](packs/original/signal/) | Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens. | A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text. |
 | 🕵️ | [**Firefox privacy**](packs/original/firefox/) | Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings. | The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint. |
-| 🌐 | [**NordVPN**](packs/original/nordvpn/) (WireGuard) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
+| 🔐 | [**Signal: key in the wallet**](packs/integrations/signal/) | Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens. | A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text. |
+| 🌐 | [**NordVPN**](packs/integrations/nordvpn/) (WireGuard) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
 
 ### System
 
@@ -150,9 +150,9 @@ them.
 
 | | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
-| 🧑‍💻 | [**VSCodium**](packs/original/vscodium/) | VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub. | For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR. |
-| 🤖 | [**Claude Code**](packs/original/claude-code/) (command line) | Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer. | Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone. |
-| 🤖 | [**Claude Desktop**](packs/original/claude-desktop/) | Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command. | Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead. |
+| 🧑‍💻 | [**VSCodium**](packs/integrations/vscodium/) | VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub. | For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR. |
+| 🤖 | [**Claude Code**](packs/integrations/claude-code/) (command line) | Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer. | Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone. |
+| 🤖 | [**Claude Desktop**](packs/integrations/claude-desktop/) | Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command. | Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead. |
 <!-- /generated:tweaks -->
 
 ## Using the installer window
@@ -217,10 +217,12 @@ Only one install, update or removal can run at a time, from the window or the te
 ### Adding your own tweaks
 
 Every tweak comes from a *pack*: a folder of tweak folders, each described by the YAML front
-matter of its README.md. Frame Tweaks' own tweaks are in two official packs, both on unless you
-turn one off: **Original** ([`packs/original/`](packs/original/)) and **3rd Party**, other
-projects' apps that Frame Tweaks installs ([`packs/third-party/`](packs/third-party/)). Put other packs in `~/.local/share/frame-tweaks/packs/`
-and trust them (**🧩 Packs** in the window). A pack's tweaks run as you, so only trust packs
+matter of its README.md. Frame Tweaks' own tweaks are in three official packs, all on unless
+you turn one off: **Original**, written for the Frame ([`packs/original/`](packs/original/));
+**Integrations**, other projects' apps that Frame Tweaks fits to the Frame
+([`packs/integrations/`](packs/integrations/)); and **3rd Party**, other projects' apps installed
+as they are ([`packs/third-party/`](packs/third-party/)). Put other packs in
+`~/.local/share/frame-tweaks/packs/` and trust them (**🧩 Packs** in the window). A pack's tweaks run as you, so only trust packs
 from people you trust. How to write one: [docs/mods.md](docs/mods.md).
 
 ```text
@@ -310,7 +312,7 @@ but read it before you share it.
   tweaks here exist because of this; see [Shared KDE wallet](packs/original/wallet/).
 - **Anything installed into `/usr`** (with `steamos-readonly disable` and pacman) disappears at
   the next SteamOS update. Prefer home-folder installs, Flatpaks, or settings in `/etc` (as
-  [NordVPN](packs/original/nordvpn/) does).
+  [NordVPN](packs/integrations/nordvpn/) does).
 - **SteamOS's stock KDE wallet has no password.** Set one; see [SECURITY.md](SECURITY.md).
 - **Steam's on-screen keyboard:** hold **Shift** for ←/→. Keyboards that only work on X11
   don't work on the Frame's Wayland desktop.

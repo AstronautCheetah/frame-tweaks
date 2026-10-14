@@ -31,6 +31,17 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 from jeepney import DBusAddress, MessageType, new_method_call
 from jeepney.bus_messages import message_bus
 from jeepney.io.blocking import open_dbus_connection
@@ -236,9 +247,9 @@ def prompt_pending():
 
 
 def ask_password(retry):
-    text = ("Wrong password (is Caps Lock on?). Try again:" if retry
-            else "Password for the KDE wallet:")
-    r = subprocess.run(["kdialog", "--title", "Unlock wallet", "--password", text],
+    text = (_("Wrong password (is Caps Lock on?). Try again:") if retry
+            else _("Password for the KDE wallet:"))
+    r = subprocess.run(["kdialog", "--title", _("Unlock wallet"), "--password", text],
                        capture_output=True, text=True)
     return None if r.returncode else r.stdout.rstrip("\n")
 
@@ -255,15 +266,15 @@ def unlock(conn):
         key = hashlib.pbkdf2_hmac("sha512", pw.encode(), salt, 50000, 56)
         del pw
         conn.send(new_method_call(KSECRETD, "pamOpen", "sayi", (WALLET, key, 0)))
-        for _ in range(20):            # pamOpen has no reply; poll the result
+        for _poll in range(20):        # pamOpen has no reply; poll the result
             time.sleep(0.1)
             if not is_locked(conn):
                 return True
         if prompt_pending():
-            subprocess.run(["kdialog", "--title", "Unlock wallet", "--sorry",
-                            "A KDE Wallet password prompt is already open (look in VR, around the "
-                            "dashboard). While it is open the wallet ignores this dialog.\n\n"
-                            "Type the password there, or close that prompt and try again."])
+            subprocess.run(["kdialog", "--title", _("Unlock wallet"), "--sorry",
+                            _("A KDE Wallet password prompt is already open (look in VR, around the "
+                              "dashboard). While it is open the wallet ignores this dialog.\n\n"
+                              "Type the password there, or close that prompt and try again.")])
             return False
     return False
 
@@ -351,7 +362,8 @@ def schedule_lock():
                         f"--on-active={hours}h", os.path.abspath(sys.argv[0]), "--lock"],
                        env=env, capture_output=True, text=True)
     if r.returncode != 0:
-        print(f"wallet-unlock: couldn't schedule the auto-lock: {r.stderr.strip()}", file=sys.stderr, flush=True)
+        print(_("wallet-unlock: couldn't schedule the auto-lock: {error}").format(error=r.stderr.strip()),
+              file=sys.stderr, flush=True)
         return "?"
     s = session()
     now = time.time()
@@ -446,27 +458,30 @@ def main():
         elif arg == "--lock":
             lock(conn)
             if not is_locked(conn):
-                sys.exit("wallet-unlock: the wallet is still unlocked (locking failed)")
+                sys.exit(_("wallet-unlock: the wallet is still unlocked (locking failed)"))
             print("locked")
         elif arg == "--watch":
             pass
         elif arg == "--schedule-lock":
             hours = schedule_lock()
-            print(f"wallet locks in {hours} h" if hours else "auto-lock is off: the wallet stays unlocked until you lock it")
+            print(_("wallet locks in {hours} h").format(hours=hours) if hours else
+                  _("auto-lock is off: the wallet stays unlocked until you lock it"))
         elif arg == "--autolock" and len(sys.argv) > 2 and sys.argv[2] in ("on", "off"):
             hours = set_autolock(conn, sys.argv[2] == "on")
-            print("auto-lock off" if sys.argv[2] == "off" else
-                  f"auto-lock on" + (f": the wallet locks in {hours} h" if hours else ""))
+            print(_("auto-lock off") if sys.argv[2] == "off" else
+                  _("auto-lock on: the wallet locks in {hours} h").format(hours=hours) if hours else
+                  _("auto-lock on"))
         elif arg:
             sys.exit(__doc__)
         elif not is_locked(conn):
-            print("Wallet already unlocked.")
+            print(_("Wallet already unlocked."))
         elif unlock(conn):
             hours = schedule_lock()
-            print(f"Wallet unlocked; it locks again in {hours} h." if hours else "Wallet unlocked (auto-lock is off).")
-            notify(f"Wallet unlocked for {hours} hours" if hours else "Wallet unlocked")
+            print(_("Wallet unlocked; it locks again in {hours} h.").format(hours=hours) if hours else
+                  _("Wallet unlocked (auto-lock is off)."))
+            notify(_("Wallet unlocked for {hours} hours").format(hours=hours) if hours else _("Wallet unlocked"))
         else:
-            print("Wallet still locked.", file=sys.stderr)
+            print(_("Wallet still locked."), file=sys.stderr)
             sys.exit(1)
 
 

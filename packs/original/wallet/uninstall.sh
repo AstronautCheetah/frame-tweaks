@@ -15,5 +15,5 @@ if [ -n "$REAL_GH" ] && [ -f "$BIN/gh" ]; then
 fi
 restore_kconfig wallet
 remove_files "$ICONS/256x256/apps/frame-tweaks-lock.png" "$HOME/.config/systemd/user/wallet-lock-sync.service" "$HOME/.config/systemd/user/app-timers.service" "$BIN/app-timers" "$APPS/wallet-lock.desktop" "$BIN/gh" "$BIN/with-keyring" "$BIN/wallet-unlock" "$BIN/wallet-gate" "$BIN/wallet-launcher" "$BIN/frame-outer-bus"
-say "Kept KWalletManager (flatpak uninstall org.kde.kwalletmanager) and the wallet itself. gh tokens stay in the wallet."
-warn "Signal still needs the wallet: keep its kwallet6 setting (see signal/README.md)."
+say "$(t 'Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet.' "flatpak uninstall org.kde.kwalletmanager")"
+warn "$(t 'Signal still needs the wallet: keep its kwallet6 setting (see %s).' signal/README.md)"

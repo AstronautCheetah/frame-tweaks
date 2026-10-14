@@ -29,6 +29,17 @@ import shlex
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 HOME = Path.home()
 APPS = HOME / ".local/share/applications"
 SOURCES = [HOME / ".local/share/flatpak/exports/share/applications",
@@ -61,7 +72,7 @@ def source_for(app_id):
         return own
     if system:
         return system
-    sys.exit(f"wallet-launcher: no desktop entry found for {app_id}")
+    sys.exit(_("wallet-launcher: no desktop entry found for {app_id}").format(app_id=app_id))
 
 
 def rewrite_exec(cmd, app_id, electron, shared=True, gate=False):
@@ -71,7 +82,7 @@ def rewrite_exec(cmd, app_id, electron, shared=True, gate=False):
     if shared and len(args) > 1 and os.path.basename(args[0]) == "flatpak" and args[1] == "run":
         idx = next((i for i, a in enumerate(args) if a == app_id), None)
         if idx is None:
-            sys.exit(f"wallet-launcher: can't find {app_id} in: {cmd}")
+            sys.exit(_("wallet-launcher: can't find {app_id} in: {command}").format(app_id=app_id, command=cmd))
         extra = [t for t in TALK if t not in args]
         args = args[:idx] + extra + [app_id] + (["--password-store=kwallet6"] if electron else []) + args[idx + 1:]
     elif electron:
@@ -113,7 +124,7 @@ def add(app_id, electron, shared=True, gate=None):
             out.append(f"{MARK}=true")
     APPS.mkdir(parents=True, exist_ok=True)
     (APPS / f"{app_id}.desktop").write_text("\n".join(out) + "\n")
-    what = [w for w, on in (("shared wallet", shared), ("password required", gate)) if on]
+    what = [w for w, on in ((_("shared wallet"), shared), (_("password required"), gate)) if on]
     print(f"{app_id}: {', '.join(what)}")
 
 
@@ -142,23 +153,23 @@ def remove(app_id):
     elif target.exists() and f"{MARK}=true" in target.read_text():
         target.unlink()
     else:
-        print(f"{app_id}: no wallet launcher"); return
-    print(f"{app_id}: original launcher restored")
+        print(_("{app_id}: no wallet launcher").format(app_id=app_id)); return
+    print(_("{app_id}: original launcher restored").format(app_id=app_id))
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("apps", nargs="*")
-    ap.add_argument("--electron", action="store_true", help="also pass --password-store=kwallet6")
-    ap.add_argument("--no-gate", action="store_true", help="stop requiring the wallet password")
+    ap.add_argument("--electron", action="store_true", help=_("also pass --password-store=kwallet6"))
+    ap.add_argument("--no-gate", action="store_true", help=_("stop requiring the wallet password"))
     ap.add_argument("--gate", action="store_true",
-                    help="require the wallet password (wallet-unlock) before starting the app")
+                    help=_("require the wallet password (wallet-unlock) before starting the app"))
     ap.add_argument("--no-shared", action="store_true",
-                    help="don't move the app to the outer bus (for apps that don't use the wallet)")
+                    help=_("don't move the app to the outer bus (for apps that don't use the wallet)"))
     ap.add_argument("--remove", action="store_true")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--reapply", action="store_true",
-                    help="rebuild the wrapper from the (updated) original, keeping its flags")
+                    help=_("rebuild the wrapper from the (updated) original, keeping its flags"))
     a = ap.parse_args()
     migrate_backups()
     if a.list:
@@ -169,7 +180,7 @@ def main():
                 print(f"{f.stem:28} {' '.join(flags)}")
         return
     if not a.apps:
-        ap.error("give at least one app ID")
+        ap.error(_("give at least one app ID"))
     for app in a.apps:
         if a.remove:
             remove(app)

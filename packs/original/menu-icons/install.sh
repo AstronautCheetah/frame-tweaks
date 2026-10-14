@@ -3,6 +3,7 @@
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 D="$HOME/.local/share/frame-tweaks/menu-icons"
 mkdir -p "$D"
+install_i18n
 install -m755 "$TWEAK_DIR/menu-icons" "$D/menu-icons"
 "$D/menu-icons" install
-say "Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
+say "$(t "Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps.")"

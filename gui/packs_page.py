@@ -8,14 +8,14 @@ from PyQt6.QtGui import QCursor
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QToolTip, QVBoxLayout, QWidget
 
 import browser  # (lib/ is on the path)
-from i18n import _  # (translations: locale/README.md)
+from i18n import _, N_, ngettext  # (translations: locale/README.md)
 import sft
 
-STATE = {"official": ("Comes with Frame Tweaks: in use", "#5cc77a"),
-         "off": ("Comes with Frame Tweaks: turned off, so its tweaks aren't listed", "#9aa6b2"),
-         "trusted": ("Trusted: its tweaks are listed", "#5cc77a"),
-         "untrusted": ("Not trusted yet: its tweaks aren't listed", "#e0b33a"),
-         "changed": ("Changed since you trusted it: not used until you trust it again", "#e0b33a")}
+STATE = {"official": (N_("Comes with Frame Tweaks: in use"), "#5cc77a"),
+         "off": (N_("Comes with Frame Tweaks: turned off, so its tweaks aren't listed"), "#9aa6b2"),
+         "trusted": (N_("Trusted: its tweaks are listed"), "#5cc77a"),
+         "untrusted": (N_("Not trusted yet: its tweaks aren't listed"), "#e0b33a"),
+         "changed": (N_("Changed since you trusted it: not used until you trust it again"), "#e0b33a")}
 
 
 class Packs(QWidget):
@@ -36,14 +36,14 @@ class Packs(QWidget):
         folder.clicked.connect(self.open_folder)
         head.addWidget(folder)
         lay.addLayout(head)
-        about = QLabel(
+        about = QLabel(_(
             "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its "
-            "README.md. Frame Tweaks' own are in two official packs, Original and 3rd Party, both in use "
-            "unless you turn one off. To add more, put a pack in "
-            f"<code>{html.escape(str(sft.USER_PACKS))}</code>, then trust it below. "
+            "README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd "
+            "Party, all in use unless you turn one off. To add more, put a pack in "
+            "<code>{folder}</code>, then trust it below. "
             "<b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs "
             "from people you trust, and read what they do first. If a pack's files change, it waits "
-            "until you trust it again. How to write one: docs/mods.md.")
+            "until you trust it again. How to write one: docs/mods.md.").format(folder=html.escape(str(sft.USER_PACKS))))
         about.setWordWrap(True)
         about.setTextFormat(Qt.TextFormat.RichText)
         lay.addWidget(about)
@@ -71,19 +71,22 @@ class Packs(QWidget):
             g = QHBoxLayout(row)
             g.setContentsMargins(12, 10, 12, 10)
             text, colour = STATE[p["state"]]
+            text = _(text)
             tweaks = []
             for t in p["tweaks"]:
                 c = used.get(t)
                 mine = c is not None and c["pack_dir"] == p["dir"]
-                tweaks.append(html.escape(t) + (f" <i>(instead of {html.escape(c['replaced'])}'s)</i>"
-                                                if mine and c["replaced"] else ""))
+                tweaks.append(html.escape(t) + (" <i>" + _("(instead of {other}'s)").format(
+                    other=html.escape(c["replaced"])) + "</i>" if mine and c["replaced"] else ""))
             info = QLabel(f"<b>{html.escape(p['name'])}</b>"
-                          + (f" <span style='color:#6b7783'>by {html.escape(p['author'])}</span>" if p["author"] else "")
+                          + (" <span style='color:#6b7783'>" + _("by {author}").format(author=html.escape(p["author"]))
+                             + "</span>" if p["author"] else "")
                           + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
                           + f"<br><span style='color:{colour}'>{text}</span>"
                           + f"<br><span style='color:#6b7783'>{html.escape(str(p['dir']))}</span>"
-                          + (f"<br>{len(p['tweaks'])} tweaks" if p["state"] in ("official", "off") else
-                             "<br>Tweaks: " + (", ".join(tweaks) or "none")))
+                          + ("<br>" + ngettext("%d tweak", "%d tweaks", len(p["tweaks"])) % len(p["tweaks"])
+                             if p["state"] in ("official", "off") else
+                             "<br>" + _("Tweaks: %s") % (", ".join(tweaks) or _("none"))))
             info.setWordWrap(True)
             info.setTextFormat(Qt.TextFormat.RichText)
             g.addWidget(info, 1)
@@ -97,11 +100,11 @@ class Packs(QWidget):
             else:
                 if p["state"] == "trusted":
                     b = QPushButton(_("Stop using"))
-                    b.setToolTip("Its tweaks leave the list; installed ones stay until you uninstall them")
+                    b.setToolTip(_("Its tweaks leave the list; installed ones stay until you uninstall them"))
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.trust(d, False))
                 elif self.confirming == p["dir"]:
                     b = QPushButton(_("Yes: it runs as me"))
-                    b.setToolTip("Trust this pack's current files")
+                    b.setToolTip(_("Trust this pack's current files"))
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.trust(d, True))
                 else:
                     b = QPushButton(_("Trust…"))
@@ -109,7 +112,7 @@ class Packs(QWidget):
                 g.addWidget(b)
             self.rows.addWidget(row)
         if data["problems"]:
-            probs = QLabel("<b>Problems</b><br>" + "<br>".join(html.escape(x) for x in data["problems"]))
+            probs = QLabel("<b>" + _("Problems") + "</b><br>" + "<br>".join(html.escape(x) for x in data["problems"]))
             probs.setWordWrap(True)
             probs.setTextFormat(Qt.TextFormat.RichText)
             probs.setStyleSheet("color: #e0b33a")

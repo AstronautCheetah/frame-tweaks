@@ -8,10 +8,12 @@ ensure_path
 
 VENV="$HOME/.local/share/arrowpad/venv"
 if [ ! -x "$VENV/bin/python" ] || ! "$VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
-    say "Creating Python venv with PyQt6 (~280 MB)"
+    say "$(t 'Creating Python venv with PyQt6 (~280 MB)')"
     python3 -m venv "$VENV"
     pip_pinned "$VENV" PyQt6
 fi
+install_i18n
+install_i18n         # (Arrow Pad's text in your language)
 install -m644 "$TWEAK_DIR/arrowpad.py" "$HOME/.local/share/arrowpad/arrowpad.py"
 install -m644 "$TWEAK_DIR/haptics.py" "$HOME/.local/share/arrowpad/haptics.py"
 install -m644 "$TWEAK_DIR/vroverlay.py" "$HOME/.local/share/arrowpad/vroverlay.py"
@@ -21,7 +23,7 @@ install -m644 "$TWEAK_DIR"/vr/*.json "$HOME/.local/share/arrowpad/vr/"
 # Controller haptics: SteamVR Input through the openvr bindings, using SteamVR's own
 # arm64 library (the wheel only bundles an x86 one).
 if ! ensure_openvr "$VENV"; then
-    warn "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
+    warn "$(t "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics.")"
 fi
 write_file "$BIN/arrowpad" 755 <<EOS
 #!/bin/sh
@@ -30,4 +32,4 @@ EOS
 install_icon frame-tweaks-arrowpad
 install_desktop "$TWEAK_DIR/arrowpad.desktop"
 install_desktop "$TWEAK_DIR/arrowpad-vr.desktop"
-say "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
+say "$(t "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5).")"

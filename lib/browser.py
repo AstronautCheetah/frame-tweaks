@@ -20,7 +20,10 @@ import sys
 import urllib.parse
 from pathlib import Path
 
-VR, DESKTOP = "VR", "desktop mode"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from i18n import _, N_  # noqa: E402  (translations: locale/README.md)
+
+VR, DESKTOP = N_("VR"), N_("desktop mode")      # (also keys: translated where they're shown)
 # What makes a program part of one session or the other; copied from a process of the target
 # session (anything else is kept from ours).
 SESSION_KEYS = ("DISPLAY", "WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE",
@@ -215,7 +218,7 @@ def open_url(url):
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     except OSError:
         return None
-    return f"Opened in {browser_name(app)} ({target})"
+    return _("Opened in {app} ({session})").format(app=browser_name(app), session=_(target))
 
 
 def open_path(path):
@@ -233,11 +236,11 @@ if __name__ == "__main__":
     if args[0] == "--where":
         p = plan(args[1] if len(args) > 1 else "https://example.com")
         if not p:
-            sys.exit("No default app found.")
+            sys.exit(_("No default app found."))
         app = p[0]
         print(f"app: {app}; running in: {', '.join(sorted(running_sessions(app))) or 'neither'}; "
               f"this program: {session_of(os.environ)}; would open in: {p[1]}")
     else:
         note = open_url(args[0]) if "://" in args[0] and not args[0].startswith("file:") else open_path(args[0])
-        print(note or "Couldn't open it.")
+        print(note or _("Couldn't open it."))
         sys.exit(0 if note else 1)

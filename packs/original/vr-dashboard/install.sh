@@ -6,6 +6,7 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 D="$HOME/.local/share/frame-tweaks/vr-dashboard"
 U="$HOME/.config/systemd/user"
 mkdir -p "$D/patches" "$U/steamvr.service.d" "$HOME/.config/frame-tweaks"
+install_i18n
 install -m755 "$TWEAK_DIR/sft-dashboard" "$D/sft-dashboard"
 install -m644 "$TWEAK_DIR/lib.js" "$D/lib.js"            # helpers the patches share
 
@@ -80,11 +81,11 @@ sysctl_user daemon-reload
 if sysctl_user is-active --quiet steamvr.service; then
     if ! timeout 8 "$D/sft-dashboard" status 2>&1 | grep -q "port closed"; then
         sysctl_user restart sft-dashboard.service
-        say "Dashboard patches active."
+        say "$(t 'Dashboard patches active.')"
     else
-        say "Installed. It starts working the next time SteamVR starts (reboot, or restart SteamVR"
-        say "from its menu): SteamVR opens the port it needs only at startup."
+        while IFS= read -r line; do say "$line"; done <<< "$(t 'Installed. It starts working the next time SteamVR starts (reboot, or restart SteamVR
+from its menu): SteamVR opens the port it needs only at startup.')"
     fi
 else
-    say "Installed; active from the next SteamVR start."
+    say "$(t 'Installed; active from the next SteamVR start.')"
 fi

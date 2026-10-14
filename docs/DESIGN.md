@@ -83,7 +83,7 @@ reader, to PyYAML and to a person:
 
 Every tweak comes from a pack: a folder of tweak folders with an optional `pack.md`.
 `lib/sft.py` `pack_dirs` looks in three places, in this order: the official packs
-(`packs/original/`, then `packs/third-party/`; other folders in `packs/` are local packs that
+(`packs/original/`, `packs/integrations/`, then `packs/third-party/`; other folders in `packs/` are local packs that
 need trusting), the folders in `~/.local/share/frame-tweaks/packs/`, and the folders
 listed in `FRAME_TWEAKS_PACKS`.
 

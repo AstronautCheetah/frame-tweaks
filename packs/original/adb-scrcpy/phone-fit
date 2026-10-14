@@ -23,6 +23,18 @@ import os
 import subprocess
 import sys
 import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
 
 LONG = 1920                    # the screen's width (its height is 9/16 of it)
 P_MIN_SIZE, P_MAX_SIZE, P_ASPECT = 16, 32, 128
@@ -61,7 +73,7 @@ class X:
         self.x.XListProperties.restype = ctypes.c_void_p       # (default int would cut 64-bit pointers)
         self.d = ctypes.c_void_p(self.x.XOpenDisplay(None))
         if not self.d.value:
-            sys.exit("phone-fit: no X display")
+            sys.exit(_("phone-fit: no X display"))
         self.root = ctypes.c_ulong(self.x.XDefaultRootWindow(self.d))
         # A window can vanish between listing and asking about it: ignore those X errors. (Kept
         # on self: the callback must outlive this call.)

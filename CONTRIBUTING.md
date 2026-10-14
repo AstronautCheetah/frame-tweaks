@@ -1,8 +1,10 @@
 # Contributing
 
-Tweaks are self-contained folders in packs; Frame Tweaks' own are in two official packs:
-`packs/original/` (tweaks written for Frame Tweaks) and `packs/third-party/` (other projects'
-apps, installed from their pinned source or release, with their own README appended). A tweak's README.md starts with its manifest (YAML front matter), which is
+Tweaks are self-contained folders in packs; Frame Tweaks' own are in three official packs:
+`packs/original/` (tweaks written for Frame Tweaks), `packs/integrations/` (other projects' apps
+that Frame Tweaks fits to the Frame: a tray icon, a key in the wallet, menu entries) and
+`packs/third-party/` (other projects' apps installed as they are, from their pinned source or
+release, with their own README appended). A tweak's README.md starts with its manifest (YAML front matter), which is
 all the installer, the installer window, the docs and the tests know about it. The format, the
 scripts and the helpers they can use: [docs/mods.md](docs/mods.md). To add one:
 

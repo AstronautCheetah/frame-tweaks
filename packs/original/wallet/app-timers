@@ -28,6 +28,17 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 CONF = Path.home() / ".config/frame-tweaks/app-timers.conf"
 SIGNAL_CONF = Path.home() / ".config/signal-guard.conf"     # Signal guard's, read once to migrate
 SIGNAL_ID = "org.signal.Signal"
@@ -74,7 +85,7 @@ def set_timer(app_id, minutes):
 def set_headset(app_id, on):
     timers = read_conf()
     if app_id not in timers:
-        sys.exit(f"{app_id} has no timer: set one first")
+        sys.exit(_("{app_id} has no timer: set one first").format(app_id=app_id))
     timers[app_id]["headset"] = on
     write_conf(timers)
 
@@ -174,7 +185,7 @@ def quit_app(app_id, why):
         except OSError:
             pass
     if pids:
-        subprocess.run(["notify-send", "-a", "App timers", f"{app_name(app_id)} closed",
+        subprocess.run(["notify-send", "-a", _("App timers"), _("{app} closed").format(app=app_name(app_id)),
                         why], stderr=subprocess.DEVNULL)
     return bool(pids)
 
@@ -246,7 +257,7 @@ def run():
                     except OSError:
                         pass
             last_scan = now
-        ready, _, _ = select.select(list(fds.values()), [], [], 2)
+        ready, _w, _x = select.select(list(fds.values()), [], [], 2)
         for fd in ready:
             try:
                 if has_user_input(os.read(fd, EVENT_SIZE * 64)):
@@ -272,14 +283,14 @@ def run():
                 if now - off_since >= HEADSET_OFF_GRACE:
                     for app_id in on_head:
                         if app_pids(app_id):
-                            quit_app(app_id, "The headset was taken off.")
+                            quit_app(app_id, _("The headset was taken off."))
                     off_since = float("inf")          # once per time it's taken off
         if now - last_check < 15:      # finding processes costs a /proc scan: 4x a minute
             continue
         last_check = now
         for app_id, t in timers.items():
             if app_id not in closed and idle >= t["minutes"] * 60 and app_pids(app_id):
-                quit_app(app_id, f"No activity for {t['minutes']:g} minutes.")
+                quit_app(app_id, _("No activity for {minutes} minutes.").format(minutes=f"{t['minutes']:g}"))
                 closed.add(app_id)
 
 
@@ -292,7 +303,7 @@ def main():
         try:
             minutes = float(a[2])
         except ValueError:
-            sys.exit("minutes must be a number")
+            sys.exit(_("minutes must be a number"))
         set_timer(a[1], max(0.0, minutes))
     elif a[:1] == ["--headset"] and len(a) == 3 and a[2] in ("on", "off"):
         set_headset(a[1], a[2] == "on")
@@ -300,10 +311,12 @@ def main():
         import_signal_guard()
     elif a[:1] == ["--status"]:
         idle = STATE.read_text() if STATE.exists() else "?"
-        print(f"idle {idle}s")
+        print(_("idle {seconds}s").format(seconds=idle))
         for app_id, t in sorted(read_conf().items()):
-            print(f"  {app_id}: {t['minutes']:g} min{', and headset off' if t['headset'] else ''}, "
-                  f"{'running' if app_pids(app_id) else 'not running'}")
+            line = (_("{app_id}: {minutes} min, and headset off, {state}") if t["headset"] else
+                    _("{app_id}: {minutes} min, {state}"))
+            print("  " + line.format(app_id=app_id, minutes=f"{t['minutes']:g}",
+                                     state=_("running") if app_pids(app_id) else _("not running")))
     elif a[:1] == ["--run"]:
         run()
     else:
