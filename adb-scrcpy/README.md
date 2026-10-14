@@ -64,7 +64,8 @@ the way Arrow Pad reads the grips: from the tilt of the controller model's thumb
 picture size (720 to 1920 pixels on the long side), bit rate (1 to 8 Mbit/s), frame rate (30, 60,
 or one of the Steam Frame's refresh rates, 72 to 144) and joystick scrolling speed. They're saved in
 `~/.config/phone.conf` (only those lines; the rest of the file is kept). *Restart stream* starts
-scrcpy again with the new picture settings, without closing the mirror. The
+scrcpy again with the new picture settings, without closing the mirror; *Reset to defaults*
+removes those lines again. The
 [scroll strips](../scroll-strips/) beside the mirror scroll the phone through `phone-touch` too.
 
 ## One-time pairing

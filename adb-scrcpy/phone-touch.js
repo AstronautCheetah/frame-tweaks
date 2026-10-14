@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | e[e.World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 5, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 6, DASH = 1, WORLD = 4;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
@@ -161,6 +161,7 @@
     ['Frame rate (fps, at most)', 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
     ['Joystick scrolling', 'PHONE_STICK_SPEED', [['Slow', '8'], ['Medium', '15'], ['Fast', '25']], false],
   ];
+  const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
   let inst = null;
@@ -210,9 +211,19 @@
           redraw();
         }))));
     }
+    // Back to the defaults (phone-touch's DEFAULTS; kept in step by tests/test_phone_touch.py).
+    const isDefault = Object.entries(DEFAULTS).every(([key, v]) => conf[key] === v);
+    const streamDefault = OPTIONS.every(([, key, , restart]) => !restart || conf[key] === DEFAULTS[key]);
     rows.push(el('div', { key: 'restart', style: { display: 'flex', marginTop: '14px' } },
+      button('Reset to defaults', false, () => {
+        if (isDefault) return;
+        if (!streamDefault) pending = true;
+        window.__sftPhoneTouchConf = { ...conf, ...DEFAULTS };
+        call({ a: 'reset' });
+        redraw();
+      }),
       button(pending ? 'Restart stream to apply' : 'Restart stream', pending,
-             () => { pending = false; call({ a: 'restart' }); redraw(); }, true)));
+             () => { pending = false; call({ a: 'restart' }); redraw(); })));
     const pxW = 460;
     return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
                        translation: { x: -(GAP_M * k + SETTINGS_M * k / 2), z: LIFT_M * k } },

@@ -99,3 +99,23 @@ class Settings(unittest.TestCase):
             conf = Path(d) / "phone.conf"
             conf.write_text("PHONE_BIT_RATE=$(rm -rf ~)\n")
             self.assertEqual(pt.read_conf(conf)["PHONE_BIT_RATE"], "2M")
+
+
+class Defaults(unittest.TestCase):
+    def test_panel_and_helper_agree(self):
+        import re
+        js = (ROOT / "adb-scrcpy" / "phone-touch.js").read_text()
+        found = dict(re.findall(r"(PHONE_\w+): '([^']+)'", re.search(r"const DEFAULTS = \{([^}]*)\}", js).group(1)))
+        self.assertEqual(found, pt.DEFAULTS)
+        for key, value in pt.DEFAULTS.items():
+            self.assertIn(value, pt.CHOICES[key])
+        self.assertIn('PHONE_MAX_SIZE:-1024', (ROOT / "adb-scrcpy" / "phone").read_text())
+        self.assertIn('PHONE_BIT_RATE:-2M', (ROOT / "adb-scrcpy" / "phone").read_text())
+
+    def test_reset_keeps_other_lines(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            conf = Path(d) / "phone.conf"
+            conf.write_text('PHONE_NAME="x"\nPHONE_MAX_FPS=120\n')
+            pt.reset_conf(conf)
+            self.assertEqual(conf.read_text(), 'PHONE_NAME="x"\n')
