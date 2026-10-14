@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- The installer window's Wallet apps page and its helpers moved into `gui/wallet_page.py` (the
+  window's file was over 1,400 lines).
 - **Dashboard patches share one helper file** (`vr-dashboard/lib.js`, injected first): finding
   the dashboard's components, drawing pieces in a fixed page corner, reusing unchanged pieces,
   reading a window's picture size. Scroll strips, Android Mirror's two patches and Pick up when

@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")
 gui = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gui)
+import wallet_page as wp  # noqa: E402  (the window's Wallet apps page; gui put it on sys.path)
 loader = importlib.machinery.SourceFileLoader("wl", str(ROOT / "wallet" / "wallet-launcher"))
 wl = importlib.util.module_from_spec(importlib.util.spec_from_loader("wl", loader))
 loader.exec_module(wl)
@@ -39,7 +40,7 @@ class Lists(unittest.TestCase):
         entry(self.own, "Some Game", "steam steam://rungameid/123")
         entry(self.own, "mytool", "/opt/mytool/run")
         entry(self.own, "org.editor", "/home/u/.local/bin/frame-outer-bus flatpak run org.editor", **{"X-FrameTweaks-Wallet": "true"})
-        self.patch = mock.patch.multiple(gui, LAUNCHERS=self.own, FLATPAK_APPS=[self.flat],
+        self.patch = mock.patch.multiple(wp, LAUNCHERS=self.own, FLATPAK_APPS=[self.flat],
                                          SYSTEM_APPS=[self.sys], FLATPAK_ROOTS=[self.roots])
         self.patch.start()
 
@@ -47,17 +48,17 @@ class Lists(unittest.TestCase):
         self.patch.stop()
 
     def test_every_kind_of_installed_app_is_offered_once(self):
-        protected = gui.protected_apps()
+        protected = wp.protected_apps()
         self.assertEqual([a["id"] for a in protected], ["org.editor"])
         self.assertTrue(protected[0]["shared"])
-        offered = {a["id"]: a["kind"] for a in gui.wallet_candidates({"org.editor"})}
+        offered = {a["id"]: a["kind"] for a in wp.wallet_candidates({"org.editor"})}
         # Steam shortcuts, hidden entries and protected apps aren't offered.
         self.assertEqual(offered, {"org.notes": "Flatpak", "org.kde.dolphin": "System app", "mytool": "Your app"})
 
     def test_electron_flatpak_detected(self):
-        apps = {a["id"]: a for a in gui.wallet_candidates(set())}
-        self.assertTrue(gui.is_electron(apps["org.notes"]))
-        self.assertFalse(gui.is_electron(apps["org.kde.dolphin"]))
+        apps = {a["id"]: a for a in wp.wallet_candidates(set())}
+        self.assertTrue(wp.is_electron(apps["org.notes"]))
+        self.assertFalse(wp.is_electron(apps["org.kde.dolphin"]))
 
 
 class SystemApp(unittest.TestCase):
@@ -90,24 +91,24 @@ loader2.exec_module(at)
 
 class Timers(unittest.TestCase):
     def test_steps(self):
-        self.assertEqual(gui.timer_step(0, 1), 5)
-        self.assertEqual(gui.timer_step(15, -1), 10)
-        self.assertEqual(gui.timer_step(20, 1), 30)          # a custom value snaps to a preset
-        self.assertEqual(gui.timer_step(5, -1, floor=5), 5)  # Signal: can't go below 5 / off
-        self.assertEqual(gui.timer_step(240, 1), 240)
-        self.assertEqual(gui.timer_text(0), "Never")
-        self.assertEqual(gui.timer_text(120), "2 h")
+        self.assertEqual(wp.timer_step(0, 1), 5)
+        self.assertEqual(wp.timer_step(15, -1), 10)
+        self.assertEqual(wp.timer_step(20, 1), 30)          # a custom value snaps to a preset
+        self.assertEqual(wp.timer_step(5, -1, floor=5), 5)  # Signal: can't go below 5 / off
+        self.assertEqual(wp.timer_step(240, 1), 240)
+        self.assertEqual(wp.timer_text(0), "Never")
+        self.assertEqual(wp.timer_text(120), "2 h")
 
     def test_wallet_state_line(self):
         now = 1_000_000.0
-        self.assertIn("locked", gui.wallet_state_text({"state": "locked"}, now))
-        t = gui.wallet_state_text({"state": "unlocked", "unlocked_at": now - 31 * 60,
+        self.assertIn("locked", wp.wallet_state_text({"state": "locked"}, now))
+        t = wp.wallet_state_text({"state": "unlocked", "unlocked_at": now - 31 * 60,
                                    "locks_at": now + 3 * 3600 + 5 * 60, "idle_close_minutes": 240}, now)
         self.assertIn("for 31 min", t)
         self.assertIn("in 3 h 5 min", t)
         self.assertIn("4 h unused", t)
-        self.assertIn("No automatic lock", gui.wallet_state_text({"state": "unlocked"}, now))
-        self.assertIn("unknown", gui.wallet_state_text(None, now))
+        self.assertIn("No automatic lock", wp.wallet_state_text({"state": "unlocked"}, now))
+        self.assertIn("unknown", wp.wallet_state_text(None, now))
 
     def test_settings_files(self):
         t = Path(tempfile.mkdtemp())
