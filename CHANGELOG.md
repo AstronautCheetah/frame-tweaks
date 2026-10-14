@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 (2026-10-14)
 - **README:** what some tweaks can do on your Frame (the DevTools port, the virtual keyboard, key
   monitoring), Requirements, and Remove everything (new `./install.sh uninstall all`); the
   "home folder only" claim names its two exceptions (Homebrew, NordVPN).
