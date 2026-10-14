@@ -94,59 +94,68 @@ update. They check those internals each time SteamVR starts and switch the affec
 (their status says so) until an update catches up; nothing else is affected. A few tweaks
 need **SteamVR restarted (or a reboot)** once after installing; the installer tells you which.
 
-### Core: fixes for the Frame
+Grouped as in the Frame Tweaks window. *Helpers* are installed automatically when a tweak needs
+them.
 
 <p align="center"><img src="packs/official/arrowpad/screenshot.png" width="300" alt="Arrow Pad: arrows, Home/End, PgUp/PgDn, Esc, Tab, Ctrl/Alt/Super, right/middle click, clipboard keys and a Tools layer with dictation and screen snip"></p>
 
-<!-- generated:core (dev/gen-docs.py, from each tweak's README front matter) -->
-| | Tweak | What you get | Why (on the Frame) |
+<!-- generated:tweaks (dev/gen-docs.py, from each tweak's README front matter) -->
+### Accessibility
+
+| | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
 | ⌨️ | [**Dictation**](packs/official/dictation/) | Speech-to-text that runs on the headset itself, with whisper.cpp. Press a shortcut (or 🎤 on Arrow Pad's Tools layer) to start, press again to stop; the text is typed into the app you're using and copied to the clipboard. | Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset. |
 | ⌨️ | [**Arrow Pad**](packs/official/arrowpad/) | A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super, right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It opens in desktop mode or as its own VR panel, and never takes focus from the app you're using. | Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop. |
 | ✂️ | [**Screen snip**](packs/official/snip/) | Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it. | SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR. |
+
+### Convenience
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
 | ⌨️ | [**Full Keyboard**](packs/official/full-keyboard/) (VR) | TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset. | Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks. |
 | 📋 | [**Shared clipboard**](packs/official/clipboard/) | Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source. | The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other. |
+| 📱 | [**Android Mirror**](packs/official/adb-scrcpy/) 🧪 | Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself. | Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape. |
 | 🖱️ | [**Mouse cursor fix**](packs/official/cursor/) | Makes the mouse pointer visible in desktop mode. | In desktop mode on the Frame, the mouse moves but its pointer isn't shown: the desktop draws it on a separate layer that the headset's view leaves out. |
+
+### VR environment
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
+| 🧩 | [**VR dashboard patching**](packs/official/vr-dashboard/) (helper) 🧪 | The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. | SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them. |
 | 🌀 | [**Curved world windows**](packs/official/curvature/) 🧪 | Windows you float into the world start curved, like the dashboard; Toggle Curvature still works. | On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one. |
 | ↩️ | [**Back to the previous window**](packs/official/float-return/) 🧪 | After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam. | SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does. |
 | ✋ | [**Pick up when floating**](packs/official/float-grab/) 🧪 | "Float in World" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down. | In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one. |
 | 📜 | [**Scroll strips**](packs/official/scroll-strips/) 🧪 | Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR. | In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit. |
-| 🔐 | [**Shared KDE wallet**](packs/official/wallet/) | Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`. | Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins. |
-| 🛠️ | [**Tools**](packs/official/tools/) | `restart-plasmashell`: brings the desktop-mode taskbar and system tray back after a crash, with one button. | In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session. |
-| 🖼️ | [**Menu icons**](packs/official/menu-icons/) | Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu. | Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme. |
-| 🔓 | [**Grab guard**](packs/official/grab-guard/) | A notification when desktop mode has taken all input, so other windows stop responding, telling you how to undo it. | A Right Ctrl press makes the Frame's desktop mode take every key and click. Nothing on screen says so except its window title, so everything else just seems frozen. |
-<!-- /generated:core -->
-
-### Extras: app setups
-
-<details><summary>Android mirroring, Recline, Signal and Firefox hardening, NordVPN, VSCodium, Claude. Optional; tick only what you use.</summary>
-
-<!-- generated:extras (dev/gen-docs.py, from each tweak's README front matter) -->
-| | Tweak | What you get | Why (on the Frame) |
-|---|---|---|---|
-| 📱 | [**Android Mirror**](packs/official/adb-scrcpy/) 🧪 | Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself. | Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape. |
 | 🛋️ | [**Recline**](packs/official/recline/) 🧪 | Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you. | SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you. |
+
+### Privacy & security
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
+| 🔐 | [**Shared KDE wallet**](packs/official/wallet/) | Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`. | Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins. |
 | 🔐 | [**Signal: key in the wallet**](packs/official/signal/) | Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens. | A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text. |
 | 🕵️ | [**Firefox privacy**](packs/official/firefox/) | Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings. | The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint. |
 | 🌐 | [**NordVPN**](packs/official/nordvpn/) (WireGuard) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
+
+### System
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
+| 🍺 | [**Homebrew**](packs/official/homebrew/) *(helper)* | Homebrew, a package manager for command-line programs. It installs everything into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates, so programs installed there don't last. Homebrew installs outside it, and several tweaks use it for that reason. |
+| 🛠️ | [**Tools**](packs/official/tools/) | `restart-plasmashell`: brings the desktop-mode taskbar and system tray back after a crash, with one button. | In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session. |
+| 🖼️ | [**Menu icons**](packs/official/menu-icons/) | Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu. | Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme. |
+| ⌨️ | [**ydotool**](packs/official/ydotool/) (helper) | The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them. | On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one. |
+| 🗣️ | [**Speech engine**](packs/official/speech/) (helper) | A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip. | SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent. |
+| 🔓 | [**Grab guard**](packs/official/grab-guard/) | A notification when desktop mode has taken all input, so other windows stop responding, telling you how to undo it. | A Right Ctrl press makes the Frame's desktop mode take every key and click. Nothing on screen says so except its window title, so everything else just seems frozen. |
+
+### Developer
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
 | 🧑‍💻 | [**VSCodium**](packs/official/vscodium/) | VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub. | For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR. |
 | 🤖 | [**Claude Code**](packs/official/claude-code/) (command line) | Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer. | Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone. |
 | 🤖 | [**Claude Desktop**](packs/official/claude-desktop/) | Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command. | Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead. |
-<!-- /generated:extras -->
-</details>
-
-### Helpers
-
-Installed automatically when a tweak needs them; listed so you can see and manage them.
-
-<!-- generated:helper (dev/gen-docs.py, from each tweak's README front matter) -->
-| | Tweak | What you get | Why (on the Frame) |
-|---|---|---|---|
-| 🧩 | [**VR dashboard patching**](packs/official/vr-dashboard/) (helper) 🧪 | The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. | SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them. |
-| 🍺 | [**Homebrew**](packs/official/homebrew/) | Homebrew, a package manager for command-line programs. It installs everything into `/home/linuxbrew`. | SteamOS's system partition is read-only and wiped by updates, so programs installed there don't last. Homebrew installs outside it, and several tweaks use it for that reason. |
-| ⌨️ | [**ydotool**](packs/official/ydotool/) (helper) | The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them. | On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one. |
-| 🗣️ | [**Speech engine**](packs/official/speech/) (helper) | A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip. | SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent. |
-<!-- /generated:helper -->
+<!-- /generated:tweaks -->
 
 ## Using the installer window
 
@@ -227,9 +236,11 @@ from people you trust. How to write one: [docs/mods.md](docs/mods.md).
 cd ~/frame-tweaks && ./install.sh update
 ```
 
-This moves to the newest release and re-runs the installer of every tweak you have installed
-(the installer window's "Update" link does the same). Nothing updates on its own: a tweak only
-changes when you update.
+Or, in the Frame Tweaks window: **⟳ Check for updates**, then **⬇ Update to …**, then
+**↻ Restart** when it's done (the window also checks when it opens). This moves to the newest
+release and re-runs the installer of every tweak you have installed. It first checks that the
+release is signed by Frame Tweaks' release key and refuses one that isn't. Nothing updates on its
+own: a tweak only changes when you update.
 
 - **Pre-releases:** put `beta` in `~/.config/frame-tweaks/channel` to get them too.
 - **Go to a specific release** (for example, to go back): `./install.sh update --to vX.Y.Z`.

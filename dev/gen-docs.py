@@ -2,7 +2,7 @@
 """Generate the docs that list tweaks, from the official pack (packs/official: each tweak's
 README.md front matter, in pack.md's order):
 
-  README.md       the Core / Extras / Helpers tables
+  README.md       a table of tweaks per category, in the installer window's order
   SECURITY.md     the "What each tweak changes on your system" rows
   <tweak>/README  its opening (what it is, why on a Steam Frame), a "What it changes" section
                   (survives updates, what it changes, unusual access, how to undo), and
@@ -31,7 +31,8 @@ def tweaks():
         out.append((c["id"], {"emoji": c["emoji"], "name": c["title"], "group": c["tier"], "what": c["what"],
                               "why": c["why"], "changes": c["changes"], "access": c["access"],
                               "survives-updates": c["survives_updates"], "undo": c["undo"],
-                              "experimental": c["experimental"], "upstream": c["upstream_readme"]}))
+                              "experimental": c["experimental"], "upstream": c["upstream_readme"],
+                              "category": c["category"]}))
     return out
 
 
@@ -41,11 +42,20 @@ def link(i, name):
     return f"[**{m[1]}**]({OFFICIAL}/{i}/){m[2] or ''}"
 
 
-def readme_table(rows, group):
-    lines = ["| | Tweak | What you get | Why (on the Frame) |", "|---|---|---|---|"]
-    lines += [f"| {m['emoji']} | {link(i, m['name'])}{' 🧪' if m.get('experimental') else ''} | {m['what']} | {m['why']} |"
-              for i, m in rows if m["group"] == group]
-    return "\n".join(lines)
+def readme_tables(rows):
+    """One table per category, in pack.md's order (as the installer window lists them)."""
+    order = sft.read_pack(ROOT / OFFICIAL)[0]["categories"]
+    cats = order + sorted({m["category"] for _, m in rows} - set(order))
+    out = []
+    for cat in cats:
+        mine = [(i, m) for i, m in rows if m["category"] == cat]
+        if not mine:
+            continue
+        out += [f"### {cat}", "", "| | Tweak | What you get | Why on a Steam Frame |", "|---|---|---|---|"]
+        out += [f"| {m['emoji']} | {link(i, m['name'])}{' 🧪' if m.get('experimental') else ''}"
+                f"{' *(helper)*' if m['group'] == 'helper' and 'helper' not in m['name'].lower() else ''} | {m['what']} | {m['why']} |" for i, m in mine]
+        out.append("")
+    return "\n".join(out).rstrip()
 
 
 def security_rows(rows):
@@ -104,7 +114,7 @@ def put(text, name, body, path):
 def main():
     check = "--check" in sys.argv
     rows = tweaks()
-    targets = {ROOT / "README.md": [(g, readme_table(rows, g)) for g in ("core", "extras", "helper")],
+    targets = {ROOT / "README.md": [("tweaks", readme_tables(rows))],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
         targets[ROOT / OFFICIAL / i / "README.md"] = [("intro", intro(m)), ("changes", changes(m))] + (
