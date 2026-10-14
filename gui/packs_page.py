@@ -11,7 +11,8 @@ import browser  # (lib/ is on the path)
 from i18n import _  # (translations: locale/README.md)
 import sft
 
-STATE = {"official": ("Comes with Frame Tweaks", "#5cc77a"),
+STATE = {"official": ("Comes with Frame Tweaks: in use", "#5cc77a"),
+         "off": ("Comes with Frame Tweaks: turned off, so its tweaks aren't listed", "#9aa6b2"),
          "trusted": ("Trusted: its tweaks are listed", "#5cc77a"),
          "untrusted": ("Not trusted yet: its tweaks aren't listed", "#e0b33a"),
          "changed": ("Changed since you trusted it: not used until you trust it again", "#e0b33a")}
@@ -37,7 +38,8 @@ class Packs(QWidget):
         lay.addLayout(head)
         about = QLabel(
             "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its "
-            "README.md. Frame Tweaks' own tweaks are the official pack. To add more, put a pack in "
+            "README.md. Frame Tweaks' own are in two official packs, Original and 3rd Party, both in use "
+            "unless you turn one off. To add more, put a pack in "
             f"<code>{html.escape(str(sft.USER_PACKS))}</code>, then trust it below. "
             "<b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs "
             "from people you trust, and read what they do first. If a pack's files change, it waits "
@@ -80,12 +82,19 @@ class Packs(QWidget):
                           + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
                           + f"<br><span style='color:{colour}'>{text}</span>"
                           + f"<br><span style='color:#6b7783'>{html.escape(str(p['dir']))}</span>"
-                          + (f"<br>{len(p['tweaks'])} tweaks" if p["state"] == "official" else
+                          + (f"<br>{len(p['tweaks'])} tweaks" if p["state"] in ("official", "off") else
                              "<br>Tweaks: " + (", ".join(tweaks) or "none")))
             info.setWordWrap(True)
             info.setTextFormat(Qt.TextFormat.RichText)
             g.addWidget(info, 1)
-            if p["state"] != "official":
+            if p["state"] in ("official", "off"):
+                on = p["state"] == "off"
+                b = QPushButton(_("Use") if on else _("Stop using"))
+                b.setToolTip(_("Its tweaks come back to the list") if on else
+                             _("Its tweaks leave the list; installed ones stay until you uninstall them"))
+                b.clicked.connect(lambda _=False, d=p["dir"], on=on: self.use_official(d, on))
+                g.addWidget(b)
+            else:
                 if p["state"] == "trusted":
                     b = QPushButton(_("Stop using"))
                     b.setToolTip("Its tweaks leave the list; installed ones stay until you uninstall them")
@@ -114,6 +123,11 @@ class Packs(QWidget):
     def trust(self, d, on):
         self.confirming = None
         sft.set_trusted(d, on)
+        self.window.reload_tweaks()
+        self.build()
+
+    def use_official(self, d, on):
+        sft.set_official(d, on)
         self.window.reload_tweaks()
         self.build()
 

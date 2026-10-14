@@ -2,7 +2,7 @@
 """For maintainers: move a pin to upstream's newest version, so a bump the weekly upstream check
 (dev/check-upstream.sh) reports is one command plus review, not hand-editing URLs and hashes.
 
-  dev/bump-pin.py TWEAK[/NAME]...     packs/official/<tweak>/pin, or <tweak>/<name>.pin (e.g. speech/voice)
+  dev/bump-pin.py TWEAK[/NAME]...     packs/<pack>/<tweak>/pin, or <tweak>/<name>.pin (e.g. speech/voice)
   dev/bump-pin.py python              lib/python-constraints.txt to PyPI's newest
 
 For each pin it finds the newest version the way dev/check-pins.sh does (GitHub release, git
@@ -143,7 +143,8 @@ def main(args):
             bump_python()
             continue
         tweak, _, name = a.partition("/")
-        path = ROOT / "packs/official" / tweak / (f"{name}.pin" if name else "pin")
+        path = next((d for p in ("original", "third-party") if (d := ROOT / "packs" / p / tweak).is_dir()),
+                    ROOT / "packs/original" / tweak) / (f"{name}.pin" if name else "pin")
         if not path.is_file():
             sys.exit(f"no pin {path.relative_to(ROOT)}")
         bump(path)

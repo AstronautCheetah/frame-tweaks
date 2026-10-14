@@ -24,7 +24,7 @@ except ImportError:
 class Reader(unittest.TestCase):
     @unittest.skipIf(yaml is None, "PyYAML not installed")
     def test_official_manifests_read_as_pyyaml_reads_them(self):
-        files = sorted((ROOT / "packs/official").glob("*/README.md")) + [ROOT / "packs/official/pack.md"]
+        files = sorted(ROOT.glob("packs/[ot]*/*/README.md")) + sorted(ROOT.glob("packs/[ot]*/pack.md"))
         self.assertGreater(len(files), 20)
         for f in files:
             text = f.read_text()
@@ -100,7 +100,7 @@ class Packs(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         t = Path(self.tmp.name)
         self.user = t / "packs"
-        for name, value in (("USER_PACKS", self.user), ("TRUSTED", t / "trusted"), ("CONF", t)):
+        for name, value in (("USER_PACKS", self.user), ("TRUSTED", t / "trusted"), ("OFF_PACKS", t / "off"), ("CONF", t)):
             p = mock.patch.object(sft, name, value)
             p.start()
             self.addCleanup(p.stop)
@@ -125,6 +125,23 @@ class Packs(unittest.TestCase):
         data = sft.load(refresh=True)
         self.assertEqual([p for p in data["problems"] if not p.startswith("warning")], [])
         self.assertIn("scroll-strips", self.ids())
+
+    def test_two_official_packs_on_until_turned_off(self):
+        """Original and 3rd Party: both in use without trusting; either can be turned off."""
+        packs = {p["name"]: p for p in sft.load(refresh=True)["packs"]}
+        self.assertEqual((packs["Original"]["state"], packs["3rd Party"]["state"]), ("official", "official"))
+        self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["recline"]["pack"]), ("Original", "3rd Party"))
+        self.assertTrue(self.ids()["recline"]["official"])
+        sft.set_official(sft.THIRD_PARTY, False)
+        self.assertNotIn("recline", self.ids())
+        self.assertIn("arrowpad", self.ids())
+        self.assertEqual({p["name"]: p["state"] for p in sft.load(refresh=True)["packs"]}["3rd Party"], "off")
+        sft.set_official(sft.THIRD_PARTY, True)
+        self.assertIn("recline", self.ids())
+
+    def test_official_packs_share_the_category_order(self):
+        cats = [sft.read_pack(p)[0]["categories"] for p in sft.OFFICIAL_PACKS]
+        self.assertEqual(cats[0], cats[1])
 
     def test_untrusted_pack_is_listed_not_used(self):
         self.tweak("mypack", "hello")
@@ -151,7 +168,7 @@ class Packs(unittest.TestCase):
         sft.set_trusted(d.parent, True)
         rows = sft.load(refresh=True)["components"]
         c = next(c for c in rows if c["id"] == "cursor")
-        self.assertEqual((c["title"], c["replaced"]), ("My cursor", "Frame Tweaks"))
+        self.assertEqual((c["title"], c["replaced"]), ("My cursor", "Original"))
         self.assertEqual(len([r for r in rows if r["id"] == "cursor"]), 1)
 
     def test_missing_dependency_and_bad_manifest(self):

@@ -9,20 +9,20 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("sft", str(ROOT / "packs/official/vr-dashboard" / "sft-dashboard"))
+_l = importlib.machinery.SourceFileLoader("sft", str(ROOT / "packs/original/vr-dashboard" / "sft-dashboard"))
 sft = importlib.util.module_from_spec(importlib.util.spec_from_loader("sft", _l))
 _l.exec_module(sft)
 def _patches():
     """Every dashboard patch a tweak installs: install_dashboard_patch NAME FILE in its install.sh."""
     found = {}
-    for inst in ROOT.glob("packs/official/*/install.sh"):
+    for inst in ROOT.glob("packs/*/*/install.sh"):
         for name, rel in re.findall(r'install_dashboard_patch\s+(\S+)\s+"\$TWEAK_DIR/([^"]+)"', inst.read_text()):
             found[name] = inst.parent / rel
     return found
 
 
 PATCHES = _patches()
-PATCHES_AND_LIB = {**PATCHES, "lib": ROOT / "packs/official/vr-dashboard" / "lib.js"}
+PATCHES_AND_LIB = {**PATCHES, "lib": ROOT / "packs/original/vr-dashboard" / "lib.js"}
 
 
 class ArmRestore(unittest.TestCase):

@@ -20,7 +20,7 @@ def load():
             setattr(mod, n, object)
         fake["PyQt6." + m] = mod
     with mock.patch.dict(sys.modules, fake):
-        spec = importlib.util.spec_from_file_location("vroverlay", ROOT / "packs/official/arrowpad" / "vroverlay.py")
+        spec = importlib.util.spec_from_file_location("vroverlay", ROOT / "packs/original/arrowpad" / "vroverlay.py")
         v = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(v)
     return v

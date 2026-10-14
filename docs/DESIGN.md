@@ -2,7 +2,7 @@
 
 How Frame Tweaks' core works and why it is built the way it is. This page is for contributors
 and reviewers. What each tweak does, and how, is in its own README under
-[`packs/official/`](../packs/official/); how to write a tweak or a pack is in [mods.md](mods.md).
+[`packs/original/`](../packs/original/); how to write a tweak or a pack is in [mods.md](mods.md).
 
 ## Goal
 
@@ -26,8 +26,8 @@ The design follows from what the Frame is:
   windows live. Desktop mode is a Plasma session nested inside it, on Wayland, with its own
   D-Bus bus and `XDG_RUNTIME_DIR`. Programs started from the desktop, from shortcuts and from
   VR can each see a different environment, clipboard and wallet. Several tweaks exist only
-  because of this: [clipboard](../packs/official/clipboard/) syncs the two clipboards,
-  [wallet](../packs/official/wallet/) makes both sessions use one KDE wallet, and
+  because of this: [clipboard](../packs/third-party/clipboard/) syncs the two clipboards,
+  [wallet](../packs/original/wallet/) makes both sessions use one KDE wallet, and
   [`lib/browser.py`](../lib/browser.py) sends a web link to the session where the browser is
   already running. `sysctl_user` in `lib/common.sh` runs `systemctl --user` with the outer
   session's runtime folder and bus, so it also works from a desktop-mode shell.
@@ -47,7 +47,7 @@ The design follows from what the Frame is:
 | [`lib/sft.py`](../lib/sft.py) | Loads the packs and their tweaks, and holds everything the installer window and `install.sh` share: the tweak list (`registry`), hidden rows and groups, the Run label, and tweak settings. Both front ends call it, so they can't drift apart. |
 | [`lib/manifest.py`](../lib/manifest.py) | Reads (and writes) the YAML front matter of manifests, with no dependencies. |
 | [`gui/`](../gui/) | The installer window (PyQt6): the list, details pages, Packs and Wallet apps pages. |
-| [`packs/official/<id>/`](../packs/official/) | One folder per tweak: `README.md` (its manifest, then its documentation), `install.sh`, `uninstall.sh`, `status.sh` and optional scripts. `pack.md` sets the order and categories. |
+| [`packs/original/<id>/`](../packs/original/) | One folder per tweak: `README.md` (its manifest, then its documentation), `install.sh`, `uninstall.sh`, `status.sh` and optional scripts. `pack.md` sets the order and categories. |
 | [`dev/`](../dev/) | Maintainer tools: docs generation and checks, pin checks and bumps, the mirror, the test harness, git hooks. |
 | [`tests/`](../tests/) | Unit tests (`python3 -m unittest discover -s tests`). |
 
@@ -82,12 +82,15 @@ reader, to PyYAML and to a person:
 ## Packs and trust
 
 Every tweak comes from a pack: a folder of tweak folders with an optional `pack.md`.
-`lib/sft.py` `pack_dirs` looks in three places, in this order: the official pack
-(`packs/official/`), the folders in `~/.local/share/frame-tweaks/packs/`, and the folders
+`lib/sft.py` `pack_dirs` looks in three places, in this order: the official packs
+(`packs/original/`, then `packs/third-party/`; other folders in `packs/` are local packs that
+need trusting), the folders in `~/.local/share/frame-tweaks/packs/`, and the folders
 listed in `FRAME_TWEAKS_PACKS`.
 
-- **The official pack loads like any other.** It goes through the same `read_pack` and
-  `read_tweak` checks. The only difference is that it doesn't need trusting.
+- **The official packs load like any other.** They go through the same `read_pack` and
+  `read_tweak` checks. The only differences: they don't need trusting, and they're on unless
+  turned off (`./install.sh mods off NAME`, kept in `~/.config/frame-tweaks/installer/off-packs`).
+  Original's `pack.md` sets the category order; 3rd Party lists the same categories.
 - **Other packs need trusting.** A pack's scripts run as the user, with their files and
   passwords in reach. `./install.sh mods trust PACK` records the pack's folder and a SHA256
   over its file names and contents (`.git` and `__pycache__` left out) in
@@ -276,7 +279,7 @@ are marked 🧪 in the README, in the window and in `./install.sh list`, and the
 happens when SteamVR changes.
 
 The dashboard tweaks share
-[`vr-dashboard`](../packs/official/vr-dashboard/). Its `sft-dashboard` turns on SteamVR's
+[`vr-dashboard`](../packs/original/vr-dashboard/). Its `sft-dashboard` turns on SteamVR's
 dashboard DevTools port (`127.0.0.1:8087`) through a `steamvr.service` drop-in, and only while
 SteamVR is stopped, because SteamVR rewrites `steamvr.vrsettings` from memory. The previous
 value is put back after SteamVR stops. While SteamVR runs, a watcher injects each installed
@@ -315,7 +318,7 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 - **Don't push the compositor.** Arrow Pad's VR overlay sends its picture with
   `SetOverlayFromFile`, not `SetOverlayRaw`: on the Frame, raw uploads never showed, and a
   2.5 MB raw upload crashed vrcompositor (SIGBUS). Picture size and update rate are capped
-  ([`vroverlay.py`](../packs/official/arrowpad/vroverlay.py)).
+  ([`vroverlay.py`](../packs/original/arrowpad/vroverlay.py)).
 - **Wallet gates go through launchers.** The wallet tweak protects apps by wrapping their menu
   entries. So `run.sh` scripts start apps with `gtk-launch <id>` (through the menu entry), and
   `install_desktop` re-applies the wrapper when a tweak reinstalls an entry it guards.
@@ -334,7 +337,7 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
   Conventional Commits rule). The same check runs in the `commit-msg` hook
   (`dev/install-hooks.sh` turns the hooks on), which can also refuse tool attribution lines in
   your own commits if you opt in ([`dev/check-trailers.sh`](../dev/check-trailers.sh)).
-- Manifest and installer self-checks: `lib/sft.py mods check packs/official`,
+- Manifest and installer self-checks: `lib/sft.py mods check packs/original`,
   `./install.sh list`, dependency resolution, every pin's fields, mirror lines, and exact
   versions in the Python constraints.
 - Unit tests (`tests/`), with Qt headless (`QT_QPA_PLATFORM=offscreen`) and Xvfb for the

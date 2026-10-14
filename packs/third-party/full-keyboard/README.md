@@ -56,7 +56,7 @@ text field, then type with the controller laser. Opening it again re-centres it.
 app: the system keyboard button still opens Steam's keyboard. The full guide is TaiKeid's, below
 the line at the end of this page.
 
-Not sure which keyboard to use? See the [keyboard guide](../arrowpad/README.md#which-keyboard-when).
+Not sure which keyboard to use? See the [keyboard guide](../../original/arrowpad/README.md#which-keyboard-when).
 
 ## Good to know
 

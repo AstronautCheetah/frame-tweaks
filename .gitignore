@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 *.swp
 *~
-# Local packs (e.g. packs/attic: tweaks set aside, not shipped); only the official one is published.
+# Local packs (e.g. packs/attic: tweaks set aside, not shipped); only the official ones are published.
 /packs/*
-!/packs/official/
+!/packs/original/
+!/packs/third-party/

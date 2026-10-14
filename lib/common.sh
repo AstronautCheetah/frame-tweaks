@@ -20,14 +20,18 @@ ft_version() {
 }
 # The folder of the tweak whose script sourced this file (its own files), and tweak_dir <id> for
 # another tweak's: the installer passes the folders it found (FRAME_TWEAKS_DIRS, "id=folder"
-# lines, user packs included); a script run on its own falls back to the official pack.
+# lines, user packs included); a script run on its own falls back to the official packs.
 TWEAK_DIR="$(cd "$(dirname "${BASH_SOURCE[1]:-$0}")" && pwd)"
 tweak_dir() {
     local line
     while IFS= read -r line; do
         [ "${line%%=*}" = "$1" ] && { echo "${line#*=}"; return; }
     done <<<"${FRAME_TWEAKS_DIRS:-}"
-    echo "$REPO_DIR/packs/official/$1"
+    local pack
+    for pack in original third-party; do
+        [ -d "$REPO_DIR/packs/$pack/$1" ] && { echo "$REPO_DIR/packs/$pack/$1"; return; }
+    done
+    echo "$REPO_DIR/packs/original/$1"
 }
 export FRAME_TWEAKS_LIB="$REPO_DIR/lib"     # (for the scripts a tweak runs in turn, wherever they are)
 BIN="$HOME/.local/bin"
@@ -365,7 +369,7 @@ remove_files() {
 
 export QT_VENV="$HOME/.local/share/arrowpad/venv"   # PyQt6, shared by arrowpad and nordvpn-tray
 
-# --- SteamVR dashboard patches (packs/official/vr-dashboard/) ---------------------------------------------
+# --- SteamVR dashboard patches (packs/original/vr-dashboard/) ---------------------------------------------
 # A VR environment tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
 VR_DASHBOARD="$HOME/.local/share/frame-tweaks/vr-dashboard"
 install_dashboard_patch() {    # install_dashboard_patch NAME FILE

@@ -1,14 +1,15 @@
 # Contributing
 
-Tweaks are self-contained folders in packs; Frame Tweaks' own are the official pack,
-`packs/official/`. A tweak's README.md starts with its manifest (YAML front matter), which is
+Tweaks are self-contained folders in packs; Frame Tweaks' own are in two official packs:
+`packs/original/` (tweaks written for Frame Tweaks) and `packs/third-party/` (other projects'
+apps, installed from their pinned source or release, with their own README appended). A tweak's README.md starts with its manifest (YAML front matter), which is
 all the installer, the installer window, the docs and the tests know about it. The format, the
 scripts and the helpers they can use: [docs/mods.md](docs/mods.md). To add one:
 
-1. Create `packs/official/<id>/` with a `README.md` (manifest, then: problem, install, use,
+1. Create `packs/original/<id>/` (or `packs/third-party/<id>/`) with a `README.md` (manifest, then: problem, install, use,
    configuration, how it works, gotchas), `install.sh`, `uninstall.sh` and `status.sh`, plus
    any optional scripts. [examples/hello-pack/](examples/hello-pack/) is a small complete one.
-2. Add its id to `order:` in `packs/official/pack.md`, where it belongs in the list.
+2. Add its id to `order:` in `packs/original/pack.md`, where it belongs in the list.
 3. Run `dev/gen-docs.py` (the README tables, SECURITY.md's rows and its "At a glance" box come
    from its manifest), then the checks CI runs (see "Checks" below).
 
@@ -80,7 +81,7 @@ What CI runs, and what to run before sending a change:
   the venv the installer window sets up (`~/.local/share/arrowpad/venv/bin/python`), or
   `pip install PyQt6` (versions in `lib/python-constraints.txt`).
 - `dev/gen-docs.py --check`: generated README/SECURITY sections match the manifests.
-- `python3 lib/sft.py mods check packs/official`: every manifest is valid and its scripts exist.
+- `python3 lib/sft.py mods check packs/original`: every manifest is valid and its scripts exist.
 - `dev/check-docs.py`: every tweak has a README row; relative links resolve.
 - `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home.
 - `dev/check-commit-msg.sh --all`: commit message format (above).

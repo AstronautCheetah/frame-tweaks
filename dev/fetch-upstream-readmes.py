@@ -65,7 +65,7 @@ def convert(text, raw_url, out):
 
 def main():
     want = set(sys.argv[1:])
-    for d in sft.read_pack(ROOT / "packs/official")[1]:
+    for d in (d for pack in sft.OFFICIAL_PACKS for d in sft.read_pack(pack)[1]):
         c, problems = sft.read_tweak(d)
         if not c or not c["upstream_readme"] or (want and c["id"] not in want):
             continue

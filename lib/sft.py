@@ -11,6 +11,7 @@ The tweaks themselves come from packs (docs/mods.md): each tweak's README.md fro
 Command line (through ./install.sh):
   sft.py mods                           the packs, whether each is in use, and any problems
   sft.py mods trust|untrust PACK        use a user's pack (it runs as you), or stop using it
+  sft.py mods on|off PACK               use one of Frame Tweaks' own packs, or stop using it
   sft.py mods check FOLDER              check a pack or a single tweak folder, using nothing
   sft.py hide|unhide ID...              hide a row in the installer window (or show it again)
   sft.py hide-group|unhide-group NAME   the same for a whole group (e.g. "VR environment")
@@ -57,14 +58,17 @@ CONF = Path.home() / ".config/frame-tweaks/installer"      # (before 0.5: ~/.con
 HIDDEN, SHOWN = CONF / "hidden", CONF / "shown"     # SHOWN: default-hidden rows you unhid
 COLLAPSED, HIDDEN_CATS = CONF / "collapsed-categories", CONF / "hidden-categories"
 TRUSTED = CONF / "trusted-packs"                    # "<folder>\t<sha256 of its files>" per line
+OFF_PACKS = CONF / "off-packs"                      # official packs turned off (folder names)
 
 # ---- packs and tweaks -------------------------------------------------------------------------
 # A pack is a folder of tweak folders, with an optional pack.md; a tweak is a folder whose
-# README.md starts with front matter (docs/mods.md). The official pack is loaded like any other;
-# a user's packs need trusting first (they run as you), and a tweak of theirs may take the place
-# of one with the same id only by saying `replaces: true`.
-OFFICIAL = REPO / "packs/official"
-OFFICIAL_PACKS = [OFFICIAL]                 # (dev/i18n.py: the packs whose text is in the template)
+# README.md starts with front matter (docs/mods.md). Frame Tweaks' own packs (official) are loaded
+# like any other, and are on unless turned off: Original (our own tweaks) and 3rd Party (other
+# projects' apps, set up for the Frame). A user's packs need trusting first (they run as you),
+# and a tweak of theirs may take the place of one with the same id only by saying `replaces: true`.
+ORIGINAL = REPO / "packs/original"
+THIRD_PARTY = REPO / "packs/third-party"
+OFFICIAL_PACKS = [ORIGINAL, THIRD_PARTY]    # (also dev/i18n.py's: the packs whose text is in the template)
 USER_PACKS = Path.home() / ".local/share/frame-tweaks/packs"
 API = 1                                             # the newest pack api this version knows
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -100,11 +104,11 @@ def translated(c):
 
 
 def pack_dirs():
-    """The official pack, then other folders in this checkout's packs/ (local, not published:
+    """The official packs, then other folders in this checkout's packs/ (local, not published:
     e.g. packs/attic for tweaks set aside), then ~/.local/share/frame-tweaks/packs/*, then
-    FRAME_TWEAKS_PACKS (folders separated by :, each a pack). All but the official one need trust."""
-    out = [OFFICIAL]
-    out += sorted(d for d in OFFICIAL.parent.iterdir() if d.is_dir() and d != OFFICIAL and not d.name.startswith("."))
+    FRAME_TWEAKS_PACKS (folders separated by :, each a pack). All but the official ones need trust."""
+    out = list(OFFICIAL_PACKS)
+    out += sorted(d for d in ORIGINAL.parent.iterdir() if d.is_dir() and d not in OFFICIAL_PACKS and not d.name.startswith("."))
     if USER_PACKS.is_dir():
         out += sorted(d for d in USER_PACKS.iterdir() if d.is_dir() and not d.name.startswith("."))
     out += [Path(d).expanduser() for d in os.environ.get("FRAME_TWEAKS_PACKS", "").split(":") if d]
@@ -145,6 +149,16 @@ def set_trusted(d, trust):
         t.pop(str(Path(d).resolve()), None)
     CONF.mkdir(parents=True, exist_ok=True)
     TRUSTED.write_text("".join(f"{k}\t{v}\n" for k, v in sorted(t.items())))
+
+
+def off_packs():
+    """The official packs turned off, by folder name (e.g. {"third-party"})."""
+    return read_set(OFF_PACKS)
+
+
+def set_official(d, on):
+    off = off_packs() - {Path(d).name} if on else off_packs() | {Path(d).name}
+    write_set(OFF_PACKS, off)
 
 
 def check_settings(st, cid, where):
@@ -258,13 +272,13 @@ def load(refresh=False):
     """{"components": the tweaks in use (ordered), "packs": [...], "problems": [...]}"""
     if _CACHE and not refresh:
         return _CACHE
-    trust = trusted_packs()
+    trust, off = trusted_packs(), off_packs()
     comps, problems, packs, cats = {}, [], [], []
     for d in pack_dirs():
         info, folders, probs = read_pack(d)
-        official = d == OFFICIAL.resolve()
-        state = "official" if official else "trusted" if trust.get(str(d)) == pack_hash(d) else (
-            "changed" if str(d) in trust else "untrusted")
+        official = d in {p.resolve() for p in OFFICIAL_PACKS}
+        state = ("off" if d.name in off else "official") if official else (
+            "trusted" if trust.get(str(d)) == pack_hash(d) else "changed" if str(d) in trust else "untrusted")
         pack = dict(dir=d, name=info["name"], author=info["author"], about=info["about"], state=state,
                     tweaks=[f.name for f in folders])
         packs.append(pack)
@@ -523,10 +537,18 @@ def find_pack(name):
 
 
 def mods(args):
+    if args[:1] in (["on"], ["off"]) and len(args) == 2:
+        p = find_pack(args[1])
+        if p["state"] not in ("official", "off"):
+            sys.exit(f"{p['name']} isn't one of Frame Tweaks' own packs: ./install.sh mods trust|untrust NAME")
+        set_official(p["dir"], args[0] == "on")
+        print(f"{p['name']}: " + ("in use; its tweaks are listed" if args[0] == "on" else
+                                  "turned off (installed tweaks of it stay until you uninstall them)"))
+        return
     if args[:1] in (["trust"], ["untrust"]) and len(args) == 2:
         p = find_pack(args[1])
-        if p["state"] == "official":
-            sys.exit("the official pack is always used")
+        if p["state"] in ("official", "off"):
+            sys.exit(f"{p['name']} comes with Frame Tweaks, so it needs no trust: ./install.sh mods on|off NAME")
         set_trusted(p["dir"], args[0] == "trust")
         print(f"{p['name']}: " + ("trusted; its tweaks are listed now" if args[0] == "trust" else
                                   "no longer used (installed tweaks of it stay until you uninstall them)"))
@@ -547,13 +569,14 @@ def mods(args):
     data = load()
     used = {c["id"]: c for c in data["components"]}
     for p in data["packs"]:
-        state = {"official": "official", "trusted": "trusted: in use",
+        state = {"official": "official: in use", "off": "official: turned off (./install.sh mods on NAME)",
+                 "trusted": "trusted: in use",
                  "untrusted": "not trusted: not used (./install.sh mods trust NAME)",
                  "changed": "changed since you trusted it: not used until you trust it again"}[p["state"]]
         print(f"{p['name']}  ({p['dir']})  {state}")
         if p["about"]:
             print(f"    {p['about']}")
-        if p["state"] != "official":
+        if p["state"] not in ("official", "off"):
             for t in p["tweaks"]:
                 c = used.get(t)
                 note = "" if not c or c["pack_dir"] != p["dir"] else (

@@ -19,7 +19,7 @@ work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"
 # bypass in the real scripts.
 REPO="$work/repo"; mkdir -p "$REPO"
 tar -C "$PWD" --exclude=./.git --exclude=./references --exclude=./tmp -cf - . | tar -C "$REPO" -xf -
-# The packs: the official one and the example (examples/hello-pack), trusted in a scratch
+# The packs: the official ones and the example (examples/hello-pack), trusted in a scratch
 # settings folder the way a user trusts a pack.
 export FRAME_TWEAKS_PACKS="$REPO/examples/hello-pack"
 sft() { HOME="$work/sft-home" python3 "$REPO/lib/sft.py" "$@"; }
@@ -53,7 +53,7 @@ printf 'pkgname = ydotool\npkgver = 1.0.4-2\n' > "$fx/pkg/.PKGINFO"
 (cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" .PKGINFO usr)
 echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
 head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"
-sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/packs/official/dictation/pin"
+sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/packs/original/dictation/pin"
 cat > "$stubs/curl" <<STUB
 #!/bin/bash
 out=""; url=""

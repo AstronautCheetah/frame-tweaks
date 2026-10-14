@@ -4,36 +4,36 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: gui/frame-tweaks-gui.py:1137
+#: gui/frame-tweaks-gui.py:1138
 msgid "Cancel"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1139
+#: gui/frame-tweaks-gui.py:1140
 msgid "Remove them"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1169
+#: gui/frame-tweaks-gui.py:1170
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1174
+#: gui/frame-tweaks-gui.py:1175
 msgid "Nothing to change."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1276
+#: gui/frame-tweaks-gui.py:1277
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1279
+#: gui/frame-tweaks-gui.py:1280
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1285
+#: gui/frame-tweaks-gui.py:1286
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:348 gui/frame-tweaks-gui.py:371 gui/frame-tweaks-gui.py:590 gui/frame-tweaks-gui.py:1288 gui/packs_page.py:27 gui/wallet_page.py:248
+#: gui/frame-tweaks-gui.py:348 gui/frame-tweaks-gui.py:371 gui/frame-tweaks-gui.py:591 gui/frame-tweaks-gui.py:1289 gui/packs_page.py:28 gui/wallet_page.py:248
 msgid "← Back"
 msgstr ""
 
@@ -41,52 +41,69 @@ msgstr ""
 msgid "About Frame Tweaks"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:504
+#: gui/frame-tweaks-gui.py:407
+msgid "Pack"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py:505
 msgid "Reset to defaults"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:664
+#: gui/frame-tweaks-gui.py:665
 msgid "🧩 Packs"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:668
+#: gui/frame-tweaks-gui.py:669
 msgid "Refresh"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:694
+#: gui/frame-tweaks-gui.py:695
 msgid "📖 README"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:698
+#: gui/frame-tweaks-gui.py:699
 msgid "Diagnostics"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:702
+#: gui/frame-tweaks-gui.py:703
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:706
+#: gui/frame-tweaks-gui.py:707
 msgid "Close"
 msgstr ""
 
-#: gui/packs_page.py:30
-msgid "Packs"
-msgstr ""
-
-#: gui/packs_page.py:33
-msgid "Open packs folder"
-msgstr ""
-
-#: gui/packs_page.py:90
-msgid "Stop using"
-msgstr ""
-
-#: gui/packs_page.py:94
+#: gui/packs_page.py:103
 msgid "Yes: it runs as me"
 msgstr ""
 
-#: gui/packs_page.py:98
+#: gui/packs_page.py:107
 msgid "Trust…"
+msgstr ""
+
+#: gui/packs_page.py:31
+msgid "Packs"
+msgstr ""
+
+#: gui/packs_page.py:34
+msgid "Open packs folder"
+msgstr ""
+
+#: gui/packs_page.py:92 gui/packs_page.py:99
+msgid "Stop using"
+msgstr ""
+
+#: gui/packs_page.py:92
+msgid "Use"
+msgstr ""
+
+#: gui/packs_page.py:93
+msgid "Its tweaks come back to the list"
+msgstr ""
+
+#: gui/packs_page.py:94
+msgid ""
+"Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 
 #: gui/wallet_page.py:251
@@ -125,818 +142,818 @@ msgstr ""
 msgid "Headset off"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Android Mirror"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Fast"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Joystick scrolling"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Medium"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid ""
 "See and control your Android phone in a window, over Wi-Fi, without taking the headset off"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "Slow"
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid "The phone mirror's stream and joystick scrolling."
 msgstr ""
 
-#: packs/official/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape."
 msgstr ""
 
-#: packs/official/arrowpad/README.md
+#: packs/original/arrowpad/README.md
 msgid ""
 "A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super, right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It opens in desktop mode or as its own VR panel, and never takes focus from the app you're using."
 msgstr ""
 
-#: packs/official/arrowpad/README.md
+#: packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr ""
 
-#: packs/official/arrowpad/README.md
+#: packs/original/arrowpad/README.md
 msgid ""
 "Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
 msgstr ""
 
-#: packs/official/arrowpad/README.md packs/official/full-keyboard/README.md packs/official/adb-scrcpy/README.md packs/official/signal/README.md packs/official/firefox/README.md packs/official/vscodium/README.md packs/official/claude-code/README.md packs/official/claude-desktop/README.md
+#: packs/original/arrowpad/README.md packs/original/adb-scrcpy/README.md packs/original/signal/README.md packs/original/firefox/README.md packs/original/vscodium/README.md packs/original/claude-code/README.md packs/original/claude-desktop/README.md packs/third-party/full-keyboard/README.md
 msgid "Open"
 msgstr ""
 
-#: packs/official/arrowpad/README.md
+#: packs/original/arrowpad/README.md
 msgid ""
 "Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop."
 msgstr ""
 
-#: packs/official/claude-code/README.md
+#: packs/original/claude-code/README.md
 msgid ""
 "Anthropic's coding agent for the terminal (`claude`), installed into your home folder"
 msgstr ""
 
-#: packs/official/claude-code/README.md
+#: packs/original/claude-code/README.md
 msgid ""
 "Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone."
 msgstr ""
 
-#: packs/official/claude-code/README.md
+#: packs/original/claude-code/README.md
 msgid "Claude Code (command line)"
 msgstr ""
 
-#: packs/official/claude-code/README.md
+#: packs/original/claude-code/README.md
 msgid ""
 "Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer."
 msgstr ""
 
-#: packs/official/claude-desktop/README.md
+#: packs/original/claude-desktop/README.md
 msgid ""
 "Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead."
 msgstr ""
 
-#: packs/official/claude-desktop/README.md
+#: packs/original/claude-desktop/README.md
 msgid ""
 "Anthropic's Claude Desktop app for Linux (arm64), installed without apt"
 msgstr ""
 
-#: packs/official/claude-desktop/README.md
+#: packs/original/claude-desktop/README.md
 msgid "Claude Desktop"
 msgstr ""
 
-#: packs/official/claude-desktop/README.md
+#: packs/original/claude-desktop/README.md
 msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/official/clipboard/README.md
-msgid ""
-"Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source."
-msgstr ""
-
-#: packs/official/clipboard/README.md
-msgid "One clipboard for desktop mode and VR floating windows"
-msgstr ""
-
-#: packs/official/clipboard/README.md packs/official/ydotool/README.md
-msgid "Restart"
-msgstr ""
-
-#: packs/official/clipboard/README.md
-msgid "Shared clipboard"
-msgstr ""
-
-#: packs/official/clipboard/README.md
-msgid ""
-"The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
-msgstr ""
-
-#: packs/official/cursor/README.md
+#: packs/original/cursor/README.md
 msgid ""
 "In desktop mode on the Frame, the mouse moves but its pointer isn't shown: the desktop draws it on a separate layer that the headset's view leaves out."
 msgstr ""
 
-#: packs/official/cursor/README.md
+#: packs/original/cursor/README.md
 msgid "Makes the mouse pointer visible in desktop mode"
 msgstr ""
 
-#: packs/official/cursor/README.md
+#: packs/original/cursor/README.md
 msgid "Makes the mouse pointer visible in desktop mode."
 msgstr ""
 
-#: packs/official/cursor/README.md
+#: packs/original/cursor/README.md
 msgid "Mouse cursor fix"
 msgstr ""
 
-#: packs/official/curvature/README.md
+#: packs/original/curvature/README.md
 msgid "Curved world windows"
 msgstr ""
 
-#: packs/official/curvature/README.md
+#: packs/original/curvature/README.md
 msgid ""
 "On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
 msgstr ""
 
-#: packs/official/curvature/README.md
+#: packs/original/curvature/README.md
 msgid ""
 "Windows you float into the world start curved, like the dashboard (Toggle Curvature still works)"
 msgstr ""
 
-#: packs/official/curvature/README.md
+#: packs/original/curvature/README.md
 msgid ""
 "Windows you float into the world start curved, like the dashboard; Toggle Curvature still works."
 msgstr ""
 
-#: packs/official/dictation/README.md
+#: packs/original/dictation/README.md
 msgid "Dictate"
 msgstr ""
 
-#: packs/official/dictation/README.md
+#: packs/original/dictation/README.md
 msgid "Dictation"
 msgstr ""
 
-#: packs/official/dictation/README.md
+#: packs/original/dictation/README.md
 msgid ""
 "Speak instead of typing: one shortcut to record, then the text is typed and copied, all on the headset"
 msgstr ""
 
-#: packs/official/dictation/README.md
+#: packs/original/dictation/README.md
 msgid ""
 "Speech-to-text that runs on the headset itself, with whisper.cpp. Press a shortcut (or 🎤 on Arrow Pad's Tools layer) to start, press again to stop; the text is typed into the app you're using and copied to the clipboard."
 msgstr ""
 
-#: packs/official/dictation/README.md
+#: packs/original/dictation/README.md
 msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
 msgstr ""
 
-#: packs/official/firefox/README.md
+#: packs/original/firefox/README.md
 msgid "Firefox privacy"
 msgstr ""
 
-#: packs/official/firefox/README.md
+#: packs/original/firefox/README.md
 msgid ""
 "Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings."
 msgstr ""
 
-#: packs/official/firefox/README.md
+#: packs/original/firefox/README.md
 msgid ""
 "Makes Firefox harder for websites to track: strong anti-fingerprinting, letterboxing and WebRTC limits"
 msgstr ""
 
-#: packs/official/firefox/README.md
+#: packs/original/firefox/README.md
 msgid ""
 "The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint."
 msgstr ""
 
-#: packs/official/float-grab/README.md
+#: packs/original/float-grab/README.md
 msgid ""
 "\"Float in World\" also picks the window up for placing, like grabbing its bar; your next click (or letting go of the trigger) puts it down"
 msgstr ""
 
-#: packs/official/float-grab/README.md
+#: packs/original/float-grab/README.md
 msgid ""
 "\"Float in World\" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down."
 msgstr ""
 
-#: packs/official/float-grab/README.md
+#: packs/original/float-grab/README.md
 msgid ""
 "In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one."
 msgstr ""
 
-#: packs/official/float-grab/README.md
+#: packs/original/float-grab/README.md
 msgid "Pick up when floating"
 msgstr ""
 
-#: packs/official/float-return/README.md
+#: packs/original/float-return/README.md
 msgid ""
 "After you float a window out of the dashboard, the dashboard shows the window it showed before (after 2.5 s) instead of an empty space"
 msgstr ""
 
-#: packs/official/float-return/README.md
+#: packs/original/float-return/README.md
 msgid ""
 "After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam."
 msgstr ""
 
-#: packs/official/float-return/README.md
+#: packs/original/float-return/README.md
 msgid "Back to the previous window"
 msgstr ""
 
-#: packs/official/float-return/README.md
+#: packs/original/float-return/README.md
 msgid ""
 "SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
 msgstr ""
 
-#: packs/official/full-keyboard/README.md
-msgid "Full Keyboard (VR)"
-msgstr ""
-
-#: packs/official/full-keyboard/README.md
-msgid ""
-"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks."
-msgstr ""
-
-#: packs/official/full-keyboard/README.md
-msgid ""
-"TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset."
-msgstr ""
-
-#: packs/official/full-keyboard/README.md
-msgid ""
-"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release"
-msgstr ""
-
-#: packs/official/homebrew/README.md
+#: packs/original/homebrew/README.md
 msgid "Homebrew"
 msgstr ""
 
-#: packs/official/homebrew/README.md
+#: packs/original/homebrew/README.md
 msgid ""
 "Homebrew, a package manager for command-line programs. It installs everything into `/home/linuxbrew`."
 msgstr ""
 
-#: packs/official/homebrew/README.md
+#: packs/original/homebrew/README.md
 msgid ""
 "SteamOS's system partition is read-only and wiped by updates, so programs installed there don't last. Homebrew installs outside it, and several tweaks use it for that reason."
 msgstr ""
 
-#: packs/official/homebrew/README.md
+#: packs/original/homebrew/README.md
 msgid "The package manager several tweaks install their programs with"
 msgstr ""
 
-#: packs/official/menu-icons/README.md
+#: packs/original/menu-icons/README.md
 msgid ""
 "Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
 msgstr ""
 
-#: packs/official/menu-icons/README.md
+#: packs/original/menu-icons/README.md
 msgid ""
 "Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
 msgstr ""
 
-#: packs/official/menu-icons/README.md
+#: packs/original/menu-icons/README.md
 msgid "Menu icons"
 msgstr ""
 
-#: packs/official/menu-icons/README.md
+#: packs/original/menu-icons/README.md
 msgid ""
 "Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
 msgstr ""
 
-#: packs/official/nordvpn/README.md
+#: packs/original/nordvpn/README.md
 msgid "NordVPN (WireGuard)"
 msgstr ""
 
-#: packs/official/nordvpn/README.md
+#: packs/original/nordvpn/README.md
 msgid ""
 "NordVPN as NetworkManager connections with a tray icon; survives SteamOS updates"
 msgstr ""
 
-#: packs/official/nordvpn/README.md
+#: packs/original/nordvpn/README.md
 msgid ""
 "NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates."
 msgstr ""
 
-#: packs/official/nordvpn/README.md
+#: packs/original/nordvpn/README.md
 msgid ""
 "The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs."
 msgstr ""
 
-#: packs/official/nordvpn/README.md
+#: packs/original/nordvpn/README.md
 msgid "Tray"
 msgstr ""
 
-#: packs/official/pack.md packs/official/dictation/README.md packs/official/arrowpad/README.md packs/official/snip/README.md
+#: packs/original/pack.md packs/original/dictation/README.md packs/original/arrowpad/README.md packs/original/snip/README.md packs/third-party/pack.md
 msgid "Accessibility"
 msgstr ""
 
-#: packs/official/pack.md packs/official/full-keyboard/README.md packs/official/clipboard/README.md packs/official/adb-scrcpy/README.md packs/official/cursor/README.md
+#: packs/original/pack.md packs/original/adb-scrcpy/README.md packs/original/cursor/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/clipboard/README.md
 msgid "Convenience"
 msgstr ""
 
-#: packs/official/pack.md packs/official/vscodium/README.md packs/official/claude-code/README.md packs/official/claude-desktop/README.md
+#: packs/original/pack.md packs/original/vscodium/README.md packs/original/claude-code/README.md packs/original/claude-desktop/README.md packs/third-party/pack.md
 msgid "Developer"
 msgstr ""
 
-#: packs/official/pack.md packs/official/wallet/README.md packs/official/signal/README.md packs/official/firefox/README.md packs/official/nordvpn/README.md
+#: packs/original/pack.md packs/original/wallet/README.md packs/original/signal/README.md packs/original/firefox/README.md packs/original/nordvpn/README.md packs/third-party/pack.md
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/official/pack.md packs/official/homebrew/README.md packs/official/tools/README.md packs/official/menu-icons/README.md packs/official/ydotool/README.md packs/official/speech/README.md
+#: packs/original/pack.md packs/original/homebrew/README.md packs/original/tools/README.md packs/original/menu-icons/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/third-party/pack.md
 msgid "System"
 msgstr ""
 
-#: packs/official/pack.md packs/official/vr-dashboard/README.md packs/official/curvature/README.md packs/official/float-return/README.md packs/official/float-grab/README.md packs/official/scroll-strips/README.md packs/official/recline/README.md
+#: packs/original/pack.md packs/original/vr-dashboard/README.md packs/original/curvature/README.md packs/original/float-return/README.md packs/original/float-grab/README.md packs/original/scroll-strips/README.md packs/third-party/pack.md packs/third-party/recline/README.md
 msgid "VR environment"
 msgstr ""
 
-#: packs/official/recline/README.md
-msgid "Applies when you reinstall Recline, then restart SteamVR."
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid "Keep the room view aligned while reclined"
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid ""
-"Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid "No (the room view looks tilted while reclined)"
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid "Recline"
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid ""
-"Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid ""
-"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid ""
-"Use VR lying down or reclined; one button makes your view level and forward"
-msgstr ""
-
-#: packs/official/recline/README.md
-msgid "Yes (adds a small library to the Frame's camera service)"
-msgstr ""
-
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid ""
 "Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR."
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid ""
 "Big scroll strips beside windows (docked or floating), easy to grab with the laser: drag to scroll, tap near an end to page"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid ""
 "Big strips beside each window. Press one and drag away from that point to scroll (farther = faster; let go to stop); tap near an end to page."
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Blue"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Bottom"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid ""
 "Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Colour"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Cyan"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Gap from the window (cm)"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Green"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Haptics (a tick on the controller as you scroll)"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Horizontal strip (scrolls sideways)"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid ""
 "In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit."
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Left"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Magenta"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "On"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Orange"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Pink"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Red"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Right"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Scroll strips"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Set back behind the window (cm)"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Sky"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Thickness (cm)"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Top"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Vertical strip (scrolls up and down)"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Violet"
 msgstr ""
 
-#: packs/official/scroll-strips/README.md
+#: packs/original/scroll-strips/README.md
 msgid "Yellow"
 msgstr ""
 
-#: packs/official/signal/README.md
+#: packs/original/signal/README.md
 msgid ""
 "A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text."
 msgstr ""
 
-#: packs/official/signal/README.md
+#: packs/original/signal/README.md
 msgid ""
 "Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens."
 msgstr ""
 
-#: packs/official/signal/README.md
+#: packs/original/signal/README.md
 msgid ""
 "Signal's database key in the wallet instead of plain text (an existing plain-text key is moved over)"
 msgstr ""
 
-#: packs/official/signal/README.md
+#: packs/original/signal/README.md
 msgid "Signal: key in the wallet"
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid ""
 "How Narrate reads: its speed here, and its voice and language below (the Speech engine's settings). The ⚙ on Narrate's panel shows the same."
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid "Reading speed"
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid "Screen snip + Narrate"
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid ""
 "Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it."
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid ""
 "Select a rectangle of the window you're using: copy it, save it, copy its text (OCR) or read it aloud"
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid "Snip"
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid ""
 "SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR."
 msgstr ""
 
-#: packs/official/snip/README.md
+#: packs/original/snip/README.md
 msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid ""
 "A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip."
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Apply"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Deutsch"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Downloads the chosen language's voice if needed and switches to it."
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "English (UK)"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "English (US)"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Español (España)"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Español (México)"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Français"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid ""
 "Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps; installed with Screen snip + Narrate"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Italiano"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Language"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Narrate with"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Nederlands"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Piper: natural, neural voices"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Polski"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Português (Brasil)"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid ""
 "Press Apply to switch (a new language downloads its voice, about 60 MB)."
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Speech engine (helper)"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid ""
 "SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent."
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Svenska"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid ""
 "The voice Screen snip's Narrate reads with, and the language of apps that speak through speech-dispatcher. Both engines are open source and run on the Frame, offline."
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Türkçe"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "eSpeak NG: robotic, fast, light"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Čeština"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Русский"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "Українська"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "العربية"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "हिन्दी"
 msgstr ""
 
-#: packs/official/speech/README.md
+#: packs/original/speech/README.md
 msgid "中文 (普通话)"
 msgstr ""
 
-#: packs/official/tools/README.md
+#: packs/original/tools/README.md
 msgid ""
 "An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
 msgstr ""
 
-#: packs/official/tools/README.md
+#: packs/original/tools/README.md
 msgid ""
 "An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`)."
 msgstr ""
 
-#: packs/official/tools/README.md
+#: packs/original/tools/README.md
 msgid "Desktop Recovery"
 msgstr ""
 
-#: packs/official/tools/README.md
+#: packs/original/tools/README.md
 msgid ""
 "In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session."
 msgstr ""
 
-#: packs/official/tools/README.md
+#: packs/original/tools/README.md
 msgid "Restart taskbar"
 msgstr ""
 
-#: packs/official/vr-dashboard/README.md
+#: packs/original/vr-dashboard/README.md
 msgid ""
 "Lets the VR environment tweaks adjust SteamVR's dashboard; installed automatically when needed"
 msgstr ""
 
-#: packs/official/vr-dashboard/README.md
+#: packs/original/vr-dashboard/README.md
 msgid ""
 "SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them."
 msgstr ""
 
-#: packs/official/vr-dashboard/README.md
+#: packs/original/vr-dashboard/README.md
 msgid ""
 "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
 msgstr ""
 
-#: packs/official/vr-dashboard/README.md
+#: packs/original/vr-dashboard/README.md
 msgid "VR dashboard patching (helper)"
 msgstr ""
 
-#: packs/official/vscodium/README.md
+#: packs/original/vscodium/README.md
 msgid ""
 "For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR."
 msgstr ""
 
-#: packs/official/vscodium/README.md
+#: packs/original/vscodium/README.md
 msgid "VS Code without Microsoft's telemetry, from Flathub"
 msgstr ""
 
-#: packs/official/vscodium/README.md
+#: packs/original/vscodium/README.md
 msgid "VSCodium"
 msgstr ""
 
-#: packs/official/vscodium/README.md
+#: packs/original/vscodium/README.md
 msgid ""
 "VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub."
 msgstr ""
 
-#: packs/official/wallet/README.md
+#: packs/original/wallet/README.md
 msgid ""
 "Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins."
 msgstr ""
 
-#: packs/official/wallet/README.md
+#: packs/original/wallet/README.md
 msgid ""
 "Password-protect the apps you choose (messages, sign-ins), with one wallet that locks itself; shared by desktop mode and VR"
 msgstr ""
 
-#: packs/official/wallet/README.md
+#: packs/original/wallet/README.md
 msgid ""
 "Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`."
 msgstr ""
 
-#: packs/official/wallet/README.md
+#: packs/original/wallet/README.md
 msgid "Shared KDE wallet"
 msgstr ""
 
-#: packs/official/wallet/README.md
+#: packs/original/wallet/README.md
 msgid "Unlock"
 msgstr ""
 
-#: packs/official/ydotool/README.md
+#: packs/original/ydotool/README.md
 msgid ""
 "Lets other tweaks type into any app; installed automatically when needed"
 msgstr ""
 
-#: packs/official/ydotool/README.md
+#: packs/original/ydotool/README.md
 msgid ""
 "On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one."
 msgstr ""
 
-#: packs/official/ydotool/README.md
+#: packs/original/ydotool/README.md packs/third-party/clipboard/README.md
+msgid "Restart"
+msgstr ""
+
+#: packs/original/ydotool/README.md
 msgid ""
 "The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them."
 msgstr ""
 
-#: packs/official/ydotool/README.md
+#: packs/original/ydotool/README.md
 msgid "ydotool (helper)"
+msgstr ""
+
+#: packs/third-party/clipboard/README.md
+msgid ""
+"Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source."
+msgstr ""
+
+#: packs/third-party/clipboard/README.md
+msgid "One clipboard for desktop mode and VR floating windows"
+msgstr ""
+
+#: packs/third-party/clipboard/README.md
+msgid "Shared clipboard"
+msgstr ""
+
+#: packs/third-party/clipboard/README.md
+msgid ""
+"The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
+msgstr ""
+
+#: packs/third-party/full-keyboard/README.md
+msgid "Full Keyboard (VR)"
+msgstr ""
+
+#: packs/third-party/full-keyboard/README.md
+msgid ""
+"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks."
+msgstr ""
+
+#: packs/third-party/full-keyboard/README.md
+msgid ""
+"TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset."
+msgstr ""
+
+#: packs/third-party/full-keyboard/README.md
+msgid ""
+"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Applies when you reinstall Recline, then restart SteamVR."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Keep the room view aligned while reclined"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "No (the room view looks tilted while reclined)"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Recline"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"Use VR lying down or reclined; one button makes your view level and forward"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Yes (adds a small library to the Frame's camera service)"
 msgstr ""
 

@@ -50,7 +50,7 @@ two launches, so the installer starts and closes Signal twice (about 20 seconds 
 checks the result. To check again later:
 
 ```sh
-packs/official/signal/check   # "OK: database key is encrypted via kwallet6; ..."
+packs/original/signal/check   # "OK: database key is encrypted via kwallet6; ..."
 ```
 
 Set a wallet password if you haven't yet (KWalletManager → *kdewallet* → *Change Password*):

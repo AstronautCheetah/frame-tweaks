@@ -1,8 +1,9 @@
 # Packs: adding your own tweaks
 
 Every tweak Frame Tweaks offers comes from a **pack**: a folder of tweak folders. Its own tweaks
-are the official pack, [`packs/official/`](../packs/official/), and they're loaded exactly like
-anyone else's. To add programs or fixes of your own, write a pack. You don't need to change
+are in two official packs, [`packs/original/`](../packs/original/) and
+[`packs/third-party/`](../packs/third-party/) (other projects' apps it installs), and they're
+loaded exactly like anyone else's. To add programs or fixes of your own, write a pack. You don't need to change
 Frame Tweaks itself, and your pack survives its updates.
 
 Start from the example, [`examples/hello-pack/`](../examples/hello-pack/): one small tweak that
@@ -108,7 +109,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `wallet_apps` | `[org.signal.Signal]` | Apps it sets up to use the shared KDE wallet (the Wallet apps page says so). |
 | `test` | `{offline: true, keeps: [.config/…], needs: [orca]}` | `dev/test-tweaks.sh` installs, checks and removes it in a throwaway home folder (only official and example tweaks run in CI). `keeps`: the files its uninstall leaves on purpose; `needs`: commands it needs to be tested. |
 | `replaces` | `true` | Use it instead of the tweak with the same id in another pack. |
-| `upstream_readme` | `https://raw.githubusercontent.com/owner/repo/v1.0/README.md` | For a tweak that installs another project: that project's README at the pinned version. In the official pack, `dev/fetch-upstream-readmes.py` copies it (with its pictures) into the tweak's folder and `dev/gen-docs.py` appends it below the tweak's own README. |
+| `upstream_readme` | `https://raw.githubusercontent.com/owner/repo/v1.0/README.md` | For a tweak that installs another project: that project's README at the pinned version. In the official packs, `dev/fetch-upstream-readmes.py` copies it (with its pictures) into the tweak's folder and `dev/gen-docs.py` appends it below the tweak's own README. |
 
 **Settings:**
 
@@ -236,6 +237,7 @@ The helpers in `lib/common.sh` and the manifest fields above are what a pack can
 
 ## Sending a tweak to Frame Tweaks
 
-A tweak in a pack is already in the shape the official pack uses: to propose it for Frame
-Tweaks itself, add its folder to `packs/official/` and its id to `packs/official/pack.md`, then
+A tweak in a pack is already in the shape the official packs use: to propose it for Frame
+Tweaks itself, add its folder to `packs/original/` and its id to `packs/original/pack.md` (or,
+for a tweak that installs another project's app, to `packs/third-party/`), then
 follow [CONTRIBUTING.md](../CONTRIBUTING.md).

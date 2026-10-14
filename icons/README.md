@@ -2,7 +2,7 @@
 
 App-menu icons, PNG (256×256; Frame Tweaks' own also at 64 and 128), installed into `~/.local/share/icons/hicolor` because Steam's
 "+" menu only looks up icons in the hicolor theme. This folder holds Frame Tweaks' own
-(`frame-tweaks*.png`); each tweak's icon is in its folder under `packs/official/` (installed with
+(`frame-tweaks*.png`); each tweak's icon is in its folder under `packs/original/` (installed with
 `install_icon`, listed as `icon:` in its README's front matter). Where they come from:
 
 - `frame-tweaks-dictate.png`: the Arrow Pad's 🎤 button in its recording state, using the

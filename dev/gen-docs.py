@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generate the docs that list tweaks, from the official pack (packs/official: each tweak's
-README.md front matter, in pack.md's order):
+"""Generate the docs that list tweaks, from the official packs (packs/original, then
+packs/third-party: each tweak's README.md front matter, in their pack.md's order):
 
   README.md       a table of tweaks per category, in the installer window's order
   SECURITY.md     the "What each tweak changes on your system" rows
@@ -19,16 +19,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
 import sft  # noqa: E402
-OFFICIAL = "packs/official"
 
 
 def tweaks():
     out = []
-    for d in sft.read_pack(ROOT / OFFICIAL)[1]:
+    for d in (d for pack in sft.OFFICIAL_PACKS for d in sft.read_pack(pack)[1]):
         c, problems = sft.read_tweak(d)
         if not c:
             sys.exit("\n".join(problems))
-        out.append((c["id"], {"emoji": c["emoji"], "name": c["title"], "group": c["tier"], "what": c["what"],
+        out.append((c["id"], {"dir": d.relative_to(ROOT).as_posix(), "emoji": c["emoji"], "name": c["title"], "group": c["tier"], "what": c["what"],
                               "why": c["why"], "changes": c["changes"], "access": c["access"],
                               "survives-updates": c["survives_updates"], "undo": c["undo"],
                               "experimental": c["experimental"], "upstream": c["upstream_readme"],
@@ -36,15 +35,15 @@ def tweaks():
     return out
 
 
-def link(i, name):
-    """[**Claude Code**](packs/official/claude-code/) (command line): bold name, plain parenthetical."""
-    m = re.match(r"(.*?)( \(.*\))?$", name)
-    return f"[**{m[1]}**]({OFFICIAL}/{i}/){m[2] or ''}"
+def link(m):
+    """[**Claude Code**](packs/original/claude-code/) (command line): bold name, plain parenthetical."""
+    n = re.match(r"(.*?)( \(.*\))?$", m["name"])
+    return f"[**{n[1]}**]({m['dir']}/){n[2] or ''}"
 
 
 def readme_tables(rows):
     """One table per category, in pack.md's order (as the installer window lists them)."""
-    order = sft.read_pack(ROOT / OFFICIAL)[0]["categories"]
+    order = sft.read_pack(sft.ORIGINAL)[0]["categories"]
     cats = order + sorted({m["category"] for _, m in rows} - set(order))
     out = []
     for cat in cats:
@@ -52,7 +51,7 @@ def readme_tables(rows):
         if not mine:
             continue
         out += [f"### {cat}", "", "| | Tweak | What you get | Why on a Steam Frame |", "|---|---|---|---|"]
-        out += [f"| {m['emoji']} | {link(i, m['name'])}{' 🧪' if m.get('experimental') else ''}"
+        out += [f"| {m['emoji']} | {link(m)}{' 🧪' if m.get('experimental') else ''}"
                 f"{' *(helper)*' if m['group'] == 'helper' and 'helper' not in m['name'].lower() else ''} | {m['what']} | {m['why']} |" for i, m in mine]
         out.append("")
     return "\n".join(out).rstrip()
@@ -78,10 +77,10 @@ def changes(m):
     return "\n".join(lines)
 
 
-def upstream(i, url):
+def upstream(i, m):
     """The installed project's own README, after a footer line and a separator."""
-    owner, repo, ref = url.split("/")[3:6]
-    copy = ROOT / OFFICIAL / i / "upstream.md"
+    owner, repo, ref = m["upstream"].split("/")[3:6]
+    copy = ROOT / m["dir"] / "upstream.md"
     if not copy.is_file():
         sys.exit(f"{copy.relative_to(ROOT)} is missing: run dev/fetch-upstream-readmes.py {i}")
     return (f"---\n\n*The rest of this page is [{owner}/{repo}](https://github.com/{owner}/{repo})'s own "
@@ -117,8 +116,8 @@ def main():
     targets = {ROOT / "README.md": [("tweaks", readme_tables(rows))],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
-        targets[ROOT / OFFICIAL / i / "README.md"] = [("intro", intro(m)), ("changes", changes(m))] + (
-            [("upstream", upstream(i, m["upstream"]))] if m["upstream"] else [])
+        targets[ROOT / m["dir"] / "README.md"] = [("intro", intro(m)), ("changes", changes(m))] + (
+            [("upstream", upstream(i, m))] if m["upstream"] else [])
     stale = []
     for path, parts in targets.items():
         old = path.read_text()
