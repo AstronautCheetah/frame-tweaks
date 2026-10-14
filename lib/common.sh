@@ -381,6 +381,18 @@ remove_files() {
 
 export QT_VENV="$HOME/.local/share/arrowpad/venv"   # PyQt6, shared by arrowpad and nordvpn-tray
 
+# remove_qt_venv: QT_VENV is shared by Arrow Pad, Screen snip, the NordVPN tray and the full
+# installer window (install.sh gui, which runs it as bin/sft-python): the last of them to go
+# removes it. Kept on a reinstall (↻), rather than downloaded again. (Unticking one of them in
+# the window used to delete the window's own Python while it ran.)
+remove_qt_venv() {
+    [ -z "${FRAME_TWEAKS_REINSTALL:-}" ] || return 0
+    [ ! -e "$QT_VENV/bin/sft-python" ] || return 0
+    local p
+    for p in arrowpad frame-snip nordvpn-tray; do [ ! -x "$BIN/$p" ] || return 0; done
+    remove_files "$QT_VENV"
+}
+
 # --- SteamVR dashboard patches (packs/original/vr-dashboard/) ---------------------------------------------
 # A VR environment tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
 VR_DASHBOARD="$HOME/.local/share/frame-tweaks/vr-dashboard"
