@@ -108,6 +108,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `wallet_apps` | `[org.signal.Signal]` | Apps it sets up to use the shared KDE wallet (the Wallet apps page says so). |
 | `test` | `{offline: true, keeps: [.config/…], needs: [orca]}` | `dev/test-tweaks.sh` installs, checks and removes it in a throwaway home folder (only official and example tweaks run in CI). `keeps`: the files its uninstall leaves on purpose; `needs`: commands it needs to be tested. |
 | `replaces` | `true` | Use it instead of the tweak with the same id in another pack. |
+| `upstream_readme` | `https://raw.githubusercontent.com/owner/repo/v1.0/README.md` | For a tweak that installs another project: that project's README at the pinned version. In the official pack, `dev/fetch-upstream-readmes.py` copies it (with its pictures) into the tweak's folder and `dev/gen-docs.py` appends it below the tweak's own README. |
 
 **Settings:**
 

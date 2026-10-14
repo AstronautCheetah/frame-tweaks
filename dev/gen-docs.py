@@ -4,7 +4,9 @@ README.md front matter, in pack.md's order):
 
   README.md       the Core / Extras / Helpers tables
   SECURITY.md     the "What each tweak changes on your system" rows
-  <tweak>/README  an "At a glance" box (survives updates, what it changes, how to undo)
+  <tweak>/README  an "At a glance" box (survives updates, what it changes, how to undo), and
+                  for a tweak that installs another project, that project's own README at the end
+                  (from <tweak>/upstream.md; dev/fetch-upstream-readmes.py updates it)
 
 Generated parts sit between <!-- generated:NAME --> and <!-- /generated:NAME --> markers.
   dev/gen-docs.py           rewrite them
@@ -28,7 +30,7 @@ def tweaks():
         out.append((c["id"], {"emoji": c["emoji"], "name": c["title"], "group": c["tier"], "what": c["what"],
                               "why": c["why"], "changes": c["changes"], "access": c["access"],
                               "survives-updates": c["survives_updates"], "undo": c["undo"],
-                              "experimental": c["experimental"]}))
+                              "experimental": c["experimental"], "upstream": c["upstream_readme"]}))
     return out
 
 
@@ -61,12 +63,27 @@ def glance(m):
     return "\n".join(lines)
 
 
+def upstream(i, url):
+    """The installed project's own README, after a footer line and a separator."""
+    owner, repo, ref = url.split("/")[3:6]
+    copy = ROOT / OFFICIAL / i / "upstream.md"
+    if not copy.is_file():
+        sys.exit(f"{copy.relative_to(ROOT)} is missing: run dev/fetch-upstream-readmes.py {i}")
+    return (f"---\n\n*The rest of this page is [{owner}/{repo}](https://github.com/{owner}/{repo})'s own "
+            f"README at `{ref[:12]}`, as its author wrote it (only links and heading levels adjusted), "
+            f"included for its instructions and credits. Everything above is Frame Tweaks'.*\n\n"
+            + copy.read_text().strip())
+
+
 def put(text, name, body, path):
-    begin, end = f"<!-- generated:{name} (dev/gen-docs.py, from each tweak's README front matter) -->", f"<!-- /generated:{name} -->"
+    source = "upstream.md" if name == "upstream" else "each tweak's README front matter"
+    begin, end = f"<!-- generated:{name} (dev/gen-docs.py, from {source}) -->", f"<!-- /generated:{name} -->"
     block = f"{begin}\n{body}\n{end}"
     pat = re.compile(re.escape(begin.split(" (")[0]) + r".*?" + re.escape(end), re.S)
     if pat.search(text):
         return pat.sub(lambda _: block, text)
+    if name == "upstream":        # first run: at the end
+        return text.rstrip("\n") + "\n\n" + block + "\n"
     if name == "glance":          # first run: after the title and first paragraph
         parts = text.split("\n\n", 2)
         return "\n\n".join(parts[:2] + [block] + parts[2:]) if len(parts) == 3 else text + "\n\n" + block + "\n"
@@ -79,7 +96,8 @@ def main():
     targets = {ROOT / "README.md": [(g, readme_table(rows, g)) for g in ("core", "extras", "helper")],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
-        targets[ROOT / OFFICIAL / i / "README.md"] = [("glance", glance(m))]
+        targets[ROOT / OFFICIAL / i / "README.md"] = [("glance", glance(m))] + (
+            [("upstream", upstream(i, m["upstream"]))] if m["upstream"] else [])
     stale = []
     for path, parts in targets.items():
         old = path.read_text()

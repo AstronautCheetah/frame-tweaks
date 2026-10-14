@@ -93,6 +93,10 @@ To take a newer version: read upstream's changes (`dev/bump-pin.py` prints the l
 `dev/bump-pin.py <tweak>` (or `python`), test (the VR tweaks in the headset too), then commit it
 on its own. After testing a newer scrcpy, android-tools or ydotool, update `lib/tested-versions`
 (and for a new scrcpy major version, `SCRCPY_TESTED` in `adb-scrcpy/phone-touch`).
+A tweak that installs another project shows that project's README below its own
+(`upstream_readme:` in its manifest). After bumping its pin, point `upstream_readme:` at the same
+version and run `dev/fetch-upstream-readmes.py <tweak>` and `dev/gen-docs.py`.
+
 After bumping a pin that has a `mirror=` line, run `dev/mirror-pins.sh` to upload Frame Tweaks'
 copy and its licence texts (a new pin needs `mirror=`, `license=` and `license_file=`, or
 `nomirror=` saying why it can't be copied).
