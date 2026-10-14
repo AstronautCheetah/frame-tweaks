@@ -20,7 +20,7 @@
 #   ./install.sh wallet lock|unlock|status      the shared KDE wallet (wallet-unlock)
 #   ./install.sh wallet-apps [ARGS]  apps that use the wallet (wallet-launcher; --help for its options)
 #   ./install.sh timers [ARGS]       close-after timers for apps (app-timers; --help for its options)
-#   ./install.sh menu                (re)create the "Frame Tweaks" app-menu entry
+#   ./install.sh menu [--remove]     (re)create the "Frame Tweaks" app-menu entry (or remove it)
 #   ./install.sh ID...               same as "install ID..."
 #
 # Everything installs into your home directory; nothing touches SteamOS's read-only system
@@ -92,6 +92,14 @@ ensure_menu_entry() {
     rm -f "$apps/steam-frame-tweaks.desktop"          # its old name
     update-desktop-database -q "$apps" 2>/dev/null || true
     touch "$apps" "$icons"     # Steam's "+" menu rescans on these
+}
+remove_menu_entry() {
+    local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor" n
+    local id=io.github.AstronautCheetah.FrameTweaks
+    rm -f "$apps/$id.desktop" "$HOME/.local/share/metainfo/$id.metainfo.xml" "$icons/256x256/apps/frame-tweaks.png"
+    for n in 64 128 256; do rm -f "$icons/${n}x$n/apps/$id.png"; done
+    update-desktop-database -q "$apps" 2>/dev/null || true
+    touch "$apps" "$icons" 2>/dev/null || true
 }
 
 bold() { printf '\033[1m%s\033[0m\n' "$*"; }
@@ -441,7 +449,8 @@ case ${1:-} in
                  esac ;;
     wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
-    menu)        ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu." ;;
+    menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "Removed 'Frame Tweaks' from the app menu."
+                 else ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu."; fi ;;
     -h|--help|help) usage ;;
     --version|version) echo "$FT_BUILD" ;;
     *)           take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;
