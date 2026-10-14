@@ -1,0 +1,35 @@
+name: Upstream check
+# Weekly: has anything outside the repo that installs depend on changed or gone away (pinned
+# downloads, Arch Linux ARM packages, Homebrew's scrcpy, newer versions to bump)? Keeps one issue
+# (label "upstream-check") up to date with the answer; see dev/check-upstream.sh.
+on:
+  schedule:
+    - cron: "17 6 * * 1"        # Mondays, 06:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+  actions: write                # to keep this schedule switched on (below)
+concurrency:
+  group: upstream-check
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Tools (bsdtar reads Arch Linux ARM packages)
+        run: sudo apt-get update -qq && sudo apt-get install -y libarchive-tools >/dev/null
+      - name: Check
+        run: dev/check-upstream.sh > report.md || true; cat report.md
+      - name: Update the issue
+        run: dev/upstream-issue.sh report.md
+      # GitHub switches scheduled workflows off after 60 days without commits to the repository;
+      # re-enabling it each run keeps the check going while nobody commits (the approach of
+      # gautamkrishnar/keepalive-workflow's API mode).
+      - name: Keep this schedule on
+        if: github.event_name == 'schedule'
+        run: gh api -X PUT "repos/$GH_REPO/actions/workflows/upstream.yml/enable"
