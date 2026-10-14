@@ -31,14 +31,14 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | float-grab | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | scroll-strips | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json` | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys |
 | wallet | `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`) | Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet |
-| signal | Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json` | Asks for the wallet password first; quits Signal when idle; key in the wallet |
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
-| nordvpn | `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry, `~/.config/nordvpn-wg` (your WireGuard key and locations) | **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key |
 | homebrew | `/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew` | **Needs your sudo password once**, to create `/home/linuxbrew` |
 | tools | `~/.local/bin/restart-plasmashell` | – |
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool` and `ydotoold` in `~/.local/bin` (Arch Linux ARM package, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall) | None beyond your home folder |
+| signal | Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json` | Asks for the wallet password first; quits Signal when idle; key in the wallet |
+| nordvpn | `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry, `~/.config/nordvpn-wg` (your WireGuard key and locations) | **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key |
 | vscodium | Flathub app `com.vscodium.codium` (system-wide Flatpak) | VSCodium's own Flatpak permissions: all your files, the network, and running commands outside its sandbox |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS |
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |
@@ -75,7 +75,7 @@ password. Until you set one (KWalletManager → *Change Password*), nothing abov
 protected. Avoid changing it while a second wallet service is running (see
 [wallet/README.md](packs/original/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
-**Other people's packs.** Tweaks can come from packs other than the official ones (Original and 3rd Party)
+**Other people's packs.** Tweaks can come from packs other than the official ones (Original, Integrations and 3rd Party)
 ([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
 `~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
 and trust covers its files as they were then: if any change, it's ignored again until you

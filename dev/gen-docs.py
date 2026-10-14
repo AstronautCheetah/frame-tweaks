@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generate the docs that list tweaks, from the official packs (packs/original, then
-packs/third-party: each tweak's README.md front matter, in their pack.md's order):
+"""Generate the docs that list tweaks, from the official packs (packs/original,
+packs/integrations, then packs/third-party: each tweak's README.md front matter, in their pack.md's order):
 
   README.md       a table of tweaks per category, in the installer window's order
   SECURITY.md     the "What each tweak changes on your system" rows
@@ -36,7 +36,7 @@ def tweaks():
 
 
 def link(m):
-    """[**Claude Code**](packs/original/claude-code/) (command line): bold name, plain parenthetical."""
+    """[**Claude Code**](packs/integrations/claude-code/) (command line): bold name, plain parenthetical."""
     n = re.match(r"(.*?)( \(.*\))?$", m["name"])
     return f"[**{n[1]}**]({m['dir']}/){n[2] or ''}"
 

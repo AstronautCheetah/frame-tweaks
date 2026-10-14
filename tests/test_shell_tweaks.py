@@ -25,7 +25,7 @@ class Home(unittest.TestCase):
 
     def run_script(self, script, *args):
         env = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin", "USER": os.environ.get("USER", "u")}
-        return subprocess.run(["bash", str(ROOT / "packs/original" / script), *args], env=env, capture_output=True, text=True, timeout=60)
+        return subprocess.run(["bash", str(next(p for p in ROOT.glob("packs/*/" + script))), *args], env=env, capture_output=True, text=True, timeout=60)
 
 
 class Firefox(Home):

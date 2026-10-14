@@ -36,6 +36,17 @@ import threading
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 DASHBOARD = Path.home() / ".local/share/frame-tweaks/vr-dashboard/sft-dashboard"
 BINDING = "sftPhoneTouch"
 JAR = "/data/local/tmp/sft-phone-touch.jar"     # scrcpy deletes its own copy once it has started
@@ -70,7 +81,7 @@ def scrcpy_server():
     m = re.match(r"scrcpy (\S+)", out)
     jar = os.environ.get("SCRCPY_SERVER_PATH") or Path(os.path.realpath(exe)).parent.parent / "share/scrcpy/scrcpy-server"
     if not m or not Path(jar).is_file():
-        sys.exit("phone-touch: can't find scrcpy's server")
+        sys.exit(_("phone-touch: can't find scrcpy's server"))
     return m.group(1), str(jar)
 
 
@@ -80,12 +91,13 @@ def tested(version):
 
 def check():
     """0 if the installed scrcpy is a tested one; else say so (a notification once per version)."""
-    version, _ = scrcpy_server()
+    version, _jar = scrcpy_server()
     if tested(version):
         return 0
-    why = (f"scrcpy {version} isn't a version Frame Tweaks has been tested with "
-           f"({', '.join(v + '.x' for v in SCRCPY_TESTED)}), so the mirror's VR extras are off: aimed laser "
-           "clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update.")
+    why = _("scrcpy {version} isn't a version Frame Tweaks has been tested with "
+            "({tested}), so the mirror's VR extras are off: aimed laser "
+            "clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update.").format(
+                version=version, tested=", ".join(v + ".x" for v in SCRCPY_TESTED))
     log(why)
     seen = STATE / "phone-touch-untested"
     try:
@@ -96,7 +108,7 @@ def check():
     try:
         STATE.mkdir(parents=True, exist_ok=True)
         seen.write_text(version + "\n")
-        subprocess.run(["notify-send", "-a", "Android Mirror", "VR extras are off", why], timeout=10)
+        subprocess.run(["notify-send", "-a", "Android Mirror", _("VR extras are off"), why], timeout=10)
     except (OSError, subprocess.SubprocessError):
         pass
     return 1

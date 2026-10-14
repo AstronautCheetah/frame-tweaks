@@ -1,9 +1,9 @@
 #!/bin/bash
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
-[ -x "$BIN/clipboard-sync" ] || status_missing "clipboard-sync not installed"
-pgrep -u "$(id -u)" -x clipboard-sync >/dev/null || status_warn "installed but not running (starts with desktop mode)"
+[ -x "$BIN/clipboard-sync" ] || status_missing "$(t '%s not installed' clipboard-sync)"
+pgrep -u "$(id -u)" -x clipboard-sync >/dev/null || status_warn "$(t 'installed but not running (starts with desktop mode)')"
 n=$(pgrep -u "$(id -u)" -x clipboard-sync | wc -l)
-[ "$n" -le 2 ] || status_warn "$n copies running (Restart fixes it)"   # (each forks one helper)
+[ "$n" -le 2 ] || status_warn "$(t '%s copies running (Restart fixes it)' "$n")"   # (each forks one helper)
 grep -q "keep-images" "$HOME/.local/share/frame-tweaks/src/clipboard-sync/.sft-patched" 2>/dev/null \
-    || status_warn "older build: replaces copied images with text (Reinstall fixes it)"
-status_ok "clipboard-sync running"
+    || status_warn "$(t 'older build: replaces copied images with text (Reinstall fixes it)')"
+status_ok "$(t '%s running' clipboard-sync)"

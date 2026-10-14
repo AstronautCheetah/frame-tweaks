@@ -12,16 +12,16 @@ trap 'rm -rf "$BUILD"' EXIT
 export RUSTUP_HOME="$BUILD/rustup" CARGO_HOME="$BUILD/cargo"
 fetch_pinned clipboard "$BUILD/rustup-init" rust.pin
 chmod +x "$BUILD/rustup-init"
-say "Fetching Rust $(sed -n 's/^toolchain=//p' "$TWEAK_DIR/rust.pin") (temporary, for the build)"
+say "$(t 'Fetching Rust %s (temporary, for the build)' "$(sed -n 's/^toolchain=//p' "$TWEAK_DIR/rust.pin")")"
 "$BUILD/rustup-init" -y -q --no-modify-path --profile minimal \
     --default-toolchain "$(sed -n 's/^toolchain=//p' "$TWEAK_DIR/rust.pin")" ||
-    die "couldn't set up Rust for the build"
+    die "$(t "couldn't set up Rust for the build")"
 export PATH="$CARGO_HOME/bin:$PATH"
 if [ -x /home/linuxbrew/.linuxbrew/bin/rustc ]; then
-    say "Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you"
-    say "don't use it yourself: brew uninstall rust && brew autoremove   (frees about 3.4 GB)"
+    while IFS= read -r line; do say "$line"; done <<< "$(t "Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you
+don't use it yourself: %s   (frees about 3.4 GB)" "brew uninstall rust && brew autoremove")"
 fi
-say "Building clipboard-sync from https://github.com/dnut/clipboard-sync (a few minutes)"
+say "$(t 'Building %s from %s (a few minutes)' clipboard-sync https://github.com/dnut/clipboard-sync)"
 # The pinned commit, plus one small change (keep-images.patch): it only shares text, and used
 # to replace a copied image with the last text a moment later.
 SRC="$HOME/.local/share/frame-tweaks/src/clipboard-sync"
@@ -29,9 +29,9 @@ rev=$(sed -n 's/^rev=//p' "$TWEAK_DIR/pin")
 rm -rf "$SRC"
 if git clone -q "$(sed -n 's/^url=//p' "$TWEAK_DIR/pin")" "$SRC" &&
    git -C "$SRC" -c advice.detachedHead=false checkout -q "$rev"; then
-    [ "$(git -C "$SRC" rev-parse HEAD)" = "$rev" ] || die "clipboard-sync: not the pinned commit"
+    [ "$(git -C "$SRC" rev-parse HEAD)" = "$rev" ] || die "$(t '%s: not the pinned commit' clipboard-sync)"
 else      # gone upstream: Frame Tweaks' copy of that commit's source (dev/mirror-pins.sh)
-    warn "clipboard-sync's pinned commit isn't available upstream; using Frame Tweaks' copy"
+    warn "$(t "%s's pinned commit isn't available upstream; using Frame Tweaks' copy" clipboard-sync)"
     rm -rf "$SRC" && mkdir -p "$SRC"
     fetch_mirror "$(sed -n 's/^mirror=//p' "$TWEAK_DIR/pin")" \
         "$(sed -n 's/^mirror_sha256=//p' "$TWEAK_DIR/pin")" "$BUILD/src.tar.gz"
@@ -60,7 +60,7 @@ DESKTOP
 if src=$(pgrep -u "$(id -u)" -x ksmserver | head -1) && [ -n "$src" ]; then
     mapfile -d '' envs < "/proc/$src/environ"
     (cd "$HOME" && env -i "${envs[@]}" setsid -f "$BIN/clipboard-sync-start" >/dev/null 2>&1 </dev/null)
-    say "clipboard-sync started"
+    say "$(t '%s started' clipboard-sync)"
 else
-    say "clipboard-sync starts with desktop mode."
+    say "$(t '%s starts with desktop mode.' clipboard-sync)"
 fi

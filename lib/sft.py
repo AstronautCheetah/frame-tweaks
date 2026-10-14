@@ -63,12 +63,14 @@ OFF_PACKS = CONF / "off-packs"                      # official packs turned off 
 # ---- packs and tweaks -------------------------------------------------------------------------
 # A pack is a folder of tweak folders, with an optional pack.md; a tweak is a folder whose
 # README.md starts with front matter (docs/mods.md). Frame Tweaks' own packs (official) are loaded
-# like any other, and are on unless turned off: Original (our own tweaks) and 3rd Party (other
-# projects' apps, set up for the Frame). A user's packs need trusting first (they run as you),
+# like any other, and are on unless turned off: Original (our own tweaks), Integrations (other
+# projects' apps that Frame Tweaks fits to the Frame) and 3rd Party (other projects' apps,
+# installed as they are). A user's packs need trusting first (they run as you),
 # and a tweak of theirs may take the place of one with the same id only by saying `replaces: true`.
 ORIGINAL = REPO / "packs/original"
+INTEGRATIONS = REPO / "packs/integrations"
 THIRD_PARTY = REPO / "packs/third-party"
-OFFICIAL_PACKS = [ORIGINAL, THIRD_PARTY]    # (also dev/i18n.py's: the packs whose text is in the template)
+OFFICIAL_PACKS = [ORIGINAL, INTEGRATIONS, THIRD_PARTY]    # (also dev/i18n.py's: the packs whose text is in the template)
 USER_PACKS = Path.home() / ".local/share/frame-tweaks/packs"
 API = 1                                             # the newest pack api this version knows
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -491,12 +493,13 @@ def write_settings(cid, changes, reset=False):
 def parse_value(cid, key, text):
     """A value from the command line: a listed value, or its label (case and spaces ignored)."""
     norm = lambda t: str(t).replace(" ", "").lower()
-    for k, _, choices, _ in SETTINGS[cid]["options"]:
+    for k, _title, choices, _default in SETTINGS[cid]["options"]:
         if k == key:
             for label, value in choices:
                 if norm(text) in (norm(value), norm(label)):
                     return value
-            raise ValueError(f"{key}: {text!r} isn't one of: {', '.join(label for label, _ in choices)}")
+            raise ValueError(_("{key}: {text} isn't one of: {choices}").format(
+                key=key, text=repr(text), choices=", ".join(label for label, _v in choices)))
     raise KeyError(key)
 
 
@@ -504,27 +507,28 @@ def parse_value(cid, key, text):
 def info(cid):
     c = component(cid)
     if not c:
-        sys.exit(f"unknown component: {cid}")
+        sys.exit(_("unknown component: %s") % cid)
     lines = [f"{c['title']}  ({c['category']})", "", c["what"]]
     if c["why"]:
-        lines += ["", "Why: " + c["why"]]
+        lines += ["", _("Why: %s") % c["why"]]
     if c["experimental"]:
-        lines += ["", "Experimental: " + c["experimental"]]
+        lines += ["", _("Experimental: %s") % c["experimental"]]
     if c["deps"]:
-        lines += ["", "Needs: " + ", ".join(c["deps"])]
+        lines += ["", _("Needs: %s") % ", ".join(c["deps"])]
     if c["author"]:
-        lines += ["By: " + c["author"]]
+        lines += [_("By: %s") % c["author"]]
     if c["source"]:
-        lines += ["Source: " + c["source"].split("|")[-1]]
+        lines += [_("Source: %s") % c["source"].split("|")[-1]]
     if not c["official"]:
-        lines += [f"From the pack {c['pack']!r} ({c['pack_dir']}), not part of Frame Tweaks"
-                  + (f"; used instead of {c['replaced']}'s" if c["replaced"] else "")]
-    lines += ["More: " + str(c["readme"])]
+        lines += [(_("From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s")
+                   if c["replaced"] else _("From the pack {pack} ({folder}), not part of Frame Tweaks")).format(
+                      pack=repr(c["pack"]), folder=c["pack_dir"], other=c["replaced"])]
+    lines += [_("More: %s") % c["readme"]]
     label = run_label(cid)
     if label:
-        lines += [f"Run ({label}): ./install.sh run {cid}"]
+        lines += [_("Run ({label}): {command}").format(label=label, command=f"./install.sh run {cid}")]
     if cid in SETTINGS:
-        lines += [f"Settings: ./install.sh settings {cid}"]
+        lines += [_("Settings: %s") % f"./install.sh settings {cid}"]
     return "\n".join(lines)
 
 
@@ -533,25 +537,27 @@ def find_pack(name):
     for p in load()["packs"]:
         if name in (p["name"], p["dir"].name, str(p["dir"])) or Path(name).expanduser().resolve() == p["dir"]:
             return p
-    sys.exit(f"no pack {name!r}; see ./install.sh mods")
+    sys.exit(_("no pack {name}; see {command}").format(name=repr(name), command="./install.sh mods"))
 
 
 def mods(args):
     if args[:1] in (["on"], ["off"]) and len(args) == 2:
         p = find_pack(args[1])
         if p["state"] not in ("official", "off"):
-            sys.exit(f"{p['name']} isn't one of Frame Tweaks' own packs: ./install.sh mods trust|untrust NAME")
+            sys.exit(_("{pack} isn't one of Frame Tweaks' own packs: {command}").format(
+                pack=p["name"], command="./install.sh mods trust|untrust NAME"))
         set_official(p["dir"], args[0] == "on")
-        print(f"{p['name']}: " + ("in use; its tweaks are listed" if args[0] == "on" else
-                                  "turned off (installed tweaks of it stay until you uninstall them)"))
+        print(f"{p['name']}: " + (_("in use; its tweaks are listed") if args[0] == "on" else
+                                  _("turned off (installed tweaks of it stay until you uninstall them)")))
         return
     if args[:1] in (["trust"], ["untrust"]) and len(args) == 2:
         p = find_pack(args[1])
         if p["state"] in ("official", "off"):
-            sys.exit(f"{p['name']} comes with Frame Tweaks, so it needs no trust: ./install.sh mods on|off NAME")
+            sys.exit(_("{pack} comes with Frame Tweaks, so it needs no trust: {command}").format(
+                pack=p["name"], command="./install.sh mods on|off NAME"))
         set_trusted(p["dir"], args[0] == "trust")
-        print(f"{p['name']}: " + ("trusted; its tweaks are listed now" if args[0] == "trust" else
-                                  "no longer used (installed tweaks of it stay until you uninstall them)"))
+        print(f"{p['name']}: " + (_("trusted; its tweaks are listed now") if args[0] == "trust" else
+                                  _("no longer used (installed tweaks of it stay until you uninstall them)")))
         return
     if args[:1] == ["check"] and len(args) == 2:
         d = Path(args[1]).expanduser().resolve()
@@ -569,10 +575,11 @@ def mods(args):
     data = load()
     used = {c["id"]: c for c in data["components"]}
     for p in data["packs"]:
-        state = {"official": "official: in use", "off": "official: turned off (./install.sh mods on NAME)",
-                 "trusted": "trusted: in use",
-                 "untrusted": "not trusted: not used (./install.sh mods trust NAME)",
-                 "changed": "changed since you trusted it: not used until you trust it again"}[p["state"]]
+        state = {"official": _("official: in use"),
+                 "off": _("official: turned off ({command})").format(command="./install.sh mods on NAME"),
+                 "trusted": _("trusted: in use"),
+                 "untrusted": _("not trusted: not used ({command})").format(command="./install.sh mods trust NAME"),
+                 "changed": _("changed since you trusted it: not used until you trust it again")}[p["state"]]
         print(f"{p['name']}  ({p['dir']})  {state}")
         if p["about"]:
             print(f"    {p['about']}")
@@ -580,10 +587,10 @@ def mods(args):
             for t in p["tweaks"]:
                 c = used.get(t)
                 note = "" if not c or c["pack_dir"] != p["dir"] else (
-                    f"  (instead of {c['replaced']}'s)" if c["replaced"] else "")
+                    "  " + _("(instead of {other}'s)").format(other=c["replaced"]) if c["replaced"] else "")
                 print(f"    {t}{note}")
     for pr in data["problems"]:
-        print("problem: " + pr)
+        print(_("problem: %s") % pr)
 
 
 def show_settings(cid):
@@ -591,8 +598,8 @@ def show_settings(cid):
     out = [f"{s['about']}  ({s['file']})"]
     for key, title, choices, default in s["options"]:
         label = next((lab for lab, v in choices if v == cur[key]), cur[key])
-        out.append(f"  {key} = {label}{'  (default)' if cur[key] == default else ''}    # {title}: "
-                   + ", ".join(lab for lab, _ in choices))
+        mark = "  " + _("(default)") if cur[key] == default else ""
+        out.append(f"  {key} = {label}{mark}    # {title}: " + ", ".join(lab for lab, _v in choices))
     out.append(s["note"])
     return "\n".join(out)
 
@@ -605,17 +612,19 @@ def main(argv):
     if cmd in ("hide", "unhide"):
         bad = [a for a in args if a not in ids]
         if bad or not args:
-            sys.exit(f"unknown component: {' '.join(bad)}" if bad else f"{cmd} what?")
+            sys.exit(_("unknown component: %s") % " ".join(bad) if bad else _("%s what?") % cmd)
         for a in args:
             set_hidden(a, cmd == "hide")
-        print(("Hidden" if cmd == "hide" else "Shown") + " in the installer window: " + " ".join(args))
+        print((_("Hidden in the installer window: %s") if cmd == "hide" else
+               _("Shown in the installer window: %s")) % " ".join(args))
     elif cmd in ("hide-group", "unhide-group"):
         cats = {c["category"] for c in components()}
         name = " ".join(args)
         if name not in cats:
-            sys.exit(f"unknown group {name!r}; groups: {', '.join(sorted(cats))}")
+            sys.exit(_("unknown group {name}; groups: {groups}").format(name=repr(name), groups=", ".join(sorted(cats))))
         set_category_hidden(name, cmd == "hide-group")
-        print(f"Group {name!r} " + ("hidden" if cmd == "hide-group" else "shown") + " in the installer window.")
+        print((_("Group {name} hidden in the installer window.") if cmd == "hide-group" else
+               _("Group {name} shown in the installer window.")).format(name=repr(name)))
     elif cmd == "mods":
         mods(args)
     elif cmd == "registry":                     # for ./install.sh: one line per tweak, \x1f-separated
@@ -624,7 +633,7 @@ def main(argv):
                                "1" if c["experimental"] else ""]))
     elif cmd == "dir" and len(args) == 1:
         c = component(args[0])
-        sys.exit(f"unknown component: {args[0]}") if not c else print(c["dir"])
+        sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])
     elif cmd == "processes" and len(args) == 1:
         c = component(args[0])
         print("\n".join(c["processes"] if c else []))
@@ -651,7 +660,7 @@ def main(argv):
     elif cmd == "settings" and args:
         cid = args[0]
         if cid not in SETTINGS:
-            sys.exit(f"{cid} has no settings; these do: {', '.join(SETTINGS)}")
+            sys.exit(_("{id} has no settings; these do: {ids}").format(id=cid, ids=", ".join(SETTINGS)))
         if args[1:] == ["--reset"]:
             write_settings(cid, {}, reset=True)
         elif args[1:]:
@@ -659,11 +668,12 @@ def main(argv):
             for a in args[1:]:
                 key, eq, text = a.partition("=")
                 if not eq:
-                    sys.exit(f"expected KEY=VALUE, got {a!r}")
+                    sys.exit(_("expected KEY=VALUE, got %s") % repr(a))
                 try:
                     changes[key] = parse_value(cid, key, text)
                 except KeyError:
-                    sys.exit(f"{cid} has no setting {key!r}; it has: {', '.join(defaults(cid))}")
+                    sys.exit(_("{id} has no setting {key}; it has: {keys}").format(
+                        id=cid, key=repr(key), keys=", ".join(defaults(cid))))
                 except ValueError as e:
                     sys.exit(str(e))
             write_settings(cid, changes)

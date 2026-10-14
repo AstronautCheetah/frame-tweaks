@@ -8,7 +8,7 @@ if pgrep -f "^$HOME/.local/share/arrowpad/venv/bin/python $HOME/.local/share/arr
     pkill -f "^$HOME/.local/share/arrowpad/venv/bin/python $HOME/.local/share/arrowpad/arrowpad.py" || true
     sleep 1
     clear_stuck_modifiers
-    say "stopped a running Arrow Pad"
+    say "$(t 'stopped a running Arrow Pad')"
 fi
 remove_files "$ICONS/256x256/apps/frame-tweaks-arrowpad.png" "$BIN/arrowpad" "$APPS/arrowpad.desktop" "$APPS/arrowpad-vr.desktop" "$HOME/.local/share/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/vroverlay.py" "$HOME/.local/share/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/vr" "$HOME/.local/share/arrowpad/__pycache__"
 # The PyQt6 venv is shared with the NordVPN tray and Screen snip: only the last one removes it.

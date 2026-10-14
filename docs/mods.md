@@ -1,9 +1,11 @@
 # Packs: adding your own tweaks
 
 Every tweak Frame Tweaks offers comes from a **pack**: a folder of tweak folders. Its own tweaks
-are in two official packs, [`packs/original/`](../packs/original/) and
-[`packs/third-party/`](../packs/third-party/) (other projects' apps it installs), and they're
-loaded exactly like anyone else's. To add programs or fixes of your own, write a pack. You don't need to change
+are in three official packs, [`packs/original/`](../packs/original/),
+[`packs/integrations/`](../packs/integrations/) (other projects' apps it fits to the Frame) and
+[`packs/third-party/`](../packs/third-party/) (other projects' apps installed as they are), and
+they're loaded exactly like anyone else's. To add programs or fixes of your own, write a pack.
+You don't need to change
 Frame Tweaks itself, and your pack survives its updates.
 
 Start from the example, [`examples/hello-pack/`](../examples/hello-pack/): one small tweak that
@@ -238,6 +240,7 @@ The helpers in `lib/common.sh` and the manifest fields above are what a pack can
 ## Sending a tweak to Frame Tweaks
 
 A tweak in a pack is already in the shape the official packs use: to propose it for Frame
-Tweaks itself, add its folder to `packs/original/` and its id to `packs/original/pack.md` (or,
-for a tweak that installs another project's app, to `packs/third-party/`), then
+Tweaks itself, add its folder to `packs/original/` and its id to `packs/original/pack.md` (or the
+same in `packs/integrations/` or `packs/third-party/` for a tweak that installs another
+project's app), then
 follow [CONTRIBUTING.md](../CONTRIBUTING.md).

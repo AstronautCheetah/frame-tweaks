@@ -37,7 +37,7 @@ LOGS="$STATE/logs"
 migrate_legacy_dirs
 # The tweaks moved into packs/official/ (0.6): an update leaves their old folders behind
 # holding only Python's __pycache__ (git doesn't track it).
-# The same for packs/official, which became packs/original and packs/third-party (after 0.6.0).
+# The same for packs/official, which became packs/original, packs/integrations and packs/third-party (after 0.6.0).
 shopt -s nullglob
 for d in */__pycache__ packs/official/*/__pycache__; do
     d=${d%/__pycache__}
@@ -74,7 +74,7 @@ IDS=()
 while IFS=$'\x1f' read -r id title deps desc dir exp; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
 done < <(python3 lib/sft.py registry)
-[[ ${#IDS[@]} -gt 0 ]] || { echo "No tweaks found (python3 lib/sft.py mods says why)" >&2; exit 1; }
+[[ ${#IDS[@]} -gt 0 ]] || { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
 export FRAME_TWEAKS_DIRS
@@ -138,9 +138,9 @@ cmd_list() {
     bold "frame-tweaks $FT_BUILD"
     local id
     for id in "${IDS[@]}"; do
-        printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ (experimental)}"
+        printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ $(t '(experimental)')}"
     done
-    [[ " ${EXPERIMENTAL[*]} " == *1* ]] && echo "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
+    [[ " ${EXPERIMENTAL[*]} " == *1* ]] && echo "$(t "(experimental: relies on SteamVR's internals; see ./install.sh info ID)")"
     return 0
 }
 
@@ -152,7 +152,7 @@ cmd_status() {
         line=$(status_of "$id"); rc=$?
         case $rc in
             0) printf '  \033[32m✔\033[0m %-15s %s\n' "$id" "${line#ok       }" ;;
-            1) printf '  \033[2m·\033[0m %-15s \033[2mnot installed\033[0m\n' "$id" ;;
+            1) printf '  \033[2m·\033[0m %-15s \033[2m%s\033[0m\n' "$id" "$(t 'not installed')" ;;
             *) printf '  \033[33m!\033[0m %-15s %s\n' "$id" "${line#warning  }"; worst=2 ;;
         esac
     done
@@ -160,7 +160,7 @@ cmd_status() {
 }
 
 cmd_install() {
-    [[ $# -eq 0 ]] && { echo "install what? (./install.sh list)" >&2; exit 1; }
+    [[ $# -eq 0 ]] && { echo "$(t 'install what? (./install.sh list)')" >&2; exit 1; }
     ensure_menu_entry
     [[ $1 == all ]] && set -- "${IDS[@]}"
     check_ids "$@"
@@ -171,23 +171,23 @@ cmd_install() {
             echo "held: left as it is (./install.sh unhold $id)"; echo; continue
         fi
         stop_processes "$id"            # a reinstall must not leave the old copy running
-        if ! bash "${DIR[$id]}/install.sh" 8>&-; then failed+=("$id"); echo "!! $id failed" >&2
+        if ! bash "${DIR[$id]}/install.sh" 8>&-; then failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2
         else record_version "$id"; fi
         echo
     done
-    [[ ${#failed[@]} -eq 0 ]] || { echo "Failed: ${failed[*]}" >&2; return 1; }
-    bold "Done."; cmd_status "$@"
+    [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
+    bold "$(t 'Done.')"; cmd_status "$@"
 }
 
 cmd_uninstall() {
-    [[ $# -eq 0 ]] && { echo "uninstall what?" >&2; exit 1; }
+    [[ $# -eq 0 ]] && { echo "$(t 'uninstall what?')" >&2; exit 1; }
     if [[ $1 == all ]]; then           # everything installed, each tweak before what it depends on
         local i all=() order
         mapfile -t order < <(with_deps "${IDS[@]}")
         for (( i=${#order[@]}-1; i>=0; i-- )); do
             status_of "${order[i]}" >/dev/null; [[ $? -ne 1 ]] && all+=("${order[i]}")
         done
-        [[ ${#all[@]} -eq 0 ]] && { echo "Nothing installed."; return; }
+        [[ ${#all[@]} -eq 0 ]] && { t 'Nothing installed.'; echo; return; }
         set -- "${all[@]}"
     fi
     check_ids "$@"
@@ -197,48 +197,48 @@ cmd_uninstall() {
         for other in "${IDS[@]}"; do
             for d in ${DEPS[$other]}; do
                 if [[ $d == "$id" && " $* " != *" $other "* ]] && status_of "$other" >/dev/null; then
-                    echo "$id is needed by $other: uninstall $other too, or keep $id" >&2; exit 1
+                    echo "$(t '%s is needed by %s: uninstall %s too, or keep %s' "$id" "$other" "$other" "$id")" >&2; exit 1
                 fi
             done
         done
     done
-    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    for id in "$@"; do bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
 }
 
 # Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:
 # it's back a moment later.
 cmd_reinstall_ids() {
-    [[ $# -eq 0 ]] && { echo "reinstall what?" >&2; exit 1; }
+    [[ $# -eq 0 ]] && { echo "$(t 'reinstall what?')" >&2; exit 1; }
     check_ids "$@"
     local id
     # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
     # dashboard patches of the tweaks that use the VR environment helper.)
-    for id in "$@"; do bold "── removing $id"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    for id in "$@"; do bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
     cmd_install "$@"
 }
 
 cmd_update() {
     local want=""
-    [[ ${1:-} == --to ]] && { want=${2:?"--to needs a release, e.g. v0.3.1"}; [[ $want == v* ]] || want="v$want"; }
+    [[ ${1:-} == --to ]] && { want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* ]] || want="v$want"; }
     if [[ -d .git ]]; then
         if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
-            bold "Updating the checkout"
+            bold "$(t 'Updating the checkout')"
             if ! git pull --ff-only; then
                 git fetch --quiet origin 2>/dev/null
                 if ! git merge-base --is-ancestor HEAD "@{upstream}" 2>/dev/null; then
-                    echo "This checkout and GitHub's main have gone separate ways. Without local work to" >&2
-                    echo "keep: git reset --hard @{upstream}" >&2
+                    echo "$(t "This checkout and GitHub's main have gone separate ways. Without local work to
+keep: git reset --hard @{upstream}")" >&2
                 fi
-                echo "git pull failed; not reinstalling" >&2; exit 1
+                echo "$(t 'git pull failed; not reinstalling')" >&2; exit 1
             fi
         else                                                # a release (tag): move to the newest
             # (--force: GitHub's tags win over local ones with the same name.)
-            git fetch --quiet --force --tags origin || { echo "couldn't reach GitHub; not updating" >&2; exit 1; }
+            git fetch --quiet --force --tags origin || { echo "$(t "couldn't reach GitHub; not updating")" >&2; exit 1; }
             local tag; tag=${want:-$(git tag -l 'v*' | newest_tag)}
-            [ -n "$tag" ] || { echo "no release found" >&2; exit 1; }
-            git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "no release $tag" >&2; exit 1; }
+            [ -n "$tag" ] || { echo "$(t 'no release found')" >&2; exit 1; }
+            git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "$(t 'no release %s' "$tag")" >&2; exit 1; }
             verify_release "$PWD" "$tag" || exit 1
-            bold "Updating to $tag ($(release_channel) channel)"; git -c advice.detachedHead=false checkout --quiet "$tag"
+            bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"; git -c advice.detachedHead=false checkout --quiet "$tag"
         fi
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi
@@ -248,10 +248,10 @@ cmd_update() {
 cmd_reinstall() {
     local id installed=()
     for id in "${IDS[@]}"; do status_of "$id" >/dev/null; [[ $? -ne 1 ]] && installed+=("$id"); done
-    [[ ${#installed[@]} -eq 0 ]] && { echo "Nothing installed yet."; return; }
+    [[ ${#installed[@]} -eq 0 ]] && { t 'Nothing installed yet.'; echo; return; }
     run_migrations "${installed[@]}"
     cmd_install "${installed[@]}"
-    echo; bold "Checking the SteamOS/SteamVR parts the tweaks rely on"; cmd_check_system || true
+    echo; bold "$(t 'Checking the SteamOS/SteamVR parts the tweaks rely on')"; cmd_check_system || true
 }
 
 cmd_gui() {
@@ -260,9 +260,9 @@ cmd_gui() {
     # NordVPN tray. Offer to set it up; otherwise fall back to kdialog's plain checklist.
     local qt="$HOME/.local/share/arrowpad/venv"
     if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
-       kdialog --title "Frame Tweaks" --yesno "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist."; then
+       kdialog --title "Frame Tweaks" --yesno "$(t 'Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist.')"; then
         python3 -m venv "$qt" && pip_pinned "$qt" PyQt6 ||
-            kdialog --sorry "Couldn't install PyQt6; using the simple checklist."
+            kdialog --sorry "$(t "Couldn't install PyQt6; using the simple checklist.")"
     fi
     if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then
         # A copy of the interpreter under its own name, so SteamVR gives the window its own
@@ -283,23 +283,23 @@ cmd_kdialog_gui() {
     done
     local picked
     picked=$(kdialog --title "Frame Tweaks $FT_BUILD" --geometry 900x560 --separate-output \
-        --checklist "Tick what you want installed. Unticking an installed tweak removes it." "${args[@]}") || exit 0
+        --checklist "$(t 'Tick what you want installed. Unticking an installed tweak removes it.')" "${args[@]}") || exit 0
     local add=() del=()
     for id in "${IDS[@]}"; do
         status_of "$id" >/dev/null; st=$?
         if grep -qx "$id" <<<"$picked"; then [[ $st -ne 0 ]] && add+=("$id")
         else [[ $st -ne 1 ]] && del+=("$id"); fi
     done
-    [[ ${#add[@]} -eq 0 && ${#del[@]} -eq 0 ]] && { kdialog --msgbox "Nothing to change."; exit 0; }
+    [[ ${#add[@]} -eq 0 && ${#del[@]} -eq 0 ]] && { kdialog --msgbox "$(t 'Nothing to change.')"; exit 0; }
     # Removals get their own warning, and an empty selection never removes anything:
     # a dialog that fails or is dismissed oddly must not wipe the user's setup.
     if [[ ${#del[@]} -gt 0 ]]; then
         if [[ -z $picked ]]; then
-            kdialog --sorry "Nothing was selected, so nothing will be removed. To remove everything, use: ./install.sh uninstall ${del[*]}"
+            kdialog --sorry "$(t 'Nothing was selected, so nothing will be removed. To remove everything, use: %s' "./install.sh uninstall ${del[*]}")"
             exit 0
         fi
-        kdialog --title "Remove tweaks?" --warningcontinuecancel \
-            "These installed tweaks were unticked and will be REMOVED:\n\n  ${del[*]}\n\nContinue?" || del=()
+        kdialog --title "$(t 'Remove tweaks?')" --warningcontinuecancel \
+            "$(t 'These installed tweaks were unticked and will be REMOVED:\n\n  %s\n\nContinue?' "${del[*]}")" || del=()
     fi
     [[ ${#add[@]} -eq 0 && ${#del[@]} -eq 0 ]] && exit 0
     if [[ -n ${FRAME_TWEAKS_DRY_RUN:-} ]]; then   # for tests: show the plan, change nothing
@@ -309,9 +309,9 @@ cmd_kdialog_gui() {
     [[ ${#del[@]} -gt 0 ]] && cmd+=" && ./install.sh uninstall ${del[*]}"
     [[ ${#add[@]} -gt 0 ]] && cmd+=" && ./install.sh install ${add[*]}"
     # (In VR a floating window has an X button below it: easier than a key without a keyboard.)
-    local close="Press Enter to close…"
-    [[ ${DISPLAY:-} == :0 ]] && close="Press Enter to close, or press the X button floating below to close."
-    cmd+="; echo; read -rp '$close'"
+    local close; close=$(t 'Press Enter to close…')
+    [[ ${DISPLAY:-} == :0 ]] && close=$(t 'Press Enter to close, or press the X button floating below to close.')
+    cmd+="; echo; read -rp $(printf %q "$close")"
     exec konsole --separate -e bash -c "$cmd"
 }
 
@@ -337,7 +337,7 @@ stop_processes() {
         n=$((n + 1))
     done < <(python3 lib/sft.py processes "$id")
     if [[ $n -gt 0 ]]; then
-        echo "stopped $id's running programs"
+        echo "$(t "stopped %s's running programs" "$id")"
         [[ -f ${DIR[$id]}/stopped.sh ]] && bash "${DIR[$id]}/stopped.sh" 8>&-
     fi
     return 0
@@ -360,17 +360,17 @@ run_migrations() {
         # Only from an older release: going back to an older one doesn't run them backwards.
         [[ $old != "$VERSION" && $(printf '%s\n%s\n' "$old" "$VERSION" | sort -V | head -1) == "$old" ]] || continue
         bold "── migrating $id from $old"
-        bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $id migration failed" >&2
+        bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $(t '%s migration failed' "$id")" >&2
     done
 }
 cmd_hold() {
     local mode=$1; shift
-    [[ $# -gt 0 ]] || { echo "$mode what? (./install.sh list)" >&2; exit 1; }
+    [[ $# -gt 0 ]] || { echo "$(t '%s what? (./install.sh list)' "$mode")" >&2; exit 1; }
     check_ids "$@"; mkdir -p "$STATE/held"
     local id
     for id in "$@"; do
-        if [[ $mode == hold ]]; then touch "$STATE/held/$id"; echo "$id: held (updates leave it as it is)"
-        else rm -f "$STATE/held/$id"; echo "$id: updated normally again"; fi
+        if [[ $mode == hold ]]; then touch "$STATE/held/$id"; echo "$(t '%s: held (updates leave it as it is)' "$id")"
+        else rm -f "$STATE/held/$id"; echo "$(t '%s: updated normally again' "$id")"; fi
     done
 }
 
@@ -411,7 +411,7 @@ cmd_debug_info() {
              ${phone:+-e "s/$phone/<phone>/g"} \
         > "$out"
     echo "Wrote $out"
-    echo "Read it before sharing; attach it to a bug report: https://github.com/AstronautCheetah/frame-tweaks/issues"
+    echo "$(t 'Read it before sharing; attach it to a bug report: %s' https://github.com/AstronautCheetah/frame-tweaks/issues)"
 }
 
 # check-system: run each installed tweak's optional check-system.sh, which tests whether the
@@ -445,8 +445,8 @@ case ${1:-} in
     list)        cmd_list ;;
     # The installer window's other buttons, through the same code (lib/sft.py) or tools it uses.
     info|hide|unhide|hide-group|unhide-group|settings|mods) python3 lib/sft.py "$@" ;;
-    run)         shift; [[ $# -eq 1 ]] || { echo "run what?" >&2; exit 1; }; check_ids "$1"
-                 [[ -n $(python3 lib/sft.py run-label "$1") ]] || { echo "$1 has nothing to run" >&2; exit 1; }
+    run)         shift; [[ $# -eq 1 ]] || { echo "$(t 'run what?')" >&2; exit 1; }; check_ids "$1"
+                 [[ -n $(python3 lib/sft.py run-label "$1") ]] || { echo "$(t '%s has nothing to run' "$1")" >&2; exit 1; }
                  setsid -f bash "${DIR[$1]}/run.sh" >/dev/null 2>&1 </dev/null ;;
     wallet)      shift; case ${1:-} in
                      lock) exec "$HOME/.local/bin/wallet-unlock" --lock ;;
@@ -456,8 +456,8 @@ case ${1:-} in
                  esac ;;
     wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
-    menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "Removed 'Frame Tweaks' from the app menu."
-                 else ensure_menu_entry; echo "Added 'Frame Tweaks' to the app menu."; fi ;;
+    menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "$(t "Removed 'Frame Tweaks' from the app menu.")"
+                 else ensure_menu_entry; echo "$(t "Added 'Frame Tweaks' to the app menu.")"; fi ;;
     -h|--help|help) usage ;;
     --version|version) echo "$FT_BUILD" ;;
     *)           take_lock; start_log install "$@"; run_migrations "$@"; cmd_install "$@" ;;

@@ -77,6 +77,11 @@ class Reading(unittest.TestCase):
 
 
 class Language(unittest.TestCase):
+    def setUp(self):
+        p = mock.patch.object(i18n, "keyboard_language", lambda: None)     # (this machine's keyboard: not in the test)
+        p.start()
+        self.addCleanup(p.stop)
+
     def test_usual_variables(self):
         with mock.patch.dict(os.environ, {"LANGUAGE": "pt_BR:de", "LANG": "fr_FR.UTF-8"}, clear=True):
             self.assertEqual(i18n.wanted_languages(), ["pt_BR", "pt", "de"])     # LANGUAGE wins
@@ -84,6 +89,81 @@ class Language(unittest.TestCase):
             self.assertEqual(i18n.wanted_languages(), ["fr_FR", "fr"])
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANGUAGE": "de", "LANG": "C.UTF-8"}, clear=True):
             self.assertEqual(i18n.wanted_languages(), ["de"])
+
+
+class Keyboard(unittest.TestCase):
+    """The active keyboard's language: Steam's VR keyboard (VR session) or KDE's layout (desktop),
+    looked at no more than once every 5 s."""
+    def setUp(self):
+        self.d = Path(tempfile.mkdtemp())
+        self.addCleanup(subprocess.run, ["rm", "-rf", str(self.d)])
+        for name, value in (("STEAM_CONFIG", self.d / "config.vdf"), ("STEAM_USERS", str(self.d / "u*/localconfig.vdf"))):
+            p = mock.patch.object(i18n, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+        p = mock.patch.dict(i18n._keyboard, {"at": None, "value": None, "files": {}})
+        p.start()
+        self.addCleanup(p.stop)
+
+    def steam(self, layout, f="config.vdf"):
+        (self.d / f).parent.mkdir(parents=True, exist_ok=True)
+        (self.d / f).write_text('"InstallConfigStore"\n{\n\t\t"keyboard_layout"\t\t'
+                                f'"{{\\"currentLayout\\":{layout},\\"selectedLayouts\\":[0,19]}}"\n}}\n')
+
+    def test_steam_keyboard_in_vr(self):
+        with mock.patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": "gamescope"}, clear=True):
+            self.steam(19)
+            self.assertEqual(i18n.keyboard_language(), "es")
+            self.assertEqual(i18n.wanted_languages(), ["es"])
+            self.steam(0)                                       # QWERTY: says nothing
+            self.assertEqual(i18n.keyboard_language(), "es")    # (not looked at again yet)
+            i18n._keyboard["at"] -= i18n.CHECK_EVERY
+            self.assertIsNone(i18n.keyboard_language())
+
+    def test_newest_steam_file_wins(self):
+        with mock.patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": "gamescope"}, clear=True):
+            self.steam(0)
+            self.steam(8, "u1/localconfig.vdf")
+            os.utime(self.d / "config.vdf", (1, 1))
+            self.assertEqual(i18n.keyboard_language(), "de")
+
+    def test_kde_layout_in_desktop_mode(self):
+        (self.d / "kxkbrc").write_text("[Layout]\nLayoutList=latam\nUse=true\n")
+        with mock.patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": "KDE", "XDG_CONFIG_HOME": str(self.d),
+                                          "LANG": "en_US.UTF-8"}, clear=True):
+            self.assertEqual(i18n.keyboard_language(), "es_419")
+            self.assertEqual(i18n.wanted_languages(), ["es_419", "es", "en_US", "en"])
+
+    def test_off(self):
+        self.steam(19)
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_KEYBOARD": "0"}, clear=True):
+            self.assertIsNone(i18n.keyboard_language())
+
+    def test_same_language_elsewhere(self):
+        """es and es_MX use es_419.po (the only Spanish one)."""
+        (self.d / "es_419.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Close"\nmsgstr "Cerrar"\n')
+        self.assertEqual(i18n.pick(["es"], self.d).name, "es_419.po")
+        self.assertEqual(i18n.Catalogue(["es_MX"], self.d).gettext("Close"), "Cerrar")
+        self.assertIsNone(i18n.pick(["de", "fr"], self.d))
+
+
+class Shell(unittest.TestCase):
+    def test_t(self):
+        d = Path(tempfile.mkdtemp())
+        self.addCleanup(subprocess.run, ["rm", "-rf", str(d)])
+        (d / "locale").mkdir()
+        for f in ("i18n.py", "i18n.sh"):
+            (d / f).write_text((ROOT / "lib" / f).read_text())
+        (d / "locale/es_419.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Fetching %s"\nmsgstr "Descargando %s"\n\n'
+                                           'msgid "Can\'t"\nmsgstr "No se puede"\n')
+        script = (f'source {d}/i18n.sh; t "Fetching %s" "a \'b\'"; echo; t "Can\'t"; echo; t "Other 100%"; echo; '
+                  'echo "$FRAME_TWEAKS_LANG_RESOLVED"')
+        env = {"PATH": os.environ["PATH"], "HOME": str(d), "FRAME_TWEAKS_LANGUAGE": "es", "FRAME_TWEAKS_KEYBOARD": "0"}
+        out = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True).stdout
+        self.assertEqual(out.splitlines(), ["Descargando a 'b'", "No se puede", "Other 100%", "es_419"])
+        env["FRAME_TWEAKS_LANG_RESOLVED"] = "en"                # (a script started by one that found none)
+        out = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True).stdout
+        self.assertEqual(out.splitlines()[0], "Fetching a 'b'")
 
 
 class Template(unittest.TestCase):

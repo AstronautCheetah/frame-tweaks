@@ -36,7 +36,8 @@ import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, se
 from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
 import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
-from i18n import _, ngettext  # noqa: E402  (translations: locale/README.md)
+import i18n  # noqa: E402
+from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md)
 from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
@@ -100,7 +101,7 @@ def status(cid):
         # (a check that never returns would hold a worker for good; four of them, every status)
         r = subprocess.run(["bash", str(component(cid)["dir"] / "status.sh")], capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
-        return 2, "status check didn't finish (took over a minute)"
+        return 2, _("status check didn't finish (took over a minute)")
     text = r.stdout.strip().split(None, 1)[-1] if r.stdout.strip() else ""
     return r.returncode, text
 
@@ -147,10 +148,12 @@ def release_key(tag):
     return (int(m[1]), int(m[2]), int(m[3]), m[4] is None, m[4] or "")
 
 
-# How the terminal of an install, update or removal closes. In VR (the Steam session's display),
-# a floating window has an X button below it: easier than a key when there's no keyboard.
-CLOSE_PROMPT = shlex.quote("Press Enter to close" + (", or press the X button floating below to close."
-                                                     if os.environ.get("DISPLAY") == ":0" else "…"))
+def close_prompt():
+    """How the terminal of an install, update or removal closes (quoted for bash). In VR (the Steam
+    session's display), a floating window has an X button below it: easier than a key when there's
+    no keyboard."""
+    return shlex.quote(_("Press Enter to close, or press the X button floating below to close.")
+                       if os.environ.get("DISPLAY") == ":0" else _("Press Enter to close…"))
 
 
 def current_release():
@@ -227,8 +230,9 @@ COPY_LINK = re.compile(r"""(<a\b[^>]*?\bhref=(["'])((?:https?|file):[^"']+)\2[^>
 
 def with_copy(text):
     """Rich text with a 📋 after each web or file link, which copies the link instead of opening it."""
+    title = html.escape(_("Copy the link"), quote=True)
     return COPY_LINK.sub(lambda m: f"{m.group(1)}&nbsp;<a href={m.group(2)}copy:{m.group(3)}{m.group(2)} "
-                         "style='text-decoration:none' title='Copy the link'>📋</a>", text)
+                         f"style='text-decoration:none' title='{title}'>📋</a>", text)
 
 
 def md_text(text):
@@ -243,7 +247,7 @@ def follow_link(url):
     opens the usual way."""
     if url.startswith("copy:"):
         QApplication.clipboard().setText(url[5:])
-        QToolTip.showText(QCursor.pos(), "Link copied")
+        QToolTip.showText(QCursor.pos(), _("Link copied"))
     elif url.startswith(("https:", "http:")) and (note := browser.open_url(url)):
         QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
     elif url.startswith("file:") and (note := browser.open_path(url)):
@@ -293,9 +297,9 @@ def latest_release(url):
 
 def status_text(code_text):
     if code_text is None:
-        return "checking…", "checking"
+        return _("checking…"), "checking"
     code, text = code_text
-    return ({0: "✔ " + text, 2: "! " + text}.get(code, "· not installed"),
+    return ({0: "✔ " + text, 2: "! " + text}.get(code, "· " + _("not installed")),
             {0: "ok", 2: "warn"}.get(code, "missing"))
 
 
@@ -308,16 +312,17 @@ class CategoryHeader(QWidget):
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 4, 0)
         arrow = "▶" if collapsed else "▼"
-        toggle = QPushButton(f"{arrow}  {category.upper().replace('&', '&&')}  ({count})" + ("   · hidden" if hidden else ""))
+        toggle = QPushButton(f"{arrow}  {category.upper().replace('&', '&&')}  ({count})"
+                             + ("   · " + _("hidden") if hidden else ""))
         toggle.setObjectName("cattoggle")
         toggle.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        toggle.setToolTip("Expand" if collapsed else "Collapse")
+        toggle.setToolTip(_("Expand") if collapsed else _("Collapse"))
         toggle.clicked.connect(lambda: window.toggle_collapsed(category))
         lay.addWidget(toggle, 1)
-        hide = QPushButton("Unhide category" if hidden else "Hide category")
+        hide = QPushButton(_("Unhide category") if hidden else _("Hide category"))
         hide.setObjectName("cathide")
-        hide.setToolTip("Show this category again" if hidden else
-                        "Hide the whole category from the list (doesn't remove anything)")
+        hide.setToolTip(_("Show this category again") if hidden else
+                        _("Hide the whole category from the list (doesn't remove anything)"))
         hide.clicked.connect(lambda: window.toggle_category_hidden(category))
         lay.addWidget(hide)
 
@@ -355,7 +360,7 @@ class ReadmePage(QWidget):
         try:
             text = plain_markdown((REPO / "README.md").read_text())
         except OSError:
-            text = "_No README._"
+            text = "_" + _("No README.") + "_"
         lay.addWidget(readme_browser(text, {"official": True, "id": None, "dir": REPO}), 1)
 
 
@@ -392,25 +397,26 @@ class Details(QWidget):
 
         text, kind = status_text(state)
         rel, url = comp["source"].split("|", 1) if "|" in comp["source"] else ("", "")
-        facts = [("What it is", md_text(comp["what"])),
-                 ("Why it's included", md_text(comp["why"])),
-                 ("Made by", md_text(comp["author"]))]
+        facts = [(_("What it is"), md_text(comp["what"])),
+                 (_("Why it's included"), md_text(comp["why"])),
+                 (_("Made by"), md_text(comp["author"]))]
         if comp["experimental"]:
-            facts.append(("🧪 Experimental", f"<span style='color:#e0b33a'>{md_text(comp['experimental'])}</span>"))
+            facts.append((_("🧪 Experimental"), f"<span style='color:#e0b33a'>{md_text(comp['experimental'])}</span>"))
         if url:
-            facts.append(("Source", f"{html.escape(rel)} <a style='color:#7fb2e5' href='{url}'>{url}</a>"))
+            facts.append((_("Source"), f"{html.escape(rel)} <a style='color:#7fb2e5' href='{url}'>{url}</a>"))
         if comp["deps"]:
-            facts.append(("Needs", ", ".join(comp["deps"]) + " (installed automatically)"))
+            facts.append((_("Needs"), _("{tweaks} (installed automatically)").format(tweaks=", ".join(comp["deps"]))))
         colour = {"ok": "#5cc77a", "warn": "#e0b33a"}.get(kind, "#9aa6b2")
-        facts.append(("Status", f"<span style='color:{colour}'>{html.escape(text)}</span>"))
+        facts.append((_("Status"), f"<span style='color:{colour}'>{html.escape(text)}</span>"))
         if comp["official"]:
             facts.append((_("Pack"), html.escape(comp["pack"])))
-            facts.append(("Documentation", f"<a style='color:#7fb2e5' href='{GITHUB}/packs/{comp['pack_dir'].name}/{comp['id']}'>"
-                          f"{comp['id']}/README.md on GitHub</a>"))
+            facts.append((_("Documentation"), f"<a style='color:#7fb2e5' href='{GITHUB}/packs/{comp['pack_dir'].name}/{comp['id']}'>"
+                          + _("{file} on GitHub").format(file=f"{comp['id']}/README.md") + "</a>"))
         else:
-            facts.append(("From", f"<span style='color:#e0b33a'>the pack {html.escape(comp['pack'])}, not part of "
-                          f"Frame Tweaks</span>" + (f" (used instead of {html.escape(comp['replaced'])}'s)"
-                                                    if comp["replaced"] else "")
+            facts.append((_("From"), "<span style='color:#e0b33a'>"
+                          + _("the pack {pack}, not part of Frame Tweaks").format(pack=html.escape(comp["pack"]))
+                          + "</span>" + (" " + _("(used instead of {other}'s)").format(other=html.escape(comp["replaced"]))
+                                         if comp["replaced"] else "")
                           + f"<br><a style='color:#7fb2e5' href='{comp['readme'].as_uri()}'>{html.escape(str(comp['dir']))}</a>"))
         summary = link_label(QLabel())
         summary.setText(with_copy("<table cellspacing=6>" + "".join(
@@ -422,7 +428,7 @@ class Details(QWidget):
         try:
             text = manifest.front_matter(comp["readme"].read_text())[1]
         except (OSError, manifest.ManifestError):
-            text = "_No README._"
+            text = "_" + _("No README.") + "_"
         # (Its opening, what it is and why, is in the table above already.)
         text = re.sub(r"<!-- generated:intro .*?<!-- /generated:intro -->\n*", "", text, flags=re.S)
         lay.addWidget(readme_browser(text, comp), 1)
@@ -430,19 +436,22 @@ class Details(QWidget):
     def show_issue(self, latest):
         """latest: newest upstream tag, "checking", or None when it couldn't be fetched."""
         issue = KNOWN_ISSUES[self.comp["id"]]
-        text = "<b>⚠ Known issue.</b> " + html.escape(issue["long"], quote=False)
+        text = "<b>" + _("⚠ Known issue.") + "</b> " + html.escape(issue["long"], quote=False)
         rel = issue["latest"].replace("api.github.com/repos", "github.com")
+        link = f"<a style='color:#7fb2e5' href='{rel}'>"
         if latest == "checking":
-            text += "<br><span style='color:#9aa6b2'>Checking for a newer release…</span>"
+            text += "<br><span style='color:#9aa6b2'>" + _("Checking for a newer release…") + "</span>"
         elif latest is None:
-            text += (f"<br><span style='color:#9aa6b2'>Couldn't check for a newer release; see "
-                     f"<a style='color:#7fb2e5' href='{rel}'>its releases</a>.</span>")
+            text += ("<br><span style='color:#9aa6b2'>"
+                     + _("Couldn't check for a newer release; see {link}its releases{end}.").format(link=link, end="</a>")
+                     + "</span>")
         elif version_tuple(latest) > version_tuple(issue["version"]):
-            text += (f"<br><b>Version {html.escape(latest)} is now available</b>, so this may be resolved: "
-                     f"see <a style='color:#7fb2e5' href='{rel}'>its release notes</a>, then reinstall "
-                     f"to update.")
+            text += "<br>" + _("<b>Version {version} is now available</b>, so this may be resolved: "
+                               "see {link}its release notes{end}, then reinstall to update.").format(
+                version=html.escape(latest), link=link, end="</a>")
         else:
-            text += f"<br><span style='color:#9aa6b2'>{html.escape(latest)} is still the latest release.</span>"
+            text += ("<br><span style='color:#9aa6b2'>"
+                     + _("{version} is still the latest release.").format(version=html.escape(latest)) + "</span>")
         self.issue_label.setText(with_copy(text))
 
 
@@ -536,16 +545,17 @@ class SettingsSection(QWidget):
             return
         for _a, b, _note in self.actions:
             b.setEnabled(False)
-        self.notice.setText("Working… (a download can take a minute)")
+        self.notice.setText(_("Working… (a download can take a minute)"))
         proc = QProcess(self)
         proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
 
-        def done(*_):
+        def done(*_args):
             lines = [re.sub(r"\x1b\[[0-9;]*m", "", l).strip() for l in
                      bytes(proc.readAll()).decode(errors="replace").splitlines()]
             lines = [l for l in lines if l and "#" not in l[:3]]          # (not curl's progress bar)
             ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
-            self.notice.setText(("" if ok else "Didn't work: ") + (lines[-1] if lines else "Done."))
+            last = lines[-1] if lines else _("Done.")
+            self.notice.setText(last if ok else _("Didn't work: %s") % last)
             for _a, b, _note in self.actions:
                 b.setEnabled(True)
             self.show_actions()
@@ -566,7 +576,7 @@ class SettingsSection(QWidget):
             print("would save:", self.cid, json.dumps({key: value}))
             return
         sft.write_settings(self.cid, {key: value})
-        self.notice.setText("Saved. " + self.spec["note"])
+        self.notice.setText(_("Saved.") + " " + self.spec["note"])
 
     def reset(self):
         self.conf = sft.defaults(self.cid)
@@ -575,7 +585,7 @@ class SettingsSection(QWidget):
             print("would reset:", self.cid)
             return
         sft.write_settings(self.cid, {}, reset=True)
-        self.notice.setText("Back to the defaults. " + self.spec["note"])
+        self.notice.setText(_("Back to the defaults.") + " " + self.spec["note"])
 
 
 class SettingsPage(QWidget):
@@ -623,7 +633,7 @@ class SettingsPage(QWidget):
 
 SETTINGS_PAGES = {cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS}   # the row's button opens these
 # A row whose button opens a page of its own instead (label, page): the wallet's apps.
-PAGES = {"wallet": ("🔑 Wallet apps", WalletApps)}
+PAGES = {"wallet": (N_("🔑 Wallet apps"), WalletApps)}         # (label: translated where it's shown)
 
 
 class Window(QWidget):
@@ -649,8 +659,32 @@ class Window(QWidget):
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
         self.self_update = self.pool.submit(self_update_check)
 
+        self.release_at_start = current_release()
+        self.update_state, self.update_newest = "check", None
+        self.outer = QVBoxLayout(self)
+        self.outer.setContentsMargins(20, 16, 20, 16)
+        self.stack = None
+        self.build_ui()
+        QTimer(self, interval=100, timeout=self.collect).start()
+        QTimer(self, interval=int(i18n.CHECK_EVERY * 1000), timeout=self.check_language).start()
+        self.vr_buttons = None
+        if os.environ.get("DISPLAY") == ":0":          # opened in VR: controller buttons too
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            from vrbuttons import VRButtons
+            self.vr_buttons = VRButtons({"back": self.go_back, "home": self.go_home,
+                                         "toggle": self.toggle_pointed_row,
+                                         "up": lambda: self.move_focus(-1),
+                                         "down": lambda: self.move_focus(+1)})
+            if self.vr_buttons.ok:
+                QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
+                self._laser = (None, 0.0)
+                QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.laser_over_window())).start()
+        self.refresh()
+
+    def build_ui(self):
+        """The window's widgets (again after a change of language: retranslate)."""
         top = QHBoxLayout()
-        title = QLabel(f"Frame Tweaks <span style='color:#6b7783;font-size:14px'>{version}</span>")
+        title = QLabel(f"Frame Tweaks <span style='color:#6b7783;font-size:14px'>{sft.build_version()}</span>")
         title.setObjectName("title")
         top.addWidget(title)
         top.addStretch(1)
@@ -663,7 +697,7 @@ class Window(QWidget):
         self.show_hidden.toggled.connect(self.rebuild)
         top.addWidget(self.show_hidden)
         packs = QPushButton(_("🧩 Packs"))
-        packs.setToolTip("Where the tweaks come from; add other people's (docs/mods.md)")
+        packs.setToolTip(_("Where the tweaks come from; add other people's (docs/mods.md)"))
         packs.clicked.connect(self.show_packs)
         top.addWidget(packs)
         refresh = QPushButton(_("Refresh"))
@@ -681,8 +715,8 @@ class Window(QWidget):
 
         bottom = QHBoxLayout()
         # One line on the left: how the list works, or for a few seconds a message (say()).
-        self.hint_text = ("Tick to install, untick to remove, then Apply changes. "
-                          "Click a row for details, a category to fold it.")
+        self.hint_text = _("Tick to install, untick to remove, then Apply changes. "
+                           "Click a row for details, a category to fold it.")
         self.notice = QLabel(self.hint_text)
         self.notice.setObjectName("desc")
         self.notice.setWordWrap(True)
@@ -690,14 +724,13 @@ class Window(QWidget):
         self.update_button = QPushButton()
         self.update_button.clicked.connect(self.update_clicked)
         bottom.addWidget(self.update_button)
-        self.release_at_start = current_release()
-        self.set_update_state("check")
+        self.set_update_state(self.update_state, self.update_newest)
         about = QPushButton(_("📖 README"))
-        about.setToolTip("What Frame Tweaks is, how to install, update and remove it, common issues")
+        about.setToolTip(_("What Frame Tweaks is, how to install, update and remove it, common issues"))
         about.clicked.connect(self.show_readme)
         bottom.addWidget(about)
         diag = QPushButton(_("Diagnostics"))
-        diag.setToolTip("Save a report for a bug report (user names and paths removed)")
+        diag.setToolTip(_("Save a report for a bug report (user names and paths removed)"))
         diag.clicked.connect(self.save_diagnostics)
         bottom.addWidget(diag)
         apply_ = QPushButton(_("Apply changes"))
@@ -715,30 +748,39 @@ class Window(QWidget):
         lay.addLayout(top)
         lay.addWidget(scroll, 1)
         lay.addLayout(bottom)
+        self.row_widgets, self.focus_index = [], -1
+        old = self.stack
         self.stack = QStackedWidget()
         self.stack.addWidget(page)
         self.confirm_page, self.confirm_text, self.confirm_yes = self.make_confirm_page()
         self.stack.addWidget(self.confirm_page)
         self.error_page, self.error_text = self.make_error_page()
         self.stack.addWidget(self.error_page)
-        self.row_widgets, self.focus_index = [], -1
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(20, 16, 20, 16)
-        outer.addWidget(self.stack)
-        QTimer(self, interval=100, timeout=self.collect).start()
-        self.vr_buttons = None
-        if os.environ.get("DISPLAY") == ":0":          # opened in VR: controller buttons too
-            sys.path.insert(0, str(Path(__file__).resolve().parent))
-            from vrbuttons import VRButtons
-            self.vr_buttons = VRButtons({"back": self.go_back, "home": self.go_home,
-                                         "toggle": self.toggle_pointed_row,
-                                         "up": lambda: self.move_focus(-1),
-                                         "down": lambda: self.move_focus(+1)})
-            if self.vr_buttons.ok:
-                QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
-                self._laser = (None, 0.0)
-                QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.laser_over_window())).start()
-        self.refresh()
+        self.outer.addWidget(self.stack)
+        if old is not None:
+            self.outer.removeWidget(old)
+            old.deleteLater()
+
+    def check_language(self):
+        """Every 5 s: has the keyboard's language changed (lib/i18n.py)? Then the window's text
+        follows, once you're back on the list (an open page isn't pulled away from you)."""
+        if self.stack.currentIndex() == 0 and self.details is None and i18n.refresh():
+            self.retranslate()
+
+    def retranslate(self):
+        global KNOWN_ISSUES
+        showing = self.show_hidden.isChecked()
+        sft.load(refresh=True)
+        sft.SETTINGS = sft.settings_specs()
+        KNOWN_ISSUES = {c["id"]: c["known_issue"] for c in components() if c["known_issue"]}
+        self.rows = components()
+        self.build_ui()
+        self.show_hidden.blockSignals(True)
+        self.show_hidden.setChecked(showing)
+        self.show_hidden.blockSignals(False)
+        if self.update_newest and self.update_state == "update":
+            self.show_newest(self.update_newest)
+        self.rebuild()
 
     # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
     def hidden(self):
@@ -774,14 +816,12 @@ class Window(QWidget):
         if self.self_update is not None and self.self_update.done():
             newest, self.self_update = self.self_update.result(), None
             if newest:
-                self.self_update_label.setText(
-                    f"↑ {html.escape(newest)} available · "
-                    "<a style='color:#7fb2e5' href='update'>Update</a>")
+                self.show_newest(newest)
                 if self.update_state in ("check", "checking"):
                     self.set_update_state("update", newest)
             elif self.update_state == "checking":
                 self.set_update_state("check")
-                self.say(f"✔ Frame Tweaks is up to date ({current_release()}).", good=True)
+                self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=current_release()), good=True)
         for cid, fut in list(self.update_futures.items()):
             if fut.done():
                 del self.update_futures[cid]
@@ -811,7 +851,7 @@ class Window(QWidget):
                 self.update_apply()
 
     # ---- layout -----------------------------------------------------------------
-    def rebuild(self, *_):
+    def rebuild(self, *_args):
         self.row_widgets, self.focus_index = [], -1
         while self.grid.count():
             item = self.grid.takeAt(0)
@@ -823,7 +863,7 @@ class Window(QWidget):
         showing = self.show_hidden.isChecked()
         n_hidden = sum(1 for c in self.rows if c["id"] in hidden and c["category"] not in hidden_cats)
         n_hidden += len(hidden_cats)
-        self.show_hidden.setText(f"Show hidden ({n_hidden})")
+        self.show_hidden.setText(_("Show hidden ({n})").format(n=n_hidden))
         self.show_hidden.setEnabled(n_hidden > 0 or showing)
         self.boxes, self.status_labels, self.run_buttons, self.again_buttons = {}, {}, {}, {}
         category = None
@@ -850,7 +890,7 @@ class Window(QWidget):
             box = QCheckBox()
             state = self.state.get(cid)
             box.setChecked(self.wanted.get(cid, state[0] != 1 if state else False))
-            box.setToolTip("Tick to install, untick to remove")
+            box.setToolTip(_("Tick to install, untick to remove"))
             box.toggled.connect(lambda on, c=cid: (self.wanted.__setitem__(c, on), self.update_apply()))
             self.boxes[cid] = box
             icon = QLabel()
@@ -859,16 +899,17 @@ class Window(QWidget):
                           ("  🧪" if comp["experimental"] else "") +
                           ("" if comp["official"] else
                            f"  <span style='color:#e0b33a;font-size:12px'>🧩 {html.escape(comp['pack'])}</span>") +
-                          ("  <span style='color:#6b7783'>(hidden)</span>" if is_hidden else ""))
+                          ("  <span style='color:#6b7783'>" + _("(hidden)") + "</span>" if is_hidden else ""))
             name.setObjectName("name")
             if comp["experimental"]:
-                name.setToolTip("Experimental: " + comp["experimental"])
+                name.setToolTip(_("Experimental: %s") % comp["experimental"])
             if not comp["official"]:
-                name.setToolTip(f"From the pack {comp['pack']}, not part of Frame Tweaks"
-                                + (f"; used instead of {comp['replaced']}'s" if comp["replaced"] else ""))
+                name.setToolTip((_("From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s")
+                                 if comp["replaced"] else _("From the pack {pack}, not part of Frame Tweaks")).format(
+                                    pack=comp["pack"], other=comp["replaced"]))
             deps = comp["deps"]
             info = QLabel(html.escape(comp["desc"], quote=False) +
-                          (f"  <i style='color:#6b7783'>needs: {', '.join(deps)}</i>" if deps else ""))
+                          ("  <i style='color:#6b7783'>" + _("needs: %s") % ", ".join(deps) + "</i>" if deps else ""))
             info.setObjectName("desc")
             info.setWordWrap(True)
             if cid in KNOWN_ISSUES:
@@ -883,7 +924,7 @@ class Window(QWidget):
                 link_label(link).setText(with_copy(
                     f"<span style='color:#6b7783'>{html.escape(rel)}</span> "
                     f"<a style='color:#7fb2e5' href='{url}'>{html.escape(short)} ↗</a>"))
-                link.setToolTip(f"Open {url}")
+                link.setToolTip(_("Open %s") % url)
             text, kind = status_text(state)
             st = QLabel(text)
             st.setProperty("status", kind)
@@ -899,16 +940,16 @@ class Window(QWidget):
             run.clicked.connect(lambda _=False, c=comp: self.run(c))
             details = QPushButton("ⓘ")
             details.setObjectName("info")
-            details.setToolTip("Details: what it is, why it's included, who made it")
+            details.setToolTip(_("Details: what it is, why it's included, who made it"))
             details.clicked.connect(lambda _=False, c=comp: self.show_details(c))
             again = QPushButton("↻")
             again.setObjectName("again")
             again.clicked.connect(lambda _=False, c=cid: self.run_reinstall(c))
             self.again_buttons[cid] = again
             self.update_again(cid)
-            hide = QPushButton("Unhide" if is_hidden else "Hide")
-            hide.setToolTip("Show this tweak in the list again" if is_hidden else
-                            "Hide this tweak from the list (doesn't remove it)")
+            hide = QPushButton(_("Unhide") if is_hidden else _("Hide"))
+            hide.setToolTip(_("Show this tweak in the list again") if is_hidden else
+                            _("Hide this tweak from the list (doesn't remove it)"))
             hide.clicked.connect(lambda _=False, c=cid: self.toggle_hidden(c))
             g.addWidget(box, 0, 0, 3, 1)
             g.addWidget(icon, 0, 1, 3, 1)
@@ -922,7 +963,7 @@ class Window(QWidget):
             if cid in SETTINGS_PAGES and run_label(cid):   # both a Run and settings: ⚙ beside Run
                 gear = QPushButton("⚙")
                 gear.setObjectName("info")
-                gear.setToolTip("Settings")
+                gear.setToolTip(_("Settings"))
                 gear.clicked.connect(lambda _=False, c=cid: self.open_settings(c))
                 g.addWidget(gear, 0, col, 3, 1)
                 col += 1
@@ -944,8 +985,8 @@ class Window(QWidget):
         text = html.escape(text, quote=False)
         if cid in self.updates:
             cur, new = self.updates[cid]
-            text += (f"<br><span style='color:#7fb2e5'>↑ {html.escape(new)} available · "
-                     f"<a style='color:#7fb2e5' href='u'>Update</a></span>")
+            text += ("<br><span style='color:#7fb2e5'>↑ " + _("{version} available").format(version=html.escape(new))
+                     + " · <a style='color:#7fb2e5' href='u'>" + _("Update") + "</a></span>")
         label.setText(text)
 
     def run_update(self, cid):
@@ -954,20 +995,27 @@ class Window(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
-        after = "" if cid else "; echo; echo 'Close and reopen Frame Tweaks to use the new version.'"
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp {CLOSE_PROMPT}"
+        after = "" if cid else "; echo; echo " + shlex.quote(_("Close and reopen Frame Tweaks to use the new version."))
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh(),
                                                cid is None and self.after_self_update()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
 
     # ---- updating Frame Tweaks itself: Check for updates → Update to X → Restart --------
+    def show_newest(self, newest):
+        self.self_update_label.setText(
+            "↑ " + _("{version} available").format(version=html.escape(newest)) + " · "
+            "<a style='color:#7fb2e5' href='update'>" + _("Update") + "</a>")
+
     def set_update_state(self, state, newest=None):
         self.update_state, b = state, self.update_button
-        text, tip = {"check": ("⟳ Check for updates", "Look for a newer Frame Tweaks release"),
-                     "checking": ("Checking…", ""),
-                     "update": (f"⬇ Update to {newest}", "Install it: your tweaks are updated with it"),
-                     "restart": ("↻ Restart", "Reopen Frame Tweaks to use the new version")}[state]
+        self.update_newest = newest
+        text, tip = {"check": (_("⟳ Check for updates"), _("Look for a newer Frame Tweaks release")),
+                     "checking": (_("Checking…"), ""),
+                     "update": (_("⬇ Update to {version}").format(version=newest),
+                                _("Install it: your tweaks are updated with it")),
+                     "restart": (_("↻ Restart"), _("Reopen Frame Tweaks to use the new version"))}[state]
         b.setText(text)
         b.setToolTip(tip)
         b.setEnabled(state != "checking")
@@ -1005,7 +1053,7 @@ class Window(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {CLOSE_PROMPT}"
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: self.refresh())
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
@@ -1018,8 +1066,8 @@ class Window(QWidget):
         state = self.state.get(cid)
         installed = state is not None and state[0] != 1
         button.setEnabled(installed)
-        button.setToolTip("Reinstall: remove it and install it again in one step (settings kept)"
-                          if installed else "Reinstall (available once it's installed)")
+        button.setToolTip(_("Reinstall: remove it and install it again in one step (settings kept)")
+                          if installed else _("Reinstall (available once it's installed)"))
 
     def update_run(self, cid):
         """Run/Open/... for installed tweaks with something to launch, Help otherwise."""
@@ -1030,29 +1078,30 @@ class Window(QWidget):
         installed = state is not None and state[0] != 1
         label = run_label(cid)
         if cid in PAGES:
-            button.setText(PAGES[cid][0])
+            button.setText(_(PAGES[cid][0]))
             button.setProperty("help", "false")
             button.style().unpolish(button)
             button.style().polish(button)
             button.setEnabled(installed)
-            button.setToolTip("Choose which apps open with the shared KDE wallet; lock or unlock it"
-                              if installed else "Tick it and Apply first")
+            button.setToolTip(_("Choose which apps open with the shared KDE wallet; lock or unlock it")
+                              if installed else _("Tick it and Apply first"))
             return
         if cid in SETTINGS_PAGES and not label:          # (with something to run: a ⚙ beside it)
-            button.setText("⚙ Settings")
+            button.setText(_("⚙ Settings"))
             button.setProperty("help", "false")
             button.style().unpolish(button)
             button.style().polish(button)
             button.setEnabled(installed)
-            button.setToolTip("Settings" if installed else "Settings (tick it and Apply first)")
+            button.setToolTip(_("Settings") if installed else _("Settings (tick it and Apply first)"))
             return
-        button.setText(("▶ " + label) if label else "Help")
+        button.setText(("▶ " + label) if label else _("Help"))
         button.setProperty("help", "false" if label else "true")
         button.style().unpolish(button)
         button.style().polish(button)
         button.setEnabled(installed or label is None)
-        button.setToolTip(f"{label} (installs first if needed: tick it and Apply)" if label and not installed
-                          else label and f"{label}" or "Nothing to launch: how to use it")
+        button.setToolTip(_("{label} (installs first if needed: tick it and Apply)").format(label=label)
+                          if label and not installed
+                          else label and f"{label}" or _("Nothing to launch: how to use it"))
 
     def open_settings(self, cid):
         self.close_details()
@@ -1162,8 +1211,9 @@ class Window(QWidget):
             return
         add, remove = self.pending_changes()
         button.setEnabled(bool(add or remove))
-        button.setToolTip(("Install: " + ", ".join(add) if add else "") + ("; " if add and remove else "")
-                          + ("Remove: " + ", ".join(remove) if remove else "") or "Nothing to change: tick or untick a tweak first")
+        button.setToolTip((_("Install: %s") % ", ".join(add) if add else "") + ("; " if add and remove else "")
+                          + (_("Remove: %s") % ", ".join(remove) if remove else "")
+                          or _("Nothing to change: tick or untick a tweak first"))
 
     def apply(self):
         if self.futures:
@@ -1176,9 +1226,9 @@ class Window(QWidget):
             return
         if remove:
             self.confirm_text.setText(
-                "These installed tweaks were unticked and will be <b>removed</b>:<br><br>"
+                _("These installed tweaks were unticked and will be <b>removed</b>:") + "<br><br>"
                 + html.escape(", ".join(remove)) + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
-                "Their settings and data are kept.</span>")
+                + _("Their settings and data are kept.") + "</span>")
             try:
                 self.confirm_yes.clicked.disconnect()
             except TypeError:
@@ -1198,7 +1248,7 @@ class Window(QWidget):
             steps.append("./install.sh uninstall " + " ".join(remove))
         if add:
             steps.append("./install.sh install " + " ".join(add))
-        cmd = " && ".join(steps) + f"; echo; read -rp {CLOSE_PROMPT}"
+        cmd = " && ".join(steps) + f"; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
         self.proc.start("konsole", ["--separate", "-e", "bash", "-c", cmd])
@@ -1268,8 +1318,8 @@ class Window(QWidget):
             return
         r = subprocess.run([str(REPO / "install.sh"), "debug-info"], capture_output=True, text=True)
         path = next((l.split(" ", 1)[1] for l in r.stdout.splitlines() if l.startswith("Wrote ")), None)
-        self.say(f"Saved {path.replace(str(Path.home()), '~')}: read it, then attach it to a bug report."
-                 if path else "Couldn't write the report (see ./install.sh debug-info).")
+        self.say(_("Saved {file}: read it, then attach it to a bug report.").format(file=path.replace(str(Path.home()), "~"))
+                 if path else _("Couldn't write the report (see {command}).").format(command="./install.sh debug-info"))
 
     def make_error_page(self):
         page = QWidget()
@@ -1285,9 +1335,9 @@ class Window(QWidget):
         buttons = QHBoxLayout()
         copy = QPushButton(_("Copy for bug report"))
         copy.clicked.connect(lambda: (QApplication.clipboard().setText(text.toPlainText()),
-                                      copy.setText("Copied")))
+                                      copy.setText(_("Copied"))))
         back = QPushButton(_("← Back"))
-        back.clicked.connect(lambda: (copy.setText("Copy for bug report"), self.stack.setCurrentIndex(0)))
+        back.clicked.connect(lambda: (copy.setText(_("Copy for bug report")), self.stack.setCurrentIndex(0)))
         buttons.addWidget(back)
         buttons.addStretch(1)
         buttons.addWidget(copy)

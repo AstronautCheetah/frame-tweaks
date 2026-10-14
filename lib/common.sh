@@ -6,6 +6,8 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/i18n.sh
+source "$REPO_DIR/lib/i18n.sh"      # t 'Text %s' VALUE: in the user's language
 # The exact build, for people and logs: 0.5.0 at a release tag, 0.5.0+3.abc1234 three commits
 # after it, -dirty with local changes; the VERSION file without git. (VERSION itself stays the
 # release number that migrations and update checks compare.)
@@ -28,7 +30,7 @@ tweak_dir() {
         [ "${line%%=*}" = "$1" ] && { echo "${line#*=}"; return; }
     done <<<"${FRAME_TWEAKS_DIRS:-}"
     local pack
-    for pack in original third-party; do
+    for pack in original integrations third-party; do
         [ -d "$REPO_DIR/packs/$pack/$1" ] && { echo "$REPO_DIR/packs/$pack/$1"; return; }
     done
     echo "$REPO_DIR/packs/original/$1"
@@ -46,7 +48,7 @@ say()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
-[ "$(uname -m)" = aarch64 ] || warn "These tweaks target the Steam Frame (aarch64); you're on $(uname -m)."
+[ "$(uname -m)" = aarch64 ] || warn "$(t "These tweaks target the Steam Frame (aarch64); you're on %s." "$(uname -m)")"
 
 # The user systemd/D-Bus env can be missing in nested desktop-mode shells.
 XDG_RUNTIME_DIR_USER="/run/user/$(id -u)"
@@ -76,28 +78,25 @@ need_brew() {
         eval "$("${BREW_BIN:-$(command -v brew || echo "$BREW")}" shellenv)"
         return 0
     fi
-    cat <<MSG
-
-This tweak needs Homebrew, a package manager that installs into /home/linuxbrew.
+    printf '\n%s\n' "$(t "This tweak needs Homebrew, a package manager that installs into /home/linuxbrew.
 That folder is outside SteamOS's system partition, so updates don't remove it.
-Homebrew's installer asks for your sudo (admin) password once, to create that folder.
-MSG
+Homebrew's installer asks for your sudo (admin) password once, to create that folder.")"
     if passwd -S "$USER" 2>/dev/null | grep -q " NP "; then
-        die "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
+        die "$(t "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run.")"
     fi
-    ask "Install Homebrew now?" || die "Homebrew is required for this tweak. Install it from https://brew.sh and re-run."
-    sudo -v || die "sudo failed."
+    ask "$(t 'Install Homebrew now?')" || die "$(t 'Homebrew is required for this tweak. Install it from https://brew.sh and re-run.')"
+    sudo -v || die "$(t 'sudo failed.')"
     # Homebrew's installer at a pinned commit, checked against homebrew/pin's hash before it runs.
     local brew_installer; brew_installer=$(mktemp)
     fetch_pinned homebrew "$brew_installer"
-    NONINTERACTIVE=1 /bin/bash "$brew_installer" || { rm -f "$brew_installer"; die "Homebrew's installer failed (see above)."; }
+    NONINTERACTIVE=1 /bin/bash "$brew_installer" || { rm -f "$brew_installer"; die "$(t "Homebrew's installer failed (see above).")"; }
     rm -f "$brew_installer"
-    [ -x "$BREW" ] || die "Homebrew didn't end up in /home/linuxbrew."
+    [ -x "$BREW" ] || die "$(t "Homebrew didn't end up in /home/linuxbrew.")"
     # shellcheck disable=SC2016
     grep -qs 'linuxbrew/bin/brew shellenv' "$HOME/.bashrc" ||
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.bashrc"
     eval "$("$BREW" shellenv)"
-    say "Homebrew installed."
+    say "$(t 'Homebrew installed.')"
 }
 
 # Before 0.5 a few files lived under the project's old name, and before 0.6 some settings sat
@@ -152,7 +151,7 @@ alarm_fetch() {
         [ -n "$file" ] && break
     done
     [ -n "$file" ] || die "package $name not found in ALARM $repo"
-    say "Fetching $file"
+    say "$(t 'Fetching %s' "$file")"
     t=$(mktemp -d)
     curl -fsSL -o "$t/$file" "$mirror/$repo/$file" && curl -fsSL -o "$t/$file.sig" "$mirror/$repo/$file.sig" ||
         { rm -rf "$t"; die "download of $file failed"; }
@@ -201,6 +200,16 @@ fetch_pinned() {
 fetch_mirror() {
     { curl -fL# -o "$3" "$1" && sha_ok "$2" "$3"; } ||
         die "$(basename "$1"): Frame Tweaks' copy failed too (download or checksum); not installing it"
+}
+# Translations for installed programs (they don't run from this folder): lib/i18n.py, lib/i18n.sh
+# and locale/*.po in ~/.local/share/frame-tweaks/i18n. A Python program adds that folder to
+# sys.path and imports _ from i18n; a bash program sources its i18n.sh (see arrowpad, adb-scrcpy).
+install_i18n() {
+    local d="$HOME/.local/share/frame-tweaks/i18n"
+    mkdir -p "$d/locale"
+    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$d/"
+    find "$d/locale" -name '*.po' -delete
+    find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }
 sha_ok() { [ -n "$1" ] && echo "$1  $2" | sha256sum -c --quiet - 2>/dev/null; }
 # newest_tag: the newest release tag from the tag names on stdin. Stable (vX.Y.Z) only, unless
@@ -254,7 +263,7 @@ install_desktop() {
 pip_pinned() {
     local venv=$1; shift
     "$venv/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" "$@" && return
-    warn "The tested versions of $* don't install on this Python ($("$venv/bin/python" -V 2>&1)); trying the newest."
+    warn "$(t "The tested versions of %s don't install on this Python (%s); trying the newest." "$*" "$("$venv/bin/python" -V 2>&1)")"
     "$venv/bin/pip" install -q "$@"
 }
 
@@ -262,7 +271,7 @@ pip_pinned() {
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 ensure_tweaks_venv() {
     if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
-        say "Creating Python venv with jeepney"
+        say "$(t 'Creating Python venv with jeepney')"
         python3 -m venv "$TWEAKS_VENV"
         pip_pinned "$TWEAKS_VENV" jeepney
     fi
@@ -312,8 +321,8 @@ backup_file() {
 # restore_file <tweak> <file>: put it back as it was (or remove it if it didn't exist).
 restore_file() {
     local dest="$BACKUPS/$1/${2#"$HOME"/}"
-    if [ -e "$dest" ]; then cp -p "$dest" "$2" && rm -f "$dest" && say "restored $2"
-    elif [ -e "$dest.absent" ]; then rm -f "$2" "$dest.absent" && say "removed $2 (it didn't exist before)"
+    if [ -e "$dest" ]; then cp -p "$dest" "$2" && rm -f "$dest" && say "$(t 'restored %s' "$2")"
+    elif [ -e "$dest.absent" ]; then rm -f "$2" "$dest.absent" && say "$(t "removed %s (it didn't exist before)" "$2")"
     fi
 }
 # KDE settings change key by key, so only those keys are recorded and restored (the rest of the
@@ -337,7 +346,7 @@ restore_kconfig() {
         if [ "$value" = "<unset>" ]; then kwriteconfig6 --file "$file" --group "$group" --key "$key" --delete
         else kwriteconfig6 --file "$file" --group "$group" --key "$key" "$value"; fi
     done < "$rec"
-    rm -f "$rec"; say "restored KDE settings changed by $1"
+    rm -f "$rec"; say "$(t 'restored KDE settings changed by %s' "$1")"
 }
 
 # clear_stuck_modifiers: make the desktop forget modifiers our virtual keyboard may have left
@@ -363,7 +372,7 @@ status_warn()    { printf 'warning  %s\n' "$*"; exit 2; }
 remove_files() {
     local f
     for f in "$@"; do
-        if [ -e "$f" ] || [ -L "$f" ]; then rm -rf -- "$f" && say "removed $f"; fi
+        if [ -e "$f" ] || [ -L "$f" ]; then rm -rf -- "$f" && say "$(t 'removed %s' "$f")"; fi
     done
 }
 
@@ -383,25 +392,25 @@ install_dashboard_patch() {    # install_dashboard_patch NAME FILE
             "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null | grep -q ": patched$" && break
             sleep 1
         done
-        say "Active now."
+        say "$(t 'Active now.')"
     elif sysctl_user is-active --quiet steamvr.service; then
-        say "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
+        say "$(t 'Active from the next SteamVR start (reboot, or restart SteamVR from its menu).')"
     else
-        say "Active from the next SteamVR start."
+        say "$(t 'Active from the next SteamVR start.')"
     fi
 }
 remove_dashboard_patch() {     # remove_dashboard_patch NAME: the watcher stops it in the dashboard
     remove_files "$VR_DASHBOARD/patches/$1.js"
 }
 dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
-    [ -f "$VR_DASHBOARD/patches/$1.js" ] || status_missing "not installed"
-    sysctl_user is-active --quiet steamvr.service || status_ok "installed (active while SteamVR runs)"
+    [ -f "$VR_DASHBOARD/patches/$1.js" ] || status_missing "$(t 'not installed')"
+    sysctl_user is-active --quiet steamvr.service || status_ok "$(t 'installed (active while SteamVR runs)')"
     local s
     s=$(timeout 8 "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null) || true
     case "$s" in
         *": patched") status_ok "$2" ;;
-        *port*closed*) status_warn "waiting for a SteamVR restart (restart SteamVR or reboot once)" ;;
-        *) status_warn "${s:-not responding}" ;;
+        *port*closed*) status_warn "$(t 'waiting for a SteamVR restart (restart SteamVR or reboot once)')" ;;
+        *) status_warn "${s:-$(t 'not responding')}" ;;
     esac
 }
 
@@ -417,10 +426,10 @@ verify_release() {
     fi
     rm -f "$signers"
     if [[ ${FRAME_TWEAKS_ALLOW_UNSIGNED:-} == 1 ]]; then
-        echo "warning: release $2 isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)" >&2
+        echo "warning: $(t "release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)" "$2")" >&2
         return 0
     fi
     echo "Release $2 isn't signed by Frame Tweaks' release key, so it wasn't installed." >&2
-    echo "This can mean it was tampered with. Check https://github.com/AstronautCheetah/frame-tweaks/releases" >&2
+    echo "$(t 'This can mean it was tampered with. Check %s' https://github.com/AstronautCheetah/frame-tweaks/releases)" >&2
     return 1
 }

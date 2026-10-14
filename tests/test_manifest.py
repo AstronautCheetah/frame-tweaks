@@ -24,7 +24,7 @@ except ImportError:
 class Reader(unittest.TestCase):
     @unittest.skipIf(yaml is None, "PyYAML not installed")
     def test_official_manifests_read_as_pyyaml_reads_them(self):
-        files = sorted(ROOT.glob("packs/[ot]*/*/README.md")) + sorted(ROOT.glob("packs/[ot]*/pack.md"))
+        files = sorted(p for pack in sft.OFFICIAL_PACKS for p in pack.glob("*/README.md")) + [p / "pack.md" for p in sft.OFFICIAL_PACKS]
         self.assertGreater(len(files), 20)
         for f in files:
             text = f.read_text()
@@ -127,9 +127,10 @@ class Packs(unittest.TestCase):
         self.assertIn("scroll-strips", self.ids())
 
     def test_two_official_packs_on_until_turned_off(self):
-        """Original and 3rd Party: both in use without trusting; either can be turned off."""
+        """Original, Integrations and 3rd Party: in use without trusting; each can be turned off."""
         packs = {p["name"]: p for p in sft.load(refresh=True)["packs"]}
-        self.assertEqual((packs["Original"]["state"], packs["3rd Party"]["state"]), ("official", "official"))
+        self.assertEqual([packs[n]["state"] for n in ("Original", "Integrations", "3rd Party")], ["official"] * 3)
+        self.assertEqual(self.ids()["signal"]["pack"], "Integrations")
         self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["recline"]["pack"]), ("Original", "3rd Party"))
         self.assertTrue(self.ids()["recline"]["official"])
         sft.set_official(sft.THIRD_PARTY, False)
@@ -141,7 +142,7 @@ class Packs(unittest.TestCase):
 
     def test_official_packs_share_the_category_order(self):
         cats = [sft.read_pack(p)[0]["categories"] for p in sft.OFFICIAL_PACKS]
-        self.assertEqual(cats[0], cats[1])
+        self.assertEqual(cats, [cats[0]] * len(cats))
 
     def test_untrusted_pack_is_listed_not_used(self):
         self.tweak("mypack", "hello")

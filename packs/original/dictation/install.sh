@@ -7,11 +7,11 @@ ensure_path
 # wl-clipboard (copy to the clipboard) from Homebrew either way.
 WF_CLI="$HOME/.local/lib/whisper-frame/whisper-cli"
 if [ -x "$WF_CLI" ]; then
-    say "Using whisper-frame's whisper-cli (no second copy)"
+    say "$(t "Using whisper-frame's whisper-cli (no second copy)")"
     command -v wl-copy >/dev/null || { need_brew; brew install wl-clipboard; }
 else
     need_brew
-    say "Installing whisper.cpp and wl-clipboard (Homebrew)"
+    say "$(t 'Installing whisper.cpp and wl-clipboard (Homebrew)')"
     brew install whisper-cpp wl-clipboard
 fi
 
@@ -22,21 +22,22 @@ fi
 MODELS="$HOME/.local/share/whisper"; MODEL=ggml-small-q8_0.bin
 mkdir -p "$MODELS"
 if [ ! -f "$MODELS/$MODEL" ]; then
-    say "Downloading Whisper model $MODEL"
+    say "$(t 'Downloading Whisper model %s' "$MODEL")"
     fetch_pinned dictation "$MODELS/$MODEL.part"     # pinned revision and SHA256 (dictation/pin)
     mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
 fi
 # Models older versions downloaded; the shared one replaces them.
 for old in ggml-small.en-q5_1.bin ggml-base.en-q5_1.bin; do
     if [ -f "$MODELS/$old" ] && ! grep -qs "$old" "$HOME/.config/frame-tweaks/dictate.conf"; then
-        rm -f "$MODELS/$old" && say "Removed old model $old (replaced by the shared $MODEL)"
+        rm -f "$MODELS/$old" && say "$(t 'Removed old model %s (replaced by the shared %s)' "$old" "$MODEL")"
     fi
 done
 
+install_i18n         # (dictate's notifications in your language)
 install -m755 "$TWEAK_DIR/dictate" "$BIN/dictate"
 install_icon frame-tweaks-dictate
 install_desktop "$TWEAK_DIR/dictate.desktop"
 mkdir -p "$HOME/.config/frame-tweaks"
 [ -f "$HOME/.config/frame-tweaks/dictate.conf" ] || cp "$TWEAK_DIR/dictate.conf.example" "$HOME/.config/frame-tweaks/dictate.conf"
 
-say "Done. Bind 'Dictate (toggle)' to a key (and a controller button): docs/controller-shortcuts.md"
+say "$(t "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s" docs/controller-shortcuts.md)"

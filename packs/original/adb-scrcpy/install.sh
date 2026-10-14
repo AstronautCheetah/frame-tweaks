@@ -4,7 +4,7 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 need_brew
 ensure_path
 
-say "Installing scrcpy (Homebrew)"
+say "$(t 'Installing scrcpy (Homebrew)')"
 brew install scrcpy
 
 # adb plus the libraries SteamOS lacks or has too old, kept private to adb.
@@ -22,11 +22,11 @@ if missing=$(runs_here "$NEW/adb.bin" "$NEW") && LD_LIBRARY_PATH="$NEW" "$NEW/ad
     # (Copied beside it, then swapped by rename: a failed copy leaves the old one working.)
     rm -rf "$LIB.new" "$LIB.old" && mkdir -p "$(dirname "$LIB")" && cp -a "$NEW" "$LIB.new" &&
         { [ ! -e "$LIB" ] || mv "$LIB" "$LIB.old"; } && mv "$LIB.new" "$LIB" && rm -rf "$LIB.old" ||
-        die "couldn't put the new adb in place (the one before is in $LIB or $LIB.old)"
+        die "$(t "couldn't put the new adb in place (the one before is in %s or %s)" "$LIB" "$LIB.old")"
 elif [ -x "$LIB/adb.bin" ] && LD_LIBRARY_PATH="$LIB" "$LIB/adb.bin" version >/dev/null 2>&1; then
-    warn "Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: $missing"
+    warn "$(t "Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: %s" "$missing")"
 else
-    die "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: $missing"
+    die "$(t "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: %s" "$missing")"
 fi
 # adb's server listens on a socket file in your runtime folder instead of TCP 127.0.0.1:5037,
 # which every local program (sandboxed Flatpak apps too) could use to get a shell on a connected
@@ -40,10 +40,11 @@ LD_LIBRARY_PATH="$HOME/.local/lib/android-tools${LD_LIBRARY_PATH:+:$LD_LIBRARY_P
 EOS
 "$BIN/adb" version | sed -n 1,2p
 
+install_i18n         # (phone's dialogs in your language)
 install -m755 "$TWEAK_DIR/phone" "$TWEAK_DIR/phone-fit" "$BIN/"
 # phone-touch reads the joystick through SteamVR (openvr): it runs on the shared venv.
 ensure_tweaks_venv
-ensure_openvr "$TWEAKS_VENV" || say "SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
+ensure_openvr "$TWEAKS_VENV" || say "$(t "SteamVR's OpenVR library not found: no joystick scrolling on the mirror.")"
 install_py_tool "$TWEAK_DIR/phone-touch"
 install_icon frame-tweaks-phone
 # Renamed from "Phone Mirror" (it only works with Android). Keep a password gate if it had one.
@@ -59,11 +60,9 @@ if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
     # ... and laser clicks on it land where you aim (see phone-touch).
     install_dashboard_patch phone-touch "$TWEAK_DIR/phone-touch.js"
 else
-    say "In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both)."
+    say "$(t 'In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both).')"
 fi
-cat <<MSG
-Done. One-time pairing: on the phone open Developer options → Wireless debugging →
-"Pair device with pairing code", then within the minute run:
+t "Done. One-time pairing: on the phone open Developer options → Wireless debugging →
+\"Pair device with pairing code\", then within the minute run:
     adb pair <ip>:<pairing-port> <code>
-Afterwards just launch 'Android Mirror' (or run: phone).
-MSG
+Afterwards just launch 'Android Mirror' (or run: phone)."; echo

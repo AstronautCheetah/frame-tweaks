@@ -2,12 +2,21 @@
 """Translations (gettext .po files in locale/; lib/i18n.py reads them; locale/README.md).
 
   dev/i18n.py extract      write locale/frame-tweaks.pot: every text marked in the code
-                           (_("..."), ngettext, pgettext) and the official tweaks' manifest text
+                           (Python: _("..."), ngettext, pgettext; shell: t '...') and the
+                           official tweaks' manifest text
   dev/i18n.py check        fail if the .pot is out of date (CI)
   dev/i18n.py new LANG     start locale/LANG.po from the .pot (LANG: de, pt_BR, …)
   dev/i18n.py update       bring every locale/*.po up to date with the .pot (translations kept;
                            new text untranslated; removed text kept as #~ comments)
-  dev/i18n.py stats        how much of each language is translated"""
+  dev/i18n.py stats        how much of each language is translated
+  dev/i18n.py export LANG DIR [--size N] [--all]
+                           the texts LANG.po hasn't translated yet (--all: every text), as
+                           JSON files of N entries (default 150) in DIR: part-01.json, … for a
+                           translator or a translation helper (docs/claude/i18n-translating.md)
+  dev/i18n.py import LANG DIR
+                           put DIR's answers (part-01.LANG.json: {"id": "text" or [forms]}) into
+                           LANG.po, after checking each keeps the placeholders, tags and spacing"""
+import json
 import ast
 import re
 import sys
@@ -20,8 +29,32 @@ import sft  # noqa: E402
 
 LOCALE = ROOT / "locale"
 POT = LOCALE / "frame-tweaks.pot"
-CODE = sorted([*ROOT.glob("gui/*.py"), ROOT / "gui/frame-tweaks-gui.py", *ROOT.glob("lib/*.py")])
-FUNCS = {"_": ("msgid",), "ngettext": ("msgid", "msgid_plural"), "pgettext": ("msgctxt", "msgid")}
+
+
+def programs(shebang):
+    """The official packs' files whose first line matches shebang (programs without .py)."""
+    out = []
+    for f in sorted(ROOT.glob("packs/*/*/*")):
+        if f.is_file() and f.parts[-3] in ("original", "integrations", "third-party") and "__pycache__" not in f.parts:
+            try:
+                with open(f, "rb") as fh:
+                    first = fh.readline()
+            except OSError:
+                continue
+            if re.match(shebang, first):
+                out.append(f)
+    return out
+
+
+CODE = sorted({*ROOT.glob("gui/*.py"), ROOT / "gui/frame-tweaks-gui.py", *ROOT.glob("lib/*.py"),
+               *ROOT.glob("packs/original/*/*.py"), *ROOT.glob("packs/integrations/*/*.py"), *ROOT.glob("packs/third-party/*/*.py"),
+               *programs(rb"#!.*python")})
+SHELL = sorted({ROOT / "install.sh", *ROOT.glob("lib/*.sh"), *ROOT.glob("packs/original/*/*.sh"),
+                *ROOT.glob("packs/integrations/*/*.sh"), *ROOT.glob("packs/third-party/*/*.sh"), *programs(rb"#!.*(/bash|/sh\b|env bash)")})
+# t 'text' or t "text" (no $ in it): see lib/i18n.sh
+T_CALL = re.compile(r"""(?:^|[\s;&|(`])t\s+(?:'([^']*)'|"((?:[^"\\$`]|\\.)*)"(?=[\s;&|)`]|$))""", re.M)
+T_DOLLAR = re.compile(r"""(?:^|[\s;&|(`])t\s+"(?:[^"\\]|\\.)*\$""", re.M)
+FUNCS = {"_": ("msgid",), "N_": ("msgid",), "ngettext": ("msgid", "msgid_plural"), "pgettext": ("msgctxt", "msgid")}
 
 
 def quote(s):
@@ -52,6 +85,34 @@ def from_code():
             vals = dict(zip(FUNCS[node.func.id], (a.value for a in args)))
             key = (vals.get("msgctxt"), vals["msgid"], vals.get("msgid_plural"))
             out.setdefault(key, []).append(f"{f.relative_to(ROOT)}:{node.lineno}")
+    return out
+
+
+def from_shell():
+    """{(None, msgid, None): [where, …]} from t '...' in the shell scripts."""
+    out = {}
+    for f in SHELL:
+        text = f.read_text(errors="replace")
+        for m in T_CALL.finditer(text):
+            if re.search(r"(^|\s)#", text[text.rfind("\n", 0, m.start()) + 1:m.start()]):
+                continue                                   # (in a comment)
+            msgid = m[1] if m[1] is not None else re.sub(r'\\([\\"$`])', r"\1", m[2])
+            if msgid:
+                line = text.count("\n", 0, m.start()) + 1
+                out.setdefault((None, msgid, None), []).append(f"{f.relative_to(ROOT)}:{line}")
+    return out
+
+
+def shell_problems():
+    """t "...$..." (a value inside the text): it can't be translated."""
+    out = []
+    for f in SHELL:
+        text = f.read_text(errors="replace")
+        for m in T_DOLLAR.finditer(text):
+            if re.search(r"(^|\s)#", text[text.rfind("\n", 0, m.start()) + 1:m.start()]):
+                continue
+            out.append(f"{f.relative_to(ROOT)}:{text.count(chr(10), 0, m.start()) + 1}: "
+                       "a $value inside t \"...\": use %s and pass it after the text")
     return out
 
 
@@ -90,7 +151,7 @@ def from_manifests():
 
 def template():
     entries = {}
-    for source in (from_code(), from_manifests()):
+    for source in (from_code(), from_shell(), from_manifests()):
         for key, where in source.items():
             entries.setdefault(key, []).extend(where)
     lines = ['# Frame Tweaks: text to translate. Made by dev/i18n.py extract; don\'t edit by hand.',
@@ -143,6 +204,91 @@ def update(po, pot_text):
     po.write_text("\n\n".join(out) + "\n")
 
 
+PLACEHOLDER = re.compile(r"%(?:\([^)]+\))?[-+ #0]*\d*(?:\.\d+)?[sdifr%]|\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
+
+
+def problems(msgid, msgstr):
+    """What a translation loses of its English: placeholders, HTML tags, newlines, and the
+    spaces at either end."""
+    out = []
+    want, got = sorted(PLACEHOLDER.findall(msgid)), sorted(PLACEHOLDER.findall(msgstr))
+    if want != got:
+        out.append(f"placeholders/tags {want} became {got}")
+    for side, f in (("start", lambda x: x[:len(x) - len(x.lstrip())]), ("end", lambda x: x[len(x.rstrip()):])):
+        if f(msgid) != f(msgstr):
+            out.append(f"spacing at the {side} differs")
+    return out
+
+
+def export(lang, outdir, size=150, every=False):
+    done = {k for k, v in i18n.parse_po((LOCALE / f"{lang}.po").read_text()).items()} if (LOCALE / f"{lang}.po").exists() else set()
+    rows = []
+    for ctx, msgid, plural, block in entries_of(template()):
+        if msgid == "" or (not every and (ctx, msgid) in done):
+            continue
+        where = [w for l in block.splitlines() if l.startswith("#:") for w in l[2:].split()]
+        rows.append({"id": len(rows) + 1, "ctx": ctx, "msgid": msgid, "plural": plural, "where": where})
+    outdir.mkdir(parents=True, exist_ok=True)
+    parts = [rows[i:i + size] for i in range(0, len(rows), size)]
+    for n, part in enumerate(parts, 1):
+        (outdir / f"part-{n:02d}.json").write_text(json.dumps(part, ensure_ascii=False, indent=1) + "\n")
+    print(f"{len(rows)} texts in {len(parts)} files in {outdir}")
+
+
+def fill(po, answers):
+    """Write answers ({(ctx, msgid): str or [forms]}) into the .po file's entries."""
+    out = []
+    for ctx, msgid, plural, block in entries_of(po.read_text()):
+        a = answers.get((ctx, msgid)) if msgid else None
+        if a is not None and not block.lstrip().startswith("#~"):
+            keep, seen_msgstr = [], False
+            for l in block.splitlines():
+                if l.startswith("msgstr"):
+                    seen_msgstr = True
+                    continue
+                if seen_msgstr and l.startswith('"'):
+                    continue
+                keep.append(l)
+            keep = [l for l in keep if l != "#, fuzzy"]
+            if plural:
+                forms = a if isinstance(a, list) else [a, a]
+                keep += [f"msgstr[{i}] " + quote(f) for i, f in enumerate(forms)]
+            else:
+                keep.append("msgstr " + quote(a if isinstance(a, str) else a[0]))
+            block = "\n".join(keep)
+        out.append(block)
+    po.write_text("\n\n".join(out) + "\n")
+
+
+def import_(lang, outdir):
+    po = LOCALE / f"{lang}.po"
+    if not po.exists():
+        sys.exit(f"no {po.relative_to(ROOT)}: dev/i18n.py new {lang} first")
+    update(po, template() + "\n")
+    answers, bad = {}, []
+    for part in sorted(outdir.glob("part-[0-9][0-9].json")):
+        mine = outdir / f"{part.stem}.{lang}.json"
+        if not mine.exists():
+            print(f"{mine.name}: missing, skipped")
+            continue
+        rows, got = json.loads(part.read_text()), json.loads(mine.read_text())
+        for row in rows:
+            a = got.get(str(row["id"]))
+            if a in (None, "", []):
+                continue
+            pairs = list(zip([row["msgid"], row["plural"]], a)) if isinstance(a, list) else [(row["msgid"], a)]
+            probs = [p for en, tr in pairs for p in problems(en, tr)]
+            if probs:
+                bad.append(f"{part.name} #{row['id']} {row['msgid'][:50]!r}: " + "; ".join(probs))
+                continue
+            answers[(row["ctx"], row["msgid"])] = a
+    fill(po, answers)
+    print(f"{po.relative_to(ROOT)}: {len(answers)} texts put in")
+    if bad:
+        print(f"{len(bad)} left out (fix them in the answer files, then import again):")
+        print("\n".join("  " + b for b in bad))
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     text = template()
@@ -151,6 +297,8 @@ def main():
         POT.write_text(text + "\n")
         print(f"{POT.relative_to(ROOT)}: {len(entries_of(text)) - 1} texts")
     elif cmd == "check":
+        if shell_problems():
+            sys.exit("\n".join(shell_problems()))
         if not POT.exists() or POT.read_text() != text + "\n":
             sys.exit("locale/frame-tweaks.pot is out of date: run dev/i18n.py extract (and update)")
         print("translation template up to date")
@@ -174,6 +322,11 @@ def main():
             print(f"{po.stem}: {done} of {total} translated ({100 * done // max(total, 1)} %)")
         if not list(LOCALE.glob("*.po")):
             print("no translations yet")
+    elif cmd == "export" and len(sys.argv) > 3:
+        size = int(sys.argv[sys.argv.index("--size") + 1]) if "--size" in sys.argv else 150
+        export(sys.argv[2], Path(sys.argv[3]), size, "--all" in sys.argv)
+    elif cmd == "import" and len(sys.argv) == 4:
+        import_(sys.argv[2], Path(sys.argv[3]))
     else:
         sys.exit(__doc__)
 

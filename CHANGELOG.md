@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **Español (Latinoamérica):** the first translation: the window, the installer's messages, and
+  the tweaks' own programs (Arrow Pad, Screen snip + Narrate, Android Mirror, the wallet tools).
+- **The language follows your keyboard:** Steam's VR keyboard in VR, KDE's layout in desktop
+  mode. Switch to a Spanish layout and the window follows within 5 seconds (once you're on its
+  list); programs pick it up when they start. A QWERTY or English layout keeps the system's
+  language. `FRAME_TWEAKS_LANGUAGE` still chooses one outright.
 - **Screen snip + Narrate settings:** a ⚙ on Narrate's panel (engine and language, with Apply),
   and a ⚙ beside its Snip button in the window (reading speed, engine, language).
 - **Speech engine settings:** Narrate with Piper or eSpeak NG, in one of 18 languages (each
@@ -44,11 +50,12 @@
 - **whisper-frame, Screen reader, Memory caps and Grab guard** are no longer offered.
 
 ### Changed
-- **Two official packs: Original and 3rd Party.** Frame Tweaks' own tweaks are in **Original**;
-  the ones that install another project's app (Full Keyboard, Shared clipboard, Recline) are in
-  **3rd Party**. Both are on; either can be turned off on the Packs page or with
-  `./install.sh mods off NAME` (`on` to use it again). In the repo, `packs/official/` became
-  `packs/original/` and `packs/third-party/`.
+- **Three official packs: Original, Integrations and 3rd Party.** Frame Tweaks' own tweaks are
+  in **Original**; other projects' apps that Frame Tweaks fits to the Frame (Signal, NordVPN,
+  VSCodium, Claude Code, Claude Desktop) are in **Integrations**; the ones installed as they are
+  (Full Keyboard, Shared clipboard, Recline) are in **3rd Party**. All are on; each can be turned
+  off on the Packs page or with `./install.sh mods off NAME` (`on` to use it again). In the
+  repo, `packs/official/` became `packs/original/`, `packs/integrations/` and `packs/third-party/`.
 - **Screen snip's narration panel:** a **Snip** button (Arrow Pad's icon) starts a new snip that's
   read in the same panel; Stop / Again, Pause / Resume, Paste and Close are icons (named in their
   tooltips); the "drag here to move" bar is gone (move it with the grip, or drag an empty edge).

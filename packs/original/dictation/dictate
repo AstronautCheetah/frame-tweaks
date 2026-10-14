@@ -9,6 +9,10 @@
 # Settings in ~/.config/frame-tweaks/dictate.conf: DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
 # DICTATE_NOTYPE=1 (copy only), DICTATE_MAX_SECONDS (auto-stop, default 300).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
+# Translations (lib/i18n.sh; the copy install_i18n puts here), else English
+# shellcheck source=/dev/null
+source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
+    t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
 RUN=/run/user/$(id -u)
 export YDOTOOL_SOCKET=$RUN/.ydotool_socket
 # Shortcut/launcher runs get XDG_RUNTIME_DIR=/run/user/<uid>, but the desktop's
@@ -59,7 +63,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     local wav=$1 text
     echo $$ > "$BUSY"
     cue device-removed
-    notify "Transcribing…"
+    notify "$(t 'Transcribing…')"
     log "stop: $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$wav")s of audio"
     # Whisper invents text for silence ("Thanks for watching", "Subs by …"), so check
     # loudness first: a recording whose peak stays under -40 dB has no speech.
@@ -67,7 +71,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     peak=$(ffmpeg -nostats -i "$wav" -af volumedetect -f null - 2>&1 | sed -n 's/.*max_volume: \(-*[0-9.]*\) dB/\1/p')
     if [ -n "$peak" ] && awk -v p="$peak" 'BEGIN{exit !(p < -40)}'; then
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
-        notify "No speech detected"; return
+        notify "$(t 'No speech detected')"; return
     fi
     # With "Memory caps" installed, Whisper runs inside its memory limit.
     local cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" whisper --)
@@ -80,7 +84,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     fi
     mv -f "$wav" "$STATE/last.wav"
     rm -f "$BUSY"
-    if [ -z "$text" ]; then log "no speech"; notify "No speech detected"; return; fi
+    if [ -z "$text" ]; then log "no speech"; notify "$(t 'No speech detected')"; return; fi
     # Trailing space after a finished sentence, so the next dictation flows on.
     [[ "$text" =~ [.?!]$ ]] && text="$text "
     printf '%s\t%s\n' "$(date '+%F %T')" "$text" >> "$HISTORY"
@@ -89,7 +93,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     if [ -z "${DICTATE_NOTYPE:-}" ]; then
         ydotool type --key-delay 2 -- "$text" 2>>"$LOG" || log "typing failed (is ydotoold running?)"
     fi
-    notify "Copied to clipboard" "$text"
+    notify "$(t 'Copied to clipboard')" "$text"
 }
 
 # Decide start/stop under a lock, so two quick presses can't both start (or both stop).
@@ -110,7 +114,7 @@ if alive "$PID"; then
     transcribe "$wav"
 elif alive "$BUSY"; then
     log "ignored: still transcribing"
-    notify "Still transcribing…" "Wait for the text before dictating again."
+    notify "$(t 'Still transcribing…')" "$(t 'Wait for the text before dictating again.')"
 else
     wav="$STATE/rec-$(date +%s%N).wav"   # own file per recording: never clobbers one being transcribed
     pw-record --rate 16000 --channels 1 --format s16 "$wav" 9>&- 2>/dev/null &   # 9>&-: don't inherit the lock
@@ -122,5 +126,5 @@ else
       if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST"; exec "$0"; fi
     ) >/dev/null 2>&1 &
     sleep 0.15; cue device-added
-    notify "🎙 Listening… (run again to stop)"
+    notify "🎙 $(t 'Listening… (run again to stop)')"
 fi

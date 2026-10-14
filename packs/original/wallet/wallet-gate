@@ -1,8 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 # wallet-gate CMD...: run CMD only once the KDE wallet is unlocked. If it's locked,
 # wallet-unlock asks for the password in a dialog on this display.
 if ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
-    notify-send -a Wallet "$(basename "$1") not started" "The wallet is still locked." 2>/dev/null
+    # Translations (lib/i18n.sh; the copy install_i18n puts here), else English. Only here: it
+    # runs python3, and this wraps every launch.
+    # shellcheck source=/dev/null
+    source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
+        t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
+    notify-send -a Wallet "$(t '%s not started' "$(basename "$1")")" "$(t 'The wallet is still locked.')" 2>/dev/null
     exit 1
 fi
 exec "$@"

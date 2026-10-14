@@ -24,6 +24,17 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _, N_, ngettext  # noqa: F401
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+    def ngettext(singular, plural, n):
+        return singular if n == 1 else plural
+    N_ = _
+
 # Must be set before Qt is imported: KWin only honours "no focus" for X11 windows.
 os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
@@ -36,7 +47,7 @@ def pick_display(argv):
         src = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "ksmserver"],
                              capture_output=True, text=True).stdout.split()
         if not src:
-            sys.exit("arrowpad: desktop mode isn't running")
+            sys.exit(_("arrowpad: desktop mode isn't running"))
         env = dict(kv.split("=", 1) for kv in Path(f"/proc/{src[0]}/environ").read_text().split("\0") if "=" in kv)
         for k in ("DISPLAY", "XAUTHORITY"):
             if k in env:
@@ -128,19 +139,22 @@ ICONS = {"Copy": "edit-copy", "Paste": "edit-paste", "Cut": "edit-cut", "Undo": 
          "RMB": "input-mouse-click-right", "MMB": "input-mouse-click-middle",
          "smaller": "zoom-out", "larger": "zoom-in", "close": "window-close", "Snip": "select-rectangular",
          "Redo": "edit-redo", "Find": "edit-find", "Save": "document-save"}
-TIPS = {"🎤": "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types",
-        "Copy": "Copy (Ctrl+C)", "Paste": "Paste (Ctrl+V)", "Cut": "Cut (Ctrl+X)",
-        "All": "Select all (Ctrl+A)", "Undo": "Undo (Ctrl+Z)", "Fn": "F1–F12 layer (tap again to go back)",
-        "Redo": "Redo (Ctrl+Shift+Z)", "Find": "Find (Ctrl+F)", "Save": "Save (Ctrl+S)",
-        "Tools": "Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)",
-        "Snip": "Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud",
-        "Unstick": "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this",
-        "RMB": "Right click: your next click becomes a right click",
-        "Launcher": "Open the desktop's application menu (taps Super)",
-        "Super": "Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand",
-        "MMB": "Middle click: your next click becomes a middle click",
-        **{m: f"{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
+# Tooltips: marked here, translated where shown ({m} is the modifier's key name).
+TIPS = {"🎤": N_("Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"),
+        "Copy": N_("Copy (Ctrl+C)"), "Paste": N_("Paste (Ctrl+V)"), "Cut": N_("Cut (Ctrl+X)"),
+        "All": N_("Select all (Ctrl+A)"), "Undo": N_("Undo (Ctrl+Z)"), "Fn": N_("F1–F12 layer (tap again to go back)"),
+        "Redo": N_("Redo (Ctrl+Shift+Z)"), "Find": N_("Find (Ctrl+F)"), "Save": N_("Save (Ctrl+S)"),
+        "Tools": N_("Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"),
+        "Snip": N_("Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"),
+        "Unstick": N_("Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"),
+        "RMB": N_("Right click: your next click becomes a right click"),
+        "Launcher": N_("Open the desktop's application menu (taps Super)"),
+        "Super": N_("Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"),
+        "MMB": N_("Middle click: your next click becomes a middle click"),
+        **{m: N_("{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand")
            for m in MODIFIERS if m != "Super"}}
+# Keys whose legend is a word rather than a key name (translated where shown).
+WORDS = {"Tools": N_("Tools"), "Unstick": N_("Unstick"), "Snip": N_("Snip"), "Launcher": N_("Launcher")}
 DOUBLE_TAP = 0.4
 SCALE_MIN, SCALE_MAX, SCALE_STEP = 0.6, 2.0, 0.1
 RUN = Path(f"/run/user/{os.getuid()}")
@@ -150,17 +164,19 @@ ICON = Path.home() / ".local/share/icons/hicolor/256x256/apps/frame-tweaks-arrow
 
 # Full Keyboard's two themes (TaiKeid/steam-frame-full-keyboard share/framekeyboard/themes, MIT).
 THEMES = {
-    "graphite": {"name": "Graphite", "surface": "#0b1016", "surface_radius": 20, "key_top": "#2c333b",
+    "graphite": {"name": N_("Graphite"), "surface": "#0b1016", "surface_radius": 20, "key_top": "#2c333b",
                  "key_middle": "#232a32", "key_bottom": "#1c232a", "key_side_top": "#141a21",
                  "key_side_bottom": "#0c1015", "legend": "#ffffff", "key_radius": 8, "key_depth": 3.5,
                  "key_press_travel": 3, "press_duration_ms": 80, "hover": "#3d4855", "latched": "#355b7a"},
-    "midnight": {"name": "Midnight", "surface": "#20242c", "surface_radius": 20, "key_top": "#505d72",
+    "midnight": {"name": N_("Midnight"), "surface": "#20242c", "surface_radius": 20, "key_top": "#505d72",
                  "key_middle": "#455063", "key_bottom": "#374252", "key_side_top": "#293241",
                  "key_side_bottom": "#191f29", "legend": "#ffffff", "key_radius": 8, "key_depth": 3.5,
                  "key_press_travel": 3, "press_duration_ms": 80, "hover": "#687c99", "latched": "#387d8d"},
 }
 THEME = dict(THEMES["graphite"])        # the current theme; set_theme() switches it in place
 HAPTIC_LEVELS = {"off": 0.0, "light": 0.5, "normal": 1.0}
+HAPTIC_NAMES = {"off": N_("Off"), "light": N_("Light"), "normal": N_("Normal")}
+SETTING_TITLES = {"Theme": N_("Theme"), "Haptics": N_("Haptics")}
 
 
 def stylesheet(scale):
@@ -633,13 +649,13 @@ class ArrowPad(QWidget):
         # toolbar: pin, reset position, smaller, larger ......... close
         bar = QHBoxLayout()
         self.tools = {}
-        for name, tip in (("settings", "Settings: theme and haptics"),
-                          ("pin", "Pin: stop accidental moves"), ("reset", "Reset position"),
-                          ("smaller", "Smaller"), ("larger", "Larger")):
+        for name, tip in (("settings", _("Settings: theme and haptics")),
+                          ("pin", _("Pin: stop accidental moves")), ("reset", _("Reset position")),
+                          ("smaller", _("Smaller")), ("larger", _("Larger"))):
             self.tools[name] = self.tool_button(name, tip)
             bar.addWidget(self.tools[name])
         bar.addStretch(1)
-        self.tools["close"] = self.tool_button("close", "Close")
+        self.tools["close"] = self.tool_button("close", _("Close"))
         bar.addWidget(self.tools["close"])
         self.click_swap = ClickSwap(self.restyle)
         outer.addLayout(bar)
@@ -654,7 +670,7 @@ class ArrowPad(QWidget):
         self.grid = grid
         self.buttons = []
         for r, row in enumerate(LAYERS["nav"]):
-            for c, _ in enumerate(row):
+            for c, _key in enumerate(row):
                 b = KeyButton(self)
                 b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 b.pressed.connect(lambda r=r, c=c: self.on_press(r, c))
@@ -718,7 +734,7 @@ class ArrowPad(QWidget):
         for b in self.tools.values():
             b.setFixedSize(round(tool * 1.4), tool)
             b.setIconSize(QSize(round(tool * 0.6), round(tool * 0.6)))
-        for _, _, b in self.buttons:
+        for _r, _c, b in self.buttons:
             b.setFixedSize(key, key)
             b.setIconSize(QSize(round(key * 0.45), round(key * 0.45)))
         for b in self.setting_buttons.values():
@@ -749,13 +765,15 @@ class ArrowPad(QWidget):
         self.save_config()
 
     def label(self, name):
+        if name in WORDS:
+            return _(WORDS[name])
         return LABELS.get(self.lang, {}).get(name, LABELS["en"].get(name, name))
 
     def relabel(self):
         key = round(52 * self.scale)
         for r, c, b in self.buttons:
             name = self.name_at(r, c)
-            b.setToolTip(TIPS.get(name, ""))
+            b.setToolTip(_(TIPS[name]).format(m=name) if name in TIPS else "")
             icon = icon_for(name) if name in CHORDS or name in MOUSE or name in ("Super", "Launcher", "Snip") else None
             if icon:
                 b.setIcon(icon)
@@ -814,7 +832,7 @@ class ArrowPad(QWidget):
         if icon and pin.property("pinned") != self.pinned:
             pin.setIcon(icon)
             pin.setProperty("pinned", self.pinned)
-        pin.setToolTip("Pinned: tap to allow moving" if self.pinned else "Pin: stop accidental moves")
+        pin.setToolTip(_("Pinned: tap to allow moving") if self.pinned else _("Pin: stop accidental moves"))
 
 
     @staticmethod
@@ -845,9 +863,9 @@ class ArrowPad(QWidget):
         lay = QVBoxLayout(page)
         lay.setContentsMargins(0, 0, 0, 0)
         self.setting_buttons, self.setting_labels = {}, []
-        for title, options in (("Theme", [(k, v["name"]) for k, v in THEMES.items()]),
-                               ("Haptics", [(k, k.capitalize()) for k in HAPTIC_LEVELS])):
-            lab = QLabel(title)
+        for title, options in (("Theme", [(k, _(v["name"])) for k, v in THEMES.items()]),
+                               ("Haptics", [(k, _(HAPTIC_NAMES[k])) for k in HAPTIC_LEVELS])):
+            lab = QLabel(_(SETTING_TITLES[title]))
             self.setting_labels.append(lab)
             lay.addWidget(lab)
             row = QHBoxLayout()
@@ -861,7 +879,7 @@ class ArrowPad(QWidget):
             lay.addLayout(row)
         lay.addStretch(1)
         done = KeyButton(self)
-        done.setText("Done")
+        done.setText(_("Done"))
         done.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         done.clicked.connect(self.toggle_settings)
         self.setting_buttons[("", "done")] = done
@@ -1009,8 +1027,8 @@ class ArrowPad(QWidget):
         self.release_all_mods()
         self.yd.clear_stuck_modifiers()
         self.restyle()
-        subprocess.Popen(["notify-send", "-a", "Arrow Pad", "Keys released",
-                          "Shift, Ctrl, Alt and Super were pressed and let go."], start_new_session=True)
+        subprocess.Popen(["notify-send", "-a", "Arrow Pad", _("Keys released"),
+                          _("Shift, Ctrl, Alt and Super were pressed and let go.")], start_new_session=True)
 
     # ---- screen snip (snip/ tweak) --------------------------------------
     def snip(self):
@@ -1019,8 +1037,9 @@ class ArrowPad(QWidget):
             # Its own process and session: the selection window opens on the Steam session's display.
             subprocess.Popen([str(tool)], start_new_session=True)
         else:
-            subprocess.Popen(["notify-send", "-a", "Arrow Pad", "Screen snip isn't installed",
-                              "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."], start_new_session=True)
+            subprocess.Popen(["notify-send", "-a", "Arrow Pad", _("Screen snip isn't installed"),
+                              _("Tick 'Screen snip + Narrate' in Frame Tweaks to use this button.")],
+                             start_new_session=True)
 
     # ---- dictation ------------------------------------------------------
     @staticmethod
@@ -1119,11 +1138,11 @@ def main():
         pass
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--scale", type=float, default=float(os.environ.get("ARROWPAD_SCALE", 1.0)),
-                    help="button size multiplier (default 1.0)")
-    ap.add_argument("--socket", default=default_socket(), help="ydotoold socket path")
-    ap.add_argument("--quit", action="store_true", help="close a running pad")
-    ap.add_argument("--desktop", action="store_true", help="open in desktop mode (even from the VR menu)")
-    ap.add_argument("--vr", action="store_true", help="open as a floating VR window")
+                    help=_("button size multiplier (default 1.0)"))
+    ap.add_argument("--socket", default=default_socket(), help=_("ydotoold socket path"))
+    ap.add_argument("--quit", action="store_true", help=_("close a running pad"))
+    ap.add_argument("--desktop", action="store_true", help=_("open in desktop mode (even from the VR menu)"))
+    ap.add_argument("--vr", action="store_true", help=_("open as a floating VR window"))
     args = ap.parse_args()
 
     # Hand "quit"/"toggle" to a running pad before any window code starts: --quit must work
@@ -1141,8 +1160,8 @@ def main():
         yd = Ydotool(args.socket)
         yd.clear_stuck_modifiers()
     except OSError as e:
-        sys.exit(f"arrowpad: cannot reach ydotoold at {args.socket}: {e}\n"
-                 "Start it with: systemctl --user start ydotoold")
+        sys.exit(_("arrowpad: cannot reach ydotoold at {socket}: {error}\n"
+                   "Start it with: systemctl --user start ydotoold").format(socket=args.socket, error=e))
 
     pad = ArrowPad(yd, args.scale)
     QLocalServer.removeServer(SERVER_NAME)   # stale socket from a crashed instance

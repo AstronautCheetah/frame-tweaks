@@ -43,7 +43,7 @@ jobs:
       - name: Manifest and installer self-checks
         run: |
           # every tweak's manifest (README.md front matter) is valid and names its scripts
-          python3 lib/sft.py mods check packs/original && python3 lib/sft.py mods check packs/third-party
+          python3 lib/sft.py mods check packs/original && python3 lib/sft.py mods check packs/integrations && python3 lib/sft.py mods check packs/third-party
           ./install.sh list
           ./install.sh _deps all
           ./install.sh _deps signal | grep -q '^wallet signal'
