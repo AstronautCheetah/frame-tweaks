@@ -19,6 +19,26 @@ source:
 depends: [homebrew, speech]
 icon: {file: frame-tweaks-snip.png}
 run: {label: Snip}
+settings:
+  file: ~/.config/frame-tweaks/snip.json
+  format: json
+  about: >-
+    How Narrate reads: its speed here, and its voice and language below (the Speech engine's
+    settings). The ⚙ on Narrate's panel shows the same.
+  note: >-
+    The speed applies to the next Narrate (or at once, from the panel's − / +).
+  options:
+    - key: speed
+      title: Reading speed
+      default: 1.0
+      choices:
+        - {label: "0.75×", value: 0.75}
+        - {label: "1×", value: 1.0}
+        - {label: "1.25×", value: 1.25}
+        - {label: "1.5×", value: 1.5}
+        - {label: "1.75×", value: 1.75}
+        - {label: "2×", value: 2.0}
+  include: [speech]
 changes: >-
   `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the
   Speech engine helper
@@ -86,6 +106,8 @@ The panel has:
 - **Snip** (the dashed rectangle, as on Arrow Pad): snip something new; it's read in this panel.
 - **Copy image** and **Copy text**.
 - **Paste** (icon): read the clipboard's text instead. It's shown in place of the snip.
+- **⚙ Settings:** Narrate's engine (Piper or eSpeak NG) and language, with **Apply**. The same
+  settings are on this tweak's ⚙ button in the Frame Tweaks window, with the reading speed.
 - **Close** (✕), and **Collapse** at either end of the bottom row. Collapse shrinks the panel to a
   single Expand icon, right where you pressed it; reading carries on.
 

@@ -50,6 +50,14 @@ if [ "$(cat "$D/voice.version" 2>/dev/null)" != "$want" ]; then
     mv "$D/voice.onnx.part" "$D/voice.onnx" && mv "$D/voice.onnx.json.part" "$D/voice.onnx.json"
     echo "$want" > "$D/voice.version"
 fi
+# For Narrate's ⚙ panel (frame-snip): the languages, and a command that applies changed settings
+# (this installer again, from wherever Frame Tweaks is).
+cp "$TWEAK_DIR/voices.tsv" "$D/voices.tsv"
+write_file "$D/apply" 755 <<APPLY
+#!/bin/sh
+# Applies the Speech engine settings (~/.config/frame-tweaks/speech.conf): Frame Tweaks' speech/install.sh.
+exec env FRAME_TWEAKS_LIB="$FRAME_TWEAKS_LIB" bash "$TWEAK_DIR/install.sh"
+APPLY
 # What Narrate reads (frame-snip): the engine, and eSpeak NG's voice for this language.
 printf 'engine=%s\nespeak_voice=%s\nlanguage=%s\n' "${engine:-piper}" "$espeak_voice" "$lang" > "$D/narrate.conf"
 

@@ -150,6 +150,8 @@ def check_settings(st, cid, where):
     for o in opts:
         if isinstance(o, dict) and o.get("checkbox") and len(o.get("choices") or []) != 2:
             errs.append(f"{where}: {o.get('key')}: a checkbox option needs exactly two choices (on, then off)")
+    if not (isinstance(st.get("include", []), list) and all(isinstance(i, str) for i in st.get("include", []))):
+        errs.append(f"{where}: settings.include must be a list of tweak ids")
     for a in st.get("actions", []):
         if not (isinstance(a, dict) and isinstance(a.get("label"), str) and isinstance(a.get("script"), str)
                 and isinstance(a.get("args", []), list) and isinstance(a.get("when", ""), str)):
@@ -349,7 +351,9 @@ def settings_specs():
                             # that setting has a value; {KEY} in the label shows it).
                             "actions": [dict(a, dir=c["dir"]) for a in st.get("actions", [])],
                             # Options shown as one tick box (two choices: on, then off).
-                            "checkboxes": {o["key"] for o in st["options"] if o.get("checkbox")}}
+                            "checkboxes": {o["key"] for o in st["options"] if o.get("checkbox")},
+                            # Other tweaks' settings shown on the same page (their own files).
+                            "include": [i for i in st.get("include", []) if isinstance(i, str)]}
     return out
 
 
