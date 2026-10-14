@@ -1,4 +1,4 @@
-// steam-frame-tweaks scroll-strips: big scroll strips beside each window (the one docked in the
+// frame-tweaks scroll-strips: big scroll strips beside each window (the one docked in the
 // dashboard and every floating one), easy to hit with the laser. Each works like a joystick: press,
 // then drag away from where you pressed to scroll (the farther, the faster; back past it reverses);
 // let go to stop. A quick tap near an end pages. Scrolling goes to the window you last clicked, as
@@ -11,11 +11,11 @@
 // floating window's own space); the page elements stay small, so the dashboard's layout is unchanged.
 // (Version 1 used the window's scaled local size and big page elements: strips far too big and far
 // away, and the Steam bar drawn too large.)
-// requires: panel anchors | GetPanelAnchorID(e){
+// requires: panel anchors | GetPanelAnchorID(
 // requires: frame panel height | latestMeasuredPanelLocalHeight
 // requires: window.Dashboard | window.Dashboard=
-// requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
-// requires: EDockLocation.World = 4 | e[e.World=4]="World"
+// requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
+// requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small

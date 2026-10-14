@@ -5,6 +5,7 @@
 # fake home, or if uninstall leaves files behind that aren't the settings it promises to keep.
 #
 #   dev/test-tweaks.sh            the default set (runs anywhere, CI included)
+#   (TEST_IGNORE=REGEX: files outside the test home that other programs write meanwhile)
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -50,7 +51,8 @@ done
 fx="$work/fixtures"; mkdir -p "$fx/pkg/usr/bin"
 printf '#!/bin/sh\nexit 0\n' > "$fx/pkg/usr/bin/ydotool"; cp "$fx/pkg/usr/bin/ydotool" "$fx/pkg/usr/bin/ydotoold"
 chmod +x "$fx/pkg/usr/bin/"*
-(cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" usr)
+printf 'pkgname = ydotool\npkgver = 1.0.4-2\n' > "$fx/pkg/.PKGINFO"
+(cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" .PKGINFO usr)
 echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
 head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"
 sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/dictation/pin"
@@ -90,9 +92,10 @@ for t in "${TWEAKS[@]}"; do
         after=$(snapshot "$home")
         # (caches that desktop tools regenerate don't count)
         left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <(printf '%s\n' ${KEEP[$t]:-} | sed 's|^|./|') |
-               grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$|^\./\.cache/' || true)
+               grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$|^\./\.cache/' |
+               grep -vE '^\./\.local/state/frame-tweaks/alarm/' || true)   # (kept on purpose: no downgrades)
         outside=$(find /tmp /var/tmp "$REPO" -newer "$marker" -type f 2>/dev/null |
-                  grep -v "^$work/" | grep -v "^$REPO/\.git/" | grep -v "^/tmp/claude" || true)
+                  grep -v "^$work/" | grep -v "^$REPO/\.git/" | { if [ -n "${TEST_IGNORE:-}" ]; then grep -vE "$TEST_IGNORE"; else cat; fi; } || true)
         if [ -n "$left" ]; then
             echo "FAIL $t: uninstall left files behind:"; echo "$left" | sed 's/^/    /'; fail=1
         elif [ -n "$outside" ]; then

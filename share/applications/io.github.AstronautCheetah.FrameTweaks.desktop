@@ -8,4 +8,4 @@ Icon=io.github.AstronautCheetah.FrameTweaks
 Terminal=false
 Categories=Utility;
 Keywords=Steam;Frame;SteamOS;VR;keyboard;dictation;wallet;
-StartupWMClass=steam-frame-tweaks
+StartupWMClass=frame-tweaks

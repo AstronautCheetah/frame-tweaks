@@ -2,7 +2,7 @@
   "action_manifest_version": 0,
   "controller_type": "frame_controller",
   "name": "Arrow Pad haptics",
-  "description": "Hover and press feedback for steam-frame-tweaks Arrow Pad",
+  "description": "Hover and press feedback for Frame Tweaks Arrow Pad",
   "bindings": {
     "/actions/arrowpad": {
       "haptics": [

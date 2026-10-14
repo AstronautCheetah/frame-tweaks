@@ -21,7 +21,7 @@ from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt, QTimer
 from PyQt6.QtGui import QImage, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton
 
-KEY = "steam-frame-tweaks.arrowpad"
+KEY = "frame-tweaks.arrowpad"
 # The texture goes to SteamVR as a PNG file (SetOverlayFromFile), not SetOverlayRaw: on the Frame
 # raw uploads never showed (an invisible panel that still caught the laser), and a 2.5 MB raw
 # upload crashed vrcompositor (SIGBUS). Capped size and rate keep the compositor's work small.

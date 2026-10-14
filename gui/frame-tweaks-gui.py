@@ -1397,7 +1397,7 @@ def watch_for_hangs(log_dir):
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("steam-frame-tweaks")
+    app.setApplicationName("frame-tweaks")
     app.setDesktopFileName("io.github.AstronautCheetah.FrameTweaks")
     # One window: a second launch asks the running one to come forward and exits.
     probe = QLocalSocket()

@@ -1,4 +1,4 @@
-// steam-frame-tweaks float-grab: "Float in World" also picks the window up, as grabbing the bar
+// frame-tweaks float-grab: "Float in World" also picks the window up, as grabbing the bar
 // under it does, so you place it in one go. It's let go by your next click, or by releasing the
 // trigger if you're still holding the click that floated it. While it's held, and briefly after,
 // "Return to Dashboard" (the button that replaced Float in World under the laser) is ignored for
@@ -7,13 +7,15 @@
 // own drag (UndockedOverlay.startFloatingWindowMove / endFloatingWindowMove), with the controller
 // that pressed the button (the dashboard's primary device), encoded the way SteamVR's laser
 // mouse events encode it (NumLock = left hand, NumLock + CapsLock = right hand).
-// requires: Float in World sets the dock | onInvoked:()=>{t.docking.SetDockLocation(l.yWq.World)}
+// requires: the Float in World button | "#FloatInWorld"
+// requires: it sets the dock | docking.SetDockLocation(
 // requires: UndockedOverlay.startFloatingWindowMove | startFloatingWindowMove(e){
 // requires: UndockedOverlay.endFloatingWindowMove | endFloatingWindowMove(){
 // requires: the drag ends on mouseup | window.addEventListener("mouseup",this.endFloatingWindowMove)
-// requires: hand from mouse modifiers | e.getModifierState("CapsLock")&&(n|=1),e.getModifierState("NumLock")&&(n|=2)
-// requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
-// requires: EDockLocation.World = 4 | e[e.World=4]="World"
+// requires: hand from mouse modifiers (CapsLock) | getModifierState("CapsLock")&&(
+// requires: hand from mouse modifiers (NumLock) | getModifierState("NumLock")&&(
+// requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
+// requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
   const NAME = 'float-grab', VERSION = 2, DASH = 1, WORLD = 4;
   const RELEASE_DEG = 2;            // trigger moved this far from where it was: a click ended or began

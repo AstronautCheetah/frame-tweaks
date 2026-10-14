@@ -94,21 +94,24 @@ class Phone:
              self.version, f"scid={scid:08x}", "log_level=warn", "video=false", "audio=false", "control=true",
              "tunnel_forward=true", "clipboard_autosync=false", "cleanup=false", "power_on=false",
              "send_device_meta=false"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        port = adb(self.dev, "forward", "tcp:0", f"localabstract:scrcpy_{scid:08x}").stdout.strip()
-        if not port.isdigit():
-            raise OSError("adb forward failed")
-        self.port = port
+        # The tunnel ends in a socket file in your runtime folder (only you can reach it), not a
+        # TCP port on 127.0.0.1, which any local program (sandboxed apps included) could connect to.
+        path = f"/run/user/{os.getuid()}/sft-phone-touch-{scid:08x}.sock"
+        r = adb(self.dev, "forward", f"localfilesystem:{path}", f"localabstract:scrcpy_{scid:08x}")
+        if r.returncode:
+            raise OSError(f"adb forward failed: {r.stderr.strip()}")
+        self.port = path
         for _ in range(100):       # the tunnel accepts before the server listens: wait for its first byte
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             try:
-                s = socket.create_connection(("127.0.0.1", int(port)), timeout=3)
+                s.settimeout(3)
+                s.connect(path)
                 if s.recv(1) == b"\0":
-                    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                    s.settimeout(3)
                     self.sock = s
                     return
-                s.close()
             except OSError:
                 pass
+            s.close()
             time.sleep(0.1)
         raise OSError("the phone's server didn't answer")
 
@@ -117,7 +120,11 @@ class Phone:
             self.sock.close()
             self.sock = None
         if self.port:
-            adb(self.dev, "forward", "--remove", f"tcp:{self.port}")
+            adb(self.dev, "forward", "--remove", f"localfilesystem:{self.port}")
+            try:
+                os.unlink(self.port)
+            except OSError:
+                pass
             self.port = None
         if self.server:
             self.server.terminate()
@@ -209,12 +216,23 @@ def reset_conf(path=CONF):
     path.write_text("".join(f"{line}\n" for line in lines if line.partition("=")[0].strip() not in CHOICES))
 
 
+def running(pidfile, name):
+    """The pid in pidfile, if that process is still `name` (not a stale file whose pid was reused)."""
+    try:
+        pid = int(pidfile.read_text())
+        cmd = Path(f"/proc/{pid}/cmdline").read_bytes().split(b"\0")
+    except (OSError, ValueError):
+        return None
+    return pid if any(Path(a.decode(errors="replace")).name == name for a in cmd[:3]) else None
+
+
 def restart_stream():
     """Ask `phone` to start scrcpy again (with the settings as they are now)."""
-    try:
-        os.kill(int(PHONE_PIDFILE.read_text()), 10)                    # SIGUSR1
-    except (OSError, ValueError) as e:
-        log("restart:", e)
+    pid = running(PHONE_PIDFILE, "phone")
+    if pid:
+        os.kill(pid, 10)                                              # SIGUSR1
+    else:
+        log("restart: phone isn't running")
 
 
 class Sticks:
@@ -379,12 +397,12 @@ def main():
     if not DASHBOARD.is_file():
         return                                    # no VR windows helper: no layer to talk to
     # One at a time: a reconnect (new address) replaces the one before.
-    try:
-        old = int(PIDFILE.read_text())
-        if old != os.getpid():
+    old = running(PIDFILE, "phone-touch")
+    if old and old != os.getpid():
+        try:
             os.kill(old, 15)
-    except (OSError, ValueError):
-        pass
+        except OSError:
+            pass
     PIDFILE.write_text(str(os.getpid()))
     phone = Phone(sys.argv[1])
     try:

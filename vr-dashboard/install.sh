@@ -19,7 +19,7 @@ fi
 # Before every SteamVR start: turn its dashboard DevTools port on (put back when it stops).
 cat > "$U/sft-vr-debugger.service" <<UNIT
 [Unit]
-Description=Turn on SteamVR's dashboard DevTools port until SteamVR stops (steam-frame-tweaks)
+Description=Turn on SteamVR's dashboard DevTools port until SteamVR stops (Frame Tweaks)
 Before=steamvr.service
 
 [Service]
@@ -41,7 +41,7 @@ UNIT
 # While SteamVR runs: inject the patches (and again after a dashboard reload).
 cat > "$U/sft-dashboard.service" <<UNIT
 [Unit]
-Description=SteamVR dashboard patches: VR windows tweaks (steam-frame-tweaks)
+Description=SteamVR dashboard patches: VR windows tweaks (Frame Tweaks)
 After=steamvr.service
 PartOf=steamvr.service
 

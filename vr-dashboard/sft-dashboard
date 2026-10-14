@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SteamVR dashboard patches (steam-frame-tweaks): the shared part of Curved world windows,
+"""SteamVR dashboard patches (Frame Tweaks): the shared part of Curved world windows,
 Back to the previous window, and any later dashboard tweak.
 
   sft-dashboard arm       before SteamVR starts: turn on its dashboard DevTools port (127.0.0.1:8087)
@@ -23,7 +23,8 @@ import base64, json, os, re, socket, struct, subprocess, sys, threading, time, u
 from pathlib import Path
 
 SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
-STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"
+STATE = Path.home() / ".local/state/frame-tweaks/vr-debugger.prev"
+OLD_STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"   # before 0.5
 PATCHES = Path(__file__).resolve().parent / "patches"
 PORT = 8087
 DASHBOARD = Path("/opt/steamvr/resources/webinterface/dashboard")
@@ -55,6 +56,9 @@ def arm():
 
 
 def restore():
+    if not STATE.exists() and OLD_STATE.exists():      # armed by an older version
+        STATE.parent.mkdir(parents=True, exist_ok=True)
+        OLD_STATE.replace(STATE)
     if not STATE.exists():
         return
     prev = json.loads(STATE.read_text())

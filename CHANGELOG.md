@@ -1,6 +1,26 @@
 # Changelog
 
 ## Unreleased
+- **adb's server is private:** it listens on a socket file in your runtime folder instead of
+  TCP 127.0.0.1:5037, which any local program (sandboxed Flatpak apps too) could use to get a
+  shell on a connected phone. phone-touch's tunnel to the phone is a socket file too.
+- **Android Mirror remembers your phone:** with no `PHONE_NAME` set it connects only when one
+  phone is advertising, and then remembers it; with several, it asks which.
+- **Arch Linux ARM downloads:** HTTPS mirrors only, the signed package's own name is checked,
+  and a version older than one installed before is refused (`ALARM_ALLOW_DOWNGRADE=1` overrides).
+- **Homebrew's installer is pinned** to a reviewed commit and checked against its hash
+  (`homebrew/pin`) before it runs.
+- **One name: Frame Tweaks / `frame-tweaks`.** The installer window's settings move from
+  `~/.config/steam-frame-tweaks` to `~/.config/frame-tweaks/installer` (the update channel to
+  `~/.config/frame-tweaks/channel`), and `~/.local/state/steam-frame-tweaks` into
+  `~/.local/state/frame-tweaks`, on the next run of `./install.sh`. Firefox's `user.js` block
+  is marked `frame-tweaks` (the old block is removed).
+- Fixed: NordVPN's status said "not installed" with no locations set up; `wallet-unlock --lock`
+  reported success when locking failed; uninstalling Firefox's settings left them in `prefs.js`
+  (now reset there too, while Firefox is closed); `debug-info` now also removes MAC and IPv6
+  addresses and your phone's name.
+- Dashboard patches check SteamVR's code with stable names (not minified ones that change with
+  every SteamVR build), and the test finds every patch by itself.
 - **Contributing from outside:** fork and open a pull request (CONTRIBUTING.md, "Sending a
   change"). The commit check (`dev/check-trailers.sh`, used by the hooks and CI) now refuses only
   AI attribution, so human `Co-authored-by` lines, including GitHub's on squash merges, are fine.

@@ -17,8 +17,14 @@ done
 rm -rf "$LIB" && mkdir -p "$LIB"
 cp -a "$T"/deps/usr/lib/*.so* "$LIB/"
 install -m755 "$T/at/usr/bin/adb" "$LIB/adb.bin"
+# adb's server listens on a socket file in your runtime folder instead of TCP 127.0.0.1:5037,
+# which every local program (sandboxed Flatpak apps too) could use to get a shell on a connected
+# phone. (Set ADB_SERVER_SOCKET yourself to override.) An old server on the TCP port is stopped.
+ADB_SERVER_SOCKET=tcp:localhost:5037 LD_LIBRARY_PATH="$LIB" timeout 10 "$LIB/adb.bin" kill-server 2>/dev/null || true
 cat > "$BIN/adb" <<'EOS'
 #!/bin/sh
+: "${ADB_SERVER_SOCKET:=localfilesystem:${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/adb.sock}"
+export ADB_SERVER_SOCKET
 LD_LIBRARY_PATH="$HOME/.local/lib/android-tools${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" exec "$HOME/.local/lib/android-tools/adb.bin" "$@"
 EOS
 chmod +x "$BIN/adb"

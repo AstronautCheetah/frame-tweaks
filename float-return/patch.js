@@ -1,15 +1,15 @@
-// steam-frame-tweaks float-return: after you float the window the dashboard is showing out into
+// frame-tweaks float-return: after you float the window the dashboard is showing out into
 // the world, the dashboard goes back (after 2.5 s) to the window it showed before, instead of
 // leaving an empty space. And when the window it shows is closed (a finished Screen snip, say),
 // it goes back to the one before that instead of falling back to Steam. Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
 // It only switches the way a click on that window's dashboard button does (switchToFrameInternal).
 // requires: window.Dashboard | window.Dashboard=
-// requires: Dashboard.switchToFrameInternal() | switchToFrameInternal(e,t,r){
+// requires: Dashboard.switchToFrameInternal() | switchToFrameInternal(
 // requires: Dashboard.autoSwitchOverlayIfNeeded() | autoSwitchOverlayIfNeeded(){
 // requires: window.DashboardStore | window.DashboardStore=
 // requires: DashboardStore.activeFrame | get activeFrame(){
-// requires: EDockLocation.Dashboard = 1 | e[e.Dashboard=1]="Dashboard"
-// requires: EDockLocation.World = 4 | e[e.World=4]="World"
+// requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
+// requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
   const NAME = 'float-return', VERSION = 4, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
   const all = (window.__sftPatches ??= {});
