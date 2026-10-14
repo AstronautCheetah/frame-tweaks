@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: settings changed with the scroll strips' gear in VR weren't saved** (the dashboard
+  service wasn't allowed to write `~/.config/frame-tweaks`).
 - **Every installer-window function has a command:** `./install.sh info`, `run`, `settings`
   (show, change, `--reset`), `hide`/`unhide`, `hide-group`/`unhide-group`, `wallet`,
   `wallet-apps` and `timers`. The window now uses the same code (`lib/sft.py`) for hidden rows,
