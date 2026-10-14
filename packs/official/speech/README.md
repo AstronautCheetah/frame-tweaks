@@ -11,7 +11,7 @@ what: >-
   Orca and other apps that speak through speech-dispatcher. Installed automatically.
 why: >-
   SteamOS ships speech-dispatcher and its espeak-ng module, but not espeak-ng itself, so nothing
-  can speak (the Screen reader's Orca was silent).
+  can speak (KDE's screen reader, Orca, stays silent).
 author: RHASSPY (Piper); espeak-ng contributors
 source: {relation: uses, url: https://github.com/rhasspy/piper}
 icon: {theme: audio-speakers-symbolic}
@@ -20,14 +20,14 @@ changes: >-
   `~/.config/speech-dispatcher/speechd.conf` (backed up, restored on uninstall)
 access: None beyond your home folder
 survives_updates: Yes (everything is in your home folder)
-undo: "`./install.sh uninstall speech` (after Screen snip and Screen reader)"
+undo: "`./install.sh uninstall speech` (after Screen snip)"
 ---
 # Speech engine (helper)
 
 SteamOS includes **speech-dispatcher** (the service Orca and other apps speak through) and its
-**espeak-ng** module, but not espeak-ng itself, so nothing can actually speak: the
-[Screen reader](../screen-reader/)'s Orca is silent. This helper fixes that, and provides the
-voice for [Screen snip](../snip/)'s **Narrate**. It's installed automatically with them.
+**espeak-ng** module, but not espeak-ng itself, so nothing can actually speak: KDE's screen
+reader, Orca, is silent. This helper fixes that, and provides the voice for
+[Screen snip](../snip/)'s **Narrate**. It's installed automatically with it.
 
 <!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
 > **At a glance**
@@ -35,7 +35,7 @@ voice for [Screen snip](../snip/)'s **Narrate**. It's installed automatically wi
 > - **Survives SteamOS updates:** Yes (everything is in your home folder)
 > - **Changes:** Piper and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned), `~/.config/speech-dispatcher/speechd.conf` (backed up, restored on uninstall)
 > - **Unusual access:** None beyond your home folder
-> - **Undo:** `./install.sh uninstall speech` (after Screen snip and Screen reader)
+> - **Undo:** `./install.sh uninstall speech` (after Screen snip)
 <!-- /generated:glance -->
 
 - **[Piper](https://github.com/rhasspy/piper)** (MIT), a fast offline neural voice, with the

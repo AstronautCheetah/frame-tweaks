@@ -11,6 +11,9 @@
 - **Screenshots on details pages:** pictures in a tweak's README now show in the installer
   window too. Arrow Pad's shows its main and Tools layers.
 
+### Removed
+- **whisper-frame and Screen reader** are no longer offered.
+
 ### Changed
 - **Wallet apps: ⏱ Extend timer** (next to Lock now) restarts the auto-lock countdown, and
   **Auto-lock after unlocking** sets its length (1–24 h; default 4 h).

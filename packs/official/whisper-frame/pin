@@ -1,9 +1,0 @@
-# Pinned upstream release: installs get exactly this file, checked against this hash (recorded
-# here, not fetched from the release). Bump with dev/check-pins.sh after reviewing the release.
-version=0.2.0
-url=https://github.com/groffta/whisper-frame/releases/download/v0.2.0/whisper-frame-0.2.0-aarch64.tar.gz
-sha256=1c69942558d16d0cec2758587be0eb6c238d4a384eb564161939b40ad0115820
-latest=https://api.github.com/repos/groffta/whisper-frame/releases/latest
-mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/1c69942558d1-whisper-frame-0.2.0-aarch64.tar.gz
-license=MIT (groffta; whisper.cpp MIT; LICENSE and LICENSES/ in the archive)
-license_file=https://raw.githubusercontent.com/groffta/whisper-frame/v0.2.0/LICENSE

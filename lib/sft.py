@@ -75,9 +75,11 @@ UPSTREAM_README = re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/
 
 
 def pack_dirs():
-    """The official pack, then ~/.local/share/frame-tweaks/packs/*, then FRAME_TWEAKS_PACKS
-    (folders separated by :, each a pack)."""
+    """The official pack, then other folders in this checkout's packs/ (local, not published:
+    e.g. packs/attic for tweaks set aside), then ~/.local/share/frame-tweaks/packs/*, then
+    FRAME_TWEAKS_PACKS (folders separated by :, each a pack). All but the official one need trust."""
     out = [OFFICIAL]
+    out += sorted(d for d in OFFICIAL.parent.iterdir() if d.is_dir() and d != OFFICIAL and not d.name.startswith("."))
     if USER_PACKS.is_dir():
         out += sorted(d for d in USER_PACKS.iterdir() if d.is_dir() and not d.name.startswith("."))
     out += [Path(d).expanduser() for d in os.environ.get("FRAME_TWEAKS_PACKS", "").split(":") if d]

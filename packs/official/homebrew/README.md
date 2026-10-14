@@ -43,7 +43,7 @@ brew install <program>      # anything from https://formulae.brew.sh
 brew upgrade                # update everything it installed
 ```
 
-**Used by:** [Dictation](../dictation/) (wl-clipboard, and whisper.cpp when whisper-frame isn't installed),
+**Used by:** [Dictation](../dictation/) (wl-clipboard and whisper.cpp),
 [Android Mirror](../adb-scrcpy/) (scrcpy) and [Screen snip](../snip/) (Tesseract). Claude Code may also have been installed
 with it (`brew install --cask claude-code`).
 
