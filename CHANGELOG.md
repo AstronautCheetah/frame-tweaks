@@ -34,6 +34,9 @@
 - **whisper-frame, Screen reader, Memory caps and Grab guard** are no longer offered.
 
 ### Changed
+- **Screen snip's narration panel:** a **Snip** button (Arrow Pad's icon) starts a new snip that's
+  read in the same panel; Stop / Again, Pause / Resume, Paste and Close are icons (named in their
+  tooltips); the "drag here to move" bar is gone (move it with the grip, or drag an empty edge).
 - **Tools is now Desktop Recovery**, described as what it is: an as-needed fix for a desktop
   whose taskbar has gone missing.
 - **Install, update and removal terminals in VR** also say you can close them with the X button
