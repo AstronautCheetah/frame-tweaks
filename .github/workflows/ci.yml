@@ -24,7 +24,9 @@ jobs:
       - name: ShellCheck
         run: |
           sudo apt-get install -y shellcheck
-          shellcheck -x -S warning $(grep -lE '^#!(/bin/(ba)?sh|/usr/bin/env bash)' -r --exclude-dir=.git .)
+          # scripts by their shebang, and the sourced libraries (lib/common.sh) by their shellcheck directive;
+          # not Markdown, whose code examples can start a line with one
+          shellcheck -x -S warning $(grep -lE '^(#!(/bin/(ba)?sh|/usr/bin/env bash)|# shellcheck shell=)' -r --exclude-dir=.git --exclude='*.md' .)
       - name: Programs are replaced, not written into (lib/common.sh write_file)
         run: |
           ! grep -nE '(>|\bcp\b[^|]*) *"\$(BIN|HOME/\.local/bin)/' packs/*/*/*.sh lib/common.sh | grep -v write_file
@@ -32,29 +34,36 @@ jobs:
         run: python3 dev/i18n.py check
       - name: Python syntax
         run: |
-          for f in $(grep -lE '^#!/usr/bin/env python3' -r --exclude-dir=.git .); do
+          for f in $(grep -lE '^#!/usr/bin/env python3' -r --exclude-dir=.git --exclude='*.md' .); do
             python3 -m py_compile "$f"
           done
-          python3 -m py_compile gui/*.py lib/*.py packs/original/arrowpad/*.py     # modules without a shebang
+          python3 -m py_compile gui/*.py lib/*.py packs/*/*/*.py     # modules without a shebang
       - name: Conventional Commits messages (commitizen, .cz.toml)
         run: |
           python3 -m pip install --quiet commitizen
           dev/check-commit-msg.sh --all
       - name: Manifest and installer self-checks
         run: |
-          # every tweak's manifest (README.md front matter) is valid and names its scripts
-          python3 lib/sft.py mods check packs/original && python3 lib/sft.py mods check packs/integrations && python3 lib/sft.py mods check packs/third-party
+          # every tweak's manifest (README.md front matter) is valid and names its scripts (one per line: a
+          # failure before the last && of a list doesn't stop the step); the example's too, or
+          # dev/test-tweaks.sh would leave it out unseen
+          python3 lib/sft.py mods check packs/original
+          python3 lib/sft.py mods check packs/integrations
+          python3 lib/sft.py mods check packs/third-party
+          python3 lib/sft.py mods check examples/hello-pack
           ./install.sh list
           ./install.sh _deps all
           ./install.sh _deps signal | grep -q '^wallet signal'
           # every pin names a version, an https URL, and a SHA256 (files) or a commit (git)
-          for pin in packs/*/*/pin; do
+          for pin in packs/*/*/pin packs/*/*/*.pin; do
+            [ -f "$pin" ] || continue      # (a pattern that matched nothing)
             grep -qE '^version=.+' "$pin" && grep -qE '^url=https://' "$pin" &&
               grep -qE '^(sha256=[0-9a-f]{64}|rev=[0-9a-f]{40})$' "$pin" || { echo "incomplete $pin"; exit 1; }
           done
           # ... and Frame Tweaks' copy (mirror=, with its licence and licence texts; a git commit's archive with its
           # own sha256), or why there's none (nomirror=)
           for pin in packs/*/*/pin packs/*/*/*.pin; do
+            [ -f "$pin" ] || continue
             if grep -q '^mirror=' "$pin"; then
               grep -qE '^mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/[^/]+$' "$pin" &&
                 grep -qE '^license=.+' "$pin" && grep -qE '^license_file=https://' "$pin" &&

@@ -8,7 +8,18 @@
 #   (TEST_IGNORE=REGEX: files outside the test home that other programs write meanwhile)
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
+# No network for anything it runs, where user namespaces allow it: curl is a stand-in below, but
+# Python's urllib isn't (an uninstall reached a running SteamVR's 127.0.0.1:8087 and unpatched its
+# dashboard). One empty network namespace for the whole run, -c: the same uid inside. (One per
+# script would make a running adb server log each one's loopback device into /tmp.) Without user
+# namespaces (some CI runners), it runs as before.
+if [ -z "${TEST_IN_NETNS:-}" ]; then
+    if unshare -cn true 2>/dev/null; then TEST_IN_NETNS=1 exec unshare -cn "$BASH" "$0" "$@"; fi
+    echo "note: no network namespace here (unshare -cn), so the tweaks' scripts can reach the network" >&2
+fi
 cd "$(dirname "$0")/.."
+# (without it, unpacking the Arch Linux ARM package fails as "contains package '', not ydotool")
+command -v bsdtar >/dev/null || { echo "dev/test-tweaks.sh needs bsdtar, as SteamOS has (Debian/Ubuntu: apt install libarchive-tools)" >&2; exit 1; }
 # What uninstall may leave: the shared "~/.local/bin on PATH" setup (other tweaks rely on it),
 # what the tweak's dependencies installed (set up before the baseline), and the settings its
 # manifest says it keeps (test: keeps:). Caches desktop tools regenerate don't count.
@@ -104,8 +115,11 @@ for t in "${TWEAKS[@]}"; do
                grep -vE '/mimeinfo\.cache$|/__pycache__/|/icon-theme\.cache$|^\./\.cache/' |
                grep -vE '^\./\.local/state/frame-tweaks/alarm/' |    # (kept on purpose: no downgrades)
                grep -vE '^\./\.local/share/frame-tweaks/i18n/' || true)    # (translations: shared by tweaks' programs)
-        outside=$(find /tmp /var/tmp "$REPO" -newer "$marker" -type f 2>/dev/null |
-                  grep -v "^$work/" | grep -v "^$REPO/\.git/" | { if [ -n "${TEST_IGNORE:-}" ]; then grep -vE "$TEST_IGNORE"; else cat; fi; } || true)
+        # (-cnewer: files unpacked from an archive keep its old dates; the checkout is searched on
+        # its own, as it's inside $work)
+        outside=$({ find /tmp /var/tmp -cnewer "$marker" -type f 2>/dev/null | grep -v "^$work/"
+                    find "$REPO" -cnewer "$marker" -type f ! -path '*/__pycache__/*' 2>/dev/null; } |
+                  { if [ -n "${TEST_IGNORE:-}" ]; then grep -vE "$TEST_IGNORE"; else cat; fi; } || true)
         if [ -n "$left" ]; then
             echo "FAIL $t: uninstall left files behind:"; echo "$left" | sed 's/^/    /'; fail=1
         elif [ -n "$outside" ]; then

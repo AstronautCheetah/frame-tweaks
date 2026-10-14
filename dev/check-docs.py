@@ -16,7 +16,9 @@ for md in root.rglob("*.md"):
         continue
     text = re.sub(r"```.*?```", "", md.read_text(), flags=re.S)
     text = re.sub(r"`[^`\n]*`", "", text)                # code isn't a link
-    for target in re.findall(r"\]\((?!https?:|mailto:|#)([^)#\s]+)", text):
+    links = re.findall(r"\]\((?!https?:|mailto:|#)([^)#\s]+)", text)
+    links += re.findall(r"""<(?:img|a|source)\b[^>]*?\s(?:src|href)=["'](?!https?:|mailto:|#|data:)([^"'#]+)""", text)  # (HTML)
+    for target in links:
         if not (md.parent / target).exists():
             problems.append(f"{md.relative_to(root)}: broken link {target}")
 print("\n".join(problems) or "docs ok")

@@ -5,6 +5,8 @@
 #   dev/upstream-issue.sh REPORT.md       (needs gh, authenticated; GH_REPO set in CI)
 set -euo pipefail
 report=$1
+# (an empty report means dev/check-upstream.sh broke: fail the run rather than empty the issue)
+[ -s "$report" ] || { echo "upstream-issue: $report is empty; did dev/check-upstream.sh fail?" >&2; exit 1; }
 label=upstream-check
 title="Upstream check: outside changes to look at"
 gh label create "$label" --color FBCA04 --description "Weekly dev/check-upstream.sh" --force >/dev/null

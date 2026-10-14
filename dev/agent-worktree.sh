@@ -23,6 +23,10 @@ unpushed() {   # unpushed <path>: commits there that origin/main doesn't have (b
     git -C "$1" cherry origin/main HEAD 2>/dev/null | grep -c '^+' || true
 }
 
+nested() {     # nested <path>: worktrees made inside it (its tmp/), which removing it would delete
+    git worktree list --porcelain | sed -n 's/^worktree //p' | grep -cF "$1/" || true
+}
+
 case "$cmd" in
 add)
     [ -n "$slug" ] || { usage; exit 1; }
@@ -70,6 +74,12 @@ remove)
         echo "  lost when it's removed. Publish with dev/safe-push.sh first." >&2
         exit 1
     fi
+    n=$(nested "$path")
+    if [ "${n:-0}" -gt 0 ]; then
+        echo "agent-worktree: $path holds $n other worktree(s); removing it would delete them, and" >&2
+        echo "  their uncommitted work. Remove those first (see: $0 list)." >&2
+        exit 1
+    fi
     git worktree remove --force "$path"
     echo "worktree removed: $path"
     ;;
@@ -85,6 +95,8 @@ prune)
             echo "keep:   $wt (uncommitted changes)"
         elif [ "$(unpushed "$wt")" -gt 0 ]; then
             echo "keep:   $wt (unpushed commits)"
+        elif [ "$(nested "$wt")" -gt 0 ]; then
+            echo "keep:   $wt (other worktrees inside it)"
         elif [ "$apply" = 1 ]; then
             git worktree remove --force "$wt" && echo "pruned: $wt"
         else
