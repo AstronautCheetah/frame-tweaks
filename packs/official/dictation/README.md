@@ -7,7 +7,7 @@ summary: >-
   Local Whisper speech-to-text on the GPU: one shortcut to record, text is typed and copied
 what: >-
   Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut
-  or the Arrow Pad's 🎤 to start/stop; the text is typed into the focused app, copied, and
+  or Arrow Pad's Tools → 🎤 to start/stop; the text is typed into the focused app, copied, and
   logged.
 why: >-
   Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough
@@ -49,7 +49,8 @@ The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the d
 
 ## Use
 1. Bind **Dictate (toggle)** to a key in *System Settings → Keyboard → Shortcuts*
-   (and, if you like, map a controller button to that key in Steam Input).
+   (and, if you like, map a controller button to that key in Steam Input). With
+   [Arrow Pad](../arrowpad/) installed, there's one ready: **Tools**, then **🎤**.
 2. Press once: a chime means it's recording. Speak.
 3. Press again: a second chime, then within a few seconds the text is
    - typed into the focused window,

@@ -60,12 +60,12 @@ less ~/frame-tweaks/get.sh        # short: finds the newest release tag, clones 
 any update. They check it first and switch themselves off (their status says so) until a Frame
 Tweaks update catches up; nothing else is affected.
 
-<p align="center"><img src="docs/images/arrowpad.png" width="300" alt="Arrow Pad: arrows, Home/End, PgUp/PgDn, Esc, Tab, Ctrl/Alt/Super, right/middle click, clipboard keys and a dictation button"></p>
+<p align="center"><img src="packs/official/arrowpad/screenshot.png" width="300" alt="Arrow Pad: arrows, Home/End, PgUp/PgDn, Esc, Tab, Ctrl/Alt/Super, right/middle click, clipboard keys and a Tools layer with dictation and screen snip"></p>
 
 <!-- generated:core (dev/gen-docs.py, from each tweak's README front matter) -->
 | | Tweak | What you get | Why (on the Frame) |
 |---|---|---|---|
-| ⌨️ | [**Dictation**](packs/official/dictation/) | Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut or the Arrow Pad's 🎤 to start/stop; the text is typed into the focused app, copied, and logged. | Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough to transcribe locally, so nothing leaves the headset. |
+| ⌨️ | [**Dictation**](packs/official/dictation/) | Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut or Arrow Pad's Tools → 🎤 to start/stop; the text is typed into the focused app, copied, and logged. | Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough to transcribe locally, so nothing leaves the headset. |
 | 🎙️ | [**whisper-frame**](packs/official/whisper-frame/) | groffta's dictation: hold the headset's Select button, or the mic under any floating window. Installed from upstream; shares dictation's model. | Dictate without menus or the desktop, straight into the window you're looking at in VR. |
 | ⌨️ | [**Arrow Pad**](packs/official/arrowpad/) | Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super, right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus. | Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop. |
 | ✂️ | [**Screen snip**](packs/official/snip/) | Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or read it aloud (Narrate). Arrow Pad's Tools layer has a button for it. | SteamOS has no screenshot tool, and none of the usual ones can select a region inside VR. |

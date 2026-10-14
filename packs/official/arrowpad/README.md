@@ -45,12 +45,14 @@ working in.
 > - **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)
 <!-- /generated:glance -->
 
+![Arrow Pad, main layer](screenshot.png) ![Arrow Pad, Tools layer](screenshot-tools.png)
+
 ```
- nav layer                                  Fn layer
- Esc   Tab   Bksp  Del   🖱R    🖱M          F1    F2    F3   F4    🖱R   🖱M
- Fn    Home   ↑    End   PgUp   🎤          Fn    F5    F6   F7    F8    🎤
- Ctrl   ←     ↓     →    PgDn   Copy        Ctrl  F9    F10  F11   F12   Copy
- Alt   Super Undo  Cut   All    Paste       Alt   Super Ins  PrtSc SteamOS Paste
+ main layer                         Fn layer                           Tools layer
+ Tools Tab   Bksp  Del  🖱R   🖱M     Tools F1    F2   F3    🖱R    🖱M     Tools Tab  Bksp     Del   🖱R      🖱M
+ Fn    Home  ↑     End  PgUp  Esc    Fn    F4    F5   F6    F7    Esc    Fn    Snip 🎤       Launcher Save Esc
+ Ctrl  ←     ↓     →    PgDn  Copy   Ctrl  F8    F9   F10   F11   Copy   Ctrl  Find Redo     Enter Unstick Copy
+ Alt   Super Undo  Cut  All   Paste  Alt   Super F12  Ins   PrtSc Paste  Alt   Super Undo   Cut   All     Paste
 ```
 
 Two menu entries, usable from the desktop menu *or* Steam's VR "+" menu:
@@ -119,8 +121,9 @@ Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, Re
 - **⚙ Settings:** Full Keyboard's two themes (Graphite, Midnight) and haptic strength (off, light,
   normal), remembered per pad.
 - **Copy / Paste / Cut / Undo / Select all** (icons) send the Ctrl shortcuts.
-- **🎤** toggles [dictation](../dictation/): red while recording, yellow while transcribing. The text
-  goes to the focused app, because the pad never takes focus.
+- **🎤** (Tools layer: **Tools**, then 🎤) toggles [dictation](../dictation/): red while
+  recording, yellow while transcribing. The text goes to the focused app, because the pad never
+  takes focus.
 - **Toggle, don't duplicate**: launching again hides/shows the running pad. The
   position is remembered in `~/.config/arrowpad.json`.
 
@@ -131,7 +134,7 @@ Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, Re
 | Typing text in VR, dashboard or floating app windows | [Full Keyboard](../full-keyboard/) (laser typing, full layout) |
 | Quick text entry anywhere | Steam keyboard (Steam + X). Hold **Shift** for ←/→ |
 | Navigating / editing in desktop-mode apps (arrows, selection, shortcuts, F-keys) | **Arrow Pad** |
-| Lots of text | [Dictation](../dictation/) (🎤 on the pad, or its shortcut) |
+| Lots of text | [Dictation](../dictation/) (**Tools → 🎤** on the pad, or its shortcut) |
 | Nix user who wants arrows/Esc/Ctrl inside Steam's own VR keyboard, plus swipe | [steam-frame-nix VR keyboard](https://github.com/lhns/steam-frame-nix/blob/main/docs/keyboard.md) |
 
 ## Ideas borrowed
