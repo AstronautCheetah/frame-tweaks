@@ -9,22 +9,22 @@ main() {
     DIR=${FRAME_TWEAKS_DIR:-$HOME/frame-tweaks}
     [ -z "${FRAME_TWEAKS_DIR:-}" ] && [ -d "$HOME/steam-frame-tweaks/.git" ] && DIR=$HOME/steam-frame-tweaks   # its old name
 
-    # Install the newest release (a vX.Y.Z tag), not whatever is on main right now.
-    # Stable releases only (vX.Y.Z); FRAME_TWEAKS_CHANNEL=beta also takes pre-releases (vX.Y.Z-rc1),
-    # ranked below the release they lead up to ("-" → "~" sorts before the final version).
-    pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
-    [ "${FRAME_TWEAKS_CHANNEL:-stable}" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
-    # (|| true: with no release found, or GitHub out of reach, set -e would stop here without a word.)
-    TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | grep -E "$pattern" |
-          sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1) || true
-    [ -n "$TAG" ] || { echo "Couldn't find a release of $REPO" >&2; exit 1; }
     if [ -d "$DIR/.git" ]; then
-        echo "Updating $DIR to $TAG"
-        # (Two commands, not an && list: there a failed fetch doesn't stop set -e, and the old
-        # version would open as if updated.)
-        git -C "$DIR" fetch --quiet --force --tags origin
-        git -C "$DIR" -c advice.detachedHead=false checkout --quiet "refs/tags/$TAG"
+        # Already installed: so this is an update, done as ./install.sh update does it: the newest
+        # release, but only one signed by the release key this copy already has, and the installed
+        # tweaks' installers run again. (A plain checkout here skipped both.)
+        echo "Updating $DIR (./install.sh update)"
+        (cd "$DIR" && ./install.sh update)
     else
+        # The newest release (a vX.Y.Z tag), not whatever is on main right now. Stable releases
+        # only (vX.Y.Z); FRAME_TWEAKS_CHANNEL=beta also takes pre-releases (vX.Y.Z-rc1), ranked
+        # below the release they lead up to ("-" → "~" sorts before the final version).
+        pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
+        [ "${FRAME_TWEAKS_CHANNEL:-stable}" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+        # (|| true: with no release found, or GitHub out of reach, set -e would stop here without a word.)
+        TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | grep -E "$pattern" |
+              sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1) || true
+        [ -n "$TAG" ] || { echo "Couldn't find a release of $REPO" >&2; exit 1; }
         echo "Installing $TAG into $DIR"
         git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" "$REPO" "$DIR"
     fi
