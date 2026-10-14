@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **📖 README** next to Diagnostics shows Frame Tweaks' own README in the window.
+- **Screen snip's narration panel: grip to carry it,** as on Arrow Pad and Full Keyboard: squeeze
+  while pointing at it, let go to put it down.
 - **Android Mirror: Forget phone** in its settings: it stops connecting to the remembered phone
   by default (`phone --forget`). Its README now lists what to turn on in the phone, and what
   Wireless debugging allows.

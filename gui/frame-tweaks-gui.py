@@ -167,13 +167,40 @@ def readme_links(text, comp):
     resolve outside the repo), as files for a user's pack."""
     def target(link):
         if comp["official"]:
-            rel = posixpath.normpath(f"packs/official/{comp['id']}/{link}")
+            rel = posixpath.normpath(f"packs/official/{comp['id']}/{link}" if comp.get("id") else link)
             return GITHUB.rsplit("/tree/", 1)[0] + "/blob/main/" + rel
         return (comp["dir"] / link).resolve().as_uri()
     # Pictures from the local copy (the window can't fetch web images), links to GitHub.
     text = re.sub(r"!\[([^\]]*)\]\((?!https?:|file:)([^)\s]+)\)",
                   lambda m: f"![{m.group(1)}]({(comp['dir'] / m.group(2)).resolve().as_uri()})", text)
     return re.sub(r"\]\((?!https?:|#|mailto:|file:)([^)]+)\)", lambda m: f"]({target(m.group(1))})", text)
+
+
+def plain_markdown(text):
+    """GitHub-style README HTML as Markdown the window can show (Qt's Markdown reader loses the
+    text around HTML blocks): centred pictures become pictures, folded <details> sections show
+    open with their summary in bold, and badges (pictures from the web) are left out."""
+    text = re.sub(r'<p[^>]*>\s*<img\b[^>]*?\bsrc="([^"]+)"[^>]*?\balt="([^"]*)"[^>]*>\s*</p>',
+                  lambda m: f"![{m[2]}]({m[1]})", text)
+    text = re.sub(r"<details>\s*<summary>(.*?)</summary>", lambda m: f"**{m[1].strip()}**\n", text, flags=re.S)
+    text = re.sub(r"</details>", "", text)
+    text = re.sub(r"<!--.*?-->\n?", "", text, flags=re.S)
+    return re.sub(r"^\[!\[[^\]]*\]\(https?://[^)]*\)\]\([^)]*\)\s*$", "", text, flags=re.M)
+
+
+def readme_browser(text, comp):
+    """A README (Markdown) as the window shows it: links absolute (readme_links), pictures from the
+    local copy and fitted, a 📋 after each link, the window's font and link colour."""
+    view = QTextBrowser()
+    view.setOpenLinks(False)
+    view.anchorClicked.connect(lambda u: follow_link(u.toString()))
+    view.document().setDefaultStyleSheet(
+        "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
+    view.setMarkdown(readme_links(text, comp))
+    # (toHtml() pins the font and link colour it saw; dropping them keeps the window's style.)
+    html_ = re.sub(r'<body style="[^"]*">', "<body>", fit_images(with_copy(view.toHtml())), count=1)
+    view.setHtml(html_.replace("color:#0000ff;", "color:#7fb2e5;"))
+    return view
 
 
 def fit_images(text, width=860):
@@ -299,6 +326,28 @@ class Row(QWidget):
             self.window.show_details(self.comp)
 
 
+class ReadmePage(QWidget):
+    """Frame Tweaks' own README.md, as a page (Back returns to the list)."""
+
+    def __init__(self, window):
+        super().__init__()
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        head = QHBoxLayout()
+        back = QPushButton("← Back")
+        back.clicked.connect(window.go_back)
+        head.addWidget(back)
+        title = QLabel("About Frame Tweaks")
+        title.setObjectName("title")
+        head.addWidget(title, 1)
+        lay.addLayout(head)
+        try:
+            text = plain_markdown((REPO / "README.md").read_text())
+        except OSError:
+            text = "_No README._"
+        lay.addWidget(readme_browser(text, {"official": True, "id": None, "dir": REPO}), 1)
+
+
 class Details(QWidget):
     """A page inside the main window (not a dialog: in VR each new window opens in the dashboard)."""
 
@@ -358,22 +407,13 @@ class Details(QWidget):
         summary.setWordWrap(True)
         lay.addWidget(summary)
 
-        readme = QTextBrowser()
-        readme.setOpenLinks(False)
-        readme.anchorClicked.connect(lambda u: follow_link(u.toString()))
-        readme.document().setDefaultStyleSheet(
-            "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
         try:
             text = manifest.front_matter(comp["readme"].read_text())[1]
         except (OSError, manifest.ManifestError):
             text = "_No README._"
         # (Its opening, what it is and why, is in the table above already.)
         text = re.sub(r"<!-- generated:intro .*?<!-- /generated:intro -->\n*", "", text, flags=re.S)
-        readme.setMarkdown(readme_links(text, comp))
-        # (toHtml() pins the font and link colour it saw; dropping them keeps the window's style.)
-        html_ = re.sub(r'<body style="[^"]*">', "<body>", fit_images(with_copy(readme.toHtml())), count=1)
-        readme.setHtml(html_.replace("color:#0000ff;", "color:#7fb2e5;"))
-        lay.addWidget(readme, 1)
+        lay.addWidget(readme_browser(text, comp), 1)
 
     def show_issue(self, latest):
         """latest: newest upstream tag, "checking", or None when it couldn't be fetched."""
@@ -562,6 +602,10 @@ class Window(QWidget):
         self.notice = QLabel()
         self.notice.setObjectName("notice")
         bottom.addWidget(self.notice)
+        about = QPushButton("📖 README")
+        about.setToolTip("What Frame Tweaks is, how to install, update and remove it, common issues")
+        about.clicked.connect(self.show_readme)
+        bottom.addWidget(about)
         diag = QPushButton("Diagnostics")
         diag.setToolTip("Save a report for a bug report (user names and paths removed)")
         diag.clicked.connect(self.save_diagnostics)
@@ -889,6 +933,12 @@ class Window(QWidget):
     def show_details(self, comp):
         self.close_details()
         self.details = Details(self, comp, self.state.get(comp["id"]))
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
+    def show_readme(self):
+        self.close_details()
+        self.details = ReadmePage(self)
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
