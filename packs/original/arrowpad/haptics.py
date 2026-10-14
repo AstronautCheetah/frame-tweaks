@@ -1,9 +1,9 @@
 """Controller haptics for Arrow Pad, like Full Keyboard: a light tick when the laser moves
 onto a key, a firmer click on press, on the hand doing the pointing.
 
-SteamVR delivers SteamVR Input haptics only to the app that has input focus. Full Keyboard
-owns its VR overlay, so it does; our VR window is a Steam floating window, so the dashboard
-has focus. We therefore also send the older direct pulse (IVRSystem.TriggerHapticPulse),
+SteamVR delivers SteamVR Input haptics only to the app that has input focus: the VR panel (our
+own overlay, like Full Keyboard's) has it while you point at it, the desktop pad (an ordinary
+window) doesn't. We therefore also send the older direct pulse (IVRSystem.TriggerHapticPulse),
 which isn't tied to input focus. Optional: does nothing without SteamVR or openvr."""
 import math
 import os

@@ -12,7 +12,6 @@ if [ ! -x "$VENV/bin/python" ] || ! "$VENV/bin/python" -c 'import PyQt6' 2>/dev/
     python3 -m venv "$VENV"
     pip_pinned "$VENV" PyQt6
 fi
-install_i18n
 install_i18n         # (Arrow Pad's text in your language)
 install -m644 "$TWEAK_DIR/arrowpad.py" "$HOME/.local/share/arrowpad/arrowpad.py"
 install -m644 "$TWEAK_DIR/haptics.py" "$HOME/.local/share/arrowpad/haptics.py"

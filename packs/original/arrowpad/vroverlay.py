@@ -11,7 +11,6 @@ its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that.
 """
 import glob
 import hashlib
-import json
 import math
 import os
 import time
@@ -189,6 +188,8 @@ class OverlayHost:
     # ---- rendering ------------------------------------------------------
     def uncover(self, path):
         """The pad shows the new image now: hide the cover and load that image into it."""
+        if getattr(self, "closed", False):
+            return                  # (a timer due with the Close that disconnected: no SteamVR now)
         try:
             self.ov.hideOverlay(self.cover)
             self.ov.setOverlayFromFile(self.cover, path)
@@ -210,10 +211,6 @@ class OverlayHost:
             # red on the first tap, yellow left behind after the text arrived).
             p.restyle()
             self.dirty = True
-
-    @property
-    def handle(self):
-        return self.handles[self.front]
 
     @property
     def size(self):
@@ -362,7 +359,9 @@ class OverlayHost:
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
         anchor = self.dashboard_anchor(PLACE)
-        h_m = self.width_m * (self.size[1] / self.size[0] if self.size[0] else 0.8)
+        # The panel's height as shown, collapsed too (metres per pixel as fit_size has them).
+        w, h = self.size
+        h_m = h * self.width_m / (self.pad.expanded_size.width() or w) if w else 0.8 * self.width_m
         t = math.radians(PITCH_DEG)
         if anchor is not None:
             # Upright frame from the anchor: its left-right axis, true vertical, and "toward you"
@@ -382,7 +381,7 @@ class OverlayHost:
             fx, fz = -head[0][2], -head[2][2]
             n = math.hypot(fx, fz) or 1.0
             fx, fz = fx / n, fz / n
-            az, ay, ax = [-fx, 0.0, -fz], [0.0, 1.0, 0.0], [fz, 0.0, -fx]
+            az, ay, ax = [-fx, 0.0, -fz], [0.0, 1.0, 0.0], [-fz, 0.0, fx]     # x = forward x up: your right
             org = [head[0][3] + fx * FORWARD, head[1][3] - BELOW + GAP_BELOW, head[2][3] + fz * FORWARD]
         # tilt back: rotate about the anchor's x axis so the top leans away from you
         y = [ay[i] * math.cos(t) - az[i] * math.sin(t) for i in range(3)]
@@ -433,9 +432,12 @@ class OverlayHost:
         if button is self.hover:
             return
         if self.hover is not None:
-            self.hover.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False)
-            QApplication.sendEvent(self.hover, QEvent(QEvent.Type.Leave))
-            self.hover.update()
+            try:
+                self.hover.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False)
+                QApplication.sendEvent(self.hover, QEvent(QEvent.Type.Leave))
+                self.hover.update()
+            except RuntimeError:        # (deleted: a language change rebuilds the settings page)
+                pass
         self.hover = button
         if button is not None:
             button.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, True)
@@ -462,6 +464,9 @@ class OverlayHost:
                 # Like Full Keyboard: closing the dashboard releases our input (a pending
                 # right/middle-click toggle would otherwise change a click you can't see coming).
                 self.hovered_devices.clear()
+                # ...and the keys lasers hold down: a release may never reach the hidden panel (the
+                # key would repeat on), and one arriving later would latch a modifier again.
+                self.cancel_presses()
                 if self.drag is not None:
                     self.end_drag()
                 if self.pad.click_swap.armed:
@@ -484,7 +489,7 @@ class OverlayHost:
         elif visible and self.ticks % 5 == 0:
             self.follow_dashboard()             # ride along with the dashboard, ~10x a second
         self.pump(self.input_handle)            # the only overlay that takes laser input
-        if self.dirty and visible:
+        if self.dirty and visible and not getattr(self, "closed", False):   # (Close in pump: disconnected)
             self.render()
 
     INPUT_LOG = f"{TEX_DIR}/arrowpad-input.log"
@@ -572,15 +577,22 @@ class OverlayHost:
                 if self.drag is not None and not self.grip_drag and self.drag[0] == dev:
                     self.end_drag()
 
+    def cancel_presses(self):
+        """Take back the presses lasers hold (a grab, the dashboard closing, Close): a release off
+        the key, so nothing is clicked, and the pad lets go of what each holds down (that release
+        alone left a held ↓ or Bksp down, repeating in your app)."""
+        for b in list(self.pressed.values()):
+            self.send(b, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
+            self.pad.let_go(b)
+        self.pressed.clear()
+
     def start_drag(self, dev, grip):
         """Grab: the panel follows the controller rigidly, like Full Keyboard's grab. (Moving it
         by laser coordinates on the panel ran away.)"""
         ctrl = self.device_matrix(dev)
         if ctrl is None:
             return
-        for c, b in list(self.pressed.items()):        # a grab cancels presses in progress
-            self.send(b, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
-        self.pressed.clear()
+        self.cancel_presses()                       # a grab cancels presses in progress
         self.grip_drag = grip
         self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose),
                      [ctrl[r][3] for r in range(3)], self.depth_axis())
@@ -613,7 +625,7 @@ class OverlayHost:
         self._level_left = self.LEVEL_STEPS
 
         def tick():
-            if self.drag is not None or self._level_left <= 0 or not self.pose:
+            if self.drag is not None or self._level_left <= 0 or not self.pose or getattr(self, "closed", False):
                 timer.stop()
                 return
             self.rotate_about_normal(step)
@@ -672,6 +684,7 @@ class OverlayHost:
         after this (reading them from a closed connection crashed the pad on Close)."""
         if getattr(self, "closed", False):
             return
+        self.cancel_presses()       # (a key the other laser holds would stay down after we exit)
         self.closed = True
         try:
             self.ov.destroyOverlay(self.input_handle)
@@ -680,6 +693,3 @@ class OverlayHost:
             openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:
             pass
-
-    def dump(self):
-        return json.dumps({"width_m": self.width_m})
