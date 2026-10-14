@@ -26,6 +26,7 @@ SETTINGS = Path.home() / ".config/openvr/config/steamvr.vrsettings"
 STATE = Path.home() / ".local/state/frame-tweaks/vr-debugger.prev"
 OLD_STATE = Path.home() / ".local/state/steam-frame-tweaks/vr-debugger.prev"   # before 0.5
 PATCHES = Path(__file__).resolve().parent / "patches"
+LIB = Path(__file__).resolve().parent / "lib.js"         # helpers the patches share, injected first
 PORT = 8087
 DASHBOARD = Path("/opt/steamvr/resources/webinterface/dashboard")
 CHECK_FILE = Path(f"/run/user/{os.getuid()}/sft-dashboard.status")
@@ -266,7 +267,8 @@ def watch():
     threading.Thread(target=listen, daemon=True).start()
     while True:
         found = patches()
-        bad = {n: missing(p, code) for n, p in found.items()}
+        lib_bad = missing(LIB, code) if LIB.exists() else ["lib.js"]
+        bad = {n: lib_bad + missing(p, code) for n, p in found.items()}
         CHECK_FILE.write_text("".join(f"{n}: SteamVR changed (missing: {', '.join(m)}); off\n"
                                       for n, m in bad.items() if m))
         try:
@@ -278,6 +280,8 @@ def watch():
                 for n in sorted(injected - set(found)):          # its tweak was removed
                     ws_eval(url, stop_expr(n))
                     injected.discard(n)
+                if found and not lib_bad:
+                    ws_eval(url, LIB.read_text())          # (it skips itself if already loaded)
                 for n, p in found.items():
                     if bad[n]:
                         results.append(f"{n}: off (SteamVR changed)")
@@ -324,6 +328,7 @@ def status(name=None):
 def check():
     code = dashboard_code()
     bad = {n: missing(p, code) for n, p in patches().items()}
+    bad["lib.js (shared helpers)"] = missing(LIB, code) if LIB.exists() else ["the file itself"]
     bad = {n: m for n, m in bad.items() if m}
     print("compatible" if not bad else "; ".join(f"{n} missing: {', '.join(m)}" for n, m in bad.items()))
     return bool(bad)

@@ -15,14 +15,16 @@
 // requires: overlay picture size | GetOverlayMouseScale(
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-rotate', VERSION = 7, DASH = 1, WORLD = 4;
+  const NAME = 'phone-rotate', VERSION = 8;
   const LONG_M = 0.8;                  // long side of a turned window, metres (a standard one: 0.98 wide)
   const DOCKED_M = 0.554;              // an upright window in the dashboard: a standard one's height
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
-  const FS = window.FrameStore;
+  const FS = window.FrameStore, L = window.__sftLib;
   if (!FS?.frames) return 'not patched: dashboard objects missing';
+  if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
+  const DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
 
   // frame -> panel height (local units) for its size component's override. Each window's size
   // component holds its componentProps as a MobX computed value (made from the class's getter
@@ -47,14 +49,10 @@
   // The override is computed from the frame's (observable) props: a fresh copy makes it look again.
   const nudge = (f) => { try { f.props = { ...f.props }; } catch (e) { /* changed */ } };
 
-  // The window's picture size, from its overlay (the page's latestContentSize is only read again
-  // when something else changes, so it can stay at the old shape after the phone turns).
+  // The window's picture size, from its overlay (L.pictureSize).
   const pictureSize = (f) => {
-    try {
-      const m = VRHTML.VROverlay.GetOverlayMouseScale(VRHTML.VROverlay.FindOverlay(f.activePage.summonOverlayKey));
-      if (m?.x > 0 && m?.y > 0) return { unWidth: m.x, unHeight: m.y };
-    } catch (e) { /* no overlay */ }
-    return f.activePage?.size?.latestContentSize;
+    const p = L.pictureSize(f.activePage);
+    return p && { unWidth: p.w, unHeight: p.h };
   };
   const upright = new WeakSet();       // floating windows seen upright: these get the override
   let set = 0;

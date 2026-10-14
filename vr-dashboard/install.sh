@@ -7,6 +7,7 @@ D="$HOME/.local/share/frame-tweaks/vr-dashboard"
 U="$HOME/.config/systemd/user"
 mkdir -p "$D/patches" "$U/steamvr.service.d" "$HOME/.config/frame-tweaks"
 install -m755 "$REPO_DIR/vr-dashboard/sft-dashboard" "$D/sft-dashboard"
+install -m644 "$REPO_DIR/vr-dashboard/lib.js" "$D/lib.js"            # helpers the patches share
 
 # Older versions: this lived inside Curved world windows (sft-curvature). Move its patch over.
 OLD="$HOME/.local/share/frame-tweaks/curvature"

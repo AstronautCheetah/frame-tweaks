@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Dashboard patches share one helper file** (`vr-dashboard/lib.js`, injected first): finding
+  the dashboard's components, drawing pieces in a fixed page corner, reusing unchanged pieces,
+  reading a window's picture size. Scroll strips, Android Mirror's two patches and Pick up when
+  floating use it instead of their own copies.
 - Fixed: installing the Firefox settings reported a failure whenever Firefox wasn't running, and
   its status said "not applied" for profiles in Firefox's older folder (`~/.mozilla`).
 - Tests for Firefox's settings and NordVPN's status; the test run no longer prints messages.

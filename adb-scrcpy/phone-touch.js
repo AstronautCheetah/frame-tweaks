@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 9, DASH = 1, WORLD = 4;
+  const NAME = 'phone-touch', VERSION = 10;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
@@ -22,56 +22,15 @@
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
-  const FS = window.FrameStore, DS = window.DashboardStore, D = window.Dashboard;
-  if (!FS || !DS || !D) return 'not patched: dashboard objects missing';
-  const Base = Object.getPrototypeOf(D.constructor);
-  if (!Base?.prototype?.isReactComponent) return 'not patched: no React component class';
+  const FS = window.FrameStore, DS = window.DashboardStore, L = window.__sftLib;
+  if (!FS || !DS) return 'not patched: dashboard objects missing';
+  if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
+  const { el } = L, DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
+  let PANEL = null, XFORM = null;                   // the dashboard's panel / transform (L.components)
   const alive = () => Date.now() - (window.__sftPhoneTouchAlive || 0) < 6000 && typeof window.sftPhoneTouch === 'function';
 
-  // The dashboard's panel and transform components, found among its rendered fibers (as in scroll-strips).
-  const fibers = () => {
-    const rootEl = document.getElementById('root');
-    const key = rootEl && Object.keys(rootEl).find((k) => k.startsWith('__reactContainer$'));
-    return key ? [rootEl[key]] : [];
-  };
-  let PANEL = null, XFORM = null, SAMPLE = null;
-  const learn = () => {
-    const stack = fibers();
-    while (stack.length && !(PANEL && XFORM)) {
-      const fb = stack.pop(), p = fb.memoizedProps;
-      if (p && typeof p === 'object' && typeof fb.type === 'function') {
-        if (!PANEL && 'debug_name' in p && 'width' in p && 'interactive' in p) PANEL = fb.type;
-        if (!XFORM && 'parent_id' in p && 'translation' in p && !('width' in p)) XFORM = fb.type;
-      }
-      if (fb.sibling) stack.push(fb.sibling);
-      if (fb.child) stack.push(fb.child);
-    }
-    return PANEL && XFORM;
-  };
-  const el = (type, props, ...children) => {
-    const e = Object.assign({}, SAMPLE, { type, key: props?.key ?? null,
-      props: Object.assign({}, props, children.length ? { children: children.length === 1 ? children[0] : children } : {}) });
-    if ('_store' in e) e._store = {};
-    if ('ref' in e && !('ref' in (props ?? {}))) e.ref = null;
-    return e;
-  };
-  // The same pieces while nothing they show has changed: the dashboard redraws often (each time
-  // the laser crosses one of SteamVR's buttons), and fresh pieces, even identical ones, make it
-  // send them to SteamVR again, which showed as jitter.
-  const memo = new Map();
-  const cached = (key, make) => {
-    if (memo.has(key)) return memo.get(key);
-    const v = make();
-    memo.set(key, v);
-    if (memo.size > 40) memo.delete(memo.keys().next().value);
-    return v;
-  };
-  const pictureSize = (page) => {
-    try {
-      const m = VRHTML.VROverlay.GetOverlayMouseScale(VRHTML.VROverlay.FindOverlay(page.summonOverlayKey));
-      if (m?.x > 0 && m?.y > 0) return { w: m.x, h: m.y };
-    } catch (e) { /* no overlay */ }
-  };
+  const cached = L.memo();                          // the same pieces while nothing changed (L.memo)
+  const pictureSize = L.pictureSize;
 
   // A press, then drags, then a let-go: one finger on the phone.
   let touch = null;
@@ -199,8 +158,7 @@
   const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
-  let inst = null;
-  const redraw = () => { try { inst?.forceUpdate(); } catch (e) {} };
+  let redraw = () => {};
   const call = (req) => { try { window.sftPhoneTouch(JSON.stringify(req)); } catch (e) {} };
   const hueOf = () => {
     try {
@@ -295,65 +253,30 @@
   const extras = (f) => cached(JSON.stringify(['extras', ...sizes(f), settingsOpen.has(f.frameID), pending, hueOf(),
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
-  const AREA = { position: 'absolute', right: '0px', bottom: '0px', width: '920px', textAlign: 'right' };
-
-  class SftPhoneTouch extends Base {
-    componentDidMount() {
-      mounted++; inst = this;
-      this.timer = setInterval(() => { try { placeCarried(); this.forceUpdate(); } catch (e) {} }, 250);
+  // Drawn as the last child of the dashboard app, in the page's bottom-right corner (L.mount; the
+  // scroll strips have the left), four times a second.
+  const render = () => {
+    const c = L.components();
+    if (!alive() || !c) return null;
+    ({ PANEL, XFORM } = c);
+    const out = [];
+    for (const f of FS.frames ?? []) {
+      if (f?.title !== TITLE) continue;
+      const dock = f.docking?.dockLocation;
+      if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(layer(f), ...extras(f));
     }
-    componentWillUnmount() { mounted--; if (inst === this) inst = null; clearInterval(this.timer); }
-    render() {
-      try {
-        if (!alive() || !learn()) return null;
-        const out = [];
-        for (const f of FS.frames ?? []) {
-          if (f?.title !== TITLE) continue;
-          const dock = f.docking?.dockLocation;
-          if (dock === WORLD || (dock === DASH && f === DS.activeFrame && DS.isFullyVisible)) out.push(layer(f), ...extras(f));
-        }
-        const parts = out.filter(Boolean);
-        // Our pieces are drawn from one shared page (1860 x 2048). Placed after the dashboard's
-        // own content, they moved whenever it changed size (its buttons grow under the laser),
-        // which showed as jitter, and a tall settings panel ran off the page's bottom. So they
-        // sit in a fixed corner of their own: the bottom right (the scroll strips have the left).
-        return parts.length ? el('div', { key: 'sft-phone-touch-area', style: AREA }, ...parts) : null;
-      } catch (e) { return null; }
-    }
-  }
-
-  // Mounted after the dashboard app's own children, like scroll-strips. Another patch that
-  // restores the app's render when it stops would drop ours: put it back if so.
-  let app = null;
-  for (const stack = fibers(); stack.length;) {
-    const fb = stack.pop();
-    if (fb.stateNode && typeof fb.stateNode.toggleDebugPointer === 'function') { app = fb.stateNode; break; }
-    if (fb.sibling) stack.push(fb.sibling);
-    if (fb.child) stack.push(fb.child);
-  }
-  if (!app) return 'not patched: dashboard app component not found';
-  let on = true, mounted = 0;
-  const mount = () => {
-    const below = app.render;
-    app.render = function (...args) {
-      const tree = below.apply(this, args);
-      const kids = tree?.props?.children;
-      if (!on || !tree || typeof tree !== 'object' || !Array.isArray(kids)) return tree;
-      SAMPLE ??= tree;
-      return Object.assign({}, tree, { props: Object.assign({}, tree.props,
-        { children: [...kids, el(SftPhoneTouch, { key: 'sft-phone-touch' })] }) });
-    };
-    try { app.forceUpdate(); } catch (e) {}
+    return out;
   };
-  mount();
-  const guard = setInterval(() => { if (on && !mounted) mount(); }, 2000);
+  const mounted = L.mount('sft-phone-touch', render, 'right', 250);
+  if (!mounted) return 'not patched: dashboard app component not found';
+  redraw = mounted.redraw;
+  const carryTimer = setInterval(() => { try { placeCarried(); } catch (e) {} }, 250);
   all[NAME] = {
     version: VERSION, stats,
     stop: () => {
-      on = false;                                  // stays in the chain, passing straight through
-      clearInterval(guard);
+      mounted.stop();
+      clearInterval(carryTimer);
       onUp({ clientX: 0, clientY: 0 });
-      try { app.forceUpdate(); } catch (e) {}
     },
   };
   return 'patched';
