@@ -110,7 +110,7 @@ class Preferences(QWidget):
     def choose_language(self, value):
         i18n.set_preference(value)
         self.window.close_details()
-        self.window.check_language(now=True)            # (back on the list: it changes at once)
+        self.window.check_language()                    # (back on the list: it changes at once)
 
     def set_pref(self, key, on):
         set_window_pref(key, on)

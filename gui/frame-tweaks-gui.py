@@ -21,6 +21,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from PyQt6 import sip
 from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontMetrics, QIcon, QImage
@@ -137,13 +138,14 @@ def update_check(cid):
 
 STABLE_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 ANY_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.]+))?$")
+CHANNEL = CONF.parent / "channel"           # (~/.config/frame-tweaks/channel, as lib/common.sh reads it)
 
 
 def release_channel():
     c = os.environ.get("FRAME_TWEAKS_CHANNEL") or ""
     if not c:
         try:
-            c = (CONF / "channel").read_text().strip()
+            c = CHANNEL.read_text().strip()
         except OSError:
             pass
     return "beta" if c == "beta" else "stable"
@@ -158,11 +160,13 @@ def newest_release(tags, channel="stable"):
 
 
 def release_key(tag):
-    """Sort key for "v1.2.0" / "1.2.0-rc1": a pre-release sorts below its final version."""
+    """Sort key for "v1.2.0" / "1.2.0-rc.1": a pre-release sorts below its final version, and the
+    numbers in it count as numbers (rc.10 after rc.9), as ./install.sh's sort -V has it."""
     m = ANY_TAG.match(tag if tag.startswith("v") else "v" + tag)
     if not m:
-        return (0, 0, 0, False, "")
-    return (int(m[1]), int(m[2]), int(m[3]), m[4] is None, m[4] or "")
+        return (0, 0, 0, False, ())
+    pre = tuple((0, int(p)) if p.isdigit() else (1, p) for p in re.findall(r"\d+|\D+", m[4] or ""))
+    return (int(m[1]), int(m[2]), int(m[3]), m[4] is None, pre)
 
 
 def close_prompt():
@@ -173,22 +177,33 @@ def close_prompt():
                        if os.environ.get("DISPLAY") == ":0" else _("Press Enter to close…"))
 
 
+def in_terminal(proc, script):
+    """Start script (bash) in a Konsole window of its own, through a shell that waits for it: proc
+    finishes when the terminal closes, and closing this window (which kills proc) leaves the
+    terminal, and the install running in it, alone. (Konsole's messages go nowhere, as before:
+    nothing read them, and once this window is gone a pipe to it would stop Konsole.)"""
+    proc.start("bash", ["-c", 'konsole --separate -e bash -c "$1" >/dev/null 2>&1 & wait', "konsole", script])
+
+
 def current_release():
     return (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
 
 
 def self_update_check():
-    """Newest vX.Y.Z tag of this repo on GitHub, if newer than VERSION (needs git access)."""
+    """Newest vX.Y.Z tag of this repo on GitHub, if newer than VERSION (needs git access); "" if
+    there's none newer, None when it couldn't look (offline, say)."""
     try:
-        out = subprocess.run(["git", "-C", str(REPO), "ls-remote", "--tags", "--refs", "origin", "v*"],
-                             capture_output=True, text=True, timeout=15,
-                             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"}).stdout
+        r = subprocess.run(["git", "-C", str(REPO), "ls-remote", "--tags", "--refs", "origin", "v*"],
+                           capture_output=True, text=True, timeout=15,
+                           env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
     except (OSError, subprocess.TimeoutExpired):
         return None
-    tags = [line.rsplit("/", 1)[-1] for line in out.splitlines() if "refs/tags/v" in line]
+    if r.returncode != 0:
+        return None
+    tags = [line.rsplit("/", 1)[-1] for line in r.stdout.splitlines() if "refs/tags/v" in line]
     newest = newest_release(tags, release_channel())
     current = current_release()
-    return newest if newest and release_key(newest) > release_key(current) else None
+    return newest if newest and release_key(newest) > release_key(current) else ""
 
 
 
@@ -224,7 +239,7 @@ def readme_browser(text, comp):
     local copy and fitted, a 📋 after each link, the window's font and link colour."""
     view = QTextBrowser()
     view.setOpenLinks(False)
-    view.anchorClicked.connect(lambda u: follow_link(u.toString()))
+    view.anchorClicked.connect(lambda u: follow_link(u.toString()) if u.scheme() else to_heading(view, u.fragment()))
     view.document().setDefaultStyleSheet(
         "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
     view.setMarkdown(readme_links(text, comp))
@@ -232,6 +247,18 @@ def readme_browser(text, comp):
     html_ = re.sub(r'<body style="[^"]*">', "<body>", fit_images(with_copy(view.toHtml())), count=1)
     view.setHtml(html_.replace("color:#0000ff;", "color:#7fb2e5;"))
     return view
+
+
+def to_heading(view, anchor):
+    """A README's link to one of its own headings (#build-from-source, named as GitHub names
+    them): scroll there. (Qt's Markdown reader gives headings no anchors of their own.)"""
+    block = view.document().begin()
+    while block.isValid():
+        if block.blockFormat().headingLevel() and \
+                re.sub(r"[^\w\- ]", "", block.text().strip().lower()).replace(" ", "-") == anchor:
+            view.verticalScrollBar().setValue(int(view.document().documentLayout().blockBoundingRect(block).top()))
+            return
+        block = block.next()
 
 
 def fit_images(text, width=860):
@@ -573,18 +600,25 @@ class SettingsSection(QWidget):
 
     def act(self, a):
         """Run the action's script in the background (a download can take a while); its last line
-        of output says how it went."""
+        of output says how it went. It's the window's process (going Back mustn't stop it), so
+        one at a time: a page opened again meanwhile doesn't start a second."""
         cmd = ["bash", str(a["dir"] / a["script"]), *a.get("args", [])]
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", " ".join(cmd))
             return
+        self.notice.setText(_("Working… (a download can take a minute)"))
+        if any(p.state() != QProcess.ProcessState.NotRunning for p in self.window().findChildren(QProcess, "action")):
+            return
         for _a, b, _note in self.actions:
             b.setEnabled(False)
-        self.notice.setText(_("Working… (a download can take a minute)"))
-        proc = QProcess(self)
+        proc = QProcess(self.window())
+        proc.setObjectName("action")
         proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
 
         def done(*_args):
+            proc.deleteLater()
+            if sip.isdeleted(self):             # (its page was closed meanwhile)
+                return
             lines = [re.sub(r"\x1b\[[0-9;]*m", "", l).strip() for l in
                      bytes(proc.readAll()).decode(errors="replace").splitlines()]
             lines = [l for l in lines if l and "#" not in l[:3]]          # (not curl's progress bar)
@@ -802,7 +836,7 @@ class Window(QWidget):
             self.outer.removeWidget(old)
             old.deleteLater()
 
-    def check_language(self, now=False):
+    def check_language(self):
         """Every 5 s: has the keyboard's language changed (lib/i18n.py)? Then the window's text
         follows, once you're back on the list (an open page isn't pulled away from you)."""
         if self.stack.currentIndex() == 0 and self.details is None and i18n.refresh():
@@ -863,7 +897,10 @@ class Window(QWidget):
                     self.set_update_state("update", newest)
             elif self.update_state == "checking":
                 self.set_update_state("check")
-                self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=current_release()), good=True)
+                if newest is None:                       # (offline, say: not "up to date")
+                    self.say(_("Couldn't check for updates (no connection to GitHub?)."))
+                else:
+                    self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=current_release()), good=True)
         for cid, fut in list(self.update_futures.items()):
             if fut.done():
                 del self.update_futures[cid]
@@ -1043,7 +1080,7 @@ class Window(QWidget):
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh(),
                                                cid is None and self.after_self_update()))
-        self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
+        in_terminal(self.proc, full)
 
     # ---- updating Frame Tweaks itself: Check for updates → Update to X → Restart --------
     def show_newest(self, newest):
@@ -1099,7 +1136,7 @@ class Window(QWidget):
         full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: self.refresh())
-        self.proc.start("konsole", ["--separate", "-e", "bash", "-c", full])
+        in_terminal(self.proc, full)
 
     def update_again(self, cid):
         """The ↻ Reinstall button: only for installed tweaks."""
@@ -1168,6 +1205,9 @@ class Window(QWidget):
         label = run_label(comp["id"])
         if label is None:
             self.show_details(comp)
+            return
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # (some restart things: Plasma, ydotoold)
+            print("would run:", "bash", comp["dir"] / "run.sh")
             return
         QProcess.startDetached("bash", [str(comp["dir"] / "run.sh")])
 
@@ -1306,7 +1346,7 @@ class Window(QWidget):
         cmd = " && ".join(steps) + f"; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
-        self.proc.start("konsole", ["--separate", "-e", "bash", "-c", cmd])
+        in_terminal(self.proc, cmd)
 
     def eventFilter(self, obj, ev):
         """In VR: a haptic tick when the laser moves onto a button or tick box, a firmer pulse
@@ -1409,6 +1449,8 @@ class Window(QWidget):
         if self.vr_buttons:
             self.vr_buttons.close()
         self.pool.shutdown(wait=False, cancel_futures=True)
+        for proc in self.findChildren(QProcess):    # (stopped as the window goes: their finished
+            proc.blockSignals(True)                 # would refresh it, with the pool shut down)
         super().closeEvent(ev)
 
 
