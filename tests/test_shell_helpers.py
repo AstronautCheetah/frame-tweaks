@@ -66,5 +66,26 @@ class KConfig(unittest.TestCase):
         self.assertEqual(out, "-0.4 unset")
 
 
+class QtVenv(unittest.TestCase):
+    """remove_qt_venv: the PyQt6 venv shared by Arrow Pad, Screen snip, the NordVPN tray and the
+    full installer window goes with the last of them, and stays on a reinstall."""
+    SETUP = 'mkdir -p "$QT_VENV/bin" "$BIN" && touch "$QT_VENV/bin/python"; '
+
+    def left(self, setup="", **env):
+        return sh(self.SETUP + setup + ' remove_qt_venv >/dev/null; [ -d "$QT_VENV" ] && echo kept || echo removed', **env)
+
+    def test_the_last_one_removes_it(self):
+        self.assertEqual(self.left(), "removed")
+
+    def test_kept_for_the_installer_window(self):     # (it runs on the venv as bin/sft-python)
+        self.assertEqual(self.left('touch "$QT_VENV/bin/sft-python";'), "kept")
+
+    def test_kept_while_another_tweak_uses_it(self):
+        self.assertEqual(self.left('printf "#!/bin/sh\\n" > "$BIN/frame-snip"; chmod +x "$BIN/frame-snip";'), "kept")
+
+    def test_kept_on_a_reinstall(self):
+        self.assertEqual(self.left(FRAME_TWEAKS_REINSTALL="1"), "kept")
+
+
 if __name__ == "__main__":
     unittest.main()

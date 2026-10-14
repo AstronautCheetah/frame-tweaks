@@ -17,6 +17,5 @@ restore_kconfig nordvpn
 remove_files "$ICONS/256x256/apps/frame-tweaks-nordvpn.png" "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$APPS/nordvpn-tray.desktop" "$HOME/.config/autostart/nordvpn-tray.desktop"
 if [ -n "$keep" ]; then say "$(t 'Kept your NordVPN connections and settings (~/.config/nordvpn-wg).')"
 else remove_files "$HOME/.config/nordvpn-wg"; fi
-# The PyQt6 venv is shared with Arrow Pad and Screen snip: only the last one removes it (a
-# reinstall keeps it, rather than download it again).
-[ -n "$keep" ] || [ -x "$BIN/arrowpad" ] || [ -x "$BIN/frame-snip" ] || remove_files "$QT_VENV"
+# The PyQt6 venv is shared with Arrow Pad, Screen snip and the installer window.
+remove_qt_venv
