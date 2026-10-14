@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install or update Claude Desktop (official Linux beta, arm64) without apt:
+# Install or update Claude Desktop (official Linux build, arm64) without apt:
 # fetch the latest .deb from Anthropic's apt repo, verify its SHA256 and unpack
 # it into ~/.local/opt. Safe to re-run; does nothing when already current. Refuses while
 # Claude Desktop is open unless given --restart.

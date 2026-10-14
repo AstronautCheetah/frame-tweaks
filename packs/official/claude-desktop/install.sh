@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Desktop (official Linux arm64 beta), unpacked into ~/.local/opt.
+# Claude Desktop (official Linux build, arm64), unpacked into ~/.local/opt.
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 ensure_path
 install -m755 "$TWEAK_DIR/claude-desktop-update" "$BIN/claude-desktop-update"

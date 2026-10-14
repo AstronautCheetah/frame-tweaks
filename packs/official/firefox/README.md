@@ -4,10 +4,12 @@ emoji: 🕵️
 category: Privacy & security
 tier: extras
 summary: >-
-  Strong anti-fingerprinting (resistFingerprinting, letterboxing, WebRTC limits)
+  Makes Firefox harder for websites to track: strong anti-fingerprinting, letterboxing and
+  WebRTC limits
 what: >-
-  Firefox's strongest built-in anti-fingerprinting (`resistFingerprinting`, from Tor Browser),
-  with letterboxing, WebRTC limits and daily re-randomized canvas readings.
+  Makes Firefox harder for websites to track you: it turns on Firefox's strongest
+  anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC
+  limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings.
 why: >-
   The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare
   among browsers, so it's easy to fingerprint.
@@ -24,7 +26,7 @@ undo: >-
 # Firefox privacy
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Firefox's strongest built-in anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits and daily re-randomized canvas readings.
+Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings.
 
 **Why on a Steam Frame:** The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint.
 <!-- /generated:intro -->

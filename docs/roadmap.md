@@ -50,8 +50,8 @@ next to the idea it inspired.
   ProtonUp-Qt)*
 
 ## New tweak ideas
-- [x] **Screen reader:** Orca autostarting in the desktop session. *(Jovian-NixOS)*
-- [x] **Memory caps** for heavy apps (Whisper, VSCodium, Android Mirror) with user-level systemd
+- [ ] **Screen reader** (set aside for now): Orca autostarting in the desktop session. *(Jovian-NixOS)*
+- [ ] **Memory caps** (set aside for now) for heavy apps (Whisper, VSCodium, Android Mirror) with user-level systemd
   limits, so one app can't freeze the headset. *(Jovian-NixOS)*
 
 ## Not adopting
