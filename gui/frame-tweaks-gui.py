@@ -522,13 +522,30 @@ class SettingsPage(QWidget):
             note.setVisible(b.isVisibleTo(self) or not a.get("when"))
 
     def act(self, a):
+        """Run the action's script in the background (a download can take a while); its last line
+        of output says how it went."""
         cmd = ["bash", str(a["dir"] / a["script"]), *a.get("args", [])]
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", " ".join(cmd))
             return
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-        self.notice.setText((r.stdout or r.stderr).strip() or "Done.")
-        self.show_actions()
+        for _, b, _ in self.actions:
+            b.setEnabled(False)
+        self.notice.setText("Working… (a download can take a minute)")
+        proc = QProcess(self)
+        proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+
+        def done(*_):
+            lines = [re.sub(r"\x1b\[[0-9;]*m", "", l).strip() for l in
+                     bytes(proc.readAll()).decode(errors="replace").splitlines()]
+            lines = [l for l in lines if l and "#" not in l[:3]]          # (not curl's progress bar)
+            ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
+            self.notice.setText(("" if ok else "Didn't work: ") + (lines[-1] if lines else "Done."))
+            for _, b, _ in self.actions:
+                b.setEnabled(True)
+            self.show_actions()
+        proc.finished.connect(done)
+        proc.start(cmd[0], cmd[1:])
+        self.action_proc = proc
 
     def show_choices(self):
         for (key, _), (b, value) in self.buttons.items():

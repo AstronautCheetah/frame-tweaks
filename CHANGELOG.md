@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Speech engine settings:** Narrate with Piper or eSpeak NG, in one of 18 languages (each
+  voice pinned and checked), from the ⚙ Settings button on its row.
 - **Android Mirror: Pair it again.** When it can't connect because the phone forgot the Frame, it
   offers to pair again: it finds the phone's pairing dialog on the Wi-Fi and asks only for the code.
 - **Android Mirror shows what it's doing:** a small window while it finds and connects to the

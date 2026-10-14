@@ -33,7 +33,8 @@ else:
     os.environ["QT_QPA_PLATFORM"] = "xcb"
     os.environ["DISPLAY"] = ":0"                # the Steam session: every VR window lives here
 
-from PyQt6.QtCore import QEvent, QObject, QPoint, QPointF, QProcess, QRect, Qt, QTimer, pyqtSignal  # noqa: E402
+from PyQt6.QtCore import (QEvent, QObject, QPoint, QPointF, QProcess, QProcessEnvironment, QRect, Qt, QTimer,
+                          pyqtSignal)  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
 from PyQt6.QtCore import QSize                                                    # noqa: E402
 from PyQt6.QtGui import QColor, QIcon, QImage, QMouseEvent, QPainter, QPen, QPixmap  # noqa: E402
@@ -45,6 +46,15 @@ RUN = Path(f"/run/user/{os.getuid()}")
 DATA = HOME / ".local/share/frame-tweaks/speech"     # the Speech engine helper (speech/)
 PIPER = DATA / "piper/piper"
 VOICE = DATA / "voice.onnx"
+ESPEAK = DATA / "piper/espeak-ng"                      # eSpeak NG, as it comes with Piper
+
+
+def narrate_conf():
+    """The Speech engine's settings for Narrate (speech/install.sh writes narrate.conf)."""
+    try:
+        return dict(l.split("=", 1) for l in (DATA / "narrate.conf").read_text().splitlines() if "=" in l)
+    except OSError:
+        return {}
 SAVE_DIR = HOME / "Pictures/Screenshots"
 TESSERACT = shutil.which("tesseract") or "/home/linuxbrew/.linuxbrew/bin/tesseract"
 PANEL_SOCKET = f"frame-snip-narration-{os.getuid()}"   # the open narration panel takes new snips here
@@ -329,8 +339,17 @@ class Narrator(QObject):
         proc = QProcess(self)
         speed = self.speed
         proc.finished.connect(lambda *_: self._synthesized(i, speed, out, proc))
-        proc.start(str(PIPER), ["--model", str(VOICE), "--config", f"{VOICE}.json", "--output_file", str(out),
-                                "--length_scale", f"{1 / speed:.3f}"])
+        conf = narrate_conf()
+        if conf.get("engine") == "espeak-ng" and ESPEAK.exists():
+            env = QProcessEnvironment.systemEnvironment()
+            env.insert("LD_LIBRARY_PATH", str(ESPEAK.parent))
+            env.insert("ESPEAK_DATA_PATH", str(ESPEAK.parent))
+            proc.setProcessEnvironment(env)
+            proc.start(str(ESPEAK), ["-v", conf.get("espeak_voice") or "en-us", "-s", str(round(175 * speed)),
+                                     "-w", str(out), "--stdin"])
+        else:
+            proc.start(str(PIPER), ["--model", str(VOICE), "--config", f"{VOICE}.json", "--output_file", str(out),
+                                    "--length_scale", f"{1 / speed:.3f}"])
         proc.write(self.parts[i].encode())
         proc.closeWriteChannel()
         self.synth = (i, speed, proc)

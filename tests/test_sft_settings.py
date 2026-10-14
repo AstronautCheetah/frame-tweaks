@@ -45,6 +45,18 @@ class SameChoicesEverywhere(unittest.TestCase):
         self.assertEqual(eval("{" + re.sub(r"(\w+):", r"'\1':", d) + "}"), sft.defaults("scroll-strips"))
 
 
+class SpeechLanguages(unittest.TestCase):
+    """The Speech engine's Language choices are voices.tsv's languages (dev/speech-voices.py),
+    each with a Piper voice file, two SHA256s and an eSpeak NG voice."""
+    def test_same_languages(self):
+        rows = [l.split("\t") for l in (ROOT / "packs/official/speech/voices.tsv").read_text().splitlines()
+                if l and not l.startswith("#")]
+        self.assertTrue(all(len(r) == 6 and re.fullmatch(r"[0-9a-f]{64}", r[3]) and re.fullmatch(r"[0-9a-f]{64}", r[4])
+                            and r[2].endswith(".onnx") for r in rows))
+        self.assertEqual([r[0] for r in rows], values("speech")["SPEECH_LANGUAGE"])
+        self.assertEqual(rows[0][0], sft.defaults("speech")["SPEECH_LANGUAGE"])
+
+
 class ReadWrite(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.TemporaryDirectory()

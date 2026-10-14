@@ -16,6 +16,47 @@ why: >-
 author: RHASSPY (Piper); espeak-ng contributors
 source: {relation: uses, url: https://github.com/rhasspy/piper}
 icon: {theme: audio-speakers-symbolic}
+settings:
+  file: ~/.config/frame-tweaks/speech.conf
+  format: shell
+  about: >-
+    The voice Screen snip's Narrate reads with, and the language of apps that speak through
+    speech-dispatcher. Both engines are open source and run on the Frame, offline.
+  note: >-
+    Press Apply to switch (a new language downloads its voice, about 60 MB).
+  options:
+    - key: SPEECH_ENGINE
+      title: Narrate with
+      default: piper
+      choices:
+        - {label: "Piper: natural, neural voices", value: piper}
+        - {label: "eSpeak NG: robotic, fast, light", value: espeak-ng}
+    - key: SPEECH_LANGUAGE
+      title: Language
+      default: en_US
+      choices:
+        - {label: "English (US)", value: en_US}
+        - {label: "English (UK)", value: en_GB}
+        - {label: "Deutsch", value: de_DE}
+        - {label: "Français", value: fr_FR}
+        - {label: "Español (España)", value: es_ES}
+        - {label: "Español (México)", value: es_MX}
+        - {label: "Italiano", value: it_IT}
+        - {label: "Português (Brasil)", value: pt_BR}
+        - {label: "Nederlands", value: nl_NL}
+        - {label: "Polski", value: pl_PL}
+        - {label: "Čeština", value: cs_CZ}
+        - {label: "Svenska", value: sv_SE}
+        - {label: "Türkçe", value: tr_TR}
+        - {label: "Русский", value: ru_RU}
+        - {label: "Українська", value: uk_UA}
+        - {label: "العربية", value: ar_JO}
+        - {label: "हिन्दी", value: hi_IN}
+        - {label: "中文 (普通话)", value: zh_CN}
+  actions:
+    - label: Apply
+      script: install.sh
+      about: Downloads the chosen language's voice if needed and switches to it.
 changes: >-
   Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a
   speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on
@@ -50,6 +91,17 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
   espeak-ng. It sounds more robotic than Piper but starts speaking faster, which suits a
   screen reader. Orca's voice settings are in **System Settings → Accessibility → Screen Reader**.
 - To test it from a terminal: `spd-say "hello"`.
+
+## Settings
+**⚙ Settings** on its row in the Frame Tweaks window (or `./install.sh settings speech`), then
+**Apply**:
+
+- **Narrate with:** *Piper*, natural neural voices, or *eSpeak NG*, robotic but very fast and
+  light. Both are open source and run on the Frame, offline.
+- **Language:** 18 languages, from English and the main European languages to Russian,
+  Ukrainian, Arabic, Hindi and Mandarin. Each has a natural Piper voice (downloaded when you
+  choose it, about 60 MB, checked against its SHA256) and the matching eSpeak NG voice. It also
+  becomes the default language of apps that speak through speech-dispatcher.
 
 ## How it works
 
