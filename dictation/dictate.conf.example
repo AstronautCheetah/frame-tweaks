@@ -1,4 +1,4 @@
-# Copy to ~/.config/dictate.conf to customise dictation.
+# Copy to ~/.config/frame-tweaks/dictate.conf to customise dictation.
 # Words Whisper should spell your way (names, jargon):
 #DICTATE_PROMPT="Claude Code, SteamOS, Steam Frame, KDE Plasma."
 # Language spoken (the shared model is multilingual), e.g. de, fr, es; "auto" to detect:

@@ -162,9 +162,9 @@ class Phone:
                         return
 
 
-# The gear's settings panel (phone-touch.js): its choices, as lines of ~/.config/phone.conf (which
+# The gear's settings panel (phone-touch.js): its choices, as lines of ~/.config/frame-tweaks/phone.conf (which
 # `phone` reads). Only these keys are written; anything else in the file is kept as it is.
-CONF = Path.home() / ".config/phone.conf"
+CONF = Path.home() / ".config/frame-tweaks/phone.conf"      # (before 0.6: ~/.config/phone.conf)
 # Frame rates: the Steam Frame display's refresh rates, plus 30 and 60.
 CHOICES = {"PHONE_MAX_SIZE": ("720", "800", "1024", "1280", "1600", "1920"),
            "PHONE_BIT_RATE": ("1M", "1500K", "2M", "3M", "4M", "6M", "8M"),

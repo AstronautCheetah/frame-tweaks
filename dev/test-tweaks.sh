@@ -21,7 +21,7 @@ YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.se
 VRDASH=".local/share/frame-tweaks/vr-dashboard/sft-dashboard .config/systemd/user/sft-vr-debugger.service .config/systemd/user/sft-dashboard.service .config/systemd/user/steamvr.service.d/sft-dashboard.conf"   # shared by the VR windows tweaks
 # memcap keeps your limits file; KDE settings files stay (only the changed keys are restored).
 declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [scroll-strips]="$VRDASH $YDOTOOL .config/frame-tweaks/scroll-strips.json" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
-                 [dictation]="$PATHSET .config/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
+                 [dictation]="$PATHSET .config/frame-tweaks/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
                  [memcap]="$PATHSET .config/frame-tweaks/memcap.conf" [screen-reader]=".config/kaccessrc")
 
 work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"' EXIT

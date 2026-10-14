@@ -105,7 +105,7 @@ SETTINGS = {
         ],
     },
     "adb-scrcpy": {
-        "file": Path.home() / ".config/phone.conf", "format": "shell",
+        "file": Path.home() / ".config/frame-tweaks/phone.conf", "format": "shell",
         "about": "The phone mirror's stream and joystick scrolling.",
         "note": "Picture and frame rate apply the next time the mirror starts (or its gear's Restart "
                 "stream, in VR). Joystick speed applies at once.",

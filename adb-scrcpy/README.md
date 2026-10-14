@@ -23,7 +23,7 @@ Mirror and control an Android phone in a desktop window.
   it's switched on, so `phone` looks it up via mDNS, connects and starts scrcpy.
   Extra args go to scrcpy, e.g. `phone --turn-screen-off`.
 - **Which phone:** with one phone advertising, it's taken and remembered (`PHONE_NAME` in
-  `~/.config/phone.conf`); with several, a list asks which. When the remembered phone isn't in
+  `~/.config/frame-tweaks/phone.conf`); with several, a list asks which. When the remembered phone isn't in
   sight, you can wait for it (up to 3 minutes, while you turn on Wireless debugging) or use one
   that is. To choose again: Android Mirror's **Choose phone…** (right-click its menu entry) or
   `phone --pick`.
@@ -67,7 +67,7 @@ the way Arrow Pad reads the grips: from the tilt of the controller model's thumb
 **Settings in VR:** the gear below the mirror's lower-left corner opens its settings beside it:
 picture size (720 to 1920 pixels on the long side), bit rate (1 to 8 Mbit/s), frame rate (30, 60,
 or one of the Steam Frame's refresh rates, 72 to 144) and joystick scrolling speed. They're saved in
-`~/.config/phone.conf` (only those lines; the rest of the file is kept). *Restart stream* starts
+`~/.config/frame-tweaks/phone.conf` (only those lines; the rest of the file is kept). *Restart stream* starts
 scrcpy again with the new picture settings, without closing the mirror; *Reset to defaults*
 removes those lines again. The
 [scroll strips](../scroll-strips/) beside the mirror scroll the phone through `phone-touch` too.

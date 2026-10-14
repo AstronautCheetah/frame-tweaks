@@ -72,7 +72,8 @@ MSG
     say "Homebrew installed."
 }
 
-# Before 0.5 a few files lived under the project's old name: move them (once; install.sh runs it).
+# Before 0.5 a few files lived under the project's old name, and before 0.6 some settings sat
+# loose in ~/.config: move them (once; install.sh runs it, and those programs check themselves).
 migrate_legacy_dirs() {
     local old="$HOME/.config/steam-frame-tweaks" f
     if [ -d "$old" ]; then
@@ -81,6 +82,12 @@ migrate_legacy_dirs() {
         for f in "$old"/*; do [ -e "$f" ] && mv -n "$f" "$HOME/.config/frame-tweaks/installer/"; done
         rmdir "$old" 2>/dev/null || true
     fi
+    # (0.6: the phone mirror's and dictation's settings joined them)
+    for f in phone dictate; do
+        if [ -f "$HOME/.config/$f.conf" ] && [ ! -e "$HOME/.config/frame-tweaks/$f.conf" ]; then
+            mkdir -p "$HOME/.config/frame-tweaks" && mv "$HOME/.config/$f.conf" "$HOME/.config/frame-tweaks/$f.conf"
+        fi
+    done
     old="$HOME/.local/state/steam-frame-tweaks"
     if [ -d "$old" ]; then
         mkdir -p "$HOME/.local/state/frame-tweaks"

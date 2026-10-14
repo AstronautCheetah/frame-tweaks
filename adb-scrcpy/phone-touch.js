@@ -5,7 +5,7 @@
 // its sftPhoneTouch binding), which sends them to the phone as touches. The layer is there only
 // while phone-touch runs (it sets window.__sftPhoneTouchAlive every 2 s). A gear below the window's
 // lower-left corner opens its settings beside it (picture, smoothness, joystick speed; saved by
-// phone-touch in ~/.config/phone.conf, which it hands back as window.__sftPhoneTouchConf).
+// phone-touch in ~/.config/frame-tweaks/phone.conf, which it hands back as window.__sftPhoneTouchConf).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
 // requires: panel anchors | GetPanelAnchorID(
 // requires: frame panel height | latestMeasuredPanelLocalHeight

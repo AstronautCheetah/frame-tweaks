@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **All settings under `~/.config/frame-tweaks/`:** Android Mirror's `phone.conf` and
+  Dictation's `dictate.conf` move there from `~/.config` (on the next `./install.sh` run, or
+  the next time `phone` / `dictate` runs).
 - **The shared clipboard no longer needs Homebrew's Rust (3.4 GB with its LLVM):** it's built
   with a pinned Rust toolchain in a temporary folder that's deleted afterwards. Homebrew's Rust
   from older versions stays; the installer says how to remove it (`brew uninstall rust && brew

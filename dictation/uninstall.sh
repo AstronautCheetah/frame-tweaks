@@ -6,4 +6,4 @@ if [ -x "$BIN/whisper-ptt" ]; then
 else
     remove_files "$HOME/.local/share/whisper/ggml-small-q8_0.bin"
 fi
-say "Kept ~/.config/dictate.conf and ~/.local/share/dictation-history.txt; whisper-cpp (if any) stays in Homebrew."
+say "Kept ~/.config/frame-tweaks/dictate.conf and ~/.local/share/dictation-history.txt; whisper-cpp (if any) stays in Homebrew."
