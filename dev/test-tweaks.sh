@@ -18,7 +18,7 @@ TWEAKS=("${@:-${DEFAULT[@]}}")
 # dictation, wallet: settings they promise to keep, the shared PATH setup, shared dependencies.
 PATHSET=".bashrc .config/environment.d/10-local-bin.conf"
 YDOTOOL=".local/bin/ydotool .local/bin/ydotoold .config/systemd/user/ydotoold.service"   # a dependency other tweaks share
-VRDASH=".local/share/frame-tweaks/vr-dashboard/sft-dashboard .config/systemd/user/sft-vr-debugger.service .config/systemd/user/sft-dashboard.service .config/systemd/user/steamvr.service.d/sft-dashboard.conf"   # shared by the VR windows tweaks
+VRDASH=".local/share/frame-tweaks/vr-dashboard/sft-dashboard .local/share/frame-tweaks/vr-dashboard/lib.js .config/systemd/user/sft-vr-debugger.service .config/systemd/user/sft-dashboard.service .config/systemd/user/steamvr.service.d/sft-dashboard.conf"   # shared by the VR windows tweaks
 # memcap keeps your limits file; KDE settings files stay (only the changed keys are restored).
 declare -A KEEP=([curvature]="$VRDASH" [float-return]="$VRDASH" [float-grab]="$VRDASH" [scroll-strips]="$VRDASH $YDOTOOL .config/frame-tweaks/scroll-strips.json" [vr-dashboard]="" [menu-icons]="" [cursor]="" [tools]="$PATHSET" [homebrew]="" [ydotool]=""
                  [dictation]="$PATHSET .config/frame-tweaks/dictate.conf $YDOTOOL" [wallet]="$PATHSET .config/kwalletrc"
