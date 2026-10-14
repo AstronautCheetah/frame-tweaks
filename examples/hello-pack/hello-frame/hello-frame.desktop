@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Hello Frame
+Comment=An example Frame Tweaks tweak
+Exec=@BIN@/hello-frame
+Icon=face-smile
+Categories=Utility;

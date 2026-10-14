@@ -1,25 +1,16 @@
 # Contributing
 
-Tweaks are self-contained folders. To add one:
+Tweaks are self-contained folders in packs; Frame Tweaks' own are the official pack,
+`packs/official/`. A tweak's README.md starts with its manifest (YAML front matter), which is
+all the installer, the installer window, the docs and the tests know about it. The format, the
+scripts and the helpers they can use: [docs/mods.md](docs/mods.md). To add one:
 
-1. Add a line to `components.tsv` (tab-separated, see its header): id, title, category
-   (Accessibility, Convenience, VR windows, Privacy & security, System, Developer), dependencies, one-line description,
-   source (`relation|url`, if it comes from another project), author, why it's useful on the
-   Frame, flags (`hidden-by-default`, `helper`). The installer window shows all of it.
-2. Create `<id>/` with:
-   - `install.sh`: idempotent (safe to re-run), installs only under `$HOME`. Start with
-     `source "$(dirname "$0")/../lib/common.sh"` for `$BIN`, `$APPS`, `say`/`warn`/`die`,
-     `ensure_path`, `alarm_fetch`, `install_desktop` and friends.
-   - `status.sh`: prints one line and exits via `status_ok` (installed and healthy),
-     `status_missing` (not installed) or `status_warn` (installed, needs attention).
-     It must change nothing.
-   - `uninstall.sh`: removes what `install.sh` added (`remove_files`), keeps user settings and
-     data, and says what it kept.
-   - `README.md`: problem, install, use, configuration, how it works, gotchas.
-   - optional `run.sh`, with a `# label: Open` line: what the installer window's ▶ button does
-     (launch through the app's menu entry with `gtk-launch <id>` so gates apply). Without it the
-     button shows Help.
-3. Run the checks CI runs (see "Checks" below).
+1. Create `packs/official/<id>/` with a `README.md` (manifest, then: problem, install, use,
+   configuration, how it works, gotchas), `install.sh`, `uninstall.sh` and `status.sh`, plus
+   any optional scripts. [examples/hello-pack/](examples/hello-pack/) is a small complete one.
+2. Add its id to `order:` in `packs/official/pack.md`, where it belongs in the list.
+3. Run `dev/gen-docs.py` (the README tables, SECURITY.md's rows and its "At a glance" box come
+   from its manifest), then the checks CI runs (see "Checks" below).
 
 House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on command lines or
 in plain-text files; verify downloads when the publisher offers checksums; credit the
@@ -49,35 +40,12 @@ welcome: `Co-authored-by: Jane Doe <jane@example.com>` is fine (GitHub adds thos
 squash-merges a pull request with several authors). `dev/check-trailers.sh` is the rule; the
 hooks and CI run it.
 
-## Running programs (`<tweak>/processes`)
+## Pinned downloads
 
-If a tweak starts programs that keep running, list them in `processes` (one `pgrep -f`
-pattern per line, `~` for the home folder). The installer stops them before uninstalling or
-reinstalling the tweak.
-
-## Docs metadata (`<tweak>/meta`)
-
-Every tweak has a `meta` file: emoji, name, group (core / extras / helper), what you get, why,
-what it changes, unusual access, whether it survives SteamOS updates, and how to undo it. The
-README tables, SECURITY.md's change list and each tweak's "At a glance" box are generated from
-it: edit `meta`, then run `dev/gen-docs.py` (CI fails when they're out of date). For example:
-
-```text
-emoji: 📱
-name: Android Mirror
-group: extras
-what: Mirror and control your Android phone in a desktop window.
-why: Use your phone without taking the headset off.
-changes: `adb` in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher
-access: Network connection to your phone's wireless debugging
-survives-updates: Yes (everything is in your home folder)
-undo: `./install.sh uninstall adb-scrcpy`
-```
-
-Other optional files: `check-system.sh` (are the SteamOS/SteamVR parts it relies on still
-there? one line, exit 0 or 1), `processes` (above), and for a pinned upstream download a `pin`
-file (`version=`, `url=`, `sha256=` or `rev=`, and `latest=`, how `dev/check-pins.sh` finds
-newer releases).
+For a download from another project, add a `pin` file (`version=`, `url=`, `sha256=` or
+`rev=`, and `latest=`, how `dev/check-pins.sh` finds newer releases) and fetch it with
+`fetch_pinned`. Each pin also needs `mirror=` and `license=` (Frame Tweaks' copy, see below)
+or `nomirror=` saying why it can't be copied.
 
 ## Changing files a tweak doesn't own
 
@@ -94,13 +62,14 @@ What CI runs, and what to run before sending a change:
   and run headless with `QT_QPA_PLATFORM=offscreen`; the click-swap test also uses `Xvfb`. Use
   the venv the installer window sets up (`~/.local/share/arrowpad/venv/bin/python`), or
   `pip install PyQt6` (versions in `lib/python-constraints.txt`).
-- `dev/gen-docs.py --check`: generated README/SECURITY sections match each tweak's `meta`.
+- `dev/gen-docs.py --check`: generated README/SECURITY sections match the manifests.
+- `python3 lib/sft.py mods check packs/official`: every manifest is valid and its scripts exist.
 - `dev/check-docs.py`: every tweak has a README row; relative links resolve.
 - `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home.
 - `git log --format=%B | dev/check-trailers.sh`: commit messages (above).
 - A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
-  `tests/test_vr_dashboard.py` automatically; one that can be tested offline belongs in
-  `dev/test-tweaks.sh`'s default list.
+  `tests/test_vr_dashboard.py` automatically; one that can be tested offline says
+  `test: {offline: true}` in its manifest, and `dev/test-tweaks.sh` includes it.
 
 ### Keeping up with upstream (maintainers)
 

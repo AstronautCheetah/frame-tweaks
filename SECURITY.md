@@ -78,6 +78,14 @@ password. Until you set one (KWalletManager → *Change Password*), nothing abov
 protected. Avoid changing it while a second wallet service is running (see
 [wallet/README.md](packs/official/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
+**Other people's packs.** Tweaks can come from packs other than the official one
+([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
+`~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
+and trust covers its files as they were then: if any change, it's ignored again until you
+trust it again. Tweaks from them are marked 🧩 with the pack's name, and one can take an
+official tweak's place only by declaring `replaces: true` (the window says so). Frame Tweaks
+doesn't review or sandbox other people's packs.
+
 **Downloads.**
 - **Pinned upstream releases** (Full Keyboard, whisper-frame, the Whisper model): each tweak's
   `pin` file records the exact version and SHA256; the download must match it, so a changed or

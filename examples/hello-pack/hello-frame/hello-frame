@@ -1,0 +1,7 @@
+#!/bin/bash
+# Greets you with the greeting chosen in the installer window (Hello Frame's settings).
+HELLO_GREETING=hello
+# shellcheck source=/dev/null
+[ -f "$HOME/.config/frame-tweaks/hello-frame.conf" ] && . "$HOME/.config/frame-tweaks/hello-frame.conf"
+case $HELLO_GREETING in welcome) text="Good to see you" ;; ahoy) text="Ahoy" ;; *) text="Hello" ;; esac
+notify-send -a "Hello Frame" "$text, $(id -un)!" 2>/dev/null || echo "$text, $(id -un)!"

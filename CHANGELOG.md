@@ -1,6 +1,17 @@
 # Changelog
 
 ## Unreleased
+- **Packs: add your own tweaks without changing Frame Tweaks.** Every tweak is now a folder in a
+  pack, described by the YAML front matter of its README.md; Frame Tweaks' own tweaks are the
+  official pack (`packs/official/`, moved from the top folder) and load the same way. Put other
+  packs in `~/.local/share/frame-tweaks/packs/` and trust them (the window's **🧩 Packs** page,
+  or `./install.sh mods`); a changed pack needs trusting again, and a pack's tweak replaces an
+  official one only if it says `replaces: true`. Guide: `docs/mods.md`; example:
+  `examples/hello-pack/`.
+  - The installer window's details page now shows the same "what" and "why" as the README.
+  - For developers: `components.tsv`, the `meta` and `processes` files and the `# label:` lines
+    are gone (all in the front matter); scripts use `$TWEAK_DIR`, `tweak_dir ID` and
+    `$FRAME_TWEAKS_LIB`.
 - **Frame Tweaks keeps its own copies of the pinned downloads** (Full Keyboard, whisper-frame,
   the Whisper model, the voice, rustup, Homebrew's installer, clipboard-sync's source) on a
   `mirror` release. If upstream deletes or changes a file, installs use the copy, checked

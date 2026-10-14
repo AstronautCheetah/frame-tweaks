@@ -35,6 +35,7 @@ order:
 ---
 # Frame Tweaks: the official pack
 
-The tweaks that come with Frame Tweaks. They're loaded the same way as any other pack: one
-folder per tweak, each described by the front matter of its README.md. This file sets the order of the categories and of the tweaks in the installer
+The tweaks that come with Frame Tweaks. They're loaded the same way as any other pack (see
+[docs/mods.md](../../docs/mods.md)): one folder per tweak, each described by the front matter of
+its README.md. This file sets the order of the categories and of the tweaks in the installer
 window, the README and `./install.sh list`.
