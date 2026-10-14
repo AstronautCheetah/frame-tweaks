@@ -10,5 +10,5 @@ if [ -n "$shell" ]; then
         status_warn "installed; active after the next reboot"
     status_ok "software cursor active"
 fi
-[ "${KWIN_FORCE_SW_CURSOR:-}" = 1 ] && status_ok "software cursor active"
+if [ "${KWIN_FORCE_SW_CURSOR:-}" = 1 ]; then status_ok "software cursor active"; fi
 status_ok "installed (active in desktop mode after a reboot)"
