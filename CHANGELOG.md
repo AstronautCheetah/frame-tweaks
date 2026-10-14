@@ -7,7 +7,8 @@
   phone (with Cancel), and a message saying why when it can't, such as no phone on the Wi-Fi,
   a phone not paired yet, or scrcpy failing to start, instead of failing silently.
 - **Scroll strips: haptics** from the dashboard's own effects: a tick when the laser reaches a
-  strip, a firmer one on press and on a page, and light ticks while it scrolls.
+  strip, a firmer one on press and on a page, and light ticks while it scrolls. A **Haptics** tick
+  box in its settings turns them off.
 - **Haptic ticks** on the Frame Tweaks window's buttons and on Screen snip's narration panel, as
   on Arrow Pad: a light one when the laser moves onto a button, a firmer one on a click.
 - **Signed releases:** release tags are signed, and `./install.sh update` refuses a release that
@@ -159,6 +160,8 @@
 - **Migrations ran when going back to an older release;** they now run only on the way up.
 
 ### For contributors
+- Settings can have tick boxes (`checkbox: true` on a two-choice option) and buttons that run one
+  of the tweak's scripts (`actions:`); see docs/mods.md.
 - Attribution lines in commits are up to each contributor; the hooks refuse tool attribution
   only for those who opt in (`git config frame-tweaks.refuseToolTrailers true`).
 - Commit messages follow Conventional Commits, checked by commitizen in the commit-msg hook and

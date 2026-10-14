@@ -125,6 +125,19 @@ settings:
       choices:
         - {label: Hello, value: hello}
         - {label: Ahoy, value: ahoy}
+    - key: HELLO_LOUD                              # two choices, shown as one tick box
+      title: Shout it
+      checkbox: true                               # (the first choice is "ticked")
+      default: "no"
+      choices:
+        - {label: "Yes", value: "yes"}
+        - {label: "No", value: "no"}
+  actions:                                         # optional: buttons that run a script
+    - label: "Forget {HELLO_NAME}"                  # {KEY} shows that setting's value
+      script: hello-frame                          # in the tweak's folder, run with bash
+      args: [--forget]
+      when: HELLO_NAME                             # shown only while that setting has a value
+      about: What pressing it does.
 ```
 
 Only the listed keys are written; anything else in the file is kept. Your program reads the

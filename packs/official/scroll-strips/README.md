@@ -89,6 +89,13 @@ settings:
         - {label: Violet, value: 0.75}
         - {label: Magenta, value: 0.83}
         - {label: Pink, value: 0.92}
+    - key: haptics
+      title: Haptics (a tick on the controller as you scroll)
+      checkbox: true
+      default: true
+      choices:
+        - {label: "On", value: true}
+        - {label: "Off", value: false}
 changes: >-
   One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via
   VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json`
@@ -160,6 +167,7 @@ every window at once.
 | Gap from the window | 0 to 5 cm | 1.5 cm |
 | Set back behind the window | 0 to 5 cm | 3 cm |
 | Colour | the passthrough's Camera Color Tint, or one of ten hues | the tint |
+| Haptics | a tick box: a tick on the controller when the laser reaches a strip, as it scrolls and on a page | on |
 
 Setting the strips back a little keeps SteamVR's own buttons by the window's edge drawn in
 front of them. Uninstalling keeps your settings.
