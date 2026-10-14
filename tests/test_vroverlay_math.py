@@ -167,6 +167,7 @@ class Collapse(unittest.TestCase):
         o.input_handle, o.cover, o.width_m = 1, None, 0.5
         o.pose = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, -1.0]]
         o.apply_pose = o.remember_offset = o.save = lambda: None
+        o.log_input = lambda msg: None                           # (not the real pad's log)
         pad = types.SimpleNamespace(expanded_size=QSize(500, 400), toggled=False, pivot=lambda: QPoint(420, 20))
         o.pad = pad
         self.assertFalse(o.fit_size(500, 400))                   # (first picture: nothing to move)
