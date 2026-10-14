@@ -1,6 +1,18 @@
 # Changelog
 
 ## Unreleased
+- **The version shows the exact build** between releases (`0.5.0+15.bca47ad`, `-dirty` with
+  local changes): `./install.sh --version`, the window title, logs and debug-info. Releases
+  still show plain `0.6.0`.
+- **Updates replace programs instead of writing into them**, so a wrapper that's running while
+  you update (adb, arrowpad, gh, the speech module, the Python tools) can't run half old, half
+  new; Android Mirror's adb is swapped in only once the new copy is complete. (`write_file` in
+  `lib/common.sh`; CI refuses the old pattern.)
+- **debug-info includes the tweaks' services' recent log lines** and which release installed
+  each tweak; the README says where every log is.
+- **New: [docs/DESIGN.md](docs/DESIGN.md)**, how Frame Tweaks works and why.
+- For developers: tests for the Arch Linux ARM package checks (real signatures, wrong package,
+  downgrade), for migrations, holds and the install lock, and for the version string.
 - **Recline** (new, VR environment, 🧪): use VR lying down or reclined. One button (or a
   controller shortcut) makes your view level and forward; it undoes itself when you get up.
   Builds [new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) v1.2.0 from its pinned

@@ -19,7 +19,10 @@ cp -a "$T"/deps/usr/lib/*.so* "$NEW/"
 install -m755 "$T/at/usr/bin/adb" "$NEW/adb.bin"
 # Swapped in only if it runs here; otherwise a working adb from before is kept.
 if missing=$(runs_here "$NEW/adb.bin" "$NEW") && LD_LIBRARY_PATH="$NEW" "$NEW/adb.bin" version >/dev/null 2>&1; then
-    rm -rf "$LIB" && mkdir -p "$(dirname "$LIB")" && cp -a "$NEW" "$LIB"
+    # (Copied beside it, then swapped by rename: a failed copy leaves the old one working.)
+    rm -rf "$LIB.new" "$LIB.old" && mkdir -p "$(dirname "$LIB")" && cp -a "$NEW" "$LIB.new" &&
+        { [ ! -e "$LIB" ] || mv "$LIB" "$LIB.old"; } && mv "$LIB.new" "$LIB" && rm -rf "$LIB.old" ||
+        die "couldn't put the new adb in place (the one before is in $LIB or $LIB.old)"
 elif [ -x "$LIB/adb.bin" ] && LD_LIBRARY_PATH="$LIB" "$LIB/adb.bin" version >/dev/null 2>&1; then
     warn "Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: $missing"
 else
@@ -29,13 +32,12 @@ fi
 # which every local program (sandboxed Flatpak apps too) could use to get a shell on a connected
 # phone. (Set ADB_SERVER_SOCKET yourself to override.) An old server on the TCP port is stopped.
 ADB_SERVER_SOCKET=tcp:localhost:5037 LD_LIBRARY_PATH="$LIB" timeout 10 "$LIB/adb.bin" kill-server 2>/dev/null || true
-cat > "$BIN/adb" <<'EOS'
+write_file "$BIN/adb" 755 <<'EOS'
 #!/bin/sh
 : "${ADB_SERVER_SOCKET:=localfilesystem:${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/adb.sock}"
 export ADB_SERVER_SOCKET
 LD_LIBRARY_PATH="$HOME/.local/lib/android-tools${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" exec "$HOME/.local/lib/android-tools/adb.bin" "$@"
 EOS
-chmod +x "$BIN/adb"
 "$BIN/adb" version | sed -n 1,2p
 
 install -m755 "$TWEAK_DIR/phone" "$TWEAK_DIR/phone-fit" "$BIN/"

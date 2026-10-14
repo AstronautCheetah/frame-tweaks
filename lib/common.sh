@@ -6,6 +6,18 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# The exact build, for people and logs: 0.5.0 at a release tag, 0.5.0+3.abc1234 three commits
+# after it, -dirty with local changes; the VERSION file without git. (VERSION itself stays the
+# release number that migrations and update checks compare.)
+ft_version() {
+    local d
+    d=$(git -C "$REPO_DIR" describe --tags --match 'v[0-9]*' --dirty 2>/dev/null) ||
+        { cat "$REPO_DIR/VERSION" 2>/dev/null || echo dev; return; }
+    d=${d#v}
+    [[ $d =~ ^(.+)-([0-9]+)-g([0-9a-f]+)(-dirty)?$ ]] &&
+        d="${BASH_REMATCH[1]}+${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}"
+    echo "$d"
+}
 # The folder of the tweak whose script sourced this file (its own files), and tweak_dir <id> for
 # another tweak's: the installer passes the folders it found (FRAME_TWEAKS_DIRS, "id=folder"
 # lines, user packs included); a script run on its own falls back to the official pack.
@@ -223,10 +235,10 @@ install_icon() {
 install_desktop() {
     local name; name=$(basename "$1")
     if [ -f "$LAUNCHER_ORIGINALS/$name" ] && [ -x "$BIN/wallet-launcher" ]; then
-        sed "s|@BIN@|$BIN|g" "$1" > "$LAUNCHER_ORIGINALS/$name"
+        sed "s|@BIN@|$BIN|g" "$1" | write_file "$LAUNCHER_ORIGINALS/$name"
         "$BIN/wallet-launcher" --reapply "${name%.desktop}" >/dev/null
     else
-        sed "s|@BIN@|$BIN|g" "$1" > "$APPS/$name"
+        sed "s|@BIN@|$BIN|g" "$1" | write_file "$APPS/$name"
     fi
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS"
@@ -266,8 +278,19 @@ ensure_openvr() {
 
 # install_py_tool <src> : install a Python tool into ~/.local/bin, running on the shared venv.
 install_py_tool() {
-    sed "1s|.*|#!$TWEAKS_VENV/bin/python|" "$1" > "$BIN/$(basename "$1")"
-    chmod 755 "$BIN/$(basename "$1")"
+    sed "1s|.*|#!$TWEAKS_VENV/bin/python|" "$1" | write_file "$BIN/$(basename "$1")" 755
+}
+
+# write_file <dest> [mode] < content: replace dest with stdin by renaming a finished copy over
+# it (mode 644 unless given). Writing into the file instead would change it under anything
+# running it: bash reads a script as it goes, so a wrapper being run could run half of each.
+# (install -m and cp to a new name are fine; cp or > onto an existing program is not.)
+write_file() {
+    local dest=$1 tmp
+    mkdir -p "$(dirname "$dest")"
+    tmp=$(mktemp "$dest.new.XXXXXX") || return 1
+    if cat > "$tmp" && chmod "${2:-644}" "$tmp" && mv -f "$tmp" "$dest"; then return 0; fi
+    rm -f "$tmp"; return 1
 }
 
 # --- backups of user files a tweak changes -------------------------------------------------

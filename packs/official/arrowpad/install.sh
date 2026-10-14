@@ -23,11 +23,10 @@ install -m644 "$TWEAK_DIR"/vr/*.json "$HOME/.local/share/arrowpad/vr/"
 if ! ensure_openvr "$VENV"; then
     warn "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
 fi
-cat > "$BIN/arrowpad" <<EOS
+write_file "$BIN/arrowpad" 755 <<EOS
 #!/bin/sh
 exec "$VENV/bin/python" "$HOME/.local/share/arrowpad/arrowpad.py" "\$@"
 EOS
-chmod +x "$BIN/arrowpad"
 install_icon frame-tweaks-arrowpad
 install_desktop "$TWEAK_DIR/arrowpad.desktop"
 install_desktop "$TWEAK_DIR/arrowpad-vr.desktop"

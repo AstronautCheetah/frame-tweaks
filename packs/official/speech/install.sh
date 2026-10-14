@@ -30,14 +30,13 @@ if [ "$(cat "$D/voice.version" 2>/dev/null)" != "$voice_rev" ]; then
 fi
 
 # speech-dispatcher: its espeak-ng module, run with Piper's espeak-ng library and voice data.
-cat > "$D/sd_espeak-ng" <<WRAP
+write_file "$D/sd_espeak-ng" 755 <<WRAP
 #!/bin/sh
 # speech-dispatcher's espeak-ng module with the espeak-ng that comes with Piper (Frame Tweaks).
 export LD_LIBRARY_PATH="$D/piper\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
 export ESPEAK_DATA_PATH="$D/piper"
 exec /usr/lib/speech-dispatcher/speech-dispatcher-modules/sd_espeak-ng "\$@"
 WRAP
-chmod 755 "$D/sd_espeak-ng"
 # A user speechd.conf replaces the system one: start from it, add the module, make it the default.
 C="$HOME/.config/speech-dispatcher"
 backup_file speech "$C/speechd.conf"

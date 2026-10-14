@@ -12,8 +12,7 @@ if ! "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
     python3 -m venv "$QT_VENV"
     pip_pinned "$QT_VENV" PyQt6
 fi
-sed "1s|.*|#!$QT_VENV/bin/python|" "$TWEAK_DIR/nordvpn-tray" > "$BIN/nordvpn-tray"
-chmod 755 "$BIN/nordvpn-tray"
+sed "1s|.*|#!$QT_VENV/bin/python|" "$TWEAK_DIR/nordvpn-tray" | write_file "$BIN/nordvpn-tray" 755
 install_icon frame-tweaks-nordvpn
 install_desktop "$TWEAK_DIR/nordvpn-tray.desktop"
 mkdir -p "$HOME/.config/autostart"

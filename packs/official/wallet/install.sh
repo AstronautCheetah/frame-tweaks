@@ -26,8 +26,7 @@ install_desktop "$TWEAK_DIR/wallet-lock.desktop"
 # gh (Homebrew) would store its token in plain text: no Secret Service on the desktop's bus.
 REAL_GH=$(PATH="${PATH//$BIN:/}" command -v gh || true)
 if [ -n "$REAL_GH" ]; then
-    printf '#!/bin/sh\n# gh with its token in the shared KDE wallet (see with-keyring)\nexec "$HOME/.local/bin/with-keyring" %s "$@"\n' "$REAL_GH" > "$BIN/gh"
-    chmod 755 "$BIN/gh"
+    printf '#!/bin/sh\n# gh with its token in the shared KDE wallet (see with-keyring)\nexec "$HOME/.local/bin/with-keyring" %s "$@"\n' "$REAL_GH" | write_file "$BIN/gh" 755
     for h in https://github.com https://gist.github.com; do
         git config --global --get "credential.$h.helper" >/dev/null 2>&1 &&
             git config --global --replace-all "credential.$h.helper" "!$BIN/gh auth git-credential" '^!.*gh auth git-credential$'

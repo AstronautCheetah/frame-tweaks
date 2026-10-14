@@ -19,7 +19,7 @@ issue forms.
   our user services where it doesn't break them. *(Jovian-NixOS)*
 
 ## Support and diagnostics
-- [x] **Logs:** keep the last two runs' logs in `~/.local/state/frame-tweaks/`. *(EmuDeck)*
+- [x] **Logs:** keep the last five runs' logs in `~/.local/state/frame-tweaks/`. *(EmuDeck)*
 - [x] **`./install.sh debug-info`** and a "Save diagnostics" button: versions, status, recent
   logs, with user names and paths removed, zipped for a bug report; the bug form asks for it.
   *(Decky, EmuDeck)*
