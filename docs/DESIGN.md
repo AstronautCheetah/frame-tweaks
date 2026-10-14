@@ -298,7 +298,7 @@ patch into the dashboard page every 5 seconds, again after a reload.
   the installer window shows it before the tweak is ticked.
 
 Other tweaks that rely on internals use `check-system.sh` the same way (for example
-`recline`, `curvature`, `arrowpad`).
+`curvature`, `arrowpad`, `dictation`).
 
 ## Safety rules that shaped the design
 

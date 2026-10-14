@@ -50,6 +50,23 @@ next to the idea it inspired.
 - [x] **Translations** of the installer window, the installer's messages and the tweaks' programs
   (gettext `.po` files, locale/README.md; Latin American Spanish first). Still to come: a
   translation platform (Weblate) once there are outside translators. *(Decky, ProtonUp-Qt)*
+- [ ] **Screen snip: text recognition (OCR) in more languages.** Today it reads English only:
+  Homebrew's Tesseract brings just `eng.traineddata`, and frame-snip doesn't pass `-l`. Plan:
+  - **Data:** Tesseract's `tessdata_fast` models (a few MB each; Apache-2.0), one file per
+    language, from a pinned commit of github.com/tesseract-ocr/tessdata_fast with each file's
+    SHA256 in `packs/original/snip/ocr-languages.tsv`, built by a `dev/ocr-languages.py` (as
+    `dev/speech-voices.py` builds the voices list), and copied to the mirror release like other
+    pinned downloads.
+  - **Where:** `~/.local/share/frame-tweaks/tessdata/` (English copied in from Homebrew's), passed
+    with `--tessdata-dir`; nothing under Homebrew is changed.
+  - **Which:** a "Text recognition" setting on Screen snip + Narrate's ⚙ (window and VR panel):
+    English plus the Frame Tweaks language by default (es_419 → `eng+spa`), up to three in all
+    (each one more slows recognition and can lower accuracy). A table maps our language codes to
+    Tesseract's (`spa`, `por`, `deu`, `fra`, `chi_sim`, `jpn`, …).
+  - **Getting them:** Apply downloads the chosen ones (checked), like Narrate's voices; a language
+    without its file falls back to English with a message, never fails the snip.
+  - **Narrate:** suggest the matching voice when the recognised language isn't the voice's.
+  - **Tests:** the list's checksums and URLs, the code table, the `tesseract` command line built.
 - [ ] **Arrow Pad: a key's tooltip on a long hover.** When the laser rests on a key or toolbar
   button for 5 seconds or more, show what it does (the tooltip it already has: "Right click: your
   next click becomes a right click", "Pin: stop accidental moves"). Desktop mode shows Qt's

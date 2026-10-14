@@ -131,14 +131,14 @@ class Packs(unittest.TestCase):
         packs = {p["name"]: p for p in sft.load(refresh=True)["packs"]}
         self.assertEqual([packs[n]["state"] for n in ("Original", "Integrations", "3rd Party")], ["official"] * 3)
         self.assertEqual(self.ids()["signal"]["pack"], "Integrations")
-        self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["recline"]["pack"]), ("Original", "3rd Party"))
-        self.assertTrue(self.ids()["recline"]["official"])
+        self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["clipboard"]["pack"]), ("Original", "3rd Party"))
+        self.assertTrue(self.ids()["clipboard"]["official"])
         sft.set_official(sft.THIRD_PARTY, False)
-        self.assertNotIn("recline", self.ids())
+        self.assertNotIn("clipboard", self.ids())
         self.assertIn("arrowpad", self.ids())
         self.assertEqual({p["name"]: p["state"] for p in sft.load(refresh=True)["packs"]}["3rd Party"], "off")
         sft.set_official(sft.THIRD_PARTY, True)
-        self.assertIn("recline", self.ids())
+        self.assertIn("clipboard", self.ids())
 
     def test_official_packs_share_the_category_order(self):
         cats = [sft.read_pack(p)[0]["categories"] for p in sft.OFFICIAL_PACKS]
