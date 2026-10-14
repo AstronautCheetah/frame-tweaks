@@ -206,19 +206,64 @@ def browser_name(app_id):
     return (entry(path).get("Name") if path else None) or app_id.removesuffix(".desktop")
 
 
+LOG = Path.home() / ".local/state/frame-tweaks/logs/links.log"
+
+
+def log(msg):
+    """What happened to each link (for a bug report: it's in the diagnostics report)."""
+    try:
+        LOG.parent.mkdir(parents=True, exist_ok=True)
+        if LOG.exists() and LOG.stat().st_size > 50_000:
+            LOG.replace(LOG.with_suffix(".log.1"))
+        import time
+        with open(LOG, "a") as f:
+            f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}\n")
+    except OSError:
+        pass
+
+
+def launch(url):
+    """Opens url: (note, process, handoff) or None when it couldn't (the caller falls back to its
+    own way). handoff: the app already runs there, so the process should only pass the link on
+    and exit; one still running after a few seconds is stuck (Firefox: "already running, but is
+    not responding", when its running copy doesn't answer): see still_stuck."""
+    p = plan(url)
+    if not p:
+        log(f"no plan for {url!r}: no default app found")
+        return None
+    app, target, env = p
+    handoff = target in running_sessions(app)
+    try:
+        proc = subprocess.Popen(["gtk-launch", app, url], env=env, stdin=subprocess.DEVNULL,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError as e:
+        log(f"couldn't start {app} for {url!r}: {e}")
+        return None
+    log(f"{url!r} -> {app} in {target} (from {session_of(os.environ)}; {'hand-off' if handoff else 'new window'})")
+    return _("Opened in {app} ({session})").format(app=browser_name(app), session=_(target)), proc, handoff
+
+
+def still_stuck(proc, url):
+    """After a hand-off: True if the launched copy is still up (it shows "not responding" instead
+    of passing the link on); those processes (ones with this link on their command line) are
+    stopped. gtk-launch itself exits at once, so it's the browser's own processes that tell."""
+    import signal
+    stuck = [pid for pid in pids() if pid != os.getpid() and url in proc_cmd(pid)]
+    for pid in stuck:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+    if stuck:
+        log(f"{url!r}: the running copy didn't answer; stopped the stuck launch ({len(stuck)} processes)")
+    return bool(stuck)
+
+
 def open_url(url):
     """Opens url; returns a short note on where it went, or None when it couldn't (the caller
     falls back to its own way)."""
-    p = plan(url)
-    if not p:
-        return None
-    app, target, env = p
-    try:
-        subprocess.Popen(["gtk-launch", app, url], env=env, stdin=subprocess.DEVNULL,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-    except OSError:
-        return None
-    return _("Opened in {app} ({session})").format(app=browser_name(app), session=_(target))
+    r = launch(url)
+    return r[0] if r else None
 
 
 def open_path(path):
