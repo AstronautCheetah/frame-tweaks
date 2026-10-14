@@ -58,5 +58,21 @@ class DashboardCheck(unittest.TestCase):
             self.assertEqual(sft.missing(path, code), [], name)
 
 
+class SaveConfig(unittest.TestCase):
+    def test_only_installed_patches_and_small_objects(self):
+        with tempfile.TemporaryDirectory() as d:
+            conf = Path(d) / "conf"
+            with mock.patch.object(sft, "CONF_DIR", conf), \
+                 mock.patch.object(sft, "patches", return_value={"scroll-strips": Path("x.js")}):
+                sft.save_config({"name": "scroll-strips", "config": {"color": 0.5}})
+                self.assertEqual(json.loads((conf / "scroll-strips.json").read_text()), {"color": 0.5})
+                sft.save_config({"name": "../evil", "config": {"a": 1}})
+                sft.save_config({"name": "other", "config": {"a": 1}})
+                sft.save_config({"name": "scroll-strips", "config": ["not", "an", "object"]})
+                sft.save_config({"name": "scroll-strips", "config": {"big": "x" * 5000}})
+                self.assertEqual(sorted(p.name for p in conf.iterdir()), ["scroll-strips.json"])
+                self.assertEqual(json.loads((conf / "scroll-strips.json").read_text()), {"color": 0.5})
+
+
 if __name__ == "__main__":
     unittest.main()

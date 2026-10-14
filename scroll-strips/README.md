@@ -23,8 +23,14 @@ vertical one on the **right** and a horizontal one on **top**.
   pointer input only from the lasers, so an injected mouse wheel never arrives (we tried XTest,
   ydotool and the desktop's Remote Desktop portal); keyboard input does.
 - **Curved windows:** the top (or bottom) strip bends with the window.
-- **Settings** (the row's ⚙ button in the installer window): which side each strip is on (or off),
-  and how thick they are.
+- **The Android Mirror** is scrolled through its own helper (it sends the phone a scroll wheel),
+  since the Steam session never sees that window clicked.
+- **Settings in VR:** the gear where the two strips meet (by the window's top-right corner, by
+  default) opens them beside the window: which side each strip is on (or off), thickness, gap
+  from the window, how far it's set back, and colour (follow the passthrough's Camera Color Tint,
+  or pick a hue), plus *Reset to defaults*. They apply to every window at once and are saved in
+  `~/.config/frame-tweaks/scroll-strips.json` (through the VR windows helper's service).
+- **Settings in the installer window** (the row's ⚙ button): side and thickness.
 - The window docked in the dashboard (the desktop, say) gets strips too, while the dashboard is open.
 
 ## How it works
