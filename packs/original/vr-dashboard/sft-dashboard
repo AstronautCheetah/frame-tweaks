@@ -75,7 +75,10 @@ def restore():
         OLD_STATE.replace(STATE)
     if not STATE.exists():
         return
-    prev = json.loads(STATE.read_text())
+    try:
+        prev = json.loads(STATE.read_text())
+    except ValueError:                  # (empty or garbled, say cut short by a crash: as if the key
+        prev = None                     # wasn't there, so the port goes off, SteamVR's default)
     d = load()
     sec = d.setdefault("VRWebHelper", {})
     if prev is None:
@@ -219,11 +222,13 @@ def listen():
             while True:
                 m = ws.recv()
                 if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") in BINDINGS:
+                    # (Any script on the page can call these, with anything: a bad call is logged
+                    # and skipped. Nothing restarts this thread, so nothing may end it.)
                     try:
                         BINDINGS[m["params"]["name"]](json.loads(m["params"].get("payload") or "{}"))
-                    except (ValueError, TypeError, OSError, subprocess.SubprocessError) as e:
-                        print(f"binding {m['params'].get('name')}: {e}", flush=True)
-        except (OSError, ValueError):
+                    except Exception as e:
+                        print(f"binding {m['params'].get('name')}: {e!r}", flush=True)
+        except Exception:                 # (SteamVR or its page went away, or a bad message)
             time.sleep(3)
 
 
@@ -261,7 +266,7 @@ def i18n_expr(found):
         for p in found.values():
             mtime = p.stat().st_mtime
             if _js_texts.get(p, (None,))[0] != mtime:
-                _js_texts[p] = (mtime, {js_string(a or b) for a, b in JS_TEXT.findall(p.read_text())})
+                _js_texts[p] = (mtime, {js_string(a or b) for a, b in JS_TEXT.findall(p.read_text(errors="replace"))})
             for text in _js_texts[p][1]:
                 if _(text) != text:
                     table[text] = _(text)
@@ -270,14 +275,14 @@ def i18n_expr(found):
 
 def requires(path):
     req = dict(BASE)
-    for m in re.finditer(r"^// requires: (.+?) \| (.+)$", path.read_text(), re.M):
+    for m in re.finditer(r"^// requires: (.+?) \| (.+)$", path.read_text(errors="replace"), re.M):
         req[m[1]] = m[2]
     return req
 
 
 def dashboard_code():
-    try:
-        return "".join(f.read_text(errors="replace") for f in DASHBOARD.glob("*.js"))
+    try:                       # (no files at all, the folder gone or moved, is None too)
+        return "".join(f.read_text(errors="replace") for f in DASHBOARD.glob("*.js")) or None
     except OSError:
         return None
 
@@ -290,7 +295,8 @@ def missing(path, code):
 
 
 def stop_expr(name):
-    return f"window.__sftPatches?.[{json.dumps(name)}]?.stop?.(); delete window.__sftPatches?.[{json.dumps(name)}]; 'stopped'"
+    n = json.dumps(name)          # (unregistered even if its stop() throws: ticked again, it's injected anew)
+    return f"try {{ window.__sftPatches?.[{n}]?.stop?.(); }} catch (e) {{}} delete window.__sftPatches?.[{n}]; 'stopped'"
 
 
 def config_expr(name, path):
@@ -306,7 +312,7 @@ def config_expr(name, path):
 
 
 def watch():
-    code, last, injected = dashboard_code(), None, set()
+    code, last, injected = dashboard_code(), None, None      # (injected: None until the page is seen)
     threading.Thread(target=listen, daemon=True).start()
     while True:
         found = patches()
@@ -320,11 +326,16 @@ def watch():
                 result = "waiting for the dashboard"
             else:
                 results = []
+                if injected is None:
+                    # Just started: the patches an earlier run left on the page count too (a tweak
+                    # removed moments before this service restarted, as an install right after does).
+                    names = ws_eval(url, "Object.keys(window.__sftPatches ?? {})")
+                    injected = set(names) if isinstance(names, list) else set()
                 for n in sorted(injected - set(found)):          # its tweak was removed
                     ws_eval(url, stop_expr(n))
                     injected.discard(n)
                 if found and not lib_bad:
-                    lib = LIB.read_text()                  # (it skips itself if this very file is loaded)
+                    lib = LIB.read_text(errors="replace")  # (it skips itself if this very file is loaded)
                     wanted = hashlib.sha256(lib.encode()).hexdigest()[:16]
                     ws_eval(url, f"window.__sftLibWanted = {json.dumps(wanted)};\n" + lib)
                     ws_eval(url, i18n_expr(found))         # (the patches redraw with it)
@@ -335,7 +346,7 @@ def watch():
                     conf = config_expr(n, CONF_DIR / f"{n}.json")
                     if conf:
                         ws_eval(url, conf)
-                    results.append(f"{n}: {ws_eval(url, p.read_text())}")
+                    results.append(f"{n}: {ws_eval(url, p.read_text(errors='replace'))}")
                     injected.add(n)
                 result = "; ".join(results) or "no patches installed"
         except OSError as e:
