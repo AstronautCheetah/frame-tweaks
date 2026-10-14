@@ -17,7 +17,7 @@ TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | grep -
 [ -n "$TAG" ] || { echo "Couldn't find a release of $REPO" >&2; exit 1; }
 if [ -d "$DIR/.git" ]; then
     echo "Updating $DIR to $TAG"
-    git -C "$DIR" fetch --quiet --tags origin && git -C "$DIR" -c advice.detachedHead=false checkout --quiet "$TAG"
+    git -C "$DIR" fetch --quiet --force --tags origin && git -C "$DIR" -c advice.detachedHead=false checkout --quiet "$TAG"
 else
     echo "Installing $TAG into $DIR"
     git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" "$REPO" "$DIR"

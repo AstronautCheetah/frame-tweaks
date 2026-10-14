@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- **Updates are sturdier:** `./install.sh update` and `get.sh` take GitHub's release tags as
+  they are, and a checkout of `main` that can't fast-forward says how to catch up.
+- **Frame Tweaks' copies of pinned downloads come with their licence texts** (beside each copy
+  on the `mirror` release).
+- For contributors: commit messages follow Conventional Commits, checked by commitizen in the
+  commit-msg hook and CI (`.cz.toml`, `dev/check-commit-msg.sh`; CONTRIBUTING.md).
 - **The version shows the exact build** between releases (`0.5.0+15.bca47ad`, `-dirty` with
   local changes): `./install.sh --version`, the window title, logs and debug-info. Releases
   still show plain `0.6.0`.

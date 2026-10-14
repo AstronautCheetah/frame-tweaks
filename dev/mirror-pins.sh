@@ -4,7 +4,8 @@
 # (lib/common.sh fetch_pinned falls back to it, checked against the pin's sha256). Uploads only
 # what's missing, each checked against its pin first. A pinned git commit (clipboard) becomes a
 # source archive, whose sha256 this writes into the pin's mirror_sha256= (commit that change).
-# Pins that can't be copied say why in nomirror=. Needs gh, signed in.
+# Each copy's licence texts (the pin's license_file= URLs, at the pinned version) go beside it as
+# <copy>.<file>.txt. Pins that can't be copied say why in nomirror=. Needs gh, signed in.
 #   dev/mirror-pins.sh            upload what's missing, refresh the release notes
 #   dev/mirror-pins.sh --check    list what's missing (exit 1 if anything is)
 set -euo pipefail
@@ -13,6 +14,12 @@ TAG=mirror
 check=; [ "${1:-}" = --check ] && check=1
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 val() { sed -n "s/^$1=//p" "$2"; }
+# <copy>.<project>-<file>: the project the text comes from (GitHub or Hugging Face repository).
+lic_name() {
+    local b proj; b=$(basename "$2"); [[ $b == *.* ]] || b="$b.txt"
+    proj=$(sed -E 's#^https://(raw\.githubusercontent\.com|huggingface\.co)/[^/]+/([^/]+)/.*#\2#' <<<"$2")
+    echo "$(basename "$(val mirror "$1")").$proj-$b"
+}
 
 notes() {
     echo "Frame Tweaks' copies of the upstream files its tweaks pin. Installs use one only when"
@@ -21,7 +28,8 @@ notes() {
     echo
     for pin in packs/*/*/pin packs/*/*/*.pin; do
         [ -n "$(val mirror "$pin")" ] || continue
-        echo "- \`$(basename "$(val mirror "$pin")")\` (\`$pin\`, from $(val url "$pin")): $(val license "$pin")"
+        echo "- \`$(basename "$(val mirror "$pin")")\` (\`$pin\`, from $(val url "$pin")): $(val license "$pin");" \
+             "licence texts: $(for u in $(val license_file "$pin"); do printf '`%s` ' "$(lic_name "$pin" "$u")"; done)"
     done
 }
 
@@ -32,6 +40,17 @@ if ! have=$(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/nu
     have=""
 fi
 missing=0
+for pin in packs/*/*/pin packs/*/*/*.pin; do                   # licence texts first (small)
+    [ -n "$(val mirror "$pin")" ] || continue
+    for u in $(val license_file "$pin"); do
+        lic=$(lic_name "$pin" "$u")
+        grep -qxF "$lic" <<<"$have" && continue
+        missing=1
+        if [ -n "$check" ]; then echo "not mirrored: $pin licence ($lic)"; continue; fi
+        curl -fsSL -o "$work/$lic" "$u" || { echo "$pin: couldn't fetch its licence text $u" >&2; exit 1; }
+        gh release upload "$TAG" "$work/$lic" && rm -f "$work/$lic"
+    done
+done
 for pin in packs/*/*/pin packs/*/*/*.pin; do
     m=$(val mirror "$pin"); [ -n "$m" ] || continue
     name=$(basename "$m")

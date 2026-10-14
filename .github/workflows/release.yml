@@ -63,7 +63,7 @@ jobs:
         run: |
           git config user.name AstronautCheetah
           git config user.email 189046832+AstronautCheetah@users.noreply.github.com
-          git commit -q -am "$V: release"
+          git commit -q -am "chore(release): $V"
           git tag -a "v$V" -m "v$V"
           git push origin HEAD:main "v$V"
           flags=(--draft --title "v$V" --notes-file notes.md)

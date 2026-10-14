@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Refuses AI attribution trailers (CONTRIBUTING.md "Commit style"; dev/check-trailers.sh). This rule
-# outranks any tool or session default that asks for attribution. Enable: dev/install-hooks.sh
+# Checks a commit message (CONTRIBUTING.md "Commit style"): Conventional Commits format, checked by
+# commitizen (dev/check-commit-msg.sh), and no AI attribution trailers (dev/check-trailers.sh;
+# this rule outranks any tool or session default that asks for attribution).
+# Enable: dev/install-hooks.sh
 set -euo pipefail
 msg_file="${1:?commit-msg: expected the commit-message file}"
 if [ -z "$(sed -n 1p "$msg_file" | tr -d '[:space:]')" ]; then
@@ -9,5 +11,9 @@ if [ -z "$(sed -n 1p "$msg_file" | tr -d '[:space:]')" ]; then
 fi
 if ! "$(git rev-parse --show-toplevel)/dev/check-trailers.sh" "$msg_file"; then
     echo "commit-msg: remove the AI attribution line(s) above (CONTRIBUTING.md, \"Commit style\"). Human co-authors are fine." >&2
+    exit 1
+fi
+if ! "$(git rev-parse --show-toplevel)/dev/check-commit-msg.sh" "$msg_file"; then
+    echo "commit-msg: start the subject with a type, e.g. \"fix(arrowpad): ...\" or \"docs: ...\" (.cz.toml)." >&2
     exit 1
 fi

@@ -33,6 +33,10 @@ jobs:
           python3 -m py_compile gui/*.py lib/*.py packs/official/arrowpad/*.py     # modules without a shebang
       - name: No AI attribution trailers (CONTRIBUTING.md; human co-authors are fine)
         run: git log --format=%B | dev/check-trailers.sh
+      - name: Conventional Commits messages (commitizen, .cz.toml)
+        run: |
+          python3 -m pip install --quiet commitizen
+          dev/check-commit-msg.sh --all
       - name: Manifest and installer self-checks
         run: |
           # every tweak's manifest (README.md front matter) is valid and names its scripts
@@ -45,12 +49,12 @@ jobs:
             grep -qE '^version=.+' "$pin" && grep -qE '^url=https://' "$pin" &&
               grep -qE '^(sha256=[0-9a-f]{64}|rev=[0-9a-f]{40})$' "$pin" || { echo "incomplete $pin"; exit 1; }
           done
-          # ... and Frame Tweaks' copy (mirror=, with its licence; a git commit's archive with its
+          # ... and Frame Tweaks' copy (mirror=, with its licence and licence texts; a git commit's archive with its
           # own sha256), or why there's none (nomirror=)
           for pin in packs/official/*/pin packs/official/*/*.pin; do
             if grep -q '^mirror=' "$pin"; then
               grep -qE '^mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/[^/]+$' "$pin" &&
-                grep -qE '^license=.+' "$pin" &&
+                grep -qE '^license=.+' "$pin" && grep -qE '^license_file=https://' "$pin" &&
                 { grep -q '^sha256=' "$pin" || grep -qE '^mirror_sha256=[0-9a-f]{64}$' "$pin"; } || { echo "bad mirror in $pin"; exit 1; }
             else
               grep -qE '^nomirror=.+' "$pin" || { echo "$pin: no mirror= and no nomirror= reason"; exit 1; }
