@@ -4,7 +4,7 @@ f="$HOME/.config/environment.d/90-kwin-software-cursor.conf"
 [ -f "$f" ] || status_missing "cursor fix not installed"
 # Is it active where it matters, in desktop mode's session? (This check may run from the VR
 # session, which never has it; KWin's own environment isn't readable, so ask Plasma's shell.)
-shell=$(pgrep -u "$(id -u)" -x plasmashell | head -1)
+shell=$(pgrep -u "$(id -u)" -x plasmashell | head -1 || true)
 if [ -n "$shell" ]; then
     tr '\0' '\n' < "/proc/$shell/environ" 2>/dev/null | grep -qx 'KWIN_FORCE_SW_CURSOR=1' ||
         status_warn "installed; active after the next reboot"
