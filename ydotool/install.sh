@@ -7,7 +7,14 @@ UINPUT=${FRAME_TWEAKS_UINPUT:-/dev/uinput}   # overridable for dev/test-tweaks.s
 
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 alarm_fetch extra ydotool "$T"
-install -m755 "$T/usr/bin/ydotool" "$T/usr/bin/ydotoold" "$BIN/"
+# Installed only if it runs here; otherwise a working ydotool from before is kept.
+if missing=$(runs_here "$T/usr/bin/ydotool") && missing=$(runs_here "$T/usr/bin/ydotoold"); then
+    install -m755 "$T/usr/bin/ydotool" "$T/usr/bin/ydotoold" "$BIN/"
+elif [ -x "$BIN/ydotoold" ] && runs_here "$BIN/ydotoold" >/dev/null && runs_here "$BIN/ydotool" >/dev/null; then
+    warn "Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: $missing"
+else
+    die "Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: $missing"
+fi
 
 mkdir -p "$HOME/.config/systemd/user"
 cp "$REPO_DIR/ydotool/ydotoold.service" "$HOME/.config/systemd/user/"

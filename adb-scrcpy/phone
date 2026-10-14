@@ -107,13 +107,18 @@ while :; do
     # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
     # without it the Steam session makes the window 1920x1080, with black bars beside a portrait
     # phone. (It ends with scrcpy, so it's started again with each reconnect.)
-    if [ -x "$HOME/.local/bin/phone-fit" ] && ! pgrep -u "$(id -u)" -f "bin/phone-fit" >/dev/null; then
-        setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
-    fi
     # The Steam session puts laser clicks on so narrow a window at its left edge: phone-touch
     # takes them from a layer over the window instead and sends them to the phone as touches.
-    # (Desktop mode or no VR windows helper: it just exits. A reconnect replaces it.)
+    # (Desktop mode or no VR windows helper: it just exits. A reconnect replaces it.) With a
+    # scrcpy it wasn't tested with, neither runs: a plain 16:9 window, where clicks land right.
+    extras=1
     if [ -x "$HOME/.local/bin/phone-touch" ] && [ "${DISPLAY:-}" = ":0" ]; then
+        "$HOME/.local/bin/phone-touch" --check 2>/dev/null || extras=
+    fi
+    if [ -n "$extras" ] && [ -x "$HOME/.local/bin/phone-fit" ] && ! pgrep -u "$(id -u)" -f "bin/phone-fit" >/dev/null; then
+        setsid -f "$HOME/.local/bin/phone-fit" "$MAX" >/dev/null 2>&1 </dev/null
+    fi
+    if [ -n "$extras" ] && [ -x "$HOME/.local/bin/phone-touch" ] && [ "${DISPLAY:-}" = ":0" ]; then
         setsid -f "$HOME/.local/bin/phone-touch" "$dev" >/dev/null 2>&1 </dev/null
     fi
     # The title is how the dashboard patches recognise the mirror window.

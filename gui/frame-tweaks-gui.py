@@ -280,6 +280,8 @@ class Details(QWidget):
         facts = [("What it is", html.escape(comp["desc"], quote=False)),
                  ("Why it's included", html.escape(comp["why"], quote=False)),
                  ("Made by", html.escape(comp["author"], quote=False))]
+        if comp["experimental"]:
+            facts.append(("🧪 Experimental", f"<span style='color:#e0b33a'>{html.escape(comp['experimental'], quote=False)}</span>"))
         if url:
             facts.append(("Source", f"{html.escape(rel)} <a style='color:#7fb2e5' href='{url}'>{url}</a>"))
         if comp["deps"]:
@@ -619,8 +621,11 @@ class Window(QWidget):
             icon = QLabel()
             icon.setPixmap(row_icon(cid).pixmap(40, 40))
             name = QLabel(html.escape(comp["title"], quote=False) +
+                          ("  🧪" if comp["experimental"] else "") +
                           ("  <span style='color:#6b7783'>(hidden)</span>" if is_hidden else ""))
             name.setObjectName("name")
+            if comp["experimental"]:
+                name.setToolTip("Experimental: " + comp["experimental"])
             deps = comp["deps"]
             info = QLabel(html.escape(comp["desc"], quote=False) +
                           (f"  <i style='color:#6b7783'>needs: {', '.join(deps)}</i>" if deps else ""))

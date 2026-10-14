@@ -99,5 +99,16 @@ class HiddenRows(unittest.TestCase):
                 self.assertEqual(sft.hidden(rows), {"b"})
 
 
+class Experimental(unittest.TestCase):
+    """The 🧪 note comes from each tweak's meta, for the window, `info` and the docs alike."""
+    def test_dashboard_patches_are_marked_and_plain_installs_are_not(self):
+        rows = {c["id"]: c for c in sft.components()}
+        for cid in ("vr-dashboard", "curvature", "float-return", "float-grab", "scroll-strips", "adb-scrcpy"):
+            self.assertIn("SteamVR", rows[cid]["experimental"], cid)
+        for cid in ("cursor", "full-keyboard", "homebrew"):
+            self.assertEqual(rows[cid]["experimental"], "", cid)
+        self.assertIn("Experimental: ", sft.info("curvature"))
+
+
 if __name__ == "__main__":
     unittest.main()

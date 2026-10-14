@@ -110,7 +110,11 @@ check_ids() {
 cmd_list() {
     bold "frame-tweaks $VERSION"
     local id
-    for id in "${IDS[@]}"; do printf '  %-15s %s\n' "$id" "${DESC[$id]}"; done
+    for id in "${IDS[@]}"; do
+        printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "$(grep -qs '^experimental:' "$id/meta" && echo ' (experimental)')"
+    done
+    grep -qs '^experimental:' */meta && echo "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
+    return 0
 }
 
 cmd_status() {
@@ -220,7 +224,7 @@ cmd_gui() {
     local qt="$HOME/.local/share/arrowpad/venv"
     if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
        kdialog --title "Frame Tweaks" --yesno "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist."; then
-        python3 -m venv "$qt" && "$qt/bin/pip" install -q -c lib/python-constraints.txt PyQt6 ||
+        python3 -m venv "$qt" && pip_pinned "$qt" PyQt6 ||
             kdialog --sorry "Couldn't install PyQt6; using the simple checklist."
     fi
     if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then

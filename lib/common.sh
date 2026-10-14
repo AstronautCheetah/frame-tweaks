@@ -146,6 +146,15 @@ alarm_fetch() {
     rm -rf "$t"
 }
 
+# runs_here <binary> [library-dir]: whether the system can load it (ldd finds every library,
+# at a recent enough version). A newer Arch Linux ARM build can need a newer glibc or library
+# than SteamOS has; installers then keep the copy that works. Prints what's missing.
+runs_here() {
+    local missing
+    missing=$(LD_LIBRARY_PATH="${2:-}${2:+${LD_LIBRARY_PATH:+:}}${LD_LIBRARY_PATH:-}" ldd "$1" 2>&1 | grep 'not found' || true)
+    [ -z "$missing" ] || { sed 's/^[[:space:]]*//' <<<"$missing" | paste -sd ';' -; return 1; }
+}
+
 # fetch_pinned <id> <out-file> [pin-name]: download <id>/pin's (or <id>/<pin-name>'s) url and
 # check it against the hash recorded in the pin (not one fetched alongside it), so a changed
 # upstream file is refused.
@@ -197,13 +206,23 @@ install_desktop() {
     touch "$APPS"
 }
 
+# pip_pinned <venv> <package>...: install at the tested versions (lib/python-constraints.txt).
+# If pip can't (no build of those versions for this Python, say after a SteamOS update moved
+# Python on), fall back to the newest versions with a warning: working beats exact.
+pip_pinned() {
+    local venv=$1; shift
+    "$venv/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" "$@" && return
+    warn "The tested versions of $* don't install on this Python ($("$venv/bin/python" -V 2>&1)); trying the newest."
+    "$venv/bin/pip" install -q "$@"
+}
+
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 ensure_tweaks_venv() {
     if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
         say "Creating Python venv with jeepney"
         python3 -m venv "$TWEAKS_VENV"
-        "$TWEAKS_VENV/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" jeepney
+        pip_pinned "$TWEAKS_VENV" jeepney
     fi
 }
 
@@ -213,7 +232,7 @@ VR_LIB=/opt/steamvr/bin/linuxarm64/libopenvr_api.so
 ensure_openvr() {
     [ -f "$VR_LIB" ] || return 1
     "$1/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' ||
-        "$1/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" openvr
+        pip_pinned "$1" openvr
     local ovr
     ovr=$("$1/bin/python" -c 'import importlib.util,os; print(os.path.dirname(importlib.util.find_spec("openvr").origin))')
     ln -sf "$VR_LIB" "$ovr/libopenvr_api_64.so"
