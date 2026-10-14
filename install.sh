@@ -61,7 +61,8 @@ start_log() {
     # (tee without the lock's fd 8: holding it, tee kept the lock after `update` re-runs this
     # script for its second stage, which then found "another install running" and stopped.)
     exec > >(tee -a "$log" 8>&-) 2>&1
-    find "$LOGS" -name '*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
+    # (Only the installer's own logs, named by date: tweaks keep theirs here too, e.g. grab-guard.log.)
+    find "$LOGS" -name '[0-9]*-*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
 }
 
 # The tweaks, from the packs (lib/sft.py registry: the official pack and the user's trusted
@@ -395,7 +396,7 @@ cmd_debug_info() {
             done
         done
         local log
-        for log in $(ls -t "$LOGS"/*.log 2>/dev/null | head -2); do
+        for log in $(ls -t "$LOGS"/[0-9]*-*.log 2>/dev/null | head -2); do
             echo; echo "## log $(basename "$log")"; sed 's/\x1b\[[0-9;]*m//g' "$log" | tail -150
         done
     } | sed -E -e "s|$HOME|~|g" -e "s/\b$USER\b/<user>/g" -E -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \

@@ -5,4 +5,5 @@ nmcli -t -f TYPE,NAME connection show | sed -n "s/^wireguard:\(NordVPN .*\)/\1/p
 pkill -f "^$QT_VENV/bin/python $BIN/nordvpn-tray" 2>/dev/null || true
 restore_kconfig nordvpn
 remove_files "$ICONS/256x256/apps/frame-tweaks-nordvpn.png" "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$APPS/nordvpn-tray.desktop" "$HOME/.config/autostart/nordvpn-tray.desktop" "$HOME/.config/nordvpn-wg"
-[ -x "$BIN/arrowpad" ] || remove_files "$QT_VENV"
+# The PyQt6 venv is shared with Arrow Pad and Screen snip: only the last one removes it.
+[ -x "$BIN/arrowpad" ] || [ -x "$BIN/frame-snip" ] || remove_files "$QT_VENV"
