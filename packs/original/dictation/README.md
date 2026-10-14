@@ -129,7 +129,9 @@ to use it:
 [Whisper](https://github.com/openai/whisper) models (MIT) do the transcription;
 [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) types. Other dictation projects
 for the Frame: [frame-voice](https://github.com/techieyann/frame-voice) and
-[whisper-frame](https://github.com/groffta/whisper-frame). See also
+[whisper-frame](https://github.com/groffta/whisper-frame). Its menu icon is the
+[Noto Color Emoji](https://github.com/googlefonts/noto-emoji) font's 🎤 (SIL OFL 1.1) on a tile, drawn
+by `dev/draw-icons.py` ([icons/README.md](../../../icons/README.md)). See also
 [CREDITS.md](../../../CREDITS.md).
 
 ---

@@ -203,7 +203,7 @@ wallet in KWalletManager, or KWallet's idle timeout, only closes `kwalletd6`'s v
 <!-- /generated:changes -->
 
 ## Credits
-The shared-wallet launcher approach is adapted from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) (Apache-2.0), reimplemented without Nix. The unlock key derivation follows KDE's kwallet-pam. The headset's proximity sensor, used by **Headset off**, is documented by [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils#proximity-sensor). D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). See also [CREDITS.md](../../../CREDITS.md).
+The shared-wallet launcher approach is adapted from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix) (Apache-2.0), reimplemented without Nix. The unlock key derivation follows KDE's kwallet-pam. The headset's proximity sensor, used by **Headset off**, is documented by [curiousjtuber/steam-frame-utils](https://github.com/curiousjtuber/steam-frame-utils#proximity-sensor). D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). Its menu icon is a [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons) glyph (LGPL-3.0-or-later) on a coloured tile, drawn by `dev/draw-icons.py` ([icons/README.md](../../../icons/README.md)). See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status wallet` · Remove: `./install.sh uninstall wallet`

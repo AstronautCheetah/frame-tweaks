@@ -235,8 +235,10 @@ the same file (`PHONE_NAME`).
 
 ## Credits
 [scrcpy](https://github.com/Genymobile/scrcpy) by Genymobile (Apache-2.0); `adb` from Android's
-platform tools (Apache-2.0), as packaged by [Arch Linux ARM](https://archlinuxarm.org). See
-also [CREDITS.md](../../../CREDITS.md).
+platform tools (Apache-2.0), as packaged by [Arch Linux ARM](https://archlinuxarm.org). Its menu icon is a [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons) glyph
+(LGPL-3.0-or-later) on a coloured tile, drawn by `dev/draw-icons.py`
+([icons/README.md](../../../icons/README.md)).
+See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status adb-scrcpy` · Remove: `./install.sh uninstall adb-scrcpy`

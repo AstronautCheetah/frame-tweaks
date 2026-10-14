@@ -204,7 +204,8 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
 - [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s VR keyboard (Apache-2.0):
   the idea of one-shot and locked modifiers and an F-key layer. No code copied.
 - The other key icons are [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons)
-  (LGPL-3.0), loaded from SteamOS's own icon theme.
+  (LGPL-3.0-or-later), loaded from SteamOS's own icon theme. Its menu icon is a Breeze glyph on a
+  coloured tile, drawn by `dev/draw-icons.py` ([icons/README.md](../../../icons/README.md)).
 - [pyopenvr](https://github.com/cmbruns/pyopenvr) (BSD-3-Clause) for the VR panel and haptics;
   [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) (GPL-3.0) draws the pad;
   [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) types.

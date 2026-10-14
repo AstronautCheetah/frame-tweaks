@@ -89,7 +89,7 @@ Check: `./install.sh status full-keyboard` · Remove: `./install.sh uninstall fu
 <!-- generated:upstream (dev/gen-docs.py, from upstream.md) -->
 ---
 
-*The rest of this page is [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)'s own README at `0.6.0`, as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
+*The rest of this page is [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard)'s own README at `0.6.0`, © its authors, under [MIT](https://raw.githubusercontent.com/TaiKeid/steam-frame-full-keyboard/0.6.0/LICENSE), as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
 
 ## Full Keyboard for Steam Frame
 

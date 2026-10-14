@@ -109,7 +109,7 @@ a command line or in a temporary file, and creating one doesn't connect it.
 <!-- /generated:changes -->
 
 ## Credits
-Uses NordVPN's public server API and NordLynx (WireGuard). D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). NordVPN is a trademark of Nord Security; this project isn't affiliated with it. See also [CREDITS.md](../../../CREDITS.md).
+Uses NordVPN's public server API and NordLynx (WireGuard). D-Bus via [jeepney](https://gitlab.com/takluyver/jeepney) (MIT). NordVPN is a trademark of Nord Security; this project isn't affiliated with it. Its menu icon is a [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons) glyph (LGPL-3.0-or-later) on a coloured tile, drawn by `dev/draw-icons.py` ([icons/README.md](../../../icons/README.md)). See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status nordvpn` · Remove: `./install.sh uninstall nordvpn`
