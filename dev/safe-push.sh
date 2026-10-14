@@ -5,7 +5,7 @@
 #     worktree, push that, verify origin advanced to it BEFORE tearing anything down, then
 #     move this checkout onto it (only when clean). A replay conflict stops and leaves the
 #     throwaway worktree for manual resolution.
-# Never force-pushes. Don't chain it after a rebase in one command (see CLAUDE.md).
+# Never force-pushes. Don't chain it after a rebase in one command.
 set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"

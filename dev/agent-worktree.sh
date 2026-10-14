@@ -10,7 +10,7 @@
 #   dev/agent-worktree.sh prune [--apply]  # reap clean worktrees whose work is on origin/main
 #
 # Worktrees live in <repo>/tmp/<slug>, kept out of `git status` by .git/info/exclude.
-# NEVER mv or rm -rf a worktree by hand: use `remove`. See docs/claude/parallel-work.md.
+# NEVER mv or rm -rf a worktree by hand: use `remove`. (Maintainers: one worktree per parallel session.)
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
