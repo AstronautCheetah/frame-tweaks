@@ -6,6 +6,7 @@ connected."""
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 # Under native Wayland a parentless popup menu can't be positioned; XWayland can.
 os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
@@ -176,7 +177,34 @@ class Tray:
         return self._codes[name]
 
 
+def desktop_session_env():
+    """Desktop mode's environment (its display, D-Bus and session), from its Plasma shell; None
+    when desktop mode isn't running."""
+    uid = os.getuid()
+    for p in Path("/proc").iterdir():
+        if not p.name.isdigit():
+            continue
+        try:
+            if p.stat().st_uid != uid or (p / "comm").read_text().strip() != "plasmashell":
+                continue
+            raw = (p / "environ").read_bytes().decode(errors="replace").split("\0")
+        except OSError:
+            continue
+        return dict(kv.split("=", 1) for kv in raw if "=" in kv)
+    return None
+
+
 def main():
+    # The icon lives in desktop mode's system tray. Started from VR (the Frame Tweaks window, the
+    # "+" menu), it would run in the Steam session, which has no tray: no icon, and it would hold
+    # the lock below, so desktop mode's own copy quietly quit. So move into desktop mode first.
+    if os.environ.get("XDG_CURRENT_DESKTOP") != "KDE":
+        env = desktop_session_env()
+        if env is None:
+            subprocess.run(["notify-send", "-a", "NordVPN", "NordVPN tray",
+                            "Its icon lives in desktop mode's system tray: open desktop mode, and it starts there."])
+            sys.exit(0)
+        os.execve(sys.executable, [sys.executable, os.path.abspath(sys.argv[0])], env)
     # One tray only. Autostart starts it, and KDE's session restore used to start a second copy
     # at login; whichever comes second finds the lock held and quietly exits.
     import fcntl
