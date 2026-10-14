@@ -19,7 +19,7 @@ dashboard code it relies on; if an update changes any of them, that patch isn't 
 status says so) instead of poking at code it doesn't understand.
 SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only while it's stopped.
 """
-import base64, json, os, re, socket, struct, subprocess, sys, threading, time, urllib.request
+import base64, hashlib, json, os, re, socket, struct, subprocess, sys, threading, time, urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
@@ -324,7 +324,9 @@ def watch():
                     ws_eval(url, stop_expr(n))
                     injected.discard(n)
                 if found and not lib_bad:
-                    ws_eval(url, LIB.read_text())          # (it skips itself if already loaded)
+                    lib = LIB.read_text()                  # (it skips itself if this very file is loaded)
+                    wanted = hashlib.sha256(lib.encode()).hexdigest()[:16]
+                    ws_eval(url, f"window.__sftLibWanted = {json.dumps(wanted)};\n" + lib)
                     ws_eval(url, i18n_expr(found))         # (the patches redraw with it)
                 for n, p in found.items():
                     if bad[n]:
