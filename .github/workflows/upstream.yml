@@ -14,7 +14,7 @@ concurrency:
   group: upstream-check
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04     # (named, not ubuntu-latest: a new Ubuntu comes in when we try it, not by surprise)
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
