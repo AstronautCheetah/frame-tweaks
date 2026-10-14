@@ -14,9 +14,10 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 # (as test_00_english.py does, for when this file runs alone: English, and the language the window
 # announces as it's imported kept from the real programs, which would follow it)
+_ANNOUNCED, _PREFERRED = tempfile.TemporaryDirectory(), tempfile.TemporaryDirectory()   # (removed at the end)
 for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
-             "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(tempfile.mkdtemp(), "language"),
-             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(tempfile.mkdtemp(), "language")}.items():
+             "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(_ANNOUNCED.name, "language"),
+             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(_PREFERRED.name, "language")}.items():
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")

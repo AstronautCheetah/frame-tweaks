@@ -5,6 +5,7 @@ import io
 import importlib.util
 import os
 import sys
+import shutil
 import tempfile
 import time
 import unittest
@@ -14,9 +15,10 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 # (as test_00_english.py does, for when this file runs alone: English, and the language the window
 # announces as it's imported kept from the real programs, which would follow it)
+_ANNOUNCED, _PREFERRED = tempfile.TemporaryDirectory(), tempfile.TemporaryDirectory()   # (removed at the end)
 for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
-             "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(tempfile.mkdtemp(), "language"),
-             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(tempfile.mkdtemp(), "language")}.items():
+             "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(_ANNOUNCED.name, "language"),
+             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(_PREFERRED.name, "language")}.items():
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")
@@ -38,6 +40,7 @@ def entry(d, app_id, exec_line, **extra):
 class Lists(unittest.TestCase):
     def setUp(self):
         t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
         self.own, self.flat, self.sys, self.roots = t / "own", t / "flat", t / "sys", t / "roots"
         entry(self.flat, "org.notes", "flatpak run org.notes")
         (self.roots / "org.notes/current/active/files/notes").mkdir(parents=True)
@@ -93,6 +96,7 @@ class Lists(unittest.TestCase):
 class SystemApp(unittest.TestCase):
     def test_wrap_and_unwrap_a_system_app(self):
         t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
         apps, sysd = t / "apps", t / "sys"
         entry(sysd, "org.kde.dolphin", "dolphin %u", DBusActivatable="true")
         out = io.StringIO()                  # (what it reports, kept out of the test output)
@@ -141,6 +145,7 @@ class Timers(unittest.TestCase):
 
     def test_settings_files(self):
         t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
         with mock.patch.multiple(at, CONF=t / "app-timers.conf", SIGNAL_CONF=t / "signal-guard.conf"):
             at.set_timer("org.notes", 30)
             at.set_timer("org.other", 10)
@@ -172,6 +177,7 @@ class LockHours(unittest.TestCase):
     def test_default_set_and_kept_lines(self):
         import tempfile
         d = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, d, True)
         with mock.patch.object(wp, "LOCK_CONF", d / "wallet.conf"):
             self.assertEqual(wp.lock_hours(), 4)
             (d / "wallet.conf").write_text("OTHER=1\nWALLET_LOCK_HOURS=bad\n")
@@ -182,6 +188,7 @@ class LockHours(unittest.TestCase):
 
     def test_dry_run_saves_nothing(self):
         d = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, d, True)
         with mock.patch.object(wp, "LOCK_CONF", d / "wallet.conf"), contextlib.redirect_stdout(io.StringIO()) as out, \
                 mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}):
             wp.WalletApps.step_hours(mock.Mock(), +1)         # the + beside the auto-lock time
@@ -197,6 +204,7 @@ class Background(unittest.TestCase):
         from PyQt6.QtWidgets import QApplication, QWidget
         app = QApplication.instance() or QApplication([])
         t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
         unlock = t / "wallet-unlock"           # (a stand-in: locked, and unlocks after a moment)
         unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked"}\'; exit; }\n'
                           f"sleep 0.5; touch {t}/unlocked\n")

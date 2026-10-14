@@ -45,7 +45,9 @@ class ClickSwapTest(unittest.TestCase):
         spec.loader.exec_module(ap)
         from PyQt6.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
-        ap.ClickSwap.LOG = Path(tempfile.mkdtemp()) / "clicks.log"
+        logs = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, logs, True)
+        ap.ClickSwap.LOG = Path(logs) / "clicks.log"
         D = display.encode()
         x = C.CDLL("libX11.so.6"); t = C.CDLL("libXtst.so.6")
         x.XOpenDisplay.restype = C.c_void_p
