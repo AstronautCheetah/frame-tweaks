@@ -6,6 +6,8 @@
 - **Android Mirror shows what it's doing:** a small window while it finds and connects to the
   phone (with Cancel), and a message saying why when it can't, such as no phone on the Wi-Fi,
   a phone not paired yet, or scrcpy failing to start, instead of failing silently.
+- **Scroll strips: haptics** from the dashboard's own effects: a tick when the laser reaches a
+  strip, a firmer one on press and on a page, and light ticks while it scrolls.
 - **Haptic ticks** on the Frame Tweaks window's buttons and on Screen snip's narration panel, as
   on Arrow Pad: a light one when the laser moves onto a button, a firmer one on a click.
 - **Signed releases:** release tags are signed, and `./install.sh update` refuses a release that
@@ -55,8 +57,10 @@
 - **The NordVPN tray icon could vanish:** started from VR (the window's Tray button, the "+"
   menu), the tray ran where there's no system tray, and kept desktop mode's own copy from
   starting. It now always runs in desktop mode, or says to open desktop mode.
-- **Arrow Pad's haptics could stop for good** after a single error; they now try again a few
-  seconds later (errors are noted in `/run/user/<uid>/arrowpad-haptics.log`).
+- **Arrow Pad's haptics stopped:** SteamVR refused its SteamVR Input vibration
+  (InputError_InvalidHandle), which aborted the direct pulse that actually reaches the controller,
+  and then switched haptics off for good. The direct pulse now goes first; errors are noted in
+  `/run/user/<uid>/arrowpad-haptics.log` and retried.
 - **Screen snip's narration panel came back in the wrong place** after collapsing it with the
   other end's Collapse button than the last one used.
 - **Mouse cursor fix said "active after the next reboot"** when it was already active (the check
