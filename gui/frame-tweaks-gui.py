@@ -28,9 +28,9 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, 
                              QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
-CONF = Path.home() / ".config/steam-frame-tweaks"
-HIDDEN, SHOWN = CONF / "hidden", CONF / "shown"     # SHOWN: default-hidden rows you unhid
-COLLAPSED, HIDDEN_CATS = CONF / "collapsed-categories", CONF / "hidden-categories"
+sys.path.insert(0, str(REPO / "lib"))
+import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
+from sft import COLLAPSED, CONF, HIDDEN_CATS, components, read_set, run_label, write_set  # noqa: E402
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
@@ -274,17 +274,6 @@ QLabel#notice { color: #e0b33a; }
 """
 
 
-def components():
-    rows = []
-    for line in (REPO / "components.tsv").read_text().splitlines():
-        if not line.strip() or line.startswith("#"):
-            continue
-        f = (line.split("\t") + [""] * 9)[:9]
-        cid, title, category, deps, desc, source, author, why, flags = f
-        rows.append(dict(id=cid, title=title, category=category, deps=deps.split(), desc=desc,
-                         source=source, author=author, why=why, flags=set(flags.split(","))))
-    return rows
-
 
 def status(cid):
     """(code, text): 0 ok, 1 not installed, 2 needs attention."""
@@ -353,16 +342,6 @@ def self_update_check():
     return newest if newest and release_key(newest) > release_key(current) else None
 
 
-def read_set(path):
-    try:
-        return {line.strip() for line in path.read_text().splitlines() if line.strip()}
-    except OSError:
-        return set()
-
-
-def write_set(path, items):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("".join(f"{i}\n" for i in sorted(items)))
 
 
 def row_icon(cid):
@@ -376,16 +355,6 @@ def row_icon(cid):
     hits = sorted(BREEZE.glob(f"*/*/{BREEZE_ROW.get(cid, 'application-x-executable')}.svg"))
     return QIcon(str(hits[-1])) if hits else QIcon()
 
-
-def run_label(cid):
-    """Label from <id>/run.sh's '# label:' line, or None when there's nothing to launch."""
-    run = REPO / cid / "run.sh"
-    if not run.exists():
-        return None
-    for line in run.read_text().splitlines()[:3]:
-        if line.startswith("# label:"):
-            return line.split(":", 1)[1].strip()
-    return "Run"
 
 
 def version_tuple(v):
@@ -533,72 +502,78 @@ class Details(QWidget):
         self.issue_label.setText(text)
 
 
-class ScrollStripSettings(QWidget):
-    """Scroll strips: side and thickness (~/.config/frame-tweaks/scroll-strips.json)."""
-    CONF = Path.home() / ".config/frame-tweaks/scroll-strips.json"
-    DEFAULTS = {"vertical": "right", "horizontal": "top", "thickness": 0.04}
-    OPTIONS = [("vertical", "Vertical strip (scrolls up and down)", [("right", "Right"), ("left", "Left"), ("off", "Off")]),
-               ("horizontal", "Horizontal strip (scrolls sideways)", [("top", "Top"), ("bottom", "Bottom"), ("off", "Off")]),
-               ("thickness", "Thickness", [(0.025, "Thin"), (0.04, "Medium"), (0.06, "Thick")])]
+class SettingsPage(QWidget):
+    """A tweak's settings (lib/sft.py SETTINGS: the same choices as ./install.sh settings and the
+    gears in VR)."""
 
-    def __init__(self, window):
+    def __init__(self, window, cid):
         super().__init__()
+        self.cid, self.spec = cid, sft.SETTINGS[cid]
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
         back = QPushButton("← Back")
         back.clicked.connect(window.go_back)
         head.addWidget(back)
-        title = QLabel("Scroll strips")
+        title = QLabel(next((c["title"] for c in components() if c["id"] == cid), cid))
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
-        about = QLabel("Big strips beside each window. Press one and drag away from that point to scroll "
-                       "(farther = faster; let go to stop); tap near an end to page. They scroll the "
-                       "window you last clicked.")
+        about = QLabel(self.spec["about"])
         about.setObjectName("desc")
         about.setWordWrap(True)
         lay.addWidget(about)
-        try:
-            self.conf = {**self.DEFAULTS, **json.loads(self.CONF.read_text())}
-        except (OSError, ValueError):
-            self.conf = dict(self.DEFAULTS)
-        for key, label, choices in self.OPTIONS:
+        self.conf = sft.read_settings(cid)
+        self.buttons = {}
+        for key, label, choices, _ in self.spec["options"]:
             lab = QLabel(label)
             lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
             lay.addWidget(lab)
             row = QHBoxLayout()
-            for value, text in choices:
+            for text, value in choices:
                 b = QPushButton(text)
                 b.setCheckable(True)
                 b.setChecked(self.conf.get(key) == value)
-                b.setMinimumWidth(130)
+                b.setMinimumWidth(70)
                 b.setStyleSheet("QPushButton:checked { background: #355b7a; font-weight: 600; }")
                 b.clicked.connect(lambda _=False, k=key, v=value: self.choose(k, v))
                 row.addWidget(b)
-                setattr(self, f"b_{key}_{text}", b)
+                self.buttons[(key, text)] = (b, value)
             row.addStretch(1)
             lay.addLayout(row)
+        reset = QPushButton("Reset to defaults")
+        reset.clicked.connect(self.reset)
+        lay.addWidget(reset)
         self.notice = QLabel()
         self.notice.setObjectName("notice")
+        self.notice.setWordWrap(True)
         lay.addWidget(self.notice)
         lay.addStretch(1)
 
+    def show_choices(self):
+        for (key, _), (b, value) in self.buttons.items():
+            b.setChecked(self.conf.get(key) == value)
+
     def choose(self, key, value):
         self.conf[key] = value
-        for k, _, choices in self.OPTIONS:
-            if k == key:
-                for v, text in choices:
-                    getattr(self, f"b_{k}_{text}").setChecked(v == value)
+        self.show_choices()
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
-            print("would save:", json.dumps(self.conf))
+            print("would save:", self.cid, json.dumps({key: value}))
             return
-        self.CONF.parent.mkdir(parents=True, exist_ok=True)
-        self.CONF.write_text(json.dumps(self.conf) + "\n")
-        self.notice.setText("Saved: the strips change within a few seconds.")
+        sft.write_settings(self.cid, {key: value})
+        self.notice.setText("Saved. " + self.spec["note"])
+
+    def reset(self):
+        self.conf = sft.defaults(self.cid)
+        self.show_choices()
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would reset:", self.cid)
+            return
+        sft.write_settings(self.cid, {}, reset=True)
+        self.notice.setText("Back to the defaults. " + self.spec["note"])
 
 
-SETTINGS_PAGES = {"scroll-strips": ScrollStripSettings}     # the row's button opens these
+SETTINGS_PAGES = {cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS}   # the row's button opens these
 
 
 class WalletApps(QWidget):
@@ -931,8 +906,7 @@ class Window(QWidget):
 
     # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
     def hidden(self):
-        defaults = {c["id"] for c in self.rows if "hidden-by-default" in c["flags"]}
-        return read_set(HIDDEN) | (defaults - read_set(SHOWN))
+        return sft.hidden(self.rows)
 
     def toggle_collapsed(self, category):
         collapsed = read_set(COLLAPSED)
@@ -941,21 +915,11 @@ class Window(QWidget):
         self.rebuild()
 
     def toggle_category_hidden(self, category):
-        cats = read_set(HIDDEN_CATS)
-        cats ^= {category}
-        write_set(HIDDEN_CATS, cats)
+        sft.set_category_hidden(category, category not in read_set(HIDDEN_CATS))
         self.rebuild()
 
     def toggle_hidden(self, cid):
-        hidden, shown = read_set(HIDDEN), read_set(SHOWN)
-        if cid in self.hidden():
-            hidden.discard(cid)
-            shown.add(cid)
-        else:
-            hidden.add(cid)
-            shown.discard(cid)
-        write_set(HIDDEN, hidden)
-        write_set(SHOWN, shown)
+        sft.set_hidden(cid, cid not in self.hidden())
         self.rebuild()
 
     # ---- status, in the background ------------------------------------------------

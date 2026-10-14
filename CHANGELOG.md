@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- **Every installer-window function has a command:** `./install.sh info`, `run`, `settings`
+  (show, change, `--reset`), `hide`/`unhide`, `hide-group`/`unhide-group`, `wallet`,
+  `wallet-apps` and `timers`. The window now uses the same code (`lib/sft.py`) for hidden rows,
+  details and settings, so the two can't drift apart; tests check the VR gear panels offer the
+  same choices.
+- **Android Mirror has a settings page in the installer window** too (same choices as its gear).
+- **Scroll strips' settings page** offers all the choices the gear in VR does (sizes, colour).
 - **Fixed: scroll strips, gears and settings panels jittering, and the bottom of a settings panel
   missing.** They're drawn from the dashboard's one shared page, placed after its own content, so
   they moved whenever that changed size (its buttons grow under the laser), and a tall panel ran
