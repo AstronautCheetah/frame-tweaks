@@ -138,5 +138,19 @@ class Timers(unittest.TestCase):
             self.assertFalse(pat.search(cg), cg)
 
 
+class LockHours(unittest.TestCase):
+    """The auto-lock length the Wallet apps page sets, as wallet-unlock reads it."""
+    def test_default_set_and_kept_lines(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.object(wp, "LOCK_CONF", d / "wallet.conf"):
+            self.assertEqual(wp.lock_hours(), 4)
+            (d / "wallet.conf").write_text("OTHER=1\nWALLET_LOCK_HOURS=bad\n")
+            self.assertEqual(wp.lock_hours(), 4)
+            wp.set_lock_hours(8)
+            self.assertEqual(wp.lock_hours(), 8)
+            self.assertEqual((d / "wallet.conf").read_text(), "OTHER=1\nWALLET_LOCK_HOURS=8\n")
+
+
 if __name__ == "__main__":
     unittest.main()

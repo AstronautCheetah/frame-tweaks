@@ -4,7 +4,8 @@ the display you're using (the desktop), instead of ksecretd's own prompt, which
 pops up as a floating VR window on the Steam session's display.
 
   wallet-unlock            ask (kdialog) if the wallet is locked; exit 0 when unlocked.
-                           Schedules an automatic lock after WALLET_LOCK_HOURS (default 4).
+                           Schedules an automatic lock after the hours set on the installer window's
+                           Wallet apps page (wallet.conf; WALLET_LOCK_HOURS overrides; default 4).
   wallet-unlock --lock     lock it now
   wallet-unlock --status   print locked / unlocked
   wallet-unlock --info     JSON: state, when it was unlocked, when it locks (installer window)
@@ -122,7 +123,7 @@ def timer_lock_time():
     started = props.get("ActiveEnterTimestamp", "").lstrip("@")
     if props.get("ActiveState") != "active" or not started.isdigit():
         return None
-    return int(started) + float(os.environ.get("WALLET_LOCK_HOURS", "4")) * 3600
+    return int(started) + float(lock_hours()) * 3600
 
 
 def idle_close_minutes():
@@ -265,9 +266,27 @@ def unlock(conn):
     return False
 
 
+LOCK_CONF = Path.home() / ".config/frame-tweaks/wallet.conf"
+
+
+def lock_hours():
+    """Hours from an unlock to the auto-lock: WALLET_LOCK_HOURS, else wallet.conf's (set on the
+    Wallet apps page), else 4."""
+    for v in (os.environ.get("WALLET_LOCK_HOURS"),
+              next((ln.split("=", 1)[1].strip().strip('"') for ln in
+                    (LOCK_CONF.read_text().splitlines() if LOCK_CONF.exists() else [])
+                    if ln.startswith("WALLET_LOCK_HOURS=")), None)):
+        try:
+            if v and float(v) > 0:
+                return v
+        except ValueError:
+            pass
+    return "4"
+
+
 def schedule_lock():
     """(Re)start a transient systemd timer that locks the wallet later."""
-    hours = os.environ.get("WALLET_LOCK_HOURS", "4")
+    hours = lock_hours()
     env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}",
                DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
     # Clear the previous timer *and* its service: a failed earlier run left a unit with this name
@@ -368,7 +387,8 @@ def main():
             if not locked and "locks" not in s:     # unlocked before times were recorded
                 s["locks"] = timer_lock_time()
             print(json.dumps({"state": "locked" if locked else "unlocked", "unlocked_at": s.get("unlocked"),
-                              "locks_at": s.get("locks"), "idle_close_minutes": idle_close_minutes()}))
+                              "locks_at": s.get("locks"), "idle_close_minutes": idle_close_minutes(),
+                              "lock_hours": float(lock_hours())}))
         elif arg == "--lock":
             lock(conn)
             if not is_locked(conn):
