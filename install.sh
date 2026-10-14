@@ -95,11 +95,36 @@ ensure_menu_entry() {
     rm -f "$apps/steam-frame-tweaks.desktop"          # its old name
     update-desktop-database -q "$apps" 2>/dev/null || true
     touch "$apps" "$icons"     # Steam's "+" menu rescans on these
+    ensure_menu_language
+}
+# Menu entries in the keyboard's language (lib/i18n.py menus): a systemd path unit relabels them
+# when Steam saves its keyboard layout (or KDE its layout list), so a menu opens in the language
+# chosen before it; nothing polls. The units are rewritten only when they change.
+MENU_UNIT=frame-tweaks-menus
+ensure_menu_language() {
+    local u="$HOME/.config/systemd/user" py="$HOME/.local/share/frame-tweaks/i18n/i18n.py" changed=
+    install_i18n
+    mkdir -p "$u"
+    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
+        "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "PathChanged=%h/.config/kxkbrc" "" \
+        "[Install]" "WantedBy=default.target" > "$u/$MENU_UNIT.path.new"
+    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
+        "[Service]" "Type=oneshot" "ExecStart=/usr/bin/python3 $py menus" > "$u/$MENU_UNIT.service.new"
+    for f in "$u/$MENU_UNIT.path" "$u/$MENU_UNIT.service"; do
+        if cmp -s "$f.new" "$f"; then rm -f "$f.new"; else mv "$f.new" "$f"; changed=1; fi
+    done
+    if [[ -n $changed ]]; then
+        sysctl_user daemon-reload 2>/dev/null || true
+        sysctl_user enable --now "$MENU_UNIT.path" >/dev/null 2>&1 || true
+    fi
+    python3 "$py" menus >/dev/null 2>&1 || true
 }
 remove_menu_entry() {
     local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor" n
     local id=io.github.AstronautCheetah.FrameTweaks
     rm -f "$apps/$id.desktop" "$HOME/.local/share/metainfo/$id.metainfo.xml" "$icons/256x256/apps/frame-tweaks.png"
+    sysctl_user disable --now "$MENU_UNIT.path" >/dev/null 2>&1 || true
+    rm -f "$HOME/.config/systemd/user/$MENU_UNIT.path" "$HOME/.config/systemd/user/$MENU_UNIT.service"
     for n in 64 128 256; do rm -f "$icons/${n}x$n/apps/$id.png"; done
     update-desktop-database -q "$apps" 2>/dev/null || true
     touch "$apps" "$icons" 2>/dev/null || true

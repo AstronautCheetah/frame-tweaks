@@ -100,7 +100,7 @@ msgstr ""
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1230 install.sh:293
+#: gui/frame-tweaks-gui.py:1230 install.sh:318
 msgid "Nothing to change."
 msgstr ""
 
@@ -137,11 +137,11 @@ msgstr ""
 msgid "Copied"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:155 install.sh:313
+#: gui/frame-tweaks-gui.py:155 install.sh:338
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:156 install.sh:312
+#: gui/frame-tweaks-gui.py:156 install.sh:337
 msgid "Press Enter to close…"
 msgstr ""
 
@@ -157,7 +157,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:305 install.sh:155 lib/common.sh:407 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:305 install.sh:180 lib/common.sh:407 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
 msgid "not installed"
 msgstr ""
 
@@ -286,7 +286,7 @@ msgstr ""
 msgid "Working… (a download can take a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:561 packs/original/snip/frame-snip:572 install.sh:179
+#: gui/frame-tweaks-gui.py:561 packs/original/snip/frame-snip:572 install.sh:204
 msgid "Done."
 msgstr ""
 
@@ -745,154 +745,154 @@ msgstr ""
 msgid "{h} h {m} min"
 msgstr ""
 
-#: install.sh:141
+#: install.sh:166
 msgid "(experimental)"
 msgstr ""
 
-#: install.sh:143
+#: install.sh:168
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 
-#: install.sh:163
+#: install.sh:188
 msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:174 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
+#: install.sh:199 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
 msgid "%s failed"
 msgstr ""
 
-#: install.sh:178
+#: install.sh:203
 msgid "Failed: %s"
 msgstr ""
 
-#: install.sh:183
+#: install.sh:208
 msgid "uninstall what?"
 msgstr ""
 
-#: install.sh:190
+#: install.sh:215
 msgid "Nothing installed."
 msgstr ""
 
-#: install.sh:200
+#: install.sh:225
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr ""
 
-#: install.sh:205 install.sh:216
+#: install.sh:230 install.sh:241
 msgid "removing %s"
 msgstr ""
 
-#: install.sh:211
+#: install.sh:236
 msgid "reinstall what?"
 msgstr ""
 
-#: install.sh:222
+#: install.sh:247
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr ""
 
-#: install.sh:225
+#: install.sh:250
 msgid "Updating the checkout"
 msgstr ""
 
-#: install.sh:229
+#: install.sh:254
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
 msgstr ""
 
-#: install.sh:232
+#: install.sh:257
 msgid "git pull failed; not reinstalling"
 msgstr ""
 
-#: install.sh:236
+#: install.sh:261
 msgid "couldn't reach GitHub; not updating"
 msgstr ""
 
-#: install.sh:238
+#: install.sh:263
 msgid "no release found"
 msgstr ""
 
-#: install.sh:239
+#: install.sh:264
 msgid "no release %s"
 msgstr ""
 
-#: install.sh:241
+#: install.sh:266
 msgid "Updating to %s (%s channel)"
 msgstr ""
 
-#: install.sh:251
+#: install.sh:276
 msgid "Nothing installed yet."
 msgstr ""
 
-#: install.sh:254
+#: install.sh:279
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 
-#: install.sh:263
+#: install.sh:288
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 
-#: install.sh:265
+#: install.sh:290
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr ""
 
-#: install.sh:286
+#: install.sh:311
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 
-#: install.sh:298
+#: install.sh:323
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 
-#: install.sh:301
+#: install.sh:326
 msgid "Remove tweaks?"
 msgstr ""
 
-#: install.sh:302
+#: install.sh:327
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 
-#: install.sh:340
+#: install.sh:365
 msgid "stopped %s's running programs"
 msgstr ""
 
-#: install.sh:363
+#: install.sh:388
 msgid "%s migration failed"
 msgstr ""
 
-#: install.sh:368
+#: install.sh:393
 msgid "%s what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:372
+#: install.sh:397
 msgid "%s: held (updates leave it as it is)"
 msgstr ""
 
-#: install.sh:373
+#: install.sh:398
 msgid "%s: updated normally again"
 msgstr ""
 
-#: install.sh:414
+#: install.sh:439
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr ""
 
-#: install.sh:448
+#: install.sh:473
 msgid "run what?"
 msgstr ""
 
-#: install.sh:449
+#: install.sh:474
 msgid "%s has nothing to run"
 msgstr ""
 
-#: install.sh:459
+#: install.sh:484
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
-#: install.sh:460
+#: install.sh:485
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr ""
 

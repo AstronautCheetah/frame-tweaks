@@ -68,9 +68,13 @@ The full rules: [MARKING.md](MARKING.md).
 
 Two places choose their language differently:
 
-- **Menu entries** (the desktop menu and Steam's "+" menu) carry every translation, as
-  `Name[es_419]=…` lines written at install, and the menu shows the one for the **system's**
-  language (`LANG`), not the keyboard's. Reinstall a tweak after its translation changes.
+- **Menu entries** (the desktop menu and Steam's "+" menu) open in the language chosen before
+  the menu opened, and don't change while it's open. Each carries every translation (the usual
+  `Name[es_419]=…` lines, for a system set to that language) and its English
+  (`X-Frame-Tweaks-Name=…`); its plain `Name=` is put in the keyboard's language at install and
+  again whenever Steam saves a new keyboard layout (a systemd path unit,
+  `frame-tweaks-menus.path`, runs `i18n.py menus`; nothing polls). Reinstall a tweak after its
+  translation changes.
 - **The ⚙ panels in SteamVR's dashboard** (scroll strips, Android Mirror) follow the keyboard
   like the window: vr-dashboard's `sft-dashboard` sends their text in the current language
   every 5 seconds, and they redraw with it.

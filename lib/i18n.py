@@ -269,10 +269,18 @@ def bash():
     print(f"FT_TR=({pairs})")
 
 
-def desktop(text, folder=LOCALE):
-    """A menu entry (.desktop) with its Name, GenericName and Comment in every translated
-    language, as Name[es_419]=… lines (and Name[es]=… for es_MX and other Spanish locales, while
-    there's no es.po): the menus pick the line for the system's language."""
+# ---- menu entries -------------------------------------------------------------------------------
+# A Frame Tweaks menu entry (.desktop) carries every translation as Name[es_419]=… lines (the
+# usual way: menus pick the system language's), and keeps its English as X-Frame-Tweaks-Name=…
+# so its plain Name= can be put in the keyboard's language: at install, and again when the
+# keyboard's language changes (`i18n.py menus`, run by a systemd path unit when Steam saves its
+# keyboard layout; install.sh ensure_menu_entry). A menu shows what the entry said when it opened.
+MENU_KEYS = ("Name", "GenericName", "Comment")
+APPS = Path.home() / ".local/share/applications"
+LAUNCHER_ORIGINALS = Path.home() / ".local/share/frame-tweaks/launcher-originals"   # (wallet-launcher's)
+
+
+def _catalogues(folder):
     langs = []
     for f in sorted(folder.glob("*.po")):
         msgs = parse_po(f.read_text(encoding="utf-8"))
@@ -280,16 +288,61 @@ def desktop(text, folder=LOCALE):
         base = f.stem.split("_")[0]
         if base != f.stem and not (folder / f"{base}.po").exists() and base not in (l for l, _m in langs):
             langs.append((base, msgs))
-    out = []
+    return langs
+
+
+def desktop(text, folder=LOCALE, catalogue=None):
+    """A menu entry with its Name, GenericName and Comment in every translated language, its
+    English kept (X-Frame-Tweaks-Name=…), and the plain keys in the current language."""
+    cat = catalogue or CATALOGUE
+    langs, out = _catalogues(folder), []
     for line in text.splitlines():
-        out.append(line)
-        m = re.match(r"(Name|GenericName|Comment)=(.+)$", line)
-        if m:
-            for lang, msgs in langs:
-                tr = (msgs.get((None, m[2])) or [""])[0]
-                if tr and tr != m[2] and "\n" not in tr:
-                    out.append(f"{m[1]}[{lang}]={tr}")
+        m = re.match(rf"({'|'.join(MENU_KEYS)})=(.+)$", line)
+        if not m:
+            if not re.match(rf"(X-Frame-Tweaks-({'|'.join(MENU_KEYS)})|({'|'.join(MENU_KEYS)})\[[^]]+\])=", line):
+                out.append(line)
+            continue
+        key, english = m[1], m[2]
+        out += [f"{key}={cat.gettext(english)}", f"X-Frame-Tweaks-{key}={english}"]
+        for lang, msgs in langs:
+            tr = (msgs.get((None, english)) or [""])[0]
+            if tr and tr != english and "\n" not in tr:
+                out.append(f"{key}[{lang}]={tr}")
     return "\n".join(out) + "\n"
+
+
+def relabel(path, catalogue=None):
+    """Put a Frame Tweaks menu entry's plain Name/GenericName/Comment in the current language
+    (from its X-Frame-Tweaks-… English). True if the file changed."""
+    cat = catalogue or CATALOGUE
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    if "X-Frame-Tweaks-" not in text:
+        return False
+    out, groups = [], re.split(r"(?m)^(?=\[)", text)
+    for g in groups:
+        english = dict(re.findall(rf"(?m)^X-Frame-Tweaks-({'|'.join(MENU_KEYS)})=(.+)$", g))
+        for key, en in english.items():
+            g = re.sub(rf"(?m)^{key}=.*$", lambda _m, k=key, e=en: f"{k}={cat.gettext(e)}", g)
+        out.append(g)
+    new = "".join(out)
+    if new == text:
+        return False
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(new, encoding="utf-8")
+    os.replace(tmp, path)                             # (a menu reading it sees the old or the new)
+    return True
+
+
+def menus(folders=(APPS, LAUNCHER_ORIGINALS)):
+    """Every Frame Tweaks menu entry in the current language; the applications folder touched
+    when one changed (Steam's "+" menu reads it again on its next opening)."""
+    changed = [f for d in folders if d.is_dir() for f in sorted(d.glob("*.desktop")) if relabel(f)]
+    if changed and APPS.is_dir():
+        os.utime(APPS)
+    return changed
 
 
 if __name__ == "__main__":
@@ -297,7 +350,10 @@ if __name__ == "__main__":
         bash()
     elif sys.argv[1:] == ["desktop"]:
         sys.stdout.write(desktop(sys.stdin.read()))
+    elif sys.argv[1:] == ["menus"]:
+        for f in menus():
+            print(f"{f.name}: {CATALOGUE.language or 'en'}")
     elif sys.argv[1:] == ["language"]:
         print(CATALOGUE.language or "en")
     else:
-        sys.exit("i18n.py bash | language | desktop (a .desktop file in, translated out)")
+        sys.exit("i18n.py bash | language | desktop (a .desktop file in, translated out) | menus")
