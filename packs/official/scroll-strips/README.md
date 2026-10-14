@@ -76,6 +76,7 @@ settings:
         - {label: "5", value: 0.05}
     - key: color
       title: Colour
+      swatches: true
       default: tint
       choices:
         - {label: Passthrough tint, value: tint}
