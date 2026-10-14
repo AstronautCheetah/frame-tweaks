@@ -45,6 +45,11 @@ wait_for() {
     notify-send -a Phone "$1 didn't appear" "Open Android Mirror again when its Wireless debugging is on."
     return 1
 }
+if [ "${1:-}" = --forget ]; then     # phone --forget: no remembered phone any more
+    [ -f "$CONF" ] && sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
+    echo "Forgot ${PHONE_NAME:-the remembered phone}. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
+    exit 0
+fi
 pick=; [ "${1:-}" = --pick ] && { pick=1; shift; }       # phone --pick: choose the phone again
 names=$(advertised | names_in)
 count=$(printf '%s\n' "$names" | grep -c .)

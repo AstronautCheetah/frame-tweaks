@@ -436,11 +436,41 @@ class SettingsPage(QWidget):
         reset = QPushButton("Reset to defaults")
         reset.clicked.connect(self.reset)
         lay.addWidget(reset)
+        self.actions = []
+        for a in self.spec["actions"]:
+            b = QPushButton()
+            b.clicked.connect(lambda _=False, a=a: self.act(a))
+            note = QLabel(a.get("about", ""))
+            note.setObjectName("desc")
+            note.setWordWrap(True)
+            row = QHBoxLayout()
+            row.addWidget(b)
+            row.addWidget(note, 1)
+            lay.addSpacing(10)
+            lay.addLayout(row)
+            self.actions.append((a, b, note))
+        self.show_actions()
         self.notice = QLabel()
         self.notice.setObjectName("notice")
         self.notice.setWordWrap(True)
         lay.addWidget(self.notice)
         lay.addStretch(1)
+
+    def show_actions(self):
+        for a, b, note in self.actions:
+            value = sft.raw_setting(self.cid, a["when"]) if a.get("when") else ""
+            b.setText(re.sub(r"\{(\w+)\}", lambda m: sft.raw_setting(self.cid, m[1]), a["label"]))
+            b.setVisible(not a.get("when") or bool(value))
+            note.setVisible(b.isVisibleTo(self) or not a.get("when"))
+
+    def act(self, a):
+        cmd = ["bash", str(a["dir"] / a["script"]), *a.get("args", [])]
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run:", " ".join(cmd))
+            return
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        self.notice.setText((r.stdout or r.stderr).strip() or "Done.")
+        self.show_actions()
 
     def show_choices(self):
         for (key, _), (b, value) in self.buttons.items():
