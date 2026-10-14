@@ -616,10 +616,11 @@ class NarrationWindow(QWidget):
             self.full.setFixedWidth(w)
             self.setFixedSize(w, self.full.sizeHint().height())
 
-    def pivot(self):
+    def pivot(self, b=None):
         """Where the Collapse / Expand icon is (widget pixels): the overlay keeps that point still
-        when the panel collapses or expands, so the icon stays under the laser."""
-        b = self.expand_button if self.collapsed else self.collapse_button
+        when the panel collapses or expands, so the icon stays under the laser. b: that button
+        (default: Expand when collapsed, else the Collapse last used)."""
+        b = b or (self.expand_button if self.collapsed else self.collapse_button)
         if b is None:
             return None
         if b is self.collapse_buttons[-1]:              # its icon, at the right end
@@ -627,6 +628,12 @@ class NarrationWindow(QWidget):
         else:
             p = b.mapTo(self, QPoint(b.width() // 2, b.height() // 2))
         return p
+
+    def pivots(self):
+        """{button: its icon's point} for each Collapse / Expand button now showing: which one is
+        pressed next is only known then, so the overlay remembers them all."""
+        shown = [self.expand_button] if self.collapsed else self.collapse_buttons
+        return {b: self.pivot(b) for b in shown if b is not None}
 
     def collapse(self, button=None):
         """button: the Collapse used (left or right); Expand comes back to it, its icon in place."""
@@ -935,7 +942,9 @@ class NarrationOverlay(QObject):
             new_w, new_h = self.w.width(), self.w.height()
             moved = False
             if getattr(self, "pose", None) and old_h:
-                pv, old_pv = self.w.pivot(), getattr(self, "last_pivot", None)
+                # The point of the button just pressed, before (remembered) and now.
+                pressed = self.w.collapse_button if self.w.collapsed else self.w.expand_button
+                pv, old_pv = self.w.pivot(), getattr(self, "last_pivots", {}).get(pressed)
                 if getattr(self.w, "toggled", False) and pv is not None and old_pv is not None:
                     # Collapse / Expand: the icon's point stays where it was.
                     a = (old_pv.x() - old_w / 2 - (pv.x() - new_w / 2)) * k     # along the panel's x
@@ -951,7 +960,7 @@ class NarrationOverlay(QObject):
                 self.apply_pose(cover=False)
                 if self.offset:                             # (follow() works from the offset)
                     self.save_offset()
-        self.last_pivot = self.w.pivot()
+        self.last_pivots = self.w.pivots() if hasattr(self.w, "pivots") else {}
         img = self.w.grab().toImage()
         digest = hash(bytes(img.constBits().asstring(img.sizeInBytes())))
         if digest == self.last_digest and not resized:
