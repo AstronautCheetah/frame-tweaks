@@ -48,7 +48,8 @@ for pin in packs/*/*/pin packs/*/*/*.pin; do                   # licence texts f
         missing=1
         if [ -n "$check" ]; then echo "not mirrored: $pin licence ($lic)"; continue; fi
         curl -fsSL -o "$work/$lic" "$u" || { echo "$pin: couldn't fetch its licence text $u" >&2; exit 1; }
-        gh release upload "$TAG" "$work/$lic" && rm -f "$work/$lic"
+        gh release upload "$TAG" "$work/$lic"      # (not "&& rm": set -e would let a failed upload by)
+        rm -f "$work/$lic"
     done
 done
 for pin in packs/*/*/pin packs/*/*/*.pin; do

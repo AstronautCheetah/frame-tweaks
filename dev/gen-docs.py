@@ -94,6 +94,8 @@ def put(text, name, body, path):
     begin, end = f"<!-- generated:{name} (dev/gen-docs.py, from {source}) -->", f"<!-- /generated:{name} -->"
     block = f"{begin}\n{body}\n{end}"
     pat = re.compile(re.escape(begin.split(" (")[0]) + r".*?" + re.escape(end), re.S)
+    if body is None:              # no longer generated (upstream_readme: removed): the old block goes
+        return re.sub(r"\n*" + pat.pattern + r"\n?", "\n", text, flags=re.S) if pat.search(text) else text
     if pat.search(text):
         return pat.sub(lambda _: block, text)
     if name == "upstream":        # first run: at the end
@@ -116,8 +118,8 @@ def main():
     targets = {ROOT / "README.md": [("tweaks", readme_tables(rows))],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
-        targets[ROOT / m["dir"] / "README.md"] = [("intro", intro(m)), ("changes", changes(m))] + (
-            [("upstream", upstream(i, m))] if m["upstream"] else [])
+        targets[ROOT / m["dir"] / "README.md"] = [("intro", intro(m)), ("changes", changes(m)),
+                                                  ("upstream", upstream(i, m) if m["upstream"] else None)]
     stale = []
     for path, parts in targets.items():
         old = path.read_text()

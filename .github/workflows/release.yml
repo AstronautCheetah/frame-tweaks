@@ -33,10 +33,13 @@ jobs:
           PRE: ${{ inputs.prerelease }}
         run: |
           IFS=. read -r major minor patch < <(sed 's/-.*//' VERSION)
+          # After a pre-release (VERSION X.Y.Z-rc.N), X.Y.Z isn't out yet: a bump that X.Y.Z already
+          # has keeps it (the next rc, or the release itself), as semver's increments do.
+          pre=; grep -q -- - VERSION && pre=1
           case "$BUMP" in
-            major) major=$((major + 1)); minor=0; patch=0 ;;
-            minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)) ;;
+            major) [ -n "$pre" ] && [ "$minor.$patch" = 0.0 ] || { major=$((major + 1)); minor=0; patch=0; } ;;
+            minor) [ -n "$pre" ] && [ "$patch" = 0 ] || { minor=$((minor + 1)); patch=0; } ;;
+            patch) [ -n "$pre" ] || patch=$((patch + 1)) ;;
           esac
           v="$major.$minor.$patch"
           if [ "$PRE" = true ]; then
@@ -50,7 +53,7 @@ jobs:
         run: |
           grep -q '^## Unreleased' CHANGELOG.md || { echo 'CHANGELOG.md has no "## Unreleased" section'; exit 1; }
           awk '/^## Unreleased/{f=1; next} f && /^## /{exit} f' CHANGELOG.md > notes.md
-          [ -s notes.md ] || { echo "the Unreleased section is empty"; exit 1; }
+          grep -q '[^[:space:]]' notes.md || { echo "the Unreleased section is empty"; exit 1; }
           sed -i "s/^## Unreleased.*/## $V ($(date +%Y-%m-%d))/" CHANGELOG.md
           echo "$V" > VERSION
           type=""; case "$V" in *-*) type=' type="development"' ;; esac

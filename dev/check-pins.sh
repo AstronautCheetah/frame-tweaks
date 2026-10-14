@@ -28,7 +28,8 @@ for pin in packs/*/*/pin packs/*/*/*.pin; do
         new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")
         if [[ $new == "$cur"* ]]; then echo "$id: pinned $cur (latest revision)"
         else   # the repository moved on; has our file? (big files: their sha256 is in a header)
-            url=$(sed -n 's/^url=//p' "$pin"); main=${url/\/resolve\/$cur\//\/resolve\/main\/}
+            # (the url names the whole revision; version= may be just its start)
+            url=$(sed -n 's/^url=//p' "$pin"); main=$(sed 's#/resolve/[^/]*/#/resolve/main/#' <<<"$url")
             sha=$(curl -fsSIL --max-time 15 "$main" | tr -d '\r"' | sed -n 's/^x-linked-etag: *\([0-9a-f]\{64\}\)$/\1/Ip' | tail -1)
             [ -n "$sha" ] || sha=$(curl -fsSL --max-time 60 "$main" | sha256sum | cut -c1-64)
             [ "$sha" = "$(sed -n 's/^sha256=//p' "$pin")" ] && echo "$id: pinned ${cur:0:8} (the file is unchanged at ${new:0:8})" ||

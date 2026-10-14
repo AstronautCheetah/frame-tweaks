@@ -225,10 +225,18 @@ def entries_of(text):
     return out
 
 
+def obsolete(text):
+    """The #~ blocks of a .po text: removed texts, kept for their translations."""
+    return [b for b in re.split(r"\n\s*\n", text.strip()) if b.lstrip().startswith("#~")]
+
+
 def update(po, pot_text):
-    """po's translations, laid out on the template's entries."""
-    old = {(c, m): b for c, m, _, b in entries_of(po.read_text()) if not b.lstrip().startswith("#~")}
-    header = next((b for c, m, _, b in entries_of(po.read_text()) if m == ""), None)
+    """po's translations, laid out on the template's entries. Texts removed before stay as #~
+    comments, and are in use again if the template has them again."""
+    text = po.read_text()
+    kept = entries_of("\n\n".join(re.sub(r"^#~ ", "", b, flags=re.M) for b in obsolete(text)))
+    old = {(c, m): b for c, m, _, b in kept + entries_of(text) if not b.lstrip().startswith("#~")}
+    header = next((b for c, m, _, b in entries_of(text) if m == ""), None)
     out, used = [], set()
     for ctx, msgid, plural, block in entries_of(pot_text):
         if msgid == "":
@@ -241,7 +249,8 @@ def update(po, pot_text):
             used.add((ctx, msgid))
         else:
             out.append(block)
-    gone = [b for k, b in old.items() if k not in used and k[1] != "" and re.search(r'^msgstr(\[\d+\])? "(?!")', b, re.M)]
+    # (translated: a msgstr with text, on its line or, when long, on the next: msgstr "" "…")
+    gone = [b for k, b in old.items() if k not in used and k[1] != "" and re.search(r'^msgstr(\[\d+\])? (""\n)?"(?!")', b, re.M)]
     out += ["\n".join("#~ " + l for l in b.splitlines() if not l.startswith("#:")) for b in gone]
     po.write_text("\n\n".join(out) + "\n")
 
@@ -282,8 +291,8 @@ def export(lang, outdir, size=150, every=False):
 
 def fill(po, answers):
     """Write answers ({(ctx, msgid): str or [forms]}) into the .po file's entries."""
-    out = []
-    for ctx, msgid, plural, block in entries_of(po.read_text()):
+    out, text = [], po.read_text()
+    for ctx, msgid, plural, block in entries_of(text):
         a = answers.get((ctx, msgid)) if msgid else None
         if a is not None and not block.lstrip().startswith("#~"):
             keep, seen_msgstr = [], False
@@ -302,7 +311,7 @@ def fill(po, answers):
                 keep.append("msgstr " + quote(a if isinstance(a, str) else a[0]))
             block = "\n".join(keep)
         out.append(block)
-    po.write_text("\n\n".join(out) + "\n")
+    po.write_text("\n\n".join(out + obsolete(text)) + "\n")
 
 
 def import_(lang, outdir):

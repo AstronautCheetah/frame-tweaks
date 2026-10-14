@@ -107,10 +107,13 @@ elif [ "$have" != "$want" ]; then
 fi
 
 # ---- newer pins and Python packages ----
+pins=$(dev/check-pins.sh 2>&1); rc=$?
 while IFS= read -r line; do
     case $line in *"upstream has"*|*"HEAD is"*|*"PyPI has"*|*"stable is"*|*"file changed"*|*"couldn't reach"*)
         yellow+=("$line") ;; esac
-done < <(dev/check-pins.sh 2>&1)
+done <<<"$pins"
+# (it stops at its first error: what it didn't get to is missing above)
+[ "$rc" = 0 ] || yellow+=("\`dev/check-pins.sh\` stopped early (exit $rc), so newer versions may be missing here: run it by hand")
 
 # ---- report ----
 echo "Checked $(date -u '+%Y-%m-%d') against $(git rev-parse --short HEAD 2>/dev/null || echo 'this checkout')."
