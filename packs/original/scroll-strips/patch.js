@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 19;
+  const NAME = 'scroll-strips', VERSION = 20;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -59,7 +59,7 @@
   const cfg = () => {
     const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, haptics: true, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
     c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
-    c.gap = Math.min(0.1, Math.max(0, Number(c.gap) || 0.015));
+    c.gap = Math.min(0.1, Math.max(0, Number(c.gap ?? 0.015) || 0));     // (0 is a choice: no gap)
     // Set back a little behind the window's plane, so SteamVR's own buttons by the window's edge
     // (e.g. Enter Gamepad Mode above it) draw in front instead of through the strip.
     c.back = Math.min(0.2, Math.max(0, Number(c.back ?? 0.03) || 0));

@@ -17,7 +17,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'float-grab', VERSION = 3;
+  const NAME = 'float-grab', VERSION = 4;
   const RELEASE_DEG = 2;            // trigger moved this far from where it was: a click ended or began
   const NO_REDOCK_MS = 1500;        // after putting it down, ignore Return to Dashboard this long
   const all = (window.__sftPatches ??= {});
@@ -49,6 +49,7 @@
   };
 
   let grabbed = 0, active = null;     // active: {frame, mover, hand, trigger0, timer}
+  let waiting = null;                 // a pick-up waiting for its window to come up (one at a time)
   let noRedock = { frame: null, until: 0 };
   const onPageClick = () => finish();  // a laser click on the dashboard page itself
   const finish = () => {
@@ -62,22 +63,27 @@
   };
   const pickUp = (f, h) => {
     let tries = 0;
-    const wait = setInterval(() => {                    // the floating component mounts shortly after
+    clearInterval(waiting);             // (two windows floated at once: only the last is picked up)
+    const wait = waiting = setInterval(() => {          // the floating component mounts shortly after
       const s = mover(f);
       if (!s?.state?.xfTransform && ++tries < 25) return;
       clearInterval(wait);
+      waiting = null;
       if (!s || f.docking.dockLocation !== WORLD || f.docking.beingDragged) return;
       const ev = { getModifierState: (k) => k === 'NumLock' || (h === 'right' && k === 'CapsLock'),
                    preventDefault() {}, stopPropagation() {} };
       s.startFloatingWindowMove(ev);
       grabbed++;
-      const t0 = trigger(h);
+      // The trigger's pose comes from SteamVR's internal API (no "requires:" line can check it): if
+      // it can't be read, the window is still put down by the next click, as on the bar.
+      let t0 = null;
+      try { t0 = trigger(h); } catch (e) { /* changed */ }
       window.addEventListener('mousedown', onPageClick, true);
       active = { frame: f, mover: s, hand: h, trigger0: t0, timer: setInterval(() => {
         try {
           if (!f.docking.beingDragged) return finish();           // ended by a click (mouseup)
-          const t = trigger(h);
-          if (t0 && t && degreesBetween(t0, t) >= RELEASE_DEG) finish();   // trigger let go / pressed
+          const t = t0 && trigger(h);
+          if (t && degreesBetween(t0, t) >= RELEASE_DEG) finish();   // trigger let go / pressed
         } catch (e) { finish(); }
       }, 15) };
     }, 40);
@@ -89,7 +95,7 @@
     for (const f of FS.frames ?? []) {
       const d = f?.docking;
       if (!d || wrapped.has(d) || typeof d.SetDockLocation !== 'function') continue;
-      const orig = d.SetDockLocation;
+      const orig = d.SetDockLocation, own = Object.prototype.hasOwnProperty.call(d, 'SetDockLocation');
       d.SetDockLocation = function (loc, ...rest) {
         const from = d.dockLocation, dragging = d.beingDragged;
         if (loc === DASH && from === WORLD &&
@@ -106,7 +112,7 @@
         } catch (e) { /* dashboard changed: leave it */ }
         return r;
       };
-      d.__sftOrigSetDock = { orig, own: Object.prototype.hasOwnProperty.call(d, 'SetDockLocation') };
+      d.__sftOrigSetDock = { orig, own };            // (own: looked at before the wrapper went on)
       wrapped.add(d);
     }
   };
@@ -116,6 +122,8 @@
     version: VERSION,
     stop: () => {
       clearInterval(timer);
+      clearInterval(waiting);
+      waiting = null;
       finish();
       for (const f of FS.frames ?? []) {
         const d = f?.docking, saved = d?.__sftOrigSetDock;

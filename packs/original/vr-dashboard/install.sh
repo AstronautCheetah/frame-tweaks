@@ -79,7 +79,7 @@ UNIT
 sysctl_user daemon-reload
 
 if sysctl_user is-active --quiet steamvr.service; then
-    if ! timeout 8 "$D/sft-dashboard" status 2>&1 | grep -q "port closed"; then
+    if ! { timeout 8 "$D/sft-dashboard" status 2>&1 || true; } | grep -q "port closed"; then  # (its exit 2 mustn't fail the pipe)
         sysctl_user restart sft-dashboard.service
         say "$(t 'Dashboard patches active.')"
     else
@@ -89,3 +89,6 @@ from its menu): SteamVR opens the port it needs only at startup.')"
 else
     say "$(t 'Installed; active from the next SteamVR start.')"
 fi
+# (A reinstall while SteamVR ran left the uninstall's copy that puts the port setting back when
+# SteamVR stops; the drop-in above does that now.)
+rm -f "$HOME/.local/state/frame-tweaks/sft-dashboard-restore"
