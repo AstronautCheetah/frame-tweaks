@@ -47,7 +47,9 @@ start_log() {
     mkdir -p "$LOGS"
     local log; log="$LOGS/$(date +%Y%m%d-%H%M%S)-$$-$1.log"
     { echo "# frame-tweaks $VERSION: $*"; date; } > "$log"
-    exec > >(tee -a "$log") 2>&1
+    # (tee without the lock's fd 8: holding it, tee kept the lock after `update` re-runs this
+    # script for its second stage, which then found "another install running" and stopped.)
+    exec > >(tee -a "$log" 8>&-) 2>&1
     find "$LOGS" -name '*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
 }
 

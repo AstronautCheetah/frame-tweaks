@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **Fixed: `./install.sh update` (and the installer window's Update) stopped halfway** with
+  "Another Frame Tweaks install… is running": its own log writer kept the install lock when it
+  restarted itself for the second stage.
 - **adb's server is private:** it listens on a socket file in your runtime folder instead of
   TCP 127.0.0.1:5037, which any local program (sandboxed Flatpak apps too) could use to get a
   shell on a connected phone. phone-touch's tunnel to the phone is a socket file too.
