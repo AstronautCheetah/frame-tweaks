@@ -52,6 +52,13 @@ it into `frame-tweaks.pot`. These are the rules the code follows (lib/i18n.py, l
     `install_i18n` in that tweak's install.sh.
   - kdialog/notify-send/zenity texts: `kdialog --msgbox "$(t 'Text %s' "$x")"`.
 
+- **SteamVR dashboard patches** (packs/*/*/*.js): each defines
+  `const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;`. `T('Text')` where it's
+  shown; `N('Text')` in constants, with `T(x)` where shown. Plain quotes only (no template
+  strings), and the language in the redraw cache key: `window.__sftI18n?.lang`. vr-dashboard's
+  sft-dashboard sends the translations.
+- **Menu entries** (.desktop): nothing to mark; install them with `install_desktop`.
+
 ## What to mark
 Everything a user reads: window text, buttons, tooltips, dialogs, notifications, terminal
 messages from say/warn/die/echo/printf meant for people, status lines (status_ok/missing/warn

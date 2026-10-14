@@ -14,9 +14,11 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 10;
+  const NAME = 'phone-touch', VERSION = 11;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
+  // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
+  const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
   const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, trail: [] };
   const all = (window.__sftPatches ??= {});
@@ -125,11 +127,11 @@
   // [title, key, [[label, value]...], needs a stream restart]: the real settings (scrcpy's
   // --max-size, --video-bit-rate, --max-fps); frame rates are the Steam Frame's refresh rates.
   const OPTIONS = [
-    ['Picture size (long side, pixels)', 'PHONE_MAX_SIZE', ['720', '800', '1024', '1280', '1600', '1920'].map((v) => [v, v]), true],
-    ['Bit rate (Mbit/s)', 'PHONE_BIT_RATE',
+    [N('Picture size (long side, pixels)'), 'PHONE_MAX_SIZE', ['720', '800', '1024', '1280', '1600', '1920'].map((v) => [v, v]), true],
+    [N('Bit rate (Mbit/s)'), 'PHONE_BIT_RATE',
      [['1', '1M'], ['1.5', '1500K'], ['2', '2M'], ['3', '3M'], ['4', '4M'], ['6', '6M'], ['8', '8M']], true],
-    ['Frame rate (fps, at most)', 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
-    ['Joystick scrolling', 'PHONE_STICK_SPEED', [['Slow', '8'], ['Medium', '15'], ['Fast', '25']], false],
+    [N('Frame rate (fps, at most)'), 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
+    [N('Joystick scrolling'), 'PHONE_STICK_SPEED', [[N('Slow'), '8'], [N('Medium'), '15'], [N('Fast'), '25']], false],
   ];
   // A restart makes a new window, which the dashboard would dock. Carry the floating one's place
   // (and its open settings) over to the new mirror window when it appears (within 20 s).
@@ -191,10 +193,10 @@
       flex: wide ? '1 1 100%' : '1 0 auto', minWidth: '58px', padding: '11px 6px', margin: '4px', borderRadius: '10px',
       textAlign: 'center', fontSize: '19px', fontWeight: on ? 700 : 500, color: on ? '#fff' : '#d8dee6',
       background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
-      border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}` } }, label);
+      border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}` } }, T(label));
     const rows = [];
     for (const [title, key, choices, restart] of OPTIONS) {
-      rows.push(el('div', { key: `t-${key}`, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, title));
+      rows.push(el('div', { key: `t-${key}`, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, T(title)));
       rows.push(el('div', { key: `r-${key}`, style: { display: 'flex', flexWrap: 'wrap' } },
         ...choices.map(([label, value]) => button(label, conf[key] === value, () => {
           if (conf[key] === value) return;
@@ -208,14 +210,14 @@
     const isDefault = Object.entries(DEFAULTS).every(([key, v]) => conf[key] === v);
     const streamDefault = OPTIONS.every(([, key, , restart]) => !restart || conf[key] === DEFAULTS[key]);
     rows.push(el('div', { key: 'restart', style: { display: 'flex', marginTop: '14px' } },
-      button('Reset to defaults', false, () => {
+      button(N('Reset to defaults'), false, () => {
         if (isDefault) return;
         if (!streamDefault) pending = true;
         window.__sftPhoneTouchConf = { ...conf, ...DEFAULTS };
         call({ a: 'reset' });
         redraw();
       }),
-      button(pending ? 'Restart stream to apply' : 'Restart stream', pending,
+      button(pending ? N('Restart stream to apply') : N('Restart stream'), pending,
              () => { pending = false; carryOver(f); call({ a: 'restart' }); redraw(); })));
     const pxW = 460;
     return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
@@ -232,7 +234,7 @@
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
-             'Picture and smoothness apply when the stream restarts; joystick speed at once.'))));
+             T('Picture and smoothness apply when the stream restarts; joystick speed at once.')))));
   };
   const buildExtras = (f) => {
     const page = f.activePage, sz = page?.size;
@@ -250,7 +252,7 @@
             f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
   };
   const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f)]), () => buildLayer(f));
-  const extras = (f) => cached(JSON.stringify(['extras', ...sizes(f), settingsOpen.has(f.frameID), pending, hueOf(),
+  const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), settingsOpen.has(f.frameID), pending, hueOf(),
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
   // Drawn as the last child of the dashboard app, in the page's bottom-right corner (L.mount; the

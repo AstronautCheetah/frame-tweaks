@@ -56,14 +56,27 @@ The full rules: [MARKING.md](MARKING.md).
   go in afterwards (`_("Saved {path}").format(path=p)`), so the text stays one literal.
 - **Shell:** `t 'Text with %s' "$value"` (lib/i18n.sh, sourced by lib/common.sh), printf-style:
   `say "$(t 'Fetching %s' "$name")"`. The text is in single quotes, or double quotes without `$`.
+- **SteamVR dashboard patches (JS):** `T('Text')` where it's shown, `N('Text')` in a constant
+  (each patch defines both; see scroll-strips' patch.js). Put the language in the patch's
+  redraw cache key (`window.__sftI18n?.lang`).
+- **Menu entries:** `Name=`, `GenericName=` and `Comment=` in a tweak's `.desktop` file are
+  collected as they are; install it with `install_desktop` (lib/common.sh), which adds the
+  translations.
 - Programs a tweak installs can't see this folder: `install_i18n` (lib/common.sh) copies the
   translations to `~/.local/share/frame-tweaks/i18n`, and the program imports or sources them
   from there (see Arrow Pad or Android Mirror's `phone`).
 
+Two places choose their language differently:
+
+- **Menu entries** (the desktop menu and Steam's "+" menu) carry every translation, as
+  `Name[es_419]=…` lines written at install, and the menu shows the one for the **system's**
+  language (`LANG`), not the keyboard's. Reinstall a tweak after its translation changes.
+- **The ⚙ panels in SteamVR's dashboard** (scroll strips, Android Mirror) follow the keyboard
+  like the window: vr-dashboard's `sft-dashboard` sends their text in the current language
+  every 5 seconds, and they redraw with it.
+
 ## Not translated yet
 
-- The README files, and the tweaks' menu entries (`.desktop` files).
-- The text in SteamVR's dashboard from the VR environment tweaks (the scroll strips' and Android
-  Mirror's ⚙ panels).
+- The README files.
 
 Contributions that mark more text are welcome (CONTRIBUTING.md, "Translations").

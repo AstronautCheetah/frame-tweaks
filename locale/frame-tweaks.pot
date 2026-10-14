@@ -157,7 +157,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:305 install.sh:155 lib/common.sh:406 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:305 install.sh:155 lib/common.sh:407 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
 msgid "not installed"
 msgstr ""
 
@@ -278,7 +278,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:518
+#: gui/frame-tweaks-gui.py:518 packs/original/adb-scrcpy/phone-touch.js:213 packs/original/scroll-strips/patch.js:282
 msgid "Reset to defaults"
 msgstr ""
 
@@ -924,62 +924,62 @@ msgstr ""
 msgid "Fetching %s"
 msgstr ""
 
-#: lib/common.sh:266
+#: lib/common.sh:267
 msgid ""
 "The tested versions of %s don't install on this Python (%s); trying the newest."
 msgstr ""
 
-#: lib/common.sh:274
+#: lib/common.sh:275
 msgid "Creating Python venv with jeepney"
 msgstr ""
 
-#: lib/common.sh:324
+#: lib/common.sh:325
 msgid "restored %s"
 msgstr ""
 
-#: lib/common.sh:325
+#: lib/common.sh:326
 msgid "removed %s (it didn't exist before)"
 msgstr ""
 
-#: lib/common.sh:349
+#: lib/common.sh:350
 msgid "restored KDE settings changed by %s"
 msgstr ""
 
-#: lib/common.sh:375
+#: lib/common.sh:376
 msgid "removed %s"
 msgstr ""
 
-#: lib/common.sh:395
+#: lib/common.sh:396
 msgid "Active now."
 msgstr ""
 
-#: lib/common.sh:397
+#: lib/common.sh:398
 msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
 msgstr ""
 
-#: lib/common.sh:399
+#: lib/common.sh:400
 msgid "Active from the next SteamVR start."
 msgstr ""
 
-#: lib/common.sh:407
+#: lib/common.sh:408
 msgid "installed (active while SteamVR runs)"
 msgstr ""
 
-#: lib/common.sh:412
+#: lib/common.sh:413
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 
-#: lib/common.sh:413
+#: lib/common.sh:414
 msgid "not responding"
 msgstr ""
 
-#: lib/common.sh:429
+#: lib/common.sh:430
 msgid ""
 "release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 
-#: lib/common.sh:433
+#: lib/common.sh:434
 msgid "This can mean it was tampered with. Check %s"
 msgstr ""
 
@@ -1313,6 +1313,14 @@ msgid ""
 "The tray icon starts with desktop mode (or launch 'NordVPN Tray' now)."
 msgstr ""
 
+#: packs/integrations/nordvpn/nordvpn-tray.desktop:3
+msgid "NordVPN Tray"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray.desktop:4
+msgid "Tray menu for the NordVPN WireGuard connections"
+msgstr ""
+
 #: packs/integrations/nordvpn/nordvpn-tray:153
 msgid "NordVPN: {location}"
 msgstr ""
@@ -1557,20 +1565,8 @@ msgid "Kept your settings and extensions in ~/.var/app/com.vscodium.codium."
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
-msgid "Android Mirror"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Bit rate (Mbit/s)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Fast"
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
@@ -1582,20 +1578,8 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
-msgid "Joystick scrolling"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Medium"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Picture size (long side, pixels)"
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
@@ -1609,16 +1593,24 @@ msgid ""
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
-msgid "Slow"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
 msgid "The phone mirror's stream and joystick scrolling."
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
 msgid ""
 "Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape."
+msgstr ""
+
+#: packs/original/adb-scrcpy/android-mirror.desktop:12
+msgid "Choose phone…"
+msgstr ""
+
+#: packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
+msgid "Android Mirror"
+msgstr ""
+
+#: packs/original/adb-scrcpy/android-mirror.desktop:4
+msgid "Mirror and control an Android phone (scrcpy over wireless adb)"
 msgstr ""
 
 #: packs/original/adb-scrcpy/install.sh:25
@@ -1658,6 +1650,47 @@ msgstr ""
 
 #: packs/original/adb-scrcpy/phone-fit:76
 msgid "phone-fit: no X display"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:130 packs/original/adb-scrcpy/README.md
+msgid "Picture size (long side, pixels)"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:131 packs/original/adb-scrcpy/README.md
+msgid "Bit rate (Mbit/s)"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:133
+msgid "Frame rate (fps, at most)"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:134 packs/original/adb-scrcpy/README.md
+msgid "Fast"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:134 packs/original/adb-scrcpy/README.md
+msgid "Joystick scrolling"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:134 packs/original/adb-scrcpy/README.md
+msgid "Medium"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:134 packs/original/adb-scrcpy/README.md
+msgid "Slow"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:220
+msgid "Restart stream"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:220
+msgid "Restart stream to apply"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:237
+msgid ""
+"Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
 
 #: packs/original/adb-scrcpy/phone-touch:111
@@ -1885,10 +1918,6 @@ msgid ""
 msgstr ""
 
 #: packs/original/arrowpad/README.md
-msgid "Arrow Pad"
-msgstr ""
-
-#: packs/original/arrowpad/README.md
 msgid ""
 "Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
 msgstr ""
@@ -1904,6 +1933,22 @@ msgstr ""
 
 #: packs/original/arrowpad/README.md
 msgid "styled after"
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad-vr.desktop:3
+msgid "Arrow Pad (VR window)"
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad-vr.desktop:4
+msgid "Arrow/navigation keys as their own floating VR window"
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+msgid "Arrow Pad"
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad.desktop:4
+msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:1030
@@ -2058,11 +2103,11 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:178 packs/original/scroll-strips/README.md
+#: packs/original/arrowpad/arrowpad.py:178 packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:179
+#: packs/original/arrowpad/arrowpad.py:179 packs/original/scroll-strips/patch.js:221
 msgid "Haptics"
 msgstr ""
 
@@ -2250,6 +2295,14 @@ msgstr ""
 
 #: packs/original/dictation/check-system.sh:7 packs/original/wallet/check-system.sh:7
 msgid "missing: %s"
+msgstr ""
+
+#: packs/original/dictation/dictate.desktop:3
+msgid "Dictate (toggle)"
+msgstr ""
+
+#: packs/original/dictation/dictate.desktop:4
+msgid "Start/stop local Whisper speech-to-text"
 msgstr ""
 
 #: packs/original/dictation/dictate:117
@@ -2565,24 +2618,12 @@ msgid "Blue"
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
-msgid "Bottom"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
 msgid ""
 "Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
-msgid "Colour"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
 msgid "Cyan"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Gap from the window (cm)"
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
@@ -2603,23 +2644,11 @@ msgid ""
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
-msgid "Left"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
 msgid "Magenta"
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
-msgid "On"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
 msgid "Orange"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Passthrough tint"
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
@@ -2631,27 +2660,7 @@ msgid "Red"
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
-msgid "Right"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Scroll strips"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Set back behind the window (cm)"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
 msgid "Sky"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Thickness (cm)"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Top"
 msgstr ""
 
 #: packs/original/scroll-strips/README.md
@@ -2666,6 +2675,67 @@ msgstr ""
 msgid "Yellow"
 msgstr ""
 
+#: packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/README.md
+msgid "Left"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:216 packs/original/scroll-strips/README.md
+msgid "Right"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:216
+msgid "Vertical strip"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/README.md
+msgid "Bottom"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:217
+msgid "Horizontal strip"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/README.md
+msgid "Top"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:218 packs/original/scroll-strips/README.md
+msgid "Thickness (cm)"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/README.md
+msgid "Gap from the window (cm)"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/README.md
+msgid "Set back behind the window (cm)"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
+msgid "On"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:232
+msgid ""
+"Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:274 packs/original/scroll-strips/README.md
+msgid "Colour"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:276 packs/original/scroll-strips/README.md
+msgid "Passthrough tint"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:292 packs/original/scroll-strips/README.md
+msgid "Scroll strips"
+msgstr ""
+
+#: packs/original/scroll-strips/patch.js:297
+msgid "For every window. Changes show at once."
+msgstr ""
+
 #: packs/original/scroll-strips/status.sh:3
 msgid "scroll strips beside floating windows"
 msgstr ""
@@ -2677,10 +2747,6 @@ msgstr ""
 
 #: packs/original/snip/README.md
 msgid "Reading speed"
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid "Screen snip + Narrate"
 msgstr ""
 
 #: packs/original/snip/README.md
@@ -2701,6 +2767,15 @@ msgstr ""
 #: packs/original/snip/README.md
 msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
+msgstr ""
+
+#: packs/original/snip/frame-snip.desktop:3 packs/original/snip/README.md
+msgid "Screen snip + Narrate"
+msgstr ""
+
+#: packs/original/snip/frame-snip.desktop:4
+msgid ""
+"Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud"
 msgstr ""
 
 #: packs/original/snip/frame-snip:105
@@ -3222,15 +3297,15 @@ msgstr ""
 msgid "Installed; active from the next SteamVR start."
 msgstr ""
 
-#: packs/original/vr-dashboard/sft-dashboard:316
+#: packs/original/vr-dashboard/sft-dashboard:349
 msgid "{name}: not installed"
 msgstr ""
 
-#: packs/original/vr-dashboard/sft-dashboard:328
+#: packs/original/vr-dashboard/sft-dashboard:361
 msgid "dashboard page not found"
 msgstr ""
 
-#: packs/original/vr-dashboard/sft-dashboard:335
+#: packs/original/vr-dashboard/sft-dashboard:368
 msgid "{name}: port open, not patched yet"
 msgstr ""
 
@@ -3451,6 +3526,15 @@ msgstr ""
 
 #: packs/original/wallet/wallet-launcher:85
 msgid "wallet-launcher: can't find {app_id} in: {command}"
+msgstr ""
+
+#: packs/original/wallet/wallet-lock.desktop:3
+msgid "Lock Wallet"
+msgstr ""
+
+#: packs/original/wallet/wallet-lock.desktop:4
+msgid ""
+"Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
 msgstr ""
 
 #: packs/original/wallet/wallet-unlock:250
@@ -3857,5 +3941,17 @@ msgstr ""
 #: packs/third-party/recline/uninstall.sh:8
 msgid ""
 "couldn't unregister Recline's panel from SteamVR; it will report it missing"
+msgstr ""
+
+#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3
+msgid "Frame Tweaks"
+msgstr ""
+
+#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:4
+msgid "Tweak installer"
+msgstr ""
+
+#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:5
+msgid "Install, check and remove Steam Frame desktop-mode tweaks"
 msgstr ""
 

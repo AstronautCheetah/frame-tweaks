@@ -24,8 +24,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
+    import i18n
     from i18n import _, N_, ngettext
 except ImportError:                       # (not installed by Frame Tweaks: English)
+    i18n = None
     def _(text):
         return text
 
@@ -236,6 +238,36 @@ def patches():
     return {p.stem: p for p in sorted(PATCHES.glob("*.js"))}
 
 
+# The patches' own text: T('...') and N('...') in their JS (dev/i18n.py collects the same).
+JS_TEXT = re.compile(r"""\b[TN]\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")\s*\)""")
+_js_texts = {}
+
+
+def js_string(body):
+    """A JS string literal's text (its quotes taken off)."""
+    try:
+        return json.loads('"' + body.replace("\\'", "'").replace('"', '\\"').replace('\\\\"', '\\"') + '"')
+    except ValueError:
+        return body
+
+
+def i18n_expr(found):
+    """window.__sftI18n = {lang, t: {English: translation}} for the patches' text, in the
+    language the keyboard asks for now (lib/i18n.py looks no more than every 5 s)."""
+    table, lang = {}, None
+    if i18n is not None:
+        i18n.refresh()
+        lang = i18n.CATALOGUE.language
+        for p in found.values():
+            mtime = p.stat().st_mtime
+            if _js_texts.get(p, (None,))[0] != mtime:
+                _js_texts[p] = (mtime, {js_string(a or b) for a, b in JS_TEXT.findall(p.read_text())})
+            for text in _js_texts[p][1]:
+                if _(text) != text:
+                    table[text] = _(text)
+    return f"window.__sftI18n = {json.dumps({'lang': lang, 't': table})}; 'i18n'"
+
+
 def requires(path):
     req = dict(BASE)
     for m in re.finditer(r"^// requires: (.+?) \| (.+)$", path.read_text(), re.M):
@@ -293,6 +325,7 @@ def watch():
                     injected.discard(n)
                 if found and not lib_bad:
                     ws_eval(url, LIB.read_text())          # (it skips itself if already loaded)
+                    ws_eval(url, i18n_expr(found))         # (the patches redraw with it)
                 for n, p in found.items():
                     if bad[n]:
                         results.append(f"{n}: off (SteamVR changed)")

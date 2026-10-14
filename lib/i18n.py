@@ -269,10 +269,35 @@ def bash():
     print(f"FT_TR=({pairs})")
 
 
+def desktop(text, folder=LOCALE):
+    """A menu entry (.desktop) with its Name, GenericName and Comment in every translated
+    language, as Name[es_419]=… lines (and Name[es]=… for es_MX and other Spanish locales, while
+    there's no es.po): the menus pick the line for the system's language."""
+    langs = []
+    for f in sorted(folder.glob("*.po")):
+        msgs = parse_po(f.read_text(encoding="utf-8"))
+        langs.append((f.stem, msgs))
+        base = f.stem.split("_")[0]
+        if base != f.stem and not (folder / f"{base}.po").exists() and base not in (l for l, _m in langs):
+            langs.append((base, msgs))
+    out = []
+    for line in text.splitlines():
+        out.append(line)
+        m = re.match(r"(Name|GenericName|Comment)=(.+)$", line)
+        if m:
+            for lang, msgs in langs:
+                tr = (msgs.get((None, m[2])) or [""])[0]
+                if tr and tr != m[2] and "\n" not in tr:
+                    out.append(f"{m[1]}[{lang}]={tr}")
+    return "\n".join(out) + "\n"
+
+
 if __name__ == "__main__":
     if sys.argv[1:] == ["bash"]:
         bash()
+    elif sys.argv[1:] == ["desktop"]:
+        sys.stdout.write(desktop(sys.stdin.read()))
     elif sys.argv[1:] == ["language"]:
         print(CATALOGUE.language or "en")
     else:
-        sys.exit("i18n.py bash | language")
+        sys.exit("i18n.py bash | language | desktop (a .desktop file in, translated out)")

@@ -51,6 +51,12 @@ CODE = sorted({*ROOT.glob("gui/*.py"), ROOT / "gui/frame-tweaks-gui.py", *ROOT.g
                *programs(rb"#!.*python")})
 SHELL = sorted({ROOT / "install.sh", *ROOT.glob("lib/*.sh"), *ROOT.glob("packs/original/*/*.sh"),
                 *ROOT.glob("packs/integrations/*/*.sh"), *ROOT.glob("packs/third-party/*/*.sh"), *programs(rb"#!.*(/bash|/sh\b|env bash)")})
+JS = sorted(p for pack in ("original", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.js"))
+DESKTOP = sorted([*ROOT.glob("share/applications/*.desktop"),
+                  *(p for pack in ("original", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.desktop"))])
+# SteamVR dashboard patches: T('text') where it's shown, N('text') in a constant (the same rule as
+# vr-dashboard/sft-dashboard's, which sends the translations into the dashboard).
+JS_TEXT = re.compile(r"""\b[TN]\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")\s*\)""")
 # t 'text' or t "text" (no $ in it): see lib/i18n.sh
 T_CALL = re.compile(r"""(?:^|[\s;&|(`])t\s+(?:'([^']*)'|"((?:[^"\\$`]|\\.)*)"(?=[\s;&|)`]|$))""", re.M)
 T_DOLLAR = re.compile(r"""(?:^|[\s;&|(`])t\s+"(?:[^"\\]|\\.)*\$""", re.M)
@@ -100,6 +106,39 @@ def from_shell():
             if msgid:
                 line = text.count("\n", 0, m.start()) + 1
                 out.setdefault((None, msgid, None), []).append(f"{f.relative_to(ROOT)}:{line}")
+    return out
+
+
+def js_string(body):
+    try:
+        return json.loads('"' + body.replace("\\'", "'").replace('"', '\\"').replace('\\\\"', '\\"') + '"')
+    except ValueError:
+        return body
+
+
+def from_js():
+    """{(None, msgid, None): [where, …]} from T('...') / N('...') in the dashboard patches."""
+    out = {}
+    for f in JS:
+        text = f.read_text()
+        for m in JS_TEXT.finditer(text):
+            msgid = js_string(m[1] if m[1] is not None else m[2])
+            if msgid:
+                out.setdefault((None, msgid, None), []).append(f"{f.relative_to(ROOT)}:{text.count(chr(10), 0, m.start()) + 1}")
+    return out
+
+
+DESKTOP_KEYS = ("Name", "GenericName", "Comment")
+
+
+def from_desktop():
+    """{(None, msgid, None): [where, …]} from the menu entries' Name, GenericName and Comment."""
+    out = {}
+    for f in DESKTOP:
+        for n, line in enumerate(f.read_text().splitlines(), 1):
+            m = re.match(rf"({'|'.join(DESKTOP_KEYS)})=(.+)$", line)
+            if m:
+                out.setdefault((None, m[2], None), []).append(f"{f.relative_to(ROOT)}:{n}")
     return out
 
 
@@ -153,7 +192,7 @@ def from_manifests():
 
 def template():
     entries = {}
-    for source in (from_code(), from_shell(), from_manifests()):
+    for source in (from_code(), from_shell(), from_js(), from_desktop(), from_manifests()):
         for key, where in source.items():
             entries.setdefault(key, []).extend(where)
     lines = ['# Frame Tweaks: text to translate. Made by dev/i18n.py extract; don\'t edit by hand.',

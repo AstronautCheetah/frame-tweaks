@@ -5,6 +5,9 @@
 ### Added
 - **Español (Latinoamérica):** the first translation: the window, the installer's messages, and
   the tweaks' own programs (Arrow Pad, Screen snip + Narrate, Android Mirror, the wallet tools).
+- **Spanish menu entries and VR panels:** the tweaks' menu entries carry their translations
+  (shown when the system's language is Spanish), and the scroll strips' and Android Mirror's ⚙
+  panels in SteamVR's dashboard follow the keyboard's language like the window.
 - **The language follows your keyboard:** Steam's VR keyboard in VR, KDE's layout in desktop
   mode. Switch to a Spanish layout and the window follows within 5 seconds (once you're on its
   list); programs pick it up when they start. A QWERTY or English layout keeps the system's
