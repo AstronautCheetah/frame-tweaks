@@ -14,12 +14,16 @@ main() {
     # ranked below the release they lead up to ("-" → "~" sorts before the final version).
     pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
     [ "${FRAME_TWEAKS_CHANNEL:-stable}" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+    # (|| true: with no release found, or GitHub out of reach, set -e would stop here without a word.)
     TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | grep -E "$pattern" |
-          sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1)
+          sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1) || true
     [ -n "$TAG" ] || { echo "Couldn't find a release of $REPO" >&2; exit 1; }
     if [ -d "$DIR/.git" ]; then
         echo "Updating $DIR to $TAG"
-        git -C "$DIR" fetch --quiet --force --tags origin && git -C "$DIR" -c advice.detachedHead=false checkout --quiet "$TAG"
+        # (Two commands, not an && list: there a failed fetch doesn't stop set -e, and the old
+        # version would open as if updated.)
+        git -C "$DIR" fetch --quiet --force --tags origin
+        git -C "$DIR" -c advice.detachedHead=false checkout --quiet "refs/tags/$TAG"
     else
         echo "Installing $TAG into $DIR"
         git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" "$REPO" "$DIR"

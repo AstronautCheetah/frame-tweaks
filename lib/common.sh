@@ -347,7 +347,7 @@ restore_kconfig() {
     [ -f "$rec" ] || return 0
     while IFS=$'\t' read -r file group key value; do
         if [ "$value" = "<unset>" ]; then kwriteconfig6 --file "$file" --group "$group" --key "$key" --delete
-        else kwriteconfig6 --file "$file" --group "$group" --key "$key" "$value"; fi
+        else kwriteconfig6 --file "$file" --group "$group" --key "$key" -- "$value"; fi     # (--: a value like -1)
     done < "$rec"
     rm -f "$rec"; say "$(t 'restored KDE settings changed by %s' "$1")"
 }
