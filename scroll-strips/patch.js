@@ -3,7 +3,8 @@
 // then drag away from where you pressed to scroll (the farther, the faster; back past it reverses);
 // let go to stop. A quick tap near an end pages. Scrolling goes to the window you last clicked, as
 // arrow keys / PgUp-PgDn through vr-dashboard's sftScroll binding (in VR, the Steam session takes
-// pointer input only from the lasers, so a mouse wheel can't be injected; keys can).
+// pointer input only from the lasers, so a mouse wheel can't be injected; keys can). The Android
+// Mirror is scrolled through its phone-touch helper instead (see adb-scrcpy).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard. Settings:
 // window.__sftPatchConfig["scroll-strips"] = {vertical: "right"|"left"|"off",
 //   horizontal: "top"|"bottom"|"off", thickness: metres, gap: metres, back: metres}. Sizes are real metres (the
@@ -19,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 11, DASH = 1, WORLD = 4;
+  const NAME = 'scroll-strips', VERSION = 12, DASH = 1, WORLD = 4;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -89,6 +90,17 @@
   // the faster; back across the centre reverses), let go to stop. A quick tap near an end pages.
   let drag = null;
   const send = (target, dx, dy, page = 0) => {
+    // The Android Mirror (with phone-touch running): scroll the phone itself, as its wheel. Keys
+    // would go to the window the Steam session last saw clicked, and clicks on the mirror go to
+    // phone-touch's layer instead, so that was the dashboard's window. A page is 10 notches.
+    if (typeof target === 'object') {
+      try {
+        window.sftPhoneTouch(JSON.stringify({ a: 'scroll', u: 0.5, v: 0.5, w: target.w, h: target.h,
+                                              dx: dx + 0, dy: -dy - page * 10 }));
+        stats.sent++;
+      } catch (e) {}
+      return;
+    }
     if (typeof window.sftScroll !== 'function') { stats.noBinding++; return; }
     try { window.sftScroll(JSON.stringify({ target, dx, dy, page })); stats.sent++; } catch (e) {}
   };
@@ -178,7 +190,10 @@
     if (!H || !Hw || !c?.unHeight || typeof page.GetPanelAnchorID !== 'function') return [];
     const o = cfg(), k = H / Hw;                 // anchor units per metre (the panel's own scale)
     // The desktop scrolls through its own portal; other windows get keys (see vr-dashboard).
-    const target = /^KDE Wayland Compositor/.test(f.title ?? '') ? 'desktop' : 'window';
+    const phone = f.title === 'Android Mirror' && typeof window.sftPhoneTouch === 'function' &&
+      Date.now() - (window.__sftPhoneTouchAlive || 0) < 6000;
+    const target = phone ? { w: c.unWidth, h: c.unHeight }
+      : /^KDE Wayland Compositor/.test(f.title ?? '') ? 'desktop' : 'window';
     // A curved window: bend the horizontal strip around the same origin as the window.
     const curveId = f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : undefined;
     const W = H * c.unWidth / c.unHeight, t = o.thickness * k, g = o.gap * k, z = -o.back * k, out = [];
