@@ -61,6 +61,26 @@ fail() {
     exit 1
 }
 trap 'splash_end' EXIT
+# pair_phone ADDRESS: pair the Frame with the phone again. The phone's "Pair device with pairing
+# code" dialog advertises its pairing port on the Wi-Fi (mDNS), so only the code is asked for.
+pair_phone() {
+    local ip=${1%:*} where="" code out
+    splash "On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…"
+    for _ in $(seq 60); do
+        where=$(avahi-browse -rtp _adb-tls-pairing._tcp 2>/dev/null | grep '^=' | grep ';IPv4;' |
+                awk -F';' -v ip="$ip" '$8 == ip {print $8 ":" $9; exit}')
+        [ -n "$where" ] && break
+        cancelled && exit 0
+        sleep 2
+    done
+    splash_end
+    [ -n "$where" ] || fail "The phone didn't offer pairing" "Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again."
+    code=$(kdialog --title "Android Mirror: pair with ${PHONE_NAME:-the phone}" --inputbox "The six-digit pairing code the phone shows:" 2>/dev/null) || exit 0
+    out=$(adb pair "$where" "$code" 2>&1)
+    grep -qi "successfully paired" <<< "$out" || fail "Pairing didn't work" "adb said: $out
+
+Check the code and try again (a new code appears each time the phone's pairing dialog opens)."
+}
 # wait_for NAME: up to 3 minutes for it to show up (Wireless debugging turned on, back on the Wi-Fi).
 wait_for() {
     splash "Waiting for $1: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes."
@@ -140,9 +160,18 @@ while :; do
     splash "Connecting to ${PHONE_NAME:-the phone}…"
     out=$(adb connect "$dev" 2>&1)
     if [ -n "$first" ] && ! grep -q "connected to" <<< "$out"; then
-        fail "Couldn't connect to ${PHONE_NAME:-the phone}" "adb said: $out
+        # Often: the phone forgot the Frame (or never knew it). Offer to pair again, then retry.
+        splash_end
+        why="Couldn't connect to ${PHONE_NAME:-the phone}. adb said: $out
 
-If the Frame isn't paired with this phone yet, pair it once: on the phone, Developer options → Wireless debugging → Pair device with pairing code; then in a terminal on the Frame: adb pair <ip>:<port> <code>. See Android Mirror's README."
+If the phone forgot the Frame (or it's a new phone), pair them again."
+        choice=$(ask "Android Mirror" "$why" pair "Pair it again" close "Close"); r=$?
+        [ $r -eq 2 ] && fail "Couldn't connect to ${PHONE_NAME:-the phone}" "$why See Android Mirror's README for adb pair."
+        [ "$choice" = pair ] || exit 1
+        pair_phone "$dev"
+        splash "Connecting to ${PHONE_NAME:-the phone}…"
+        out=$(adb connect "$dev" 2>&1)
+        grep -q "connected to" <<< "$out" || fail "Couldn't connect to ${PHONE_NAME:-the phone}" "Paired, but connecting still failed. adb said: $out"
     fi
     # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
     # without it the Steam session makes the window 1920x1080, with black bars beside a portrait

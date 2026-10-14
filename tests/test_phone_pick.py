@@ -86,6 +86,20 @@ class PhonePick(unittest.TestCase):
         self.assertNotIn("--menu", log)                            # nothing else to choose
         self.assertIn("--error", log)                              # it says why it stopped
 
+    def test_failed_connection_offers_pairing_again(self):
+        """adb can't connect (the phone forgot the Frame): Pair it again finds the phone's pairing
+        port on the Wi-Fi, asks only for the code, pairs, and the mirror starts."""
+        pairing = "=;wlan0;IPv4;adb-x;_adb-tls-pairing._tcp;local;host.local;10.0.0.5;37001;"
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\n', choose="pair", extra={
+            # the connect advert as usual; the pairing one when asked for _adb-tls-pairing
+            "avahi-browse": f'''case "$*" in *pairing*) echo '{pairing}';; *) printf '%s\\n' '{advert("Pixel 9", "10.0.0.5", 4000)}';; esac''',
+            "kdialog": 'echo "kdialog $*" >> "$HOME/log"; case "$*" in *--inputbox*) echo 123456;; *) echo "$CHOOSE";; esac',
+            "adb": 'echo "adb $*" >> "$HOME/log"; case "$1" in connect) [ -f "$HOME/paired" ] && echo "connected to $2" || echo "failed to connect to $2";; '
+                   'pair) touch "$HOME/paired"; echo "Successfully paired to $2";; esac; exit 0'})
+        self.assertIn("Pair it again", log)
+        self.assertIn("adb pair 10.0.0.5:37001 123456", log)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+
     def test_splash_then_a_message_saying_why(self):
         """No phone in sight: the splash shows, then closes, and an error dialog explains."""
         code, log, _ = self.run_phone([], env={"PHONE_NO_SPLASH": ""}, extra={

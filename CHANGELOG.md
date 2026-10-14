@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Android Mirror: Pair it again.** When it can't connect because the phone forgot the Frame, it
+  offers to pair again: it finds the phone's pairing dialog on the Wi-Fi and asks only for the code.
 - **Android Mirror shows what it's doing:** a small window while it finds and connects to the
   phone (with Cancel), and a message saying why when it can't, such as no phone on the Wi-Fi,
   a phone not paired yet, or scrcpy failing to start, instead of failing silently.
