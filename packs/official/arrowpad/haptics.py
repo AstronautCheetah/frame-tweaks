@@ -91,23 +91,36 @@ class Haptics:
                 hand = "left" if role == vr.TrackedControllerRole_LeftHand else "right"
             else:
                 hand = self.pointing_hand()
-            self.input.updateActionState([self.active])
-            self.input.triggerHapticVibrationAction(self.out[hand], 0, duration, freq,
-                                                    amp, self.vr_mod.k_ulInvalidInputValueHandle)
-            # Direct pulse, not tied to input focus. Duration in microseconds (max 3999);
-            # strength comes from the length, so scale it by amplitude.
+            # Direct pulse first: it's what reaches the controller here (not tied to input focus).
+            # Duration in microseconds (max 3999); strength comes from the length, so scale it.
             idx = device if device not in (None, self.vr_mod.k_unTrackedDeviceIndexInvalid) else self.pointing_index()
             if idx != self.vr_mod.k_unTrackedDeviceIndexInvalid:
                 self.system.triggerHapticPulse(idx, 0, int(min(3999, duration * 1e6) * max(0.25, amp)))
         except Exception as e:
             self.failed(e)
+            return
+        # SteamVR Input's vibration as well (it only arrives while we have input focus). It can be
+        # refused (InputError_InvalidHandle, seen on the Frame); that used to abort the direct pulse
+        # above, and then every pulse: now it's only noted, once.
+        try:
+            self.input.updateActionState([self.active])
+            self.input.triggerHapticVibrationAction(self.out[hand], 0, duration, freq,
+                                                    amp, self.vr_mod.k_ulInvalidInputValueHandle)
+        except Exception as e:
+            if not getattr(self, "action_noted", False):
+                self.action_noted = True
+                self.note(f"SteamVR Input vibration refused (direct pulses still sent): {type(e).__name__}")
 
     def failed(self, e):
         """Note it (LOG) and pause for 5 s; one error used to switch haptics off for good."""
         self.ok, self.retry_at = False, time.monotonic() + 5
+        self.note(f"{type(e).__name__}: {e}")
+
+    @staticmethod
+    def note(text):
         try:
             with open(LOG, "a") as f:
-                f.write(f"{time.strftime('%F %T')} haptics: {type(e).__name__}: {e}\n")
+                f.write(f"{time.strftime('%F %T')} haptics: {text}\n")
         except OSError:
             pass
 
