@@ -52,6 +52,9 @@
   changes.
 
 ### Fixed
+- **The NordVPN tray icon could vanish:** started from VR (the window's Tray button, the "+"
+  menu), the tray ran where there's no system tray, and kept desktop mode's own copy from
+  starting. It now always runs in desktop mode, or says to open desktop mode.
 - **Arrow Pad's haptics could stop for good** after a single error; they now try again a few
   seconds later (errors are noted in `/run/user/<uid>/arrowpad-haptics.log`).
 - **Screen snip's narration panel came back in the wrong place** after collapsing it with the
