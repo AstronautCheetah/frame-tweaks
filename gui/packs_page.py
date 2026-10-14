@@ -4,9 +4,11 @@ import html
 import subprocess
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtGui import QCursor
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QToolTip, QVBoxLayout, QWidget
 
-import sft  # (lib/ is on the path)
+import browser  # (lib/ is on the path)
+import sft
 
 STATE = {"official": ("Comes with Frame Tweaks", "#5cc77a"),
          "trusted": ("Trusted: its tweaks are listed", "#5cc77a"),
@@ -115,4 +117,10 @@ class Packs(QWidget):
 
     def open_folder(self):
         sft.USER_PACKS.mkdir(parents=True, exist_ok=True)
-        subprocess.Popen(["xdg-open", str(sft.USER_PACKS)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # The default file manager as desktop mode sets it, where it's running (lib/browser.py):
+        # xdg-open from the VR session would pick Kate.
+        note = browser.open_path(str(sft.USER_PACKS))
+        if note:
+            QToolTip.showText(QCursor.pos(), note)
+        else:
+            subprocess.Popen(["xdg-open", str(sft.USER_PACKS)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

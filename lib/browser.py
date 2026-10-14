@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-"""Open a web link in the default browser, in whichever session it's already running.
+"""Open a web link, a folder or a file in its default app, in whichever session it's already running.
 
 The Frame runs two sessions: Steam's VR session (X display :0, where floating windows live) and
 the desktop mode (Plasma on Wayland, nested in VR). A browser started in one session can't hand
 a link to a copy running in the other (Firefox then says it's "already running, but is not
-responding"). So: find the default browser; if it's running in this program's session, send
-the link there; if only in the other session, launch it with that session's environment so it
-reaches the running copy; if it isn't running, open it in VR.
+responding"). So: find the default app (as desktop mode sets it: the VR session doesn't read
+KDE's defaults, so a folder there would open in Kate, not Dolphin); if it's running in this
+program's session, send the link there; if only in the other session, launch it with that
+session's environment so it reaches the running copy; if it isn't running, open it in VR.
 
-  browser.py URL             open it
-  browser.py --where URL     say what it would do, without opening anything
+  browser.py URL|PATH             open it
+  browser.py --where URL|PATH     say what it would do, without opening anything
 """
 import os
 import re
 import shlex
 import subprocess
 import sys
+import urllib.parse
 from pathlib import Path
 
 VR, DESKTOP = "VR", "desktop mode"
@@ -75,17 +77,40 @@ def pids():
                 pass
 
 
-def default_browser(env=None):
-    """The default browser's desktop file id (e.g. org.mozilla.firefox.desktop), or None."""
-    for kind in ("x-scheme-handler/https", "x-scheme-handler/http", "text/html"):
-        try:
-            out = subprocess.run(["xdg-mime", "query", "default", kind], env=env, capture_output=True,
-                                 text=True, timeout=10).stdout.strip()
-        except (OSError, subprocess.TimeoutExpired):
-            out = ""
-        if out.endswith(".desktop"):
-            return out
+def xdg_mime(*args, env=None):
+    try:
+        return subprocess.run(["xdg-mime", *args], env=env, capture_output=True, text=True,
+                              timeout=10).stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+
+
+def default_app(*kinds):
+    """The default app's desktop file id for the first of these MIME types that has one, as
+    desktop mode sets it (KDE's defaults), else as this session sees it; or None."""
+    for env in ({**os.environ, "XDG_CURRENT_DESKTOP": "KDE"}, None):
+        for kind in kinds:
+            out = xdg_mime("query", "default", kind, env=env)
+            if out.endswith(".desktop"):
+                return out
     return None
+
+
+def default_browser():
+    """The default browser's desktop file id (e.g. org.mozilla.firefox.desktop), or None."""
+    return default_app("x-scheme-handler/https", "x-scheme-handler/http", "text/html")
+
+
+def target_app(target):
+    """The default app for a URL, folder or file."""
+    if target.startswith("file://"):
+        target = urllib.parse.unquote(target[7:])
+    if re.match(r"^[a-z][a-z0-9+.-]*://", target):
+        return default_browser()
+    if os.path.isdir(target):
+        return default_app("inode/directory")
+    kind = xdg_mime("query", "filetype", target)
+    return default_app(kind) if kind else None
 
 
 def desktop_file(app_id):
@@ -161,8 +186,8 @@ def session_env(target):
 
 
 def plan(url):
-    """(browser desktop id, session, environment) for opening url, or None when there's no browser."""
-    app = default_browser()
+    """(app desktop id, session, environment) for opening url (or a path), or None without an app."""
+    app = target_app(url)
     if not app:
         return None
     own = session_of(os.environ) or DESKTOP
@@ -193,6 +218,13 @@ def open_url(url):
     return f"Opened in {browser_name(app)} ({target})"
 
 
+def open_path(path):
+    """open_url for a folder or file (a path or a file:// URL)."""
+    if path.startswith("file://"):
+        path = urllib.parse.unquote(path[7:])
+    return open_url(os.path.abspath(path))
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if not args or args[0] in ("-h", "--help"):
@@ -201,11 +233,11 @@ if __name__ == "__main__":
     if args[0] == "--where":
         p = plan(args[1] if len(args) > 1 else "https://example.com")
         if not p:
-            sys.exit("No default browser found.")
+            sys.exit("No default app found.")
         app = p[0]
-        print(f"browser: {app}; running in: {', '.join(sorted(running_sessions(app))) or 'neither'}; "
+        print(f"app: {app}; running in: {', '.join(sorted(running_sessions(app))) or 'neither'}; "
               f"this program: {session_of(os.environ)}; would open in: {p[1]}")
     else:
-        note = open_url(args[0])
+        note = open_url(args[0]) if "://" in args[0] and not args[0].startswith("file:") else open_path(args[0])
         print(note or "Couldn't open it.")
         sys.exit(0 if note else 1)
