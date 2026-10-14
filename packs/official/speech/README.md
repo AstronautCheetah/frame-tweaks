@@ -5,7 +5,7 @@ category: System
 tier: helper
 summary: >-
   Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps;
-  installed with Screen snip
+  installed with Screen snip + Narrate
 what: >-
   A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate,
   and espeak-ng for KDE's screen reader (Orca) and other apps that speak through
@@ -63,7 +63,7 @@ changes: >-
   uninstall)
 access: None beyond your home folder
 survives_updates: Yes (everything is in your home folder)
-undo: "`./install.sh uninstall speech` (after Screen snip)"
+undo: "`./install.sh uninstall speech` (after Screen snip + Narrate)"
 ---
 # Speech engine (helper)
 
@@ -75,7 +75,7 @@ A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen sni
 
 ## Install
 
-You don't need to tick it: it's installed automatically with [Screen snip](../snip/). To install
+You don't need to tick it: it's installed automatically with [Screen snip + Narrate](../snip/). To install
 it on its own (for example, to give Orca a voice), tick it in the Frame Tweaks window, or:
 
 ```sh
@@ -86,7 +86,7 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
 
 ## Use
 
-- **Narrate** in [Screen snip](../snip/) reads the text in your snip aloud with Piper's voice.
+- **Narrate** in [Screen snip + Narrate](../snip/) reads the text in your snip aloud with Piper's voice.
 - **Orca**, KDE's screen reader, and other apps that speak through speech-dispatcher use
   espeak-ng. It sounds more robotic than Piper but starts speaking faster, which suits a
   screen reader. Orca's voice settings are in **System Settings → Accessibility → Screen Reader**.
@@ -119,7 +119,7 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
 
 ## Good to know
 
-- You can't remove it while Screen snip is installed: uninstall Screen snip first.
+- You can't remove it while Screen snip + Narrate is installed: uninstall it first.
 - After uninstalling, speech-dispatcher is back to SteamOS's setup, which has no voice.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
@@ -128,7 +128,7 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
 - **Changes:** Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall)
 - **Unusual access:** None beyond your home folder
-- **Undo:** `./install.sh uninstall speech` (after Screen snip)
+- **Undo:** `./install.sh uninstall speech` (after Screen snip + Narrate)
 <!-- /generated:changes -->
 
 ## Credits

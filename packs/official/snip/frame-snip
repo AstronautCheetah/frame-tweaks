@@ -1329,7 +1329,7 @@ class Snip(QWidget):
     def copy_text(self):
         text = ocr(self.snipped())
         if text is None:
-            notify("Copy text needs Tesseract", "Reinstall Screen snip in Frame Tweaks")
+            notify("Copy text needs Tesseract", "Reinstall Screen snip + Narrate in Frame Tweaks")
         elif not text:
             notify("No text found in the snip")
         else:
@@ -1352,7 +1352,7 @@ class Snip(QWidget):
         text = ocr(snip)
         if not text:
             notify("No text found in the snip" if text == "" else "Narrate needs Tesseract",
-                   "" if text == "" else "Reinstall Screen snip in Frame Tweaks")
+                   "" if text == "" else "Reinstall Screen snip + Narrate in Frame Tweaks")
             return self.close()
         if not PIPER.exists() or not VOICE.exists():
             notify("Narrate needs Piper", "Reinstall 'Speech engine' in Frame Tweaks")

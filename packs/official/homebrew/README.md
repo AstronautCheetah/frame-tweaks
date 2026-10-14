@@ -53,7 +53,7 @@ brew upgrade                # update everything it installed
 ```
 
 **Used by:** [Dictation](../dictation/) (wl-clipboard and whisper.cpp),
-[Android Mirror](../adb-scrcpy/) (scrcpy) and [Screen snip](../snip/) (Tesseract, for reading
+[Android Mirror](../adb-scrcpy/) (scrcpy) and [Screen snip + Narrate](../snip/) (Tesseract, for reading
 text in screenshots).
 
 ## How it works

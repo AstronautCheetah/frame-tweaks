@@ -92,7 +92,7 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   when the pad is hidden or the dashboard closes. Scrolling passes straight through.
 - **🎤** (Tools layer) starts and stops [Dictation](../dictation/), if it's installed. It turns
   red while recording and yellow while transcribing. The text goes to the app you're using.
-- **Snip** (Tools layer, the dashed rectangle) starts a [Screen snip](../snip/), if it's
+- **Snip** (Tools layer, the dashed rectangle) starts a [Screen snip + Narrate](../snip/), if it's
   installed.
 - **Launcher** (Tools layer, the SteamOS logo) taps Super, which opens the desktop's app menu.
 - **Unstick** (Tools layer): if the desktop acts as if Shift, Ctrl, Alt or Super were still

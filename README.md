@@ -105,7 +105,7 @@ them.
 |---|---|---|---|
 | ⌨️ | [**Dictation**](packs/official/dictation/) | Speech-to-text that runs on the headset itself, with whisper.cpp. Press a shortcut (or 🎤 on Arrow Pad's Tools layer) to start, press again to stop; the text is typed into the app you're using and copied to the clipboard. | Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset. |
 | ⌨️ | [**Arrow Pad**](packs/official/arrowpad/) | A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super, right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It opens in desktop mode or as its own VR panel, and never takes focus from the app you're using. | Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop. |
-| ✂️ | [**Screen snip**](packs/official/snip/) | Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it. | SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR. |
+| ✂️ | [**Screen snip + Narrate**](packs/official/snip/) | Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it. | SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR. |
 
 ### Convenience
 

@@ -1,5 +1,5 @@
 ---
-title: Screen snip
+title: Screen snip + Narrate
 emoji: ✂️
 category: Accessibility
 tier: core
@@ -28,7 +28,7 @@ undo: >-
   `./install.sh uninstall snip` (keeps Tesseract, your settings in
   `~/.config/frame-tweaks/snip.json` and your snips in `~/Pictures/Screenshots`)
 ---
-# Screen snip
+# Screen snip + Narrate
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it.
@@ -50,7 +50,7 @@ through the [Speech engine](../speech/) helper. Nothing else to do.
 ## Use
 
 Start a snip from [Arrow Pad](../arrowpad/): the **Tools** key, then **Snip** (the dashed
-rectangle). Or open **Screen snip** from the app menu.
+rectangle). Or open **Screen snip + Narrate** from the app menu.
 
 It takes a still picture of the window the Steam session has focused (the desktop, or a window
 you floated) and shows it full size:

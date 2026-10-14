@@ -60,7 +60,7 @@ Nothing to press. It acts in two cases:
   the window you had before, the same as clicking that window's button in the dashboard bar.
   If you dock the window again within that time, or pick another window yourself, it does
   nothing.
-- **The shown window closes** (a finished or cancelled [Screen snip](../snip/), say). Instead
+- **The shown window closes** (a finished or cancelled [Screen snip + Narrate](../snip/), say). Instead
   of falling back to Steam, the dashboard goes straight back to the window before it.
 
 It only goes back to a window that is still in the dashboard. If there's none, the dashboard
