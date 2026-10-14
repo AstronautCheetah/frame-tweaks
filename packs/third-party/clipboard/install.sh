@@ -39,7 +39,9 @@ else      # gone upstream: Frame Tweaks' copy of that commit's source (dev/mirro
 fi
 git -C "$SRC" apply "$TWEAK_DIR/keep-images.patch"
 echo keep-images > "$SRC/.sft-patched"
-cargo install --locked --force --path "$SRC" --root "$ROOT"
+# (Its build files go in the temporary folder too: with --path, cargo keeps them in $SRC/target,
+# about 350 MB that would stay.)
+cargo install --locked --force --path "$SRC" --root "$ROOT" --target-dir "$BUILD/target"
 install -m755 "$TWEAK_DIR/clipboard-sync-start" "$BIN/clipboard-sync-start"
 ln -sf "$ROOT/bin/clipboard-sync" "$BIN/clipboard-sync"
 

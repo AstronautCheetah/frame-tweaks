@@ -11,9 +11,18 @@ P="$ROOT/$PROFILE"
 BEGIN="// >>> frame-tweaks"; END="// <<< frame-tweaks"
 touch "$P/user.js"
 # Replace our block (between markers) and keep anything else the user has in user.js. (Before
-# 0.5 the markers said steam-frame-tweaks: those blocks go too.)
+# 0.5 the markers said steam-frame-tweaks: those blocks go too.) A start marker without its end
+# would have sed delete everything after it, the user's own lines too: stop instead.
+for m in frame-tweaks steam-frame-tweaks; do
+    awk -v b="// >>> $m" -v e="// <<< $m" 'index($0, b) == 1 { if (open) exit 1; open = 1 }
+        index($0, e) == 1 { open = 0 } END { exit open }' "$P/user.js" ||
+        die "$(t "%s has a '%s' line without its '%s' line: fix that by hand, then run this again." "$P/user.js" "// >>> $m" "// <<< $m")"
+done
 sed -i -e "\|^$BEGIN|,\|^$END|d" -e "\|^// >>> steam-frame-tweaks|,\|^// <<< steam-frame-tweaks|d" "$P/user.js"
 if [ "${1:-}" != "--remove" ]; then
+    # (After a last line without its newline, the start marker would join that line, and the
+    # block couldn't be found again: not even to remove it.)
+    [ -z "$(tail -c1 "$P/user.js")" ] || echo >> "$P/user.js"
     { echo "$BEGIN"; cat "$TWEAK_DIR/user.js"; echo "$END"; } >> "$P/user.js"
     say "$(t 'Anti-fingerprinting settings written to %s' "$P/user.js")"
 else
@@ -21,7 +30,7 @@ else
     # Firefox copied them into prefs.js, where they'd stay: take out the same names there too.
     # (Only while it's closed: it rewrites prefs.js when it quits.)
     if pgrep -f '/app/lib/firefox/firefox ' >/dev/null; then
-        warn "Firefox is running: quit it and run this again, or reset the settings in about:config."
+        warn "$(t 'Firefox is running: quit it and run this again, or reset the settings in about:config.')"
     elif [ -f "$P/prefs.js" ]; then
         names=$(sed -n 's/^user_pref("\([^"]*\)".*/\1/p' "$TWEAK_DIR/user.js")
         cp "$P/prefs.js" "$P/prefs.js.frame-tweaks-bak"

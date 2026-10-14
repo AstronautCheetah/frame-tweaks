@@ -94,7 +94,7 @@ a command line or in a temporary file, and creating one doesn't connect it.
 - **No kill switch:** if the tunnel drops, traffic goes out normally.
 - Your WireGuard private key is stored in the connection files (readable only by root) and in
   `~/.config/nordvpn-wg/private_key` (readable only by you), so locations can be added later.
-  Removing the tweak deletes both, along with the connections.
+  Removing the tweak deletes both, along with the connections. Reinstalling it (↻) keeps them.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
