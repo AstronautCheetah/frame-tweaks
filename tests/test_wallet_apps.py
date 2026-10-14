@@ -1,5 +1,7 @@
 """Wallet apps: the installer window's app lists, and wallet-launcher wrapping a system app."""
+import contextlib
 import importlib.machinery
+import io
 import importlib.util
 import os
 import tempfile
@@ -63,7 +65,9 @@ class SystemApp(unittest.TestCase):
         t = Path(tempfile.mkdtemp())
         apps, sysd = t / "apps", t / "sys"
         entry(sysd, "org.kde.dolphin", "dolphin %u", DBusActivatable="true")
-        with mock.patch.multiple(wl, APPS=apps, SOURCES=[], SYSTEM_SOURCES=[sysd], BACKUP_DIR=t / "orig"):
+        out = io.StringIO()                  # (what it reports, kept out of the test output)
+        with mock.patch.multiple(wl, APPS=apps, SOURCES=[], SYSTEM_SOURCES=[sysd], BACKUP_DIR=t / "orig"), \
+                contextlib.redirect_stdout(out):
             wl.add("org.kde.dolphin", electron=False, shared=True, gate=True)
             text = (apps / "org.kde.dolphin.desktop").read_text()
             self.assertIn("X-FrameTweaks-Wallet=true", text)
@@ -76,6 +80,7 @@ class SystemApp(unittest.TestCase):
             wl.remove("org.kde.dolphin")
             self.assertFalse((apps / "org.kde.dolphin.desktop").exists())     # system entry shows again
             self.assertTrue((sysd / "org.kde.dolphin.desktop").exists())
+        self.assertIn("original launcher restored", out.getvalue())
 
 
 loader2 = importlib.machinery.SourceFileLoader("at", str(ROOT / "wallet" / "app-timers"))

@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Fixed: installing the Firefox settings reported a failure whenever Firefox wasn't running, and
+  its status said "not applied" for profiles in Firefox's older folder (`~/.mozilla`).
+- Tests for Firefox's settings and NordVPN's status; the test run no longer prints messages.
 - **All settings under `~/.config/frame-tweaks/`:** Android Mirror's `phone.conf` and
   Dictation's `dictate.conf` move there from `~/.config` (on the next `./install.sh` run, or
   the next time `phone` / `dictate` runs).

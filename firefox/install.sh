@@ -29,4 +29,4 @@ else
         say "Reset them in prefs.js too (the previous copy: prefs.js.frame-tweaks-bak)."
     fi
 fi
-pgrep -f '/app/lib/firefox/firefox ' >/dev/null && warn "Firefox is running: restart it to apply."
+if pgrep -f '/app/lib/firefox/firefox ' >/dev/null; then warn "Firefox is running: restart it to apply."; fi
