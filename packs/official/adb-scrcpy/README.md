@@ -134,6 +134,10 @@ once).
    adb pair <ip>:<pairing-port> <code>
    ```
 
+Later, if Android Mirror can't connect because the phone forgot the Frame (or it's a new phone),
+it offers **Pair it again**: open *Pair device with pairing code* on the phone, and enter the
+six-digit code when asked. No terminal needed.
+
 ## Use
 1. On the phone, turn on *Wireless debugging*.
 2. Open **Android Mirror** from the app menu (or press **Open** on its row in Frame Tweaks, or
