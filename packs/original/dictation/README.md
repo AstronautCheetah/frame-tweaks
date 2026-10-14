@@ -18,6 +18,7 @@ source: {relation: uses, url: https://github.com/ggml-org/whisper.cpp}
 depends: [ydotool]
 icon: {file: frame-tweaks-dictate.png}
 run: {label: Dictate}
+config: [~/.config/frame-tweaks/dictate.conf]
 changes: >-
   `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry,
   `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history

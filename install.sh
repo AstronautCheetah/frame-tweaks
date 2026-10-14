@@ -3,7 +3,9 @@
 #
 #   ./install.sh                     graphical checklist (in desktop mode), else this help
 #   ./install.sh install ID... | all install components (dependencies are added automatically)
-#   ./install.sh uninstall ID... | all  remove components (settings kept)
+#   ./install.sh uninstall [--keep-settings|--remove-settings] ID... | all
+#                                    remove components; their settings are kept unless the
+#                                    option or ⚙ Preferences says to remove them
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
@@ -214,6 +216,9 @@ cmd_install() {
 }
 
 cmd_uninstall() {
+    local settings
+    settings=$(python3 lib/sft.py uninstall-settings)          # ⚙ Preferences: keep (default) or remove
+    case ${1:-} in --keep-settings) settings=keep; shift ;; --remove-settings) settings=remove; shift ;; esac
     [[ $# -eq 0 ]] && { echo "$(t 'uninstall what?')" >&2; exit 1; }
     if [[ $1 == all ]]; then           # everything installed, each tweak before what it depends on
         local i all=() order
@@ -240,11 +245,24 @@ cmd_uninstall() {
     for id in "$@"; do
         bold "── $(t 'removing %s' "$id")"; stop_processes "$id"
         # (As with install: a failure is reported, and the version record stays with what's left.)
-        if bash "${DIR[$id]}/uninstall.sh" 8>&-; then forget_version "$id"
+        if bash "${DIR[$id]}/uninstall.sh" 8>&-; then forget_version "$id"; uninstall_settings "$id" "$settings"
         else failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2; fi
         echo
     done
     [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
+}
+
+# uninstall_settings ID keep|remove: what's left of the tweak's settings (its manifest's config:
+# list) after its uninstall.sh: removed, or kept and named. (A reinstall doesn't come here.)
+uninstall_settings() {
+    local id=$1 how=$2 c kept=()
+    while IFS= read -r c; do
+        [[ -n $c ]] || continue
+        c=$HOME/${c#\~/}
+        [[ -e $c || -L $c ]] || continue
+        if [[ $how == remove ]]; then remove_files "$c"; else kept+=("${c/#$HOME/\~}"); fi
+    done < <(python3 lib/sft.py config "$id")
+    [[ ${#kept[@]} -eq 0 ]] || say "$(t 'Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)' "${kept[*]}" "$id")"
 }
 
 # Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:

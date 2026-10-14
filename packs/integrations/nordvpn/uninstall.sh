@@ -1,8 +1,9 @@
 #!/bin/bash
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
-# A reinstall (↻, FRAME_TWEAKS_REINSTALL) only replaces the programs: it keeps your setup (the
-# connections, and your key and locations in ~/.config/nordvpn-wg, which would take a new access
-# token to set up again) and doesn't disconnect.
+# A reinstall (↻, FRAME_TWEAKS_REINSTALL) only replaces the programs: it keeps the connections
+# and doesn't disconnect. Your key and locations (~/.config/nordvpn-wg, which would take a new
+# access token to set up again) are its settings: kept, or removed by ./install.sh uninstall as
+# the ⚙ Preferences say.
 keep=${FRAME_TWEAKS_REINSTALL:-}
 if [ -z "$keep" ]; then
     if [ -x "$BIN/nordvpn-wg" ]; then "$BIN/nordvpn-wg" down >/dev/null 2>&1 || true; fi
@@ -15,7 +16,5 @@ fi
 pkill -f "^$QT_VENV/bin/python $BIN/nordvpn-tray" 2>/dev/null || true
 restore_kconfig nordvpn
 remove_files "$ICONS/256x256/apps/frame-tweaks-nordvpn.png" "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$APPS/nordvpn-tray.desktop" "$HOME/.config/autostart/nordvpn-tray.desktop"
-if [ -n "$keep" ]; then say "$(t 'Kept your NordVPN connections and settings (~/.config/nordvpn-wg).')"
-else remove_files "$HOME/.config/nordvpn-wg"; fi
 # The PyQt6 venv is shared with Arrow Pad, Screen snip and the installer window.
 remove_qt_venv

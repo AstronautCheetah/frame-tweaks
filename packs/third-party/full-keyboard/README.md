@@ -20,6 +20,7 @@ source:
 icon: {theme: input-keyboard}
 run: {label: Open}
 processes: [/framekeyboard( |$)]
+config: [~/.config/framekeyboard]
 changes: >-
   A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with
   `~/.local/bin/framekeyboard` and an app-menu entry

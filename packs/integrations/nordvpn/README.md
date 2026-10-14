@@ -15,6 +15,7 @@ author: Frame Tweaks; uses NordVPN's servers and API
 icon: {file: frame-tweaks-nordvpn.png}
 run: {label: Tray}
 processes: [^~/.local/share/arrowpad/venv/bin/python ~/.local/bin/nordvpn-tray]
+config: [~/.config/nordvpn-wg]
 changes: >-
   `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart
   entry and session-restore setting (`ksmserverrc`, so the tray isn't started twice),

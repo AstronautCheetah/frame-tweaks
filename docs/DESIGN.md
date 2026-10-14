@@ -142,8 +142,11 @@ installed. The version records in `installed/` are used only for migrations.
 
 ### Uninstall
 
-`uninstall.sh` removes what `install.sh` added, keeps the user's settings and data, and says
-what it kept. `install.sh` refuses to remove a tweak that an installed tweak depends on, and
+`uninstall.sh` removes what `install.sh` added, keeps the user's data, and says what it kept.
+The tweak's settings (its manifest's `config:` list, and its `settings.file`) are left to
+`install.sh`: kept and named, or removed when ⚙ Preferences → Uninstalling (in
+`~/.config/frame-tweaks/uninstall-settings`) or `--remove-settings` says so. A reinstall always
+keeps them. `install.sh` refuses to remove a tweak that an installed tweak depends on, and
 `uninstall all` removes dependents first.
 
 Before changing a file the user owns, a tweak calls `backup_file`, and `restore_file` on

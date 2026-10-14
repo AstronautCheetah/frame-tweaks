@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Uninstalling: keep a tweak's settings, or remove them too,** a choice in ⚙ Preferences (kept
+  by default, as before). The uninstall names what it kept; `./install.sh uninstall
+  --remove-settings ID` (or `--keep-settings`) decides for one run. A reinstall (↻) always keeps
+  them. Tweaks list where they keep their settings in a new manifest field, `config:`.
 - **🐞 Report a problem** (was Diagnostics): saves the diagnostics report, says where, and opens
   the bug form with your version filled in, to attach it to; `./install.sh report` in a terminal.
   The crash page has it too.
@@ -22,6 +26,9 @@
   language (D and C in Spanish).
 
 ### Changed
+- **Uninstalling NordVPN keeps your key and locations** (`~/.config/nordvpn-wg`) unless ⚙
+  Preferences say to remove settings: it used to remove them, so setting it up again took a new
+  access token.
 - **Screen snip's VR panel has rounded corners,** like Arrow Pad's.
 - **Spanish: a second pass.** Frame Tweaks' own tools and tweaks have Spanish names (Teclado de
   flechas, Teclado completo, Espejo de Android, …), and what the text names in SteamVR, KDE,

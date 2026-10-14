@@ -1,6 +1,7 @@
-"""The installer window's ⚙ Preferences page: the language (every Frame Tweaks program follows it)
-and how this window behaves. The window's own choices are kept in
-~/.config/frame-tweaks/installer/window.json; the language in ~/.config/frame-tweaks/language."""
+"""The installer window's ⚙ Preferences page: the language (every Frame Tweaks program follows it),
+whether uninstalling a tweak removes its settings, and how this window behaves. The window's own
+choices are kept in ~/.config/frame-tweaks/installer/window.json; the language in
+~/.config/frame-tweaks/language; the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
 import html
 import json
 
@@ -87,6 +88,30 @@ class Preferences(QWidget):
         grid.addStretch(1)
         rows.addLayout(grid)
 
+        # Uninstalling: what happens to a tweak's settings (lib/sft.py UNINSTALL_PREF, which
+        # ./install.sh uninstall reads, so the terminal does the same).
+        rows.addWidget(self.heading(_("Uninstalling a tweak")))
+        note = QLabel(_("Its settings: kept, so it's set up as before if you install it again, or removed with it. "
+                        "Removing them also signs you out of Claude Desktop, takes VSCodium's extensions, and "
+                        "NordVPN's key (setting it up again takes a new access token). Data stays either way: "
+                        "the dictation history, adb's pairing keys, Claude Code's ~/.claude."))
+        note.setObjectName("desc")
+        note.setWordWrap(True)
+        rows.addWidget(note)
+        grid = QHBoxLayout()
+        grid.setSpacing(6)
+        self.uninstall_buttons = {}
+        for value, label in (("keep", _("Keep its settings")), ("remove", _("Remove its settings too"))):
+            b = QPushButton(label)
+            b.setCheckable(True)
+            b.setChecked(value == sft.uninstall_settings())
+            b.setObjectName("choice")
+            b.clicked.connect(lambda _on=False, v=value: self.choose_uninstall(v))
+            grid.addWidget(b)
+            self.uninstall_buttons[value] = b
+        grid.addStretch(1)
+        rows.addLayout(grid)
+
         rows.addWidget(self.heading(_("This window")))
         prefs = window_prefs()
         for key, (_default, label, about) in OPTIONS.items():
@@ -111,6 +136,12 @@ class Preferences(QWidget):
         i18n.set_preference(value)
         self.window.close_details()
         self.window.check_language()                    # (back on the list: it changes at once)
+
+    def choose_uninstall(self, value):
+        sft.set_uninstall_settings(value)
+        for v, b in self.uninstall_buttons.items():
+            b.setChecked(v == value)
+        self.window.say(_("Saved."), good=True)
 
     def set_pref(self, key, on):
         set_window_pref(key, on)
