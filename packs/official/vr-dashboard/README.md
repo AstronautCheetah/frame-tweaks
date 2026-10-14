@@ -35,19 +35,16 @@ test: {offline: true}
 ---
 # VR dashboard patching (helper)
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Lets the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips) and Android Mirror adjust SteamVR's dashboard. Installed automatically.
+
+**Why on a Steam Frame:** SteamVR's dashboard is a web page with no settings for these behaviours; each VR environment tweak is a small patch this injects while SteamVR runs.
+<!-- /generated:intro -->
+
 The shared part of the **VR environment** tweaks ([Curved world windows](../curvature/),
 [Back to the previous window](../float-return/), [Pick up when floating](../float-grab/), [Scroll strips](../scroll-strips/)). Installed automatically with them; each of
 those tweaks is one small patch, which you switch on or off by ticking it in the installer window.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches off each patch whose code changed
-> - **Changes:** `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in
-> - **🧪 Experimental:** The base the VR environment tweaks share. They rely on SteamVR's internal dashboard code, which Valve can change in any update: each patch is checked when SteamVR starts and switched off if its code changed (shown in its status) until a Frame Tweaks update catches up.
-> - **Unusual access:** **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame (sandboxed Flatpak apps included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed
-> - **Undo:** `./install.sh uninstall vr-dashboard` (after the VR environment tweaks)
-<!-- /generated:glance -->
 
 **Restart SteamVR once after installing** (reboot is easiest). SteamVR opens the local port
 the patches need only when it starts; `./install.sh status vr-dashboard` says when it's waiting.
@@ -70,6 +67,16 @@ the patches need only when it starts; `./install.sh status vr-dashboard` says wh
   `~/.config/systemd/user/steamvr.service.d/sft-dashboard.conf`. Home folder only.
 - Before this helper existed, Curved world windows did all this itself (`sft-curvature`); the
   first install of this helper moves that setup over.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes; after a SteamVR update it checks SteamVR's dashboard code and switches off each patch whose code changed
+- **Changes:** `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in
+- **🧪 Experimental:** The base the VR environment tweaks share. They rely on SteamVR's internal dashboard code, which Valve can change in any update: each patch is checked when SteamVR starts and switched off if its code changed (shown in its status) until a Frame Tweaks update catches up.
+- **Unusual access:** **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame (sandboxed Flatpak apps included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed
+- **Undo:** `./install.sh uninstall vr-dashboard` (after the VR environment tweaks)
+<!-- /generated:changes -->
 
 ## Credits
 The approach (SteamVR's dashboard DevTools port, patching the dashboard page) follows

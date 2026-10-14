@@ -29,17 +29,15 @@ test:
 ---
 # Memory caps
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Memory limits for Whisper (dictation), scrcpy (Android Mirror) and VSCodium, adjustable in one file.
+
+**Why on a Steam Frame:** One runaway app can use up the Frame's memory and stall VR. systemd caps an app per process group, without root.
+<!-- /generated:intro -->
+
 Heavy apps get a memory limit, so one runaway process can't use up the Frame's memory and
 stall VR: **Whisper** (dictation), **scrcpy** (Android Mirror) and **VSCodium**.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `~/.local/bin/capped`, `~/.config/frame-tweaks/memcap.conf`, a systemd drop-in for VSCodium's Flatpak scope
-> - **Unusual access:** Starts capped apps in their own systemd scope
-> - **Undo:** `./install.sh uninstall memcap` (keeps your limits file)
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install memcap
@@ -64,6 +62,15 @@ stopped (the rest of the headset keeps running). Changes apply the next time the
   limit is a systemd drop-in for every scope with that prefix.
 - Most other apps on the Frame run inside Steam's own session service, so they aren't capped
   individually. `./install.sh check-system` confirms the memory controller is available.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `~/.local/bin/capped`, `~/.config/frame-tweaks/memcap.conf`, a systemd drop-in for VSCodium's Flatpak scope
+- **Unusual access:** Starts capped apps in their own systemd scope
+- **Undo:** `./install.sh uninstall memcap` (keeps your limits file)
+<!-- /generated:changes -->
 
 ## Credits
 Idea from [Jovian-NixOS](https://github.com/Jovian-Experiments/Jovian-NixOS)'s early

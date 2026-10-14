@@ -28,6 +28,12 @@ undo: >-
 ---
 # Screen snip
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or read it aloud (Narrate). Arrow Pad's Tools layer has a button for it.
+
+**Why on a Steam Frame:** SteamOS has no screenshot tool, and none of the usual ones can select a region inside VR.
+<!-- /generated:intro -->
+
 Select a rectangle of the window you're using, then:
 
 - **Copy**: the picture, to the clipboard (desktop and, with [Shared clipboard](../clipboard/),
@@ -49,14 +55,6 @@ Select a rectangle of the window you're using, then:
   full-screen snip goes away, so you can carry on with anything else while it reads. A speed change applies at
   once (it reads sentence by sentence and restarts the current one).
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-> - **Changes:** `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
-> - **Unusual access:** Reads the picture of the window you're using (only when you start a snip)
-> - **Undo:** `./install.sh uninstall snip` (keeps Tesseract and your snips in `~/Pictures/Screenshots`)
-<!-- /generated:glance -->
 
 Start it from **Arrow Pad**: the **Tools** key, then **Snip** (the dashed rectangle). Or from
 the app menu: **Screen snip**. It freezes a picture of the window the Steam session has focused
@@ -74,6 +72,15 @@ domain), installed by the [Speech engine](../speech/) helper and pinned by check
 
 The same helper gives SteamOS's speech-dispatcher a voice (it has none of its own), which KDE's
 screen reader, Orca, uses.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
+- **Changes:** `frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper
+- **Unusual access:** Reads the picture of the window you're using (only when you start a snip)
+- **Undo:** `./install.sh uninstall snip` (keeps Tesseract and your snips in `~/Pictures/Screenshots`)
+<!-- /generated:changes -->
 
 ---
 Check: `./install.sh status snip` · Remove: `./install.sh uninstall snip`

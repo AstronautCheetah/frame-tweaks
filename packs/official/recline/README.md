@@ -52,20 +52,17 @@ upstream_readme: https://raw.githubusercontent.com/new-waifu/Recline-VR/ee7d4b3c
 ---
 # Recline
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you.
+
+**Why on a Steam Frame:** SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you.
+<!-- /generated:intro -->
+
 Use VR **lying down or reclined**. [Recline-VR](https://github.com/new-waifu/Recline-VR) by
 new-waifu rotates the whole tracked world, not just your heading: press **Recline recenter**
 and the direction you're looking becomes level and forward, at a chosen eye height. Every
 tracked device moves together, so your hands stay attached. **Reset to normal** puts it back.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder); after a SteamVR update it checks SteamVR's internals and turns off what changed. Reinstalling needs SteamOS's compiler and CMake
-> - **Changes:** Recline-VR built from source into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR
-> - **🧪 Experimental:** Hooks into SteamVR's driver interface, and (for the room view) into the Frame's camera service. It checks those internals each time SteamVR starts and turns the affected part off if they changed (the room view looks tilted while reclined, or the driver doesn't load; shown in its status) until Recline-VR catches up.
-> - **Unusual access:** Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the room-view fix, also inside the Frame's camera service
-> - **Undo:** `./install.sh uninstall recline`, then restart SteamVR
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install recline
@@ -104,6 +101,16 @@ when it starts. Installing builds Recline-VR on the Frame (under a minute) and r
   drawing that has crashed SteamVR's compositor on the Frame.
 - Uninstalling resets any recline, unregisters the panel and the driver, and removes
   `~/.local/share/recline-vr`. It keeps your panel options (`~/.config/recline-vr`).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder); after a SteamVR update it checks SteamVR's internals and turns off what changed. Reinstalling needs SteamOS's compiler and CMake
+- **Changes:** Recline-VR built from source into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR
+- **🧪 Experimental:** Hooks into SteamVR's driver interface, and (for the room view) into the Frame's camera service. It checks those internals each time SteamVR starts and turns the affected part off if they changed (the room view looks tilted while reclined, or the driver doesn't load; shown in its status) until Recline-VR catches up.
+- **Unusual access:** Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the room-view fix, also inside the Frame's camera service
+- **Undo:** `./install.sh uninstall recline`, then restart SteamVR
+<!-- /generated:changes -->
 
 ## Credits
 [Recline-VR](https://github.com/new-waifu/Recline-VR) is by new-waifu (MIT), with parts of the

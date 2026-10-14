@@ -31,17 +31,15 @@ test:
 ---
 # Dictation: local Whisper speech-to-text
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Speech-to-text that runs on the Frame's GPU (Whisper, ~3.5 s for 11 s of speech). One shortcut or Arrow Pad's Tools → 🎤 to start/stop; the text is typed into the focused app, copied, and logged.
+
+**Why on a Steam Frame:** Typing on a VR keyboard with controller lasers is slow. The Frame's Adreno GPU is fast enough to transcribe locally, so nothing leaves the headset.
+<!-- /generated:intro -->
+
 Speech-to-text that runs entirely on the Frame: whisper.cpp on the GPU (Vulkan).
 The `small.en` model transcribes ~11 s of speech in ~3.5 s. Nothing leaves the device.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `~/.local/bin/dictate`, `~/.config/frame-tweaks/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
-> - **Unusual access:** Microphone while recording; types through ydotool
-> - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf` and your dictation history)
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install dictation
@@ -90,6 +88,15 @@ Log: `/run/user/$UID/dictate/dictate.log`. Last recording: `/run/user/$UID/dicta
 - whisper.cpp's Vulkan backend crashes in the Gamescope WSI layer, so it runs with `DISABLE_GAMESCOPE_WSI=1`.
 
 **On a controller button:** see [Dictate and Lock Wallet on a controller button](../../../docs/controller-shortcuts.md).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `~/.local/bin/dictate`, `~/.config/frame-tweaks/dictate.conf`, Whisper model in `~/.local/share/whisper`; Homebrew `wl-clipboard`
+- **Unusual access:** Microphone while recording; types through ydotool
+- **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf` and your dictation history)
+<!-- /generated:changes -->
 
 ## Credits
 [whisper.cpp](https://github.com/ggml-org/whisper.cpp) (MIT) and OpenAI's Whisper models do the transcription; [ydotool](https://github.com/ReimuNotMoe/ydotool) (AGPL-3.0) types. Alternatives: [frame-voice](https://github.com/techieyann/frame-voice), [whisper-frame](https://github.com/groffta/whisper-frame). See also [CREDITS.md](../../../CREDITS.md).

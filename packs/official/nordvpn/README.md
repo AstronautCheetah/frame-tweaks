@@ -24,18 +24,16 @@ undo: "`./install.sh uninstall nordvpn`"
 ---
 # NordVPN that survives SteamOS updates
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates.
+
+**Why on a Steam Frame:** The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs.
+<!-- /generated:intro -->
+
 Installers that put NordVPN's own app into `/usr` (e.g. scripts that unlock the read-only
 root and use pacman) lose it at **every SteamOS update**, because the update replaces the
 whole system partition. Your settings in `/var` and `/etc` remain, but `nordvpn` is gone.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)
-> - **Changes:** `nordvpn-wg`, tray app, KDE autostart entry
-> - **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`)
-> - **Undo:** `./install.sh uninstall nordvpn`
-<!-- /generated:glance -->
 
 This uses NordVPN's WireGuard servers (NordLynx) as ordinary **NetworkManager** connections
 instead. They live in `/etc/NetworkManager/system-connections`, which updates keep, and
@@ -82,6 +80,15 @@ Default locations: US, CA, GB, NL, CH, DE, JP (edit `~/.config/nordvpn-wg/locati
   connects immediately.
 - The private key lives in the system connection files (root-only) and in
   `~/.config/nordvpn-wg/private_key` (mode 600, for adding locations later).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)
+- **Changes:** `nordvpn-wg`, tray app, KDE autostart entry
+- **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via `nmcli`)
+- **Undo:** `./install.sh uninstall nordvpn`
+<!-- /generated:changes -->
 
 ## Credits
 Uses NordVPN's public server API and NordLynx (WireGuard). NordVPN is a trademark of Nord Security; this project isn't affiliated with it. See also [CREDITS.md](../../../CREDITS.md).

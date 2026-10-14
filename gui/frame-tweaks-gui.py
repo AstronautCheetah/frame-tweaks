@@ -367,6 +367,8 @@ class Details(QWidget):
             text = manifest.front_matter(comp["readme"].read_text())[1]
         except (OSError, manifest.ManifestError):
             text = "_No README._"
+        # (Its opening, what it is and why, is in the table above already.)
+        text = re.sub(r"<!-- generated:intro .*?<!-- /generated:intro -->\n*", "", text, flags=re.S)
         readme.setMarkdown(readme_links(text, comp))
         # (toHtml() pins the font and link colour it saw; dropping them keeps the window's style.)
         html_ = re.sub(r'<body style="[^"]*">', "<body>", fit_images(with_copy(readme.toHtml())), count=1)

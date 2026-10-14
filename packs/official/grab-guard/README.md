@@ -22,19 +22,17 @@ undo: "`./install.sh uninstall grab-guard`"
 ---
 # Grab guard: notice when desktop mode takes all input
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Tells you when desktop mode has taken all input (windows stop responding) and how to undo it.
+
+**Why on a Steam Frame:** A Right Ctrl press makes desktop mode grab every key and click; nothing on screen says so except its window title.
+<!-- /generated:intro -->
+
 **Problem:** desktop mode on the Frame is a nested KWin running as a window of the Steam session.
 **A Right Ctrl press toggles its input grab.** While it's grabbed, every key and click goes to
 the desktop: Frame Tweaks, floating windows and the rest stop responding, and nothing says why
 except the desktop window's title ("Press right control to **ungrab** input").
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `grab-guard`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs`
-> - **Unusual access:** **Reads every keyboard's key presses**, and the Steam session's display's (only to notice Right Ctrl; nothing else is kept)
-> - **Undo:** `./install.sh uninstall grab-guard`
-<!-- /generated:glance -->
 
 **Fix:** a small watcher (`grab-guard`, a user service) checks that title every second. When
 the grab turns on it shows a notification: tap **Right Ctrl** on a keyboard once to release it.
@@ -51,6 +49,15 @@ Keyboard does): `~/.local/state/frame-tweaks/logs/grab-guard.log`, or `grab-guar
 It never sends a key itself: sending Right Ctrl is exactly what flips the grab, and Frame
 Tweaks' own key clean-ups (Arrow Pad's Unstick, the stuck-key reset) leave it out for that
 reason.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `grab-guard`, user service `grab-guard`, a log in `~/.local/state/frame-tweaks/logs`
+- **Unusual access:** **Reads every keyboard's key presses**, and the Steam session's display's (only to notice Right Ctrl; nothing else is kept)
+- **Undo:** `./install.sh uninstall grab-guard`
+<!-- /generated:changes -->
 
 ---
 Check: `./install.sh status grab-guard` · Remove: `./install.sh uninstall grab-guard`

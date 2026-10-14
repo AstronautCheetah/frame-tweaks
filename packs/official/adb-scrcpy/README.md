@@ -81,17 +81,14 @@ undo: "`./install.sh uninstall adb-scrcpy`"
 ---
 # Android Mirror: wireless adb + scrcpy
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Mirror and control your Android phone in a desktop window (scrcpy over wireless adb). Finds the phone's changing port automatically.
+
+**Why on a Steam Frame:** Use your phone without taking the headset off. Google ships `adb` only for x86, so this installs an aarch64 build that runs on the Frame.
+<!-- /generated:intro -->
+
 Mirror and control an Android phone in a desktop window.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone
-> - **🧪 Experimental:** Only the VR extras: aimed laser clicks, joystick scrolling and turning with the phone rely on SteamVR's internal dashboard code and scrcpy's control protocol. After an update of either they switch themselves off, and the mirror works as a plain window.
-> - **Unusual access:** Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037)
-> - **Undo:** `./install.sh uninstall adb-scrcpy`
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install adb-scrcpy
@@ -164,6 +161,16 @@ The phone may display its VPN address (like `10.2.0.2`), which you can't reach. 
 advertises its real LAN address over mDNS, and that's what `phone` uses. Check with
 `avahi-browse -rt _adb-tls-connect._tcp`. If the phone isn't visible at all, enable
 the VPN's "allow LAN connections" option.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone
+- **🧪 Experimental:** Only the VR extras: aimed laser clicks, joystick scrolling and turning with the phone rely on SteamVR's internal dashboard code and scrcpy's control protocol. After an update of either they switch themselves off, and the mirror works as a plain window.
+- **Unusual access:** Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037)
+- **Undo:** `./install.sh uninstall adb-scrcpy`
+<!-- /generated:changes -->
 
 ## Credits
 [scrcpy](https://github.com/Genymobile/scrcpy) (Apache-2.0); `adb` from Android's platform tools (Apache-2.0) as packaged by [Arch Linux ARM](https://archlinuxarm.org). See also [CREDITS.md](../../../CREDITS.md).

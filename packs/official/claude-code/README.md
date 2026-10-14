@@ -21,17 +21,15 @@ undo: "`./install.sh uninstall claude-code`"
 ---
 # Claude Code (command line)
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Anthropic's coding agent in the terminal (`claude`), via Anthropic's own installer.
+
+**Why on a Steam Frame:** The native installer runs without root on arm64 and updates itself, so SteamOS updates leave it alone.
+<!-- /generated:intro -->
+
 Anthropic's coding agent in the terminal: `claude` in Konsole. It reads and edits files in
 the folder you start it in and runs commands there, asking first.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer)
-> - **Unusual access:** Downloads Anthropic's installer over HTTPS
-> - **Undo:** `./install.sh uninstall claude-code`
-<!-- /generated:glance -->
 
 ```sh
 ./install.sh install claude-code
@@ -47,6 +45,15 @@ leave it alone. If `claude` is already installed another way (for example Homebr
 **▶ Open** starts it in a new Konsole window in your home folder.
 
 Remove: `./install.sh uninstall claude-code` (keeps `~/.claude` and your login).
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer)
+- **Unusual access:** Downloads Anthropic's installer over HTTPS
+- **Undo:** `./install.sh uninstall claude-code`
+<!-- /generated:changes -->
 
 ## Credits
 Made by [Anthropic](https://www.anthropic.com/claude-code). This tweak only runs Anthropic's installer.

@@ -25,19 +25,17 @@ upstream_readme: https://raw.githubusercontent.com/dnut/clipboard-sync/138a59b8f
 ---
 # Clipboard: one clipboard for desktop mode and VR windows
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Copy in a floating VR window, paste in the desktop, and back.
+
+**Why on a Steam Frame:** The Frame's VR session and its nested desktop each have their own clipboard. This runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from upstream, as steam-frame-nix does.
+<!-- /generated:intro -->
+
 **Problem:** the Frame runs two sessions: Steam/VR (its floating windows live on X display
 `:0`) and the nested Plasma desktop (its own Wayland and X `:2`). They have **separate
 clipboards**, so copying in a floating VR window and pasting in the desktop (or back) doesn't
 work.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `clipboard-sync` built from source (with a temporary, pinned Rust toolchain), KDE autostart entry
-> - **Unusual access:** Reads and writes both sessions' clipboards
-> - **Undo:** `./install.sh uninstall clipboard`
-<!-- /generated:glance -->
 
 **Fix:** [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) watches every X11 and
 Wayland clipboard it can reach and keeps them in sync. Started with the desktop session, it
@@ -61,6 +59,15 @@ sees both.
 - Starts with desktop mode via KDE autostart (`~/.config/autostart/clipboard-sync.desktop`).
   It needs the desktop session's environment: started from VR or a user service, it wouldn't
   see the desktop's clipboard.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `clipboard-sync` built from source (with a temporary, pinned Rust toolchain), KDE autostart entry
+- **Unusual access:** Reads and writes both sessions' clipboards
+- **Undo:** `./install.sh uninstall clipboard`
+<!-- /generated:changes -->
 
 ## Credits
 This is the approach of [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s

@@ -32,18 +32,16 @@ undo: >-
 ---
 # Arrow Pad
 
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+Floating pad with arrows, Home/End, PgUp/PgDn, F-keys, one-shot Ctrl/Alt/Super, right/middle-click toggles, clipboard keys and a 🎤 button. Opens in desktop mode or as its own VR window; never steals focus.
+
+**Why on a Steam Frame:** Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop.
+<!-- /generated:intro -->
+
 A compact, always-on-top pad for desktop mode with the keys Steam's on-screen
 keyboard lacks. It never steals focus, so whatever you tap goes to the app you're
 working in.
 
-<!-- generated:glance (dev/gen-docs.py, from each tweak's README front matter) -->
-> **At a glance**
->
-> - **Survives SteamOS updates:** Yes (everything is in your home folder)
-> - **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
-> - **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
-> - **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)
-<!-- /generated:glance -->
 
 ![Arrow Pad, main layer](screenshot.png) ![Arrow Pad, Tools layer](screenshot-tools.png)
 
@@ -152,6 +150,15 @@ Einfg, Pos1, Bild↑*, French *Échap, Suppr, Début*, Spanish *Supr, Inicio, Re
 - Single instance via a `QLocalServer` socket (`arrowpad-$UID`).
 - PyQt6 in a private venv (`~/.local/share/arrowpad/venv`, ~280 MB), because SteamOS
   ships no Python GUI bindings.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (incl. a ~280 MB PyQt6 venv)
+- **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **R/M keys grab the pointer on the Steam display (`:0`) for one click** (max 20 s) and replay it with XTEST
+- **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json`)
+<!-- /generated:changes -->
 
 ## Credits
 Look, toolbar, pin/recenter/size controls and haptic values from [TaiKeid/steam-frame-full-keyboard](https://github.com/TaiKeid/steam-frame-full-keyboard) (MIT); one-shot modifiers and the F-key layer from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s VR keyboard (Apache-2.0). Icons: KDE Breeze (LGPL-3.0). Haptics via [pyopenvr](https://github.com/cmbruns/pyopenvr) (BSD). See also [CREDITS.md](../../../CREDITS.md).
