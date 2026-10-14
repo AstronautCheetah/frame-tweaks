@@ -61,7 +61,7 @@ JS_TEXT = re.compile(r"""\b[TN]\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")\
 # t 'text' or t "text" (no $ in it): see lib/i18n.sh
 T_CALL = re.compile(r"""(?:^|[\s;&|(`])t\s+(?:'([^']*)'|"((?:[^"\\$`]|\\.)*)"(?=[\s;&|)`]|$))""", re.M)
 T_DOLLAR = re.compile(r"""(?:^|[\s;&|(`])t\s+"(?:[^"\\]|\\.)*\$""", re.M)
-FUNCS = {"_": ("msgid",), "N_": ("msgid",), "ngettext": ("msgid", "msgid_plural"), "pgettext": ("msgctxt", "msgid")}
+FUNCS = {"_": ("msgid",), "N_": ("msgid",), "NP_": ("msgctxt", "msgid"), "ngettext": ("msgid", "msgid_plural"), "pgettext": ("msgctxt", "msgid")}
 
 
 def quote(s):

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Added
+- **⚙ Preferences** in the window, left of Show hidden: the language (follow the keyboard, or
+  choose one for every Frame Tweaks program), haptic ticks on the window's buttons, its controller
+  buttons in VR, and whether it looks for a new release when it opens.
+- **Arrow Pad and Screen snip switch language with the window:** it announces a change, and they
+  follow (they no longer check the keyboard themselves).
+- **Arrow Pad's key legends are translated:** what each language's keyboards print (RePág,
+  Inicio, Supr in Spanish); the mouse keys show the initial of "Right" and "Middle" in your
+  language (D and C in Spanish).
+
 ### Changed
 - **Spanish: a second pass.** Frame Tweaks' own tools and tweaks have Spanish names (Teclado de
   flechas, Teclado completo, Espejo de Android, …), and what the text names in SteamVR, KDE,
@@ -9,6 +19,11 @@
   sistema", "Depuración inalámbrica").
 
 ### Fixed
+- **Pasting a snip's image gave its HTML as text** (`<img src="data:…`) wherever the Shared
+  clipboard had carried it: clipboard-sync took the image's HTML form for text. It now shares only
+  plain text, so the image stays an image (an update rebuilds Shared clipboard with the fix).
+- **The window mixed English and Spanish** when it was started by something that passed on
+  another language: the tweaks' titles and descriptions were read before the window chose its own.
 - **Status lines stayed in English** when the window was in Spanish: the window passed on the
   language the installer found when it opened it. It now passes on its own, and checks the
   statuses again when the language changes.

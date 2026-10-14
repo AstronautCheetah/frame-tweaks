@@ -105,6 +105,46 @@ class Inherited(unittest.TestCase):
                 self.assertEqual(i18n.wanted_languages(), [])
 
 
+class PreferenceAndAnnouncement(unittest.TestCase):
+    def setUp(self):
+        self.d = Path(tempfile.mkdtemp())
+        self.addCleanup(subprocess.run, ["rm", "-rf", str(self.d)])
+        for name, value in (("PREFERENCE", self.d / "language"), ("ANNOUNCED", self.d / "run/language")):
+            p = mock.patch.object(i18n, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_chosen_language_beats_the_keyboard(self):
+        with mock.patch.object(i18n, "keyboard_language", lambda: "de"), mock.patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(i18n.wanted_languages(), ["de"])
+            i18n.set_preference("es_419")
+            self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
+            i18n.set_preference("en")
+            self.assertEqual(i18n.wanted_languages(), [])
+            i18n.set_preference("keyboard")
+            self.assertEqual(i18n.wanted_languages(), ["de"])
+
+    def test_programs_follow_the_window(self):
+        """The window announces; a Qt program watching switches (inotify, no polling)."""
+        from PyQt6.QtCore import QCoreApplication, QObject
+        app = QCoreApplication.instance() or QCoreApplication([])
+        (self.d / "es_419.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Close"\nmsgstr "Cerrar"\n')
+        heard = []
+        owner = QObject()
+        with mock.patch.object(i18n, "LOCALE", self.d), mock.patch.object(i18n, "CATALOGUE", i18n.Catalogue([])), \
+                mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+            i18n.follow_announcements(owner, lambda: heard.append(i18n._("Close")))
+            i18n.announce("es_419")
+            for _n in range(50):
+                app.processEvents()
+                if heard:
+                    break
+                import time
+                time.sleep(0.02)
+            self.assertEqual(heard, ["Cerrar"])
+
+
 class Keyboard(unittest.TestCase):
     """The active keyboard's language: Steam's VR keyboard (VR session) or KDE's layout (desktop),
     looked at no more than once every 5 s."""

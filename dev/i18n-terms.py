@@ -10,7 +10,8 @@ names in other software (SteamVR's "Float in World", KDE's "System Settings", â€
                                     how those programs translate a word or phrase (for the
                                     glossary's own terms: "Dashboard", "Passthrough", â€¦)
 
-It reads the translations those programs install (a Steam Frame has all of them; a source that
+It reads the translations those programs install (SteamVR, Steam, Claude Desktop, Qt, KDE: a
+Steam Frame has all of them; a source that
 isn't on this machine is skipped, and said so), and Android's Settings app's (the phone side of
 Android Mirror), downloaded once from the Android source into ~/.cache/frame-tweaks/i18n-terms. Use it before a translation pass: the terms go
 with the glossary (locale/BATCH.md)."""
@@ -41,7 +42,9 @@ ANDROID_FILES = ["platform_frameworks_base/main/packages/SettingsLib/res/{}/stri
                  "platform_packages_apps_settings/main/res/{}/strings.xml",
                  "platform_packages_apps_settings/main/res-product/{}/strings.xml"]
 CACHE = HOME / ".cache/frame-tweaks/i18n-terms"
-SOURCES = ("SteamVR", "Steam", "Android", "Claude Desktop", "KDE")      # (the first one wins a disagreement)
+QT = Path("/usr/share/qt6/translations")
+LCONVERT = Path("/usr/lib/qt6/bin/lconvert")
+SOURCES = ("SteamVR", "Steam", "Android", "Claude Desktop", "Qt", "KDE")      # (the first one wins a disagreement)
 
 
 def clean(text):
@@ -132,6 +135,19 @@ def claude(lang):
             yield from ((a[k], b[k]) for k in a if isinstance(a[k], str) and isinstance(b.get(k), str))
 
 
+def qt(lang):
+    """Qt's own translations (key names, standard dialogs): its .qm files, read through lconvert."""
+    import subprocess
+    if not LCONVERT.exists():
+        return
+    for code in dict.fromkeys([lang, lang.split("_")[0]]):
+        for qm in sorted(QT.glob(f"*_{code}.qm")):
+            r = subprocess.run([str(LCONVERT), "-i", str(qm), "-of", "po", "-o", "-"], capture_output=True, text=True)
+            for (_ctx, msgid), strs in i18n.parse_po(r.stdout).items():
+                if strs[0]:
+                    yield msgid, strs[0]
+
+
 def kde(lang):
     for code in dict.fromkeys([lang, lang.split("_")[0]]):
         for mo in sorted((KDE / code / "LC_MESSAGES").glob("*.mo")):
@@ -148,7 +164,7 @@ def kde(lang):
 def official(lang):
     """{English phrase: [(translation, source, count)]}, the most used translation first."""
     found, here = collections.defaultdict(collections.Counter), []
-    for name, source in zip(SOURCES, (steamvr, steam, android, claude, kde)):
+    for name, source in zip(SOURCES, (steamvr, steam, android, claude, qt, kde)):
         n = 0
         for en, tr in source(lang):
             en, tr = clean(en), clean(tr)

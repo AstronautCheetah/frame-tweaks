@@ -27,8 +27,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
+    import i18n
     from i18n import _, N_, ngettext  # noqa: F401
 except ImportError:                       # (not installed by Frame Tweaks: English)
+    i18n = None
+
     def _(text):
         return text
 
@@ -141,12 +144,28 @@ def to_clipboard(data, mime):
 
 
 def icon_button(b, icon, tip):
-    """An icon-only button (Breeze), named by its tooltip."""
+    """An icon-only button (Breeze), named by its tooltip (English, N_; shown translated)."""
     b.setText("")
     b.setIcon(breeze(icon))
     b.setIconSize(QSize(30, 30))
-    b.setToolTip(tip)
-    b.setAccessibleName(tip)
+    tr_tip(b, tip)
+
+
+def tr_tip(w, tip):
+    """A tooltip (and accessible name) in the user's language, kept in English too so it can
+    follow a change of language (retranslate)."""
+    w.setProperty("tr_tip", tip)
+    w.setToolTip(_(tip))
+    w.setAccessibleName(_(tip))
+
+
+def retranslate_tips(root):
+    from PyQt6.QtWidgets import QWidget
+    for w in [root, *root.findChildren(QWidget)]:
+        tip = w.property("tr_tip")
+        if tip:
+            w.setToolTip(_(tip))
+            w.setAccessibleName(_(tip))
 
 
 # A plain gear (Breeze's "configure" is sliders): the same shape as Scroll strips' gear in VR.
@@ -520,7 +539,7 @@ class SpeechConfig(QWidget):
         lay.addLayout(grid)
         foot = QHBoxLayout()
         self.apply = QPushButton(_("Apply"))
-        self.apply.setToolTip(_("Download the chosen language's voice if needed, and switch"))
+        tr_tip(self.apply, N_("Download the chosen language's voice if needed, and switch"))
         self.apply.clicked.connect(self.run_apply)
         foot.addWidget(self.apply)
         self.state = QLabel()
@@ -595,6 +614,8 @@ class NarrationWindow(QWidget):
         self.panel, self.speed, self.narrator, self.collapsed = panel, speed, None, False
         self.toggled = False                     # the last resize was Collapse/Expand (see pivot)
         self.setWindowTitle(_("Screen snip: narrating"))
+        if i18n is not None:          # (the installer window announces a new language: no polling)
+            i18n.follow_announcements(self, self.retranslate)
         self.setStyleSheet(self.PANEL_STYLE if panel else self.STYLE)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -617,15 +638,15 @@ class NarrationWindow(QWidget):
         lay.addWidget(self.state)
         row = QHBoxLayout()
         self.toggle = QPushButton()
-        icon_button(self.toggle, "media-playback-stop", _("Stop"))
+        icon_button(self.toggle, "media-playback-stop", N_("Stop"))
         self.toggle.clicked.connect(self.stop_or_again)
         row.addWidget(self.toggle)
         self.pause_button = QPushButton()
-        icon_button(self.pause_button, "media-playback-pause", _("Pause"))
+        icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
         self.pause_button.clicked.connect(self.pause_or_resume)
         row.addWidget(self.pause_button)
         self.view_button = QPushButton(_("Show text"))
-        self.view_button.setToolTip(_("Switch between the snip's image and the text read from it"))
+        tr_tip(self.view_button, N_("Switch between the snip's image and the text read from it"))
         self.view_button.clicked.connect(self.toggle_view)
         row.addWidget(self.view_button)
         row.addStretch(1)
@@ -641,13 +662,13 @@ class NarrationWindow(QWidget):
         # Second row: the text itself, and the panel.
         row2 = QHBoxLayout()
         self.copy_image_button = QPushButton(_("Copy image"))
-        self.copy_image_button.setToolTip(_("Put the snip's image on the clipboard"))
+        tr_tip(self.copy_image_button, N_("Put the snip's image on the clipboard"))
         self.copy_image_button.clicked.connect(self.copy_image)
         copy = QPushButton(_("Copy text"))
-        copy.setToolTip(_("Put the text being read on the clipboard"))
+        tr_tip(copy, N_("Put the text being read on the clipboard"))
         copy.clicked.connect(self.copy_text)
         paste = QPushButton()
-        icon_button(paste, "edit-paste", _("Paste: read the clipboard's text instead"))
+        icon_button(paste, "edit-paste", N_("Paste: read the clipboard's text instead"))
         paste.clicked.connect(self.paste_text)
         # Collapse at both ends (icon only on the left), so it can be collapsed toward either side;
         # the copy buttons centred between equal-width ends.
@@ -656,12 +677,12 @@ class NarrationWindow(QWidget):
         for l in (left_lay, right_lay):
             l.setContentsMargins(0, 0, 0, 0)
         close = QPushButton()
-        icon_button(close, "window-close", _("Close"))
+        icon_button(close, "window-close", N_("Close"))
         snip = QPushButton()                      # a new snip; it's read here (see load)
-        icon_button(snip, "select-rectangular", _("Snip something new: it's read here"))
+        icon_button(snip, "select-rectangular", N_("Snip something new: it's read here"))
         snip.clicked.connect(start_snip)
         gear = QPushButton()
-        icon_button(gear, "configure", _("Settings: Narrate's voice and language"))
+        icon_button(gear, "configure", N_("Settings: Narrate's voice and language"))
         gear.setIcon(gear_icon())
         gear.clicked.connect(self.open_config)
         close.clicked.connect(self.close)
@@ -671,7 +692,7 @@ class NarrationWindow(QWidget):
             collapse_left = QPushButton()
             collapse_left.setIcon(breeze("expand"))      # (Breeze's "expand" is the down chevron)
             collapse_left.setIconSize(QSize(30, 30))
-            collapse_left.setToolTip(_("Collapse"))
+            tr_tip(collapse_left, N_("Collapse"))
             collapse_left.setStyleSheet("min-width: 0px; padding: 11px 12px;")
             collapse_left.clicked.connect(lambda: self.collapse(collapse_left))
             left_lay.addWidget(collapse_left)
@@ -702,7 +723,7 @@ class NarrationWindow(QWidget):
         expand = QPushButton()
         expand.setIcon(breeze("collapse"))                # (and its "collapse" the up chevron)
         expand.setIconSize(QSize(36, 36))
-        expand.setToolTip(_("Expand"))
+        tr_tip(expand, N_("Expand"))
         expand.setStyleSheet("min-width: 0px; padding: 10px;")
         expand.clicked.connect(self.expand)
         self.expand_button = expand
@@ -725,14 +746,21 @@ class NarrationWindow(QWidget):
         self.copy_image_button.setEnabled(image is not None)
         self.show_view()
         self.state.setText(_("Preparing…"))
-        icon_button(self.toggle, "media-playback-stop", _("Stop"))
-        icon_button(self.pause_button, "media-playback-pause", _("Pause"))
+        icon_button(self.toggle, "media-playback-stop", N_("Stop"))
+        icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
         self.pause_button.setEnabled(True)
         self.narrator = Narrator(text, self.speed)
         self.narrator.progress.connect(lambda i, n: self.state.setText(_("Reading aloud: part {part} of {count}").format(part=i + 1, count=n)))
         self.narrator.finished.connect(self.done)
         self.narrator.start()
         self.expand() if self.collapsed else self.fit()
+
+    def retranslate(self):
+        """The installer window switched language: the tooltips and labels here follow (a state
+        line changes with the next step)."""
+        self.setWindowTitle(_("Screen snip: narrating"))
+        retranslate_tips(self)
+        self.view_button.setText(_("Show image") if self.view == "text" else _("Show text"))
 
     def show_view(self):
         """The snip's image, or the text (OCR'd or pasted)."""
@@ -867,37 +895,37 @@ class NarrationWindow(QWidget):
             self.narrator.set_speed(self.speed)
             if self.narrator.paused:                     # a new speed carries on reading
                 self.narrator.paused = False
-                icon_button(self.pause_button, "media-playback-pause", _("Pause"))
+                icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
                 self.state.setText(_("Reading aloud…"))
 
     def done(self):
         self.state.setText(_("Finished."))
-        icon_button(self.toggle, "media-playlist-repeat", _("Read it again"))
+        icon_button(self.toggle, "media-playlist-repeat", N_("Read it again"))
         self.pause_button.setEnabled(False)
 
     def pause_or_resume(self):
         if self.narrator.paused:
             self.narrator.resume()
-            icon_button(self.pause_button, "media-playback-pause", _("Pause"))
+            icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
             self.state.setText(_("Reading aloud…"))
         else:
             self.narrator.pause()
-            icon_button(self.pause_button, "media-playback-start", _("Resume"))
+            icon_button(self.pause_button, "media-playback-start", N_("Resume"))
             self.state.setText(_("Paused."))
 
     def stop_or_again(self):
         if self.narrator.stopped or self.toggle.text().startswith("▶"):
             self.narrator.speed = self.speed
-            icon_button(self.toggle, "media-playback-stop", _("Stop"))
+            icon_button(self.toggle, "media-playback-stop", N_("Stop"))
             self.state.setText(_("Reading aloud…"))
-            icon_button(self.pause_button, "media-playback-pause", _("Pause"))
+            icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
             self.pause_button.setEnabled(True)
             self.narrator.again()
         else:
             self.narrator.stop()
             self.state.setText(_("Stopped."))
-            icon_button(self.toggle, "media-playlist-repeat", _("Read it again"))
-            icon_button(self.pause_button, "media-playback-pause", _("Pause"))
+            icon_button(self.toggle, "media-playlist-repeat", N_("Read it again"))
+            icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
             self.pause_button.setEnabled(False)
 
     def closeEvent(self, ev):
