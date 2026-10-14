@@ -113,7 +113,12 @@ ensure_menu_language() {
         "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "PathChanged=%h/.config/frame-tweaks/language" "" \
         "[Install]" "WantedBy=default.target" > "$u/$MENU_UNIT.path.new"
     printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
-        "[Service]" "Type=oneshot" "ExecStart=/usr/bin/python3 $py menus" > "$u/$MENU_UNIT.service.new"
+        "[Service]" "Type=oneshot" "ExecStart=/usr/bin/python3 $py menus" \
+        "# (It rewrites only Frame Tweaks' menu entries: the rest of the system is out of its reach.)" \
+        "NoNewPrivileges=yes" "ProtectSystem=strict" "ProtectHome=read-only" \
+        "ReadWritePaths=-%h/.local/share/applications -%h/.local/share/frame-tweaks/launcher-originals" \
+        "PrivateTmp=yes" "PrivateNetwork=yes" "RestrictAddressFamilies=AF_UNIX" "LockPersonality=yes" \
+        "RestrictRealtime=yes" "RestrictNamespaces=yes" "SystemCallArchitectures=native" > "$u/$MENU_UNIT.service.new"
     for f in "$u/$MENU_UNIT.path" "$u/$MENU_UNIT.service"; do
         if cmp -s "$f.new" "$f"; then rm -f "$f.new"; else mv "$f.new" "$f"; changed=1; fi
     done

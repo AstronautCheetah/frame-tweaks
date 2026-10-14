@@ -6,8 +6,11 @@ ExecStart=%h/.local/bin/app-timers --run
 Restart=on-failure
 RestartSec=5
 # Reads input devices and /proc, sends a quit (TERM) to your own apps, shows a notification.
+# Writes only its idle count in the runtime folder (its settings are written by app-timers --set,
+# run from the window, outside this).
 NoNewPrivileges=yes
 ProtectSystem=strict
+ProtectHome=read-only
 ReadWritePaths=%t
 LockPersonality=yes
 RestrictRealtime=yes

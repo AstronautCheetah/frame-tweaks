@@ -60,14 +60,13 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 
 **Our background services are sandboxed** with systemd's options, as far as a user's own
 services can be: no new privileges, a read-only system and restricted address families, and for
-`ydotoold`, `sft-dashboard` and `sft-vr-debugger` a read-only home folder except the folders each
-writes. `ydotoold` also has a private `/tmp` and no network. `sft-dashboard` connects only to
-SteamVR's port on `127.0.0.1` (its unit also asks for an IP filter, but systemd applies those to
-system services only). `app-timers` and `wallet-lock-sync` are lighter: your home folder stays
-writable (and `/run/user` and `/tmp` for `wallet-lock-sync`, which shows the unlock dialog on
-either desktop). Two small units aren't sandboxed: the one that relabels the menu entries in your
-keyboard's language, and the wallet's auto-lock timer. `systemd-analyze --user security <unit>`
-shows the result.
+`ydotoold`, `sft-dashboard`, `sft-vr-debugger`, `app-timers` and the unit that relabels the menu
+entries in your keyboard's language, a read-only home folder except the folders each writes.
+`ydotoold` and the menu unit also have a private `/tmp` and no network. `sft-dashboard` connects
+only to SteamVR's port on `127.0.0.1` (its unit also asks for an IP filter, but systemd applies
+those to system services only). `wallet-lock-sync` is lighter (it shows the unlock dialog on
+either desktop): your home folder, `/run/user` and `/tmp` stay writable. The wallet's auto-lock
+timer isn't sandboxed. `systemd-analyze --user security <unit>` shows the result.
 
 **Local programs.** Some tweaks open things on the Frame itself that any program running there
 can use (a Flatpak's sandbox doesn't stop it): SteamVR's dashboard DevTools port (VR dashboard
@@ -129,9 +128,8 @@ doesn't review or sandbox other people's packs.
   signature against the release key your copy already has (`dev/release-signers`) and refuses an
   unsigned or wrongly signed one. Only an SSH signature by that key counts, on a tag that
   carries its own name, so an older signed release can't come back under a newer one's name.
-  The first install (`get.sh`) trusts GitHub's HTTPS; so does running `get.sh` again on an
-  existing copy, which moves it to the newest release without the check (and without re-running
-  the tweaks' installers): update with `./install.sh update`. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
+  The first install (`get.sh`) trusts GitHub's HTTPS; running `get.sh` again on an existing
+  copy is an update (`./install.sh update`), with the same check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
   skips the check, for an emergency.
 
 Found a problem? See [Reporting a problem](#reporting-a-problem) at the top.

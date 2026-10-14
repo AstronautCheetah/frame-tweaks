@@ -1,7 +1,8 @@
 """get.sh, the bootstrap: it installs the newest release tag of the channel (stable, or beta with
-pre-releases ranked below their release), updates an existing checkout to it, says so when there
-is no release, and stops (without opening the old version) when an existing checkout can't be
-updated. Against a stand-in repository whose install.sh only logs how it was run."""
+pre-releases ranked below their release), says so when there is no release, and on an existing
+checkout runs ./install.sh update (signature check and all), stopping, without opening the old
+version, when that fails. Against a stand-in repository whose install.sh only logs how it was run
+(and fails "update" when FAIL_UPDATE is set)."""
 import os
 import shutil
 import subprocess
@@ -25,7 +26,8 @@ class GetSh(unittest.TestCase):
         (self.tmp / "home").mkdir()
         self.src = self.tmp / "src"
         self.git(self.tmp, "init", "-q", str(self.src))
-        (self.src / "install.sh").write_text('#!/bin/bash\necho "install.sh $*" >> "$LOG"\n')
+        (self.src / "install.sh").write_text('#!/bin/bash\necho "install.sh $*" >> "$LOG"\n'
+                                             '[ "${1:-}" = update ] && [ -n "${FAIL_UPDATE:-}" ] && exit 1; exit 0\n')
         (self.src / "install.sh").chmod(0o755)
         self.dest = self.tmp / "frame-tweaks"
 
@@ -63,17 +65,20 @@ class GetSh(unittest.TestCase):
         self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="beta").returncode, 0)
         self.assertEqual(self.at(), "v0.11.0-rc.1")
         self.release("v0.11.0")
-        self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="beta").returncode, 0)     # (an update)
+        shutil.rmtree(self.dest)                          # (a new install: an update is install.sh's)
+        self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="beta").returncode, 0)
         self.assertEqual(self.at(), "v0.11.0")
 
-    def test_updates_an_existing_checkout(self):
+    def test_an_existing_checkout_is_updated_by_install_sh(self):
+        """With its checks: the signature against this copy's release key, the installers again."""
         self.release("v0.9.0")
         self.assertEqual(self.get().returncode, 0)
+        self.log.unlink()
         self.release("v0.10.0")
         r = self.get()
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("Updating", r.stdout)
-        self.assertEqual(self.at(), "v0.10.0")
+        self.assertEqual(self.ran(), ["install.sh update", "install.sh menu", "install.sh "])
 
     def test_no_release_says_so(self):
         self.release("v0.11.0-rc.1")                      # (a pre-release only: none for stable)
@@ -87,11 +92,10 @@ class GetSh(unittest.TestCase):
         self.assertEqual(self.get().returncode, 0)
         self.log.unlink()
         self.release("v0.10.0")
-        self.git(self.dest, "remote", "set-url", "origin", str(self.tmp / "gone"))     # (fetch fails)
-        r = self.get()
+        r = self.get(FAIL_UPDATE="1")                      # (say, a release that isn't signed)
         self.assertNotEqual(r.returncode, 0, r.stdout)
         self.assertEqual(self.at(), "v0.9.0")
-        self.assertEqual(self.ran(), [])
+        self.assertEqual(self.ran(), ["install.sh update"])
 
 
 if __name__ == "__main__":
