@@ -1,12 +1,12 @@
 ---
-title: Tools
+title: Desktop Recovery
 emoji: 🛠️
 category: System
 tier: core
-summary: "restart-plasmashell: bring back a crashed taskbar/system tray"
+summary: "An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
 what: >-
-  `restart-plasmashell`: brings the desktop-mode taskbar and system tray back after a crash, with
-  one button.
+  An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing:
+  one button, **Restart taskbar**, brings them back (`restart-plasmashell`).
 why: >-
   In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to
   be relaunched inside that session.
@@ -19,10 +19,10 @@ survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall tools`"
 test: {offline: true}
 ---
-# Tools
+# Desktop Recovery
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-`restart-plasmashell`: brings the desktop-mode taskbar and system tray back after a crash, with one button.
+An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`).
 
 **Why on a Steam Frame:** In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session.
 <!-- /generated:intro -->

@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Android Mirror shows what it's doing:** a small window while it finds and connects to the
+  phone (with Cancel), and a message saying why when it can't, such as no phone on the Wi-Fi,
+  a phone not paired yet, or scrcpy failing to start, instead of failing silently.
+- **Haptic ticks** on the Frame Tweaks window's buttons and on Screen snip's narration panel, as
+  on Arrow Pad: a light one when the laser moves onto a button, a firmer one on a click.
 - **Signed releases:** release tags are signed, and `./install.sh update` refuses a release that
   isn't signed by the key your copy already trusts.
 - **⟳ Check for updates** in the window, next to README: it becomes **⬇ Update to …**, then
@@ -27,6 +32,8 @@
 - **whisper-frame, Screen reader, Memory caps and Grab guard** are no longer offered.
 
 ### Changed
+- **Tools is now Desktop Recovery**, described as what it is: an as-needed fix for a desktop
+  whose taskbar has gone missing.
 - **Install, update and removal terminals in VR** also say you can close them with the X button
   floating below the window, for when there's no keyboard.
 - **"Frame Tweaks is up to date"** shows in green.
@@ -45,6 +52,8 @@
   changes.
 
 ### Fixed
+- **Arrow Pad's haptics could stop for good** after a single error; they now try again a few
+  seconds later (errors are noted in `/run/user/<uid>/arrowpad-haptics.log`).
 - **Screen snip's narration panel came back in the wrong place** after collapsing it with the
   other end's Collapse button than the last one used.
 - **Mouse cursor fix said "active after the next reboot"** when it was already active (the check
