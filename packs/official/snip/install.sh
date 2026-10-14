@@ -32,4 +32,4 @@ install_desktop "$TWEAK_DIR/frame-snip.desktop"
 # (0.4.1 briefly floated the selection over a floating window: less usable than snipping its copy
 # in the dashboard. Remove that patch if it's there.)
 [ -f "$VR_DASHBOARD/patches/snip-float.js" ] && remove_dashboard_patch snip-float
-say "Done: Arrow Pad's Tools key, then Snip (or 'Screen snip' in the app menu) starts a snip."
+say "Done: Arrow Pad's Tools key, then Snip (or 'Screen snip + Narrate' in the app menu) starts a snip."

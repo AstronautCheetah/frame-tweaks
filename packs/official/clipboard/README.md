@@ -61,7 +61,7 @@ both.
   and deleted afterwards.
 - **One small change** is applied before building, [`keep-images.patch`](keep-images.patch).
   clipboard-sync shares text only. Without the patch, copying an image (for example **Copy
-  image** in [Screen snip](../snip/)) looked like "no text" to it, so it put the last text back
+  image** in [Screen snip + Narrate](../snip/)) looked like "no text" to it, so it put the last text back
   a moment later and the image never pasted. With the patch, a clipboard without text is left
   alone.
 - **Starts with desktop mode** through KDE autostart

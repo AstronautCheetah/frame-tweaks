@@ -1020,7 +1020,7 @@ class ArrowPad(QWidget):
             subprocess.Popen([str(tool)], start_new_session=True)
         else:
             subprocess.Popen(["notify-send", "-a", "Arrow Pad", "Screen snip isn't installed",
-                              "Tick 'Screen snip' in Frame Tweaks to use this button."], start_new_session=True)
+                              "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."], start_new_session=True)
 
     # ---- dictation ------------------------------------------------------
     @staticmethod
