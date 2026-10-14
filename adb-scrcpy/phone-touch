@@ -200,6 +200,15 @@ def write_conf(changes, path=CONF):
     path.write_text("\n".join(out) + "\n")
 
 
+def reset_conf(path=CONF):
+    """Back to the defaults: remove our keys' lines, keeping the rest of the file."""
+    try:
+        lines = path.read_text().splitlines()
+    except OSError:
+        return
+    path.write_text("".join(f"{line}\n" for line in lines if line.partition("=")[0].strip() not in CHOICES))
+
+
 def restart_stream():
     """Ask `phone` to start scrcpy again (with the settings as they are now)."""
     try:
@@ -334,9 +343,11 @@ def serve(phone, sd, state):
                 if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") == BINDING:
                     try:
                         req = json.loads(m["params"].get("payload") or "{}")
-                        if req["a"] in ("set", "restart"):
+                        if req["a"] in ("set", "reset", "restart"):
                             if req["a"] == "set":
                                 write_conf(req.get("conf") or {})
+                            elif req["a"] == "reset":
+                                reset_conf()
                             else:
                                 restart_stream()
                             publish(ws, state)

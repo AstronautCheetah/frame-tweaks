@@ -3,7 +3,8 @@
 ## Unreleased
 - **Android Mirror settings in VR:** a gear below the mirror's lower-left corner opens the real
   settings: picture size, bit rate, frame rate (30, 60 and the Steam Frame's refresh rates, 72 to
-  144) and joystick speed; *Restart stream* applies them without closing the mirror.
+  144) and joystick speed; *Restart stream* applies them without closing the mirror, and *Reset to
+  defaults* goes back to 1024 px, 2 Mbit/s, 60 fps.
 - **Scroll strips scroll the Android Mirror's phone** (their arrow keys went to the dashboard's
   window: clicks on the mirror go to its touch layer, so the Steam session never saw it clicked).
 - **Fixed: joystick scrolling on the mirror stopping** after a click whose release went missing.
