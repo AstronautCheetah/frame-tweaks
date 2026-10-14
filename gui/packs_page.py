@@ -78,7 +78,7 @@ class Packs(QWidget):
                 mine = c is not None and c["pack_dir"] == p["dir"]
                 tweaks.append(html.escape(t) + (" <i>" + _("(instead of {other}'s)").format(
                     other=html.escape(c["replaced"])) + "</i>" if mine and c["replaced"] else ""))
-            info = QLabel(f"<b>{html.escape(p['name'])}</b>"
+            info = QLabel(f"<b>{html.escape(p['label'])}</b>"
                           + (" <span style='color:#6b7783'>" + _("by {author}").format(author=html.escape(p["author"]))
                              + "</span>" if p["author"] else "")
                           + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
