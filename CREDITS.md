@@ -30,7 +30,8 @@ FIRST*, which credits **ThrillSeeker**.
 | [scrcpy](https://github.com/Genymobile/scrcpy) | Apache-2.0 | Android Mirror (Homebrew); phone-touch speaks its server's control protocol |
 | Android `adb` (android-tools) | Apache-2.0 | Android Mirror (Arch Linux ARM package) |
 | [Arch Linux ARM](https://archlinuxarm.org) packages | various | adb, ydotool and libraries |
-| [Homebrew](https://brew.sh) | BSD-2-Clause | [homebrew](homebrew/) row; installs whisper.cpp, scrcpy, wl-clipboard, Rust (to build clipboard-sync) |
+| [Homebrew](https://brew.sh) | BSD-2-Clause | [homebrew](homebrew/) row; installs whisper.cpp, scrcpy, wl-clipboard, Tesseract |
+| [Rust](https://www.rust-lang.org) (rustup) | MIT or Apache-2.0 | builds clipboard-sync (a temporary toolchain, deleted after the build) |
 | [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) / Qt | GPL-3.0 / LGPL | Arrow Pad, NordVPN tray, installer window (installed with pip, not bundled) |
 | [pyopenvr](https://github.com/cmbruns/pyopenvr), OpenVR | BSD-3-Clause | Arrow Pad haptics (with SteamVR's own arm64 `libopenvr_api.so`) |
 | [VSCodium](https://github.com/VSCodium/vscodium) | MIT | vscodium tweak (Flathub) |
