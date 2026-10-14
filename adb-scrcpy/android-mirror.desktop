@@ -6,3 +6,8 @@ Exec=@BIN@/phone
 Icon=frame-tweaks-phone
 Terminal=false
 Categories=Utility;
+Actions=pick;
+
+[Desktop Action pick]
+Name=Choose phone…
+Exec=@BIN@/phone --pick

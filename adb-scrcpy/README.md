@@ -22,7 +22,11 @@ Mirror and control an Android phone in a desktop window.
 - **`phone`** / *Android Mirror* launcher: wireless debugging picks a new port every time
   it's switched on, so `phone` looks it up via mDNS, connects and starts scrcpy.
   Extra args go to scrcpy, e.g. `phone --turn-screen-off`.
-  With several phones around, set `PHONE_NAME="Pixel 9"` in `~/.config/phone.conf`.
+- **Which phone:** with one phone advertising, it's taken and remembered (`PHONE_NAME` in
+  `~/.config/phone.conf`); with several, a list asks which. When the remembered phone isn't in
+  sight, you can wait for it (up to 3 minutes, while you turn on Wireless debugging) or use one
+  that is. To choose again: Android Mirror's **Choose phone…** (right-click its menu entry) or
+  `phone --pick`.
   The stream is 1024 pixels on its long side at up to 2 Mbit/s and 60 frames a second, enough for
   VR and light on the wireless link (a heavier stream falls behind the phone); change it there
   with `PHONE_MAX_SIZE=`, `PHONE_BIT_RATE=` and `PHONE_MAX_FPS=`, or with the gear in VR.

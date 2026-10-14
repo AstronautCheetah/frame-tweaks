@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+- **Android Mirror asks which phone:** with several advertising, a list to choose from (it's
+  remembered); when the remembered one isn't in sight, wait for it or use one that is. **Choose
+  phone…** on its menu entry (or `phone --pick`) chooses again.
+
 ## 0.5.0 (2026-10-14)
 - **README:** what some tweaks can do on your Frame (the DevTools port, the virtual keyboard, key
   monitoring), Requirements, and Remove everything (new `./install.sh uninstall all`); the
