@@ -3,7 +3,8 @@ only logs to a file there: installed/<id> records the version, migrate.sh runs (
 version) only when that record is older, hold/unhold and held tweaks being left alone during
 updates (FRAME_TWEAKS_UPDATING=1), the lock refusing a second run, the last five logs kept (and
 tweaks' own logs left alone), an uninstall keeping its settings or removing them (⚙ Preferences,
---remove-settings, and never on a reinstall), a failed uninstall reported, and debug-info's report without names
+--remove-settings, and never on a reinstall), forget-settings deleting only what uninstalled
+tweaks left, uninstall-self (every tweak or none, settings or not), a failed uninstall reported, and debug-info's report without names
 and addresses. systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
 whatever HOME is."""
 import fcntl
@@ -65,12 +66,24 @@ class InstallState(unittest.TestCase):
         self.stubs = t / "stubs"
         self.stubs.mkdir()
         self.stub("systemctl", 'case " $* " in *" is-active "*) exit 3 ;; esac')    # (nothing runs)
+        # (and nothing machine-wide is reached: Flatpaks are the system's, Homebrew is shared)
+        for tool in ("flatpak", "brew", "nmcli"):
+            self.stub(tool, f'echo "{tool} $*" >> "$HOME/machine-wide.log"; exit 1')
         self.env = {"HOME": str(self.home), "USER": os.environ.get("USER", "u"), "LANG": "C.UTF-8",
                     "PATH": os.pathsep.join([str(self.stubs), os.path.dirname(shutil.which("flock")), "/usr/bin", "/bin"]),
-                    "FRAME_TWEAKS_PACKS": str(self.pack)}
+                    "FRAME_TWEAKS_PACKS": str(self.pack),
+                    "FRAME_TWEAKS_KEEP_CHECKOUT": "1",      # (uninstall-self: never the checkout the tests run from)
+                    "FRAME_TWEAKS_LANGUAGE": "en"}
         self.trust()
+        # (every test: some official tweaks find what's installed machine-wide, VSCodium's system
+        # Flatpak say, and an "uninstall all" here once removed it for real)
+        self.only_the_probe()
         self.state = self.home / ".local/state/frame-tweaks"
         self.record = self.state / "installed/probe"
+
+    def tearDown(self):
+        log = self.home / "machine-wide.log"
+        self.assertFalse(log.exists(), log.read_text() if log.exists() else "")
 
     def stub(self, name, body):
         (self.stubs / name).write_text(f"#!/bin/bash\n{body}\n")
@@ -186,6 +199,104 @@ class InstallState(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertFalse((self.home / ".config/probe.conf").exists())
         self.assertFalse((self.home / ".config/probe").exists())
+
+    def test_forget_settings_takes_only_what_uninstalled_tweaks_left(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        r = self.sh("forget-settings")                          # (installed: its settings are in use)
+        self.assertIn("No settings left behind", r.stdout)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        self.assertEqual(self.sh("uninstall", "probe").returncode, 0)
+        r = self.sh("forget-settings", "--list")
+        self.assertIn("probe\t~/.config/probe.conf", r.stdout)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        r = self.sh("forget-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / ".config/probe.conf").exists())
+        self.assertFalse((self.home / ".config/probe").exists())
+        self.assertTrue((self.home / ".config/other.conf").exists())
+
+    def shared_files(self):
+        share = self.home / ".local/share/frame-tweaks"
+        for d in ("i18n", "packs/mine"):
+            (share / d).mkdir(parents=True, exist_ok=True)
+        (self.home / ".cache/frame-tweaks").mkdir(parents=True, exist_ok=True)
+        (self.home / ".config/frame-tweaks/installer").mkdir(parents=True, exist_ok=True)
+        (self.home / ".config/frame-tweaks/language").write_text("es_419\n")
+        (self.state / "backups/firefox").mkdir(parents=True)
+        (self.state / "backups/firefox/user.js").write_text("as it was")
+        (self.state / "logs").mkdir(parents=True, exist_ok=True)
+
+    def test_uninstall_self_removes_every_tweak_and_what_they_shared(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        self.shared_files()
+        r = self.sh("uninstall-self", "--remove-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("uninstall", self.log())
+        self.assertFalse((self.home / "probe-installed").exists())
+        self.assertFalse((self.home / ".config/probe.conf").exists())              # its settings
+        self.assertFalse((self.home / ".config/frame-tweaks").exists())            # Frame Tweaks' own
+        self.assertTrue((self.home / ".config/other.conf").exists())
+        self.assertFalse((self.home / ".local/share/frame-tweaks/i18n").exists())
+        self.assertTrue((self.home / ".local/share/frame-tweaks/packs/mine").is_dir())   # your own packs
+        self.assertFalse((self.home / ".cache/frame-tweaks").exists())
+        self.assertEqual(sorted(p.name for p in self.state.iterdir()), ["backups"])     # not yet put back
+        self.assertTrue("FRAME_TWEAKS_KEEP_CHECKOUT: kept" in r.stdout or "it is a git worktree" in r.stdout, r.stdout)
+        self.assertIn("Frame Tweaks is uninstalled.", r.stdout)
+
+    def test_uninstall_self_keeping_tweaks_and_settings(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        self.shared_files()
+        r = self.sh("uninstall-self", "--keep-tweaks", "--remove-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.home / "probe-installed").exists())
+        self.assertTrue((self.home / ".config/probe.conf").exists())               # in use
+        self.assertFalse((self.home / ".config/frame-tweaks/installer").exists())
+        self.assertTrue((self.home / ".config/frame-tweaks/language").exists())    # (the tweaks follow it)
+        self.assertTrue((self.home / ".local/share/frame-tweaks/i18n").is_dir())
+        self.assertTrue(self.record.exists())
+        self.assertIn("Kept for the tweaks still installed (probe)", r.stdout)
+        self.trust()
+        self.only_the_probe()          # (the settings just removed held them, and the trust)
+        r = self.sh("uninstall-self", "--keep-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / "probe-installed").exists())
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        self.assertTrue((self.home / ".config/frame-tweaks/language").exists())
+        self.assertIn("Kept the settings", r.stdout)
+
+    def test_uninstall_self_counts_tweaks_of_packs_not_in_use(self):
+        """A tweak from a pack turned off or no longer trusted isn't listed, but its install record
+        is there: what it shares stays."""
+        self.shared_files()
+        (self.state / "installed").mkdir(parents=True, exist_ok=True)
+        (self.state / "installed/recline").write_text("0.6.1\n")
+        r = self.sh("uninstall-self", "--remove-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("from packs not in use (turned off, or not trusted): recline", r.stdout)
+        self.assertTrue((self.home / ".local/share/frame-tweaks/i18n").is_dir())
+        self.assertTrue((self.state / "installed/recline").exists())
+
+    def test_uninstall_self_with_every_pack_off(self):
+        (self.home / ".config/frame-tweaks/installer/trusted-packs").unlink()     # (the probe's pack too)
+        self.shared_files()
+        r = self.sh("uninstall-self", "--keep-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Frame Tweaks is uninstalled.", r.stdout)
+        self.assertFalse((self.home / ".local/share/frame-tweaks/i18n").exists())
+
+    def test_uninstall_self_stops_when_a_tweak_wont_go(self):
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.shared_files()
+        (self.pack / "probe/uninstall.sh").write_text("#!/bin/bash\nexit 1\n")
+        self.trust()
+        r = self.sh("uninstall-self")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("Frame Tweaks is still here", r.stdout + r.stderr)         # (the log takes both)
+        self.assertTrue((self.home / ".local/share/frame-tweaks/i18n").is_dir())
+        self.assertTrue((self.home / ".config/frame-tweaks/installer").is_dir())
 
     def test_hold_and_unhold(self):
         r = self.sh("hold", "probe")

@@ -6,6 +6,10 @@
 #   ./install.sh uninstall [--keep-settings|--remove-settings] ID... | all
 #                                    remove components; their settings are kept unless the
 #                                    option or ⚙ Preferences says to remove them
+#   ./install.sh forget-settings [--list]  delete the settings uninstalled tweaks left behind
+#   ./install.sh uninstall-self [--keep-tweaks] [--remove-settings|--keep-settings]
+#                                    uninstall Frame Tweaks itself (first every tweak, unless
+#                                    --keep-tweaks); this folder too, unless it holds work of yours
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
@@ -78,7 +82,9 @@ IDS=()
 while IFS=$'\x1f' read -r id title deps desc dir exp; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
 done < <(python3 lib/sft.py registry)
-[[ ${#IDS[@]} -gt 0 ]] || { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
+# (Frame Tweaks' own commands work without: every pack off or not trusted)
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu)$ ]] ||
+    { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
 export FRAME_TWEAKS_DIRS
@@ -130,12 +136,15 @@ ensure_menu_language() {
     fi
     sysctl_user start --no-block "$MENU_UNIT.service" 2>/dev/null || true     # (labelled by the unit, as always)
 }
+# (keep-language: the unit stays for the tweaks' own menu entries, when they outlive Frame Tweaks)
 remove_menu_entry() {
     local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor" n
     local id=io.github.AstronautCheetah.FrameTweaks
     rm -f "$apps/$id.desktop" "$HOME/.local/share/metainfo/$id.metainfo.xml" "$icons/256x256/apps/frame-tweaks.png"
-    sysctl_user disable --now "$MENU_UNIT.path" >/dev/null 2>&1 || true
-    rm -f "$HOME/.config/systemd/user/$MENU_UNIT.path" "$HOME/.config/systemd/user/$MENU_UNIT.service"
+    if [[ ${1:-} != keep-language ]]; then
+        sysctl_user disable --now "$MENU_UNIT.path" >/dev/null 2>&1 || true
+        rm -f "$HOME/.config/systemd/user/$MENU_UNIT.path" "$HOME/.config/systemd/user/$MENU_UNIT.service"
+    fi
     for n in 64 128 256; do rm -f "$icons/${n}x$n/apps/$id.png"; done
     update-desktop-database -q "$apps" 2>/dev/null || true
     touch "$apps" "$icons" 2>/dev/null || true
@@ -146,6 +155,11 @@ is_component() { [[ -n ${TITLE[$1]:-} ]]; }
 
 # status <id>: prints the component's one-line status; returns 0 ok, 1 missing, 2 warning
 status_of() { bash "${DIR[$1]}/status.sh" 2>/dev/null; }
+installed_ids() {           # every tweak that is installed (or half: status 0 or 2)
+    local id
+    for id in "${IDS[@]}"; do status_of "$id" >/dev/null; [[ $? -ne 1 ]] && echo "$id"; done
+    return 0
+}
 
 # with_deps <id>...: the ids plus their dependencies, dependencies first, no duplicates
 with_deps() {
@@ -159,7 +173,7 @@ with_deps() {
     }
     local id
     for id in "$@"; do visit "$id"; done
-    printf '%s\n' "${out[@]}"
+    [[ ${#out[@]} -eq 0 ]] || printf '%s\n' "${out[@]}"      # (none: no empty line, which isn't an id)
 }
 
 check_ids() {
@@ -263,6 +277,114 @@ uninstall_settings() {
         if [[ $how == remove ]]; then remove_files "$c"; else kept+=("${c/#$HOME/\~}"); fi
     done < <(python3 lib/sft.py config "$id")
     [[ ${#kept[@]} -eq 0 ]] || say "$(t 'Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)' "${kept[*]}" "$id")"
+}
+
+# forget-settings [--list]: the settings tweaks left behind when they were uninstalled (kept, as
+# ⚙ Preferences said then). Installed tweaks' settings are never touched. (The window's ⚙
+# Preferences button does the same.)
+cmd_forget_settings() {
+    local id p n=0
+    # shellcheck disable=SC2046
+    while IFS=$'\t' read -r id p; do
+        n=$((n + 1))
+        if [[ ${1:-} == --list ]]; then echo "$id	$p"; else say "$(t 'removed %s' "$p") ($id)"; fi
+    done < <(python3 lib/sft.py leftover-settings $([[ ${1:-} == --list ]] || echo --delete) $(installed_ids))
+    [[ $n -gt 0 ]] || { t 'No settings left behind by uninstalled tweaks.'; echo; }
+}
+
+# uninstall-self [--keep-tweaks] [--remove-settings|--keep-settings]: Frame Tweaks itself.
+#  1. every tweak, unless --keep-tweaks (stops here if one fails: you can run it again);
+#  2. with --remove-settings (default: ⚙ Preferences' choice), the settings uninstalled tweaks
+#     left, and Frame Tweaks' own; those of tweaks still installed stay;
+#  3. its app-menu entry; with no tweak left, the files they shared (~/.local/share/frame-tweaks
+#     but your own packs/, ~/.cache/frame-tweaks, ~/.local/state/frame-tweaks but backups still
+#     waiting to go back, and what VR dashboard patching needs to put SteamVR's setting back
+#     when SteamVR stops) and the Python setup the window ran in;
+#  4. this folder, if nothing of yours is in it (changes, your own packs, commits not pushed,
+#     other worktrees): else it stays, and says why.
+cmd_uninstall_self() {
+    local tweaks=remove settings installed p
+    settings=$(python3 lib/sft.py uninstall-settings)
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --keep-tweaks) tweaks=keep ;;
+            --remove-settings) settings=remove ;;
+            --keep-settings) settings=keep ;;
+            *) echo "$(t 'uninstall-self takes --keep-tweaks, --remove-settings and --keep-settings')" >&2; exit 1 ;;
+        esac
+        shift
+    done
+    if [[ $tweaks == remove ]]; then
+        bold "$(t 'Uninstalling every tweak')"
+        if ! ( cmd_uninstall "--$settings-settings" all ); then
+            echo "$(t 'Frame Tweaks is still here: see what failed above, then run this again.')" >&2; return 1
+        fi
+    fi
+    # Tweaks of packs not in use (turned off, or no longer trusted) aren't listed, but their
+    # install record says they're there, using what's shared: they count as installed.
+    local others=() r
+    for r in "$STATE"/installed/*; do
+        [[ -e $r ]] && ! is_component "${r##*/}" && others+=("${r##*/}")
+    done
+    installed=$(installed_ids; [[ ${#others[@]} -eq 0 ]] || printf '%s\n' "${others[@]}")
+    bold "$(t 'Uninstalling Frame Tweaks')"
+    [[ ${#others[@]} -eq 0 ]] || say "$(t 'Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again.' "${others[*]}")"
+    [[ $settings == remove ]] && cmd_forget_settings | grep -v "^$(t 'No settings left behind by uninstalled tweaks.')$"
+    if [[ -n $installed ]]; then
+        remove_menu_entry keep-language
+        [[ $settings == remove ]] && remove_files "$HOME/.config/frame-tweaks/installer" "$HOME/.config/frame-tweaks/uninstall-settings"
+        say "$(t 'Kept for the tweaks still installed (%s): ~/.local/share/frame-tweaks, ~/.local/state/frame-tweaks and their settings.' "$(echo $installed)")"
+    else
+        remove_menu_entry
+        rm -f "$QT_VENV/bin/sft-python"; remove_qt_venv
+        if [[ -d $HOME/.local/share/frame-tweaks ]]; then
+            find "$HOME/.local/share/frame-tweaks" -mindepth 1 -maxdepth 1 ! -name packs -exec rm -rf {} +
+            rmdir "$HOME/.local/share/frame-tweaks" 2>/dev/null && say "$(t 'removed %s' "$HOME/.local/share/frame-tweaks")"
+            [[ -d $HOME/.local/share/frame-tweaks/packs ]] && say "$(t 'Kept your own packs: %s' "$HOME/.local/share/frame-tweaks/packs")"
+        fi
+        remove_files "$HOME/.cache/frame-tweaks"
+        if [[ -d $STATE ]]; then
+            for p in "$STATE"/* "$STATE"/.[!.]*; do
+                [[ -e $p ]] || continue
+                case ${p##*/} in
+                    sft-dashboard-restore|vr-debugger.prev) [[ -e $STATE/sft-dashboard-restore ]] && continue ;;
+                    backups) [[ -n $(find "$p" -type f -print -quit) ]] && { say "$(t 'Kept backups of files tweaks changed: %s' "$p")"; continue; } ;;
+                esac
+                rm -rf -- "$p"
+            done
+            rmdir "$STATE" 2>/dev/null && say "$(t 'removed %s' "$STATE")"
+            [[ -e $STATE/sft-dashboard-restore ]] && say "$(t "SteamVR's own setting goes back when SteamVR stops; then this goes too: %s" "$STATE")"
+        fi
+        [[ $settings == remove ]] && remove_files "$HOME/.config/frame-tweaks"
+    fi
+    [[ $settings == keep ]] && [[ -d $HOME/.config/frame-tweaks ]] && say "$(t 'Kept the settings: %s' "$HOME/.config/frame-tweaks")"
+    remove_checkout
+}
+
+# remove_checkout: this folder goes, unless something of yours is in it.
+remove_checkout() {
+    local here=$PWD why=
+    if [[ -f .git ]]; then
+        why=$(t 'it is a git worktree')
+    elif [[ -e .git ]]; then
+        if [[ -n $(git status --porcelain --ignored --untracked-files=all 2>/dev/null | grep -vE '(^|/)__pycache__/|\.pyc$') ]]; then
+            why=$(t 'it has files of yours: changes, your own packs in packs/, or a tmp/ folder')
+        elif [[ -n $(git log --branches --not --remotes --oneline 2>/dev/null | head -1) ]]; then
+            why=$(t 'it has commits that are not pushed anywhere')
+        elif [[ $(git worktree list 2>/dev/null | wc -l) -gt 1 || -n $(git stash list 2>/dev/null | head -1) ]]; then
+            why=$(t 'it has other worktrees or stashed changes')
+        fi
+    elif [[ -n $(find packs -mindepth 1 -maxdepth 1 -type d ! -name original ! -name integrations ! -name third-party -print -quit) ]]; then
+        why=$(t 'it has your own packs in packs/')
+    fi
+    if [[ -n $why ]]; then
+        say "$(t 'Kept this folder, %s: %s. Delete it yourself when you no longer need it.' "$here" "$why")"
+    elif [[ -n ${FRAME_TWEAKS_KEEP_CHECKOUT:-} ]]; then      # (tests: the checkout they run from)
+        say "FRAME_TWEAKS_KEEP_CHECKOUT: kept $here"
+    else
+        cd / && rm -rf -- "$here" && say "$(t 'removed %s' "$here")"
+    fi
+    bold "$(t 'Frame Tweaks is uninstalled.')"
 }
 
 # Remove, then install again. Unlike uninstall, a tweak others depend on may be removed here:
@@ -532,6 +654,8 @@ case ${1:-} in
                  esac ;;
     wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
+    forget-settings) shift; take_lock; start_log forget-settings "$@"; cmd_forget_settings "$@" ;;
+    uninstall-self) shift; take_lock; start_log uninstall-self "$@"; cmd_uninstall_self "$@" ;;
     menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "$(t "Removed 'Frame Tweaks' from the app menu.")"
                  else ensure_menu_entry; echo "$(t "Added 'Frame Tweaks' to the app menu.")"; fi ;;
     -h|--help|help) usage ;;

@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Uninstall Frame Tweaks** from ⚙ Preferences (or `./install.sh uninstall-self`): every tweak
+  first, or leave them installed; delete the settings too, or keep them. It removes the menu
+  entry, the files the tweaks shared, and its own folder, unless that holds work of yours.
+- **Delete settings left by uninstalled tweaks…** in ⚙ Preferences (`./install.sh
+  forget-settings`): what tweaks kept when they were uninstalled; installed tweaks' are left alone.
 - **Uninstalling: keep a tweak's settings, or remove them too,** a choice in ⚙ Preferences (kept
   by default, as before). The uninstall names what it kept; `./install.sh uninstall
   --remove-settings ID` (or `--keep-settings`) decides for one run. A reinstall (↻) always keeps

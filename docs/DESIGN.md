@@ -146,7 +146,10 @@ installed. The version records in `installed/` are used only for migrations.
 The tweak's settings (its manifest's `config:` list, and its `settings.file`) are left to
 `install.sh`: kept and named, or removed when ⚙ Preferences → Uninstalling (in
 `~/.config/frame-tweaks/uninstall-settings`) or `--remove-settings` says so. A reinstall always
-keeps them. `install.sh` refuses to remove a tweak that an installed tweak depends on, and
+keeps them. `forget-settings` removes those that tweaks no longer installed left, and
+`uninstall-self` removes Frame Tweaks itself (every tweak first, unless `--keep-tweaks`; its
+folder only when nothing of the user's is in it: changes, their own packs, unpushed commits,
+other worktrees). `install.sh` refuses to remove a tweak that an installed tweak depends on, and
 `uninstall all` removes dependents first.
 
 Before changing a file the user owns, a tweak calls `backup_file`, and `restore_file` on

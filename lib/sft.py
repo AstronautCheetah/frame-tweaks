@@ -21,13 +21,15 @@ Command line (through ./install.sh):
   sft.py settings ID KEY=VALUE...       change them (VALUE: a listed value or its label)
   sft.py settings ID --reset            back to the defaults
 For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID,
-uninstall-settings [keep|remove], test-list, test-keeps ID.
+uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
+test-keeps ID.
 """
 import hashlib
 import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -209,6 +211,24 @@ def uninstall_settings():
 def set_uninstall_settings(value):
     UNINSTALL_PREF.parent.mkdir(parents=True, exist_ok=True)
     UNINSTALL_PREF.write_text(("remove" if value == "remove" else "keep") + "\n")
+
+
+def leftover_settings(installed):
+    """[(tweak, path)]: the settings that tweaks not installed left behind (kept on uninstall), and
+    are still there. A place an installed tweak also lists stays theirs."""
+    comps = components()
+    used = {p for c in comps if c["id"] in installed for p in c["config"]}
+    return [(c, p) for c in comps if c["id"] not in installed for p in c["config"]
+            if p not in used and (lambda f: f.exists() or f.is_symlink())(Path.home() / p[2:])]
+
+
+def remove_setting(p):
+    """Delete one config: place (a file or a folder), given as ~/…"""
+    f = Path.home() / p[2:]
+    if f.is_dir() and not f.is_symlink():
+        shutil.rmtree(f)
+    else:
+        f.unlink(missing_ok=True)
 
 
 def check_settings(st, cid, where):
@@ -755,6 +775,12 @@ def main(argv):
     elif cmd == "config" and len(args) == 1:  # where it keeps its settings (~ = $HOME)
         c = component(args[0])
         print("\n".join(c["config"] if c else []))
+    elif cmd == "leftover-settings":          # [--delete] INSTALLED_ID...: what uninstalled tweaks left
+        delete = args[:1] == ["--delete"]
+        for c, p in leftover_settings(set(args[delete:])):
+            if delete:
+                remove_setting(p)
+            print(f"{c['id']}\t{p}")
     elif cmd == "uninstall-settings" and len(args) <= 1:
         if args:
             if args[0] not in ("keep", "remove"):

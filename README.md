@@ -290,21 +290,26 @@ switch themselves off, and Android Mirror stays usable as a plain window.
 
 ## Removing everything
 
-```sh
-cd ~/frame-tweaks && ./install.sh uninstall all   # every tweak, the ones that depend on others first
-./install.sh menu --remove                        # the Frame Tweaks app-menu entry and icons
-```
-
-Then **restart SteamVR (or reboot)** before you delete anything else: VR dashboard patching puts
-SteamVR's own setting back only once SteamVR has stopped, and it keeps what it needs for that in
-`~/.local/state/frame-tweaks`. Then:
+In the window: **⚙ Preferences → Uninstalling Frame Tweaks**, with two choices: uninstall every
+tweak first (or leave them installed), and delete the settings too (or keep them). Or in a
+terminal:
 
 ```sh
-rm -rf ~/frame-tweaks ~/.config/frame-tweaks ~/.local/state/frame-tweaks \
-       ~/.local/share/frame-tweaks ~/.local/share/arrowpad ~/.cache/frame-tweaks   # settings, logs, Python setups
-rm -f ~/.config/arrowpad.json ~/.config/arrowpad-vr.json   # Arrow Pad's size and place
-rm -f ~/.local/share/dictation-history.txt ~/frame-tweaks-debug-*.txt   # what you dictated; reports
+cd ~/frame-tweaks && ./install.sh uninstall-self --remove-settings   # everything
+./install.sh uninstall-self --keep-tweaks     # only Frame Tweaks: the tweaks stay and keep working
 ```
+
+It uninstalls every tweak (the ones that depend on others first; it stops if one fails), removes
+the app-menu entry, the files the tweaks shared, the logs and the Python setup, and then
+`~/frame-tweaks` itself, unless it holds work of yours (changes, your own packs, commits not
+pushed): then it says so and leaves it. It keeps your own packs in `~/.local/share/frame-tweaks/packs`
+and backups of files still waiting to be put back. If SteamVR was running, VR dashboard patching
+puts SteamVR's own setting back when SteamVR stops, and what it needs for that goes then.
+
+**Settings left behind:** a tweak uninstalled while ⚙ Preferences said to keep its settings leaves
+them; **Delete settings left by uninstalled tweaks…** there (or `./install.sh forget-settings`)
+removes those, never an installed tweak's. Not removed either way: what you dictated
+(`~/.local/share/dictation-history.txt`) and saved reports (`~/frame-tweaks-debug-*.txt`).
 
 `uninstall all` removes the tweaks of the packs in use: turn a pack back on (or trust it again)
 first if you turned it off.
