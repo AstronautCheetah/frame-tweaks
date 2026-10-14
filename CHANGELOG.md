@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Contributing from outside:** fork and open a pull request (CONTRIBUTING.md, "Sending a
+  change"). The commit check (`dev/check-trailers.sh`, used by the hooks and CI) now refuses only
+  AI attribution, so human `Co-authored-by` lines, including GitHub's on squash merges, are fine.
+  CONTRIBUTING also lists every check CI runs, what the tests need, and an example `meta`.
 - **Fixed: settings changed with the scroll strips' gear in VR weren't saved** (the dashboard
   service wasn't allowed to write `~/.config/frame-tweaks`).
 - **Every installer-window function has a command:** `./install.sh info`, `run`, `settings`

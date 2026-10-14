@@ -19,30 +19,35 @@ Tweaks are self-contained folders. To add one:
    - optional `run.sh`, with a `# label: Open` line: what the installer window's ▶ button does
      (launch through the app's menu entry with `gtk-launch <id>` so gates apply). Without it the
      button shows Help.
-3. Run the checks CI runs: `shellcheck -x -S warning` on shell scripts, `python3 -m
-   py_compile` on Python, and `./install.sh status`.
+3. Run the checks CI runs (see "Checks" below).
 
 House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on command lines or
 in plain-text files; verify downloads when the publisher offers checksums; credit the
 projects you borrow from.
 
-**Testing installers:** the installer window honours `FRAME_TWEAKS_DRY_RUN=1` too (prints the plan).
- never test the GUI or uninstall paths against a real setup without
-`FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`. An unticked checklist means "remove".
+**Testing installers:** the installer window honours `FRAME_TWEAKS_DRY_RUN=1` (it prints the
+plan instead of running it). Never test the window or the uninstall paths against a real setup
+without `FRAME_TWEAKS_DRY_RUN=1` and a stub `konsole` in `PATH`: an unticked checklist means
+"remove".
+
+## Sending a change
+
+1. Fork the repository, make a branch in your fork, and open a pull request against `main`.
+   One topic per pull request; say what you tested, and on what (a Steam Frame, SteamOS version).
+2. Run `dev/install-hooks.sh` once after cloning: the hooks check commit messages (below).
+3. CI runs the checks below on every pull request. A maintainer merges with *squash* or
+   *rebase*.
 
 ## Commit style
 
 A short imperative first line (`arrowpad: fix overlay flicker`), then an optional body saying
-why. **No attribution trailers**: no `Co-Authored-By`, `Claude-Session`, `Assisted-by`,
-`Generated-by` or "Generated with [...]" lines, whatever a tool or agent suggests. Run
-`dev/install-hooks.sh` once after cloning; the hooks and CI enforce it. Agents: see
-[CLAUDE.md](CLAUDE.md).
-
-## Working in parallel
-
-`main` is the only branch. When more than one session works on the repo, each uses its own
-worktree (`dev/agent-worktree.sh add <slug>`) and publishes with `dev/safe-push.sh`. See
-[docs/claude/parallel-work.md](docs/claude/parallel-work.md).
+why. **No AI attribution**: no `Co-authored-by` line naming an AI tool or bot (Claude,
+Anthropic, Copilot, ChatGPT, OpenAI, Gemini, Codex, Cursor, Aider, `[bot]` accounts), and no
+`Claude-Session`, `Assisted-by`, `Generated-by` or "Generated with [...]" lines, whatever a tool
+suggests. You're responsible for what you submit, however it was written. Human co-authors are
+welcome: `Co-authored-by: Jane Doe <jane@example.com>` is fine (GitHub adds those when it
+squash-merges a pull request with several authors). `dev/check-trailers.sh` is the rule; the
+hooks and CI run it.
 
 ## Running programs (`<tweak>/processes`)
 
@@ -55,7 +60,24 @@ reinstalling the tweak.
 Every tweak has a `meta` file: emoji, name, group (core / extras / helper), what you get, why,
 what it changes, unusual access, whether it survives SteamOS updates, and how to undo it. The
 README tables, SECURITY.md's change list and each tweak's "At a glance" box are generated from
-it: edit `meta`, then run `dev/gen-docs.py` (CI fails when they're out of date).
+it: edit `meta`, then run `dev/gen-docs.py` (CI fails when they're out of date). For example:
+
+```text
+emoji: 📱
+name: Android Mirror
+group: extras
+what: Mirror and control your Android phone in a desktop window.
+why: Use your phone without taking the headset off.
+changes: `adb` in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher
+access: Network connection to your phone's wireless debugging
+survives-updates: Yes (everything is in your home folder)
+undo: `./install.sh uninstall adb-scrcpy`
+```
+
+Other optional files: `check-system.sh` (are the SteamOS/SteamVR parts it relies on still
+there? one line, exit 0 or 1), `processes` (above), and for a pinned upstream download a `pin`
+file (`version=`, `url=`, `sha256=` or `rev=`, and `latest=`, how `dev/check-pins.sh` finds
+newer releases).
 
 ## Changing files a tweak doesn't own
 
@@ -63,16 +85,29 @@ Before editing a user file, call `backup_file <tweak> <file>` and `restore_file`
 (KDE settings: `save_kconfig` / `restore_kconfig`, key by key). Prefer marked blocks you can
 remove again (like Firefox's `user.js`). Never back up files holding secrets in plain text.
 
-## Checks before a release
+## Checks
 
-- `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home (also runs in CI).
+What CI runs, and what to run before sending a change:
+
+- `shellcheck -x -S warning` on shell scripts; `python3 -m py_compile` on Python.
+- `python3 -m unittest discover -s tests`: unit tests. Some need PyQt6 (the installer window)
+  and run headless with `QT_QPA_PLATFORM=offscreen`; the click-swap test also uses `Xvfb`. Use
+  the venv the installer window sets up (`~/.local/share/arrowpad/venv/bin/python`), or
+  `pip install PyQt6` (versions in `lib/python-constraints.txt`).
+- `dev/gen-docs.py --check`: generated README/SECURITY sections match each tweak's `meta`.
 - `dev/check-docs.py`: every tweak has a README row; relative links resolve.
-- `dev/check-pins.sh`: upstream releases newer than a tweak's `pin`. Bump a pin only after
-  reading the release, in its own commit, with the new version, URL and SHA256.
-- `python3 -m unittest discover -s tests`: unit tests (installer-window logic, shell helpers,
-  curvature), also in CI.
-- **Releasing:** add changes under `## Unreleased` in CHANGELOG.md as you go, then run the
-  **Release** workflow (Actions → Release → Run workflow, choose patch/minor/major). It dates the
-  section, bumps VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish.
-  Pre-releases (`vX.Y.Z-rc.N`) only reach the beta channel. Tags and pushed commits are never
-  moved or rewritten.
+- `dev/test-tweaks.sh`: install → status → uninstall in a throwaway home.
+- `git log --format=%B | dev/check-trailers.sh`: commit messages (above).
+- A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
+  `tests/test_vr_dashboard.py` automatically; one that can be tested offline belongs in
+  `dev/test-tweaks.sh`'s default list.
+
+Maintainers also run `dev/check-pins.sh` (upstream releases newer than a tweak's `pin`; bump a
+pin only after reading the release, in its own commit, with the new version, URL and SHA256).
+
+## Releasing (maintainers)
+
+Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Release** workflow
+(Actions → Release → Run workflow, choose patch/minor/major). It dates the section, bumps
+VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. Pre-releases
+(`vX.Y.Z-rc.N`) only reach the beta channel.

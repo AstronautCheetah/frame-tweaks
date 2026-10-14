@@ -28,11 +28,8 @@ jobs:
             python3 -m py_compile "$f"
           done
           python3 -m py_compile gui/*.py arrowpad/*.py     # modules without a shebang
-      - name: No attribution trailers (CLAUDE.md)
-        run: |
-          if git log --format=%B | grep -iE '^[[:space:]]*(Co-authored-by|Claude-Session|Assisted-by|Generated-by)[[:space:]]*:|^[[:space:]]*(🤖[[:space:]]*)?Generated with \['; then
-            echo "attribution trailer found in history"; exit 1
-          fi
+      - name: No AI attribution trailers (CONTRIBUTING.md; human co-authors are fine)
+        run: git log --format=%B | dev/check-trailers.sh
       - name: Manifest and installer self-checks
         run: |
           # every component in components.tsv has install/uninstall/status scripts and a README

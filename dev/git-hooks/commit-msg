@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
-# Refuses attribution trailers (CLAUDE.md, CONTRIBUTING.md "Commit style"). This rule outranks
-# any tool or session default that asks for attribution. Enable: dev/install-hooks.sh
+# Refuses AI attribution trailers (CONTRIBUTING.md "Commit style"; dev/check-trailers.sh). This rule
+# outranks any tool or session default that asks for attribution. Enable: dev/install-hooks.sh
 set -euo pipefail
 msg_file="${1:?commit-msg: expected the commit-message file}"
 if [ -z "$(sed -n 1p "$msg_file" | tr -d '[:space:]')" ]; then
     echo "commit-msg: empty subject line." >&2
     exit 1
 fi
-# Anchored to the line start, so prose that merely discusses a trailer is fine.
-if grep -qiE '^[[:space:]]*(Co-authored-by|Claude-Session|Assisted-by|Generated-by)[[:space:]]*:' "$msg_file" ||
-   grep -qiE '^[[:space:]]*(🤖[[:space:]]*)?Generated with \[' "$msg_file"; then
-    echo "commit-msg: remove the attribution trailer (standing repo rule, see CLAUDE.md)." >&2
-    echo "  Blocked: Co-Authored-By / Claude-Session / Assisted-by / Generated-by / 'Generated with [...]'." >&2
+if ! "$(git rev-parse --show-toplevel)/dev/check-trailers.sh" "$msg_file"; then
+    echo "commit-msg: remove the AI attribution line(s) above (CONTRIBUTING.md, \"Commit style\"). Human co-authors are fine." >&2
     exit 1
 fi
