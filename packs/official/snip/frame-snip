@@ -119,6 +119,20 @@ def to_clipboard(data, mime):
     return p.returncode == 0
 
 
+def icon_button(b, icon, tip):
+    """An icon-only button (Breeze), named by its tooltip."""
+    b.setText("")
+    b.setIcon(breeze(icon))
+    b.setIconSize(QSize(30, 30))
+    b.setToolTip(tip)
+    b.setAccessibleName(tip)
+
+
+def start_snip():
+    """A new snip, as Arrow Pad's Snip key starts one (its own process and session)."""
+    subprocess.Popen([os.path.abspath(sys.argv[0])], start_new_session=True)
+
+
 def breeze(name):
     """A Breeze icon (largest SVG), or an empty icon."""
     hits = sorted(Path("/usr/share/icons/breeze-dark").glob(f"*/*/{name}.svg"))
@@ -427,13 +441,9 @@ class NarrationWindow(QWidget):
         outer.addWidget(self.full)
         lay = QVBoxLayout(self.full)
         if panel:
-            # Its own VR panel (NarrationOverlay): compact, with a bar to move it by.
-            lay.setContentsMargins(18, 10, 18, 16)
-            handle = QLabel("⠿  Screen snip  ·  drag here to move")
-            handle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            handle.setStyleSheet("color: #9aa6b2; font-size: 18px; padding: 6px;"
-                                 " background: #161c23; border-radius: 8px;")
-            lay.addWidget(handle)
+            # Its own VR panel (NarrationOverlay): compact. Moved by the grip, or a trigger-drag on
+            # an empty part (the margins).
+            lay.setContentsMargins(18, 16, 18, 16)
         else:
             # The Steam session shows every window as a 1920x1080 panel, so fill it: the snip as
             # large as fits above the controls.
@@ -445,10 +455,12 @@ class NarrationWindow(QWidget):
         self.state.setStyleSheet("color: #9aa6b2;")
         lay.addWidget(self.state)
         row = QHBoxLayout()
-        self.toggle = QPushButton("■ Stop")
+        self.toggle = QPushButton()
+        icon_button(self.toggle, "media-playback-stop", "Stop")
         self.toggle.clicked.connect(self.stop_or_again)
         row.addWidget(self.toggle)
-        self.pause_button = QPushButton("⏸ Pause")
+        self.pause_button = QPushButton()
+        icon_button(self.pause_button, "media-playback-pause", "Pause")
         self.pause_button.clicked.connect(self.pause_or_resume)
         row.addWidget(self.pause_button)
         self.view_button = QPushButton("Show text")
@@ -473,8 +485,8 @@ class NarrationWindow(QWidget):
         copy = QPushButton("Copy text")
         copy.setToolTip("Put the text being read on the clipboard")
         copy.clicked.connect(self.copy_text)
-        paste = QPushButton("Paste")
-        paste.setToolTip("Read the clipboard's text instead")
+        paste = QPushButton()
+        icon_button(paste, "edit-paste", "Paste: read the clipboard's text instead")
         paste.clicked.connect(self.paste_text)
         # Collapse at both ends (icon only on the left), so it can be collapsed toward either side;
         # the copy buttons centred between equal-width ends.
@@ -482,7 +494,11 @@ class NarrationWindow(QWidget):
         left_lay, right_lay = QHBoxLayout(left), QHBoxLayout(right)
         for l in (left_lay, right_lay):
             l.setContentsMargins(0, 0, 0, 0)
-        close = QPushButton("Close")
+        close = QPushButton()
+        icon_button(close, "window-close", "Close")
+        snip = QPushButton()                      # a new snip; it's read here (see load)
+        icon_button(snip, "select-rectangular", "Snip something new: it's read here")
+        snip.clicked.connect(start_snip)
         close.clicked.connect(self.close)
         right_lay.addWidget(close)
         self.collapse_buttons = []
@@ -505,11 +521,11 @@ class NarrationWindow(QWidget):
         self.collapse_button = self.collapse_buttons[-1] if panel else None    # the one last used
         row2.addWidget(left)
         row2.addStretch(1)
-        for b in (self.copy_image_button, copy, paste):
+        for b in (snip, self.copy_image_button, copy, paste):
             row2.addWidget(b)
         row2.addStretch(1)
         row2.addWidget(right)
-        for b in (self.copy_image_button, copy, paste, close) + ((collapse,) if panel else ()):
+        for b in (snip, self.copy_image_button, copy, paste, close) + ((collapse,) if panel else ()):
             b.setStyleSheet("padding: 12px 14px; font-size: 20px;")        # (a narrower row)
         self.row2, self.left_end, self.right_end = row2, left, right
         self.ensurePolished()
@@ -542,8 +558,8 @@ class NarrationWindow(QWidget):
         self.copy_image_button.setEnabled(image is not None)
         self.show_view()
         self.state.setText("Preparing…")
-        self.toggle.setText("■ Stop")
-        self.pause_button.setText("⏸ Pause")
+        icon_button(self.toggle, "media-playback-stop", "Stop")
+        icon_button(self.pause_button, "media-playback-pause", "Pause")
         self.pause_button.setEnabled(True)
         self.narrator = Narrator(text, self.speed)
         self.narrator.progress.connect(lambda i, n: self.state.setText(f"Reading aloud: part {i + 1} of {n}"))
@@ -665,37 +681,37 @@ class NarrationWindow(QWidget):
             self.narrator.set_speed(self.speed)
             if self.narrator.paused:                     # a new speed carries on reading
                 self.narrator.paused = False
-                self.pause_button.setText("⏸ Pause")
+                icon_button(self.pause_button, "media-playback-pause", "Pause")
                 self.state.setText("Reading aloud…")
 
     def done(self):
         self.state.setText("Finished.")
-        self.toggle.setText("▶ Again")
+        icon_button(self.toggle, "media-playlist-repeat", "Read it again")
         self.pause_button.setEnabled(False)
 
     def pause_or_resume(self):
         if self.narrator.paused:
             self.narrator.resume()
-            self.pause_button.setText("⏸ Pause")
+            icon_button(self.pause_button, "media-playback-pause", "Pause")
             self.state.setText("Reading aloud…")
         else:
             self.narrator.pause()
-            self.pause_button.setText("▶ Resume")
+            icon_button(self.pause_button, "media-playback-start", "Resume")
             self.state.setText("Paused.")
 
     def stop_or_again(self):
         if self.narrator.stopped or self.toggle.text().startswith("▶"):
             self.narrator.speed = self.speed
-            self.toggle.setText("■ Stop")
+            icon_button(self.toggle, "media-playback-stop", "Stop")
             self.state.setText("Reading aloud…")
-            self.pause_button.setText("⏸ Pause")
+            icon_button(self.pause_button, "media-playback-pause", "Pause")
             self.pause_button.setEnabled(True)
             self.narrator.again()
         else:
             self.narrator.stop()
             self.state.setText("Stopped.")
-            self.toggle.setText("▶ Again")
-            self.pause_button.setText("⏸ Pause")
+            icon_button(self.toggle, "media-playlist-repeat", "Read it again")
+            icon_button(self.pause_button, "media-playback-pause", "Pause")
             self.pause_button.setEnabled(False)
 
     def closeEvent(self, ev):

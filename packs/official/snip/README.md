@@ -79,13 +79,14 @@ or pull the trigger on an empty part of it and drag. It remembers the spot for n
 
 The panel has:
 
-- **■ Stop** / **▶ Again** and **⏸ Pause** / **▶ Resume**.
+- **Stop** / **Again** and **Pause** / **Resume** (icons; point at one to see its name).
 - **Speed** **−** / **+**. A change applies at once: it reads sentence by sentence and starts
   the current sentence again.
 - **Show text** / **Show image**: the snip's picture, or the text read from it.
+- **Snip** (the dashed rectangle, as on Arrow Pad): snip something new; it's read in this panel.
 - **Copy image** and **Copy text**.
-- **Paste**: read the clipboard's text instead. It's shown in place of the snip.
-- **Close**, and **Collapse** at either end of the bottom row. Collapse shrinks the panel to a
+- **Paste** (icon): read the clipboard's text instead. It's shown in place of the snip.
+- **Close** (✕), and **Collapse** at either end of the bottom row. Collapse shrinks the panel to a
   single Expand icon, right where you pressed it; reading carries on.
 
 Narrating another snip while the panel is open reuses it, where it is.
