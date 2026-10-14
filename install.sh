@@ -14,7 +14,7 @@
 #   ./install.sh info ID             one component's details (as in the installer window)
 #   ./install.sh run ID              its Run / Open button (e.g. open Arrow Pad)
 #   ./install.sh settings ID [KEY=VALUE... | --reset]   show or change its settings (scroll-strips, adb-scrcpy)
-#   ./install.sh mods [trust|untrust PACK | check FOLDER]   packs of tweaks (docs/mods.md)
+#   ./install.sh mods [trust|untrust|on|off PACK | check FOLDER]   packs of tweaks (docs/mods.md)
 #   ./install.sh hide|unhide ID...   hide a row in the installer window (or show it again)
 #   ./install.sh hide-group|unhide-group NAME   the same for a whole group, e.g. "VR environment"
 #   ./install.sh wallet lock|unlock|status      the shared KDE wallet (wallet-unlock)
@@ -37,13 +37,15 @@ LOGS="$STATE/logs"
 migrate_legacy_dirs
 # The tweaks moved into packs/official/ (0.6): an update leaves their old folders behind
 # holding only Python's __pycache__ (git doesn't track it).
+# The same for packs/official, which became packs/original and packs/third-party (after 0.6.0).
 shopt -s nullglob
-for d in */__pycache__; do
+for d in */__pycache__ packs/official/*/__pycache__; do
     d=${d%/__pycache__}
     others=("$d"/* "$d"/.[!.]*)
     [[ -d $d && ${#others[@]} -eq 1 ]] && rm -rf -- "$d"     # (nothing but __pycache__)
 done
 shopt -u nullglob
+rmdir packs/official 2>/dev/null     # (only if that left it empty)
 
 # One install/uninstall/update at a time (installer window and terminal alike). The lock is on
 # fd 8; tweak scripts run with it closed, so a background process they start can't keep it.
@@ -65,7 +67,7 @@ start_log() {
     find "$LOGS" -name '[0-9]*-*.log' -printf '%T@ %p\n' | sort -n | head -n -5 | cut -d' ' -f2- | xargs -r rm -f
 }
 
-# The tweaks, from the packs (lib/sft.py registry: the official pack and the user's trusted
+# The tweaks, from the packs (lib/sft.py registry: the official packs and the user's trusted
 # packs, each tweak described by its README.md front matter; see docs/mods.md).
 declare -A TITLE DEPS DESC DIR EXPERIMENTAL
 IDS=()

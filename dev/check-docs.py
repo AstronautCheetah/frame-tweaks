@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Docs consistency: every tweak in the official pack has a row in README.md, README links only
+"""Docs consistency: every tweak in the official packs has a row in README.md, README links only
 to tweaks that exist, and relative links in all Markdown files point at real files."""
 import re
 import sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-ids = [d.name for d in (root / "packs/official").iterdir() if (d / "README.md").is_file()]
+ids = [d.name for pack in ("original", "third-party") for d in (root / "packs" / pack).iterdir() if (d / "README.md").is_file()]
 readme = (root / "README.md").read_text()
-rows = set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(packs/official/([a-z0-9-]+)/\)", readme, re.M))
+rows = set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(packs/(?:original|third-party)/([a-z0-9-]+)/\)", readme, re.M))
 problems = [f"README.md: no row for '{i}'" for i in ids if i not in rows]
 problems += [f"README.md: row for unknown tweak '{r}'" for r in rows - set(ids)]
 for md in root.rglob("*.md"):

@@ -127,7 +127,7 @@ When you let go, a slight sideways lean (under 5°) eases level.
 
 | Situation | Best tool |
 |---|---|
-| Typing text in VR, in the dashboard or floating app windows | [Full Keyboard](../full-keyboard/) (laser typing, full layout) |
+| Typing text in VR, in the dashboard or floating app windows | [Full Keyboard](../../third-party/full-keyboard/) (laser typing, full layout) |
 | Quick text entry anywhere | Steam's keyboard (Steam + X). Hold **Shift** for ←/→ |
 | Navigating and editing in desktop-mode apps (arrows, selection, shortcuts, F-keys) | **Arrow Pad** |
 | Lots of text | [Dictation](../dictation/) (**Tools → 🎤** on the pad, or its shortcut) |

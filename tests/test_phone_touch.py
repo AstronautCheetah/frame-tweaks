@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "packs/official/adb-scrcpy" / "phone-touch"))
+_l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "packs/original/adb-scrcpy" / "phone-touch"))
 pt = importlib.util.module_from_spec(importlib.util.spec_from_loader("phone_touch", _l))
 _l.exec_module(pt)
 
@@ -102,13 +102,13 @@ class Settings(unittest.TestCase):
 class Defaults(unittest.TestCase):
     def test_panel_and_helper_agree(self):
         import re
-        js = (ROOT / "packs/official/adb-scrcpy" / "phone-touch.js").read_text()
+        js = (ROOT / "packs/original/adb-scrcpy" / "phone-touch.js").read_text()
         found = dict(re.findall(r"(PHONE_\w+): '([^']+)'", re.search(r"const DEFAULTS = \{([^}]*)\}", js).group(1)))
         self.assertEqual(found, pt.DEFAULTS)
         for key, value in pt.DEFAULTS.items():
             self.assertIn(value, pt.CHOICES[key])
-        self.assertIn('PHONE_MAX_SIZE:-1024', (ROOT / "packs/official/adb-scrcpy" / "phone").read_text())
-        self.assertIn('PHONE_BIT_RATE:-2M', (ROOT / "packs/official/adb-scrcpy" / "phone").read_text())
+        self.assertIn('PHONE_MAX_SIZE:-1024', (ROOT / "packs/original/adb-scrcpy" / "phone").read_text())
+        self.assertIn('PHONE_BIT_RATE:-2M', (ROOT / "packs/original/adb-scrcpy" / "phone").read_text())
 
     def test_reset_keeps_other_lines(self):
         import tempfile

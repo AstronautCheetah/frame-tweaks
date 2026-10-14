@@ -23,8 +23,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | dictation | `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`; Homebrew's `whisper-cpp` and `wl-clipboard` | Microphone while recording; types through ydotool |
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two app-menu entries | Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam display (`:0`) for one click** (at most 10 s) and replay it with XTEST |
 | snip | `~/.local/bin/frame-snip`, Tesseract (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |
-| full-keyboard | A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
-| clipboard | `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry | Reads and writes both sessions' clipboards |
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037) |
 | cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
 | vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in; SteamVR's `VRWebHelper/DebuggerEnabled` setting while SteamVR runs | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame that can reach the local network (Flatpak apps with network access included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed |
@@ -32,7 +30,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | float-return | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-return.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | float-grab | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | scroll-strips | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js`) via VR dashboard patching (helper); settings in `~/.config/frame-tweaks/scroll-strips.json` | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs; scrolls with ydotool's arrow keys |
-| recline | Recline-VR built from source into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the room-view fix, also inside the Frame's camera service |
 | wallet | `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`) | Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet |
 | signal | Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json` | Asks for the wallet password first; quits Signal when idle; key in the wallet |
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
@@ -45,6 +42,9 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | vscodium | Flathub app `com.vscodium.codium` (system-wide Flatpak) | VSCodium's own Flatpak permissions: all your files, the network, and running commands outside its sandbox |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS |
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |
+| full-keyboard | A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
+| clipboard | `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry | Reads and writes both sessions' clipboards |
+| recline | Recline-VR built from source into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the room-view fix, also inside the Frame's camera service |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y** through SteamVR Input while the laser is over the window |
 
@@ -73,9 +73,9 @@ running as your user.
 **Set a wallet password.** SteamOS seeds every Frame with the same stock wallet, and it has no
 password. Until you set one (KWalletManager → *Change Password*), nothing above is really
 protected. Avoid changing it while a second wallet service is running (see
-[wallet/README.md](packs/official/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
+[wallet/README.md](packs/original/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
-**Other people's packs.** Tweaks can come from packs other than the official one
+**Other people's packs.** Tweaks can come from packs other than the official ones (Original and 3rd Party)
 ([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
 `~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
 and trust covers its files as they were then: if any change, it's ignored again until you

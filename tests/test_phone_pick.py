@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PHONE = ROOT / "packs/official/adb-scrcpy" / "phone"
+PHONE = ROOT / "packs/original/adb-scrcpy" / "phone"
 
 
 def advert(name, ip, port):

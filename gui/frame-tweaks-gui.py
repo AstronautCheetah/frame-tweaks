@@ -174,11 +174,11 @@ def self_update_check():
 
 
 def readme_links(text, comp):
-    """Relative links in a README, made absolute: on GitHub for the official pack (they don't
+    """Relative links in a README, made absolute: on GitHub for the official packs (they don't
     resolve outside the repo), as files for a user's pack."""
     def target(link):
         if comp["official"]:
-            rel = posixpath.normpath(f"packs/official/{comp['id']}/{link}" if comp.get("id") else link)
+            rel = posixpath.normpath(f"packs/{comp['pack_dir'].name}/{comp['id']}/{link}" if comp.get("id") else link)
             return GITHUB.rsplit("/tree/", 1)[0] + "/blob/main/" + rel
         return (comp["dir"] / link).resolve().as_uri()
     # Pictures from the local copy (the window can't fetch web images), links to GitHub.
@@ -404,7 +404,8 @@ class Details(QWidget):
         colour = {"ok": "#5cc77a", "warn": "#e0b33a"}.get(kind, "#9aa6b2")
         facts.append(("Status", f"<span style='color:{colour}'>{html.escape(text)}</span>"))
         if comp["official"]:
-            facts.append(("Documentation", f"<a style='color:#7fb2e5' href='{GITHUB}/packs/official/{comp['id']}'>"
+            facts.append((_("Pack"), html.escape(comp["pack"])))
+            facts.append(("Documentation", f"<a style='color:#7fb2e5' href='{GITHUB}/packs/{comp['pack_dir'].name}/{comp['id']}'>"
                           f"{comp['id']}/README.md on GitHub</a>"))
         else:
             facts.append(("From", f"<span style='color:#e0b33a'>the pack {html.escape(comp['pack'])}, not part of "
