@@ -1,7 +1,10 @@
 #!/bin/bash
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 if [ -x "$BIN/wallet-launcher" ]; then
-    for app in $("$BIN/wallet-launcher" --list | cut -d" " -f1); do "$BIN/wallet-launcher" --remove "$app"; done
+    # (by file, not --list's columns: an entry's name can have spaces, e.g. "My App.desktop")
+    for f in "$APPS"/*.desktop; do
+        grep -q '^X-FrameTweaks-Wallet=true' "$f" 2>/dev/null && "$BIN/wallet-launcher" --remove "$(basename "$f" .desktop)"
+    done
 fi
 sysctl_user stop wallet-autolock.timer 2>/dev/null || true
 sysctl_user disable --now wallet-lock-sync 2>/dev/null || true

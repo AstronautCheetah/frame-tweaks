@@ -186,7 +186,8 @@ wallet in KWalletManager, or KWallet's idle timeout, only closes `kwalletd6`'s v
 - An app's own installer (for example another tweak's) may rewrite its menu entry. If **Password
   first** is gone afterwards, turn it on again on the Wallet apps page.
 - A **Close after** timer finds apps by their systemd scope (every Flatpak, and other apps
-  started from the VR "+" menu or Steam), otherwise by their program. It asks them to quit
+  started from the VR "+" menu or Steam), otherwise by their program, unless that's a shell or
+  interpreter (`sh -c …`, `python3 …`), which runs other programs too. It asks them to quit
   normally.
 - "Password refused" although it's right? A ksecretd prompt is probably open in VR. Close it (or
   type the password there), then unlock again.

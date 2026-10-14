@@ -127,6 +127,10 @@ def app_cgroups(app_id):
 # Host programs whose menu command is a launcher script, not the program itself.
 KNOWN_PROGRAMS = {"com.anthropic.Claude": str(Path.home() / ".local/opt/claude-desktop/claude-desktop")}
 WRAPPERS = ("wallet-gate", "frame-outer-bus", "signal-guard", "--", "env")   # (signal-guard: older entries)
+# Shells and interpreters also run your session's scripts, terminals and tools (sh -c …, python3 …):
+# an app started through one is found by its scope only, never by that program.
+INTERPRETERS = re.compile(r"(?:ba|da|z|k|mk|fi|tc|c)?sh|busybox|python[\d.]*|perl[\d.]*|ruby[\d.]*|"
+                          r"node(?:js)?|java|lua[\d.]*|php[\d.]*|tclsh[\d.]*|wish[\d.]*")
 
 
 def host_program(app_id):
@@ -146,7 +150,9 @@ def host_program(app_id):
             if not args or os.path.basename(args[0]) == "flatpak":
                 return None                 # Flatpaks are found by their scope
             prog = shutil.which(os.path.expanduser(args[0]))
-            return os.path.realpath(prog) if prog else None
+            if not prog or INTERPRETERS.fullmatch(os.path.basename(os.path.realpath(prog))):
+                return None
+            return os.path.realpath(prog)
     return None
 
 

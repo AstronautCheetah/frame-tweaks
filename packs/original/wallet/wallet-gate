@@ -7,7 +7,12 @@ if ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
     # shellcheck source=/dev/null
     source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
         t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
-    notify-send -a Wallet "$(t '%s not started' "$(basename "$1")")" "$(t 'The wallet is still locked.')" 2>/dev/null
+    # Name the app, not a wrapper: past frame-outer-bus, and a Flatpak's app id after its options.
+    app=$1; [ "${app##*/}" = frame-outer-bus ] && shift && app=${1:-$app}
+    if [ "${app##*/}" = flatpak ] && [ "${2:-}" = run ]; then
+        for a in "${@:3}"; do case $a in -*) ;; *) app=$a; break ;; esac; done
+    fi
+    notify-send -a Wallet "$(t '%s not started' "${app##*/}")" "$(t 'The wallet is still locked.')" 2>/dev/null
     exit 1
 fi
 exec "$@"
