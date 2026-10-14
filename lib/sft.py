@@ -27,6 +27,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -124,20 +125,38 @@ def pack_dirs():
 
 
 def pack_hash(d):
-    """sha256 over a pack's files (names and contents): trust is for this content only."""
+    """sha256 over a pack's files (names, contents, whether they can be run) and its links
+    (where they point): trust is for this content only. Each goes in as a kind, its name, a NUL,
+    then a fixed-size digest or a link's target and a NUL, so two different packs can't give the
+    same input. (Folders behind links aren't followed, but adding or changing a link counts.)"""
     h = hashlib.sha256()
-    for f in sorted(p for p in Path(d).rglob("*") if p.is_file() and not any(
-            part in (".git", "__pycache__") for part in p.relative_to(d).parts)):
-        h.update(str(f.relative_to(d)).encode() + b"\0" + f.read_bytes() + b"\0")
+    for root, dirs, files in os.walk(d):
+        dirs[:] = sorted(x for x in dirs if x not in (".git", "__pycache__"))
+        for name in sorted(dirs + [f for f in files if f not in (".git", "__pycache__")]):
+            p = os.path.join(root, name)
+            rel = os.fsencode(os.path.relpath(p, d))
+            if os.path.islink(p):
+                h.update(b"L" + rel + b"\0" + os.fsencode(os.readlink(p)) + b"\0")
+            if not os.path.isfile(p):
+                continue
+            try:
+                with open(p, "rb") as f:
+                    fh = hashlib.sha256()
+                    for chunk in iter(lambda: f.read(1 << 20), b""):
+                        fh.update(chunk)
+                h.update(b"F" + rel + b"\0" + (b"x" if os.access(p, os.X_OK) else b"-") + fh.digest())
+            except OSError:
+                h.update(b"U" + rel + b"\0")             # (unreadable: not something we run)
     return h.hexdigest()
 
 
 def trusted_packs():
     out = {}
     try:
-        for line in TRUSTED.read_text().splitlines():
+        for line in TRUSTED.read_text().split("\n"):     # (not splitlines(): it also splits at \x85, \u2028…)
             path, _, digest = line.partition("\t")
-            out[path] = digest
+            if path:
+                out[path] = digest
     except OSError:
         pass
     return out
@@ -168,10 +187,13 @@ def check_settings(st, cid, where):
     if not isinstance(st, dict):
         return [f"{where}: settings must be a mapping"]
     f = st.get("file")
-    if not (isinstance(f, str) and f.startswith("~/.config/")):
+    if not (isinstance(f, str) and f.startswith("~/.config/") and len(Path(f).parts) > 2 and ".." not in Path(f).parts):
         errs.append(f"{where}: settings.file must be a file under ~/.config/")
     if st.get("format") not in ("json", "shell"):
         errs.append(f"{where}: settings.format must be json or shell")
+    for k in ("about", "note"):
+        if not isinstance(st.get(k, ""), str):
+            errs.append(f"{where}: settings.{k} must be text")
     opts = st.get("options")
     if not isinstance(opts, list) or not opts:
         return errs + [f"{where}: settings.options must be a list"]
@@ -189,14 +211,21 @@ def check_settings(st, cid, where):
         if o.get("default") not in vals:
             errs.append(f"{where}: {o['key']}: the default must be one of the choices' values")
     for o in opts:
-        if isinstance(o, dict) and o.get("checkbox") and len(o.get("choices") or []) != 2:
+        if isinstance(o, dict) and o.get("checkbox") and not (isinstance(o.get("choices"), list) and len(o["choices"]) == 2):
             errs.append(f"{where}: {o.get('key')}: a checkbox option needs exactly two choices (on, then off)")
     if not (isinstance(st.get("include", []), list) and all(isinstance(i, str) for i in st.get("include", []))):
         errs.append(f"{where}: settings.include must be a list of tweak ids")
-    for a in st.get("actions", []):
+    actions = st.get("actions", [])
+    if not isinstance(actions, list):
+        errs.append(f"{where}: settings.actions must be a list")
+        actions = []
+    for a in actions:
         if not (isinstance(a, dict) and isinstance(a.get("label"), str) and isinstance(a.get("script"), str)
-                and isinstance(a.get("args", []), list) and isinstance(a.get("when", ""), str)):
-            errs.append(f"{where}: each settings action needs a label and a script (args, when, about optional)")
+                and not Path(a["script"]).is_absolute() and ".." not in Path(a["script"]).parts
+                and isinstance(a.get("args", []), list) and all(isinstance(x, str) for x in a.get("args", []))
+                and isinstance(a.get("when", ""), str) and isinstance(a.get("about", ""), str)):
+            errs.append(f"{where}: each settings action needs a label and a script in the tweak's folder "
+                        "(args, when, about optional)")
     return errs
 
 
@@ -207,7 +236,7 @@ def read_tweak(d):
         return None, [f"{where}: a tweak's folder name (its id) must be lower-case letters, digits and -"]
     try:
         data, _ = manifest.front_matter((d / "README.md").read_text())
-    except (OSError, manifest.ManifestError) as e:
+    except (OSError, ValueError) as e:                  # (ValueError: a ManifestError, or not UTF-8)
         return None, [f"{where}/README.md: {e}"]
     errs = [f"{where}: {k} is missing (or not text)" for k in TEXT if not isinstance(data.get(k), str) or not data[k]]
     warn = [f"warning: {where}: unknown key {k!r} (ignored)" for k in data if k not in TEXT + OPTIONAL]
@@ -226,8 +255,25 @@ def read_tweak(d):
                                           and UPSTREAM_README.match(data["upstream_readme"])):
         errs.append(f"{where}: upstream_readme must be a raw.githubusercontent.com URL of a .md file")
     icon = data.get("icon", {})
-    if not (isinstance(icon, dict) and set(icon) <= {"file", "flatpak", "theme"}):
+    if not (isinstance(icon, dict) and set(icon) <= {"file", "flatpak", "theme"} and all(isinstance(v, str) for v in icon.values())):
         errs.append(f"{where}: icon takes file, flatpak and theme")
+    # (install.sh stops whatever each pattern matches: a plain text here would be one per letter)
+    procs = data.get("processes") or []
+    if not (isinstance(procs, list) and all(isinstance(p, str) and p.strip() and "\n" not in p for p in procs)):
+        errs.append(f"{where}: processes must be a list of pgrep -f patterns, e.g. [^~/.local/bin/my-daemon]")
+    apps = data.get("wallet_apps") or []
+    if not (isinstance(apps, list) and all(isinstance(a, str) for a in apps)):
+        errs.append(f"{where}: wallet_apps must be a list of app ids")
+    if not isinstance(data.get("experimental") or "", str):
+        errs.append(f"{where}: experimental must be text (what relies on another program's internals)")
+    for k in ("source", "run", "known_issue", "test"):
+        if not isinstance(data.get(k) or {}, dict):
+            errs.append(f"{where}: {k} must be a mapping, like {{key: value}}")
+    if isinstance(data.get("run"), dict) and not isinstance(data["run"].get("label", ""), str):
+        errs.append(f"{where}: run.label must be text")
+    issue = data.get("known_issue")
+    if isinstance(issue, dict) and issue and not all(isinstance(issue.get(k), str) for k in ("version", "short", "long", "latest")):
+        errs.append(f"{where}: known_issue needs version, short, long and latest (text)")
     if "settings" in data:
         errs += check_settings(data["settings"], cid, where)
     if errs:
@@ -240,12 +286,12 @@ def read_tweak(d):
         what=data["what"], why=data["why"], author=data["author"],
         source=f"{src.get('relation', 'uses')}|{src['url']}" if src.get("url") else "",
         flags={"hidden-by-default"} if data.get("hidden_by_default") else set(),
-        experimental=data.get("experimental", ""), icon=icon,
+        experimental=data.get("experimental") or "", icon=icon,
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() else None,
-        processes=data.get("processes", []), settings=data.get("settings"),
-        known_issue=data.get("known_issue"), wallet_apps=data.get("wallet_apps", []),
+        processes=procs, settings=data.get("settings"),
+        known_issue=data.get("known_issue"), wallet_apps=apps,
         upstream_readme=data.get("upstream_readme", ""),
-        test=data.get("test", {}), replaces=data.get("replaces", False),
+        test=data.get("test") or {}, replaces=data.get("replaces", False),
         changes=data["changes"], access=data["access"], survives_updates=data["survives_updates"],
         undo=data["undo"]), warn
 
@@ -260,9 +306,21 @@ def read_pack(d):
             # Its description: the text's first paragraph (headings skipped).
             paras = [p.strip() for p in body.split("\n\n") if p.strip() and not p.lstrip().startswith("#")]
             info["about"] = " ".join(paras[0].split()) if paras else ""
-        except manifest.ManifestError as e:
+        except (OSError, ValueError) as e:              # (ValueError: a ManifestError, or not UTF-8)
             probs.append(f"{d.name}/pack.md: {e}")
-    subs = {p.name: p for p in d.iterdir() if p.is_dir() and (p / "README.md").is_file()}
+    # (any pack's, trusted or not, is read: a wrong kind of value is a problem, and the default is used)
+    for k, default in (("name", d.name), ("author", ""), ("categories", []), ("order", [])):
+        v = info[k]
+        ok = (isinstance(v, str) and (v or k == "author")) if isinstance(default, str) else (
+            isinstance(v, list) and all(isinstance(x, str) for x in v))
+        if not ok:
+            probs.append(f"{d.name}/pack.md: {k} must be {'text' if isinstance(default, str) else 'a list, like [a, b]'}")
+            info[k] = default
+    try:
+        subs = {p.name: p for p in d.iterdir() if p.is_dir() and (p / "README.md").is_file()}
+    except OSError as e:
+        subs = {}
+        probs.append(f"{d.name}: {e}")
     order = [subs.pop(i) for i in info["order"] if i in subs] + [subs[k] for k in sorted(subs)]
     return info, order, probs
 
@@ -277,10 +335,13 @@ def load(refresh=False):
     trust, off = trusted_packs(), off_packs()
     comps, problems, packs, cats = {}, [], [], []
     for d in pack_dirs():
+        if "\n" in str(d) or "\r" in str(d):          # (trusting it would write more than its own line)
+            problems.append(f"{str(d)!r}: a pack's folder can't have a line break in its name")
+            continue
         info, folders, probs = read_pack(d)
         official = d in {p.resolve() for p in OFFICIAL_PACKS}
         state = ("off" if d.name in off else "official") if official else (
-            "trusted" if trust.get(str(d)) == pack_hash(d) else "changed" if str(d) in trust else "untrusted")
+            ("trusted" if trust[str(d)] == pack_hash(d) else "changed") if str(d) in trust else "untrusted")
         # (label, about: shown in the user's language for an official pack; name stays the id)
         label, about = (_(info["name"]), _(info["about"])) if official else (info["name"], info["about"])
         pack = dict(dir=d, name=info["name"], label=label, author=info["author"], about=about, state=state,
@@ -414,8 +475,8 @@ def raw_setting(cid, key):
             return str(json.loads(s["file"].read_text()).get(key, ""))
         except (OSError, ValueError, AttributeError):
             return ""
-    try:   # a shell file: sourced, as the scripts do (values may be shell-quoted)
-        return subprocess.run(["bash", "-c", f'. "$1" 2>/dev/null; printf %s "${{{key}:-}}"', "_", str(s["file"])],
+    try:   # a shell file: sourced, as the scripts do (values may be shell-quoted); the key goes in as $2
+        return subprocess.run(["bash", "-c", '. "$1" 2>/dev/null; printf %s "${!2:-}"', "_", str(s["file"]), key],
                               capture_output=True, text=True, timeout=5).stdout
     except (OSError, subprocess.TimeoutExpired):
         return ""
@@ -436,6 +497,7 @@ def read_settings(cid):
     if s["format"] == "json":
         try:
             raw = json.loads(s["file"].read_text())
+            raw = raw if isinstance(raw, dict) else {}   # (as write_settings: null or a list is no settings)
         except (OSError, ValueError):
             raw = {}
     else:
@@ -447,9 +509,10 @@ def read_settings(cid):
                     raw[k.strip()] = v.strip().strip("'\"")
         except OSError:
             pass
-    for key in out:
-        if key in raw and _allowed(cid, key, raw[key]):
-            out[key] = raw[key]
+    for key, _title, choices, _default in s["options"]:
+        if key in raw:                                 # (a shell file holds text: "1280" for a listed 1280)
+            out[key] = next((v for _label, v in choices if v == raw[key] or s["format"] == "shell" and str(v) == raw[key]),
+                            out[key])
     return out
 
 
@@ -480,15 +543,15 @@ def write_settings(cid, changes, reset=False):
     except OSError:
         lines = []
     out, done = [], set()
-    for line in lines:
+    for line in lines:          # (values quoted where they must be, so the file can be sourced: K='a b')
         k = line.partition("=")[0].strip()
         if k in defaults(cid) and (reset or k in changes):
             if k in changes and k not in done:
-                out.append(f"{k}={changes[k]}")
+                out.append(f"{k}={shlex.quote(str(changes[k]))}")
                 done.add(k)
             continue
         out.append(line)
-    out += [f"{k}={v}" for k, v in changes.items() if k not in done]
+    out += [f"{k}={shlex.quote(str(v))}" for k, v in changes.items() if k not in done]
     path.write_text("".join(f"{line}\n" for line in out))
 
 
@@ -535,10 +598,16 @@ def info(cid):
 
 
 def find_pack(name):
-    """A pack by its name, folder name or folder."""
-    for p in load()["packs"]:
-        if name in (p["name"], p["label"], p["dir"].name, str(p["dir"])) or Path(name).expanduser().resolve() == p["dir"]:
-            return p
+    """A pack by its folder, or by its name or folder name if only one pack goes by it (any pack
+    can call itself anything: trusting the wrong one by its name mustn't be possible)."""
+    packs = load()["packs"]
+    found = [p for p in packs if Path(name).expanduser().resolve() == p["dir"]] or [
+        p for p in packs if name in (p["name"], p["label"], p["dir"].name, str(p["dir"]))]
+    if len(found) > 1:
+        sys.exit(_("more than one pack is called {name}: give its folder ({folders})").format(
+            name=repr(name), folders=", ".join(str(p["dir"]) for p in found)))
+    if found:
+        return found[0]
     sys.exit(_("no pack {name}; see {command}").format(name=repr(name), command="./install.sh mods"))
 
 
@@ -563,8 +632,15 @@ def mods(args):
         return
     if args[:1] == ["check"] and len(args) == 2:
         d = Path(args[1]).expanduser().resolve()
-        folders = [d] if (d / "README.md").is_file() and not (d / "pack.md").is_file() else read_pack(d)[1]
-        bad = 0
+        if (d / "README.md").is_file() and not (d / "pack.md").is_file():
+            folders, probs = [d], []
+        else:                                          # (a pack: its pack.md is checked too)
+            info, folders, probs = read_pack(d)
+            if not isinstance(info["api"], int) or info["api"] > API:
+                probs.append(f"{d.name}: needs a newer Frame Tweaks (pack api {info['api']}; this one knows {API})")
+        for pr in probs:
+            print(pr)
+        bad = len(probs)
         for f in folders:
             c, probs = read_tweak(f)
             for pr in probs:
@@ -623,6 +699,8 @@ def main(argv):
     elif cmd in ("hide-group", "unhide-group"):
         cats = {c["category"] for c in components()}
         name = " ".join(args)
+        if name not in cats and _(name) in cats:      # (its English name, in another language)
+            name = _(name)
         if name not in cats:
             sys.exit(_("unknown group {name}; groups: {groups}").format(name=repr(name), groups=", ".join(sorted(cats))))
         set_category_hidden(name, cmd == "hide-group")
@@ -631,9 +709,9 @@ def main(argv):
     elif cmd == "mods":
         mods(args)
     elif cmd == "registry":                     # for ./install.sh: one line per tweak, \x1f-separated
-        for c in components():
-            print("\x1f".join([c["id"], c["title"], " ".join(c["deps"]), c["desc"], str(c["dir"]),
-                               "1" if c["experimental"] else ""]))
+        for c in components():                  # (a line break in a summary would start a row of its own)
+            print("\x1f".join(re.sub(r"[\n\r\x1f]", " ", f) for f in [c["id"], c["title"], " ".join(c["deps"]),
+                                                                  c["desc"], str(c["dir"]), "1" if c["experimental"] else ""]))
     elif cmd == "dir" and len(args) == 1:
         c = component(args[0])
         sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])
@@ -641,10 +719,13 @@ def main(argv):
         c = component(args[0])
         print("\n".join(c["processes"] if c else []))
     elif cmd == "deps" and len(args) == 1:      # what ID needs, transitively, dependencies first
-        byid, out = {c["id"]: c for c in components()}, []
-        def visit(i):
+        byid, out, seen = {c["id"]: c for c in components()}, [], set()
+        if args[0] not in byid:
+            sys.exit(_("unknown component: %s") % args[0])
+        def visit(i):                           # (as install.sh's with_deps: a cycle stops where it began)
+            seen.add(i)
             for d in byid[i]["deps"]:
-                if d not in out:
+                if d not in seen:
                     visit(d)
                     out.append(d)
         visit(args[0])

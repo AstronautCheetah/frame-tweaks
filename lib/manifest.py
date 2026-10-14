@@ -16,14 +16,17 @@ person reading it (tests/test_manifest.py checks every manifest against PyYAML):
   # comment               on its own line, or after a value (space before #)
 
 Refused, with the line number, instead of being guessed at: tabs, anchors and aliases (& *),
-tags (!), duplicate keys, a value continuing on the next line without > or |, and plain
-values YAML 1.1 readers turn into something else (yes/no/on/off, dates, 010, 1_000, .5):
-quote those. Plain text can't start with one of  [ ] { } , & * ! | > ' " % @ `  or "- ".
+tags (!), duplicate keys, keys YAML reads as something other than text (1:, on:), a value
+continuing on the next line without > or |, and plain values YAML 1.1 readers turn into
+something else (yes/no/on/off, dates, 010, 1_000, .5): quote those. Plain text can't start
+with one of  [ ] { } , & * ! | > ' " % @ `  or "- " or "? "; inside [...] and {...} it can't
+hold ? [ { or start with : or #, and an empty value there is refused too.
 """
 import re
+from decimal import Decimal
 
 INDICATORS = set("[]{},&*!|>'\"%@`")
-AMBIGUOUS = re.compile(r"(?i)^(y|n|yes|no|on|off|true|false|null|~|\.inf|-\.inf|\.nan)$")
+AMBIGUOUS = re.compile(r"(?i)^(y|n|yes|no|on|off|true|false|null|~|[-+]?\.inf|\.nan|=|<<)$")   # (= and <<: PyYAML can't read them)
 INT = re.compile(r"^-?(0|[1-9][0-9]*)$")
 FLOAT = re.compile(r"^-?(0|[1-9][0-9]*)\.[0-9]+$")
 KEY = re.compile(r"^([A-Za-z0-9_][A-Za-z0-9_-]*):(?: (.*))?$")
@@ -48,13 +51,25 @@ def scalar(text, line):
         return float(t)
     if AMBIGUOUS.match(t):
         raise ManifestError(f"{t!r} means different things to different YAML readers: quote it", line)
-    if t[:1] in INDICATORS or t.startswith("- ") or t == "-":
+    if t[:1] in INDICATORS or t.startswith(("- ", "? ")) or t in ("-", "?"):
         raise ManifestError(f"a plain value can't start with {t[:1]!r}: quote it", line)
     if re.match(r"[-+]?\.?[0-9]", t):
         raise ManifestError(f"{t!r} looks like a number or date but isn't a simple one: quote it", line)
     if ": " in t or t.endswith(":") or " #" in t:
         raise ManifestError(f"{t!r} contains ': ' or ' #': quote it", line)
     return t
+
+
+def plain_key(k, line):
+    """A mapping key, refused if YAML readers would take it for a number, true/false, null or a
+    date (PyYAML reads 1: and on: as 1 and True; y: and n: it keeps as text)."""
+    try:
+        same = k.lower() in ("y", "n") or scalar(k, line) == k
+    except ManifestError:
+        same = False
+    if not same:
+        raise ManifestError(f"{k!r} can't be a key: YAML reads it as a number, true/false, null or a date", line)
+    return k
 
 
 def strip_comment(text):
@@ -123,6 +138,7 @@ class Flow:
                 m = re.compile(r"([A-Za-z0-9_][A-Za-z0-9_-]*): ").match(self.s, self.i)
                 if not m:
                     self.err("expected key: value in a {...} mapping")
+                plain_key(m[1], self.line)
                 if m[1] in out:
                     self.err(f"duplicate key {m[1]!r}")
                 self.i = m.end()
@@ -170,8 +186,10 @@ class Flow:
             j += 1
         raw = self.s[self.i:j]
         self.i = j
-        if inside and (raw.strip()[:1] in INDICATORS):
-            self.err(f"{raw.strip()!r}: quote it")
+        if inside and not raw.strip():                 # (PyYAML: null, or nothing after a last comma)
+            self.err("an empty value in [...] or {...}: write null or \"\", or leave the comma out")
+        if inside and (raw.strip()[:1] in INDICATORS | {":", "#"} or any(c in raw for c in "[{?")):
+            self.err(f"{raw.strip()!r}: quote it")         # (in there, PyYAML takes ? : # [ { as syntax)
         return scalar(raw, self.line)
 
     def whole(self):
@@ -187,6 +205,8 @@ def parse_yaml(text):
     for n, raw in enumerate(lines, 1):
         if "\t" in raw[:len(raw) - len(raw.lstrip(" \t"))]:
             raise ManifestError("tab in the indentation: use spaces", n)
+        if "\t" in raw:                                # (PyYAML refuses most, or ends the value there)
+            raise ManifestError("a tab: use spaces (or \\t in \"...\")", n)
     p = _Parser(lines)
     p.skip()
     if p.i >= len(lines):
@@ -220,13 +240,13 @@ class _Parser:
     def mapping(self, ind, first=None):
         out = {}
         while True:
-            self.skip()
-            if self.i >= len(self.lines) and first is None:
-                return out
-            if first is not None:
-                text, n = first
+            if first is not None:                      # ("- key: |": its text starts on the next line,
+                text, n = first                        # blank or # lines included, so no skip() first)
                 first = None
             else:
+                self.skip()
+                if self.i >= len(self.lines):
+                    return out
                 if self.indent() != ind:
                     if self.indent() > ind:
                         raise ManifestError("unexpected indentation", self.i + 1)
@@ -239,7 +259,7 @@ class _Parser:
             m = KEY.match(strip_comment(text) if not text.rstrip().endswith((">", ">-", "|", "|-")) else text.rstrip())
             if not m:
                 raise ManifestError(f"expected key: value, got {text!r}", n)
-            key, rest = m[1], m[2]
+            key, rest = plain_key(m[1], n), m[2]
             if key in out:
                 raise ManifestError(f"duplicate key {key!r}", n)
             out[key] = self.value(rest, ind, n)
@@ -256,7 +276,7 @@ class _Parser:
             n = self.i + 1
             item = self.lines[self.i].strip()[2:]
             self.i += 1
-            if not item.strip():
+            if not strip_comment(item).strip():            # "-" alone, or with a comment: what's below, or null
                 self.skip()
                 out.append(self.block(self.indent()) if self.i < len(self.lines) and self.indent() > ind else None)
             elif item.startswith("- ") or item == "-":       # "- - x": a list in a list
@@ -289,7 +309,7 @@ class _Parser:
         return v
 
     def text(self, style, ind, n):
-        body = []
+        body, blank = [], []
         start = None
         while self.i < len(self.lines):
             line = self.lines[self.i]
@@ -304,7 +324,11 @@ class _Parser:
                 body.append(line[start:])
             else:
                 body.append("")
+                blank.append((self.i + 1, len(line)))
             self.i += 1
+        for k, width in blank:                         # (PyYAML keeps the spaces past the indentation)
+            if start is not None and width > start:
+                raise ManifestError("a line of only spaces, more than the text's indentation: remove them", k)
         while body and body[-1] == "":
             body.pop()
         if not body:
@@ -341,9 +365,10 @@ def front_matter(text):
 
 # ---- writing (for tools that create or update manifests) -----------------------------------
 def dump_value(v, ind=0, width=96):
-    """YAML for v as this reader (and PyYAML) read it back; long text is folded (>-)."""
+    """YAML for v as this reader (and PyYAML) read it back; long text is folded (>-). The file
+    itself (ind 0) is always key: value lines, as the reader wants."""
     pad = " " * ind
-    if isinstance(v, dict) and v and all(not isinstance(x, (dict, list)) for x in v.values()):
+    if isinstance(v, dict) and v and ind and all(not isinstance(x, (dict, list)) for x in v.values()):
         flow = _inline(v)                              # a small mapping stays on one line
         if len(flow) <= 64 and "\n" not in flow:
             return flow
@@ -355,34 +380,36 @@ def dump_value(v, ind=0, width=96):
             s = dump_value(x, ind + 2, width)
             if isinstance(x, (dict, list)) and x and not s.startswith(("[", "{")):
                 out.append(f"{pad}{k}:\n{s}")
-            elif s.startswith((">-\n", "|\n", "|-\n")):
-                out.append(f"{pad}{k}: {s}")
             else:
                 out.append(f"{pad}{k}: {s}")
         return "\n".join(out)
     if isinstance(v, list):
         if not v:
             return "[]"
-        if all(not isinstance(x, (dict, list)) for x in v):
+        if ind and all(not isinstance(x, (dict, list)) for x in v):
             flow = "[" + ", ".join(_inline(x) for x in v) + "]"
             if len(flow) + ind < width and "\n" not in flow:
                 return flow
         out = []
-        for x in v:
-            if isinstance(x, dict) and x and dump_value(x, ind + 2, width).startswith("{"):
-                out.append(f"{pad}- {dump_value(x, ind + 2, width)}")
-            elif isinstance(x, dict) and x:
-                inner = dump_value(x, ind + 2, width).split("\n", 1)
-                out.append(f"{pad}- {inner[0].lstrip()}" + (f"\n{inner[1]}" if len(inner) > 1 else ""))
-            else:
-                out.append(f"{pad}- {dump_value(x, ind + 2, width)}")
+        for x in v:                                    # "- " and the item (a mapping's or list's first line)
+            first, nl, rest = dump_value(x, ind + 2, width).partition("\n")
+            out.append(f"{pad}- {first.lstrip()}{nl}{rest}")
         return "\n".join(out)
-    if isinstance(v, str) and (len(v) + ind > width - 20 or "\n" in v):
+    if isinstance(v, str) and (len(v) + ind > width - 20 or "\n" in v) and _block_keeps(v):
         if "\n" in v or v != v.strip() or "  " in v:
             body = v.rstrip("\n")
             return ("|\n" if v.endswith("\n") else "|-\n") + "\n".join((pad + l) if l else "" for l in body.split("\n"))
         return ">-\n" + "\n".join(pad + l for l in _wrap(v, width - ind))
     return _inline(v)
+
+
+def _block_keeps(v):
+    """Whether | (or >-) gives v back as it is, else it's written in quotes: no tab or line of only
+    spaces, its first line with text not indented, and no more than one line break at the end."""
+    lines = v.removesuffix("\n").split("\n")
+    first = next((line for line in lines if line), "")
+    return ("\t" not in v and not v.endswith("\n\n") and first[:1] not in ("", " ")
+            and all(line.strip() or not line for line in lines))
 
 
 def _wrap(text, width):
@@ -403,13 +430,20 @@ def _inline(v):
     if isinstance(v, bool):
         return "true" if v else "false"
     if isinstance(v, (int, float)):
-        return repr(v)
+        s = repr(v)
+        if isinstance(v, float) and not FLOAT.match(s):   # 1e-05, 1e+20: as plain decimals (the reader's)
+            if v != v or v in (float("inf"), float("-inf")):
+                raise ValueError(f"{v!r} can't be written: the reader has no infinity or nan")
+            s = format(Decimal(s), "f")
+            s += "" if "." in s else ".0"
+        return s
     if isinstance(v, dict):
         return "{" + ", ".join(f"{k}: {_inline(x)}" for k, x in v.items()) + "}"
     if isinstance(v, list):
         return "[" + ", ".join(_inline(x) for x in v) + "]"
-    try:
-        if scalar(v, None) == v and v.strip() == v and v and not any(c in v for c in ",[]{}#"):
+    try:   # plain, if it reads back the same, in [...] and {...} too (where ? and a first : are syntax)
+        if (scalar(v, None) == v and v.strip() == v and v and not any(c in v for c in ",[]{}#?\t\n\r")
+                and v[:1] != ":"):
             return v
     except ManifestError:
         pass

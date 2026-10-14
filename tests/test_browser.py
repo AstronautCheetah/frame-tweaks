@@ -35,6 +35,8 @@ class Sessions(unittest.TestCase):
             self.assertTrue(native(1, {}))
         with mock.patch.object(browser, "proc_cmd", return_value=["/usr/bin/konsole"]):
             self.assertFalse(native(1, {}))
+        with mock.patch.object(browser, "proc_cmd", side_effect=[["/usr/bin/chromium"], []]):
+            self.assertTrue(native(1, {}))       # (read once: a process that ends meanwhile is no IndexError)
 
     def test_default_app_asks_as_desktop_mode_first(self):
         """The VR session doesn't read KDE's defaults (a folder would open in Kate there)."""
@@ -77,3 +79,27 @@ class StuckHandoff(unittest.TestCase):
             self.assertTrue(browser.still_stuck(None, url))
             p.wait(timeout=5)
             self.assertFalse(browser.still_stuck(None, url))      # (nothing left: it handed off)
+
+    def test_the_browser_this_link_started_is_left_alone(self):
+        """A first click on a link started the browser with it on its command line; after a second
+        click on it, only the second launch's processes can be the stuck ones."""
+        import subprocess, sys
+        url = "https://example.com/stuck-test?x=3"
+        started = lambda: subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", url])
+        first = started()
+        self.addCleanup(lambda: first.poll() is None and first.kill())
+        with mock.patch.object(browser, "plan", return_value=("b.desktop", VR, {})), \
+                mock.patch.object(browser, "running_sessions", return_value={VR}), \
+                mock.patch.object(browser.subprocess, "Popen") as popen, \
+                mock.patch.object(browser, "browser_name", return_value="B"), \
+                mock.patch.object(browser, "log", lambda msg: None):
+            _note, proc, handoff = browser.launch(url)            # (nothing is started: Popen is a stand-in)
+        self.assertTrue(handoff)
+        self.assertEqual(popen.call_args[0][0], ["gtk-launch", "b.desktop", url])
+        self.assertIn(first.pid, proc.had_link)
+        second = started()
+        self.addCleanup(lambda: second.poll() is None and second.kill())
+        with mock.patch.object(browser, "log", lambda msg: None):
+            self.assertTrue(browser.still_stuck(proc, url))
+        second.wait(timeout=5)
+        self.assertIsNone(first.poll())
