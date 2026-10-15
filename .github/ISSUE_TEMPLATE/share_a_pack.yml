@@ -1,0 +1,63 @@
+name: Share a pack
+description: List your pack of tweaks on the Community packs page, so others can try it
+labels: [pack]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Listed packs are on [Community packs](https://github.com/AstronautCheetah/frame-tweaks/blob/main/docs/community-packs.md).
+        People add one from its link (🧩 Packs → Add a pack from a link) and decide themselves whether to trust it.
+        Before listing yours, a maintainer checks that it loads and reads it for anything harmful, at the commit you name below.
+        How to prepare it: [Sharing a pack](https://github.com/AstronautCheetah/frame-tweaks/blob/main/docs/mods.md#sharing-a-pack).
+  - type: input
+    id: link
+    attributes:
+      label: The pack's link
+      description: Its git repository, with the pack at its top (pack.md and the tweak folders).
+      placeholder: https://github.com/you/your-pack
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: The commit or tag to check
+      description: What gets read before listing; later changes aren't checked.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What its tweaks do
+      description: One line or two for each tweak, as the Community packs page would show it.
+    validations:
+      required: true
+  - type: textarea
+    id: access
+    attributes:
+      label: What they install or change, and anything unusual they reach
+      description: Downloads, background services, the network, sudo, other apps' files, SteamVR's internals…
+    validations:
+      required: true
+  - type: input
+    id: tested
+    attributes:
+      label: Tested on
+      description: The SteamOS and Frame Tweaks versions you tried it with.
+  - type: input
+    id: license
+    attributes:
+      label: Licence
+      placeholder: MIT
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you send it
+      options:
+        - label: The pack check passes (./install.sh mods check FOLDER, or the check-pack action).
+          required: true
+        - label: Everything installs into the home folder; nothing needs SteamOS's system partition made writable.
+          required: true
+        - label: Uninstalling a tweak removes what it installed (its settings may stay).
+          required: true
+        - label: I wrote it, or may share it under its licence.
+          required: true

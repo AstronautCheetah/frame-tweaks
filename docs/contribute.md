@@ -39,6 +39,9 @@ hands. You don't need to write code for most of these, and none of it needs much
   has the layout of a tweak and the checks to run.
 - **Make your own pack** of tweaks, for yourself or to share:
   [packs of tweaks](https://github.com/AstronautCheetah/frame-tweaks/blob/main/docs/mods.md).
+  Shared, it can be listed on
+  [Community packs](https://github.com/AstronautCheetah/frame-tweaks/blob/main/docs/community-packs.md)
+  for others to try.
 - **Improve the docs:** a step that confused you, a missing screenshot, a "Common issues" entry.
 
 ## Spreading the word

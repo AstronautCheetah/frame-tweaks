@@ -358,6 +358,10 @@ class PacksPage(unittest.TestCase):
                             return
                         time.sleep(0.02)
                     self.fail("still busy")
+                from PyQt6.QtWidgets import QLabel
+                import packs_page
+                shared = [w for w in page.findChildren(QLabel) if packs_page.COMMUNITY in w.text()]
+                self.assertEqual(len(shared), 1)                      # (Packs others share ↗)
                 buttons()["Add"].click()
                 self.assertIn("Paste or type the link", page.notice.text())
                 page.link.setText(f"file://{src}")

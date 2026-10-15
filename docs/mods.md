@@ -264,6 +264,28 @@ only knows older versions leaves the pack out and says so, rather than misreadin
 it doesn't know are reported as warnings and ignored, so packs can use newer optional fields.
 The helpers in `lib/common.sh` and the manifest fields above are what a pack can rely on.
 
+## Sharing a pack
+
+1. **Give it a git repository of its own,** with the pack at its top: its `pack.md` and the
+   tweak folders, as in [`examples/hello-pack/`](../examples/hello-pack/). Others add it with its
+   link (**🧩 Packs → Add a pack from a link**, or `./install.sh mods add LINK`). Tag a version
+   for a fixed one (`mods add LINK v1.0`); without a tag they follow its default branch, and
+   each **Update** waits until they trust the pack again.
+2. **Check it on each change** with Frame Tweaks' pack check: copy the example's
+   [`.github/workflows/pack-check.yml`](../examples/hello-pack/.github/workflows/pack-check.yml)
+   into your repository. It reads the pack as Frame Tweaks does (`./install.sh mods check`) and
+   checks its shell scripts with ShellCheck:
+
+   ```yaml
+   - uses: AstronautCheetah/frame-tweaks/.github/actions/check-pack@main
+     with:
+       path: .          # where the pack is in your repository
+   ```
+3. **Get it listed** on [Community packs](community-packs.md), where others find it: open a
+   [Share a pack](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=share_a_pack.yml)
+   issue with its link and the commit to check. A maintainer checks that it loads and reads it
+   for anything harmful before listing it.
+
 ## Sending a tweak to Frame Tweaks
 
 A tweak in a pack is already in the shape the official packs use: to propose it for Frame

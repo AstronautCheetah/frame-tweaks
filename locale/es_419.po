@@ -73,7 +73,7 @@ msgstr "Leer"
 msgid "{version} available"
 msgstr "{version} disponible"
 
-#: gui/frame-tweaks-gui.py:1155 gui/frame-tweaks-gui.py:1177 gui/packs_page.py:147
+#: gui/frame-tweaks-gui.py:1155 gui/frame-tweaks-gui.py:1177 gui/packs_page.py:152
 msgid "Update"
 msgstr "Actualizar"
 
@@ -324,7 +324,7 @@ msgstr "Mostrar esta categoría otra vez"
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr "Ocultar toda la categoría de la lista (no quita nada)"
 
-#: gui/frame-tweaks-gui.py:440 gui/frame-tweaks-gui.py:463 gui/frame-tweaks-gui.py:696 gui/frame-tweaks-gui.py:1592 gui/packs_page.py:36 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:440 gui/frame-tweaks-gui.py:463 gui/frame-tweaks-gui.py:696 gui/frame-tweaks-gui.py:1592 gui/packs_page.py:37 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr "← Volver"
 
@@ -506,203 +506,214 @@ msgstr "✔ Frame Tweaks está actualizado ({version})."
 msgid "Show hidden ({n})"
 msgstr "Mostrar ocultos ({n})"
 
-#: gui/packs_page.py:108 lib/sft.py:888
+#: gui/packs_page.py:113 lib/sft.py:888
 msgid "(instead of {other}'s)"
 msgstr "(en lugar del de {other})"
 
-#: gui/packs_page.py:111
+#: gui/packs_page.py:116
 msgid "by {author}"
 msgstr "por {author}"
 
 # needs review
-#: gui/packs_page.py:116
+#: gui/packs_page.py:121
 msgid "From {link}"
 msgstr "De {link}"
 
-#: gui/packs_page.py:119
+#: gui/packs_page.py:124
 msgid "%d tweak"
 msgid_plural "%d tweaks"
 msgstr[0] "%d ajuste"
 msgstr[1] "%d ajustes"
 
-#: gui/packs_page.py:121 lib/sft.py:843
+#: gui/packs_page.py:126 lib/sft.py:843
 msgid "Tweaks: %s"
 msgstr "Ajustes: %s"
 
-#: gui/packs_page.py:121 lib/sft.py:843
+#: gui/packs_page.py:126 lib/sft.py:843
 msgid "none"
 msgstr "ninguno"
 
-#: gui/packs_page.py:128 gui/packs_page.py:135
+#: gui/packs_page.py:133 gui/packs_page.py:140
 msgid "Stop using"
 msgstr "Dejar de usar"
 
-#: gui/packs_page.py:128
+#: gui/packs_page.py:133
 msgid "Use"
 msgstr "Usar"
 
-#: gui/packs_page.py:129
+#: gui/packs_page.py:134
 msgid "Its tweaks come back to the list"
 msgstr "Sus ajustes vuelven a la lista"
 
-#: gui/packs_page.py:130 gui/packs_page.py:136
+#: gui/packs_page.py:135 gui/packs_page.py:141
 msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 "Sus ajustes salen de la lista; los instalados se quedan hasta que los desinstales"
 
-#: gui/packs_page.py:139
+#: gui/packs_page.py:144
 msgid "Yes: it runs as me"
 msgstr "Sí: se ejecuta como yo"
 
-#: gui/packs_page.py:140
+#: gui/packs_page.py:145
 msgid "Trust this pack's current files"
 msgstr "Confiar en los archivos actuales de este paquete"
 
-#: gui/packs_page.py:143
+#: gui/packs_page.py:148
 msgid "Trust…"
 msgstr "Confiar…"
 
 # needs review
-#: gui/packs_page.py:148
+#: gui/packs_page.py:153
 msgid ""
 "Get its newer version from where it was added; it waits until you trust it again"
 msgstr ""
 "Obtener su versión más nueva desde donde se agregó; espera hasta que vuelvas a confiar en él"
 
 # needs review
-#: gui/packs_page.py:154
+#: gui/packs_page.py:159
 msgid "Yes, delete it"
 msgstr "Sí, eliminarlo"
 
 # needs review
-#: gui/packs_page.py:158
+#: gui/packs_page.py:163
 msgid "Remove…"
 msgstr "Quitar…"
 
 # needs review
-#: gui/packs_page.py:159
+#: gui/packs_page.py:164
 msgid "Delete this pack from your packs folder"
 msgstr "Eliminar este paquete de tu carpeta de paquetes"
 
-#: gui/packs_page.py:164
+#: gui/packs_page.py:169
 msgid "Problems"
 msgstr "Problemas"
 
-#: gui/packs_page.py:18
+#: gui/packs_page.py:19
 msgid "Comes with Frame Tweaks: in use"
 msgstr "Viene con Frame Tweaks: en uso"
 
-#: gui/packs_page.py:19
+#: gui/packs_page.py:20
 msgid "Comes with Frame Tweaks: turned off, so its tweaks aren't listed"
 msgstr ""
 "Viene con Frame Tweaks: desactivado, así que sus ajustes no aparecen en la lista"
 
-#: gui/packs_page.py:20
+#: gui/packs_page.py:21
 msgid "Trusted: its tweaks are listed"
 msgstr "De confianza: sus ajustes aparecen en la lista"
 
 # needs review
-#: gui/packs_page.py:209
+#: gui/packs_page.py:214
 msgid "That didn't work: {error}"
 msgstr "Eso no funcionó: {error}"
 
-#: gui/packs_page.py:21
+#: gui/packs_page.py:22
 msgid "Not trusted yet: its tweaks aren't listed"
 msgstr "Aún no es de confianza: sus ajustes no aparecen en la lista"
 
 # needs review
-#: gui/packs_page.py:217
+#: gui/packs_page.py:222
 msgid "Paste or type the link of a pack's git repository first."
 msgstr "Primero pega o escribe el enlace del repositorio git de un paquete."
 
 # needs review
-#: gui/packs_page.py:219
+#: gui/packs_page.py:224
 msgid "Adding the pack…"
 msgstr "Agregando el paquete…"
 
-#: gui/packs_page.py:22
-msgid "Changed since you trusted it: not used until you trust it again"
-msgstr ""
-"Cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
-
 # needs review
-#: gui/packs_page.py:224
+#: gui/packs_page.py:229
 msgid ""
 "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
 msgstr ""
 "Se agregó {name}. No se usa hasta que confíes en él: sus ajustes se ejecutarían como tú. Lee primero lo que hacen (su enlace, o Abrir carpeta de paquetes) y luego Confiar… abajo."
 
+#: gui/packs_page.py:23
+msgid "Changed since you trusted it: not used until you trust it again"
+msgstr ""
+"Cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
+
 # needs review
-#: gui/packs_page.py:231
+#: gui/packs_page.py:236
 msgid "Updating {name}…"
 msgstr "Actualizando {name}…"
 
 # needs review
-#: gui/packs_page.py:236 lib/sft.py:861
+#: gui/packs_page.py:241 lib/sft.py:861
 msgid "{name} is up to date."
 msgstr "{name} está al día."
 
 # needs review
-#: gui/packs_page.py:238 lib/sft.py:863
+#: gui/packs_page.py:243 lib/sft.py:863
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] "{name}: actualizado, cambió {n} archivo."
 msgstr[1] "{name}: actualizado, cambiaron {n} archivos."
 
 # needs review
-#: gui/packs_page.py:240
+#: gui/packs_page.py:245
 msgid ""
 "It isn't used until you trust it again: read what changed first, then Trust… below."
 msgstr ""
 "No se usa hasta que vuelvas a confiar en él: lee primero lo que cambió y luego Confiar… abajo."
 
 # needs review
-#: gui/packs_page.py:253
+#: gui/packs_page.py:258
 msgid "Removed {name}."
 msgstr "Se quitó {name}."
 
-#: gui/packs_page.py:39
+#: gui/packs_page.py:40
 msgid "Packs"
 msgstr "Paquetes"
 
-#: gui/packs_page.py:42
+#: gui/packs_page.py:43
 msgid "Open packs folder"
 msgstr "Abrir carpeta de paquetes"
 
 # needs review
-#: gui/packs_page.py:47
+#: gui/packs_page.py:48
 msgid ""
 "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 "Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Original, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, agrega uno desde su enlace abajo, o pon la carpeta de un paquete en <code>{folder}</code>; luego confía en él. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
 
 # needs review
-#: gui/packs_page.py:59
+#: gui/packs_page.py:60
 msgid "Add a pack from a link:"
 msgstr "Agregar un paquete desde un enlace:"
 
 # needs review
-#: gui/packs_page.py:64
+#: gui/packs_page.py:65
 msgid "Paste"
 msgstr "Pegar"
 
 # needs review
-#: gui/packs_page.py:65
+#: gui/packs_page.py:66
 msgid "Paste the link from the clipboard"
 msgstr "Pegar el enlace desde el portapapeles"
 
 # needs review
-#: gui/packs_page.py:68
+#: gui/packs_page.py:69
 msgid "Add"
 msgstr "Agregar"
 
 # needs review
-#: gui/packs_page.py:69
+#: gui/packs_page.py:70
 msgid ""
 "Download the pack into your packs folder. Nothing of it runs until you trust it."
 msgstr ""
 "Descargar el paquete en tu carpeta de paquetes. Nada de él se ejecuta hasta que confíes en él."
+
+# needs review
+#: gui/packs_page.py:74
+msgid "Packs others share"
+msgstr "Paquetes que otros comparten"
+
+# needs review
+#: gui/packs_page.py:75
+msgid "Community packs: packs people shared, with their links"
+msgstr ""
+"Paquetes de la comunidad: paquetes que la gente compartió, con sus enlaces"
 
 # needs review
 #: gui/prefs_page.py:101

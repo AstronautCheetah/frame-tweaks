@@ -1,0 +1,16 @@
+# Frame Tweaks' pack check, on each change: copy this file into your pack's repository (the pack
+# at its top) as .github/workflows/pack-check.yml. It reads the pack as Frame Tweaks does
+# (./install.sh mods check) and checks its shell scripts with ShellCheck. @main checks against
+# Frame Tweaks' newest code; a release tag (such as @v0.7.0) against that release.
+name: Pack check
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: AstronautCheetah/frame-tweaks/.github/actions/check-pack@main
+        with:
+          path: .          # where the pack is in your repository

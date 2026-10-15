@@ -1,0 +1,31 @@
+name: Check a Frame Tweaks pack
+description: >-
+  Reads a pack of tweaks as Frame Tweaks does (./install.sh mods check), and checks its shell
+  scripts with ShellCheck. For pack authors' own repositories (docs/mods.md, Sharing a pack).
+inputs:
+  path:
+    description: The pack's folder in your repository (its pack.md and tweak folders)
+    default: .
+  shellcheck:
+    description: Also check the tweaks' shell scripts with ShellCheck (warnings and errors)
+    default: "true"
+runs:
+  using: composite
+  steps:
+    # (the action's own checkout of Frame Tweaks, at the ref the workflow names: its lib/ reads the pack)
+    - name: The pack, as Frame Tweaks reads it
+      shell: bash
+      env:
+        PACK: ${{ inputs.path }}
+        FRAME_TWEAKS_LANGUAGE: en
+      run: python3 "$GITHUB_ACTION_PATH/../../../lib/sft.py" mods check "$PACK"
+    - name: Its shell scripts (ShellCheck)
+      if: inputs.shellcheck == 'true'
+      shell: bash
+      env:
+        PACK: ${{ inputs.path }}
+      run: |
+        command -v shellcheck >/dev/null || sudo apt-get install -y shellcheck >/dev/null
+        mapfile -d '' scripts < <(find "$PACK" -name .git -prune -o -type f -name '*.sh' -print0)
+        if [ ${#scripts[@]} -eq 0 ]; then echo "no shell scripts"; exit 0; fi
+        shellcheck -S warning "${scripts[@]}"

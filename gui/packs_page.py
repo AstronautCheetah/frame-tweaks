@@ -15,6 +15,7 @@ from i18n import _, N_, ngettext  # (translations: locale/README.md)
 import sft
 
 EXAMPLE_LINK = "https://github.com/…/…"         # (an address, not text: the same in every language)
+COMMUNITY = "https://github.com/AstronautCheetah/frame-tweaks/blob/main/docs/community-packs.md"
 STATE = {"official": (N_("Comes with Frame Tweaks: in use"), "#5cc77a"),
          "off": (N_("Comes with Frame Tweaks: turned off, so its tweaks aren't listed"), "#9aa6b2"),
          "trusted": (N_("Trusted: its tweaks are listed"), "#5cc77a"),
@@ -70,6 +71,10 @@ class Packs(QWidget):
         self.add_button.clicked.connect(self.add)
         add.addWidget(self.add_button)
         lay.addLayout(add)
+        shared = QLabel(f"<a style='color:#7fb2e5' href='{COMMUNITY}'>" + html.escape(_("Packs others share")) + " ↗</a>")
+        shared.setToolTip(_("Community packs: packs people shared, with their links"))
+        shared.linkActivated.connect(self.open_link)
+        lay.addWidget(shared)
         self.notice = QLabel()
         self.notice.setWordWrap(True)
         self.notice.setTextFormat(Qt.TextFormat.PlainText)

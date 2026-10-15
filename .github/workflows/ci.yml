@@ -40,6 +40,11 @@ jobs:
           fi
       - name: Python syntax
         run: dev/check.sh python
+      # The pack check pack authors use in their own repositories (docs/mods.md, Sharing a pack).
+      - name: The pack check for pack authors, on the example pack
+        uses: ./.github/actions/check-pack
+        with:
+          path: examples/hello-pack
       - name: Conventional Commits messages (commitizen, .cz.toml)
         run: |
           python3 -m pip install --quiet commitizen
