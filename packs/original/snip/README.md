@@ -88,7 +88,7 @@ you floated) and shows it full size:
 
 The actions:
 
-- **Copy**: the picture, to the clipboard. With [Shared clipboard](../../third-party/clipboard/) installed,
+- **Copy**: the picture, to the clipboard. With [Shared clipboard](../../integrations/clipboard/) installed,
   you can paste it into VR windows too.
 - **Save**: to `~/Pictures/Screenshots/Snip_<date>_<time>.png`.
 - **Copy text**: reads the text in it and copies that.

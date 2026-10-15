@@ -2,6 +2,18 @@
 
 Synchronizes the clipboard across multiple X11 and wayland instances running on the same machine.
 
+> **This fork** is the clipboard-sync that [Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks)
+> installs as its Shared clipboard on the Steam Frame, where desktop mode is a nested KWin (Wayland,
+> with its own Xwayland) inside the VR session's gamescope (X11). It's
+> [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) plus two commits (see the log):
+> a copied image is no longer replaced by the last text; and files, pictures and the primary
+> selection are shared, a copy is never written back where it came from, a password manager's
+> secret mark is kept, copies are noticed as they happen (data-control, XFixes) instead of polled,
+> and a start replaces nothing. [Releases](https://github.com/AstronautCheetah/clipboard-sync/releases)
+> have a prebuilt aarch64 Linux binary (glibc 2.39 or newer, libxcb) with its SHA256SUMS, built by
+> this repository's Build workflow. The changes are offered upstream too; licence as upstream's
+> (MIT or Apache-2.0, in Cargo.toml).
+
 To use clipboard sync, you only need to install it and start the service. It identifies and synchronizes your clipboards automatically.
 
 Example use cases:

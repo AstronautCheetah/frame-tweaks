@@ -197,7 +197,7 @@ phone is saved in the same file (`PHONE_NAME`).
 
 **The clipboard with the phone.** Shared (scrcpy's way): what you paste in the mirror (Ctrl+V)
 is first copied to the phone, and whatever the phone copies comes to the Frame's clipboard, and
-from there to the desktop and VR with [Shared clipboard](../../third-party/clipboard/). So a
+from there to the desktop and VR with [Shared clipboard](../../integrations/clipboard/). So a
 password copied on the phone reaches the Frame, and one you paste into the mirror stays in the
 phone's clipboard (and its keyboard's clipboard history, if it keeps one). Not shared: each keeps
 its own; Ctrl+V in the mirror pastes the phone's clipboard.

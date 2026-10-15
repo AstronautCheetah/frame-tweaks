@@ -51,10 +51,10 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | charge-limit | `charge-limit` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts | Pauses and resumes the battery's charging. Asks for your sudo password once to add the udev rule, and again to remove it |
 | signal | Signal's menu entry (Wallet apps: password first, Close-after timer), a Flatpak override for Signal, Signal's `config.json` | Asks for the wallet password first; quits Signal when idle; key in the wallet |
 | nordvpn | `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry and session-restore setting (`ksmserverrc`, so the tray isn't started twice), `~/.config/nordvpn-wg` (your WireGuard key and locations) | **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key |
+| clipboard | `clipboard-sync` (Frame Tweaks' build, a pinned and checked release) in `~/.local/share/frame-tweaks/`, a KDE autostart entry | Reads and writes both sessions' clipboards |
 | claude-code | `~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer) | Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS |
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |
 | full-keyboard | Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
-| clipboard | `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry | Reads and writes both sessions' clipboards |
 | recline | Whatever Recline-VR's own installer sets up (its README lists it): its source in `~/Recline-VR`, built and installed into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position), and inside the Frame's camera service for the room view |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
@@ -100,9 +100,10 @@ doesn't review or sandbox other people's packs.
 **Downloads.**
 - **Pinned upstream releases** (Full Keyboard, Piper and its voices, the Whisper model): each tweak's
   `pin` file records the exact version and SHA256; the download must match it, so a changed or
-  replaced upstream file is refused. **clipboard-sync** is built from a pinned commit with its
-  own lock file, using a pinned `rustup-init` (checked against its SHA256) that installs a
-  pinned Rust toolchain for the build only. **Python packages** (PyQt6, openvr, jeepney) are
+  replaced upstream file is refused. **clipboard-sync** is Frame Tweaks' own build
+  ([AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync), a fork
+  with its changes as commits): its Build workflow makes the binary from the tagged source and
+  its lock file, and the release is pinned by SHA256 like the others. **Python packages** (PyQt6, openvr, jeepney) are
   installed at the exact versions in `lib/python-constraints.txt`. Pins move only in a reviewed
   commit (`dev/check-pins.sh`, `dev/bump-pin.py`); a weekly GitHub check
   (`dev/check-upstream.sh`) reports pinned files that changed or vanished upstream. If one

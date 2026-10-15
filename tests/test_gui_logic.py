@@ -456,10 +456,10 @@ class PackInventory(unittest.TestCase):
 
             def text():
                 return " ".join(w.text() for w in third_party().findChildren(QLabel))
-            self.assertIn("▸ 3 tweaks", text())
+            self.assertIn("▸ 2 tweaks", text())
             self.assertNotIn("Recline", text())
             QTest.mouseClick(third_party(), gui.Qt.MouseButton.LeftButton, pos=QPoint(5, 5))
-            self.assertIn("▾ 3 tweaks", text())
+            self.assertIn("▾ 2 tweaks", text())
             self.assertIn("href='tweak:recline'>Recline</a> 🧪 🔗 — Use VR lying down", text())
             self.assertIn("✔ installed", text().split("tweak:recline")[1])
             self.assertNotIn("✔ installed", text().split("tweak:recline")[0])   # (the others aren't)
@@ -468,7 +468,7 @@ class PackInventory(unittest.TestCase):
             self.assertEqual(comp["id"], "recline")
             self.assertEqual(window.show_details.call_args[1]["back"], window.show_packs)
             QTest.mouseClick(third_party(), gui.Qt.MouseButton.LeftButton, pos=QPoint(5, 5))
-            self.assertIn("▸ 3 tweaks", text())
+            self.assertIn("▸ 2 tweaks", text())
 
     def test_back_goes_where_the_page_came_from(self):
         w = gui.Window.__new__(gui.Window)

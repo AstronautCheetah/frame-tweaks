@@ -131,31 +131,49 @@ class NordVPNUninstall(Home):
         self.assertFalse((self.home / ".local/bin/nordvpn-tray").exists())
 
 
-class ClipboardBuild(Home):
-    """Rust and cargo's build files stay in the temporary folder that's deleted afterwards. (With
-    --path, cargo builds in the source's own target/ unless told otherwise: ~350 MB that stayed.)"""
-    def test_build_files_go_with_the_temporary_folder(self):
-        tweak = self.home / "clipboard"
-        shutil.copytree(ROOT / "packs/third-party/clipboard", tweak)
-        rustup = self.home / "rustup-init.fixture"
-        rustup.write_text("#!/bin/sh\nexit 0\n")
-        pin = re.sub(r"(?m)^sha256=.*$", "sha256=" + hashlib.sha256(rustup.read_bytes()).hexdigest(),
-                     (tweak / "rust.pin").read_text())
-        (tweak / "rust.pin").write_text(pin)
-        rev = re.search(r"(?m)^rev=(.*)$", (tweak / "pin").read_text()).group(1)
-        self.stub("curl", f'while [ $# -gt 1 ]; do [ "$1" = -o ] && out=$2; shift; done; cp {rustup} "$out"')
-        self.stub("git", f'case "$1" in clone) mkdir -p "$4" ;; -C) [ "$3" = rev-parse ] && echo {rev} ;; esac; exit 0')
-        # cargo install as documented: build files in --target-dir, else in the package's target/
-        self.stub("cargo", 'while [ $# -gt 0 ]; do case "$1" in --path) src=$2 ;; --root) root=$2 ;; '
-                           '--target-dir) td=$2 ;; esac; shift; done\nout=${td:-$src/target}/release\n'
-                           'mkdir -p "$out" "$root/bin" && : > "$out/clipboard-sync" && : > "$root/bin/clipboard-sync"')
+class ClipboardRelease(Home):
+    """Shared clipboard installs Frame Tweaks' build of clipboard-sync: the pinned release, checked
+    against the pin's SHA256 (a changed file is refused), and what older versions' builds on the
+    Frame left (source, Rust's build folder) goes."""
+    def setUp(self):
+        super().setUp()
+        import tarfile
+        self.tweak = self.home / "clipboard"
+        shutil.copytree(ROOT / "packs/integrations/clipboard", self.tweak)
+        ver = re.search(r"(?m)^version=(.*)$", (self.tweak / "pin").read_text()).group(1)
+        top = self.home / f"fixture/clipboard-sync-{ver}-aarch64-linux"
+        top.mkdir(parents=True)
+        (top / "clipboard-sync").write_text("#!/bin/sh\necho clipboard-sync\n")
+        self.archive = self.home / "release.tar.gz"
+        with tarfile.open(self.archive, "w:gz") as tar:
+            tar.add(top, arcname=top.name)
+        self.ver = ver
+        self.stub("curl", f'while [ $# -gt 1 ]; do [ "$1" = -o ] && out=$2; shift; done; cp {self.archive} "$out"')
         self.stub("pgrep", "exit 1")                      # not in desktop mode: nothing started
-        r = self.run_path(tweak / "install.sh", env={"FRAME_TWEAKS_LIB": str(ROOT / "lib"),
-                                                     "FRAME_TWEAKS_DIRS": f"clipboard={tweak}"})
+
+    def install(self, sha):
+        pin = re.sub(r"(?m)^sha256=.*$", f"sha256={sha}", (ROOT / "packs/integrations/clipboard/pin").read_text())
+        (self.tweak / "pin").write_text(pin)
+        return self.run_path(self.tweak / "install.sh", env={"FRAME_TWEAKS_LIB": str(ROOT / "lib"),
+                                                             "FRAME_TWEAKS_DIRS": f"clipboard={self.tweak}"})
+
+    def test_installs_the_pinned_release(self):
+        old = self.home / ".local/share/frame-tweaks/src/clipboard-sync"
+        (old / "target").mkdir(parents=True)                       # (an older version's build)
+        (self.home / ".cache/frame-tweaks/rust-build").mkdir(parents=True)
+        r = self.install(hashlib.sha256(self.archive.read_bytes()).hexdigest())
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertTrue((self.home / ".local/share/frame-tweaks/clipboard-sync/bin/clipboard-sync").exists())
-        self.assertFalse((self.home / ".local/share/frame-tweaks/src/clipboard-sync/target").exists())
+        root = self.home / ".local/share/frame-tweaks/clipboard-sync"
+        self.assertEqual((root / "bin/clipboard-sync").read_text(), "#!/bin/sh\necho clipboard-sync\n")
+        self.assertEqual((root / "VERSION").read_text(), self.ver + "\n")
+        self.assertTrue((self.home / ".local/bin/clipboard-sync").is_symlink())
+        self.assertFalse(old.exists())
         self.assertFalse((self.home / ".cache/frame-tweaks/rust-build").exists())
+
+    def test_a_changed_file_is_refused(self):
+        r = self.install("0" * 64)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertFalse((self.home / ".local/share/frame-tweaks/clipboard-sync/bin/clipboard-sync").exists())
 
 
 class RestartPlasmashell(Home):

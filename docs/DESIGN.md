@@ -29,7 +29,7 @@ The design follows from what the Frame is:
   windows live. Desktop mode is a Plasma session nested inside it, on Wayland, with its own
   D-Bus bus and `XDG_RUNTIME_DIR`. Programs started from the desktop, from shortcuts and from
   VR can each see a different environment, clipboard and wallet. Several tweaks exist only
-  because of this: [clipboard](../packs/third-party/clipboard/) syncs the two clipboards,
+  because of this: [clipboard](../packs/integrations/clipboard/) syncs the two clipboards,
   [wallet](../packs/original/wallet/) makes both sessions use one KDE wallet, and
   [`lib/browser.py`](../lib/browser.py) sends a web link to the session where the browser is
   already running. `sysctl_user` in `lib/common.sh` runs `systemctl --user` with the outer
@@ -433,4 +433,5 @@ What isn't tested automatically:
 - **Dialogs in the installer window**: they would open elsewhere in the VR dashboard (see
   *Safety rules*).
 - **Homebrew's Rust for building clipboard-sync**: 3.4 GB with its LLVM. A pinned Rust
-  toolchain in a temporary folder is used and deleted afterwards (CHANGELOG).
+  toolchain in a temporary folder replaced it, and then a prebuilt binary: Frame Tweaks' fork
+  of clipboard-sync builds it in CI (CHANGELOG).
