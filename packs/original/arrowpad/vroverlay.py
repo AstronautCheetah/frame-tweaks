@@ -114,8 +114,13 @@ class OverlayHost:
         if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         self.visible = False
-        QTimer(pad, interval=22, timeout=self.poll).start()      # ~45 Hz event pump
+        # ~45 Hz event pump while the dashboard shows the pad; 5 Hz while it's closed (only to
+        # notice it opening: nothing can be pressed or grabbed then)
+        self.timer = QTimer(pad, interval=self.FAST_MS, timeout=self.poll)
+        self.timer.start()
         QTimer(pad, interval=100, timeout=self.mark_dirty).start()   # state changes (mic etc.)
+
+    FAST_MS, IDLE_MS = 22, 200
 
     # ---- rendering ------------------------------------------------------
     def uncover(self, path):
@@ -133,6 +138,8 @@ class OverlayHost:
     def mark_dirty(self):
         """Periodic check: redraw only when something visible changed (mic colour, modifiers,
         layer, pin, language), so SteamVR doesn't reload the image for nothing."""
+        if not getattr(self, "visible", True):
+            return                  # (nothing shows: checked again within 0.1 s of the dashboard opening)
         p = self.pad
         sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale,
                p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"), p.collapsed)
@@ -383,7 +390,7 @@ class OverlayHost:
         if getattr(self, "closed", False):
             return
         self.ticks += 1
-        if self.ticks % 9 == 1:                 # dashboard open? ~5x a second is plenty
+        if self.ticks % 9 == 1 or not self.visible:     # dashboard open? ~5x a second is plenty
             self._dash = bool(self.ov.isDashboardVisible())
         visible = self._dash
         if visible != self.visible:
@@ -423,6 +430,9 @@ class OverlayHost:
         self.pump(self.input_handle)            # the only overlay that takes laser input
         if self.dirty and visible and not getattr(self, "closed", False):   # (Close in pump: disconnected)
             self.render()
+        timer, want = getattr(self, "timer", None), self.FAST_MS if self.visible else self.IDLE_MS
+        if timer is not None and timer.interval() != want:
+            timer.setInterval(want)
 
     INPUT_LOG = f"{TEX_DIR}/arrowpad-input.log"
 

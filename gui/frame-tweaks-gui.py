@@ -760,7 +760,10 @@ class Window(QWidget):
         self.outer.setContentsMargins(20, 16, 20, 16)
         self.stack = None
         self.build_ui()
-        QTimer(self, interval=100, timeout=self.collect).start()
+        # Results of background jobs (status checks, update checks): looked for 10x a second while
+        # any is running, once a second otherwise (collect sets which).
+        self.collector = QTimer(self, interval=100, timeout=self.collect)
+        self.collector.start()
         QTimer(self, interval=int(i18n.CHECK_EVERY * 1000), timeout=self.check_language).start()
         self.vr_buttons = None
         if os.environ.get("DISPLAY") == ":0":          # opened in VR: controller buttons too
@@ -774,7 +777,10 @@ class Window(QWidget):
             if self.vr_buttons.ok:
                 QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
                 self._laser = (None, 0.0)
-                QTimer(self, interval=33, timeout=lambda: self.vr_buttons.poll(self.laser_over_window())).start()
+                # 30x a second while the laser is on the window (or A/B/Y are claimed); 4x a second
+                # otherwise, only to notice it arriving.
+                self.vr_timer = QTimer(self, interval=33, timeout=self.poll_vr_buttons)
+                self.vr_timer.start()
         self.refresh()
 
     def build_ui(self):
@@ -905,7 +911,19 @@ class Window(QWidget):
     def refresh(self):
         self.state = {}
         self.futures = {c["id"]: self.pool.submit(status, c["id"]) for c in self.rows}
+        self.collecting()
         self.rebuild()
+
+    def collecting(self):
+        """Background jobs were started: look for their results often again (collect)."""
+        self.collect_every(100)
+
+    def collect_every(self, ms):
+        try:
+            if self.collector.interval() != ms:
+                self.collector.setInterval(ms)
+        except (AttributeError, RuntimeError):       # (before the timer exists, or in a test's bare window)
+            pass
 
     def collect(self):
         for cid, fut in list(self.latest_futures.items()):
@@ -953,6 +971,8 @@ class Window(QWidget):
                         box.setChecked(self.state[cid][0] != 1)
                         box.blockSignals(False)
                 self.update_apply()
+        busy = self.futures or self.latest_futures or self.update_futures or self.self_update is not None
+        self.collect_every(100 if busy else 1000)
 
     # ---- layout -----------------------------------------------------------------
     def rebuild(self, *_args):
@@ -1171,6 +1191,7 @@ class Window(QWidget):
         if self.update_state == "check":
             self.set_update_state("checking")
             self.self_update = self.pool.submit(self_update_check)
+            self.collecting()
         elif self.update_state == "update":
             self.run_update(None)
         elif self.update_state == "restart":
@@ -1445,6 +1466,13 @@ class Window(QWidget):
         return False
 
     # ---- controller buttons in VR (vrbuttons.py): B back, Y home, A tick ----------
+    def poll_vr_buttons(self):
+        over = self.laser_over_window()
+        self.vr_buttons.poll(over)
+        want = 33 if over or self.vr_buttons.claimed else 250
+        if self.vr_timer.interval() != want:
+            self.vr_timer.setInterval(want)
+
     def laser_over_window(self):
         """True while the laser is really on this window: the pointer is inside it and has moved
         in the last 3 s (a laser always jitters). Qt's hover state alone can stay set after the

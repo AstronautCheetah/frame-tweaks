@@ -86,6 +86,13 @@
   without the check, and without running the installed tweaks' installers again.
 
 ### Fixed
+- **Android Mirror after "Restart stream":** its "Connecting…" window could stay open, taken for
+  the mirror and floated over it, so the mirror's handle couldn't be grabbed. Android Mirror's
+  own windows now have a title of their own ("Android Mirror setup"), and that window is always
+  closed (stopped, if it doesn't answer).
+- **Less CPU while idle:** Arrow Pad's VR panel checks 5 times a second instead of 45 while the
+  dashboard is closed; the window checks the controller buttons 4 times a second until the
+  laser is on it (then 30), and background jobs once a second when none is running.
 - **Uninstalling a tweak whose menu entry the wallet guards** (Arrow Pad, Screen snip, NordVPN,
   Dictation, the wallet, Full Keyboard) no longer leaves the entry's kept copy behind, and
   uninstalling Screen snip stops a running Screen snip.
