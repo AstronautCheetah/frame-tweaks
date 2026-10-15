@@ -2,7 +2,7 @@
 name: Original
 author: Frame Tweaks
 api: 1
-categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Hardware, Developer]
+categories: [Accessibility, Convenience, VR environment, System, Hardware, Privacy & security, Developer]
 order:
   - dictation
   - arrowpad
