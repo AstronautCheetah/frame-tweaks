@@ -20,9 +20,12 @@
   through it is shorter.
 
 ### For contributors
+- Each test file passes when run on its own (`python3 -m unittest discover -s tests -p
+  test_i18n.py`), as in the full run: `tests/helpers.py` starts it the way `test_00_english.py`
+  starts the suite. Run alone, `test_i18n.py` read the language the installer window had
+  announced in this session, and two others couldn't import `lib/`.
 - `dev/i18n.py export LANG DIR --review` for a language with no `.po` file yet says so, instead
   of stopping with a traceback.
-
 
 ## 0.6.2 (2026-10-15)
 
