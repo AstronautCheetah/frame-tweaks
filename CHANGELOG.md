@@ -34,6 +34,9 @@
   folder. As any pack, it isn't used until you trust it. **Update** (`mods update`) brings its
   newer version, which waits until you trust it again; **Remove…** (`mods remove`) deletes it once
   its tweaks are uninstalled.
+- **Check for updates looks at packs added from a link too:** it asks where each came from
+  (nothing is downloaded) and says how many have a newer version, linking to the Packs page,
+  which marks them; Update gets one, as before (`./install.sh mods updates` lists them).
 - **Community packs** ([docs/community-packs.md](docs/community-packs.md), and **Packs others
   share ↗** on the Packs page): packs people shared, to add from their links. A
   [Share a pack](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=share_a_pack.yml)

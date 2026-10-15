@@ -305,6 +305,7 @@ How to write one, and share it: [docs/mods.md](docs/mods.md).
 ./install.sh mods add LINK      add a pack from its git repository's link (not used until trusted)
 ./install.sh mods trust "My pack" use it (again after its files change); untrust to stop
 ./install.sh mods update "My pack" its newer version (then trust it again); remove to delete it
+./install.sh mods updates       which packs added from a link have a newer version
 ./install.sh mods off "3rd Party" turn off one of the official packs; on to use it again
 ./install.sh mods check FOLDER  check a pack or a tweak without using it
 ```
@@ -323,6 +324,11 @@ release is signed by Frame Tweaks' release key and refuses one that isn't. Nothi
 own: a tweak only changes when you update. (The one exception is Claude Code, which updates itself
 the way Anthropic's installer sets it up.)
 
+- **Packs:** Frame Tweaks' own packs come with its releases, so a change to them, even to their
+  text only, arrives with the next release. For packs added from a link, **⟳ Check for updates**
+  also asks where each came from (nothing is downloaded) and says how many have a newer version
+  (**🧩 N pack updates**, a link to the Packs page); **Update** on the Packs page gets one (`./install.sh mods updates` lists
+  them). Linked tweaks (🔗) update their own way: ↻ on their row runs their installer again.
 - **Test releases** (such as `0.7.0-rc.1`, newer and less tested): ⚙ Preferences → **Get test
   releases too**, or `./install.sh channel beta`. Unticking it (`./install.sh channel stable`)
   keeps you on the test release until the next stable one is out, or takes you back at once

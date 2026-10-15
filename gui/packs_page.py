@@ -106,6 +106,8 @@ class Packs(QWidget):
             text, colour = STATE[p["state"]]
             text = _(text)
             origin = sft.pack_origin(p["dir"]) if sft.removable(p) else None
+            updates = getattr(self.window, "pack_updates", None)            # (Check for updates found these)
+            newer = isinstance(updates, set) and p["dir"] in updates
             tweaks = []
             for t in p["tweaks"]:
                 c = used.get(t)
@@ -117,6 +119,8 @@ class Packs(QWidget):
                              + "</span>" if p["author"] else "")
                           + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
                           + f"<br><span style='color:{colour}'>{text}</span>"
+                          + ("<br><span style='color:#e0b33a'>" + _("A newer version is out where it came from: "
+                                                                    "Update gets it.") + "</span>" if newer else "")
                           + f"<br><span style='color:#6b7783'>{html.escape(str(p['dir']))}</span>"
                           + ("<br>" + _("From {link}").format(link=(
                               f"<a style='color:#7fb2e5' href='{html.escape(origin)}'>{html.escape(origin)} ↗</a>"
@@ -150,6 +154,8 @@ class Packs(QWidget):
                 g.addWidget(b)
                 if origin:
                     b = QPushButton(_("Update"))
+                    if newer:
+                        b.setObjectName("apply")
                     b.setToolTip(_("Get its newer version from where it was added; it waits until you trust it again"))
                     b.setEnabled(self.job is None)
                     b.clicked.connect(lambda _=False, p=p: self.update(p))
@@ -237,6 +243,10 @@ class Packs(QWidget):
 
     def updated(self, p, got):
         name = sft.plain(p["name"])
+        updates = getattr(self.window, "pack_updates", None)
+        if isinstance(updates, set) and p["dir"] in updates:   # (got it: the window's notice goes too)
+            updates.discard(p["dir"])
+            self.window.show_pack_updates()
         if not got["files"]:
             self.tell(_("{name} is up to date.").format(name=name), good=True)
         else:

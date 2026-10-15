@@ -95,6 +95,31 @@ class PackLinks(unittest.TestCase):
         self.assertNotIn("\x1b", r.stdout)
         self.assertIn("changed since you trusted it", self.state())
 
+    def test_which_have_a_newer_version(self):
+        """mods updates (and Check for updates in the window): asks where each pack came from, without
+        downloading it."""
+        self.assertIn("No packs added from a link", self.mods("updates").stdout)
+        self.mods("add", self.link)
+        self.assertEqual(self.mods("updates").stdout, "Hello pack: up to date\n")
+        with open(self.src / "hello-frame/install.sh", "a") as f:
+            f.write("# a change\n")
+        self.commit("a change")
+        out = self.mods("updates").stdout
+        self.assertIn("Hello pack: a newer version is out: ./install.sh mods update", out)
+        self.assertNotIn("a change", self.git(self.packs / "hello-pack", "log", "--all", "--format=%s"))   # (nothing fetched)
+        self.mods("update", str(self.packs / "hello-pack"))
+        self.assertEqual(self.mods("updates").stdout, "Hello pack: up to date\n")
+        shutil.rmtree(self.src)                                              # (gone, or offline)
+        self.assertEqual(self.mods("updates").stdout, "Hello pack: couldn't check (no connection?)\n")
+
+    def test_a_fixed_version_has_no_updates(self):
+        self.git(self.src, "tag", "v1")
+        self.mods("add", self.link, "v1")
+        with open(self.src / "pack.md", "a") as f:
+            f.write("\nMore.\n")
+        self.commit("later")
+        self.assertEqual(self.mods("updates").stdout, "Hello pack: up to date\n")
+
     def test_only_packs_from_a_link_update(self):
         shutil.copytree(self.src, self.packs / "copied", ignore=shutil.ignore_patterns(".git"))
         r = self.mods("update", str(self.packs / "copied"))
