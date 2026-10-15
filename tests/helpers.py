@@ -4,9 +4,16 @@ test that uses it.)"""
 import importlib.machinery
 import importlib.util
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# A test file run alone starts as the whole suite does: in English, with throwaway settings files
+# (test_00_english.py, which runs first), and the shared modules in lib/ importable, as the
+# programs loaded here find them beside i18n.py when installed.
+import test_00_english  # noqa: E402,F401
+if str(ROOT / "lib") not in sys.path:
+    sys.path.insert(0, str(ROOT / "lib"))
 
 
 def stub(folder, name, body):
