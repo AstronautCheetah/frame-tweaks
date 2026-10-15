@@ -15,8 +15,11 @@ How it works
     a second one, so a keyboard shortcut or controller button can summon it.
 """
 import argparse
+import array
+import fcntl
 import json
 import os
+import re
 import socket
 import struct
 import subprocess
@@ -93,6 +96,84 @@ except Exception:  # pragma: no cover
 
 # Linux input-event-codes.h
 EV_SYN, EV_KEY, SYN_REPORT = 0x00, 0x01, 0
+KEY_RIGHTCTRL = 97                       # (toggles the nested desktop's input grab: never sent)
+KEY_NAMES = {1: "Esc", 14: "Backspace", 15: "Tab", 28: "Enter", 29: "Ctrl", 42: "Shift", 54: "Shift", 56: "Alt",
+             57: "Space", 97: "Right Ctrl", 100: "AltGr", 125: "Super", 126: "Super"}
+
+
+def key_name(code):
+    return KEY_NAMES.get(code, _("key {code}").format(code=code))
+
+
+def keyboards(text=None):
+    """{"/dev/input/eventN": device name} for keyboards and mice: devices with an A key or a left
+    button (not the power button, the gamepad or the like). text: /proc/bus/input/devices."""
+    devs = {}
+    try:
+        text = Path("/proc/bus/input/devices").read_text() if text is None else text
+    except OSError:
+        return devs
+    for blk in text.split("\n\n"):
+        name = re.search(r'N: Name="([^"]*)"', blk)
+        ev = re.search(r"H: Handlers=.*\b(event\d+)", blk)
+        keys = re.search(r"B: KEY=([0-9a-f ]+)", blk)
+        if not (name and ev and keys):
+            continue
+        bits = 0                                         # (the bitmap: words, most significant first)
+        for word in keys[1].split():
+            bits = (bits << (8 * struct.calcsize("l"))) | int(word, 16)
+        if bits >> 30 & 1 or bits >> 0x110 & 1:          # KEY_A, BTN_LEFT
+            devs[f"/dev/input/{ev[1]}"] = name[1]
+    return devs
+
+
+def held_keys(path):
+    """The keys the kernel has as down on an input device (EVIOCGKEY; the input group may read it)."""
+    buf = array.array("B", bytes(96))
+    fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+    try:
+        fcntl.ioctl(fd, (2 << 30) | (len(buf) << 16) | (ord("E") << 8) | 0x18, buf, True)
+    finally:
+        os.close(fd)
+    return [i for i in range(len(buf) * 8) if buf[i // 8] >> (i % 8) & 1]
+
+
+def release_held_keys(devices=None):
+    """Let go of the keys input devices still hold: {device name: [codes]} of what it let go of.
+    A Bluetooth keyboard that lost a key's release keeps the key down for every app, and the pad's
+    own presses can't release another device's key. A release written to the device's node goes
+    to every app as if the keyboard had sent it. (Never Right Ctrl, the desktop's grab key.)"""
+    released = {}
+    for path, name in (keyboards() if devices is None else devices).items():
+        try:
+            keys = [k for k in held_keys(path) if k != KEY_RIGHTCTRL]
+            if not keys:
+                continue
+            now = time.time()
+            stamp = (int(now), int(now % 1 * 1e6))
+            fd = os.open(path, os.O_WRONLY)
+            try:
+                for k in keys:
+                    os.write(fd, struct.pack("llHHi", *stamp, EV_KEY, k, 0))
+                os.write(fd, struct.pack("llHHi", *stamp, EV_SYN, SYN_REPORT, 0))
+            finally:
+                os.close(fd)
+        except OSError:                                  # (not readable or writable: not ours to fix)
+            continue
+        released[name] = keys
+    return released
+
+
+def desktop_grabbed():
+    """Whether desktop mode has taken all input: its window on the Steam session's display then
+    says "Press right control to ungrab input"."""
+    try:
+        out = subprocess.run(["xwininfo", "-root", "-tree"], capture_output=True, text=True, timeout=5,
+                             env={**os.environ, "DISPLAY": ":0"}).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    m = re.search(r'"(KDE Wayland Compositor[^"]*)"', out)
+    return bool(m) and "ungrab" in m[1]
 KEY = {
     "Esc": 1, "Tab": 15, "Bksp": 14, "Del": 111, "Enter": 28, "Ins": 110,
     "Home": 102, "End": 107, "PgUp": 104, "PgDn": 109,
@@ -1139,12 +1220,20 @@ class ArrowPad(QWidget):
     def unstick(self):
         """The desktop can miss a key's release (focus moved to another VR window while it was
         held) and keep acting as if Shift, Ctrl, Alt or Super were down: send each one a full
-        press and release, and let go of the pad's own modifiers."""
+        press and release, and let go of the pad's own modifiers. A keyboard that lost a key's
+        release (Bluetooth) still holds it for everyone: let go of it there too. And say so when
+        it's desktop mode that has taken all input (Right Ctrl), which no key release undoes."""
         self.release_all_mods()
         self.yd.clear_stuck_modifiers()
         self.restyle()
-        subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Keys released"),
-                          _("Shift, Ctrl, Alt and Super were pressed and let go.")], start_new_session=True)
+        text = _("Shift, Ctrl, Alt and Super were pressed and let go.")
+        for device, keys in release_held_keys().items():
+            text += " " + _("{device} still held {keys}: released too.").format(
+                device=device, keys=", ".join(key_name(k) for k in keys))
+        if desktop_grabbed():
+            text += " " + _("Desktop mode has taken all input, so other windows don't get it: tap Right Ctrl on a "
+                            "keyboard to give it back.")
+        subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Keys released"), text], start_new_session=True)
 
     # ---- screen snip (snip/ tweak) --------------------------------------
     def snip(self):

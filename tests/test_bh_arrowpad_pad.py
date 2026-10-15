@@ -107,6 +107,49 @@ class TakenBack(PadTest):
         self.assertEqual(self.keys.sent, [(108, True), (108, False)])
 
 
+class Unstick(PadTest):
+    """Unstick: a keyboard that lost a key's release (Bluetooth) still holds it for every app, and
+    the pad's own presses can't let go of another device's key; a release written to that device
+    does. Desktop mode's input grab (Right Ctrl) isn't a held key: Unstick says how to undo it."""
+    def test_lets_go_of_keys_a_keyboard_holds(self):
+        dev = self.tmp / "event7"                               # (a file stands in for the device node)
+        dev.touch()
+        with mock.patch.object(self.ap, "held_keys", return_value=[29, 14, 97]):
+            got = self.ap.release_held_keys({str(dev): "Keyboard Craft Keyboard"})
+        self.assertEqual(got, {"Keyboard Craft Keyboard": [29, 14]})       # (never Right Ctrl: the grab key)
+        size = struct.calcsize("llHHi")
+        data = dev.read_bytes()
+        events = [struct.unpack("llHHi", data[i:i + size])[2:] for i in range(0, len(data), size)]
+        self.assertEqual(events, [(1, 29, 0), (1, 14, 0), (0, 0, 0)])     # releases, then a report
+        with mock.patch.object(self.ap, "held_keys", return_value=[]):
+            self.assertEqual(self.ap.release_held_keys({str(dev): "Keyboard Craft Keyboard"}), {})
+
+    def test_only_keyboards_and_mice(self):
+        devices = "\n\n".join((
+            'N: Name="pmic_pwrkey"\nH: Handlers=kbd event0\nB: KEY=10000000000000 0',
+            'N: Name="Keyboard Craft Keyboard"\nH: Handlers=sysrq kbd leds event7\n'
+            'B: KEY=33eff 0 0 483ffff17aff32d bfd4444600000000 1 130ff38b17c007 ffe77bfad9415fff febeffdfffefffff '
+            'fffffffffffffffe',
+            'N: Name="Keyboard Craft Mouse"\nH: Handlers=mouse0 event8\nB: KEY=1f0000 0 0 0 0',
+            'N: Name="Microsoft X-Box 360 pad 0"\nH: Handlers=event5 js0\nB: KEY=7cdb000000000000 0 0 0 0'))
+        self.assertEqual(self.ap.keyboards(devices), {"/dev/input/event7": "Keyboard Craft Keyboard",
+                                                      "/dev/input/event8": "Keyboard Craft Mouse"})
+
+    def test_says_what_it_did_and_how_to_undo_a_grab(self):
+        with mock.patch.object(self.ap, "release_held_keys", return_value={"Keyboard Craft Keyboard": [29, 14]}), \
+                mock.patch.object(self.ap, "desktop_grabbed", return_value=True), \
+                mock.patch.object(self.ap.subprocess, "Popen") as popen:
+            self.pad.unstick()
+        text = popen.call_args[0][0][-1]
+        self.assertIn("Keyboard Craft Keyboard still held Ctrl, Backspace", text)
+        self.assertIn("tap Right Ctrl", text)
+        with mock.patch.object(self.ap, "release_held_keys", return_value={}), \
+                mock.patch.object(self.ap, "desktop_grabbed", return_value=False), \
+                mock.patch.object(self.ap.subprocess, "Popen") as popen:
+            self.pad.unstick()
+        self.assertEqual(popen.call_args[0][0][-1], "Shift, Ctrl, Alt and Super were pressed and let go.")
+
+
 class Mic(PadTest):
     def test_without_dictation_it_says_so(self):
         """🎤 with Dictation not installed: a dialog offering to open Frame Tweaks on it (lib/needs.py;
