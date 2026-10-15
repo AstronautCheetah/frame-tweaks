@@ -208,7 +208,10 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   what it kept.
 - `status.sh`: prints one line and exits through `status_ok` (installed and working),
   `status_missing` (not installed) or `status_warn` (installed, needs attention). It must
-  change nothing; the installer window runs it often.
+  change nothing; the installer window runs it often. Something SteamVR loads only as it
+  starts (a driver, a dashboard patch) says so with `status_restart` once installed, until
+  SteamVR has restarted: the window then offers **⟳ Restart SteamVR** on its row.
+  `vr_started_before FILE` tells whether the running SteamVR started before FILE changed.
 - `run.sh` (with `run:`): what the Run button does. Launch apps through their menu entry
   (`gtk-launch <id>`), so wallet gates apply.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one

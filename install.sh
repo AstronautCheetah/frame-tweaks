@@ -155,7 +155,7 @@ remove_menu_entry() {
 bold() { printf '\033[1m%s\033[0m\n' "$*"; }
 is_component() { [[ -n ${TITLE[$1]:-} ]]; }
 
-# status <id>: prints the component's one-line status; returns 0 ok, 1 missing, 2 warning
+# status <id>: prints the component's one-line status; returns 0 ok, 1 missing, 2 warning (or restart)
 status_of() { bash "${DIR[$1]}/status.sh" 2>/dev/null; }
 installed_ids() {           # every tweak that is installed (or half: status 0 or 2)
     local id
@@ -205,7 +205,7 @@ cmd_status() {
         case $rc in
             0) printf '  \033[32m✔\033[0m %-15s %s\n' "$id" "${line#ok       }" ;;
             1) printf '  \033[2m·\033[0m %-15s \033[2m%s\033[0m\n' "$id" "$(t 'not installed')" ;;
-            *) printf '  \033[33m!\033[0m %-15s %s\n' "$id" "${line#warning  }"; worst=2 ;;
+            *) line=${line#warning  }; printf '  \033[33m!\033[0m %-15s %s\n' "$id" "${line#restart  }"; worst=2 ;;
         esac
     done
     return $worst

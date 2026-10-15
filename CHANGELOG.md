@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+- **⟳ Restart SteamVR on a tweak's row** while SteamVR has yet to load it (the VR dashboard
+  tweaks, installed while SteamVR runs): its status says it waits for a SteamVR restart, and
+  the row's Run or Settings button becomes **⟳ Restart SteamVR**, which asks first (every open
+  app closes) and then restarts SteamVR with SteamOS's `steamvr restart`.
+
 ### Security
 - **NordVPN's WireGuard key after uninstalling:** since 0.6.2, uninstalling NordVPN keeps
   `~/.config/nordvpn-wg` (your key and locations) unless ⚙ Preferences say to remove settings,
@@ -24,6 +30,9 @@
   through it is shorter.
 
 ### For contributors
+- `status_restart` in `lib/common.sh`: a status line for something SteamVR loads only as it
+  starts, which the window turns into ⟳ Restart SteamVR; `vr_started_before FILE` tells whether
+  the running SteamVR started before FILE changed (docs/mods.md).
 - Each test file passes when run on its own (`python3 -m unittest discover -s tests -p
   test_i18n.py`), as in the full run: `tests/helpers.py` starts it the way `test_00_english.py`
   starts the suite. Run alone, `test_i18n.py` read the language the installer window had

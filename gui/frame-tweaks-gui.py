@@ -121,15 +121,20 @@ QRadioButton::indicator:checked {{ image: url({_BOX}/radio-checked.svg); }}
 
 
 
+RESTART = 3      # a status code of the window's own: installed, but SteamVR loads it only as it starts
+
+
 def status(cid):
-    """(code, text): 0 ok, 1 not installed, 2 needs attention."""
+    """(code, text): 0 ok, 1 not installed, 2 needs attention, RESTART (a status.sh line "restart …",
+    exit 2) waiting for a SteamVR restart."""
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
         r = subprocess.run(["bash", str(component(cid)["dir"] / "status.sh")], capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         return 2, _("status check didn't finish (took over a minute)")
-    text = r.stdout.strip().split(None, 1)[-1] if r.stdout.strip() else ""
-    return r.returncode, text
+    out = r.stdout.strip()
+    text = out.split(None, 1)[-1] if out else ""
+    return RESTART if r.returncode == 2 and out.split(None, 1)[0] == "restart" else r.returncode, text
 
 
 def update_check(cid):
@@ -380,8 +385,8 @@ def status_text(code_text):
     if code_text is None:
         return _("checking…"), "checking"
     code, text = code_text
-    return ({0: "✔ " + text, 2: "! " + text}.get(code, "· " + _("not installed")),
-            {0: "ok", 2: "warn"}.get(code, "missing"))
+    return ({0: "✔ " + text, 2: "! " + text, RESTART: "⟳ " + text}.get(code, "· " + _("not installed")),
+            {0: "ok", 2: "warn", RESTART: "warn"}.get(code, "missing"))
 
 
 class CategoryHeader(QWidget):
@@ -1255,6 +1260,14 @@ class Window(QWidget):
         state = self.state.get(cid)
         installed = state is not None and state[0] != 1
         label = run_label(cid)
+        if state is not None and state[0] == RESTART:    # (until SteamVR has loaded it: no Run or Settings)
+            button.setText(_("⟳ Restart SteamVR"))
+            button.setProperty("help", "false")
+            button.style().unpolish(button)
+            button.style().polish(button)
+            button.setEnabled(True)
+            button.setToolTip(_("SteamVR loads it only as it starts. Every open app closes."))
+            return
         if cid in PAGES:
             button.setText(_(PAGES[cid][0]))
             button.setProperty("help", "false")
@@ -1288,6 +1301,9 @@ class Window(QWidget):
         self.stack.setCurrentWidget(self.details)
 
     def run(self, comp):
+        if (self.state.get(comp["id"]) or (None,))[0] == RESTART:
+            self.restart_steamvr()
+            return
         if comp["id"] in PAGES:
             self.close_details()
             self.details = PAGES[comp["id"]][1](self)            # a page: Back and B return to the list
@@ -1308,6 +1324,22 @@ class Window(QWidget):
             print("would run:", "bash", comp["dir"] / "run.sh")
             return
         QProcess.startDetached("bash", [str(comp["dir"] / "run.sh")])
+
+    def restart_steamvr(self):
+        """⟳ Restart SteamVR, on the row of a tweak SteamVR loads only as it starts: SteamOS's own
+        restart (steamvr restart), which closes every app in the Steam session, desktop mode and
+        this window too."""
+        self.confirm(_("Restart SteamVR?") + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
+                     + html.escape(_("Every open app closes, desktop mode and this window too: save your work "
+                                     "first. SteamVR then starts again by itself."), quote=False) + "</span>",
+                     _("Restart SteamVR"), self.do_restart_steamvr)
+
+    def do_restart_steamvr(self):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: steamvr restart")
+            return
+        if not QProcess.startDetached("steamvr", ["restart"])[0]:
+            self.say(_("Couldn't restart SteamVR; restart it from its menu, or reboot."))
 
     def show_details(self, comp):
         self.close_details()
@@ -1391,7 +1423,7 @@ class Window(QWidget):
         buttons.addStretch(1)
         no = QPushButton(_("Cancel"))
         no.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        yes = QPushButton(_("Remove them"))
+        yes = QPushButton()
         yes.setObjectName("apply")
         buttons.addWidget(no)
         buttons.addWidget(yes)
@@ -1430,19 +1462,26 @@ class Window(QWidget):
             self.say(_("Nothing to change."))
             return
         if remove:
-            self.confirm_text.setText(
+            self.confirm(
                 _("These installed tweaks were unticked and will be <b>removed</b>:") + "<br><br>"
                 + html.escape(", ".join(remove)) + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
                 + (_("Their settings are removed too (⚙ Preferences); their data is kept.")
-                   if sft.uninstall_settings() == "remove" else _("Their settings and data are kept.")) + "</span>")
-            try:
-                self.confirm_yes.clicked.disconnect()
-            except TypeError:
-                pass
-            self.confirm_yes.clicked.connect(lambda: (self.stack.setCurrentIndex(0), self.run_changes(add, remove)))
-            self.stack.setCurrentWidget(self.confirm_page)
+                   if sft.uninstall_settings() == "remove" else _("Their settings and data are kept.")) + "</span>",
+                _("Remove them"), lambda: self.run_changes(add, remove))
             return
         self.run_changes(add, remove)
+
+    def confirm(self, text, yes_label, on_yes):
+        """Ask on the confirm page (text: rich text): Cancel goes back to the list, the yes button
+        (yes_label) back too, then does on_yes."""
+        self.confirm_text.setText(text)
+        self.confirm_yes.setText(yes_label)
+        try:
+            self.confirm_yes.clicked.disconnect()
+        except TypeError:
+            pass
+        self.confirm_yes.clicked.connect(lambda: (self.stack.setCurrentIndex(0), on_yes()))
+        self.stack.setCurrentWidget(self.confirm_page)
 
     def run_changes(self, add, remove):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
