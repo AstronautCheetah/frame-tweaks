@@ -170,6 +170,10 @@ class PhonePick(unittest.TestCase):
         error = next(i for i, l in enumerate(lines) if "--error" in l)
         self.assertLess(close, error)                              # splash gone, then the message
         self.assertIn("No phone found", lines[error])
+        # Never the mirror window's own title, which the VR dashboard's patches go by (a splash
+        # with it was taken for the mirror after a stream restart, and left over it)
+        self.assertIn("--title Android Mirror setup --progressbar", lines[0])
+        self.assertNotIn("--title Android Mirror --", log)
 
     def test_settings_in_the_old_place_are_moved(self):
         code, log, conf = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n',

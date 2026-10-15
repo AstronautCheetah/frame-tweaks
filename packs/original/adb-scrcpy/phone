@@ -44,20 +44,43 @@ ask() {
     command -v kdialog >/dev/null || return 2
     kdialog --title "$title" --menu "$text" "$@" 2>/dev/null
 }
-# The splash: a small "Android Mirror" window with what's happening, from starting until the mirror
-# shows (notifications alone go unseen in VR); a failure replaces it with a message saying why.
+# Its dialogs' title. Never the mirror window's own ("Android Mirror", which the VR dashboard's
+# patches go by): a dialog with that title was once taken for the mirror after a stream restart,
+# moved to where the mirror floated, and left over it, so its handle couldn't be grabbed.
+DLG=$(t 'Android Mirror setup')
+# The splash: a small window with what's happening, from starting until the mirror shows
+# (notifications alone go unseen in VR); a failure replaces it with a message saying why.
 # kdialog's progress dialog, steered over D-Bus. PHONE_NO_SPLASH=1: none.
 SPLASH=()
 splash() {                          # splash TEXT: show it, or change its text
     if [ ${#SPLASH[@]} -eq 0 ]; then
         [ -z "${PHONE_NO_SPLASH:-}" ] && command -v kdialog >/dev/null && command -v qdbus6 >/dev/null || return 0
-        read -ra SPLASH <<< "$(kdialog --title "$(t 'Android Mirror')" --progressbar "$1" 0 2>/dev/null)"
+        splash_leftovers
+        read -ra SPLASH <<< "$(kdialog --title "$DLG" --progressbar "$1" 0 2>/dev/null)"
         [ ${#SPLASH[@]} -eq 2 ] && qdbus6 "${SPLASH[@]}" showCancelButton true >/dev/null 2>&1
     else
         qdbus6 "${SPLASH[@]}" setLabelText "$1" >/dev/null 2>&1
     fi
 }
-splash_end() { [ ${#SPLASH[@]} -eq 2 ] && qdbus6 "${SPLASH[@]}" close >/dev/null 2>&1; SPLASH=(); }
+# splash_end: close it; if it doesn't answer, stop its process (its D-Bus name ends in the pid).
+splash_end() {
+    [ ${#SPLASH[@]} -eq 2 ] || { SPLASH=(); return 0; }
+    local pid=${SPLASH[0]##*-}
+    qdbus6 "${SPLASH[@]}" close >/dev/null 2>&1
+    SPLASH=()
+    for _ in 1 2 3 4; do kill -0 "$pid" 2>/dev/null || return 0; sleep 0.25; done
+    [[ $pid =~ ^[0-9]+$ ]] && grep -qs kdialog "/proc/$pid/cmdline" && kill "$pid" 2>/dev/null
+    return 0
+}
+# splash_leftovers: a splash this script lost track of (a stream restart arriving while one was
+# opening): ours by its title, before a new one opens.
+splash_leftovers() {
+    local pid
+    for pid in $(pgrep -u "$(id -u)" -f '^/usr/bin/kdialog_progress_helper ' 2>/dev/null); do
+        tr '\0' '\n' < "/proc/$pid/cmdline" 2>/dev/null | grep -qxF -- "$DLG" && kill "$pid" 2>/dev/null
+    done
+    return 0
+}
 cancelled() { [ ${#SPLASH[@]} -eq 2 ] && [ "$(qdbus6 "${SPLASH[@]}" wasCancelled 2>/dev/null)" = true ]; }
 # fail TITLE TEXT: say why it stopped (a dialog, and a notification), then stop.
 fail() {
@@ -118,7 +141,7 @@ if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
         mapfile -t list <<< "$names"
         args=(); for n in "${list[@]}"; do args+=("$n" "$n"); done
         splash_end
-        chosen=$(ask "$(t 'Android Mirror')" "$(t 'Which phone?')" "${args[@]}")
+        chosen=$(ask "$DLG" "$(t 'Which phone?')" "${args[@]}")
         [ -n "$chosen" ] || { [ -z "${PHONE_NAME:-}" ] && notify-send -a Phone "$(t 'Which phone?')" "$(t 'Several are advertising: %s. Run: phone --pick' "$(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g')")"; exit 1; }
         remember "$chosen"
     fi
@@ -128,7 +151,7 @@ if ! find_phone; then
     mapfile -t list <<< "$names"
     # (no other phone in sight, or no kdialog: just wait)
     args=(@wait "$(t 'Wait for %s' "$PHONE_NAME")"); for n in "${list[@]}"; do [ -n "$n" ] && args+=("$n" "$(t 'Use %s instead' "$n")"); done
-    if [ "$count" -eq 0 ]; then chosen=@wait; else splash_end; chosen=$(ask "$(t 'Android Mirror')" "$(t "%s isn't on the Wi-Fi with Wireless debugging on." "$PHONE_NAME")" "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
+    if [ "$count" -eq 0 ]; then chosen=@wait; else splash_end; chosen=$(ask "$DLG" "$(t "%s isn't on the Wi-Fi with Wireless debugging on." "$PHONE_NAME")" "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
     case "$chosen" in
         "") exit 1 ;;                                       # closed: do nothing
         @wait) wait_for "$PHONE_NAME" || exit 1 ;;
@@ -175,11 +198,11 @@ while :; do
         why=$(t "Couldn't connect to %s. adb said: %s
 
 If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_NAME:-$(t 'the phone')}" "$out")
-        choice=$(ask "$(t 'Android Mirror')" "$why" pair "$(t 'Pair it again')" forget "$(t 'Forget %s' "${PHONE_NAME:-$(t 'this phone')}")" close "$(t 'Close')"); r=$?
+        choice=$(ask "$DLG" "$why" pair "$(t 'Pair it again')" forget "$(t 'Forget %s' "${PHONE_NAME:-$(t 'this phone')}")" close "$(t 'Close')"); r=$?
         [ $r -eq 2 ] && fail "$(t "Couldn't connect to %s" "${PHONE_NAME:-$(t 'the phone')}")" "$why $(t "See Android Mirror's README for adb pair.")"
         if [ "$choice" = forget ]; then          # stop connecting to it by default (phone --forget)
             [ -f "$CONF" ] && sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
-            kdialog --title "$(t 'Android Mirror')" --msgbox "$(t 'Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several.' "${PHONE_NAME:-$(t 'the phone')}")" 2>/dev/null
+            kdialog --title "$DLG" --msgbox "$(t 'Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several.' "${PHONE_NAME:-$(t 'the phone')}")" 2>/dev/null
             exit 0
         fi
         [ "$choice" = pair ] || exit 1
