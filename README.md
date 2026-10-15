@@ -120,8 +120,6 @@ need **SteamVR restarted (or a reboot)** once after installing; the installer te
 Grouped as in the Frame Tweaks window. *Helpers* are installed automatically when a tweak needs
 them.
 
-<p align="center"><img src="packs/original/arrowpad/screenshot.png" width="300" alt="Arrow Pad: arrows, Home/End, PgUp/PgDn, Esc, Tab, Ctrl/Alt/Super, right/middle click, clipboard keys and a Tools layer with dictation and screen snip"></p>
-
 <!-- generated:tweaks (dev/gen-docs.py, from each tweak's README front matter) -->
 ### Accessibility
 
@@ -178,6 +176,28 @@ them.
 | 🤖 | [**Claude Code**](packs/integrations/claude-code/) (command line) | Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer. | Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone. |
 | 🤖 | [**Claude Desktop**](packs/integrations/claude-desktop/) | Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command. | Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead. |
 <!-- /generated:tweaks -->
+
+### Screenshots
+
+What the tweaks you open look like (click one to unfold it). The VR environment tweaks work in
+SteamVR's dashboard: the picture at the top of this page shows some of them.
+
+<details><summary>⌨️ Arrow Pad, and its Tools layer</summary>
+
+<p align="center"><img src="docs/images/arrowpad.png" width="420" alt="Arrow Pad: Tools, Tab, Bksp, Del, right- and middle-click keys; Fn, Home, the arrows, End, PgUp, PgDn, Esc; Ctrl, Alt, Super, undo, cut, select all, copy and paste; above them settings, pin, recenter, smaller, larger, collapse and close"></p>
+<p align="center"><img src="docs/images/arrowpad-tools.png" width="420" alt="Arrow Pad's Tools layer: screen snip, dictation, the app launcher, save, find, redo, Enter and Unstick in the arrow keys' places"></p>
+</details>
+
+<details><summary>✂️ Screen snip, and Narrate reading a snip aloud</summary>
+
+<p align="center"><img src="docs/images/snip.png" width="720" alt="Screen snip: a paragraph selected with handles on its corners and sides, and below it Copy, Save, Copy text, Narrate with its reading speed, and Cancel"></p>
+<p align="center"><img src="docs/images/narrate.png" width="620" alt="Narrate's panel: the snip, reading aloud part 2 of 3, with Stop, Pause, Show text, the speed, and settings, a new snip, Copy image, Copy text, Paste, Close and Collapse"></p>
+</details>
+
+<details><summary>🔐 Shared KDE wallet: choosing the apps it protects</summary>
+
+<p align="center"><img src="docs/images/wallet.png" width="720" alt="The Wallet apps page in the Frame Tweaks window: the wallet open for 25 minutes and locking by itself in about three and a half hours, auto-lock after 4 h, and Firefox, Signal and VSCodium behind the wallet, each with Close after, Headset off and Password first"></p>
+</details>
 
 ## Using the installer window
 

@@ -166,6 +166,12 @@ about it. To add one:
    changes" section of the tweak's README come from its manifest) and `dev/i18n.py extract` (its
    title, summary, what and why are translated). For a 3rd Party tweak with `upstream_readme:`,
    `dev/fetch-upstream-readmes.py ID` first. Then `dev/check.sh`.
+4. A tweak with a window: a screenshot under its intro, and in the README's **Screenshots**
+   (a folded `<details>` section). The Original tweaks' windows are drawn off-screen with sample
+   content by `dev/screenshots.py` (into `docs/images/`; run it with a Python that has PyQt6,
+   such as Arrow Pad's), so they can be taken again when a window changes and never show
+   anything of the machine they're taken on; add yours there. Views that exist only in VR are
+   taken in the headset.
 
 House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on command lines or in
 plain-text files; verify downloads when the publisher offers checksums; link to other projects

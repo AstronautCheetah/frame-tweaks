@@ -50,6 +50,8 @@ Puts the apps you choose behind one password: they ask for the KDE wallet's pass
 **Why on a Steam Frame:** Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins.
 <!-- /generated:intro -->
 
+![The Wallet apps page: the wallet's state, auto-lock, and the apps behind it](../../../docs/images/wallet.png)
+
 ## Install
 Tick it in the Frame Tweaks window, or:
 

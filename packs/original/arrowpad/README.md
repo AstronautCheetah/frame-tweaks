@@ -42,7 +42,7 @@ A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctr
 **Why on a Steam Frame:** Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop.
 <!-- /generated:intro -->
 
-![Arrow Pad, main layer](screenshot.png) ![Arrow Pad, Tools layer](screenshot-tools.png)
+![Arrow Pad, main layer](../../../docs/images/arrowpad.png) ![Arrow Pad, Tools layer](../../../docs/images/arrowpad-tools.png)
 
 ## Install
 
