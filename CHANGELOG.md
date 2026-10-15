@@ -12,8 +12,8 @@
   Frame, which took a few minutes and about 600 MB of temporary space. The build is
   [AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync), a fork
   of dnut/clipboard-sync with Frame Tweaks' changes as commits, tested and built by its CI. It
-  moves to **Integrations** (3rd Party is now the linked projects); reinstall it (↻) to switch,
-  which also removes the old build's leftovers.
+  moves to **Integrations** (3rd Party is now the linked projects). This update switches it, and
+  removes the old build's leftovers.
 
 ### Added
 - **What's in a pack:** on the Packs page, click a pack to see its tweaks, each with its tags,
@@ -28,8 +28,8 @@
 - **Check for updates no longer says "up to date" when Frame Tweaks was updated under an open
   window** (in a terminal, say) while the window still runs the older version: it offers ↻ Restart.
   The version in the title is the one the window runs.
-- **The Packs page describes 3rd Party as it is now:** most of its projects are linked and update
-  their own way; the Original pack's text mentions Battery charge limit's udev rule.
+- **The Packs page describes 3rd Party as it is now:** linked projects, which update their own
+  way; the Original pack's text mentions Battery charge limit's udev rule.
 
 ## 0.6.4 (2026-10-15)
 
