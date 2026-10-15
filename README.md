@@ -8,7 +8,9 @@ on-screen keyboard is missing, dictation that runs on the headset, curved VR win
 clipboard and one KDE wallet for VR and the desktop, and more. Tick what you want; untick it to
 remove it again.
 
-<p align="center"><img src="docs/images/installer.png" width="720" alt="The Frame Tweaks installer window: tweaks grouped by category, each with its status and an Open button"></p>
+<p align="center"><img src="docs/images/in-vr.jpg" width="720" alt="Frame Tweaks in use in the Steam Frame headset: an Android phone mirrored in a window on the left, the desktop in the middle, and on the right the Frame Tweaks window, Screen snip's reading panel and Arrow Pad"><br>
+<sub>In the headset: Android Mirror (left), the desktop (middle), and the Frame Tweaks window,
+Screen snip's reading panel and Arrow Pad (right).</sub></p>
 
 **Project status:** early (0.x) and changing quickly, tested on one Frame so far
 ([Tested on](#tested-on)). Reports from other SteamOS and SteamVR versions help a lot, and so
@@ -60,6 +62,8 @@ offers to set up the full window (PyQt6, about 280 MB); if you say no, you get a
 Until you tick a tweak and press **Apply changes**, that's all it installs: the menu entry (with a
 small user service that keeps it in your keyboard's language) and, if you said yes, the window's
 Python setup.
+
+<p align="center"><img src="docs/images/installer.png" width="720" alt="The Frame Tweaks installer window: tweaks grouped by category, each with its status and an Open button"></p>
 
 <details><summary>Prefer to read the script first?</summary>
 
