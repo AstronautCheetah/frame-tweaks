@@ -1,7 +1,8 @@
 """The installer window's ⚙ Preferences page: the language (every Frame Tweaks program follows it),
 whether uninstalling a tweak removes its settings, and how this window behaves. The window's own
 choices are kept in ~/.config/frame-tweaks/installer/window.json; the language in
-~/.config/frame-tweaks/language; the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
+~/.config/frame-tweaks/language; whether updates take test releases in ~/.config/frame-tweaks/channel;
+the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
 import html
 
 from PyQt6.QtCore import Qt
@@ -89,6 +90,16 @@ class Preferences(QWidget):
             rows.addWidget(box)
             rows.addWidget(self.about(_(about)))
 
+        # Updates: stable releases, or test releases too (sft.CHANNEL, as ./install.sh channel sets it).
+        rows.addWidget(self.heading(_("Updates")))
+        self.test_releases = QCheckBox(_("Get test releases too"))
+        self.test_releases.setChecked(sft.release_channel() == "beta")
+        self.test_releases.toggled.connect(lambda on: self.choose_channel(on))
+        rows.addWidget(self.test_releases)
+        rows.addWidget(self.about(_("Test releases (such as 0.7.0-rc.1) come before a release, for people who try "
+                                    "things first: newer, less tested. Off: stable releases only.")))
+        self.going_back = self.ask_box(rows, _("Go back now"), lambda: self.go_back_to_stable(), no_label=_("Stay on it"))
+
         # (below a line: what removes things)
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
@@ -172,8 +183,8 @@ class Preferences(QWidget):
         a.setWordWrap(True)
         return a
 
-    def ask_box(self, rows, yes_label, on_yes, danger=False):
-        """A question shown in place (hidden until asked): its text, Cancel and a yes button."""
+    def ask_box(self, rows, yes_label, on_yes, danger=False, no_label=None):
+        """A question shown in place (hidden until asked): its text, Cancel (or no_label) and a yes button."""
         box = QWidget()
         box.setObjectName("ask")
         lay = QVBoxLayout(box)
@@ -182,7 +193,7 @@ class Preferences(QWidget):
         box.text.setTextFormat(Qt.TextFormat.PlainText)
         lay.addWidget(box.text)
         buttons = QHBoxLayout()
-        no = QPushButton(_("Cancel"))
+        no = QPushButton(no_label or _("Cancel"))
         no.clicked.connect(box.hide)
         box.yes = QPushButton(yes_label)
         box.yes.setObjectName("danger" if danger else "apply")
@@ -258,6 +269,25 @@ class Preferences(QWidget):
         for v, b in self.uninstall_buttons.items():
             b.setChecked(v == value)
         self.window.say(_("Saved."), good=True)
+
+    def choose_channel(self, on):
+        sft.set_release_channel("beta" if on else "stable")
+        self.window.channel_changed()
+        current = sft.current_release()
+        if on:
+            self.going_back.hide()
+            self.window.say(_("Saved. ⟳ Check for updates finds test releases too."), good=True)
+        elif "-" in current:                            # on a test release: back now, or with the next release
+            self.going_back.text.setText(_("You're on {version}, a test release. Stay on it until the next stable "
+                                           "release is out, or go back to the newest stable release now?").format(
+                                               version=current))
+            self.going_back.show()
+        else:
+            self.window.say(_("Saved."), good=True)
+
+    def go_back_to_stable(self):
+        self.going_back.hide()
+        self.window.run_update(None, to="stable")
 
     def set_pref(self, key, on):
         set_window_pref(key, on)

@@ -34,7 +34,8 @@ sys.path.insert(0, str(REPO / "lib"))
 os.environ.setdefault("FRAME_TWEAKS_LIB", str(REPO / "lib"))   # (packs' scripts source the helpers through it)
 sys.path.insert(0, str(REPO / "gui"))           # (its pages, e.g. wallet_page.py)
 import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
-from sft import COLLAPSED, CONF, HIDDEN_CATS, component, components, read_set, run_label, write_set  # noqa: E402
+from sft import (COLLAPSED, CONF, HIDDEN_CATS, component, components, current_release, read_set,  # noqa: E402
+                 release_channel, run_label, write_set)
 import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
 import i18n  # noqa: E402
@@ -151,19 +152,6 @@ def update_check(cid):
 
 STABLE_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 ANY_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.]+))?$")
-CHANNEL = CONF.parent / "channel"           # (~/.config/frame-tweaks/channel, as lib/common.sh reads it)
-
-
-def release_channel():
-    c = os.environ.get("FRAME_TWEAKS_CHANNEL") or ""
-    if not c:
-        try:
-            c = CHANNEL.read_text().strip()
-        except OSError:
-            pass
-    return "beta" if c == "beta" else "stable"
-
-
 def newest_release(tags, channel="stable"):
     """Newest tag (without the leading v): stable vX.Y.Z only, or with pre-releases on beta,
     where vX.Y.Z-rc1 ranks below vX.Y.Z."""
@@ -196,10 +184,6 @@ def in_terminal(proc, script):
     terminal, and the install running in it, alone. (Konsole's messages go nowhere, as before:
     nothing read them, and once this window is gone a pipe to it would stop Konsole.)"""
     proc.start("bash", ["-c", 'konsole --separate -e bash -c "$1" >/dev/null 2>&1 & wait', "konsole", script])
-
-
-def current_release():
-    return (REPO / "VERSION").read_text().strip() if (REPO / "VERSION").exists() else "0"
 
 
 def self_update_check():
@@ -1171,9 +1155,11 @@ class Window(QWidget):
                      + " · <a style='color:#7fb2e5' href='u'>" + _("Update") + "</a></span>")
         label.setText(text)
 
-    def run_update(self, cid):
-        """Reinstall one tweak (fetches its latest upstream version), or update this repo (cid None)."""
-        cmd = "./install.sh install " + shlex.quote(cid) if cid else "./install.sh update"
+    def run_update(self, cid, to=None):
+        """Reinstall one tweak (fetches its latest upstream version), or update this repo (cid None;
+        to: a release, or "stable" for the newest stable one)."""
+        cmd = "./install.sh install " + shlex.quote(cid) if cid else "./install.sh update" + (
+            " --to " + shlex.quote(to) if to else "")
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
@@ -1214,6 +1200,12 @@ class Window(QWidget):
             self.run_update(None)
         elif self.update_state == "restart":
             self.restart_self()
+
+    def channel_changed(self):
+        """Test releases on or off (⚙ Preferences): a release found before may not be one to offer now."""
+        if self.update_state != "restart":
+            self.self_update_label.setText("")
+            self.set_update_state("check")
 
     def after_self_update(self):
         """The updater's terminal closed: Restart if a new release is in place."""

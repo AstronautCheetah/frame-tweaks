@@ -285,7 +285,11 @@ release is signed by Frame Tweaks' release key and refuses one that isn't. Nothi
 own: a tweak only changes when you update. (The one exception is Claude Code, which updates itself
 the way Anthropic's installer sets it up.)
 
-- **Pre-releases:** put `beta` in `~/.config/frame-tweaks/channel` to get them too.
+- **Test releases** (such as `0.7.0-rc.1`, newer and less tested): ⚙ Preferences → **Get test
+  releases too**, or `./install.sh channel beta`. Unticking it (`./install.sh channel stable`)
+  keeps you on the test release until the next stable one is out, or takes you back at once
+  (`./install.sh update --to stable`). To install with test releases from the start:
+  `curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/get.sh | FRAME_TWEAKS_CHANNEL=beta bash`.
 - **Go to a specific release** (for example, to go back): `./install.sh update --to vX.Y.Z`
   (0.6.1 or later: older releases aren't signed, so they're refused).
 - **Keep one tweak as it is** during updates: `./install.sh hold ID` (`unhold` to undo).

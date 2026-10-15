@@ -137,7 +137,7 @@ A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
 | `FRAME_TWEAKS_DRY_RUN=1` | The installer window and the simple checklist show what they'd do instead of doing it. |
 | `FRAME_TWEAKS_PACKS=DIR:DIR` | More pack folders (trusted like any other). |
 | `FRAME_TWEAKS_LANGUAGE=es_419` | The language (`en`: English), instead of the one chosen in ⚙ or the keyboard's. |
-| `FRAME_TWEAKS_CHANNEL=beta` | Pre-releases too, for `get.sh` and updates (`beta` in `~/.config/frame-tweaks/channel` does the same for updates). |
+| `FRAME_TWEAKS_CHANNEL=beta` | Pre-releases too, for `get.sh` and updates. `get.sh` keeps it in `~/.config/frame-tweaks/channel` (as `./install.sh channel beta` and ⚙ Preferences do). |
 | `FRAME_TWEAKS_REPO=URL`, `FRAME_TWEAKS_DIR=DIR` | Where `get.sh` installs from, and into. |
 | `FRAME_TWEAKS_ALLOW_UNSIGNED=1` | Lets an update take a release the release key didn't sign: an emergency switch. |
 | `ALARM_MIRROR=URL`, `ALARM_ALLOW_DOWNGRADE=1` | The Arch Linux ARM mirror to use; allow a package older than one installed before. |
@@ -280,8 +280,22 @@ Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Rele
 (Actions → Release → Run workflow, choose patch/minor/major). It dates the section, bumps
 VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. The tag is what
 `get.sh` and `./install.sh update` install, so the release is out as soon as the workflow pushes
-it; the draft is only its page of notes on GitHub. Pre-releases
-(`vX.Y.Z-rc.N`) only reach the beta channel.
+it; the draft is only its page of notes on GitHub.
+
+**Test releases for testers.** Tick **Pre-release** in the Release workflow: it tags
+`vX.Y.Z-rc.N` and drafts a release marked as a pre-release; publish it as one, so GitHub's
+"latest" stays on the stable release. Only people who opted in get it. Send testers this
+install command (it keeps their choice for later updates), or point them to ⚙ Preferences →
+**Get test releases too**:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/get.sh | FRAME_TWEAKS_CHANNEL=beta bash
+```
+
+Testers go back with the same box unticked (or `./install.sh channel stable`): they stay on the
+test release until the next stable one is out, which ranks above its test releases, or go back
+at once (the window offers it; `./install.sh update --to stable`). An update never moves to an
+older release unasked.
 
 **How many people use it** (Frame Tweaks itself never reports anything): GitHub counts clones
 (each install is one; updates may count too) and page views, but keeps only 14 days. The **Traffic**

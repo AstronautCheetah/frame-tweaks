@@ -144,13 +144,13 @@ class Update(unittest.TestCase):
         (cls.src / "dev/release-signers").write_text(f'release namespaces="git" {pub[0]} {pub[1]}\n')
         sign = ["-c", "gpg.format=ssh", "-c", f"user.signingkey={key}", "tag", "-s"]
         cls.git(cls.tmp, "init", "-q", str(cls.src))
-        for n in (1, 2):
-            if n == 2:
+        for n, tag in enumerate(("v0.0.1", "v0.0.2", "v0.0.3-rc.1"), 1):     # (the last: a test release)
+            if n > 1:
                 with open(cls.src / "README.md", "a") as readme:
-                    readme.write("\nThe next release.\n")
+                    readme.write(f"\nRelease {n}.\n")
             cls.git(cls.src, "add", "-A")
             cls.git(cls.src, "commit", "-qm", f"release {n}")
-            cls.git(cls.src, *sign, f"v0.0.{n}", "-m", f"v0.0.{n}")
+            cls.git(cls.src, *sign, tag, "-m", tag)
         cls.pack = cls.tmp / "probe-pack"
         (cls.pack / "probe").mkdir(parents=True)
         (cls.pack / "pack.md").write_text("---\nname: Probe pack\napi: 1\n---\n")
@@ -185,9 +185,13 @@ class Update(unittest.TestCase):
     def run_env(self):
         return {**self.env, "HOME": str(self.home), "FRAME_TWEAKS_PACKS": str(self.pack)}
 
-    def update(self, co):
-        return subprocess.run([str(co / "install.sh"), "update"], env=self.run_env(), stdin=subprocess.DEVNULL,
+    def update(self, co, *args):
+        return subprocess.run([str(co / "install.sh"), "update", *args], env=self.run_env(), stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=120)
+
+    def channel(self, co, *args):
+        return subprocess.run([str(co / "install.sh"), "channel", *args], env=self.run_env(), stdin=subprocess.DEVNULL,
+                              capture_output=True, text=True, timeout=60)
 
     def at(self, co):
         return self.git(co, "rev-parse", "HEAD").stdout.strip()
@@ -202,6 +206,26 @@ class Update(unittest.TestCase):
         self.assertIn("Release v0.0.2: signature verified.", r.stdout)
         self.assertEqual(self.at(co), self.commit("v0.0.2"))
         self.assertIn("Nothing installed yet.", r.stdout)                # (the new version's second stage)
+
+    def test_test_releases_come_and_go_with_the_channel(self):
+        """Beta: the test release. Stable again: no going back unasked, but --to stable goes back."""
+        co = self.checkout()
+        self.assertEqual(self.channel(co).stdout, "stable\n")
+        r = self.channel(co, "beta")
+        self.assertIn("test releases too", r.stdout)
+        r = self.update(co)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.at(co), self.commit("v0.0.3-rc.1"))
+        r = self.channel(co, "stable")
+        self.assertIn("You're on v0.0.3-rc.1, a test release", r.stdout)
+        r = self.update(co)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("you stay on it until a newer stable release is out", r.stdout)
+        self.assertEqual(self.at(co), self.commit("v0.0.3-rc.1"))
+        r = self.update(co, "--to", "stable")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.at(co), self.commit("v0.0.2"))
+        self.assertNotEqual(self.channel(co, "nightly").returncode, 0)
 
     def test_a_branch_named_like_the_release_doesnt_win(self):
         co = self.checkout()

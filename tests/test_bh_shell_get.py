@@ -60,6 +60,22 @@ class GetSh(unittest.TestCase):
         self.assertEqual(self.at(), "v0.10.0")
         self.assertEqual(self.ran(), ["install.sh menu", "install.sh "])     # (then the installer)
 
+    def test_the_channel_given_is_kept_for_updates(self):
+        """The testers' link (FRAME_TWEAKS_CHANNEL=beta) is remembered: updates take test releases too."""
+        self.release("v0.10.0", "v0.11.0-rc.1")
+        channel = self.tmp / "home/.config/frame-tweaks/channel"
+        self.assertEqual(self.get().returncode, 0)
+        self.assertFalse(channel.exists())                            # (none given: none written)
+        shutil.rmtree(self.dest)
+        self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="beta").returncode, 0)
+        self.assertEqual(channel.read_text(), "beta\n")
+        r = self.get(FRAME_TWEAKS_CHANNEL="stable")                    # (installed: an update)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(channel.read_text(), "stable\n")
+        r = self.get(FRAME_TWEAKS_CHANNEL="nightly")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("stable or beta", r.stderr)
+
     def test_beta_takes_a_pre_release_but_not_over_its_release(self):
         self.release("v0.10.0", "v0.11.0-rc.1")
         self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="beta").returncode, 0)

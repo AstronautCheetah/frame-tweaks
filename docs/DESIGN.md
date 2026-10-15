@@ -208,7 +208,10 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
 - **Channels.** Stable takes only `vX.Y.Z`. Beta (`beta` in `~/.config/frame-tweaks/channel`,
   or `FRAME_TWEAKS_CHANNEL=beta`) also takes pre-releases, sorted below the release they lead
   up to: `-` is replaced by `~` before `sort -V`. `get.sh`, `lib/common.sh` `newest_tag` and
-  the window's update hint each implement this rule.
+  the window's update hint each implement this rule. `get.sh` writes a channel it's given into
+  that file (`./install.sh channel` and ⚙ Preferences do too). An update never moves to an
+  older release unless asked (`--to vX.Y.Z`, or `--to stable` for the newest stable one), so a
+  tester back on stable stays on the test release until a newer stable one is out.
 - **Migrations are keyed by `VERSION`.** `installed/<id>` holds the `VERSION` that last
   installed each tweak, and the tweak's `migrate.sh` receives it. What people and logs see is the exact build
   instead (`lib/common.sh` `ft_version`, `lib/sft.py` `build_version`): `0.5.0` at a release
