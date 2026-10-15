@@ -9,24 +9,30 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 action=${1:?} id=${2:?}
 field() { python3 "$REPO_DIR/lib/sft.py" link "$id" "$1"; }
 name=$(field title) || exit 1
+# restart: steamvr: when it was uninstalled (SteamVR runs it until it restarts)
+UNLOADED="$HOME/.local/state/frame-tweaks/unloaded/$id"
 
 case $action in
     install)
         cmd=$(field install)
         say "$(t "Installing %s with its own installer (from the project, not checked by Frame Tweaks):" "$name")"
         echo "  $cmd"
-        bash -c "$cmd" ;;
+        bash -c "$cmd" || exit
+        rm -f "$UNLOADED" ;;
     uninstall)
         cmd=$(field uninstall)
         [ -n "$cmd" ] || die "$(t "%s has no uninstall command here: see its README" "$name")"
         say "$(t "Uninstalling %s with its own uninstaller:" "$name")"
         echo "  $cmd"
         bash -c "$cmd" || exit
-        [ "$(field restart)" = steamvr ] && say "$(t 'Restart SteamVR to unload it (reboot, or: %s).' "steamvr restart")"
-        true ;;
+        if [ "$(field restart)" = steamvr ]; then
+            mkdir -p "${UNLOADED%/*}" && touch "$UNLOADED"
+            say "$(t 'Restart SteamVR to unload it (reboot, or: %s).' "steamvr restart")"
+        fi ;;
     status)
         # restart: steamvr: SteamVR loads it only as it starts, so a SteamVR that started before
-        # the install hasn't (the installer window then offers to restart it).
+        # the install hasn't, and one that started before the uninstall still runs it (the
+        # installer window offers to restart it either way).
         restart=$(field restart)
         while IFS= read -r path; do
             path=${path/#\~/$HOME}
@@ -35,6 +41,8 @@ case $action in
                 status_restart "$(t 'installed; restart SteamVR to load it')"
             status_ok "$(t "installed by its own installer (it updates its own way)")"
         done < <(field installed)
+        [ "$restart" = steamvr ] && vr_started_before "$UNLOADED" &&
+            status_unload "$(t 'uninstalled; restart SteamVR to unload it')"
         status_missing "$(t 'not installed')" ;;
     run)
         cmd=$(field run)

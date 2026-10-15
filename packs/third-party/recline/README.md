@@ -61,8 +61,9 @@ installs, and doesn't pin, check or change what they install.
 - **Update:** ↻ on its row pulls the latest Recline-VR and runs its installer again; then restart
   SteamVR. Frame Tweaks' own updates leave it alone.
 - **Uninstall** (untick it): runs `~/.local/share/recline-vr/uninstall.sh`, which unregisters its
-  panel and driver, then removes `~/.local/share/recline-vr` and `~/Recline-VR`. Restart SteamVR
-  to unload the driver. Your panel options stay in `~/.config/recline-vr`.
+  panel and driver, then removes `~/.local/share/recline-vr` and `~/Recline-VR`. **Then restart
+  SteamVR** to unload the driver: until then its row offers **⟳ Restart SteamVR**. Your panel
+  options stay in `~/.config/recline-vr`.
 
 ## Use
 - **The Recline panel** in the SteamVR dashboard: *Recline recenter*, *Reset to normal*,

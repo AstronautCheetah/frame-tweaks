@@ -521,8 +521,9 @@ class LinkedProject(unittest.TestCase):
         self.assertEqual(self.linked_log(), ["installed"])
 
     def test_restart_steamvr(self):
-        """restart: steamvr: installed after SteamVR started, it isn't loaded yet (the row offers to
-        restart SteamVR); uninstalling says so too. (pgrep and ps are stand-ins.)"""
+        """restart: steamvr: installed after SteamVR started, it isn't loaded yet; uninstalled after
+        SteamVR started, SteamVR still runs it. Either way the row offers to restart SteamVR, until
+        it has restarted. (pgrep and ps are stand-ins.)"""
         (self.pack / "linked/README.md").write_text(LINKED.replace("  readme:", "  restart: steamvr\n  readme:"))
         self.trust()
         self.sh("install", "linked")
@@ -533,6 +534,15 @@ class LinkedProject(unittest.TestCase):
             self.stub("ps", f"echo {started}")
             self.assertIn(says, self.sh("status", "linked").stdout, started)
         self.assertIn("Restart SteamVR to unload it", self.sh("uninstall", "linked").stdout)
+        os.utime(self.home / ".local/state/frame-tweaks/unloaded/linked", (time.time() - 3600,) * 2)
+        for started, says, code in ((7200, "uninstalled; restart SteamVR to unload it", 1), (60, "not installed", 1)):
+            self.stub("ps", f"echo {started}")
+            self.assertIn(says, self.sh("status", "linked").stdout, started)
+            r = subprocess.run(["bash", str(ROOT / "lib/link.sh"), "status", "linked"], env=self.env,
+                               capture_output=True, text=True, timeout=60)
+            self.assertEqual(r.returncode, code, r.stdout)          # (not installed, either way)
+        self.sh("install", "linked")                                    # (installing again forgets it)
+        self.assertFalse((self.home / ".local/state/frame-tweaks/unloaded/linked").exists())
 
     def test_run(self):
         self.sh("install", "linked")

@@ -208,7 +208,8 @@ class Preferences(QWidget):
     def installed(self):
         """The tweaks that are (or may be) installed: any whose status isn't known yet counts."""
         state = getattr(self.window, "state", {}) or {}
-        return {c["id"] for c in sft.components() if (state.get(c["id"]) or (0,))[0] != 1}
+        return {c["id"] for c in sft.components()                 # (1, and 4: uninstalled, until SteamVR restarts)
+                if (state.get(c["id"]) or (0,))[0] not in (1, 4)}
 
     def list_leftovers(self):
         self.found = sft.leftover_settings(self.installed())
