@@ -1,7 +1,6 @@
 """dev/i18n-terms.py: which phrases of ours name something in other software, and reading Steam's
 and SteamVR's own translations (made up here; the real ones are on a Steam Frame)."""
-import importlib.machinery
-import importlib.util
+import sys
 import json
 import shutil
 import tempfile
@@ -10,9 +9,9 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("terms", str(ROOT / "dev/i18n-terms.py"))
-terms = importlib.util.module_from_spec(importlib.util.spec_from_loader("terms", _l))
-_l.exec_module(terms)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
+terms = load_script(ROOT / "dev/i18n-terms.py", "terms")
 
 
 class Phrases(unittest.TestCase):

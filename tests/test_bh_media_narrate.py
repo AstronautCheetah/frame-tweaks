@@ -2,8 +2,6 @@
 spoken), a throwaway home. "Read it again" after the end, a new speed while paused, a paste whose
 clipboard owner doesn't answer, the ⚙ view following a new language, and an open VR panel (with a
 stand-in openvr) reading the next snip at the speed set under Narrate."""
-import importlib.machinery
-import importlib.util
 import json
 import os
 import socket
@@ -17,6 +15,8 @@ from unittest import mock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script, stub  # noqa: E402
 SNIP = ROOT / "packs/original/snip/frame-snip"
 HOME = tempfile.TemporaryDirectory()       # (where the module's settings and Speech engine paths point)
 TWO = ("The first sentence is long enough to be read on its own. "
@@ -28,9 +28,7 @@ def load():
     # --narrate: the panel's offscreen platform, never the Steam session's display; no i18n: English
     with mock.patch.object(sys, "argv", ["frame-snip", "--narrate"]), mock.patch.dict(sys.modules, {"i18n": None}), \
             mock.patch.dict(os.environ, {"HOME": HOME.name}):
-        loader = importlib.machinery.SourceFileLoader("frame_snip", str(SNIP))
-        mod = importlib.util.module_from_spec(importlib.util.spec_from_loader("frame_snip", loader))
-        loader.exec_module(mod)
+        mod = load_script(SNIP, "frame_snip")
     sys.path.remove(str(Path(HOME.name) / ".local/share/frame-tweaks/i18n"))
     return mod
 
@@ -38,9 +36,8 @@ def load():
 fs = load()
 
 
-def stub(path, body):
-    path.write_text(f"#!/bin/bash\n{body}\n")
-    path.chmod(0o755)
+def stub_at(path, body):
+    stub(path.parent, path.name, body)
 
 
 class Narration(unittest.TestCase):
@@ -58,9 +55,9 @@ class Narration(unittest.TestCase):
         self.log = self.tmp / "log"
         self.log.write_text("")
         # Piper writes the file it's asked for; pw-play "plays" for a moment. PATH has only these.
-        stub(stubs / "piper", 'while [ $# -gt 0 ]; do [ "$1" = --output_file ] && out=$2; shift; done\n'
+        stub_at(stubs / "piper", 'while [ $# -gt 0 ]; do [ "$1" = --output_file ] && out=$2; shift; done\n'
                               f'/bin/cat > "$out"; echo "synth $out" >> {self.log}')
-        stub(stubs / "pw-play", f'echo "play $1" >> {self.log}; exec /bin/sleep 0.3')
+        stub_at(stubs / "pw-play", f'echo "play $1" >> {self.log}; exec /bin/sleep 0.3')
         for p in (mock.patch.dict(os.environ, {"PATH": str(stubs)}), mock.patch.object(fs, "PIPER", stubs / "piper"),
                   mock.patch.object(tempfile, "tempdir", str(self.tmp))):        # (its sound files go here)
             p.start()
@@ -152,11 +149,11 @@ class OpenPanel(unittest.TestCase):
         for d in (speech / "piper", stubs, vr, home / ".config/frame-tweaks"):
             d.mkdir(parents=True)
         log = t / "log"
-        stub(speech / "piper/piper", 'args="$*"\n'
+        stub_at(speech / "piper/piper", 'args="$*"\n'
                                      'while [ $# -gt 0 ]; do [ "$1" = --output_file ] && out=$2; shift; done\n'
                                      f'/bin/cat > "$out"; echo "synth $args" >> {log}')
         (speech / "voice.onnx").write_text("")
-        stub(stubs / "pw-play", "exec /bin/sleep 0.2")
+        stub_at(stubs / "pw-play", "exec /bin/sleep 0.2")
         (vr / "openvr.py").write_text(FAKE_OPENVR)
         settings = home / ".config/frame-tweaks/snip.json"
         settings.write_text(json.dumps({"speed": 1.0}))

@@ -1,6 +1,5 @@
 """Pure logic of the installer window (no window is opened). Run: python3 -m unittest -v"""
 import contextlib
-import importlib.util
 import io
 import os
 import subprocess
@@ -20,16 +19,21 @@ for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
              "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(_PREFERRED.name, "language")}.items():
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")
-gui = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(gui)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
+gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 
 
 class Versions(unittest.TestCase):
     def test_version_tuple(self):
-        self.assertEqual(gui.version_tuple("v1.10.2"), (1, 10, 2))
+        self.assertEqual(gui.version_tuple("v1.10.2")[0], (1, 10, 2))
         self.assertGreater(gui.version_tuple("0.10.0"), gui.version_tuple("0.9.9"))
-        self.assertEqual(gui.version_tuple(None), ())
+        self.assertEqual(gui.version_tuple(None)[0], ())
+        # a pre-release is older than its release (it used to rank 1.2.0-rc1 above 1.2.0)
+        self.assertLess(gui.version_tuple("1.2.0-rc1"), gui.version_tuple("1.2.0"))
+        self.assertLess(gui.version_tuple("1.2.0-rc.9"), gui.version_tuple("1.2.0-rc.10"))
+        self.assertGreater(gui.version_tuple("1.2.1-rc1"), gui.version_tuple("1.2.0"))
+        self.assertEqual(gui.version_tuple("0.2.0+138a59b"), gui.version_tuple("0.2.0"))   # (build metadata)
 
     def test_prerelease_sorts_below_its_release(self):
         self.assertLess(gui.release_key("v1.2.0-rc1"), gui.release_key("v1.2.0"))

@@ -1,8 +1,6 @@
 """Wallet apps: the installer window's app lists, and wallet-launcher wrapping a system app."""
 import contextlib
-import importlib.machinery
 import io
-import importlib.util
 import os
 import sys
 import shutil
@@ -21,13 +19,11 @@ for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
              "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(_PREFERRED.name, "language")}.items():
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("gui", ROOT / "gui" / "frame-tweaks-gui.py")
-gui = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(gui)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
+gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 import wallet_page as wp  # noqa: E402  (the window's Wallet apps page; gui put it on sys.path)
-loader = importlib.machinery.SourceFileLoader("wl", str(ROOT / "packs/original/wallet" / "wallet-launcher"))
-wl = importlib.util.module_from_spec(importlib.util.spec_from_loader("wl", loader))
-loader.exec_module(wl)
+wl = load_script(ROOT / "packs/original/wallet" / "wallet-launcher", "wl")
 
 
 def entry(d, app_id, exec_line, **extra):
@@ -117,9 +113,7 @@ class SystemApp(unittest.TestCase):
         self.assertIn("original launcher restored", out.getvalue())
 
 
-loader2 = importlib.machinery.SourceFileLoader("at", str(ROOT / "packs/original/wallet" / "app-timers"))
-at = importlib.util.module_from_spec(importlib.util.spec_from_loader("at", loader2))
-loader2.exec_module(at)
+at = load_script(ROOT / "packs/original/wallet" / "app-timers", "at")
 
 
 class Timers(unittest.TestCase):

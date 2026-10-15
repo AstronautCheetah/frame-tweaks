@@ -1,7 +1,6 @@
 """dev/i18n.py's "needs review" mark: a translation imported with --needs-review (a machine's,
 say) is used like any other, counted apart (stats, report), kept by update, exported with
 --review, and cleared by an import with --reviewed."""
-import importlib.util
 import json
 import sys
 import tempfile
@@ -10,12 +9,12 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
 sys.path.insert(0, str(ROOT / "lib"))
 import i18n  # noqa: E402
 
-spec = importlib.util.spec_from_file_location("i18n_tool", ROOT / "dev/i18n.py")
-tool = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(tool)
+tool = load_script(ROOT / "dev/i18n.py", "i18n_tool")
 
 POT = '''msgid ""
 msgstr ""

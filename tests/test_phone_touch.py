@@ -1,15 +1,14 @@
 """adb-scrcpy/phone-touch: laser positions on the mirror become scrcpy touch messages."""
-import importlib.machinery
-import importlib.util
+import sys
 import struct
 import unittest
 from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "packs/original/adb-scrcpy" / "phone-touch"))
-pt = importlib.util.module_from_spec(importlib.util.spec_from_loader("phone_touch", _l))
-_l.exec_module(pt)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
+pt = load_script(ROOT / "packs/original/adb-scrcpy" / "phone-touch", "phone_touch")
 
 
 def phone(size=(1080, 2400)):

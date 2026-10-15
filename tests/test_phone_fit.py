@@ -1,13 +1,12 @@
 """adb-scrcpy/phone-fit: the window size for the phone screen's shape."""
-import importlib.machinery
-import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("pf", str(ROOT / "packs/original/adb-scrcpy" / "phone-fit"))
-pf = importlib.util.module_from_spec(importlib.util.spec_from_loader("pf", _l))
-_l.exec_module(pf)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
+pf = load_script(ROOT / "packs/original/adb-scrcpy" / "phone-fit", "pf")
 
 
 class Fit(unittest.TestCase):

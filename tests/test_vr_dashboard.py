@@ -1,7 +1,6 @@
 """vr-dashboard/sft-dashboard: settings arm/restore, each patch's SteamVR compatibility check, the
 service's bindings and restarts; install.sh / uninstall.sh in a throwaway home."""
-import importlib.machinery
-import importlib.util
+import sys
 import json
 import re
 import subprocess
@@ -11,9 +10,9 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-_l = importlib.machinery.SourceFileLoader("sft", str(ROOT / "packs/original/vr-dashboard" / "sft-dashboard"))
-sft = importlib.util.module_from_spec(importlib.util.spec_from_loader("sft", _l))
-_l.exec_module(sft)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script, sandbox_env, stub  # noqa: E402
+sft = load_script(ROOT / "packs/original/vr-dashboard" / "sft-dashboard", "sft")
 def _patches():
     """Every dashboard patch a tweak installs: install_dashboard_patch NAME FILE in its install.sh."""
     found = {}
@@ -208,12 +207,10 @@ class Scripts(unittest.TestCase):
                   'exec /usr/bin/python3 "$@"')
 
     def stub(self, name, body):
-        (self.home / "stubs" / name).write_text(f"#!/bin/bash\n{body}\n")
-        (self.home / "stubs" / name).chmod(0o755)
+        stub(self.home / "stubs", name, body)
 
     def run_script(self, script, steamvr=3):
-        env = {"HOME": str(self.home), "PATH": f"{self.home / 'stubs'}:/usr/bin:/bin", "STEAMVR": str(steamvr),
-               "FRAME_TWEAKS_LANG_RESOLVED": "en", "FRAME_TWEAKS_LANGUAGE": "en"}
+        env = sandbox_env(self.home, self.home / "stubs", STEAMVR=steamvr)
         r = subprocess.run(["bash", str(ROOT / "packs/original/vr-dashboard" / script)], env=env,
                            capture_output=True, text=True, timeout=60)
         self.assertEqual(r.returncode, 0, r.stderr)
