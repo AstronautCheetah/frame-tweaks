@@ -4,6 +4,8 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 pgrep -u "$(id -u)" -x clipboard-sync >/dev/null || status_warn "$(t 'installed but not running (starts with desktop mode)')"
 n=$(pgrep -u "$(id -u)" -x clipboard-sync | wc -l)
 [ "$n" -le 2 ] || status_warn "$(t '%s copies running (Restart fixes it)' "$n")"   # (each forks one helper)
-grep -q "keep-images" "$HOME/.local/share/frame-tweaks/src/clipboard-sync/.sft-patched" 2>/dev/null \
-    || status_warn "$(t 'older build: replaces copied images with text (Reinstall fixes it)')"
+patched=$(cat "$HOME/.local/share/frame-tweaks/src/clipboard-sync/.sft-patched" 2>/dev/null)
+[[ $patched == *keep-images* ]] || status_warn "$(t 'older build: replaces copied images with text (Reinstall fixes it)')"
+[[ $patched == *keep-source* ]] ||
+    status_warn "$(t 'older build: a copied file or formatted text pastes only as text (Reinstall fixes it)')"
 status_ok "$(t '%s running' clipboard-sync)"

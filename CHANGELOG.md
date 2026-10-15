@@ -19,6 +19,15 @@
   [Share a pack](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=share_a_pack.yml)
   issue asks for one to be listed, after a maintainer has read it.
 
+### Fixed
+- **Shared clipboard: cutting or copying a file in desktop mode pastes the file again**, not just
+  its address ("Paste Clipboard Contents"). clipboard-sync wrote the text it shares back into the
+  clipboard it came from (directly, or through the desktop's own X11 clipboard, which KWin links
+  to the Wayland one), replacing what the app had put there. The same happened to formatted
+  text, to images that also carry text, and to a password manager's "don't keep this in the
+  clipboard history" mark, in desktop mode and in VR. The text now goes only to the other
+  session. Reinstall Shared clipboard (↻) to get it; its status says when you need to.
+
 ### Changed
 - **An update never moves to an older release unless you ask** (`--to`): with test releases
   turned off, `./install.sh update` keeps the test release you're on instead of going back.

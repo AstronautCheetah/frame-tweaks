@@ -60,11 +60,19 @@ both.
 - **Built from source**, at the clipboard-sync commit pinned in [`pin`](pin), with the Rust
   toolchain pinned in [`rust.pin`](rust.pin). Rust is set up in a temporary folder for the build
   and deleted afterwards.
-- **One small change** is applied before building, [`keep-images.patch`](keep-images.patch).
-  clipboard-sync shares text only. Without the patch, copying an image (for example **Copy
-  image** in [Screen snip + Narrate](../../original/snip/)) looked like "no text" to it, so it put the last text back
-  a moment later and the image never pasted. With the patch, a clipboard without text is left
-  alone.
+- **Two small changes** are applied before building. clipboard-sync shares text only.
+  - [`keep-images.patch`](keep-images.patch): copying an image (for example **Copy image** in
+    [Screen snip + Narrate](../../original/snip/)) looked like "no text" to it, so it put the
+    last text back a moment later and the image never pasted. Now a clipboard without text is
+    left alone.
+  - [`keep-source.patch`](keep-source.patch): it also wrote the text back into the clipboard it
+    was copied in, replacing what the app had put there. A file cut or copied in Dolphin then
+    pasted only as its address ("Paste Clipboard Contents"), formatted text lost its formatting,
+    and a password manager's "don't keep this in the clipboard history" mark was dropped. Now
+    the text goes only to the other clipboards, and the desktop's own X11 clipboard is left to
+    KWin, which already passes copies between it and the desktop's Wayland one (text written
+    there went on to the Wayland side the same way). It also waits a moment when testing
+    whether two clipboards are really one.
 - **Starts with desktop mode** through KDE autostart
   (`~/.config/autostart/clipboard-sync.desktop`). It needs the desktop session's environment;
   started from VR or as a background service, it wouldn't see the desktop's clipboard.
@@ -72,7 +80,8 @@ both.
   that is still running, for example from a desktop session that was restarted.
 
 ## Good to know
-- Only text is shared. Images and files stay on the clipboard where you copied them.
+- Only text is shared. Images and files stay on the clipboard where you copied them, and paste
+  there as usual; the other session gets a copied file's address as text.
 - The status line warns if it isn't running, if more than one copy is running, or if your build
   doesn't have the image patch yet (reinstall it to fix that).
 - If you have Homebrew's Rust installed and don't use it yourself, installing or removing this
