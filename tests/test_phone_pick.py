@@ -183,6 +183,13 @@ class PhonePick(unittest.TestCase):
         self.assertIn("PHONE_MAX_FPS=90", conf)
         self.assertFalse((Path(self.tmp.name) / ".config/phone.conf").exists())
 
+    def test_clipboard_shared_unless_set_not_to(self):
+        """PHONE_CLIPBOARD=off: scrcpy keeps the phone's clipboard and the Frame's apart."""
+        for conf, flagged in (("", False), ("PHONE_CLIPBOARD=both\n", False), ("PHONE_CLIPBOARD=off\n", True)):
+            code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\n' + conf)
+            self.assertIn("scrcpy -s 10.0.0.5:4000", log, conf)
+            self.assertEqual("--no-clipboard-autosync" in log, flagged, conf)
+
     def test_pick_asks_even_with_a_remembered_phone(self):
         phones = [("Pixel 9", "10.0.0.5", 4000)]
         code, log, conf = self.run_phone(phones, conf='PHONE_NAME="Galaxy S30"\n', choose="Pixel 9", args=["--pick"])

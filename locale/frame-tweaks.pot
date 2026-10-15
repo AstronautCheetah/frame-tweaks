@@ -391,7 +391,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:602 packs/original/adb-scrcpy/phone-touch.js:286 packs/original/scroll-strips/patch.js:287
+#: gui/frame-tweaks-gui.py:602 packs/original/adb-scrcpy/phone-touch.js:290 packs/original/scroll-strips/patch.js:287
 msgid "Reset to defaults"
 msgstr ""
 
@@ -462,7 +462,7 @@ msgstr ""
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:848 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:201
+#: gui/frame-tweaks-gui.py:848 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
 msgid "Close"
 msgstr ""
 
@@ -2195,7 +2195,7 @@ msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
 msgid ""
-"Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
@@ -2204,12 +2204,16 @@ msgid ""
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
+msgid "Share the clipboard with the phone"
+msgstr ""
+
+#: packs/original/adb-scrcpy/README.md
 msgid ""
 "Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
-msgid "The phone mirror's stream and joystick scrolling."
+msgid "The phone mirror's stream, joystick scrolling, and its clipboard."
 msgstr ""
 
 #: packs/original/adb-scrcpy/README.md
@@ -2292,15 +2296,27 @@ msgstr ""
 msgid "Slow"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch.js:293
+#: packs/original/adb-scrcpy/phone-touch.js:148
+msgid "Clipboard with the phone"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:148 packs/original/adb-scrcpy/README.md
+msgid "Not shared"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:148 packs/original/adb-scrcpy/README.md
+msgid "Shared"
+msgstr ""
+
+#: packs/original/adb-scrcpy/phone-touch.js:297
 msgid "Restart stream"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch.js:293
+#: packs/original/adb-scrcpy/phone-touch.js:297
 msgid "Restart stream to apply"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch.js:312
+#: packs/original/adb-scrcpy/phone-touch.js:316
 msgid ""
 "Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
@@ -2310,7 +2326,7 @@ msgid ""
 "scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:307 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:311 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
 msgid "Android Mirror"
 msgstr ""
 
@@ -2339,7 +2355,7 @@ msgstr ""
 msgid "The six-digit pairing code the phone shows:"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:107 packs/original/adb-scrcpy/phone:193 packs/original/adb-scrcpy/phone:200 packs/original/adb-scrcpy/phone:202 packs/original/adb-scrcpy/phone:205 packs/original/adb-scrcpy/phone:210 packs/original/adb-scrcpy/phone:212 packs/original/adb-scrcpy/phone:273 packs/original/adb-scrcpy/phone:282
+#: packs/original/adb-scrcpy/phone:107 packs/original/adb-scrcpy/phone:197 packs/original/adb-scrcpy/phone:204 packs/original/adb-scrcpy/phone:206 packs/original/adb-scrcpy/phone:209 packs/original/adb-scrcpy/phone:214 packs/original/adb-scrcpy/phone:216 packs/original/adb-scrcpy/phone:278 packs/original/adb-scrcpy/phone:287
 msgid "the phone"
 msgstr ""
 
@@ -2368,7 +2384,7 @@ msgid ""
 "It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:126 packs/original/adb-scrcpy/phone:205
+#: packs/original/adb-scrcpy/phone:126 packs/original/adb-scrcpy/phone:209
 msgid ""
 "Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
 msgstr ""
@@ -2424,50 +2440,50 @@ msgid ""
 "It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:193 packs/original/adb-scrcpy/phone:210
+#: packs/original/adb-scrcpy/phone:197 packs/original/adb-scrcpy/phone:214
 msgid "Connecting to %s…"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:198
+#: packs/original/adb-scrcpy/phone:202
 msgid ""
 "Couldn't connect to %s. adb said: %s\n"
 "\n"
 "If the phone forgot the Frame (or it's a new phone), pair them again."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:201
+#: packs/original/adb-scrcpy/phone:205
 msgid "Forget %s"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:201
+#: packs/original/adb-scrcpy/phone:205
 msgid "Pair it again"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:201
+#: packs/original/adb-scrcpy/phone:205
 msgid "this phone"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:202 packs/original/adb-scrcpy/phone:212
+#: packs/original/adb-scrcpy/phone:206 packs/original/adb-scrcpy/phone:216
 msgid "Couldn't connect to %s"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:202
+#: packs/original/adb-scrcpy/phone:206
 msgid "See Android Mirror's README for adb pair."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:212
+#: packs/original/adb-scrcpy/phone:216
 msgid "Paired, but connecting still failed. adb said: %s"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:235
+#: packs/original/adb-scrcpy/phone:239
 msgid "Starting the mirror…"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:244
+#: packs/original/adb-scrcpy/phone:249
 msgid "The mirror didn't start"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:244
+#: packs/original/adb-scrcpy/phone:249
 msgid ""
 "scrcpy stopped straight away. It said:\n"
 "\n"
@@ -2476,23 +2492,23 @@ msgid ""
 "If the phone asked to allow USB debugging or screen sharing, allow it and try again."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:272
+#: packs/original/adb-scrcpy/phone:277
 msgid "Phone connection lost"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:272
+#: packs/original/adb-scrcpy/phone:277
 msgid "Reconnecting…"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:273
+#: packs/original/adb-scrcpy/phone:278
 msgid "The connection to %s was lost. Reconnecting…"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:282
+#: packs/original/adb-scrcpy/phone:287
 msgid "Phone not found"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone:282
+#: packs/original/adb-scrcpy/phone:287
 msgid ""
 "The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
 msgstr ""
@@ -4407,7 +4423,7 @@ msgstr ""
 msgid "%s socket missing"
 msgstr ""
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
+#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:13
 msgid "%s running"
 msgstr ""
 
@@ -4443,19 +4459,19 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:20
+#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:20
 msgid "%s: not the pinned commit"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:22
+#: packs/third-party/clipboard/install.sh:38 packs/third-party/recline/install.sh:22
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:67
+#: packs/third-party/clipboard/install.sh:69
 msgid "%s started"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:69
+#: packs/third-party/clipboard/install.sh:71
 msgid "%s starts with desktop mode."
 msgstr ""
 
@@ -4478,6 +4494,11 @@ msgstr ""
 #: packs/third-party/clipboard/status.sh:10
 msgid ""
 "older build: a copied file or formatted text pastes only as text (Reinstall fixes it)"
+msgstr ""
+
+#: packs/third-party/clipboard/status.sh:12
+msgid ""
+"older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)"
 msgstr ""
 
 #: packs/third-party/clipboard/status.sh:4

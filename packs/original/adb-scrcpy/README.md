@@ -22,10 +22,10 @@ run: {label: Open}
 settings:
   file: ~/.config/frame-tweaks/phone.conf
   format: shell
-  about: The phone mirror's stream and joystick scrolling.
+  about: The phone mirror's stream, joystick scrolling, and its clipboard.
   note: >-
-    Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream,
-    in VR). Joystick speed applies at once.
+    Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's
+    Restart stream, in VR). Joystick speed applies at once.
   options:
     - key: PHONE_MAX_SIZE
       title: "Picture size (long side, pixels)"
@@ -68,6 +68,13 @@ settings:
         - {label: Slow, value: "8"}
         - {label: Medium, value: "15"}
         - {label: Fast, value: "25"}
+    - key: PHONE_CLIPBOARD
+      title: Share the clipboard with the phone
+      default: "both"
+      checkbox: true
+      choices:
+        - {label: Shared, value: "both"}
+        - {label: Not shared, value: "off"}
   actions:
     - label: "Forget {PHONE_NAME}"
       script: phone
@@ -180,11 +187,19 @@ Change these with the **⚙ Settings** button on its row in Frame Tweaks, with t
 | Bit rate (`PHONE_BIT_RATE`) | 2 Mbit/s | 1 to 8 |
 | Frame rate (at most, `PHONE_MAX_FPS`) | 60 | 30, 60, or one of the Frame's refresh rates, 72 to 144 |
 | Joystick scrolling (`PHONE_STICK_SPEED`) | Medium | Slow, Medium, Fast |
+| Share the clipboard with the phone (`PHONE_CLIPBOARD`) | Shared (`both`) | Shared, Not shared (`off`) |
 
 The defaults are enough for VR and keep the Wi-Fi link light; a heavier stream can fall
-behind the phone. Picture size, bit rate and frame rate apply the next time the mirror starts
-(or after *Restart stream* in VR); joystick speed applies at once. The chosen phone is saved in
-the same file (`PHONE_NAME`).
+behind the phone. Picture size, bit rate, frame rate and the clipboard apply the next time the
+mirror starts (or after *Restart stream* in VR); joystick speed applies at once. The chosen
+phone is saved in the same file (`PHONE_NAME`).
+
+**The clipboard with the phone.** Shared (scrcpy's way): what you paste in the mirror (Ctrl+V)
+is first copied to the phone, and whatever the phone copies comes to the Frame's clipboard, and
+from there to the desktop and VR with [Shared clipboard](../../third-party/clipboard/). So a
+password copied on the phone reaches the Frame, and one you paste into the mirror stays in the
+phone's clipboard (and its keyboard's clipboard history, if it keeps one). Not shared: each keeps
+its own; Ctrl+V in the mirror pastes the phone's clipboard.
 
 ## How it works
 - **adb for the Frame:** Google only ships `adb` (Android's debugging tool) for x86 PCs. The

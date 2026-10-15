@@ -415,7 +415,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr "{version} sigue siendo la versión más reciente."
 
-#: gui/frame-tweaks-gui.py:602 packs/original/adb-scrcpy/phone-touch.js:286 packs/original/scroll-strips/patch.js:287
+#: gui/frame-tweaks-gui.py:602 packs/original/adb-scrcpy/phone-touch.js:290 packs/original/scroll-strips/patch.js:287
 msgid "Reset to defaults"
 msgstr "Restablecer valores predeterminados"
 
@@ -490,7 +490,7 @@ msgstr ""
 msgid "Apply changes"
 msgstr "Aplicar cambios"
 
-#: gui/frame-tweaks-gui.py:848 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:201
+#: gui/frame-tweaks-gui.py:848 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
 msgid "Close"
 msgstr "Cerrar"
 
@@ -2387,11 +2387,12 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 "Cuadros por segundo (fps, como máximo; 72-144: las frecuencias de actualización del Steam Frame)"
 
+# needs review
 #: packs/original/adb-scrcpy/README.md
 msgid ""
-"Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
 msgstr ""
-"La imagen y los cuadros por segundo se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
+"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
 
 #: packs/original/adb-scrcpy/README.md
 msgid ""
@@ -2399,16 +2400,22 @@ msgid ""
 msgstr ""
 "Ve y controla tu teléfono Android en una ventana, por Wi-Fi, sin quitarte el visor"
 
+# needs review
+#: packs/original/adb-scrcpy/README.md
+msgid "Share the clipboard with the phone"
+msgstr "Compartir el portapapeles con el teléfono"
+
 #: packs/original/adb-scrcpy/README.md
 msgid ""
 "Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
 msgstr ""
 "Muestra la pantalla de tu teléfono Android en una ventana donde puedes hacer clic, escribir y desplazarte, por Wi-Fi (scrcpy con la depuración inalámbrica de Android). Encuentra el teléfono en la red por sí solo."
 
+# needs review
 #: packs/original/adb-scrcpy/README.md
-msgid "The phone mirror's stream and joystick scrolling."
+msgid "The phone mirror's stream, joystick scrolling, and its clipboard."
 msgstr ""
-"La transmisión del espejo del teléfono y el desplazamiento con joystick."
+"La transmisión del espejo del teléfono, el desplazamiento con joystick y su portapapeles."
 
 #: packs/original/adb-scrcpy/README.md
 msgid ""
@@ -2500,15 +2507,30 @@ msgstr "Medio"
 msgid "Slow"
 msgstr "Lento"
 
-#: packs/original/adb-scrcpy/phone-touch.js:293
+# needs review
+#: packs/original/adb-scrcpy/phone-touch.js:148
+msgid "Clipboard with the phone"
+msgstr "Portapapeles con el teléfono"
+
+# needs review
+#: packs/original/adb-scrcpy/phone-touch.js:148 packs/original/adb-scrcpy/README.md
+msgid "Not shared"
+msgstr "Sin compartir"
+
+# needs review
+#: packs/original/adb-scrcpy/phone-touch.js:148 packs/original/adb-scrcpy/README.md
+msgid "Shared"
+msgstr "Compartido"
+
+#: packs/original/adb-scrcpy/phone-touch.js:297
 msgid "Restart stream"
 msgstr "Reiniciar transmisión"
 
-#: packs/original/adb-scrcpy/phone-touch.js:293
+#: packs/original/adb-scrcpy/phone-touch.js:297
 msgid "Restart stream to apply"
 msgstr "Reinicia la transmisión para aplicar"
 
-#: packs/original/adb-scrcpy/phone-touch.js:312
+#: packs/original/adb-scrcpy/phone-touch.js:316
 msgid ""
 "Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
@@ -2520,7 +2542,7 @@ msgid ""
 msgstr ""
 "scrcpy {version} no es una versión con la que se haya probado Frame Tweaks ({tested}), así que los extras de RV del espejo están desactivados: clics apuntados con el láser y desplazamiento con joystick. Funciona como una ventana normal hasta una actualización de Frame Tweaks."
 
-#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:307 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:311 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
 msgid "Android Mirror"
 msgstr "Espejo de Android"
 
@@ -2550,7 +2572,7 @@ msgstr "Espejo de Android: vincular con %s"
 msgid "The six-digit pairing code the phone shows:"
 msgstr "El código de vinculación de seis dígitos que muestra el teléfono:"
 
-#: packs/original/adb-scrcpy/phone:107 packs/original/adb-scrcpy/phone:193 packs/original/adb-scrcpy/phone:200 packs/original/adb-scrcpy/phone:202 packs/original/adb-scrcpy/phone:205 packs/original/adb-scrcpy/phone:210 packs/original/adb-scrcpy/phone:212 packs/original/adb-scrcpy/phone:273 packs/original/adb-scrcpy/phone:282
+#: packs/original/adb-scrcpy/phone:107 packs/original/adb-scrcpy/phone:197 packs/original/adb-scrcpy/phone:204 packs/original/adb-scrcpy/phone:206 packs/original/adb-scrcpy/phone:209 packs/original/adb-scrcpy/phone:214 packs/original/adb-scrcpy/phone:216 packs/original/adb-scrcpy/phone:278 packs/original/adb-scrcpy/phone:287
 msgid "the phone"
 msgstr "el teléfono"
 
@@ -2584,7 +2606,7 @@ msgid ""
 msgstr ""
 "No apareció en la Wi-Fi con la Depuración inalámbrica activada. Actívala en las Opciones para desarrolladores del teléfono (perfil principal, misma Wi-Fi que el Frame) y luego abre Espejo de Android de nuevo."
 
-#: packs/original/adb-scrcpy/phone:126 packs/original/adb-scrcpy/phone:205
+#: packs/original/adb-scrcpy/phone:126 packs/original/adb-scrcpy/phone:209
 msgid ""
 "Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
 msgstr ""
@@ -2644,11 +2666,11 @@ msgid ""
 msgstr ""
 "Dejó de aparecer en la Wi-Fi. Comprueba que su Depuración inalámbrica siga activada y vuelve a intentarlo."
 
-#: packs/original/adb-scrcpy/phone:193 packs/original/adb-scrcpy/phone:210
+#: packs/original/adb-scrcpy/phone:197 packs/original/adb-scrcpy/phone:214
 msgid "Connecting to %s…"
 msgstr "Conectando a %s…"
 
-#: packs/original/adb-scrcpy/phone:198
+#: packs/original/adb-scrcpy/phone:202
 msgid ""
 "Couldn't connect to %s. adb said: %s\n"
 "\n"
@@ -2658,39 +2680,39 @@ msgstr ""
 "\n"
 "Si el teléfono olvidó el Frame (o es un teléfono nuevo), vuelve a vincularlos."
 
-#: packs/original/adb-scrcpy/phone:201
+#: packs/original/adb-scrcpy/phone:205
 msgid "Forget %s"
 msgstr "Olvidar %s"
 
-#: packs/original/adb-scrcpy/phone:201
+#: packs/original/adb-scrcpy/phone:205
 msgid "Pair it again"
 msgstr "Volver a vincularlo"
 
-#: packs/original/adb-scrcpy/phone:201
+#: packs/original/adb-scrcpy/phone:205
 msgid "this phone"
 msgstr "este teléfono"
 
-#: packs/original/adb-scrcpy/phone:202 packs/original/adb-scrcpy/phone:212
+#: packs/original/adb-scrcpy/phone:206 packs/original/adb-scrcpy/phone:216
 msgid "Couldn't connect to %s"
 msgstr "No se pudo conectar a %s"
 
-#: packs/original/adb-scrcpy/phone:202
+#: packs/original/adb-scrcpy/phone:206
 msgid "See Android Mirror's README for adb pair."
 msgstr "Consulta el README de Espejo de Android para adb pair."
 
-#: packs/original/adb-scrcpy/phone:212
+#: packs/original/adb-scrcpy/phone:216
 msgid "Paired, but connecting still failed. adb said: %s"
 msgstr "Vinculado, pero la conexión siguió fallando. adb dijo: %s"
 
-#: packs/original/adb-scrcpy/phone:235
+#: packs/original/adb-scrcpy/phone:239
 msgid "Starting the mirror…"
 msgstr "Iniciando el espejo…"
 
-#: packs/original/adb-scrcpy/phone:244
+#: packs/original/adb-scrcpy/phone:249
 msgid "The mirror didn't start"
 msgstr "El espejo no se inició"
 
-#: packs/original/adb-scrcpy/phone:244
+#: packs/original/adb-scrcpy/phone:249
 msgid ""
 "scrcpy stopped straight away. It said:\n"
 "\n"
@@ -2704,23 +2726,23 @@ msgstr ""
 "\n"
 "Si el teléfono pidió permitir la depuración por USB o compartir la pantalla, permítelo y vuelve a intentarlo."
 
-#: packs/original/adb-scrcpy/phone:272
+#: packs/original/adb-scrcpy/phone:277
 msgid "Phone connection lost"
 msgstr "Se perdió la conexión con el teléfono"
 
-#: packs/original/adb-scrcpy/phone:272
+#: packs/original/adb-scrcpy/phone:277
 msgid "Reconnecting…"
 msgstr "Reconectando…"
 
-#: packs/original/adb-scrcpy/phone:273
+#: packs/original/adb-scrcpy/phone:278
 msgid "The connection to %s was lost. Reconnecting…"
 msgstr "Se perdió la conexión con %s. Reconectando…"
 
-#: packs/original/adb-scrcpy/phone:282
+#: packs/original/adb-scrcpy/phone:287
 msgid "Phone not found"
 msgstr "Teléfono no encontrado"
 
-#: packs/original/adb-scrcpy/phone:282
+#: packs/original/adb-scrcpy/phone:287
 msgid ""
 "The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
 msgstr ""
@@ -4758,7 +4780,7 @@ msgstr "servicio %s no está en ejecución (%s)"
 msgid "%s socket missing"
 msgstr "falta el socket de %s"
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
+#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:13
 msgid "%s running"
 msgstr "%s en ejecución"
 
@@ -4799,20 +4821,20 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr "Compilando %s desde %s (unos minutos)"
 
-#: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:20
+#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:20
 msgid "%s: not the pinned commit"
 msgstr "%s: no es el commit fijado"
 
-#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:22
+#: packs/third-party/clipboard/install.sh:38 packs/third-party/recline/install.sh:22
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 "El commit fijado de %s no está disponible en el repositorio original; se usa la copia de Frame Tweaks"
 
-#: packs/third-party/clipboard/install.sh:67
+#: packs/third-party/clipboard/install.sh:69
 msgid "%s started"
 msgstr "%s iniciado"
 
-#: packs/third-party/clipboard/install.sh:69
+#: packs/third-party/clipboard/install.sh:71
 msgid "%s starts with desktop mode."
 msgstr "%s se inicia con el modo escritorio."
 
@@ -4838,6 +4860,13 @@ msgid ""
 "older build: a copied file or formatted text pastes only as text (Reinstall fixes it)"
 msgstr ""
 "compilación anterior: un archivo o un texto con formato copiado se pega solo como texto (Reinstalar lo corrige)"
+
+# needs review
+#: packs/third-party/clipboard/status.sh:12
+msgid ""
+"older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)"
+msgstr ""
+"compilación anterior: las contraseñas copiadas se quedan en la otra sesión, y sobrescribe el portapapeles cada 10 minutos (Reinstalar lo corrige)"
 
 #: packs/third-party/clipboard/status.sh:4
 msgid "installed but not running (starts with desktop mode)"
@@ -5193,3 +5222,12 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, put a pack in <code>{folder}</code>, then trust it below. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 #~ msgstr ""
 #~ "Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Original, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, pon un paquete en <code>{folder}</code> y luego confía en él abajo. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
+
+#~ msgid ""
+#~ "Picture and frame rate apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
+#~ msgstr ""
+#~ "La imagen y los cuadros por segundo se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
+
+#~ msgid "The phone mirror's stream and joystick scrolling."
+#~ msgstr ""
+#~ "La transmisión del espejo del teléfono y el desplazamiento con joystick."

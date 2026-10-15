@@ -9,6 +9,9 @@
   to the newest stable one at once (`./install.sh update --to stable`). The install command
   with `FRAME_TWEAKS_CHANNEL=beta` now keeps that choice for later updates; before, the first
   update took a tester back to the stable release.
+- **Android Mirror: Share the clipboard with the phone** (⚙ Settings, or the gear in VR). On by
+  default, as before: what you paste in the mirror goes to the phone, and what the phone copies
+  comes to the Frame. Off, each keeps its own.
 - **Try someone's pack from its link:** 🧩 Packs → **Add a pack from a link** (or
   `./install.sh mods add LINK`) downloads a pack shared as a git repository into your packs
   folder. As any pack, it isn't used until you trust it. **Update** (`mods update`) brings its
@@ -27,6 +30,13 @@
   text, to images that also carry text, and to a password manager's "don't keep this in the
   clipboard history" mark, in desktop mode and in VR. The text now goes only to the other
   session. Reinstall Shared clipboard (↻) to get it; its status says when you need to.
+- **Shared clipboard: a copied password no longer stays in the other session.** One its password
+  manager marks secret (KeePassXC does) is shared with the mark, so desktop mode's clipboard
+  history leaves it out, and when the password manager clears it, the copies are cleared too.
+- **Shared clipboard no longer overwrites the clipboard every 10 minutes.** It restarts its worker
+  that often, and each start wrote test values, then the first text it found, into every
+  clipboard: a file or picture copied but not yet pasted was replaced. Now a start replaces
+  nothing; only a clipboard with nothing on it gets the text the others hold.
 
 ### Changed
 - **An update never moves to an older release unless you ask** (`--to`): with test releases

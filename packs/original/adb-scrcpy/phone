@@ -166,6 +166,10 @@ MAX=1920                                   # the window: fits the Steam session'
 # (TCP, which can't drop a late one) and the phone's encoder. Less data per second, less backlog.
 # Set any of these in ~/.config/frame-tweaks/phone.conf.
 STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHONE_MAX_FPS:-60}
+# The clipboard with the phone (PHONE_CLIPBOARD): scrcpy shares it unless told not to. Shared, the
+# Frame's goes to the phone when you paste in the mirror, and the phone's comes here whenever it
+# copies (then on to the desktop and VR with the Shared clipboard tweak).
+clipboard() { [ "${PHONE_CLIPBOARD:-both}" = off ] && echo --no-clipboard-autosync; return 0; }
 
 # A wireless connection can die without scrcpy noticing (the phone changed network or address,
 # e.g. after switching profile): the picture just freezes. Check the phone answers every 5 s;
@@ -233,8 +237,9 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
     fi
     # The title is how the dashboard patches recognise the mirror window.
     splash "$(t 'Starting the mirror…')"
+    # shellcheck disable=SC2046   # (one word or none)
     "${cap[@]}" scrcpy -s "$dev" --video-bit-rate="$BIT_RATE" --max-size="$STREAM_MAX" --max-fps="$MAX_FPS" \
-        --window-title="Android Mirror" "$@" >"$SCRCPY_LOG" 2>&1 &
+        $(clipboard) --window-title="Android Mirror" "$@" >"$SCRCPY_LOG" 2>&1 &
     pid=$! misses=0
     # The splash stays until the mirror has been up a moment (after a reconnect or a restart too).
     for _ in 1 2 3 4 5 6; do sleep 0.5; kill -0 "$pid" 2>/dev/null || break; done
