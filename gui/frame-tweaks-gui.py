@@ -748,7 +748,9 @@ PAGES = {"wallet": (N_("🔑 Wallet apps"), WalletApps)}         # (label: trans
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-        version = sft.build_version()
+        # The build this window runs: the checkout can change under it (an update in a terminal,
+        # a git pull), and until it restarts, it's this one's code that runs.
+        self.build_at_start = version = sft.build_version()
         self.setWindowTitle(f"Frame Tweaks {version}")
         icon = ICONS / "frame-tweaks.png"
         if icon.exists():
@@ -805,7 +807,7 @@ class Window(QWidget):
     def build_ui(self):
         """The window's widgets (again after a change of language: retranslate)."""
         top = QHBoxLayout()
-        title = QLabel(f"Frame Tweaks <span style='color:#6b7783;font-size:14px'>{sft.build_version()}</span>")
+        title = QLabel(f"Frame Tweaks <span style='color:#6b7783;font-size:14px'>{self.running_build()}</span>")
         title.setObjectName("title")
         top.addWidget(title)
         top.addStretch(1)
@@ -962,12 +964,19 @@ class Window(QWidget):
                 self.show_newest(newest)
                 if self.update_state in ("check", "checking"):
                     self.set_update_state("update", newest)
+            elif self.update_state == "checking" and newest == "" and sft.build_version() != self.running_build():
+                # Nothing newer on GitHub, but the checkout changed since this window opened: what's
+                # on disk is newer than what runs here (an update in a terminal, a git pull).
+                self.set_update_state("restart")
+                self.say(_("Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use "
+                           "it.").format(version=sft.build_version()), good=True)
             elif self.update_state == "checking":
                 self.set_update_state("check")
                 if newest is None:                       # (offline, say: not "up to date")
                     self.say(_("Couldn't check for updates (no connection to GitHub?)."))
                 else:
-                    self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=current_release()), good=True)
+                    self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=self.running_build()),
+                                             good=True)
         if self.pack_check is not None and self.pack_check.done():
             try:
                 found = self.pack_check.result()
@@ -1234,6 +1243,10 @@ class Window(QWidget):
         b.setObjectName("apply" if state in ("update", "restart") else "")
         b.style().unpolish(b)
         b.style().polish(b)
+
+    def running_build(self):
+        """The build this window runs (as it opened; sft.build_version() is the checkout's now)."""
+        return getattr(self, "build_at_start", None) or sft.build_version()
 
     def show_pack_updates(self):
         """🧩 N pack updates, a link to the Packs page (packs added from a link; that page says which)."""
@@ -1662,7 +1675,7 @@ class Window(QWidget):
         """sys.excepthook: show it in the window (a dialog would open elsewhere in VR)."""
         import platform
         import traceback
-        version = sft.build_version()
+        version = self.running_build()
         details = (f"Frame Tweaks {version}, Python {platform.python_version()}, {platform.machine()}\n\n"
                    + "".join(traceback.format_exception(kind, value, tb)))
         self.error_text.setPlainText(details.replace(str(Path.home()), "~"))

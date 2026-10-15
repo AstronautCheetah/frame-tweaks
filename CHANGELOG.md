@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Fixed
+- **Check for updates no longer says "up to date" when Frame Tweaks was updated under an open
+  window** (in a terminal, say) while the window still runs the older version: it offers ↻ Restart.
+  The version in the title is the one the window runs.
 - **The Packs page describes 3rd Party as it is now:** most of its projects are linked and update
   their own way; the Original pack's text mentions Battery charge limit's udev rule.
 
