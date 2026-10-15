@@ -180,7 +180,7 @@ msgstr ""
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1427 gui/prefs_page.py:196 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1427 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
@@ -425,7 +425,7 @@ msgstr ""
 msgid "Didn't work: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:680 gui/prefs_page.py:271 gui/prefs_page.py:295 gui/prefs_page.py:286
+#: gui/frame-tweaks-gui.py:680 gui/prefs_page.py:270 gui/prefs_page.py:294 gui/prefs_page.py:285
 msgid "Saved."
 msgstr ""
 
@@ -693,78 +693,78 @@ msgstr ""
 
 #: gui/prefs_page.py:115
 msgid ""
-"Removing settings also signs you out of Claude Desktop, removes VSCodium's extensions, and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
+"Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
 msgstr ""
 
-#: gui/prefs_page.py:118
+#: gui/prefs_page.py:117
 msgid ""
 "Your own data is never removed: your dictation history, adb's pairing keys and Claude Code's ~/.claude folder stay either way."
 msgstr ""
 
-#: gui/prefs_page.py:123
+#: gui/prefs_page.py:122
 msgid "Keep its settings"
 msgstr ""
 
-#: gui/prefs_page.py:123
+#: gui/prefs_page.py:122
 msgid "Remove its settings too"
 msgstr ""
 
-#: gui/prefs_page.py:134
+#: gui/prefs_page.py:133
 msgid "Delete settings left by uninstalled tweaks…"
 msgstr ""
 
-#: gui/prefs_page.py:137
+#: gui/prefs_page.py:136
 msgid "Delete them"
 msgstr ""
 
-#: gui/prefs_page.py:140 install.sh:365
+#: gui/prefs_page.py:139 install.sh:365
 msgid "Uninstalling Frame Tweaks"
 msgstr ""
 
-#: gui/prefs_page.py:141
+#: gui/prefs_page.py:140
 msgid "What happens to the tweaks:"
 msgstr ""
 
-#: gui/prefs_page.py:146
+#: gui/prefs_page.py:145
 msgid "Uninstall the tweaks, but keep third-party apps"
 msgstr ""
 
-#: gui/prefs_page.py:147
+#: gui/prefs_page.py:146
 msgid ""
 "These stay installed and keep working, with the tweaks that installed them: {apps}."
 msgstr ""
 
-#: gui/prefs_page.py:148
+#: gui/prefs_page.py:147
 msgid "Uninstall every tweak, third-party apps too"
 msgstr ""
 
-#: gui/prefs_page.py:149
+#: gui/prefs_page.py:148
 msgid "Homebrew itself is never removed: other programs may live in it."
 msgstr ""
 
-#: gui/prefs_page.py:150
+#: gui/prefs_page.py:149
 msgid "Leave every tweak installed"
 msgstr ""
 
-#: gui/prefs_page.py:151
+#: gui/prefs_page.py:150
 msgid ""
 "They keep working, but nothing updates them, and removing them later takes Frame Tweaks again."
 msgstr ""
 
-#: gui/prefs_page.py:158
+#: gui/prefs_page.py:157
 msgid "Also delete the settings"
 msgstr ""
 
-#: gui/prefs_page.py:161
+#: gui/prefs_page.py:160
 msgid ""
 "Deletes Frame Tweaks' own settings and those of every tweak it removes, now or earlier. Tweaks that stay installed keep theirs. Off: all settings are kept, for a later install."
 msgstr ""
 
-#: gui/prefs_page.py:164
+#: gui/prefs_page.py:163
 msgid "Uninstall Frame Tweaks…"
 msgstr ""
 
-#: gui/prefs_page.py:168
+#: gui/prefs_page.py:167
 msgid "Uninstall"
 msgstr ""
 
@@ -777,66 +777,66 @@ msgid ""
 "A light tick when the laser moves onto a button, a firmer one on a click."
 msgstr ""
 
-#: gui/prefs_page.py:218 install.sh:308 install.sh:367
+#: gui/prefs_page.py:217 install.sh:308 install.sh:367
 msgid "No settings left behind by uninstalled tweaks."
+msgstr ""
+
+#: gui/prefs_page.py:219
+msgid "Delete these settings? Their tweaks aren't installed."
 msgstr ""
 
 #: gui/prefs_page.py:22
 msgid "Look for a new Frame Tweaks release when this window opens"
 msgstr ""
 
-#: gui/prefs_page.py:220
-msgid "Delete these settings? Their tweaks aren't installed."
-msgstr ""
-
 #: gui/prefs_page.py:23
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr ""
 
-#: gui/prefs_page.py:233
+#: gui/prefs_page.py:232
 msgid "Couldn't delete: {paths}"
 msgstr ""
 
-#: gui/prefs_page.py:235
+#: gui/prefs_page.py:234
 msgid "Deleted {n} setting."
 msgid_plural "Deleted {n} settings."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/prefs_page.py:239
+#: gui/prefs_page.py:238
 msgid "Uninstall Frame Tweaks?"
 msgstr ""
 
-#: gui/prefs_page.py:241
+#: gui/prefs_page.py:240
 msgid "The tweaks are uninstalled first; third-party apps stay."
 msgstr ""
 
-#: gui/prefs_page.py:242
+#: gui/prefs_page.py:241
 msgid "Every tweak is uninstalled first, third-party apps too."
 msgstr ""
 
-#: gui/prefs_page.py:243
+#: gui/prefs_page.py:242
 msgid "The tweaks stay installed."
 msgstr ""
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:243
 msgid "Settings are deleted."
 msgstr ""
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:243
 msgid "Settings are kept."
 msgstr ""
 
-#: gui/prefs_page.py:245
+#: gui/prefs_page.py:244
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
 msgstr ""
 
-#: gui/prefs_page.py:279
+#: gui/prefs_page.py:278
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr ""
 
-#: gui/prefs_page.py:281
+#: gui/prefs_page.py:280
 msgid ""
 "You're on {version}, a test release. Stay on it until the next stable release is out, or go back to the newest stable release now?"
 msgstr ""
@@ -2202,36 +2202,6 @@ msgid ""
 "The kwallet6 setting stays: Signal's database key now lives in the wallet, and switching back would lock you out."
 msgstr ""
 
-#: packs/integrations/vscodium/README.md
-msgid ""
-"For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR."
-msgstr ""
-
-#: packs/integrations/vscodium/README.md
-msgid "VS Code without Microsoft's telemetry, from Flathub"
-msgstr ""
-
-#: packs/integrations/vscodium/README.md
-msgid "VSCodium"
-msgstr ""
-
-#: packs/integrations/vscodium/README.md
-msgid ""
-"VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub."
-msgstr ""
-
-#: packs/integrations/vscodium/install.sh:4
-msgid "Installing VSCodium (Flathub, about 245 MB)"
-msgstr ""
-
-#: packs/integrations/vscodium/install.sh:7
-msgid "Open 'VSCodium' from the app menu. Extensions come from Open VSX."
-msgstr ""
-
-#: packs/integrations/vscodium/status.sh:4
-msgid "VSCodium not installed"
-msgstr ""
-
 #: packs/original/adb-scrcpy/README.md
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
@@ -2619,7 +2589,7 @@ msgid ""
 "Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
 msgstr ""
 
-#: packs/original/arrowpad/README.md packs/original/adb-scrcpy/README.md packs/original/firefox/README.md packs/integrations/signal/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/original/arrowpad/README.md packs/original/adb-scrcpy/README.md packs/original/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
 msgid "Open"
 msgstr ""
 
@@ -3011,7 +2981,7 @@ msgstr ""
 msgid "Mouse cursor fix"
 msgstr ""
 
-#: packs/original/cursor/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
+#: packs/original/cursor/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
 msgid "from"
 msgstr ""
 
@@ -3388,7 +3358,7 @@ msgstr ""
 msgid "Convenience"
 msgstr ""
 
-#: packs/original/pack.md packs/integrations/pack.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/original/pack.md packs/integrations/pack.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
 msgid "Developer"
 msgstr ""
 

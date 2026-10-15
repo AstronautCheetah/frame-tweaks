@@ -6,7 +6,6 @@ categories: [Accessibility, Convenience, VR environment, Privacy & security, Sys
 order:
   - signal
   - nordvpn
-  - vscodium
   - claude-code
   - claude-desktop
 ---

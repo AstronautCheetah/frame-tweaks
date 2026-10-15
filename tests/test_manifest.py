@@ -318,7 +318,7 @@ class Packs(unittest.TestCase):
         self.assertEqual(ids["claude-code"]["config"], [])      # (~/.claude holds its sign-in, history and memory)
         # Third-party apps, left installed when Frame Tweaks is uninstalled (unless --remove-apps)
         self.assertEqual({i for i, c in ids.items() if c["app"]},
-                         {"homebrew", "vscodium", "claude-desktop", "claude-code", "full-keyboard", "clipboard"})
+                         {"homebrew", "claude-desktop", "claude-code", "full-keyboard", "clipboard"})
 
     def test_trusting_by_name_needs_a_name_only_one_pack_has(self):
         """A pack can call itself anything, so `mods trust NAME` mustn't pick one of two."""
@@ -359,7 +359,7 @@ class Packs(unittest.TestCase):
         sft.set_trusted(d.parent, True)
         rows = [c["id"] for c in sft.load(refresh=True)["components"]]
         self.assertEqual(rows[-1], "hello")                          # its own category, last
-        self.assertLess(rows.index("hello2"), rows.index("vscodium"))   # joins Accessibility
+        self.assertLess(rows.index("hello2"), rows.index("claude-code"))   # joins Accessibility
 
 
 if __name__ == "__main__":

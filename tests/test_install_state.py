@@ -77,8 +77,8 @@ class InstallState(unittest.TestCase):
                                FRAME_TWEAKS_PACKS=self.pack,
                                FRAME_TWEAKS_KEEP_CHECKOUT=1)    # (uninstall-self: never the checkout the tests run from)
         self.trust()
-        # (every test: some official tweaks find what's installed machine-wide, VSCodium's system
-        # Flatpak say, and an "uninstall all" here once removed it for real)
+        # (every test: some official tweaks find what's installed machine-wide, a system
+        # Flatpak say, and an "uninstall all" here once removed one for real)
         self.only_the_probe()
         self.state = self.home / ".local/state/frame-tweaks"
         self.record = self.state / "installed/probe"

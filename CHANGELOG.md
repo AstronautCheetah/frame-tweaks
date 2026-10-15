@@ -54,6 +54,9 @@
   ↻ pulls its latest version. Its row still offers ⟳ Restart SteamVR after an install. Its
   setting is gone: Recline-VR always keeps the room view aligned. An installed Recline keeps
   working as it is.
+- **VSCodium is set aside** (not offered any more): it's in Flathub, so Discover installs it as well,
+  and Frame Tweaks offers only what you can't get there or from Homebrew. An installed VSCodium
+  stays, with your settings and extensions (Discover can remove it).
 - **An update never moves to an older release unless you ask** (`--to`): with test releases
   turned off, `./install.sh update` keeps the test release you're on instead of going back.
 

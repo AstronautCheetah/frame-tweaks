@@ -115,7 +115,7 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
             "app", "link")
-# app: the name of the other project's app the tweak installs (VSCodium, Claude Desktop, …).
+# app: the name of the other project's app the tweak installs (Claude Desktop, Full Keyboard, …).
 # Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
 # uninstall keeps them, or removes them when the Preferences say so (UNINSTALL_PREF). Only below

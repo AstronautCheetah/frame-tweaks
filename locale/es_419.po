@@ -197,7 +197,7 @@ msgstr "la revisión del estado no terminó (tardó más de un minuto)"
 msgid "Help make Frame Tweaks better"
 msgstr "Ayuda a mejorar Frame Tweaks"
 
-#: gui/frame-tweaks-gui.py:1427 gui/prefs_page.py:196 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1427 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -455,7 +455,7 @@ msgstr "Listo."
 msgid "Didn't work: %s"
 msgstr "No funcionó: %s"
 
-#: gui/frame-tweaks-gui.py:680 gui/prefs_page.py:271 gui/prefs_page.py:295 gui/prefs_page.py:286
+#: gui/frame-tweaks-gui.py:680 gui/prefs_page.py:270 gui/prefs_page.py:294 gui/prefs_page.py:285
 msgid "Saved."
 msgstr "Guardado."
 
@@ -759,85 +759,86 @@ msgid ""
 msgstr ""
 "Cuando desinstalas un ajuste, su configuración puede quedarse, para que quede como antes si lo vuelves a instalar, o eliminarse junto con él."
 
+# needs review
 #: gui/prefs_page.py:115
 msgid ""
-"Removing settings also signs you out of Claude Desktop, removes VSCodium's extensions, and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
+"Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
 msgstr ""
-"Eliminar la configuración también cierra tu sesión de Claude para escritorio, quita las extensiones de VSCodium y borra la clave de NordVPN (para volver a configurar NordVPN necesitarás un nuevo token de acceso)."
+"Eliminar la configuración también cierra tu sesión de Claude para escritorio y borra la clave de NordVPN (para volver a configurar NordVPN necesitarás un nuevo token de acceso)."
 
-#: gui/prefs_page.py:118
+#: gui/prefs_page.py:117
 msgid ""
 "Your own data is never removed: your dictation history, adb's pairing keys and Claude Code's ~/.claude folder stay either way."
 msgstr ""
 "Tus propios datos nunca se eliminan: tu historial de dictado, las claves de vinculación de adb y la carpeta ~/.claude de Claude Code se quedan en ambos casos."
 
-#: gui/prefs_page.py:123
+#: gui/prefs_page.py:122
 msgid "Keep its settings"
 msgstr "Conservar su configuración"
 
-#: gui/prefs_page.py:123
+#: gui/prefs_page.py:122
 msgid "Remove its settings too"
 msgstr "Eliminar también su configuración"
 
-#: gui/prefs_page.py:134
+#: gui/prefs_page.py:133
 msgid "Delete settings left by uninstalled tweaks…"
 msgstr "Eliminar la configuración que dejaron los ajustes desinstalados…"
 
-#: gui/prefs_page.py:137
+#: gui/prefs_page.py:136
 msgid "Delete them"
 msgstr "Eliminarla"
 
-#: gui/prefs_page.py:140 install.sh:365
+#: gui/prefs_page.py:139 install.sh:365
 msgid "Uninstalling Frame Tweaks"
 msgstr "Al desinstalar Frame Tweaks"
 
-#: gui/prefs_page.py:141
+#: gui/prefs_page.py:140
 msgid "What happens to the tweaks:"
 msgstr "Qué pasa con los ajustes:"
 
-#: gui/prefs_page.py:146
+#: gui/prefs_page.py:145
 msgid "Uninstall the tweaks, but keep third-party apps"
 msgstr "Desinstalar los ajustes, pero conservar las apps de terceros"
 
-#: gui/prefs_page.py:147
+#: gui/prefs_page.py:146
 msgid ""
 "These stay installed and keep working, with the tweaks that installed them: {apps}."
 msgstr ""
 "Estas siguen instaladas y funcionando, con los ajustes que las instalaron: {apps}."
 
-#: gui/prefs_page.py:148
+#: gui/prefs_page.py:147
 msgid "Uninstall every tweak, third-party apps too"
 msgstr "Desinstalar todos los ajustes, también las apps de terceros"
 
-#: gui/prefs_page.py:149
+#: gui/prefs_page.py:148
 msgid "Homebrew itself is never removed: other programs may live in it."
 msgstr "Homebrew nunca se elimina: puede haber otros programas en él."
 
-#: gui/prefs_page.py:150
+#: gui/prefs_page.py:149
 msgid "Leave every tweak installed"
 msgstr "Dejar todos los ajustes instalados"
 
-#: gui/prefs_page.py:151
+#: gui/prefs_page.py:150
 msgid ""
 "They keep working, but nothing updates them, and removing them later takes Frame Tweaks again."
 msgstr ""
 "Siguen funcionando, pero nada los actualiza, y para quitarlos más adelante necesitarás Frame Tweaks de nuevo."
 
-#: gui/prefs_page.py:158
+#: gui/prefs_page.py:157
 msgid "Also delete the settings"
 msgstr "Eliminar también la configuración"
 
-#: gui/prefs_page.py:161
+#: gui/prefs_page.py:160
 msgid ""
 "Deletes Frame Tweaks' own settings and those of every tweak it removes, now or earlier. Tweaks that stay installed keep theirs. Off: all settings are kept, for a later install."
 msgstr ""
 "Elimina la configuración de Frame Tweaks y la de cada ajuste que quite, ahora o antes. Los ajustes que siguen instalados conservan la suya. Desactivado: se conserva toda la configuración, para una instalación futura."
 
-#: gui/prefs_page.py:164
+#: gui/prefs_page.py:163
 msgid "Uninstall Frame Tweaks…"
 msgstr "Desinstalar Frame Tweaks…"
 
-#: gui/prefs_page.py:168
+#: gui/prefs_page.py:167
 msgid "Uninstall"
 msgstr "Desinstalar"
 
@@ -851,71 +852,71 @@ msgid ""
 msgstr ""
 "Un pulso suave cuando el láser pasa sobre un botón y uno más firme al hacer clic."
 
-#: gui/prefs_page.py:218 install.sh:308 install.sh:367
+#: gui/prefs_page.py:217 install.sh:308 install.sh:367
 msgid "No settings left behind by uninstalled tweaks."
 msgstr "Los ajustes desinstalados no dejaron configuración."
+
+#: gui/prefs_page.py:219
+msgid "Delete these settings? Their tweaks aren't installed."
+msgstr "¿Eliminar esta configuración? Sus ajustes no están instalados."
 
 #: gui/prefs_page.py:22
 msgid "Look for a new Frame Tweaks release when this window opens"
 msgstr "Buscar una nueva versión de Frame Tweaks al abrir esta ventana"
 
-#: gui/prefs_page.py:220
-msgid "Delete these settings? Their tweaks aren't installed."
-msgstr "¿Eliminar esta configuración? Sus ajustes no están instalados."
-
 #: gui/prefs_page.py:23
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr "Desactivado: solo cuando presionas ⟳ Buscar actualizaciones."
 
-#: gui/prefs_page.py:233
+#: gui/prefs_page.py:232
 msgid "Couldn't delete: {paths}"
 msgstr "No se pudo eliminar: {paths}"
 
-#: gui/prefs_page.py:235
+#: gui/prefs_page.py:234
 msgid "Deleted {n} setting."
 msgid_plural "Deleted {n} settings."
 msgstr[0] "Se eliminó {n} elemento de configuración."
 msgstr[1] "Se eliminaron {n} elementos de configuración."
 
-#: gui/prefs_page.py:239
+#: gui/prefs_page.py:238
 msgid "Uninstall Frame Tweaks?"
 msgstr "¿Desinstalar Frame Tweaks?"
 
-#: gui/prefs_page.py:241
+#: gui/prefs_page.py:240
 msgid "The tweaks are uninstalled first; third-party apps stay."
 msgstr "Primero se desinstalan los ajustes; las apps de terceros se quedan."
 
-#: gui/prefs_page.py:242
+#: gui/prefs_page.py:241
 msgid "Every tweak is uninstalled first, third-party apps too."
 msgstr ""
 "Primero se desinstalan todos los ajustes, también las apps de terceros."
 
-#: gui/prefs_page.py:243
+#: gui/prefs_page.py:242
 msgid "The tweaks stay installed."
 msgstr "Los ajustes siguen instalados."
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:243
 msgid "Settings are deleted."
 msgstr "La configuración se elimina."
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:243
 msgid "Settings are kept."
 msgstr "La configuración se conserva."
 
-#: gui/prefs_page.py:245
+#: gui/prefs_page.py:244
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
 msgstr ""
 "Su carpeta ({folder}) también se elimina, a menos que contenga trabajo tuyo (cambios, tus propios paquetes); esta ventana se cierra y una terminal muestra cada paso."
 
 # needs review
-#: gui/prefs_page.py:279
+#: gui/prefs_page.py:278
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr ""
 "Guardado. ⟳ Buscar actualizaciones también encuentra versiones de prueba."
 
 # needs review
-#: gui/prefs_page.py:281
+#: gui/prefs_page.py:280
 msgid ""
 "You're on {version}, a test release. Stay on it until the next stable release is out, or go back to the newest stable release now?"
 msgstr ""
@@ -2407,39 +2408,6 @@ msgid ""
 msgstr ""
 "La opción kwallet6 se mantiene: la clave de la base de datos de Signal ahora está en la cartera, y volver atrás te dejaría sin acceso."
 
-#: packs/integrations/vscodium/README.md
-msgid ""
-"For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR."
-msgstr ""
-"Para programar en el visor: Flathub tiene una versión para el procesador ARM del Frame, y funciona bien con Teclado de flechas y Dictado para escribir en RV."
-
-#: packs/integrations/vscodium/README.md
-msgid "VS Code without Microsoft's telemetry, from Flathub"
-msgstr "VS Code sin la telemetría de Microsoft, desde Flathub"
-
-#: packs/integrations/vscodium/README.md
-msgid "VSCodium"
-msgstr "VSCodium"
-
-#: packs/integrations/vscodium/README.md
-msgid ""
-"VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub."
-msgstr ""
-"VSCodium, el editor de código VS Code compilado desde su código abierto sin la telemetría ni la marca de Microsoft. Se instala desde Flathub."
-
-#: packs/integrations/vscodium/install.sh:4
-msgid "Installing VSCodium (Flathub, about 245 MB)"
-msgstr "Instalando VSCodium (Flathub, unos 245 MB)"
-
-#: packs/integrations/vscodium/install.sh:7
-msgid "Open 'VSCodium' from the app menu. Extensions come from Open VSX."
-msgstr ""
-"Abre 'VSCodium' desde el menú de apps. Las extensiones vienen de Open VSX."
-
-#: packs/integrations/vscodium/status.sh:4
-msgid "VSCodium not installed"
-msgstr "VSCodium no instalado"
-
 #: packs/original/adb-scrcpy/README.md
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
@@ -2877,7 +2845,7 @@ msgid ""
 msgstr ""
 "Teclado flotante con flechas, Home/End, teclas F, Ctrl/Alt/Super y un botón de dictado; nunca roba el foco"
 
-#: packs/original/arrowpad/README.md packs/original/adb-scrcpy/README.md packs/original/firefox/README.md packs/integrations/signal/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/original/arrowpad/README.md packs/original/adb-scrcpy/README.md packs/original/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
 msgid "Open"
 msgstr "Abrir"
 
@@ -3285,7 +3253,7 @@ msgstr "Hace visible el puntero del mouse en modo escritorio."
 msgid "Mouse cursor fix"
 msgstr "Corrección del cursor del mouse"
 
-#: packs/original/cursor/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
+#: packs/original/cursor/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
 msgid "from"
 msgstr "de"
 
@@ -3694,7 +3662,7 @@ msgstr "Accesibilidad"
 msgid "Convenience"
 msgstr "Comodidad"
 
-#: packs/original/pack.md packs/integrations/pack.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/original/pack.md packs/integrations/pack.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
 msgid "Developer"
 msgstr "Desarrollo"
 
@@ -5189,6 +5157,37 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ msgstr ""
 #~ "compilación anterior: las contraseñas copiadas se quedan en la otra sesión, y sobrescribe el portapapeles cada 10 minutos (Reinstalar lo corrige)"
 
+#~ msgid ""
+#~ "Removing settings also signs you out of Claude Desktop, removes VSCodium's extensions, and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
+#~ msgstr ""
+#~ "Eliminar la configuración también cierra tu sesión de Claude para escritorio, quita las extensiones de VSCodium y borra la clave de NordVPN (para volver a configurar NordVPN necesitarás un nuevo token de acceso)."
+
+#~ msgid ""
+#~ "For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR."
+#~ msgstr ""
+#~ "Para programar en el visor: Flathub tiene una versión para el procesador ARM del Frame, y funciona bien con Teclado de flechas y Dictado para escribir en RV."
+
+#~ msgid "VS Code without Microsoft's telemetry, from Flathub"
+#~ msgstr "VS Code sin la telemetría de Microsoft, desde Flathub"
+
+#~ msgid "VSCodium"
+#~ msgstr "VSCodium"
+
+#~ msgid ""
+#~ "VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub."
+#~ msgstr ""
+#~ "VSCodium, el editor de código VS Code compilado desde su código abierto sin la telemetría ni la marca de Microsoft. Se instala desde Flathub."
+
+#~ msgid "Installing VSCodium (Flathub, about 245 MB)"
+#~ msgstr "Instalando VSCodium (Flathub, unos 245 MB)"
+
+#~ msgid "Open 'VSCodium' from the app menu. Extensions come from Open VSX."
+#~ msgstr ""
+#~ "Abre 'VSCodium' desde el menú de apps. Las extensiones vienen de Open VSX."
+
+#~ msgid "VSCodium not installed"
+#~ msgstr "VSCodium no instalado"
+
 #~ msgid "Applies when you reinstall Recline, then restart SteamVR."
 #~ msgstr "Se aplica cuando reinstalas Reclinar y luego reinicias SteamVR."
 
@@ -5295,9 +5294,3 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "couldn't unregister Recline's panel from SteamVR; it will report it missing"
 #~ msgstr ""
 #~ "no se pudo quitar el registro del panel de Reclinar en SteamVR; lo reportará como faltante"
-
-#~ # needs review
-#~ msgid ""
-#~ "Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
-#~ msgstr ""
-#~ "Eliminar la configuración también cierra tu sesión de Claude para escritorio y borra la clave de NordVPN (para volver a configurar NordVPN necesitarás un nuevo token de acceso)."

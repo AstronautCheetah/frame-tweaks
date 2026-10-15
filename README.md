@@ -47,8 +47,8 @@ You need:
 - Some disk space: a few MB for most tweaks. The bigger ones: the full installer window and Arrow
   Pad share a Python setup of about 280 MB, Dictation's Whisper model is about 260 MB, and
   Homebrew (used by a few tweaks) takes several hundred MB or more, depending on what is in it.
-  VSCodium is about 245 MB, each Narrate voice about 60 MB, and building the shared clipboard
-  needs about 600 MB of temporary space.
+  Each Narrate voice is about 60 MB, and building the shared clipboard needs about 600 MB of
+  temporary space.
 
 In desktop mode, open **Konsole** and run:
 
@@ -83,7 +83,7 @@ needs it:
   a password for your user, set one first with `passwd` in Konsole). This is the only
   time anything asks for sudo.
 - **NordVPN** adds its connections to NetworkManager (`/etc/NetworkManager/system-connections`).
-- **Shared KDE wallet** and **VSCodium** install apps from Flathub, which go into the system-wide
+- **Shared KDE wallet** installs KWalletManager from Flathub, which goes into the system-wide
   Flatpak folder.
 
 Every tweak installs, checks and removes on its own, and removing one keeps your settings
@@ -99,8 +99,8 @@ window goes online only to look for newer releases: Frame Tweaks' own (it asks G
 off in its ⚙ preferences) and, for a tweak that installs an app with its own releases, that
 app's (Claude Desktop asks Anthropic's download server). Installs and updates download what the
 tweaks need. **🐞 Report a problem** saves its report on the Frame and opens GitHub's bug form;
-nothing is sent unless you attach it. The apps the tweaks install (Signal, NordVPN, VSCodium,
-Claude…) go online as they normally do.
+nothing is sent unless you attach it. The apps the tweaks install (Signal, NordVPN, Claude…) go
+online as they normally do.
 
 > **What some tweaks can do on your Frame.** VR dashboard patching turns on SteamVR's dashboard
 > DevTools port while SteamVR runs (any program on the Frame could use it). Arrow Pad and
@@ -175,7 +175,6 @@ them.
 
 | | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
-| 🧑‍💻 | [**VSCodium**](packs/integrations/vscodium/) | VSCodium, the code editor VS Code built from its open-source code without Microsoft's telemetry and branding. Installed from Flathub. | For coding on the headset: Flathub has a build for the Frame's ARM processor, and it works well with Arrow Pad and Dictation for typing in VR. |
 | 🤖 | [**Claude Code**](packs/integrations/claude-code/) (command line) | Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer. | Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone. |
 | 🤖 | [**Claude Desktop**](packs/integrations/claude-desktop/) | Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command. | Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead. |
 <!-- /generated:tweaks -->
@@ -340,7 +339,7 @@ with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's
 - **When you uninstall a tweak** its settings are kept, so it's set up as before if you install
   it again. ⚙ Preferences → **Uninstalling a tweak** can make them go with it instead (for one
   run: `./install.sh uninstall --remove-settings ID`, or `--keep-settings`). Removing them also
-  signs you out of Claude Desktop, removes VSCodium's extensions, and removes NordVPN's key
+  signs you out of Claude Desktop and removes NordVPN's key
   (setting it up again takes a new access token). A reinstall (↻) always keeps them.
 - **Settings left behind** by tweaks you've uninstalled: ⚙ Preferences → **Delete settings left
   by uninstalled tweaks…** lists them and asks before deleting (`./install.sh forget-settings`;
@@ -352,8 +351,8 @@ with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's
 In the window: **⚙ Preferences → Uninstalling Frame Tweaks**. First, what happens to the tweaks:
 
 - **Uninstall the tweaks, but keep third-party apps** (the default): the tweaks that install
-  another project's app (Homebrew, VSCodium, Claude Desktop, Claude Code, Full Keyboard,
-  clipboard-sync) stay, with what they need, so those apps and your work in them stay as they are.
+  another project's app (Homebrew, Claude Desktop, Claude Code, Full Keyboard, clipboard-sync)
+  stay, with what they need, so those apps and your work in them stay as they are.
 - **Uninstall every tweak, third-party apps too.** Homebrew itself is never removed by Frame
   Tweaks, even then: other programs may live in it, so its tweak only shows Homebrew's own
   uninstall command.
