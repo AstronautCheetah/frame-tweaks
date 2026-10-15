@@ -269,6 +269,30 @@ class Packs(unittest.TestCase):
             self.assertNotIn("hello", self.ids(), key)
             self.assertTrue(any(f"hello: {key}" in p for p in sft.load()["problems"]), key)
 
+    def test_a_link_needs_no_scripts_and_says_what_it_runs(self):
+        """link: (docs/mods.md, Linking a project): no scripts, and lib/link.sh runs in their place."""
+        good = ("link:\n  install: curl -fsSL https://example.org/get.sh | bash\n"
+                "  installed: [~/project, /opt/elsewhere]\n  run: project-app\n  readme: https://example.org\n"
+                "run: {label: Open}\n")
+        d = self.tweak("mine", "linked", extra=good)
+        for script in d.glob("*.sh"):
+            script.unlink()
+        sft.set_trusted(self.user / "mine", True)
+        c = self.ids()["linked"]
+        self.assertEqual(c["link"]["installed"], ["~/project", "/opt/elsewhere"])
+        self.assertEqual(c["run_label"], "Open")
+        self.assertEqual(sft.script(c, "status")[1:], [str(sft.LINK_HELPER), "status", "linked"])
+        self.assertIsNone(sft.script(c, "check-system"))
+        for bad, says in (("link:\n  installed: ~/p\n", "link.install is missing"),
+                          ("link:\n  install: x\n  installed: project\n", "link.installed must be a path"),
+                          ("link:\n  install: x\n  installed: ~/p\n  readme: http://x\n", "https://"),
+                          ("link: x\n", "link must be a mapping")):
+            (d / "README.md").write_text(TWEAK.format(id="linked", title="Mine", category="Mods", extra=bad))
+            sft.set_trusted(self.user / "mine", True)
+            problems = sft.load(refresh=True)["problems"]
+            self.assertTrue(any(says in pr for pr in problems), (bad, problems))
+            self.assertNotIn("linked", self.ids())
+
     def test_config_lists_only_its_own_settings_places(self):
         """config: is what an uninstall may remove (⚙ Preferences): a path below ~/.config/,
         ~/.var/app/<app> or ~/.local/state/frame-tweaks/, never one of those folders whole, nor a

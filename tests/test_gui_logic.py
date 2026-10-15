@@ -142,7 +142,7 @@ class Manifest(unittest.TestCase):
         ids = [c["id"] for c in rows]
         self.assertEqual(len(ids), len(set(ids)))
         for c in rows:
-            self.assertTrue((c["dir"] / "install.sh").exists(), c["id"])
+            self.assertIsNotNone(gui.sft.script(c, "install"), c["id"])     # (its install.sh, or a link's)
             self.assertIn(c["category"], {"Accessibility", "Convenience", "VR environment", "Privacy & security", "System", "Developer"})
 
 
@@ -380,6 +380,33 @@ class PacksPage(unittest.TestCase):
                 window.reload_tweaks.assert_called()
         gui.sft.load(refresh=True)
 
+
+
+class LinkedProject(unittest.TestCase):
+    """A linked project (manifest link:): its page says it's linked and links its README; its status
+    comes from lib/link.sh."""
+    def test_page_and_status(self):
+        import shutil
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            t = d / "packs/mine/linked"
+            t.mkdir(parents=True)
+            readme = (ROOT / "examples/hello-pack/hello-frame/README.md").read_text()
+            readme = readme.replace("\n---\n", "\nlink:\n  install: echo installing\n  installed: ~/linked-project\n"
+                                    "  readme: https://example.org/linked#readme\n---\n", 1)
+            (t / "README.md").write_text(readme)
+            with mock.patch.object(gui.sft, "USER_PACKS", d / "packs"), mock.patch.object(gui.sft, "CONF", d), \
+                    mock.patch.object(gui.sft, "TRUSTED", d / "trusted"), mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
+                gui.sft.set_trusted(d / "packs/mine", True)
+                comp = next(c for c in gui.sft.load(refresh=True)["components"] if c["id"] == "linked")
+                page = gui.Details(mock.Mock(), comp, (1, "not installed"))
+                text = " ".join(w.text() for w in page.findChildren(QLabel))
+                self.assertIn("🔗 Linked", text)
+                self.assertIn("https://example.org/linked#readme", text)
+                self.assertEqual(gui.sft.script(comp, "status")[2:], ["status", "linked"])
+        gui.sft.load(refresh=True)
 
 
 class PreferencesPage(unittest.TestCase):

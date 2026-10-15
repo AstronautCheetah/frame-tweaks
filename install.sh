@@ -83,10 +83,11 @@ start_log() {
 
 # The tweaks, from the packs (lib/sft.py registry: the official packs and the user's trusted
 # packs, each tweak described by its README.md front matter; see docs/mods.md).
-declare -A TITLE DEPS DESC DIR EXPERIMENTAL
+declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED
 IDS=()
-while IFS=$'\x1f' read -r id title deps desc dir exp; do
+while IFS=$'\x1f' read -r id title deps desc dir exp linked; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
+    LINKED[$id]=$linked
 done < <(python3 lib/sft.py registry)
 # (Frame Tweaks' own commands work without: every pack off or not trusted)
 [[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel)$ ]] ||
@@ -159,8 +160,17 @@ remove_menu_entry() {
 bold() { printf '\033[1m%s\033[0m\n' "$*"; }
 is_component() { [[ -n ${TITLE[$1]:-} ]]; }
 
+# tweak_script ID NAME [ARGS]: run the tweak's NAME.sh; for a linked project (manifest link:, no
+# scripts of its own), lib/link.sh does the same from the link's fields.
+tweak_script() {
+    local id=$1 name=$2; shift 2
+    if [[ -f ${DIR[$id]}/$name.sh ]]; then bash "${DIR[$id]}/$name.sh" "$@"
+    elif [[ -n ${LINKED[$id]:-} ]]; then bash "$REPO_DIR/lib/link.sh" "$name" "$id" "$@"
+    else return 127; fi
+}
+
 # status <id>: prints the component's one-line status; returns 0 ok, 1 missing, 2 warning (or restart)
-status_of() { bash "${DIR[$1]}/status.sh" 2>/dev/null; }
+status_of() { tweak_script "$1" status 2>/dev/null; }
 installed_ids() {           # every tweak that is installed (or half: status 0 or 2)
     local id
     for id in "${IDS[@]}"; do status_of "$id" >/dev/null; [[ $? -ne 1 ]] && echo "$id"; done
@@ -227,7 +237,7 @@ cmd_install() {
             echo "held: left as it is (./install.sh unhold $id)"; echo; continue
         fi
         stop_processes "$id"            # a reinstall must not leave the old copy running
-        if ! bash "${DIR[$id]}/install.sh" 8>&-; then failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2
+        if ! tweak_script "$id" install 8>&-; then failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2
         else record_version "$id"; fi
         echo
     done
@@ -265,7 +275,7 @@ cmd_uninstall() {
     for id in "$@"; do
         bold "── $(t 'removing %s' "$id")"; stop_processes "$id"
         # (As with install: a failure is reported, and the version record stays with what's left.)
-        if bash "${DIR[$id]}/uninstall.sh" 8>&-; then forget_version "$id"; uninstall_settings "$id" "$settings"
+        if tweak_script "$id" uninstall 8>&-; then forget_version "$id"; uninstall_settings "$id" "$settings"
         else failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2; fi
         echo
     done
@@ -423,7 +433,11 @@ cmd_reinstall_ids() {
     local id
     # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
     # dashboard patches of the tweaks that use the VR environment helper.)
-    for id in "$@"; do bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo; done
+    # (a linked project isn't removed first: its own installer, run again, updates it)
+    for id in "$@"; do
+        [[ -n ${LINKED[$id]:-} ]] && continue
+        bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo
+    done
     cmd_install "$@"
 }
 
@@ -487,8 +501,13 @@ cmd_channel() {
 }
 
 cmd_reinstall() {
-    local id installed=()
-    for id in "${IDS[@]}"; do status_of "$id" >/dev/null; [[ $? -ne 1 ]] && installed+=("$id"); done
+    local id installed=() linked=()
+    for id in "${IDS[@]}"; do
+        status_of "$id" >/dev/null; [[ $? -ne 1 ]] || continue
+        # (a linked project updates its own way: its installer isn't run with every update)
+        if [[ -n ${LINKED[$id]:-} ]]; then linked+=("$id"); else installed+=("$id"); fi
+    done
+    [[ ${#linked[@]} -gt 0 ]] && say "$(t 'Linked, so they update their own way (their row: ↻ runs their installer again): %s' "${linked[*]}")"
     [[ ${#installed[@]} -eq 0 ]] && { t 'Nothing installed yet.'; echo; return; }
     run_migrations "${installed[@]}"
     cmd_install "${installed[@]}"
@@ -701,7 +720,8 @@ case ${1:-} in
     info|hide|unhide|hide-group|unhide-group|settings|mods) python3 lib/sft.py "$@" ;;
     run)         shift; [[ $# -eq 1 ]] || { echo "$(t 'run what?')" >&2; exit 1; }; check_ids "$1"
                  [[ -n $(python3 lib/sft.py run-label "$1") ]] || { echo "$(t '%s has nothing to run' "$1")" >&2; exit 1; }
-                 setsid -f bash "${DIR[$1]}/run.sh" >/dev/null 2>&1 </dev/null ;;
+                 if [[ -f ${DIR[$1]}/run.sh ]]; then setsid -f bash "${DIR[$1]}/run.sh" >/dev/null 2>&1 </dev/null
+                 else setsid -f bash "$REPO_DIR/lib/link.sh" run "$1" >/dev/null 2>&1 </dev/null; fi ;;
     wallet)      shift; case ${1:-} in
                      lock) exec "$HOME/.local/bin/wallet-unlock" --lock ;;
                      unlock) exec "$HOME/.local/bin/wallet-unlock" ;;
