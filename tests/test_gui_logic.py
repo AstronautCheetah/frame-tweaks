@@ -436,6 +436,52 @@ class PacksPage(unittest.TestCase):
 
 
 
+class PackInventory(unittest.TestCase):
+    """Packs page: clicking a pack's row shows what's in it (each tweak's name, tags, summary, and
+    whether it's installed), again to hide it; a tweak's name opens its page, whose Back comes
+    back to Packs."""
+    def test_click_shows_its_tweaks(self):
+        from PyQt6.QtCore import QPoint
+        from PyQt6.QtTest import QTest
+        from PyQt6.QtWidgets import QApplication, QLabel
+        import packs_page
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(gui.sft, "INSTALLED", Path(d)):
+            (Path(d) / "recline").write_text("0.6.4\n")                     # (an install record)
+            window = mock.Mock()
+            page = gui.Packs(window)
+
+            def third_party():
+                return next(r for r in page.findChildren(packs_page.PackRow) if r.dir.name == "third-party")
+
+            def text():
+                return " ".join(w.text() for w in third_party().findChildren(QLabel))
+            self.assertIn("▸ 3 tweaks", text())
+            self.assertNotIn("Recline", text())
+            QTest.mouseClick(third_party(), gui.Qt.MouseButton.LeftButton, pos=QPoint(5, 5))
+            self.assertIn("▾ 3 tweaks", text())
+            self.assertIn("href='tweak:recline'>Recline</a> 🧪 🔗 — Use VR lying down", text())
+            self.assertIn("✔ installed", text().split("tweak:recline")[1])
+            self.assertNotIn("✔ installed", text().split("tweak:recline")[0])   # (the others aren't)
+            page.open_link("tweak:recline")
+            comp, = window.show_details.call_args[0]
+            self.assertEqual(comp["id"], "recline")
+            self.assertEqual(window.show_details.call_args[1]["back"], window.show_packs)
+            QTest.mouseClick(third_party(), gui.Qt.MouseButton.LeftButton, pos=QPoint(5, 5))
+            self.assertIn("▸ 3 tweaks", text())
+
+    def test_back_goes_where_the_page_came_from(self):
+        w = gui.Window.__new__(gui.Window)
+        w.close_details, back = mock.Mock(), mock.Mock()
+        w.details_back = back
+        w.leave_details()
+        w.close_details.assert_called_once()
+        back.assert_called_once()
+        w.details_back = None
+        w.leave_details()                                           # (the list: nothing more)
+        back.assert_called_once()
+
+
 class LinkedProject(unittest.TestCase):
     """A linked project (manifest link:): its page says it's linked and links its README; its status
     comes from lib/link.sh."""

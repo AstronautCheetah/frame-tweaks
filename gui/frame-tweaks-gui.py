@@ -465,7 +465,7 @@ class Details(QWidget):
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
         back = QPushButton(_("← Back"))
-        back.clicked.connect(window.close_details)
+        back.clicked.connect(window.leave_details)
         head.addWidget(back)
         icon = QLabel()
         icon.setPixmap(row_icon(comp["id"]).pixmap(56, 56))
@@ -1403,9 +1403,10 @@ class Window(QWidget):
         if not QProcess.startDetached("steamvr", ["restart"])[0]:
             self.say(_("Couldn't restart SteamVR; restart it from its menu, or reboot."))
 
-    def show_details(self, comp):
+    def show_details(self, comp, back=None):
         self.close_details()
         self.details = Details(self, comp, self.state.get(comp["id"]))
+        self.details_back = back                     # (where its Back goes: see leave_details)
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
@@ -1462,6 +1463,15 @@ class Window(QWidget):
             self.details.deleteLater()
             self.details = None
         self.stack.setCurrentIndex(0)
+        self.details_back = None
+
+    def leave_details(self):
+        """Back on a page: to where it was opened from (the Packs page, for a tweak of a pack's
+        inventory), else to the list."""
+        back = getattr(self, "details_back", None)
+        self.close_details()
+        if back is not None:
+            back()
 
     # ---- in-window messages (no dialogs: in VR they'd open in the dashboard) ----------
     def say(self, text, good=False):
@@ -1607,7 +1617,7 @@ class Window(QWidget):
 
     def go_back(self):
         if self.details is not None:
-            self.close_details()
+            self.leave_details()
         else:
             self.stack.setCurrentIndex(0)
 

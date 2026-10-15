@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+- **What's in a pack:** on the Packs page, click a pack to see its tweaks, each with its tags,
+  summary and whether it's installed; a tweak's name opens its page, and Back returns to Packs.
+
 ### Fixed
 - **Check for updates no longer says "up to date" when Frame Tweaks was updated under an open
   window** (in a terminal, say) while the window still runs the older version: it offers ↻ Restart.

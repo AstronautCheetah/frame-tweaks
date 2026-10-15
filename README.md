@@ -230,7 +230,8 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
 - "↑ … available · Update" appears when a newer Frame Tweaks release, or a newer version of an
   app a tweak installs, is out.
 - **🐞 Report a problem** saves a diagnostics report and offers the bug form, with your version
-  filled in, to attach it to; **🧩 Packs** manages extra packs of tweaks; **⚙** holds the
+  filled in, to attach it to; **🧩 Packs** manages extra packs of tweaks (click one to see what's
+  in it); **⚙** holds the
   preferences: the language, how the window behaves, what uninstalling a tweak does with its
   settings, and uninstalling Frame Tweaks itself.
 - The **Developer** group ends with **Help make Frame Tweaks better**: not a tweak, but the ways

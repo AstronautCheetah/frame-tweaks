@@ -23,6 +23,21 @@ STATE = {"official": (N_("Comes with Frame Tweaks: in use"), "#5cc77a"),
          "changed": (N_("Changed since you trusted it: not used until you trust it again"), "#e0b33a")}
 
 
+class PackRow(QWidget):
+    """A pack's row: clicking it (but its buttons or links) shows or hides its inventory."""
+
+    def __init__(self, page, d):
+        super().__init__()
+        self.page, self.dir = page, d
+        self.setObjectName("row")
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
+
+    def mouseReleaseEvent(self, ev):
+        if ev.button() == Qt.MouseButton.LeftButton:
+            self.page.toggle_inventory(self.dir)
+
+
 class Packs(QWidget):
     def __init__(self, window, follow_link=None, pool=None):
         super().__init__()
@@ -95,12 +110,13 @@ class Packs(QWidget):
         while self.rows.count():
             w = self.rows.takeAt(0).widget()
             if w:
+                w.hide()                                 # (gone now, not only once it's deleted)
                 w.deleteLater()
         data = sft.load(refresh=True)
         used = {c["id"]: c for c in data["components"]}
+        shown = self.open_packs()
         for p in data["packs"]:
-            row = QWidget()
-            row.setObjectName("row")
+            row = PackRow(self, p["dir"])
             g = QHBoxLayout(row)
             g.setContentsMargins(12, 10, 12, 10)
             text, colour = STATE[p["state"]]
@@ -108,12 +124,9 @@ class Packs(QWidget):
             origin = sft.pack_origin(p["dir"]) if sft.removable(p) else None
             updates = getattr(self.window, "pack_updates", None)            # (Check for updates found these)
             newer = isinstance(updates, set) and p["dir"] in updates
-            tweaks = []
-            for t in p["tweaks"]:
-                c = used.get(t)
-                mine = c is not None and c["pack_dir"] == p["dir"]
-                tweaks.append(html.escape(t) + (" <i>" + _("(instead of {other}'s)").format(
-                    other=html.escape(c["replaced"])) + "</i>" if mine and c["replaced"] else ""))
+            count = ngettext("%d tweak", "%d tweaks", len(p["tweaks"])) % len(p["tweaks"])
+            inventory = (f"<br><span style='color:#7fb2e5'>▾ {count}</span>" + self.inventory(p, used)
+                         if p["dir"] in shown else f"<br><span style='color:#7fb2e5'>▸ {count}</span>")
             info = QLabel(f"<b>{html.escape(p['label'])}</b>"
                           + (" <span style='color:#6b7783'>" + _("by {author}").format(author=html.escape(p["author"]))
                              + "</span>" if p["author"] else "")
@@ -125,9 +138,7 @@ class Packs(QWidget):
                           + ("<br>" + _("From {link}").format(link=(
                               f"<a style='color:#7fb2e5' href='{html.escape(origin)}'>{html.escape(origin)} ↗</a>"
                               if origin.startswith("https://") else html.escape(origin))) if origin else "")
-                          + ("<br>" + ngettext("%d tweak", "%d tweaks", len(p["tweaks"])) % len(p["tweaks"])
-                             if p["state"] in ("official", "off") else
-                             "<br>" + _("Tweaks: %s") % (", ".join(tweaks) or _("none"))))
+                          + inventory)
             info.setWordWrap(True)
             info.setTextFormat(Qt.TextFormat.RichText)
             info.linkActivated.connect(self.open_link)
@@ -269,7 +280,50 @@ class Packs(QWidget):
         self.window.reload_tweaks()
         self.build()
 
+    def open_packs(self):
+        """The packs whose inventory is shown (kept by the window: the page is built anew each time)."""
+        shown = getattr(self.window, "packs_open", None)
+        if not isinstance(shown, set):
+            shown = set()
+            try:
+                self.window.packs_open = shown
+            except AttributeError:
+                pass
+        return shown
+
+    def toggle_inventory(self, d):
+        shown = self.open_packs()
+        shown.symmetric_difference_update({d})
+        self.build()
+
+    def inventory(self, p, used):
+        """Its tweaks, one a line: emoji, name (a link to its page while it's in the list), tags,
+        summary, and whether it's installed. Read from their READMEs: nothing of the pack runs."""
+        installed = set(sft.pack_installed(p))
+        lines = []
+        for t in p["tweaks"]:
+            c, _probs = sft.read_tweak(p["dir"] / t)
+            if not c:
+                lines.append(f"{html.escape(t)} <span style='color:#e0b33a'>" + _("(its README can't be read)") + "</span>")
+                continue
+            c = sft.translated(c) if p["state"] in ("official", "off") else c
+            mine = used.get(t) is not None and used[t]["pack_dir"] == p["dir"]
+            name = html.escape(c["title"], quote=False)
+            name = f"<a style='color:#7fb2e5' href='tweak:{html.escape(t)}'>{name}</a>" if mine else f"<b>{name}</b>"
+            tags = (" 🧪" if c["experimental"] else "") + (" 🔗" if c["link"] else "") + (
+                " <span style='color:#e0b33a'>sudo</span>" if c["sudo"] else "")
+            other = used[t]["replaced"] if mine and used[t]["replaced"] else ""
+            lines.append(f"{html.escape(c['emoji'])} {name}{tags} — {html.escape(c['desc'], quote=False)}"
+                         + (" <i>" + _("(instead of {other}'s)").format(other=html.escape(other)) + "</i>" if other else "")
+                         + (" <span style='color:#5cc77a'>✔ " + _("installed") + "</span>" if t in installed else ""))
+        return "".join(f"<br>&nbsp;&nbsp;{line}" for line in lines) or "<br>&nbsp;&nbsp;" + _("none")
+
     def open_link(self, url):
+        if url.startswith("tweak:"):                     # (a tweak of the inventory: its page; Back comes here)
+            comp = next((c for c in sft.components() if c["id"] == url[len("tweak:"):]), None)
+            if comp is not None:
+                self.window.show_details(comp, back=self.window.show_packs)
+            return
         if self.follow:
             self.follow(url)
         else:
