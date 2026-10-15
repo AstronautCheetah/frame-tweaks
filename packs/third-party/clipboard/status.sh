@@ -8,4 +8,6 @@ patched=$(cat "$HOME/.local/share/frame-tweaks/src/clipboard-sync/.sft-patched" 
 [[ $patched == *keep-images* ]] || status_warn "$(t 'older build: replaces copied images with text (Reinstall fixes it)')"
 [[ $patched == *keep-source* ]] ||
     status_warn "$(t 'older build: a copied file or formatted text pastes only as text (Reinstall fixes it)')"
+[[ $patched == *keep-source:2* ]] ||
+    status_warn "$(t 'older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)')"
 status_ok "$(t '%s running' clipboard-sync)"
