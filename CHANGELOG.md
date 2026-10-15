@@ -7,6 +7,10 @@
   summary and whether it's installed; a tweak's name opens its page, and Back returns to Packs.
 
 ### Fixed
+- **Arrow Pad's Unstick also lets go of keys a keyboard still holds:** a Bluetooth keyboard that
+  lost a key's release kept it down for every app (Ctrl stuck), and Unstick's own presses couldn't
+  release another device's key. It also says when desktop mode has taken all input (tap Right Ctrl),
+  which no key release undoes.
 - **Check for updates no longer says "up to date" when Frame Tweaks was updated under an open
   window** (in a terminal, say) while the window still runs the older version: it offers ↻ Restart.
   The version in the title is the one the window runs.

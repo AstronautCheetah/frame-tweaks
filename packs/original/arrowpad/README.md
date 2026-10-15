@@ -97,7 +97,10 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   installed.
 - **Launcher** (Tools layer, the SteamOS logo) taps Super, which opens the desktop's app menu.
 - **Unstick** (Tools layer): if the desktop acts as if Shift, Ctrl, Alt or Super were still
-  held down, tap this. It presses and releases each of them.
+  held down, tap this. It presses and releases each of them, and lets go of any key a keyboard
+  or mouse still holds (a Bluetooth keyboard that lost a key's release keeps it down for every
+  app). If desktop mode has taken all input (its title says "Press right control to **ungrab**
+  input"), its message says so: tap Right Ctrl on a keyboard to give it back.
 
 Key labels follow Frame Tweaks' language: the one chosen in the installer window's ⚙, else your
 keyboard's when the pad opens; they switch when the window's language changes. They use the
