@@ -54,13 +54,18 @@ class Sessions(unittest.TestCase):
             self.assertEqual(browser.target_app("https://example.com/x"), "b.desktop")
 
     def test_session_env_takes_the_display_keys(self):
-        ref = {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0", "DISPLAY": ":2", "OTHER": "x"}
-        own = {"XDG_CURRENT_DESKTOP": "gamescope", "DISPLAY": ":0", "XDG_DESKTOP_PORTAL_DIR": "/g", "HOME": "/h"}
+        ref = {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0", "DISPLAY": ":2", "OTHER": "x",
+               "XDG_RUNTIME_DIR": "/run/user/1000/nested_plasma", "DBUS_SESSION_BUS_ADDRESS": "unix:path=/tmp/d"}
+        own = {"XDG_CURRENT_DESKTOP": "gamescope", "DISPLAY": ":0", "XDG_DESKTOP_PORTAL_DIR": "/g", "HOME": "/h",
+               "XDG_RUNTIME_DIR": "/run/user/1000", "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus"}
         with mock.patch.dict(os.environ, own, clear=True), mock.patch.object(browser, "pids", return_value=[7]), \
                 mock.patch.object(browser, "proc_cmd", return_value=["/usr/bin/plasmashell"]), \
                 mock.patch.object(browser, "proc_env", return_value=ref):
             env = browser.session_env(DESKTOP)
-        self.assertEqual(env, {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0", "DISPLAY": ":2", "HOME": "/h"})
+        # Desktop mode's own runtime folder and bus too: Firefox finds its running copy there.
+        self.assertEqual(env, {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0", "DISPLAY": ":2", "HOME": "/h",
+                               "XDG_RUNTIME_DIR": "/run/user/1000/nested_plasma",
+                               "DBUS_SESSION_BUS_ADDRESS": "unix:path=/tmp/d"})
 
 
 
