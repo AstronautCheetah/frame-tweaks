@@ -1302,6 +1302,12 @@ class Window(QWidget):
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
+    def show_tweak(self, cid):
+        """That tweak's page (--show ID); nothing for an unknown id (from a pack not in use, say)."""
+        comp = next((c for c in self.rows if c["id"] == cid), None)
+        if comp is not None:
+            self.show_details(comp)
+
     def show_contribute(self):
         self.close_details()
         self.details = ReadmePage(self, REPO / "docs/contribute.md", _("Help make Frame Tweaks better"))
@@ -1605,11 +1611,14 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("frame-tweaks")
     app.setDesktopFileName("io.github.AstronautCheetah.FrameTweaks")
-    # One window: a second launch asks the running one to come forward and exits.
+    # --show ID: open on that tweak's page (lib/needs.py: a feature that needs it, not installed).
+    args = sys.argv[1:]
+    tweak = args[args.index("--show") + 1] if "--show" in args[:-1] else ""
+    # One window: a second launch asks the running one to come forward (on that tweak) and exits.
     probe = QLocalSocket()
     probe.connectToServer(SERVER)
     if probe.waitForConnected(300):
-        probe.write(b"show")
+        probe.write(f"show {tweak}".strip().encode())
         probe.waitForBytesWritten(300)
         return
     QLocalServer.removeServer(SERVER)
@@ -1617,11 +1626,20 @@ def main():
     server.listen(SERVER)
     watch_for_hangs(Path.home() / ".local/state/frame-tweaks/logs")
     w = Window()
-    server.newConnection.connect(lambda: (server.nextPendingConnection(), w.showNormal(),
-                                          w.raise_(), w.activateWindow()))
+
+    def come_forward():
+        conn = server.nextPendingConnection()
+        w.showNormal()
+        w.raise_()
+        w.activateWindow()
+        if conn is not None:          # ("show ID": that tweak's page, once the message has arrived)
+            conn.readyRead.connect(lambda: w.show_tweak(bytes(conn.readAll()).decode(errors="replace")[5:].strip()))
+    server.newConnection.connect(come_forward)
     sys.excepthook = w.show_error
     app.aboutToQuit.connect(i18n.withdraw)          # (programs started later follow the keyboard again)
     w.show()
+    if tweak:
+        w.show_tweak(tweak)
     sys.exit(app.exec())
 
 

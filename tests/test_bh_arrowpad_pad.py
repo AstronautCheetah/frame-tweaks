@@ -109,16 +109,18 @@ class TakenBack(PadTest):
 
 class Mic(PadTest):
     def test_without_dictation_it_says_so(self):
-        """🎤 with Dictation not installed: a notification (starting the missing program raised,
-        and an error inside a button's handler aborts the pad)."""
+        """🎤 with Dictation not installed: a dialog offering to open Frame Tweaks on it (lib/needs.py;
+        starting the missing program raised, and an error inside a button's handler aborts the pad)."""
         home, started = self.tmp / "home", []
         self.pad.layer = "tools"
         r, c, _ = self.at("🎤")
         with mock.patch.object(self.ap.Path, "home", return_value=home), \
-                mock.patch.object(self.ap.subprocess, "Popen", lambda cmd, **kw: started.append(cmd)):
+                mock.patch.object(self.ap.subprocess, "Popen", lambda cmd, **kw: started.append(cmd)), \
+                mock.patch.object(self.ap.needs, "offer") as offer:
             self.pad.on_press(r, c)
             self.pad.on_release(r, c)
-            self.assertEqual(started[-1][0], "notify-send")
+            self.assertEqual(offer.call_args.args[0], "dictation")
+            self.assertEqual(started, [])
             (home / ".local/bin").mkdir(parents=True)
             (home / ".local/bin/dictate").touch()
             self.pad.on_press(r, c)

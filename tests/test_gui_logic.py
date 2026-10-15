@@ -421,5 +421,16 @@ class ContributeRow(unittest.TestCase):
             self.assertIn(part, text)
         holder.deleteLater()
 
+
+class ShowTweak(unittest.TestCase):
+    def test_opens_that_tweaks_page(self):
+        """--show ID (lib/needs.py: "Open Frame Tweaks" for a feature whose tweak isn't installed)."""
+        window = mock.Mock(rows=[{"id": "dictation"}, {"id": "speech"}])
+        gui.Window.show_tweak(window, "speech")
+        window.show_details.assert_called_once_with({"id": "speech"})
+        gui.Window.show_tweak(window, "no-such-tweak")                   # (from a pack not in use: nothing)
+        window.show_details.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()

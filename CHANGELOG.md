@@ -39,6 +39,10 @@
   language (D and C in Spanish).
 
 ### Changed
+- **A feature whose tweak isn't installed says so where you'll see it:** Arrow Pad's 🎤 and Snip
+  buttons, and Screen snip's Narrate and Copy text, show a dialog (in VR too, where a
+  notification goes unseen) saying what's missing, with **Open Frame Tweaks**, which opens on that
+  tweak's page to install it. `./install.sh gui --show ID` does the same.
 - **⚙ Preferences reads more clearly:** the uninstall options come last, below a line; what
   happens to the tweaks when Frame Tweaks is uninstalled is one choice of three (keep
   third-party apps, remove everything, or leave the tweaks); explanations no longer show

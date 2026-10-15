@@ -2,6 +2,7 @@
 # frame-tweaks: install, check, update and remove desktop-mode tweaks for the Steam Frame.
 #
 #   ./install.sh                     graphical checklist (in desktop mode), else this help
+#   ./install.sh gui [--show ID]     the installer window (--show: open on that tweak's page)
 #   ./install.sh install ID... | all install components (dependencies are added automatically)
 #   ./install.sh uninstall [--keep-settings|--remove-settings] ID... | all
 #                                    remove components; their settings are kept unless the
@@ -460,7 +461,7 @@ cmd_reinstall() {
     echo; bold "$(t 'Checking the SteamOS/SteamVR parts the tweaks rely on')"; cmd_check_system || true
 }
 
-cmd_gui() {
+cmd_gui() {               # [--show ID]: open on that tweak's page
     ensure_menu_entry
     # The full window (hide rows, live status) needs PyQt6, shared with Arrow Pad and the
     # NordVPN tray. Offer to set it up; otherwise fall back to kdialog's plain checklist.
@@ -475,8 +476,8 @@ cmd_gui() {
         # controller bindings (it keys them by program name; Arrow Pad also runs on Python).
         local sft="$qt/bin/sft-python"
         cp -u "$(readlink -f "$qt/bin/python")" "$sft" 2>/dev/null || true
-        if "$sft" -c 'import PyQt6' 2>/dev/null; then exec "$sft" gui/frame-tweaks-gui.py; fi
-        exec "$qt/bin/python" gui/frame-tweaks-gui.py
+        if "$sft" -c 'import PyQt6' 2>/dev/null; then exec "$sft" gui/frame-tweaks-gui.py "$@"; fi
+        exec "$qt/bin/python" gui/frame-tweaks-gui.py "$@"
     fi
     cmd_kdialog_gui
 }
@@ -647,7 +648,7 @@ cmd_check_system() {
 case ${1:-} in
     "")          if [[ ! -t 0 || -n ${FRAME_TWEAKS_GUI:-} ]] && command -v kdialog >/dev/null && [[ -n ${WAYLAND_DISPLAY:-${DISPLAY:-}} ]]; then cmd_gui
                  else usage; echo; cmd_status; fi ;;
-    gui)         cmd_gui ;;
+    gui)         shift; cmd_gui "$@" ;;
     # ("all" is every tweak, for the migrations as for the installs)
     install)     shift; take_lock; start_log install "$@"; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; run_migrations "$@"; cmd_install "$@" ;;
     uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;

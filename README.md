@@ -209,7 +209,7 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 
 ```text
 ./install.sh                    help, and every tweak's status
-./install.sh gui                the installer window (desktop mode)
+./install.sh gui                the installer window (desktop mode; --show ID opens on that tweak)
 ./install.sh list               every tweak and what it does
 ./install.sh install signal     install (adds what it depends on: here, the wallet)
 ./install.sh uninstall arrowpad remove one (keeps its settings, unless ⚙ Preferences say to remove them)
