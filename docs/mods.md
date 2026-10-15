@@ -281,7 +281,9 @@ run: {label: Open}                                 # the Run button's label, wit
 ```
 
 - **Install and uninstall** run in the terminal the window opens, so the project's installer can
-  ask its own questions. `lib/link.sh` does the scripts' part.
+  ask its own questions. `lib/link.sh` does the scripts' part. One thing differs from running
+  them yourself: `xdg-open vrmonitor://…`, which SteamVR's `vrpathreg` runs to tell its monitor
+  app (not on the Frame) about a new driver, does nothing instead of failing noisily.
 - **Status** is "installed" while any `installed` path exists. With `restart: steamvr` (a SteamVR
   driver, say), a path that changed after SteamVR started means it isn't loaded yet, and an
   uninstall after SteamVR started means SteamVR still runs it: either way the row offers

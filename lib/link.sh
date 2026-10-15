@@ -9,6 +9,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 action=${1:?} id=${2:?}
 field() { python3 "$REPO_DIR/lib/sft.py" link "$id" "$1"; }
 name=$(field title) || exit 1
+# (its commands run with lib/link-path first on PATH: xdg-open there drops SteamVR's vrmonitor://
+# links, which nothing on the Frame opens)
+LINK_PATH="$REPO_DIR/lib/link-path:$PATH"
 # restart: steamvr: when it was uninstalled (SteamVR runs it until it restarts)
 UNLOADED="$HOME/.local/state/frame-tweaks/unloaded/$id"
 
@@ -17,14 +20,14 @@ case $action in
         cmd=$(field install)
         say "$(t "Installing %s with its own installer (from the project, not checked by Frame Tweaks):" "$name")"
         echo "  $cmd"
-        bash -c "$cmd" || exit
+        PATH=$LINK_PATH bash -c "$cmd" || exit
         rm -f "$UNLOADED" ;;
     uninstall)
         cmd=$(field uninstall)
         [ -n "$cmd" ] || die "$(t "%s has no uninstall command here: see its README" "$name")"
         say "$(t "Uninstalling %s with its own uninstaller:" "$name")"
         echo "  $cmd"
-        bash -c "$cmd" || exit
+        PATH=$LINK_PATH bash -c "$cmd" || exit
         if [ "$(field restart)" = steamvr ]; then
             mkdir -p "${UNLOADED%/*}" && touch "$UNLOADED"
             say "$(t 'Restart SteamVR to unload it (reboot, or: %s).' "steamvr restart")"
