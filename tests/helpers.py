@@ -27,7 +27,8 @@ def sandbox_env(home, stubs=None, path=("/usr/bin", "/bin"), **extra):
     env = {"HOME": str(home), "USER": os.environ.get("USER", "u"), "LANG": "C.UTF-8",
            "PATH": os.pathsep.join(([str(stubs)] if stubs else []) + list(path)),
            "FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_LANG_RESOLVED": "en", "FRAME_TWEAKS_KEYBOARD": "0",
-           "FRAME_TWEAKS_ANNOUNCE_FILE": str(home / ".announced-language")}
+           "FRAME_TWEAKS_ANNOUNCE_FILE": str(home / ".announced-language"),
+           "FRAME_TWEAKS_PYLIB": str(ROOT / "lib")}      # (the shared modules: the repo's, not an installed copy)
     env.update({k: str(v) for k, v in extra.items()})
     return env
 

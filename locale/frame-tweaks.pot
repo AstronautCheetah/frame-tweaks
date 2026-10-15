@@ -112,7 +112,7 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1290 gui/prefs_page.py:177 packs/original/snip/frame-snip:1391
+#: gui/frame-tweaks-gui.py:1290 gui/prefs_page.py:171 packs/original/snip/frame-snip:1297
 msgid "Cancel"
 msgstr ""
 
@@ -207,7 +207,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:371 install.sh:206 lib/common.sh:447 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:371 install.sh:206 lib/common.sh:449 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -215,11 +215,11 @@ msgstr ""
 msgid "hidden"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:388 packs/original/arrowpad/arrowpad.py:183 packs/original/snip/frame-snip:717 packs/original/snip/frame-snip:722
+#: gui/frame-tweaks-gui.py:388 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:703 packs/original/snip/frame-snip:708
 msgid "Collapse"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:388 packs/original/arrowpad/arrowpad.py:183 packs/original/snip/frame-snip:748
+#: gui/frame-tweaks-gui.py:388 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:734
 msgid "Expand"
 msgstr ""
 
@@ -239,7 +239,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:422 gui/frame-tweaks-gui.py:445 gui/frame-tweaks-gui.py:678 gui/frame-tweaks-gui.py:1450 gui/packs_page.py:28 gui/prefs_page.py:51 gui/report_page.py:34 gui/wallet_page.py:259 packs/original/snip/frame-snip:535
+#: gui/frame-tweaks-gui.py:422 gui/frame-tweaks-gui.py:445 gui/frame-tweaks-gui.py:678 gui/frame-tweaks-gui.py:1450 gui/packs_page.py:28 gui/prefs_page.py:45 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:521
 msgid "← Back"
 msgstr ""
 
@@ -336,15 +336,15 @@ msgstr ""
 msgid "Working… (a download can take a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:634 packs/original/snip/frame-snip:609 install.sh:230
+#: gui/frame-tweaks-gui.py:634 packs/original/snip/frame-snip:595 install.sh:230
 msgid "Done."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:635 gui/wallet_page.py:513 gui/wallet_page.py:525 gui/wallet_page.py:539 packs/original/snip/frame-snip:610
+#: gui/frame-tweaks-gui.py:635 gui/wallet_page.py:505 gui/wallet_page.py:517 gui/wallet_page.py:531 packs/original/snip/frame-snip:596
 msgid "Didn't work: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:656 gui/prefs_page.py:254 gui/prefs_page.py:259
+#: gui/frame-tweaks-gui.py:656 gui/prefs_page.py:248 gui/prefs_page.py:253
 msgid "Saved."
 msgstr ""
 
@@ -399,7 +399,7 @@ msgstr ""
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:823 packs/original/arrowpad/arrowpad.py:182 packs/original/snip/frame-snip:702 packs/original/adb-scrcpy/phone:178
+#: gui/frame-tweaks-gui.py:823 packs/original/arrowpad/arrowpad.py:184 packs/original/snip/frame-snip:688 packs/original/adb-scrcpy/phone:178
 msgid "Close"
 msgstr ""
 
@@ -423,7 +423,7 @@ msgstr ""
 msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:992 lib/sft.py:640
+#: gui/frame-tweaks-gui.py:992 lib/sft.py:604
 msgid "Experimental: %s"
 msgstr ""
 
@@ -489,7 +489,7 @@ msgid ""
 "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, put a pack in <code>{folder}</code>, then trust it below. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 
-#: gui/packs_page.py:79 lib/sft.py:729
+#: gui/packs_page.py:79 lib/sft.py:693
 msgid "(instead of {other}'s)"
 msgstr ""
 
@@ -528,62 +528,54 @@ msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 
-#: gui/prefs_page.py:104
-msgid "Keep its settings"
-msgstr ""
-
-#: gui/prefs_page.py:104
-msgid "Remove its settings too"
-msgstr ""
-
-#: gui/prefs_page.py:115
+#: gui/prefs_page.py:109
 msgid "Delete settings left by uninstalled tweaks…"
 msgstr ""
 
-#: gui/prefs_page.py:118
+#: gui/prefs_page.py:112
 msgid "Delete them"
 msgstr ""
 
-#: gui/prefs_page.py:121 install.sh:350
+#: gui/prefs_page.py:115 install.sh:350
 msgid "Uninstalling Frame Tweaks"
 msgstr ""
 
-#: gui/prefs_page.py:122
+#: gui/prefs_page.py:116
 msgid "Uninstall every tweak first"
 msgstr ""
 
-#: gui/prefs_page.py:125
+#: gui/prefs_page.py:119
 msgid ""
 "Off: they stay installed and keep working, but nothing updates them, and removing them later takes Frame Tweaks again."
 msgstr ""
 
-#: gui/prefs_page.py:127
+#: gui/prefs_page.py:121
 msgid "Leave third-party apps installed"
 msgstr ""
 
-#: gui/prefs_page.py:131
+#: gui/prefs_page.py:125
 msgid ""
 "Their tweaks stay installed, and the apps work as before: {apps}. Off: they're uninstalled too."
 msgstr ""
 
-#: gui/prefs_page.py:135
+#: gui/prefs_page.py:129
 msgid "Delete the settings too"
 msgstr ""
 
-#: gui/prefs_page.py:138
+#: gui/prefs_page.py:132
 msgid ""
 "Frame Tweaks' own, and those of the tweaks it uninstalls or uninstalled before. Off: they stay, for an install later."
 msgstr ""
 
-#: gui/prefs_page.py:140
+#: gui/prefs_page.py:134
 msgid "Uninstall Frame Tweaks…"
 msgstr ""
 
-#: gui/prefs_page.py:144
+#: gui/prefs_page.py:138
 msgid "Uninstall"
 msgstr ""
 
-#: gui/prefs_page.py:146
+#: gui/prefs_page.py:140
 msgid "This window"
 msgstr ""
 
@@ -596,16 +588,20 @@ msgid ""
 "A light tick when the laser moves onto a button, a firmer one on a click."
 msgstr ""
 
-#: gui/prefs_page.py:199 install.sh:293 install.sh:352
+#: gui/prefs_page.py:193 install.sh:293 install.sh:352
 msgid "No settings left behind by uninstalled tweaks."
+msgstr ""
+
+#: gui/prefs_page.py:195
+msgid "Delete these settings? Their tweaks aren't installed."
 msgstr ""
 
 #: gui/prefs_page.py:20
 msgid "Controller buttons in VR"
 msgstr ""
 
-#: gui/prefs_page.py:201
-msgid "Delete these settings? Their tweaks aren't installed."
+#: gui/prefs_page.py:208
+msgid "Couldn't delete: {paths}"
 msgstr ""
 
 #: gui/prefs_page.py:21
@@ -613,42 +609,38 @@ msgid ""
 "While the laser is on this window: B goes back, Y to the top, A ticks the row it points at, the left D-pad moves through the rows. Takes effect when the window opens again."
 msgstr ""
 
-#: gui/prefs_page.py:214
-msgid "Couldn't delete: {paths}"
-msgstr ""
-
-#: gui/prefs_page.py:216
+#: gui/prefs_page.py:210
 msgid "Deleted {n} setting."
 msgid_plural "Deleted {n} settings."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/prefs_page.py:220
+#: gui/prefs_page.py:214
 msgid "Uninstall Frame Tweaks?"
 msgstr ""
 
-#: gui/prefs_page.py:222
+#: gui/prefs_page.py:216
 msgid "The tweaks stay installed."
 msgstr ""
 
-#: gui/prefs_page.py:224
+#: gui/prefs_page.py:218
 msgid ""
 "Every tweak is uninstalled first, but those of third-party apps, which stay."
 msgstr ""
 
-#: gui/prefs_page.py:226
+#: gui/prefs_page.py:220
 msgid "Every tweak is uninstalled first, third-party apps too."
 msgstr ""
 
-#: gui/prefs_page.py:227
+#: gui/prefs_page.py:221
 msgid "Settings are deleted."
 msgstr ""
 
-#: gui/prefs_page.py:227
+#: gui/prefs_page.py:221
 msgid "Settings are kept."
 msgstr ""
 
-#: gui/prefs_page.py:228
+#: gui/prefs_page.py:222
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
 msgstr ""
@@ -661,30 +653,38 @@ msgstr ""
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr ""
 
-#: gui/prefs_page.py:54
+#: gui/prefs_page.py:48
 msgid "Preferences"
 msgstr ""
 
-#: gui/prefs_page.py:68 packs/original/snip/frame-snip:549 packs/original/speech/README.md
+#: gui/prefs_page.py:62 packs/original/snip/frame-snip:535 packs/original/speech/README.md
 msgid "Language"
 msgstr ""
 
-#: gui/prefs_page.py:69
+#: gui/prefs_page.py:63
 msgid ""
 "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
 msgstr ""
 
-#: gui/prefs_page.py:78
+#: gui/prefs_page.py:72
 msgid "Follow the keyboard (now: {language})"
 msgstr ""
 
-#: gui/prefs_page.py:93
+#: gui/prefs_page.py:87
 msgid "Uninstalling a tweak"
 msgstr ""
 
-#: gui/prefs_page.py:94
+#: gui/prefs_page.py:88
 msgid ""
 "Its settings: kept, so it's set up as before if you install it again, or removed with it. Removing them also signs you out of Claude Desktop, takes VSCodium's extensions, and NordVPN's key (setting it up again takes a new access token). Data stays either way: the dictation history, adb's pairing keys, Claude Code's ~/.claude."
+msgstr ""
+
+#: gui/prefs_page.py:98
+msgid "Keep its settings"
+msgstr ""
+
+#: gui/prefs_page.py:98
+msgid "Remove its settings too"
 msgstr ""
 
 #: gui/report_page.py:37
@@ -721,243 +721,243 @@ msgstr ""
 msgid "Couldn't write the report (see {command})."
 msgstr ""
 
-#: gui/wallet_page.py:100
+#: gui/wallet_page.py:101
 msgid "{h} h {m} min"
 msgstr ""
 
-#: gui/wallet_page.py:145
+#: gui/wallet_page.py:137
 msgid "Wallet state unknown (is the Wallet tweak installed?)"
 msgstr ""
 
-#: gui/wallet_page.py:147
+#: gui/wallet_page.py:139
 msgid "🔒 Wallet locked."
 msgstr ""
 
-#: gui/wallet_page.py:148
+#: gui/wallet_page.py:140
 msgid "Protected apps ask for the password before they open."
 msgstr ""
 
-#: gui/wallet_page.py:149
+#: gui/wallet_page.py:141
 msgid "🔓 Wallet open"
 msgstr ""
 
-#: gui/wallet_page.py:151
+#: gui/wallet_page.py:143
 msgid "{wallet_open} for {time}."
 msgstr ""
 
-#: gui/wallet_page.py:158
+#: gui/wallet_page.py:150
 msgid "Locks by itself at {at} (in {time}), or sooner after {idle} unused."
 msgstr ""
 
-#: gui/wallet_page.py:161
+#: gui/wallet_page.py:153
 msgid "Locks by itself at {at} (in {time})."
 msgstr ""
 
-#: gui/wallet_page.py:163
+#: gui/wallet_page.py:155
 msgid "It stays unlocked until you lock it (auto-lock is off)."
 msgstr ""
 
-#: gui/wallet_page.py:165
+#: gui/wallet_page.py:157
 msgid "Locks by itself after {idle} unused."
 msgstr ""
 
-#: gui/wallet_page.py:167
+#: gui/wallet_page.py:159
 msgid "No automatic lock is scheduled."
 msgstr ""
 
-#: gui/wallet_page.py:173
+#: gui/wallet_page.py:165
 msgid "Never"
 msgstr ""
 
-#: gui/wallet_page.py:174 gui/wallet_page.py:100
+#: gui/wallet_page.py:166 gui/wallet_page.py:101
 msgid "{h} h"
 msgstr ""
 
-#: gui/wallet_page.py:174 gui/wallet_page.py:101
+#: gui/wallet_page.py:166 gui/wallet_page.py:102
 msgid "{m} min"
 msgstr ""
 
-#: gui/wallet_page.py:214
+#: gui/wallet_page.py:206
 msgid "System app"
 msgstr ""
 
-#: gui/wallet_page.py:214
+#: gui/wallet_page.py:206
 msgid "Your app"
 msgstr ""
 
-#: gui/wallet_page.py:262
+#: gui/wallet_page.py:254
 msgid "Wallet apps"
 msgstr ""
 
-#: gui/wallet_page.py:266
+#: gui/wallet_page.py:258
 msgid ""
 "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker to pick up, and it gets passed around to family and friends. But the apps you use in it can still hold sensitive things, like messages, notes and signed-in accounts. Here you can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the whole headset: the wallet is unlocked once when you need it, and locks again by itself."
 msgstr ""
 
-#: gui/wallet_page.py:280
+#: gui/wallet_page.py:272
 msgid "⏱ Extend timer"
 msgstr ""
 
-#: gui/wallet_page.py:290
+#: gui/wallet_page.py:282
 msgid "Auto-lock"
 msgstr ""
 
-#: gui/wallet_page.py:291
+#: gui/wallet_page.py:283
 msgid ""
 "Lock the wallet by itself: a set time after unlocking, or after 4 h unused"
 msgstr ""
 
-#: gui/wallet_page.py:294
+#: gui/wallet_page.py:286
 msgid "after unlocking:"
 msgstr ""
 
-#: gui/wallet_page.py:311
+#: gui/wallet_page.py:303
 msgid ""
 "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
 msgstr ""
 
-#: gui/wallet_page.py:346
+#: gui/wallet_page.py:338
 msgid "Start the {time} countdown to the auto-lock again, from now"
 msgstr ""
 
-#: gui/wallet_page.py:348
+#: gui/wallet_page.py:340
 msgid "🔒 Lock now"
 msgstr ""
 
-#: gui/wallet_page.py:348
+#: gui/wallet_page.py:340
 msgid "🔓 Unlock…"
 msgstr ""
 
-#: gui/wallet_page.py:349
+#: gui/wallet_page.py:341
 msgid "Asks for the wallet password"
 msgstr ""
 
-#: gui/wallet_page.py:350
+#: gui/wallet_page.py:342
 msgid "Lock the wallet now: protected apps need the password again"
 msgstr ""
 
-#: gui/wallet_page.py:377
+#: gui/wallet_page.py:369
 msgid "(default 4 h)"
 msgstr ""
 
-#: gui/wallet_page.py:400
+#: gui/wallet_page.py:392
 msgid "Waiting for the wallet password (look for the dialog)…"
 msgstr ""
 
-#: gui/wallet_page.py:412
+#: gui/wallet_page.py:404
 msgid "Protected ({n})"
 msgstr ""
 
-#: gui/wallet_page.py:414
+#: gui/wallet_page.py:406
 msgid "Electron told to use it"
 msgstr ""
 
-#: gui/wallet_page.py:414 packs/original/wallet/wallet-launcher:133
+#: gui/wallet_page.py:406 packs/original/wallet/wallet-launcher:133
 msgid "shared wallet"
 msgstr ""
 
-#: gui/wallet_page.py:416
+#: gui/wallet_page.py:408
 msgid "password only (keeps its own session)"
 msgstr ""
 
-#: gui/wallet_page.py:418
+#: gui/wallet_page.py:410
 msgid ""
 "Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here."
 msgstr ""
 
-#: gui/wallet_page.py:421
+#: gui/wallet_page.py:413
 msgid "Password first"
 msgstr ""
 
-#: gui/wallet_page.py:423
+#: gui/wallet_page.py:415
 msgid ""
 "Ask for the wallet password before the app opens (when the wallet is locked)"
 msgstr ""
 
-#: gui/wallet_page.py:425
+#: gui/wallet_page.py:417
 msgid "Remove"
 msgstr ""
 
-#: gui/wallet_page.py:426
+#: gui/wallet_page.py:418
 msgid "Open it the way it opened before (its original launcher)"
 msgstr ""
 
-#: gui/wallet_page.py:428
+#: gui/wallet_page.py:420
 msgid "{app}: removed"
 msgstr ""
 
-#: gui/wallet_page.py:432
+#: gui/wallet_page.py:424
 msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/wallet_page.py:436
+#: gui/wallet_page.py:428
 msgid "Electron app: will be told to use the wallet"
 msgstr ""
 
-#: gui/wallet_page.py:438
+#: gui/wallet_page.py:430
 msgid "Protect"
 msgstr ""
 
-#: gui/wallet_page.py:442
+#: gui/wallet_page.py:434
 msgid "{app}: protected. Reopen it if it's running."
 msgstr ""
 
-#: gui/wallet_page.py:479
+#: gui/wallet_page.py:471
 msgid "Close after"
 msgstr ""
 
-#: gui/wallet_page.py:488
+#: gui/wallet_page.py:480
 msgid "Longer"
 msgstr ""
 
-#: gui/wallet_page.py:488
+#: gui/wallet_page.py:480
 msgid "Shorter"
 msgstr ""
 
-#: gui/wallet_page.py:492
+#: gui/wallet_page.py:484
 msgid ""
 "Quit the app after this long with no keyboard, mouse or controller input"
 msgstr ""
 
-#: gui/wallet_page.py:495
+#: gui/wallet_page.py:487
 msgid "Headset off"
 msgstr ""
 
-#: gui/wallet_page.py:498
+#: gui/wallet_page.py:490
 msgid "Also quit it about 10 s after the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:499
+#: gui/wallet_page.py:491
 msgid "Set a Close after time first"
 msgstr ""
 
-#: gui/wallet_page.py:511
+#: gui/wallet_page.py:503
 msgid "{app}: closes after {time} with no activity"
 msgstr ""
 
-#: gui/wallet_page.py:512
+#: gui/wallet_page.py:504
 msgid "{app}: no timer"
 msgstr ""
 
-#: gui/wallet_page.py:523
+#: gui/wallet_page.py:515
 msgid "also closes when the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:524
+#: gui/wallet_page.py:516
 msgid "no longer closes when the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:530
+#: gui/wallet_page.py:522
 msgid "asks for the wallet password first"
 msgstr ""
 
-#: gui/wallet_page.py:531
+#: gui/wallet_page.py:523
 msgid "opens without asking for the password"
 msgstr ""
 
-#: gui/wallet_page.py:98
+#: gui/wallet_page.py:99
 msgid "under a minute"
 msgstr ""
 
@@ -1003,7 +1003,7 @@ msgid ""
 "Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
-#: install.sh:291 install.sh:362 install.sh:375 install.sh:405 lib/common.sh:404
+#: install.sh:291 install.sh:362 install.sh:375 install.sh:405 lib/common.sh:406
 msgid "removed %s"
 msgstr ""
 
@@ -1209,23 +1209,23 @@ msgstr ""
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
 msgstr ""
 
-#: lib/browser.py:245
+#: lib/browser.py:238
 msgid "Opened in {app} ({session})"
 msgstr ""
 
-#: lib/browser.py:26
+#: lib/browser.py:27
 msgid "VR"
 msgstr ""
 
-#: lib/browser.py:26
+#: lib/browser.py:27
 msgid "desktop mode"
 msgstr ""
 
-#: lib/browser.py:288
+#: lib/browser.py:281
 msgid "No default app found."
 msgstr ""
 
-#: lib/browser.py:294
+#: lib/browser.py:287
 msgid "Couldn't open it."
 msgstr ""
 
@@ -1237,63 +1237,63 @@ msgstr ""
 msgid "Fetching %s"
 msgstr ""
 
-#: lib/common.sh:287
+#: lib/common.sh:289
 msgid ""
 "The tested versions of %s don't install on this Python (%s); trying the newest."
 msgstr ""
 
-#: lib/common.sh:297
+#: lib/common.sh:299
 msgid ""
 "Setting up PyQt6 (about 280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray and the installer window)"
 msgstr ""
 
-#: lib/common.sh:303
+#: lib/common.sh:305
 msgid "Creating Python venv with jeepney"
 msgstr ""
 
-#: lib/common.sh:353
+#: lib/common.sh:355
 msgid "restored %s"
 msgstr ""
 
-#: lib/common.sh:354
+#: lib/common.sh:356
 msgid "removed %s (it didn't exist before)"
 msgstr ""
 
-#: lib/common.sh:378
+#: lib/common.sh:380
 msgid "restored KDE settings changed by %s"
 msgstr ""
 
-#: lib/common.sh:436
+#: lib/common.sh:438
 msgid "Active now."
 msgstr ""
 
-#: lib/common.sh:438
+#: lib/common.sh:440
 msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
 msgstr ""
 
-#: lib/common.sh:440
+#: lib/common.sh:442
 msgid "Active from the next SteamVR start."
 msgstr ""
 
-#: lib/common.sh:448
+#: lib/common.sh:450
 msgid "installed (active while SteamVR runs)"
 msgstr ""
 
-#: lib/common.sh:453
+#: lib/common.sh:455
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 
-#: lib/common.sh:454
+#: lib/common.sh:456
 msgid "not responding"
 msgstr ""
 
-#: lib/common.sh:475
+#: lib/common.sh:477
 msgid ""
 "release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 
-#: lib/common.sh:479
+#: lib/common.sh:481
 msgid "This can mean it was tampered with. Check %s"
 msgstr ""
 
@@ -1334,148 +1334,148 @@ msgstr ""
 msgid "Homebrew didn't end up in /home/linuxbrew."
 msgstr ""
 
-#: lib/sft.py:626
+#: lib/sft.py:590
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr ""
 
-#: lib/sft.py:635 lib/sft.py:754 lib/sft.py:777 lib/sft.py:803
+#: lib/sft.py:599 lib/sft.py:718 lib/sft.py:741 lib/sft.py:767
 msgid "unknown component: %s"
 msgstr ""
 
-#: lib/sft.py:638
+#: lib/sft.py:602
 msgid "Why: %s"
 msgstr ""
 
-#: lib/sft.py:642
+#: lib/sft.py:606
 msgid "Needs: %s"
 msgstr ""
 
-#: lib/sft.py:644
+#: lib/sft.py:608
 msgid "By: %s"
 msgstr ""
 
-#: lib/sft.py:646
+#: lib/sft.py:610
 msgid "Source: %s"
 msgstr ""
 
-#: lib/sft.py:648
+#: lib/sft.py:612
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: lib/sft.py:649
+#: lib/sft.py:613
 msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr ""
 
-#: lib/sft.py:651
+#: lib/sft.py:615
 msgid "More: %s"
 msgstr ""
 
-#: lib/sft.py:654
+#: lib/sft.py:618
 msgid "Run ({label}): {command}"
 msgstr ""
 
-#: lib/sft.py:656
+#: lib/sft.py:620
 msgid "Settings: %s"
 msgstr ""
 
-#: lib/sft.py:667
+#: lib/sft.py:631
 msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr ""
 
-#: lib/sft.py:671
+#: lib/sft.py:635
 msgid "no pack {name}; see {command}"
 msgstr ""
 
-#: lib/sft.py:678
+#: lib/sft.py:642
 msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
 msgstr ""
 
-#: lib/sft.py:681
+#: lib/sft.py:645
 msgid "in use; its tweaks are listed"
 msgstr ""
 
-#: lib/sft.py:682
+#: lib/sft.py:646
 msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:687
+#: lib/sft.py:651
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
 
-#: lib/sft.py:690
+#: lib/sft.py:654
 msgid "trusted; its tweaks are listed now"
 msgstr ""
 
-#: lib/sft.py:691
+#: lib/sft.py:655
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:716
+#: lib/sft.py:680
 msgid "official: in use"
 msgstr ""
 
-#: lib/sft.py:717
+#: lib/sft.py:681
 msgid "official: turned off ({command})"
 msgstr ""
 
-#: lib/sft.py:718
+#: lib/sft.py:682
 msgid "trusted: in use"
 msgstr ""
 
-#: lib/sft.py:719
+#: lib/sft.py:683
 msgid "not trusted: not used ({command})"
 msgstr ""
 
-#: lib/sft.py:720
+#: lib/sft.py:684
 msgid "changed since you trusted it: not used until you trust it again"
 msgstr ""
 
-#: lib/sft.py:732
+#: lib/sft.py:696
 msgid "problem: %s"
 msgstr ""
 
-#: lib/sft.py:740
+#: lib/sft.py:704
 msgid "(default)"
 msgstr ""
 
-#: lib/sft.py:754
+#: lib/sft.py:718
 msgid "%s what?"
 msgstr ""
 
-#: lib/sft.py:757
+#: lib/sft.py:721
 msgid "Hidden in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:758
+#: lib/sft.py:722
 msgid "Shown in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:765
+#: lib/sft.py:729
 msgid "unknown group {name}; groups: {groups}"
 msgstr ""
 
-#: lib/sft.py:767
+#: lib/sft.py:731
 msgid "Group {name} hidden in the installer window."
 msgstr ""
 
-#: lib/sft.py:768
+#: lib/sft.py:732
 msgid "Group {name} shown in the installer window."
 msgstr ""
 
-#: lib/sft.py:797
+#: lib/sft.py:761
 msgid "uninstall-settings takes keep or remove"
 msgstr ""
 
-#: lib/sft.py:826
+#: lib/sft.py:790
 msgid "{id} has no settings; these do: {ids}"
 msgstr ""
 
-#: lib/sft.py:834
+#: lib/sft.py:798
 msgid "expected KEY=VALUE, got %s"
 msgstr ""
 
-#: lib/sft.py:838
+#: lib/sft.py:802
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr ""
 
@@ -2007,20 +2007,20 @@ msgid ""
 "Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch:103
+#: packs/original/adb-scrcpy/phone-touch:104
 msgid ""
 "scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch:117 packs/original/adb-scrcpy/phone:54 packs/original/adb-scrcpy/phone:116 packs/original/adb-scrcpy/phone:121 packs/original/adb-scrcpy/phone:131 packs/original/adb-scrcpy/phone:178 packs/original/adb-scrcpy/phone:182 packs/original/adb-scrcpy/phone-touch.js:236 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:54 packs/original/adb-scrcpy/phone:116 packs/original/adb-scrcpy/phone:121 packs/original/adb-scrcpy/phone:131 packs/original/adb-scrcpy/phone:178 packs/original/adb-scrcpy/phone:182 packs/original/adb-scrcpy/phone-touch.js:236 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
 msgid "Android Mirror"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch:117
+#: packs/original/adb-scrcpy/phone-touch:118
 msgid "VR extras are off"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch:90
+#: packs/original/adb-scrcpy/phone-touch:91
 msgid "phone-touch: can't find scrcpy's server"
 msgstr ""
 
@@ -2274,293 +2274,293 @@ msgstr ""
 msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1149
+#: packs/original/arrowpad/arrowpad.py:1145
 msgid "Keys released"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1150
+#: packs/original/arrowpad/arrowpad.py:1146
 msgid "Shift, Ctrl, Alt and Super were pressed and let go."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1159
+#: packs/original/arrowpad/arrowpad.py:1155
 msgid "Screen snip isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1160
+#: packs/original/arrowpad/arrowpad.py:1156
 msgid "Tick 'Screen snip + Narrate' in Frame Tweaks to use this button."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1171
+#: packs/original/arrowpad/arrowpad.py:1167
 msgid "Dictation isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1172
+#: packs/original/arrowpad/arrowpad.py:1168
 msgid "Tick 'Dictation' in Frame Tweaks to use this button."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1272
+#: packs/original/arrowpad/arrowpad.py:1265
 msgid "button size multiplier (default 1.0)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1273
+#: packs/original/arrowpad/arrowpad.py:1266
 msgid "ydotoold socket path"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1274
+#: packs/original/arrowpad/arrowpad.py:1267
 msgid "close a running pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1275
+#: packs/original/arrowpad/arrowpad.py:1268
 msgid "collapse a running pad to its chevron, or expand it"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1276
+#: packs/original/arrowpad/arrowpad.py:1269
 msgid "open in desktop mode (even from the VR menu)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1277
+#: packs/original/arrowpad/arrowpad.py:1270
 msgid "open as a floating VR window"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1295
+#: packs/original/arrowpad/arrowpad.py:1288
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:132
+#: packs/original/arrowpad/arrowpad.py:134
 msgctxt "key legend"
 msgid "Bksp"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:132
+#: packs/original/arrowpad/arrowpad.py:134
 msgctxt "key legend"
 msgid "Esc"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:132
+#: packs/original/arrowpad/arrowpad.py:134
 msgctxt "key legend"
 msgid "Tab"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:133
+#: packs/original/arrowpad/arrowpad.py:135
 msgctxt "key legend"
 msgid "Del"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:133
+#: packs/original/arrowpad/arrowpad.py:135
 msgctxt "key legend"
 msgid "Enter"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:133
+#: packs/original/arrowpad/arrowpad.py:135
 msgctxt "key legend"
 msgid "Ins"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:134
+#: packs/original/arrowpad/arrowpad.py:136
 msgctxt "key legend"
 msgid "End"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:134
+#: packs/original/arrowpad/arrowpad.py:136
 msgctxt "key legend"
 msgid "Home"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:134
+#: packs/original/arrowpad/arrowpad.py:136
 msgctxt "key legend"
 msgid "PgUp"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:135
+#: packs/original/arrowpad/arrowpad.py:137
 msgctxt "key legend"
 msgid "Menu"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:135
+#: packs/original/arrowpad/arrowpad.py:137
 msgctxt "key legend"
 msgid "PgDn"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:135
+#: packs/original/arrowpad/arrowpad.py:137
 msgctxt "key legend"
 msgid "PrtSc"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:136
+#: packs/original/arrowpad/arrowpad.py:138
 msgctxt "key legend"
 msgid "Alt"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:136
+#: packs/original/arrowpad/arrowpad.py:138
 msgctxt "key legend"
 msgid "Ctrl"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:136
+#: packs/original/arrowpad/arrowpad.py:138
 msgctxt "key legend"
 msgid "Shift"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:137
+#: packs/original/arrowpad/arrowpad.py:139
 msgctxt "key legend"
 msgid "Super"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:139
+#: packs/original/arrowpad/arrowpad.py:141
 msgctxt "mouse button"
 msgid "Middle"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:139
+#: packs/original/arrowpad/arrowpad.py:141
 msgctxt "mouse button"
 msgid "Right"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:168
+#: packs/original/arrowpad/arrowpad.py:170
 msgid ""
 "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:169
+#: packs/original/arrowpad/arrowpad.py:171
 msgid "Copy (Ctrl+C)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:169
+#: packs/original/arrowpad/arrowpad.py:171
 msgid "Cut (Ctrl+X)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:169
+#: packs/original/arrowpad/arrowpad.py:171
 msgid "Paste (Ctrl+V)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:170
+#: packs/original/arrowpad/arrowpad.py:172
 msgid "F1–F12 layer (tap again to go back)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:170
+#: packs/original/arrowpad/arrowpad.py:172
 msgid "Select all (Ctrl+A)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:170
+#: packs/original/arrowpad/arrowpad.py:172
 msgid "Undo (Ctrl+Z)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:171
+#: packs/original/arrowpad/arrowpad.py:173
 msgid "Find (Ctrl+F)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:171
+#: packs/original/arrowpad/arrowpad.py:173
 msgid "Redo (Ctrl+Shift+Z)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:171
-msgid "Save (Ctrl+S)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:172
-msgid ""
-"Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
-msgstr ""
-
 #: packs/original/arrowpad/arrowpad.py:173
-msgid ""
-"Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
+msgid "Save (Ctrl+S)"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:174
 msgid ""
-"Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
+"Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:175
-msgid "Right click: your next click becomes a right click"
+msgid ""
+"Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:176
-msgid "Open the desktop's application menu (taps Super)"
+msgid ""
+"Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:177
-msgid ""
-"Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
+msgid "Right click: your next click becomes a right click"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:178
-msgid "Middle click: your next click becomes a middle click"
+msgid "Open the desktop's application menu (taps Super)"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:179
 msgid ""
-"{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
+"Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:181 packs/original/arrowpad/arrowpad.py:936
-msgid "Pin: stop accidental moves"
+#: packs/original/arrowpad/arrowpad.py:180
+msgid "Middle click: your next click becomes a middle click"
 msgstr ""
 
 #: packs/original/arrowpad/arrowpad.py:181
+msgid ""
+"{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad.py:183 packs/original/arrowpad/arrowpad.py:932
+msgid "Pin: stop accidental moves"
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad.py:183
 msgid "Settings: theme and haptics"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:182
+#: packs/original/arrowpad/arrowpad.py:184
 msgid "Larger"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:182
+#: packs/original/arrowpad/arrowpad.py:184
 msgid "Reset position"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:182
+#: packs/original/arrowpad/arrowpad.py:184
 msgid "Smaller"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:186
+#: packs/original/arrowpad/arrowpad.py:188
 msgctxt "key legend"
 msgid "Tools"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:186
+#: packs/original/arrowpad/arrowpad.py:188
 msgctxt "key legend"
 msgid "Unstick"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:187
+#: packs/original/arrowpad/arrowpad.py:189
 msgctxt "key legend"
 msgid "Launcher"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:187
+#: packs/original/arrowpad/arrowpad.py:189
 msgctxt "key legend"
 msgid "Snip"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:197
+#: packs/original/arrowpad/arrowpad.py:199
 msgid "Graphite"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:201
+#: packs/original/arrowpad/arrowpad.py:203
 msgid "Midnight"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:208
+#: packs/original/arrowpad/arrowpad.py:210
 msgid "Light"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:208
+#: packs/original/arrowpad/arrowpad.py:210
 msgid "Normal"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:208 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:218 packs/original/scroll-strips/patch.js:222 packs/original/scroll-strips/README.md
+#: packs/original/arrowpad/arrowpad.py:210 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:218 packs/original/scroll-strips/patch.js:222 packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:209 packs/original/scroll-strips/patch.js:222
+#: packs/original/arrowpad/arrowpad.py:211 packs/original/scroll-strips/patch.js:222
 msgid "Haptics"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:209
+#: packs/original/arrowpad/arrowpad.py:211
 msgid "Theme"
 msgstr ""
 
@@ -2568,19 +2568,19 @@ msgstr ""
 msgid "arrowpad: desktop mode isn't running"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:666 packs/original/arrowpad/arrowpad.py:866 packs/original/arrowpad/arrowpad.py:1149 packs/original/arrowpad/arrowpad.py:1159 packs/original/arrowpad/arrowpad.py:1171 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+#: packs/original/arrowpad/arrowpad.py:662 packs/original/arrowpad/arrowpad.py:862 packs/original/arrowpad/arrowpad.py:1145 packs/original/arrowpad/arrowpad.py:1155 packs/original/arrowpad/arrowpad.py:1167 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:666 packs/original/arrowpad/arrowpad.py:866
+#: packs/original/arrowpad/arrowpad.py:662 packs/original/arrowpad/arrowpad.py:862
 msgid "Arrow Pad (VR)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:936
+#: packs/original/arrowpad/arrowpad.py:932
 msgid "Pinned: tap to allow moving"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:982
+#: packs/original/arrowpad/arrowpad.py:978
 msgid "Done"
 msgstr ""
 
@@ -3221,240 +3221,240 @@ msgid ""
 "Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud"
 msgstr ""
 
-#: packs/original/snip/frame-snip:100
+#: packs/original/snip/frame-snip:102
 msgid "can't open the Steam session's display"
 msgstr ""
 
-#: packs/original/snip/frame-snip:108
+#: packs/original/snip/frame-snip:110
 msgid "no focused window"
 msgstr ""
 
-#: packs/original/snip/frame-snip:115
+#: packs/original/snip/frame-snip:117
 msgid "couldn't read the window's picture"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1371
+#: packs/original/snip/frame-snip:1277
 msgid "Screen snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1377
+#: packs/original/snip/frame-snip:1283
 msgid ""
 "Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1390
+#: packs/original/snip/frame-snip:1296
 msgid "Copy"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1390
+#: packs/original/snip/frame-snip:1296
 msgid "Save"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1391
+#: packs/original/snip/frame-snip:1297
 msgid "Narrate"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1545
+#: packs/original/snip/frame-snip:1451
 msgid "Couldn't copy the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1545
+#: packs/original/snip/frame-snip:1451
 msgid "Snip copied"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1545
+#: packs/original/snip/frame-snip:1451
 msgid "the desktop isn't available"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1552
+#: packs/original/snip/frame-snip:1458
 msgid "Couldn't save the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1552
+#: packs/original/snip/frame-snip:1458
 msgid "Snip saved"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1558
+#: packs/original/snip/frame-snip:1464
 msgid "Copy text needs Tesseract"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1558 packs/original/snip/frame-snip:1581
+#: packs/original/snip/frame-snip:1464 packs/original/snip/frame-snip:1487
 msgid "Reinstall Screen snip + Narrate in Frame Tweaks"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1560 packs/original/snip/frame-snip:1580
+#: packs/original/snip/frame-snip:1466 packs/original/snip/frame-snip:1486
 msgid "No text found in the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1563
+#: packs/original/snip/frame-snip:1469
 msgid "Couldn't copy the text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1563
+#: packs/original/snip/frame-snip:1469
 msgid "Text copied"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1580
+#: packs/original/snip/frame-snip:1486
 msgid "Narrate needs Tesseract"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1584
+#: packs/original/snip/frame-snip:1490
 msgid "Narrate needs Piper"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1584
+#: packs/original/snip/frame-snip:1490
 msgid "Reinstall 'Speech engine' in Frame Tweaks"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1682 packs/original/snip/frame-snip:1679
+#: packs/original/snip/frame-snip:1588 packs/original/snip/frame-snip:1585
 msgid "Couldn't take a snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1682
+#: packs/original/snip/frame-snip:1588
 msgid "empty picture"
 msgstr ""
 
-#: packs/original/snip/frame-snip:321 packs/original/snip/frame-snip.desktop:3 packs/original/snip/README.md
+#: packs/original/snip/frame-snip:323 packs/original/snip/frame-snip.desktop:3 packs/original/snip/README.md
 msgid "Screen snip + Narrate"
 msgstr ""
 
-#: packs/original/snip/frame-snip:538
+#: packs/original/snip/frame-snip:524
 msgid "Narrate's voice"
 msgstr ""
 
-#: packs/original/snip/frame-snip:543 packs/original/speech/README.md
+#: packs/original/snip/frame-snip:529 packs/original/speech/README.md
 msgid "Narrate with"
 msgstr ""
 
-#: packs/original/snip/frame-snip:545
+#: packs/original/snip/frame-snip:531
 msgid "Piper: natural"
 msgstr ""
 
-#: packs/original/snip/frame-snip:545
+#: packs/original/snip/frame-snip:531
 msgid "eSpeak NG: fast"
 msgstr ""
 
-#: packs/original/snip/frame-snip:559 packs/original/speech/README.md
+#: packs/original/snip/frame-snip:545 packs/original/speech/README.md
 msgid "Apply"
 msgstr ""
 
-#: packs/original/snip/frame-snip:560
+#: packs/original/snip/frame-snip:546
 msgid "Download the chosen language's voice if needed, and switch"
 msgstr ""
 
-#: packs/original/snip/frame-snip:589
+#: packs/original/snip/frame-snip:575
 msgid "Changes apply when you press Apply."
 msgstr ""
 
-#: packs/original/snip/frame-snip:598
+#: packs/original/snip/frame-snip:584
 msgid "Reinstall the Speech engine in Frame Tweaks first."
 msgstr ""
 
-#: packs/original/snip/frame-snip:601
+#: packs/original/snip/frame-snip:587
 msgid "Applying… (a new language downloads its voice, about 60 MB)"
 msgstr ""
 
-#: packs/original/snip/frame-snip:636 packs/original/snip/frame-snip:792
+#: packs/original/snip/frame-snip:622 packs/original/snip/frame-snip:778
 msgid "Screen snip: narrating"
 msgstr ""
 
-#: packs/original/snip/frame-snip:658 packs/original/snip/frame-snip:770
+#: packs/original/snip/frame-snip:644 packs/original/snip/frame-snip:756
 msgid "Preparing…"
 msgstr ""
 
-#: packs/original/snip/frame-snip:663 packs/original/snip/frame-snip:771 packs/original/snip/frame-snip:950
+#: packs/original/snip/frame-snip:649 packs/original/snip/frame-snip:757 packs/original/snip/frame-snip:936
 msgid "Stop"
 msgstr ""
 
-#: packs/original/snip/frame-snip:667 packs/original/snip/frame-snip:772 packs/original/snip/frame-snip:940 packs/original/snip/frame-snip:952 packs/original/snip/frame-snip:959 packs/original/snip/frame-snip:929
+#: packs/original/snip/frame-snip:653 packs/original/snip/frame-snip:758 packs/original/snip/frame-snip:926 packs/original/snip/frame-snip:938 packs/original/snip/frame-snip:945 packs/original/snip/frame-snip:915
 msgid "Pause"
 msgstr ""
 
-#: packs/original/snip/frame-snip:670 packs/original/snip/frame-snip:794 packs/original/snip/frame-snip:822
+#: packs/original/snip/frame-snip:656 packs/original/snip/frame-snip:780 packs/original/snip/frame-snip:808
 msgid "Show text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:671
+#: packs/original/snip/frame-snip:657
 msgid "Switch between the snip's image and the text read from it"
 msgstr ""
 
-#: packs/original/snip/frame-snip:681
+#: packs/original/snip/frame-snip:667
 msgid "Speed"
 msgstr ""
 
-#: packs/original/snip/frame-snip:686
+#: packs/original/snip/frame-snip:672
 msgid "Copy image"
 msgstr ""
 
-#: packs/original/snip/frame-snip:687
+#: packs/original/snip/frame-snip:673
 msgid "Put the snip's image on the clipboard"
 msgstr ""
 
-#: packs/original/snip/frame-snip:689 packs/original/snip/frame-snip:1390
+#: packs/original/snip/frame-snip:675 packs/original/snip/frame-snip:1296
 msgid "Copy text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:690
+#: packs/original/snip/frame-snip:676
 msgid "Put the text being read on the clipboard"
 msgstr ""
 
-#: packs/original/snip/frame-snip:693
+#: packs/original/snip/frame-snip:679
 msgid "Paste: read the clipboard's text instead"
 msgstr ""
 
-#: packs/original/snip/frame-snip:704
+#: packs/original/snip/frame-snip:690
 msgid "Snip something new: it's read here"
 msgstr ""
 
-#: packs/original/snip/frame-snip:707
+#: packs/original/snip/frame-snip:693
 msgid "Settings: Narrate's voice and language"
 msgstr ""
 
-#: packs/original/snip/frame-snip:775
+#: packs/original/snip/frame-snip:761
 msgid "Reading aloud: part {part} of {count}"
 msgstr ""
 
-#: packs/original/snip/frame-snip:794 packs/original/snip/frame-snip:822
+#: packs/original/snip/frame-snip:780 packs/original/snip/frame-snip:808
 msgid "Show image"
 msgstr ""
 
-#: packs/original/snip/frame-snip:833 packs/original/snip/frame-snip:837
+#: packs/original/snip/frame-snip:819 packs/original/snip/frame-snip:823
 msgid "Couldn't copy (is desktop mode running?)"
 msgstr ""
 
-#: packs/original/snip/frame-snip:833
+#: packs/original/snip/frame-snip:819
 msgid "Image copied to the clipboard."
 msgstr ""
 
-#: packs/original/snip/frame-snip:837
+#: packs/original/snip/frame-snip:823
 msgid "Text copied to the clipboard."
 msgstr ""
 
-#: packs/original/snip/frame-snip:842
+#: packs/original/snip/frame-snip:828
 msgid "The clipboard has no text."
 msgstr ""
 
-#: packs/original/snip/frame-snip:933
+#: packs/original/snip/frame-snip:919
 msgid "Finished."
 msgstr ""
 
-#: packs/original/snip/frame-snip:934 packs/original/snip/frame-snip:958
+#: packs/original/snip/frame-snip:920 packs/original/snip/frame-snip:944
 msgid "Read it again"
 msgstr ""
 
-#: packs/original/snip/frame-snip:941 packs/original/snip/frame-snip:951 packs/original/snip/frame-snip:930
+#: packs/original/snip/frame-snip:927 packs/original/snip/frame-snip:937 packs/original/snip/frame-snip:916
 msgid "Reading aloud…"
 msgstr ""
 
-#: packs/original/snip/frame-snip:944
+#: packs/original/snip/frame-snip:930
 msgid "Resume"
 msgstr ""
 
-#: packs/original/snip/frame-snip:945
+#: packs/original/snip/frame-snip:931
 msgid "Paused."
 msgstr ""
 
-#: packs/original/snip/frame-snip:957
+#: packs/original/snip/frame-snip:943
 msgid "Stopped."
 msgstr ""
 
@@ -3972,74 +3972,74 @@ msgid ""
 "Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:250
+#: packs/original/wallet/wallet-unlock:251
 msgid "Wrong password (is Caps Lock on?). Try again:"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:251
+#: packs/original/wallet/wallet-unlock:252
 msgid "Password for the KDE wallet:"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:252 packs/original/wallet/wallet-unlock:274
+#: packs/original/wallet/wallet-unlock:253 packs/original/wallet/wallet-unlock:275
 msgid "Unlock wallet"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:275
+#: packs/original/wallet/wallet-unlock:276
 msgid ""
 "A KDE Wallet password prompt is already open (look in VR, around the dashboard). While it is open the wallet ignores this dialog.\n"
 "\n"
 "Type the password there, or close that prompt and try again."
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:365
+#: packs/original/wallet/wallet-unlock:354
 msgid "wallet-unlock: couldn't schedule the auto-lock: {error}"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:461
+#: packs/original/wallet/wallet-unlock:450
 msgid "wallet-unlock: the wallet is still unlocked (locking failed)"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:467
+#: packs/original/wallet/wallet-unlock:456
 msgid "wallet locks in {hours} h"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:468
+#: packs/original/wallet/wallet-unlock:457
 msgid "auto-lock is off: the wallet stays unlocked until you lock it"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:471
+#: packs/original/wallet/wallet-unlock:460
 msgid "auto-lock off"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:472
+#: packs/original/wallet/wallet-unlock:461
 msgid "auto-lock on: the wallet locks in {hours} h"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:473
+#: packs/original/wallet/wallet-unlock:462
 msgid "auto-lock on"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:477
+#: packs/original/wallet/wallet-unlock:466
 msgid "Wallet already unlocked."
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:480
+#: packs/original/wallet/wallet-unlock:469
 msgid "Wallet unlocked; it locks again in {hours} h."
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:481
+#: packs/original/wallet/wallet-unlock:470
 msgid "Wallet unlocked (auto-lock is off)."
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:482
+#: packs/original/wallet/wallet-unlock:471
 msgid "Wallet unlocked"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:482
+#: packs/original/wallet/wallet-unlock:471
 msgid "Wallet unlocked for {hours} hours"
 msgstr ""
 
-#: packs/original/wallet/wallet-unlock:484
+#: packs/original/wallet/wallet-unlock:473
 msgid "Wallet still locked."
 msgstr ""
 

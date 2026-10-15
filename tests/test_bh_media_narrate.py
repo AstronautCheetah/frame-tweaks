@@ -29,7 +29,7 @@ def load():
     with mock.patch.object(sys, "argv", ["frame-snip", "--narrate"]), mock.patch.dict(sys.modules, {"i18n": None}), \
             mock.patch.dict(os.environ, {"HOME": HOME.name}):
         mod = load_script(SNIP, "frame_snip")
-    sys.path.remove(str(Path(HOME.name) / ".local/share/frame-tweaks/i18n"))
+    sys.path.remove(os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path(HOME.name) / ".local/share/frame-tweaks/i18n"))
     return mod
 
 
@@ -174,6 +174,7 @@ class OpenPanel(unittest.TestCase):
         # (this PyQt6 wherever it's installed: pip's --user install, as on CI, is found through HOME,
         # and the panel's is a throwaway one)
         env = {"HOME": str(home), "PATH": str(stubs), "TMPDIR": str(t), "QT_QPA_PLATFORM": "offscreen",
+               "FRAME_TWEAKS_PYLIB": str(ROOT / "lib"),
                "FRAME_TWEAKS_LANGUAGE": "en", "PYTHONPATH": str(Path(PyQt6.__file__).resolve().parent.parent)}
         out = open(t / "panel.out", "w")
         self.addCleanup(out.close)

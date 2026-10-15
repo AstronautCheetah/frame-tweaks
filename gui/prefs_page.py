@@ -3,12 +3,12 @@ whether uninstalling a tweak removes its settings, and how this window behaves. 
 choices are kept in ~/.config/frame-tweaks/installer/window.json; the language in
 ~/.config/frame-tweaks/language; the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
 import html
-import json
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 import i18n  # (lib/ is on the path)
+import ftconf
 from i18n import _, N_, ngettext
 import sft
 
@@ -26,19 +26,13 @@ OPTIONS = {
 
 
 def window_prefs():
-    try:
-        saved = json.loads(WINDOW.read_text())
-    except (OSError, ValueError):
-        saved = {}
+    saved = ftconf.read_json(WINDOW)
     return {k: saved.get(k, default) if isinstance(saved.get(k, default), bool) else default
             for k, (default, _label, _about) in OPTIONS.items()}
 
 
 def set_window_pref(key, value):
-    prefs = window_prefs()
-    prefs[key] = value
-    WINDOW.parent.mkdir(parents=True, exist_ok=True)
-    WINDOW.write_text(json.dumps(prefs, indent=1) + "\n")
+    ftconf.update_json(WINDOW, {**window_prefs(), key: value})
 
 
 class Preferences(QWidget):

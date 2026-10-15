@@ -10,6 +10,9 @@ import os
 import time
 from pathlib import Path
 
+import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sys.path)
+import vrkit  # noqa: E402
+
 VR_DIR = Path(__file__).resolve().parent / "vr"
 # Full Keyboard's feedback: hover 4 ms at 10 % / 240 Hz, press 25 ms at full strength / 150 Hz.
 HOVER = (0.004, 240, 0.10)
@@ -95,7 +98,7 @@ class Haptics:
             # Duration in microseconds (max 3999); strength comes from the length, so scale it.
             idx = device if device not in (None, self.vr_mod.k_unTrackedDeviceIndexInvalid) else self.pointing_index()
             if idx != self.vr_mod.k_unTrackedDeviceIndexInvalid:
-                self.system.triggerHapticPulse(idx, 0, int(min(3999, duration * 1e6) * max(0.25, amp)))
+                vrkit.direct_pulse(self.vr_mod, self.system, idx, min(3999, duration * 1e6) * max(0.25, amp))
         except Exception as e:
             self.failed(e)
             return
@@ -118,11 +121,7 @@ class Haptics:
 
     @staticmethod
     def note(text):
-        try:
-            with open(LOG, "a") as f:
-                f.write(f"{time.strftime('%F %T')} haptics: {text}\n")
-        except OSError:
-            pass
+        ftconf.append_log(LOG, f"haptics: {text}", stamp="%F %T")    # (it used to grow without end)
 
     def close(self):
         if self.ok:

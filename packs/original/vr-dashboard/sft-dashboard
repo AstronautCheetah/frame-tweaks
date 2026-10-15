@@ -22,7 +22,7 @@ SteamVR rewrites steamvr.vrsettings from memory, so the setting is changed only 
 import base64, hashlib, json, os, re, socket, struct, subprocess, sys, threading, time, urllib.request
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     import i18n
     from i18n import _, N_, ngettext

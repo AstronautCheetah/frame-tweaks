@@ -25,7 +25,7 @@ import tempfile
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     import i18n
     from i18n import _, N_, ngettext  # noqa: F401
@@ -47,6 +47,8 @@ else:
     os.environ["QT_QPA_PLATFORM"] = "xcb"
     os.environ["DISPLAY"] = ":0"                # the Steam session: every VR window lives here
 
+import ftconf  # noqa: E402  (settings files: lib/ftconf.py, installed beside i18n.py)
+import vrkit  # noqa: E402  (SteamVR poses, grips and haptics: lib/vrkit.py, the same)
 from PyQt6.QtCore import (QEvent, QObject, QPoint, QPointF, QProcess, QProcessEnvironment, QRect, Qt, QTimer,
                           pyqtSignal)  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
@@ -342,20 +344,14 @@ SPEEDS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
 
 def load_speed():
     try:
-        v = float(json.loads(SETTINGS.read_text()).get("speed", 1.0))
-    except (OSError, ValueError, AttributeError):
+        v = float(ftconf.read_json(SETTINGS).get("speed", 1.0))
+    except (TypeError, ValueError):
         v = 1.0
     return min(SPEEDS, key=lambda x: abs(x - v))
 
 
 def save_speed(v):
-    try:
-        conf = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
-    except (OSError, ValueError):
-        conf = {}
-    conf["speed"] = v
-    SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-    SETTINGS.write_text(json.dumps(conf) + "\n")
+    ftconf.update_json(SETTINGS, {"speed": v})
 
 
 def sentences(text):
@@ -504,23 +500,13 @@ SPEECH_CONF = HOME / ".config/frame-tweaks/speech.conf"
 
 def speech_settings():
     """(engine, language) from speech.conf, as the Speech engine reads them."""
-    conf = {"SPEECH_ENGINE": "piper", "SPEECH_LANGUAGE": "en_US"}
-    try:
-        for line in SPEECH_CONF.read_text().splitlines():
-            k, eq, v = line.partition("=")
-            if eq:
-                conf[k.strip()] = v.strip().strip("'\"")
-    except OSError:
-        pass
+    conf = {"SPEECH_ENGINE": "piper", "SPEECH_LANGUAGE": "en_US", **ftconf.read_shell(SPEECH_CONF)}
     return conf["SPEECH_ENGINE"], conf["SPEECH_LANGUAGE"]
 
 
 def save_speech_setting(key, value):
     """One KEY=value line in speech.conf (other lines kept)."""
-    lines = SPEECH_CONF.read_text().splitlines() if SPEECH_CONF.exists() else []
-    lines = [l for l in lines if not l.startswith(key + "=")] + [f"{key}={value}"]
-    SPEECH_CONF.parent.mkdir(parents=True, exist_ok=True)
-    SPEECH_CONF.write_text("\n".join(lines) + "\n")
+    ftconf.set_shell(SPEECH_CONF, {key: value})
 
 
 class SpeechConfig(QWidget):
@@ -964,56 +950,6 @@ class NarrationWindow(QWidget):
         super().closeEvent(ev)
 
 
-class GripReader:
-    """Grip squeezes, read as Arrow Pad and Full Keyboard read them (the Frame's dashboard hides
-    grip actions from apps, but the controller model's "button_grip" part still moves): its
-    rotation from the rest pose, held from 1.0°, released below 0.5°, armed after a release."""
-
-    def __init__(self, openvr):
-        self.vr = openvr
-        self.sys, self.rm, self.inp = openvr.VRSystem(), openvr.VRRenderModels(), openvr.VRInput()
-        self.hands = [{"role": role, "path": self.inp.getInputSourceHandle(f"/user/hand/{hand}"),
-                       "armed": False, "held": False, "device": None}
-                      for hand, role in (("left", openvr.TrackedControllerRole_LeftHand),
-                                         ("right", openvr.TrackedControllerRole_RightHand))]
-
-    @staticmethod
-    def _angle(a, b):
-        import math
-        tr = sum(a.m[r][c] * b.m[r][c] for r in range(3) for c in range(3))
-        return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1) / 2))))
-
-    def poll(self):
-        """[(device, held, just_pressed)] for each connected controller."""
-        vr, out = self.vr, []
-        for h in self.hands:
-            try:
-                d = self.sys.getTrackedDeviceIndexForControllerRole(h["role"])
-                if d == vr.k_unTrackedDeviceIndexInvalid or not self.sys.isTrackedDeviceConnected(d):
-                    h.update(armed=False, held=False, device=None)
-                    continue
-                if d != h["device"]:
-                    h.update(armed=False, held=False, device=d)
-                model = self.sys.getStringTrackedDeviceProperty(d, vr.Prop_RenderModelName_String)
-                mode = vr.RenderModel_ControllerMode_State_t()
-                ok1, cur = self.rm.getComponentStateForDevicePath(model, "button_grip", h["path"], mode)
-                ok2, rest = self.rm.getComponentState(model, "button_grip", vr.VRControllerState_t(), mode)
-                if not (ok1 and ok2):
-                    h.update(armed=False, held=False)
-                    continue
-                a = self._angle(rest.mTrackingToComponentRenderModel, cur.mTrackingToComponentRenderModel)
-            except Exception:
-                h.update(armed=False, held=False)
-                continue
-            if not h["armed"]:
-                h["armed"] = a < 0.5
-                continue
-            held = a >= (0.5 if h["held"] else 1.0)
-            out.append((d, held, held and not h["held"]))
-            h["held"] = held
-        return out
-
-
 class NarrationOverlay(QObject):
     """Shows a widget as its own SteamVR overlay, the way Arrow Pad does: laser clicks reach its
     buttons; a press elsewhere (its top bar, say) carries it with the controller until released.
@@ -1040,7 +976,7 @@ class NarrationOverlay(QObject):
         self.grip_drag = False                      # the current carry is a grip squeeze
         self.hovered = set()                        # controllers whose laser is on the panel
         try:
-            self.grips = GripReader(openvr)
+            self.grips = vrkit.GripReader(openvr)
         except Exception:
             self.grips = None
         self.offset = self.load_offset()            # the panel relative to the dashboard bar
@@ -1075,13 +1011,6 @@ class NarrationOverlay(QObject):
     def top_from_centre(self, c):
         h = self.height_m() / 2
         return [[c[i][0], c[i][1], c[i][2], c[i][3] + c[i][1] * h] for i in range(3)]
-
-    def matrix(self, rows):
-        m = self.vr.HmdMatrix34_t()
-        for i in range(3):
-            for j in range(4):
-                m.m[i][j] = rows[i][j]
-        return m
 
     def device_pose(self, index):
         poses = self.system.getDeviceToAbsoluteTrackingPose(self.vr.TrackingUniverseStanding, 0, index + 1)
@@ -1122,32 +1051,23 @@ class NarrationOverlay(QObject):
         a = self.anchor()
         if a is None:
             return False
-        pose = self.centre_from_top(self.compose(a, self.offset))
+        pose = self.centre_from_top(vrkit.rigid_mul(a, self.offset))
         if not getattr(self, "pose", None) or max(abs(x - y) for r1, r2 in zip(pose, self.pose) for x, y in zip(r1, r2)) > 0.0015:
             self.pose = pose
             self.apply_pose()
         return True
 
     def load_offset(self):
-        try:
-            off = json.loads(SETTINGS.read_text()).get("panel_top")
-            return off if isinstance(off, list) and len(off) == 3 else None
-        except (OSError, ValueError, AttributeError):
-            return None
+        off = ftconf.read_json(SETTINGS).get("panel_top")
+        return off if isinstance(off, list) and len(off) == 3 else None
 
     def save_offset(self):
         a = self.anchor()
         if a is None:
             return
-        self.offset = self.relative(a, self.top_from_centre(self.pose))
-        try:
-            conf = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
-        except (OSError, ValueError):
-            conf = {}
-        conf.pop("panel_offset", None)                # (older versions kept the centre)
-        conf["panel_top"] = self.offset
-        SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-        SETTINGS.write_text(json.dumps(conf) + "\n")
+        self.offset = vrkit.relative(a, self.top_from_centre(self.pose))
+        # (older versions kept the centre, as panel_offset)
+        ftconf.update_json(SETTINGS, {"panel_top": self.offset}, drop=("panel_offset",))
 
     def place_default(self):
         import math
@@ -1186,7 +1106,7 @@ class NarrationOverlay(QObject):
         self.apply_pose()
 
     def apply_pose(self, cover=True):
-        m = self.matrix(self.pose)
+        m = vrkit.hmd34(self.vr, self.pose)
         for o in (self.h, self.cover) if cover else (self.h,):
             self.ov.setOverlayTransformAbsolute(o, self.vr.TrackingUniverseStanding, m)
 
@@ -1294,7 +1214,7 @@ class NarrationOverlay(QObject):
                 else:                                          # elsewhere: carry the panel
                     ctrl = self.device_pose(dev)
                     if ctrl is not None:
-                        self.drag = (dev, self.relative(ctrl, self.pose))
+                        self.drag = (dev, vrkit.relative(ctrl, self.pose))
             elif t == vr.VREvent_MouseButtonUp:
                 pos = self.to_widget(ev.data.mouse)
                 if self.pressed is not None:
@@ -1314,37 +1234,23 @@ class NarrationOverlay(QObject):
                     if self.pressed is not None:           # a squeeze cancels a press in progress
                         self.send(self.pressed, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
                         self.pressed = None
-                    self.drag, self.grip_drag = (d, self.relative(ctrl, self.pose)), True
+                    self.drag, self.grip_drag = (d, vrkit.relative(ctrl, self.pose)), True
         if self.drag is not None and self.grip_drag and self.drag[0] not in held:
             self.drag, self.grip_drag = None, False
             self.save_offset()
         if self.drag is not None:
             ctrl = self.device_pose(self.drag[0])
             if ctrl is not None:
-                self.pose = self.compose(ctrl, self.drag[1])
+                self.pose = vrkit.rigid_mul(ctrl, self.drag[1])
                 self.apply_pose()
 
     def haptic(self, dev, kind):
         """A tick on the controller pointing at a button, a firmer one on a press (Arrow Pad's and
         Full Keyboard's feel). A direct pulse: SteamVR Input haptics need input focus."""
         try:
-            us = 1000 if kind == "hover" else 3999          # 4 ms at 10 %, 25 ms at full strength
-            if dev != self.vr.k_unTrackedDeviceIndexInvalid:
-                self.system.triggerHapticPulse(dev, 0, us)
+            vrkit.direct_pulse(self.vr, self.system, dev, vrkit.TICK[kind])
         except Exception:
             pass
-
-    @staticmethod
-    def compose(a, b):
-        return [[sum(a[i][k] * b[k][j] for k in range(3)) + (a[i][3] if j == 3 else 0) for j in range(4)] for i in range(3)]
-
-    @staticmethod
-    def relative(a, b):
-        """a^-1 * b for rigid 3x4 transforms."""
-        rt = [[a[k][i] for k in range(3)] for i in range(3)]
-        t = [-sum(rt[i][k] * a[k][3] for k in range(3)) for i in range(3)]
-        inv = [rt[i] + [t[i]] for i in range(3)]
-        return NarrationOverlay.compose(inv, b)
 
     def close(self):
         try:

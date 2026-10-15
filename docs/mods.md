@@ -228,13 +228,16 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
 | `ensure_path` | Puts `~/.local/bin` on PATH for terminals and the desktop. |
 | `install_desktop FILE` | A `.desktop` file into the app menu (`@BIN@` becomes `~/.local/bin`). |
 | `install_icon NAME` | `NAME.png` from the tweak's folder into the icon theme (Steam's VR menu finds it). |
+| `remove_desktop FILE...`, `remove_icon NAME` | Their undo, for `uninstall.sh` (including the copy kept while the wallet guards an entry). |
+| `brew_cmd NAME` | A command's path, on PATH or in Homebrew (for `status.sh`); fails without it. |
 | `remove_files PATH...` | Removes them, saying what went. |
 | `write_file DEST [MODE] < content` | Replaces a program (or any file) with new content by renaming a finished copy over it, so a running copy isn't changed under it. Use it, not `>` or `cp`, for anything in `~/.local/bin` (CI checks). |
-| `install_i18n` | Frame Tweaks' translations, for a program of the tweak that shows text (`locale/MARKING.md`). |
+| `install_i18n` | Frame Tweaks' translations, for a program of the tweak that shows text (`locale/MARKING.md`), and the Python modules programs share, in the same folder: `ftconf` (settings files, JSON or `KEY=value`, and rotating logs) and `vrkit` (SteamVR poses, grip squeezes, haptic ticks). A program puts `os.environ.get("FRAME_TWEAKS_PYLIB") or ~/.local/share/frame-tweaks/i18n` on `sys.path` (tests point it at `lib/`). |
 | `backup_file TWEAK FILE`, `restore_file TWEAK FILE` | Keep a user file as it was before you changed it, and put it back on uninstall. KDE settings: `save_kconfig` / `restore_kconfig`. |
 | `fetch_pinned ID OUT [PIN]` | Downloads the file a `pin` names and checks its SHA256 (see below). |
 | `alarm_fetch REPO NAME DEST` | An Arch Linux ARM package, signature-checked, unpacked into DEST. `runs_here BINARY` says whether it can run on SteamOS. |
 | `need_brew` | Homebrew, installed if needed (with the user's consent). |
+| `ensure_qt_venv` | PyQt6 in the venv Arrow Pad, Screen snip, the NordVPN tray and the window share (`$QT_VENV`). |
 | `ensure_openvr VENV` | The openvr bindings in that venv, on SteamVR's own arm64 library; returns 1 without SteamVR. |
 | `ensure_tweaks_venv`, `install_py_tool FILE` | A Python program in `~/.local/bin`, run on Frame Tweaks' shared venv. `pip_pinned VENV PKG` installs packages at tested versions. |
 | `install_dashboard_patch NAME FILE`, `remove_dashboard_patch NAME`, `dashboard_patch_status NAME TEXT` | A SteamVR dashboard patch (see the VR environment tweaks; depend on `vr-dashboard`). |

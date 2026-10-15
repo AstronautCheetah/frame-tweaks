@@ -22,6 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from i18n import _, N_  # noqa: E402  (translations: locale/README.md)
+import ftconf  # noqa: E402
 
 VR, DESKTOP = N_("VR"), N_("desktop mode")      # (also keys: translated where they're shown)
 # What makes a program part of one session or the other; copied from a process of the target
@@ -211,15 +212,7 @@ LOG = Path.home() / ".local/state/frame-tweaks/logs/links.log"
 
 def log(msg):
     """What happened to each link (for a bug report: it's in the diagnostics report)."""
-    try:
-        LOG.parent.mkdir(parents=True, exist_ok=True)
-        if LOG.exists() and LOG.stat().st_size > 50_000:
-            LOG.replace(LOG.with_suffix(".log.1"))
-        import time
-        with open(LOG, "a") as f:
-            f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}\n")
-    except OSError:
-        pass
+    ftconf.append_log(LOG, msg, max_bytes=50_000, stamp="%Y-%m-%d %H:%M:%S")
 
 
 def launch(url):

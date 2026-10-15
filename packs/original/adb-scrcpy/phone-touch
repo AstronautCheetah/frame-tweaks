@@ -37,7 +37,7 @@ import threading
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     from i18n import _, N_, ngettext
 except ImportError:                       # (not installed by Frame Tweaks: English)
@@ -47,6 +47,7 @@ except ImportError:                       # (not installed by Frame Tweaks: Engl
     def ngettext(singular, plural, n):
         return singular if n == 1 else plural
     N_ = _
+import ftconf  # noqa: E402  (settings files: lib/ftconf.py, installed beside i18n.py)
 
 DASHBOARD = Path.home() / ".local/share/frame-tweaks/vr-dashboard/sft-dashboard"
 BINDING = "sftPhoneTouch"
@@ -231,44 +232,19 @@ PHONE_PIDFILE = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid
 
 def read_conf(path=CONF):
     conf = dict(DEFAULTS)
-    try:
-        for line in path.read_text().splitlines():
-            k, _, v = line.partition("=")
-            if k.strip() in CHOICES and v.strip().strip("'\"") in CHOICES[k.strip()]:
-                conf[k.strip()] = v.strip().strip("'\"")
-    except OSError:
-        pass
+    conf.update({k: v for k, v in ftconf.read_shell(path).items() if k in CHOICES and v in CHOICES[k]})
     return conf
 
 
 def write_conf(changes, path=CONF):
     """Set these keys (allowed values only) in the file, keeping its other lines."""
-    changes = {k: str(v) for k, v in changes.items() if k in CHOICES and str(v) in CHOICES[k]}
-    try:
-        lines = path.read_text().splitlines()
-    except OSError:
-        lines = []
-    out, done = [], set()
-    for line in lines:
-        k = line.partition("=")[0].strip()
-        if k in changes:
-            if k not in done:
-                out.append(f"{k}={changes[k]}")
-                done.add(k)
-            continue
-        out.append(line)
-    out += [f"{k}={v}" for k, v in changes.items() if k not in done]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(out) + "\n")
+    ftconf.set_shell(path, {k: str(v) for k, v in changes.items() if k in CHOICES and str(v) in CHOICES[k]})
 
 
 def reset_conf(path=CONF):
     """Back to the defaults: remove our keys' lines, keeping the rest of the file."""
-    try:
-        lines = path.read_text().splitlines()
-    except OSError:
-        return
-    path.write_text("".join(f"{line}\n" for line in lines if line.partition("=")[0].strip() not in CHOICES))
+    if path.exists():
+        ftconf.set_shell(path, drop=CHOICES)
 
 
 def running(pidfile, name):
