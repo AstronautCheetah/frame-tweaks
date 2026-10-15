@@ -216,8 +216,10 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   `status_missing` (not installed) or `status_warn` (installed, needs attention). It must
   change nothing; the installer window runs it often. Something SteamVR loads only as it
   starts (a driver, a dashboard patch) says so with `status_restart` once installed, until
-  SteamVR has restarted: the window then offers **⟳ Restart SteamVR** on its row.
-  `vr_started_before FILE` tells whether the running SteamVR started before FILE changed.
+  SteamVR has restarted: the window then offers **⟳ Restart SteamVR** on its row. Once
+  uninstalled, `status_unload` does the same while SteamVR still runs it (the row shows it as
+  not installed). `vr_started_before FILE` tells whether the running SteamVR started before FILE
+  changed: keep a file whose time is the uninstall's for that.
 - `run.sh` (with `run:`): what the Run button does. Launch apps through their menu entry
   (`gtk-launch <id>`), so wallet gates apply.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one
@@ -280,8 +282,9 @@ run: {label: Open}                                 # the Run button's label, wit
 - **Install and uninstall** run in the terminal the window opens, so the project's installer can
   ask its own questions. `lib/link.sh` does the scripts' part.
 - **Status** is "installed" while any `installed` path exists. With `restart: steamvr` (a SteamVR
-  driver, say), a path that changed after SteamVR started means it isn't loaded yet: the row
-  offers ⟳ Restart SteamVR.
+  driver, say), a path that changed after SteamVR started means it isn't loaded yet, and an
+  uninstall after SteamVR started means SteamVR still runs it: either way the row offers
+  ⟳ Restart SteamVR until SteamVR has restarted.
 - **Updates:** ↻ runs its installer again, which updates most projects; Frame Tweaks' own updates
   leave it alone (it updates its own way).
 - The other fields are as for any tweak; `changes`, `access` and `undo` describe what the

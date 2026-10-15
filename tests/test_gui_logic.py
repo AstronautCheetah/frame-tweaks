@@ -103,10 +103,13 @@ class Status(unittest.TestCase):
         self.assertEqual(gui.status_text((2, "hmm")), ("! hmm", "warn"))
         self.assertEqual(gui.status_text((1, "")), ("· not installed", "missing"))
         self.assertEqual(gui.status_text((gui.RESTART, "load")), ("⟳ load", "warn"))
+        self.assertEqual(gui.status_text((gui.UNLOAD, "unload")), ("⟳ unload", "warn"))
 
     def test_restart_line(self):
-        """status.sh's "restart" line (exit 2) is a status of its own; other lines keep their code."""
+        """status.sh's "restart" line is a status of its own: installed (exit 2) or uninstalled (exit 1);
+        other lines keep their code."""
         for out, code, want in (("restart  Load it\n", 2, (gui.RESTART, "Load it")), ("warning  Hmm\n", 2, (2, "Hmm")),
+                                ("restart  Unload it\n", 1, (gui.UNLOAD, "Unload it")), ("missing  No\n", 1, (1, "No")),
                                 ("ok       Fine\n", 0, (0, "Fine")), ("restart  x\n", 0, (0, "x"))):
             done = subprocess.CompletedProcess([], code, stdout=out, stderr="")
             with mock.patch.object(gui.subprocess, "run", return_value=done):
@@ -150,12 +153,15 @@ class Manifest(unittest.TestCase):
 class PendingChanges(unittest.TestCase):
     def test_only_real_changes_count(self):
         w = gui.Window.__new__(gui.Window)
-        w.rows = [{"id": i} for i in ("a", "b", "c", "d")]
-        w.state = {"a": (0, "ok"), "b": (1, "missing"), "c": (2, "warning"), "d": None}   # d: still checking
+        w.rows = [{"id": i} for i in ("a", "b", "c", "d", "e")]
+        w.state = {"a": (0, "ok"), "b": (1, "missing"), "c": (2, "warning"), "d": None,   # d: still checking
+                   "e": (gui.UNLOAD, "uninstalled; restart SteamVR")}                     # e: not installed
         w.wanted = {}
         self.assertEqual(w.pending_changes(), ([], []))          # nothing ticked differently
         w.wanted = {"b": True, "a": False, "c": True, "d": True}
         self.assertEqual(w.pending_changes(), (["b"], ["a"]))    # c only has a warning: not a change
+        w.wanted = {"e": True}
+        self.assertEqual(w.pending_changes(), (["e"], []))
 
 
 class DryRun(unittest.TestCase):
@@ -197,6 +203,10 @@ class DryRun(unittest.TestCase):
         w.state[comp["id"]] = (0, "loaded")                    # restarted: Settings again
         w.update_run(comp["id"])
         self.assertEqual(w.run_buttons[comp["id"]].text(), "⚙ Settings")
+        w.state[comp["id"]] = (gui.UNLOAD, "uninstalled")      # uninstalled, SteamVR still runs it: the button again
+        w.update_run(comp["id"])
+        self.assertEqual(w.run_buttons[comp["id"]].text(), "⟳ Restart SteamVR")
+        self.assertTrue(w.run_buttons[comp["id"]].isEnabled())
 
 
 class Terminal(unittest.TestCase):

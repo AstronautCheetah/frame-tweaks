@@ -169,7 +169,8 @@ tweak_script() {
     else return 127; fi
 }
 
-# status <id>: prints the component's one-line status; returns 0 ok, 1 missing, 2 warning (or restart)
+# status <id>: prints the component's one-line status; returns 0 ok, 1 missing (or uninstalled,
+# waiting for a SteamVR restart), 2 warning (or installed, waiting for one)
 status_of() { tweak_script "$1" status 2>/dev/null; }
 installed_ids() {           # every tweak that is installed (or half: status 0 or 2)
     local id
@@ -218,7 +219,8 @@ cmd_status() {
         line=$(status_of "$id"); rc=$?
         case $rc in
             0) printf '  \033[32m✔\033[0m %-15s %s\n' "$id" "${line#ok       }" ;;
-            1) printf '  \033[2m·\033[0m %-15s \033[2m%s\033[0m\n' "$id" "$(t 'not installed')" ;;
+            1) [[ $line == "restart  "* ]] && line=${line#restart  } || line=$(t 'not installed')
+               printf '  \033[2m·\033[0m %-15s \033[2m%s\033[0m\n' "$id" "$line" ;;
             *) line=${line#warning  }; printf '  \033[33m!\033[0m %-15s %s\n' "$id" "${line#restart  }"; worst=2 ;;
         esac
     done

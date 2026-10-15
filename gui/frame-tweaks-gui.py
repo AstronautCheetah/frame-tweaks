@@ -123,11 +123,13 @@ QRadioButton::indicator:checked {{ image: url({_BOX}/radio-checked.svg); }}
 
 
 RESTART = 3      # a status code of the window's own: installed, but SteamVR loads it only as it starts
+UNLOAD = 4       # and: uninstalled, but SteamVR runs what it loaded until it restarts
+GONE = (1, UNLOAD)   # the codes of a tweak that isn't installed
 
 
 def status(cid):
-    """(code, text): 0 ok, 1 not installed, 2 needs attention, RESTART (a status.sh line "restart …",
-    exit 2) waiting for a SteamVR restart."""
+    """(code, text): 0 ok, 1 not installed, 2 needs attention; a status.sh line "restart …" is
+    RESTART (exit 2: installed) or UNLOAD (exit 1: uninstalled), waiting for a SteamVR restart."""
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
         r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
@@ -135,7 +137,9 @@ def status(cid):
         return 2, _("status check didn't finish (took over a minute)")
     out = r.stdout.strip()
     text = out.split(None, 1)[-1] if out else ""
-    return RESTART if r.returncode == 2 and out.split(None, 1)[0] == "restart" else r.returncode, text
+    if out.split(None, 1)[:1] == ["restart"] and r.returncode in (1, 2):
+        return {2: RESTART, 1: UNLOAD}[r.returncode], text
+    return r.returncode, text
 
 
 def update_check(cid):
@@ -369,8 +373,8 @@ def status_text(code_text):
     if code_text is None:
         return _("checking…"), "checking"
     code, text = code_text
-    return ({0: "✔ " + text, 2: "! " + text, RESTART: "⟳ " + text}.get(code, "· " + _("not installed")),
-            {0: "ok", 2: "warn", RESTART: "warn"}.get(code, "missing"))
+    return ({0: "✔ " + text, 2: "! " + text, RESTART: "⟳ " + text, UNLOAD: "⟳ " + text}.get(code, "· " + _("not installed")),
+            {0: "ok", 2: "warn", RESTART: "warn", UNLOAD: "warn"}.get(code, "missing"))
 
 
 class CategoryHeader(QWidget):
@@ -962,7 +966,7 @@ class Window(QWidget):
             if fut.done():
                 del self.futures[cid]
                 self.state[cid] = fut.result()
-                if self.state[cid][0] != 1 and (component(cid)["dir"] / "update-check.sh").exists():
+                if self.state[cid][0] not in GONE and (component(cid)["dir"] / "update-check.sh").exists():
                     self.update_futures[cid] = self.pool.submit(update_check, cid)
                 if cid in self.status_labels:
                     label = self.status_labels[cid]
@@ -976,7 +980,7 @@ class Window(QWidget):
                     box = self.boxes.get(cid)
                     if box is not None and cid not in self.wanted:
                         box.blockSignals(True)
-                        box.setChecked(self.state[cid][0] != 1)
+                        box.setChecked(self.state[cid][0] not in GONE)
                         box.blockSignals(False)
                 self.update_apply()
         busy = self.futures or self.latest_futures or self.update_futures or self.self_update is not None
@@ -1023,7 +1027,7 @@ class Window(QWidget):
             g.setHorizontalSpacing(14)
             box = QCheckBox()
             state = self.state.get(cid)
-            box.setChecked(self.wanted.get(cid, state[0] != 1 if state else False))
+            box.setChecked(self.wanted.get(cid, state[0] not in GONE if state else False))
             box.setToolTip(_("Tick to install, untick to remove"))
             box.toggled.connect(lambda on, c=cid: (self.wanted.__setitem__(c, on), self.update_apply()))
             self.boxes[cid] = box
@@ -1249,7 +1253,7 @@ class Window(QWidget):
         if button is None:
             return
         state = self.state.get(cid)
-        installed = state is not None and state[0] != 1
+        installed = state is not None and state[0] not in GONE
         button.setEnabled(installed)
         button.setToolTip(_("Reinstall: remove it and install it again in one step (settings kept)")
                           if installed else _("Reinstall (available once it's installed)"))
@@ -1260,15 +1264,16 @@ class Window(QWidget):
         if button is None:
             return
         state = self.state.get(cid)
-        installed = state is not None and state[0] != 1
+        installed = state is not None and state[0] not in GONE
         label = run_label(cid)
-        if state is not None and state[0] == RESTART:    # (until SteamVR has loaded it: no Run or Settings)
+        if state is not None and state[0] in (RESTART, UNLOAD):    # (until SteamVR restarts: no Run or Settings)
             button.setText(_("⟳ Restart SteamVR"))
             button.setProperty("help", "false")
             button.style().unpolish(button)
             button.style().polish(button)
             button.setEnabled(True)
-            button.setToolTip(_("SteamVR loads it only as it starts. Every open app closes."))
+            button.setToolTip(_("SteamVR loads it only as it starts. Every open app closes.") if state[0] == RESTART
+                              else _("SteamVR runs it until it restarts. Every open app closes."))
             return
         if cid in PAGES:
             button.setText(_(PAGES[cid][0]))
@@ -1303,7 +1308,7 @@ class Window(QWidget):
         self.stack.setCurrentWidget(self.details)
 
     def run(self, comp):
-        if (self.state.get(comp["id"]) or (None,))[0] == RESTART:
+        if (self.state.get(comp["id"]) or (None,))[0] in (RESTART, UNLOAD):
             self.restart_steamvr()
             return
         if comp["id"] in PAGES:
@@ -1329,9 +1334,9 @@ class Window(QWidget):
         QProcess.startDetached(cmd[0], cmd[1:])
 
     def restart_steamvr(self):
-        """⟳ Restart SteamVR, on the row of a tweak SteamVR loads only as it starts: SteamOS's own
-        restart (steamvr restart), which closes every app in the Steam session, desktop mode and
-        this window too."""
+        """⟳ Restart SteamVR, on the row of a tweak SteamVR loads only as it starts (installed, or
+        uninstalled but still running): SteamOS's own restart (steamvr restart), which closes every
+        app in the Steam session, desktop mode and this window too."""
         self.confirm(_("Restart SteamVR?") + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
                      + html.escape(_("Every open app closes, desktop mode and this window too: save your work "
                                      "first. SteamVR then starts again by itself."), quote=False) + "</span>",
@@ -1440,9 +1445,9 @@ class Window(QWidget):
         """(install, remove): ticked but not installed, unticked but installed. Rows whose status
         isn't known yet don't count; a tweak with a warning is reinstalled with its ↻ button."""
         known = [c["id"] for c in self.rows if self.state.get(c["id"]) is not None]
-        want = {cid: self.wanted.get(cid, self.state[cid][0] != 1) for cid in known}
-        return ([cid for cid, on in want.items() if on and self.state[cid][0] == 1],
-                [cid for cid, on in want.items() if not on and self.state[cid][0] != 1])
+        want = {cid: self.wanted.get(cid, self.state[cid][0] not in GONE) for cid in known}
+        return ([cid for cid, on in want.items() if on and self.state[cid][0] in GONE],
+                [cid for cid, on in want.items() if not on and self.state[cid][0] not in GONE])
 
     def update_apply(self):
         """Apply changes is dimmed while there's nothing to change."""

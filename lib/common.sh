@@ -404,6 +404,9 @@ status_warn()    { printf 'warning  %s\n' "$*"; exit 2; }
 # Installed, but SteamVR loads it only as it starts: needs attention (2), and the installer window
 # offers to restart SteamVR on its row.
 status_restart() { printf 'restart  %s\n' "$*"; exit 2; }
+# Uninstalled, but SteamVR keeps running what it loaded as it started: not installed (1), and the
+# installer window still offers to restart SteamVR on its row.
+status_unload()  { printf 'restart  %s\n' "$*"; exit 1; }
 # vr_started_before FILE: SteamVR's server runs and started before FILE last changed, so what was
 # installed then (a driver, a setting it reads as it starts) isn't loaded yet.
 vr_started_before() {
