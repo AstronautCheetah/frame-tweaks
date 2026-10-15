@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.5 (2026-10-15)
 
 ### Changed
 - **The Frame Tweaks window:** scroll bars twice as wide (easier to grab with a laser), with a
