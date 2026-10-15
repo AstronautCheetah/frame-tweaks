@@ -330,7 +330,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1683 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1683 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr ""
 
@@ -452,7 +452,7 @@ msgstr ""
 msgid "Done."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:505 gui/wallet_page.py:517 gui/wallet_page.py:531 packs/original/snip/frame-snip:605
+#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:516 gui/wallet_page.py:528 gui/wallet_page.py:542 packs/original/snip/frame-snip:605
 msgid "Didn't work: %s"
 msgstr ""
 
@@ -949,244 +949,248 @@ msgstr ""
 msgid "Couldn't write the report (see {command})."
 msgstr ""
 
-#: gui/wallet_page.py:101
+#: gui/wallet_page.py:108
+msgid "under a minute"
+msgstr ""
+
+#: gui/wallet_page.py:110
 msgid "{h} h {m} min"
 msgstr ""
 
-#: gui/wallet_page.py:137
+#: gui/wallet_page.py:146
 msgid "Wallet state unknown (is the Wallet tweak installed?)"
 msgstr ""
 
-#: gui/wallet_page.py:139
+#: gui/wallet_page.py:148
 msgid "🔒 Wallet locked."
 msgstr ""
 
-#: gui/wallet_page.py:140
+#: gui/wallet_page.py:149
 msgid "Protected apps ask for the password before they open."
 msgstr ""
 
-#: gui/wallet_page.py:141
+#: gui/wallet_page.py:150
 msgid "🔓 Wallet open"
 msgstr ""
 
-#: gui/wallet_page.py:143
+#: gui/wallet_page.py:152
 msgid "{wallet_open} for {time}."
 msgstr ""
 
-#: gui/wallet_page.py:150
+#: gui/wallet_page.py:159
 msgid "Locks by itself at {at} (in {time}), or sooner after {idle} unused."
 msgstr ""
 
-#: gui/wallet_page.py:153
+#: gui/wallet_page.py:162
 msgid "Locks by itself at {at} (in {time})."
 msgstr ""
 
-#: gui/wallet_page.py:155
+#: gui/wallet_page.py:164
 msgid "It stays unlocked until you lock it (auto-lock is off)."
 msgstr ""
 
-#: gui/wallet_page.py:157
+#: gui/wallet_page.py:166
 msgid "Locks by itself after {idle} unused."
 msgstr ""
 
-#: gui/wallet_page.py:159
+#: gui/wallet_page.py:168
 msgid "No automatic lock is scheduled."
 msgstr ""
 
-#: gui/wallet_page.py:165
+#: gui/wallet_page.py:174
 msgid "Never"
 msgstr ""
 
-#: gui/wallet_page.py:166 gui/wallet_page.py:101
+#: gui/wallet_page.py:175 gui/wallet_page.py:110
 msgid "{h} h"
 msgstr ""
 
-#: gui/wallet_page.py:166 gui/wallet_page.py:102
+#: gui/wallet_page.py:175 gui/wallet_page.py:111
 msgid "{m} min"
 msgstr ""
 
-#: gui/wallet_page.py:206
+#: gui/wallet_page.py:215
 msgid "System app"
 msgstr ""
 
-#: gui/wallet_page.py:206
+#: gui/wallet_page.py:215
 msgid "Your app"
 msgstr ""
 
-#: gui/wallet_page.py:254
+#: gui/wallet_page.py:229
+msgid "Frame Tweaks app"
+msgstr ""
+
+#: gui/wallet_page.py:265
 msgid "Wallet apps"
 msgstr ""
 
-#: gui/wallet_page.py:258
+#: gui/wallet_page.py:269
 msgid ""
 "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker to pick up, and it gets passed around to family and friends. But the apps you use in it can still hold sensitive things, like messages, notes and signed-in accounts. Here you can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the whole headset: the wallet is unlocked once when you need it, and locks again by itself."
 msgstr ""
 
-#: gui/wallet_page.py:272
+#: gui/wallet_page.py:283
 msgid "⏱ Extend timer"
 msgstr ""
 
-#: gui/wallet_page.py:282
+#: gui/wallet_page.py:293
 msgid "Auto-lock"
 msgstr ""
 
-#: gui/wallet_page.py:283
+#: gui/wallet_page.py:294
 msgid ""
 "Lock the wallet by itself: a set time after unlocking, or after 4 h unused"
 msgstr ""
 
-#: gui/wallet_page.py:286
+#: gui/wallet_page.py:297
 msgid "after unlocking:"
 msgstr ""
 
-#: gui/wallet_page.py:303
+#: gui/wallet_page.py:314
 msgid ""
 "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
 msgstr ""
 
-#: gui/wallet_page.py:338
+#: gui/wallet_page.py:349
 msgid "Start the {time} countdown to the auto-lock again, from now"
 msgstr ""
 
-#: gui/wallet_page.py:340
+#: gui/wallet_page.py:351
 msgid "🔒 Lock now"
 msgstr ""
 
-#: gui/wallet_page.py:340
+#: gui/wallet_page.py:351
 msgid "🔓 Unlock…"
 msgstr ""
 
-#: gui/wallet_page.py:341
+#: gui/wallet_page.py:352
 msgid "Asks for the wallet password"
 msgstr ""
 
-#: gui/wallet_page.py:342
+#: gui/wallet_page.py:353
 msgid "Lock the wallet now: protected apps need the password again"
 msgstr ""
 
-#: gui/wallet_page.py:369
+#: gui/wallet_page.py:380
 msgid "(default 4 h)"
 msgstr ""
 
-#: gui/wallet_page.py:392
+#: gui/wallet_page.py:403
 msgid "Waiting for the wallet password (look for the dialog)…"
 msgstr ""
 
-#: gui/wallet_page.py:404
+#: gui/wallet_page.py:415
 msgid "Protected ({n})"
 msgstr ""
 
-#: gui/wallet_page.py:406
+#: gui/wallet_page.py:417
 msgid "Electron told to use it"
 msgstr ""
 
-#: gui/wallet_page.py:406 packs/original/wallet/wallet-launcher:133
+#: gui/wallet_page.py:417 packs/original/wallet/wallet-launcher:133
 msgid "shared wallet"
 msgstr ""
 
-#: gui/wallet_page.py:408
+#: gui/wallet_page.py:419
 msgid "password only (keeps its own session)"
 msgstr ""
 
-#: gui/wallet_page.py:410
+#: gui/wallet_page.py:421
 msgid ""
 "Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here."
 msgstr ""
 
-#: gui/wallet_page.py:413
+#: gui/wallet_page.py:424
 msgid "Password first"
 msgstr ""
 
-#: gui/wallet_page.py:415
+#: gui/wallet_page.py:426
 msgid ""
 "Ask for the wallet password before the app opens (when the wallet is locked)"
 msgstr ""
 
-#: gui/wallet_page.py:417
+#: gui/wallet_page.py:428
 msgid "Remove"
 msgstr ""
 
-#: gui/wallet_page.py:418
+#: gui/wallet_page.py:429
 msgid "Open it the way it opened before (its original launcher)"
 msgstr ""
 
-#: gui/wallet_page.py:420
+#: gui/wallet_page.py:431
 msgid "{app}: removed"
 msgstr ""
 
-#: gui/wallet_page.py:424
+#: gui/wallet_page.py:435
 msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/wallet_page.py:428
+#: gui/wallet_page.py:439
 msgid "Electron app: will be told to use the wallet"
 msgstr ""
 
-#: gui/wallet_page.py:430
+#: gui/wallet_page.py:441
 msgid "Protect"
 msgstr ""
 
-#: gui/wallet_page.py:434
+#: gui/wallet_page.py:445
 msgid "{app}: protected. Reopen it if it's running."
 msgstr ""
 
-#: gui/wallet_page.py:471
+#: gui/wallet_page.py:482
 msgid "Close after"
 msgstr ""
 
-#: gui/wallet_page.py:480
+#: gui/wallet_page.py:491
 msgid "Longer"
 msgstr ""
 
-#: gui/wallet_page.py:480
+#: gui/wallet_page.py:491
 msgid "Shorter"
 msgstr ""
 
-#: gui/wallet_page.py:484
+#: gui/wallet_page.py:495
 msgid ""
 "Quit the app after this long with no keyboard, mouse or controller input"
 msgstr ""
 
-#: gui/wallet_page.py:487
+#: gui/wallet_page.py:498
 msgid "Headset off"
 msgstr ""
 
-#: gui/wallet_page.py:490
+#: gui/wallet_page.py:501
 msgid "Also quit it about 10 s after the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:491
+#: gui/wallet_page.py:502
 msgid "Set a Close after time first"
 msgstr ""
 
-#: gui/wallet_page.py:503
+#: gui/wallet_page.py:514
 msgid "{app}: closes after {time} with no activity"
 msgstr ""
 
-#: gui/wallet_page.py:504
+#: gui/wallet_page.py:515
 msgid "{app}: no timer"
 msgstr ""
 
-#: gui/wallet_page.py:515
+#: gui/wallet_page.py:526
 msgid "also closes when the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:516
+#: gui/wallet_page.py:527
 msgid "no longer closes when the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:522
+#: gui/wallet_page.py:533
 msgid "asks for the wallet password first"
 msgstr ""
 
-#: gui/wallet_page.py:523
+#: gui/wallet_page.py:534
 msgid "opens without asking for the password"
-msgstr ""
-
-#: gui/wallet_page.py:99
-msgid "under a minute"
 msgstr ""
 
 #: install.sh:209

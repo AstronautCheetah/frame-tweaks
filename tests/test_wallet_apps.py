@@ -46,6 +46,7 @@ class Lists(unittest.TestCase):
         entry(self.sys, "hidden-helper", "helper", NoDisplay="true")
         entry(self.own, "Some Game", "steam steam://rungameid/123")
         entry(self.own, "mytool", "/opt/mytool/run")
+        entry(self.own, "arrowpad", "/home/u/.local/bin/arrowpad --desktop")        # (Frame Tweaks' own)
         entry(self.own, "org.editor", "/home/u/.local/bin/frame-outer-bus flatpak run org.editor", **{"X-FrameTweaks-Wallet": "true"})
         self.patch = mock.patch.multiple(wp, LAUNCHERS=self.own, FLATPAK_APPS=[self.flat],
                                          SYSTEM_APPS=[self.sys], FLATPAK_ROOTS=[self.roots])
@@ -60,7 +61,8 @@ class Lists(unittest.TestCase):
         self.assertTrue(protected[0]["shared"])
         offered = {a["id"]: a["kind"] for a in wp.wallet_candidates({"org.editor"})}
         # Steam shortcuts, hidden entries and protected apps aren't offered.
-        self.assertEqual(offered, {"org.notes": "Flatpak", "org.kde.dolphin": "System app", "mytool": "Your app"})
+        self.assertEqual(offered, {"org.notes": "Flatpak", "org.kde.dolphin": "System app", "mytool": "Your app",
+                                   "arrowpad": "Frame Tweaks app"})
 
     def test_electron_flatpak_detected(self):
         apps = {a["id"]: a for a in wp.wallet_candidates(set())}

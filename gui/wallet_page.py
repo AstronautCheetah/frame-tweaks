@@ -42,6 +42,15 @@ def wallet_owners():
     return {app: c["title"] for c in components() for app in c["wallet_apps"]}   # (wallet_apps: in manifests)
 
 
+FRAME_TWEAKS_ENTRY = "io.github.AstronautCheetah.FrameTweaks"      # (the window's own: install.sh ensure_menu_entry)
+
+
+def frame_tweaks_entries():
+    """Menu entries of Frame Tweaks' own apps: the ones its official packs' tweaks install (their
+    .desktop files: Arrow Pad, Dictation, Screen snip, ...), and the window's."""
+    return {FRAME_TWEAKS_ENTRY} | {f.stem for c in components() if c.get("official") for f in c["dir"].glob("*.desktop")}
+
+
 def desktop_entry(path):
     """Keys of a .desktop file's [Desktop Entry] group (unlocalised)."""
     keys, section = {}, None
@@ -201,7 +210,7 @@ def is_electron(app):
 def wallet_candidates(protected_ids):
     """Every installed app shown in menus (Flatpak, your own launchers, the system's) that isn't
     protected yet. An app with entries in several places counts once (the one menus use)."""
-    seen = {}
+    seen, ours = {}, frame_tweaks_entries()
     # (kind: also a key; translated where it's shown)
     for kind, dirs in ((N_("Your app"), [LAUNCHERS]), ("Flatpak", FLATPAK_APPS), (N_("System app"), SYSTEM_APPS)):
         for d in dirs:
@@ -216,6 +225,8 @@ def wallet_candidates(protected_ids):
                     continue
                 if kind == "Your app" and any((d2 / f.name).exists() for d2 in FLATPAK_APPS):
                     kind_here = "Flatpak"    # your override of a Flatpak's entry
+                elif kind == "Your app" and f.stem in ours:
+                    kind_here = N_("Frame Tweaks app")
                 else:
                     kind_here = kind
                 seen[f.stem] = {"id": f.stem, "name": e.get("Name", f.stem), "icon": e.get("Icon", ""),
