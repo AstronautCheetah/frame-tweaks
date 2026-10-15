@@ -4780,20 +4780,23 @@ msgstr "servicio %s no está en ejecución (%s)"
 msgid "%s socket missing"
 msgstr "falta el socket de %s"
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:13
+#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
 msgid "%s running"
 msgstr "%s en ejecución"
 
+# needs review
 #: packs/third-party/clipboard/README.md
 msgid ""
-"Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source."
+"Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes."
 msgstr ""
-"Copia texto en una ventana flotante de RV y pégalo en el escritorio, y al revés. Ejecuta [clipboard-sync](https://github.com/dnut/clipboard-sync), compilado desde su código fuente."
+"Copia en una ventana flotante de RV y pega en el escritorio, y al revés: texto, archivos e imágenes, y el texto que seleccionas para pegar con clic central. Ejecuta [clipboard-sync](https://github.com/dnut/clipboard-sync), compilado desde su código fuente, con los cambios de Frame Tweaks."
 
+# needs review
 #: packs/third-party/clipboard/README.md
-msgid "One clipboard for desktop mode and VR floating windows"
+msgid ""
+"One clipboard for desktop mode and VR floating windows, files and pictures included"
 msgstr ""
-"Un solo portapapeles para el modo escritorio y las ventanas flotantes de RV"
+"Un solo portapapeles para el modo escritorio y las ventanas flotantes de RV, archivos e imágenes incluidos"
 
 #: packs/third-party/clipboard/README.md
 msgid ""
@@ -4857,16 +4860,9 @@ msgstr "Copia en RV, pega en el escritorio, y al revés."
 # needs review
 #: packs/third-party/clipboard/status.sh:10
 msgid ""
-"older build: a copied file or formatted text pastes only as text (Reinstall fixes it)"
+"older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
 msgstr ""
-"compilación anterior: un archivo o un texto con formato copiado se pega solo como texto (Reinstalar lo corrige)"
-
-# needs review
-#: packs/third-party/clipboard/status.sh:12
-msgid ""
-"older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)"
-msgstr ""
-"compilación anterior: las contraseñas copiadas se quedan en la otra sesión, y sobrescribe el portapapeles cada 10 minutos (Reinstalar lo corrige)"
+"compilación anterior: los archivos y las imágenes se quedan en su sesión, y un archivo copiado puede pegarse solo como texto (Reinstalar lo corrige)"
 
 #: packs/third-party/clipboard/status.sh:4
 msgid "installed but not running (starts with desktop mode)"
@@ -5231,3 +5227,24 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ msgid "The phone mirror's stream and joystick scrolling."
 #~ msgstr ""
 #~ "La transmisión del espejo del teléfono y el desplazamiento con joystick."
+
+#~ msgid ""
+#~ "Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source."
+#~ msgstr ""
+#~ "Copia texto en una ventana flotante de RV y pégalo en el escritorio, y al revés. Ejecuta [clipboard-sync](https://github.com/dnut/clipboard-sync), compilado desde su código fuente."
+
+#~ msgid "One clipboard for desktop mode and VR floating windows"
+#~ msgstr ""
+#~ "Un solo portapapeles para el modo escritorio y las ventanas flotantes de RV"
+
+#~ # needs review
+#~ msgid ""
+#~ "older build: a copied file or formatted text pastes only as text (Reinstall fixes it)"
+#~ msgstr ""
+#~ "compilación anterior: un archivo o un texto con formato copiado se pega solo como texto (Reinstalar lo corrige)"
+
+#~ # needs review
+#~ msgid ""
+#~ "older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)"
+#~ msgstr ""
+#~ "compilación anterior: las contraseñas copiadas se quedan en la otra sesión, y sobrescribe el portapapeles cada 10 minutos (Reinstalar lo corrige)"

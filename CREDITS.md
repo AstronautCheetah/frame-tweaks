@@ -25,6 +25,7 @@ FIRST*, which credits **ThrillSeeker**.
 | Software | License | Used by |
 |---|---|---|
 | [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) | MIT or Apache-2.0 | clipboard (built from upstream source, not bundled; approach from steam-frame-nix's `clipboardSync`); its README is reproduced on [clipboard](packs/third-party/clipboard/)'s page, under its licence |
+| [quininer/x11-clipboard](https://github.com/quininer/x11-clipboard) | MIT | The X11 clipboard owner in [Shared clipboard](packs/third-party/clipboard/)'s `sync-sessions.patch` is adapted from its `run.rs` (0.5.3), to offer several formats at once; credited in the code. |
 | [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and OpenAI's Whisper models | MIT | dictation (via Homebrew; models from Hugging Face) |
 | [ydotool](https://github.com/ReimuNotMoe/ydotool) | AGPL-3.0 | dictation, Arrow Pad (Arch Linux ARM package, not modified) |
 | [scrcpy](https://github.com/Genymobile/scrcpy) | Apache-2.0 | Android Mirror (Homebrew); phone-touch speaks its server's control protocol |

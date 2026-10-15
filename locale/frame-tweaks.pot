@@ -4423,17 +4423,18 @@ msgstr ""
 msgid "%s socket missing"
 msgstr ""
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:13
+#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
 msgid "%s running"
 msgstr ""
 
 #: packs/third-party/clipboard/README.md
 msgid ""
-"Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source."
+"Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes."
 msgstr ""
 
 #: packs/third-party/clipboard/README.md
-msgid "One clipboard for desktop mode and VR floating windows"
+msgid ""
+"One clipboard for desktop mode and VR floating windows, files and pictures included"
 msgstr ""
 
 #: packs/third-party/clipboard/README.md
@@ -4493,12 +4494,7 @@ msgstr ""
 
 #: packs/third-party/clipboard/status.sh:10
 msgid ""
-"older build: a copied file or formatted text pastes only as text (Reinstall fixes it)"
-msgstr ""
-
-#: packs/third-party/clipboard/status.sh:12
-msgid ""
-"older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)"
+"older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
 msgstr ""
 
 #: packs/third-party/clipboard/status.sh:4

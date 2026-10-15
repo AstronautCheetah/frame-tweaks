@@ -3,10 +3,12 @@ title: Shared clipboard
 emoji: 📋
 category: Convenience
 tier: core
-summary: One clipboard for desktop mode and VR floating windows
+summary: One clipboard for desktop mode and VR floating windows, files and pictures included
 what: >-
-  Copy text in a floating VR window and paste it in the desktop, and the other way round. It
-  runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source.
+  Copy in a floating VR window and paste in the desktop, and the other way round: text, files
+  and pictures, and the text you select for a middle-click paste. It runs
+  [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame
+  Tweaks' changes.
 why: >-
   The Frame's VR session and its desktop mode each have their own clipboard, so text copied in
   one can't be pasted in the other.
@@ -27,7 +29,7 @@ upstream_readme: https://raw.githubusercontent.com/dnut/clipboard-sync/138a59b8f
 # Shared clipboard
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Copy text in a floating VR window and paste it in the desktop, and the other way round. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source.
+Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes.
 
 **Why on a Steam Frame:** The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other.
 <!-- /generated:intro -->
@@ -44,8 +46,17 @@ space; the build files are deleted afterwards. If desktop mode is running, it st
 otherwise it starts the next time you open desktop mode.
 
 ## Use
-Nothing to do: copy text as usual in a floating VR window or in the desktop, and paste it in the
-other.
+Nothing to do: copy as usual in a floating VR window or in the desktop, and paste in the other.
+
+- **Text**, as you'd expect, and the text you select (for a middle-click paste: Arrow Pad's **M**
+  key in VR).
+- **Files** copied in a file manager paste as files in the other session (both see the same
+  files): in a file manager there, or an app that takes files. A cut is shared as a copy there,
+  so a paste in the other session never moves a file.
+- **Pictures** (PNG, JPEG, BMP, GIF or WebP, up to 32 MB), for example from a browser's **Copy
+  Image** or [Screen snip + Narrate](../../original/snip/)'s **Copy**.
+- **Passwords** a password manager copies (KeePassXC, …) can be pasted in the other session, and
+  go from there when the password manager clears them.
 
 It runs while desktop mode is running. If copying stops working, press **Restart** on its row
 in the Frame Tweaks window.
@@ -60,27 +71,31 @@ both.
 - **Built from source**, at the clipboard-sync commit pinned in [`pin`](pin), with the Rust
   toolchain pinned in [`rust.pin`](rust.pin). Rust is set up in a temporary folder for the build
   and deleted afterwards.
-- **Two small changes** are applied before building. clipboard-sync shares text only.
-  - [`keep-images.patch`](keep-images.patch): copying an image (for example **Copy image** in
-    [Screen snip + Narrate](../../original/snip/)) looked like "no text" to it, so it put the
-    last text back a moment later and the image never pasted. Now a clipboard without text is
-    left alone.
-  - [`keep-source.patch`](keep-source.patch): it also wrote the text back into the clipboard it
-    was copied in, replacing what the app had put there. A file cut or copied in Dolphin then
-    pasted only as its address ("Paste Clipboard Contents"), formatted text lost its formatting,
-    and a password manager's "don't keep this in the clipboard history" mark was dropped. Now
-    the text goes only to the other clipboards, and the desktop's own X11 clipboard is left to
-    KWin, which already passes copies between it and the desktop's Wayland one (text written
-    there went on to the Wayland side the same way).
-
-    The same patch handles **passwords**: a copy its password manager marks secret (KeePassXC
-    does) is shared with the mark where the clipboard can carry it, and when the password
-    manager empties the clipboard after its timeout, the copies in the other session are emptied
-    too (before, they stayed). And **starting replaces nothing** that's on a clipboard: it used
-    to write test values into every clipboard to tell which were one, then the first text it
-    found, and it starts again every 10 minutes, so a file or image copied but not yet pasted was
-    replaced. Now only a clipboard with nothing at all on it gets the text the others hold (a
-    copy it had shared there goes when it restarts).
+- **Frame Tweaks' changes** are applied before building (clipboard-sync shares text only, and
+  wrote it into every clipboard):
+  - [`keep-images.patch`](keep-images.patch): copying an image looked like "no text" to it, so it
+    put the last text back a moment later and the image never pasted.
+  - [`sync-sessions.patch`](sync-sessions.patch), the rest:
+    - **A copy is never written back where it came from.** It was, as text, replacing what the
+      app had put there: a file cut or copied in Dolphin then pasted only as its address
+      ("Paste Clipboard Contents"), formatted text lost its formatting, and a password manager's
+      "don't keep this in the clipboard history" mark was dropped. The desktop's own X11
+      clipboard is left to KWin, which already passes copies between it and the desktop's
+      Wayland one.
+    - **Files, pictures and the selection are shared**, not just text. VR's X11 clipboards get a
+      copy with all its formats at once (text and a file list, say), from a clipboard owner of
+      its own (adapted from x11-clipboard's, MIT).
+    - **Copies are noticed as they happen**: from the desktop's Wayland clipboard (its
+      data-control protocol) and VR's X11 ones (XFixes), instead of reading every clipboard five
+      times a second. A picture copied over another is noticed too, and it uses next to no
+      processor time while nothing is copied.
+    - **Passwords**: a copy its password manager marks secret is shared with the mark where the
+      clipboard can carry it, and the copies are emptied when the original is. (Which session a
+      password came from is noted in the runtime folder, in memory; never the password.)
+    - **Starting replaces nothing.** It starts again every 10 minutes, and each start wrote test
+      values, then the first text it found, into every clipboard: a file or picture copied but
+      not yet pasted was replaced. Now only a clipboard with nothing on it gets what the others
+      hold (a copy it had shared there goes when it restarts).
 - **Starts with desktop mode** through KDE autostart
   (`~/.config/autostart/clipboard-sync.desktop`). It needs the desktop session's environment;
   started from VR or as a background service, it wouldn't see the desktop's clipboard.
@@ -88,13 +103,12 @@ both.
   that is still running, for example from a desktop session that was restarted.
 
 ## Good to know
-- Only text is shared. Images and files stay on the clipboard where you copied them, and paste
-  there as usual; the other session gets a copied file's address as text.
-- A password copied from a password manager is shared too, so you can paste it in the other
-  session, and goes from there when the password manager clears it. Android Mirror can pass the
-  clipboard on to the phone: see its setting **Share the clipboard with the phone**.
+- Formats beyond text, files and pictures (a spreadsheet's cells, an app's own formats) stay
+  where you copied them; the other session gets their text, if they have any.
+- Android Mirror can pass the clipboard on to the phone: see its setting **Share the clipboard
+  with the phone**.
 - The status line warns if it isn't running, if more than one copy is running, or if your build
-  doesn't have the image patch yet (reinstall it to fix that).
+  is older than these changes (reinstall it to fix that).
 - If you have Homebrew's Rust installed and don't use it yourself, installing or removing this
   tweak reminds you that you can free about 3.4 GB with
   `brew uninstall rust && brew autoremove`.
