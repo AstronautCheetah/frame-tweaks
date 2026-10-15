@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 13;
+  const NAME = 'phone-touch', VERSION = 14;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -176,11 +176,15 @@
   const GEAR_SVG = 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1' +
     'l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1' +
     'l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z';
-  const gear = (f, k, H, id) => {
+  // Under the window's left end; but beside it, level with its bottom, for an upright mirror docked
+  // in the dashboard: the dashboard's own buttons under it (Show Keyboard, View in Theater, …)
+  // are wider than so narrow a window, and the gear sat on Show Keyboard.
+  const gear = (f, k, H, id, beside) => {
     const h = hueOf(), px = 64, size = GEAR_M * k;
     const isOpen = settingsOpen.has(f.frameID);
-    return el(XFORM, { key: `${f.frameID}-sft-gear`, parent_id: id,
-                       translation: { x: size / 2, y: -(H / 2 + GAP_M * k + size / 2), z: LIFT_M * k } },
+    const at = beside ? { x: -(GAP_M * k + size / 2), y: -(H / 2 - size / 2) }
+                      : { x: size / 2, y: -(H / 2 + GAP_M * k + size / 2) };
+    return el(XFORM, { key: `${f.frameID}-sft-gear`, parent_id: id, translation: { ...at, z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-gear-p`, width: size, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftPhoneGear', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
         el('div', { style: { width: `${px}px`, height: `${px}px`, borderRadius: '50%', boxSizing: 'border-box',
@@ -191,7 +195,7 @@
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))));
   };
-  const settings = (f, k, id) => {
+  const settings = (f, k, id, beside) => {
     const h = hueOf(), conf = window.__sftPhoneTouchConf || {};
     const button = (label, on, onClick, wide) => el('div', { key: label, ...tap(), onClick, style: {
       flex: wide ? '1 1 100%' : '1 0 auto', minWidth: '58px', padding: '11px 6px', margin: '4px', borderRadius: '10px',
@@ -225,7 +229,9 @@
              () => { pending = false; carryOver(f); call({ a: 'restart' }); redraw(); })));
     const pxW = 460;
     return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
-                       translation: { x: -(GAP_M * k + SETTINGS_M * k / 2), z: LIFT_M * k } },
+                       // (left of the window; beside: left of the gear, which is beside it)
+                       translation: { x: -(GAP_M * k + (beside ? GEAR_M * k + GAP_M * k : 0) + SETTINGS_M * k / 2),
+                                      z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-set-p`, width: SETTINGS_M * k, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftPhoneSettings', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
         // (zoom: drawn smaller in the shared page, so it fits; it's shown at the same size in VR)
@@ -245,8 +251,9 @@
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
     const id = typeof page?.GetPanelAnchorID === 'function' && page.GetPanelAnchorID(CENTER_LEFT);
     if (!H || !Hw || !id) return [];
-    const k = H / Hw;
-    return [gear(f, k, H, id), settingsOpen.has(f.frameID) ? settings(f, k, id) : null];
+    const k = H / Hw, c = pictureSize(page);
+    const beside = f.docking?.dockLocation === DASH && c && c.w < c.h;      // upright, docked
+    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null];
   };
 
   const sizes = (f) => {
@@ -256,7 +263,8 @@
             f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
   };
   const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f)]), () => buildLayer(f));
-  const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), settingsOpen.has(f.frameID), pending, hueOf(),
+  const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
+                                               settingsOpen.has(f.frameID), pending, hueOf(),
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
   // Drawn as the last child of the dashboard app, in the page's bottom-right corner (L.mount; the
