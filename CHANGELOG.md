@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **The Packs page describes 3rd Party as it is now:** most of its projects are linked and update
+  their own way; the Original pack's text mentions Battery charge limit's udev rule.
+
 ## 0.6.4 (2026-10-15)
 
 ### Added

@@ -3580,7 +3580,7 @@ msgstr ""
 
 #: packs/original/pack.md
 msgid ""
-"Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly."
+"Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep)."
 msgstr ""
 
 #: packs/original/pack.md packs/original/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
@@ -4785,7 +4785,7 @@ msgstr ""
 
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each built or downloaded from a pinned, checked version of its source, into your home folder, and credited to its authors (their own README follows ours on each tweak's page)."
+"Other people's projects for the Steam Frame, installed into your home folder and credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, and they update their own way (↻ on their row). The others it fits to the Frame: built from a pinned, checked version of their source and updated with Frame Tweaks, with their own README following ours on their page."
 msgstr ""
 
 #: packs/third-party/recline/README.md

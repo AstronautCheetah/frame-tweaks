@@ -8,9 +8,11 @@ order:
   - clipboard
   - recline
 ---
-Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each
-built or downloaded from a pinned, checked version of its source, into your home folder, and
-credited to its authors (their own README follows ours on each tweak's page).
+Other people's projects for the Steam Frame, installed into your home folder and credited to
+their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives
+it, and they update their own way (↻ on their row). The others it fits to the Frame: built from a
+pinned, checked version of their source and updated with Frame Tweaks, with their own README
+following ours on their page.
 
 How it's loaded: like [Original](../original/pack.md) and
 [Integrations](../integrations/pack.md), Frame Tweaks' other official packs, with the same

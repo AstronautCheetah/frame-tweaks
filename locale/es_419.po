@@ -3952,11 +3952,12 @@ msgstr "Comodidad"
 msgid "Developer"
 msgstr "Desarrollo"
 
+# needs review
 #: packs/original/pack.md
 msgid ""
-"Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly."
+"Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep)."
 msgstr ""
-"Las correcciones y configuraciones de apps propias de Frame Tweaks, escritas para el Steam Frame: cada una probada en un Frame e instalada en tu carpeta personal, así que sobrevive a las actualizaciones de SteamOS y se quita sin dejar rastro."
+"Las correcciones y configuraciones de apps propias de Frame Tweaks, escritas para el Steam Frame: cada una probada en un Frame e instalada en tu carpeta personal, así que sobrevive a las actualizaciones de SteamOS y se quita sin dejar rastro (Límite de carga de la batería también agrega una regla de udev en /etc, que las actualizaciones de SteamOS conservan)."
 
 # needs review
 #: packs/original/pack.md packs/original/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
@@ -5242,11 +5243,12 @@ msgstr ""
 msgid "3rd Party"
 msgstr "De terceros"
 
+# needs review
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each built or downloaded from a pinned, checked version of its source, into your home folder, and credited to its authors (their own README follows ours on each tweak's page)."
+"Other people's projects for the Steam Frame, installed into your home folder and credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, and they update their own way (↻ on their row). The others it fits to the Frame: built from a pinned, checked version of their source and updated with Frame Tweaks, with their own README following ours on their page."
 msgstr ""
-"Proyectos de otras personas para el Steam Frame, instalados y actualizados por Frame Tweaks: cada uno compilado o descargado desde una versión fijada y verificada de su código, en tu carpeta personal, y con el crédito para sus autores (su propio README va después del nuestro en la página de cada ajuste)."
+"Proyectos de otras personas para el Steam Frame, instalados en tu carpeta personal y con el crédito a sus autores. La mayoría están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, y se actualizan a su manera (↻ en su fila). Los demás los adapta al Frame: se compilan desde una versión fijada y verificada de su código fuente y se actualizan con Frame Tweaks, con su propio README después del nuestro en su página."
 
 #: packs/third-party/recline/README.md
 msgid ""
@@ -5600,3 +5602,13 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ msgid_plural "%d packs have a newer version"
 #~ msgstr[0] "%d paquete tiene una versión más reciente"
 #~ msgstr[1] "%d paquetes tienen una versión más reciente"
+
+#~ msgid ""
+#~ "Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly."
+#~ msgstr ""
+#~ "Las correcciones y configuraciones de apps propias de Frame Tweaks, escritas para el Steam Frame: cada una probada en un Frame e instalada en tu carpeta personal, así que sobrevive a las actualizaciones de SteamOS y se quita sin dejar rastro."
+
+#~ msgid ""
+#~ "Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each built or downloaded from a pinned, checked version of its source, into your home folder, and credited to its authors (their own README follows ours on each tweak's page)."
+#~ msgstr ""
+#~ "Proyectos de otras personas para el Steam Frame, instalados y actualizados por Frame Tweaks: cada uno compilado o descargado desde una versión fijada y verificada de su código, en tu carpeta personal, y con el crédito para sus autores (su propio README va después del nuestro en la página de cada ajuste)."
