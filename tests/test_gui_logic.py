@@ -146,7 +146,7 @@ class Manifest(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         for c in rows:
             self.assertIsNotNone(gui.sft.script(c, "install"), c["id"])     # (its install.sh, or a link's)
-            self.assertIn(c["category"], {"Accessibility", "Convenience", "VR environment", "Privacy & security", "System", "Developer"})
+            self.assertIn(c["category"], {"Accessibility", "Convenience", "VR environment", "Privacy & security", "System", "Hardware", "Developer"})
 
 
 

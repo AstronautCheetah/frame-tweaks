@@ -2,7 +2,7 @@
 name: Integrations
 author: Frame Tweaks
 api: 1
-categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Developer]
+categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Hardware, Developer]
 order:
   - signal
   - nordvpn

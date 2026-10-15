@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- **Battery charge limit** (new, in a new **Hardware** category, 🧪): charging stops at 80% (or
+  85 or 90%; ⚙ on its row) while the Frame is on, and starts again 5% below, so a Frame that's
+  often plugged in (to a power bank while you play, say) doesn't sit at 100%. ▶ **Charge to 100%
+  once** lifts it until the next full charge. Its install asks for your sudo password once, for
+  a udev rule that lets you pause charging. Valve Support says leaving the Frame plugged in at
+  100% is fine for daily use; this is for a battery that wears more slowly, until SteamOS offers
+  its own limit on the Frame, as it does on the Steam Deck.
 - **Test releases for people who try things first:** ⚙ Preferences → **Get test releases too**
   (or `./install.sh channel beta`) makes updates take test releases (`vX.Y.Z-rc.N`) as well.
   Unticked again, you stay on the test release until the next stable release is out, or go back

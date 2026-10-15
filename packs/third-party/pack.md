@@ -2,7 +2,7 @@
 name: "3rd Party"
 author: Frame Tweaks
 api: 1
-categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Developer]
+categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Hardware, Developer]
 order:
   - full-keyboard
   - clipboard

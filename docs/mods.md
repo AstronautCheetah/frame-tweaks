@@ -95,7 +95,7 @@ undo: "`./install.sh uninstall hello-frame`"
 |---|---|
 | `title` | Its name in the list. |
 | `emoji` | Its emoji in the README tables. |
-| `category` | Its group in the list: an existing one (Accessibility, Convenience, VR environment, Privacy & security, System, Developer) or a new one. |
+| `category` | Its group in the list: an existing one (Accessibility, Convenience, VR environment, Privacy & security, System, Hardware, Developer) or a new one. |
 | `tier` | `core` (a fix for the Frame), `extras` (an app setup) or `helper` (something other tweaks need; the README tables mark it "helper"). It describes the tweak and doesn't change how it installs. |
 | `summary` | One line, shown in the list and in `./install.sh list`. |
 | `what`, `why` | Its details page. |

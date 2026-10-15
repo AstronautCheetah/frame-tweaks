@@ -126,7 +126,7 @@ A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
   your `PATH` (the window runs installs in Konsole).
 - **On a Frame:** `./install.sh install ID` in your clone installs your copy of the tweak, and
   `./install.sh status ID` checks it. (On a PC it installs too, for real, into your home folder,
-  and the Homebrew ones ask for sudo: use `dev/test-tweaks.sh` there.) `./install.sh gui` and `./install.sh menu` point the
+  and the Homebrew ones and Battery charge limit ask for sudo: use `dev/test-tweaks.sh` there.) `./install.sh gui` and `./install.sh menu` point the
   app-menu entry at the clone they run in; afterwards, `~/frame-tweaks/install.sh menu` points it
   back at your usual copy.
 

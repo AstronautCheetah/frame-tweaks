@@ -283,7 +283,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:376 install.sh:222 lib/common.sh:465 lib/link.sh:46 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:376 install.sh:222 lib/common.sh:465 lib/link.sh:46 packs/original/charge-limit/status.sh:6 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -1195,7 +1195,7 @@ msgid ""
 "Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
-#: install.sh:308 install.sh:379 install.sh:392 install.sh:425 lib/common.sh:422
+#: install.sh:308 install.sh:379 install.sh:392 install.sh:425 lib/common.sh:422 packs/original/charge-limit/uninstall.sh:20
 msgid "removed %s"
 msgstr ""
 
@@ -1538,7 +1538,7 @@ msgid ""
 "Homebrew's installer asks for your sudo (admin) password once, to create that folder."
 msgstr ""
 
-#: lib/common.sh:88
+#: lib/common.sh:88 packs/original/charge-limit/install.sh:16
 msgid ""
 "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
 msgstr ""
@@ -1552,7 +1552,7 @@ msgstr ""
 msgid "Install Homebrew now?"
 msgstr ""
 
-#: lib/common.sh:91
+#: lib/common.sh:91 packs/original/charge-limit/install.sh:18
 msgid "sudo failed."
 msgstr ""
 
@@ -2972,6 +2972,144 @@ msgstr ""
 msgid "stopped a running Arrow Pad"
 msgstr ""
 
+#: packs/original/charge-limit/README.md
+msgid "80% (the battery wears least)"
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid ""
+"A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame."
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid "Applies within 30 seconds."
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid "Battery charge limit"
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid "Charge to 100% once"
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid ""
+"Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame runs from the charger or power bank and leaves the battery alone."
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid ""
+"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next full charge."
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid "Off (charge to 100%)"
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid "Stop charging at"
+msgstr ""
+
+#: packs/original/charge-limit/README.md
+msgid ""
+"Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
+msgstr ""
+
+#: packs/original/charge-limit/check-system.sh:5
+msgid "SteamOS no longer has: %s"
+msgstr ""
+
+#: packs/original/charge-limit/check-system.sh:5
+msgid "the charger's pause switch"
+msgstr ""
+
+#: packs/original/charge-limit/check-system.sh:7
+msgid "The charger's pause switch is there"
+msgstr ""
+
+#: packs/original/charge-limit/install.sh:13
+msgid ""
+"The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
+"password once, to add a udev rule (%s) that SteamOS updates keep."
+msgstr ""
+
+#: packs/original/charge-limit/install.sh:22
+msgid "Couldn't add the udev rule."
+msgstr ""
+
+#: packs/original/charge-limit/install.sh:34
+msgid ""
+"Installed; the limit is off (its settings), so the battery charges to 100%."
+msgstr ""
+
+#: packs/original/charge-limit/install.sh:36
+msgid "The battery now stops charging at %s%% while the Frame is on."
+msgstr ""
+
+#: packs/original/charge-limit/run.sh:5
+msgid "Charging to 100% once; then the limit applies again."
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:11
+msgid ""
+"SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:13
+msgid "This SteamOS has no charger pause switch, so the limit can't work"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:14
+msgid "Can't pause charging: Reinstall it (it asks for your password)"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:15
+msgid "Not running (Reinstall starts it)"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:16
+msgid "No battery found"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:19
+msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:20
+msgid "Limit off: charges to 100%% (now %s%%)"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:24
+msgid ""
+"Paused at %s%%, but the battery still charges: the Frame's charger ignored the pause"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:25
+msgid "Holding at %s%% (battery %s%%, not charging)"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:29
+msgid "Battery at %s%%, but charging isn't paused; see: %s"
+msgstr ""
+
+#: packs/original/charge-limit/status.sh:30
+msgid "Stops charging at %s%% (battery %s%%)"
+msgstr ""
+
+#: packs/original/charge-limit/uninstall.sh:11
+msgid "Couldn't let the battery charge again: restart the Frame."
+msgstr ""
+
+#: packs/original/charge-limit/uninstall.sh:17
+msgid "Removing its udev rule needs your sudo (admin) password."
+msgstr ""
+
+#: packs/original/charge-limit/uninstall.sh:22
+msgid ""
+"Left its udev rule; it only lets you pause charging. Remove it with: %s"
+msgstr ""
+
 #: packs/original/cursor/README.md
 msgid ""
 "In desktop mode on the Frame, the mouse moves but its pointer isn't shown: the desktop draws it on a separate layer that the headset's view leaves out."
@@ -3373,6 +3511,10 @@ msgstr ""
 #: packs/original/pack.md
 msgid ""
 "Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly."
+msgstr ""
+
+#: packs/original/pack.md packs/original/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
+msgid "Hardware"
 msgstr ""
 
 #: packs/original/pack.md

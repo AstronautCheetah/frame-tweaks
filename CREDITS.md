@@ -16,6 +16,7 @@ README of the tweak that uses them; software we install or call keeps its own li
 | [new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) | MIT (bundles OpenVR SDK parts, BSD-3-Clause) | Linked by [Recline](packs/third-party/recline/), which runs its own installer: lying-down / reclined VR. |
 | [RobcPeng/steam-frame-recline](https://github.com/RobcPeng/steam-frame-recline) | MIT | Not used; a similar recline project we compared before choosing Recline-VR. |
 | [gripspeak](https://github.com/gripspeak/gripspeak) | – | Not used; an alternative worth knowing. |
+| [y0usaf/frame-charge](https://github.com/y0usaf/frame-charge) | – (none given) | Not used; it showed the Frame charger's pause switch that [Battery charge limit](packs/original/charge-limit/) holds the battery with. |
 
 The cursor fix was popularised by Cas and Chary XR's video *Steam Frame: 10 Things To Do
 FIRST*, which credits **ThrillSeeker**.
