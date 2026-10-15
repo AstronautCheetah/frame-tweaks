@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Security
+- **NordVPN's WireGuard key after uninstalling:** since 0.6.2, uninstalling NordVPN keeps
+  `~/.config/nordvpn-wg` (your key and locations) unless ⚙ Preferences say to remove settings,
+  but its page and the README still said the key was deleted. They now say what happens. To
+  delete one left behind: ⚙ Preferences → **Delete settings left by uninstalled tweaks…**, or
+  `./install.sh forget-settings`.
+
 ### Fixed
 - **Less load on SteamVR from Arrow Pad and Screen snip's narration panel:** they read the
   controllers' grip only while a laser is on them (each read waits on SteamVR's shared property

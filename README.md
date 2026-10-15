@@ -83,7 +83,7 @@ needs it:
   Flatpak folder.
 
 Every tweak installs, checks and removes on its own, and removing one keeps your settings
-(NordVPN's removal also deletes its key and locations, as its page says).
+unless you choose otherwise (see [Settings](#settings)).
 
 **Checked downloads.** Files taken from other projects' releases are pinned to a SHA256 checksum
 recorded in this repo, and Arch Linux ARM packages are checked against Arch Linux ARM's signing

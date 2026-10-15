@@ -26,8 +26,9 @@ access: >-
 survives_updates: >-
   Yes (its connections live in NetworkManager's settings, which updates keep)
 undo: >-
-  `./install.sh uninstall nordvpn` (also deletes the connections, your key and locations; the ↻
-  reinstall keeps them)
+  `./install.sh uninstall nordvpn` (also deletes the connections; keeps your key and locations
+  in `~/.config/nordvpn-wg` unless ⚙ Preferences say to remove settings; the ↻ reinstall keeps
+  the connections too)
 ---
 # NordVPN (WireGuard)
 
@@ -98,7 +99,10 @@ a command line or in a temporary file, and creating one doesn't connect it.
 - **No kill switch:** if the tunnel drops, traffic goes out normally.
 - Your WireGuard private key is stored in the connection files (readable only by root) and in
   `~/.config/nordvpn-wg/private_key` (readable only by you), so locations can be added later.
-  Removing the tweak deletes both, along with the connections. Reinstalling it (↻) keeps them.
+  Removing the tweak deletes the connections, and the root-only copy with them. The copy in
+  `~/.config/nordvpn-wg` is one of its settings: kept, so you can install it again without a new
+  access token, unless ⚙ Preferences → **Uninstalling a tweak** says to remove settings.
+  Reinstalling it (↻) keeps both.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
@@ -106,7 +110,7 @@ a command line or in a temporary file, and creating one doesn't connect it.
 - **Survives SteamOS updates:** Yes (its connections live in NetworkManager's settings, which updates keep)
 - **Changes:** `nordvpn-wg`, tray app and its PyQt6 Python environment (shared with Arrow Pad), KDE autostart entry and session-restore setting (`ksmserverrc`, so the tray isn't started twice), `~/.config/nordvpn-wg` (your WireGuard key and locations)
 - **Unusual access:** **Outside your home folder:** NetworkManager WireGuard connections (via NetworkManager's D-Bus API and `nmcli`); uses your NordVPN access token once, to fetch your WireGuard key
-- **Undo:** `./install.sh uninstall nordvpn` (also deletes the connections, your key and locations; the ↻ reinstall keeps them)
+- **Undo:** `./install.sh uninstall nordvpn` (also deletes the connections; keeps your key and locations in `~/.config/nordvpn-wg` unless ⚙ Preferences say to remove settings; the ↻ reinstall keeps the connections too)
 <!-- /generated:changes -->
 
 ## Credits
