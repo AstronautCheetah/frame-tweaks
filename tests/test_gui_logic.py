@@ -419,6 +419,27 @@ class LinkedProject(unittest.TestCase):
         gui.sft.load(refresh=True)
 
 
+class SudoTag(unittest.TestCase):
+    """A tweak whose install asks for the sudo password (manifest sudo:) says so on its page; a
+    Homebrew one only while Homebrew isn't installed."""
+    def test_page_says_why(self):
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+
+        def page_text(cid):
+            page = gui.Details(mock.Mock(), gui.component(cid), (1, "not installed"))
+            return " ".join(w.text() for w in page.findChildren(QLabel))
+        self.assertIn("Asks for sudo", page_text("charge-limit"))
+        self.assertIn("udev rule", page_text("charge-limit"))
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch.object(gui.sft, "BREW", Path(d) / "brew"):            # no Homebrew yet
+                self.assertIn("/home/linuxbrew", page_text("snip"))
+            (Path(d) / "brew").touch()
+            with mock.patch.object(gui.sft, "BREW", Path(d) / "brew"):            # Homebrew there: no tag
+                self.assertNotIn("Asks for sudo", page_text("snip"))
+        self.assertNotIn("Asks for sudo", page_text("cursor"))
+
+
 class PreferencesPage(unittest.TestCase):
     """⚙ Preferences → Uninstalling a tweak: the choice lands in the file ./install.sh uninstall
     reads, and the confirmation before removing says what happens to the settings."""

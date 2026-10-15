@@ -14,6 +14,7 @@ why: >-
   Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech
   locally, so you can talk instead, and your voice never leaves the headset.
 author: "Frame Tweaks; engine: whisper.cpp (ggml-org), model: OpenAI Whisper"
+sudo: homebrew
 source: {relation: uses, url: https://github.com/ggml-org/whisper.cpp}
 depends: [ydotool]
 icon: {file: frame-tweaks-dictate.png}

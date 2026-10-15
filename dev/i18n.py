@@ -185,8 +185,9 @@ def from_manifests():
             if not c:
                 continue
             where = f"{d.relative_to(ROOT)}/README.md"
-            for k in ("title", "desc", "what", "why", "run_label", "category"):
-                add(c.get(k), where)
+            for k in ("title", "desc", "what", "why", "run_label", "category", "sudo"):
+                if not (k == "sudo" and c.get(k) == "homebrew"):        # (a keyword: lib/sft.py sudo_note)
+                    add(c.get(k), where)
             if "|" in c.get("source", ""):
                 add(c["source"].split("|", 1)[0], where)              # (uses, from, styled after, …)
             st = c.get("settings") or {}

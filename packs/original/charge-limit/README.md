@@ -14,6 +14,9 @@ why: >-
   of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge
   limit on the Steam Deck (Settings → Power), but not on the Frame.
 author: Frame Tweaks
+sudo: >-
+  once, to add a udev rule that lets you pause the battery's charging, and again to remove
+  it
 experimental: >-
   Uses the Frame's charger driver directly (its charging pause switch). SteamOS's charger
   service turns the pause off each time it starts; it's on again within 30 seconds. The status

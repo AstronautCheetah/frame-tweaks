@@ -12,6 +12,7 @@ why: >-
   Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's
   ARM processor, so this installs a build that does; in VR, the window takes the phone's shape.
 author: "Genymobile (scrcpy), Android platform tools, Frame Tweaks launcher"
+sudo: homebrew
 source: {relation: uses, url: https://github.com/Genymobile/scrcpy}
 experimental: >-
   Only the VR extras: aimed laser clicks, joystick scrolling and turning with the phone rely on
