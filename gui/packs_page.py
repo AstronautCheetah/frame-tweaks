@@ -1,16 +1,20 @@
 """The installer window's Packs page: the packs of tweaks it found (docs/mods.md), whether each is
-in use, trusting or no longer using a user's pack, and what's wrong with any of them."""
+in use, trusting or no longer using a user's pack, adding one from a link (and updating or
+removing it), and what's wrong with any of them."""
 import html
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QCursor
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QToolTip, QVBoxLayout, QWidget
+from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtGui import QCursor, QDesktopServices
+from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea, QToolTip,
+                             QVBoxLayout, QWidget)
 
 import browser  # (lib/ is on the path)
 from i18n import _, N_, ngettext  # (translations: locale/README.md)
 import sft
 
+EXAMPLE_LINK = "https://github.com/…/…"         # (an address, not text: the same in every language)
 STATE = {"official": (N_("Comes with Frame Tweaks: in use"), "#5cc77a"),
          "off": (N_("Comes with Frame Tweaks: turned off, so its tweaks aren't listed"), "#9aa6b2"),
          "trusted": (N_("Trusted: its tweaks are listed"), "#5cc77a"),
@@ -19,9 +23,13 @@ STATE = {"official": (N_("Comes with Frame Tweaks: in use"), "#5cc77a"),
 
 
 class Packs(QWidget):
-    def __init__(self, window):
+    def __init__(self, window, follow_link=None, pool=None):
         super().__init__()
-        self.window = window
+        self.window, self.follow = window, follow_link
+        # (adding or updating a pack is a git clone or pull: off this thread, looked at 5 times a second)
+        self.pool = pool or ThreadPoolExecutor(max_workers=1)
+        self.job = None
+        self.timer = QTimer(self, interval=200, timeout=self.collect)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
@@ -39,14 +47,34 @@ class Packs(QWidget):
         about = QLabel(_(
             "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its "
             "README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd "
-            "Party, all in use unless you turn one off. To add more, put a pack in "
-            "<code>{folder}</code>, then trust it below. "
+            "Party, all in use unless you turn one off. To add more, add one from its link below, or put "
+            "a pack's folder in <code>{folder}</code>; then trust it. "
             "<b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs "
             "from people you trust, and read what they do first. If a pack's files change, it waits "
             "until you trust it again. How to write one: docs/mods.md.").format(folder=html.escape(str(sft.USER_PACKS))))
         about.setWordWrap(True)
         about.setTextFormat(Qt.TextFormat.RichText)
         lay.addWidget(about)
+        add = QHBoxLayout()
+        add.addWidget(QLabel(_("Add a pack from a link:")))
+        self.link = QLineEdit()
+        self.link.setPlaceholderText(EXAMPLE_LINK)
+        self.link.returnPressed.connect(self.add)
+        add.addWidget(self.link, 1)
+        paste = QPushButton(_("Paste"))
+        paste.setToolTip(_("Paste the link from the clipboard"))
+        paste.clicked.connect(lambda: self.link.setText(QApplication.clipboard().text().strip()))
+        add.addWidget(paste)
+        self.add_button = QPushButton(_("Add"))
+        self.add_button.setToolTip(_("Download the pack into your packs folder. Nothing of it runs until you trust it."))
+        self.add_button.clicked.connect(self.add)
+        add.addWidget(self.add_button)
+        lay.addLayout(add)
+        self.notice = QLabel()
+        self.notice.setWordWrap(True)
+        self.notice.setTextFormat(Qt.TextFormat.PlainText)
+        self.notice.hide()
+        lay.addWidget(self.notice)
         self.body = QWidget()
         self.rows = QVBoxLayout(self.body)
         self.rows.setSpacing(8)
@@ -55,7 +83,7 @@ class Packs(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.body)
         lay.addWidget(scroll, 1)
-        self.confirming = None
+        self.confirming = self.removing = None
         self.build()
 
     def build(self):
@@ -72,6 +100,7 @@ class Packs(QWidget):
             g.setContentsMargins(12, 10, 12, 10)
             text, colour = STATE[p["state"]]
             text = _(text)
+            origin = sft.pack_origin(p["dir"]) if sft.removable(p) else None
             tweaks = []
             for t in p["tweaks"]:
                 c = used.get(t)
@@ -84,11 +113,15 @@ class Packs(QWidget):
                           + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
                           + f"<br><span style='color:{colour}'>{text}</span>"
                           + f"<br><span style='color:#6b7783'>{html.escape(str(p['dir']))}</span>"
+                          + ("<br>" + _("From {link}").format(link=(
+                              f"<a style='color:#7fb2e5' href='{html.escape(origin)}'>{html.escape(origin)} ↗</a>"
+                              if origin.startswith("https://") else html.escape(origin))) if origin else "")
                           + ("<br>" + ngettext("%d tweak", "%d tweaks", len(p["tweaks"])) % len(p["tweaks"])
                              if p["state"] in ("official", "off") else
                              "<br>" + _("Tweaks: %s") % (", ".join(tweaks) or _("none"))))
             info.setWordWrap(True)
             info.setTextFormat(Qt.TextFormat.RichText)
+            info.linkActivated.connect(self.open_link)
             g.addWidget(info, 1)
             if p["state"] in ("official", "off"):
                 on = p["state"] == "off"
@@ -110,6 +143,22 @@ class Packs(QWidget):
                     b = QPushButton(_("Trust…"))
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.confirm(d))
                 g.addWidget(b)
+                if origin:
+                    b = QPushButton(_("Update"))
+                    b.setToolTip(_("Get its newer version from where it was added; it waits until you trust it again"))
+                    b.setEnabled(self.job is None)
+                    b.clicked.connect(lambda _=False, p=p: self.update(p))
+                    g.addWidget(b)
+                if sft.removable(p):
+                    if self.removing == p["dir"]:
+                        b = QPushButton(_("Yes, delete it"))
+                        b.setObjectName("danger")
+                        b.clicked.connect(lambda _=False, p=p: self.remove(p))
+                    else:
+                        b = QPushButton(_("Remove…"))
+                        b.setToolTip(_("Delete this pack from your packs folder"))
+                        b.clicked.connect(lambda _=False, d=p["dir"]: self.ask_remove(d))
+                    g.addWidget(b)
             self.rows.addWidget(row)
         if data["problems"]:
             probs = QLabel("<b>" + _("Problems") + "</b><br>" + "<br>".join(html.escape(x) for x in data["problems"]))
@@ -120,11 +169,99 @@ class Packs(QWidget):
         self.rows.addStretch(1)
 
     def confirm(self, d):
-        self.confirming = d
+        self.confirming, self.removing = d, None
         self.build()
 
+    def ask_remove(self, d):
+        self.confirming, self.removing = None, d
+        self.build()
+
+    # ---- packs from a link (lib/sft.py add_pack, update_pack, remove_pack) ----
+    def tell(self, text, good=False):
+        self.notice.setText(text)
+        self.notice.setStyleSheet(f"color: {'#5cc77a' if good else '#e0b33a'}")
+        self.notice.show()
+
+    def start(self, work, done, saying):
+        """work() off this thread (a git clone or pull takes seconds); then done(its result)."""
+        if self.job is not None:
+            return
+        self.job = (self.pool.submit(work), done)
+        self.add_button.setEnabled(False)
+        self.tell(saying, good=True)
+        self.build()                                    # (its Update buttons dimmed meanwhile)
+        self.timer.start()
+
+    def collect(self):
+        fut, done = self.job
+        if not fut.done():
+            return
+        self.timer.stop()
+        self.job = None
+        self.add_button.setEnabled(True)
+        try:
+            result = fut.result()
+        except sft.PackError as e:
+            self.tell(str(e))
+            self.build()
+            return
+        except Exception as e:                          # (whatever it is, said rather than lost)
+            self.tell(_("That didn't work: {error}").format(error=e))
+            self.build()
+            return
+        done(result)
+
+    def add(self):
+        link = self.link.text().strip()
+        if not link:
+            self.tell(_("Paste or type the link of a pack's git repository first."))
+            return
+        self.start(lambda: sft.add_pack(link), self.added, _("Adding the pack…"))
+
+    def added(self, d):
+        self.link.clear()
+        p = next((x for x in sft.load()["packs"] if x["dir"] == d.resolve()), None)
+        self.tell(_("Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they "
+                    "do first (its link, or Open packs folder), then Trust… below.").format(
+                        name=sft.plain(p["name"]) if p else d.name), good=True)
+        self.build()
+
+    def update(self, p):
+        self.start(lambda: sft.update_pack(p["dir"]), lambda got: self.updated(p, got),
+                   _("Updating {name}…").format(name=sft.plain(p["name"])))
+
+    def updated(self, p, got):
+        name = sft.plain(p["name"])
+        if not got["files"]:
+            self.tell(_("{name} is up to date.").format(name=name), good=True)
+        else:
+            self.tell(ngettext("{name}: updated, {n} file changed.", "{name}: updated, {n} files changed.",
+                               len(got["files"])).format(name=name, n=len(got["files"])) + " "
+                      + _("It isn't used until you trust it again: read what changed first, then Trust… below.")
+                      + "".join("\n• " + line for line in got["log"]))
+            self.window.reload_tweaks()
+        self.build()
+
+    def remove(self, p):
+        self.removing = None
+        try:
+            sft.remove_pack(p["dir"])
+        except sft.PackError as e:
+            self.tell(str(e))
+            self.build()
+            return
+        self.tell(_("Removed {name}.").format(name=sft.plain(p["name"])), good=True)
+        self.window.reload_tweaks()
+        self.build()
+
+    def open_link(self, url):
+        if self.follow:
+            self.follow(url)
+        else:
+            QDesktopServices.openUrl(QUrl(url))
+
     def trust(self, d, on):
-        self.confirming = None
+        self.confirming = self.removing = None
         sft.set_trusted(d, on)
         self.window.reload_tweaks()
         self.build()

@@ -27,6 +27,7 @@
 #   ./install.sh run ID              its Run / Open button (e.g. open Arrow Pad)
 #   ./install.sh settings ID [KEY=VALUE... | --reset]   show or change its settings (scroll-strips, adb-scrcpy)
 #   ./install.sh mods [trust|untrust|on|off PACK | check FOLDER]   packs of tweaks (docs/mods.md)
+#   ./install.sh mods add LINK [BRANCH|TAG] | update PACK | remove PACK   a pack shared as a git repository
 #   ./install.sh hide|unhide ID...   hide a row in the installer window (or show it again)
 #   ./install.sh hide-group|unhide-group NAME   the same for a whole group, e.g. "VR environment"
 #   ./install.sh wallet lock|unlock|status      the shared KDE wallet (wallet-unlock)

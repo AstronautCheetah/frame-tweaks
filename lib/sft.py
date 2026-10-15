@@ -13,6 +13,10 @@ Command line (through ./install.sh):
   sft.py mods trust|untrust PACK        use a user's pack (it runs as you), or stop using it
   sft.py mods on|off PACK               use one of Frame Tweaks' own packs, or stop using it
   sft.py mods check FOLDER              check a pack or a single tweak folder, using nothing
+  sft.py mods add LINK [BRANCH|TAG]     a pack shared as a git repository: put in your packs folder,
+                                        not used until you trust it
+  sft.py mods update PACK               its newer version (from where it was added); trust it again
+  sft.py mods remove PACK               delete one of your packs (its tweaks uninstalled first)
   sft.py hide|unhide ID...              hide a row in the installer window (or show it again)
   sft.py hide-group|unhide-group NAME   the same for a whole group (e.g. "VR environment")
   sft.py info ID                        what the installer window's details page shows
@@ -38,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manifest  # noqa: E402
 import ftconf  # noqa: E402
 import i18n  # noqa: E402
-from i18n import _  # noqa: E402
+from i18n import _, ngettext  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -649,6 +653,148 @@ def info(cid):
     return "\n".join(lines)
 
 
+# ---- packs from a link (mods add | update | remove) --------------------------------------------
+# A pack someone shares as a git repository (the pack at its top) is cloned into USER_PACKS. As any
+# pack, nothing of it runs until it's trusted; an update fetches its newer version, which then
+# waits to be trusted again; remove deletes it once its tweaks are uninstalled.
+INSTALLED = Path.home() / ".local/state/frame-tweaks/installed"     # install records (./install.sh)
+LINK = re.compile(r"^(https://|ssh://|git@[\w.-]+:|file://)[^\s]+$")
+# (no ext:: transport, which runs a command; no submodules; never a password prompt)
+GIT = ["git", "-c", "protocol.ext.allow=never", "-c", "submodule.recurse=false"]
+
+
+class PackError(Exception):
+    """Why a pack couldn't be added, updated or removed (shown as it is)."""
+
+
+def git(*args, cwd=None, check=True, timeout=120):
+    """git's output; on failure PackError with git's last line (check), or None."""
+    try:
+        r = subprocess.run(GIT + list(args), cwd=cwd, capture_output=True, text=True, timeout=timeout,
+                           env={**os.environ, "GIT_TERMINAL_PROMPT": "0", "GIT_ASKPASS": "true", "SSH_ASKPASS": "true"})
+    except FileNotFoundError:
+        raise PackError(_("git isn't installed")) from None
+    except subprocess.TimeoutExpired:
+        raise PackError(_("git took too long (no connection?)")) from None
+    if r.returncode != 0:
+        if not check:
+            return None
+        raise PackError((r.stderr.strip().splitlines() or [_("git {command} failed").format(command=args[0])])[-1])
+    return r.stdout
+
+
+def plain(text):
+    """Text from a pack's repository, without control characters (it's shown in a terminal too)."""
+    return re.sub(r"[\x00-\x1f\x7f-\x9f]", " ", text).strip()
+
+
+def pack_folder_name(link):
+    """Its folder in USER_PACKS: the repository's name (https://host/someone/my-pack.git → my-pack)."""
+    name = re.sub(r"\.git$", "", link.rstrip("/").rsplit("/", 1)[-1].rsplit(":", 1)[-1])
+    return re.sub(r"[^A-Za-z0-9._-]", "-", name).strip(".-") or "pack"
+
+
+def pack_origin(d):
+    """The link a pack was added from (mods add), or None."""
+    if not (Path(d) / ".git").is_dir():
+        return None
+    out = git("remote", "get-url", "origin", cwd=d, check=False)
+    return plain(out) or None if out else None
+
+
+def add_pack(link, ref=None):
+    """Clone the pack at link (a branch or tag of it: ref) into USER_PACKS, not trusted; its folder."""
+    link = link.strip()
+    if not LINK.match(link):
+        raise PackError(_("That isn't a link to a pack: give the address of its git repository, starting with https://"))
+    if ref is not None and not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_./-]*", ref):
+        raise PackError(_("{ref} isn't a branch or tag name").format(ref=repr(ref)))
+    dest = USER_PACKS / pack_folder_name(link)
+    if dest.exists():
+        raise PackError(_("You have a pack in {folder} already: update it, or remove it first.").format(folder=dest))
+    USER_PACKS.mkdir(parents=True, exist_ok=True)
+    tmp = USER_PACKS / f".adding-{dest.name}"            # (a dot folder: not a pack while it comes in)
+    shutil.rmtree(tmp, ignore_errors=True)
+    try:
+        git("clone", "--quiet", *(["--branch", ref] if ref else []), "--", link, str(tmp))
+        tops = [p for p in tmp.iterdir() if p.is_dir() and not p.name.startswith(".")]
+        if not (tmp / "pack.md").is_file() and not any((p / "README.md").is_file() for p in tops):
+            raise PackError(_("There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md).").format(
+                link=link))
+        tmp.rename(dest)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    load(refresh=True)
+    return dest
+
+
+def update_pack(d):
+    """The newer version of a pack added from a link: {"files": changed files, "log": commit subjects}."""
+    d = Path(d)
+    if not pack_origin(d):
+        raise PackError(_("{pack} wasn't added from a link: change its folder yourself.").format(pack=d.name))
+    if git("symbolic-ref", "-q", "HEAD", cwd=d, check=False) is None:
+        raise PackError(_("{pack} was added at a fixed version: to follow another one, remove it and add it again.").format(
+            pack=d.name))
+    old = git("rev-parse", "HEAD", cwd=d).strip()
+    git("pull", "--ff-only", "--quiet", cwd=d)
+    new = git("rev-parse", "HEAD", cwd=d).strip()
+    load(refresh=True)
+    if old == new:
+        return {"files": [], "log": []}
+    return {"files": [plain(x) for x in git("diff", "--name-only", old, new, cwd=d).splitlines()],
+            "log": [plain(x) for x in git("log", "--format=%s", f"{old}..{new}", cwd=d).splitlines()[:20]]}
+
+
+def pack_installed(p):
+    """A pack's tweaks that are installed (an install record), but not those another pack in use provides."""
+    try:
+        records = {f.name for f in INSTALLED.iterdir()}
+    except OSError:
+        records = set()
+    used = {c["id"]: c for c in components()}
+    return [t for t in p["tweaks"] if t in records and (t not in used or used[t]["pack_dir"] == p["dir"])]
+
+
+def removable(p):
+    """Whether a pack can be removed here: one in your packs folder (not the official ones, nor others)."""
+    return p["dir"].parent == USER_PACKS.resolve()
+
+
+def remove_pack(d):
+    """Delete one of your packs, and its trust. Not while its tweaks are installed."""
+    d = Path(d).resolve()
+    p = next((x for x in load(refresh=True)["packs"] if x["dir"] == d), None)
+    if p is None or not removable(p):
+        raise PackError(_("Only packs in {folder} can be removed here.").format(folder=USER_PACKS))
+    left = pack_installed(p)
+    if left:
+        ids = " ".join(left)
+        raise PackError((_("Uninstall its tweaks first: {ids} ({command}).") if p["state"] == "trusted" else
+                         _("Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), "
+                           "then remove it.")).format(ids=ids, command=f"./install.sh uninstall {ids}"))
+    shutil.rmtree(d)
+    set_trusted(d, False)
+    load(refresh=True)
+
+
+def check_folder(d):
+    """(lines, bad): mods check of a pack, or of a single tweak folder."""
+    if (d / "README.md").is_file() and not (d / "pack.md").is_file():
+        folders, probs = [d], []
+    else:                                          # (a pack: its pack.md is checked too)
+        info, folders, probs = read_pack(d)
+        if not isinstance(info["api"], int) or info["api"] > API:
+            probs.append(f"{d.name}: needs a newer Frame Tweaks (pack api {info['api']}; this one knows {API})")
+    lines, bad = list(probs), len(probs)
+    for f in folders:
+        c, probs = read_tweak(f)
+        lines += probs
+        bad += c is None
+        lines.append(f"{'ok ' if c else 'BAD'} {f.name}")
+    return lines, bad
+
+
 def find_pack(name):
     """A pack by its folder, or by its name or folder name if only one pack goes by it (any pack
     can call itself anything: trusting the wrong one by its name mustn't be possible)."""
@@ -683,23 +829,44 @@ def mods(args):
                                   _("no longer used (installed tweaks of it stay until you uninstall them)")))
         return
     if args[:1] == ["check"] and len(args) == 2:
-        d = Path(args[1]).expanduser().resolve()
-        if (d / "README.md").is_file() and not (d / "pack.md").is_file():
-            folders, probs = [d], []
-        else:                                          # (a pack: its pack.md is checked too)
-            info, folders, probs = read_pack(d)
-            if not isinstance(info["api"], int) or info["api"] > API:
-                probs.append(f"{d.name}: needs a newer Frame Tweaks (pack api {info['api']}; this one knows {API})")
-        for pr in probs:
-            print(pr)
-        bad = len(probs)
-        for f in folders:
-            c, probs = read_tweak(f)
-            for pr in probs:
-                print(pr)
-            bad += c is None
-            print(f"{'ok ' if c else 'BAD'} {f.name}")
+        lines, bad = check_folder(Path(args[1]).expanduser().resolve())
+        print("\n".join(lines))
         sys.exit(1 if bad else 0)
+    if args[:1] == ["add"] and len(args) in (2, 3):
+        try:
+            d = add_pack(args[1], args[2] if len(args) == 3 else None)
+        except PackError as e:
+            sys.exit(str(e))
+        p = next(x for x in load()["packs"] if x["dir"] == d.resolve())
+        print(_("Added the pack {name} in {folder}.").format(name=plain(p["name"]), folder=d)
+              + (" " + _("By {author}.").format(author=plain(p["author"])) if p["author"] else ""))
+        print(_("Tweaks: %s") % (", ".join(p["tweaks"]) or _("none")))
+        lines, bad = check_folder(d)
+        if bad:
+            print(_("Problems:") + "\n  " + "\n  ".join(plain(x) for x in lines if not x.startswith("ok ")))
+        print(_("It isn't used until you trust it: its tweaks would run as you. Read what they do first (each "
+                "one's README.md in that folder), then: {command}").format(command=f'./install.sh mods trust "{d}"'))
+        return
+    if args[:1] in (["update"], ["remove"]) and len(args) == 2:
+        p = find_pack(args[1])
+        try:
+            if args[0] == "remove":
+                remove_pack(p["dir"])
+                print(_("Removed the pack {name} ({folder}).").format(name=plain(p["name"]), folder=p["dir"]))
+                return
+            got = update_pack(p["dir"])
+        except PackError as e:
+            sys.exit(str(e))
+        if not got["files"]:
+            print(_("{name} is up to date.").format(name=plain(p["name"])))
+            return
+        print(ngettext("{name}: updated, {n} file changed.", "{name}: updated, {n} files changed.",
+                       len(got["files"])).format(name=plain(p["name"]), n=len(got["files"])))
+        for line in got["log"]:
+            print(f"  {line}")
+        print(_("It isn't used until you trust it again. Read what changed first, then: {command}").format(
+            command=f'./install.sh mods trust "{p["dir"]}"'))
+        return
     if args:
         sys.exit(__doc__)
     data = load()

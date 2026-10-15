@@ -9,6 +9,11 @@
   to the newest stable one at once (`./install.sh update --to stable`). The install command
   with `FRAME_TWEAKS_CHANNEL=beta` now keeps that choice for later updates; before, the first
   update took a tester back to the stable release.
+- **Try someone's pack from its link:** 🧩 Packs → **Add a pack from a link** (or
+  `./install.sh mods add LINK`) downloads a pack shared as a git repository into your packs
+  folder. As any pack, it isn't used until you trust it. **Update** (`mods update`) brings its
+  newer version, which waits until you trust it again; **Remove…** (`mods remove`) deletes it once
+  its tweaks are uninstalled.
 
 ### Changed
 - **An update never moves to an older release unless you ask** (`--to`): with test releases

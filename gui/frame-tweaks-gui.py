@@ -1371,7 +1371,7 @@ class Window(QWidget):
 
     def show_packs(self):
         self.close_details()
-        self.details = Packs(self)
+        self.details = Packs(self, follow_link, self.pool)
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
