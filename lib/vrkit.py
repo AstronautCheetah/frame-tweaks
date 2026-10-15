@@ -98,6 +98,13 @@ class GripReader:
                 h["armed"] = a < 0.5
                 continue
             held = a >= (0.5 if h["held"] else 1.0)
-            out.append((d, held, held and not h["held"]))
+            out.append((d, held, held and h["held"] is False))
             h["held"] = held
         return out
+
+    def pause(self):
+        """Not read for a while (no laser on the panel): the next read says whether each grip is
+        held, but a grip squeezed meanwhile (carrying a window, say) isn't a new squeeze."""
+        for h in self.hands:
+            if h["armed"]:                      # (unarmed, it's released when it arms: not stale)
+                h["held"] = None

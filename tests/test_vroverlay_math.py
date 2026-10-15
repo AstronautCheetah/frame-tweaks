@@ -269,6 +269,23 @@ class AfterClose(unittest.TestCase):
         self.assertFalse(timers[-1].running)
 
 
+class Grips(unittest.TestCase):
+    def test_read_while_a_laser_is_on_the_pad_paused_otherwise(self):
+        """(lib/vrkit.py GripReader.pause: a grip squeezed while unread isn't taken for a grab.)"""
+        v = load()
+        o = v.OverlayHost.__new__(v.OverlayHost)
+        o.ticks, o._dash, o.visible, o.drag, o.dirty, o.input_handle = 1, True, True, None, False, 7
+        o.hovered_devices, o.grip_drag, o.pump = set(), False, lambda handle: None
+        o.grips = mock.Mock(poll=mock.Mock(return_value=[]))
+        o.poll()
+        o.grips.pause.assert_called_once_with()
+        o.grips.poll.assert_not_called()
+        o.hovered_devices = {2}
+        o.poll()
+        o.grips.poll.assert_called_once_with()
+        self.assertEqual(o.grips.pause.call_count, 1)
+
+
 class Reset(unittest.TestCase):
     ANCHOR = [[1, 0, 0, 0.0], [0, 1, 0, 1.2], [0, 0, 1, -1.0]]   # the dashboard bar, facing you
 

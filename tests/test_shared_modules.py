@@ -1,9 +1,11 @@
-"""lib/ftconf.py (settings files and logs) and lib/vrkit.py (poses and haptic pulses): the
+"""lib/ftconf.py (settings files and logs) and lib/vrkit.py (poses, haptic pulses and grips): the
 modules the installed programs share (lib/common.sh install_i18n puts them beside i18n.py)."""
 import json
+import math
 import os
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -91,6 +93,51 @@ class VR(unittest.TestCase):
         self.assertTrue(vrkit.direct_pulse(vr, system, 3, 9000.7))
         system.triggerHapticPulse.assert_called_once_with(3, 0, 3999)      # (at most 3999 µs)
         self.assertEqual(vrkit.TICK, {"hover": 1000, "press": 3999})
+
+    @staticmethod
+    def grip_vr(angle):
+        """openvr as GripReader sees it: the left hand is device 1, the right 2, and each grip
+        part is turned angle[hand] degrees from its rest pose."""
+        def turned(deg):
+            c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+            return types.SimpleNamespace(mTrackingToComponentRenderModel=types.SimpleNamespace(
+                m=[[c, -s, 0, 0], [s, c, 0, 0], [0, 0, 1, 0]]))
+        system = mock.Mock(isTrackedDeviceConnected=lambda d: True,
+                           getTrackedDeviceIndexForControllerRole=lambda role: role)
+        models = mock.Mock(getComponentStateForDevicePath=lambda m, part, path, mode: (True, turned(angle[path])),
+                           getComponentState=lambda m, part, state, mode: (True, turned(0)))
+        inp = mock.Mock(getInputSourceHandle=lambda path: path.rsplit("/", 1)[1])
+        return mock.Mock(k_unTrackedDeviceIndexInvalid=-1, TrackedControllerRole_LeftHand=1,
+                         TrackedControllerRole_RightHand=2, VRSystem=lambda: system,
+                         VRRenderModels=lambda: models, VRInput=lambda: inp)
+
+    def test_grip_squeezed_while_paused_is_held_not_a_squeeze(self):
+        """Arrow Pad and Screen snip read grips only while a laser is on them: one squeezed
+        meanwhile (carrying a window with Float grab, say) mustn't grab the panel the laser reaches."""
+        angle = {"left": 0.0, "right": 0.0}
+        g = vrkit.GripReader(self.grip_vr(angle))
+        self.assertEqual(g.poll(), [])                              # (armed by a released sample)
+        angle["right"] = 5.0
+        self.assertEqual(g.poll(), [(1, False, False), (2, True, True)])     # read: a squeeze
+        angle["right"] = 0.0
+        g.poll()
+        g.pause()
+        angle["right"] = 5.0                                        # squeezed, unread
+        self.assertEqual(g.poll(), [(1, False, False), (2, True, False)])    # held, no squeeze
+        self.assertEqual(g.poll()[1], (2, True, False))
+        angle["right"] = 0.0
+        g.poll()
+        angle["right"] = 5.0
+        self.assertEqual(g.poll()[1], (2, True, True))              # a new one is
+        angle["right"] = 0.0
+        g.poll()
+        g.pause()                                                   # released while unread
+        angle["right"] = 5.0
+        g.pause()
+        angle["right"] = 0.0
+        self.assertEqual(g.poll()[1], (2, False, False))
+        angle["right"] = 5.0
+        self.assertEqual(g.poll()[1], (2, True, True))
 
 
 if __name__ == "__main__":

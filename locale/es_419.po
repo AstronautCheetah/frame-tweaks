@@ -160,7 +160,7 @@ msgstr "la revisión del estado no terminó (tardó más de un minuto)"
 msgid "Help make Frame Tweaks better"
 msgstr "Ayuda a mejorar Frame Tweaks"
 
-#: gui/frame-tweaks-gui.py:1392 gui/prefs_page.py:185 packs/original/snip/frame-snip:1314
+#: gui/frame-tweaks-gui.py:1392 gui/prefs_page.py:185 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -3510,75 +3510,75 @@ msgstr "no hay ninguna ventana con el foco"
 msgid "couldn't read the window's picture"
 msgstr "no se pudo leer la imagen de la ventana"
 
-#: packs/original/snip/frame-snip:1294
+#: packs/original/snip/frame-snip:1298
 msgid "Screen snip"
 msgstr "Recorte de pantalla"
 
-#: packs/original/snip/frame-snip:1300
+#: packs/original/snip/frame-snip:1304
 msgid ""
 "Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
 msgstr ""
 "Arrastra un rectángulo para recortar y luego ajústalo con sus tiradores  ·  Esc o clic derecho cancela"
 
-#: packs/original/snip/frame-snip:1313
+#: packs/original/snip/frame-snip:1317
 msgid "Copy"
 msgstr "Copiar"
 
-#: packs/original/snip/frame-snip:1313
+#: packs/original/snip/frame-snip:1317
 msgid "Save"
 msgstr "Guardar"
 
-#: packs/original/snip/frame-snip:1314
+#: packs/original/snip/frame-snip:1318
 msgid "Narrate"
 msgstr "Narrar"
 
-#: packs/original/snip/frame-snip:1468
+#: packs/original/snip/frame-snip:1472
 msgid "Couldn't copy the snip"
 msgstr "No se pudo copiar el recorte"
 
-#: packs/original/snip/frame-snip:1468
+#: packs/original/snip/frame-snip:1472
 msgid "Snip copied"
 msgstr "Recorte copiado"
 
-#: packs/original/snip/frame-snip:1468
+#: packs/original/snip/frame-snip:1472
 msgid "the desktop isn't available"
 msgstr "el escritorio no está disponible"
 
-#: packs/original/snip/frame-snip:1475
+#: packs/original/snip/frame-snip:1479
 msgid "Couldn't save the snip"
 msgstr "No se pudo guardar el recorte"
 
-#: packs/original/snip/frame-snip:1475
+#: packs/original/snip/frame-snip:1479
 msgid "Snip saved"
 msgstr "Recorte guardado"
 
-#: packs/original/snip/frame-snip:1483 packs/original/snip/frame-snip:1504
+#: packs/original/snip/frame-snip:1487 packs/original/snip/frame-snip:1508
 msgid "No text found in the snip"
 msgstr "No se encontró texto en el recorte"
 
-#: packs/original/snip/frame-snip:1486
+#: packs/original/snip/frame-snip:1490
 msgid "Couldn't copy the text"
 msgstr "No se pudo copiar el texto"
 
-#: packs/original/snip/frame-snip:1486
+#: packs/original/snip/frame-snip:1490
 msgid "Text copied"
 msgstr "Texto copiado"
 
-#: packs/original/snip/frame-snip:1509
+#: packs/original/snip/frame-snip:1513
 msgid "Narrate needs the Speech engine"
 msgstr "Narrar necesita el motor de voz"
 
-#: packs/original/snip/frame-snip:1510
+#: packs/original/snip/frame-snip:1514
 msgid ""
 "Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), which isn't installed, or is missing its voice."
 msgstr ""
 "Narrar lee el recorte en voz alta con el motor de voz (Piper, en el propio Frame), que no está instalado o le falta su voz."
 
-#: packs/original/snip/frame-snip:1609 packs/original/snip/frame-snip:1606
+#: packs/original/snip/frame-snip:1613 packs/original/snip/frame-snip:1610
 msgid "Couldn't take a snip"
 msgstr "No se pudo hacer un recorte"
 
-#: packs/original/snip/frame-snip:1609
+#: packs/original/snip/frame-snip:1613
 msgid "empty picture"
 msgstr "imagen vacía"
 
@@ -3672,7 +3672,7 @@ msgstr "Copiar imagen"
 msgid "Put the snip's image on the clipboard"
 msgstr "Poner la imagen del recorte en el portapapeles"
 
-#: packs/original/snip/frame-snip:684 packs/original/snip/frame-snip:1313
+#: packs/original/snip/frame-snip:684 packs/original/snip/frame-snip:1317
 msgid "Copy text"
 msgstr "Copiar texto"
 

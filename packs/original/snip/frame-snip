@@ -1238,7 +1238,11 @@ class NarrationOverlay(QObject):
         # Grip to carry it, as on Arrow Pad and Full Keyboard: squeeze while that controller's
         # laser is on the panel (buttons included), let go to put it down. (Read only then: each
         # read asks SteamVR for controller properties, which other programs wait on too.)
-        grips = self.grips.poll() if self.grips and (self.hovered or self.grip_drag) else []
+        grips = []
+        if self.grips and (self.hovered or self.grip_drag):
+            grips = self.grips.poll()
+        elif self.grips:
+            self.grips.pause()                  # (a grip squeezed elsewhere doesn't grab the panel)
         held = {d for d, h, _ in grips if h}
         for d, _, pressed in grips:
             if pressed and d in self.hovered and self.drag is None:

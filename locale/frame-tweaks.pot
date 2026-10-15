@@ -154,7 +154,7 @@ msgstr ""
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1392 gui/prefs_page.py:185 packs/original/snip/frame-snip:1314
+#: gui/frame-tweaks-gui.py:1392 gui/prefs_page.py:185 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
@@ -3291,73 +3291,73 @@ msgstr ""
 msgid "couldn't read the window's picture"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1294
+#: packs/original/snip/frame-snip:1298
 msgid "Screen snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1300
+#: packs/original/snip/frame-snip:1304
 msgid ""
 "Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1313
+#: packs/original/snip/frame-snip:1317
 msgid "Copy"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1313
+#: packs/original/snip/frame-snip:1317
 msgid "Save"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1314
+#: packs/original/snip/frame-snip:1318
 msgid "Narrate"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1468
+#: packs/original/snip/frame-snip:1472
 msgid "Couldn't copy the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1468
+#: packs/original/snip/frame-snip:1472
 msgid "Snip copied"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1468
+#: packs/original/snip/frame-snip:1472
 msgid "the desktop isn't available"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1475
+#: packs/original/snip/frame-snip:1479
 msgid "Couldn't save the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1475
+#: packs/original/snip/frame-snip:1479
 msgid "Snip saved"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1483 packs/original/snip/frame-snip:1504
+#: packs/original/snip/frame-snip:1487 packs/original/snip/frame-snip:1508
 msgid "No text found in the snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1486
+#: packs/original/snip/frame-snip:1490
 msgid "Couldn't copy the text"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1486
+#: packs/original/snip/frame-snip:1490
 msgid "Text copied"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1509
+#: packs/original/snip/frame-snip:1513
 msgid "Narrate needs the Speech engine"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1510
+#: packs/original/snip/frame-snip:1514
 msgid ""
 "Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), which isn't installed, or is missing its voice."
 msgstr ""
 
-#: packs/original/snip/frame-snip:1609 packs/original/snip/frame-snip:1606
+#: packs/original/snip/frame-snip:1613 packs/original/snip/frame-snip:1610
 msgid "Couldn't take a snip"
 msgstr ""
 
-#: packs/original/snip/frame-snip:1609
+#: packs/original/snip/frame-snip:1613
 msgid "empty picture"
 msgstr ""
 
@@ -3450,7 +3450,7 @@ msgstr ""
 msgid "Put the snip's image on the clipboard"
 msgstr ""
 
-#: packs/original/snip/frame-snip:684 packs/original/snip/frame-snip:1313
+#: packs/original/snip/frame-snip:684 packs/original/snip/frame-snip:1317
 msgid "Copy text"
 msgstr ""
 
