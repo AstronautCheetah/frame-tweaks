@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Android Mirror coming back after the phone slept** (it reconnects by itself): the new window
+  showed in the dashboard, was put back where the mirror floated, and left the dashboard showing
+  nothing. The dashboard now goes back to the window it showed before, and the mirror's trip
+  through it is shorter.
+
 ## 0.6.2 (2026-10-15)
 
 ### Added
