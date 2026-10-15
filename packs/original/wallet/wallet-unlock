@@ -31,7 +31,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     from i18n import _, N_, ngettext
 except ImportError:                       # (not installed by Frame Tweaks: English)
@@ -41,6 +41,7 @@ except ImportError:                       # (not installed by Frame Tweaks: Engl
     def ngettext(singular, plural, n):
         return singular if n == 1 else plural
     N_ = _
+import ftconf  # noqa: E402  (settings files: lib/ftconf.py, installed beside i18n.py)
 
 from jeepney import DBusAddress, MessageType, new_method_call
 from jeepney.bus_messages import message_bus
@@ -285,10 +286,7 @@ LOCK_CONF = Path.home() / ".config/frame-tweaks/wallet.conf"
 def lock_hours():
     """Hours from an unlock to the auto-lock: WALLET_LOCK_HOURS, else wallet.conf's (set on the
     Wallet apps page), else 4."""
-    for v in (os.environ.get("WALLET_LOCK_HOURS"),
-              next((ln.split("=", 1)[1].strip().strip('"') for ln in
-                    (LOCK_CONF.read_text().splitlines() if LOCK_CONF.exists() else [])
-                    if ln.startswith("WALLET_LOCK_HOURS=")), None)):
+    for v in (os.environ.get("WALLET_LOCK_HOURS"), conf_value("WALLET_LOCK_HOURS")):
         try:
             if v and float(v) > 0:
                 return v
@@ -298,13 +296,7 @@ def lock_hours():
 
 
 def conf_value(key):
-    try:
-        for ln in LOCK_CONF.read_text().splitlines():
-            if ln.startswith(key + "="):
-                return ln.split("=", 1)[1].strip().strip('"')
-    except OSError:
-        pass
-    return None
+    return ftconf.read_shell(LOCK_CONF).get(key)
 
 
 def autolock_on():
@@ -315,10 +307,7 @@ def autolock_on():
 def set_autolock(conn, on):
     """Turn both automatic locks on or off: the timer after an unlock, and kwalletd's close
     after being unused (kwalletrc Close When Idle; the Idle Timeout itself is kept)."""
-    lines = LOCK_CONF.read_text().splitlines() if LOCK_CONF.exists() else []
-    lines = [ln for ln in lines if not ln.startswith("WALLET_AUTOLOCK=")] + [f"WALLET_AUTOLOCK={1 if on else 0}"]
-    LOCK_CONF.parent.mkdir(parents=True, exist_ok=True)
-    LOCK_CONF.write_text("\n".join(lines) + "\n")
+    ftconf.set_shell(LOCK_CONF, {"WALLET_AUTOLOCK": 1 if on else 0})
     subprocess.run(["kwriteconfig6", "--file", "kwalletrc", "--group", "Wallet", "--key", "Close When Idle",
                     "true" if on else "false"], stderr=subprocess.DEVNULL)
     for addr in (KWALLETD, KSECRETD):          # re-read kwalletrc now

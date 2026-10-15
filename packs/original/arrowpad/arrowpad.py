@@ -24,7 +24,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     import i18n
     from i18n import _, N_, NP_, ngettext, pgettext  # noqa: F401
@@ -81,6 +81,8 @@ from PyQt6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPainterPa
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLayout, QPushButton,  # noqa: E402
                              QVBoxLayout, QWidget)
+
+import ftconf  # noqa: E402  (settings files and logs: lib/ftconf.py, installed beside i18n.py)
 
 try:  # controller haptics (optional): SteamVR Input via the openvr module
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -310,13 +312,7 @@ class ClickSwap:
         self.press_time = 0.0
 
     def log(self, msg):
-        try:
-            if self.LOG.exists() and self.LOG.stat().st_size > 200_000:
-                self.LOG.replace(self.LOG.with_suffix(".log.1"))
-            with open(self.LOG, "a") as f:
-                f.write(f"{time.strftime('%H:%M:%S')} {msg}\n")
-        except OSError:
-            pass
+        ftconf.append_log(self.LOG, msg)
 
     def _open(self):
         if self.dpy:
@@ -1203,16 +1199,13 @@ class ArrowPad(QWidget):
 
     @staticmethod
     def load_config():
-        try:
-            return json.loads(CONFIG.read_text())
-        except (OSError, ValueError):
-            return {}
+        return ftconf.read_json(CONFIG)          # ({} for none, or a damaged file: it used to crash on a list)
 
     def save_config(self):
         try:
             self.cfg.update({"pos": [self.x(), self.y()], "scale": self.scale, "pinned": self.pinned,
                              "haptics": self.haptic_level})
-            CONFIG.write_text(json.dumps(self.cfg))
+            ftconf.write_text(CONFIG, json.dumps(self.cfg))
         except OSError:
             pass
 

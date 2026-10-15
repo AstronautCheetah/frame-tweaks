@@ -207,10 +207,12 @@ fetch_mirror() {
 # Translations for installed programs (they don't run from this folder): lib/i18n.py, lib/i18n.sh
 # and locale/*.po in ~/.local/share/frame-tweaks/i18n. A Python program adds that folder to
 # sys.path and imports _ from i18n; a bash program sources its i18n.sh (see arrowpad, adb-scrcpy).
+# (and the Python modules the programs share: lib/ftconf.py, settings files and logs; lib/vrkit.py,
+# SteamVR poses, grips and haptics)
 install_i18n() {
     local d="$HOME/.local/share/frame-tweaks/i18n"
     mkdir -p "$d/locale"
-    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$d/"
+    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$d/"
     find "$d/locale" -name '*.po' -delete
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }

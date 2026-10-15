@@ -15,7 +15,9 @@ import math
 import os
 import time
 
+import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sys.path)
 import openvr
+import vrkit  # noqa: E402
 from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt, QTimer
 from PyQt6.QtGui import QImage, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton
@@ -44,76 +46,6 @@ FOLLOW = (DASHBOARD_BAR, DASHBOARD_MAIN)       # what the pad rides along with
 PLACE = (DASHBOARD_MAIN, DASHBOARD_BAR)        # what Reset puts it beneath
 GAP_BELOW, TOWARD_VIEWER, PITCH_DEG = 0.06, 0.24, 50
 FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of the headset
-
-
-def _rigid_mul(a, b):
-    """Compose two 3x4 rigid transforms (rotation | translation)."""
-    return [[sum(a[r][k] * b[k][c] for k in range(3)) + (a[r][3] if c == 3 else 0.0)
-             for c in range(4)] for r in range(3)]
-
-
-def _rigid_inv(a):
-    rt = [[a[c][r] for c in range(3)] for r in range(3)]          # rotation transposed
-    t = [-sum(rt[r][k] * a[k][3] for k in range(3)) for r in range(3)]
-    return [rt[r] + [t[r]] for r in range(3)]
-
-
-def _mat(rows):
-    m = openvr.HmdMatrix34_t()
-    for r in range(3):
-        for c in range(4):
-            m.m[r][c] = rows[r][c]
-    return m
-
-
-class GripReader:
-    """Grip squeezes, read the way Full Keyboard reads them: the Frame's dashboard hides grip
-    actions and legacy controller state from apps, but the controller model's "button_grip"
-    part still moves. Its rotation from the rest pose, in degrees, with Full Keyboard's latch:
-    held from 1.0°, released below 0.5°, armed only after a released sample."""
-
-    def __init__(self):
-        self.sys, self.rm, self.inp = openvr.VRSystem(), openvr.VRRenderModels(), openvr.VRInput()
-        self.hands = []
-        for hand, role in (("left", openvr.TrackedControllerRole_LeftHand),
-                           ("right", openvr.TrackedControllerRole_RightHand)):
-            self.hands.append({"role": role, "path": self.inp.getInputSourceHandle(f"/user/hand/{hand}"),
-                               "armed": False, "held": False, "device": None})
-
-    @staticmethod
-    def _angle(a, b):
-        tr = sum(a.m[r][c] * b.m[r][c] for r in range(3) for c in range(3))
-        return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1) / 2))))
-
-    def poll(self):
-        """[(device, held, just_pressed)] for each connected controller."""
-        out = []
-        for h in self.hands:
-            try:
-                d = self.sys.getTrackedDeviceIndexForControllerRole(h["role"])
-                if d == openvr.k_unTrackedDeviceIndexInvalid or not self.sys.isTrackedDeviceConnected(d):
-                    h.update(armed=False, held=False, device=None)
-                    continue
-                if d != h["device"]:
-                    h.update(armed=False, held=False, device=d)
-                model = self.sys.getStringTrackedDeviceProperty(d, openvr.Prop_RenderModelName_String)
-                mode = openvr.RenderModel_ControllerMode_State_t()
-                ok1, cur = self.rm.getComponentStateForDevicePath(model, "button_grip", h["path"], mode)
-                ok2, rest = self.rm.getComponentState(model, "button_grip", openvr.VRControllerState_t(), mode)
-                if not (ok1 and ok2):
-                    h.update(armed=False, held=False)
-                    continue
-                a = self._angle(rest.mTrackingToComponentRenderModel, cur.mTrackingToComponentRenderModel)
-            except Exception:
-                h.update(armed=False, held=False)
-                continue
-            if not h["armed"]:
-                h["armed"] = a < 0.5
-                continue
-            held = a >= (0.5 if h["held"] else 1.0)
-            out.append((d, held, held and not h["held"]))
-            h["held"] = held
-        return out
 
 
 class OverlayHost:
@@ -159,7 +91,7 @@ class OverlayHost:
         self.hovered_devices = set()    # controllers whose laser is on the pad
         self.grip_drag = False          # the current drag is a grip squeeze (ends on release)
         try:
-            self.grips = GripReader()
+            self.grips = vrkit.GripReader(openvr)
         except Exception:
             self.grips = None
         self.drag = None                # (device, offset, controller start, depth axis) while dragging
@@ -176,7 +108,7 @@ class OverlayHost:
             # Saved by an older version, relative to the main panel whenever it was showing.
             old = self.dashboard_anchor(PLACE)
             if old is not None:
-                self.pose = _rigid_mul(old, self.offset)
+                self.pose = vrkit.rigid_mul(old, self.offset)
                 self.remember_offset()
                 self.pose = None
         if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
@@ -332,7 +264,7 @@ class OverlayHost:
         anchor = self.dashboard_anchor()
         if anchor is None or not self.offset:
             return False
-        pose = _rigid_mul(anchor, self.offset)
+        pose = vrkit.rigid_mul(anchor, self.offset)
         # The anchor's reported pose wobbles slightly; moving on every wobble looked like shimmer.
         if not self.pose or max(abs(a - b) for ra, rb in zip(pose, self.pose) for a, b in zip(ra, rb)) > POSE_EPSILON:
             self.pose = pose
@@ -342,7 +274,7 @@ class OverlayHost:
     def remember_offset(self):
         anchor = self.dashboard_anchor()
         if anchor is not None and self.pose:
-            self.offset = _rigid_mul(_rigid_inv(anchor), self.pose)
+            self.offset = vrkit.relative(anchor, self.pose)
 
     def distance_from_head(self):
         head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
@@ -351,7 +283,7 @@ class OverlayHost:
         return math.dist([head[r][3] for r in range(3)], [self.pose[r][3] for r in range(3)])
 
     def apply_pose(self):
-        m = _mat(self.pose)
+        m = vrkit.hmd34(openvr, self.pose)
         self.ov.setOverlayTransformAbsolute(self.input_handle, openvr.TrackingUniverseStanding, m)
         if getattr(self, "cover", None) is not None:
             self.ov.setOverlayTransformAbsolute(self.cover, openvr.TrackingUniverseStanding, m)
@@ -496,13 +428,7 @@ class OverlayHost:
 
     def log_input(self, msg):
         """Presses and releases as SteamVR reports them and where they land (for diagnosis)."""
-        try:
-            if os.path.exists(self.INPUT_LOG) and os.path.getsize(self.INPUT_LOG) > 200_000:
-                os.replace(self.INPUT_LOG, self.INPUT_LOG + ".1")
-            with open(self.INPUT_LOG, "a") as f:
-                f.write(f"{time.strftime('%H:%M:%S')}.{int(time.time() * 1000) % 1000:03d} {msg}\n")
-        except OSError:
-            pass
+        ftconf.append_log(self.INPUT_LOG, msg, stamp="%H:%M:%S.ms")
 
     def describe(self, w):
         if w is None:
@@ -594,7 +520,7 @@ class OverlayHost:
             return
         self.cancel_presses()                       # a grab cancels presses in progress
         self.grip_drag = grip
-        self.drag = (dev, _rigid_mul(_rigid_inv(ctrl), self.pose),
+        self.drag = (dev, vrkit.relative(ctrl, self.pose),
                      [ctrl[r][3] for r in range(3)], self.depth_axis())
 
     def end_drag(self):
@@ -666,7 +592,7 @@ class OverlayHost:
         ctrl = self.device_matrix(dev)
         if ctrl is None:
             return
-        pose = _rigid_mul(ctrl, offset)
+        pose = vrkit.rigid_mul(ctrl, offset)
         head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
         if axis is not None and head is not None:
             pushed = sum((ctrl[i][3] - start[i]) * axis[i] for i in range(3))

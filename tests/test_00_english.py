@@ -6,6 +6,8 @@ import tempfile
 import unittest
 
 os.environ["FRAME_TWEAKS_LANGUAGE"] = "en"
+# (programs import the shared modules from the repo's lib/, not a copy installed in this home)
+os.environ["FRAME_TWEAKS_PYLIB"] = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "lib")
 os.environ["FRAME_TWEAKS_KEYBOARD"] = "0"
 # (the window announces its language to running programs: not to the real ones from a test)
 # (in folders removed when the tests end)

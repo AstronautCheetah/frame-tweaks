@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrol
 from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
 
 from sft import components  # (the tweaks: which one set up an app; lib/ is on the path)
+import ftconf  # noqa: E402  (settings files; lib/ is on the path)
 
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
@@ -107,36 +108,27 @@ LOCK_STEPS = (1, 2, 3, 4, 6, 8, 12, 24)
 
 
 def lock_hours():
-    """The auto-lock length in hours, as wallet-unlock reads it (wallet.conf, default 4)."""
-    try:
-        for line in LOCK_CONF.read_text().splitlines():
-            if line.startswith("WALLET_LOCK_HOURS="):
-                v = float(line.split("=", 1)[1].strip().strip('"'))
-                if v > 0:
-                    return v
-    except (OSError, ValueError):
-        pass
+    """The auto-lock length in hours, as wallet-unlock reads it (WALLET_LOCK_HOURS, else
+    wallet.conf's, else 4)."""
+    for v in (os.environ.get("WALLET_LOCK_HOURS"), ftconf.read_shell(LOCK_CONF).get("WALLET_LOCK_HOURS")):
+        try:
+            if v and float(v) > 0:
+                return float(v)
+        except ValueError:
+            pass
     return DEFAULT_LOCK_HOURS
 
 
 def autolock_on():
-    """Whether the wallet locks itself (WALLET_AUTOLOCK in wallet.conf; on unless 0)."""
-    try:
-        for line in LOCK_CONF.read_text().splitlines():
-            if line.startswith("WALLET_AUTOLOCK="):
-                return line.split("=", 1)[1].strip().strip('"') != "0"
-    except OSError:
-        pass
-    return True
+    """Whether the wallet locks itself, as wallet-unlock reads it (WALLET_AUTOLOCK, else
+    wallet.conf's; on unless 0)."""
+    return (os.environ.get("WALLET_AUTOLOCK") or ftconf.read_shell(LOCK_CONF).get("WALLET_AUTOLOCK") or "1") != "0"
 
 
 def set_lock_hours(hours):
     """Save it for wallet-unlock (other lines in wallet.conf are kept). Takes effect at the next
     unlock or Extend timer."""
-    lines = LOCK_CONF.read_text().splitlines() if LOCK_CONF.exists() else []
-    lines = [ln for ln in lines if not ln.startswith("WALLET_LOCK_HOURS=")] + [f"WALLET_LOCK_HOURS={hours:g}"]
-    LOCK_CONF.parent.mkdir(parents=True, exist_ok=True)
-    LOCK_CONF.write_text("\n".join(lines) + "\n")
+    ftconf.set_shell(LOCK_CONF, {"WALLET_LOCK_HOURS": f"{hours:g}"})
 
 
 def wallet_state_text(info, now):

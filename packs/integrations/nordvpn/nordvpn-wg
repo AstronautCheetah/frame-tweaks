@@ -31,7 +31,7 @@ import urllib.request
 from base64 import b64encode
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     from i18n import _, N_, ngettext
 except ImportError:                       # (not installed by Frame Tweaks: English)

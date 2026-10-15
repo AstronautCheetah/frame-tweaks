@@ -12,6 +12,8 @@ IVRApplications doesn't work on the Frame.)
 Optional: does nothing without SteamVR or the openvr module."""
 from pathlib import Path
 
+import vrkit  # (lib/: on the window's sys.path)
+
 VR_DIR = Path(__file__).resolve().parent / "vr"
 
 
@@ -19,6 +21,7 @@ class VRButtons:
     def __init__(self, handlers):
         self.handlers = handlers            # {"back": fn, "home": fn, "toggle": fn}
         self.ok, self.claimed = False, False
+        self.started = False                # SteamVR is up: haptics work even if the buttons stop
         try:
             import openvr
             self.vr = openvr
@@ -28,6 +31,7 @@ class VRButtons:
             self.set = openvr.VRActiveActionSet_t()
             self.set.ulActionSet = self.input.getActionSetHandle("/actions/sft")
             self.set.nPriority = openvr.k_nActionSetOverlayGlobalPriorityMin
+            self.started = True
             self.actions = {n: self.input.getActionHandle(f"/actions/sft/in/{n}") for n in handlers}
             self.ok = True
         except Exception:
@@ -57,20 +61,16 @@ class VRButtons:
         """A tick (hover) or a firmer pulse (press) on the controller driving the laser, as on
         Arrow Pad and Full Keyboard. A direct pulse: SteamVR Input haptics need input focus,
         which the dashboard has."""
-        if not self.ok:
+        # (not tied to self.ok: an error claiming the buttons used to turn haptics off too, for good)
+        if not self.started:
             return
         try:
-            vr = self.vr
-            dev = vr.VROverlay().getPrimaryDashboardDevice()
-            if dev == vr.k_unTrackedDeviceIndexInvalid:
-                dev = vr.VRSystem().getTrackedDeviceIndexForControllerRole(vr.TrackedControllerRole_RightHand)
-            if dev != vr.k_unTrackedDeviceIndexInvalid:
-                vr.VRSystem().triggerHapticPulse(dev, 0, 1000 if kind == "hover" else 3999)
+            vrkit.direct_pulse(self.vr, self.vr.VRSystem(), vrkit.dashboard_device(self.vr), vrkit.TICK[kind])
         except Exception:
             pass
 
     def close(self):
-        if self.ok:
+        if self.started:
             try:
                 self.input.updateActionState([])
                 self.vr.shutdown()

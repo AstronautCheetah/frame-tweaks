@@ -36,6 +36,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manifest  # noqa: E402
+import ftconf  # noqa: E402
 import i18n  # noqa: E402
 from i18n import _  # noqa: E402
 
@@ -554,21 +555,7 @@ def _allowed(cid, key, value):
 def read_settings(cid):
     """Current values (defaults for anything unset or not allowed)."""
     s, out = SETTINGS[cid], defaults(cid)
-    if s["format"] == "json":
-        try:
-            raw = json.loads(s["file"].read_text())
-            raw = raw if isinstance(raw, dict) else {}   # (as write_settings: null or a list is no settings)
-        except (OSError, ValueError):
-            raw = {}
-    else:
-        raw = {}
-        try:
-            for line in s["file"].read_text().splitlines():
-                k, eq, v = line.partition("=")
-                if eq:
-                    raw[k.strip()] = v.strip().strip("'\"")
-        except OSError:
-            pass
+    raw = ftconf.read_json(s["file"]) if s["format"] == "json" else ftconf.read_shell(s["file"])
     for key, _title, choices, _default in s["options"]:
         if key in raw:                                 # (a shell file holds text: "1280" for a listed 1280)
             out[key] = next((v for _label, v in choices if v == raw[key] or s["format"] == "shell" and str(v) == raw[key]),
@@ -585,34 +572,11 @@ def write_settings(cid, changes, reset=False):
             raise KeyError(key)
         if not _allowed(cid, key, value):
             raise ValueError(f"{key}={value}")
-    path = s["file"]
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ours = [k for k in defaults(cid) if reset and k not in changes]
     if s["format"] == "json":
-        try:
-            raw = json.loads(path.read_text())
-            raw = raw if isinstance(raw, dict) else {}
-        except (OSError, ValueError):
-            raw = {}
-        if reset:
-            raw = {k: v for k, v in raw.items() if k not in defaults(cid)}
-        raw.update(changes)
-        path.write_text(json.dumps(raw) + "\n")
-        return
-    try:
-        lines = path.read_text().splitlines()
-    except OSError:
-        lines = []
-    out, done = [], set()
-    for line in lines:          # (values quoted where they must be, so the file can be sourced: K='a b')
-        k = line.partition("=")[0].strip()
-        if k in defaults(cid) and (reset or k in changes):
-            if k in changes and k not in done:
-                out.append(f"{k}={shlex.quote(str(changes[k]))}")
-                done.add(k)
-            continue
-        out.append(line)
-    out += [f"{k}={shlex.quote(str(v))}" for k, v in changes.items() if k not in done]
-    path.write_text("".join(f"{line}\n" for line in out))
+        ftconf.update_json(s["file"], changes, drop=ours)
+    else:                       # (quoted where they must be, so the file can be sourced: K='a b')
+        ftconf.set_shell(s["file"], changes, drop=ours)
 
 
 def parse_value(cid, key, text):
