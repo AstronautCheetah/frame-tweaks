@@ -12,7 +12,7 @@ msgstr ""
 msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1040 lib/sft.py:688
+#: gui/frame-tweaks-gui.py:1040 lib/sft.py:690
 msgid "Experimental: %s"
 msgstr ""
 
@@ -275,7 +275,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:372 install.sh:221 lib/common.sh:462 lib/link.sh:29 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:372 install.sh:221 lib/common.sh:462 lib/link.sh:38 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -496,7 +496,7 @@ msgstr ""
 msgid "Show hidden ({n})"
 msgstr ""
 
-#: gui/packs_page.py:113 lib/sft.py:940
+#: gui/packs_page.py:113 lib/sft.py:942
 msgid "(instead of {other}'s)"
 msgstr ""
 
@@ -514,11 +514,11 @@ msgid_plural "%d tweaks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py:126 lib/sft.py:895
+#: gui/packs_page.py:126 lib/sft.py:897
 msgid "Tweaks: %s"
 msgstr ""
 
-#: gui/packs_page.py:126 lib/sft.py:895
+#: gui/packs_page.py:126 lib/sft.py:897
 msgid "none"
 msgstr ""
 
@@ -613,11 +613,11 @@ msgstr ""
 msgid "Updating {name}…"
 msgstr ""
 
-#: gui/packs_page.py:241 lib/sft.py:913
+#: gui/packs_page.py:241 lib/sft.py:915
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py:243 lib/sft.py:915
+#: gui/packs_page.py:243 lib/sft.py:917
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
@@ -1409,7 +1409,7 @@ msgstr ""
 msgid "run what?"
 msgstr ""
 
-#: install.sh:722 lib/link.sh:32
+#: install.sh:722 lib/link.sh:41
 msgid "%s has nothing to run"
 msgstr ""
 
@@ -1433,25 +1433,25 @@ msgstr ""
 msgid "desktop mode"
 msgstr ""
 
-#: lib/browser.py:308
+#: lib/browser.py:311
 msgid "Opened in {app} ({session})"
 msgstr ""
 
-#: lib/browser.py:315
+#: lib/browser.py:318
 msgid ""
 "Your default browser, {default}, can't open links, so {app} did. Choose one in System Settings → Default Applications → Web browser."
 msgstr ""
 
-#: lib/browser.py:317
+#: lib/browser.py:320
 msgid ""
 "No default browser is set, so {app} opened it. Choose one in System Settings → Default Applications → Web browser."
 msgstr ""
 
-#: lib/browser.py:363
+#: lib/browser.py:366
 msgid "No default app found."
 msgstr ""
 
-#: lib/browser.py:372
+#: lib/browser.py:375
 msgid "Couldn't open it."
 msgstr ""
 
@@ -1573,7 +1573,15 @@ msgstr ""
 msgid "Uninstalling %s with its own uninstaller:"
 msgstr ""
 
-#: lib/link.sh:27
+#: lib/link.sh:25
+msgid "Restart SteamVR to unload it (reboot, or: %s)."
+msgstr ""
+
+#: lib/link.sh:35
+msgid "installed; restart SteamVR to load it"
+msgstr ""
+
+#: lib/link.sh:36
 msgid "installed by its own installer (it updates its own way)"
 msgstr ""
 
@@ -1594,230 +1602,230 @@ msgstr ""
 msgid "Open Frame Tweaks to install it?"
 msgstr ""
 
-#: lib/sft.py:1015
+#: lib/sft.py:1017
 msgid "uninstall-settings takes keep or remove"
 msgstr ""
 
-#: lib/sft.py:1044
+#: lib/sft.py:1046
 msgid "{id} has no settings; these do: {ids}"
 msgstr ""
 
-#: lib/sft.py:1052
+#: lib/sft.py:1054
 msgid "expected KEY=VALUE, got %s"
 msgstr ""
 
-#: lib/sft.py:1056
+#: lib/sft.py:1058
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr ""
 
-#: lib/sft.py:674
+#: lib/sft.py:676
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr ""
 
-#: lib/sft.py:683 lib/sft.py:965 lib/sft.py:989 lib/sft.py:993 lib/sft.py:1021
+#: lib/sft.py:685 lib/sft.py:967 lib/sft.py:991 lib/sft.py:995 lib/sft.py:1023
 msgid "unknown component: %s"
 msgstr ""
 
-#: lib/sft.py:686
+#: lib/sft.py:688
 msgid "Why: %s"
 msgstr ""
 
-#: lib/sft.py:690
+#: lib/sft.py:692
 msgid "Needs: %s"
 msgstr ""
 
-#: lib/sft.py:692
+#: lib/sft.py:694
 msgid "By: %s"
 msgstr ""
 
-#: lib/sft.py:694
+#: lib/sft.py:696
 msgid "Source: %s"
 msgstr ""
 
-#: lib/sft.py:696
+#: lib/sft.py:698
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: lib/sft.py:697
+#: lib/sft.py:699
 msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr ""
 
-#: lib/sft.py:699
+#: lib/sft.py:701
 msgid "More: %s"
 msgstr ""
 
-#: lib/sft.py:702
+#: lib/sft.py:704
 msgid "Run ({label}): {command}"
 msgstr ""
 
-#: lib/sft.py:704
+#: lib/sft.py:706
 msgid "Settings: %s"
 msgstr ""
 
-#: lib/sft.py:728
+#: lib/sft.py:730
 msgid "git isn't installed"
 msgstr ""
 
-#: lib/sft.py:730
+#: lib/sft.py:732
 msgid "git took too long (no connection?)"
 msgstr ""
 
-#: lib/sft.py:734
+#: lib/sft.py:736
 msgid "git {command} failed"
 msgstr ""
 
-#: lib/sft.py:761
+#: lib/sft.py:763
 msgid ""
 "That isn't a link to a pack: give the address of its git repository, starting with https://"
 msgstr ""
 
-#: lib/sft.py:763
+#: lib/sft.py:765
 msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
-#: lib/sft.py:766
+#: lib/sft.py:768
 msgid "You have a pack in {folder} already: update it, or remove it first."
 msgstr ""
 
-#: lib/sft.py:774
+#: lib/sft.py:776
 msgid ""
 "There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
 msgstr ""
 
-#: lib/sft.py:787
+#: lib/sft.py:789
 msgid "{pack} wasn't added from a link: change its folder yourself."
 msgstr ""
 
-#: lib/sft.py:789
+#: lib/sft.py:791
 msgid ""
 "{pack} was added at a fixed version: to follow another one, remove it and add it again."
 msgstr ""
 
-#: lib/sft.py:821
+#: lib/sft.py:823
 msgid "Only packs in {folder} can be removed here."
 msgstr ""
 
-#: lib/sft.py:825
+#: lib/sft.py:827
 msgid "Uninstall its tweaks first: {ids} ({command})."
 msgstr ""
 
-#: lib/sft.py:826
+#: lib/sft.py:828
 msgid ""
 "Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
 msgstr ""
 
-#: lib/sft.py:857
+#: lib/sft.py:859
 msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr ""
 
-#: lib/sft.py:861
+#: lib/sft.py:863
 msgid "no pack {name}; see {command}"
 msgstr ""
 
-#: lib/sft.py:868
+#: lib/sft.py:870
 msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
 msgstr ""
 
-#: lib/sft.py:871
+#: lib/sft.py:873
 msgid "in use; its tweaks are listed"
 msgstr ""
 
-#: lib/sft.py:872
+#: lib/sft.py:874
 msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:877
+#: lib/sft.py:879
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
 
-#: lib/sft.py:880
+#: lib/sft.py:882
 msgid "trusted; its tweaks are listed now"
 msgstr ""
 
-#: lib/sft.py:881
+#: lib/sft.py:883
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:893
+#: lib/sft.py:895
 msgid "Added the pack {name} in {folder}."
 msgstr ""
 
-#: lib/sft.py:894
+#: lib/sft.py:896
 msgid "By {author}."
 msgstr ""
 
-#: lib/sft.py:898
+#: lib/sft.py:900
 msgid "Problems:"
 msgstr ""
 
-#: lib/sft.py:899
+#: lib/sft.py:901
 msgid ""
 "It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
 msgstr ""
 
-#: lib/sft.py:907
+#: lib/sft.py:909
 msgid "Removed the pack {name} ({folder})."
 msgstr ""
 
-#: lib/sft.py:919
+#: lib/sft.py:921
 msgid ""
 "It isn't used until you trust it again. Read what changed first, then: {command}"
 msgstr ""
 
-#: lib/sft.py:927
+#: lib/sft.py:929
 msgid "official: in use"
 msgstr ""
 
-#: lib/sft.py:928
+#: lib/sft.py:930
 msgid "official: turned off ({command})"
 msgstr ""
 
-#: lib/sft.py:929
+#: lib/sft.py:931
 msgid "trusted: in use"
 msgstr ""
 
-#: lib/sft.py:930
+#: lib/sft.py:932
 msgid "not trusted: not used ({command})"
 msgstr ""
 
-#: lib/sft.py:931
+#: lib/sft.py:933
 msgid "changed since you trusted it: not used until you trust it again"
 msgstr ""
 
-#: lib/sft.py:943
+#: lib/sft.py:945
 msgid "problem: %s"
 msgstr ""
 
-#: lib/sft.py:951
+#: lib/sft.py:953
 msgid "(default)"
 msgstr ""
 
-#: lib/sft.py:965
+#: lib/sft.py:967
 msgid "%s what?"
 msgstr ""
 
-#: lib/sft.py:968
+#: lib/sft.py:970
 msgid "Hidden in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:969
+#: lib/sft.py:971
 msgid "Shown in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:976
+#: lib/sft.py:978
 msgid "unknown group {name}; groups: {groups}"
 msgstr ""
 
-#: lib/sft.py:978
+#: lib/sft.py:980
 msgid "Group {name} hidden in the installer window."
 msgstr ""
 
-#: lib/sft.py:979
+#: lib/sft.py:981
 msgid "Group {name} shown in the installer window."
 msgstr ""
 
-#: lib/sft.py:993
+#: lib/sft.py:995
 msgid "%s isn't linked"
 msgstr ""
 
@@ -4504,11 +4512,11 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:20
+#: packs/third-party/clipboard/install.sh:36
 msgid "%s: not the pinned commit"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:38 packs/third-party/recline/install.sh:22
+#: packs/third-party/clipboard/install.sh:38
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 
@@ -4616,20 +4624,8 @@ msgid ""
 msgstr ""
 
 #: packs/third-party/recline/README.md
-msgid "Applies when you reinstall Recline, then restart SteamVR."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "Keep the room view aligned while reclined"
-msgstr ""
-
-#: packs/third-party/recline/README.md
 msgid ""
 "Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "No (the room view looks tilted while reclined)"
 msgstr ""
 
 #: packs/third-party/recline/README.md
@@ -4638,116 +4634,12 @@ msgstr ""
 
 #: packs/third-party/recline/README.md
 msgid ""
-"Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid ""
-"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
+"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes."
 msgstr ""
 
 #: packs/third-party/recline/README.md
 msgid ""
 "Use VR lying down or reclined; one button makes your view level and forward"
-msgstr ""
-
-#: packs/third-party/recline/README.md
-msgid "Yes (adds a small library to the Frame's camera service)"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:11
-msgid ""
-"SteamVR's vrpathreg, CMake, a C++ compiler and the Vulkan headers are there"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:5
-msgid "SteamVR's vrpathreg"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:7
-msgid "the Vulkan headers"
-msgstr ""
-
-#: packs/third-party/recline/check-system.sh:9
-msgid "SteamOS no longer has: %s"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:17
-msgid "Fetching Recline-VR %s from %s"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:29
-msgid "Building it (under a minute) and running its tests"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:31
-msgid "Recline-VR: cmake failed"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:32
-msgid "Recline-VR: the build failed"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:33
-msgid "Recline-VR: its tests failed; nothing was installed"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:35
-msgid ""
-"Recline-VR built without Vulkan; not installing (its fallback has crashed SteamVR's compositor)"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:44
-msgid ""
-"Room-view fix left out (setting); the room view will look tilted while reclined"
-msgstr ""
-
-#: packs/third-party/recline/install.sh:52
-msgid "Recline %s installed. Restart SteamVR to load it (reboot, or: %s)."
-msgstr ""
-
-#: packs/third-party/recline/install.sh:9
-msgid "can't build Recline: %s"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:12
-msgid "Recline %s installed; restart SteamVR to load it"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:15
-msgid ""
-"Recline %s installed, but SteamVR didn't load it (check SteamVR's safe mode: SteamVR settings → Startup)"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:16
-msgid "Recline %s loaded"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:7
-msgid ""
-"Recline %s installed but its driver isn't registered (Reinstall fixes it)"
-msgstr ""
-
-#: packs/third-party/recline/status.sh:8
-msgid "Recline %s installed (SteamVR isn't running)"
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:11
-msgid ""
-"SteamVR isn't running, so Recline's panel couldn't be unregistered (SteamVR may still list it)"
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:15
-msgid "Kept Recline's panel options: ~/.config/recline-vr"
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:16
-msgid "Restart SteamVR to unload its driver (reboot, or: %s)."
-msgstr ""
-
-#: packs/third-party/recline/uninstall.sh:8
-msgid ""
-"couldn't unregister Recline's panel from SteamVR; it will report it missing"
 msgstr ""
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3

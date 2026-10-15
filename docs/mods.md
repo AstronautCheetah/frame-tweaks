@@ -273,12 +273,15 @@ link:
   installed: [~/project, ~/.local/share/project]   # any of these existing means it's installed
   run: gtk-launch project-settings                 # optional: what the Run button starts
   readme: https://github.com/someone/project#readme   # its README, linked (not copied)
+  restart: steamvr                                 # optional: SteamVR loads it only as it starts
 run: {label: Open}                                 # the Run button's label, with link.run
 ```
 
 - **Install and uninstall** run in the terminal the window opens, so the project's installer can
   ask its own questions. `lib/link.sh` does the scripts' part.
-- **Status** is "installed" while any `installed` path exists.
+- **Status** is "installed" while any `installed` path exists. With `restart: steamvr` (a SteamVR
+  driver, say), a path that changed after SteamVR started means it isn't loaded yet: the row
+  offers ⟳ Restart SteamVR.
 - **Updates:** ↻ runs its installer again, which updates most projects; Frame Tweaks' own updates
   leave it alone (it updates its own way).
 - The other fields are as for any tweak; `changes`, `access` and `undo` describe what the

@@ -128,7 +128,7 @@ UNINSTALL_PREF = Path(os.environ.get("FRAME_TWEAKS_UNINSTALL_FILE")             
 # it's installed, can start it (run), and links its README. Nothing of it is pinned, checked,
 # copied or patched; the project's own channel is trusted. Such a tweak needs no scripts of its
 # own: lib/link.sh does their part (script()).
-LINK_KEYS = ("install", "uninstall", "installed", "run", "readme")
+LINK_KEYS = ("install", "uninstall", "installed", "run", "readme", "restart")
 LINK_ACTIONS = ("install", "uninstall", "status", "run")
 LINK_HELPER = REPO / "lib/link.sh"
 # upstream_readme: the README of the project a tweak installs, at the version it pins
@@ -421,6 +421,8 @@ def check_link(link, where):
                     "exists once it's installed, e.g. ~/frametop")
     if "readme" in link and not (isinstance(link["readme"], str) and link["readme"].startswith("https://")):
         errs.append(f"{where}: link.readme must be an https:// address")
+    if "restart" in link and link["restart"] != "steamvr":
+        errs.append(f"{where}: link.restart can only be steamvr (SteamVR loads it only as it starts)")
     return errs
 
 

@@ -31,7 +31,7 @@ def tweaks():
                               "why": c["why"], "changes": c["changes"], "access": c["access"],
                               "survives-updates": c["survives_updates"], "undo": c["undo"],
                               "experimental": c["experimental"], "upstream": c["upstream_readme"],
-                              "category": c["category"]}))
+                              "category": c["category"], "linked": bool(c["link"])}))
     return out
 
 
@@ -51,7 +51,7 @@ def readme_tables(rows):
         if not mine:
             continue
         out += [f"### {cat}", "", "| | Tweak | What you get | Why on a Steam Frame |", "|---|---|---|---|"]
-        out += [f"| {m['emoji']} | {link(m)}{' 🧪' if m.get('experimental') else ''}"
+        out += [f"| {m['emoji']} | {link(m)}{' 🧪' if m.get('experimental') else ''}{' 🔗' if m.get('linked') else ''}"
                 f"{' *(helper)*' if m['group'] == 'helper' and 'helper' not in m['name'].lower() else ''} | {m['what']} | {m['why']} |" for i, m in mine]
         out.append("")
     return "\n".join(out).rstrip()

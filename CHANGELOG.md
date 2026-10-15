@@ -49,6 +49,11 @@
   nothing; only a clipboard with nothing on it gets the text the others hold.
 
 ### Changed
+- **Recline is linked** (🔗): Frame Tweaks runs Recline-VR's own installer, as its README gives
+  it (cloned into `~/Recline-VR`, then its `install.sh`), instead of building a pinned copy;
+  ↻ pulls its latest version. Its row still offers ⟳ Restart SteamVR after an install. Its
+  setting is gone: Recline-VR always keeps the room view aligned. An installed Recline keeps
+  working as it is.
 - **An update never moves to an older release unless you ask** (`--to`): with test releases
   turned off, `./install.sh update` keeps the test release you're on instead of going back.
 
@@ -57,7 +62,8 @@
   commands, a path that exists once it's installed, an optional run command and README) makes a
   tweak without scripts: Frame Tweaks runs the project's own commands, as its README gives them,
   and pins, checks and copies nothing. The window marks it 🔗 and links its README; ↻ runs its
-  installer again, and Frame Tweaks' updates leave it alone. [docs/mods.md, Linking a
+  installer again, and Frame Tweaks' updates leave it alone. `restart: steamvr` makes its row
+  offer ⟳ Restart SteamVR after an install. [docs/mods.md, Linking a
   project](docs/mods.md#linking-a-project).
 - **A pack check for your own repository:** the `check-pack` GitHub Action reads your pack as
   Frame Tweaks does and checks its scripts with ShellCheck. Copy the example pack's
