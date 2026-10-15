@@ -291,6 +291,9 @@ class Packs(unittest.TestCase):
         self.assertEqual(ids["arrowpad"]["config"], ["~/.config/arrowpad.json", "~/.config/arrowpad-vr.json"])
         self.assertEqual(ids["snip"]["config"], ["~/.config/frame-tweaks/snip.json"])
         self.assertEqual(ids["claude-code"]["config"], [])      # (~/.claude holds its sign-in, history and memory)
+        # Third-party apps, left installed when Frame Tweaks is uninstalled (unless --remove-apps)
+        self.assertEqual({i for i, c in ids.items() if c["app"]},
+                         {"homebrew", "vscodium", "claude-desktop", "claude-code", "full-keyboard", "clipboard"})
 
     def test_trusting_by_name_needs_a_name_only_one_pack_has(self):
         """A pack can call itself anything, so `mods trust NAME` mustn't pick one of two."""

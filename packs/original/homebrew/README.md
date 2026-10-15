@@ -13,6 +13,7 @@ why: >-
 author: Homebrew project
 source: {relation: uses, url: https://brew.sh}
 icon: {theme: package-x-generic}
+app: Homebrew
 changes: "`/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew`"
 access: "**Needs your sudo password once**, to create `/home/linuxbrew`"
 survives_updates: Yes (it lives in /home/linuxbrew)
