@@ -257,6 +257,38 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
 optionally `latest=`, an API URL `dev/check-pins.sh` reads). `fetch_pinned <id> <file>` then
 refuses anything that doesn't match the checksum.
 
+## Linking a project
+
+Some projects install themselves well and only need to be found, with a way to install,
+uninstall and start them from the Frame Tweaks window. A **link** does that without integrating
+anything: Frame Tweaks runs the project's own commands, as its README gives them, and doesn't
+pin, check, copy or patch what they install. The project's own channel is what's trusted, and
+the window says so (🔗 on its row, and on its details page). A linked tweak needs no scripts:
+its manifest's `link:` says what they'd do.
+
+```yaml
+link:
+  install: curl -fsSL https://example.org/get.sh | bash     # its own install command
+  uninstall: curl -fsSL https://example.org/uninstall.sh | bash   # optional
+  installed: [~/project, ~/.local/share/project]   # any of these existing means it's installed
+  run: gtk-launch project-settings                 # optional: what the Run button starts
+  readme: https://github.com/someone/project#readme   # its README, linked (not copied)
+run: {label: Open}                                 # the Run button's label, with link.run
+```
+
+- **Install and uninstall** run in the terminal the window opens, so the project's installer can
+  ask its own questions. `lib/link.sh` does the scripts' part.
+- **Status** is "installed" while any `installed` path exists.
+- **Updates:** ↻ runs its installer again, which updates most projects; Frame Tweaks' own updates
+  leave it alone (it updates its own way).
+- The other fields are as for any tweak; `changes`, `access` and `undo` describe what the
+  project's installer does. Name the app in `app:` if it should stay installed when Frame Tweaks
+  itself is uninstalled.
+
+When to link and when to integrate: link a project that installs, updates and uninstalls itself
+well. Integrate it (scripts of your own, its download pinned and checked) when it needs fitting
+to the Frame, or when the installer window should vouch for exactly what it installs.
+
 ## Packs and Frame Tweaks updates
 
 `api:` in `pack.md` is the version of this format the pack is written for. A Frame Tweaks that

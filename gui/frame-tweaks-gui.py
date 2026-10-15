@@ -130,7 +130,7 @@ def status(cid):
     exit 2) waiting for a SteamVR restart."""
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
-        r = subprocess.run(["bash", str(component(cid)["dir"] / "status.sh")], capture_output=True, text=True, timeout=60)
+        r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         return 2, _("status check didn't finish (took over a minute)")
     out = r.stdout.strip()
@@ -490,6 +490,12 @@ class Details(QWidget):
                  (_("Made by"), md_text(comp["author"]))]
         if comp["experimental"]:
             facts.append((_("🧪 Experimental"), f"<span style='color:#e0b33a'>{md_text(comp['experimental'])}</span>"))
+        if comp["link"]:
+            readme = comp["link"].get("readme") or url
+            facts.append((_("🔗 Linked"), "<span style='color:#e0b33a'>" + html.escape(_(
+                "Installed, updated and uninstalled with the project's own commands, as its README gives them; "
+                "Frame Tweaks runs them, but doesn't pin, check or change what they install."), quote=False) + "</span>"
+                + (f"<br><a style='color:#7fb2e5' href='{html.escape(readme)}'>" + _("Its README") + " ↗</a>" if readme else "")))
         if url:
             facts.append((_("Source"), f"{html.escape(rel)} <a style='color:#7fb2e5' href='{url}'>{url}</a>"))
         if comp["deps"]:
@@ -1025,12 +1031,16 @@ class Window(QWidget):
             icon.setPixmap(row_icon(cid).pixmap(40, 40))
             name = QLabel(html.escape(comp["title"], quote=False) +
                           ("  🧪" if comp["experimental"] else "") +
+                          ("  🔗" if comp["link"] else "") +
                           ("" if comp["official"] else
                            f"  <span style='color:#e0b33a;font-size:12px'>🧩 {html.escape(comp['pack'])}</span>") +
                           ("  <span style='color:#6b7783'>" + _("(hidden)") + "</span>" if is_hidden else ""))
             name.setObjectName("name")
             if comp["experimental"]:
                 name.setToolTip(_("Experimental: %s") % comp["experimental"])
+            if comp["link"]:
+                name.setToolTip(_("Linked: installed and uninstalled with the project's own commands, which Frame "
+                                  "Tweaks runs but doesn't check"))
             if not comp["official"]:
                 name.setToolTip((_("From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s")
                                  if comp["replaced"] else _("From the pack {pack}, not part of Frame Tweaks")).format(
@@ -1312,10 +1322,11 @@ class Window(QWidget):
         if label is None:
             self.show_details(comp)
             return
+        cmd = sft.script(comp, "run")                 # (its run.sh, or a linked project's run: command)
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # (some restart things: Plasma, ydotoold)
-            print("would run:", "bash", comp["dir"] / "run.sh")
+            print("would run:", " ".join(cmd))
             return
-        QProcess.startDetached("bash", [str(comp["dir"] / "run.sh")])
+        QProcess.startDetached(cmd[0], cmd[1:])
 
     def restart_steamvr(self):
         """⟳ Restart SteamVR, on the row of a tweak SteamVR loads only as it starts: SteamOS's own

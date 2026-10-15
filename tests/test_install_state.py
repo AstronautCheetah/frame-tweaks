@@ -453,5 +453,82 @@ class InstallState(unittest.TestCase):
             self.assertNotIn(secret, report)
 
 
+LINKED = """\
+---
+title: Linked
+emoji: 🔗
+category: Tests
+tier: extras
+summary: A project that installs itself
+what: Linked, not integrated.
+why: For tests.
+author: Tests
+changes: Whatever its installer does
+access: None
+survives_updates: Its own concern
+undo: ./install.sh uninstall linked
+run: {label: Open}
+link:
+  install: echo installed >> ~/linked.log; mkdir -p ~/linked-project
+  uninstall: echo uninstalled >> ~/linked.log; rm -rf ~/linked-project
+  installed: [~/linked-project, ~/.local/share/linked-project]
+  run: touch ~/linked-ran
+  readme: https://example.org/linked#readme
+---
+# Linked
+"""
+
+
+class LinkedProject(unittest.TestCase):
+    """A tweak with link: and no scripts: the project's own commands run (lib/link.sh), its status is
+    whether a path exists, ↻ runs its installer again without uninstalling it first, and Frame
+    Tweaks' updates leave it alone. (InstallState's home and probe pack, not its tests.)"""
+    stub, trust, only_the_probe, sh, tearDown = (InstallState.stub, InstallState.trust, InstallState.only_the_probe,
+                                                 InstallState.sh, InstallState.tearDown)
+
+    def setUp(self):
+        InstallState.setUp(self)
+        (self.pack / "linked").mkdir()
+        (self.pack / "linked/README.md").write_text(LINKED)
+        self.trust()
+
+    def linked_log(self):
+        p = self.home / "linked.log"
+        return p.read_text().split() if p.exists() else []
+
+    def test_install_status_reinstall_and_uninstall(self):
+        self.assertIn("not installed", self.sh("status", "linked").stdout)
+        r = self.sh("install", "linked")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("with its own installer", r.stdout)
+        self.assertEqual(self.linked_log(), ["installed"])
+        r = self.sh("status", "linked")
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertIn("installed by its own installer", r.stdout)
+        self.sh("reinstall", "linked")                                  # (↻: its installer again, no uninstall)
+        self.assertEqual(self.linked_log(), ["installed", "installed"])
+        r = self.sh("uninstall", "linked")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.linked_log(), ["installed", "installed", "uninstalled"])
+        self.assertIn("not installed", self.sh("status", "linked").stdout)
+
+    def test_updates_leave_it_alone(self):
+        self.sh("install", "linked")
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Linked, so they update their own way", r.stdout)
+        self.assertEqual(self.linked_log(), ["installed"])
+
+    def test_run(self):
+        self.sh("install", "linked")
+        self.assertEqual(self.sh("run", "linked").returncode, 0)
+        for _ in range(50):                                             # (started in the background)
+            if (self.home / "linked-ran").exists():
+                break
+            import time
+            time.sleep(0.1)
+        self.assertTrue((self.home / "linked-ran").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

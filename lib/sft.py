@@ -24,7 +24,7 @@ Command line (through ./install.sh):
   sft.py settings ID                    current settings, and what each can be set to
   sft.py settings ID KEY=VALUE...       change them (VALUE: a listed value or its label)
   sft.py settings ID --reset            back to the defaults
-For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID,
+For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID, link ID FIELD,
 apps, uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
 test-keeps ID.
 """
@@ -114,7 +114,7 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
-            "app")
+            "app", "link")
 # app: the name of the other project's app the tweak installs (VSCodium, Claude Desktop, …).
 # Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
@@ -123,6 +123,14 @@ OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "r
 CONFIG_ROOTS = ("~/.config/", "~/.var/app/", "~/.local/state/frame-tweaks/")
 UNINSTALL_PREF = Path(os.environ.get("FRAME_TWEAKS_UNINSTALL_FILE")             # keep (default) | remove
                       or Path.home() / ".config/frame-tweaks/uninstall-settings")
+# link: a project linked rather than integrated (docs/mods.md, Linking a project): Frame Tweaks runs
+# its own install and uninstall commands as its README gives them, checks a path to tell whether
+# it's installed, can start it (run), and links its README. Nothing of it is pinned, checked,
+# copied or patched; the project's own channel is trusted. Such a tweak needs no scripts of its
+# own: lib/link.sh does their part (script()).
+LINK_KEYS = ("install", "uninstall", "installed", "run", "readme")
+LINK_ACTIONS = ("install", "uninstall", "status", "run")
+LINK_HELPER = REPO / "lib/link.sh"
 # upstream_readme: the README of the project a tweak installs, at the version it pins
 # (dev/fetch-upstream-readmes.py copies it into upstream.md; dev/gen-docs.py appends it).
 UPSTREAM_README = re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/[^/]+/\S+\.md$")
@@ -330,9 +338,15 @@ def read_tweak(d):
     deps = data.get("depends", [])
     if not (isinstance(deps, list) and all(isinstance(x, str) for x in deps)):
         errs.append(f"{where}: depends must be a list of tweak ids")
-    for script in ("install.sh", "uninstall.sh", "status.sh") + (("run.sh",) if "run" in data else ()):
-        if not (d / script).is_file():
-            errs.append(f"{where}: {script} is missing")
+    link = data.get("link")
+    if link is not None:
+        errs += check_link(link, where)
+        warn += [f"warning: {where}: link: unknown key {k!r} (ignored)" for k in (link if isinstance(link, dict) else {})
+                 if k not in LINK_KEYS]
+    else:
+        for script in ("install.sh", "uninstall.sh", "status.sh") + (("run.sh",) if "run" in data else ()):
+            if not (d / script).is_file():
+                errs.append(f"{where}: {script} is missing")
     for k in ("hidden_by_default", "replaces"):
         if k in data and not isinstance(data[k], bool):
             errs.append(f"{where}: {k} must be true or false")
@@ -378,7 +392,8 @@ def read_tweak(d):
         source=f"{src.get('relation', 'uses')}|{src['url']}" if src.get("url") else "",
         flags={"hidden-by-default"} if data.get("hidden_by_default") else set(),
         experimental=data.get("experimental") or "", icon=icon,
-        run_label=run.get("label", "Run") if (d / "run.sh").is_file() else None,
+        run_label=run.get("label", "Run") if (d / "run.sh").is_file() or (link or {}).get("run") else None,
+        link=link_paths(link) if link else None,
         processes=procs, settings=data.get("settings"),
         app=data.get("app") or "",
         config=list(dict.fromkeys(conf + ([data["settings"]["file"]] if data.get("settings") else []))),
@@ -387,6 +402,43 @@ def read_tweak(d):
         test=data.get("test") or {}, replaces=data.get("replaces", False),
         changes=data["changes"], access=data["access"], survives_updates=data["survives_updates"],
         undo=data["undo"]), warn
+
+
+def check_link(link, where):
+    """Problems with a manifest's link: (see LINK_KEYS)."""
+    if not isinstance(link, dict):
+        return [f"{where}: link must be a mapping, like {{install: ..., installed: ~/...}}"]
+    errs = []
+    for k in ("install", "uninstall", "run"):
+        if k in link and not (isinstance(link[k], str) and link[k].strip() and "\n" not in link[k]):
+            errs.append(f"{where}: link.{k} must be one command line")
+    if "install" not in link:
+        errs.append(f"{where}: link.install is missing: the project's own install command")
+    paths = link.get("installed")
+    paths = [paths] if isinstance(paths, str) else paths
+    if not (isinstance(paths, list) and paths and all(isinstance(x, str) and re.match(r"^(~/|/)\S", x) for x in paths)):
+        errs.append(f"{where}: link.installed must be a path (or a list of them, any one will do) that "
+                    "exists once it's installed, e.g. ~/frametop")
+    if "readme" in link and not (isinstance(link["readme"], str) and link["readme"].startswith("https://")):
+        errs.append(f"{where}: link.readme must be an https:// address")
+    return errs
+
+
+def link_paths(link):
+    """link:, its installed: always a list."""
+    paths = link["installed"]
+    return dict(link, installed=[paths] if isinstance(paths, str) else list(paths))
+
+
+def script(c, name):
+    """How to run a tweak's script (name: install, uninstall, status, run, ...), as an argument
+    list: its own name.sh, or for a linked project lib/link.sh doing the same. None: it has none."""
+    own = c["dir"] / f"{name}.sh"
+    if own.is_file():
+        return ["bash", str(own)]
+    if c.get("link") and name in LINK_ACTIONS and (name != "run" or c["link"].get("run")):
+        return ["bash", str(LINK_HELPER), name, c["id"]]
+    return None
 
 
 def read_pack(d):
@@ -930,10 +982,17 @@ def main(argv):
     elif cmd == "registry":                     # for ./install.sh: one line per tweak, \x1f-separated
         for c in components():                  # (a line break in a summary would start a row of its own)
             print("\x1f".join(re.sub(r"[\n\r\x1f]", " ", f) for f in [c["id"], c["title"], " ".join(c["deps"]),
-                                                                  c["desc"], str(c["dir"]), "1" if c["experimental"] else ""]))
+                                                                  c["desc"], str(c["dir"]), "1" if c["experimental"] else "",
+                                                                  "1" if c["link"] else ""]))
     elif cmd == "dir" and len(args) == 1:
         c = component(args[0])
         sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])
+    elif cmd == "link" and len(args) == 2:      # for lib/link.sh: a linked project's link: field
+        c = component(args[0])
+        if not c or not c["link"] or args[1] not in LINK_KEYS + ("title", "app"):
+            sys.exit(_("unknown component: %s") % args[0] if not c else _("%s isn't linked") % args[0])
+        value = c["link"].get(args[1], "") if args[1] in LINK_KEYS else c[args[1]]
+        print("\n".join(value) if isinstance(value, list) else value)
     elif cmd == "processes" and len(args) == 1:
         c = component(args[0])
         print("\n".join(c["processes"] if c else []))
