@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 16;
+  const NAME = 'phone-touch', VERSION = 17;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -152,7 +152,20 @@
   };
   const mover = (f) => L.walk((fb) => typeof fb.stateNode?.startFloatingWindowMove === 'function' &&
                                      fb.stateNode.props?.frame === f)?.stateNode ?? null;
+  // The window the dashboard showed, for when a returning mirror came up there and is floated away
+  // (a reconnect, after the phone slept: the new window docks, and the dashboard shows it; floated
+  // back to its place, it left the dashboard showing nothing).
+  let lastShown = null;
+  const showAgain = () => {
+    const ctl = L.walk((fb) => typeof fb.stateNode?.switchToFrameInternal === 'function')?.stateNode;
+    if (!ctl) return;
+    const g = lastShown != null ? FS.GetFrame?.(lastShown) : null;
+    if (g && g.docking?.dockLocation === DASH) ctl.switchToFrameInternal(g, undefined, 'sft-phone-touch');
+    else ctl.switchToHomeOverlay?.();         // (the dashboard's own choice when a shown window goes)
+  };
   const watchMirrors = () => {
+    const a = DS.activeFrame;
+    if (a && a.title !== TITLE && a.docking?.dockLocation === DASH) lastShown = a.frameID;
     const now = (FS.frames ?? []).filter((g) => g?.title === TITLE && g.docking);
     for (const f of now) if (!carry || f.frameID === carry.from) snapshot(f);
     for (const [id, last] of seen) {
@@ -173,9 +186,11 @@
       const d = f.docking;
       d.m_mapLastRelativeTransformForDockLocation.set(WORLD, clone(c.xf));
       if (d.dockLocation !== WORLD) {
+        const shown = DS.activeFrameID === f.frameID;
         // The dashboard's own SetDockLocation: Float grab's wrapper would pick it up in your hand.
         const own = d.__sftOrigSetDock?.orig ?? d.SetDockLocation;
         own.call(d, WORLD);
+        if (shown) showAgain();                 // (the dashboard showed it: back to what it showed before)
         return;                                 // (its floating component mounts next: placed then)
       }
       const m = mover(f);
@@ -323,7 +338,7 @@
   const mounted = L.mount('sft-phone-touch', render, 'right', 250);
   if (!mounted) return 'not patched: dashboard app component not found';
   redraw = mounted.redraw;
-  const carryTimer = setInterval(() => { try { watchMirrors(); placeCarried(); } catch (e) {} }, 250);
+  const carryTimer = setInterval(() => { try { watchMirrors(); placeCarried(); } catch (e) {} }, 100);
   all[NAME] = {
     version: VERSION, stats,
     stop: () => {

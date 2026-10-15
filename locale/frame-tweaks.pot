@@ -370,7 +370,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:613 packs/original/adb-scrcpy/phone-touch.js:260 packs/original/scroll-strips/patch.js:287
+#: gui/frame-tweaks-gui.py:613 packs/original/adb-scrcpy/phone-touch.js:275 packs/original/scroll-strips/patch.js:287
 msgid "Reset to defaults"
 msgstr ""
 
@@ -2046,15 +2046,15 @@ msgstr ""
 msgid "Slow"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch.js:267
+#: packs/original/adb-scrcpy/phone-touch.js:282
 msgid "Restart stream"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch.js:267
+#: packs/original/adb-scrcpy/phone-touch.js:282
 msgid "Restart stream to apply"
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch.js:286
+#: packs/original/adb-scrcpy/phone-touch.js:301
 msgid ""
 "Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
@@ -2064,7 +2064,7 @@ msgid ""
 "scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
 msgstr ""
 
-#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:281 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
+#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:296 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
 msgid "Android Mirror"
 msgstr ""
 
