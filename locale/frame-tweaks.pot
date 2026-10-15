@@ -83,7 +83,7 @@ msgstr ""
 msgid "{version} available"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1208 gui/frame-tweaks-gui.py:1230 gui/packs_page.py:156
+#: gui/frame-tweaks-gui.py:1208 gui/frame-tweaks-gui.py:1230 gui/packs_page.py:167
 msgid "Update"
 msgstr ""
 
@@ -199,72 +199,72 @@ msgstr ""
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1420 gui/frame-tweaks-gui.py:1180
+#: gui/frame-tweaks-gui.py:1421 gui/frame-tweaks-gui.py:1180
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1486 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1496 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1513
+#: gui/frame-tweaks-gui.py:1523
 msgid "Install: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1514
+#: gui/frame-tweaks-gui.py:1524
 msgid "Remove: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1515
+#: gui/frame-tweaks-gui.py:1525
 msgid "Nothing to change: tick or untick a tweak first"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1519
+#: gui/frame-tweaks-gui.py:1529
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1524 install.sh:557
+#: gui/frame-tweaks-gui.py:1534 install.sh:557
 msgid "Nothing to change."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1528
+#: gui/frame-tweaks-gui.py:1538
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1530
+#: gui/frame-tweaks-gui.py:1540
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1531
+#: gui/frame-tweaks-gui.py:1541
 msgid "Their settings and data are kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1532
+#: gui/frame-tweaks-gui.py:1542
 msgid "Remove them"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1577
+#: gui/frame-tweaks-gui.py:1587
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1650
+#: gui/frame-tweaks-gui.py:1660
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1653
+#: gui/frame-tweaks-gui.py:1663
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1659 gui/frame-tweaks-gui.py:1663
+#: gui/frame-tweaks-gui.py:1669 gui/frame-tweaks-gui.py:1673
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1661
+#: gui/frame-tweaks-gui.py:1671
 msgid "Copied"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1665
+#: gui/frame-tweaks-gui.py:1675
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
@@ -330,7 +330,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:444 gui/frame-tweaks-gui.py:467 gui/frame-tweaks-gui.py:710 gui/frame-tweaks-gui.py:1662 gui/packs_page.py:37 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:444 gui/frame-tweaks-gui.py:467 gui/frame-tweaks-gui.py:710 gui/frame-tweaks-gui.py:1672 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr ""
 
@@ -498,7 +498,7 @@ msgid ""
 "What Frame Tweaks is, how to install, update and remove it, common issues"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:864 gui/frame-tweaks-gui.py:1664
+#: gui/frame-tweaks-gui.py:864 gui/frame-tweaks-gui.py:1674
 msgid "🐞 Report a problem"
 msgstr ""
 
@@ -528,83 +528,71 @@ msgstr ""
 msgid "✔ Frame Tweaks is up to date ({version})."
 msgstr ""
 
-#: gui/packs_page.py:115 lib/sft.py:1000
-msgid "(instead of {other}'s)"
-msgstr ""
-
-#: gui/packs_page.py:118
-msgid "by {author}"
-msgstr ""
-
-#: gui/packs_page.py:122
-msgid "A newer version is out where it came from: Update gets it."
-msgstr ""
-
-#: gui/packs_page.py:125
-msgid "From {link}"
-msgstr ""
-
-#: gui/packs_page.py:128
+#: gui/packs_page.py:127
 msgid "%d tweak"
 msgid_plural "%d tweaks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py:130 lib/sft.py:942
-msgid "Tweaks: %s"
+#: gui/packs_page.py:131
+msgid "by {author}"
 msgstr ""
 
-#: gui/packs_page.py:130 lib/sft.py:942
-msgid "none"
-msgstr ""
-
-#: gui/packs_page.py:137 gui/packs_page.py:144
-msgid "Stop using"
-msgstr ""
-
-#: gui/packs_page.py:137
-msgid "Use"
+#: gui/packs_page.py:135
+msgid "A newer version is out where it came from: Update gets it."
 msgstr ""
 
 #: gui/packs_page.py:138
+msgid "From {link}"
+msgstr ""
+
+#: gui/packs_page.py:148 gui/packs_page.py:155
+msgid "Stop using"
+msgstr ""
+
+#: gui/packs_page.py:148
+msgid "Use"
+msgstr ""
+
+#: gui/packs_page.py:149
 msgid "Its tweaks come back to the list"
 msgstr ""
 
-#: gui/packs_page.py:139 gui/packs_page.py:145
+#: gui/packs_page.py:150 gui/packs_page.py:156
 msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 
-#: gui/packs_page.py:148
+#: gui/packs_page.py:159
 msgid "Yes: it runs as me"
 msgstr ""
 
-#: gui/packs_page.py:149
+#: gui/packs_page.py:160
 msgid "Trust this pack's current files"
 msgstr ""
 
-#: gui/packs_page.py:152
+#: gui/packs_page.py:163
 msgid "Trust…"
 msgstr ""
 
-#: gui/packs_page.py:159
+#: gui/packs_page.py:170
 msgid ""
 "Get its newer version from where it was added; it waits until you trust it again"
 msgstr ""
 
-#: gui/packs_page.py:165
+#: gui/packs_page.py:176
 msgid "Yes, delete it"
 msgstr ""
 
-#: gui/packs_page.py:169
+#: gui/packs_page.py:180
 msgid "Remove…"
 msgstr ""
 
-#: gui/packs_page.py:170
+#: gui/packs_page.py:181
 msgid "Delete this pack from your packs folder"
 msgstr ""
 
-#: gui/packs_page.py:175
+#: gui/packs_page.py:186
 msgid "Problems"
 msgstr ""
 
@@ -624,89 +612,105 @@ msgstr ""
 msgid "Not trusted yet: its tweaks aren't listed"
 msgstr ""
 
-#: gui/packs_page.py:220
-msgid "That didn't work: {error}"
-msgstr ""
-
-#: gui/packs_page.py:228
-msgid "Paste or type the link of a pack's git repository first."
-msgstr ""
-
 #: gui/packs_page.py:23
 msgid "Changed since you trusted it: not used until you trust it again"
 msgstr ""
 
-#: gui/packs_page.py:230
+#: gui/packs_page.py:231
+msgid "That didn't work: {error}"
+msgstr ""
+
+#: gui/packs_page.py:239
+msgid "Paste or type the link of a pack's git repository first."
+msgstr ""
+
+#: gui/packs_page.py:241
 msgid "Adding the pack…"
 msgstr ""
 
-#: gui/packs_page.py:235
+#: gui/packs_page.py:246
 msgid ""
 "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
 msgstr ""
 
-#: gui/packs_page.py:242
+#: gui/packs_page.py:253
 msgid "Updating {name}…"
 msgstr ""
 
-#: gui/packs_page.py:251 lib/sft.py:973
+#: gui/packs_page.py:262 lib/sft.py:973
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py:253 lib/sft.py:975
+#: gui/packs_page.py:264 lib/sft.py:975
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py:255
+#: gui/packs_page.py:266
 msgid ""
 "It isn't used until you trust it again: read what changed first, then Trust… below."
 msgstr ""
 
-#: gui/packs_page.py:268
+#: gui/packs_page.py:279
 msgid "Removed {name}."
 msgstr ""
 
-#: gui/packs_page.py:40
+#: gui/packs_page.py:307
+msgid "(its README can't be read)"
+msgstr ""
+
+#: gui/packs_page.py:317 lib/sft.py:1000
+msgid "(instead of {other}'s)"
+msgstr ""
+
+#: gui/packs_page.py:318
+msgid "installed"
+msgstr ""
+
+#: gui/packs_page.py:319 lib/sft.py:942
+msgid "none"
+msgstr ""
+
+#: gui/packs_page.py:55
 msgid "Packs"
 msgstr ""
 
-#: gui/packs_page.py:43
+#: gui/packs_page.py:58
 msgid "Open packs folder"
 msgstr ""
 
-#: gui/packs_page.py:48
+#: gui/packs_page.py:63
 msgid ""
 "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 
-#: gui/packs_page.py:60
+#: gui/packs_page.py:75
 msgid "Add a pack from a link:"
 msgstr ""
 
-#: gui/packs_page.py:65
+#: gui/packs_page.py:80
 msgid "Paste"
 msgstr ""
 
-#: gui/packs_page.py:66
+#: gui/packs_page.py:81
 msgid "Paste the link from the clipboard"
 msgstr ""
 
-#: gui/packs_page.py:69
+#: gui/packs_page.py:84
 msgid "Add"
 msgstr ""
 
-#: gui/packs_page.py:70
+#: gui/packs_page.py:85
 msgid ""
 "Download the pack into your packs folder. Nothing of it runs until you trust it."
 msgstr ""
 
-#: gui/packs_page.py:74
+#: gui/packs_page.py:89
 msgid "Packs others share"
 msgstr ""
 
-#: gui/packs_page.py:75
+#: gui/packs_page.py:90
 msgid "Community packs: packs people shared, with their links"
 msgstr ""
 
@@ -1838,6 +1842,10 @@ msgstr ""
 
 #: lib/sft.py:941
 msgid "By {author}."
+msgstr ""
+
+#: lib/sft.py:942
+msgid "Tweaks: %s"
 msgstr ""
 
 #: lib/sft.py:945
