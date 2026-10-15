@@ -6,6 +6,7 @@ import hashlib
 import os
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -99,7 +100,41 @@ class NordVPNStatus(Home):
         self.assertIn("2 location(s); connected via Japan", r.stdout)
 
 
-class PinnedDownload(Home):
+
+class ReclineStatus(Home):
+    """SteamVR loads Recline's driver only as it starts: installed after SteamVR started, the status
+    asks for a restart (the window's ⟳ Restart SteamVR); a SteamVR started since that didn't load it
+    points to safe mode. (pgrep, ps and reclinectl are stand-ins.)"""
+    def setUp(self):
+        super().setUp()
+        dest = self.home / ".local/share/recline-vr"
+        dest.mkdir(parents=True)
+        for name, body in (("recline_overlay", ""), ("reclinectl", "exit 1")):      # (the driver doesn't answer)
+            (dest / name).write_text(f"#!/bin/sh\n{body}\n")
+            (dest / name).chmod(0o755)
+        self.version = dest / ".frame-tweaks-version"
+        self.version.write_text("1.2.0\n")
+        (self.home / ".config/openvr").mkdir(parents=True)
+        (self.home / ".config/openvr/openvrpaths.vrpath").write_text(f'{{"external_drivers": ["{dest}/recline"]}}\n')
+
+    def status(self, steamvr_age=None, installed_ago=0):
+        self.stub("pgrep", "exit 1" if steamvr_age is None else "echo 4242")
+        self.stub("ps", f'echo "  {steamvr_age}"')
+        os.utime(self.version, (time.time() - installed_ago,) * 2)
+        return self.run_script("recline/status.sh")
+
+    def test_installed_while_steamvr_runs(self):
+        r = self.status(steamvr_age=100)
+        self.assertEqual((r.returncode, r.stdout), (2, "restart  Recline 1.2.0 installed; restart SteamVR to load it\n"))
+
+    def test_steamvr_not_running(self):
+        self.assertEqual(self.status().returncode, 0)
+
+    def test_restarted_but_not_loaded(self):
+        r = self.status(steamvr_age=100, installed_ago=200)
+        self.assertEqual(r.returncode, 2)
+        self.assertTrue(r.stdout.startswith("warning  "), r.stdout)
+        self.assertIn("safe mode", r.stdout)
     """fetch_pinned: upstream's file if it's there and unchanged, else the pin's mirror= copy,
     held to the same sha256."""
     GOOD = b"the pinned file\n"
