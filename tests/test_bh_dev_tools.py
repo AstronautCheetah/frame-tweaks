@@ -5,8 +5,6 @@ and HTML pictures; dev/gen-docs.py and an upstream README a tweak no longer name
 keeping removed texts' translations; dev/check-pins.sh comparing a Hugging Face file at main;
 dev/check-upstream.sh reporting a check-pins.sh that stopped; dev/test-tweaks.sh catching writes
 into the checkout and old-dated files left in /tmp."""
-import importlib.machinery
-import importlib.util
 import os
 import shutil
 import socket
@@ -18,6 +16,8 @@ import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script, stub  # noqa: E402
 
 
 def step_script(workflow, name):
@@ -35,10 +35,9 @@ def step_script(workflow, name):
 
 
 def stubs(d, **scripts):
-    d.mkdir(parents=True, exist_ok=True)
     for name, body in scripts.items():
-        (d / name).write_text(f"#!/bin/bash\n{body}\n")
-        (d / name).chmod(0o755)
+        stub(d, name, body)
+    d.mkdir(parents=True, exist_ok=True)
     return d
 
 
@@ -157,9 +156,7 @@ class GenDocs(Temp):
         self.assertEqual(subprocess.run(gen + ["--check"], capture_output=True, timeout=120).returncode, 0)
 
 
-_l = importlib.machinery.SourceFileLoader("i18ntool", str(ROOT / "dev/i18n.py"))
-i18ntool = importlib.util.module_from_spec(importlib.util.spec_from_loader("i18ntool", _l))
-_l.exec_module(i18ntool)
+i18ntool = load_script(ROOT / "dev/i18n.py", "i18ntool")
 HEADER = 'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n'
 
 

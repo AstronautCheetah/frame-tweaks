@@ -7,6 +7,7 @@ tweaks' own logs left alone), an uninstall keeping its settings or removing them
 tweaks left, uninstall-self (every tweak or none, settings or not), a failed uninstall reported, and debug-info's report without names
 and addresses. systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
 whatever HOME is."""
+import sys
 import fcntl
 import os
 import re
@@ -18,6 +19,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env, stub  # noqa: E402
 VERSION = (ROOT / "VERSION").read_text().strip()
 
 README = """\
@@ -69,11 +72,9 @@ class InstallState(unittest.TestCase):
         # (and nothing machine-wide is reached: Flatpaks are the system's, Homebrew is shared)
         for tool in ("flatpak", "brew", "nmcli"):
             self.stub(tool, f'echo "{tool} $*" >> "$HOME/machine-wide.log"; exit 1')
-        self.env = {"HOME": str(self.home), "USER": os.environ.get("USER", "u"), "LANG": "C.UTF-8",
-                    "PATH": os.pathsep.join([str(self.stubs), os.path.dirname(shutil.which("flock")), "/usr/bin", "/bin"]),
-                    "FRAME_TWEAKS_PACKS": str(self.pack),
-                    "FRAME_TWEAKS_KEEP_CHECKOUT": "1",      # (uninstall-self: never the checkout the tests run from)
-                    "FRAME_TWEAKS_LANGUAGE": "en"}
+        self.env = sandbox_env(self.home, self.stubs, path=(os.path.dirname(shutil.which("flock")), "/usr/bin", "/bin"),
+                               FRAME_TWEAKS_PACKS=self.pack,
+                               FRAME_TWEAKS_KEEP_CHECKOUT=1)    # (uninstall-self: never the checkout the tests run from)
         self.trust()
         # (every test: some official tweaks find what's installed machine-wide, VSCodium's system
         # Flatpak say, and an "uninstall all" here once removed it for real)
@@ -86,8 +87,7 @@ class InstallState(unittest.TestCase):
         self.assertFalse(log.exists(), log.read_text() if log.exists() else "")
 
     def stub(self, name, body):
-        (self.stubs / name).write_text(f"#!/bin/bash\n{body}\n")
-        (self.stubs / name).chmod(0o755)
+        stub(self.stubs, name, body)
 
     def trust(self):
         """(again after changing the probe: trust is for the pack's files as they are)"""

@@ -1,6 +1,7 @@
 """Shell tweaks with no other tests, run in a throwaway home with stand-ins for system tools:
 Firefox's user.js block (install, the old marker, uninstall resetting prefs.js) and NordVPN's
 status line; pinned downloads falling back to Frame Tweaks' copy."""
+import sys
 import hashlib
 import os
 import subprocess
@@ -9,6 +10,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env, stub  # noqa: E402
 
 
 class Home(unittest.TestCase):
@@ -20,11 +23,10 @@ class Home(unittest.TestCase):
         self.stubs.mkdir()
 
     def stub(self, name, body):
-        (self.stubs / name).write_text(f"#!/bin/bash\n{body}\n")
-        (self.stubs / name).chmod(0o755)
+        stub(self.stubs, name, body)
 
     def run_script(self, script, *args):
-        env = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin", "USER": os.environ.get("USER", "u")}
+        env = sandbox_env(self.home, self.stubs)
         return subprocess.run(["bash", str(next(p for p in ROOT.glob("packs/*/" + script))), *args], env=env, capture_output=True, text=True, timeout=60)
 
 
@@ -117,7 +119,7 @@ class PinnedDownload(Home):
         # curl -fL# -o OUT URL: copy the matching file, or fail like a 404
         self.stub("curl", f'out=$3; case "$4" in *up.example*) f={files}/up ;; *) f={files}/mirror ;; esac\n'
                           '[ -f "$f" ] && cp "$f" "$out" || exit 22')
-        env = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin"}
+        env = sandbox_env(self.home, self.stubs)
         out = self.home / "out"
         r = subprocess.run(["bash", "-c", f'source {ROOT}/lib/common.sh; REPO_DIR={repo}; fetch_pinned x {out}'],
                            env=env, capture_output=True, text=True, timeout=30)

@@ -1,5 +1,6 @@
 """The wallet tweak's menu-entry wrapping (wallet-launcher), app timers finding an app's
 processes, and its uninstall and status scripts, each in a throwaway home folder."""
+import sys
 import contextlib
 import importlib.machinery
 import importlib.util
@@ -12,6 +13,8 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env, stub  # noqa: E402
 WALLET = ROOT / "packs/original/wallet"
 
 
@@ -135,11 +138,10 @@ class Scripts(Home):
             d.mkdir(parents=True)
 
     def tool(self, folder, name, body):
-        (folder / name).write_text(f"#!/bin/bash\n{body}\n")
-        (folder / name).chmod(0o755)
+        stub(folder, name, body)
 
     def run_script(self, name):
-        env = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin", "USER": "test"}
+        env = sandbox_env(self.home, self.stubs, USER="test")
         return subprocess.run(["bash", str(WALLET / name)], env=env, capture_output=True, text=True, timeout=60)
 
     def test_uninstall_restores_an_entry_whose_name_has_spaces(self):

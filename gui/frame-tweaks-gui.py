@@ -346,7 +346,12 @@ def row_icon(cid):
 
 
 def version_tuple(v):
-    return tuple(int(n) for n in re.findall(r"\d+", v or ""))
+    """Sort key for an app's version, in whatever form its project writes it (1.140.06880,
+    v2.3, 0.2.0+138a59b): its numbers, then a pre-release (1.2.0-rc1, 1.2.0~beta2) below the
+    final version. (Frame Tweaks' own tags: release_key.)"""
+    main, sep, pre = (re.split(r"([-~])", (v or "").split("+")[0], maxsplit=1) + ["", ""])[:3]
+    nums = lambda s: tuple(int(n) for n in re.findall(r"\d+", s))
+    return nums(main), 0 if sep else 1, nums(pre)
 
 
 def latest_release(url):

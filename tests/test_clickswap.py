@@ -1,7 +1,6 @@
 """Arrow Pad's right/middle-click toggles (ClickSwap) on a private Xvfb display: a receiver
 window records which buttons arrive. Skipped where Xvfb isn't installed."""
 import ctypes as C
-import importlib.util
 import os
 import shutil
 import subprocess
@@ -13,6 +12,8 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
 
 
 @unittest.skipUnless(shutil.which("Xvfb"), "needs Xvfb")
@@ -40,9 +41,7 @@ class ClickSwapTest(unittest.TestCase):
         self.addCleanup(argv.stop)
         sys.path.insert(0, str(ROOT / "packs/original/arrowpad"))
         self.addCleanup(lambda: sys.path.remove(str(ROOT / "packs/original/arrowpad")))
-        spec = importlib.util.spec_from_file_location("ap", ROOT / "packs/original/arrowpad" / "arrowpad.py")
-        ap = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(ap)
+        ap = load_script(ROOT / "packs/original/arrowpad" / "arrowpad.py", "ap")
         from PyQt6.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
         logs = tempfile.mkdtemp()

@@ -3,6 +3,7 @@ system tools: Firefox's user.js block (a last line without a newline, a start ma
 end), NordVPN's reinstall keeping the VPN setup, Shared clipboard's build files staying in the
 temporary folder, restart-plasmashell waiting for (or killing) the old taskbar, and the example
 tweak's Run button going through its menu entry."""
+import sys
 import hashlib
 import os
 import re
@@ -13,6 +14,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env, stub  # noqa: E402
 
 
 class Home(unittest.TestCase):
@@ -24,13 +27,11 @@ class Home(unittest.TestCase):
         self.stubs.mkdir()
 
     def stub(self, name, body):
-        (self.stubs / name).write_text(f"#!/bin/bash\n{body}\n")
-        (self.stubs / name).chmod(0o755)
+        stub(self.stubs, name, body)
 
     def run_path(self, path, *args, env=None):
         # (in English, whichever language an open installer window shows)
-        full = {"HOME": str(self.home), "PATH": f"{self.stubs}:/usr/bin:/bin", "USER": os.environ.get("USER", "u"),
-                "FRAME_TWEAKS_LANGUAGE": "en", **(env or {})}
+        full = sandbox_env(self.home, self.stubs, **(env or {}))
         return subprocess.run(["bash", str(path), *args], env=full, capture_output=True, text=True, timeout=60)
 
     def run_script(self, script, *args, env=None):

@@ -1,8 +1,6 @@
 """lib/sft.py: the settings, hidden rows and details shared by the installer window and
 ./install.sh, and that the VR gear panels still offer the same choices."""
 import contextlib
-import importlib.machinery
-import importlib.util
 import io
 import json
 import re
@@ -13,13 +11,13 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
 sys.path.insert(0, str(ROOT / "lib"))
 import i18n  # noqa: E402
 import sft  # noqa: E402
 
-_l = importlib.machinery.SourceFileLoader("phone_touch", str(ROOT / "packs/original/adb-scrcpy" / "phone-touch"))
-pt = importlib.util.module_from_spec(importlib.util.spec_from_loader("phone_touch", _l))
-_l.exec_module(pt)
+pt = load_script(ROOT / "packs/original/adb-scrcpy" / "phone-touch", "phone_touch")
 
 
 def values(cid):

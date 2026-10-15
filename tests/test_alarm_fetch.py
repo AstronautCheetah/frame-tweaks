@@ -4,6 +4,7 @@ gpgv against a copy of lib/ whose keys/archlinuxarm.gpg is that key. A good pack
 and its version recorded; a wrong key, a tampered or unsigned package, one that contains another
 package, or one older than the last installed (without ALARM_ALLOW_DOWNGRADE=1) is refused and
 nothing is unpacked."""
+import sys
 import os
 import shutil
 import subprocess
@@ -12,6 +13,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env  # noqa: E402
 TOOLS = ("gpg", "gpgv", "bsdtar", "vercmp", "gpgconf")
 MIRROR = "http://mirror.test/aarch64"
 
@@ -90,10 +93,8 @@ class AlarmFetch(unittest.TestCase):
         return pkg
 
     def fetch(self, **extra):
-        env = {"HOME": str(self.home), "USER": os.environ.get("USER", "u"),
-               "PATH": os.pathsep.join([str(self.stubs)] + [os.path.dirname(shutil.which(t)) for t in TOOLS]
-                                       + ["/usr/bin", "/bin"]),
-               "ALARM_MIRROR": MIRROR, "MIRROR": MIRROR, "SERVE": str(self.serve), **extra}
+        env = sandbox_env(self.home, self.stubs, path=[os.path.dirname(shutil.which(t)) for t in TOOLS] + ["/usr/bin", "/bin"],
+                          ALARM_MIRROR=MIRROR, MIRROR=MIRROR, SERVE=self.serve, **extra)
         return subprocess.run(["bash", "-c", f'source "{self.repo}/lib/common.sh"; alarm_fetch extra hello "{self.dest}"'],
                               env=env, capture_output=True, text=True, timeout=60)
 

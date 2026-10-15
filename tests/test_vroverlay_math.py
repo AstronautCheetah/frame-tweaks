@@ -1,5 +1,4 @@
 """Arrow Pad VR overlay geometry: easing a slight sideways lean level after a grab."""
-import importlib.util
 import math
 import os
 import sys
@@ -9,6 +8,8 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
 
 
 def load():
@@ -21,9 +22,7 @@ def load():
             setattr(mod, n, object)
         fake["PyQt6." + m] = mod
     with mock.patch.dict(sys.modules, fake):
-        spec = importlib.util.spec_from_file_location("vroverlay", ROOT / "packs/original/arrowpad" / "vroverlay.py")
-        v = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(v)
+        v = load_script(ROOT / "packs/original/arrowpad" / "vroverlay.py", "vroverlay")
     return v
 
 

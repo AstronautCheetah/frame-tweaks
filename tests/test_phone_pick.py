@@ -1,6 +1,7 @@
 """adb-scrcpy/phone: which phone it connects to. Fake avahi-browse/kdialog/adb/scrcpy in a
 throwaway home: one phone is taken and remembered, several are chosen from a list, a remembered
 phone that's missing can be waited for or swapped."""
+import sys
 import os
 import subprocess
 import tempfile
@@ -8,6 +9,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env, stub  # noqa: E402
 PHONE = ROOT / "packs/original/adb-scrcpy" / "phone"
 
 
@@ -37,11 +40,10 @@ class PhonePick(unittest.TestCase):
             **(extra or {}),
         }
         for name, body in scripts.items():
-            (stubs / name).write_text(f"#!/bin/bash\n{body}\n")
-            (stubs / name).chmod(0o755)
+            stub(stubs, name, body)
         (home / "run").mkdir(exist_ok=True)      # (its pid file and scrcpy's log: not a running mirror's)
-        env = {"HOME": str(home), "PATH": f"{stubs}:/usr/bin:/bin", "CHOOSE": choose or "",
-               "XDG_RUNTIME_DIR": str(home / "run"), "PHONE_NO_SPLASH": "1", **(env or {})}   # (the splash has a test of its own)
+        env = sandbox_env(home, stubs, **{"CHOOSE": choose or "", "XDG_RUNTIME_DIR": home / "run",
+                                          "PHONE_NO_SPLASH": 1, **(env or {})})   # (the splash has a test of its own)
         r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30,
                            stdin=subprocess.DEVNULL)
         f = home / ".config/frame-tweaks/phone.conf"

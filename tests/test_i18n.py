@@ -13,6 +13,8 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import load_script  # noqa: E402
 sys.path.insert(0, str(ROOT / "lib"))
 import i18n  # noqa: E402
 
@@ -296,9 +298,7 @@ class MenusAndDashboard(unittest.TestCase):
     def test_dashboard_table(self):
         import importlib.machinery
         import importlib.util
-        loader = importlib.machinery.SourceFileLoader("sd", str(ROOT / "packs/original/vr-dashboard/sft-dashboard"))
-        sd = importlib.util.module_from_spec(importlib.util.spec_from_loader("sd", loader))
-        loader.exec_module(sd)
+        sd = load_script(ROOT / "packs/original/vr-dashboard/sft-dashboard", "sd")
         js = self.d / "p.js"
         js.write_text("const T = (s) => s, N = (s) => s;\nconst O = [[N('Off'), 'off']];\nel('div', {}, T('Colour'), 'Other');\n")
         cat = i18n.Catalogue(["es"], self.d)

@@ -3,6 +3,7 @@ the tools that would download, record, play or notify. A speech.conf without a l
 the engine chosen, or reset) is English (US): nothing to download, a real language for
 speech-dispatcher. A recording that ended by itself isn't "auto-stopped" into a new one. Every
 setting the README lists is in the example settings file."""
+import sys
 import os
 import re
 import subprocess
@@ -12,6 +13,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import sandbox_env, stub  # noqa: E402
 SPEECH = ROOT / "packs/original/speech"
 DICTATION = ROOT / "packs/original/dictation"
 
@@ -30,9 +33,7 @@ class Home(unittest.TestCase):
         self.log.write_text("")
 
     def stub(self, folder, name, body):
-        folder.mkdir(parents=True, exist_ok=True)
-        (folder / name).write_text(f"#!/bin/bash\n{body}\n")
-        (folder / name).chmod(0o755)
+        stub(folder, name, body)
 
 
 class SpeechLanguage(Home):
@@ -51,8 +52,7 @@ class SpeechLanguage(Home):
         stubs = self.tmp / "stubs"     # no network; and never the real speech-dispatcher
         self.stub(stubs, "curl", f'echo "curl $*" >> {self.log}; exit 7')
         self.stub(stubs, "pkill", f'echo "pkill $*" >> {self.log}')
-        env = {"HOME": str(self.home), "PATH": f"{stubs}:/usr/bin:/bin", "USER": os.environ.get("USER", "u"),
-               "FRAME_TWEAKS_LANGUAGE": "en"}
+        env = sandbox_env(self.home, stubs)
         r = subprocess.run(["bash", str(SPEECH / "install.sh")], env=env, capture_output=True, text=True, timeout=60)
         return r, d
 
@@ -88,7 +88,7 @@ class DictateAutoStop(Home):
         self.stub(bin_, "notify-send", f'echo "notify $*" >> {self.log}')
         (self.home / ".config/frame-tweaks").mkdir(parents=True)
         (self.home / ".config/frame-tweaks/dictate.conf").write_text("DICTATE_MAX_SECONDS=1\n")
-        env = {"HOME": str(self.home), "PATH": "/usr/bin:/bin"}
+        env = sandbox_env(self.home)
         r = subprocess.run(["bash", str(script)], env=env, capture_output=True, text=True, timeout=30)
         self.assertEqual(r.returncode, 0, r.stderr)
         time.sleep(2.5)                           # the auto-stop timer (1 s) has run
