@@ -16,6 +16,7 @@ Command line (through ./install.sh):
   sft.py mods add LINK [BRANCH|TAG]     a pack shared as a git repository: put in your packs folder,
                                         not used until you trust it
   sft.py mods update PACK               its newer version (from where it was added); trust it again
+  sft.py mods updates                   which packs added from a link have a newer version
   sft.py mods remove PACK               delete one of your packs (its tweaks uninstalled first)
   sft.py hide|unhide ID...              hide a row in the installer window (or show it again)
   sft.py hide-group|unhide-group NAME   the same for a whole group (e.g. "VR environment")
@@ -818,6 +819,32 @@ def update_pack(d):
             "log": [plain(x) for x in git("log", "--format=%s", f"{old}..{new}", cwd=d).splitlines()[:20]]}
 
 
+def pack_has_update(d):
+    """Whether where a pack was added from has a newer version than this copy: True, False (the
+    same, or one added at a fixed version), or None (couldn't look: offline, say). It only asks
+    the repository for its branch's commit (git ls-remote); nothing is downloaded."""
+    d = Path(d)
+    if not pack_origin(d):
+        return False
+    branch = (git("symbolic-ref", "-q", "--short", "HEAD", cwd=d, check=False) or "").strip()
+    if not branch:                                       # (a fixed version: it doesn't follow one)
+        return False
+    try:
+        out = git("ls-remote", "--heads", "origin", f"refs/heads/{branch}", cwd=d, timeout=20)
+    except PackError:
+        return None
+    theirs = out.split()[0] if out.split() else ""
+    if not re.fullmatch(r"[0-9a-f]{40,64}", theirs):
+        return None
+    # (newer unless this copy already has that commit: equal, or behind work of its own)
+    return git("merge-base", "--is-ancestor", theirs, "HEAD", cwd=d, check=False) is None
+
+
+def packs_with_updates():
+    """Your packs added from a link whose source has a newer version: their pack entries (load())."""
+    return [p for p in load(refresh=True)["packs"] if removable(p) and pack_has_update(p["dir"])]
+
+
 def pack_installed(p):
     """A pack's tweaks that are installed (an install record), but not those another pack in use provides."""
     try:
@@ -918,6 +945,19 @@ def mods(args):
             print(_("Problems:") + "\n  " + "\n  ".join(plain(x) for x in lines if not x.startswith("ok ")))
         print(_("It isn't used until you trust it: its tweaks would run as you. Read what they do first (each "
                 "one's README.md in that folder), then: {command}").format(command=f'./install.sh mods trust "{d}"'))
+        return
+    if args == ["updates"]:
+        found = 0
+        for p in load()["packs"]:
+            if not (removable(p) and pack_origin(p["dir"])):
+                continue
+            found += 1
+            news = pack_has_update(p["dir"])
+            print(f"{plain(p['name'])}: " + {True: _("a newer version is out: {command}").format(
+                command=f'./install.sh mods update "{p["dir"]}"'), False: _("up to date"),
+                None: _("couldn't check (no connection?)")}[news])
+        if not found:
+            print(_("No packs added from a link."))
         return
     if args[:1] in (["update"], ["remove"]) and len(args) == 2:
         p = find_pack(args[1])

@@ -89,11 +89,32 @@ class Versions(unittest.TestCase):
         done.set_result(None)
         w = gui.Window.__new__(gui.Window)                 # ⟳ Check for updates, then the answer
         w.latest_futures, w.update_futures, w.futures, w.self_update, w.update_state = {}, {}, {}, done, "checking"
+        w.pack_check = None
         w.set_update_state, w.say = mock.Mock(), mock.Mock()
         w.collect()
         w.set_update_state.assert_called_once_with("check")
         self.assertNotIn("up to date", w.say.call_args[0][0])
         self.assertNotEqual(w.say.call_args[1].get("good"), True)
+
+    def test_packs_with_a_newer_version(self):
+        """Check for updates also asks where packs added from a link came from: the window says how
+        many have a newer version, linking to the Packs page."""
+        from concurrent.futures import Future
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        found = Future()
+        found.set_result([{"dir": Path("/p/one")}, {"dir": Path("/p/two")}])
+        w = gui.Window.__new__(gui.Window)
+        w.latest_futures, w.update_futures, w.futures, w.self_update, w.details = {}, {}, {}, None, None
+        w.pack_check, w.pack_update_label, w.pack_updates = found, QLabel(), set()
+        w.collect()
+        self.assertEqual(w.pack_updates, {Path("/p/one"), Path("/p/two")})
+        self.assertIn("2 pack updates", w.pack_update_label.text())
+        self.assertIn("href='packs'", w.pack_update_label.text())
+        self.assertIsNone(w.pack_check)
+        w.pack_updates = set()
+        w.show_pack_updates()
+        self.assertEqual(w.pack_update_label.text(), "")
 
 
 class Status(unittest.TestCase):
@@ -341,7 +362,8 @@ class PacksPage(unittest.TestCase):
         gui.sft.load(refresh=True)
 
     def test_add_update_and_remove_from_a_link(self):
-        """A pack's link: Add brings it in, not trusted; Update says it's up to date; Remove… asks once more."""
+        """A pack's link: Add brings it in, not trusted; one Check for updates found newer says so, and
+        Update gets it; Remove… asks once more."""
         import shutil
         from PyQt6.QtWidgets import QApplication, QPushButton
         self.app = QApplication.instance() or QApplication([])
@@ -380,9 +402,14 @@ class PacksPage(unittest.TestCase):
                 self.assertIn("Added Hello pack. It isn't used until you trust it", page.notice.text())
                 self.assertTrue((d / "packs/their-pack/pack.md").is_file())
                 self.assertIn("Trust…", buttons())
+                window.pack_updates = {(d / "packs/their-pack").resolve()}     # (Check for updates found one)
+                page.build()
+                self.assertTrue(any("A newer version is out" in w.text() for w in page.findChildren(QLabel)))
                 buttons()["Update"].click()
                 wait()
                 self.assertEqual(page.notice.text(), "Hello pack is up to date.")
+                self.assertEqual(window.pack_updates, set())                     # (got it: the notice goes)
+                window.show_pack_updates.assert_called()
                 buttons()["Remove…"].click()
                 buttons()["Yes, delete it"].click()
                 self.assertEqual(page.notice.text(), "Removed Hello pack.")

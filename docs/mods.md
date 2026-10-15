@@ -21,6 +21,9 @@ uses most of what's described here.
   LINK [BRANCH|TAG]`. It's cloned into your packs folder and, like any pack, isn't used until
   you trust it. **Update** (`mods update PACK`) brings its newer version, which waits until you
   trust it again; **Remove…** (`mods remove PACK`) deletes it once its tweaks are uninstalled.
+  **⟳ Check for updates** in the window (and `mods updates`) asks each one's repository whether
+  its branch has moved on, without downloading anything, and the Packs page marks those that have.
+  So a pack author publishes an update by pushing to the branch people added.
   Links start with `https://` (or `ssh://`, `git@host:`); a pack added at a tag stays at it.
 - **Trust:** a pack's tweaks run as you, with your files and passwords in reach, so a new pack
   is listed but not used until you trust it: **🧩 Packs → Trust…**, or

@@ -768,6 +768,9 @@ class Window(QWidget):
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
         self.prefs = window_prefs()
         self.self_update = self.pool.submit(self_update_check) if self.prefs["update_check"] else None
+        # packs added from a link whose source has a newer version (with Frame Tweaks' own check)
+        self.pack_updates = set()
+        self.pack_check = self.pool.submit(sft.packs_with_updates) if self.prefs["update_check"] else None
 
         self.release_at_start = current_release()
         self.update_state, self.update_newest = "check", None
@@ -810,6 +813,11 @@ class Window(QWidget):
         self.self_update_label.setObjectName("notice")
         self.self_update_label.linkActivated.connect(lambda _: self.run_update(None))
         top.addWidget(self.self_update_label)
+        self.pack_update_label = QLabel()
+        self.pack_update_label.setObjectName("notice")
+        self.pack_update_label.linkActivated.connect(lambda _: self.show_packs())
+        top.addWidget(self.pack_update_label)
+        self.show_pack_updates()
         prefs = QPushButton("⚙")
         prefs.setToolTip(_("Preferences: the language, and how this window behaves"))
         prefs.clicked.connect(self.show_prefs)
@@ -960,6 +968,16 @@ class Window(QWidget):
                     self.say(_("Couldn't check for updates (no connection to GitHub?)."))
                 else:
                     self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=current_release()), good=True)
+        if self.pack_check is not None and self.pack_check.done():
+            try:
+                found = self.pack_check.result()
+            except Exception:                            # (a pack's git saying something odd)
+                found = []
+            self.pack_check = None
+            self.pack_updates = {p["dir"] for p in found}
+            self.show_pack_updates()
+            if isinstance(self.details, Packs):
+                self.details.build()
         for cid, fut in list(self.update_futures.items()):
             if fut.done():
                 del self.update_futures[cid]
@@ -987,7 +1005,8 @@ class Window(QWidget):
                         box.setChecked(self.state[cid][0] not in GONE)
                         box.blockSignals(False)
                 self.update_apply()
-        busy = self.futures or self.latest_futures or self.update_futures or self.self_update is not None
+        busy = (self.futures or self.latest_futures or self.update_futures or self.self_update is not None
+                or self.pack_check is not None)
         self.collect_every(100 if busy else 1000)
 
     # ---- layout -----------------------------------------------------------------
@@ -1216,10 +1235,21 @@ class Window(QWidget):
         b.style().unpolish(b)
         b.style().polish(b)
 
+    def show_pack_updates(self):
+        """🧩 N pack updates, a link to the Packs page (packs added from a link; that page says which)."""
+        n = len(getattr(self, "pack_updates", ()))
+        self.pack_update_label.setText(
+            ("🧩 <a style='color:#7fb2e5' href='packs'>" + ngettext("%d pack update", "%d pack updates", n) % n
+             + "</a>") if n else "")
+        self.pack_update_label.setToolTip(_("Packs added from a link have a newer version where they came from: "
+                                            "the Packs page says which") if n else "")
+
     def update_clicked(self):
         if self.update_state == "check":
             self.set_update_state("checking")
             self.self_update = self.pool.submit(self_update_check)
+            if self.pack_check is None:
+                self.pack_check = self.pool.submit(sft.packs_with_updates)
             self.collecting()
         elif self.update_state == "update":
             self.run_update(None)
