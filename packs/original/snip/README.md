@@ -13,6 +13,7 @@ why: >-
   SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a
   window floating in VR.
 author: "Frame Tweaks (OCR: Tesseract; speech: Piper)"
+sudo: homebrew
 source:
   relation: uses
   url: https://github.com/tesseract-ocr/tesseract

@@ -254,6 +254,30 @@ class Packs(unittest.TestCase):
         (self.user / "mypack" / "pack.md").write_bytes(b"---\nname: Caf\xe9\n---\n")   # (not UTF-8)
         self.assertTrue(any("pack.md" in p for p in sft.load(refresh=True)["problems"]))
 
+    def test_sudo_says_when_and_why(self):
+        """sudo: text for the window's tag and page (and ./install.sh list), or homebrew: only while
+        Homebrew isn't installed."""
+        d = self.tweak("mypack", "hello", extra="sudo: once, to add a udev rule\n")
+        sft.set_trusted(d.parent, True)
+        c = self.ids()["hello"]
+        self.assertEqual(sft.sudo_note(c), "once, to add a udev rule")
+        self.assertIn("Asks for your sudo password: once, to add a udev rule", sft.info("hello"))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            sft.main(["registry"])
+        line = next(l for l in out.getvalue().splitlines() if l.startswith("hello\x1f"))
+        self.assertEqual(line.split("\x1f")[7], "1")                     # (./install.sh list's mark)
+        c = dict(c, sudo="homebrew")
+        with tempfile.TemporaryDirectory() as brew:
+            with mock.patch.object(sft, "BREW", Path(brew) / "brew"):
+                self.assertIn("/home/linuxbrew", sft.sudo_note(c))
+                (Path(brew) / "brew").touch()
+                self.assertEqual(sft.sudo_note(c), "")
+        (d / "README.md").write_text(TWEAK.format(id="hello", title="Mine", category="Mods", extra="sudo: [install]\n"))
+        sft.set_trusted(d.parent, True)
+        self.assertNotIn("hello", self.ids())
+        self.assertTrue(any("sudo must be text" in p for p in sft.load()["problems"]), sft.load()["problems"])
+
     def test_wrong_kinds_of_values_leave_the_tweak_out(self):
         """processes as plain text would be a pattern per letter (install.sh stops whatever matches
         "^" or "."); source and run as text, or settings: actions: left empty, crashed the loader."""

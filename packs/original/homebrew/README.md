@@ -11,6 +11,7 @@ why: >-
   SteamOS's system partition is read-only and wiped by updates, so programs installed there
   don't last. Homebrew installs outside it, and several tweaks use it for that reason.
 author: Homebrew project
+sudo: homebrew
 source: {relation: uses, url: https://brew.sh}
 icon: {theme: package-x-generic}
 app: Homebrew

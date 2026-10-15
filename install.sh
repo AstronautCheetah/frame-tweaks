@@ -83,11 +83,11 @@ start_log() {
 
 # The tweaks, from the packs (lib/sft.py registry: the official packs and the user's trusted
 # packs, each tweak described by its README.md front matter; see docs/mods.md).
-declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED
+declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED SUDO
 IDS=()
-while IFS=$'\x1f' read -r id title deps desc dir exp linked; do
+while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
-    LINKED[$id]=$linked
+    LINKED[$id]=$linked; SUDO[$id]=$sudo
 done < <(python3 lib/sft.py registry)
 # (Frame Tweaks' own commands work without: every pack off or not trusted)
 [[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel)$ ]] ||
@@ -205,7 +205,8 @@ cmd_list() {
     bold "frame-tweaks $FT_BUILD"
     local id
     for id in "${IDS[@]}"; do
-        printf '  %-15s %s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ $(t '(experimental)')}"
+        printf '  %-15s %s%s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ $(t '(experimental)')}" \
+            "${SUDO[$id]:+ $(t '(asks for your sudo password)')}"
     done
     [[ " ${EXPERIMENTAL[*]} " == *1* ]] && echo "$(t "(experimental: relies on SteamVR's internals; see ./install.sh info ID)")"
     return 0

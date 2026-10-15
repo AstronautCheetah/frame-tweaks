@@ -10,6 +10,10 @@
   a udev rule that lets you pause charging. Valve Support says leaving the Frame plugged in at
   100% is fine for daily use; this is for a battery that wears more slowly, until SteamOS offers
   its own limit on the Frame, as it does on the Steam Deck.
+- **Tweaks that ask for your sudo password are tagged sudo** in the Frame Tweaks window, with why
+  on their page (Battery charge limit, and Dictation, Screen snip, Android Mirror and Homebrew
+  while Homebrew isn't installed yet), *(sudo)* in the README's tables, and in
+  `./install.sh list` and `info`.
 - **Test releases for people who try things first:** ⚙ Preferences → **Get test releases too**
   (or `./install.sh channel beta`) makes updates take test releases (`vX.Y.Z-rc.N`) as well.
   Unticked again, you stay on the test release until the next stable release is out, or go back
@@ -82,6 +86,8 @@
   offer ⟳ Restart SteamVR after an install or an uninstall, until SteamVR has restarted (a status
   script can do the same: `status_restart`, or `status_unload` once uninstalled).
   [docs/mods.md, Linking a project](docs/mods.md#linking-a-project).
+- **`sudo:` in a manifest** says when and why installing the tweak asks for the sudo password
+  (`homebrew`: only while Homebrew isn't installed); the window tags its row.
 - **A pack check for your own repository:** the `check-pack` GitHub Action reads your pack as
   Frame Tweaks does and checks its scripts with ShellCheck. Copy the example pack's
   `.github/workflows/pack-check.yml`; [docs/mods.md, Sharing a pack](docs/mods.md#sharing-a-pack).

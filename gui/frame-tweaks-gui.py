@@ -494,6 +494,10 @@ class Details(QWidget):
                  (_("Made by"), md_text(comp["author"]))]
         if comp["experimental"]:
             facts.append((_("🧪 Experimental"), f"<span style='color:#e0b33a'>{md_text(comp['experimental'])}</span>"))
+        if sft.sudo_note(comp):
+            facts.append((_("Asks for sudo"), "<span style='color:#e0b33a'>" + html.escape(
+                _("Installing it asks for your sudo (admin) password in its terminal: %s") % sft.sudo_note(comp),
+                quote=False) + "</span>"))
         if comp["link"]:
             readme = comp["link"].get("readme") or url
             facts.append((_("🔗 Linked"), "<span style='color:#e0b33a'>" + html.escape(_(
@@ -1033,22 +1037,29 @@ class Window(QWidget):
             self.boxes[cid] = box
             icon = QLabel()
             icon.setPixmap(row_icon(cid).pixmap(40, 40))
+            sudo = sft.sudo_note(comp)
             name = QLabel(html.escape(comp["title"], quote=False) +
                           ("  🧪" if comp["experimental"] else "") +
                           ("  🔗" if comp["link"] else "") +
+                          ("  <span style='color:#e0b33a;font-size:12px'>sudo</span>" if sudo else "") +
                           ("" if comp["official"] else
                            f"  <span style='color:#e0b33a;font-size:12px'>🧩 {html.escape(comp['pack'])}</span>") +
                           ("  <span style='color:#6b7783'>" + _("(hidden)") + "</span>" if is_hidden else ""))
             name.setObjectName("name")
+            tips = []                                      # (one tooltip says each of them)
             if comp["experimental"]:
-                name.setToolTip(_("Experimental: %s") % comp["experimental"])
+                tips.append(_("Experimental: %s") % comp["experimental"])
             if comp["link"]:
-                name.setToolTip(_("Linked: installed and uninstalled with the project's own commands, which Frame "
-                                  "Tweaks runs but doesn't check"))
+                tips.append(_("Linked: installed and uninstalled with the project's own commands, which Frame "
+                              "Tweaks runs but doesn't check"))
+            if sudo:
+                tips.append(_("Asks for your sudo password: %s") % sudo)
             if not comp["official"]:
-                name.setToolTip((_("From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s")
-                                 if comp["replaced"] else _("From the pack {pack}, not part of Frame Tweaks")).format(
-                                    pack=comp["pack"], other=comp["replaced"]))
+                tips.append((_("From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s")
+                             if comp["replaced"] else _("From the pack {pack}, not part of Frame Tweaks")).format(
+                                pack=comp["pack"], other=comp["replaced"]))
+            if tips:
+                name.setToolTip("\n\n".join(tips))
             deps = comp["deps"]
             info = QLabel(html.escape(comp["desc"], quote=False) +
                           ("  <i style='color:#6b7783'>" + _("needs: %s") % ", ".join(deps) + "</i>" if deps else ""))

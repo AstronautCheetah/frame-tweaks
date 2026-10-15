@@ -114,7 +114,7 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
-            "app", "link")
+            "app", "link", "sudo")
 # app: the name of the other project's app the tweak installs (Claude Desktop, Full Keyboard, …).
 # Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
@@ -123,6 +123,9 @@ OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "r
 CONFIG_ROOTS = ("~/.config/", "~/.var/app/", "~/.local/state/frame-tweaks/")
 UNINSTALL_PREF = Path(os.environ.get("FRAME_TWEAKS_UNINSTALL_FILE")             # keep (default) | remove
                       or Path.home() / ".config/frame-tweaks/uninstall-settings")
+# sudo: when and why installing it asks for the sudo password (the window tags its row sudo),
+# or "homebrew": only while Homebrew isn't installed, whose installer asks (need_brew).
+BREW = Path(os.environ.get("FRAME_TWEAKS_BREW") or "/home/linuxbrew/.linuxbrew/bin/brew")
 # link: a project linked rather than integrated (docs/mods.md, Linking a project): Frame Tweaks runs
 # its own install and uninstall commands as its README gives them, checks a path to tell whether
 # it's installed, can start it (run), and links its README. Nothing of it is pinned, checked,
@@ -145,6 +148,8 @@ def translated(c):
     for k in ("title", "desc", "what", "why", "run_label", "category"):
         if isinstance(c.get(k), str):
             c[k] = _(c[k])
+    if c.get("sudo") and c["sudo"] != "homebrew":
+        c["sudo"] = _(c["sudo"])
     st = c.get("settings")
     if st:
         st = dict(st)
@@ -338,6 +343,8 @@ def read_tweak(d):
     deps = data.get("depends", [])
     if not (isinstance(deps, list) and all(isinstance(x, str) for x in deps)):
         errs.append(f"{where}: depends must be a list of tweak ids")
+    if "sudo" in data and not (isinstance(data["sudo"], str) and data["sudo"].strip()):
+        errs.append(f"{where}: sudo must be text: when and why it asks for the sudo password (or homebrew)")
     link = data.get("link")
     if link is not None:
         errs += check_link(link, where)
@@ -391,7 +398,7 @@ def read_tweak(d):
         what=data["what"], why=data["why"], author=data["author"],
         source=f"{src.get('relation', 'uses')}|{src['url']}" if src.get("url") else "",
         flags={"hidden-by-default"} if data.get("hidden_by_default") else set(),
-        experimental=data.get("experimental") or "", icon=icon,
+        experimental=data.get("experimental") or "", icon=icon, sudo=(data.get("sudo") or "").strip(),
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() or (link or {}).get("run") else None,
         link=link_paths(link) if link else None,
         processes=procs, settings=data.get("settings"),
@@ -679,6 +686,15 @@ def parse_value(cid, key, text):
 
 
 # ---- command line -------------------------------------------------------------------------------
+def sudo_note(c):
+    """When and why installing tweak c asks for the sudo password; "" when it won't (a Homebrew
+    one, with Homebrew installed)."""
+    if c.get("sudo") == "homebrew":
+        return "" if BREW.exists() else _("once, if Homebrew isn't installed yet: its installer asks, to "
+                                           "create /home/linuxbrew")
+    return c.get("sudo") or ""
+
+
 def info(cid):
     c = component(cid)
     if not c:
@@ -690,6 +706,8 @@ def info(cid):
         lines += ["", _("Experimental: %s") % c["experimental"]]
     if c["deps"]:
         lines += ["", _("Needs: %s") % ", ".join(c["deps"])]
+    if sudo_note(c):
+        lines += ["", _("Asks for your sudo password: %s") % sudo_note(c)]
     if c["author"]:
         lines += [_("By: %s") % c["author"]]
     if c["source"]:
@@ -985,7 +1003,7 @@ def main(argv):
         for c in components():                  # (a line break in a summary would start a row of its own)
             print("\x1f".join(re.sub(r"[\n\r\x1f]", " ", f) for f in [c["id"], c["title"], " ".join(c["deps"]),
                                                                   c["desc"], str(c["dir"]), "1" if c["experimental"] else "",
-                                                                  "1" if c["link"] else ""]))
+                                                                  "1" if c["link"] else "", "1" if sudo_note(c) else ""]))
     elif cmd == "dir" and len(args) == 1:
         c = component(args[0])
         sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])
