@@ -22,12 +22,12 @@ if [ -x /home/linuxbrew/.linuxbrew/bin/rustc ]; then
 don't use it yourself: %s   (frees about 3.4 GB)" "brew uninstall rust && brew autoremove")"
 fi
 say "$(t 'Building %s from %s (a few minutes)' clipboard-sync https://github.com/dnut/clipboard-sync)"
-# The pinned commit, plus two small changes. It only shares text: keep-images.patch, or a copied
-# image was replaced with the last text a moment later; keep-source.patch, or the text was also
-# written back where it was copied (directly, or through the desktop's own Xwayland, which KWin
-# links to its Wayland clipboard), replacing what the app put there (a file, formatted text). The
-# same patch shares a password with its password manager's mark and empties the copies when the
-# original is emptied, and replaces nothing at start-up (which comes round every 10 minutes).
+# The pinned commit, plus two changes (README.md, How it works). keep-images.patch: a copied
+# image was replaced with the last text a moment later. sync-sessions.patch: the rest. A copy is
+# shared, never written back where it came from, and the desktop's own Xwayland is left to KWin;
+# files, pictures and the primary selection are shared too; a password keeps its mark and goes
+# when its original goes; copies are counted as they happen (data-control, XFixes) instead of
+# read five times a second; a start replaces nothing.
 SRC="$HOME/.local/share/frame-tweaks/src/clipboard-sync"
 rev=$(sed -n 's/^rev=//p' "$TWEAK_DIR/pin")
 rm -rf "$SRC"
@@ -41,8 +41,8 @@ else      # gone upstream: Frame Tweaks' copy of that commit's source (dev/mirro
         "$(sed -n 's/^mirror_sha256=//p' "$TWEAK_DIR/pin")" "$BUILD/src.tar.gz"
     tar -xzf "$BUILD/src.tar.gz" -C "$SRC" --strip-components=1
 fi
-for p in keep-images keep-source; do git -C "$SRC" apply "$TWEAK_DIR/$p.patch"; done
-echo keep-images keep-source:2 > "$SRC/.sft-patched"   # (status.sh: :2, passwords and a gentle start)
+for p in keep-images sync-sessions; do git -C "$SRC" apply "$TWEAK_DIR/$p.patch"; done
+echo keep-images sync-sessions > "$SRC/.sft-patched"         # (status.sh: an older build asks for a reinstall)
 # (Its build files go in the temporary folder too: with --path, cargo keeps them in $SRC/target,
 # about 350 MB that would stay.)
 cargo install --locked --force --path "$SRC" --root "$ROOT" --target-dir "$BUILD/target"

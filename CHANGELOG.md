@@ -9,6 +9,12 @@
   to the newest stable one at once (`./install.sh update --to stable`). The install command
   with `FRAME_TWEAKS_CHANNEL=beta` now keeps that choice for later updates; before, the first
   update took a tester back to the stable release.
+- **Shared clipboard: files, pictures and the middle-click selection too.** A file copied in a
+  file manager pastes as a file in the other session (as a copy, even after a cut), a picture
+  (PNG, JPEG, BMP, GIF or WebP, up to 32 MB) as a picture, and text you select pastes with a
+  middle-click on the other side (Arrow Pad's **M** key in VR). It now notices copies as they
+  happen instead of reading every clipboard five times a second, so a picture copied over
+  another is shared too, and it uses next to no processor time in between.
 - **Android Mirror: Share the clipboard with the phone** (⚙ Settings, or the gear in VR). On by
   default, as before: what you paste in the mirror goes to the phone, and what the phone copies
   comes to the Frame. Off, each keeps its own.
