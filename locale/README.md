@@ -22,6 +22,14 @@ then translate the `msgstr ""` lines in your editor of choice. Leave `%s`, `%d` 
 placeholders as they are; they're filled in by the program. A text you're unsure of can be
 marked *fuzzy* (Poedit: "Needs work"): it then isn't used until you clear the mark.
 
+**Needs review** is the other mark: a translator comment line `# needs review` above the entry
+(every gettext tool keeps those). The translation *is* used, but `dev/i18n.py stats` and the
+Translations needed issue count it as unreviewed. It's for a translation that's probably right
+but no person has checked yet: a machine's, or one made without the full context.
+`dev/i18n.py import LANG DIR --needs-review` marks what it puts in; `dev/i18n.py export LANG DIR
+--review` lists the marked ones, with their translations, for a reviewer; an import with
+`--reviewed` takes the mark off (or delete the line by hand).
+
 Translating a lot at once (a new language, or catching up)? [BATCH.md](BATCH.md): export the
 untranslated texts as JSON, translate them, and import them with checks. Each language keeps its
 terms and tone in [glossary/](glossary/) (Spanish: [glossary/es_419.md](glossary/es_419.md)).

@@ -17,6 +17,11 @@ gives every text with its `"current"` translation; the answer files hold the rev
 unchanged) text for every id. Run `dev/i18n-terms.py LANG` first, so the official terms are
 current, and `dev/i18n-terms.py LANG --check` after the import.
 
+**Machine or unchecked translations:** `import LANG DIR --needs-review` marks what it puts in
+(`# needs review`): it's shown, but counted as unreviewed. A reviewer takes `export LANG DIR
+--review` (the marked texts and their translations), answers with the checked (or corrected)
+text, and imports with `--reviewed`, which takes the mark off.
+
 `import` leaves out an answer that loses a placeholder (`%s`, `{name}`), an HTML tag, a newline,
 or the spaces at either end, and lists it: fix the answer file and import again. Then read the
 result in the window (`FRAME_TWEAKS_LANGUAGE=es_419 ./install.sh gui`) and in a terminal

@@ -13,5 +13,7 @@
 
 - [ ] `dev/check.sh` passes (it runs what CI runs)
 - [ ] Changed a manifest (a tweak's README front matter)? I ran `dev/gen-docs.py`
-- [ ] Changed text the window or a program shows? I ran `dev/i18n.py extract`
+- [ ] Changed text the window or a program shows? It's marked (`_("…")`, `t '…'`), and I ran
+      `dev/i18n.py extract` (or a maintainer will)
+- [ ] English only: I didn't translate (that's fine; the maintainers do it before the release)
 - [ ] Anything users will notice is in CHANGELOG.md under "Unreleased"

@@ -1,0 +1,37 @@
+name: Translations
+# After each change on main: one open "Translations needed" issue lists, per language, the texts
+# not translated yet and how many translations need a person's review (dev/i18n.py report). It's
+# updated in place, and closed once every language is complete and reviewed. Contributors can
+# write English only; this is how the translation work is tracked (CONTRIBUTING.md, Translations).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: translations
+jobs:
+  report:
+    runs-on: ubuntu-24.04     # (named, not ubuntu-latest: a new Ubuntu comes in when we try it, not by surprise)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Open, update or close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Translations needed
+        run: |
+          python3 dev/i18n.py report > report.md
+          python3 dev/i18n.py stats | tee stats.txt
+          gh label create translations --color 0e8a16 --description "Texts to translate or review" 2>/dev/null || true
+          issue=$(gh issue list --label translations --state open --json number,title \
+                    --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)
+          # (complete: every line "N of N translated", none "need review")
+          if awk '{ if ($2 != $4 || /need review/) bad = 1 } END { exit bad }' stats.txt; then
+            [ -z "$issue" ] || gh issue close "$issue" --comment "Every language is complete and reviewed as of ${GITHUB_SHA::7}."
+          elif [ -n "$issue" ]; then
+            gh issue edit "$issue" --body-file report.md
+          else
+            gh issue create --title "$TITLE" --label translations --body-file report.md
+          fi

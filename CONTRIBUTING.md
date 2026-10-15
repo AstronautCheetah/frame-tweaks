@@ -206,8 +206,23 @@ Text the installer window shows goes through gettext (`lib/i18n.py`): wrap it as
 different translations. Build text with placeholders inside the translated string
 (`_("{n} tweaks installed").format(n=n)`), not by joining pieces, so translators see whole
 sentences. A tweak's title, summary, what, why and settings labels are translated
-automatically. After changing marked text, run `dev/i18n.py extract` (CI checks the template is
-current). Translators: see [locale/README.md](locale/README.md).
+automatically. Translators: see [locale/README.md](locale/README.md).
+
+**English only is fine.** You don't need to translate anything, or speak another language:
+write your text in English, marked as above, and the maintainers translate it before the next
+release. Until then it shows in English, in every language. What helps:
+
+- Mark every text people see, including tooltips and messages (`tests/test_marked_text.py`
+  finds Qt text that isn't marked). Names (Frame Tweaks, NordVPN, SteamVR) stay as they are.
+- Whole sentences with placeholders, as above; a `pgettext` context when a short word could be
+  read two ways ("Right" as a direction, or a mouse button).
+- If you can, run `dev/i18n.py extract`. If you don't, CI only warns on your pull request, and a
+  maintainer runs it before merging.
+
+After a change lands on main, the **Translations needed** issue (the Translations workflow)
+lists what each language still lacks. A translation marked `# needs review` (one made by a
+machine, say) is shown like any other, and counted apart until a person checks it
+([locale/README.md](locale/README.md)).
 
 ## Pinned downloads
 
@@ -267,6 +282,12 @@ VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. The ta
 `get.sh` and `./install.sh update` install, so the release is out as soon as the workflow pushes
 it; the draft is only its page of notes on GitHub. Pre-releases
 (`vX.Y.Z-rc.N`) only reach the beta channel.
+
+**Translations first.** The workflow stops unless the translation template is current and every
+language has every text (`dev/i18n.py stats --strict`), so before releasing: `dev/i18n.py
+extract` and `update`, then translate what's missing (`dev/i18n.py export LANG DIR`,
+[locale/BATCH.md](locale/BATCH.md)). Texts marked as needing review don't hold a release up.
+"Release with texts not translated yet" overrides it, for an urgent fix: they show in English.
 
 **Release tags are signed** with an SSH key: the workflow signs with the private key in the
 repository secret `RELEASE_SIGNING_KEY`, and `./install.sh update` refuses a release whose tag

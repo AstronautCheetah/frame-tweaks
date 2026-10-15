@@ -14,6 +14,10 @@ on:
         description: Pre-release (vX.Y.Z-rc.N, only for the beta channel)
         type: boolean
         default: false
+      allow_untranslated:
+        description: Release with texts not translated yet (they show in English)
+        type: boolean
+        default: false
 permissions:
   contents: write
   actions: write       # to start CI on the release commit (pushes made here don't trigger it)
@@ -26,6 +30,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
+      # Before each release, a translation pass brings every language to every text
+      # (CONTRIBUTING.md, Releasing). Texts marked as needing review count as translated.
+      - name: Translations are current and complete (dev/i18n.py)
+        env:
+          ALLOW: ${{ inputs.allow_untranslated }}
+        run: |
+          python3 dev/i18n.py check
+          if [ "$ALLOW" = true ]; then python3 dev/i18n.py stats; else python3 dev/i18n.py stats --strict; fi
       - name: Work out the version
         id: v
         env:

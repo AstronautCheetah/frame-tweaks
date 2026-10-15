@@ -318,6 +318,8 @@ class MenusAndDashboard(unittest.TestCase):
 class Template(unittest.TestCase):
     def test_up_to_date_and_complete(self):
         r = subprocess.run([sys.executable, str(ROOT / "dev/i18n.py"), "check"], capture_output=True, text=True)
+        if r.returncode and os.environ.get("FRAME_TWEAKS_I18N_LENIENT"):     # (CI, on a pull request)
+            self.skipTest("the translation template is out of date: a maintainer refreshes it before merging")
         self.assertEqual(r.returncode, 0, r.stderr)
         pot = (ROOT / "locale/frame-tweaks.pot").read_text()
         self.assertIn('msgid "Refresh"', pot)                               # marked in the code
