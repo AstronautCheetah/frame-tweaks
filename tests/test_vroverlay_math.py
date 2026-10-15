@@ -22,7 +22,7 @@ def load():
             setattr(mod, n, object)
         fake["PyQt6." + m] = mod
     with mock.patch.dict(sys.modules, fake):
-        v = load_script(ROOT / "packs/original/arrowpad" / "vroverlay.py", "vroverlay")
+        v = load_script(ROOT / "packs/core/arrowpad" / "vroverlay.py", "vroverlay")
     return v
 
 

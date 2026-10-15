@@ -298,7 +298,7 @@ class MenusAndDashboard(unittest.TestCase):
     def test_dashboard_table(self):
         import importlib.machinery
         import importlib.util
-        sd = load_script(ROOT / "packs/original/vr-dashboard/sft-dashboard", "sd")
+        sd = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sd")
         js = self.d / "p.js"
         js.write_text("const T = (s) => s, N = (s) => s;\nconst O = [[N('Off'), 'off']];\nel('div', {}, T('Colour'), 'Other');\n")
         cat = i18n.Catalogue(["es"], self.d)

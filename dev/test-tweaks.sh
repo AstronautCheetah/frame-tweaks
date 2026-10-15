@@ -64,7 +64,7 @@ printf 'pkgname = ydotool\npkgver = 1.0.4-2\n' > "$fx/pkg/.PKGINFO"
 (cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" .PKGINFO usr)
 echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
 head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"
-sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/packs/original/dictation/pin"
+sed -i "s/^sha256=.*/sha256=$(sha256sum "$fx/model.bin" | cut -c1-64)/" "$REPO/packs/core/dictation/pin"
 cat > "$stubs/curl" <<STUB
 #!/bin/bash
 out=""; url=""

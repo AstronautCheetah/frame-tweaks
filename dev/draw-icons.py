@@ -25,13 +25,13 @@ GLYPH = QRectF(48, 48, 160, 160)
 # full-colour pictures), tile colour, glyph box
 TILES = [
     ("icons/frame-tweaks.png", "actions/24/configure.svg", "#7b4fc9", GLYPH),
-    ("packs/original/adb-scrcpy/frame-tweaks-phone.png", "devices/24/smartphone.svg", "#2e9d4f", GLYPH),
-    ("packs/original/arrowpad/frame-tweaks-arrowpad.png", "devices/24/input-keyboard.svg", "#3d7bd9", GLYPH),
+    ("packs/core/adb-scrcpy/frame-tweaks-phone.png", "devices/24/smartphone.svg", "#2e9d4f", GLYPH),
+    ("packs/core/arrowpad/frame-tweaks-arrowpad.png", "devices/24/input-keyboard.svg", "#3d7bd9", GLYPH),
     ("packs/integrations/nordvpn/frame-tweaks-nordvpn.png", "devices/24/network-vpn.svg", "#1f3b73", GLYPH),
-    ("packs/original/wallet/frame-tweaks-lock.png", "actions/22/object-locked.svg", "#b8860b", QRectF(56, 56, 144, 144)),
+    ("packs/core/wallet/frame-tweaks-lock.png", "actions/22/object-locked.svg", "#b8860b", QRectF(56, 56, 144, 144)),
 ]
-AS_IS = [("packs/original/snip/frame-tweaks-snip.png", "apps/48/accessories-screenshot-tool.svg")]
-EMOJI = ("packs/original/dictation/frame-tweaks-dictate.png", "🎤", "#c0392b", 27.5)   # (its own corners)
+AS_IS = [("packs/core/snip/frame-tweaks-snip.png", "apps/48/accessories-screenshot-tool.svg")]
+EMOJI = ("packs/core/dictation/frame-tweaks-dictate.png", "🎤", "#c0392b", 27.5)   # (its own corners)
 SMALLER = [("icons/frame-tweaks-128.png", 128), ("icons/frame-tweaks-64.png", 64)]   # (of icons/frame-tweaks.png)
 
 

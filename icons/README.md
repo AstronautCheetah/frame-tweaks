@@ -13,17 +13,17 @@ coloured tile.
 | Icon | Breeze glyph | Tile |
 |---|---|---|
 | `icons/frame-tweaks.png` (and `-64`, `-128`) | `actions/24/configure.svg` | `#7b4fc9` |
-| `packs/original/adb-scrcpy/frame-tweaks-phone.png` | `devices/24/smartphone.svg` | `#2e9d4f` |
-| `packs/original/arrowpad/frame-tweaks-arrowpad.png` | `devices/24/input-keyboard.svg` | `#3d7bd9` |
+| `packs/core/adb-scrcpy/frame-tweaks-phone.png` | `devices/24/smartphone.svg` | `#2e9d4f` |
+| `packs/core/arrowpad/frame-tweaks-arrowpad.png` | `devices/24/input-keyboard.svg` | `#3d7bd9` |
 | `packs/integrations/nordvpn/frame-tweaks-nordvpn.png` | `devices/24/network-vpn.svg` | `#1f3b73` |
-| `packs/original/wallet/frame-tweaks-lock.png` | `actions/22/object-locked.svg` | `#b8860b` |
-| `packs/original/snip/frame-tweaks-snip.png` | `apps/48/accessories-screenshot-tool.svg`, as it is | – |
+| `packs/core/wallet/frame-tweaks-lock.png` | `actions/22/object-locked.svg` | `#b8860b` |
+| `packs/core/snip/frame-tweaks-snip.png` | `apps/48/accessories-screenshot-tool.svg`, as it is | – |
 
 Breeze's licence says that for its icons, the source is their SVG: these icons' source is those
 SVGs and `dev/draw-icons.py`, which makes them from them.
 
 **From Noto Color Emoji** (SIL Open Font License 1.1; SteamOS's noto-fonts-emoji 2.042):
-`packs/original/dictation/frame-tweaks-dictate.png`, the font's 🎤 drawn on a `#c0392b` tile,
+`packs/core/dictation/frame-tweaks-dictate.png`, the font's 🎤 drawn on a `#c0392b` tile,
 like Arrow Pad's 🎤 button while it records.
 
 The texts of these licences are in [LICENSES/](../LICENSES/): `LGPL-3.0-or-later.txt` (with

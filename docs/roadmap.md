@@ -72,7 +72,7 @@ next to the idea it inspired.
   Homebrew's Tesseract brings just `eng.traineddata`, and frame-snip doesn't pass `-l`. Plan:
   - **Data:** Tesseract's `tessdata_fast` models (a few MB each; Apache-2.0), one file per
     language, from a pinned commit of github.com/tesseract-ocr/tessdata_fast with each file's
-    SHA256 in `packs/original/snip/ocr-languages.tsv`, built by a `dev/ocr-languages.py` (as
+    SHA256 in `packs/core/snip/ocr-languages.tsv`, built by a `dev/ocr-languages.py` (as
     `dev/speech-voices.py` builds the voices list), and copied to the mirror release like other
     pinned downloads.
   - **Where:** `~/.local/share/frame-tweaks/tessdata/` (English copied in from Homebrew's), passed

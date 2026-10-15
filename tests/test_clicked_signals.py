@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FILES = [*ROOT.glob("gui/*.py"), ROOT / "packs/original/arrowpad/arrowpad.py", ROOT / "packs/original/snip/frame-snip"]
+FILES = [*ROOT.glob("gui/*.py"), ROOT / "packs/core/arrowpad/arrowpad.py", ROOT / "packs/core/snip/frame-snip"]
 MEANT = {"toggle_autolock"}             # (these take `checked` on purpose)
 
 

@@ -51,7 +51,7 @@ LOGS="$STATE/logs"
 migrate_legacy_dirs
 # The tweaks moved into packs/official/ (0.6): an update leaves their old folders behind
 # holding only Python's __pycache__ (git doesn't track it).
-# The same for packs/official, which became packs/original, packs/integrations and packs/third-party (after 0.6.0).
+# The same for packs/official, which became packs/core, packs/integrations and packs/third-party (after 0.6.0).
 shopt -s nullglob
 for d in */__pycache__ packs/official/*/__pycache__; do
     d=${d%/__pycache__}
@@ -418,7 +418,7 @@ remove_checkout() {
         elif [[ $(git worktree list 2>/dev/null | wc -l) -gt 1 || -n $(git stash list 2>/dev/null | head -1) ]]; then
             why=$(t 'it has other worktrees or stashed changes')
         fi
-    elif [[ -n $(find packs -mindepth 1 -maxdepth 1 -type d ! -name original ! -name integrations ! -name third-party -print -quit) ]]; then
+    elif [[ -n $(find packs -mindepth 1 -maxdepth 1 -type d ! -name core ! -name original ! -name integrations ! -name third-party -print -quit) ]]; then
         why=$(t 'it has your own packs in packs/')
     fi
     if [[ -n $why ]]; then

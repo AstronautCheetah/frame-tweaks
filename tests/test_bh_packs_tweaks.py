@@ -1,4 +1,4 @@
-"""Integrations, 3rd Party and small Original tweaks, run in a throwaway home with stand-ins for
+"""Integrations, 3rd Party and small Core tweaks, run in a throwaway home with stand-ins for
 system tools: Firefox's user.js block (a last line without a newline, a start marker without its
 end), NordVPN's reinstall keeping the VPN setup, Shared clipboard's build files staying in the
 temporary folder, restart-plasmashell waiting for (or killing) the old taskbar, and the example
@@ -189,7 +189,7 @@ class RestartPlasmashell(Home):
         self.log = self.home / "log"
         # (its log in the test's folder, not the real /run/user/<uid>)
         self.script = self.home / "restart-plasmashell"
-        self.script.write_text((ROOT / "packs/original/tools/restart-plasmashell").read_text()
+        self.script.write_text((ROOT / "packs/core/tools/restart-plasmashell").read_text()
                                .replace("/run/user/$(id -u)", str(self.home)))
         old, new = self.home / "old", self.home / "new"
         self.old = old

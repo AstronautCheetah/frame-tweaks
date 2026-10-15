@@ -47,7 +47,7 @@ def programs(shebang):
     """The official packs' files whose first line matches shebang (programs without .py)."""
     out = []
     for f in sorted(ROOT.glob("packs/*/*/*")):
-        if f.is_file() and f.parts[-3] in ("original", "integrations", "third-party") and "__pycache__" not in f.parts:
+        if f.is_file() and f.parts[-3] in ("core", "integrations", "third-party") and "__pycache__" not in f.parts:
             try:
                 with open(f, "rb") as fh:
                     first = fh.readline()
@@ -59,13 +59,13 @@ def programs(shebang):
 
 
 CODE = sorted({*ROOT.glob("gui/*.py"), ROOT / "gui/frame-tweaks-gui.py", *ROOT.glob("lib/*.py"),
-               *ROOT.glob("packs/original/*/*.py"), *ROOT.glob("packs/integrations/*/*.py"), *ROOT.glob("packs/third-party/*/*.py"),
+               *ROOT.glob("packs/core/*/*.py"), *ROOT.glob("packs/integrations/*/*.py"), *ROOT.glob("packs/third-party/*/*.py"),
                *programs(rb"#!.*python")})
-SHELL = sorted({ROOT / "install.sh", *ROOT.glob("lib/*.sh"), *ROOT.glob("packs/original/*/*.sh"),
+SHELL = sorted({ROOT / "install.sh", *ROOT.glob("lib/*.sh"), *ROOT.glob("packs/core/*/*.sh"),
                 *ROOT.glob("packs/integrations/*/*.sh"), *ROOT.glob("packs/third-party/*/*.sh"), *programs(rb"#!.*(/bash|/sh\b|env bash)")})
-JS = sorted(p for pack in ("original", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.js"))
+JS = sorted(p for pack in ("core", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.js"))
 DESKTOP = sorted([*ROOT.glob("share/applications/*.desktop"),
-                  *(p for pack in ("original", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.desktop"))])
+                  *(p for pack in ("core", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.desktop"))])
 # SteamVR dashboard patches: T('text') where it's shown, N('text') in a constant (the same rule as
 # vr-dashboard/sft-dashboard's, which sends the translations into the dashboard).
 JS_TEXT = re.compile(r"""\b[TN]\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")\s*\)""")

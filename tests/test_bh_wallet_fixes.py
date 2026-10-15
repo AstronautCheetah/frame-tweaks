@@ -15,7 +15,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import sandbox_env, stub  # noqa: E402
-WALLET = ROOT / "packs/original/wallet"
+WALLET = ROOT / "packs/core/wallet"
 
 
 def load(name, home):

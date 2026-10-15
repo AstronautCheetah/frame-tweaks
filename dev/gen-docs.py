@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the docs that list tweaks, from the official packs (packs/original,
+"""Generate the docs that list tweaks, from the official packs (packs/core,
 packs/integrations, then packs/third-party: each tweak's README.md front matter, in their pack.md's order):
 
   README.md       a table of tweaks per category, in the installer window's order
@@ -43,7 +43,7 @@ def link(m):
 
 def readme_tables(rows):
     """One table per category, in pack.md's order (as the installer window lists them)."""
-    order = sft.read_pack(sft.ORIGINAL)[0]["categories"]
+    order = sft.read_pack(sft.CORE)[0]["categories"]
     cats = order + sorted({m["category"] for _, m in rows} - set(order))
     out = []
     for cat in cats:

@@ -41,7 +41,7 @@ def sandbox_env(home, stubs=None, path=("/usr/bin", "/bin"), **extra):
 
 
 def load_script(path, name=None):
-    """A Python program (with or without .py, e.g. packs/original/snip/frame-snip) as a module."""
+    """A Python program (with or without .py, e.g. packs/core/snip/frame-snip) as a module."""
     path = Path(path)
     name = name or path.stem.replace("-", "_")
     loader = importlib.machinery.SourceFileLoader(name, str(path))

@@ -15,8 +15,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import sandbox_env, stub  # noqa: E402
-SPEECH = ROOT / "packs/original/speech"
-DICTATION = ROOT / "packs/original/dictation"
+SPEECH = ROOT / "packs/core/speech"
+DICTATION = ROOT / "packs/core/dictation"
 
 
 def pin(path, key):

@@ -35,7 +35,7 @@ Say in your pull request what you tested, and on what; the maintainer tests the 
   is the VR session's D-Bus.
 - **Tweak:** one row of the checklist: a folder with a README (its *manifest* is the README's
   YAML front matter) and `install.sh`, `status.sh` and `uninstall.sh`.
-- **Pack:** a folder of tweaks. The three *official packs* (Original, Integrations, 3rd Party)
+- **Pack:** a folder of tweaks. The three *official packs* (Core, Integrations, 3rd Party)
   are in `packs/`; anyone else's needs trusting first.
 - **Helper:** a tweak others depend on, installed along with them (`tier: helper`), such as
   ydotool. Not to be confused with the shell helpers in `lib/common.sh`.
@@ -67,7 +67,7 @@ Say in your pull request what you tested, and on what; the maintainer tests the 
    On a minimal system (a container, say), Qt also needs `libegl1 libgl1 libxkbcommon0
    libfontconfig1 libxtst6`. Other distributions have the same tools under similar names. On a
    Frame, only ShellCheck is missing (`brew install shellcheck`, with the
-   [Homebrew](packs/original/homebrew/) tweak), the full installer window's Python already has
+   [Homebrew](packs/core/homebrew/) tweak), the full installer window's Python already has
    PyQt6 (`~/.local/share/arrowpad/venv`), and SteamOS's own `/usr/bin/python3` has PyYAML.
 
 3. Check that everything passes before you change anything: `dev/check.sh` (below).
@@ -149,7 +149,7 @@ The installer sets more for the tweaks' scripts (`FRAME_TWEAKS_LIB`, `FRAME_TWEA
 ## Adding a tweak
 
 Tweaks are self-contained folders in packs. Frame Tweaks' own are in three official packs:
-`packs/original/` (tweaks written for Frame Tweaks), `packs/integrations/` (other projects' apps
+`packs/core/` (tweaks written for Frame Tweaks), `packs/integrations/` (other projects' apps
 that Frame Tweaks fits to the Frame: a tray icon, a key in the wallet, menu entries) and
 `packs/third-party/` (other projects' apps installed as they are, from their pinned source or
 release, with their own README appended). A tweak's README.md starts with its manifest (YAML
@@ -167,7 +167,7 @@ about it. To add one:
    title, summary, what and why are translated). For a 3rd Party tweak with `upstream_readme:`,
    `dev/fetch-upstream-readmes.py ID` first. Then `dev/check.sh`.
 4. A tweak with a window: a screenshot under its intro, and in the README's **Screenshots**
-   (a folded `<details>` section). The Original tweaks' windows are drawn off-screen with sample
+   (a folded `<details>` section). The Core tweaks' windows are drawn off-screen with sample
    content by `dev/screenshots.py` (into `docs/images/`; run it with a Python that has PyQt6,
    such as Arrow Pad's), so they can be taken again when a window changes and never show
    anything of the machine they're taken on; add yours there. Views that exist only in VR are

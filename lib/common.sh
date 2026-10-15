@@ -30,10 +30,10 @@ tweak_dir() {
         [ "${line%%=*}" = "$1" ] && { echo "${line#*=}"; return; }
     done <<<"${FRAME_TWEAKS_DIRS:-}"
     local pack
-    for pack in original integrations third-party; do
+    for pack in core integrations third-party; do
         [ -d "$REPO_DIR/packs/$pack/$1" ] && { echo "$REPO_DIR/packs/$pack/$1"; return; }
     done
-    echo "$REPO_DIR/packs/original/$1"
+    echo "$REPO_DIR/packs/core/$1"
 }
 export FRAME_TWEAKS_LIB="$REPO_DIR/lib"     # (for the scripts a tweak runs in turn, wherever they are)
 BIN="$HOME/.local/bin"
@@ -437,7 +437,7 @@ remove_qt_venv() {
     remove_files "$QT_VENV"
 }
 
-# --- SteamVR dashboard patches (packs/original/vr-dashboard/) ---------------------------------------------
+# --- SteamVR dashboard patches (packs/core/vr-dashboard/) ---------------------------------------------
 # A VR environment tweak is one patch file; vr-dashboard's watcher injects it while SteamVR runs.
 VR_DASHBOARD="$HOME/.local/share/frame-tweaks/vr-dashboard"
 install_dashboard_patch() {    # install_dashboard_patch NAME FILE

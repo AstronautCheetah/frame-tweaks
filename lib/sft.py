@@ -100,14 +100,15 @@ OFF_PACKS = CONF / "off-packs"                      # official packs turned off 
 # ---- packs and tweaks -------------------------------------------------------------------------
 # A pack is a folder of tweak folders, with an optional pack.md; a tweak is a folder whose
 # README.md starts with front matter (docs/mods.md). Frame Tweaks' own packs (official) are loaded
-# like any other, and are on unless turned off: Original (our own tweaks), Integrations (other
-# projects' apps that Frame Tweaks fits to the Frame) and 3rd Party (other projects' apps,
-# installed as they are). A user's packs need trusting first (they run as you),
+# like any other, and are on unless turned off: Core (our own tweaks, and the helpers they need),
+# Integrations (other projects' apps that Frame Tweaks fits to the Frame) and 3rd Party (other
+# people's Frame projects and fixes, most of them linked). (Core was "Original", in
+# packs/original, before 0.6.6.) A user's packs need trusting first (they run as you),
 # and a tweak of theirs may take the place of one with the same id only by saying `replaces: true`.
-ORIGINAL = REPO / "packs/original"
+CORE = REPO / "packs/core"
 INTEGRATIONS = REPO / "packs/integrations"
 THIRD_PARTY = REPO / "packs/third-party"
-OFFICIAL_PACKS = [ORIGINAL, INTEGRATIONS, THIRD_PARTY]    # (also dev/i18n.py's: the packs whose text is in the template)
+OFFICIAL_PACKS = [CORE, INTEGRATIONS, THIRD_PARTY]    # (also dev/i18n.py's: the packs whose text is in the template)
 USER_PACKS = Path.home() / ".local/share/frame-tweaks/packs"
 API = 1                                             # the newest pack api this version knows
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -169,7 +170,8 @@ def pack_dirs():
     e.g. packs/attic for tweaks set aside), then ~/.local/share/frame-tweaks/packs/*, then
     FRAME_TWEAKS_PACKS (folders separated by :, each a pack). All but the official ones need trust."""
     out = list(OFFICIAL_PACKS)
-    out += sorted(d for d in ORIGINAL.parent.iterdir() if d.is_dir() and d not in OFFICIAL_PACKS and not d.name.startswith("."))
+    out += sorted(d for d in CORE.parent.iterdir() if d.is_dir() and d not in OFFICIAL_PACKS and not d.name.startswith(".")
+                  and not (d.name == "original" and not (d / "pack.md").exists()))   # (Core's old folder: what an update left)
     if USER_PACKS.is_dir():
         out += sorted(d for d in USER_PACKS.iterdir() if d.is_dir() and not d.name.startswith("."))
     out += [Path(d).expanduser() for d in os.environ.get("FRAME_TWEAKS_PACKS", "").split(":") if d]
@@ -231,8 +233,8 @@ def set_trusted(d, trust):
 
 
 def off_packs():
-    """The official packs turned off, by folder name (e.g. {"third-party"})."""
-    return read_set(OFF_PACKS)
+    """The official packs turned off, by folder name (e.g. {"third-party"}; Core's was "original")."""
+    return {"core" if name == "original" else name for name in read_set(OFF_PACKS)}
 
 
 def set_official(d, on):

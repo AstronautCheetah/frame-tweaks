@@ -126,7 +126,7 @@ class CheckDocs(Temp):
     def test_a_broken_html_picture_is_reported(self):
         (self.d / "dev").mkdir()
         shutil.copy(ROOT / "dev/check-docs.py", self.d / "dev")
-        for pack in ("original", "integrations", "third-party"):
+        for pack in ("core", "integrations", "third-party"):
             (self.d / "packs" / pack).mkdir(parents=True)
         (self.d / "docs").mkdir()
         (self.d / "docs/here.png").write_bytes(b"")
@@ -140,7 +140,7 @@ class CheckDocs(Temp):
 class GenDocs(Temp):
     def test_an_upstream_readme_no_longer_named_goes(self):
         repo = copy_repo(self.d / "repo")
-        official = [p for pack in ("original", "integrations", "third-party") for p in sorted(repo.glob(f"packs/{pack}/*/README.md"))]
+        official = [p for pack in ("core", "integrations", "third-party") for p in sorted(repo.glob(f"packs/{pack}/*/README.md"))]
         readme = next((p for p in official            # (not a local pack's: gen-docs leaves those alone)
                        if any(l.startswith("upstream_readme:") for l in p.read_text().splitlines())), None)
         if not readme:
@@ -199,8 +199,8 @@ class CheckPins(Temp):
         shutil.copy(ROOT / "dev/check-pins.sh", self.d / "dev")
         (self.d / "lib").mkdir()
         (self.d / "lib/python-constraints.txt").write_text("")
-        (self.d / "packs/original/model").mkdir(parents=True)
-        (self.d / "packs/original/model/pin").write_text(
+        (self.d / "packs/core/model").mkdir(parents=True)
+        (self.d / "packs/core/model/pin").write_text(
             f"version={rev[:8]}\nurl=https://huggingface.co/o/r/resolve/{rev}/m.bin\nsha256={'a' * 64}\n"
             "latest=https://huggingface.co/api/models/o/r/revision/main\n")
         log = self.d / "curl.log"
@@ -295,7 +295,7 @@ class TestTweaks(Temp):
     left in /tmp that kept an old date (as files unpacked from an archive do)."""
 
     def tweak(self, repo, tid, install):
-        d = repo / "packs/original" / tid
+        d = repo / "packs/core" / tid
         d.mkdir()
         (d / "README.md").write_text(MANIFEST.format(id=tid))
         for script, body in (("install.sh", install), ("status.sh", 'status_ok "fine"'), ("uninstall.sh", ":")):
@@ -315,7 +315,7 @@ class TestTweaks(Temp):
         self.assertNotEqual(r.returncode, 0, r.stdout)
         out = r.stdout.split("\nFAIL leak-tmp")
         self.assertIn("FAIL leak-repo: wrote outside the test home:", out[0])
-        self.assertRegex(out[0], r"(?m)^    \S*/repo/packs/original/leak-repo/state\.txt$")
+        self.assertRegex(out[0], r"(?m)^    \S*/repo/packs/core/leak-repo/state\.txt$")
         self.assertEqual(len(out), 2, r.stdout + r.stderr)
         self.assertTrue(out[1].startswith(": wrote outside the test home:\n"), out[1])
         self.assertRegex(out[1], rf"(?m)^    /tmp/ft-leak-{token}\.\w+/file$")

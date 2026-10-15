@@ -70,7 +70,7 @@ checked. It also adds Claude's app-menu entry and icons.
 
 Claude always starts through a small launcher, `~/.local/bin/claude-desktop`, which tells it to
 keep your sign-in in the KDE wallet. Without the wallet, Claude can't store it securely and asks
-you to sign in again after every restart. With the [Shared KDE wallet](../../original/wallet/) tweak, it uses
+you to sign in again after every restart. With the [Shared KDE wallet](../../core/wallet/) tweak, it uses
 the same wallet in desktop mode and in VR, and it's listed on that tweak's **Wallet apps** page.
 
 ## Good to know

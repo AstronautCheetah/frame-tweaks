@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Fixed
+- **The Packs page's tweak lists no longer tag Dictation, Screen snip and Android Mirror sudo
+  when Homebrew is installed:** they ask for your password only while it isn't (its installer
+  does), as the main list already said.
 - **A row's status is checked again after Restart (or any ▶ button), and when you come back to
   the window:** Shared clipboard kept saying "not running" after Restart had started it, because
   the window checked only as it opened (before desktop mode had started it). Its status now also
@@ -10,6 +13,12 @@
   running, though desktop mode is" (Restart starts it).
 
 ### Changed
+- **"Original" is now "Core"** (`packs/core/`): Frame Tweaks' own tweaks, and the helpers many
+  of them need, other projects' tools credited to their makers (Homebrew, ydotool, Piper); its
+  description on the Packs page says so. If you had turned it off, it stays off.
+- **Mouse cursor fix moves to 3rd Party:** it's curiousjtuber's fix (steam-frame-utils, from
+  ThrillSeeker via Cas and Chary XR), which Frame Tweaks applies. 3rd Party's description now
+  covers fixes like it as well as linked projects.
 - **The Packs page says "tweak pack provided by …"** after a pack's name, not just "by …".
 - **Wallet apps** lists Frame Tweaks' own apps (Arrow Pad, Dictation, Screen snip, Android Mirror,
   the NordVPN tray, the Frame Tweaks window) as **Frame Tweaks app**, not "Your app".
@@ -442,7 +451,7 @@
   VSCodium, Claude Code, Claude Desktop) are in **Integrations**; the ones installed as they are
   (Full Keyboard, Shared clipboard, Recline) are in **3rd Party**. All are on; each can be turned
   off on the Packs page or with `./install.sh mods off NAME` (`on` to use it again). In the
-  repo, `packs/official/` became `packs/original/`, `packs/integrations/` and `packs/third-party/`.
+  repo, `packs/official/` became `packs/core/`, `packs/integrations/` and `packs/third-party/`.
 - **Screen snip's narration panel:** a **Snip** button (Arrow Pad's icon) starts a new snip that's
   read in the same panel; Stop / Again, Pause / Resume, Paste and Close are icons (named in their
   tooltips); the "drag here to move" bar is gone (move it with the grip, or drag an empty edge).

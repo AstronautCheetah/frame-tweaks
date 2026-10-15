@@ -148,9 +148,9 @@ class PackLinks(unittest.TestCase):
         self.assertNotIn("hello-pack", trusted.read_text() if trusted.exists() else "")
 
     def test_only_your_packs_are_removed(self):
-        r = self.mods("remove", "Original")
+        r = self.mods("remove", "Core")
         self.assertIn("Only packs in", r.stderr)
-        self.assertTrue((ROOT / "packs/original").is_dir())
+        self.assertTrue((ROOT / "packs/core").is_dir())
 
 
 if __name__ == "__main__":

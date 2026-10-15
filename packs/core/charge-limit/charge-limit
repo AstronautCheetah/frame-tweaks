@@ -1,5 +1,5 @@
 #!/bin/bash
-# charge-limit (Frame Tweaks, packs/original/charge-limit): holds the Frame's battery at a charge
+# charge-limit (Frame Tweaks, packs/core/charge-limit): holds the Frame's battery at a charge
 # limit. At the limit it pauses the charger (its charging_pause switch, which the tweak's udev
 # rule makes yours), and RESUME_BELOW percent under it lets it charge again. Plugged in and
 # paused, the Frame runs from the charger and leaves the battery alone.

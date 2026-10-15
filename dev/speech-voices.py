@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""For maintainers: (re)build packs/original/speech/voices.tsv, the languages the Speech engine
+"""For maintainers: (re)build packs/core/speech/voices.tsv, the languages the Speech engine
 settings offer: for each, a Piper voice from rhasspy/piper-voices at the revision voice.pin pins
 (with the SHA256 of its two files, so the installer can check them) and the matching eSpeak NG
 voice. Edit LANGUAGES below, run this, review the diff, commit.
@@ -13,7 +13,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SPEECH = ROOT / "packs/original/speech"
+SPEECH = ROOT / "packs/core/speech"
 # (code, label, Piper voice, eSpeak NG voice): popular languages, one natural Piper voice each.
 LANGUAGES = [
     ("en_US", "English (US)", "en_US-ljspeech-medium", "en-us"),

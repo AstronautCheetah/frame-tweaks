@@ -14,7 +14,7 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-PAD = ROOT / "packs/original/arrowpad"
+PAD = ROOT / "packs/core/arrowpad"
 
 
 class Keys:
