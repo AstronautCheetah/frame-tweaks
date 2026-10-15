@@ -21,7 +21,7 @@ Command line (through ./install.sh):
   sft.py settings ID KEY=VALUE...       change them (VALUE: a listed value or its label)
   sft.py settings ID --reset            back to the defaults
 For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID,
-uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
+apps, uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
 test-keeps ID.
 """
 import hashlib
@@ -80,7 +80,10 @@ ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author",
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
-            "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config")
+            "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
+            "app")
+# app: the name of the other project's app the tweak installs (VSCodium, Claude Desktop, …).
+# Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
 # uninstall keeps them, or removes them when the Preferences say so (UNINSTALL_PREF). Only below
 # these roots: data kept elsewhere (adb's pairing keys, the dictation history, ~/.claude) stays.
@@ -310,6 +313,8 @@ def read_tweak(d):
     procs = data.get("processes") or []
     if not (isinstance(procs, list) and all(isinstance(p, str) and p.strip() and "\n" not in p for p in procs)):
         errs.append(f"{where}: processes must be a list of pgrep -f patterns, e.g. [^~/.local/bin/my-daemon]")
+    if not isinstance(data.get("app", ""), str):
+        errs.append(f"{where}: app must be text: the name of the app it installs")
     conf = data.get("config") or []
     if not (isinstance(conf, list) and all(config_path_ok(c) for c in conf)):
         errs.append(f"{where}: config must be a list of paths of its own under {', '.join(CONFIG_ROOTS)}, "
@@ -342,6 +347,7 @@ def read_tweak(d):
         experimental=data.get("experimental") or "", icon=icon,
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() else None,
         processes=procs, settings=data.get("settings"),
+        app=data.get("app") or "",
         config=list(dict.fromkeys(conf + ([data["settings"]["file"]] if data.get("settings") else []))),
         known_issue=data.get("known_issue"), wallet_apps=apps,
         upstream_readme=data.get("upstream_readme", ""),
@@ -772,6 +778,10 @@ def main(argv):
     elif cmd == "processes" and len(args) == 1:
         c = component(args[0])
         print("\n".join(c["processes"] if c else []))
+    elif cmd == "apps":                       # tweaks that install another project's app: ID<TAB>its name
+        for c in components():
+            if c["app"]:
+                print(f"{c['id']}\t{c['app']}")
     elif cmd == "config" and len(args) == 1:  # where it keeps its settings (~ = $HOME)
         c = component(args[0])
         print("\n".join(c["config"] if c else []))

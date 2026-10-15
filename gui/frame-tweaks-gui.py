@@ -1352,10 +1352,10 @@ class Window(QWidget):
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
         in_terminal(self.proc, cmd)
 
-    def uninstall_self(self, keep_tweaks, settings):
+    def uninstall_self(self, keep_tweaks, settings, keep_apps=True):
         """⚙ Preferences → Uninstall Frame Tweaks: ./install.sh uninstall-self in a terminal, and this
         window closes (it runs from the folder and the Python setup that go)."""
-        flags = (["--keep-tweaks"] if keep_tweaks else []) + [f"--{settings}-settings"]
+        flags = (["--keep-tweaks"] if keep_tweaks else [] if keep_apps else ["--remove-apps"]) + [f"--{settings}-settings"]
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
             print("would run: ./install.sh uninstall-self " + " ".join(flags))
             return

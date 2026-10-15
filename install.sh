@@ -7,9 +7,10 @@
 #                                    remove components; their settings are kept unless the
 #                                    option or ⚙ Preferences says to remove them
 #   ./install.sh forget-settings [--list]  delete the settings uninstalled tweaks left behind
-#   ./install.sh uninstall-self [--keep-tweaks] [--remove-settings|--keep-settings]
+#   ./install.sh uninstall-self [--keep-tweaks] [--remove-apps] [--remove-settings|--keep-settings]
 #                                    uninstall Frame Tweaks itself (first every tweak, unless
-#                                    --keep-tweaks); this folder too, unless it holds work of yours
+#                                    --keep-tweaks; other projects' apps such as VSCodium stay
+#                                    unless --remove-apps); this folder too, unless it holds work of yours
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
@@ -292,8 +293,10 @@ cmd_forget_settings() {
     [[ $n -gt 0 ]] || { t 'No settings left behind by uninstalled tweaks.'; echo; }
 }
 
-# uninstall-self [--keep-tweaks] [--remove-settings|--keep-settings]: Frame Tweaks itself.
-#  1. every tweak, unless --keep-tweaks (stops here if one fails: you can run it again);
+# uninstall-self [--keep-tweaks] [--remove-apps] [--remove-settings|--keep-settings]: Frame Tweaks itself.
+#  1. every tweak, unless --keep-tweaks (stops here if one fails: you can run it again), but
+#     those that install another project's app (manifest app:, e.g. VSCodium) and what they
+#     depend on, unless --remove-apps: the apps stay, and work as before;
 #  2. with --remove-settings (default: ⚙ Preferences' choice), the settings uninstalled tweaks
 #     left, and Frame Tweaks' own; those of tweaks still installed stay;
 #  3. its app-menu entry; with no tweak left, the files they shared (~/.local/share/frame-tweaks
@@ -303,22 +306,39 @@ cmd_forget_settings() {
 #  4. this folder, if nothing of yours is in it (changes, your own packs, commits not pushed,
 #     other worktrees): else it stays, and says why.
 cmd_uninstall_self() {
-    local tweaks=remove settings installed p
+    local tweaks=remove apps=keep settings installed p
     settings=$(python3 lib/sft.py uninstall-settings)
     while [[ $# -gt 0 ]]; do
         case $1 in
             --keep-tweaks) tweaks=keep ;;
+            --remove-apps) apps=remove ;;
+            --keep-apps) apps=keep ;;
             --remove-settings) settings=remove ;;
             --keep-settings) settings=keep ;;
-            *) echo "$(t 'uninstall-self takes --keep-tweaks, --remove-settings and --keep-settings')" >&2; exit 1 ;;
+            *) echo "$(t 'uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings')" >&2; exit 1 ;;
         esac
         shift
     done
     if [[ $tweaks == remove ]]; then
         bold "$(t 'Uninstalling every tweak')"
-        if ! ( cmd_uninstall "--$settings-settings" all ); then
+        local -A keep=() named=()
+        local id order drop=() left=()
+        if [[ $apps == keep ]]; then
+            while IFS=$'\t' read -r id p; do [[ -n $id ]] && named[$id]=$p; done < <(python3 lib/sft.py apps)
+            # (each app's tweak, and what it needs: removing that would be refused, or break it)
+            for id in $(with_deps "${!named[@]}"); do keep[$id]=1; done
+        fi
+        mapfile -t order < <(with_deps "${IDS[@]}")
+        for (( p=${#order[@]}-1; p>=0; p-- )); do        # (dependents first)
+            id=${order[p]}
+            status_of "$id" >/dev/null; [[ $? -ne 1 ]] || continue
+            if [[ -n ${keep[$id]:-} ]]; then [[ -n ${named[$id]:-} ]] && left+=("${named[$id]}"); else drop+=("$id"); fi
+        done
+        if [[ ${#drop[@]} -gt 0 ]] && ! ( cmd_uninstall "--$settings-settings" "${drop[@]}" ); then
             echo "$(t 'Frame Tweaks is still here: see what failed above, then run this again.')" >&2; return 1
         fi
+        [[ ${#drop[@]} -gt 0 ]] || { t 'Nothing installed.'; echo; }
+        [[ ${#left[@]} -eq 0 ]] || say "$(t 'Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)' "$(IFS=,; echo "${left[*]}" | sed 's/,/, /g')")"
     fi
     # Tweaks of packs not in use (turned off, or no longer trusted) aren't listed, but their
     # install record says they're there, using what's shared: they count as installed.

@@ -15,6 +15,7 @@ source: {relation: from, url: https://github.com/VSCodium/vscodium}
 icon: {flatpak: com.vscodium.codium}
 run: {label: Open}
 config: [~/.var/app/com.vscodium.codium]
+app: VSCodium
 changes: Flathub app `com.vscodium.codium` (system-wide Flatpak)
 access: >-
   VSCodium's own Flatpak permissions: all your files, the network, and running commands outside

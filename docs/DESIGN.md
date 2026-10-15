@@ -147,7 +147,8 @@ The tweak's settings (its manifest's `config:` list, and its `settings.file`) ar
 `install.sh`: kept and named, or removed when ⚙ Preferences → Uninstalling (in
 `~/.config/frame-tweaks/uninstall-settings`) or `--remove-settings` says so. A reinstall always
 keeps them. `forget-settings` removes those that tweaks no longer installed left, and
-`uninstall-self` removes Frame Tweaks itself (every tweak first, unless `--keep-tweaks`; its
+`uninstall-self` removes Frame Tweaks itself (every tweak first, unless `--keep-tweaks`, but
+those that install another project's app, manifest `app:`, unless `--remove-apps`; its
 folder only when nothing of the user's is in it: changes, their own packs, unpushed commits,
 other worktrees). `install.sh` refuses to remove a tweak that an installed tweak depends on, and
 `uninstall all` removes dependents first.

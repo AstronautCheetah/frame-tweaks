@@ -287,6 +287,59 @@ class InstallState(unittest.TestCase):
         self.assertIn("Frame Tweaks is uninstalled.", r.stdout)
         self.assertFalse((self.home / ".local/share/frame-tweaks/i18n").exists())
 
+    def app_tweak(self):
+        """A second tweak, "probeapp", that installs another project's app (manifest app:)."""
+        d = self.pack / "probeapp"
+        d.mkdir()
+        (d / "README.md").write_text(README.replace("title: Probe", "title: Probe App").replace(
+            "processes: []", "processes: []\napp: Probe App").replace("uninstall probe", "uninstall probeapp"))
+        scripts = {k: v.replace("probe-installed", "probeapp-installed").replace("probe.log", "probeapp.log")
+                   for k, v in SCRIPTS.items()}
+        for name, body in scripts.items():
+            (d / name).write_text(f"#!/bin/bash\n{body}\n")
+        self.trust()
+        self.assertEqual(self.sh("install", "probe", "probeapp").returncode, 0)
+
+    def test_uninstall_self_leaves_other_projects_apps_by_default(self):
+        self.app_tweak()
+        r = self.sh("uninstall-self", "--keep-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / "probe-installed").exists())
+        self.assertTrue((self.home / "probeapp-installed").exists())
+        self.assertIn("Left installed, as asked: Probe App", r.stdout)
+        self.assertIn("Kept for the tweaks still installed (probeapp)", r.stdout)     # (what it may use)
+        r = self.sh("uninstall-self", "--remove-apps", "--keep-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / "probeapp-installed").exists())
+
+    def test_frame_tweaks_installed_again_finds_the_tweaks_it_left(self):
+        """Uninstalled with --keep-tweaks (and its own settings deleted), then installed again (here:
+        the same checkout, as get.sh would make anew): the tweak shows as installed, at the version
+        recorded, so updates and uninstalling work as before. A pack of your own needs trusting
+        again: that was among the settings deleted. (Official packs need no trust.)"""
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        self.shared_files()
+        r = self.sh("uninstall-self", "--keep-tweaks", "--remove-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop").exists())
+        # installed again
+        self.assertNotIn("probe", self.sh("list").stdout)                    # (not trusted any more)
+        self.trust()
+        self.only_the_probe()
+        self.assertEqual(self.sh("menu").returncode, 0)
+        self.assertTrue((self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop").exists())
+        r = self.sh("status", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("installed", r.stdout)
+        self.assertEqual(self.record.read_text().strip(), VERSION)              # (no migration re-run)
+        self.assertTrue((self.home / ".config/probe.conf").exists())             # (its settings: in use)
+        r = self.sh("install", "probe")
+        self.assertNotIn("migrate", " ".join(self.log()))
+        r = self.sh("uninstall", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / "probe-installed").exists())
+
     def test_uninstall_self_stops_when_a_tweak_wont_go(self):
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         self.shared_files()

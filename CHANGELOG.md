@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Uninstalling Frame Tweaks leaves third-party apps installed** (VSCodium, Claude Desktop,
+  Claude Code, Full Keyboard, clipboard-sync) unless you untick that in ⚙ Preferences
+  (`--remove-apps`). Tweaks name such an app in a new manifest field, `app:`.
+- **Installing Frame Tweaks again finds the tweaks it left installed**, at the versions recorded
+  (now tested).
 - **Uninstall Frame Tweaks** from ⚙ Preferences (or `./install.sh uninstall-self`): every tweak
   first, or leave them installed; delete the settings too, or keep them. It removes the menu
   entry, the files the tweaks shared, and its own folder, unless that holds work of yours.
