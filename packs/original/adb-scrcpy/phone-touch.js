@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 14;
+  const NAME = 'phone-touch', VERSION = 15;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -133,29 +133,59 @@
     [N('Frame rate (fps, at most)'), 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
     [N('Joystick scrolling'), 'PHONE_STICK_SPEED', [[N('Slow'), '8'], [N('Medium'), '15'], [N('Fast'), '25']], false],
   ];
-  // A restart makes a new window, which the dashboard would dock. Carry the floating one's place
-  // (and its open settings) over to the new mirror window when it appears (within 20 s).
+  // A restart (Restart stream, or phone reconnecting) makes a new window, which the dashboard docks
+  // or floats somewhere of its own. Where a floating mirror was (and whether its settings were
+  // open) is noted as it goes; when a mirror window goes away and a new one comes within 20 s,
+  // the new one is put back there. Two places hold a floating window's pose: its floating
+  // component's state (what's drawn) and the dock's remembered pose (what it floats to).
   let carry = null;
-  const carryOver = (f) => {
+  const seen = new Map();                       // frameID → { floating, xf, settings }
+  const clone = (xf) => (xf ? JSON.parse(JSON.stringify(xf)) : null);
+  const snapshot = (f) => {
     const d = f.docking;
-    const xf = d?.m_mapLastRelativeTransformForDockLocation?.get?.(WORLD);
-    carry = { from: f.frameID, floating: d?.dockLocation === WORLD, xf, settings: settingsOpen.has(f.frameID),
-              until: Date.now() + 20000 };
+    seen.set(f.frameID, { floating: d?.dockLocation === WORLD, settings: settingsOpen.has(f.frameID),
+                          xf: clone(d?.m_mapLastRelativeTransformForDockLocation?.get?.(WORLD)) });
+  };
+  const carryOver = (f) => {                    // (Restart stream: noted now, as the window goes)
+    snapshot(f);
+    carry = { from: f.frameID, ...seen.get(f.frameID), until: Date.now() + 20000 };
+  };
+  const mover = (f) => L.walk((fb) => typeof fb.stateNode?.startFloatingWindowMove === 'function' &&
+                                     fb.stateNode.props?.frame === f)?.stateNode ?? null;
+  const watchMirrors = () => {
+    const now = (FS.frames ?? []).filter((g) => g?.title === TITLE && g.docking);
+    for (const f of now) if (!carry || f.frameID === carry.from) snapshot(f);
+    for (const [id, last] of seen) {
+      if (now.some((g) => g.frameID === id)) continue;
+      seen.delete(id);                          // (gone: its successor goes where it was)
+      if (!carry && last.floating) carry = { from: id, ...last, until: Date.now() + 20000 };
+    }
   };
   const placeCarried = () => {
     if (!carry) return;
     if (Date.now() > carry.until) { carry = null; return; }
     const f = (FS.frames ?? []).find((g) => g?.title === TITLE && g.frameID !== carry.from && g.docking);
     if (!f) return;
-    const c = carry; carry = null;
+    const c = carry;
     if (c.settings) settingsOpen.add(f.frameID);
-    if (!c.floating || f.docking.dockLocation === WORLD) return;
+    if (!c.floating || !c.xf) { carry = null; return; }
     try {
-      if (c.xf) f.docking.m_mapLastRelativeTransformForDockLocation.set(WORLD, c.xf);
-      // The dashboard's own SetDockLocation: Float grab's wrapper would pick it up in your hand.
-      const own = f.docking.__sftOrigSetDock?.orig ?? f.docking.SetDockLocation;
-      own.call(f.docking, WORLD);
-    } catch (e) { /* the dashboard changed: it stays docked */ }
+      const d = f.docking;
+      d.m_mapLastRelativeTransformForDockLocation.set(WORLD, clone(c.xf));
+      if (d.dockLocation !== WORLD) {
+        // The dashboard's own SetDockLocation: Float grab's wrapper would pick it up in your hand.
+        const own = d.__sftOrigSetDock?.orig ?? d.SetDockLocation;
+        own.call(d, WORLD);
+        return;                                 // (its floating component mounts next: placed then)
+      }
+      const m = mover(f);
+      if (!m?.state?.xfTransform) return;       // (not mounted yet: next tick)
+      if (!m.state.sParentDevice) m.setState({ xfTransform: clone(c.xf) });    // (not while held)
+      carry = null;
+      snapshot(f);
+    } catch (e) {
+      carry = null;                             // (the dashboard changed: it stays where it came up)
+    }
   };
   const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
@@ -284,7 +314,7 @@
   const mounted = L.mount('sft-phone-touch', render, 'right', 250);
   if (!mounted) return 'not patched: dashboard app component not found';
   redraw = mounted.redraw;
-  const carryTimer = setInterval(() => { try { placeCarried(); } catch (e) {} }, 250);
+  const carryTimer = setInterval(() => { try { watchMirrors(); placeCarried(); } catch (e) {} }, 250);
   all[NAME] = {
     version: VERSION, stats,
     stop: () => {
