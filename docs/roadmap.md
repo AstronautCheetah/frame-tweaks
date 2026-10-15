@@ -16,6 +16,9 @@ next to the idea it inspired.
 - [x] **Hold and roll back:** freeze a tweak so `update` skips it; `update --to vX.Y.Z`. *(Decky)*
 - [x] **Locked-down services:** systemd sandboxing (`ProtectSystem=strict`, `PrivateTmp`, …) on
   our user services where it doesn't break them. *(Jovian-NixOS)*
+- [ ] **Battery charge limit goes when Valve's comes:** once SteamOS has a charge limit for the
+  Frame (Steam → Settings → Power, as on the Steam Deck), remove the charge-limit tweak in favour
+  of it. Its status says when (SteamOS Manager's `steam-frame.toml` gains `[battery_charge_limit]`).
 
 ## Support and diagnostics
 - [x] **Logs:** keep the last five runs' logs in `~/.local/state/frame-tweaks/`. *(EmuDeck)*

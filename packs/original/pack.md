@@ -2,7 +2,7 @@
 name: Original
 author: Frame Tweaks
 api: 1
-categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Developer]
+categories: [Accessibility, Convenience, VR environment, Privacy & security, System, Hardware, Developer]
 order:
   - dictation
   - arrowpad
@@ -21,6 +21,7 @@ order:
   - menu-icons
   - ydotool
   - speech
+  - charge-limit
 ---
 Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a
 Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly.

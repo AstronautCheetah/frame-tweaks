@@ -1,0 +1,5 @@
+# Frame Tweaks, Battery charge limit (packs/original/charge-limit): makes the charger's pause
+# switch writable by user @UID@ as the charger appears at each start, so charge-limit can pause
+# charging at the limit; SteamOS's own LED rule (99-leds.rules) opens the LEDs the same way.
+# Removed with the tweak (./install.sh uninstall charge-limit).
+ACTION=="add", SUBSYSTEM=="power_supply", KERNEL=="pm8550b-charger", RUN+="/usr/bin/chown @UID@ /sys%p/charging_pause"

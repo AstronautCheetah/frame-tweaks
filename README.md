@@ -80,8 +80,10 @@ SteamOS updates don't undo it. The few exceptions, each only when you tick the t
 needs it:
 
 - **Homebrew** asks for your sudo password once, to create `/home/linuxbrew` (if you never set
-  a password for your user, set one first with `passwd` in Konsole). This is the only
-  time anything asks for sudo.
+  a password for your user, set one first with `passwd` in Konsole).
+- **Battery charge limit** asks for it once too, to add a udev rule
+  (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`) that lets you pause the battery's
+  charging, and again to remove it. Nothing else asks for sudo.
 - **NordVPN** adds its connections to NetworkManager (`/etc/NetworkManager/system-connections`).
 - **Shared KDE wallet** installs KWalletManager from Flathub, which goes into the system-wide
   Flatpak folder.
@@ -170,6 +172,12 @@ them.
 | 🖼️ | [**Menu icons**](packs/original/menu-icons/) | Icons for Konsole, System Settings and other apps that show blank in Steam's VR "+" menu. | Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme. |
 | ⌨️ | [**ydotool**](packs/original/ydotool/) (helper) | The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them. | On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one. |
 | 🗣️ | [**Speech engine**](packs/original/speech/) (helper) | A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip. | SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent. |
+
+### Hardware
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
+| 🔋 | [**Battery charge limit**](packs/original/charge-limit/) 🧪 | Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next full charge. | A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame. |
 
 ### Developer
 

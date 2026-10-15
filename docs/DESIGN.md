@@ -21,8 +21,10 @@ The design follows from what the Frame is:
   `steamos-readonly disable` and pacman) is gone after the next SteamOS update. So every tweak
   installs into `$HOME`: `~/.local/bin`, `~/.local/share`, `~/.config`, user systemd units and
   the app menu in `~/.local/share/applications`. The README lists the exceptions: Homebrew
-  needs sudo once to create `/home/linuxbrew`, NordVPN adds NetworkManager connections, and the
-  Flathub apps (KWalletManager) go into the system-wide Flatpak folder.
+  needs sudo once to create `/home/linuxbrew`, Battery charge limit needs it once for a udev rule
+  in `/etc` (listed in `/etc/atomic-update.conf.d`, which SteamOS updates keep), NordVPN adds
+  NetworkManager connections, and the Flathub apps (KWalletManager) go into the system-wide
+  Flatpak folder.
 - **Two sessions at once.** Steam's VR session runs on X display `:0`, where floating VR
   windows live. Desktop mode is a Plasma session nested inside it, on Wayland, with its own
   D-Bus bus and `XDG_RUNTIME_DIR`. Programs started from the desktop, from shortcuts and from

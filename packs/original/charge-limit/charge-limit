@@ -1,0 +1,93 @@
+#!/bin/bash
+# charge-limit (Frame Tweaks, packs/original/charge-limit): holds the Frame's battery at a charge
+# limit. At the limit it pauses the charger (its charging_pause switch, which the tweak's udev
+# rule makes yours), and RESUME_BELOW percent under it lets it charge again. Plugged in and
+# paused, the Frame runs from the charger and leaves the battery alone.
+#   charge-limit --run          a check every 30 seconds (its user service); charging resumes when it stops
+#   charge-limit --once         one check
+#   charge-limit --full-once    charge to 100% once (until the battery is full, or the Frame restarts)
+#   charge-limit --limit        the limit in use: a percentage, or off
+#   charge-limit --battery      the battery's folder in /sys
+# SteamOS's charger service (deckard-charger) sets the switch back to 0 each time it starts; the
+# next check pauses it again. Only a pause this program made is ever lifted by it.
+set -u
+SYSFS=${FRAME_TWEAKS_POWER_SUPPLY:-/sys/class/power_supply}
+SWITCH=${FRAME_TWEAKS_CHARGE_SWITCH:-$SYSFS/pm8550b-charger/charging_pause}
+CONF=${FRAME_TWEAKS_CHARGE_CONF:-$HOME/.config/frame-tweaks/charge-limit.conf}
+# paused (the pause is ours), full-once; the user service's runtime folder (desktop mode has its own)
+RUN=${FRAME_TWEAKS_CHARGE_RUN:-/run/user/$(id -u)/charge-limit}
+DEFAULT=80
+RESUME_BELOW=5
+INTERVAL=${FRAME_TWEAKS_CHARGE_INTERVAL:-30}
+
+log() { printf '%s\n' "$*"; }
+
+battery() {     # the Frame's own battery: SteamOS's charger service links it as BAT0
+    local d
+    for d in "${FRAME_TWEAKS_BATTERY:-/run/deckardcharger/BAT0}" "$SYSFS"/*; do
+        [ -r "$d/capacity" ] && [ "$(cat "$d/type" 2>/dev/null)" = Battery ] && { echo "${d%/}"; return; }
+    done
+    return 1
+}
+
+limit() {       # CHARGE_LIMIT from the settings: 50-100 or off; anything else is the default
+    local v
+    v=$(sed -n 's/^CHARGE_LIMIT=//p' "$CONF" 2>/dev/null | tail -1 | tr -d "\"' ")
+    case $v in
+        off) echo off ;;
+        [5-9][0-9] | 100) echo "$v" ;;
+        *) echo "$DEFAULT" ;;
+    esac
+}
+
+set_switch() {  # 1 pauses charging, 0 lets it charge
+    printf '%s\n' "$1" > "$SWITCH" 2>/dev/null || { log "can't write $SWITCH (reinstall the tweak: its udev rule makes it yours)"; return 1; }
+    mkdir -p "$RUN"
+    if [ "$1" = 1 ]; then touch "$RUN/paused"; else rm -f "$RUN/paused"; fi
+}
+
+release() {     # lift our pause, if it's still ours
+    if [ -e "$RUN/paused" ] && [ "$(cat "$SWITCH" 2>/dev/null)" = 1 ]; then
+        set_switch 0 && log "charging allowed again (stopped)"
+    fi
+    rm -f "$RUN/paused"
+}
+
+check() {
+    local bat cap lim paused
+    bat=$(battery) || { log "no battery found under $SYSFS"; return 1; }
+    [ -e "$SWITCH" ] || { log "no charger pause switch ($SWITCH)"; return 1; }
+    cap=$(cat "$bat/capacity") lim=$(limit) paused=$(cat "$SWITCH")
+    if [ -e "$RUN/full-once" ]; then
+        if [ "$cap" -ge 100 ] || [ "$(cat "$bat/status")" = Full ]; then
+            rm -f "$RUN/full-once"
+            log "full once: done at $cap%; the limit applies again"
+        else
+            lim=off
+        fi
+    fi
+    if [ "$lim" = off ]; then
+        [ "$paused" = 1 ] && [ -e "$RUN/paused" ] && set_switch 0 && log "charging allowed (no limit) at $cap%"
+    elif [ "$cap" -ge "$lim" ]; then
+        [ "$paused" = 1 ] && [ -e "$RUN/paused" ] || { set_switch 1 && log "charging paused at $cap% (limit $lim%)"; }
+    elif [ "$cap" -le $((lim - RESUME_BELOW)) ] && [ "$paused" = 1 ] && [ -e "$RUN/paused" ]; then
+        set_switch 0 && log "charging again at $cap% (limit $lim%)"
+    fi
+    return 0
+}
+
+case ${1:-} in
+    --run)
+        trap 'release; exit 0' TERM INT
+        while :; do
+            check
+            sleep "$INTERVAL" & wait $!
+        done ;;
+    --once) check ;;
+    --full-once)
+        mkdir -p "$RUN" && touch "$RUN/full-once"
+        check ;;
+    --limit) limit ;;
+    --battery) battery ;;
+    *) echo "usage: charge-limit --run | --once | --full-once | --limit | --battery" >&2; exit 2 ;;
+esac

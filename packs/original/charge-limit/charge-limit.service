@@ -1,0 +1,22 @@
+[Unit]
+Description=Hold the battery at its charge limit (charge-limit, Frame Tweaks)
+
+[Service]
+ExecStart=%h/.local/bin/charge-limit --run
+Restart=on-failure
+RestartSec=30
+# Reads the battery and its settings; writes only the charger's pause switch (/sys, which the
+# tweak's udev rule makes yours) and its notes in the runtime folder. Stopping it lets the
+# battery charge again.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%t
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=default.target
