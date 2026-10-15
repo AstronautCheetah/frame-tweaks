@@ -140,7 +140,8 @@ class CheckDocs(Temp):
 class GenDocs(Temp):
     def test_an_upstream_readme_no_longer_named_goes(self):
         repo = copy_repo(self.d / "repo")
-        readme = next((p for p in sorted(repo.glob("packs/*/*/README.md"))
+        official = [p for pack in ("original", "integrations", "third-party") for p in sorted(repo.glob(f"packs/{pack}/*/README.md"))]
+        readme = next((p for p in official            # (not a local pack's: gen-docs leaves those alone)
                        if any(l.startswith("upstream_readme:") for l in p.read_text().splitlines())), None)
         if not readme:
             self.skipTest("no tweak has upstream_readme:")

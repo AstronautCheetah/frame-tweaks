@@ -185,7 +185,7 @@ msgid "Still checking status; try again in a moment."
 msgstr ""
 "Todavía se está revisando el estado; vuelve a intentarlo en un momento."
 
-#: gui/frame-tweaks-gui.py:1430 install.sh:500
+#: gui/frame-tweaks-gui.py:1430 install.sh:503
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
 
@@ -231,12 +231,12 @@ msgid ""
 msgstr ""
 "Copia estos detalles, luego guarda un informe de diagnóstico y abre el formulario de error"
 
-#: gui/frame-tweaks-gui.py:184 install.sh:520
+#: gui/frame-tweaks-gui.py:184 install.sh:523
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 "Presiona Enter para cerrar, o presiona el botón X que flota abajo para cerrar."
 
-#: gui/frame-tweaks-gui.py:185 install.sh:519
+#: gui/frame-tweaks-gui.py:185 install.sh:522
 msgid "Press Enter to close…"
 msgstr "Presiona Enter para cerrar…"
 
@@ -1065,7 +1065,7 @@ msgstr "No hay nada instalado."
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 
-#: install.sh:262 install.sh:419
+#: install.sh:262 install.sh:422
 msgid "removing %s"
 msgstr "quitando %s"
 
@@ -1075,7 +1075,7 @@ msgid ""
 msgstr ""
 "Se conservó su configuración: %s (para eliminarla también: ./install.sh uninstall --remove-settings %s)"
 
-#: install.sh:292 install.sh:363 install.sh:376 install.sh:406 lib/common.sh:406
+#: install.sh:292 install.sh:363 install.sh:376 install.sh:409 lib/common.sh:406
 msgid "removed %s"
 msgstr "se quitó %s"
 
@@ -1132,51 +1132,51 @@ msgstr ""
 msgid "Kept the settings: %s"
 msgstr "Se conservó la configuración: %s"
 
-#: install.sh:389
+#: install.sh:390 install.sh:411
+msgid "Frame Tweaks is uninstalled."
+msgstr "Frame Tweaks está desinstalado."
+
+#: install.sh:394
 msgid "it is a git worktree"
 msgstr "es un worktree de git"
 
-#: install.sh:392
+#: install.sh:397
 msgid ""
 "it has files of yours: changes, your own packs in packs/, or a tmp/ folder"
 msgstr ""
 "tiene archivos tuyos: cambios, tus propios paquetes en packs/ o una carpeta tmp/"
 
-#: install.sh:394
+#: install.sh:399
 msgid "it has commits that are not pushed anywhere"
 msgstr "tiene commits que no se han subido a ningún lado"
 
-#: install.sh:396
+#: install.sh:401
 msgid "it has other worktrees or stashed changes"
 msgstr "tiene otros worktrees o cambios guardados con stash"
 
-#: install.sh:399
+#: install.sh:404
 msgid "it has your own packs in packs/"
 msgstr "tiene tus propios paquetes en packs/"
 
-#: install.sh:402
+#: install.sh:407
 msgid ""
 "Kept this folder, %s: %s. Delete it yourself when you no longer need it."
 msgstr ""
 "Se conservó esta carpeta, %s: %s. Elimínala tú cuando ya no la necesites."
 
-#: install.sh:408
-msgid "Frame Tweaks is uninstalled."
-msgstr "Frame Tweaks está desinstalado."
-
-#: install.sh:414
+#: install.sh:417
 msgid "reinstall what?"
 msgstr "¿reinstalar qué?"
 
-#: install.sh:425
+#: install.sh:428
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr "--to necesita una versión, p. ej. v0.3.1"
 
-#: install.sh:428
+#: install.sh:431
 msgid "Updating the checkout"
 msgstr "Actualizando la copia local"
 
-#: install.sh:432
+#: install.sh:435
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
@@ -1184,112 +1184,112 @@ msgstr ""
 "Esta copia local y la rama main de GitHub se separaron. Si no tienes trabajo local que\n"
 "conservar: git reset --hard @{upstream}"
 
-#: install.sh:435
+#: install.sh:438
 msgid "git pull failed; not reinstalling"
 msgstr "git pull falló; no se reinstala"
 
-#: install.sh:439
+#: install.sh:442
 msgid "couldn't reach GitHub; not updating"
 msgstr "no se pudo conectar con GitHub; no se actualiza"
 
-#: install.sh:441
+#: install.sh:444
 msgid "no release found"
 msgstr "no se encontró ninguna versión"
 
-#: install.sh:442
+#: install.sh:445
 msgid "no release %s"
 msgstr "no existe la versión %s"
 
-#: install.sh:444
+#: install.sh:447
 msgid "Updating to %s (%s channel)"
 msgstr "Actualizando a %s (canal %s)"
 
-#: install.sh:448
+#: install.sh:451
 msgid "git checkout failed; not reinstalling"
 msgstr "git checkout falló; no se reinstala"
 
-#: install.sh:458
+#: install.sh:461
 msgid "Nothing installed yet."
 msgstr "Todavía no hay nada instalado."
 
-#: install.sh:461
+#: install.sh:464
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 "Revisando las partes de SteamOS/SteamVR de las que dependen los ajustes"
 
-#: install.sh:470
+#: install.sh:473
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 "¿Configurar la ventana completa del instalador? Necesita PyQt6 (unos 280 MB, compartido con el Teclado de flechas y la bandeja de NordVPN).\\n\\nNo = usar la lista simple."
 
-#: install.sh:472
+#: install.sh:475
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr "No se pudo instalar PyQt6; se usará la lista simple."
 
-#: install.sh:493
+#: install.sh:496
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 "Marca lo que quieras instalar. Desmarcar un ajuste instalado lo quita."
 
-#: install.sh:505
+#: install.sh:508
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 "No se seleccionó nada, así que no se quitará nada. Para quitar todo, usa: %s"
 
-#: install.sh:508
+#: install.sh:511
 msgid "Remove tweaks?"
 msgstr "¿Quitar ajustes?"
 
-#: install.sh:509
+#: install.sh:512
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 "Estos ajustes instalados se desmarcaron y se QUITARÁN:\\n\\n  %s\\n\\n¿Continuar?"
 
-#: install.sh:547
+#: install.sh:550
 msgid "stopped %s's running programs"
 msgstr "se detuvieron los programas en ejecución de %s"
 
-#: install.sh:570
+#: install.sh:573
 msgid "%s migration failed"
 msgstr "falló la migración de %s"
 
-#: install.sh:575
+#: install.sh:578
 msgid "%s what? (./install.sh list)"
 msgstr "¿%s qué? (./install.sh list)"
 
-#: install.sh:579
+#: install.sh:582
 msgid "%s: held (updates leave it as it is)"
 msgstr "%s: retenido (las actualizaciones no lo cambian)"
 
-#: install.sh:580
+#: install.sh:583
 msgid "%s: updated normally again"
 msgstr "%s: se actualiza normalmente otra vez"
 
-#: install.sh:590
+#: install.sh:593
 msgid "The bug form, with your version filled in: %s"
 msgstr "El formulario de error, con tu versión ya escrita: %s"
 
-#: install.sh:631
+#: install.sh:634
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
 
-#: install.sh:667
+#: install.sh:670
 msgid "run what?"
 msgstr "¿ejecutar qué?"
 
-#: install.sh:668
+#: install.sh:671
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
-#: install.sh:680
+#: install.sh:683
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr "Se quitó 'Frame Tweaks' del menú de apps."
 
-#: install.sh:681
+#: install.sh:684
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr "Se agregó 'Frame Tweaks' al menú de apps."
 

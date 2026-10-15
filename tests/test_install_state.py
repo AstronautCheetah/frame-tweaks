@@ -242,7 +242,7 @@ class InstallState(unittest.TestCase):
         self.assertTrue((self.home / ".local/share/frame-tweaks/packs/mine").is_dir())   # your own packs
         self.assertFalse((self.home / ".cache/frame-tweaks").exists())
         self.assertEqual(sorted(p.name for p in self.state.iterdir()), ["backups"])     # not yet put back
-        self.assertTrue("FRAME_TWEAKS_KEEP_CHECKOUT: kept" in r.stdout or "it is a git worktree" in r.stdout, r.stdout)
+        self.assertIn("FRAME_TWEAKS_KEEP_CHECKOUT: kept", r.stdout)
         self.assertIn("Frame Tweaks is uninstalled.", r.stdout)
 
     def test_uninstall_self_keeping_tweaks_and_settings(self):

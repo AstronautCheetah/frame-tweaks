@@ -385,6 +385,11 @@ cmd_uninstall_self() {
 # remove_checkout: this folder goes, unless something of yours is in it.
 remove_checkout() {
     local here=$PWD why=
+    if [[ -n ${FRAME_TWEAKS_KEEP_CHECKOUT:-} ]]; then      # (tests: the checkout they run from; first, always)
+        say "FRAME_TWEAKS_KEEP_CHECKOUT: kept $here"
+        bold "$(t 'Frame Tweaks is uninstalled.')"
+        return
+    fi
     if [[ -f .git ]]; then
         why=$(t 'it is a git worktree')
     elif [[ -e .git ]]; then
@@ -400,8 +405,6 @@ remove_checkout() {
     fi
     if [[ -n $why ]]; then
         say "$(t 'Kept this folder, %s: %s. Delete it yourself when you no longer need it.' "$here" "$why")"
-    elif [[ -n ${FRAME_TWEAKS_KEEP_CHECKOUT:-} ]]; then      # (tests: the checkout they run from)
-        say "FRAME_TWEAKS_KEEP_CHECKOUT: kept $here"
     else
         cd / && rm -rf -- "$here" && say "$(t 'removed %s' "$here")"
     fi
