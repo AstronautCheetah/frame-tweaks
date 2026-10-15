@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **Wallet apps** lists Frame Tweaks' own apps (Arrow Pad, Dictation, Screen snip, Android Mirror,
+  the NordVPN tray, the Frame Tweaks window) as **Frame Tweaks app**, not "Your app".
+
 ## 0.6.5 (2026-10-15)
 
 ### Changed

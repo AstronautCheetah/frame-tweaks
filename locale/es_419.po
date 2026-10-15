@@ -362,7 +362,7 @@ msgstr "Mostrar esta categoría otra vez"
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr "Ocultar toda la categoría de la lista (no quita nada)"
 
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1683 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1683 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr "← Volver"
 
@@ -493,7 +493,7 @@ msgstr "Trabajando… (una descarga puede tardar un minuto)"
 msgid "Done."
 msgstr "Listo."
 
-#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:505 gui/wallet_page.py:517 gui/wallet_page.py:531 packs/original/snip/frame-snip:605
+#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:516 gui/wallet_page.py:528 gui/wallet_page.py:542 packs/original/snip/frame-snip:605
 msgid "Didn't work: %s"
 msgstr "No funcionó: %s"
 
@@ -1053,255 +1053,260 @@ msgstr ""
 msgid "Couldn't write the report (see {command})."
 msgstr "No se pudo escribir el informe (consulta {command})."
 
-#: gui/wallet_page.py:101
+#: gui/wallet_page.py:108
+msgid "under a minute"
+msgstr "menos de un minuto"
+
+#: gui/wallet_page.py:110
 msgid "{h} h {m} min"
 msgstr "{h} h {m} min"
 
-#: gui/wallet_page.py:137
+#: gui/wallet_page.py:146
 msgid "Wallet state unknown (is the Wallet tweak installed?)"
 msgstr ""
 "Estado de la cartera desconocido (¿está instalado el ajuste Cartera de KDE compartida?)"
 
-#: gui/wallet_page.py:139
+#: gui/wallet_page.py:148
 msgid "🔒 Wallet locked."
 msgstr "🔒 Cartera bloqueada."
 
-#: gui/wallet_page.py:140
+#: gui/wallet_page.py:149
 msgid "Protected apps ask for the password before they open."
 msgstr "Las apps protegidas piden la contraseña antes de abrirse."
 
-#: gui/wallet_page.py:141
+#: gui/wallet_page.py:150
 msgid "🔓 Wallet open"
 msgstr "🔓 Cartera abierta"
 
-#: gui/wallet_page.py:143
+#: gui/wallet_page.py:152
 msgid "{wallet_open} for {time}."
 msgstr "{wallet_open} desde hace {time}."
 
-#: gui/wallet_page.py:150
+#: gui/wallet_page.py:159
 msgid "Locks by itself at {at} (in {time}), or sooner after {idle} unused."
 msgstr "Se bloquea sola a las {at} (en {time}), o antes tras {idle} sin uso."
 
-#: gui/wallet_page.py:153
+#: gui/wallet_page.py:162
 msgid "Locks by itself at {at} (in {time})."
 msgstr "Se bloquea sola a las {at} (en {time})."
 
-#: gui/wallet_page.py:155
+#: gui/wallet_page.py:164
 msgid "It stays unlocked until you lock it (auto-lock is off)."
 msgstr ""
 "Sigue desbloqueada hasta que la bloquees (el bloqueo automático está desactivado)."
 
-#: gui/wallet_page.py:157
+#: gui/wallet_page.py:166
 msgid "Locks by itself after {idle} unused."
 msgstr "Se bloquea sola tras {idle} sin uso."
 
-#: gui/wallet_page.py:159
+#: gui/wallet_page.py:168
 msgid "No automatic lock is scheduled."
 msgstr "No hay ningún bloqueo automático programado."
 
-#: gui/wallet_page.py:165
+#: gui/wallet_page.py:174
 msgid "Never"
 msgstr "Nunca"
 
-#: gui/wallet_page.py:166 gui/wallet_page.py:101
+#: gui/wallet_page.py:175 gui/wallet_page.py:110
 msgid "{h} h"
 msgstr "{h} h"
 
-#: gui/wallet_page.py:166 gui/wallet_page.py:102
+#: gui/wallet_page.py:175 gui/wallet_page.py:111
 msgid "{m} min"
 msgstr "{m} min"
 
-#: gui/wallet_page.py:206
+#: gui/wallet_page.py:215
 msgid "System app"
 msgstr "App del sistema"
 
-#: gui/wallet_page.py:206
+#: gui/wallet_page.py:215
 msgid "Your app"
 msgstr "Tu app"
 
-#: gui/wallet_page.py:254
+# needs review
+#: gui/wallet_page.py:229
+msgid "Frame Tweaks app"
+msgstr "App de Frame Tweaks"
+
+#: gui/wallet_page.py:265
 msgid "Wallet apps"
 msgstr "Apps de la cartera"
 
-#: gui/wallet_page.py:258
+#: gui/wallet_page.py:269
 msgid ""
 "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker to pick up, and it gets passed around to family and friends. But the apps you use in it can still hold sensitive things, like messages, notes and signed-in accounts. Here you can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the whole headset: the wallet is unlocked once when you need it, and locks again by itself."
 msgstr ""
 "<b>¿Para qué sirve?</b> Mucha gente no le pone contraseña a su Steam Frame: así es más rápido ponérselo, y se lo pasan a familiares y amigos. Pero las apps que usas en él pueden guardar cosas delicadas, como mensajes, notas y cuentas con sesión iniciada. Aquí puedes proteger esas apps con <b>una sola contraseña, la de tu cartera de KDE</b>, sin bloquear todo el visor: la cartera se desbloquea una vez cuando la necesitas y se vuelve a bloquear sola."
 
-#: gui/wallet_page.py:272
+#: gui/wallet_page.py:283
 msgid "⏱ Extend timer"
 msgstr "⏱ Extender tiempo"
 
-#: gui/wallet_page.py:282
+#: gui/wallet_page.py:293
 msgid "Auto-lock"
 msgstr "Bloqueo automático"
 
-#: gui/wallet_page.py:283
+#: gui/wallet_page.py:294
 msgid ""
 "Lock the wallet by itself: a set time after unlocking, or after 4 h unused"
 msgstr ""
 "Bloquear la cartera automáticamente: un tiempo fijo después de desbloquearla, o tras 4 h sin uso"
 
-#: gui/wallet_page.py:286
+#: gui/wallet_page.py:297
 msgid "after unlocking:"
 msgstr "tras desbloquear:"
 
-#: gui/wallet_page.py:303
+#: gui/wallet_page.py:314
 msgid ""
 "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
 msgstr ""
 "Las apps de esta lista se abren con la <b>cartera de KDE compartida</b>, la misma en RV y en modo escritorio, así que los inicios de sesión y las claves que guardan se conservan y siguen cifrados. A las apps de Electron también se les indica que la usen (sin eso no pueden mantener una sesión iniciada). <b>Contraseña primero</b> pide la contraseña de la cartera antes de que se abra la app, cuando la cartera está bloqueada. <b>Cerrar después de</b> cierra la app tras ese tiempo sin actividad (sin uso del teclado, el mouse o el control), así que volver a abrirla requiere la cartera otra vez; <b>Al quitar el visor</b> también la cierra ~10 s después de quitarse el visor."
 
-#: gui/wallet_page.py:338
+#: gui/wallet_page.py:349
 msgid "Start the {time} countdown to the auto-lock again, from now"
 msgstr ""
 "Reiniciar desde ahora la cuenta regresiva de {time} para el bloqueo automático"
 
-#: gui/wallet_page.py:340
+#: gui/wallet_page.py:351
 msgid "🔒 Lock now"
 msgstr "🔒 Bloquear ahora"
 
-#: gui/wallet_page.py:340
+#: gui/wallet_page.py:351
 msgid "🔓 Unlock…"
 msgstr "🔓 Desbloquear…"
 
-#: gui/wallet_page.py:341
+#: gui/wallet_page.py:352
 msgid "Asks for the wallet password"
 msgstr "Pide la contraseña de la cartera"
 
-#: gui/wallet_page.py:342
+#: gui/wallet_page.py:353
 msgid "Lock the wallet now: protected apps need the password again"
 msgstr ""
 "Bloquear la cartera ahora: las apps protegidas vuelven a necesitar la contraseña"
 
-#: gui/wallet_page.py:369
+#: gui/wallet_page.py:380
 msgid "(default 4 h)"
 msgstr "(predeterminado: 4 h)"
 
-#: gui/wallet_page.py:392
+#: gui/wallet_page.py:403
 msgid "Waiting for the wallet password (look for the dialog)…"
 msgstr "Esperando la contraseña de la cartera (busca el cuadro de diálogo)…"
 
-#: gui/wallet_page.py:404
+#: gui/wallet_page.py:415
 msgid "Protected ({n})"
 msgstr "Protegidas ({n})"
 
-#: gui/wallet_page.py:406
+#: gui/wallet_page.py:417
 msgid "Electron told to use it"
 msgstr "Electron configurado para usarla"
 
-#: gui/wallet_page.py:406 packs/original/wallet/wallet-launcher:133
+#: gui/wallet_page.py:417 packs/original/wallet/wallet-launcher:133
 msgid "shared wallet"
 msgstr "cartera compartida"
 
-#: gui/wallet_page.py:408
+#: gui/wallet_page.py:419
 msgid "password only (keeps its own session)"
 msgstr "solo contraseña (mantiene su propia sesión)"
 
-#: gui/wallet_page.py:410
+#: gui/wallet_page.py:421
 msgid ""
 "Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here."
 msgstr ""
 "Configurada por el ajuste “{tweak}”: reinstalarlo (↻) la vuelve a agregar si la quitas aquí."
 
-#: gui/wallet_page.py:413
+#: gui/wallet_page.py:424
 msgid "Password first"
 msgstr "Contraseña primero"
 
-#: gui/wallet_page.py:415
+#: gui/wallet_page.py:426
 msgid ""
 "Ask for the wallet password before the app opens (when the wallet is locked)"
 msgstr ""
 "Pedir la contraseña de la cartera antes de que se abra la app (cuando la cartera está bloqueada)"
 
-#: gui/wallet_page.py:417
+#: gui/wallet_page.py:428
 msgid "Remove"
 msgstr "Quitar"
 
-#: gui/wallet_page.py:418
+#: gui/wallet_page.py:429
 msgid "Open it the way it opened before (its original launcher)"
 msgstr "Abrirla como se abría antes (con su lanzador original)"
 
-#: gui/wallet_page.py:420
+#: gui/wallet_page.py:431
 msgid "{app}: removed"
 msgstr "{app}: quitada"
 
-#: gui/wallet_page.py:424
+#: gui/wallet_page.py:435
 msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] "Agregar una app ({n} app instalada)"
 msgstr[1] "Agregar una app ({n} apps instaladas)"
 
-#: gui/wallet_page.py:428
+#: gui/wallet_page.py:439
 msgid "Electron app: will be told to use the wallet"
 msgstr "App de Electron: se configurará para usar la cartera"
 
-#: gui/wallet_page.py:430
+#: gui/wallet_page.py:441
 msgid "Protect"
 msgstr "Proteger"
 
-#: gui/wallet_page.py:434
+#: gui/wallet_page.py:445
 msgid "{app}: protected. Reopen it if it's running."
 msgstr "{app}: protegida. Vuelve a abrirla si está en ejecución."
 
-#: gui/wallet_page.py:471
+#: gui/wallet_page.py:482
 msgid "Close after"
 msgstr "Cerrar después de"
 
-#: gui/wallet_page.py:480
+#: gui/wallet_page.py:491
 msgid "Longer"
 msgstr "Más tiempo"
 
-#: gui/wallet_page.py:480
+#: gui/wallet_page.py:491
 msgid "Shorter"
 msgstr "Menos tiempo"
 
-#: gui/wallet_page.py:484
+#: gui/wallet_page.py:495
 msgid ""
 "Quit the app after this long with no keyboard, mouse or controller input"
 msgstr ""
 "Cerrar la app después de este tiempo sin actividad del teclado, el mouse o el control"
 
-#: gui/wallet_page.py:487
+#: gui/wallet_page.py:498
 msgid "Headset off"
 msgstr "Al quitar el visor"
 
-#: gui/wallet_page.py:490
+#: gui/wallet_page.py:501
 msgid "Also quit it about 10 s after the headset is taken off"
 msgstr "Cerrarla también unos 10 s después de quitarte el visor"
 
-#: gui/wallet_page.py:491
+#: gui/wallet_page.py:502
 msgid "Set a Close after time first"
 msgstr "Primero elige un tiempo en Cerrar después de"
 
-#: gui/wallet_page.py:503
+#: gui/wallet_page.py:514
 msgid "{app}: closes after {time} with no activity"
 msgstr "{app}: se cierra después de {time} sin actividad"
 
-#: gui/wallet_page.py:504
+#: gui/wallet_page.py:515
 msgid "{app}: no timer"
 msgstr "{app}: sin temporizador"
 
-#: gui/wallet_page.py:515
+#: gui/wallet_page.py:526
 msgid "also closes when the headset is taken off"
 msgstr "también se cierra al quitarte el visor"
 
-#: gui/wallet_page.py:516
+#: gui/wallet_page.py:527
 msgid "no longer closes when the headset is taken off"
 msgstr "ya no se cierra al quitarte el visor"
 
-#: gui/wallet_page.py:522
+#: gui/wallet_page.py:533
 msgid "asks for the wallet password first"
 msgstr "pide primero la contraseña de la cartera"
 
-#: gui/wallet_page.py:523
+#: gui/wallet_page.py:534
 msgid "opens without asking for the password"
 msgstr "se abre sin pedir la contraseña"
-
-#: gui/wallet_page.py:99
-msgid "under a minute"
-msgstr "menos de un minuto"
 
 #: install.sh:209
 msgid "(experimental)"
