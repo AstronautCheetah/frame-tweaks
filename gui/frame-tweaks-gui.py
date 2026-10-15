@@ -81,7 +81,7 @@ QWidget#row { background: #161c23; border-radius: 10px; }
 QWidget#row:hover { background: #1c242d; }
 QWidget#row[hidden_row="true"] { background: #11161c; }
 QWidget#row[focused="true"] { background: #1f2a36; border: 2px solid #7fb2e5; }
-QWidget#row QLabel, QWidget#row QCheckBox { background: transparent; }
+QWidget#row QLabel, QWidget#row QCheckBox, QWidget#row QWidget#spacer { background: transparent; }
 QPushButton { background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 #2c333b, stop:0.5 #232a32, stop:1 #1c232a);
               border: none; border-bottom: 3px solid #0c1015; border-radius: 8px; padding: 6px 14px; }
 QPushButton:hover { background: #3d4855; }
@@ -103,6 +103,17 @@ QPushButton#run[help="true"] { background: qlineargradient(x1:0,y1:0,x2:0,y2:1, 
 QCheckBox { padding: 8px; }
 QCheckBox::indicator { width: 33px; height: 33px; }
 QScrollArea { border: none; }
+QScrollBar:vertical { background: #11161c; width: 28px; margin: 0 0 0 6px; border-radius: 11px; }
+QScrollBar:horizontal { background: #11161c; height: 28px; margin: 6px 0 0 0; border-radius: 11px; }
+QScrollBar::handle { background: #2f3a46; border: 1px solid #3a4756; border-radius: 9px; margin: 2px; }
+QScrollBar::handle:vertical { min-height: 56px; }
+QScrollBar::handle:horizontal { min-width: 56px; }
+QScrollBar::handle:hover { background: #3d4b5a; border-color: #4f6175; }
+QScrollBar::handle:pressed { background: #355b7a; border-color: #7fb2e5; }
+QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; border: none; background: none; }
+QScrollBar::add-page, QScrollBar::sub-page { background: none; }
+QWidget#row[cta="true"] { background: #142130; border: 1px solid #2c4a66; }
+QWidget#row[cta="true"]:hover { background: #18283a; }
 QTextBrowser { background: #11161c; border: none; border-radius: 8px; padding: 8px; }
 QLabel#issue { background: #2a2312; color: #e0b33a; border-radius: 8px; padding: 10px; }
 QLabel#notice { color: #e0b33a; }
@@ -421,10 +432,10 @@ class Row(QWidget):
 # claims the buttons; its haptic ticks still work.
 CONTROLLER_BUTTONS = False
 
-# The last row of the Developer group: not a tweak (nothing to install), the ways to help
+# The list's last row, under every group: not a tweak (nothing to install), the ways to help
 # (docs/contribute.md). Built here, not in a pack, so install.sh, status and the README's
 # tables never see it.
-CONTRIBUTE = {"id": "_contribute", "category": "Developer", "icon": "system-users"}
+CONTRIBUTE = {"id": "_contribute", "icon": "system-users"}
 
 
 class ContributeRow(Row):
@@ -1044,8 +1055,6 @@ class Window(QWidget):
             if is_hidden and not showing:
                 continue
             if cat != category:
-                if category == "Developer":
-                    self.add_contribute_row(collapsed)
                 category = cat
                 count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden))
                 self.grid.addWidget(CategoryHeader(self, cat, count, cat in collapsed, cat in hidden_cats))
@@ -1155,23 +1164,24 @@ class Window(QWidget):
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
-        if category == "Developer":
-            self.add_contribute_row(collapsed)
+        self.add_contribute_row()
         self.grid.addStretch(1)
         self.update_apply()
 
-    def add_contribute_row(self, collapsed):
-        """The Developer group's last row: how to help (CONTRIBUTE), laid out as a tweak's row
-        with nothing to install: no tick box or status, Read instead of Run."""
-        if "Developer" in collapsed:
-            return
+    def add_contribute_row(self):
+        """The list's last row, under every group whatever the packs' order (and whichever groups
+        are folded or hidden): how to help (CONTRIBUTE), laid out as a tweak's row with nothing
+        to install: no tick box or status, a call to action instead of Run."""
+        self.grid.addSpacing(12)
         row = ContributeRow(self, CONTRIBUTE)
         self.row_widgets.append(row)
         row.setProperty("hidden_row", "false")
+        row.setProperty("cta", "true")
         g = QGridLayout(row)
         g.setContentsMargins(8, 10, 12, 10)
         g.setHorizontalSpacing(14)
-        spacer = QWidget()
+        spacer = QWidget()                           # (where a tweak's tick box is: the icons line up)
+        spacer.setObjectName("spacer")
         spacer.setFixedWidth(QCheckBox().sizeHint().width())
         icon = QLabel()
         hits = sorted(BREEZE.glob(f"*/*/{CONTRIBUTE['icon']}.svg"))
@@ -1179,12 +1189,13 @@ class Window(QWidget):
             icon.setPixmap(QIcon(str(hits[-1])).pixmap(40, 40))
         name = QLabel(html.escape(_("Help make Frame Tweaks better"), quote=False))
         name.setObjectName("name")
-        info = QLabel(html.escape(_("Not a tweak: ways to help, from ideas for new tweaks and third-party apps to "
-                                    "translations, bug reports and code."), quote=False))
+        info = QLabel(html.escape(_("Have an idea for a tweak, or an app that belongs here? Found a bug, or speak "
+                                    "another language? Every suggestion, report, translation and fix makes the Frame "
+                                    "better for everyone who has one."), quote=False))
         info.setObjectName("desc")
         info.setWordWrap(True)
-        read = QPushButton(_("Read"))
-        read.setObjectName("run")
+        read = QPushButton(_("Get involved"))
+        read.setObjectName("apply")
         read.clicked.connect(self.show_contribute)
         g.addWidget(spacer, 0, 0, 2, 1)
         g.addWidget(icon, 0, 1, 2, 1)

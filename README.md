@@ -157,15 +157,6 @@ them.
 | 📜 | [**Scroll strips**](packs/original/scroll-strips/) 🧪 | Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR. | In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit. |
 | 🛋️ | [**Recline**](packs/third-party/recline/) 🧪 🔗 | Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you. | SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes. |
 
-### Privacy & security
-
-| | Tweak | What you get | Why on a Steam Frame |
-|---|---|---|---|
-| 🔐 | [**Shared KDE wallet**](packs/original/wallet/) | Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`. | Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins. |
-| 🕵️ | [**Firefox privacy**](packs/original/firefox/) | Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings. | The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint. |
-| 🔐 | [**Signal: key in the wallet**](packs/integrations/signal/) | Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens. | A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text. |
-| 🌐 | [**NordVPN**](packs/integrations/nordvpn/) (WireGuard) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
-
 ### System
 
 | | Tweak | What you get | Why on a Steam Frame |
@@ -181,6 +172,15 @@ them.
 | | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
 | 🔋 | [**Battery charge limit**](packs/original/charge-limit/) 🧪 *(sudo)* | Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge. | A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame. |
+
+### Privacy & security
+
+| | Tweak | What you get | Why on a Steam Frame |
+|---|---|---|---|
+| 🔐 | [**Shared KDE wallet**](packs/original/wallet/) | Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`. | Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins. |
+| 🕵️ | [**Firefox privacy**](packs/original/firefox/) | Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings. | The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint. |
+| 🔐 | [**Signal: key in the wallet**](packs/integrations/signal/) | Signal Desktop keeps the key to your message database in the KDE wallet instead of a plain-text file (an existing plain-text key is moved over), and asks for the wallet password before it opens. | A headset gets passed around, often without a SteamOS login password, and Flathub's Signal otherwise keeps its database key in plain text. |
+| 🌐 | [**NordVPN**](packs/integrations/nordvpn/) (WireGuard) | NordVPN servers in several countries as built-in network connections, with a tray icon. Survives SteamOS updates. | The usual NordVPN install goes into `/usr`, which every SteamOS update wipes, and the Frame's desktop has no network applet to switch VPNs. |
 
 ### Developer
 
@@ -233,9 +233,9 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
   in it); **⚙** holds the
   preferences: the language, how the window behaves, what uninstalling a tweak does with its
   settings, and uninstalling Frame Tweaks itself.
-- The **Developer** group ends with **Help make Frame Tweaks better**: not a tweak, but the ways
-  to help, from ideas for new tweaks and third-party apps to translations, bug reports and code
-  ([docs/contribute.md](docs/contribute.md)).
+- At the very bottom, under every group, **Help make Frame Tweaks better → Get involved** shows
+  the ways to help, from ideas for new tweaks and third-party apps to translations, bug reports
+  and code ([docs/contribute.md](docs/contribute.md)).
 
 <p align="center"><img src="docs/images/details.png" width="640" alt="A tweak's details page: what it is, why it's included, who made it, its source and README"></p>
 

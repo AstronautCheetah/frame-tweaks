@@ -660,24 +660,23 @@ class PreferencesPage(unittest.TestCase):
 
 
 class ContributeRow(unittest.TestCase):
-    """The Developer group ends with a row that isn't a tweak: how to help. (Built on a stand-in
-    window: the real one would start SteamVR's button handling and the update check.)"""
+    """The list ends with a row that isn't a tweak, under every group: how to help. (Built on a
+    stand-in window: the real one would start SteamVR's button handling and the update check.)"""
     def test_row_and_page(self):
         from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QTextBrowser, QVBoxLayout, QWidget
         self.app = QApplication.instance() or QApplication([])
         holder = QWidget()
         window = mock.Mock(row_widgets=[], grid=QVBoxLayout(holder))
-        gui.Window.add_contribute_row(window, collapsed=set())
+        gui.Window.add_contribute_row(window)
         self.assertEqual(len(window.row_widgets), 1)
         row = window.row_widgets[0]
         self.assertIsInstance(row, gui.ContributeRow)
         self.assertNotIn("_contribute", [c["id"] for c in gui.sft.components()])     # (not a tweak)
-        self.assertEqual([b.text() for b in row.findChildren(QPushButton)], ["Read"])   # (no tick, ↻ or Hide)
+        self.assertEqual([b.text() for b in row.findChildren(QPushButton)], ["Get involved"])   # (no tick, ↻ or Hide)
         self.assertIn("Help make Frame Tweaks better", [w.text() for w in row.findChildren(QLabel)])
+        self.assertFalse(any("Not a tweak" in w.text() for w in row.findChildren(QLabel)))
         row.findChildren(QPushButton)[0].click()
         window.show_contribute.assert_called_once()
-        gui.Window.add_contribute_row(window, collapsed={"Developer"})             # (a folded group: none)
-        self.assertEqual(len(window.row_widgets), 1)
         page = gui.ReadmePage(mock.Mock(), gui.REPO / "docs/contribute.md", "Help make Frame Tweaks better")
         text = page.findChildren(QTextBrowser)[0].toPlainText()
         for part in ("Suggest a third-party app", "tweak nobody has written yet", "Report a bug",

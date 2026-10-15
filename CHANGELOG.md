@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Changed
+- **The Frame Tweaks window:** scroll bars twice as wide (easier to grab with a laser), with a
+  rounded handle that lights up as you use it; **Privacy & security** comes just above
+  **Developer**; and **Help make Frame Tweaks better** is the list's last row, under every
+  group, with a **Get involved** button.
 - **Shared clipboard installs in seconds:** it now downloads Frame Tweaks' own build of
   clipboard-sync (about 1 MB, checked against its pinned SHA256) instead of building it on the
   Frame, which took a few minutes and about 600 MB of temporary space. The build is
