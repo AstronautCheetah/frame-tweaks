@@ -22,7 +22,7 @@ The design follows from what the Frame is:
   installs into `$HOME`: `~/.local/bin`, `~/.local/share`, `~/.config`, user systemd units and
   the app menu in `~/.local/share/applications`. The README lists the exceptions: Homebrew
   needs sudo once to create `/home/linuxbrew`, NordVPN adds NetworkManager connections, and the
-  Flathub apps (KWalletManager, VSCodium) go into the system-wide Flatpak folder.
+  Flathub apps (KWalletManager) go into the system-wide Flatpak folder.
 - **Two sessions at once.** Steam's VR session runs on X display `:0`, where floating VR
   windows live. Desktop mode is a Plasma session nested inside it, on Wayland, with its own
   D-Bus bus and `XDG_RUNTIME_DIR`. Programs started from the desktop, from shortcuts and from

@@ -10,7 +10,7 @@
 #   ./install.sh forget-settings [--list]  delete the settings uninstalled tweaks left behind
 #   ./install.sh uninstall-self [--keep-tweaks] [--remove-apps] [--remove-settings|--keep-settings]
 #                                    uninstall Frame Tweaks itself (first every tweak, unless
-#                                    --keep-tweaks; other projects' apps such as VSCodium stay
+#                                    --keep-tweaks; other projects' apps such as Claude Desktop stay
 #                                    unless --remove-apps); this folder too, unless it holds work of yours
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
@@ -310,7 +310,7 @@ cmd_forget_settings() {
 
 # uninstall-self [--keep-tweaks] [--remove-apps] [--remove-settings|--keep-settings]: Frame Tweaks itself.
 #  1. every tweak, unless --keep-tweaks (stops here if one fails: you can run it again), but
-#     those that install another project's app (manifest app:, e.g. VSCodium) and what they
+#     those that install another project's app (manifest app:, e.g. Claude Desktop) and what they
 #     depend on, unless --remove-apps: the apps stay, and work as before;
 #  2. with --remove-settings (default: ⚙ Preferences' choice), the settings uninstalled tweaks
 #     left, and Frame Tweaks' own; those of tweaks still installed stay;

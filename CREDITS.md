@@ -35,7 +35,6 @@ FIRST*, which credits **ThrillSeeker**.
 | [Rust](https://www.rust-lang.org) (rustup) | MIT or Apache-2.0 | builds clipboard-sync (a temporary toolchain, deleted after the build) |
 | [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) / Qt | GPL-3.0 / LGPL | Arrow Pad, NordVPN tray, installer window (installed with pip, not bundled) |
 | [pyopenvr](https://github.com/cmbruns/pyopenvr), OpenVR | BSD-3-Clause | Arrow Pad haptics (with SteamVR's own arm64 `libopenvr_api.so`) |
-| [VSCodium](https://github.com/VSCodium/vscodium) | MIT | vscodium tweak (Flathub) |
 | [jeepney](https://gitlab.com/takluyver/jeepney) | MIT | wallet-unlock, nordvpn-wg (D-Bus) |
 | KDE Wallet / kwallet-pam | LGPL | `wallet-unlock` derives the key the way kwallet-pam does |
 | [KDE Breeze icons](https://invent.kde.org/frameworks/breeze-icons) | LGPL-3.0-or-later | glyphs in our menu icons (drawn by `dev/draw-icons.py`, from SteamOS's breeze-icons 6.14.0; [icons/README.md](icons/README.md)) and Arrow Pad's and Screen snip's buttons |

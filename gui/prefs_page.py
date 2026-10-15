@@ -112,9 +112,8 @@ class Preferences(QWidget):
         rows.addWidget(self.heading(_("Uninstalling a tweak")))
         rows.addWidget(self.note(_("When you uninstall a tweak, its settings can stay, so it's set up as before if "
                                    "you install it again, or be removed along with it.")))
-        rows.addWidget(self.note(_("Removing settings also signs you out of Claude Desktop, removes VSCodium's "
-                                   "extensions, and deletes NordVPN's key (setting NordVPN up again then needs a new "
-                                   "access token).")))
+        rows.addWidget(self.note(_("Removing settings also signs you out of Claude Desktop and deletes NordVPN's key "
+                                   "(setting NordVPN up again then needs a new access token).")))
         rows.addWidget(self.note(_("Your own data is never removed: your dictation history, adb's pairing keys and "
                                    "Claude Code's ~/.claude folder stay either way.")))
         grid = QHBoxLayout()
