@@ -1,0 +1,126 @@
+diff --git a/src/sync.rs b/src/sync.rs
+index 081e257..277bdd8 100644
+--- a/src/sync.rs
++++ b/src/sync.rs
+@@ -1,5 +1,6 @@
+ use chrono::Local;
+ use std::collections::HashSet;
++use std::env;
+ use std::{thread::sleep, time::Duration};
+ use wayland_client::ConnectError;
+ use wl_clipboard_rs::paste::Error as PasteError;
+@@ -9,10 +10,26 @@ use crate::error::{MyError, MyResult, StandardizedError};
+ use crate::log::{self, concise_numbers};
+ 
+ pub fn get_clipboards() -> MyResult<Vec<Box<dyn Clipboard>>> {
++    // Our own desktop's Xwayland ($DISPLAY beside $WAYLAND_DISPLAY; read before the Wayland
++    // clipboards are probed, which changes WAYLAND_DISPLAY) is left out: the compositor already
++    // passes copies between it and the Wayland clipboard (KWin: X to Wayland at once, Wayland to
++    // X while an X window has focus), so they never test as one. Synced as well, the text written
++    // to it went on to the Wayland side and replaced what had just been copied there (a file cut
++    // in Dolphin then pasted only as its address).
++    let own_xwayland = env::var("WAYLAND_DISPLAY")
++        .ok()
++        .and(env::var("DISPLAY").ok())
++        .map(|d| d.trim_end_matches(".0").to_string());
+     log::debug!("identifying unique clipboards...");
+     let mut clipboards = get_clipboards_spec(get_wayland);
+     // let x11_backend = X11Backend::new()?;
+-    clipboards.extend(get_clipboards_spec(get_x11));
++    clipboards.extend(get_clipboards_spec(get_x11).into_iter().filter(|c| {
++        let ours = own_xwayland.as_deref() == Some(c.display().as_str());
++        if ours {
++            log::debug!("leaving out {c:?}: this desktop's own Xwayland");
++        }
++        !ours
++    }));
+ 
+     let start = clipboards
+         .iter()
+@@ -62,12 +79,26 @@ pub fn keep_synced(clipboards: &Vec<Box<dyn Clipboard>>) -> MyResult<()> {
+     if clipboards.is_empty() {
+         return Err(MyError::NoClipboards);
+     }
++    // The text last shared: what each clipboard is compared with (at first, what get_clipboards
++    // shared). Not clipboard 0 read again: it may hold an image, which has no text, and then any
++    // old text elsewhere would look new and be written over the image.
++    let mut last = clipboards
++        .iter()
++        .map(|c| c.get().unwrap_or_default())
++        .find(|s| !s.is_empty())
++        .unwrap_or_default();
+     loop {
+         sleep(Duration::from_millis(100));
+-        let new_value = await_change(clipboards)?;
+-        for c in clipboards {
+-            c.set(&new_value)?;
++        let (source, new_value) = await_change(clipboards, &last)?;
++        // Not back into the clipboard it came from: that one holds the copy as the app made it
++        // (a file to paste, formatted text, a password manager's "don't keep this" mark), which
++        // the text alone would replace. The others get the text.
++        for (i, c) in clipboards.iter().enumerate() {
++            if i != source {
++                c.set(&new_value)?;
++            }
+         }
++        last = new_value;
+     }
+ }
+ 
+@@ -75,17 +106,31 @@ fn are_same(one: &dyn Clipboard, two: &dyn Clipboard) -> MyResult<bool> {
+     let d1 = &one.display();
+     let d2 = &two.display();
+     one.set(d1)?;
+-    if d1 != &two.get()? {
++    if !shows_within(two, d1)? {
+         return Ok(false);
+     }
+     two.set(d2)?;
+-    if d2 != &one.get()? {
++    if !shows_within(one, d2)? {
+         return Ok(false);
+     }
+ 
+     Ok(true)
+ }
+ 
++/// Whether a clipboard shows `want` within ~0.6 s. Two that are one, such as a Wayland desktop's
++/// and its own Xwayland's (the compositor copies between them), take a moment to agree: read at
++/// once, they looked different, both were kept, and text written to one replaced what an app had
++/// just copied into the other (a file in Dolphin then pasted only as its address).
++fn shows_within(c: &dyn Clipboard, want: &str) -> MyResult<bool> {
++    for _ in 0..12 {
++        if c.get()? == want {
++            return Ok(true);
++        }
++        sleep(Duration::from_millis(50));
++    }
++    Ok(false)
++}
++
+ // /// equality comparison is the bottleneck, and it's composed of two steps. so
+ // /// the purpose of this function is to minimize the number of executions of
+ // /// those steps. to do so, these steps are run at different times and combined
+@@ -243,10 +288,10 @@ fn get_x11(n: u8) -> MyResult<Option<Box<dyn Clipboard>>> {
+     Ok(Some(Box::new(clipboard)))
+ }
+ 
+-fn await_change(clipboards: &Vec<Box<dyn Clipboard>>) -> MyResult<String> {
+-    let start = clipboards[0].get()?;
++/// (the clipboard that changed, its text)
++fn await_change(clipboards: &Vec<Box<dyn Clipboard>>, start: &str) -> MyResult<(usize, String)> {
+     loop {
+-        for c in clipboards {
++        for (i, c) in clipboards.iter().enumerate() {
+             if !c.should_poll() {
+                 continue;
+             }
+@@ -256,7 +301,7 @@ fn await_change(clipboards: &Vec<Box<dyn Clipboard>>) -> MyResult<String> {
+             if !new.is_empty() && new != start {
+                 log::info!("clipboard updated from display {}", c.display());
+                 log::sensitive!(log::info, "clipboard contents: '{}'", new);
+-                return Ok(new);
++                return Ok((i, new));
+             }
+         }
+         sleep(Duration::from_millis(200));

@@ -22,8 +22,10 @@ if [ -x /home/linuxbrew/.linuxbrew/bin/rustc ]; then
 don't use it yourself: %s   (frees about 3.4 GB)" "brew uninstall rust && brew autoremove")"
 fi
 say "$(t 'Building %s from %s (a few minutes)' clipboard-sync https://github.com/dnut/clipboard-sync)"
-# The pinned commit, plus one small change (keep-images.patch): it only shares text, and used
-# to replace a copied image with the last text a moment later.
+# The pinned commit, plus two small changes. It only shares text: keep-images.patch, or a copied
+# image was replaced with the last text a moment later; keep-source.patch, or the text was also
+# written back where it was copied (directly, or through the desktop's own Xwayland, which KWin
+# links to its Wayland clipboard), replacing what the app put there (a file, formatted text).
 SRC="$HOME/.local/share/frame-tweaks/src/clipboard-sync"
 rev=$(sed -n 's/^rev=//p' "$TWEAK_DIR/pin")
 rm -rf "$SRC"
@@ -37,8 +39,8 @@ else      # gone upstream: Frame Tweaks' copy of that commit's source (dev/mirro
         "$(sed -n 's/^mirror_sha256=//p' "$TWEAK_DIR/pin")" "$BUILD/src.tar.gz"
     tar -xzf "$BUILD/src.tar.gz" -C "$SRC" --strip-components=1
 fi
-git -C "$SRC" apply "$TWEAK_DIR/keep-images.patch"
-echo keep-images > "$SRC/.sft-patched"
+for p in keep-images keep-source; do git -C "$SRC" apply "$TWEAK_DIR/$p.patch"; done
+echo keep-images keep-source > "$SRC/.sft-patched"
 # (Its build files go in the temporary folder too: with --path, cargo keeps them in $SRC/target,
 # about 350 MB that would stay.)
 cargo install --locked --force --path "$SRC" --root "$ROOT" --target-dir "$BUILD/target"

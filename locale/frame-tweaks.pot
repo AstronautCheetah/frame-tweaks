@@ -4407,7 +4407,7 @@ msgstr ""
 msgid "%s socket missing"
 msgstr ""
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:9
+#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
 msgid "%s running"
 msgstr ""
 
@@ -4443,19 +4443,19 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:32 packs/third-party/recline/install.sh:20
+#: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:20
 msgid "%s: not the pinned commit"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:22
+#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:22
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:65
+#: packs/third-party/clipboard/install.sh:67
 msgid "%s started"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:67
+#: packs/third-party/clipboard/install.sh:69
 msgid "%s starts with desktop mode."
 msgstr ""
 
@@ -4473,6 +4473,11 @@ msgstr ""
 
 #: packs/third-party/clipboard/run.sh:7
 msgid "Copy in VR, paste in the desktop, and back."
+msgstr ""
+
+#: packs/third-party/clipboard/status.sh:10
+msgid ""
+"older build: a copied file or formatted text pastes only as text (Reinstall fixes it)"
 msgstr ""
 
 #: packs/third-party/clipboard/status.sh:4
