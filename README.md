@@ -317,15 +317,17 @@ In the window: **⚙ Preferences → Uninstalling Frame Tweaks**, with three cho
 - **Uninstall every tweak first** (on), or leave them installed: they keep working, but nothing
   updates them, and removing them later takes Frame Tweaks again (install it, and it finds them).
 - **Leave third-party apps installed** (on): the tweaks that install another project's app
-  (VSCodium, Claude Desktop, Claude Code, Full Keyboard, clipboard-sync) stay, with what they
-  need, so the apps and your work in them stay as they are.
+  (Homebrew, VSCodium, Claude Desktop, Claude Code, Full Keyboard, clipboard-sync) stay, with what
+  they need, so the apps and your work in them stay as they are. Homebrew itself is never
+  removed by Frame Tweaks, even with this off: other programs may live in it, so its tweak only
+  shows Homebrew's own uninstall command.
 - **Delete the settings too** (starts as your choice for single tweaks): Frame Tweaks' own, and
   those of the tweaks it uninstalls or uninstalled before; installed tweaks' stay.
 
 Or in a terminal:
 
 ```sh
-cd ~/frame-tweaks && ./install.sh uninstall-self                 # tweaks, but third-party apps stay
+cd ~/frame-tweaks && ./install.sh uninstall-self                 # tweaks, but third-party apps (Homebrew too) stay
 ./install.sh uninstall-self --remove-apps --remove-settings      # everything
 ./install.sh uninstall-self --keep-tweaks                        # only Frame Tweaks itself
 ```
