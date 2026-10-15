@@ -7,7 +7,7 @@ a link to a copy running in the other (Firefox then says it's "already running, 
 responding"). So: find the default app (as desktop mode sets it: the VR session doesn't read
 KDE's defaults, so a folder there would open in Kate, not Dolphin); if it's running in this
 program's session, send the link there; if only in the other session, launch it with that
-session's environment so it reaches the running copy; if it isn't running, open it in VR.
+session's environment (display, runtime folder, session bus) so it reaches the running copy; if it isn't running, open it in VR.
 
   browser.py URL|PATH             open it
   browser.py --where URL|PATH     say what it would do, without opening anything
@@ -27,8 +27,11 @@ import ftconf  # noqa: E402
 
 VR, DESKTOP = N_("VR"), N_("desktop mode")      # (also keys: translated where they're shown)
 # What makes a program part of one session or the other; copied from a process of the target
-# session (anything else is kept from ours).
-SESSION_KEYS = ("DISPLAY", "WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE",
+# session (anything else is kept from ours). Desktop mode has its own runtime folder and session
+# bus, where a running app is found (Flatpak Firefox's remote lives there): without them a second
+# copy can't reach it and says it's "already running".
+SESSION_KEYS = ("XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS",
+                "DISPLAY", "WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE",
                 "XDG_SESSION_DESKTOP", "DESKTOP_SESSION", "KDE_FULL_SESSION", "KDE_SESSION_VERSION",
                 "XDG_DESKTOP_PORTAL_DIR", "XAUTHORITY", "GDK_BACKEND", "QT_QPA_PLATFORM")
 REFERENCE = {DESKTOP: ("plasmashell",), VR: ("steam", "steamwebhelper")}

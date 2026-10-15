@@ -29,6 +29,10 @@
   issue asks for one to be listed, after a maintainer has read it.
 
 ### Fixed
+- **Links opened from VR reach Firefox in desktop mode again** (a tweak's README, Its README ↗,
+  help links). Firefox said it was "already running, but is not responding": desktop mode has
+  its own runtime folder and session bus, where the running Firefox is found, and the link was
+  handed over without them.
 - **Shared clipboard: cutting or copying a file in desktop mode pastes the file again**, not just
   its address ("Paste Clipboard Contents"). clipboard-sync wrote the text it shares back into the
   clipboard it came from (directly, or through the desktop's own X11 clipboard, which KWin links
