@@ -415,7 +415,9 @@ class OverlayHost:
                 self.pad.release_all_mods()
                 self.pad.restyle()
             self.visible = visible
-        grips = self.grips.poll() if (self.grips and visible) else []
+        # (only while a laser is on the pad, or it's carried by the grip: each read asks SteamVR
+        # for controller properties, which other programs wait on too)
+        grips = self.grips.poll() if (self.grips and visible and (self.hovered_devices or self.grip_drag)) else []
         self.gripping = {d for d, held, _ in grips if held}
         for d, held, pressed in grips:
             # Squeeze while that controller's laser is on the pad: grab it (keys included).

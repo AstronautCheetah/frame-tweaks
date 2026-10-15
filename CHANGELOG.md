@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Fixed
+- **Less load on SteamVR from Arrow Pad and Screen snip's narration panel:** they read the
+  controllers' grip only while a laser is on them (each read waits on SteamVR's shared property
+  lock, which SteamVR and Steam use too), and the narration panel checks for events 10 times a
+  second until a laser is on it.
 - **Android Mirror coming back after the phone slept** (it reconnects by itself): the new window
   showed in the dashboard, was put back where the mirror floated, and left the dashboard showing
   nothing. The dashboard now goes back to the window it showed before, and the mirror's trip
