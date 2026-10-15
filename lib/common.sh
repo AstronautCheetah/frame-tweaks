@@ -60,6 +60,9 @@ sysctl_user() {
 }
 
 BREW=/home/linuxbrew/.linuxbrew/bin/brew
+# brew_cmd NAME: the path of a command on PATH or in Homebrew (which a status check's PATH may
+# not have); fails without it.
+brew_cmd() { command -v "$1" 2>/dev/null || { [ -x "${BREW%/brew}/$1" ] && echo "${BREW%/brew}/$1"; }; }
 
 # ask <question>: yes/no in the terminal, or a dialog when there's no terminal.
 ask() {
@@ -245,6 +248,21 @@ install_icon() {
 # install_desktop <file.desktop>: copy into the app menu, expanding @BIN@. If the entry is
 # wrapped by wallet-launcher (shared wallet / password gate), the new version becomes the
 # wrapper's original and the wrapper is re-applied, so the gate isn't silently dropped.
+# remove_desktop <file.desktop>...: install_desktop's undo: the entry, and the copy kept while
+# wallet-launcher wraps it (launcher-originals), then the menu refreshed.
+remove_desktop() {
+    local name
+    for name in "$@"; do remove_files "$APPS/$name" "$LAUNCHER_ORIGINALS/$name"; done
+    update-desktop-database "$APPS" 2>/dev/null || true
+    touch "$APPS" 2>/dev/null || true
+}
+
+# remove_icon <name>: install_icon's undo.
+remove_icon() {
+    remove_files "$ICONS/256x256/apps/$1.png"
+    touch "$ICONS" 2>/dev/null || true
+}
+
 install_desktop() {
     local name; name=$(basename "$1")
     # (with its name and comment in each translated language: lib/i18n.py desktop)
@@ -272,6 +290,14 @@ pip_pinned() {
 
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
+# ensure_qt_venv: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray
+# and the installer window); fails if it couldn't be installed.
+ensure_qt_venv() {
+    "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null && return 0
+    say "$(t 'Setting up PyQt6 (about 280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray and the installer window)')"
+    python3 -m venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
+}
+
 ensure_tweaks_venv() {
     if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
         say "$(t 'Creating Python venv with jeepney')"

@@ -1,6 +1,8 @@
 #!/bin/bash
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
-remove_files "$ICONS/256x256/apps/frame-tweaks-dictate.png" "$BIN/dictate" "$APPS/dictate.desktop"
+remove_icon frame-tweaks-dictate
+remove_desktop dictate.desktop
+remove_files "$BIN/dictate"
 if [ -x "$BIN/whisper-ptt" ]; then
     say "$(t 'Kept the Whisper model: whisper-frame uses it too.')"
 else

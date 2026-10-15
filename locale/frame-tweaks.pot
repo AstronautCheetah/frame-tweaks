@@ -207,7 +207,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:371 install.sh:206 lib/common.sh:421 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:371 install.sh:206 lib/common.sh:447 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -974,7 +974,7 @@ msgstr ""
 msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:225 install.sh:264 packs/original/snip/install.sh:20 packs/original/snip/install.sh:23
+#: install.sh:225 install.sh:264 packs/original/snip/install.sh:16 packs/original/snip/install.sh:19
 msgid "%s failed"
 msgstr ""
 
@@ -1003,7 +1003,7 @@ msgid ""
 "Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
-#: install.sh:291 install.sh:362 install.sh:375 install.sh:405 lib/common.sh:378
+#: install.sh:291 install.sh:362 install.sh:375 install.sh:405 lib/common.sh:404
 msgid "removed %s"
 msgstr ""
 
@@ -1229,62 +1229,71 @@ msgstr ""
 msgid "Couldn't open it."
 msgstr ""
 
-#: lib/common.sh:154
+#: lib/common.sh:102
+msgid "Homebrew installed."
+msgstr ""
+
+#: lib/common.sh:157
 msgid "Fetching %s"
 msgstr ""
 
-#: lib/common.sh:269
+#: lib/common.sh:287
 msgid ""
 "The tested versions of %s don't install on this Python (%s); trying the newest."
 msgstr ""
 
-#: lib/common.sh:277
+#: lib/common.sh:297
+msgid ""
+"Setting up PyQt6 (about 280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray and the installer window)"
+msgstr ""
+
+#: lib/common.sh:303
 msgid "Creating Python venv with jeepney"
 msgstr ""
 
-#: lib/common.sh:327
+#: lib/common.sh:353
 msgid "restored %s"
 msgstr ""
 
-#: lib/common.sh:328
+#: lib/common.sh:354
 msgid "removed %s (it didn't exist before)"
 msgstr ""
 
-#: lib/common.sh:352
+#: lib/common.sh:378
 msgid "restored KDE settings changed by %s"
 msgstr ""
 
-#: lib/common.sh:410
+#: lib/common.sh:436
 msgid "Active now."
 msgstr ""
 
-#: lib/common.sh:412
+#: lib/common.sh:438
 msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
 msgstr ""
 
-#: lib/common.sh:414
+#: lib/common.sh:440
 msgid "Active from the next SteamVR start."
 msgstr ""
 
-#: lib/common.sh:422
+#: lib/common.sh:448
 msgid "installed (active while SteamVR runs)"
 msgstr ""
 
-#: lib/common.sh:427
+#: lib/common.sh:453
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 
-#: lib/common.sh:428
+#: lib/common.sh:454
 msgid "not responding"
 msgstr ""
 
-#: lib/common.sh:449
+#: lib/common.sh:475
 msgid ""
 "release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 
-#: lib/common.sh:453
+#: lib/common.sh:479
 msgid "This can mean it was tampered with. Check %s"
 msgstr ""
 
@@ -1292,41 +1301,37 @@ msgstr ""
 msgid "These tweaks target the Steam Frame (aarch64); you're on %s."
 msgstr ""
 
-#: lib/common.sh:81
+#: lib/common.sh:84
 msgid ""
 "This tweak needs Homebrew, a package manager that installs into /home/linuxbrew.\n"
 "That folder is outside SteamOS's system partition, so updates don't remove it.\n"
 "Homebrew's installer asks for your sudo (admin) password once, to create that folder."
 msgstr ""
 
-#: lib/common.sh:85
+#: lib/common.sh:88
 msgid ""
 "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
 msgstr ""
 
-#: lib/common.sh:87
+#: lib/common.sh:90
 msgid ""
 "Homebrew is required for this tweak. Install it from https://brew.sh and re-run."
 msgstr ""
 
-#: lib/common.sh:87
+#: lib/common.sh:90
 msgid "Install Homebrew now?"
 msgstr ""
 
-#: lib/common.sh:88
+#: lib/common.sh:91
 msgid "sudo failed."
 msgstr ""
 
-#: lib/common.sh:92
+#: lib/common.sh:95
 msgid "Homebrew's installer failed (see above)."
 msgstr ""
 
-#: lib/common.sh:94
+#: lib/common.sh:97
 msgid "Homebrew didn't end up in /home/linuxbrew."
-msgstr ""
-
-#: lib/common.sh:99
-msgid "Homebrew installed."
 msgstr ""
 
 #: lib/sft.py:626
@@ -1609,15 +1614,15 @@ msgstr ""
 msgid "Tray"
 msgstr ""
 
-#: packs/integrations/nordvpn/install.sh:12
-msgid "Creating Python venv with PyQt6 (~280 MB, shared with arrowpad)"
+#: packs/integrations/nordvpn/install.sh:10 packs/original/arrowpad/install.sh:10 packs/original/snip/install.sh:8
+msgid "couldn't install PyQt6"
 msgstr ""
 
-#: packs/integrations/nordvpn/install.sh:27
+#: packs/integrations/nordvpn/install.sh:22
 msgid "Installed. Now run:  %s   (asks for your NordVPN access token once)"
 msgstr ""
 
-#: packs/integrations/nordvpn/install.sh:28
+#: packs/integrations/nordvpn/install.sh:23
 msgid ""
 "The tray icon starts with desktop mode (or launch 'NordVPN Tray' now)."
 msgstr ""
@@ -2229,7 +2234,7 @@ msgstr ""
 msgid "scrcpy missing (brew install scrcpy)"
 msgstr ""
 
-#: packs/original/adb-scrcpy/uninstall.sh:8
+#: packs/original/adb-scrcpy/uninstall.sh:10
 msgid ""
 "Kept adb's pairing keys (~/.android) and scrcpy (brew uninstall scrcpy)."
 msgstr ""
@@ -2591,16 +2596,12 @@ msgstr ""
 msgid "ydotoold's socket is missing (./install.sh status ydotool)"
 msgstr ""
 
-#: packs/original/arrowpad/install.sh:11
-msgid "Creating Python venv with PyQt6 (~280 MB)"
-msgstr ""
-
-#: packs/original/arrowpad/install.sh:25
+#: packs/original/arrowpad/install.sh:21
 msgid ""
 "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
 msgstr ""
 
-#: packs/original/arrowpad/install.sh:34
+#: packs/original/arrowpad/install.sh:30
 msgid ""
 "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
 msgstr ""
@@ -2785,29 +2786,29 @@ msgstr ""
 msgid "dictate not installed"
 msgstr ""
 
-#: packs/original/dictation/status.sh:5
+#: packs/original/dictation/status.sh:4
 msgid "no whisper-cli (re-run ./install.sh dictation)"
 msgstr ""
 
-#: packs/original/dictation/status.sh:7
+#: packs/original/dictation/status.sh:6
 msgid "Whisper model missing (re-run ./install.sh dictation)"
 msgstr ""
 
-#: packs/original/dictation/status.sh:8
+#: packs/original/dictation/status.sh:7
 msgid "whisper-frame's engine"
 msgstr ""
 
-#: packs/original/dictation/status.sh:9
+#: packs/original/dictation/status.sh:8
 msgid "dictate ready (%s, small model)"
 msgstr ""
 
-#: packs/original/dictation/uninstall.sh:5
-msgid "Kept the Whisper model: whisper-frame uses it too."
-msgstr ""
-
-#: packs/original/dictation/uninstall.sh:9
+#: packs/original/dictation/uninstall.sh:11
 msgid ""
 "Kept your dictation history (~/.local/share/dictation-history.txt); whisper-cpp (if any) stays in Homebrew."
+msgstr ""
+
+#: packs/original/dictation/uninstall.sh:7
+msgid "Kept the Whisper model: whisper-frame uses it too."
 msgstr ""
 
 #: packs/original/firefox/README.md
@@ -3457,40 +3458,32 @@ msgstr ""
 msgid "Stopped."
 msgstr ""
 
-#: packs/original/snip/install.sh:11
-msgid "couldn't install PyQt6"
-msgstr ""
-
-#: packs/original/snip/install.sh:20
+#: packs/original/snip/install.sh:16
 msgid "Installing Tesseract (OCR)"
 msgstr ""
 
-#: packs/original/snip/install.sh:23
+#: packs/original/snip/install.sh:19
 msgid "Installing %s"
 msgstr ""
 
-#: packs/original/snip/install.sh:36
+#: packs/original/snip/install.sh:32
 msgid ""
 "Done: Arrow Pad's Tools key, then Snip (or 'Screen snip + Narrate' in the app menu) starts a snip."
 msgstr ""
 
-#: packs/original/snip/install.sh:9
-msgid "Setting up PyQt6 (shared with Arrow Pad)"
-msgstr ""
-
-#: packs/original/snip/status.sh:6
+#: packs/original/snip/status.sh:5
 msgid "Tesseract missing: Copy text and Narrate won't work (reinstall)"
 msgstr ""
 
-#: packs/original/snip/status.sh:7
+#: packs/original/snip/status.sh:6
 msgid "Piper or its voice missing: Narrate won't work (reinstall)"
 msgstr ""
 
-#: packs/original/snip/status.sh:8
+#: packs/original/snip/status.sh:7
 msgid "snip ready (copy, save, copy text, narrate)"
 msgstr ""
 
-#: packs/original/snip/uninstall.sh:7
+#: packs/original/snip/uninstall.sh:9
 msgid ""
 "Kept Tesseract and wl-clipboard (%s) and your snips in ~/Pictures/Screenshots."
 msgstr ""
@@ -3908,12 +3901,12 @@ msgstr ""
 msgid "%s not running: apps with a timer won't be closed (re-run %s)"
 msgstr ""
 
-#: packs/original/wallet/uninstall.sh:21
+#: packs/original/wallet/uninstall.sh:23
 msgid ""
 "Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet."
 msgstr ""
 
-#: packs/original/wallet/uninstall.sh:22
+#: packs/original/wallet/uninstall.sh:24
 msgid "Signal still needs the wallet: keep its kwallet6 setting (see %s)."
 msgstr ""
 

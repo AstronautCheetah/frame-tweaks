@@ -7,12 +7,7 @@ install_i18n
 install_py_tool "$TWEAK_DIR/nordvpn-wg"
 
 # Tray icon (SteamOS has no Plasma network applet). PyQt6 venv shared with arrowpad.
-QT_VENV="$HOME/.local/share/arrowpad/venv"
-if ! "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
-    say "$(t 'Creating Python venv with PyQt6 (~280 MB, shared with arrowpad)')"
-    python3 -m venv "$QT_VENV"
-    pip_pinned "$QT_VENV" PyQt6
-fi
+ensure_qt_venv || die "$(t "couldn't install PyQt6")"
 sed "1s|.*|#!$QT_VENV/bin/python|" "$TWEAK_DIR/nordvpn-tray" | write_file "$BIN/nordvpn-tray" 755
 install_icon frame-tweaks-nordvpn
 install_desktop "$TWEAK_DIR/nordvpn-tray.desktop"
