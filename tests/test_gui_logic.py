@@ -96,6 +96,23 @@ class Versions(unittest.TestCase):
         self.assertNotIn("up to date", w.say.call_args[0][0])
         self.assertNotEqual(w.say.call_args[1].get("good"), True)
 
+    def test_updated_under_an_open_window(self):
+        """Nothing newer on GitHub, but the checkout changed since the window opened (an update in a
+        terminal, a git pull): not "up to date" with the older build in its title, but ↻ Restart."""
+        from concurrent.futures import Future
+        for now, state, says in (("0.6.4+1.def5678", "restart", "updated to 0.6.4+1.def5678 since this window opened"),
+                                 ("0.6.3+19.abc1234", "check", "up to date (0.6.3+19.abc1234)")):
+            done = Future()
+            done.set_result("")
+            w = gui.Window.__new__(gui.Window)
+            w.latest_futures, w.update_futures, w.futures, w.self_update, w.update_state = {}, {}, {}, done, "checking"
+            w.pack_check, w.build_at_start = None, "0.6.3+19.abc1234"
+            w.set_update_state, w.say = mock.Mock(), mock.Mock()
+            with mock.patch.object(gui.sft, "build_version", return_value=now):
+                w.collect()
+            w.set_update_state.assert_called_once_with(state)
+            self.assertIn(says, w.say.call_args[0][0])
+
     def test_packs_with_a_newer_version(self):
         """Check for updates also asks where packs added from a link came from: the window says how
         many have a newer version, linking to the Packs page."""

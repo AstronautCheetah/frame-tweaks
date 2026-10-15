@@ -4,177 +4,177 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: gui/frame-tweaks-gui.py:1025
+#: gui/frame-tweaks-gui.py:1034
 msgid "Show hidden ({n})"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1054
+#: gui/frame-tweaks-gui.py:1063
 msgid "Tick to install, untick to remove"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1066
+#: gui/frame-tweaks-gui.py:1075
 msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1070 lib/sft.py:707
+#: gui/frame-tweaks-gui.py:1079 lib/sft.py:707
 msgid "Experimental: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1072
+#: gui/frame-tweaks-gui.py:1081
 msgid ""
 "Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1075 lib/sft.py:711
+#: gui/frame-tweaks-gui.py:1084 lib/sft.py:711
 msgid "Asks for your sudo password: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1077
+#: gui/frame-tweaks-gui.py:1086
 msgid ""
 "From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1078
+#: gui/frame-tweaks-gui.py:1087
 msgid "From the pack {pack}, not part of Frame Tweaks"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1084
+#: gui/frame-tweaks-gui.py:1093
 msgid "needs: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1100
+#: gui/frame-tweaks-gui.py:1109
 msgid "Open %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1116
+#: gui/frame-tweaks-gui.py:1125
 msgid "Details: what it is, why it's included, who made it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1123
+#: gui/frame-tweaks-gui.py:1132
 msgid "Hide"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1123
+#: gui/frame-tweaks-gui.py:1132
 msgid "Unhide"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1124
+#: gui/frame-tweaks-gui.py:1133
 msgid "Show this tweak in the list again"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1125
+#: gui/frame-tweaks-gui.py:1134
 msgid "Hide this tweak from the list (doesn't remove it)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1139 gui/frame-tweaks-gui.py:1334
+#: gui/frame-tweaks-gui.py:1148 gui/frame-tweaks-gui.py:1347
 msgid "Settings"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1173
+#: gui/frame-tweaks-gui.py:1182
 msgid ""
 "Not a tweak: ways to help, from ideas for new tweaks and third-party apps to translations, bug reports and code."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1177
+#: gui/frame-tweaks-gui.py:1186
 msgid "Read"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1198 gui/frame-tweaks-gui.py:1220
+#: gui/frame-tweaks-gui.py:1207 gui/frame-tweaks-gui.py:1229
 msgid "{version} available"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1199 gui/frame-tweaks-gui.py:1221 gui/packs_page.py:156
+#: gui/frame-tweaks-gui.py:1208 gui/frame-tweaks-gui.py:1230 gui/packs_page.py:156
 msgid "Update"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1210
+#: gui/frame-tweaks-gui.py:1219
 msgid "Close and reopen Frame Tweaks to use the new version."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1226
+#: gui/frame-tweaks-gui.py:1235
 msgid "Look for a newer Frame Tweaks release"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1226
+#: gui/frame-tweaks-gui.py:1235
 msgid "⟳ Check for updates"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1227
+#: gui/frame-tweaks-gui.py:1236
 msgid "Checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1228
+#: gui/frame-tweaks-gui.py:1237
 msgid "⬇ Update to {version}"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1229
+#: gui/frame-tweaks-gui.py:1238
 msgid "Install it: your tweaks are updated with it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1230
+#: gui/frame-tweaks-gui.py:1239
 msgid "Reopen Frame Tweaks to use the new version"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1230
+#: gui/frame-tweaks-gui.py:1239
 msgid "↻ Restart"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1242
+#: gui/frame-tweaks-gui.py:1255
 msgid "%d pack update"
 msgid_plural "%d pack updates"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/frame-tweaks-gui.py:1244
+#: gui/frame-tweaks-gui.py:1257
 msgid ""
 "Packs added from a link have a newer version where they came from: the Packs page says which"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1299
+#: gui/frame-tweaks-gui.py:1312
 msgid "Reinstall: remove it and install it again in one step (settings kept)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1300
+#: gui/frame-tweaks-gui.py:1313
 msgid "Reinstall (available once it's installed)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1311
+#: gui/frame-tweaks-gui.py:1324
 msgid "⟳ Restart SteamVR"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1316
+#: gui/frame-tweaks-gui.py:1329
 msgid "SteamVR loads it only as it starts. Every open app closes."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1317
+#: gui/frame-tweaks-gui.py:1330
 msgid "SteamVR runs it until it restarts. Every open app closes."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1325
+#: gui/frame-tweaks-gui.py:1338
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1326
+#: gui/frame-tweaks-gui.py:1339
 msgid "Tick it and Apply first"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1329
+#: gui/frame-tweaks-gui.py:1342
 msgid "⚙ Settings"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1334
+#: gui/frame-tweaks-gui.py:1347
 msgid "Settings (tick it and Apply first)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1336
+#: gui/frame-tweaks-gui.py:1349
 msgid "Help"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1341
+#: gui/frame-tweaks-gui.py:1354
 msgid "{label} (installs first if needed: tick it and Apply)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1343
+#: gui/frame-tweaks-gui.py:1356
 msgid "Nothing to launch: how to use it"
 msgstr ""
 
@@ -182,89 +182,89 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1381
+#: gui/frame-tweaks-gui.py:1394
 msgid "Restart SteamVR?"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1382
+#: gui/frame-tweaks-gui.py:1395
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1384
+#: gui/frame-tweaks-gui.py:1397
 msgid "Restart SteamVR"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1391
+#: gui/frame-tweaks-gui.py:1404
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1407 gui/frame-tweaks-gui.py:1171
+#: gui/frame-tweaks-gui.py:1420 gui/frame-tweaks-gui.py:1180
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1473 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1486 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1500
+#: gui/frame-tweaks-gui.py:1513
 msgid "Install: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1501
+#: gui/frame-tweaks-gui.py:1514
 msgid "Remove: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1502
+#: gui/frame-tweaks-gui.py:1515
 msgid "Nothing to change: tick or untick a tweak first"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1506
+#: gui/frame-tweaks-gui.py:1519
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1511 install.sh:557
+#: gui/frame-tweaks-gui.py:1524 install.sh:557
 msgid "Nothing to change."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1515
+#: gui/frame-tweaks-gui.py:1528
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1517
+#: gui/frame-tweaks-gui.py:1530
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1518
+#: gui/frame-tweaks-gui.py:1531
 msgid "Their settings and data are kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1519
+#: gui/frame-tweaks-gui.py:1532
 msgid "Remove them"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1564
+#: gui/frame-tweaks-gui.py:1577
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1637
+#: gui/frame-tweaks-gui.py:1650
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1640
+#: gui/frame-tweaks-gui.py:1653
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1646 gui/frame-tweaks-gui.py:1650
+#: gui/frame-tweaks-gui.py:1659 gui/frame-tweaks-gui.py:1663
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1648
+#: gui/frame-tweaks-gui.py:1661
 msgid "Copied"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1652
+#: gui/frame-tweaks-gui.py:1665
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
@@ -330,7 +330,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:444 gui/frame-tweaks-gui.py:467 gui/frame-tweaks-gui.py:710 gui/frame-tweaks-gui.py:1649 gui/packs_page.py:37 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:444 gui/frame-tweaks-gui.py:467 gui/frame-tweaks-gui.py:710 gui/frame-tweaks-gui.py:1662 gui/packs_page.py:37 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr ""
 
@@ -468,58 +468,63 @@ msgstr ""
 msgid "🔑 Wallet apps"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:822
+#: gui/frame-tweaks-gui.py:824
 msgid "Preferences: the language, and how this window behaves"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:829
+#: gui/frame-tweaks-gui.py:831
 msgid "🧩 Packs"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:830
+#: gui/frame-tweaks-gui.py:832
 msgid "Where the tweaks come from; add other people's (docs/mods.md)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:833
+#: gui/frame-tweaks-gui.py:835
 msgid "Refresh"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:848
+#: gui/frame-tweaks-gui.py:850
 msgid ""
 "Tick to install, untick to remove, then Apply changes. Click a row for details, a category to fold it."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:858
+#: gui/frame-tweaks-gui.py:860
 msgid "📖 README"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:859
+#: gui/frame-tweaks-gui.py:861
 msgid ""
 "What Frame Tweaks is, how to install, update and remove it, common issues"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:862 gui/frame-tweaks-gui.py:1651
+#: gui/frame-tweaks-gui.py:864 gui/frame-tweaks-gui.py:1664
 msgid "🐞 Report a problem"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:863
+#: gui/frame-tweaks-gui.py:865
 msgid ""
 "Save a diagnostics report (user names and paths removed) and open the bug form"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:866
+#: gui/frame-tweaks-gui.py:868
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:870 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
+#: gui/frame-tweaks-gui.py:872 packs/original/arrowpad/arrowpad.py:185 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
 msgid "Close"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:968
+#: gui/frame-tweaks-gui.py:971
+msgid ""
+"Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use it."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py:976
 msgid "Couldn't check for updates (no connection to GitHub?)."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:970
+#: gui/frame-tweaks-gui.py:978
 msgid "✔ Frame Tweaks is up to date ({version})."
 msgstr ""
 
