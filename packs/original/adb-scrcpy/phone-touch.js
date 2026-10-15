@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 18;
+  const NAME = 'phone-touch', VERSION = 19;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -143,6 +143,9 @@
      [['1', '1M'], ['1.5', '1500K'], ['2', '2M'], ['3', '3M'], ['4', '4M'], ['6', '6M'], ['8', '8M']], true],
     [N('Frame rate (fps, at most)'), 'PHONE_MAX_FPS', ['30', '60', '72', '80', '90', '96', '108', '120', '144'].map((v) => [v, v]), true],
     [N('Joystick scrolling'), 'PHONE_STICK_SPEED', [[N('Slow'), '8'], [N('Medium'), '15'], [N('Fast'), '25']], false],
+    // (scrcpy's clipboard sync: the Frame's to the phone when you paste in the mirror, the phone's
+    // here whenever it copies; off: --no-clipboard-autosync)
+    [N('Clipboard with the phone'), 'PHONE_CLIPBOARD', [[N('Shared'), 'both'], [N('Not shared'), 'off']], true],
   ];
   // A restart (Restart stream, or phone reconnecting) makes a new window, which the dashboard docks
   // or floats somewhere of its own. Where a floating mirror was (and whether its settings were
@@ -222,7 +225,8 @@
       carry = null;                             // (the dashboard changed: it stays where it came up)
     }
   };
-  const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15' };
+  const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15',
+                     PHONE_CLIPBOARD: 'both' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
   let redraw = () => {};
