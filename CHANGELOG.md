@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Test releases for people who try things first:** ⚙ Preferences → **Get test releases too**
+  (or `./install.sh channel beta`) makes updates take test releases (`vX.Y.Z-rc.N`) as well.
+  Unticked again, you stay on the test release until the next stable release is out, or go back
+  to the newest stable one at once (`./install.sh update --to stable`). The install command
+  with `FRAME_TWEAKS_CHANNEL=beta` now keeps that choice for later updates; before, the first
+  update took a tester back to the stable release.
+
+### Changed
+- **An update never moves to an older release unless you ask** (`--to`): with test releases
+  turned off, `./install.sh update` keeps the test release you're on instead of going back.
+
 ## 0.6.3 (2026-10-15)
 
 ### Added

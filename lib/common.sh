@@ -228,8 +228,11 @@ release_channel() {
 newest_tag() {
     local pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
     [ "$(release_channel)" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
-    grep -E "$pattern" | sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1
+    grep -E "$pattern" | rank_tags | tail -1
 }
+rank_tags() { sed 's/-/~/' | sort -V | sed 's/~/-/'; }      # oldest first; vX.Y.Z-rc.N before vX.Y.Z
+# tag_newer A B: release tag A is newer than B (ranked as newest_tag ranks them)
+tag_newer() { [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | rank_tags | tail -1)" = "$1" ]; }
 pin_version() { sed -n 's/^version=//p' "$(tweak_dir "$1")/pin"; }
 
 # Steam's "+" menu resolves Icon= only in the hicolor theme and rescans when the

@@ -14,7 +14,10 @@
 #                                    unless --remove-apps); this folder too, unless it holds work of yours
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
-#   ./install.sh update [--to vX.Y.Z] move to the newest (or given) release, re-run what's installed
+#   ./install.sh update [--to vX.Y.Z | --to stable]
+#                                    move to the newest (or given) release, re-run what's installed
+#                                    (--to stable: the newest stable one, e.g. back from a test release)
+#   ./install.sh channel [stable|beta]  which releases updates take: stable, or test releases too
 #   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
 #   ./install.sh debug-info          write a redacted report for bug reports
 #   ./install.sh report              the same, and the bug form's address to attach it to
@@ -85,7 +88,7 @@ while IFS=$'\x1f' read -r id title deps desc dir exp; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
 done < <(python3 lib/sft.py registry)
 # (Frame Tweaks' own commands work without: every pack off or not trusted)
-[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu)$ ]] ||
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel)$ ]] ||
     { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
@@ -425,7 +428,7 @@ cmd_reinstall_ids() {
 
 cmd_update() {
     local want=""
-    [[ ${1:-} == --to ]] && { want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* ]] || want="v$want"; }
+    [[ ${1:-} == --to ]] && { want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* || $want == stable ]] || want="v$want"; }
     if [[ -d .git ]]; then
         if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
             bold "$(t 'Updating the checkout')"
@@ -440,8 +443,17 @@ keep: git reset --hard @{upstream}")" >&2
         else                                                # a release (tag): move to the newest
             # (--force: GitHub's tags win over local ones with the same name.)
             git fetch --quiet --force --tags origin || { echo "$(t "couldn't reach GitHub; not updating")" >&2; exit 1; }
-            local tag; tag=${want:-$(git tag -l 'v*' | newest_tag)}
+            local tag current
+            if [[ $want == stable ]]; then tag=$(git tag -l 'v*' | FRAME_TWEAKS_CHANNEL=stable newest_tag)
+            else tag=${want:-$(git tag -l 'v*' | newest_tag)}; fi
             [ -n "$tag" ] || { echo "$(t 'no release found')" >&2; exit 1; }
+            # Never back to an older release unasked: a tester whose channel is stable again stays
+            # on the test release until a newer stable one is out (or asks: --to stable).
+            current=$(git tag --points-at HEAD -l 'v*' | FRAME_TWEAKS_CHANNEL=beta newest_tag)
+            if [[ -z $want && -n $current ]] && tag_newer "$current" "$tag"; then
+                say "$(t "You're on %s, a test release newer than the newest stable release (%s): you stay on it until a newer stable release is out. To go back to %s now: %s" "$current" "$tag" "$tag" "./install.sh update --to stable")"
+                tag=$current
+            fi
             git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "$(t 'no release %s' "$tag")" >&2; exit 1; }
             verify_release "$PWD" "$tag" || exit 1
             bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"
@@ -453,6 +465,24 @@ keep: git reset --hard @{upstream}")" >&2
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi
     cmd_reinstall
+}
+
+# channel [stable|beta]: which releases updates take (lib/common.sh release_channel)
+cmd_channel() {
+    local f="$HOME/.config/frame-tweaks/channel" pre
+    case ${1:-} in
+        "") release_channel; return ;;
+        stable|beta) mkdir -p "${f%/*}"; echo "$1" > "$f" ;;
+        *) echo "$(t 'channel stable|beta')" >&2; exit 1 ;;
+    esac
+    if [[ $1 == beta ]]; then
+        say "$(t 'Updates now take test releases too (vX.Y.Z-rc.N: newer, less tested). To get the newest: %s' "./install.sh update")"
+        return
+    fi
+    say "$(t 'Updates now take stable releases only.')"
+    pre=$(git tag --points-at HEAD -l 'v*-*' 2>/dev/null | head -1)
+    [[ -n $pre ]] && say "$(t "You're on %s, a test release: you move to the next stable release when it's out. To go back to the newest stable release now: %s" "$pre" "./install.sh update --to stable")"
+    return 0
 }
 
 cmd_reinstall() {
@@ -660,6 +690,7 @@ case ${1:-} in
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
     _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;
     hold|unhold) cmd_hold "$@" ;;
+    channel)     shift; cmd_channel "$@" ;;
     debug-info)  cmd_debug_info ;;
     report)      cmd_report ;;
     check-system) cmd_check_system ;;

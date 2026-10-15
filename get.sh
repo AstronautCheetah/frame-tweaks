@@ -2,12 +2,20 @@
 # Bootstrap: install (or update) Frame Tweaks into ~/frame-tweaks, add a
 # "Frame Tweaks" entry to the app menu, and open the installer.
 #   curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/get.sh | bash
+# Test releases too (testers): ... | FRAME_TWEAKS_CHANNEL=beta bash (kept for later updates).
 set -euo pipefail
 # All in one function, called on the last line: a download cut short runs nothing.
 main() {
     REPO=${FRAME_TWEAKS_REPO:-https://github.com/AstronautCheetah/frame-tweaks.git}
     DIR=${FRAME_TWEAKS_DIR:-$HOME/frame-tweaks}
     [ -z "${FRAME_TWEAKS_DIR:-}" ] && [ -d "$HOME/steam-frame-tweaks/.git" ] && DIR=$HOME/steam-frame-tweaks   # its old name
+    # A channel given here is kept (./install.sh channel), so later updates take the same releases.
+    case ${FRAME_TWEAKS_CHANNEL:-} in
+        "") ;;
+        stable|beta) mkdir -p "$HOME/.config/frame-tweaks"; echo "$FRAME_TWEAKS_CHANNEL" > "$HOME/.config/frame-tweaks/channel"
+                     echo "Release channel: $FRAME_TWEAKS_CHANNEL" ;;
+        *) echo "FRAME_TWEAKS_CHANNEL: stable or beta" >&2; exit 1 ;;
+    esac
 
     if [ -d "$DIR/.git" ]; then
         # Already installed: so this is an update, done as ./install.sh update does it: the newest

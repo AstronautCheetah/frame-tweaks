@@ -67,9 +67,9 @@ class Versions(unittest.TestCase):
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": "anything"}):
             self.assertEqual(gui.release_channel(), "stable")
         # (or "beta" in ~/.config/frame-tweaks/channel: where README says, and lib/common.sh reads it)
-        self.assertEqual(gui.CHANNEL, Path.home() / ".config/frame-tweaks/channel")
+        self.assertEqual(gui.sft.CHANNEL, Path.home() / ".config/frame-tweaks/channel")
         with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": ""}), \
-                mock.patch.object(gui, "CHANNEL", Path(d) / "channel"):
+                mock.patch.object(gui.sft, "CHANNEL", Path(d) / "channel"):
             (Path(d) / "channel").write_text("beta\n")
             self.assertEqual(gui.release_channel(), "beta")
 
@@ -420,8 +420,36 @@ class PreferencesPage(unittest.TestCase):
         self.app = QApplication.instance() or QApplication([])
         page = gui.Preferences(mock.Mock())
         headings = [w.text() for w in page.findChildren(QLabel) if w.objectName() == "name"]
-        self.assertEqual(headings, ["Language", "This window", "Uninstalling a tweak", "Uninstalling Frame Tweaks"])
+        self.assertEqual(headings, ["Language", "This window", "Updates", "Uninstalling a tweak", "Uninstalling Frame Tweaks"])
         self.assertEqual(len([f for f in page.findChildren(QFrame) if f.objectName() == "separator"]), 1)
+
+    def test_test_releases(self):
+        """Get test releases too: the channel ./install.sh reads. Unticked on a test release, it asks:
+        stay on it, or go back to the newest stable release now (an update --to stable)."""
+        from PyQt6.QtWidgets import QApplication, QCheckBox, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(gui.sft, "CHANNEL", Path(d) / "channel"), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": ""}):
+            window = mock.Mock()
+            for version, asks in (("0.6.3", False), ("0.6.4-rc.1", True)):
+                with mock.patch.object(gui.sft, "current_release", return_value=version):
+                    page = gui.Preferences(window)
+                    box = next(b for b in page.findChildren(QCheckBox) if b.text() == "Get test releases too")
+                    self.assertFalse(box.isChecked())
+                    box.setChecked(True)
+                    self.assertEqual((Path(d) / "channel").read_text(), "beta\n")
+                    window.channel_changed.assert_called()
+                    box.setChecked(False)
+                    self.assertEqual((Path(d) / "channel").read_text(), "stable\n")
+                    self.assertEqual(page.going_back.isVisibleTo(page), asks, version)
+            self.assertIn("You're on 0.6.4-rc.1, a test release.", page.going_back.text.text())
+            buttons = {b.text(): b for b in page.going_back.findChildren(QPushButton)}
+            buttons["Go back now"].click()
+            window.run_update.assert_called_once_with(None, to="stable")
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(out):
+            gui.Window.run_update(mock.Mock(), None, to="stable")
+        self.assertEqual(out.getvalue(), "would run: ./install.sh update --to stable\n")
 
     def test_window_runs_uninstall_self_as_planned(self):
         out = io.StringIO()

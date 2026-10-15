@@ -58,6 +58,34 @@ def build_version():
     v = d.stdout.strip().removeprefix("v")
     m = re.fullmatch(r"(.+)-(\d+)-g([0-9a-f]+)(-dirty)?", v)
     return f"{m[1]}+{m[2]}.{m[3]}{m[4] or ''}" if m else v
+def current_release():
+    """The release this checkout is (VERSION): 0.6.3, or a test release such as 0.6.4-rc.1."""
+    try:
+        return (REPO / "VERSION").read_text().strip()
+    except OSError:
+        return "0"
+
+
+# Which releases updates take: stable (vX.Y.Z), or beta, test releases (vX.Y.Z-rc.N) too. As
+# lib/common.sh release_channel reads it, and ./install.sh channel (or get.sh) writes it.
+CHANNEL = Path.home() / ".config/frame-tweaks/channel"
+
+
+def release_channel():
+    c = os.environ.get("FRAME_TWEAKS_CHANNEL") or ""
+    if not c:
+        try:
+            c = CHANNEL.read_text().strip()
+        except OSError:
+            pass
+    return "beta" if c == "beta" else "stable"
+
+
+def set_release_channel(channel):
+    CHANNEL.parent.mkdir(parents=True, exist_ok=True)
+    CHANNEL.write_text(("beta" if channel == "beta" else "stable") + "\n")
+
+
 CONF = Path.home() / ".config/frame-tweaks/installer"      # (before 0.5: ~/.config/steam-frame-tweaks)
 HIDDEN, SHOWN = CONF / "hidden", CONF / "shown"     # SHOWN: default-hidden rows you unhid
 COLLAPSED, HIDDEN_CATS = CONF / "collapsed-categories", CONF / "hidden-categories"
