@@ -93,6 +93,9 @@
   without the check, and without running the installed tweaks' installers again.
 
 ### Fixed
+- **A floating Android Mirror stays where you put it** after Restart stream, or after it
+  reconnects by itself: the new window goes back to the old one's place (it came back elsewhere
+  when the new window came up floating rather than docked).
 - **Android Mirror's ⚙ on an upright mirror docked in the dashboard** sat on the dashboard's own
   Show Keyboard button (their row under a docked window is wider than so narrow a window): it's
   now beside the window's lower left corner there, with its settings to the left of it.
