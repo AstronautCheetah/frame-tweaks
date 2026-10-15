@@ -141,6 +141,15 @@ if __name__ == "__main__":
     unittest.main()
 
 
+def until_visible(p, url, timeout=10):
+    """Wait for a just-started process to show the link on its command line (a busy machine, CI's
+    runner say, can take a moment): what still_stuck looks for."""
+    import time
+    end = time.monotonic() + timeout
+    while time.monotonic() < end and not any(url in browser.proc_cmd(pid) for pid in [p.pid]):
+        time.sleep(0.05)
+
+
 class StuckHandoff(unittest.TestCase):
     def test_a_launch_that_never_handed_off_is_stopped(self):
         """A browser launch still holding the link after the hand-off time is stuck ("already
@@ -150,6 +159,7 @@ class StuckHandoff(unittest.TestCase):
         url = "https://example.com/stuck-test?x=1&y=2"
         p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", url])
         self.addCleanup(lambda: p.poll() is None and p.kill())
+        until_visible(p, url)
         with mock.patch.object(browser, "log", lambda msg: None):
             self.assertTrue(browser.still_stuck(None, url))
             p.wait(timeout=5)
@@ -163,6 +173,7 @@ class StuckHandoff(unittest.TestCase):
         started = lambda: subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", url])
         first = started()
         self.addCleanup(lambda: first.poll() is None and first.kill())
+        until_visible(first, url)
         with mock.patch.object(browser, "plan", return_value=("b.desktop", VR, {})), \
                 mock.patch.object(browser, "running_sessions", return_value={VR}), \
                 mock.patch.object(browser.subprocess, "Popen") as popen, \
@@ -174,6 +185,7 @@ class StuckHandoff(unittest.TestCase):
         self.assertIn(first.pid, proc.had_link)
         second = started()
         self.addCleanup(lambda: second.poll() is None and second.kill())
+        until_visible(second, url)
         with mock.patch.object(browser, "log", lambda msg: None):
             self.assertTrue(browser.still_stuck(proc, url))
         second.wait(timeout=5)
