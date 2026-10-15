@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.4 (2026-10-15)
 
 ### Added
 - **Battery charge limit** (new, in a new **Hardware** category, 🧪): charging stops at 80% (or
