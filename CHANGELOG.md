@@ -79,6 +79,16 @@
   without the check, and without running the installed tweaks' installers again.
 
 ### Fixed
+- **Uninstalling a tweak whose menu entry the wallet guards** (Arrow Pad, Screen snip, NordVPN,
+  Dictation, the wallet, Full Keyboard) no longer leaves the entry's kept copy behind, and
+  uninstalling Screen snip stops a running Screen snip.
+- **A damaged settings file** (Arrow Pad's or Screen snip's, not a JSON object) no longer stops
+  them from starting; settings files are written whole, so a crash can't leave half of one.
+- **The window's haptic ticks in VR** no longer stop for good after one error with the
+  controller buttons; **Arrow Pad's haptics log** no longer grows without end.
+- **"Update available" for an app** no longer takes a release candidate (1.2.0-rc1) for newer
+  than its release.
+- **The window's wallet page** shows the auto-lock settings the wallet really uses.
 - **Arrow Pad's Collapse didn't keep the chevron under the laser** when pressed (the button's
   click handed a "False" to the setting that keeps it in place).
 - **A link the browser in desktop mode doesn't take** (Firefox: "already running, but is not
