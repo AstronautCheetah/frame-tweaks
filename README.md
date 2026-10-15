@@ -263,7 +263,8 @@ you turn one off: **Original**, written for the Frame ([`packs/original/`](packs
 as they are ([`packs/third-party/`](packs/third-party/)). To try someone's pack, add it from
 its link (**🧩 Packs → Add a pack from a link**), or put its folder in
 `~/.local/share/frame-tweaks/packs/`; then trust it. A pack's tweaks run as you, so only trust
-packs from people you trust. How to write one: [docs/mods.md](docs/mods.md).
+packs from people you trust. Packs others share: [Community packs](docs/community-packs.md).
+How to write one, and share it: [docs/mods.md](docs/mods.md).
 
 ```text
 ./install.sh mods               packs, whether each is in use, problems

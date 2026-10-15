@@ -14,10 +14,19 @@
   folder. As any pack, it isn't used until you trust it. **Update** (`mods update`) brings its
   newer version, which waits until you trust it again; **Remove…** (`mods remove`) deletes it once
   its tweaks are uninstalled.
+- **Community packs** ([docs/community-packs.md](docs/community-packs.md), and **Packs others
+  share ↗** on the Packs page): packs people shared, to add from their links. A
+  [Share a pack](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=share_a_pack.yml)
+  issue asks for one to be listed, after a maintainer has read it.
 
 ### Changed
 - **An update never moves to an older release unless you ask** (`--to`): with test releases
   turned off, `./install.sh update` keeps the test release you're on instead of going back.
+
+### For pack authors
+- **A pack check for your own repository:** the `check-pack` GitHub Action reads your pack as
+  Frame Tweaks does and checks its scripts with ShellCheck. Copy the example pack's
+  `.github/workflows/pack-check.yml`; [docs/mods.md, Sharing a pack](docs/mods.md#sharing-a-pack).
 
 ## 0.6.3 (2026-10-15)
 
