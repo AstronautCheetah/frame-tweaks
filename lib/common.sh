@@ -398,6 +398,16 @@ clear_stuck_modifiers() {
 status_ok()      { printf 'ok       %s\n' "$*"; exit 0; }
 status_missing() { printf 'missing  %s\n' "$*"; exit 1; }
 status_warn()    { printf 'warning  %s\n' "$*"; exit 2; }
+# Installed, but SteamVR loads it only as it starts: needs attention (2), and the installer window
+# offers to restart SteamVR on its row.
+status_restart() { printf 'restart  %s\n' "$*"; exit 2; }
+# vr_started_before FILE: SteamVR's server runs and started before FILE last changed, so what was
+# installed then (a driver, a setting it reads as it starts) isn't loaded yet.
+vr_started_before() {
+    local pid age
+    [ -e "$1" ] && pid=$(pgrep -xo vrserver) && age=$(ps -o etimes= -p "$pid") || return 1
+    [ $(( $(date +%s) - age )) -lt "$(stat -c %Y "$1")" ]
+}
 
 # remove_files <path>...: delete if present, saying what went
 remove_files() {
@@ -452,7 +462,7 @@ dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
     s=$(timeout 8 "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null) || true
     case "$s" in
         *": patched") status_ok "$2" ;;
-        *port*closed*) status_warn "$(t 'waiting for a SteamVR restart (restart SteamVR or reboot once)')" ;;
+        *port*closed*) status_restart "$(t 'waiting for a SteamVR restart (restart SteamVR or reboot once)')" ;;
         *) status_warn "${s:-$(t 'not responding')}" ;;
     esac
 }

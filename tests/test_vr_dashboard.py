@@ -230,6 +230,18 @@ class Scripts(unittest.TestCase):
         self.run_script("install.sh")
         self.assertFalse(left.exists())
 
+    def test_status_offers_a_steamvr_restart(self):
+        """Installed while SteamVR runs, its port still closed: a "restart" line, which the
+        installer window shows with ⟳ Restart SteamVR (exit 2, needs attention, for the rest)."""
+        self.run_script("install.sh", steamvr=0)
+        (self.home / ".local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js").write_text("")
+        for tweak in ("vr-dashboard", "scroll-strips"):      # (a patch: through dashboard_patch_status)
+            r = subprocess.run(["bash", str(ROOT / "packs/original" / tweak / "status.sh")],
+                               env=sandbox_env(self.home, self.home / "stubs", STEAMVR=0),
+                               capture_output=True, text=True, timeout=60)
+            self.assertEqual(r.returncode, 2, tweak + r.stdout + r.stderr)
+            self.assertTrue(r.stdout.startswith("restart  waiting for a SteamVR restart"), tweak + r.stdout)
+
     def test_unpatches_only_while_steamvr_runs(self):
         """(A test's throwaway home, as here, must never unpatch the real dashboard.)"""
         for steamvr, unpatched in ((3, False), (0, True)):

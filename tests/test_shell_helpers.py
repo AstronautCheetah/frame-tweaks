@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -85,6 +86,38 @@ class QtVenv(unittest.TestCase):
 
     def test_kept_on_a_reinstall(self):
         self.assertEqual(self.left(FRAME_TWEAKS_REINSTALL="1"), "kept")
+
+
+
+class SteamVRRestart(unittest.TestCase):
+    """status_restart: a status line the installer window turns into ⟳ Restart SteamVR. vr_started_before:
+    has the running SteamVR started since a file changed (with pgrep and ps stand-ins)?"""
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.dir = Path(self.tmp.name)
+        self.file = self.dir / "installed"
+        self.file.write_text("1.0\n")
+
+    def started_before(self, running=True, age=100, file_age=0):
+        for name, body in (("pgrep", 'echo 4242' if running else 'exit 1'), ("ps", f'echo "  {age}"')):
+            (self.dir / name).write_text(f"#!/bin/sh\n{body}\n")
+            (self.dir / name).chmod(0o755)
+        if self.file.exists():
+            os.utime(self.file, (time.time() - file_age,) * 2)
+        return sh(f'vr_started_before "{self.file}" && echo yes || echo no', PATH=f"{self.dir}:/usr/bin:/bin")
+
+    def test_started_before(self):
+        self.assertEqual(self.started_before(), "yes")                      # installed after SteamVR started
+        self.assertEqual(self.started_before(file_age=200), "no")           # SteamVR started since
+        self.assertEqual(self.started_before(running=False), "no")
+        self.file.unlink()
+        self.assertEqual(self.started_before(), "no")
+
+    def test_status_line(self):
+        r = subprocess.run(["bash", "-c", f"source {ROOT}/lib/common.sh 2>/dev/null; status_restart 'Load it'; echo after"],
+                           capture_output=True, text=True, env={**os.environ, "HOME": str(self.dir)})
+        self.assertEqual((r.returncode, r.stdout), (2, "restart  Load it\n"))      # (2: needs attention)
 
 
 if __name__ == "__main__":

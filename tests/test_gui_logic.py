@@ -102,6 +102,15 @@ class Status(unittest.TestCase):
         self.assertEqual(gui.status_text((0, "fine")), ("✔ fine", "ok"))
         self.assertEqual(gui.status_text((2, "hmm")), ("! hmm", "warn"))
         self.assertEqual(gui.status_text((1, "")), ("· not installed", "missing"))
+        self.assertEqual(gui.status_text((gui.RESTART, "load")), ("⟳ load", "warn"))
+
+    def test_restart_line(self):
+        """status.sh's "restart" line (exit 2) is a status of its own; other lines keep their code."""
+        for out, code, want in (("restart  Load it\n", 2, (gui.RESTART, "Load it")), ("warning  Hmm\n", 2, (2, "Hmm")),
+                                ("ok       Fine\n", 0, (0, "Fine")), ("restart  x\n", 0, (0, "x"))):
+            done = subprocess.CompletedProcess([], code, stdout=out, stderr="")
+            with mock.patch.object(gui.subprocess, "run", return_value=done):
+                self.assertEqual(gui.status("adb-scrcpy"), want, out)
 
     def test_update_check_parsing(self):
         with tempfile.TemporaryDirectory() as d, \
@@ -154,11 +163,40 @@ class DryRun(unittest.TestCase):
     def test_run_button(self):
         comp = next(c for c in gui.components() if gui.run_label(c["id"]) and c["id"] not in gui.PAGES)
         w = gui.Window.__new__(gui.Window)
+        w.state = {comp["id"]: (0, "fine")}
         with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), \
                 contextlib.redirect_stdout(io.StringIO()) as out:
             w.run(comp)
         qprocess.startDetached.assert_not_called()
         self.assertIn("would run: bash", out.getvalue())
+
+    def test_restart_steamvr_button(self):
+        """Waiting for a SteamVR restart: the row's button (Settings here) restarts SteamVR, once asked."""
+        from PyQt6.QtWidgets import QApplication, QPushButton, QStackedWidget
+        self.app = QApplication.instance() or QApplication([])
+        comp = next(c for c in gui.components() if c["id"] in gui.SETTINGS_PAGES and not gui.run_label(c["id"]))
+        w = gui.Window.__new__(gui.Window)
+        w.state, w.run_buttons = {comp["id"]: (gui.RESTART, "load it")}, {comp["id"]: QPushButton()}
+        w.stack = QStackedWidget()
+        w.stack.addWidget(QPushButton())                 # (the list)
+        w.confirm_page, w.confirm_text, w.confirm_yes = w.make_confirm_page()
+        w.stack.addWidget(w.confirm_page)
+        w.update_run(comp["id"])
+        self.assertEqual(w.run_buttons[comp["id"]].text(), "⟳ Restart SteamVR")
+        with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            w.run(comp)
+            self.assertIs(w.stack.currentWidget(), w.confirm_page)
+            self.assertIn("Every open app closes", w.confirm_text.text())
+            self.assertEqual(out.getvalue(), "")                # (asks first)
+            self.assertEqual(w.confirm_yes.text(), "Restart SteamVR")
+            w.confirm_yes.click()
+        qprocess.startDetached.assert_not_called()
+        self.assertEqual(out.getvalue(), "would run: steamvr restart\n")
+        self.assertEqual(w.stack.currentIndex(), 0)
+        w.state[comp["id"]] = (0, "loaded")                    # restarted: Settings again
+        w.update_run(comp["id"])
+        self.assertEqual(w.run_buttons[comp["id"]].text(), "⚙ Settings")
 
 
 class Terminal(unittest.TestCase):

@@ -134,7 +134,10 @@ reinstalls simply run it again.
 
 `status.sh` prints one line and exits 0 (installed and working), 1 (not installed) or 2
 (installed, needs attention), through `status_ok`, `status_missing` and `status_warn`. It must
-not change anything: the window runs it often, in the background.
+not change anything: the window runs it often, in the background. `status_restart` is a
+needs-attention line of its own (`restart  …`, exit 2) for something SteamVR loads only as it
+starts: the window shows it with ⟳ and puts **⟳ Restart SteamVR** (SteamOS's `steamvr restart`,
+after asking) in place of the row's Run or Settings button.
 
 Status is also how Frame Tweaks knows what is installed. `uninstall all`, `update` and
 `check-system` all ask each tweak's `status.sh`, and count anything that doesn't exit 1 as
