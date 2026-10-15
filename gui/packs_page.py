@@ -128,7 +128,8 @@ class Packs(QWidget):
             inventory = (f"<br><span style='color:#7fb2e5'>▾ {count}</span>" + self.inventory(p, used)
                          if p["dir"] in shown else f"<br><span style='color:#7fb2e5'>▸ {count}</span>")
             info = QLabel(f"<b>{html.escape(p['label'])}</b>"
-                          + (" <span style='color:#6b7783'>" + _("by {author}").format(author=html.escape(p["author"]))
+                          + (" <span style='color:#6b7783'>" + _("tweak pack provided by {author}").format(
+                              author=html.escape(p["author"]))
                              + "</span>" if p["author"] else "")
                           + (f"<br>{html.escape(p['about'])}" if p["about"] else "")
                           + f"<br><span style='color:{colour}'>{text}</span>"

@@ -1,6 +1,7 @@
 """Shell tweaks with no other tests, run in a throwaway home with stand-ins for system tools:
 Firefox's user.js block (install, the old marker, uninstall resetting prefs.js) and NordVPN's
-status line; pinned downloads falling back to Frame Tweaks' copy."""
+status line; Shared clipboard's status with and without desktop mode; pinned downloads falling
+back to Frame Tweaks' copy."""
 import sys
 import hashlib
 import os
@@ -97,6 +98,26 @@ class NordVPNStatus(Home):
         self.nmcli("wireguard:NordVPN Canada\\nwireguard:NordVPN Japan\\n", "wireguard:NordVPN Japan\\n")
         r = self.run_script("nordvpn/status.sh")
         self.assertIn("2 location(s); connected via Japan", r.stdout)
+
+
+class ClipboardStatus(Home):
+    """clipboard-sync starts with desktop mode: not running without it is as it should be; not
+    running with it is a warning (Restart starts it). (pgrep is a stand-in.)"""
+    def status(self, running, desktop):
+        b = self.home / ".local/bin"
+        b.mkdir(parents=True, exist_ok=True)
+        (b / "clipboard-sync").write_text("#!/bin/sh\n")
+        (b / "clipboard-sync").chmod(0o755)
+        self.stub("pgrep", f'case "$*" in *clipboard-sync*) {"echo 42" if running else "exit 1"} ;; '
+                           f'*ksmserver*) {"echo 7" if desktop else "exit 1"} ;; esac')
+        r = self.run_script("clipboard/status.sh")
+        return r.returncode, r.stdout.strip()
+
+    def test_not_running_without_desktop_mode_is_fine(self):
+        self.assertEqual(self.status(False, False), (0, "ok       installed; starts with desktop mode"))
+
+    def test_not_running_with_desktop_mode_is_a_warning(self):
+        self.assertEqual(self.status(False, True), (2, "warning  not running, though desktop mode is (Restart starts it)"))
 
 
 class PinnedDownload(Home):

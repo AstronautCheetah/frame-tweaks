@@ -1,7 +1,11 @@
 #!/bin/bash
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 [ -x "$BIN/clipboard-sync" ] || status_missing "$(t '%s not installed' clipboard-sync)"
-pgrep -u "$(id -u)" -x clipboard-sync >/dev/null || status_warn "$(t 'installed but not running (starts with desktop mode)')"
+if ! pgrep -u "$(id -u)" -x clipboard-sync >/dev/null; then
+    # (it starts with desktop mode: not running without it is as it should be)
+    pgrep -u "$(id -u)" -x ksmserver >/dev/null || status_ok "$(t 'installed; starts with desktop mode')"
+    status_warn "$(t 'not running, though desktop mode is (Restart starts it)')"
+fi
 n=$(pgrep -u "$(id -u)" -x clipboard-sync | wc -l)
 [ "$n" -le 2 ] || status_warn "$(t '%s copies running (Restart fixes it)' "$n")"   # (each forks one helper)
 ver=$(cat "$HOME/.local/share/frame-tweaks/clipboard-sync/VERSION" 2>/dev/null)

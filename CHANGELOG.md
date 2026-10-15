@@ -2,7 +2,15 @@
 
 ## Unreleased
 
+### Fixed
+- **A row's status is checked again after Restart (or any ▶ button), and when you come back to
+  the window:** Shared clipboard kept saying "not running" after Restart had started it, because
+  the window checked only as it opened (before desktop mode had started it). Its status now also
+  tells apart "starts with desktop mode" (desktop mode isn't running: as it should be) from "not
+  running, though desktop mode is" (Restart starts it).
+
 ### Changed
+- **The Packs page says "tweak pack provided by …"** after a pack's name, not just "by …".
 - **Wallet apps** lists Frame Tweaks' own apps (Arrow Pad, Dictation, Screen snip, Android Mirror,
   the NordVPN tray, the Frame Tweaks window) as **Frame Tweaks app**, not "Your app".
 

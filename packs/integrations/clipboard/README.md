@@ -107,8 +107,9 @@ both.
   where you copied them; the other session gets their text, if they have any.
 - Android Mirror can pass the clipboard on to the phone: see its setting **Share the clipboard
   with the phone**.
-- The status line shows the build's version, and warns if it isn't running, if more than one
-  copy is running, or if an older version's build lacks these changes (reinstall it to fix that).
+- The status line shows the build's version, and warns if it isn't running while desktop mode is
+  (Restart starts it), if more than one copy is running, or if an older version's build lacks
+  these changes (reinstall it to fix that). Without desktop mode, it says it starts with it.
 - If you have Homebrew's Rust installed and don't use it yourself, installing or removing this
   tweak reminds you that you can free about 3.4 GB with
   `brew uninstall rust && brew autoremove`.
