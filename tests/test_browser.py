@@ -49,7 +49,8 @@ class Sessions(unittest.TestCase):
             self.assertEqual(browser.target_app("file://" + str(Path(__file__).parent)), "org.kde.dolphin.desktop")
 
     def test_web_links_go_to_the_browser(self):
-        with mock.patch.object(browser, "default_browser", return_value="b.desktop"):
+        with mock.patch.object(browser, "default_browser", return_value="b.desktop"), \
+                mock.patch.object(browser, "usable", return_value=True):
             self.assertEqual(browser.target_app("https://example.com/x"), "b.desktop")
 
     def test_session_env_takes_the_display_keys(self):
@@ -60,6 +61,80 @@ class Sessions(unittest.TestCase):
                 mock.patch.object(browser, "proc_env", return_value=ref):
             env = browser.session_env(DESKTOP)
         self.assertEqual(env, {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0", "DISPLAY": ":2", "HOME": "/h"})
+
+
+
+class DefaultBrowser(unittest.TestCase):
+    """Any browser, not only Firefox: the default one, unless it isn't one (SteamOS's "Install
+    Chromium" placeholder, which only opens the software store, or an uninstalled app); then an
+    installed one, a running one first, and the note says how to set a default."""
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        d = Path(self.tmp.name)
+        self.apps = d / "share/applications"
+        self.apps.mkdir(parents=True)
+        bin_ = d / "bin"
+        bin_.mkdir()
+        for name in ("brave", "chromium"):
+            (bin_ / name).write_text("#!/bin/sh\n")
+            (bin_ / name).chmod(0o755)
+        self.entry("org.chromium.Chromium.desktop", "Install Chromium",
+                   "sh -c 'xdg-open appstream://org.chromium.Chromium' %U")
+        self.entry("com.brave.Browser.desktop", "Brave", f"{bin_}/brave %U")
+        self.entry("chromium.desktop", "Chromium", "chromium %U")
+        self.entry("gone.desktop", "Gone", "/no/such/browser %U")
+        (self.apps / "mimeinfo.cache").write_text(
+            "[MIME Cache]\nx-scheme-handler/https=org.chromium.Chromium.desktop;gone.desktop;chromium.desktop;com.brave.Browser.desktop;\n")
+        env = {"XDG_DATA_HOME": str(d / "share"), "XDG_DATA_DIRS": str(d / "none"),
+               "PATH": f"{bin_}:/usr/bin:/bin", "HOME": str(d)}
+        for p in (mock.patch.dict(os.environ, env),
+                  mock.patch.object(browser, "data_dirs", lambda: [str(d / "share")])):   # (not this machine's Flatpaks)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def entry(self, app, name, cmd):
+        (self.apps / app).write_text(f"[Desktop Entry]\nType=Application\nName={name}\nExec={cmd}\n"
+                                     "MimeType=x-scheme-handler/http;x-scheme-handler/https;\n")
+
+    def test_usable(self):
+        self.assertFalse(browser.usable("org.chromium.Chromium.desktop"))      # (the store placeholder)
+        self.assertFalse(browser.usable("gone.desktop"))
+        self.assertFalse(browser.usable("not-there.desktop"))
+        self.assertTrue(browser.usable("com.brave.Browser.desktop"))
+        self.assertTrue(browser.usable("chromium.desktop"))
+        self.assertEqual(browser.installed_browsers(), ["chromium.desktop", "com.brave.Browser.desktop"])
+
+    def test_any_default_browser_is_used(self):
+        with mock.patch.object(browser, "default_browser", return_value="com.brave.Browser.desktop"):
+            self.assertEqual(browser.browser_choice(), ("com.brave.Browser.desktop", None))
+
+    def test_a_placeholder_default_gives_way_to_a_running_browser(self):
+        with mock.patch.object(browser, "default_browser", return_value="org.chromium.Chromium.desktop"), \
+                mock.patch.object(browser, "running_sessions",
+                                  side_effect=lambda a: {VR} if a == "com.brave.Browser.desktop" else set()):
+            self.assertEqual(browser.browser_choice(), ("com.brave.Browser.desktop", "org.chromium.Chromium.desktop"))
+        with mock.patch.object(browser, "default_browser", return_value=None), \
+                mock.patch.object(browser, "running_sessions", return_value=set()):
+            self.assertEqual(browser.browser_choice(), ("chromium.desktop", ""))     # (none set: the system's order)
+
+    def test_the_note_says_how_to_set_one(self):
+        with mock.patch.object(browser, "default_browser", return_value="org.chromium.Chromium.desktop"), \
+                mock.patch.object(browser, "running_sessions", return_value=set()), \
+                mock.patch.object(browser, "session_env", return_value=dict(os.environ)), \
+                mock.patch.object(browser.subprocess, "Popen") as popen, mock.patch.object(browser, "log"):
+            browser.STOOD_IN.clear()
+            note, proc, _h = browser.launch("https://example.com")
+        self.assertEqual(popen.call_args.args[0], ["gtk-launch", "chromium.desktop", "https://example.com"])
+        self.assertIn("Opened in Chromium", note)
+        self.assertIn("Your default browser, Install Chromium, can't open links, so Chromium did", proc.warning)
+        self.assertIn("Default Applications", proc.warning)
+
+    def test_a_shell_wrapped_command_isnt_taken_for_every_shell(self):
+        test = browser.matcher({"Exec": "sh -c 'xdg-open appstream://x' %U"})
+        with mock.patch.object(browser, "proc_cmd", return_value=["/usr/bin/sh", "-c", "anything"]):
+            self.assertFalse(test(1, {}))
 
 
 if __name__ == "__main__":

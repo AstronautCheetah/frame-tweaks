@@ -306,6 +306,8 @@ def follow_link(url):
     elif url.startswith(("https:", "http:")) and (r := browser.launch(url)):
         note, proc, handoff = r
         QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
+        if getattr(proc, "warning", ""):                # (the default browser isn't one: what to set)
+            window_say(proc.warning)
         if handoff:                                    # the browser runs there already: did it answer?
             QTimer.singleShot(8000, lambda: browser.still_stuck(proc, url) and stuck_link(url))
     elif url.startswith("file:") and (note := browser.open_path(url)):
@@ -318,9 +320,14 @@ def stuck_link(url):
     """The browser in the other session didn't take the link (it can stall while desktop mode
     isn't shown): the link goes on the clipboard instead, and the window says so."""
     QApplication.clipboard().setText(url)
+    window_say(_("The browser didn't answer, so the link is on the clipboard: paste it into the browser."))
+
+
+def window_say(text):
+    """A message in the window's bottom bar (Window.say), from code outside the window."""
     for w in QApplication.topLevelWidgets():
         if hasattr(w, "say"):
-            w.say(_("The browser didn't answer, so the link is on the clipboard: paste it into the browser."))
+            w.say(text)
             return
     QToolTip.showText(QCursor.pos(), _("The browser didn't answer: the link is on the clipboard."))
 

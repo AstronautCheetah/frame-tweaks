@@ -368,6 +368,7 @@ What stays in any case:
 
 | Problem | What to do |
 |---|---|
+| Links open the software store ("Install Chromium"), or Frame Tweaks says your default browser can't open links | SteamOS's "Install Chromium" is a placeholder that only offers to install Chromium, and it can end up as the default web browser. Choose your browser (any: Firefox, Chromium, Brave…) in System Settings → Default Applications → Web browser. Until then Frame Tweaks opens links in an installed browser, a running one first. |
 | Arrow Pad or Dictation types nothing | `./install.sh status ydotool`, then ▶ **Restart** on the ydotool row (or `./install.sh run ydotool`). |
 | "Failed to initialize Wayland" when opening apps | Closing desktop mode can tear it down halfway: Steam removes the desktop's runtime folder while KWin keeps running. Exit desktop mode and open it again, or reboot. |
 | The mouse pointer is invisible in desktop mode | Install **Mouse cursor fix**, then reboot (it takes effect at the next desktop-mode start). |
