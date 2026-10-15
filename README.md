@@ -192,8 +192,11 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
   app a tweak installs, is out.
 - **🐞 Report a problem** saves a diagnostics report and offers the bug form, with your version
   filled in, to attach it to; **🧩 Packs** manages extra packs of tweaks; **⚙** holds the
-  preferences: the language, what uninstalling does with settings, uninstalling Frame Tweaks
-  itself, and how the window behaves.
+  preferences: the language, how the window behaves, what uninstalling a tweak does with its
+  settings, and uninstalling Frame Tweaks itself.
+- The **Developer** group ends with **Help make Frame Tweaks better**: not a tweak, but the ways
+  to help, from ideas for new tweaks and third-party apps to translations, bug reports and code
+  ([docs/contribute.md](docs/contribute.md)).
 - In VR, the controller's **B** goes back, **Y** goes to the top of the list, the left D-pad's
   up and down move the highlight between rows, and **A** ticks the row you point at.
 
@@ -312,17 +315,19 @@ with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's
 
 ## Uninstalling
 
-In the window: **⚙ Preferences → Uninstalling Frame Tweaks**, with three choices:
+In the window: **⚙ Preferences → Uninstalling Frame Tweaks**. First, what happens to the tweaks:
 
-- **Uninstall every tweak first** (on), or leave them installed: they keep working, but nothing
-  updates them, and removing them later takes Frame Tweaks again (install it, and it finds them).
-- **Leave third-party apps installed** (on): the tweaks that install another project's app
-  (Homebrew, VSCodium, Claude Desktop, Claude Code, Full Keyboard, clipboard-sync) stay, with what
-  they need, so the apps and your work in them stay as they are. Homebrew itself is never
-  removed by Frame Tweaks, even with this off: other programs may live in it, so its tweak only
-  shows Homebrew's own uninstall command.
-- **Delete the settings too** (starts as your choice for single tweaks): Frame Tweaks' own, and
-  those of the tweaks it uninstalls or uninstalled before; installed tweaks' stay.
+- **Uninstall the tweaks, but keep third-party apps** (the default): the tweaks that install
+  another project's app (Homebrew, VSCodium, Claude Desktop, Claude Code, Full Keyboard,
+  clipboard-sync) stay, with what they need, so those apps and your work in them stay as they are.
+- **Uninstall every tweak, third-party apps too.** Homebrew itself is never removed by Frame
+  Tweaks, even then: other programs may live in it, so its tweak only shows Homebrew's own
+  uninstall command.
+- **Leave every tweak installed:** they keep working, but nothing updates them, and removing
+  them later takes Frame Tweaks again (install it, and it finds them).
+
+Then **Also delete the settings** (it starts as your choice for single tweaks): Frame Tweaks' own,
+and those of every tweak it removes, now or earlier; tweaks that stay installed keep theirs.
 
 Or in a terminal:
 

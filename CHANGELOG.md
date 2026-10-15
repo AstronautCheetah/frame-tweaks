@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **Help make Frame Tweaks better,** the last row of the Developer group: not a tweak, but the
+  ways to help (ideas for new tweaks and third-party apps, bug and test reports, translations,
+  code, docs), on a page of its own.
 - **Uninstalling Frame Tweaks leaves third-party apps installed** (Homebrew, VSCodium, Claude
   Desktop, Claude Code, Full Keyboard, clipboard-sync) unless you untick that in ⚙ Preferences
   (`--remove-apps`). Tweaks name such an app in a new manifest field, `app:`.
@@ -36,6 +39,10 @@
   language (D and C in Spanish).
 
 ### Changed
+- **⚙ Preferences reads more clearly:** the uninstall options come last, below a line; what
+  happens to the tweaks when Frame Tweaks is uninstalled is one choice of three (keep
+  third-party apps, remove everything, or leave the tweaks); explanations no longer show
+  "&#x27;" for an apostrophe.
 - **Uninstalling NordVPN keeps your key and locations** (`~/.config/nordvpn-wg`) unless ⚙
   Preferences say to remove settings: it used to remove them, so setting it up again took a new
   access token.
