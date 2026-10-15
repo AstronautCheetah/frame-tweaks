@@ -6,11 +6,13 @@ categories: [Accessibility, Convenience, VR environment, System, Hardware, Priva
 order:
   - full-keyboard
   - recline
+  - cursor
 ---
-Other people's projects for the Steam Frame, credited to their authors. They're linked (🔗):
-Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they
-update their own way (↻ on their row).
+Other people's projects and fixes for the Steam Frame, credited to their authors. Most are
+linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home
+folder, and they update their own way (↻ on their row). A fix that's only a setting, such as the
+mouse cursor's, Frame Tweaks applies itself.
 
-How it's loaded: like [Original](../original/pack.md) and
+How it's loaded: like [Core](../core/pack.md) and
 [Integrations](../integrations/pack.md), Frame Tweaks' other official packs, with the same
 categories; it's on unless you turn it off on the Packs page.

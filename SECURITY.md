@@ -35,7 +35,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | arrowpad | `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two app-menu entries | Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam display (`:0`) for one click** (at most 10 s) and replay it with XTEST |
 | snip | `~/.local/bin/frame-snip`, Tesseract and `wl-clipboard` (Homebrew), an app-menu entry; Piper comes from the Speech engine helper | Reads the picture of the window you're using (only when you start a snip) |
 | adb-scrcpy | `adb` (Arch Linux ARM, signature-checked) in `~/.local/lib/android-tools`, Homebrew `scrcpy`, `phone` launcher; in VR, two dashboard patches and a control-only scrcpy server on the phone | Network connection to your phone's wireless debugging; pairing keys in `~/.android` (plain files: anyone with your user can use them to reach the phone while it has wireless debugging on). adb's server listens on a socket only you can use (not TCP port 5037) |
-| cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
 | vr-dashboard | `~/.local/share/frame-tweaks/vr-dashboard`, user units `sft-vr-debugger`, `sft-dashboard`, a `steamvr.service` drop-in; SteamVR's `VRWebHelper/DebuggerEnabled` setting while SteamVR runs | **Turns on SteamVR's dashboard DevTools port (`127.0.0.1:8087`) while SteamVR runs** and injects the installed patches into the dashboard. The port has no password: **any program on the Frame that can reach the local network (Flatpak apps with network access included) can connect while SteamVR runs**, run code in the dashboard, and use what the patches can do (arrow keys through ydotool, taps on a mirrored phone, saving patch settings). It's only on while this helper is installed |
 | curvature | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
 | float-return | One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-return.js`), via VR dashboard patching (helper) | Through VR dashboard patching (helper): SteamVR's dashboard DevTools port while SteamVR runs |
@@ -56,6 +55,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |
 | full-keyboard | Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
 | recline | Whatever Recline-VR's own installer sets up (its README lists it): its source in `~/Recline-VR`, built and installed into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position), and inside the Frame's camera service for the room view |
+| cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 
@@ -87,9 +87,9 @@ running as your user.
 **Set a wallet password.** SteamOS seeds every Frame with the same stock wallet, and it has no
 password. Until you set one (KWalletManager → *Change Password*), nothing above is really
 protected. Avoid changing it while a second wallet service is running (see
-[wallet/README.md](packs/original/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
+[wallet/README.md](packs/core/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
-**Other people's packs.** Tweaks can come from packs other than the official ones (Original, Integrations and 3rd Party)
+**Other people's packs.** Tweaks can come from packs other than the official ones (Core, Integrations and 3rd Party)
 ([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
 `~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
 and trust covers its files as they were then (their names, contents, links and which ones can

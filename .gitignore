@@ -7,6 +7,6 @@ __pycache__/
 *~
 # Local packs (e.g. packs/attic: tweaks set aside, not shipped); only the official ones are published.
 /packs/*
-!/packs/original/
+!/packs/core/
 !/packs/integrations/
 !/packs/third-party/

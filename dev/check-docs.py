@@ -6,16 +6,16 @@ import sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-ids = [d.name for pack in ("original", "integrations", "third-party") for d in (root / "packs" / pack).iterdir() if (d / "README.md").is_file()]
+ids = [d.name for pack in ("core", "integrations", "third-party") for d in (root / "packs" / pack).iterdir() if (d / "README.md").is_file()]
 readme = (root / "README.md").read_text()
-rows = set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(packs/(?:original|integrations|third-party)/([a-z0-9-]+)/\)", readme, re.M))
+rows = set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(packs/(?:core|integrations|third-party)/([a-z0-9-]+)/\)", readme, re.M))
 problems = [f"README.md: no row for '{i}'" for i in ids if i not in rows]
 problems += [f"README.md: row for unknown tweak '{r}'" for r in rows - set(ids)]
 for md in root.rglob("*.md"):
     parts = md.relative_to(root).parts
     if {".git", "tmp", "references"} & set(parts):
         continue
-    if parts[0] == "packs" and len(parts) > 2 and parts[1] not in ("original", "integrations", "third-party"):
+    if parts[0] == "packs" and len(parts) > 2 and parts[1] not in ("core", "integrations", "third-party"):
         continue                    # (a local pack, not published: packs/attic, say)
     text = re.sub(r"```.*?```", "", md.read_text(), flags=re.S)
     text = re.sub(r"`[^`\n]*`", "", text)                # code isn't a link

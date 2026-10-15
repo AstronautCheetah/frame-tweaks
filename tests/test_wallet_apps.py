@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script  # noqa: E402
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 import wallet_page as wp  # noqa: E402  (the window's Wallet apps page; gui put it on sys.path)
-wl = load_script(ROOT / "packs/original/wallet" / "wallet-launcher", "wl")
+wl = load_script(ROOT / "packs/core/wallet" / "wallet-launcher", "wl")
 
 
 def entry(d, app_id, exec_line, **extra):
@@ -115,7 +115,7 @@ class SystemApp(unittest.TestCase):
         self.assertIn("original launcher restored", out.getvalue())
 
 
-at = load_script(ROOT / "packs/original/wallet" / "app-timers", "at")
+at = load_script(ROOT / "packs/core/wallet" / "app-timers", "at")
 
 
 class Timers(unittest.TestCase):

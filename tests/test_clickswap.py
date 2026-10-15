@@ -39,9 +39,9 @@ class ClickSwapTest(unittest.TestCase):
         argv = mock.patch.object(sys, "argv", ["arrowpad.py"])   # no target: needs no running session
         argv.start()
         self.addCleanup(argv.stop)
-        sys.path.insert(0, str(ROOT / "packs/original/arrowpad"))
-        self.addCleanup(lambda: sys.path.remove(str(ROOT / "packs/original/arrowpad")))
-        ap = load_script(ROOT / "packs/original/arrowpad" / "arrowpad.py", "ap")
+        sys.path.insert(0, str(ROOT / "packs/core/arrowpad"))
+        self.addCleanup(lambda: sys.path.remove(str(ROOT / "packs/core/arrowpad")))
+        ap = load_script(ROOT / "packs/core/arrowpad" / "arrowpad.py", "ap")
         from PyQt6.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
         logs = tempfile.mkdtemp()

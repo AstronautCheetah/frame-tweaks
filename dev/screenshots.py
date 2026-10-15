@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Screenshots of the Original tweaks' windows for the README (docs/images/), drawn off-screen with
+"""Screenshots of the Core tweaks' windows for the README (docs/images/), drawn off-screen with
 sample content: a throwaway home, so nothing of this machine's (its settings, apps, files or
 wallet) shows, and they can be taken again whenever a window changes.
 
@@ -75,7 +75,7 @@ class Keys:
 
 
 def arrowpad(tools=False):
-    ap = load("arrowpad", ROOT / "packs/original/arrowpad/arrowpad.py")
+    ap = load("arrowpad", ROOT / "packs/core/arrowpad/arrowpad.py")
     ap.CONFIG, ap.Haptics = HOME / "arrowpad.json", None
     pad = ap.ArrowPad(Keys(), None)
     if tools:
@@ -108,7 +108,7 @@ def sample_screen(w=1280, h=720):
 
 
 def snip_module():
-    return load("frame_snip", ROOT / "packs/original/snip/frame-snip")
+    return load("frame_snip", ROOT / "packs/core/snip/frame-snip")
 
 
 def snip():

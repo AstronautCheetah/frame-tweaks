@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PAD = ROOT / "packs/original/arrowpad"
+PAD = ROOT / "packs/core/arrowpad"
 QT_WIDGET = {"grab", "show", "hide", "move", "pos", "width", "height", "size", "isVisible", "update",
              "close", "setVisible", "raise_", "activateWindow", "windowHandle", "geometry", "devicePixelRatioF",
              "childAt", "mapToGlobal", "mapFromGlobal"}

@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import sandbox_env, stub  # noqa: E402
-PHONE = ROOT / "packs/original/adb-scrcpy" / "phone"
+PHONE = ROOT / "packs/core/adb-scrcpy" / "phone"
 
 
 def advert(name, ip, port):

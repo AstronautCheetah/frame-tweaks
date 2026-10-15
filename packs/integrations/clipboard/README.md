@@ -53,7 +53,7 @@ Nothing to do: copy as usual in a floating VR window or in the desktop, and past
   files): in a file manager there, or an app that takes files. A cut is shared as a copy there,
   so a paste in the other session never moves a file.
 - **Pictures** (PNG, JPEG, BMP, GIF or WebP, up to 32 MB), for example from a browser's **Copy
-  Image** or [Screen snip + Narrate](../../original/snip/)'s **Copy**.
+  Image** or [Screen snip + Narrate](../../core/snip/)'s **Copy**.
 - **Passwords** a password manager copies (KeePassXC, …) can be pasted in the other session, and
   go from there when the password manager clears them.
 

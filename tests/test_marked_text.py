@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FILES = sorted(ROOT.glob("gui/*.py")) + [ROOT / p for p in (
-    "packs/original/arrowpad/arrowpad.py", "packs/original/snip/frame-snip",
+    "packs/core/arrowpad/arrowpad.py", "packs/core/snip/frame-snip",
     "packs/integrations/nordvpn/nordvpn-tray")]
 SHOWN = {"setText", "setToolTip", "setWindowTitle", "setPlaceholderText", "setStatusTip", "addItem",
          "QLabel", "QPushButton", "QCheckBox", "QRadioButton", "QAction", "QToolButton", "QGroupBox",

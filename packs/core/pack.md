@@ -1,5 +1,5 @@
 ---
-name: Original
+name: Core
 author: Frame Tweaks
 api: 1
 categories: [Accessibility, Convenience, VR environment, System, Hardware, Privacy & security, Developer]
@@ -8,7 +8,6 @@ order:
   - arrowpad
   - snip
   - adb-scrcpy
-  - cursor
   - vr-dashboard
   - curvature
   - float-return
@@ -23,9 +22,13 @@ order:
   - speech
   - charge-limit
 ---
-Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a
-Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly
-(Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep).
+Frame Tweaks' own fixes and app setups for the Steam Frame, and the helpers many of them need:
+other projects' tools, installed with the tweaks that use them and credited to their makers.
+Homebrew installs the programs that Dictation, Screen snip and Android Mirror run (whisper.cpp,
+tesseract, scrcpy); ydotool types for Arrow Pad, Dictation and Scroll strips; Piper speaks for
+Narrate. Each one is tested on a Frame and installed into your home folder, so it survives
+SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which
+SteamOS updates keep).
 
 How it's loaded: like any other pack (see [docs/mods.md](../../docs/mods.md)), one folder per
 tweak, each described by the front matter of its README.md. Frame Tweaks' other official packs,

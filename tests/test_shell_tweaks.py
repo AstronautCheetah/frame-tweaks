@@ -127,11 +127,11 @@ class PinnedDownload(Home):
 
     def fetch(self, upstream, mirror=None, with_mirror=True):
         repo = self.home / "repo"
-        (repo / "packs/original/x").mkdir(parents=True, exist_ok=True)
+        (repo / "packs/core/x").mkdir(parents=True, exist_ok=True)
         pin = ["url=https://up.example/f.bin", f"sha256={hashlib.sha256(self.GOOD).hexdigest()}"]
         if with_mirror:
             pin.append("mirror=https://mirror.example/f.bin")
-        (repo / "packs/original/x/pin").write_text("\n".join(pin) + "\n")
+        (repo / "packs/core/x/pin").write_text("\n".join(pin) + "\n")
         files = self.home / "files"
         files.mkdir(exist_ok=True)
         for name, data in (("up", upstream), ("mirror", mirror)):

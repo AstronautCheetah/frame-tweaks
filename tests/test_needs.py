@@ -54,8 +54,8 @@ class Offer(unittest.TestCase):
 
 class Callers(unittest.TestCase):
     def test_each_feature_offers_its_tweak(self):
-        for path, calls in (("packs/original/arrowpad/arrowpad.py", ['needs.offer("snip"', 'needs.offer("dictation"']),
-                            ("packs/original/snip/frame-snip", ['needs.offer("speech"', 'needs.offer("snip"'])):
+        for path, calls in (("packs/core/arrowpad/arrowpad.py", ['needs.offer("snip"', 'needs.offer("dictation"']),
+                            ("packs/core/snip/frame-snip", ['needs.offer("speech"', 'needs.offer("snip"'])):
             text = (ROOT / path).read_text()
             for c in calls:
                 self.assertIn(c, text, path)

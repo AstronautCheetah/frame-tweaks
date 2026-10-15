@@ -62,7 +62,7 @@ class Packs(QWidget):
         lay.addLayout(head)
         about = QLabel(_(
             "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its "
-            "README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd "
+            "README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd "
             "Party, all in use unless you turn one off. To add more, add one from its link below, or put "
             "a pack's folder in <code>{folder}</code>; then trust it. "
             "<b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs "
@@ -312,7 +312,7 @@ class Packs(QWidget):
             name = html.escape(c["title"], quote=False)
             name = f"<a style='color:#7fb2e5' href='tweak:{html.escape(t)}'>{name}</a>" if mine else f"<b>{name}</b>"
             tags = (" 🧪" if c["experimental"] else "") + (" 🔗" if c["link"] else "") + (
-                " <span style='color:#e0b33a'>sudo</span>" if c["sudo"] else "")
+                " <span style='color:#e0b33a'>sudo</span>" if sft.sudo_note(c) else "")
             other = used[t]["replaced"] if mine and used[t]["replaced"] else ""
             lines.append(f"{html.escape(c['emoji'])} {name}{tags} — {html.escape(c['desc'], quote=False)}"
                          + (" <i>" + _("(instead of {other}'s)").format(other=html.escape(other)) + "</i>" if other else "")

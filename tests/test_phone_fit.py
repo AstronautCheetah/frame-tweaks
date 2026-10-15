@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script  # noqa: E402
-pf = load_script(ROOT / "packs/original/adb-scrcpy" / "phone-fit", "pf")
+pf = load_script(ROOT / "packs/core/adb-scrcpy" / "phone-fit", "pf")
 
 
 class Fit(unittest.TestCase):

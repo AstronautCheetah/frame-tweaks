@@ -12,7 +12,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script, sandbox_env, stub  # noqa: E402
-sft = load_script(ROOT / "packs/original/vr-dashboard" / "sft-dashboard", "sft")
+sft = load_script(ROOT / "packs/core/vr-dashboard" / "sft-dashboard", "sft")
 def _patches():
     """Every dashboard patch a tweak installs: install_dashboard_patch NAME FILE in its install.sh."""
     found = {}
@@ -23,7 +23,7 @@ def _patches():
 
 
 PATCHES = _patches()
-PATCHES_AND_LIB = {**PATCHES, "lib": ROOT / "packs/original/vr-dashboard" / "lib.js"}
+PATCHES_AND_LIB = {**PATCHES, "lib": ROOT / "packs/core/vr-dashboard" / "lib.js"}
 
 
 class ArmRestore(unittest.TestCase):
@@ -211,7 +211,7 @@ class Scripts(unittest.TestCase):
 
     def run_script(self, script, steamvr=3):
         env = sandbox_env(self.home, self.home / "stubs", STEAMVR=steamvr)
-        r = subprocess.run(["bash", str(ROOT / "packs/original/vr-dashboard" / script)], env=env,
+        r = subprocess.run(["bash", str(ROOT / "packs/core/vr-dashboard" / script)], env=env,
                            capture_output=True, text=True, timeout=60)
         self.assertEqual(r.returncode, 0, r.stderr)
         return r.stdout
@@ -236,7 +236,7 @@ class Scripts(unittest.TestCase):
         self.run_script("install.sh", steamvr=0)
         (self.home / ".local/share/frame-tweaks/vr-dashboard/patches/scroll-strips.js").write_text("")
         for tweak in ("vr-dashboard", "scroll-strips"):      # (a patch: through dashboard_patch_status)
-            r = subprocess.run(["bash", str(ROOT / "packs/original" / tweak / "status.sh")],
+            r = subprocess.run(["bash", str(ROOT / "packs/core" / tweak / "status.sh")],
                                env=sandbox_env(self.home, self.home / "stubs", STEAMVR=0),
                                capture_output=True, text=True, timeout=60)
             self.assertEqual(r.returncode, 2, tweak + r.stdout + r.stderr)

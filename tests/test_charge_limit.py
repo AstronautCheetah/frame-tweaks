@@ -1,4 +1,4 @@
-"""Battery charge limit (packs/original/charge-limit): charge-limit pauses the charger at the limit
+"""Battery charge limit (packs/core/charge-limit): charge-limit pauses the charger at the limit
 and lets it charge again 5% below, lifts only its own pause, follows the setting and Charge to
 100% once, and lets the battery charge when it stops; its status says how it's holding, and when
 SteamOS has a charge limit of its own for the Frame. A folder laid out like /sys stands in for the
@@ -13,7 +13,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TWEAK = ROOT / "packs/original/charge-limit"
+TWEAK = ROOT / "packs/core/charge-limit"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import sandbox_env, stub  # noqa: E402
 

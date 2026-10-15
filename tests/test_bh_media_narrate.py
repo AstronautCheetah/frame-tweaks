@@ -17,7 +17,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script, stub  # noqa: E402
-SNIP = ROOT / "packs/original/snip/frame-snip"
+SNIP = ROOT / "packs/core/snip/frame-snip"
 HOME = tempfile.TemporaryDirectory()       # (where the module's settings and Speech engine paths point)
 TWO = ("The first sentence is long enough to be read on its own. "
        "The second sentence is long enough to be read on its own too.")

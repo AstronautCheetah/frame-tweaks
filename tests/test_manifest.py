@@ -5,6 +5,7 @@ missing a dependency or needing a newer pack api isn't offered."""
 import contextlib
 import io
 import os
+import shutil
 import sys
 import tempfile
 import textwrap
@@ -158,11 +159,11 @@ class Packs(unittest.TestCase):
         self.assertIn("scroll-strips", self.ids())
 
     def test_two_official_packs_on_until_turned_off(self):
-        """Original, Integrations and 3rd Party: in use without trusting; each can be turned off."""
+        """Core, Integrations and 3rd Party: in use without trusting; each can be turned off."""
         packs = {p["name"]: p for p in sft.load(refresh=True)["packs"]}
-        self.assertEqual([packs[n]["state"] for n in ("Original", "Integrations", "3rd Party")], ["official"] * 3)
+        self.assertEqual([packs[n]["state"] for n in ("Core", "Integrations", "3rd Party")], ["official"] * 3)
         self.assertEqual(self.ids()["signal"]["pack"], "Integrations")
-        self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["recline"]["pack"]), ("Original", "3rd Party"))
+        self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["recline"]["pack"]), ("Core", "3rd Party"))
         self.assertTrue(self.ids()["recline"]["official"])
         sft.set_official(sft.THIRD_PARTY, False)
         self.assertNotIn("recline", self.ids())
@@ -170,6 +171,28 @@ class Packs(unittest.TestCase):
         self.assertEqual({p["name"]: p["state"] for p in sft.load(refresh=True)["packs"]}["3rd Party"], "off")
         sft.set_official(sft.THIRD_PARTY, True)
         self.assertIn("recline", self.ids())
+
+    def test_core_turned_off_as_original_stays_off(self):
+        """Core was "Original" (packs/original) before 0.6.6: turned off then, it stays off."""
+        sft.OFF_PACKS.write_text("original\n")
+        self.assertEqual(sft.off_packs(), {"core"})
+        packs = {p["name"]: p for p in sft.load(refresh=True)["packs"]}
+        self.assertEqual(packs["Core"]["state"], "off")
+        sft.set_official(sft.CORE, True)
+        self.assertEqual(sft.off_packs(), set())
+
+    def test_what_an_update_left_of_the_old_folder_isnt_a_pack(self):
+        """An update to Core's new folder can leave packs/original behind with only ignored files
+        (Python's caches): not a pack of the user's. A pack.md there would make it one."""
+        packs = Path(tempfile.mkdtemp()) / "packs"
+        self.addCleanup(shutil.rmtree, packs.parent, True)
+        for name in ("core", "integrations", "third-party", "original/arrowpad/__pycache__", "mine"):
+            (packs / name).mkdir(parents=True)
+        dirs = [packs / "core", packs / "integrations", packs / "third-party"]
+        with mock.patch.object(sft, "CORE", dirs[0]), mock.patch.object(sft, "OFFICIAL_PACKS", dirs):
+            self.assertEqual([d.name for d in sft.pack_dirs()][:4], ["core", "integrations", "third-party", "mine"])
+            (packs / "original/pack.md").write_text("---\nname: Mine too\n---\n")
+            self.assertIn("original", [d.name for d in sft.pack_dirs()])
 
     def test_official_packs_share_the_category_order(self):
         cats = [sft.read_pack(p)[0]["categories"] for p in sft.OFFICIAL_PACKS]
@@ -200,7 +223,7 @@ class Packs(unittest.TestCase):
         sft.set_trusted(d.parent, True)
         rows = sft.load(refresh=True)["components"]
         c = next(c for c in rows if c["id"] == "cursor")
-        self.assertEqual((c["title"], c["replaced"]), ("My cursor", "Original"))
+        self.assertEqual((c["title"], c["replaced"]), ("My cursor", "3rd Party"))
         self.assertEqual(len([r for r in rows if r["id"] == "cursor"]), 1)
 
     def test_missing_dependency_and_bad_manifest(self):

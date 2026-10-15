@@ -44,7 +44,7 @@ Then tick it in the Frame Tweaks window, or:
 ./install.sh install signal
 ```
 
-It installs the [Shared KDE wallet](../../original/wallet/) tweak too, if needed. If Signal already has a
+It installs the [Shared KDE wallet](../../core/wallet/) tweak too, if needed. If Signal already has a
 plain-text key, the installer moves it into the wallet for you: Signal does this by itself over
 two launches, so the installer starts and closes Signal twice (about 20 seconds each), then
 checks the result. To check again later:
@@ -75,7 +75,7 @@ window):
 Flathub's Signal asks at every start whether to keep its database key in plain text. This tweak
 sets `SIGNAL_PASSWORD_STORE=kwallet6` as a per-user Flatpak override (the same as doing it in
 Flatseal), so Signal stops asking and keeps the key in KDE Wallet. It also gives Signal a
-[wallet launcher](../../original/wallet/#how-it-works) with **Password first**, so it uses the same wallet
+[wallet launcher](../../core/wallet/#how-it-works) with **Password first**, so it uses the same wallet
 from the desktop and from VR.
 
 Signal's warning about "experimental" password stores is mainly about GNOME's keyring on other

@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "lib"))
 import i18n  # noqa: E402
 import sft  # noqa: E402
 
-pt = load_script(ROOT / "packs/original/adb-scrcpy" / "phone-touch", "phone_touch")
+pt = load_script(ROOT / "packs/core/adb-scrcpy" / "phone-touch", "phone_touch")
 
 
 def values(cid):
@@ -28,13 +28,13 @@ class SameChoicesEverywhere(unittest.TestCase):
     def test_android_mirror_gear_and_helper(self):
         self.assertEqual({k: list(v) for k, v in pt.CHOICES.items()}, values("adb-scrcpy"))
         self.assertEqual(pt.DEFAULTS, sft.defaults("adb-scrcpy"))
-        js = (ROOT / "packs/original/adb-scrcpy" / "phone-touch.js").read_text()
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
         for key, vals in values("adb-scrcpy").items():
             for v in vals:
                 self.assertIn(f"'{v}'", js, f"{key}={v} missing from the VR panel")
 
     def test_scroll_strips_gear(self):
-        js = (ROOT / "packs/original/scroll-strips" / "patch.js").read_text()
+        js = (ROOT / "packs/core/scroll-strips" / "patch.js").read_text()
         swatches = [float(x) for x in re.search(r"const SWATCHES = \[([^\]]*)\]", js).group(1).split(",")]
         self.assertEqual(swatches, [v for v in values("scroll-strips")["color"] if v != "tint"])
         for key, cm in (("thickness", r"'thickness', \[([^\]]*)\]"), ("gap", r"'gap', \[([^\]]*)\]"),
@@ -50,7 +50,7 @@ class SpeechLanguages(unittest.TestCase):
     """The Speech engine's Language choices are voices.tsv's languages (dev/speech-voices.py),
     each with a Piper voice file, two SHA256s and an eSpeak NG voice."""
     def test_same_languages(self):
-        rows = [l.split("\t") for l in (ROOT / "packs/original/speech/voices.tsv").read_text().splitlines()
+        rows = [l.split("\t") for l in (ROOT / "packs/core/speech/voices.tsv").read_text().splitlines()
                 if l and not l.startswith("#")]
         self.assertTrue(all(len(r) == 6 and re.fullmatch(r"[0-9a-f]{64}", r[3]) and re.fullmatch(r"[0-9a-f]{64}", r[4])
                             and r[2].endswith(".onnx") for r in rows))

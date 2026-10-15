@@ -16,7 +16,7 @@ msgstr ""
 msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1088 lib/sft.py:707
+#: gui/frame-tweaks-gui.py:1088 lib/sft.py:709
 msgid "Experimental: %s"
 msgstr ""
 
@@ -25,7 +25,7 @@ msgid ""
 "Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1093 lib/sft.py:711
+#: gui/frame-tweaks-gui.py:1093 lib/sft.py:713
 msgid "Asks for your sudo password: %s"
 msgstr ""
 
@@ -203,7 +203,7 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1530 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1530 gui/prefs_page.py:195 packs/core/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
@@ -298,7 +298,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/original/charge-limit/status.sh:6 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/menu-icons/status.sh:4 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -306,11 +306,11 @@ msgstr ""
 msgid "hidden"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:404 packs/original/arrowpad/arrowpad.py:282 packs/original/snip/frame-snip:712 packs/original/snip/frame-snip:717
+#: gui/frame-tweaks-gui.py:404 packs/core/arrowpad/arrowpad.py:282 packs/core/snip/frame-snip:712 packs/core/snip/frame-snip:717
 msgid "Collapse"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:404 packs/original/arrowpad/arrowpad.py:282 packs/original/snip/frame-snip:743
+#: gui/frame-tweaks-gui.py:404 packs/core/arrowpad/arrowpad.py:282 packs/core/snip/frame-snip:743
 msgid "Expand"
 msgstr ""
 
@@ -330,7 +330,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1706 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1706 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/core/snip/frame-snip:530
 msgid "← Back"
 msgstr ""
 
@@ -440,7 +440,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:627 packs/original/adb-scrcpy/phone-touch.js:290 packs/original/scroll-strips/patch.js:287
+#: gui/frame-tweaks-gui.py:627 packs/core/adb-scrcpy/phone-touch.js:290 packs/core/scroll-strips/patch.js:287
 msgid "Reset to defaults"
 msgstr ""
 
@@ -448,11 +448,11 @@ msgstr ""
 msgid "Working… (a download can take a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:677 packs/original/snip/frame-snip:604 install.sh:249
+#: gui/frame-tweaks-gui.py:677 packs/core/snip/frame-snip:604 install.sh:249
 msgid "Done."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:516 gui/wallet_page.py:528 gui/wallet_page.py:542 packs/original/snip/frame-snip:605
+#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:516 gui/wallet_page.py:528 gui/wallet_page.py:542 packs/core/snip/frame-snip:605
 msgid "Didn't work: %s"
 msgstr ""
 
@@ -511,7 +511,7 @@ msgstr ""
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:883 packs/original/arrowpad/arrowpad.py:281 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
+#: gui/frame-tweaks-gui.py:883 packs/core/arrowpad/arrowpad.py:281 packs/core/snip/frame-snip:697 packs/core/adb-scrcpy/phone:205
 msgid "Close"
 msgstr ""
 
@@ -637,11 +637,11 @@ msgstr ""
 msgid "Updating {name}…"
 msgstr ""
 
-#: gui/packs_page.py:263 lib/sft.py:973
+#: gui/packs_page.py:263 lib/sft.py:975
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py:265 lib/sft.py:975
+#: gui/packs_page.py:265 lib/sft.py:977
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
@@ -660,7 +660,7 @@ msgstr ""
 msgid "(its README can't be read)"
 msgstr ""
 
-#: gui/packs_page.py:318 lib/sft.py:1000
+#: gui/packs_page.py:318 lib/sft.py:1002
 msgid "(instead of {other}'s)"
 msgstr ""
 
@@ -668,7 +668,7 @@ msgstr ""
 msgid "installed"
 msgstr ""
 
-#: gui/packs_page.py:320 lib/sft.py:942
+#: gui/packs_page.py:320 lib/sft.py:944
 msgid "none"
 msgstr ""
 
@@ -682,7 +682,7 @@ msgstr ""
 
 #: gui/packs_page.py:63
 msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 
 #: gui/packs_page.py:75
@@ -885,7 +885,7 @@ msgstr ""
 msgid "Preferences"
 msgstr ""
 
-#: gui/prefs_page.py:61 packs/original/snip/frame-snip:544 packs/original/speech/README.md
+#: gui/prefs_page.py:61 packs/core/snip/frame-snip:544 packs/core/speech/README.md
 msgid "Language"
 msgstr ""
 
@@ -1088,7 +1088,7 @@ msgstr ""
 msgid "Electron told to use it"
 msgstr ""
 
-#: gui/wallet_page.py:417 packs/original/wallet/wallet-launcher:133
+#: gui/wallet_page.py:417 packs/core/wallet/wallet-launcher:133
 msgid "shared wallet"
 msgstr ""
 
@@ -1210,7 +1210,7 @@ msgstr ""
 msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:244 install.sh:283 packs/original/snip/install.sh:16 packs/original/snip/install.sh:19
+#: install.sh:244 install.sh:283 packs/core/snip/install.sh:16 packs/core/snip/install.sh:19
 msgid "%s failed"
 msgstr ""
 
@@ -1239,7 +1239,7 @@ msgid ""
 "Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
-#: install.sh:310 install.sh:381 install.sh:394 install.sh:427 lib/common.sh:422 packs/original/charge-limit/uninstall.sh:20
+#: install.sh:310 install.sh:381 install.sh:394 install.sh:427 lib/common.sh:422 packs/core/charge-limit/uninstall.sh:20
 msgid "removed %s"
 msgstr ""
 
@@ -1582,7 +1582,7 @@ msgid ""
 "Homebrew's installer asks for your sudo (admin) password once, to create that folder."
 msgstr ""
 
-#: lib/common.sh:88 packs/original/charge-limit/install.sh:16
+#: lib/common.sh:88 packs/core/charge-limit/install.sh:16
 msgid ""
 "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
 msgstr ""
@@ -1596,7 +1596,7 @@ msgstr ""
 msgid "Install Homebrew now?"
 msgstr ""
 
-#: lib/common.sh:91 packs/original/charge-limit/install.sh:18
+#: lib/common.sh:91 packs/core/charge-limit/install.sh:18
 msgid "sudo failed."
 msgstr ""
 
@@ -1654,256 +1654,2643 @@ msgstr ""
 msgid "Open Frame Tweaks to install it?"
 msgstr ""
 
-#: lib/sft.py:1003
+#: lib/sft.py:1005
 msgid "problem: %s"
 msgstr ""
 
-#: lib/sft.py:1011
+#: lib/sft.py:1013
 msgid "(default)"
 msgstr ""
 
-#: lib/sft.py:1025
+#: lib/sft.py:1027
 msgid "%s what?"
 msgstr ""
 
-#: lib/sft.py:1028
+#: lib/sft.py:1030
 msgid "Hidden in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:1029
+#: lib/sft.py:1031
 msgid "Shown in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:1036
+#: lib/sft.py:1038
 msgid "unknown group {name}; groups: {groups}"
 msgstr ""
 
-#: lib/sft.py:1038
+#: lib/sft.py:1040
 msgid "Group {name} hidden in the installer window."
 msgstr ""
 
-#: lib/sft.py:1039
+#: lib/sft.py:1041
 msgid "Group {name} shown in the installer window."
 msgstr ""
 
-#: lib/sft.py:1053
+#: lib/sft.py:1055
 msgid "%s isn't linked"
 msgstr ""
 
-#: lib/sft.py:1075
+#: lib/sft.py:1077
 msgid "uninstall-settings takes keep or remove"
 msgstr ""
 
-#: lib/sft.py:1104
+#: lib/sft.py:1106
 msgid "{id} has no settings; these do: {ids}"
 msgstr ""
 
-#: lib/sft.py:1112
+#: lib/sft.py:1114
 msgid "expected KEY=VALUE, got %s"
 msgstr ""
 
-#: lib/sft.py:1116
+#: lib/sft.py:1118
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr ""
 
-#: lib/sft.py:684
+#: lib/sft.py:686
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr ""
 
-#: lib/sft.py:694
+#: lib/sft.py:696
 msgid ""
 "once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
 msgstr ""
 
-#: lib/sft.py:702 lib/sft.py:1025 lib/sft.py:1049 lib/sft.py:1053 lib/sft.py:1081
+#: lib/sft.py:704 lib/sft.py:1027 lib/sft.py:1051 lib/sft.py:1055 lib/sft.py:1083
 msgid "unknown component: %s"
 msgstr ""
 
-#: lib/sft.py:705
+#: lib/sft.py:707
 msgid "Why: %s"
 msgstr ""
 
-#: lib/sft.py:709
+#: lib/sft.py:711
 msgid "Needs: %s"
 msgstr ""
 
-#: lib/sft.py:713
+#: lib/sft.py:715
 msgid "By: %s"
 msgstr ""
 
-#: lib/sft.py:715
+#: lib/sft.py:717
 msgid "Source: %s"
 msgstr ""
 
-#: lib/sft.py:717
+#: lib/sft.py:719
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: lib/sft.py:718
+#: lib/sft.py:720
 msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr ""
 
-#: lib/sft.py:720
+#: lib/sft.py:722
 msgid "More: %s"
 msgstr ""
 
-#: lib/sft.py:723
+#: lib/sft.py:725
 msgid "Run ({label}): {command}"
 msgstr ""
 
-#: lib/sft.py:725
+#: lib/sft.py:727
 msgid "Settings: %s"
 msgstr ""
 
-#: lib/sft.py:749
+#: lib/sft.py:751
 msgid "git isn't installed"
 msgstr ""
 
-#: lib/sft.py:751
+#: lib/sft.py:753
 msgid "git took too long (no connection?)"
 msgstr ""
 
-#: lib/sft.py:755
+#: lib/sft.py:757
 msgid "git {command} failed"
 msgstr ""
 
-#: lib/sft.py:782
+#: lib/sft.py:784
 msgid ""
 "That isn't a link to a pack: give the address of its git repository, starting with https://"
 msgstr ""
 
-#: lib/sft.py:784
+#: lib/sft.py:786
 msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
-#: lib/sft.py:787
+#: lib/sft.py:789
 msgid "You have a pack in {folder} already: update it, or remove it first."
 msgstr ""
 
-#: lib/sft.py:795
+#: lib/sft.py:797
 msgid ""
 "There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
 msgstr ""
 
-#: lib/sft.py:808
+#: lib/sft.py:810
 msgid "{pack} wasn't added from a link: change its folder yourself."
 msgstr ""
 
-#: lib/sft.py:810
+#: lib/sft.py:812
 msgid ""
 "{pack} was added at a fixed version: to follow another one, remove it and add it again."
 msgstr ""
 
-#: lib/sft.py:868
+#: lib/sft.py:870
 msgid "Only packs in {folder} can be removed here."
 msgstr ""
 
-#: lib/sft.py:872
+#: lib/sft.py:874
 msgid "Uninstall its tweaks first: {ids} ({command})."
 msgstr ""
 
-#: lib/sft.py:873
+#: lib/sft.py:875
 msgid ""
 "Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
 msgstr ""
 
-#: lib/sft.py:904
+#: lib/sft.py:906
 msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr ""
 
-#: lib/sft.py:908
+#: lib/sft.py:910
 msgid "no pack {name}; see {command}"
 msgstr ""
 
-#: lib/sft.py:915
+#: lib/sft.py:917
 msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
 msgstr ""
 
-#: lib/sft.py:918
+#: lib/sft.py:920
 msgid "in use; its tweaks are listed"
 msgstr ""
 
-#: lib/sft.py:919
+#: lib/sft.py:921
 msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:924
+#: lib/sft.py:926
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
 
-#: lib/sft.py:927
+#: lib/sft.py:929
 msgid "trusted; its tweaks are listed now"
 msgstr ""
 
-#: lib/sft.py:928
+#: lib/sft.py:930
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:940
+#: lib/sft.py:942
 msgid "Added the pack {name} in {folder}."
 msgstr ""
 
-#: lib/sft.py:941
+#: lib/sft.py:943
 msgid "By {author}."
 msgstr ""
 
-#: lib/sft.py:942
+#: lib/sft.py:944
 msgid "Tweaks: %s"
 msgstr ""
 
-#: lib/sft.py:945
+#: lib/sft.py:947
 msgid "Problems:"
 msgstr ""
 
-#: lib/sft.py:946
+#: lib/sft.py:948
 msgid ""
 "It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
 msgstr ""
 
-#: lib/sft.py:956
+#: lib/sft.py:958
 msgid "a newer version is out: {command}"
 msgstr ""
 
-#: lib/sft.py:957
+#: lib/sft.py:959
 msgid "up to date"
 msgstr ""
 
-#: lib/sft.py:958
+#: lib/sft.py:960
 msgid "couldn't check (no connection?)"
 msgstr ""
 
-#: lib/sft.py:960
+#: lib/sft.py:962
 msgid "No packs added from a link."
 msgstr ""
 
-#: lib/sft.py:967
+#: lib/sft.py:969
 msgid "Removed the pack {name} ({folder})."
 msgstr ""
 
-#: lib/sft.py:979
+#: lib/sft.py:981
 msgid ""
 "It isn't used until you trust it again. Read what changed first, then: {command}"
 msgstr ""
 
-#: lib/sft.py:987
+#: lib/sft.py:989
 msgid "official: in use"
 msgstr ""
 
-#: lib/sft.py:988
+#: lib/sft.py:990
 msgid "official: turned off ({command})"
 msgstr ""
 
-#: lib/sft.py:989
+#: lib/sft.py:991
 msgid "trusted: in use"
 msgstr ""
 
-#: lib/sft.py:990
+#: lib/sft.py:992
 msgid "not trusted: not used ({command})"
 msgstr ""
 
-#: lib/sft.py:991
+#: lib/sft.py:993
 msgid "changed since you trusted it: not used until you trust it again"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid ""
+"Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Forget {PHONE_NAME}"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid ""
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid ""
+"See and control your Android phone in a window, over Wi-Fi, without taking the headset off"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Share the clipboard with the phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid ""
+"Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "The phone mirror's stream, joystick scrolling, and its clipboard."
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid ""
+"Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape."
+msgstr ""
+
+#: packs/core/adb-scrcpy/android-mirror.desktop:12
+msgid "Choose phone…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/android-mirror.desktop:4
+msgid "Mirror and control an Android phone (scrcpy over wireless adb)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:25
+msgid "couldn't put the new adb in place (the one before is in %s or %s)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:27
+msgid ""
+"Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:29
+msgid "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:47
+msgid ""
+"SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:63
+msgid ""
+"In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both)."
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:64
+msgid ""
+"Done. One-time pairing: on the phone open Developer options → Wireless debugging →\n"
+"\"Pair device with pairing code\", then within the minute run:\n"
+"    adb pair <ip>:<pairing-port> <code>\n"
+"Afterwards just launch 'Android Mirror' (or run: phone)."
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh:7
+msgid "Installing scrcpy (Homebrew)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-fit:76
+msgid "phone-fit: no X display"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:141 packs/core/adb-scrcpy/README.md
+msgid "Picture size (long side, pixels)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:142 packs/core/adb-scrcpy/README.md
+msgid "Bit rate (Mbit/s)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:144
+msgid "Frame rate (fps, at most)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
+msgid "Fast"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
+msgid "Joystick scrolling"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
+msgid "Medium"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
+msgid "Slow"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:148
+msgid "Clipboard with the phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:148 packs/core/adb-scrcpy/README.md
+msgid "Not shared"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:148 packs/core/adb-scrcpy/README.md
+msgid "Shared"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:297
+msgid "Restart stream"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:297
+msgid "Restart stream to apply"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js:316
+msgid ""
+"Picture and smoothness apply when the stream restarts; joystick speed at once."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch:104
+msgid ""
+"scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch:118 packs/core/adb-scrcpy/phone:139 packs/core/adb-scrcpy/phone-touch.js:311 packs/core/adb-scrcpy/android-mirror.desktop:3 packs/core/adb-scrcpy/README.md
+msgid "Android Mirror"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch:118
+msgid "VR extras are off"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch:91
+msgid "phone-touch: can't find scrcpy's server"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:106
+msgid ""
+"Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:106
+msgid "The phone didn't offer pairing"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:107
+msgid "Android Mirror: pair with %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:107
+msgid "The six-digit pairing code the phone shows:"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:107 packs/core/adb-scrcpy/phone:197 packs/core/adb-scrcpy/phone:204 packs/core/adb-scrcpy/phone:206 packs/core/adb-scrcpy/phone:209 packs/core/adb-scrcpy/phone:214 packs/core/adb-scrcpy/phone:216 packs/core/adb-scrcpy/phone:278 packs/core/adb-scrcpy/phone:287
+msgid "the phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:110
+msgid "Pairing didn't work"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:110
+msgid ""
+"adb said: %s\n"
+"\n"
+"Check the code and try again (a new code appears each time the phone's pairing dialog opens)."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:116
+msgid ""
+"Waiting for %s: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:122
+msgid "%s didn't appear"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:122
+msgid ""
+"It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:126 packs/core/adb-scrcpy/phone:209
+msgid ""
+"Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:126
+msgid "the remembered phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:130
+msgid "Looking for your phone on the Wi-Fi…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:136
+msgid "No phone found"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:136
+msgid ""
+"No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:139
+msgid ""
+"Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:144 packs/core/adb-scrcpy/phone:145
+msgid "Which phone?"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:145
+msgid "Several are advertising: %s. Run: phone --pick"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:153
+msgid "Use %s instead"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:153
+msgid "Wait for %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:154
+msgid "%s isn't on the Wi-Fi with Wireless debugging on."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:158 packs/core/tools/check-system.sh:3 packs/core/vr-dashboard/check-system.sh:7
+msgid "%s not found"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:158
+msgid ""
+"It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:197 packs/core/adb-scrcpy/phone:214
+msgid "Connecting to %s…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:202
+msgid ""
+"Couldn't connect to %s. adb said: %s\n"
+"\n"
+"If the phone forgot the Frame (or it's a new phone), pair them again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:205
+msgid "Forget %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:205
+msgid "Pair it again"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:205
+msgid "this phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:206 packs/core/adb-scrcpy/phone:216
+msgid "Couldn't connect to %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:206
+msgid "See Android Mirror's README for adb pair."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:216
+msgid "Paired, but connecting still failed. adb said: %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:239
+msgid "Starting the mirror…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:249
+msgid "The mirror didn't start"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:249
+msgid ""
+"scrcpy stopped straight away. It said:\n"
+"\n"
+"%s\n"
+"\n"
+"If the phone asked to allow USB debugging or screen sharing, allow it and try again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:277
+msgid "Phone connection lost"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:277
+msgid "Reconnecting…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:278
+msgid "The connection to %s was lost. Reconnecting…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:287
+msgid "Phone not found"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:287
+msgid ""
+"The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:50
+msgid "Android Mirror setup"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:89
+msgid "Android Mirror: %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone:97
+msgid ""
+"On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh:14
+msgid ""
+"scrcpy %s is untested (Frame Tweaks is tested with %s.x): the mirror works, its VR laser clicks and joystick scrolling are off"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh:15
+msgid "adb %s, scrcpy%s, phone launcher"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh:3
+msgid "adb not installed"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh:4
+msgid "adb installed but does not run (re-run ./install.sh adb-scrcpy)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh:7
+msgid ""
+"phone launcher or its menu entry missing (re-run ./install.sh adb-scrcpy)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh:8
+msgid "scrcpy missing (brew install scrcpy)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/uninstall.sh:10
+msgid ""
+"Kept adb's pairing keys (~/.android) and scrcpy (brew uninstall scrcpy)."
+msgstr ""
+
+#: packs/core/arrowpad/README.md
+msgid ""
+"A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super, right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It opens in desktop mode or as its own VR panel, and never takes focus from the app you're using."
+msgstr ""
+
+#: packs/core/arrowpad/README.md
+msgid ""
+"Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
+msgstr ""
+
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+msgid "Open"
+msgstr ""
+
+#: packs/core/arrowpad/README.md
+msgid ""
+"Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop."
+msgstr ""
+
+#: packs/core/arrowpad/README.md
+msgid "styled after"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad-vr.desktop:3
+msgid "Arrow Pad (VR window)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad-vr.desktop:4
+msgid "Arrow/navigation keys as their own floating VR window"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.desktop:4
+msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1029
+msgid "Pinned: tap to allow moving"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:105
+msgid "key {code}"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1075
+msgid "Done"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1245
+msgid "Shift, Ctrl, Alt and Super were pressed and let go."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1248
+msgid "{device} still held {keys}: released too."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1253 packs/core/arrowpad/arrowpad.py:1267
+msgid "Keys released"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1261
+msgid ""
+"Desktop mode has taken all input, so other windows don't get it, and didn't give it back: tap Right Ctrl on a keyboard."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1265
+msgid ""
+"Desktop mode had taken all input, so other windows didn't get it: given back."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1278
+msgid "Screen snip isn't installed"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1279
+msgid ""
+"The Snip button copies, saves, reads or reads aloud part of the screen, with Screen snip + Narrate. It isn't installed yet."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1290
+msgid "Dictation isn't installed"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1291
+msgid ""
+"The 🎤 button types what you say, with Dictation (speech to text, on the Frame itself). It isn't installed yet."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1388
+msgid "button size multiplier (default 1.0)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1389
+msgid "ydotoold socket path"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1390
+msgid "close a running pad"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1391
+msgid "collapse a running pad to its chevron, or expand it"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1392
+msgid "open in desktop mode (even from the VR menu)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1393
+msgid "open as a floating VR window"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:1411
+msgid ""
+"arrowpad: cannot reach ydotoold at {socket}: {error}\n"
+"Start it with: systemctl --user start ydotoold"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:231
+msgctxt "key legend"
+msgid "Bksp"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:231
+msgctxt "key legend"
+msgid "Esc"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:231
+msgctxt "key legend"
+msgid "Tab"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:232
+msgctxt "key legend"
+msgid "Del"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:232
+msgctxt "key legend"
+msgid "Enter"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:232
+msgctxt "key legend"
+msgid "Ins"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:233
+msgctxt "key legend"
+msgid "End"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:233
+msgctxt "key legend"
+msgid "Home"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:233
+msgctxt "key legend"
+msgid "PgUp"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:234
+msgctxt "key legend"
+msgid "Menu"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:234
+msgctxt "key legend"
+msgid "PgDn"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:234
+msgctxt "key legend"
+msgid "PrtSc"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:235
+msgctxt "key legend"
+msgid "Alt"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:235
+msgctxt "key legend"
+msgid "Ctrl"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:235
+msgctxt "key legend"
+msgid "Shift"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:236
+msgctxt "key legend"
+msgid "Super"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:238
+msgctxt "mouse button"
+msgid "Middle"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:238
+msgctxt "mouse button"
+msgid "Right"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:267
+msgid ""
+"Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:268
+msgid "Copy (Ctrl+C)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:268
+msgid "Cut (Ctrl+X)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:268
+msgid "Paste (Ctrl+V)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:269
+msgid "F1–F12 layer (tap again to go back)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:269
+msgid "Select all (Ctrl+A)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:269
+msgid "Undo (Ctrl+Z)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:270
+msgid "Find (Ctrl+F)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:270
+msgid "Redo (Ctrl+Shift+Z)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:270
+msgid "Save (Ctrl+S)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:271
+msgid ""
+"Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:272
+msgid ""
+"Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:273
+msgid ""
+"Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:274
+msgid "Right click: your next click becomes a right click"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:275
+msgid "Open the desktop's application menu (taps Super)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:276
+msgid ""
+"Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:277
+msgid "Middle click: your next click becomes a middle click"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:278
+msgid ""
+"{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:280 packs/core/arrowpad/arrowpad.py:1029
+msgid "Pin: stop accidental moves"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:280
+msgid "Settings: theme and haptics"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:281
+msgid "Larger"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:281
+msgid "Reset position"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:281
+msgid "Smaller"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:285
+msgctxt "key legend"
+msgid "Tools"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:285
+msgctxt "key legend"
+msgid "Unstick"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:286
+msgctxt "key legend"
+msgid "Launcher"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:286
+msgctxt "key legend"
+msgid "Snip"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:296
+msgid "Graphite"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:300
+msgid "Midnight"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:307
+msgid "Light"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:307
+msgid "Normal"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:307 packs/core/scroll-strips/patch.js:219 packs/core/scroll-strips/patch.js:220 packs/core/scroll-strips/patch.js:224 packs/core/scroll-strips/README.md
+msgid "Off"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:308 packs/core/scroll-strips/patch.js:224
+msgid "Haptics"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:308
+msgid "Theme"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:62
+msgid "arrowpad: desktop mode isn't running"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:759 packs/core/arrowpad/arrowpad.py:959 packs/core/arrowpad/arrowpad.py:1253 packs/core/arrowpad/arrowpad.py:1267 packs/core/arrowpad/arrowpad.desktop:3 packs/core/arrowpad/README.md
+msgid "Arrow Pad"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py:759 packs/core/arrowpad/arrowpad.py:959
+msgid "Arrow Pad (VR)"
+msgstr ""
+
+#: packs/core/arrowpad/check-system.sh:6
+msgid "SteamVR's %s is gone: the VR pad can't start"
+msgstr ""
+
+#: packs/core/arrowpad/check-system.sh:7
+msgid "SteamVR's OpenVR library and ydotoold's socket present"
+msgstr ""
+
+#: packs/core/arrowpad/check-system.sh:7
+msgid "ydotoold's socket is missing (./install.sh status ydotool)"
+msgstr ""
+
+#: packs/core/arrowpad/install.sh:10 packs/core/snip/install.sh:8 packs/integrations/nordvpn/install.sh:10
+msgid "couldn't install PyQt6"
+msgstr ""
+
+#: packs/core/arrowpad/install.sh:21
+msgid ""
+"SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
+msgstr ""
+
+#: packs/core/arrowpad/install.sh:30
+msgid ""
+"Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
+msgstr ""
+
+#: packs/core/arrowpad/status.sh:3
+msgid "arrowpad not installed"
+msgstr ""
+
+#: packs/core/arrowpad/status.sh:4
+msgid "PyQt6 venv broken (re-run ./install.sh arrowpad)"
+msgstr ""
+
+#: packs/core/arrowpad/status.sh:5
+msgid "arrowpad installed"
+msgstr ""
+
+#: packs/core/arrowpad/uninstall.sh:11
+msgid "stopped a running Arrow Pad"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid "80% (the battery wears least)"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid ""
+"A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame."
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid "Applies within 30 seconds."
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid "Battery charge limit"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid ""
+"Before a long session away from power: the limit is lifted until the battery is full (or the Frame restarts), then applies again. You don't need it otherwise."
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid "Charge to 100% once"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid ""
+"Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame runs from the charger or power bank and leaves the battery alone."
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid ""
+"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid "Off (charge to 100%)"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid "Stop charging at"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid ""
+"Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
+msgstr ""
+
+#: packs/core/charge-limit/README.md
+msgid ""
+"once, to add a udev rule that lets you pause the battery's charging, and again to remove it"
+msgstr ""
+
+#: packs/core/charge-limit/check-system.sh:5
+msgid "SteamOS no longer has: %s"
+msgstr ""
+
+#: packs/core/charge-limit/check-system.sh:5
+msgid "the charger's pause switch"
+msgstr ""
+
+#: packs/core/charge-limit/check-system.sh:7
+msgid "The charger's pause switch is there"
+msgstr ""
+
+#: packs/core/charge-limit/full-once.sh:10
+msgid "Charging to 100% once; then the limit applies again."
+msgstr ""
+
+#: packs/core/charge-limit/full-once.sh:5
+msgid "Install Battery charge limit first."
+msgstr ""
+
+#: packs/core/charge-limit/full-once.sh:7
+msgid "The limit is off: the battery already charges to 100%."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh:13
+msgid ""
+"The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
+"password once, to add a udev rule (%s) that SteamOS updates keep."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh:22
+msgid "Couldn't add the udev rule."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh:34
+msgid ""
+"Installed; the limit is off (its settings), so the battery charges to 100%."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh:36
+msgid "The battery now stops charging at %s%% while the Frame is on."
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:11
+msgid ""
+"SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:13
+msgid "This SteamOS has no charger pause switch, so the limit can't work"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:14
+msgid "Can't pause charging: Reinstall it (it asks for your password)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:15
+msgid "Not running (Reinstall starts it)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:16
+msgid "No battery found"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:19
+msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:20
+msgid "Limit off: charges to 100%% (now %s%%)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:24
+msgid ""
+"Paused at %s%%, but the battery still charges: the Frame's charger ignored the pause"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:25
+msgid "Holding at %s%% (battery %s%%, not charging)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:29
+msgid "Battery at %s%%, but charging isn't paused; see: %s"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh:30
+msgid "Stops charging at %s%% (battery %s%%)"
+msgstr ""
+
+#: packs/core/charge-limit/uninstall.sh:11
+msgid "Couldn't let the battery charge again: restart the Frame."
+msgstr ""
+
+#: packs/core/charge-limit/uninstall.sh:17
+msgid "Removing its udev rule needs your sudo (admin) password."
+msgstr ""
+
+#: packs/core/charge-limit/uninstall.sh:22
+msgid ""
+"Left its udev rule; it only lets you pause charging. Remove it with: %s"
+msgstr ""
+
+#: packs/core/curvature/README.md
+msgid "Curved world windows"
+msgstr ""
+
+#: packs/core/curvature/README.md
+msgid ""
+"On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
+msgstr ""
+
+#: packs/core/curvature/README.md
+msgid ""
+"Windows you float into the world start curved, like the dashboard (Toggle Curvature still works)"
+msgstr ""
+
+#: packs/core/curvature/README.md
+msgid ""
+"Windows you float into the world start curved, like the dashboard; Toggle Curvature still works."
+msgstr ""
+
+#: packs/core/curvature/README.md
+msgid "idea from"
+msgstr ""
+
+#: packs/core/curvature/status.sh:3
+msgid "world windows start curved"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Dictate"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Dictation"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Speak instead of typing: one shortcut to record, then the text is typed and copied, all on the headset"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Speech-to-text that runs on the headset itself, with whisper.cpp. Press a shortcut (or 🎤 on Arrow Pad's Tools layer) to start, press again to stop; the text is typed into the app you're using and copied to the clipboard."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
+msgstr ""
+
+#: packs/core/dictation/README.md packs/core/snip/README.md packs/core/adb-scrcpy/README.md packs/core/homebrew/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/clipboard/README.md
+msgid "uses"
+msgstr ""
+
+#: packs/core/dictation/check-system.sh:7
+msgid "PipeWire tools and ffmpeg present"
+msgstr ""
+
+#: packs/core/dictation/check-system.sh:7 packs/core/wallet/check-system.sh:7
+msgid "missing: %s"
+msgstr ""
+
+#: packs/core/dictation/dictate.desktop:3
+msgid "Dictate (toggle)"
+msgstr ""
+
+#: packs/core/dictation/dictate.desktop:4
+msgid "Start/stop local Whisper speech-to-text"
+msgstr ""
+
+#: packs/core/dictation/dictate:117
+msgid "Still transcribing…"
+msgstr ""
+
+#: packs/core/dictation/dictate:117
+msgid "Wait for the text before dictating again."
+msgstr ""
+
+#: packs/core/dictation/dictate:130
+msgid "Listening… (run again to stop)"
+msgstr ""
+
+#: packs/core/dictation/dictate:66
+msgid "Transcribing…"
+msgstr ""
+
+#: packs/core/dictation/dictate:74 packs/core/dictation/dictate:87
+msgid "No speech detected"
+msgstr ""
+
+#: packs/core/dictation/dictate:96
+msgid "Copied to clipboard"
+msgstr ""
+
+#: packs/core/dictation/install.sh:10
+msgid "Using whisper-frame's whisper-cli (no second copy)"
+msgstr ""
+
+#: packs/core/dictation/install.sh:14
+msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
+msgstr ""
+
+#: packs/core/dictation/install.sh:25
+msgid "Downloading Whisper model %s"
+msgstr ""
+
+#: packs/core/dictation/install.sh:32
+msgid "Removed old model %s (replaced by the shared %s)"
+msgstr ""
+
+#: packs/core/dictation/install.sh:43
+msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+msgstr ""
+
+#: packs/core/dictation/status.sh:3
+msgid "dictate not installed"
+msgstr ""
+
+#: packs/core/dictation/status.sh:4
+msgid "no whisper-cli (re-run ./install.sh dictation)"
+msgstr ""
+
+#: packs/core/dictation/status.sh:6
+msgid "Whisper model missing (re-run ./install.sh dictation)"
+msgstr ""
+
+#: packs/core/dictation/status.sh:7
+msgid "whisper-frame's engine"
+msgstr ""
+
+#: packs/core/dictation/status.sh:8
+msgid "dictate ready (%s, small model)"
+msgstr ""
+
+#: packs/core/dictation/uninstall.sh:11
+msgid ""
+"Kept your dictation history (~/.local/share/dictation-history.txt); whisper-cpp (if any) stays in Homebrew."
+msgstr ""
+
+#: packs/core/dictation/uninstall.sh:7
+msgid "Kept the Whisper model: whisper-frame uses it too."
+msgstr ""
+
+#: packs/core/firefox/README.md
+msgid "Firefox privacy"
+msgstr ""
+
+#: packs/core/firefox/README.md
+msgid ""
+"Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings."
+msgstr ""
+
+#: packs/core/firefox/README.md
+msgid ""
+"Makes Firefox harder for websites to track: strong anti-fingerprinting, letterboxing and WebRTC limits"
+msgstr ""
+
+#: packs/core/firefox/README.md
+msgid ""
+"The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint."
+msgstr ""
+
+#: packs/core/firefox/install.sh:19
+msgid ""
+"%s has a '%s' line without its '%s' line: fix that by hand, then run this again."
+msgstr ""
+
+#: packs/core/firefox/install.sh:27
+msgid "Anti-fingerprinting settings written to %s"
+msgstr ""
+
+#: packs/core/firefox/install.sh:29
+msgid "Removed our settings from user.js."
+msgstr ""
+
+#: packs/core/firefox/install.sh:33
+msgid ""
+"Firefox is running: quit it and run this again, or reset the settings in about:config."
+msgstr ""
+
+#: packs/core/firefox/install.sh:38
+msgid ""
+"Reset them in prefs.js too (the previous copy: prefs.js.frame-tweaks-bak)."
+msgstr ""
+
+#: packs/core/firefox/install.sh:41
+msgid "Firefox is running: restart it to apply."
+msgstr ""
+
+#: packs/core/firefox/install.sh:6
+msgid "No Firefox profile yet: start Firefox (Flathub) once, then re-run."
+msgstr ""
+
+#: packs/core/firefox/install.sh:9
+msgid "Profile %s not found"
+msgstr ""
+
+#: packs/core/firefox/status.sh:5
+msgid "no Firefox (Flathub) profile"
+msgstr ""
+
+#: packs/core/firefox/status.sh:7
+msgid "anti-fingerprinting settings not applied"
+msgstr ""
+
+#: packs/core/firefox/status.sh:8
+msgid "applied; restart Firefox to activate"
+msgstr ""
+
+#: packs/core/firefox/status.sh:9
+msgid "resistFingerprinting active"
+msgstr ""
+
+#: packs/core/float-grab/README.md
+msgid ""
+"\"Float in World\" also picks the window up for placing, like grabbing its bar; your next click (or letting go of the trigger) puts it down"
+msgstr ""
+
+#: packs/core/float-grab/README.md
+msgid ""
+"\"Float in World\" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down."
+msgstr ""
+
+#: packs/core/float-grab/README.md
+msgid ""
+"In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one."
+msgstr ""
+
+#: packs/core/float-grab/README.md
+msgid "Pick up when floating"
+msgstr ""
+
+#: packs/core/float-grab/status.sh:3
+msgid "Float in World picks the window up"
+msgstr ""
+
+#: packs/core/float-return/README.md
+msgid ""
+"After you float a window out of the dashboard, the dashboard shows the window it showed before (after 2.5 s) instead of an empty space"
+msgstr ""
+
+#: packs/core/float-return/README.md
+msgid ""
+"After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam."
+msgstr ""
+
+#: packs/core/float-return/README.md
+msgid "Back to the previous window"
+msgstr ""
+
+#: packs/core/float-return/README.md
+msgid ""
+"SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
+msgstr ""
+
+#: packs/core/float-return/status.sh:3
+msgid "back to the previous window after floating one"
+msgstr ""
+
+#: packs/core/homebrew/README.md
+msgid "Homebrew"
+msgstr ""
+
+#: packs/core/homebrew/README.md
+msgid ""
+"Homebrew, a package manager for command-line programs. It installs everything into `/home/linuxbrew`."
+msgstr ""
+
+#: packs/core/homebrew/README.md
+msgid ""
+"SteamOS's system partition is read-only and wiped by updates, so programs installed there don't last. Homebrew installs outside it, and several tweaks use it for that reason."
+msgstr ""
+
+#: packs/core/homebrew/README.md
+msgid "The package manager several tweaks install their programs with"
+msgstr ""
+
+#: packs/core/homebrew/install.sh:5
+msgid "%s is ready: %s"
+msgstr ""
+
+#: packs/core/homebrew/status.sh:3
+msgid "Homebrew not installed"
+msgstr ""
+
+#: packs/core/homebrew/status.sh:5
+msgid "%s (%s packages)"
+msgstr ""
+
+#: packs/core/homebrew/uninstall.sh:3
+msgid ""
+"Homebrew was left installed: Dictation (wl-clipboard, whisper.cpp), Android Mirror (scrcpy),\n"
+"Screen snip (tesseract) and anything you installed yourself live in it.\n"
+"To remove it and everything in it, use Homebrew's own uninstaller:"
+msgstr ""
+
+#: packs/core/menu-icons/README.md
+msgid ""
+"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
+msgstr ""
+
+#: packs/core/menu-icons/README.md
+msgid ""
+"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
+msgstr ""
+
+#: packs/core/menu-icons/README.md
+msgid "Menu icons"
+msgstr ""
+
+#: packs/core/menu-icons/README.md
+msgid ""
+"Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
+msgstr ""
+
+#: packs/core/menu-icons/README.md
+msgid "fix from"
+msgstr ""
+
+#: packs/core/menu-icons/check-system.sh:5
+msgid "Breeze no longer has %s"
+msgstr ""
+
+#: packs/core/menu-icons/check-system.sh:6
+msgid "Breeze icons present"
+msgstr ""
+
+#: packs/core/menu-icons/install.sh:9
+msgid ""
+"Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
+msgstr ""
+
+#: packs/core/menu-icons/menu-icons:99
+msgid "icon: {name}"
+msgstr ""
+
+#: packs/core/menu-icons/status.sh:6
+msgid "%s icon(s) added for the \"+\" menu"
+msgstr ""
+
+#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
+msgid "Accessibility"
+msgstr ""
+
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
+msgid "Convenience"
+msgstr ""
+
+#: packs/core/pack.md
+msgid "Core"
+msgstr ""
+
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+msgid "Developer"
+msgstr ""
+
+#: packs/core/pack.md
+msgid ""
+"Frame Tweaks' own fixes and app setups for the Steam Frame, and the helpers many of them need: other projects' tools, installed with the tweaks that use them and credited to their makers. Homebrew installs the programs that Dictation, Screen snip and Android Mirror run (whisper.cpp, tesseract, scrcpy); ydotool types for Arrow Pad, Dictation and Scroll strips; Piper speaks for Narrate. Each one is tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep)."
+msgstr ""
+
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
+msgid "Hardware"
+msgstr ""
+
+#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md
+msgid "Privacy & security"
+msgstr ""
+
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/menu-icons/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md
+msgid "System"
+msgstr ""
+
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
+msgid "VR environment"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid ""
+"Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR."
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid ""
+"Big scroll strips beside windows (docked or floating), easy to grab with the laser: drag to scroll, tap near an end to page"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid ""
+"Big strips beside each window. Press one and drag away from that point to scroll (farther = faster; let go to stop); tap near an end to page."
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Blue"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid ""
+"Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Cyan"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Green"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Haptics (a tick on the controller as you scroll)"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Horizontal strip (scrolls sideways)"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid ""
+"In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit."
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Magenta"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Orange"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Pink"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Red"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Sky"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Vertical strip (scrolls up and down)"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Violet"
+msgstr ""
+
+#: packs/core/scroll-strips/README.md
+msgid "Yellow"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:219 packs/core/scroll-strips/README.md
+msgid "Left"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:219 packs/core/scroll-strips/README.md
+msgid "Right"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:219
+msgid "Vertical strip"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:220 packs/core/scroll-strips/README.md
+msgid "Bottom"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:220
+msgid "Horizontal strip"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:220 packs/core/scroll-strips/README.md
+msgid "Top"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:221 packs/core/scroll-strips/README.md
+msgid "Thickness (cm)"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:222 packs/core/scroll-strips/README.md
+msgid "Gap from the window (cm)"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:223 packs/core/scroll-strips/README.md
+msgid "Set back behind the window (cm)"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:224 packs/core/scroll-strips/README.md
+msgid "On"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:235
+msgid ""
+"Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:279 packs/core/scroll-strips/README.md
+msgid "Colour"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:281 packs/core/scroll-strips/README.md
+msgid "Passthrough tint"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:297 packs/core/scroll-strips/README.md
+msgid "Scroll strips"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js:302
+msgid "For every window. Changes show at once."
+msgstr ""
+
+#: packs/core/scroll-strips/status.sh:3
+msgid "scroll strips beside floating windows"
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid ""
+"How Narrate reads: its speed here, and its voice and language below (the Speech engine's settings). The ⚙ on Narrate's panel shows the same."
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid "Reading speed"
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid ""
+"Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it."
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid ""
+"Select a rectangle of the window you're using: copy it, save it, copy its text (OCR) or read it aloud"
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid "Snip"
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid ""
+"SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR."
+msgstr ""
+
+#: packs/core/snip/README.md
+msgid ""
+"The speed applies to the next Narrate (or at once, from the panel's − / +)."
+msgstr ""
+
+#: packs/core/snip/frame-snip.desktop:4
+msgid ""
+"Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud"
+msgstr ""
+
+#: packs/core/snip/frame-snip:103
+msgid "can't open the Steam session's display"
+msgstr ""
+
+#: packs/core/snip/frame-snip:111
+msgid "no focused window"
+msgstr ""
+
+#: packs/core/snip/frame-snip:118
+msgid "couldn't read the window's picture"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1298
+msgid "Screen snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1304
+msgid ""
+"Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1317
+msgid "Copy"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1317
+msgid "Save"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1318
+msgid "Narrate"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1472
+msgid "Couldn't copy the snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1472
+msgid "Snip copied"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1472
+msgid "the desktop isn't available"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1479
+msgid "Couldn't save the snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1479
+msgid "Snip saved"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1487 packs/core/snip/frame-snip:1508
+msgid "No text found in the snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1490
+msgid "Couldn't copy the text"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1490
+msgid "Text copied"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1513
+msgid "Narrate needs the Speech engine"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1514
+msgid ""
+"Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), which isn't installed, or is missing its voice."
+msgstr ""
+
+#: packs/core/snip/frame-snip:1613 packs/core/snip/frame-snip:1610
+msgid "Couldn't take a snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip:1613
+msgid "empty picture"
+msgstr ""
+
+#: packs/core/snip/frame-snip:324 packs/core/snip/frame-snip.desktop:3 packs/core/snip/README.md
+msgid "Screen snip + Narrate"
+msgstr ""
+
+#: packs/core/snip/frame-snip:329
+msgid "Tesseract is missing"
+msgstr ""
+
+#: packs/core/snip/frame-snip:330
+msgid ""
+"Copy text and Narrate read the text in a snip with Tesseract, which Screen snip installs through Homebrew. It's missing now (removed from Homebrew?)."
+msgstr ""
+
+#: packs/core/snip/frame-snip:332
+msgid "Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"
+msgstr ""
+
+#: packs/core/snip/frame-snip:533
+msgid "Narrate's voice"
+msgstr ""
+
+#: packs/core/snip/frame-snip:538 packs/core/speech/README.md
+msgid "Narrate with"
+msgstr ""
+
+#: packs/core/snip/frame-snip:540
+msgid "Piper: natural"
+msgstr ""
+
+#: packs/core/snip/frame-snip:540
+msgid "eSpeak NG: fast"
+msgstr ""
+
+#: packs/core/snip/frame-snip:554 packs/core/speech/README.md
+msgid "Apply"
+msgstr ""
+
+#: packs/core/snip/frame-snip:555
+msgid "Download the chosen language's voice if needed, and switch"
+msgstr ""
+
+#: packs/core/snip/frame-snip:584
+msgid "Changes apply when you press Apply."
+msgstr ""
+
+#: packs/core/snip/frame-snip:593
+msgid "Reinstall the Speech engine in Frame Tweaks first."
+msgstr ""
+
+#: packs/core/snip/frame-snip:596
+msgid "Applying… (a new language downloads its voice, about 60 MB)"
+msgstr ""
+
+#: packs/core/snip/frame-snip:631 packs/core/snip/frame-snip:787
+msgid "Screen snip: narrating"
+msgstr ""
+
+#: packs/core/snip/frame-snip:653 packs/core/snip/frame-snip:765
+msgid "Preparing…"
+msgstr ""
+
+#: packs/core/snip/frame-snip:658 packs/core/snip/frame-snip:766 packs/core/snip/frame-snip:945
+msgid "Stop"
+msgstr ""
+
+#: packs/core/snip/frame-snip:662 packs/core/snip/frame-snip:767 packs/core/snip/frame-snip:935 packs/core/snip/frame-snip:947 packs/core/snip/frame-snip:954 packs/core/snip/frame-snip:924
+msgid "Pause"
+msgstr ""
+
+#: packs/core/snip/frame-snip:665 packs/core/snip/frame-snip:789 packs/core/snip/frame-snip:817
+msgid "Show text"
+msgstr ""
+
+#: packs/core/snip/frame-snip:666
+msgid "Switch between the snip's image and the text read from it"
+msgstr ""
+
+#: packs/core/snip/frame-snip:676
+msgid "Speed"
+msgstr ""
+
+#: packs/core/snip/frame-snip:681
+msgid "Copy image"
+msgstr ""
+
+#: packs/core/snip/frame-snip:682
+msgid "Put the snip's image on the clipboard"
+msgstr ""
+
+#: packs/core/snip/frame-snip:684 packs/core/snip/frame-snip:1317
+msgid "Copy text"
+msgstr ""
+
+#: packs/core/snip/frame-snip:685
+msgid "Put the text being read on the clipboard"
+msgstr ""
+
+#: packs/core/snip/frame-snip:688
+msgid "Paste: read the clipboard's text instead"
+msgstr ""
+
+#: packs/core/snip/frame-snip:699
+msgid "Snip something new: it's read here"
+msgstr ""
+
+#: packs/core/snip/frame-snip:702
+msgid "Settings: Narrate's voice and language"
+msgstr ""
+
+#: packs/core/snip/frame-snip:770
+msgid "Reading aloud: part {part} of {count}"
+msgstr ""
+
+#: packs/core/snip/frame-snip:789 packs/core/snip/frame-snip:817
+msgid "Show image"
+msgstr ""
+
+#: packs/core/snip/frame-snip:828 packs/core/snip/frame-snip:832
+msgid "Couldn't copy (is desktop mode running?)"
+msgstr ""
+
+#: packs/core/snip/frame-snip:828
+msgid "Image copied to the clipboard."
+msgstr ""
+
+#: packs/core/snip/frame-snip:832
+msgid "Text copied to the clipboard."
+msgstr ""
+
+#: packs/core/snip/frame-snip:837
+msgid "The clipboard has no text."
+msgstr ""
+
+#: packs/core/snip/frame-snip:928
+msgid "Finished."
+msgstr ""
+
+#: packs/core/snip/frame-snip:929 packs/core/snip/frame-snip:953
+msgid "Read it again"
+msgstr ""
+
+#: packs/core/snip/frame-snip:936 packs/core/snip/frame-snip:946 packs/core/snip/frame-snip:925
+msgid "Reading aloud…"
+msgstr ""
+
+#: packs/core/snip/frame-snip:939
+msgid "Resume"
+msgstr ""
+
+#: packs/core/snip/frame-snip:940
+msgid "Paused."
+msgstr ""
+
+#: packs/core/snip/frame-snip:952
+msgid "Stopped."
+msgstr ""
+
+#: packs/core/snip/install.sh:16
+msgid "Installing Tesseract (OCR)"
+msgstr ""
+
+#: packs/core/snip/install.sh:19
+msgid "Installing %s"
+msgstr ""
+
+#: packs/core/snip/install.sh:32
+msgid ""
+"Done: Arrow Pad's Tools key, then Snip (or 'Screen snip + Narrate' in the app menu) starts a snip."
+msgstr ""
+
+#: packs/core/snip/status.sh:5
+msgid "Tesseract missing: Copy text and Narrate won't work (reinstall)"
+msgstr ""
+
+#: packs/core/snip/status.sh:6
+msgid "Piper or its voice missing: Narrate won't work (reinstall)"
+msgstr ""
+
+#: packs/core/snip/status.sh:7
+msgid "snip ready (copy, save, copy text, narrate)"
+msgstr ""
+
+#: packs/core/snip/uninstall.sh:9
+msgid ""
+"Kept Tesseract and wl-clipboard (%s) and your snips in ~/Pictures/Screenshots."
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid ""
+"A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip."
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Deutsch"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Downloads the chosen language's voice if needed and switches to it."
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "English (UK)"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "English (US)"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Español (España)"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Español (México)"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Français"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid ""
+"Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps; installed with Screen snip + Narrate"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Italiano"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Nederlands"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Piper: natural, neural voices"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Polski"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Português (Brasil)"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid ""
+"Press Apply to switch (a new language downloads its voice, about 60 MB)."
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Speech engine (helper)"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid ""
+"SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent."
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Svenska"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid ""
+"The voice Screen snip's Narrate reads with, and the language of apps that speak through speech-dispatcher. Both engines are open source and run on the Frame, offline."
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Türkçe"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "eSpeak NG: robotic, fast, light"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Čeština"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Русский"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "Українська"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "العربية"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "हिन्दी"
+msgstr ""
+
+#: packs/core/speech/README.md
+msgid "中文 (普通话)"
+msgstr ""
+
+#: packs/core/speech/install.sh:17
+msgid "Downloading Piper (speech)"
+msgstr ""
+
+#: packs/core/speech/install.sh:21
+msgid "the Piper download didn't contain %s"
+msgstr ""
+
+#: packs/core/speech/install.sh:33
+msgid "speech: unknown language '%s'; using English (US)"
+msgstr ""
+
+#: packs/core/speech/install.sh:40
+msgid "Downloading the %s voice (about 60 MB)"
+msgstr ""
+
+#: packs/core/speech/install.sh:47
+msgid ""
+"the %s voice didn't download, or isn't the expected file; nothing changed"
+msgstr ""
+
+#: packs/core/speech/install.sh:49
+msgid ""
+"the %s voice's settings didn't download, or aren't the expected file; nothing changed"
+msgstr ""
+
+#: packs/core/speech/install.sh:88
+msgid ""
+"Speech ready (%s): Narrate uses %s; speech-dispatcher apps use eSpeak NG."
+msgstr ""
+
+#: packs/core/speech/status.sh:6
+msgid "speech-dispatcher isn't set up (Orca has no voice): reinstall"
+msgstr ""
+
+#: packs/core/speech/status.sh:7
+msgid "Piper voice ready; speech-dispatcher uses espeak-ng"
+msgstr ""
+
+#: packs/core/speech/uninstall.sh:9
+msgid "speech-dispatcher is back to SteamOS's setup (no voice)."
+msgstr ""
+
+#: packs/core/tools/README.md
+msgid ""
+"An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
+msgstr ""
+
+#: packs/core/tools/README.md
+msgid ""
+"An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`)."
+msgstr ""
+
+#: packs/core/tools/README.md
+msgid "Desktop Recovery"
+msgstr ""
+
+#: packs/core/tools/README.md
+msgid ""
+"In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session."
+msgstr ""
+
+#: packs/core/tools/README.md
+msgid "Restart taskbar"
+msgstr ""
+
+#: packs/core/tools/check-system.sh:3
+msgid "%s present"
+msgstr ""
+
+#: packs/core/tools/install.sh:7
+msgid "Installed %s"
+msgstr ""
+
+#: packs/core/tools/restart-plasmashell:17
+msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
+msgstr ""
+
+#: packs/core/tools/restart-plasmashell:20
+msgid "%s failed; see %s"
+msgstr ""
+
+#: packs/core/tools/restart-plasmashell:20 packs/core/ydotool/run.sh:3 packs/integrations/clipboard/run.sh:7
+msgid "%s restarted"
+msgstr ""
+
+#: packs/core/tools/status.sh:3
+msgid "%s installed"
+msgstr ""
+
+#: packs/core/vr-dashboard/README.md
+msgid ""
+"Lets the VR environment tweaks adjust SteamVR's dashboard; installed automatically when needed"
+msgstr ""
+
+#: packs/core/vr-dashboard/README.md
+msgid ""
+"SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them."
+msgstr ""
+
+#: packs/core/vr-dashboard/README.md
+msgid ""
+"The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
+msgstr ""
+
+#: packs/core/vr-dashboard/README.md
+msgid "VR dashboard patching (helper)"
+msgstr ""
+
+#: packs/core/vr-dashboard/check-system.sh:6
+msgid "SteamVR dashboard code changed (%s): those patches stay off"
+msgstr ""
+
+#: packs/core/vr-dashboard/check-system.sh:7
+msgid "SteamVR dashboard code as expected"
+msgstr ""
+
+#: packs/core/vr-dashboard/install.sh:84
+msgid "Dashboard patches active."
+msgstr ""
+
+#: packs/core/vr-dashboard/install.sh:86
+msgid ""
+"Installed. It starts working the next time SteamVR starts (reboot, or restart SteamVR\n"
+"from its menu): SteamVR opens the port it needs only at startup."
+msgstr ""
+
+#: packs/core/vr-dashboard/install.sh:90
+msgid "Installed; active from the next SteamVR start."
+msgstr ""
+
+#: packs/core/vr-dashboard/sft-dashboard:362
+msgid "{name}: not installed"
+msgstr ""
+
+#: packs/core/vr-dashboard/sft-dashboard:374
+msgid "dashboard page not found"
+msgstr ""
+
+#: packs/core/vr-dashboard/sft-dashboard:381
+msgid "{name}: port open, not patched yet"
+msgstr ""
+
+#: packs/core/vr-dashboard/status.sh:10
+msgid "waiting for a SteamVR restart (reboot once)"
+msgstr ""
+
+#: packs/core/vr-dashboard/status.sh:13
+msgid "%s dashboard patch(es); DevTools port open while SteamVR runs"
+msgstr ""
+
+#: packs/core/vr-dashboard/status.sh:7
+msgid "installed, %s patch(es) (active while SteamVR runs)"
+msgstr ""
+
+#: packs/core/wallet/README.md
+msgid ""
+"Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins."
+msgstr ""
+
+#: packs/core/wallet/README.md
+msgid ""
+"Password-protect the apps you choose (messages, sign-ins), with one wallet that locks itself; shared by desktop mode and VR"
+msgstr ""
+
+#: packs/core/wallet/README.md
+msgid ""
+"Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`."
+msgstr ""
+
+#: packs/core/wallet/README.md
+msgid "Shared KDE wallet"
+msgstr ""
+
+#: packs/core/wallet/README.md
+msgid "Unlock"
+msgstr ""
+
+#: packs/core/wallet/README.md
+msgid "approach from"
+msgstr ""
+
+#: packs/core/wallet/app-timers:194
+msgid "App timers"
+msgstr ""
+
+#: packs/core/wallet/app-timers:194
+msgid "{app} closed"
+msgstr ""
+
+#: packs/core/wallet/app-timers:292
+msgid "The headset was taken off."
+msgstr ""
+
+#: packs/core/wallet/app-timers:299
+msgid "No activity for {minutes} minutes."
+msgstr ""
+
+#: packs/core/wallet/app-timers:312
+msgid "minutes must be a number"
+msgstr ""
+
+#: packs/core/wallet/app-timers:320
+msgid "idle {seconds}s"
+msgstr ""
+
+#: packs/core/wallet/app-timers:322
+msgid "{app_id}: {minutes} min, and headset off, {state}"
+msgstr ""
+
+#: packs/core/wallet/app-timers:323
+msgid "{app_id}: {minutes} min, {state}"
+msgstr ""
+
+#: packs/core/wallet/app-timers:325
+msgid "not running"
+msgstr ""
+
+#: packs/core/wallet/app-timers:325
+msgid "running"
+msgstr ""
+
+#: packs/core/wallet/app-timers:88
+msgid "{app_id} has no timer: set one first"
+msgstr ""
+
+#: packs/core/wallet/check-system.sh:6
+msgid "Steam session D-Bus"
+msgstr ""
+
+#: packs/core/wallet/check-system.sh:7
+msgid "kwalletd6, ksecretd, kdialog and the Steam session's D-Bus present"
+msgstr ""
+
+#: packs/core/wallet/install.sh:36
+msgid "Moving gh's plain-text token into the wallet"
+msgstr ""
+
+#: packs/core/wallet/install.sh:40 packs/core/wallet/status.sh:8
+msgid "gh token stored in plain text (re-run %s)"
+msgstr ""
+
+#: packs/core/wallet/install.sh:44
+msgid "Installing KWalletManager (Flathub)"
+msgstr ""
+
+#: packs/core/wallet/install.sh:62
+msgid ""
+"Wallet closes after %s minutes unused (WALLET_IDLE_MINUTES=… to change)"
+msgstr ""
+
+#: packs/core/wallet/install.sh:71
+msgid ""
+"Couldn't put the password gate on all of: %s. Those without a menu entry yet\n"
+"aren't gated; once they're installed, run: %s"
+msgstr ""
+
+#: packs/core/wallet/install.sh:74
+msgid ""
+"Add other wallet-using apps with:  %s   (--electron for Electron apps)\n"
+"SteamOS's stock wallet has an EMPTY password. To actually protect it, open\n"
+"KWalletManager → kdewallet → Change Password."
+msgstr ""
+
+#: packs/core/wallet/run.sh:4
+msgid "Lock it now with the Lock Wallet menu entry."
+msgstr ""
+
+#: packs/core/wallet/run.sh:4
+msgid "Wallet already unlocked"
+msgstr ""
+
+#: packs/core/wallet/status.sh:12
+msgid "wallet unlocked with no auto-lock scheduled (run: %s)"
+msgstr ""
+
+#: packs/core/wallet/status.sh:15
+msgid "wallet locked; %s app launcher(s) routed/gated"
+msgstr ""
+
+#: packs/core/wallet/status.sh:16
+msgid "wallet unlocked; %s app launcher(s) routed/gated"
+msgstr ""
+
+#: packs/core/wallet/status.sh:18
+msgid "wallet %s; %s app launcher(s) routed/gated"
+msgstr ""
+
+#: packs/core/wallet/status.sh:3
+msgid "wallet tools not installed"
+msgstr ""
+
+#: packs/core/wallet/status.sh:4
+msgid "%s not running: closing the wallet would not lock it (re-run %s)"
+msgstr ""
+
+#: packs/core/wallet/status.sh:5
+msgid "%s not running: apps with a timer won't be closed (re-run %s)"
+msgstr ""
+
+#: packs/core/wallet/uninstall.sh:23
+msgid ""
+"Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet."
+msgstr ""
+
+#: packs/core/wallet/uninstall.sh:24
+msgid "Signal still needs the wallet: keep its kwallet6 setting (see %s)."
+msgstr ""
+
+#: packs/core/wallet/wallet-gate:15
+msgid "%s not started"
+msgstr ""
+
+#: packs/core/wallet/wallet-gate:15
+msgid "The wallet is still locked."
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:133
+msgid "password required"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:162
+msgid "{app_id}: no wallet launcher"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:163
+msgid "{app_id}: original launcher restored"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:169
+msgid "also pass --password-store=kwallet6"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:170
+msgid "stop requiring the wallet password"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:172
+msgid "require the wallet password (wallet-unlock) before starting the app"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:174
+msgid ""
+"don't move the app to the outer bus (for apps that don't use the wallet)"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:178
+msgid "rebuild the wrapper from the (updated) original, keeping its flags"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:189
+msgid "give at least one app ID"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:80
+msgid "wallet-launcher: no desktop entry found for {app_id}"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher:90
+msgid "wallet-launcher: can't find {app_id} in: {command}"
+msgstr ""
+
+#: packs/core/wallet/wallet-lock.desktop:3
+msgid "Lock Wallet"
+msgstr ""
+
+#: packs/core/wallet/wallet-lock.desktop:4
+msgid ""
+"Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:251
+msgid "Wrong password (is Caps Lock on?). Try again:"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:252
+msgid "Password for the KDE wallet:"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:253 packs/core/wallet/wallet-unlock:275
+msgid "Unlock wallet"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:276
+msgid ""
+"A KDE Wallet password prompt is already open (look in VR, around the dashboard). While it is open the wallet ignores this dialog.\n"
+"\n"
+"Type the password there, or close that prompt and try again."
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:354
+msgid "wallet-unlock: couldn't schedule the auto-lock: {error}"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:450
+msgid "wallet-unlock: the wallet is still unlocked (locking failed)"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:456
+msgid "wallet locks in {hours} h"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:457
+msgid "auto-lock is off: the wallet stays unlocked until you lock it"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:460
+msgid "auto-lock off"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:461
+msgid "auto-lock on: the wallet locks in {hours} h"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:462
+msgid "auto-lock on"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:466
+msgid "Wallet already unlocked."
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:469
+msgid "Wallet unlocked; it locks again in {hours} h."
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:470
+msgid "Wallet unlocked (auto-lock is off)."
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:471
+msgid "Wallet unlocked"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:471
+msgid "Wallet unlocked for {hours} hours"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock:473
+msgid "Wallet still locked."
+msgstr ""
+
+#: packs/core/wallet/with-keyring:16
+msgid "wallet still locked"
+msgstr ""
+
+#: packs/core/ydotool/README.md
+msgid ""
+"Lets other tweaks type into any app; installed automatically when needed"
+msgstr ""
+
+#: packs/core/ydotool/README.md
+msgid ""
+"On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one."
+msgstr ""
+
+#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md
+msgid "Restart"
+msgstr ""
+
+#: packs/core/ydotool/README.md
+msgid ""
+"The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them."
+msgstr ""
+
+#: packs/core/ydotool/README.md
+msgid "ydotool (helper)"
+msgstr ""
+
+#: packs/core/ydotool/install.sh:14
+msgid ""
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+msgstr ""
+
+#: packs/core/ydotool/install.sh:16
+msgid ""
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+msgstr ""
+
+#: packs/core/ydotool/install.sh:24
+msgid "%s running (socket %s)"
+msgstr ""
+
+#: packs/core/ydotool/install.sh:26
+msgid "%s didn't start; see: %s"
+msgstr ""
+
+#: packs/core/ydotool/install.sh:6
+msgid ""
+"%s isn't writable. SteamOS normally grants it to the 'input' group: check 'groups'."
+msgstr ""
+
+#: packs/core/ydotool/status.sh:3 packs/integrations/clipboard/status.sh:3 packs/integrations/nordvpn/status.sh:3
+msgid "%s not installed"
+msgstr ""
+
+#: packs/core/ydotool/status.sh:4
+msgid "%s service not running (%s)"
+msgstr ""
+
+#: packs/core/ydotool/status.sh:5
+msgid "%s socket missing"
+msgstr ""
+
+#: packs/core/ydotool/status.sh:6 packs/integrations/clipboard/status.sh:18
+msgid "%s running"
 msgstr ""
 
 #: packs/integrations/claude-code/README.md
@@ -1923,6 +4310,10 @@ msgstr ""
 #: packs/integrations/claude-code/README.md
 msgid ""
 "Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer."
+msgstr ""
+
+#: packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
+msgid "from"
 msgstr ""
 
 #: packs/integrations/claude-code/install.sh:11
@@ -2063,10 +4454,6 @@ msgstr ""
 msgid "Shared clipboard"
 msgstr ""
 
-#: packs/integrations/clipboard/run.sh:7 packs/original/tools/restart-plasmashell:20 packs/original/ydotool/run.sh:3
-msgid "%s restarted"
-msgstr ""
-
 #: packs/integrations/clipboard/run.sh:7
 msgid "Copy in VR, paste in the desktop, and back."
 msgstr ""
@@ -2082,14 +4469,6 @@ msgstr ""
 #: packs/integrations/clipboard/status.sh:16
 msgid ""
 "older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
-msgstr ""
-
-#: packs/integrations/clipboard/status.sh:18 packs/original/ydotool/status.sh:6
-msgid "%s running"
-msgstr ""
-
-#: packs/integrations/clipboard/status.sh:3 packs/integrations/nordvpn/status.sh:3 packs/original/ydotool/status.sh:3
-msgid "%s not installed"
 msgstr ""
 
 #: packs/integrations/clipboard/status.sh:6
@@ -2130,10 +4509,6 @@ msgstr ""
 
 #: packs/integrations/nordvpn/README.md
 msgid "Tray"
-msgstr ""
-
-#: packs/integrations/nordvpn/install.sh:10 packs/original/arrowpad/install.sh:10 packs/original/snip/install.sh:8
-msgid "couldn't install PyQt6"
 msgstr ""
 
 #: packs/integrations/nordvpn/install.sh:22
@@ -2366,2421 +4741,46 @@ msgid ""
 "The kwallet6 setting stays: Signal's database key now lives in the wallet, and switching back would lock you out."
 msgstr ""
 
-#: packs/original/adb-scrcpy/README.md
-msgid ""
-"Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Forget {PHONE_NAME}"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid ""
-"See and control your Android phone in a window, over Wi-Fi, without taking the headset off"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "Share the clipboard with the phone"
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid ""
-"Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid "The phone mirror's stream, joystick scrolling, and its clipboard."
-msgstr ""
-
-#: packs/original/adb-scrcpy/README.md
-msgid ""
-"Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape."
-msgstr ""
-
-#: packs/original/adb-scrcpy/android-mirror.desktop:12
-msgid "Choose phone…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/android-mirror.desktop:4
-msgid "Mirror and control an Android phone (scrcpy over wireless adb)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:25
-msgid "couldn't put the new adb in place (the one before is in %s or %s)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:27
-msgid ""
-"Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:29
-msgid "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:47
-msgid ""
-"SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:63
-msgid ""
-"In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both)."
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:64
-msgid ""
-"Done. One-time pairing: on the phone open Developer options → Wireless debugging →\n"
-"\"Pair device with pairing code\", then within the minute run:\n"
-"    adb pair <ip>:<pairing-port> <code>\n"
-"Afterwards just launch 'Android Mirror' (or run: phone)."
-msgstr ""
-
-#: packs/original/adb-scrcpy/install.sh:7
-msgid "Installing scrcpy (Homebrew)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-fit:76
-msgid "phone-fit: no X display"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:141 packs/original/adb-scrcpy/README.md
-msgid "Picture size (long side, pixels)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:142 packs/original/adb-scrcpy/README.md
-msgid "Bit rate (Mbit/s)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:144
-msgid "Frame rate (fps, at most)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:145 packs/original/adb-scrcpy/README.md
-msgid "Fast"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:145 packs/original/adb-scrcpy/README.md
-msgid "Joystick scrolling"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:145 packs/original/adb-scrcpy/README.md
-msgid "Medium"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:145 packs/original/adb-scrcpy/README.md
-msgid "Slow"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:148
-msgid "Clipboard with the phone"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:148 packs/original/adb-scrcpy/README.md
-msgid "Not shared"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:148 packs/original/adb-scrcpy/README.md
-msgid "Shared"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:297
-msgid "Restart stream"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:297
-msgid "Restart stream to apply"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch.js:316
-msgid ""
-"Picture and smoothness apply when the stream restarts; joystick speed at once."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch:104
-msgid ""
-"scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch:118 packs/original/adb-scrcpy/phone:139 packs/original/adb-scrcpy/phone-touch.js:311 packs/original/adb-scrcpy/android-mirror.desktop:3 packs/original/adb-scrcpy/README.md
-msgid "Android Mirror"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch:118
-msgid "VR extras are off"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone-touch:91
-msgid "phone-touch: can't find scrcpy's server"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:106
-msgid ""
-"Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:106
-msgid "The phone didn't offer pairing"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:107
-msgid "Android Mirror: pair with %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:107
-msgid "The six-digit pairing code the phone shows:"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:107 packs/original/adb-scrcpy/phone:197 packs/original/adb-scrcpy/phone:204 packs/original/adb-scrcpy/phone:206 packs/original/adb-scrcpy/phone:209 packs/original/adb-scrcpy/phone:214 packs/original/adb-scrcpy/phone:216 packs/original/adb-scrcpy/phone:278 packs/original/adb-scrcpy/phone:287
-msgid "the phone"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:110
-msgid "Pairing didn't work"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:110
-msgid ""
-"adb said: %s\n"
-"\n"
-"Check the code and try again (a new code appears each time the phone's pairing dialog opens)."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:116
-msgid ""
-"Waiting for %s: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:122
-msgid "%s didn't appear"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:122
-msgid ""
-"It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:126 packs/original/adb-scrcpy/phone:209
-msgid ""
-"Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:126
-msgid "the remembered phone"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:130
-msgid "Looking for your phone on the Wi-Fi…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:136
-msgid "No phone found"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:136
-msgid ""
-"No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:139
-msgid ""
-"Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:144 packs/original/adb-scrcpy/phone:145
-msgid "Which phone?"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:145
-msgid "Several are advertising: %s. Run: phone --pick"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:153
-msgid "Use %s instead"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:153
-msgid "Wait for %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:154
-msgid "%s isn't on the Wi-Fi with Wireless debugging on."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:158 packs/original/tools/check-system.sh:3 packs/original/vr-dashboard/check-system.sh:7
-msgid "%s not found"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:158
-msgid ""
-"It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:197 packs/original/adb-scrcpy/phone:214
-msgid "Connecting to %s…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:202
-msgid ""
-"Couldn't connect to %s. adb said: %s\n"
-"\n"
-"If the phone forgot the Frame (or it's a new phone), pair them again."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:205
-msgid "Forget %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:205
-msgid "Pair it again"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:205
-msgid "this phone"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:206 packs/original/adb-scrcpy/phone:216
-msgid "Couldn't connect to %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:206
-msgid "See Android Mirror's README for adb pair."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:216
-msgid "Paired, but connecting still failed. adb said: %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:239
-msgid "Starting the mirror…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:249
-msgid "The mirror didn't start"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:249
-msgid ""
-"scrcpy stopped straight away. It said:\n"
-"\n"
-"%s\n"
-"\n"
-"If the phone asked to allow USB debugging or screen sharing, allow it and try again."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:277
-msgid "Phone connection lost"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:277
-msgid "Reconnecting…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:278
-msgid "The connection to %s was lost. Reconnecting…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:287
-msgid "Phone not found"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:287
-msgid ""
-"The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:50
-msgid "Android Mirror setup"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:89
-msgid "Android Mirror: %s"
-msgstr ""
-
-#: packs/original/adb-scrcpy/phone:97
-msgid ""
-"On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…"
-msgstr ""
-
-#: packs/original/adb-scrcpy/status.sh:14
-msgid ""
-"scrcpy %s is untested (Frame Tweaks is tested with %s.x): the mirror works, its VR laser clicks and joystick scrolling are off"
-msgstr ""
-
-#: packs/original/adb-scrcpy/status.sh:15
-msgid "adb %s, scrcpy%s, phone launcher"
-msgstr ""
-
-#: packs/original/adb-scrcpy/status.sh:3
-msgid "adb not installed"
-msgstr ""
-
-#: packs/original/adb-scrcpy/status.sh:4
-msgid "adb installed but does not run (re-run ./install.sh adb-scrcpy)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/status.sh:7
-msgid ""
-"phone launcher or its menu entry missing (re-run ./install.sh adb-scrcpy)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/status.sh:8
-msgid "scrcpy missing (brew install scrcpy)"
-msgstr ""
-
-#: packs/original/adb-scrcpy/uninstall.sh:10
-msgid ""
-"Kept adb's pairing keys (~/.android) and scrcpy (brew uninstall scrcpy)."
-msgstr ""
-
-#: packs/original/arrowpad/README.md
-msgid ""
-"A small floating pad with arrows, Home/End, PgUp/PgDn, Esc, F-keys, one-shot Ctrl/Alt/Super, right- and middle-click keys, clipboard keys, and buttons for dictation and screen snips. It opens in desktop mode or as its own VR panel, and never takes focus from the app you're using."
-msgstr ""
-
-#: packs/original/arrowpad/README.md
-msgid ""
-"Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
-msgstr ""
-
-#: packs/original/arrowpad/README.md packs/original/adb-scrcpy/README.md packs/original/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
-msgid "Open"
-msgstr ""
-
-#: packs/original/arrowpad/README.md
-msgid ""
-"Steam's on-screen keyboard has no up/down arrows, Esc, Ctrl or F-keys, and most on-screen keyboards don't work under the Frame's Wayland desktop."
-msgstr ""
-
-#: packs/original/arrowpad/README.md
-msgid "styled after"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad-vr.desktop:3
-msgid "Arrow Pad (VR window)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad-vr.desktop:4
-msgid "Arrow/navigation keys as their own floating VR window"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.desktop:4
-msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1029
-msgid "Pinned: tap to allow moving"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:105
-msgid "key {code}"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1075
-msgid "Done"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1245
-msgid "Shift, Ctrl, Alt and Super were pressed and let go."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1248
-msgid "{device} still held {keys}: released too."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1253 packs/original/arrowpad/arrowpad.py:1267
-msgid "Keys released"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1261
-msgid ""
-"Desktop mode has taken all input, so other windows don't get it, and didn't give it back: tap Right Ctrl on a keyboard."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1265
-msgid ""
-"Desktop mode had taken all input, so other windows didn't get it: given back."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1278
-msgid "Screen snip isn't installed"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1279
-msgid ""
-"The Snip button copies, saves, reads or reads aloud part of the screen, with Screen snip + Narrate. It isn't installed yet."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1290
-msgid "Dictation isn't installed"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1291
-msgid ""
-"The 🎤 button types what you say, with Dictation (speech to text, on the Frame itself). It isn't installed yet."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1388
-msgid "button size multiplier (default 1.0)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1389
-msgid "ydotoold socket path"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1390
-msgid "close a running pad"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1391
-msgid "collapse a running pad to its chevron, or expand it"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1392
-msgid "open in desktop mode (even from the VR menu)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1393
-msgid "open as a floating VR window"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1411
-msgid ""
-"arrowpad: cannot reach ydotoold at {socket}: {error}\n"
-"Start it with: systemctl --user start ydotoold"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:231
-msgctxt "key legend"
-msgid "Bksp"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:231
-msgctxt "key legend"
-msgid "Esc"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:231
-msgctxt "key legend"
-msgid "Tab"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:232
-msgctxt "key legend"
-msgid "Del"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:232
-msgctxt "key legend"
-msgid "Enter"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:232
-msgctxt "key legend"
-msgid "Ins"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:233
-msgctxt "key legend"
-msgid "End"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:233
-msgctxt "key legend"
-msgid "Home"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:233
-msgctxt "key legend"
-msgid "PgUp"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:234
-msgctxt "key legend"
-msgid "Menu"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:234
-msgctxt "key legend"
-msgid "PgDn"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:234
-msgctxt "key legend"
-msgid "PrtSc"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:235
-msgctxt "key legend"
-msgid "Alt"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:235
-msgctxt "key legend"
-msgid "Ctrl"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:235
-msgctxt "key legend"
-msgid "Shift"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:236
-msgctxt "key legend"
-msgid "Super"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:238
-msgctxt "mouse button"
-msgid "Middle"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:238
-msgctxt "mouse button"
-msgid "Right"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:267
-msgid ""
-"Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:268
-msgid "Copy (Ctrl+C)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:268
-msgid "Cut (Ctrl+X)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:268
-msgid "Paste (Ctrl+V)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:269
-msgid "F1–F12 layer (tap again to go back)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:269
-msgid "Select all (Ctrl+A)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:269
-msgid "Undo (Ctrl+Z)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:270
-msgid "Find (Ctrl+F)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:270
-msgid "Redo (Ctrl+Shift+Z)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:270
-msgid "Save (Ctrl+S)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:271
-msgid ""
-"Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:272
-msgid ""
-"Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:273
-msgid ""
-"Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:274
-msgid "Right click: your next click becomes a right click"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:275
-msgid "Open the desktop's application menu (taps Super)"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:276
-msgid ""
-"Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:277
-msgid "Middle click: your next click becomes a middle click"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:278
-msgid ""
-"{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:280 packs/original/arrowpad/arrowpad.py:1029
-msgid "Pin: stop accidental moves"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:280
-msgid "Settings: theme and haptics"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:281
-msgid "Larger"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:281
-msgid "Reset position"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:281
-msgid "Smaller"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:285
-msgctxt "key legend"
-msgid "Tools"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:285
-msgctxt "key legend"
-msgid "Unstick"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:286
-msgctxt "key legend"
-msgid "Launcher"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:286
-msgctxt "key legend"
-msgid "Snip"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:296
-msgid "Graphite"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:300
-msgid "Midnight"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:307
-msgid "Light"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:307
-msgid "Normal"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:307 packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/patch.js:224 packs/original/scroll-strips/README.md
-msgid "Off"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:308 packs/original/scroll-strips/patch.js:224
-msgid "Haptics"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:308
-msgid "Theme"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:62
-msgid "arrowpad: desktop mode isn't running"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:759 packs/original/arrowpad/arrowpad.py:959 packs/original/arrowpad/arrowpad.py:1253 packs/original/arrowpad/arrowpad.py:1267 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
-msgid "Arrow Pad"
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:759 packs/original/arrowpad/arrowpad.py:959
-msgid "Arrow Pad (VR)"
-msgstr ""
-
-#: packs/original/arrowpad/check-system.sh:6
-msgid "SteamVR's %s is gone: the VR pad can't start"
-msgstr ""
-
-#: packs/original/arrowpad/check-system.sh:7
-msgid "SteamVR's OpenVR library and ydotoold's socket present"
-msgstr ""
-
-#: packs/original/arrowpad/check-system.sh:7
-msgid "ydotoold's socket is missing (./install.sh status ydotool)"
-msgstr ""
-
-#: packs/original/arrowpad/install.sh:21
-msgid ""
-"SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
-msgstr ""
-
-#: packs/original/arrowpad/install.sh:30
-msgid ""
-"Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
-msgstr ""
-
-#: packs/original/arrowpad/status.sh:3
-msgid "arrowpad not installed"
-msgstr ""
-
-#: packs/original/arrowpad/status.sh:4
-msgid "PyQt6 venv broken (re-run ./install.sh arrowpad)"
-msgstr ""
-
-#: packs/original/arrowpad/status.sh:5
-msgid "arrowpad installed"
-msgstr ""
-
-#: packs/original/arrowpad/uninstall.sh:11
-msgid "stopped a running Arrow Pad"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid "80% (the battery wears least)"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid ""
-"A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame."
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid "Applies within 30 seconds."
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid "Battery charge limit"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid ""
-"Before a long session away from power: the limit is lifted until the battery is full (or the Frame restarts), then applies again. You don't need it otherwise."
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid "Charge to 100% once"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid ""
-"Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame runs from the charger or power bank and leaves the battery alone."
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid ""
-"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid "Off (charge to 100%)"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid "Stop charging at"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid ""
-"Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
-msgstr ""
-
-#: packs/original/charge-limit/README.md
-msgid ""
-"once, to add a udev rule that lets you pause the battery's charging, and again to remove it"
-msgstr ""
-
-#: packs/original/charge-limit/check-system.sh:5
-msgid "SteamOS no longer has: %s"
-msgstr ""
-
-#: packs/original/charge-limit/check-system.sh:5
-msgid "the charger's pause switch"
-msgstr ""
-
-#: packs/original/charge-limit/check-system.sh:7
-msgid "The charger's pause switch is there"
-msgstr ""
-
-#: packs/original/charge-limit/full-once.sh:10
-msgid "Charging to 100% once; then the limit applies again."
-msgstr ""
-
-#: packs/original/charge-limit/full-once.sh:5
-msgid "Install Battery charge limit first."
-msgstr ""
-
-#: packs/original/charge-limit/full-once.sh:7
-msgid "The limit is off: the battery already charges to 100%."
-msgstr ""
-
-#: packs/original/charge-limit/install.sh:13
-msgid ""
-"The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
-"password once, to add a udev rule (%s) that SteamOS updates keep."
-msgstr ""
-
-#: packs/original/charge-limit/install.sh:22
-msgid "Couldn't add the udev rule."
-msgstr ""
-
-#: packs/original/charge-limit/install.sh:34
-msgid ""
-"Installed; the limit is off (its settings), so the battery charges to 100%."
-msgstr ""
-
-#: packs/original/charge-limit/install.sh:36
-msgid "The battery now stops charging at %s%% while the Frame is on."
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:11
-msgid ""
-"SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:13
-msgid "This SteamOS has no charger pause switch, so the limit can't work"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:14
-msgid "Can't pause charging: Reinstall it (it asks for your password)"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:15
-msgid "Not running (Reinstall starts it)"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:16
-msgid "No battery found"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:19
-msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:20
-msgid "Limit off: charges to 100%% (now %s%%)"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:24
-msgid ""
-"Paused at %s%%, but the battery still charges: the Frame's charger ignored the pause"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:25
-msgid "Holding at %s%% (battery %s%%, not charging)"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:29
-msgid "Battery at %s%%, but charging isn't paused; see: %s"
-msgstr ""
-
-#: packs/original/charge-limit/status.sh:30
-msgid "Stops charging at %s%% (battery %s%%)"
-msgstr ""
-
-#: packs/original/charge-limit/uninstall.sh:11
-msgid "Couldn't let the battery charge again: restart the Frame."
-msgstr ""
-
-#: packs/original/charge-limit/uninstall.sh:17
-msgid "Removing its udev rule needs your sudo (admin) password."
-msgstr ""
-
-#: packs/original/charge-limit/uninstall.sh:22
-msgid ""
-"Left its udev rule; it only lets you pause charging. Remove it with: %s"
-msgstr ""
-
-#: packs/original/cursor/README.md
+#: packs/third-party/cursor/README.md
 msgid ""
 "In desktop mode on the Frame, the mouse moves but its pointer isn't shown: the desktop draws it on a separate layer that the headset's view leaves out."
 msgstr ""
 
-#: packs/original/cursor/README.md
+#: packs/third-party/cursor/README.md
 msgid "Makes the mouse pointer visible in desktop mode"
 msgstr ""
 
-#: packs/original/cursor/README.md
+#: packs/third-party/cursor/README.md
 msgid "Makes the mouse pointer visible in desktop mode."
 msgstr ""
 
-#: packs/original/cursor/README.md
+#: packs/third-party/cursor/README.md
 msgid "Mouse cursor fix"
 msgstr ""
 
-#: packs/original/cursor/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
-msgid "from"
-msgstr ""
-
-#: packs/original/cursor/install.sh:6
+#: packs/third-party/cursor/install.sh:6
 msgid ""
 "Installed. Takes effect after a reboot (or the next desktop-mode login)."
 msgstr ""
 
-#: packs/original/cursor/status.sh:10
+#: packs/third-party/cursor/status.sh:10
 msgid "installed; active after the next reboot"
 msgstr ""
 
-#: packs/original/cursor/status.sh:11 packs/original/cursor/status.sh:13
+#: packs/third-party/cursor/status.sh:11 packs/third-party/cursor/status.sh:13
 msgid "software cursor active"
 msgstr ""
 
-#: packs/original/cursor/status.sh:14
+#: packs/third-party/cursor/status.sh:14
 msgid "installed (active in desktop mode after a reboot)"
 msgstr ""
 
-#: packs/original/cursor/status.sh:4
+#: packs/third-party/cursor/status.sh:4
 msgid "cursor fix not installed"
 msgstr ""
 
-#: packs/original/cursor/uninstall.sh:4
+#: packs/third-party/cursor/uninstall.sh:4
 msgid "Takes effect after a reboot."
-msgstr ""
-
-#: packs/original/curvature/README.md
-msgid "Curved world windows"
-msgstr ""
-
-#: packs/original/curvature/README.md
-msgid ""
-"On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
-msgstr ""
-
-#: packs/original/curvature/README.md
-msgid ""
-"Windows you float into the world start curved, like the dashboard (Toggle Curvature still works)"
-msgstr ""
-
-#: packs/original/curvature/README.md
-msgid ""
-"Windows you float into the world start curved, like the dashboard; Toggle Curvature still works."
-msgstr ""
-
-#: packs/original/curvature/README.md
-msgid "idea from"
-msgstr ""
-
-#: packs/original/curvature/status.sh:3
-msgid "world windows start curved"
-msgstr ""
-
-#: packs/original/dictation/README.md
-msgid "Dictate"
-msgstr ""
-
-#: packs/original/dictation/README.md
-msgid "Dictation"
-msgstr ""
-
-#: packs/original/dictation/README.md
-msgid ""
-"Speak instead of typing: one shortcut to record, then the text is typed and copied, all on the headset"
-msgstr ""
-
-#: packs/original/dictation/README.md
-msgid ""
-"Speech-to-text that runs on the headset itself, with whisper.cpp. Press a shortcut (or 🎤 on Arrow Pad's Tools layer) to start, press again to stop; the text is typed into the app you're using and copied to the clipboard."
-msgstr ""
-
-#: packs/original/dictation/README.md
-msgid ""
-"Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
-msgstr ""
-
-#: packs/original/dictation/README.md packs/original/snip/README.md packs/original/adb-scrcpy/README.md packs/original/homebrew/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/integrations/clipboard/README.md
-msgid "uses"
-msgstr ""
-
-#: packs/original/dictation/check-system.sh:7
-msgid "PipeWire tools and ffmpeg present"
-msgstr ""
-
-#: packs/original/dictation/check-system.sh:7 packs/original/wallet/check-system.sh:7
-msgid "missing: %s"
-msgstr ""
-
-#: packs/original/dictation/dictate.desktop:3
-msgid "Dictate (toggle)"
-msgstr ""
-
-#: packs/original/dictation/dictate.desktop:4
-msgid "Start/stop local Whisper speech-to-text"
-msgstr ""
-
-#: packs/original/dictation/dictate:117
-msgid "Still transcribing…"
-msgstr ""
-
-#: packs/original/dictation/dictate:117
-msgid "Wait for the text before dictating again."
-msgstr ""
-
-#: packs/original/dictation/dictate:130
-msgid "Listening… (run again to stop)"
-msgstr ""
-
-#: packs/original/dictation/dictate:66
-msgid "Transcribing…"
-msgstr ""
-
-#: packs/original/dictation/dictate:74 packs/original/dictation/dictate:87
-msgid "No speech detected"
-msgstr ""
-
-#: packs/original/dictation/dictate:96
-msgid "Copied to clipboard"
-msgstr ""
-
-#: packs/original/dictation/install.sh:10
-msgid "Using whisper-frame's whisper-cli (no second copy)"
-msgstr ""
-
-#: packs/original/dictation/install.sh:14
-msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
-msgstr ""
-
-#: packs/original/dictation/install.sh:25
-msgid "Downloading Whisper model %s"
-msgstr ""
-
-#: packs/original/dictation/install.sh:32
-msgid "Removed old model %s (replaced by the shared %s)"
-msgstr ""
-
-#: packs/original/dictation/install.sh:43
-msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
-msgstr ""
-
-#: packs/original/dictation/status.sh:3
-msgid "dictate not installed"
-msgstr ""
-
-#: packs/original/dictation/status.sh:4
-msgid "no whisper-cli (re-run ./install.sh dictation)"
-msgstr ""
-
-#: packs/original/dictation/status.sh:6
-msgid "Whisper model missing (re-run ./install.sh dictation)"
-msgstr ""
-
-#: packs/original/dictation/status.sh:7
-msgid "whisper-frame's engine"
-msgstr ""
-
-#: packs/original/dictation/status.sh:8
-msgid "dictate ready (%s, small model)"
-msgstr ""
-
-#: packs/original/dictation/uninstall.sh:11
-msgid ""
-"Kept your dictation history (~/.local/share/dictation-history.txt); whisper-cpp (if any) stays in Homebrew."
-msgstr ""
-
-#: packs/original/dictation/uninstall.sh:7
-msgid "Kept the Whisper model: whisper-frame uses it too."
-msgstr ""
-
-#: packs/original/firefox/README.md
-msgid "Firefox privacy"
-msgstr ""
-
-#: packs/original/firefox/README.md
-msgid ""
-"Makes Firefox harder for websites to track you: it turns on Firefox's strongest anti-fingerprinting (`resistFingerprinting`, from Tor Browser), with letterboxing, WebRTC limits, strict tracking protection, HTTPS-only mode and daily re-randomized canvas readings."
-msgstr ""
-
-#: packs/original/firefox/README.md
-msgid ""
-"Makes Firefox harder for websites to track: strong anti-fingerprinting, letterboxing and WebRTC limits"
-msgstr ""
-
-#: packs/original/firefox/README.md
-msgid ""
-"The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint."
-msgstr ""
-
-#: packs/original/firefox/install.sh:19
-msgid ""
-"%s has a '%s' line without its '%s' line: fix that by hand, then run this again."
-msgstr ""
-
-#: packs/original/firefox/install.sh:27
-msgid "Anti-fingerprinting settings written to %s"
-msgstr ""
-
-#: packs/original/firefox/install.sh:29
-msgid "Removed our settings from user.js."
-msgstr ""
-
-#: packs/original/firefox/install.sh:33
-msgid ""
-"Firefox is running: quit it and run this again, or reset the settings in about:config."
-msgstr ""
-
-#: packs/original/firefox/install.sh:38
-msgid ""
-"Reset them in prefs.js too (the previous copy: prefs.js.frame-tweaks-bak)."
-msgstr ""
-
-#: packs/original/firefox/install.sh:41
-msgid "Firefox is running: restart it to apply."
-msgstr ""
-
-#: packs/original/firefox/install.sh:6
-msgid "No Firefox profile yet: start Firefox (Flathub) once, then re-run."
-msgstr ""
-
-#: packs/original/firefox/install.sh:9
-msgid "Profile %s not found"
-msgstr ""
-
-#: packs/original/firefox/status.sh:5
-msgid "no Firefox (Flathub) profile"
-msgstr ""
-
-#: packs/original/firefox/status.sh:7
-msgid "anti-fingerprinting settings not applied"
-msgstr ""
-
-#: packs/original/firefox/status.sh:8
-msgid "applied; restart Firefox to activate"
-msgstr ""
-
-#: packs/original/firefox/status.sh:9
-msgid "resistFingerprinting active"
-msgstr ""
-
-#: packs/original/float-grab/README.md
-msgid ""
-"\"Float in World\" also picks the window up for placing, like grabbing its bar; your next click (or letting go of the trigger) puts it down"
-msgstr ""
-
-#: packs/original/float-grab/README.md
-msgid ""
-"\"Float in World\" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down."
-msgstr ""
-
-#: packs/original/float-grab/README.md
-msgid ""
-"In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one."
-msgstr ""
-
-#: packs/original/float-grab/README.md
-msgid "Pick up when floating"
-msgstr ""
-
-#: packs/original/float-grab/status.sh:3
-msgid "Float in World picks the window up"
-msgstr ""
-
-#: packs/original/float-return/README.md
-msgid ""
-"After you float a window out of the dashboard, the dashboard shows the window it showed before (after 2.5 s) instead of an empty space"
-msgstr ""
-
-#: packs/original/float-return/README.md
-msgid ""
-"After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam."
-msgstr ""
-
-#: packs/original/float-return/README.md
-msgid "Back to the previous window"
-msgstr ""
-
-#: packs/original/float-return/README.md
-msgid ""
-"SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
-msgstr ""
-
-#: packs/original/float-return/status.sh:3
-msgid "back to the previous window after floating one"
-msgstr ""
-
-#: packs/original/homebrew/README.md
-msgid "Homebrew"
-msgstr ""
-
-#: packs/original/homebrew/README.md
-msgid ""
-"Homebrew, a package manager for command-line programs. It installs everything into `/home/linuxbrew`."
-msgstr ""
-
-#: packs/original/homebrew/README.md
-msgid ""
-"SteamOS's system partition is read-only and wiped by updates, so programs installed there don't last. Homebrew installs outside it, and several tweaks use it for that reason."
-msgstr ""
-
-#: packs/original/homebrew/README.md
-msgid "The package manager several tweaks install their programs with"
-msgstr ""
-
-#: packs/original/homebrew/install.sh:5
-msgid "%s is ready: %s"
-msgstr ""
-
-#: packs/original/homebrew/status.sh:3
-msgid "Homebrew not installed"
-msgstr ""
-
-#: packs/original/homebrew/status.sh:5
-msgid "%s (%s packages)"
-msgstr ""
-
-#: packs/original/homebrew/uninstall.sh:3
-msgid ""
-"Homebrew was left installed: Dictation (wl-clipboard, whisper.cpp), Android Mirror (scrcpy),\n"
-"Screen snip (tesseract) and anything you installed yourself live in it.\n"
-"To remove it and everything in it, use Homebrew's own uninstaller:"
-msgstr ""
-
-#: packs/original/menu-icons/README.md
-msgid ""
-"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
-msgstr ""
-
-#: packs/original/menu-icons/README.md
-msgid ""
-"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
-msgstr ""
-
-#: packs/original/menu-icons/README.md
-msgid "Menu icons"
-msgstr ""
-
-#: packs/original/menu-icons/README.md
-msgid ""
-"Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
-msgstr ""
-
-#: packs/original/menu-icons/README.md
-msgid "fix from"
-msgstr ""
-
-#: packs/original/menu-icons/check-system.sh:5
-msgid "Breeze no longer has %s"
-msgstr ""
-
-#: packs/original/menu-icons/check-system.sh:6
-msgid "Breeze icons present"
-msgstr ""
-
-#: packs/original/menu-icons/install.sh:9
-msgid ""
-"Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
-msgstr ""
-
-#: packs/original/menu-icons/menu-icons:99
-msgid "icon: {name}"
-msgstr ""
-
-#: packs/original/menu-icons/status.sh:6
-msgid "%s icon(s) added for the \"+\" menu"
-msgstr ""
-
-#: packs/original/pack.md packs/original/dictation/README.md packs/original/arrowpad/README.md packs/original/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
-msgid "Accessibility"
-msgstr ""
-
-#: packs/original/pack.md packs/original/adb-scrcpy/README.md packs/original/cursor/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md
-msgid "Convenience"
-msgstr ""
-
-#: packs/original/pack.md packs/integrations/pack.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
-msgid "Developer"
-msgstr ""
-
-#: packs/original/pack.md
-msgid ""
-"Frame Tweaks' own fixes and app setups, written for the Steam Frame: each one tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep)."
-msgstr ""
-
-#: packs/original/pack.md packs/original/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
-msgid "Hardware"
-msgstr ""
-
-#: packs/original/pack.md
-msgid "Original"
-msgstr ""
-
-#: packs/original/pack.md packs/original/wallet/README.md packs/original/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md
-msgid "Privacy & security"
-msgstr ""
-
-#: packs/original/pack.md packs/original/homebrew/README.md packs/original/tools/README.md packs/original/menu-icons/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/integrations/pack.md packs/third-party/pack.md
-msgid "System"
-msgstr ""
-
-#: packs/original/pack.md packs/original/vr-dashboard/README.md packs/original/curvature/README.md packs/original/float-return/README.md packs/original/float-grab/README.md packs/original/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
-msgid "VR environment"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid ""
-"Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR."
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid ""
-"Big scroll strips beside windows (docked or floating), easy to grab with the laser: drag to scroll, tap near an end to page"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid ""
-"Big strips beside each window. Press one and drag away from that point to scroll (farther = faster; let go to stop); tap near an end to page."
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Blue"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid ""
-"Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Cyan"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Green"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Haptics (a tick on the controller as you scroll)"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Horizontal strip (scrolls sideways)"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid ""
-"In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit."
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Magenta"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Orange"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Pink"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Red"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Sky"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Vertical strip (scrolls up and down)"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Violet"
-msgstr ""
-
-#: packs/original/scroll-strips/README.md
-msgid "Yellow"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/README.md
-msgid "Left"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/README.md
-msgid "Right"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:219
-msgid "Vertical strip"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/README.md
-msgid "Bottom"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:220
-msgid "Horizontal strip"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/README.md
-msgid "Top"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
-msgid "Thickness (cm)"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:222 packs/original/scroll-strips/README.md
-msgid "Gap from the window (cm)"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:223 packs/original/scroll-strips/README.md
-msgid "Set back behind the window (cm)"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:224 packs/original/scroll-strips/README.md
-msgid "On"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:235
-msgid ""
-"Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:279 packs/original/scroll-strips/README.md
-msgid "Colour"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:281 packs/original/scroll-strips/README.md
-msgid "Passthrough tint"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:297 packs/original/scroll-strips/README.md
-msgid "Scroll strips"
-msgstr ""
-
-#: packs/original/scroll-strips/patch.js:302
-msgid "For every window. Changes show at once."
-msgstr ""
-
-#: packs/original/scroll-strips/status.sh:3
-msgid "scroll strips beside floating windows"
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid ""
-"How Narrate reads: its speed here, and its voice and language below (the Speech engine's settings). The ⚙ on Narrate's panel shows the same."
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid "Reading speed"
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid ""
-"Select a rectangle of the window you're using, then copy it, save it, copy its text (OCR) or have it read aloud (Narrate). Arrow Pad's Tools layer has a button for it."
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid ""
-"Select a rectangle of the window you're using: copy it, save it, copy its text (OCR) or read it aloud"
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid "Snip"
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid ""
-"SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR."
-msgstr ""
-
-#: packs/original/snip/README.md
-msgid ""
-"The speed applies to the next Narrate (or at once, from the panel's − / +)."
-msgstr ""
-
-#: packs/original/snip/frame-snip.desktop:4
-msgid ""
-"Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud"
-msgstr ""
-
-#: packs/original/snip/frame-snip:103
-msgid "can't open the Steam session's display"
-msgstr ""
-
-#: packs/original/snip/frame-snip:111
-msgid "no focused window"
-msgstr ""
-
-#: packs/original/snip/frame-snip:118
-msgid "couldn't read the window's picture"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1298
-msgid "Screen snip"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1304
-msgid ""
-"Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1317
-msgid "Copy"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1317
-msgid "Save"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1318
-msgid "Narrate"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1472
-msgid "Couldn't copy the snip"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1472
-msgid "Snip copied"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1472
-msgid "the desktop isn't available"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1479
-msgid "Couldn't save the snip"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1479
-msgid "Snip saved"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1487 packs/original/snip/frame-snip:1508
-msgid "No text found in the snip"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1490
-msgid "Couldn't copy the text"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1490
-msgid "Text copied"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1513
-msgid "Narrate needs the Speech engine"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1514
-msgid ""
-"Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), which isn't installed, or is missing its voice."
-msgstr ""
-
-#: packs/original/snip/frame-snip:1613 packs/original/snip/frame-snip:1610
-msgid "Couldn't take a snip"
-msgstr ""
-
-#: packs/original/snip/frame-snip:1613
-msgid "empty picture"
-msgstr ""
-
-#: packs/original/snip/frame-snip:324 packs/original/snip/frame-snip.desktop:3 packs/original/snip/README.md
-msgid "Screen snip + Narrate"
-msgstr ""
-
-#: packs/original/snip/frame-snip:329
-msgid "Tesseract is missing"
-msgstr ""
-
-#: packs/original/snip/frame-snip:330
-msgid ""
-"Copy text and Narrate read the text in a snip with Tesseract, which Screen snip installs through Homebrew. It's missing now (removed from Homebrew?)."
-msgstr ""
-
-#: packs/original/snip/frame-snip:332
-msgid "Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"
-msgstr ""
-
-#: packs/original/snip/frame-snip:533
-msgid "Narrate's voice"
-msgstr ""
-
-#: packs/original/snip/frame-snip:538 packs/original/speech/README.md
-msgid "Narrate with"
-msgstr ""
-
-#: packs/original/snip/frame-snip:540
-msgid "Piper: natural"
-msgstr ""
-
-#: packs/original/snip/frame-snip:540
-msgid "eSpeak NG: fast"
-msgstr ""
-
-#: packs/original/snip/frame-snip:554 packs/original/speech/README.md
-msgid "Apply"
-msgstr ""
-
-#: packs/original/snip/frame-snip:555
-msgid "Download the chosen language's voice if needed, and switch"
-msgstr ""
-
-#: packs/original/snip/frame-snip:584
-msgid "Changes apply when you press Apply."
-msgstr ""
-
-#: packs/original/snip/frame-snip:593
-msgid "Reinstall the Speech engine in Frame Tweaks first."
-msgstr ""
-
-#: packs/original/snip/frame-snip:596
-msgid "Applying… (a new language downloads its voice, about 60 MB)"
-msgstr ""
-
-#: packs/original/snip/frame-snip:631 packs/original/snip/frame-snip:787
-msgid "Screen snip: narrating"
-msgstr ""
-
-#: packs/original/snip/frame-snip:653 packs/original/snip/frame-snip:765
-msgid "Preparing…"
-msgstr ""
-
-#: packs/original/snip/frame-snip:658 packs/original/snip/frame-snip:766 packs/original/snip/frame-snip:945
-msgid "Stop"
-msgstr ""
-
-#: packs/original/snip/frame-snip:662 packs/original/snip/frame-snip:767 packs/original/snip/frame-snip:935 packs/original/snip/frame-snip:947 packs/original/snip/frame-snip:954 packs/original/snip/frame-snip:924
-msgid "Pause"
-msgstr ""
-
-#: packs/original/snip/frame-snip:665 packs/original/snip/frame-snip:789 packs/original/snip/frame-snip:817
-msgid "Show text"
-msgstr ""
-
-#: packs/original/snip/frame-snip:666
-msgid "Switch between the snip's image and the text read from it"
-msgstr ""
-
-#: packs/original/snip/frame-snip:676
-msgid "Speed"
-msgstr ""
-
-#: packs/original/snip/frame-snip:681
-msgid "Copy image"
-msgstr ""
-
-#: packs/original/snip/frame-snip:682
-msgid "Put the snip's image on the clipboard"
-msgstr ""
-
-#: packs/original/snip/frame-snip:684 packs/original/snip/frame-snip:1317
-msgid "Copy text"
-msgstr ""
-
-#: packs/original/snip/frame-snip:685
-msgid "Put the text being read on the clipboard"
-msgstr ""
-
-#: packs/original/snip/frame-snip:688
-msgid "Paste: read the clipboard's text instead"
-msgstr ""
-
-#: packs/original/snip/frame-snip:699
-msgid "Snip something new: it's read here"
-msgstr ""
-
-#: packs/original/snip/frame-snip:702
-msgid "Settings: Narrate's voice and language"
-msgstr ""
-
-#: packs/original/snip/frame-snip:770
-msgid "Reading aloud: part {part} of {count}"
-msgstr ""
-
-#: packs/original/snip/frame-snip:789 packs/original/snip/frame-snip:817
-msgid "Show image"
-msgstr ""
-
-#: packs/original/snip/frame-snip:828 packs/original/snip/frame-snip:832
-msgid "Couldn't copy (is desktop mode running?)"
-msgstr ""
-
-#: packs/original/snip/frame-snip:828
-msgid "Image copied to the clipboard."
-msgstr ""
-
-#: packs/original/snip/frame-snip:832
-msgid "Text copied to the clipboard."
-msgstr ""
-
-#: packs/original/snip/frame-snip:837
-msgid "The clipboard has no text."
-msgstr ""
-
-#: packs/original/snip/frame-snip:928
-msgid "Finished."
-msgstr ""
-
-#: packs/original/snip/frame-snip:929 packs/original/snip/frame-snip:953
-msgid "Read it again"
-msgstr ""
-
-#: packs/original/snip/frame-snip:936 packs/original/snip/frame-snip:946 packs/original/snip/frame-snip:925
-msgid "Reading aloud…"
-msgstr ""
-
-#: packs/original/snip/frame-snip:939
-msgid "Resume"
-msgstr ""
-
-#: packs/original/snip/frame-snip:940
-msgid "Paused."
-msgstr ""
-
-#: packs/original/snip/frame-snip:952
-msgid "Stopped."
-msgstr ""
-
-#: packs/original/snip/install.sh:16
-msgid "Installing Tesseract (OCR)"
-msgstr ""
-
-#: packs/original/snip/install.sh:19
-msgid "Installing %s"
-msgstr ""
-
-#: packs/original/snip/install.sh:32
-msgid ""
-"Done: Arrow Pad's Tools key, then Snip (or 'Screen snip + Narrate' in the app menu) starts a snip."
-msgstr ""
-
-#: packs/original/snip/status.sh:5
-msgid "Tesseract missing: Copy text and Narrate won't work (reinstall)"
-msgstr ""
-
-#: packs/original/snip/status.sh:6
-msgid "Piper or its voice missing: Narrate won't work (reinstall)"
-msgstr ""
-
-#: packs/original/snip/status.sh:7
-msgid "snip ready (copy, save, copy text, narrate)"
-msgstr ""
-
-#: packs/original/snip/uninstall.sh:9
-msgid ""
-"Kept Tesseract and wl-clipboard (%s) and your snips in ~/Pictures/Screenshots."
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid ""
-"A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip."
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Deutsch"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Downloads the chosen language's voice if needed and switches to it."
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "English (UK)"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "English (US)"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Español (España)"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Español (México)"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Français"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid ""
-"Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps; installed with Screen snip + Narrate"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Italiano"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Nederlands"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Piper: natural, neural voices"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Polski"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Português (Brasil)"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid ""
-"Press Apply to switch (a new language downloads its voice, about 60 MB)."
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Speech engine (helper)"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid ""
-"SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent."
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Svenska"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid ""
-"The voice Screen snip's Narrate reads with, and the language of apps that speak through speech-dispatcher. Both engines are open source and run on the Frame, offline."
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Türkçe"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "eSpeak NG: robotic, fast, light"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Čeština"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Русский"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "Українська"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "العربية"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "हिन्दी"
-msgstr ""
-
-#: packs/original/speech/README.md
-msgid "中文 (普通话)"
-msgstr ""
-
-#: packs/original/speech/install.sh:17
-msgid "Downloading Piper (speech)"
-msgstr ""
-
-#: packs/original/speech/install.sh:21
-msgid "the Piper download didn't contain %s"
-msgstr ""
-
-#: packs/original/speech/install.sh:33
-msgid "speech: unknown language '%s'; using English (US)"
-msgstr ""
-
-#: packs/original/speech/install.sh:40
-msgid "Downloading the %s voice (about 60 MB)"
-msgstr ""
-
-#: packs/original/speech/install.sh:47
-msgid ""
-"the %s voice didn't download, or isn't the expected file; nothing changed"
-msgstr ""
-
-#: packs/original/speech/install.sh:49
-msgid ""
-"the %s voice's settings didn't download, or aren't the expected file; nothing changed"
-msgstr ""
-
-#: packs/original/speech/install.sh:88
-msgid ""
-"Speech ready (%s): Narrate uses %s; speech-dispatcher apps use eSpeak NG."
-msgstr ""
-
-#: packs/original/speech/status.sh:6
-msgid "speech-dispatcher isn't set up (Orca has no voice): reinstall"
-msgstr ""
-
-#: packs/original/speech/status.sh:7
-msgid "Piper voice ready; speech-dispatcher uses espeak-ng"
-msgstr ""
-
-#: packs/original/speech/uninstall.sh:9
-msgid "speech-dispatcher is back to SteamOS's setup (no voice)."
-msgstr ""
-
-#: packs/original/tools/README.md
-msgid ""
-"An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
-msgstr ""
-
-#: packs/original/tools/README.md
-msgid ""
-"An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`)."
-msgstr ""
-
-#: packs/original/tools/README.md
-msgid "Desktop Recovery"
-msgstr ""
-
-#: packs/original/tools/README.md
-msgid ""
-"In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session."
-msgstr ""
-
-#: packs/original/tools/README.md
-msgid "Restart taskbar"
-msgstr ""
-
-#: packs/original/tools/check-system.sh:3
-msgid "%s present"
-msgstr ""
-
-#: packs/original/tools/install.sh:7
-msgid "Installed %s"
-msgstr ""
-
-#: packs/original/tools/restart-plasmashell:17
-msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
-msgstr ""
-
-#: packs/original/tools/restart-plasmashell:20
-msgid "%s failed; see %s"
-msgstr ""
-
-#: packs/original/tools/status.sh:3
-msgid "%s installed"
-msgstr ""
-
-#: packs/original/vr-dashboard/README.md
-msgid ""
-"Lets the VR environment tweaks adjust SteamVR's dashboard; installed automatically when needed"
-msgstr ""
-
-#: packs/original/vr-dashboard/README.md
-msgid ""
-"SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them."
-msgstr ""
-
-#: packs/original/vr-dashboard/README.md
-msgid ""
-"The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
-msgstr ""
-
-#: packs/original/vr-dashboard/README.md
-msgid "VR dashboard patching (helper)"
-msgstr ""
-
-#: packs/original/vr-dashboard/check-system.sh:6
-msgid "SteamVR dashboard code changed (%s): those patches stay off"
-msgstr ""
-
-#: packs/original/vr-dashboard/check-system.sh:7
-msgid "SteamVR dashboard code as expected"
-msgstr ""
-
-#: packs/original/vr-dashboard/install.sh:84
-msgid "Dashboard patches active."
-msgstr ""
-
-#: packs/original/vr-dashboard/install.sh:86
-msgid ""
-"Installed. It starts working the next time SteamVR starts (reboot, or restart SteamVR\n"
-"from its menu): SteamVR opens the port it needs only at startup."
-msgstr ""
-
-#: packs/original/vr-dashboard/install.sh:90
-msgid "Installed; active from the next SteamVR start."
-msgstr ""
-
-#: packs/original/vr-dashboard/sft-dashboard:362
-msgid "{name}: not installed"
-msgstr ""
-
-#: packs/original/vr-dashboard/sft-dashboard:374
-msgid "dashboard page not found"
-msgstr ""
-
-#: packs/original/vr-dashboard/sft-dashboard:381
-msgid "{name}: port open, not patched yet"
-msgstr ""
-
-#: packs/original/vr-dashboard/status.sh:10
-msgid "waiting for a SteamVR restart (reboot once)"
-msgstr ""
-
-#: packs/original/vr-dashboard/status.sh:13
-msgid "%s dashboard patch(es); DevTools port open while SteamVR runs"
-msgstr ""
-
-#: packs/original/vr-dashboard/status.sh:7
-msgid "installed, %s patch(es) (active while SteamVR runs)"
-msgstr ""
-
-#: packs/original/wallet/README.md
-msgid ""
-"Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins."
-msgstr ""
-
-#: packs/original/wallet/README.md
-msgid ""
-"Password-protect the apps you choose (messages, sign-ins), with one wallet that locks itself; shared by desktop mode and VR"
-msgstr ""
-
-#: packs/original/wallet/README.md
-msgid ""
-"Puts the apps you choose behind one password: they ask for the KDE wallet's password before they open, and the wallet locks itself again after a while (4 hours unless you change it). The same wallet works in desktop mode and VR, with an unlock dialog where you are, a **Lock Wallet** button, and a keyring for terminal tools such as `gh`."
-msgstr ""
-
-#: packs/original/wallet/README.md
-msgid "Shared KDE wallet"
-msgstr ""
-
-#: packs/original/wallet/README.md
-msgid "Unlock"
-msgstr ""
-
-#: packs/original/wallet/README.md
-msgid "approach from"
-msgstr ""
-
-#: packs/original/wallet/app-timers:194
-msgid "App timers"
-msgstr ""
-
-#: packs/original/wallet/app-timers:194
-msgid "{app} closed"
-msgstr ""
-
-#: packs/original/wallet/app-timers:292
-msgid "The headset was taken off."
-msgstr ""
-
-#: packs/original/wallet/app-timers:299
-msgid "No activity for {minutes} minutes."
-msgstr ""
-
-#: packs/original/wallet/app-timers:312
-msgid "minutes must be a number"
-msgstr ""
-
-#: packs/original/wallet/app-timers:320
-msgid "idle {seconds}s"
-msgstr ""
-
-#: packs/original/wallet/app-timers:322
-msgid "{app_id}: {minutes} min, and headset off, {state}"
-msgstr ""
-
-#: packs/original/wallet/app-timers:323
-msgid "{app_id}: {minutes} min, {state}"
-msgstr ""
-
-#: packs/original/wallet/app-timers:325
-msgid "not running"
-msgstr ""
-
-#: packs/original/wallet/app-timers:325
-msgid "running"
-msgstr ""
-
-#: packs/original/wallet/app-timers:88
-msgid "{app_id} has no timer: set one first"
-msgstr ""
-
-#: packs/original/wallet/check-system.sh:6
-msgid "Steam session D-Bus"
-msgstr ""
-
-#: packs/original/wallet/check-system.sh:7
-msgid "kwalletd6, ksecretd, kdialog and the Steam session's D-Bus present"
-msgstr ""
-
-#: packs/original/wallet/install.sh:36
-msgid "Moving gh's plain-text token into the wallet"
-msgstr ""
-
-#: packs/original/wallet/install.sh:40 packs/original/wallet/status.sh:8
-msgid "gh token stored in plain text (re-run %s)"
-msgstr ""
-
-#: packs/original/wallet/install.sh:44
-msgid "Installing KWalletManager (Flathub)"
-msgstr ""
-
-#: packs/original/wallet/install.sh:62
-msgid ""
-"Wallet closes after %s minutes unused (WALLET_IDLE_MINUTES=… to change)"
-msgstr ""
-
-#: packs/original/wallet/install.sh:71
-msgid ""
-"Couldn't put the password gate on all of: %s. Those without a menu entry yet\n"
-"aren't gated; once they're installed, run: %s"
-msgstr ""
-
-#: packs/original/wallet/install.sh:74
-msgid ""
-"Add other wallet-using apps with:  %s   (--electron for Electron apps)\n"
-"SteamOS's stock wallet has an EMPTY password. To actually protect it, open\n"
-"KWalletManager → kdewallet → Change Password."
-msgstr ""
-
-#: packs/original/wallet/run.sh:4
-msgid "Lock it now with the Lock Wallet menu entry."
-msgstr ""
-
-#: packs/original/wallet/run.sh:4
-msgid "Wallet already unlocked"
-msgstr ""
-
-#: packs/original/wallet/status.sh:12
-msgid "wallet unlocked with no auto-lock scheduled (run: %s)"
-msgstr ""
-
-#: packs/original/wallet/status.sh:15
-msgid "wallet locked; %s app launcher(s) routed/gated"
-msgstr ""
-
-#: packs/original/wallet/status.sh:16
-msgid "wallet unlocked; %s app launcher(s) routed/gated"
-msgstr ""
-
-#: packs/original/wallet/status.sh:18
-msgid "wallet %s; %s app launcher(s) routed/gated"
-msgstr ""
-
-#: packs/original/wallet/status.sh:3
-msgid "wallet tools not installed"
-msgstr ""
-
-#: packs/original/wallet/status.sh:4
-msgid "%s not running: closing the wallet would not lock it (re-run %s)"
-msgstr ""
-
-#: packs/original/wallet/status.sh:5
-msgid "%s not running: apps with a timer won't be closed (re-run %s)"
-msgstr ""
-
-#: packs/original/wallet/uninstall.sh:23
-msgid ""
-"Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet."
-msgstr ""
-
-#: packs/original/wallet/uninstall.sh:24
-msgid "Signal still needs the wallet: keep its kwallet6 setting (see %s)."
-msgstr ""
-
-#: packs/original/wallet/wallet-gate:15
-msgid "%s not started"
-msgstr ""
-
-#: packs/original/wallet/wallet-gate:15
-msgid "The wallet is still locked."
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:133
-msgid "password required"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:162
-msgid "{app_id}: no wallet launcher"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:163
-msgid "{app_id}: original launcher restored"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:169
-msgid "also pass --password-store=kwallet6"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:170
-msgid "stop requiring the wallet password"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:172
-msgid "require the wallet password (wallet-unlock) before starting the app"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:174
-msgid ""
-"don't move the app to the outer bus (for apps that don't use the wallet)"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:178
-msgid "rebuild the wrapper from the (updated) original, keeping its flags"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:189
-msgid "give at least one app ID"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:80
-msgid "wallet-launcher: no desktop entry found for {app_id}"
-msgstr ""
-
-#: packs/original/wallet/wallet-launcher:90
-msgid "wallet-launcher: can't find {app_id} in: {command}"
-msgstr ""
-
-#: packs/original/wallet/wallet-lock.desktop:3
-msgid "Lock Wallet"
-msgstr ""
-
-#: packs/original/wallet/wallet-lock.desktop:4
-msgid ""
-"Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:251
-msgid "Wrong password (is Caps Lock on?). Try again:"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:252
-msgid "Password for the KDE wallet:"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:253 packs/original/wallet/wallet-unlock:275
-msgid "Unlock wallet"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:276
-msgid ""
-"A KDE Wallet password prompt is already open (look in VR, around the dashboard). While it is open the wallet ignores this dialog.\n"
-"\n"
-"Type the password there, or close that prompt and try again."
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:354
-msgid "wallet-unlock: couldn't schedule the auto-lock: {error}"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:450
-msgid "wallet-unlock: the wallet is still unlocked (locking failed)"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:456
-msgid "wallet locks in {hours} h"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:457
-msgid "auto-lock is off: the wallet stays unlocked until you lock it"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:460
-msgid "auto-lock off"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:461
-msgid "auto-lock on: the wallet locks in {hours} h"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:462
-msgid "auto-lock on"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:466
-msgid "Wallet already unlocked."
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:469
-msgid "Wallet unlocked; it locks again in {hours} h."
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:470
-msgid "Wallet unlocked (auto-lock is off)."
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:471
-msgid "Wallet unlocked"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:471
-msgid "Wallet unlocked for {hours} hours"
-msgstr ""
-
-#: packs/original/wallet/wallet-unlock:473
-msgid "Wallet still locked."
-msgstr ""
-
-#: packs/original/wallet/with-keyring:16
-msgid "wallet still locked"
-msgstr ""
-
-#: packs/original/ydotool/README.md
-msgid ""
-"Lets other tweaks type into any app; installed automatically when needed"
-msgstr ""
-
-#: packs/original/ydotool/README.md
-msgid ""
-"On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one."
-msgstr ""
-
-#: packs/original/ydotool/README.md packs/integrations/clipboard/README.md
-msgid "Restart"
-msgstr ""
-
-#: packs/original/ydotool/README.md
-msgid ""
-"The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them."
-msgstr ""
-
-#: packs/original/ydotool/README.md
-msgid "ydotool (helper)"
-msgstr ""
-
-#: packs/original/ydotool/install.sh:14
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
-msgstr ""
-
-#: packs/original/ydotool/install.sh:16
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
-msgstr ""
-
-#: packs/original/ydotool/install.sh:24
-msgid "%s running (socket %s)"
-msgstr ""
-
-#: packs/original/ydotool/install.sh:26
-msgid "%s didn't start; see: %s"
-msgstr ""
-
-#: packs/original/ydotool/install.sh:6
-msgid ""
-"%s isn't writable. SteamOS normally grants it to the 'input' group: check 'groups'."
-msgstr ""
-
-#: packs/original/ydotool/status.sh:4
-msgid "%s service not running (%s)"
-msgstr ""
-
-#: packs/original/ydotool/status.sh:5
-msgid "%s socket missing"
 msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
@@ -4808,7 +4808,7 @@ msgstr ""
 
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects for the Steam Frame, credited to their authors. They're linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row)."
+"Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). A fix that's only a setting, such as the mouse cursor's, Frame Tweaks applies itself."
 msgstr ""
 
 #: packs/third-party/recline/README.md
