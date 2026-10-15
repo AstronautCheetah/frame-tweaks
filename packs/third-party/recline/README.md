@@ -87,8 +87,6 @@ Recline-VR's [README](https://github.com/new-waifu/Recline-VR#readme) describes 
   Startup) and look for `[recline]` in `~/.local/share/Steam/logs/vrserver.txt`.
 - **Install and uninstall while SteamVR runs:** its panel can only be registered and
   unregistered then.
-- **Desktop mode may say "Could not read file"** (`vrmonitor://driverinstalled`) when it
-  installs: SteamVR announces the new driver to a monitor app the Frame doesn't have. Close it.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes

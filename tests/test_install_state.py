@@ -544,6 +544,17 @@ class LinkedProject(unittest.TestCase):
         self.sh("install", "linked")                                    # (installing again forgets it)
         self.assertFalse((self.home / ".local/state/frame-tweaks/unloaded/linked").exists())
 
+    def test_vrmonitor_links_go_nowhere(self):
+        """SteamVR's vrpathreg runs xdg-open vrmonitor://driverinstalled as a driver is registered;
+        nothing on the Frame opens it, so a linked installer's call does nothing. Other links open."""
+        self.stub("xdg-open", 'echo "$1" >> ~/opened')
+        (self.pack / "linked/README.md").write_text(LINKED.replace(
+            "install: echo installed", "install: xdg-open vrmonitor://driverinstalled; xdg-open https://example.org; echo installed"))
+        self.trust()
+        r = self.sh("install", "linked")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual((self.home / "opened").read_text().split(), ["https://example.org"])
+
     def test_run(self):
         self.sh("install", "linked")
         self.assertEqual(self.sh("run", "linked").returncode, 0)

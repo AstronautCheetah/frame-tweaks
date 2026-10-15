@@ -1,0 +1,12 @@
+#!/bin/sh
+# xdg-open for a linked project's install and uninstall commands (lib/link.sh puts this folder
+# first on their PATH). SteamVR's vrpathreg announces a new driver with
+# "xdg-open vrmonitor://driverinstalled", for SteamVR's monitor app, which the Frame doesn't have:
+# the VR session then lists every browser it failed to find, and desktop mode shows "Could not
+# read file". Those links are dropped; anything else opens as usual.
+case ${1:-} in
+    vrmonitor://*) exit 0 ;;
+esac
+here=$(cd "$(dirname "$0")" && pwd)
+PATH=$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$here" | paste -sd: -)
+exec xdg-open "$@"
