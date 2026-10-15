@@ -62,6 +62,11 @@
   an uninstall too, until SteamVR has restarted (SteamVR runs its driver until then). Its
   setting is gone: Recline-VR always keeps the room view aligned. An installed Recline keeps
   working as it is.
+- **Full Keyboard is linked** (🔗): Frame Tweaks runs its own install steps, as its README gives
+  them (its newest release and `SHA256SUMS` from GitHub, checked with `sha256sum -c`, then its
+  `install.sh`), instead of a release Frame Tweaks pinned. Its row says when TaiKeid publishes a
+  newer release, and ↻ installs it; you no longer wait for a Frame Tweaks update. An installed
+  Full Keyboard keeps working as it is.
 - **VSCodium is set aside** (not offered any more): it's in Flathub, so Discover installs it as well,
   and Frame Tweaks offers only what you can't get there or from Homebrew. An installed VSCodium
   stays, with your settings and extensions (Discover can remove it).

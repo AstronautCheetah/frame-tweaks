@@ -4696,7 +4696,7 @@ msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks."
+"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
 msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
@@ -4706,32 +4706,7 @@ msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release"
-msgstr ""
-
-#: packs/third-party/full-keyboard/install.sh:11
-msgid "Downloading Full Keyboard %s"
-msgstr ""
-
-#: packs/third-party/full-keyboard/install.sh:15
-msgid ""
-"Open 'Full Keyboard' from the VR dashboard's app launcher (VR session must be running)."
-msgstr ""
-
-#: packs/third-party/full-keyboard/install.sh:7
-msgid "Full Keyboard %s already installed"
-msgstr ""
-
-#: packs/third-party/full-keyboard/install.sh:9
-msgid "Full Keyboard is running: close it from its toolbar first"
-msgstr ""
-
-#: packs/third-party/full-keyboard/status.sh:4
-msgid "Full Keyboard not installed"
-msgstr ""
-
-#: packs/third-party/full-keyboard/uninstall.sh:3
-msgid "Full Keyboard is running: close it first"
+"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from its newest release"
 msgstr ""
 
 #: packs/third-party/pack.md
