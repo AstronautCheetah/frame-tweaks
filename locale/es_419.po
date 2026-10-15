@@ -91,7 +91,7 @@ msgstr "Participa"
 msgid "{version} available"
 msgstr "{version} disponible"
 
-#: gui/frame-tweaks-gui.py:1219 gui/frame-tweaks-gui.py:1241 gui/packs_page.py:167
+#: gui/frame-tweaks-gui.py:1219 gui/frame-tweaks-gui.py:1241 gui/packs_page.py:168
 msgid "Update"
 msgstr "Actualizar"
 
@@ -198,29 +198,29 @@ msgid "Nothing to launch: how to use it"
 msgstr "Nada que abrir: cómo usarlo"
 
 # needs review
-#: gui/frame-tweaks-gui.py:1405
+#: gui/frame-tweaks-gui.py:1428
 msgid "Restart SteamVR?"
 msgstr "¿Reiniciar SteamVR?"
 
 # needs review
-#: gui/frame-tweaks-gui.py:1406
+#: gui/frame-tweaks-gui.py:1429
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
 msgstr ""
 "Se cierran todas las apps abiertas, también las del modo escritorio y esta ventana: guarda tu trabajo antes. Después, SteamVR vuelve a iniciarse solo."
 
 # needs review
-#: gui/frame-tweaks-gui.py:1408
+#: gui/frame-tweaks-gui.py:1431
 msgid "Restart SteamVR"
 msgstr "Reiniciar SteamVR"
 
 # needs review
-#: gui/frame-tweaks-gui.py:1415
+#: gui/frame-tweaks-gui.py:1438
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
 msgstr ""
 "No se pudo reiniciar SteamVR; reinícialo desde su menú o reinicia el equipo."
 
-#: gui/frame-tweaks-gui.py:1432 gui/frame-tweaks-gui.py:1190
+#: gui/frame-tweaks-gui.py:1455 gui/frame-tweaks-gui.py:1190
 msgid "Help make Frame Tweaks better"
 msgstr "Ayuda a mejorar Frame Tweaks"
 
@@ -228,72 +228,72 @@ msgstr "Ayuda a mejorar Frame Tweaks"
 msgid "status check didn't finish (took over a minute)"
 msgstr "la revisión del estado no terminó (tardó más de un minuto)"
 
-#: gui/frame-tweaks-gui.py:1507 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1530 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: gui/frame-tweaks-gui.py:1534
+#: gui/frame-tweaks-gui.py:1557
 msgid "Install: %s"
 msgstr "Instalar: %s"
 
-#: gui/frame-tweaks-gui.py:1535
+#: gui/frame-tweaks-gui.py:1558
 msgid "Remove: %s"
 msgstr "Quitar: %s"
 
-#: gui/frame-tweaks-gui.py:1536
+#: gui/frame-tweaks-gui.py:1559
 msgid "Nothing to change: tick or untick a tweak first"
 msgstr "Nada que cambiar: primero marca o desmarca un ajuste"
 
-#: gui/frame-tweaks-gui.py:1540
+#: gui/frame-tweaks-gui.py:1563
 msgid "Still checking status; try again in a moment."
 msgstr ""
 "Todavía se está revisando el estado; vuelve a intentarlo en un momento."
 
-#: gui/frame-tweaks-gui.py:1545 install.sh:557
+#: gui/frame-tweaks-gui.py:1568 install.sh:557
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
 
-#: gui/frame-tweaks-gui.py:1549
+#: gui/frame-tweaks-gui.py:1572
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr "Estos ajustes instalados se desmarcaron y se <b>quitarán</b>:"
 
-#: gui/frame-tweaks-gui.py:1551
+#: gui/frame-tweaks-gui.py:1574
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 "Su configuración también se elimina (⚙ Preferencias); sus datos se conservan."
 
-#: gui/frame-tweaks-gui.py:1552
+#: gui/frame-tweaks-gui.py:1575
 msgid "Their settings and data are kept."
 msgstr "Su configuración y sus datos se conservan."
 
-#: gui/frame-tweaks-gui.py:1553
+#: gui/frame-tweaks-gui.py:1576
 msgid "Remove them"
 msgstr "Quitarlos"
 
-#: gui/frame-tweaks-gui.py:1598
+#: gui/frame-tweaks-gui.py:1621
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 "No se pudo abrir una terminal: ejecuta ./install.sh uninstall-self en {folder}"
 
-#: gui/frame-tweaks-gui.py:1671
+#: gui/frame-tweaks-gui.py:1694
 msgid "Something went wrong in the installer window"
 msgstr "Algo salió mal en la ventana del instalador"
 
-#: gui/frame-tweaks-gui.py:1674
+#: gui/frame-tweaks-gui.py:1697
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 "Copia los detalles en un informe de error. La ventana sigue funcionando: vuelve e inténtalo de nuevo."
 
-#: gui/frame-tweaks-gui.py:1680 gui/frame-tweaks-gui.py:1684
+#: gui/frame-tweaks-gui.py:1703 gui/frame-tweaks-gui.py:1707
 msgid "Copy for bug report"
 msgstr "Copiar para informe de error"
 
-#: gui/frame-tweaks-gui.py:1682
+#: gui/frame-tweaks-gui.py:1705
 msgid "Copied"
 msgstr "Copiado"
 
-#: gui/frame-tweaks-gui.py:1686
+#: gui/frame-tweaks-gui.py:1709
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
@@ -362,7 +362,7 @@ msgstr "Mostrar esta categoría otra vez"
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr "Ocultar toda la categoría de la lista (no quita nada)"
 
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1683 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1706 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr "← Volver"
 
@@ -542,7 +542,7 @@ msgid ""
 msgstr ""
 "Qué es Frame Tweaks, cómo instalarlo, actualizarlo y quitarlo, problemas comunes"
 
-#: gui/frame-tweaks-gui.py:875 gui/frame-tweaks-gui.py:1685
+#: gui/frame-tweaks-gui.py:875 gui/frame-tweaks-gui.py:1708
 msgid "🐞 Report a problem"
 msgstr "🐞 Informar un problema"
 
@@ -581,73 +581,74 @@ msgid_plural "%d tweaks"
 msgstr[0] "%d ajuste"
 msgstr[1] "%d ajustes"
 
+# needs review
 #: gui/packs_page.py:131
-msgid "by {author}"
-msgstr "por {author}"
+msgid "tweak pack provided by {author}"
+msgstr "paquete de ajustes proporcionado por {author}"
 
 # needs review
-#: gui/packs_page.py:135
+#: gui/packs_page.py:136
 msgid "A newer version is out where it came from: Update gets it."
 msgstr "Hay una versión más reciente de donde vino: Actualizar la trae."
 
 # needs review
-#: gui/packs_page.py:138
+#: gui/packs_page.py:139
 msgid "From {link}"
 msgstr "De {link}"
 
-#: gui/packs_page.py:148 gui/packs_page.py:155
+#: gui/packs_page.py:149 gui/packs_page.py:156
 msgid "Stop using"
 msgstr "Dejar de usar"
 
-#: gui/packs_page.py:148
+#: gui/packs_page.py:149
 msgid "Use"
 msgstr "Usar"
 
-#: gui/packs_page.py:149
+#: gui/packs_page.py:150
 msgid "Its tweaks come back to the list"
 msgstr "Sus ajustes vuelven a la lista"
 
-#: gui/packs_page.py:150 gui/packs_page.py:156
+#: gui/packs_page.py:151 gui/packs_page.py:157
 msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 "Sus ajustes salen de la lista; los instalados se quedan hasta que los desinstales"
 
-#: gui/packs_page.py:159
+#: gui/packs_page.py:160
 msgid "Yes: it runs as me"
 msgstr "Sí: se ejecuta como yo"
 
-#: gui/packs_page.py:160
+#: gui/packs_page.py:161
 msgid "Trust this pack's current files"
 msgstr "Confiar en los archivos actuales de este paquete"
 
-#: gui/packs_page.py:163
+#: gui/packs_page.py:164
 msgid "Trust…"
 msgstr "Confiar…"
 
 # needs review
-#: gui/packs_page.py:170
+#: gui/packs_page.py:171
 msgid ""
 "Get its newer version from where it was added; it waits until you trust it again"
 msgstr ""
 "Obtener su versión más nueva desde donde se agregó; espera hasta que vuelvas a confiar en él"
 
 # needs review
-#: gui/packs_page.py:176
+#: gui/packs_page.py:177
 msgid "Yes, delete it"
 msgstr "Sí, eliminarlo"
 
 # needs review
-#: gui/packs_page.py:180
+#: gui/packs_page.py:181
 msgid "Remove…"
 msgstr "Quitar…"
 
 # needs review
-#: gui/packs_page.py:181
+#: gui/packs_page.py:182
 msgid "Delete this pack from your packs folder"
 msgstr "Eliminar este paquete de tu carpeta de paquetes"
 
-#: gui/packs_page.py:186
+#: gui/packs_page.py:187
 msgid "Problems"
 msgstr "Problemas"
 
@@ -674,71 +675,71 @@ msgstr ""
 "Cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
 
 # needs review
-#: gui/packs_page.py:231
+#: gui/packs_page.py:232
 msgid "That didn't work: {error}"
 msgstr "Eso no funcionó: {error}"
 
 # needs review
-#: gui/packs_page.py:239
+#: gui/packs_page.py:240
 msgid "Paste or type the link of a pack's git repository first."
 msgstr "Primero pega o escribe el enlace del repositorio git de un paquete."
 
 # needs review
-#: gui/packs_page.py:241
+#: gui/packs_page.py:242
 msgid "Adding the pack…"
 msgstr "Agregando el paquete…"
 
 # needs review
-#: gui/packs_page.py:246
+#: gui/packs_page.py:247
 msgid ""
 "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
 msgstr ""
 "Se agregó {name}. No se usa hasta que confíes en él: sus ajustes se ejecutarían como tú. Lee primero lo que hacen (su enlace, o Abrir carpeta de paquetes) y luego Confiar… abajo."
 
 # needs review
-#: gui/packs_page.py:253
+#: gui/packs_page.py:254
 msgid "Updating {name}…"
 msgstr "Actualizando {name}…"
 
 # needs review
-#: gui/packs_page.py:262 lib/sft.py:973
+#: gui/packs_page.py:263 lib/sft.py:973
 msgid "{name} is up to date."
 msgstr "{name} está al día."
 
 # needs review
-#: gui/packs_page.py:264 lib/sft.py:975
+#: gui/packs_page.py:265 lib/sft.py:975
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] "{name}: actualizado, cambió {n} archivo."
 msgstr[1] "{name}: actualizado, cambiaron {n} archivos."
 
 # needs review
-#: gui/packs_page.py:266
+#: gui/packs_page.py:267
 msgid ""
 "It isn't used until you trust it again: read what changed first, then Trust… below."
 msgstr ""
 "No se usa hasta que vuelvas a confiar en él: lee primero lo que cambió y luego Confiar… abajo."
 
 # needs review
-#: gui/packs_page.py:279
+#: gui/packs_page.py:280
 msgid "Removed {name}."
 msgstr "Se quitó {name}."
 
 # needs review
-#: gui/packs_page.py:307
+#: gui/packs_page.py:308
 msgid "(its README can't be read)"
 msgstr "(no se puede leer su README)"
 
-#: gui/packs_page.py:317 lib/sft.py:1000
+#: gui/packs_page.py:318 lib/sft.py:1000
 msgid "(instead of {other}'s)"
 msgstr "(en lugar del de {other})"
 
 # needs review
-#: gui/packs_page.py:318
+#: gui/packs_page.py:319
 msgid "installed"
 msgstr "instalado"
 
-#: gui/packs_page.py:319 lib/sft.py:942
+#: gui/packs_page.py:320 lib/sft.py:942
 msgid "none"
 msgstr "ninguno"
 
@@ -2295,18 +2296,22 @@ msgid "Copy in VR, paste in the desktop, and back."
 msgstr "Copia en RV, pega en el escritorio, y al revés."
 
 #: packs/integrations/clipboard/status.sh:10
+msgid "%s copies running (Restart fixes it)"
+msgstr "%s copias en ejecución (Reiniciar lo corrige)"
+
+#: packs/integrations/clipboard/status.sh:14
 msgid "older build: replaces copied images with text (Reinstall fixes it)"
 msgstr ""
 "compilación anterior: reemplaza las imágenes copiadas con texto (Reinstalar lo corrige)"
 
 # needs review
-#: packs/integrations/clipboard/status.sh:12
+#: packs/integrations/clipboard/status.sh:16
 msgid ""
 "older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
 msgstr ""
 "compilación anterior: los archivos y las imágenes se quedan en su sesión, y un archivo copiado puede pegarse solo como texto (Reinstalar lo corrige)"
 
-#: packs/integrations/clipboard/status.sh:14 packs/original/ydotool/status.sh:6
+#: packs/integrations/clipboard/status.sh:18 packs/original/ydotool/status.sh:6
 msgid "%s running"
 msgstr "%s en ejecución"
 
@@ -2314,13 +2319,16 @@ msgstr "%s en ejecución"
 msgid "%s not installed"
 msgstr "%s no instalado"
 
-#: packs/integrations/clipboard/status.sh:4
-msgid "installed but not running (starts with desktop mode)"
-msgstr "instalado pero no en ejecución (se inicia con el modo escritorio)"
-
+# needs review
 #: packs/integrations/clipboard/status.sh:6
-msgid "%s copies running (Restart fixes it)"
-msgstr "%s copias en ejecución (Reiniciar lo corrige)"
+msgid "installed; starts with desktop mode"
+msgstr "instalado; se inicia con el modo escritorio"
+
+# needs review
+#: packs/integrations/clipboard/status.sh:7
+msgid "not running, though desktop mode is (Restart starts it)"
+msgstr ""
+"no está en ejecución, aunque el modo escritorio sí (Reiniciar lo inicia)"
 
 #: packs/integrations/clipboard/uninstall.sh:7
 msgid ""
@@ -5692,3 +5700,9 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 
 #~ msgid "Read"
 #~ msgstr "Leer"
+
+#~ msgid "by {author}"
+#~ msgstr "por {author}"
+
+#~ msgid "installed but not running (starts with desktop mode)"
+#~ msgstr "instalado pero no en ejecución (se inicia con el modo escritorio)"

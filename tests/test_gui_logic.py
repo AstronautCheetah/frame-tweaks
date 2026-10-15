@@ -96,6 +96,23 @@ class Versions(unittest.TestCase):
         self.assertNotIn("up to date", w.say.call_args[0][0])
         self.assertNotEqual(w.say.call_args[1].get("good"), True)
 
+    def test_a_row_is_checked_again(self):
+        """After Run (a Restart, say), and on coming back to the window: that row's status again,
+        once at a time."""
+        from concurrent.futures import Future
+        w = gui.Window.__new__(gui.Window)
+        w.rows, w.futures = [{"id": "clipboard"}], {}
+        done = Future()
+        done.set_result((0, "running"))
+        w.pool, w.collecting = mock.Mock(), mock.Mock()
+        w.pool.submit.return_value = done
+        w.recheck("clipboard")
+        w.recheck("clipboard")                                  # (still being checked: once)
+        w.recheck("not-a-row")
+        self.assertEqual(w.pool.submit.call_args_list, [mock.call(gui.status, "clipboard")])
+        self.assertIs(w.futures["clipboard"], done)
+        w.collecting.assert_called_once()
+
     def test_updated_under_an_open_window(self):
         """Nothing newer on GitHub, but the checkout changed since the window opened (an update in a
         terminal, a git pull): not "up to date" with the older build in its title, but ↻ Restart."""

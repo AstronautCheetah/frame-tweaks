@@ -1397,6 +1397,29 @@ class Window(QWidget):
             print("would run:", " ".join(cmd))
             return
         QProcess.startDetached(cmd[0], cmd[1:])
+        # (a Restart, say, changes what its row should say: look again once it's had time)
+        for ms in (3000, 10000):
+            QTimer.singleShot(ms, lambda c=comp["id"]: self.recheck(c))
+
+    def recheck(self, cid):
+        """Check one row's status again (in the background, as the first time)."""
+        if cid in self.futures or cid not in {c["id"] for c in self.rows}:
+            return
+        self.futures[cid] = self.pool.submit(status, cid)
+        self.collecting()
+
+    def changeEvent(self, ev):
+        """Back to the window: rows that needed attention may not any more (desktop mode started
+        since, say, and with it what the row waited for). Checked again, at most every 30 s."""
+        super().changeEvent(ev)
+        if ev.type() != QEvent.Type.ActivationChange or not self.isActiveWindow():
+            return
+        if time.monotonic() - getattr(self, "rechecked", 0) < 30:
+            return
+        self.rechecked = time.monotonic()
+        for cid, st in list(getattr(self, "state", {}).items()):
+            if st is not None and st[0] in (2, RESTART, UNLOAD):
+                self.recheck(cid)
 
     def restart_steamvr(self):
         """⟳ Restart SteamVR, on the row of a tweak SteamVR loads only as it starts (installed, or

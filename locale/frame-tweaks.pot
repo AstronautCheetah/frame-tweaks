@@ -83,7 +83,7 @@ msgstr ""
 msgid "{version} available"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1219 gui/frame-tweaks-gui.py:1241 gui/packs_page.py:167
+#: gui/frame-tweaks-gui.py:1219 gui/frame-tweaks-gui.py:1241 gui/packs_page.py:168
 msgid "Update"
 msgstr ""
 
@@ -178,24 +178,24 @@ msgstr ""
 msgid "Nothing to launch: how to use it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1405
+#: gui/frame-tweaks-gui.py:1428
 msgid "Restart SteamVR?"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1406
+#: gui/frame-tweaks-gui.py:1429
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1408
+#: gui/frame-tweaks-gui.py:1431
 msgid "Restart SteamVR"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1415
+#: gui/frame-tweaks-gui.py:1438
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1432 gui/frame-tweaks-gui.py:1190
+#: gui/frame-tweaks-gui.py:1455 gui/frame-tweaks-gui.py:1190
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
@@ -203,68 +203,68 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1507 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1530 gui/prefs_page.py:195 packs/original/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1534
+#: gui/frame-tweaks-gui.py:1557
 msgid "Install: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1535
+#: gui/frame-tweaks-gui.py:1558
 msgid "Remove: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1536
+#: gui/frame-tweaks-gui.py:1559
 msgid "Nothing to change: tick or untick a tweak first"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1540
+#: gui/frame-tweaks-gui.py:1563
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1545 install.sh:557
+#: gui/frame-tweaks-gui.py:1568 install.sh:557
 msgid "Nothing to change."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1549
+#: gui/frame-tweaks-gui.py:1572
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1551
+#: gui/frame-tweaks-gui.py:1574
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1552
+#: gui/frame-tweaks-gui.py:1575
 msgid "Their settings and data are kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1553
+#: gui/frame-tweaks-gui.py:1576
 msgid "Remove them"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1598
+#: gui/frame-tweaks-gui.py:1621
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1671
+#: gui/frame-tweaks-gui.py:1694
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1674
+#: gui/frame-tweaks-gui.py:1697
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1680 gui/frame-tweaks-gui.py:1684
+#: gui/frame-tweaks-gui.py:1703 gui/frame-tweaks-gui.py:1707
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1682
+#: gui/frame-tweaks-gui.py:1705
 msgid "Copied"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1686
+#: gui/frame-tweaks-gui.py:1709
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
@@ -330,7 +330,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1683 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1706 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr ""
 
@@ -498,7 +498,7 @@ msgid ""
 "What Frame Tweaks is, how to install, update and remove it, common issues"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:875 gui/frame-tweaks-gui.py:1685
+#: gui/frame-tweaks-gui.py:875 gui/frame-tweaks-gui.py:1708
 msgid "🐞 Report a problem"
 msgstr ""
 
@@ -535,64 +535,64 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: gui/packs_page.py:131
-msgid "by {author}"
+msgid "tweak pack provided by {author}"
 msgstr ""
 
-#: gui/packs_page.py:135
+#: gui/packs_page.py:136
 msgid "A newer version is out where it came from: Update gets it."
 msgstr ""
 
-#: gui/packs_page.py:138
+#: gui/packs_page.py:139
 msgid "From {link}"
 msgstr ""
 
-#: gui/packs_page.py:148 gui/packs_page.py:155
+#: gui/packs_page.py:149 gui/packs_page.py:156
 msgid "Stop using"
 msgstr ""
 
-#: gui/packs_page.py:148
+#: gui/packs_page.py:149
 msgid "Use"
 msgstr ""
 
-#: gui/packs_page.py:149
+#: gui/packs_page.py:150
 msgid "Its tweaks come back to the list"
 msgstr ""
 
-#: gui/packs_page.py:150 gui/packs_page.py:156
+#: gui/packs_page.py:151 gui/packs_page.py:157
 msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 
-#: gui/packs_page.py:159
+#: gui/packs_page.py:160
 msgid "Yes: it runs as me"
 msgstr ""
 
-#: gui/packs_page.py:160
+#: gui/packs_page.py:161
 msgid "Trust this pack's current files"
 msgstr ""
 
-#: gui/packs_page.py:163
+#: gui/packs_page.py:164
 msgid "Trust…"
 msgstr ""
 
-#: gui/packs_page.py:170
+#: gui/packs_page.py:171
 msgid ""
 "Get its newer version from where it was added; it waits until you trust it again"
 msgstr ""
 
-#: gui/packs_page.py:176
+#: gui/packs_page.py:177
 msgid "Yes, delete it"
 msgstr ""
 
-#: gui/packs_page.py:180
+#: gui/packs_page.py:181
 msgid "Remove…"
 msgstr ""
 
-#: gui/packs_page.py:181
+#: gui/packs_page.py:182
 msgid "Delete this pack from your packs folder"
 msgstr ""
 
-#: gui/packs_page.py:186
+#: gui/packs_page.py:187
 msgid "Problems"
 msgstr ""
 
@@ -616,59 +616,59 @@ msgstr ""
 msgid "Changed since you trusted it: not used until you trust it again"
 msgstr ""
 
-#: gui/packs_page.py:231
+#: gui/packs_page.py:232
 msgid "That didn't work: {error}"
 msgstr ""
 
-#: gui/packs_page.py:239
+#: gui/packs_page.py:240
 msgid "Paste or type the link of a pack's git repository first."
 msgstr ""
 
-#: gui/packs_page.py:241
+#: gui/packs_page.py:242
 msgid "Adding the pack…"
 msgstr ""
 
-#: gui/packs_page.py:246
+#: gui/packs_page.py:247
 msgid ""
 "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
 msgstr ""
 
-#: gui/packs_page.py:253
+#: gui/packs_page.py:254
 msgid "Updating {name}…"
 msgstr ""
 
-#: gui/packs_page.py:262 lib/sft.py:973
+#: gui/packs_page.py:263 lib/sft.py:973
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py:264 lib/sft.py:975
+#: gui/packs_page.py:265 lib/sft.py:975
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py:266
+#: gui/packs_page.py:267
 msgid ""
 "It isn't used until you trust it again: read what changed first, then Trust… below."
 msgstr ""
 
-#: gui/packs_page.py:279
+#: gui/packs_page.py:280
 msgid "Removed {name}."
 msgstr ""
 
-#: gui/packs_page.py:307
+#: gui/packs_page.py:308
 msgid "(its README can't be read)"
 msgstr ""
 
-#: gui/packs_page.py:317 lib/sft.py:1000
+#: gui/packs_page.py:318 lib/sft.py:1000
 msgid "(instead of {other}'s)"
 msgstr ""
 
-#: gui/packs_page.py:318
+#: gui/packs_page.py:319
 msgid "installed"
 msgstr ""
 
-#: gui/packs_page.py:319 lib/sft.py:942
+#: gui/packs_page.py:320 lib/sft.py:942
 msgid "none"
 msgstr ""
 
@@ -2072,15 +2072,19 @@ msgid "Copy in VR, paste in the desktop, and back."
 msgstr ""
 
 #: packs/integrations/clipboard/status.sh:10
+msgid "%s copies running (Restart fixes it)"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:14
 msgid "older build: replaces copied images with text (Reinstall fixes it)"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:12
+#: packs/integrations/clipboard/status.sh:16
 msgid ""
 "older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:14 packs/original/ydotool/status.sh:6
+#: packs/integrations/clipboard/status.sh:18 packs/original/ydotool/status.sh:6
 msgid "%s running"
 msgstr ""
 
@@ -2088,12 +2092,12 @@ msgstr ""
 msgid "%s not installed"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:4
-msgid "installed but not running (starts with desktop mode)"
+#: packs/integrations/clipboard/status.sh:6
+msgid "installed; starts with desktop mode"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:6
-msgid "%s copies running (Restart fixes it)"
+#: packs/integrations/clipboard/status.sh:7
+msgid "not running, though desktop mode is (Restart starts it)"
 msgstr ""
 
 #: packs/integrations/clipboard/uninstall.sh:7
