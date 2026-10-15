@@ -996,7 +996,10 @@ class NarrationOverlay(QObject):
         self.n, self.last_digest, self.cover_path, self.pressed, self.drag = 0, None, None, None, None
         self.render()
         self.ov.showOverlay(self.h)
-        QTimer(self, interval=22, timeout=self.poll).start()
+        # Events 45x a second while a laser is on the panel (or it's carried or pressed), 10x
+        # otherwise (only to notice one arriving; nothing is lost meanwhile: events queue)
+        self.poll_timer = QTimer(self, interval=22, timeout=self.poll)
+        self.poll_timer.start()
         QTimer(self, interval=200, timeout=self.render).start()
 
     def size_m(self):
@@ -1233,8 +1236,9 @@ class NarrationOverlay(QObject):
                     self.drag = None
                     self.save_offset()                     # remembered relative to the dashboard
         # Grip to carry it, as on Arrow Pad and Full Keyboard: squeeze while that controller's
-        # laser is on the panel (buttons included), let go to put it down.
-        grips = self.grips.poll() if self.grips else []
+        # laser is on the panel (buttons included), let go to put it down. (Read only then: each
+        # read asks SteamVR for controller properties, which other programs wait on too.)
+        grips = self.grips.poll() if self.grips and (self.hovered or self.grip_drag) else []
         held = {d for d, h, _ in grips if h}
         for d, _, pressed in grips:
             if pressed and d in self.hovered and self.drag is None:
@@ -1252,6 +1256,10 @@ class NarrationOverlay(QObject):
             if ctrl is not None:
                 self.pose = vrkit.rigid_mul(ctrl, self.drag[1])
                 self.apply_pose()
+        busy = self.hovered or self.drag is not None or self.pressed is not None
+        timer = getattr(self, "poll_timer", None)
+        if timer is not None and timer.interval() != (22 if busy else 100):
+            timer.setInterval(22 if busy else 100)
 
     def haptic(self, dev, kind):
         """A tick on the controller pointing at a button, a firmer one on a press (Arrow Pad's and
