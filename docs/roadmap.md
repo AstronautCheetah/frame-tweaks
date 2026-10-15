@@ -58,8 +58,10 @@ next to the idea it inspired.
 ## Packaging and UX
 - [x] **AppStream metainfo,** a reverse-DNS desktop ID and multi-size icons for the installer
   (needed for a Flatpak source later). *(ProtonUp-Qt)*
-- [x] **Controller navigation** in the installer window beyond A/B/Y: D-pad/stick moves focus.
-  *(ProtonUp-Qt)*
+- [ ] **Controller buttons in the installer window** (VR): B back, Y to the top, A ticks the row
+  the laser points at, the left D-pad moves through the rows. Written (`gui/vrbuttons.py`), but
+  not working reliably yet, so it's off (`CONTROLLER_BUTTONS` in the window) and out of ⚙
+  Preferences until it does; the window's haptic ticks don't depend on it. *(ProtonUp-Qt)*
 - [x] **Translations** of the installer window, the installer's messages and the tweaks' programs
   (gettext `.po` files, locale/README.md; Latin American Spanish first). Still to come: a
   translation platform (Weblate) once there are outside translators. *(Decky, ProtonUp-Qt)*

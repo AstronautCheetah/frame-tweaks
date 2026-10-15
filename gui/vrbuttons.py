@@ -26,12 +26,14 @@ class VRButtons:
             import openvr
             self.vr = openvr
             openvr.init(openvr.VRApplication_Overlay)
+            self.started = True
+            if not handlers:                # haptics only: the buttons stay with whatever has focus
+                return
             self.input = openvr.VRInput()
             self.input.setActionManifestPath(str(VR_DIR / "actions.json"))
             self.set = openvr.VRActiveActionSet_t()
             self.set.ulActionSet = self.input.getActionSetHandle("/actions/sft")
             self.set.nPriority = openvr.k_nActionSetOverlayGlobalPriorityMin
-            self.started = True
             self.actions = {n: self.input.getActionHandle(f"/actions/sft/in/{n}") for n in handlers}
             self.ok = True
         except Exception:
@@ -72,7 +74,8 @@ class VRButtons:
     def close(self):
         if self.started:
             try:
-                self.input.updateActionState([])
+                if self.ok:
+                    self.input.updateActionState([])
                 self.vr.shutdown()
             except Exception:
                 pass
