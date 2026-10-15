@@ -2014,6 +2014,93 @@ msgid ""
 "Claude Desktop starts without the KDE wallet, so sign-ins aren't kept: reinstall it"
 msgstr ""
 
+#: packs/integrations/clipboard/README.md
+msgid ""
+"Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs Frame Tweaks' build of [clipboard-sync](https://github.com/dnut/clipboard-sync), with the changes the Frame needs."
+msgstr ""
+
+#: packs/integrations/clipboard/README.md
+msgid ""
+"One clipboard for desktop mode and VR floating windows, files and pictures included"
+msgstr ""
+
+#: packs/integrations/clipboard/README.md
+msgid ""
+"The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh:18
+msgid ""
+"Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you\n"
+"don't use it yourself: %s   (frees about 3.4 GB)"
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh:41
+msgid "%s started"
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh:43
+msgid "%s starts with desktop mode."
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh:9
+msgid "Downloading %s %s"
+msgstr ""
+
+#: packs/integrations/clipboard/run.sh:4
+msgid "%s starts with it."
+msgstr ""
+
+#: packs/integrations/clipboard/run.sh:4
+msgid "Desktop mode isn't running"
+msgstr ""
+
+#: packs/integrations/clipboard/run.sh:4 packs/integrations/clipboard/run.sh:7 packs/integrations/clipboard/README.md
+msgid "Shared clipboard"
+msgstr ""
+
+#: packs/integrations/clipboard/run.sh:7 packs/original/tools/restart-plasmashell:20 packs/original/ydotool/run.sh:3
+msgid "%s restarted"
+msgstr ""
+
+#: packs/integrations/clipboard/run.sh:7
+msgid "Copy in VR, paste in the desktop, and back."
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:10
+msgid "older build: replaces copied images with text (Reinstall fixes it)"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:12
+msgid ""
+"older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:14 packs/original/ydotool/status.sh:6
+msgid "%s running"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:3 packs/integrations/nordvpn/status.sh:3 packs/original/ydotool/status.sh:3
+msgid "%s not installed"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:4
+msgid "installed but not running (starts with desktop mode)"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh:6
+msgid "%s copies running (Restart fixes it)"
+msgstr ""
+
+#: packs/integrations/clipboard/uninstall.sh:7
+msgid ""
+"Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
+msgstr ""
+
+#: packs/integrations/clipboard/uninstall.sh:8
+msgid "(frees about 3.4 GB)"
+msgstr ""
+
 #: packs/integrations/nordvpn/README.md
 msgid "NordVPN (WireGuard)"
 msgstr ""
@@ -2171,10 +2258,6 @@ msgstr ""
 msgid "NordVPN tray is running"
 msgstr ""
 
-#: packs/integrations/nordvpn/status.sh:3 packs/original/ydotool/status.sh:3 packs/third-party/clipboard/status.sh:3
-msgid "%s not installed"
-msgstr ""
-
 #: packs/integrations/nordvpn/status.sh:4
 msgid "not set up yet (run: %s)"
 msgstr ""
@@ -2197,7 +2280,7 @@ msgstr ""
 
 #: packs/integrations/pack.md
 msgid ""
-"Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their makers' own releases or Flathub where Frame Tweaks installs them, and set up with the parts that make them work well on the Frame, such as a tray icon, a key kept in the wallet, or menu entries."
+"Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their makers' own releases, Flathub, or Frame Tweaks' own build of them (Shared clipboard), and set up with the parts that make them work well on the Frame, such as a tray icon, a key kept in the wallet, or menu entries."
 msgstr ""
 
 #: packs/integrations/signal/README.md
@@ -3307,7 +3390,7 @@ msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
 msgstr ""
 
-#: packs/original/dictation/README.md packs/original/snip/README.md packs/original/adb-scrcpy/README.md packs/original/homebrew/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/third-party/clipboard/README.md
+#: packs/original/dictation/README.md packs/original/snip/README.md packs/original/adb-scrcpy/README.md packs/original/homebrew/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/integrations/clipboard/README.md
 msgid "uses"
 msgstr ""
 
@@ -3601,7 +3684,7 @@ msgstr ""
 msgid "Accessibility"
 msgstr ""
 
-#: packs/original/pack.md packs/original/adb-scrcpy/README.md packs/original/cursor/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/clipboard/README.md
+#: packs/original/pack.md packs/original/adb-scrcpy/README.md packs/original/cursor/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md
 msgid "Convenience"
 msgstr ""
 
@@ -4278,10 +4361,6 @@ msgstr ""
 msgid "%s failed; see %s"
 msgstr ""
 
-#: packs/original/tools/restart-plasmashell:20 packs/original/ydotool/run.sh:3 packs/third-party/clipboard/run.sh:7
-msgid "%s restarted"
-msgstr ""
-
 #: packs/original/tools/status.sh:3
 msgid "%s installed"
 msgstr ""
@@ -4652,7 +4731,7 @@ msgid ""
 "On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one."
 msgstr ""
 
-#: packs/original/ydotool/README.md packs/third-party/clipboard/README.md
+#: packs/original/ydotool/README.md packs/integrations/clipboard/README.md
 msgid "Restart"
 msgstr ""
 
@@ -4696,101 +4775,6 @@ msgstr ""
 msgid "%s socket missing"
 msgstr ""
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
-msgid "%s running"
-msgstr ""
-
-#: packs/third-party/clipboard/README.md
-msgid ""
-"Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes."
-msgstr ""
-
-#: packs/third-party/clipboard/README.md
-msgid ""
-"One clipboard for desktop mode and VR floating windows, files and pictures included"
-msgstr ""
-
-#: packs/third-party/clipboard/README.md
-msgid ""
-"The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:15
-msgid "Fetching Rust %s (temporary, for the build)"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:18
-msgid "couldn't set up Rust for the build"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:21
-msgid ""
-"Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you\n"
-"don't use it yourself: %s   (frees about 3.4 GB)"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:24
-msgid "Building %s from %s (a few minutes)"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:36
-msgid "%s: not the pinned commit"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:38
-msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:69
-msgid "%s started"
-msgstr ""
-
-#: packs/third-party/clipboard/install.sh:71
-msgid "%s starts with desktop mode."
-msgstr ""
-
-#: packs/third-party/clipboard/run.sh:4
-msgid "%s starts with it."
-msgstr ""
-
-#: packs/third-party/clipboard/run.sh:4
-msgid "Desktop mode isn't running"
-msgstr ""
-
-#: packs/third-party/clipboard/run.sh:4 packs/third-party/clipboard/run.sh:7 packs/third-party/clipboard/README.md
-msgid "Shared clipboard"
-msgstr ""
-
-#: packs/third-party/clipboard/run.sh:7
-msgid "Copy in VR, paste in the desktop, and back."
-msgstr ""
-
-#: packs/third-party/clipboard/status.sh:10
-msgid ""
-"older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
-msgstr ""
-
-#: packs/third-party/clipboard/status.sh:4
-msgid "installed but not running (starts with desktop mode)"
-msgstr ""
-
-#: packs/third-party/clipboard/status.sh:6
-msgid "%s copies running (Restart fixes it)"
-msgstr ""
-
-#: packs/third-party/clipboard/status.sh:8
-msgid "older build: replaces copied images with text (Reinstall fixes it)"
-msgstr ""
-
-#: packs/third-party/clipboard/uninstall.sh:7
-msgid ""
-"Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
-msgstr ""
-
-#: packs/third-party/clipboard/uninstall.sh:8
-msgid "(frees about 3.4 GB)"
-msgstr ""
-
 #: packs/third-party/full-keyboard/README.md
 msgid "Full Keyboard (VR)"
 msgstr ""
@@ -4816,7 +4800,7 @@ msgstr ""
 
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects for the Steam Frame, installed into your home folder and credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, and they update their own way (↻ on their row). The others it fits to the Frame: built from a pinned, checked version of their source and updated with Frame Tweaks, with their own README following ours on their page."
+"Other people's projects for the Steam Frame, credited to their authors. They're linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row)."
 msgstr ""
 
 #: packs/third-party/recline/README.md

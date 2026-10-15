@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed
+- **Shared clipboard installs in seconds:** it now downloads Frame Tweaks' own build of
+  clipboard-sync (about 1 MB, checked against its pinned SHA256) instead of building it on the
+  Frame, which took a few minutes and about 600 MB of temporary space. The build is
+  [AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync), a fork
+  of dnut/clipboard-sync with Frame Tweaks' changes as commits, tested and built by its CI. It
+  moves to **Integrations** (3rd Party is now the linked projects); reinstall it (↻) to switch,
+  which also removes the old build's leftovers.
+
 ### Added
 - **What's in a pack:** on the Packs page, click a pack to see its tweaks, each with its tags,
   summary and whether it's installed; a tweak's name opens its page, and Back returns to Packs.

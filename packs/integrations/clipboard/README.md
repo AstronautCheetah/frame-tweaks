@@ -6,30 +6,29 @@ tier: core
 summary: One clipboard for desktop mode and VR floating windows, files and pictures included
 what: >-
   Copy in a floating VR window and paste in the desktop, and the other way round: text, files
-  and pictures, and the text you select for a middle-click paste. It runs
-  [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame
-  Tweaks' changes.
+  and pictures, and the text you select for a middle-click paste. It runs Frame Tweaks' build of
+  [clipboard-sync](https://github.com/dnut/clipboard-sync), with the changes the Frame needs.
 why: >-
   The Frame's VR session and its desktop mode each have their own clipboard, so text copied in
   one can't be pasted in the other.
-author: dnut (clipboard-sync); approach from lhns/steam-frame-nix
-source: {relation: uses, url: https://github.com/dnut/clipboard-sync}
+author: dnut (clipboard-sync); Frame Tweaks (its fork); approach from lhns/steam-frame-nix
+source: {relation: uses, url: https://github.com/AstronautCheetah/clipboard-sync}
 icon: {theme: edit-paste}
 run: {label: Restart}
 processes: [^~/.local/bin/clipboard-sync]
 app: clipboard-sync
 changes: >-
-  `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary,
-  pinned Rust toolchain), a KDE autostart entry
+  `clipboard-sync` (Frame Tweaks' build, a pinned and checked release) in
+  `~/.local/share/frame-tweaks/`, a KDE autostart entry
 access: Reads and writes both sessions' clipboards
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall clipboard`"
-upstream_readme: https://raw.githubusercontent.com/dnut/clipboard-sync/138a59b8f3044dd9e7dcccd9607bbbb48c14bae6/README.md
+upstream_readme: https://raw.githubusercontent.com/AstronautCheetah/clipboard-sync/v0.2.0-ft.1/README.md
 ---
 # Shared clipboard
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes.
+Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs Frame Tweaks' build of [clipboard-sync](https://github.com/dnut/clipboard-sync), with the changes the Frame needs.
 
 **Why on a Steam Frame:** The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other.
 <!-- /generated:intro -->
@@ -41,9 +40,9 @@ Tick it in the Frame Tweaks window, or:
 ./install.sh install clipboard
 ```
 
-It builds clipboard-sync from source, which takes a few minutes and about 600 MB of temporary
-space; the build files are deleted afterwards. If desktop mode is running, it starts right away;
-otherwise it starts the next time you open desktop mode.
+It downloads Frame Tweaks' build of clipboard-sync (about 1 MB) and checks it against the
+checksum in [`pin`](pin). If desktop mode is running, it starts right away; otherwise it starts
+the next time you open desktop mode.
 
 ## Use
 Nothing to do: copy as usual in a floating VR window or in the desktop, and paste in the other.
@@ -68,14 +67,15 @@ desktop, which runs nested inside it with its own displays. Each has its own cli
 it can reach and copies new text to the others. Started with the desktop session, it can reach
 both.
 
-- **Built from source**, at the clipboard-sync commit pinned in [`pin`](pin), with the Rust
-  toolchain pinned in [`rust.pin`](rust.pin). Rust is set up in a temporary folder for the build
-  and deleted afterwards.
-- **Frame Tweaks' changes** are applied before building (clipboard-sync shares text only, and
-  wrote it into every clipboard):
-  - [`keep-images.patch`](keep-images.patch): copying an image looked like "no text" to it, so it
-    put the last text back a moment later and the image never pasted.
-  - [`sync-sessions.patch`](sync-sessions.patch), the rest:
+- **Frame Tweaks' build:** [AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync)
+  is clipboard-sync with Frame Tweaks' changes as commits, offered upstream too. Its Build
+  workflow tests it and makes the aarch64 binary for each release; [`pin`](pin) names the
+  release and its SHA256, which the install checks. (Older versions built it on the Frame, with a
+  temporary Rust toolchain and about 600 MB of space; reinstalling removes what they left.)
+- **Frame Tweaks' changes** (clipboard-sync shared text only, and wrote it into every clipboard):
+  - **Copying an image** looked like "no text" to it, so it put the last text back a moment
+    later and the image never pasted.
+  - **Everything else:**
     - **A copy is never written back where it came from.** It was, as text, replacing what the
       app had put there: a file cut or copied in Dolphin then pasted only as its address
       ("Paste Clipboard Contents"), formatted text lost its formatting, and a password manager's
@@ -107,8 +107,8 @@ both.
   where you copied them; the other session gets their text, if they have any.
 - Android Mirror can pass the clipboard on to the phone: see its setting **Share the clipboard
   with the phone**.
-- The status line warns if it isn't running, if more than one copy is running, or if your build
-  is older than these changes (reinstall it to fix that).
+- The status line shows the build's version, and warns if it isn't running, if more than one
+  copy is running, or if an older version's build lacks these changes (reinstall it to fix that).
 - If you have Homebrew's Rust installed and don't use it yourself, installing or removing this
   tweak reminds you that you can free about 3.4 GB with
   `brew uninstall rust && brew autoremove`.
@@ -117,7 +117,7 @@ both.
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry
+- **Changes:** `clipboard-sync` (Frame Tweaks' build, a pinned and checked release) in `~/.local/share/frame-tweaks/`, a KDE autostart entry
 - **Unusual access:** Reads and writes both sessions' clipboards
 - **Undo:** `./install.sh uninstall clipboard`
 <!-- /generated:changes -->
@@ -125,9 +125,8 @@ both.
 ## Credits
 This is the approach of [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix)'s
 `clipboardSync` module (Apache-2.0), done without Nix; the tool is
-[dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) (MIT or Apache-2.0). It's built
-with [Rust](https://www.rust-lang.org) (rustup; MIT or Apache-2.0). See also
-[CREDITS.md](../../../CREDITS.md).
+[dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) (MIT or Apache-2.0), which Frame
+Tweaks' fork builds on. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status clipboard` · Remove: `./install.sh uninstall clipboard`
@@ -135,11 +134,23 @@ Check: `./install.sh status clipboard` · Remove: `./install.sh uninstall clipbo
 <!-- generated:upstream (dev/gen-docs.py, from upstream.md) -->
 ---
 
-*The rest of this page is [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync)'s own README at `138a59b8f304`, © its authors, under [MIT](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/MIT.txt) or [Apache-2.0](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Apache-2.0.txt), as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
+*The rest of this page is [AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync)'s own README at `v0.2.0-ft.1`, © its authors, under [MIT](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/MIT.txt) or [Apache-2.0](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Apache-2.0.txt), as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
 
 ## Clipboard Sync
 
 Synchronizes the clipboard across multiple X11 and wayland instances running on the same machine.
+
+> **This fork** is the clipboard-sync that [Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks)
+> installs as its Shared clipboard on the Steam Frame, where desktop mode is a nested KWin (Wayland,
+> with its own Xwayland) inside the VR session's gamescope (X11). It's
+> [dnut/clipboard-sync](https://github.com/dnut/clipboard-sync) plus two commits (see the log):
+> a copied image is no longer replaced by the last text; and files, pictures and the primary
+> selection are shared, a copy is never written back where it came from, a password manager's
+> secret mark is kept, copies are noticed as they happen (data-control, XFixes) instead of polled,
+> and a start replaces nothing. [Releases](https://github.com/AstronautCheetah/clipboard-sync/releases)
+> have a prebuilt aarch64 Linux binary (glibc 2.39 or newer, libxcb) with its SHA256SUMS, built by
+> this repository's Build workflow. The changes are offered upstream too; licence as upstream's
+> (MIT or Apache-2.0, in Cargo.toml).
 
 To use clipboard sync, you only need to install it and start the service. It identifies and synchronizes your clipboards automatically.
 

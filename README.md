@@ -47,8 +47,7 @@ You need:
 - Some disk space: a few MB for most tweaks. The bigger ones: the full installer window and Arrow
   Pad share a Python setup of about 280 MB, Dictation's Whisper model is about 260 MB, and
   Homebrew (used by a few tweaks) takes several hundred MB or more, depending on what is in it.
-  Each Narrate voice is about 60 MB, and building the shared clipboard needs about 600 MB of
-  temporary space.
+  Each Narrate voice is about 60 MB.
 
 In desktop mode, open **Konsole** and run:
 
@@ -144,8 +143,8 @@ them.
 |---|---|---|---|
 | 📱 | [**Android Mirror**](packs/original/adb-scrcpy/) 🧪 *(sudo)* | Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself. | Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape. |
 | 🖱️ | [**Mouse cursor fix**](packs/original/cursor/) | Makes the mouse pointer visible in desktop mode. | In desktop mode on the Frame, the mouse moves but its pointer isn't shown: the desktop draws it on a separate layer that the headset's view leaves out. |
+| 📋 | [**Shared clipboard**](packs/integrations/clipboard/) | Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs Frame Tweaks' build of [clipboard-sync](https://github.com/dnut/clipboard-sync), with the changes the Frame needs. | The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other. |
 | ⌨️ | [**Full Keyboard**](packs/third-party/full-keyboard/) (VR) 🔗 | TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset. | Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes. |
-| 📋 | [**Shared clipboard**](packs/third-party/clipboard/) | Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes. | The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other. |
 
 ### VR environment
 

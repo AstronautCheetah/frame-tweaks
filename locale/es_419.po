@@ -2226,6 +2226,105 @@ msgid ""
 msgstr ""
 "Claude para escritorio se inicia sin la cartera de KDE, así que no se guardan los inicios de sesión: reinstálalo"
 
+# needs review
+#: packs/integrations/clipboard/README.md
+msgid ""
+"Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs Frame Tweaks' build of [clipboard-sync](https://github.com/dnut/clipboard-sync), with the changes the Frame needs."
+msgstr ""
+"Copia en una ventana flotante de RV y pega en el escritorio, y al revés: texto, archivos e imágenes, y el texto que seleccionas para pegar con el clic central. Usa la versión de Frame Tweaks de [clipboard-sync](https://github.com/dnut/clipboard-sync), con los cambios que necesita el Frame."
+
+# needs review
+#: packs/integrations/clipboard/README.md
+msgid ""
+"One clipboard for desktop mode and VR floating windows, files and pictures included"
+msgstr ""
+"Un solo portapapeles para el modo escritorio y las ventanas flotantes de RV, archivos e imágenes incluidos"
+
+#: packs/integrations/clipboard/README.md
+msgid ""
+"The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
+msgstr ""
+"La sesión de RV del Frame y su modo escritorio tienen cada uno su propio portapapeles, así que el texto copiado en uno no se puede pegar en el otro."
+
+#: packs/integrations/clipboard/install.sh:18
+msgid ""
+"Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you\n"
+"don't use it yourself: %s   (frees about 3.4 GB)"
+msgstr ""
+"El Rust de Homebrew (instalado por versiones anteriores para esta compilación) ya no hace falta; si\n"
+"no lo usas tú: %s   (libera unos 3.4 GB)"
+
+#: packs/integrations/clipboard/install.sh:41
+msgid "%s started"
+msgstr "%s iniciado"
+
+#: packs/integrations/clipboard/install.sh:43
+msgid "%s starts with desktop mode."
+msgstr "%s se inicia con el modo escritorio."
+
+# needs review
+#: packs/integrations/clipboard/install.sh:9
+msgid "Downloading %s %s"
+msgstr "Descargando %s %s"
+
+#: packs/integrations/clipboard/run.sh:4
+msgid "%s starts with it."
+msgstr "%s se inicia con él."
+
+#: packs/integrations/clipboard/run.sh:4
+msgid "Desktop mode isn't running"
+msgstr "El modo escritorio no está en ejecución"
+
+#: packs/integrations/clipboard/run.sh:4 packs/integrations/clipboard/run.sh:7 packs/integrations/clipboard/README.md
+msgid "Shared clipboard"
+msgstr "Portapapeles compartido"
+
+#: packs/integrations/clipboard/run.sh:7 packs/original/tools/restart-plasmashell:20 packs/original/ydotool/run.sh:3
+msgid "%s restarted"
+msgstr "%s reiniciado"
+
+#: packs/integrations/clipboard/run.sh:7
+msgid "Copy in VR, paste in the desktop, and back."
+msgstr "Copia en RV, pega en el escritorio, y al revés."
+
+#: packs/integrations/clipboard/status.sh:10
+msgid "older build: replaces copied images with text (Reinstall fixes it)"
+msgstr ""
+"compilación anterior: reemplaza las imágenes copiadas con texto (Reinstalar lo corrige)"
+
+# needs review
+#: packs/integrations/clipboard/status.sh:12
+msgid ""
+"older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
+msgstr ""
+"compilación anterior: los archivos y las imágenes se quedan en su sesión, y un archivo copiado puede pegarse solo como texto (Reinstalar lo corrige)"
+
+#: packs/integrations/clipboard/status.sh:14 packs/original/ydotool/status.sh:6
+msgid "%s running"
+msgstr "%s en ejecución"
+
+#: packs/integrations/clipboard/status.sh:3 packs/integrations/nordvpn/status.sh:3 packs/original/ydotool/status.sh:3
+msgid "%s not installed"
+msgstr "%s no instalado"
+
+#: packs/integrations/clipboard/status.sh:4
+msgid "installed but not running (starts with desktop mode)"
+msgstr "instalado pero no en ejecución (se inicia con el modo escritorio)"
+
+#: packs/integrations/clipboard/status.sh:6
+msgid "%s copies running (Restart fixes it)"
+msgstr "%s copias en ejecución (Reiniciar lo corrige)"
+
+#: packs/integrations/clipboard/uninstall.sh:7
+msgid ""
+"Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
+msgstr ""
+"El Rust de Homebrew (instalado por versiones anteriores para esta compilación) sigue ahí; si no lo usas:"
+
+#: packs/integrations/clipboard/uninstall.sh:8
+msgid "(frees about 3.4 GB)"
+msgstr "(libera unos 3.4 GB)"
+
 #: packs/integrations/nordvpn/README.md
 msgid "NordVPN (WireGuard)"
 msgstr "NordVPN (WireGuard)"
@@ -2390,10 +2489,6 @@ msgstr ""
 msgid "NordVPN tray is running"
 msgstr "La bandeja de NordVPN está en ejecución"
 
-#: packs/integrations/nordvpn/status.sh:3 packs/original/ydotool/status.sh:3 packs/third-party/clipboard/status.sh:3
-msgid "%s not installed"
-msgstr "%s no instalado"
-
 #: packs/integrations/nordvpn/status.sh:4
 msgid "not set up yet (run: %s)"
 msgstr "aún no configurado (ejecuta: %s)"
@@ -2414,11 +2509,12 @@ msgstr "se quitó la conexión %s"
 msgid "Integrations"
 msgstr "Integraciones"
 
+# needs review
 #: packs/integrations/pack.md
 msgid ""
-"Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their makers' own releases or Flathub where Frame Tweaks installs them, and set up with the parts that make them work well on the Frame, such as a tray icon, a key kept in the wallet, or menu entries."
+"Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their makers' own releases, Flathub, or Frame Tweaks' own build of them (Shared clipboard), and set up with the parts that make them work well on the Frame, such as a tray icon, a key kept in the wallet, or menu entries."
 msgstr ""
-"Apps y servicios de otros proyectos, adaptados al Steam Frame por Frame Tweaks: instalados desde las versiones de sus creadores o desde Flathub cuando Frame Tweaks los instala, y configurados con lo que los hace funcionar bien en el Frame, como un ícono en la bandeja, una clave guardada en la cartera o entradas de menú."
+"Apps y servicios de otros proyectos, adaptados al Steam Frame por Frame Tweaks: instalados desde las versiones de sus creadores, desde Flathub o desde una compilación propia de Frame Tweaks (Portapapeles compartido), y configurados con lo que los hace funcionar bien en el Frame, como un ícono en la bandeja, una clave guardada en la cartera o entradas de menú."
 
 #: packs/integrations/signal/README.md
 msgid ""
@@ -3666,7 +3762,7 @@ msgid ""
 msgstr ""
 "Escribir con los láseres de los controles en un teclado de RV es lento. El Frame puede transcribir la voz localmente, así que puedes hablar en su lugar, y tu voz nunca sale del visor."
 
-#: packs/original/dictation/README.md packs/original/snip/README.md packs/original/adb-scrcpy/README.md packs/original/homebrew/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/third-party/clipboard/README.md
+#: packs/original/dictation/README.md packs/original/snip/README.md packs/original/adb-scrcpy/README.md packs/original/homebrew/README.md packs/original/ydotool/README.md packs/original/speech/README.md packs/integrations/clipboard/README.md
 msgid "uses"
 msgstr "usa"
 
@@ -3985,7 +4081,7 @@ msgstr "%s ícono(s) agregado(s) para el menú \"+\""
 msgid "Accessibility"
 msgstr "Accesibilidad"
 
-#: packs/original/pack.md packs/original/adb-scrcpy/README.md packs/original/cursor/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/clipboard/README.md
+#: packs/original/pack.md packs/original/adb-scrcpy/README.md packs/original/cursor/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md
 msgid "Convenience"
 msgstr "Comodidad"
 
@@ -4694,10 +4790,6 @@ msgstr ""
 msgid "%s failed; see %s"
 msgstr "%s falló; consulta %s"
 
-#: packs/original/tools/restart-plasmashell:20 packs/original/ydotool/run.sh:3 packs/third-party/clipboard/run.sh:7
-msgid "%s restarted"
-msgstr "%s reiniciado"
-
 #: packs/original/tools/status.sh:3
 msgid "%s installed"
 msgstr "%s instalado"
@@ -5101,7 +5193,7 @@ msgid ""
 msgstr ""
 "En el escritorio del Frame (KDE Plasma en Wayland), los programas comunes no pueden enviar pulsaciones de teclas a otras apps. ydotool sí puede: agrega un teclado virtual al kernel (`/dev/uinput`), que todas las apps tratan como uno real."
 
-#: packs/original/ydotool/README.md packs/third-party/clipboard/README.md
+#: packs/original/ydotool/README.md packs/integrations/clipboard/README.md
 msgid "Restart"
 msgstr "Reiniciar"
 
@@ -5149,113 +5241,6 @@ msgstr "servicio %s no está en ejecución (%s)"
 msgid "%s socket missing"
 msgstr "falta el socket de %s"
 
-#: packs/original/ydotool/status.sh:6 packs/third-party/clipboard/status.sh:11
-msgid "%s running"
-msgstr "%s en ejecución"
-
-# needs review
-#: packs/third-party/clipboard/README.md
-msgid ""
-"Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes."
-msgstr ""
-"Copia en una ventana flotante de RV y pega en el escritorio, y al revés: texto, archivos e imágenes, y el texto que seleccionas para pegar con clic central. Ejecuta [clipboard-sync](https://github.com/dnut/clipboard-sync), compilado desde su código fuente, con los cambios de Frame Tweaks."
-
-# needs review
-#: packs/third-party/clipboard/README.md
-msgid ""
-"One clipboard for desktop mode and VR floating windows, files and pictures included"
-msgstr ""
-"Un solo portapapeles para el modo escritorio y las ventanas flotantes de RV, archivos e imágenes incluidos"
-
-#: packs/third-party/clipboard/README.md
-msgid ""
-"The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
-msgstr ""
-"La sesión de RV del Frame y su modo escritorio tienen cada uno su propio portapapeles, así que el texto copiado en uno no se puede pegar en el otro."
-
-#: packs/third-party/clipboard/install.sh:15
-msgid "Fetching Rust %s (temporary, for the build)"
-msgstr "Descargando Rust %s (temporal, para la compilación)"
-
-#: packs/third-party/clipboard/install.sh:18
-msgid "couldn't set up Rust for the build"
-msgstr "no se pudo preparar Rust para la compilación"
-
-#: packs/third-party/clipboard/install.sh:21
-msgid ""
-"Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you\n"
-"don't use it yourself: %s   (frees about 3.4 GB)"
-msgstr ""
-"El Rust de Homebrew (instalado por versiones anteriores para esta compilación) ya no hace falta; si\n"
-"no lo usas tú: %s   (libera unos 3.4 GB)"
-
-#: packs/third-party/clipboard/install.sh:24
-msgid "Building %s from %s (a few minutes)"
-msgstr "Compilando %s desde %s (unos minutos)"
-
-#: packs/third-party/clipboard/install.sh:36
-msgid "%s: not the pinned commit"
-msgstr "%s: no es el commit fijado"
-
-#: packs/third-party/clipboard/install.sh:38
-msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
-msgstr ""
-"El commit fijado de %s no está disponible en el repositorio original; se usa la copia de Frame Tweaks"
-
-#: packs/third-party/clipboard/install.sh:69
-msgid "%s started"
-msgstr "%s iniciado"
-
-#: packs/third-party/clipboard/install.sh:71
-msgid "%s starts with desktop mode."
-msgstr "%s se inicia con el modo escritorio."
-
-#: packs/third-party/clipboard/run.sh:4
-msgid "%s starts with it."
-msgstr "%s se inicia con él."
-
-#: packs/third-party/clipboard/run.sh:4
-msgid "Desktop mode isn't running"
-msgstr "El modo escritorio no está en ejecución"
-
-#: packs/third-party/clipboard/run.sh:4 packs/third-party/clipboard/run.sh:7 packs/third-party/clipboard/README.md
-msgid "Shared clipboard"
-msgstr "Portapapeles compartido"
-
-#: packs/third-party/clipboard/run.sh:7
-msgid "Copy in VR, paste in the desktop, and back."
-msgstr "Copia en RV, pega en el escritorio, y al revés."
-
-# needs review
-#: packs/third-party/clipboard/status.sh:10
-msgid ""
-"older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
-msgstr ""
-"compilación anterior: los archivos y las imágenes se quedan en su sesión, y un archivo copiado puede pegarse solo como texto (Reinstalar lo corrige)"
-
-#: packs/third-party/clipboard/status.sh:4
-msgid "installed but not running (starts with desktop mode)"
-msgstr "instalado pero no en ejecución (se inicia con el modo escritorio)"
-
-#: packs/third-party/clipboard/status.sh:6
-msgid "%s copies running (Restart fixes it)"
-msgstr "%s copias en ejecución (Reiniciar lo corrige)"
-
-#: packs/third-party/clipboard/status.sh:8
-msgid "older build: replaces copied images with text (Reinstall fixes it)"
-msgstr ""
-"compilación anterior: reemplaza las imágenes copiadas con texto (Reinstalar lo corrige)"
-
-#: packs/third-party/clipboard/uninstall.sh:7
-msgid ""
-"Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
-msgstr ""
-"El Rust de Homebrew (instalado por versiones anteriores para esta compilación) sigue ahí; si no lo usas:"
-
-#: packs/third-party/clipboard/uninstall.sh:8
-msgid "(frees about 3.4 GB)"
-msgstr "(libera unos 3.4 GB)"
-
 #: packs/third-party/full-keyboard/README.md
 msgid "Full Keyboard (VR)"
 msgstr "Teclado completo (RV)"
@@ -5287,9 +5272,9 @@ msgstr "De terceros"
 # needs review
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects for the Steam Frame, installed into your home folder and credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, and they update their own way (↻ on their row). The others it fits to the Frame: built from a pinned, checked version of their source and updated with Frame Tweaks, with their own README following ours on their page."
+"Other people's projects for the Steam Frame, credited to their authors. They're linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row)."
 msgstr ""
-"Proyectos de otras personas para el Steam Frame, instalados en tu carpeta personal y con el crédito a sus autores. La mayoría están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, y se actualizan a su manera (↻ en su fila). Los demás los adapta al Frame: se compilan desde una versión fijada y verificada de su código fuente y se actualizan con Frame Tweaks, con su propio README después del nuestro en su página."
+"Proyectos de otras personas para el Steam Frame, con el crédito a sus autores. Están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, en tu carpeta personal, y se actualizan a su manera (↻ en su fila)."
 
 #: packs/third-party/recline/README.md
 msgid ""
@@ -5659,3 +5644,36 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "Desktop mode has taken all input, so other windows don't get it: tap Right Ctrl on a keyboard to give it back."
 #~ msgstr ""
 #~ "El modo escritorio tomó toda la entrada, así que las demás ventanas no la reciben: toca Ctrl derecho en un teclado para devolverla."
+
+#~ msgid ""
+#~ "Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their makers' own releases or Flathub where Frame Tweaks installs them, and set up with the parts that make them work well on the Frame, such as a tray icon, a key kept in the wallet, or menu entries."
+#~ msgstr ""
+#~ "Apps y servicios de otros proyectos, adaptados al Steam Frame por Frame Tweaks: instalados desde las versiones de sus creadores o desde Flathub cuando Frame Tweaks los instala, y configurados con lo que los hace funcionar bien en el Frame, como un ícono en la bandeja, una clave guardada en la cartera o entradas de menú."
+
+#~ # needs review
+#~ msgid ""
+#~ "Copy in a floating VR window and paste in the desktop, and the other way round: text, files and pictures, and the text you select for a middle-click paste. It runs [clipboard-sync](https://github.com/dnut/clipboard-sync), built from its source, with Frame Tweaks' changes."
+#~ msgstr ""
+#~ "Copia en una ventana flotante de RV y pega en el escritorio, y al revés: texto, archivos e imágenes, y el texto que seleccionas para pegar con clic central. Ejecuta [clipboard-sync](https://github.com/dnut/clipboard-sync), compilado desde su código fuente, con los cambios de Frame Tweaks."
+
+#~ msgid "Fetching Rust %s (temporary, for the build)"
+#~ msgstr "Descargando Rust %s (temporal, para la compilación)"
+
+#~ msgid "couldn't set up Rust for the build"
+#~ msgstr "no se pudo preparar Rust para la compilación"
+
+#~ msgid "Building %s from %s (a few minutes)"
+#~ msgstr "Compilando %s desde %s (unos minutos)"
+
+#~ msgid "%s: not the pinned commit"
+#~ msgstr "%s: no es el commit fijado"
+
+#~ msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
+#~ msgstr ""
+#~ "El commit fijado de %s no está disponible en el repositorio original; se usa la copia de Frame Tweaks"
+
+#~ # needs review
+#~ msgid ""
+#~ "Other people's projects for the Steam Frame, installed into your home folder and credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, and they update their own way (↻ on their row). The others it fits to the Frame: built from a pinned, checked version of their source and updated with Frame Tweaks, with their own README following ours on their page."
+#~ msgstr ""
+#~ "Proyectos de otras personas para el Steam Frame, instalados en tu carpeta personal y con el crédito a sus autores. La mayoría están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, y se actualizan a su manera (↻ en su fila). Los demás los adapta al Frame: se compilan desde una versión fijada y verificada de su código fuente y se actualizan con Frame Tweaks, con su propio README después del nuestro en su página."
