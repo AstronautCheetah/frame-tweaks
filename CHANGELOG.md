@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.2 (2026-10-15)
 
 ### Added
 - **Help make Frame Tweaks better,** the last row of the Developer group: not a tweak, but the
