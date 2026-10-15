@@ -197,8 +197,6 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
 - The **Developer** group ends with **Help make Frame Tweaks better**: not a tweak, but the ways
   to help, from ideas for new tweaks and third-party apps to translations, bug reports and code
   ([docs/contribute.md](docs/contribute.md)).
-- In VR, the controller's **B** goes back, **Y** goes to the top of the list, the left D-pad's
-  up and down move the highlight between rows, and **A** ticks the row you point at.
 
 <p align="center"><img src="docs/images/details.png" width="640" alt="A tweak's details page: what it is, why it's included, who made it, its source and README"></p>
 

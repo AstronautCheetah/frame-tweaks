@@ -18,9 +18,6 @@ WINDOW = sft.CONF / "window.json"
 OPTIONS = {
     "haptics": (True, N_("Haptic ticks on this window's buttons (in VR)"),
                 N_("A light tick when the laser moves onto a button, a firmer one on a click.")),
-    "controller": (True, N_("Controller buttons in VR"),
-                   N_("While the laser is on this window: B goes back, Y to the top, A ticks the row it points at, "
-                      "the left D-pad moves through the rows. Takes effect when the window opens again.")),
     "update_check": (True, N_("Look for a new Frame Tweaks release when this window opens"),
                      N_("Off: only when you press ⟳ Check for updates.")),
 }

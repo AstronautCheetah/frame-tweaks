@@ -69,6 +69,9 @@
   menu folders (no network, a private `/tmp`).
 
 ### Removed
+- **Controller buttons in the installer window** (VR: B back, Y to the top, A ticks a row, the
+  left D-pad through the rows), and their ⚙ Preferences option: they don't work reliably yet. The
+  window no longer claims those buttons while the laser is on it; its haptic ticks stay.
 - **Recline** is set aside for now (not offered while it's tested). Installed, it stays until
   you remove it.
 
@@ -90,20 +93,23 @@
   without the check, and without running the installed tweaks' installers again.
 
 ### Fixed
+- **Android Mirror's ⚙ on an upright mirror docked in the dashboard** sat on the dashboard's own
+  Show Keyboard button (their row under a docked window is wider than so narrow a window): it's
+  now beside the window's lower left corner there, with its settings to the left of it.
 - **Android Mirror after "Restart stream":** its "Connecting…" window could stay open, taken for
   the mirror and floated over it, so the mirror's handle couldn't be grabbed. Android Mirror's
   own windows now have a title of their own ("Android Mirror setup"), and that window is always
   closed (stopped, if it doesn't answer).
 - **Less CPU while idle:** Arrow Pad's VR panel checks 5 times a second instead of 45 while the
-  dashboard is closed; the window checks the controller buttons 4 times a second until the
-  laser is on it (then 30), and background jobs once a second when none is running.
+  dashboard is closed; the window checks for background jobs' results once a second when none
+  is running.
 - **Uninstalling a tweak whose menu entry the wallet guards** (Arrow Pad, Screen snip, NordVPN,
   Dictation, the wallet, Full Keyboard) no longer leaves the entry's kept copy behind, and
   uninstalling Screen snip stops a running Screen snip.
 - **A damaged settings file** (Arrow Pad's or Screen snip's, not a JSON object) no longer stops
   them from starting; settings files are written whole, so a crash can't leave half of one.
-- **The window's haptic ticks in VR** no longer stop for good after one error with the
-  controller buttons; **Arrow Pad's haptics log** no longer grows without end.
+- **The window's haptic ticks in VR** no longer stop for good after an error; **Arrow Pad's
+  haptics log** no longer grows without end.
 - **"Update available" for an app** no longer takes a release candidate (1.2.0-rc1) for newer
   than its release.
 - **The window's wallet page** shows the auto-lock settings the wallet really uses.

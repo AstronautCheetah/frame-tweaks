@@ -416,6 +416,11 @@ class Row(QWidget):
             self.window.show_details(self.comp)
 
 
+# Controller buttons in VR (B back, Y to the top, A ticks the row, the left D-pad through the
+# rows; vrbuttons.py): off until they work reliably (docs/roadmap.md). Off, the window never
+# claims the buttons; its haptic ticks still work.
+CONTROLLER_BUTTONS = False
+
 # The last row of the Developer group: not a tweak (nothing to install), the ways to help
 # (docs/contribute.md). Built here, not in a pack, so install.sh, status and the README's
 # tables never see it.
@@ -766,16 +771,17 @@ class Window(QWidget):
         self.collector.start()
         QTimer(self, interval=int(i18n.CHECK_EVERY * 1000), timeout=self.check_language).start()
         self.vr_buttons = None
-        if os.environ.get("DISPLAY") == ":0":          # opened in VR: controller buttons too
+        if os.environ.get("DISPLAY") == ":0":          # opened in VR: haptic ticks (and the controller buttons, when on)
             sys.path.insert(0, str(Path(__file__).resolve().parent))
             from vrbuttons import VRButtons
             self.vr_buttons = VRButtons({"back": self.go_back, "home": self.go_home,
                                          "toggle": self.toggle_pointed_row,
                                          "up": lambda: self.move_focus(-1),
                                          "down": lambda: self.move_focus(+1)}
-                                        if self.prefs["controller"] else {})     # (⚙ Preferences)
-            if self.vr_buttons.ok:
+                                        if CONTROLLER_BUTTONS else {})
+            if self.vr_buttons.started:
                 QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
+            if self.vr_buttons.ok:
                 self._laser = (None, 0.0)
                 # 30x a second while the laser is on the window (or A/B/Y are claimed); 4x a second
                 # otherwise, only to notice it arriving.

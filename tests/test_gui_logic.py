@@ -432,5 +432,32 @@ class ShowTweak(unittest.TestCase):
         window.show_details.assert_called_once()
 
 
+
+class ControllerButtonsOff(unittest.TestCase):
+    """Controller buttons in VR are off until they work (docs/roadmap.md): no ⚙ option, and the
+    window doesn't claim the buttons; its haptic ticks still work."""
+    def test_no_option(self):
+        from PyQt6.QtWidgets import QApplication, QCheckBox
+        self.app = QApplication.instance() or QApplication([])
+        self.assertFalse(gui.CONTROLLER_BUTTONS)
+        texts = [b.text() for b in gui.Preferences(mock.Mock()).findChildren(QCheckBox)]
+        self.assertNotIn("Controller buttons in VR", texts)
+        self.assertNotIn("controller", gui.window_prefs())
+
+    def test_haptics_without_claiming_buttons(self):
+        fake = mock.MagicMock(k_unTrackedDeviceIndexInvalid=-1)
+        fake.VROverlay.return_value.getPrimaryDashboardDevice.return_value = 2
+        sys.path.insert(0, str(gui.REPO / "gui"))
+        import vrbuttons
+        with mock.patch.dict(sys.modules, {"openvr": fake}):
+            b = vrbuttons.VRButtons({})
+        self.assertTrue(b.started)
+        self.assertFalse(b.ok)
+        fake.VRInput.assert_not_called()                             # (no action manifest, no action set)
+        b.poll(True)                                                 # (laser on the window: nothing claimed)
+        b.haptic("press")
+        fake.VRSystem.return_value.triggerHapticPulse.assert_called_once_with(2, 0, 3999)
+
+
 if __name__ == "__main__":
     unittest.main()
