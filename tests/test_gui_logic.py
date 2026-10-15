@@ -344,29 +344,46 @@ class PreferencesPage(unittest.TestCase):
                 window.say.assert_called_with("No settings left behind by uninstalled tweaks.", good=True)
 
     def test_uninstall_frame_tweaks_asks_then_hands_over(self):
-        from PyQt6.QtWidgets import QApplication, QCheckBox, QPushButton
+        """One choice for the tweaks (keeping third-party apps by default), settings apart."""
+        from PyQt6.QtWidgets import QApplication, QCheckBox, QPushButton, QRadioButton
         self.app = QApplication.instance() or QApplication([])
         window = mock.Mock()
         page = gui.Preferences(window)
         buttons = {b.text(): b for b in page.findChildren(QPushButton)}
+        radios = {b.text(): b for b in page.findChildren(QRadioButton)}
         boxes = {b.text(): b for b in page.findChildren(QCheckBox)}
-        self.assertTrue(boxes["Uninstall every tweak first"].isChecked())
-        boxes["Uninstall every tweak first"].setChecked(False)
-        boxes["Delete the settings too"].setChecked(True)
-        buttons["Uninstall Frame Tweaks…"].click()
-        self.assertIn("The tweaks stay installed.", page.leaving.text.text())
-        self.assertIn("Settings are deleted.", page.leaving.text.text())
-        window.uninstall_self.assert_not_called()                     # (asked first)
-        page.leaving.yes.click()
-        window.uninstall_self.assert_called_once_with(keep_tweaks=True, settings="remove", keep_apps=True)
-        self.assertFalse(boxes["Leave third-party apps installed"].isEnabled())        # (only with the tweaks going)
-        boxes["Uninstall every tweak first"].setChecked(True)
-        self.assertTrue(boxes["Leave third-party apps installed"].isChecked())          # (safe by default)
-        boxes["Leave third-party apps installed"].setChecked(False)
-        buttons["Uninstall Frame Tweaks…"].click()
-        self.assertIn("third-party apps too", page.leaving.text.text())
-        page.leaving.yes.click()
-        window.uninstall_self.assert_called_with(keep_tweaks=False, settings="remove", keep_apps=False)
+        self.assertEqual(list(radios), ["Uninstall the tweaks, but keep third-party apps",
+                                        "Uninstall every tweak, third-party apps too", "Leave every tweak installed"])
+        self.assertTrue(radios["Uninstall the tweaks, but keep third-party apps"].isChecked())   # (the safe one)
+        for text, keep_tweaks, keep_apps, says in (
+                ("Uninstall the tweaks, but keep third-party apps", False, True, "third-party apps stay"),
+                ("Uninstall every tweak, third-party apps too", False, False, "third-party apps too"),
+                ("Leave every tweak installed", True, True, "The tweaks stay installed.")):
+            radios[text].setChecked(True)
+            boxes["Also delete the settings"].setChecked(True)
+            buttons["Uninstall Frame Tweaks…"].click()
+            self.assertIn(says, page.leaving.text.text())
+            self.assertIn("Settings are deleted.", page.leaving.text.text())
+            window.uninstall_self.reset_mock()
+            page.leaving.yes.click()
+            window.uninstall_self.assert_called_once_with(keep_tweaks=keep_tweaks, settings="remove", keep_apps=keep_apps)
+
+    def test_explanations_are_plain_text(self):
+        """(they were escaped as HTML and shown as plain text: "they&#x27;re")"""
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.Preferences(mock.Mock())
+        texts = [label.text() for label in page.findChildren(QLabel)]
+        self.assertFalse([t for t in texts if "&#" in t or "&amp;" in t])
+        self.assertTrue(any("Claude Code's ~/.claude" in t for t in texts))
+
+    def test_uninstall_comes_last_below_a_line(self):
+        from PyQt6.QtWidgets import QApplication, QFrame, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.Preferences(mock.Mock())
+        headings = [w.text() for w in page.findChildren(QLabel) if w.objectName() == "name"]
+        self.assertEqual(headings, ["Language", "This window", "Uninstalling a tweak", "Uninstalling Frame Tweaks"])
+        self.assertEqual(len([f for f in page.findChildren(QFrame) if f.objectName() == "separator"]), 1)
 
     def test_window_runs_uninstall_self_as_planned(self):
         out = io.StringIO()
@@ -376,6 +393,33 @@ class PreferencesPage(unittest.TestCase):
         self.assertEqual(out.getvalue().split("\n")[:2], ["would run: ./install.sh uninstall-self --keep-settings",
                                                            "would run: ./install.sh uninstall-self --remove-apps --keep-settings"])
 
+
+
+class ContributeRow(unittest.TestCase):
+    """The Developer group ends with a row that isn't a tweak: how to help. (Built on a stand-in
+    window: the real one would start SteamVR's button handling and the update check.)"""
+    def test_row_and_page(self):
+        from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QTextBrowser, QVBoxLayout, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        holder = QWidget()
+        window = mock.Mock(row_widgets=[], grid=QVBoxLayout(holder))
+        gui.Window.add_contribute_row(window, collapsed=set())
+        self.assertEqual(len(window.row_widgets), 1)
+        row = window.row_widgets[0]
+        self.assertIsInstance(row, gui.ContributeRow)
+        self.assertNotIn("_contribute", [c["id"] for c in gui.sft.components()])     # (not a tweak)
+        self.assertEqual([b.text() for b in row.findChildren(QPushButton)], ["Read"])   # (no tick, ↻ or Hide)
+        self.assertIn("Help make Frame Tweaks better", [w.text() for w in row.findChildren(QLabel)])
+        row.findChildren(QPushButton)[0].click()
+        window.show_contribute.assert_called_once()
+        gui.Window.add_contribute_row(window, collapsed={"Developer"})             # (a folded group: none)
+        self.assertEqual(len(window.row_widgets), 1)
+        page = gui.ReadmePage(mock.Mock(), gui.REPO / "docs/contribute.md", "Help make Frame Tweaks better")
+        text = page.findChildren(QTextBrowser)[0].toPlainText()
+        for part in ("Suggest a third-party app", "tweak nobody has written yet", "Report a bug",
+                     "Review a translation", "Add a language"):
+            self.assertIn(part, text)
+        holder.deleteLater()
 
 if __name__ == "__main__":
     unittest.main()

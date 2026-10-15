@@ -5,7 +5,8 @@ choices are kept in ~/.config/frame-tweaks/installer/window.json; the language i
 import html
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QRadioButton,
+                             QScrollArea, QVBoxLayout, QWidget)
 
 import i18n  # (lib/ is on the path)
 import ftconf
@@ -82,16 +83,32 @@ class Preferences(QWidget):
         grid.addStretch(1)
         rows.addLayout(grid)
 
+        rows.addWidget(self.heading(_("This window")))
+        prefs = window_prefs()
+        for key, (_default, label, about) in OPTIONS.items():
+            box = QCheckBox(_(label))
+            box.setChecked(prefs[key])
+            box.toggled.connect(lambda on, k=key: self.set_pref(k, on))
+            rows.addWidget(box)
+            rows.addWidget(self.about(_(about)))
+
+        # (below a line: what removes things)
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setObjectName("separator")
+        rows.addSpacing(10)
+        rows.addWidget(line)
+
         # Uninstalling: what happens to a tweak's settings (lib/sft.py UNINSTALL_PREF, which
         # ./install.sh uninstall reads, so the terminal does the same).
         rows.addWidget(self.heading(_("Uninstalling a tweak")))
-        note = QLabel(_("Its settings: kept, so it's set up as before if you install it again, or removed with it. "
-                        "Removing them also signs you out of Claude Desktop, takes VSCodium's extensions, and "
-                        "NordVPN's key (setting it up again takes a new access token). Data stays either way: "
-                        "the dictation history, adb's pairing keys, Claude Code's ~/.claude."))
-        note.setObjectName("desc")
-        note.setWordWrap(True)
-        rows.addWidget(note)
+        rows.addWidget(self.note(_("When you uninstall a tweak, its settings can stay, so it's set up as before if "
+                                   "you install it again, or be removed along with it.")))
+        rows.addWidget(self.note(_("Removing settings also signs you out of Claude Desktop, removes VSCodium's "
+                                   "extensions, and deletes NordVPN's key (setting NordVPN up again then needs a new "
+                                   "access token).")))
+        rows.addWidget(self.note(_("Your own data is never removed: your dictation history, adb's pairing keys and "
+                                   "Claude Code's ~/.claude folder stay either way.")))
         grid = QHBoxLayout()
         grid.setSpacing(6)
         self.uninstall_buttons = {}
@@ -113,49 +130,49 @@ class Preferences(QWidget):
 
         # Frame Tweaks itself (./install.sh uninstall-self, in a terminal, as installs are).
         rows.addWidget(self.heading(_("Uninstalling Frame Tweaks")))
-        self.drop_tweaks = QCheckBox(_("Uninstall every tweak first"))
-        self.drop_tweaks.setChecked(True)
-        rows.addWidget(self.drop_tweaks)
-        rows.addWidget(self.about(_("Off: they stay installed and keep working, but nothing updates them, and "
-                                    "removing them later takes Frame Tweaks again.")))
-        self.keep_apps = QCheckBox(_("Leave third-party apps installed"))
-        self.keep_apps.setChecked(True)                 # (the safe choice: other projects' apps, your work in them)
-        rows.addWidget(self.keep_apps)
+        rows.addWidget(self.note(_("What happens to the tweaks:")))
         apps = ", ".join(sorted(c["app"] for c in sft.components() if c["app"]))
-        self.keep_apps_about = self.about(_("Their tweaks stay installed, and the apps work as before: {apps}. "
-                                            "Off: they're uninstalled too.").format(apps=apps))
-        rows.addWidget(self.keep_apps_about)
-        self.drop_tweaks.toggled.connect(lambda on: (self.keep_apps.setEnabled(on), self.keep_apps_about.setEnabled(on)))
-        self.drop_settings = QCheckBox(_("Delete the settings too"))
+        self.tweaks_choice = {}
+        group = QButtonGroup(self)
+        for value, label, about in (
+                ("keep-apps", _("Uninstall the tweaks, but keep third-party apps"),
+                 _("These stay installed and keep working, with the tweaks that installed them: {apps}.").format(apps=apps)),
+                ("all", _("Uninstall every tweak, third-party apps too"),
+                 _("Homebrew itself is never removed: other programs may live in it.")),
+                ("none", _("Leave every tweak installed"),
+                 _("They keep working, but nothing updates them, and removing them later takes Frame Tweaks again."))):
+            b = QRadioButton(label)
+            b.setChecked(value == "keep-apps")                  # (the safe choice: other projects' apps stay)
+            group.addButton(b)
+            self.tweaks_choice[value] = b
+            rows.addWidget(b)
+            rows.addWidget(self.about(about))
+        self.drop_settings = QCheckBox(_("Also delete the settings"))
         self.drop_settings.setChecked(sft.uninstall_settings() == "remove")
         rows.addWidget(self.drop_settings)
-        rows.addWidget(self.about(_("Frame Tweaks' own, and those of the tweaks it uninstalls or uninstalled "
-                                    "before. Off: they stay, for an install later.")))
+        rows.addWidget(self.about(_("Deletes Frame Tweaks' own settings and those of every tweak it removes, now or "
+                                    "earlier. Tweaks that stay installed keep theirs. Off: all settings are kept, "
+                                    "for a later install.")))
         leave = QPushButton(_("Uninstall Frame Tweaks…"))
         leave.setObjectName("danger")
         leave.clicked.connect(lambda: self.ask_uninstall_self())
         rows.addWidget(leave, 0, Qt.AlignmentFlag.AlignLeft)
         self.leaving = self.ask_box(rows, _("Uninstall"), lambda: self.uninstall_self(), danger=True)
 
-        rows.addWidget(self.heading(_("This window")))
-        prefs = window_prefs()
-        for key, (_default, label, about) in OPTIONS.items():
-            box = QCheckBox(_(label))
-            box.setChecked(prefs[key])
-            box.toggled.connect(lambda on, k=key: self.set_pref(k, on))
-            rows.addWidget(box)
-            text = QLabel(html.escape(_(about)))
-            text.setObjectName("desc")
-            text.setWordWrap(True)
-            text.setContentsMargins(34, 0, 0, 6)
-            rows.addWidget(text)
         rows.addStretch(1)
 
     def about(self, text):
-        a = QLabel(html.escape(text))
+        """An option's explanation, under it (plain text: an apostrophe is an apostrophe)."""
+        a = self.note(text)
+        a.setContentsMargins(34, 0, 0, 6)
+        return a
+
+    @staticmethod
+    def note(text):
+        a = QLabel(text)
+        a.setTextFormat(Qt.TextFormat.PlainText)
         a.setObjectName("desc")
         a.setWordWrap(True)
-        a.setContentsMargins(34, 0, 0, 6)
         return a
 
     def ask_box(self, rows, yes_label, on_yes, danger=False):
@@ -212,12 +229,10 @@ class Preferences(QWidget):
 
     def ask_uninstall_self(self):
         lines = [_("Uninstall Frame Tweaks?"), ""]
-        if not self.drop_tweaks.isChecked():
-            lines.append(_("The tweaks stay installed."))
-        elif self.keep_apps.isChecked():
-            lines.append(_("Every tweak is uninstalled first, but those of third-party apps, which stay."))
-        else:
-            lines.append(_("Every tweak is uninstalled first, third-party apps too."))
+        choice = next(v for v, b in self.tweaks_choice.items() if b.isChecked())
+        lines.append({"keep-apps": _("The tweaks are uninstalled first; third-party apps stay."),
+                      "all": _("Every tweak is uninstalled first, third-party apps too."),
+                      "none": _("The tweaks stay installed.")}[choice])
         lines.append(_("Settings are deleted.") if self.drop_settings.isChecked() else _("Settings are kept."))
         lines.append(_("Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); "
                        "this window closes, and a terminal shows each step.").format(folder=sft.REPO))
@@ -226,9 +241,9 @@ class Preferences(QWidget):
 
     def uninstall_self(self):
         self.leaving.hide()
-        self.window.uninstall_self(keep_tweaks=not self.drop_tweaks.isChecked(),
+        self.window.uninstall_self(keep_tweaks=self.tweaks_choice["none"].isChecked(),
                                    settings="remove" if self.drop_settings.isChecked() else "keep",
-                                   keep_apps=self.keep_apps.isChecked())
+                                   keep_apps=not self.tweaks_choice["all"].isChecked())
 
     def heading(self, text):
         h = QLabel(text)

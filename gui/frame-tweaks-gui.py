@@ -112,6 +112,11 @@ STYLE += f"""
 QCheckBox::indicator:unchecked {{ image: url({_BOX}/box.svg); }}
 QCheckBox::indicator:unchecked:hover {{ image: url({_BOX}/box-hover.svg); }}
 QCheckBox::indicator:checked {{ image: url({_BOX}/box-checked.svg); }}
+QRadioButton {{ padding: 8px; }}
+QRadioButton::indicator {{ width: 33px; height: 33px; }}
+QRadioButton::indicator:unchecked {{ image: url({_BOX}/radio.svg); }}
+QRadioButton::indicator:unchecked:hover {{ image: url({_BOX}/radio-hover.svg); }}
+QRadioButton::indicator:checked {{ image: url({_BOX}/radio-checked.svg); }}
 """
 
 
@@ -411,10 +416,22 @@ class Row(QWidget):
             self.window.show_details(self.comp)
 
 
+# The last row of the Developer group: not a tweak (nothing to install), the ways to help
+# (docs/contribute.md). Built here, not in a pack, so install.sh, status and the README's
+# tables never see it.
+CONTRIBUTE = {"id": "_contribute", "category": "Developer", "icon": "system-users"}
+
+
+class ContributeRow(Row):
+    def mouseReleaseEvent(self, ev):
+        if ev.button() == Qt.MouseButton.LeftButton:
+            self.window.show_contribute()
+
+
 class ReadmePage(QWidget):
     """Frame Tweaks' own README.md, as a page (Back returns to the list)."""
 
-    def __init__(self, window):
+    def __init__(self, window, path=None, heading=None):
         super().__init__()
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -422,12 +439,12 @@ class ReadmePage(QWidget):
         back = QPushButton(_("← Back"))
         back.clicked.connect(window.go_back)
         head.addWidget(back)
-        title = QLabel(_("About Frame Tweaks"))
+        title = QLabel(heading or _("About Frame Tweaks"))
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
         try:
-            text = plain_markdown((REPO / "README.md").read_text())
+            text = plain_markdown((path or REPO / "README.md").read_text())
         except OSError:
             text = "_" + _("No README.") + "_"
         lay.addWidget(readme_browser(text, {"official": True, "id": None, "dir": REPO}), 1)
@@ -963,6 +980,8 @@ class Window(QWidget):
             if is_hidden and not showing:
                 continue
             if cat != category:
+                if category == "Developer":
+                    self.add_contribute_row(collapsed)
                 category = cat
                 count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden))
                 self.grid.addWidget(CategoryHeader(self, cat, count, cat in collapsed, cat in hidden_cats))
@@ -1061,8 +1080,45 @@ class Window(QWidget):
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
+        if category == "Developer":
+            self.add_contribute_row(collapsed)
         self.grid.addStretch(1)
         self.update_apply()
+
+    def add_contribute_row(self, collapsed):
+        """The Developer group's last row: how to help (CONTRIBUTE), laid out as a tweak's row
+        with nothing to install: no tick box or status, Read instead of Run."""
+        if "Developer" in collapsed:
+            return
+        row = ContributeRow(self, CONTRIBUTE)
+        self.row_widgets.append(row)
+        row.setProperty("hidden_row", "false")
+        g = QGridLayout(row)
+        g.setContentsMargins(8, 10, 12, 10)
+        g.setHorizontalSpacing(14)
+        spacer = QWidget()
+        spacer.setFixedWidth(QCheckBox().sizeHint().width())
+        icon = QLabel()
+        hits = sorted(BREEZE.glob(f"*/*/{CONTRIBUTE['icon']}.svg"))
+        if hits:
+            icon.setPixmap(QIcon(str(hits[-1])).pixmap(40, 40))
+        name = QLabel(html.escape(_("Help make Frame Tweaks better"), quote=False))
+        name.setObjectName("name")
+        info = QLabel(html.escape(_("Not a tweak: ways to help, from ideas for new tweaks and third-party apps to "
+                                    "translations, bug reports and code."), quote=False))
+        info.setObjectName("desc")
+        info.setWordWrap(True)
+        read = QPushButton(_("Read"))
+        read.setObjectName("run")
+        read.clicked.connect(self.show_contribute)
+        g.addWidget(spacer, 0, 0, 2, 1)
+        g.addWidget(icon, 0, 1, 2, 1)
+        g.addWidget(name, 0, 2)
+        g.addWidget(info, 1, 2)
+        g.addWidget(read, 0, 4, 2, 1)
+        g.setColumnStretch(2, 3)
+        g.setColumnStretch(3, 2)
+        self.grid.addWidget(row)
 
     def show_status(self, cid):
         """Status text, plus an Update link when upstream has a newer version."""
@@ -1222,6 +1278,12 @@ class Window(QWidget):
     def show_details(self, comp):
         self.close_details()
         self.details = Details(self, comp, self.state.get(comp["id"]))
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
+    def show_contribute(self):
+        self.close_details()
+        self.details = ReadmePage(self, REPO / "docs/contribute.md", _("Help make Frame Tweaks better"))
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 
@@ -1414,7 +1476,9 @@ class Window(QWidget):
             w = w.parentWidget()
         if w is None and 0 <= self.focus_index < len(self.row_widgets):
             w = self.row_widgets[self.focus_index]
-        if w is not None and w.comp["id"] in self.boxes:
+        if isinstance(w, ContributeRow):
+            self.show_contribute()
+        elif w is not None and w.comp["id"] in self.boxes:
             self.boxes[w.comp["id"]].toggle()
 
     def move_focus(self, step):
