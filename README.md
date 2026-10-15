@@ -499,7 +499,9 @@ issue form asks for what's needed.
 
 ## AI use
 
-Much of the code here was written with AI coding assistance. I review every change, test it on
-my own Steam Frame, and take responsibility for what ships, so please report anything that
-looks wrong. Contributions are held to the same standard however they were written: you're
-responsible for what you send ([CONTRIBUTING.md](CONTRIBUTING.md)).
+Much of the code here was written with AI coding assistance. I review every change and test it
+on my own Steam Frame, but for now this is a hobby project: it's shared as is, without warranty
+([LICENSE](LICENSE)), in good faith that what has helped me on my Frame can help others too.
+If something looks wrong, please report it. Contributions are welcome however they were written;
+they're held to the same standard, and you're responsible for what you send
+([CONTRIBUTING.md](CONTRIBUTING.md)).
