@@ -19,6 +19,11 @@
   nothing. The dashboard now goes back to the window it showed before, and the mirror's trip
   through it is shorter.
 
+### For contributors
+- `dev/i18n.py export LANG DIR --review` for a language with no `.po` file yet says so, instead
+  of stopping with a traceback.
+
+
 ## 0.6.2 (2026-10-15)
 
 ### Added

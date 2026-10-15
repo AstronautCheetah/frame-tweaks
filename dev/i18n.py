@@ -293,6 +293,8 @@ def needs_review(text):
 
 def export(lang, outdir, size=150, every=False, review=False):
     po = LOCALE / f"{lang}.po"
+    if review and not po.exists():
+        sys.exit(f"no locale/{po.name}: nothing of {lang}'s to review")
     done = i18n.parse_po(po.read_text()) if po.exists() else {}
     marked = needs_review(po.read_text()) if review else set()
     rows = []

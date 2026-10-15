@@ -72,6 +72,11 @@ class NeedsReview(unittest.TestCase):
         tool.import_("es_419", d)                                                   # (no flag: mark left as it is)
         self.assertEqual(tool.needs_review(self.po.read_text()), {(None, "Close")})
 
+    def test_review_of_a_language_not_started_says_so(self):
+        with self.assertRaises(SystemExit) as e:
+            tool.export("pt_BR", Path(self.tmp.name) / "review", review=True)
+        self.assertEqual(str(e.exception.code), "no locale/pt_BR.po: nothing of pt_BR's to review")
+
     def test_untranslated_listed_in_the_report(self):
         report = tool.report(POT)
         self.assertIn("es_419: 0 of 2 translated", report)
