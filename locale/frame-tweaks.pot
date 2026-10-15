@@ -287,7 +287,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:376 install.sh:223 lib/common.sh:465 lib/link.sh:46 packs/original/charge-limit/status.sh:6 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:376 install.sh:223 lib/common.sh:465 lib/link.sh:49 packs/original/charge-limit/status.sh:6 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr ""
 
@@ -1429,7 +1429,7 @@ msgstr ""
 msgid "run what?"
 msgstr ""
 
-#: install.sh:725 lib/link.sh:49
+#: install.sh:725 lib/link.sh:52
 msgid "%s has nothing to run"
 msgstr ""
 
@@ -1580,32 +1580,32 @@ msgstr ""
 msgid "Homebrew didn't end up in /home/linuxbrew."
 msgstr ""
 
-#: lib/link.sh:18
+#: lib/link.sh:21
 msgid ""
 "Installing %s with its own installer (from the project, not checked by Frame Tweaks):"
 msgstr ""
 
-#: lib/link.sh:24
+#: lib/link.sh:27
 msgid "%s has no uninstall command here: see its README"
 msgstr ""
 
-#: lib/link.sh:25
+#: lib/link.sh:28
 msgid "Uninstalling %s with its own uninstaller:"
 msgstr ""
 
-#: lib/link.sh:30
+#: lib/link.sh:33
 msgid "Restart SteamVR to unload it (reboot, or: %s)."
 msgstr ""
 
-#: lib/link.sh:41
+#: lib/link.sh:44
 msgid "installed; restart SteamVR to load it"
 msgstr ""
 
-#: lib/link.sh:42
+#: lib/link.sh:45
 msgid "installed by its own installer (it updates its own way)"
 msgstr ""
 
-#: lib/link.sh:45
+#: lib/link.sh:48
 msgid "uninstalled; restart SteamVR to unload it"
 msgstr ""
 
@@ -3011,6 +3011,11 @@ msgid "Battery charge limit"
 msgstr ""
 
 #: packs/original/charge-limit/README.md
+msgid ""
+"Before a long session away from power: the limit is lifted until the battery is full (or the Frame restarts), then applies again. You don't need it otherwise."
+msgstr ""
+
+#: packs/original/charge-limit/README.md
 msgid "Charge to 100% once"
 msgstr ""
 
@@ -3021,7 +3026,7 @@ msgstr ""
 
 #: packs/original/charge-limit/README.md
 msgid ""
-"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next full charge."
+"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
 msgstr ""
 
 #: packs/original/charge-limit/README.md
@@ -3054,6 +3059,18 @@ msgstr ""
 msgid "The charger's pause switch is there"
 msgstr ""
 
+#: packs/original/charge-limit/full-once.sh:10
+msgid "Charging to 100% once; then the limit applies again."
+msgstr ""
+
+#: packs/original/charge-limit/full-once.sh:5
+msgid "Install Battery charge limit first."
+msgstr ""
+
+#: packs/original/charge-limit/full-once.sh:7
+msgid "The limit is off: the battery already charges to 100%."
+msgstr ""
+
 #: packs/original/charge-limit/install.sh:13
 msgid ""
 "The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
@@ -3071,10 +3088,6 @@ msgstr ""
 
 #: packs/original/charge-limit/install.sh:36
 msgid "The battery now stops charging at %s%% while the Frame is on."
-msgstr ""
-
-#: packs/original/charge-limit/run.sh:5
-msgid "Charging to 100% once; then the limit applies again."
 msgstr ""
 
 #: packs/original/charge-limit/status.sh:11

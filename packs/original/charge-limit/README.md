@@ -7,8 +7,8 @@ summary: Stop charging at 80% (or 85 or 90%) while the Frame is on, for a batter
 what: >-
   Charging stops when the battery reaches the limit you choose (80% unless you change it) and
   starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and
-  leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next
-  full charge.
+  leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the
+  next full charge.
 why: >-
   A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot
   of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge
@@ -22,7 +22,6 @@ experimental: >-
   service turns the pause off each time it starts; it's on again within 30 seconds. The status
   says if the switch is gone, or if the battery still charges while paused.
 icon: {theme: battery-080}
-run: {label: Charge to 100% once}
 processes: [~/.local/bin/charge-limit --run]
 settings:
   file: ~/.config/frame-tweaks/charge-limit.conf
@@ -41,6 +40,12 @@ settings:
         - {label: "85%", value: "85"}
         - {label: "90%", value: "90"}
         - {label: "Off (charge to 100%)", value: "off"}
+  actions:
+    - label: Charge to 100% once
+      script: full-once.sh
+      about: >-
+        Before a long session away from power: the limit is lifted until the battery is full (or
+        the Frame restarts), then applies again. You don't need it otherwise.
 changes: >-
   `charge-limit` in `~/.local/bin` and its user service; a udev rule
   (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through
@@ -57,7 +62,7 @@ undo: >-
 # Battery charge limit
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next full charge.
+Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge.
 
 **Why on a Steam Frame:** A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame.
 <!-- /generated:intro -->
@@ -85,10 +90,11 @@ SteamOS's own rule makes the LEDs yours (`99-leds.rules`). Uninstalling asks for
 remove the rule. If your user has no password yet, set one first with `passwd` in Konsole.
 
 ## Use
-- **The limit:** ⚙ on its row (or `./install.sh settings charge-limit`): 80% (the default), 85%,
-  90% or Off. It applies within 30 seconds.
-- **▶ Charge to 100% once**, before a long session away from power: the limit is lifted until
-  the battery is full (or the Frame restarts), then applies again.
+- **The limit:** ⚙ Settings on its row (or `./install.sh settings charge-limit`): 80% (the
+  default), 85%, 90% or Off. It applies within 30 seconds.
+- **Charge to 100% once**, a button on the same page, is only for a long session away from
+  power: the limit is lifted until the battery is full (or the Frame restarts), then applies
+  again. You don't need it otherwise.
 - **Its status** shows the limit and the battery level, and "not charging" while it holds.
 
 ## Good to know

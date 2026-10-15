@@ -124,6 +124,30 @@ class ChargeLimit(unittest.TestCase):
         self.assertFalse(self.paused())
         self.assertIn("charging paused at 90% (limit 80%)", out)
 
+    def test_charge_to_full_once_button(self):
+        """Its settings page's button (full-once.sh): only once installed, and nothing to do while
+        the limit is off."""
+        def press():
+            return subprocess.run(["bash", str(TWEAK / "full-once.sh")], env=self.env, capture_output=True,
+                                  text=True, timeout=30)
+        r = press()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("Install Battery charge limit first", r.stderr)
+        bin_dir = self.home / ".local/bin"
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        (bin_dir / "charge-limit").write_text((TWEAK / "charge-limit").read_text())
+        (bin_dir / "charge-limit").chmod(0o755)
+        self.limit("off")
+        self.assertIn("already charges to 100%", press().stdout)
+        self.assertFalse((self.run_dir / "full-once").exists())
+        self.limit("80")
+        self.battery(85)
+        self.cl("--once")
+        r = press()
+        self.assertEqual(r.stdout, "Charging to 100% once; then the limit applies again.\n", r.stderr)
+        self.assertTrue((self.run_dir / "full-once").exists())
+        self.assertFalse(self.paused())
+
     # ---- status.sh --------------------------------------------------------------------------
     def status(self, devices="", active=True):
         stub(self.stubs, "systemctl", "exit 0" if active else "exit 3")

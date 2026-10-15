@@ -314,7 +314,7 @@ msgstr "El navegador no respondió: el enlace está en el portapapeles."
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:376 install.sh:223 lib/common.sh:465 lib/link.sh:46 packs/original/charge-limit/status.sh:6 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:376 install.sh:223 lib/common.sh:465 lib/link.sh:49 packs/original/charge-limit/status.sh:6 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr "no instalado"
 
@@ -1562,7 +1562,7 @@ msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
 msgid "run what?"
 msgstr "¿ejecutar qué?"
 
-#: install.sh:725 lib/link.sh:49
+#: install.sh:725 lib/link.sh:52
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
@@ -1726,39 +1726,39 @@ msgid "Homebrew didn't end up in /home/linuxbrew."
 msgstr "Homebrew no quedó en /home/linuxbrew."
 
 # needs review
-#: lib/link.sh:18
+#: lib/link.sh:21
 msgid ""
 "Installing %s with its own installer (from the project, not checked by Frame Tweaks):"
 msgstr ""
 "Instalando %s con su propio instalador (del proyecto, sin comprobar por Frame Tweaks):"
 
 # needs review
-#: lib/link.sh:24
+#: lib/link.sh:27
 msgid "%s has no uninstall command here: see its README"
 msgstr "%s no tiene aquí un comando para desinstalarlo: consulta su README"
 
 # needs review
-#: lib/link.sh:25
+#: lib/link.sh:28
 msgid "Uninstalling %s with its own uninstaller:"
 msgstr "Desinstalando %s con su propio desinstalador:"
 
 # needs review
-#: lib/link.sh:30
+#: lib/link.sh:33
 msgid "Restart SteamVR to unload it (reboot, or: %s)."
 msgstr "Reinicia SteamVR para descargarlo (reinicia el equipo, o: %s)."
 
 # needs review
-#: lib/link.sh:41
+#: lib/link.sh:44
 msgid "installed; restart SteamVR to load it"
 msgstr "instalado; reinicia SteamVR para cargarlo"
 
 # needs review
-#: lib/link.sh:42
+#: lib/link.sh:45
 msgid "installed by its own installer (it updates its own way)"
 msgstr "instalado por su propio instalador (se actualiza a su manera)"
 
 # needs review
-#: lib/link.sh:45
+#: lib/link.sh:48
 msgid "uninstalled; restart SteamVR to unload it"
 msgstr "desinstalado; reinicia SteamVR para descargarlo"
 
@@ -3298,6 +3298,13 @@ msgstr "Límite de carga de la batería"
 
 # needs review
 #: packs/original/charge-limit/README.md
+msgid ""
+"Before a long session away from power: the limit is lifted until the battery is full (or the Frame restarts), then applies again. You don't need it otherwise."
+msgstr ""
+"Antes de una sesión larga lejos de la corriente: el límite se quita hasta que la batería esté llena (o el Frame se reinicie) y después vuelve a aplicarse. Fuera de eso no lo necesitas."
+
+# needs review
+#: packs/original/charge-limit/README.md
 msgid "Charge to 100% once"
 msgstr "Cargar al 100% una vez"
 
@@ -3311,9 +3318,9 @@ msgstr ""
 # needs review
 #: packs/original/charge-limit/README.md
 msgid ""
-"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next full charge."
+"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
 msgstr ""
-"La carga se detiene cuando la batería llega al límite que elijas (80%, si no lo cambias) y vuelve a empezar un 5% por debajo. Conectado, el Frame funciona entonces con el cargador o la batería externa y no usa la batería. Cargar al 100% una vez, en su fila, quita el límite hasta la próxima carga completa."
+"La carga se detiene cuando la batería llega al límite que elijas (80%, si no lo cambias) y vuelve a empezar un 5% por debajo. Conectado, el Frame funciona entonces con el cargador o la batería externa y no usa la batería. Cargar al 100% una vez, en su configuración, quita el límite hasta la próxima carga completa."
 
 # needs review
 #: packs/original/charge-limit/README.md
@@ -3354,6 +3361,21 @@ msgid "The charger's pause switch is there"
 msgstr "El interruptor de pausa del cargador está ahí"
 
 # needs review
+#: packs/original/charge-limit/full-once.sh:10
+msgid "Charging to 100% once; then the limit applies again."
+msgstr "Cargando al 100% una vez; después el límite vuelve a aplicarse."
+
+# needs review
+#: packs/original/charge-limit/full-once.sh:5
+msgid "Install Battery charge limit first."
+msgstr "Primero instala Límite de carga de la batería."
+
+# needs review
+#: packs/original/charge-limit/full-once.sh:7
+msgid "The limit is off: the battery already charges to 100%."
+msgstr "El límite está desactivado: la batería ya carga al 100%."
+
+# needs review
 #: packs/original/charge-limit/install.sh:13
 msgid ""
 "The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
@@ -3379,11 +3401,6 @@ msgstr ""
 msgid "The battery now stops charging at %s%% while the Frame is on."
 msgstr ""
 "Ahora la batería deja de cargar al %s%% mientras el Frame está encendido."
-
-# needs review
-#: packs/original/charge-limit/run.sh:5
-msgid "Charging to 100% once; then the limit applies again."
-msgstr "Cargando al 100% una vez; después el límite vuelve a aplicarse."
 
 # needs review
 #: packs/original/charge-limit/status.sh:11
@@ -5532,3 +5549,9 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 
 #~ msgid "Full Keyboard is running: close it first"
 #~ msgstr "Teclado completo está en ejecución: ciérralo primero"
+
+#~ # needs review
+#~ msgid ""
+#~ "Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, on its row, lifts the limit until the next full charge."
+#~ msgstr ""
+#~ "La carga se detiene cuando la batería llega al límite que elijas (80%, si no lo cambias) y vuelve a empezar un 5% por debajo. Conectado, el Frame funciona entonces con el cargador o la batería externa y no usa la batería. Cargar al 100% una vez, en su fila, quita el límite hasta la próxima carga completa."
