@@ -27,8 +27,17 @@ jobs:
         run: |
           sudo apt-get install -y shellcheck
           dev/check.sh shell
+      # On a pull request, an out-of-date template is a warning: contributors may write English
+      # only, and a maintainer refreshes it (dev/i18n.py extract) before merging. On main, it fails.
       - name: Translation template is current (dev/i18n.py; locale/README.md)
-        run: dev/check.sh i18n
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            dev/check.sh i18n || echo "::warning title=Translation template out of date::Fine for an English-only change: a maintainer runs dev/i18n.py extract before merging (CONTRIBUTING.md, Translations)."
+          else
+            dev/check.sh i18n
+          fi
       - name: Python syntax
         run: dev/check.sh python
       - name: Conventional Commits messages (commitizen, .cz.toml)
@@ -38,6 +47,8 @@ jobs:
       - name: Manifests, dependencies and pins
         run: dev/check.sh manifests
       - name: Unit tests
+        env:
+          FRAME_TWEAKS_I18N_LENIENT: ${{ github.event_name == 'pull_request' && '1' || '' }}   # (as above)
         run: |
           sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 xvfb libxtst6 >/dev/null
           # the PyQt6 users get (lib/python-constraints.txt); pyyaml: tests compare our manifest reader with it

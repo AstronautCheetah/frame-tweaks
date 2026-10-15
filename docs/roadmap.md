@@ -41,6 +41,14 @@ next to the idea it inspired.
 - [x] **SteamOS drift check** run on the device after updates: dashboard markers, paths and
   services the tweaks rely on. *(Jovian-NixOS)*
 - [x] **CI actions pinned** to commit SHAs. *(Jovian-NixOS)*
+- [ ] **SteamOS kernel 6.18 → 7.2.** Reported: the Steam Frame OS main staging branch (mostly
+  used by Valve) moved from Linux 6.18 to 7.2, four kernel releases on (6.19, 7.0, 7.1, 7.2;
+  Linux's major number changes by count, not by compatibility). Before it reaches the stable
+  channel, review what the tweaks take from the kernel: `/dev/uinput` and its permissions
+  (ydotool, and the tweaks that type or click through it), input devices and evdev events, the GPU and
+  display paths SteamVR and KWin's software cursor use, Wi-Fi and WireGuard (NordVPN), and adb
+  over USB and Wi-Fi. Then on that build: `./install.sh check-system`, `dev/test-tweaks.sh`,
+  and each tweak's own checks in the headset.
 - [ ] **On 2026-10-20: a newer Ubuntu for CI.** The workflows (`ci.yml`, `release.yml`,
   `upstream.yml`) name `ubuntu-24.04` rather than `ubuntu-latest`, so a new Ubuntu comes in
   when we try it. Move them to the newest image `ubuntu-latest` points to then: change one

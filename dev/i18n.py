@@ -8,15 +8,25 @@
   dev/i18n.py new LANG     start locale/LANG.po from the .pot (LANG: de, pt_BR, es_419, …)
   dev/i18n.py update       bring every locale/*.po up to date with the .pot (translations kept;
                            new text untranslated; removed text kept as #~ comments)
-  dev/i18n.py stats        how much of each language is translated
-  dev/i18n.py export LANG DIR [--size N] [--all]
+  dev/i18n.py stats [--strict]
+                           how much of each language is translated, and how much needs review
+                           (--strict: fail unless every language has every text; the release)
+  dev/i18n.py report       the same as Markdown, with the texts still to translate (CI's
+                           "Translations needed" issue)
+  dev/i18n.py export LANG DIR [--size N] [--all | --review]
                            the texts LANG.po hasn't translated yet (--all: every text, with its
-                           current translation, for a review pass), as
+                           current translation, for a review pass; --review: those marked as
+                           needing review), as
                            JSON files of N entries (default 150) in DIR: part-01.json, … for a
                            translator or a translation helper (locale/BATCH.md)
-  dev/i18n.py import LANG DIR
+  dev/i18n.py import LANG DIR [--needs-review | --reviewed]
                            put DIR's answers (part-01.LANG.json: {"id": "text" or [forms]}) into
-                           LANG.po, after checking each keeps the placeholders, tags and spacing"""
+                           LANG.po, after checking each keeps the placeholders, tags and spacing
+                           (--needs-review: mark them, e.g. machine translations: they're shown,
+                           but counted as unreviewed; --reviewed: clear the mark)
+
+A translation marked "# needs review" (a translator comment, which every gettext tool keeps) is
+used like any other; only the tools count it. (Fuzzy, Poedit's "Needs work", hides it instead.)"""
 import json
 import ast
 import re
@@ -30,6 +40,7 @@ import sft  # noqa: E402
 
 LOCALE = ROOT / "locale"
 POT = LOCALE / "frame-tweaks.pot"
+REVIEW = "# needs review"
 
 
 def programs(shebang):
@@ -245,7 +256,9 @@ def update(po, pot_text):
         prev = old.get((ctx, msgid))
         if prev:
             refs = [l for l in block.splitlines() if l.startswith("#:")]
-            out.append("\n".join(refs + [l for l in prev.splitlines() if not l.startswith("#:")]))
+            mine = [l for l in prev.splitlines() if not l.startswith("#:")]
+            notes = [l for l in mine if l == "#" or l.startswith("# ")]      # (translator comments first)
+            out.append("\n".join(notes + refs + [l for l in mine if l not in notes]))
             used.add((ctx, msgid))
         else:
             out.append(block)
@@ -271,11 +284,20 @@ def problems(msgid, msgstr):
     return out
 
 
-def export(lang, outdir, size=150, every=False):
-    done = i18n.parse_po((LOCALE / f"{lang}.po").read_text()) if (LOCALE / f"{lang}.po").exists() else {}
+def needs_review(text):
+    """{(context, msgid)} of a .po text's translated entries marked "# needs review"."""
+    done = i18n.parse_po(text)
+    return {(c, m) for c, m, _, b in entries_of(text)
+            if REVIEW in b.splitlines() and (c, m) in done and not b.lstrip().startswith("#~")}
+
+
+def export(lang, outdir, size=150, every=False, review=False):
+    po = LOCALE / f"{lang}.po"
+    done = i18n.parse_po(po.read_text()) if po.exists() else {}
+    marked = needs_review(po.read_text()) if review else set()
     rows = []
     for ctx, msgid, plural, block in entries_of(template()):
-        if msgid == "" or (not every and (ctx, msgid) in done):
+        if msgid == "" or (review and (ctx, msgid) not in marked) or (not every and not review and (ctx, msgid) in done):
             continue
         where = [w for l in block.splitlines() if l.startswith("#:") for w in l[2:].split()]
         row = {"id": len(rows) + 1, "ctx": ctx, "msgid": msgid, "plural": plural, "where": where}
@@ -289,8 +311,9 @@ def export(lang, outdir, size=150, every=False):
     print(f"{len(rows)} texts in {len(parts)} files in {outdir}")
 
 
-def fill(po, answers):
-    """Write answers ({(ctx, msgid): str or [forms]}) into the .po file's entries."""
+def fill(po, answers, mark=None):
+    """Write answers ({(ctx, msgid): str or [forms]}) into the .po file's entries; mark "add"
+    puts "# needs review" on them, "clear" takes it off."""
     out, text = [], po.read_text()
     for ctx, msgid, plural, block in entries_of(text):
         a = answers.get((ctx, msgid)) if msgid else None
@@ -303,7 +326,9 @@ def fill(po, answers):
                 if seen_msgstr and l.startswith('"'):
                     continue
                 keep.append(l)
-            keep = [l for l in keep if l != "#, fuzzy"]
+            keep = [l for l in keep if l != "#, fuzzy" and (mark is None or l != REVIEW)]
+            if mark == "add":
+                keep.insert(0, REVIEW)
             if plural:
                 forms = a if isinstance(a, list) else [a, a]
                 keep += [f"msgstr[{i}] " + quote(f) for i, f in enumerate(forms)]
@@ -314,10 +339,10 @@ def fill(po, answers):
     po.write_text("\n\n".join(out + obsolete(text)) + "\n")
 
 
-def import_(lang, outdir):
+def import_(lang, outdir, mark=None):
     po = LOCALE / f"{lang}.po"
     if not po.exists():
-        sys.exit(f"no {po.relative_to(ROOT)}: dev/i18n.py new {lang} first")
+        sys.exit(f"no locale/{po.name}: dev/i18n.py new {lang} first")
     update(po, template() + "\n")
     answers, bad = {}, []
     for part in sorted(outdir.glob("part-[0-9][0-9].json")):
@@ -336,11 +361,40 @@ def import_(lang, outdir):
                 bad.append(f"{part.name} #{row['id']} {row['msgid'][:50]!r}: " + "; ".join(probs))
                 continue
             answers[(row["ctx"], row["msgid"])] = a
-    fill(po, answers)
-    print(f"{po.relative_to(ROOT)}: {len(answers)} texts put in")
+    fill(po, answers, mark)
+    print(f"locale/{po.name}: {len(answers)} texts put in"
+          + {"add": ", marked as needing review", "clear": ", marked as reviewed"}.get(mark, ""))
     if bad:
         print(f"{len(bad)} left out (fix them in the answer files, then import again):")
         print("\n".join("  " + b for b in bad))
+
+
+def progress(text):
+    """[(language, texts, translated, needing review, [msgids not translated])] per locale/*.po."""
+    want = [(c, m) for c, m, _, _ in entries_of(text) if m]
+    out = []
+    for po in sorted(LOCALE.glob("*.po")):
+        t = po.read_text()
+        done = i18n.parse_po(t)
+        out.append((po.stem, len(want), sum(k in done for k in want), len(needs_review(t)),
+                    [m for k in want if k not in done for m in [k[1]]]))
+    return out
+
+
+def report(text, most=40):
+    """Markdown: each language's progress, and the texts it still lacks (the first `most`)."""
+    lines = ["Texts that need translating, or a translation that needs a person's review, after "
+             "the latest change on main. Translators: locale/README.md and locale/BATCH.md.", ""]
+    for lang, total, done, review, missing in progress(text):
+        lines.append(f"### {lang}: {done} of {total} translated" + (f", {review} need review" if review else ""))
+        if missing:
+            lines += ["", "Not translated yet:", ""] + [f"- `{m[:120]}`" for m in missing[:most]]
+            if len(missing) > most:
+                lines.append(f"- … and {len(missing) - most} more (`dev/i18n.py export {lang} DIR`)")
+        if review:
+            lines += ["", f"To review: `dev/i18n.py export {lang} DIR --review`, then import with `--reviewed`."]
+        lines.append("")
+    return "\n".join(lines)
 
 
 def main():
@@ -370,17 +424,22 @@ def main():
             update(po, text)
             print(f"{po.relative_to(ROOT)}: updated")
     elif cmd == "stats":
-        total = len(entries_of(text)) - 1
-        for po in sorted(LOCALE.glob("*.po")):
-            done = len(i18n.parse_po(po.read_text()))
-            print(f"{po.stem}: {done} of {total} translated ({100 * done // max(total, 1)} %)")
+        short = False
+        for lang, total, done, review, _missing in progress(text):
+            print(f"{lang}: {done} of {total} translated ({100 * done // max(total, 1)} %)"
+                  + (f", {review} need review" if review else ""))
+            short = short or done < total
         if not list(LOCALE.glob("*.po")):
             print("no translations yet")
+        if short and "--strict" in sys.argv:
+            sys.exit("not every text is translated: dev/i18n.py export LANG DIR (locale/BATCH.md)")
+    elif cmd == "report":
+        print(report(text))
     elif cmd == "export" and len(sys.argv) > 3:
         size = int(sys.argv[sys.argv.index("--size") + 1]) if "--size" in sys.argv else 150
-        export(sys.argv[2], Path(sys.argv[3]), size, "--all" in sys.argv)
-    elif cmd == "import" and len(sys.argv) == 4:
-        import_(sys.argv[2], Path(sys.argv[3]))
+        export(sys.argv[2], Path(sys.argv[3]), size, "--all" in sys.argv, "--review" in sys.argv)
+    elif cmd == "import" and len(sys.argv) in (4, 5) and sys.argv[4:] in ([], ["--needs-review"], ["--reviewed"]):
+        import_(sys.argv[2], Path(sys.argv[3]), {"--needs-review": "add", "--reviewed": "clear"}.get(sys.argv[4] if sys.argv[4:] else ""))
     else:
         sys.exit(__doc__)
 
