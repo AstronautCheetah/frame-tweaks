@@ -57,6 +57,10 @@ Select a rectangle of the window you're using, then copy it, save it, copy its t
 **Why on a Steam Frame:** SteamOS comes with no screenshot tool, and the usual desktop ones can't select a region of a window floating in VR.
 <!-- /generated:intro -->
 
+![Screen snip: a selection with its handles, and Copy, Save, Copy text, Narrate and Cancel](../../../docs/images/snip.png)
+
+![Narrate's panel, reading a snip aloud](../../../docs/images/narrate.png)
+
 ## Install
 
 Tick it in the Frame Tweaks window, or:
