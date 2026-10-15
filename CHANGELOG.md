@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Recline is back** in 3rd Party (VR environment, 🧪): use VR lying down or reclined
+  ([new-waifu/Recline-VR](https://github.com/new-waifu/Recline-VR) v1.2.0, built from its pinned
+  source). Set aside in 0.6.2 while it was tested. Its status now says when SteamVR has yet to
+  load it, a SteamVR that ran it before included, and offers ⟳ Restart SteamVR.
 - **⟳ Restart SteamVR on a tweak's row** while SteamVR has yet to load it (the VR dashboard
   tweaks, installed while SteamVR runs): its status says it waits for a SteamVR restart, and
   the row's Run or Settings button becomes **⟳ Restart SteamVR**, which asks first (every open

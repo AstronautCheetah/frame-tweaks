@@ -274,7 +274,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:388 install.sh:207 lib/common.sh:459 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:388 install.sh:207 lib/common.sh:459 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
 msgid "not installed"
 msgstr ""
 
@@ -2722,7 +2722,7 @@ msgstr ""
 msgid "Mouse cursor fix"
 msgstr ""
 
-#: packs/original/cursor/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/original/cursor/README.md packs/integrations/vscodium/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md
 msgid "from"
 msgstr ""
 
@@ -3120,7 +3120,7 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: packs/original/pack.md packs/original/vr-dashboard/README.md packs/original/curvature/README.md packs/original/float-return/README.md packs/original/float-grab/README.md packs/original/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/original/pack.md packs/original/vr-dashboard/README.md packs/original/curvature/README.md packs/original/float-return/README.md packs/original/float-grab/README.md packs/original/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
 msgid "VR environment"
 msgstr ""
 
@@ -4222,11 +4222,11 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:32
+#: packs/third-party/clipboard/install.sh:32 packs/third-party/recline/install.sh:20
 msgid "%s: not the pinned commit"
 msgstr ""
 
-#: packs/third-party/clipboard/install.sh:34
+#: packs/third-party/clipboard/install.sh:34 packs/third-party/recline/install.sh:22
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 
@@ -4326,6 +4326,141 @@ msgstr ""
 #: packs/third-party/pack.md
 msgid ""
 "Other people's projects for the Steam Frame, installed and kept up to date by Frame Tweaks: each built or downloaded from a pinned, checked version of its source, into your home folder, and credited to its authors (their own README follows ours on each tweak's page)."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Applies when you reinstall Recline, then restart SteamVR."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Keep the room view aligned while reclined"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "No (the room view looks tilted while reclined)"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Recline"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid ""
+"Use VR lying down or reclined; one button makes your view level and forward"
+msgstr ""
+
+#: packs/third-party/recline/README.md
+msgid "Yes (adds a small library to the Frame's camera service)"
+msgstr ""
+
+#: packs/third-party/recline/check-system.sh:11
+msgid ""
+"SteamVR's vrpathreg, CMake, a C++ compiler and the Vulkan headers are there"
+msgstr ""
+
+#: packs/third-party/recline/check-system.sh:5
+msgid "SteamVR's vrpathreg"
+msgstr ""
+
+#: packs/third-party/recline/check-system.sh:7
+msgid "the Vulkan headers"
+msgstr ""
+
+#: packs/third-party/recline/check-system.sh:9
+msgid "SteamOS no longer has: %s"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:17
+msgid "Fetching Recline-VR %s from %s"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:29
+msgid "Building it (under a minute) and running its tests"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:31
+msgid "Recline-VR: cmake failed"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:32
+msgid "Recline-VR: the build failed"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:33
+msgid "Recline-VR: its tests failed; nothing was installed"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:35
+msgid ""
+"Recline-VR built without Vulkan; not installing (its fallback has crashed SteamVR's compositor)"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:44
+msgid ""
+"Room-view fix left out (setting); the room view will look tilted while reclined"
+msgstr ""
+
+#: packs/third-party/recline/install.sh:52
+msgid "Recline %s installed. Restart SteamVR to load it (reboot, or: %s)."
+msgstr ""
+
+#: packs/third-party/recline/install.sh:9
+msgid "can't build Recline: %s"
+msgstr ""
+
+#: packs/third-party/recline/status.sh:12
+msgid "Recline %s installed; restart SteamVR to load it"
+msgstr ""
+
+#: packs/third-party/recline/status.sh:15
+msgid ""
+"Recline %s installed, but SteamVR didn't load it (check SteamVR's safe mode: SteamVR settings → Startup)"
+msgstr ""
+
+#: packs/third-party/recline/status.sh:16
+msgid "Recline %s loaded"
+msgstr ""
+
+#: packs/third-party/recline/status.sh:7
+msgid ""
+"Recline %s installed but its driver isn't registered (Reinstall fixes it)"
+msgstr ""
+
+#: packs/third-party/recline/status.sh:8
+msgid "Recline %s installed (SteamVR isn't running)"
+msgstr ""
+
+#: packs/third-party/recline/uninstall.sh:11
+msgid ""
+"SteamVR isn't running, so Recline's panel couldn't be unregistered (SteamVR may still list it)"
+msgstr ""
+
+#: packs/third-party/recline/uninstall.sh:15
+msgid "Kept Recline's panel options: ~/.config/recline-vr"
+msgstr ""
+
+#: packs/third-party/recline/uninstall.sh:16
+msgid "Restart SteamVR to unload its driver (reboot, or: %s)."
+msgstr ""
+
+#: packs/third-party/recline/uninstall.sh:8
+msgid ""
+"couldn't unregister Recline's panel from SteamVR; it will report it missing"
 msgstr ""
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3

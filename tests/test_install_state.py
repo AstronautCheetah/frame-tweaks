@@ -272,12 +272,12 @@ class InstallState(unittest.TestCase):
         is there: what it shares stays."""
         self.shared_files()
         (self.state / "installed").mkdir(parents=True, exist_ok=True)
-        (self.state / "installed/recline").write_text("0.6.1\n")
+        (self.state / "installed/set-aside").write_text("0.6.1\n")
         r = self.sh("uninstall-self", "--remove-settings")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("from packs not in use (turned off, or not trusted): recline", r.stdout)
+        self.assertIn("from packs not in use (turned off, or not trusted): set-aside", r.stdout)
         self.assertTrue((self.home / ".local/share/frame-tweaks/i18n").is_dir())
-        self.assertTrue((self.state / "installed/recline").exists())
+        self.assertTrue((self.state / "installed/set-aside").exists())
 
     def test_uninstall_self_with_every_pack_off(self):
         (self.home / ".config/frame-tweaks/installer/trusted-packs").unlink()     # (the probe's pack too)
