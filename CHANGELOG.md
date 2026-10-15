@@ -7,8 +7,8 @@
   ways to help (ideas for new tweaks and third-party apps, bug and test reports, translations,
   code, docs), on a page of its own.
 - **Uninstalling Frame Tweaks leaves third-party apps installed** (Homebrew, VSCodium, Claude
-  Desktop, Claude Code, Full Keyboard, clipboard-sync) unless you untick that in ⚙ Preferences
-  (`--remove-apps`). Tweaks name such an app in a new manifest field, `app:`.
+  Desktop, Claude Code, Full Keyboard, clipboard-sync) unless you choose otherwise in ⚙
+  Preferences (`--remove-apps`). Tweaks name such an app in a new manifest field, `app:`.
 - **Installing Frame Tweaks again finds the tweaks it left installed**, at the versions recorded
   (now tested).
 - **Uninstall Frame Tweaks** from ⚙ Preferences (or `./install.sh uninstall-self`): every tweak
@@ -30,8 +30,8 @@
   folds to just the chevron, which stays under the pointer (or the laser, in VR), and it
   remembers being folded.
 - **⚙ Preferences** in the window, left of Show hidden: the language (follow the keyboard, or
-  choose one for every Frame Tweaks program), haptic ticks on the window's buttons, its controller
-  buttons in VR, and whether it looks for a new release when it opens.
+  choose one for every Frame Tweaks program), haptic ticks on the window's buttons, and whether it
+  looks for a new release when it opens.
 - **Arrow Pad and Screen snip switch language with the window:** it announces a change, and they
   follow (they no longer check the keyboard themselves).
 - **Arrow Pad's key legends are translated:** what each language's keyboards print (RePág,
