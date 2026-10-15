@@ -9,8 +9,9 @@
 ### Fixed
 - **Arrow Pad's Unstick also lets go of keys a keyboard still holds:** a Bluetooth keyboard that
   lost a key's release kept it down for every app (Ctrl stuck), and Unstick's own presses couldn't
-  release another device's key. It also says when desktop mode has taken all input (tap Right Ctrl),
-  which no key release undoes.
+  release another device's key. And when desktop mode has taken all input (typing and clicks go
+  to the desktop instead of your window), which no key release undoes, it gives it back with a
+  Right Ctrl tap and checks; what it found goes to a log that 🐞 Report a problem includes.
 - **Check for updates no longer says "up to date" when Frame Tweaks was updated under an open
   window** (in a terminal, say) while the window still runs the older version: it offers ↻ Restart.
   The version in the title is the one the window runs.

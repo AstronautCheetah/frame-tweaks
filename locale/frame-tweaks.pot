@@ -306,11 +306,11 @@ msgstr ""
 msgid "hidden"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:393 packs/original/arrowpad/arrowpad.py:267 packs/original/snip/frame-snip:712 packs/original/snip/frame-snip:717
+#: gui/frame-tweaks-gui.py:393 packs/original/arrowpad/arrowpad.py:282 packs/original/snip/frame-snip:712 packs/original/snip/frame-snip:717
 msgid "Collapse"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:393 packs/original/arrowpad/arrowpad.py:267 packs/original/snip/frame-snip:743
+#: gui/frame-tweaks-gui.py:393 packs/original/arrowpad/arrowpad.py:282 packs/original/snip/frame-snip:743
 msgid "Expand"
 msgstr ""
 
@@ -511,7 +511,7 @@ msgstr ""
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:872 packs/original/arrowpad/arrowpad.py:266 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
+#: gui/frame-tweaks-gui.py:872 packs/original/arrowpad/arrowpad.py:281 packs/original/snip/frame-snip:697 packs/original/adb-scrcpy/phone:205
 msgid "Close"
 msgstr ""
 
@@ -1445,23 +1445,23 @@ msgstr ""
 msgid "The bug form, with your version filled in: %s"
 msgstr ""
 
-#: install.sh:688
+#: install.sh:690
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr ""
 
-#: install.sh:725
+#: install.sh:727
 msgid "run what?"
 msgstr ""
 
-#: install.sh:726 lib/link.sh:52
+#: install.sh:728 lib/link.sh:52
 msgid "%s has nothing to run"
 msgstr ""
 
-#: install.sh:739
+#: install.sh:741
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
-#: install.sh:740
+#: install.sh:742
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr ""
 
@@ -2687,7 +2687,7 @@ msgstr ""
 msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1014
+#: packs/original/arrowpad/arrowpad.py:1029
 msgid "Pinned: tap to allow moving"
 msgstr ""
 
@@ -2695,308 +2695,313 @@ msgstr ""
 msgid "key {code}"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1060
+#: packs/original/arrowpad/arrowpad.py:1075
 msgid "Done"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1229
+#: packs/original/arrowpad/arrowpad.py:1245
 msgid "Shift, Ctrl, Alt and Super were pressed and let go."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1231
+#: packs/original/arrowpad/arrowpad.py:1248
 msgid "{device} still held {keys}: released too."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1234
-msgid ""
-"Desktop mode has taken all input, so other windows don't get it: tap Right Ctrl on a keyboard to give it back."
-msgstr ""
-
-#: packs/original/arrowpad/arrowpad.py:1236
+#: packs/original/arrowpad/arrowpad.py:1253 packs/original/arrowpad/arrowpad.py:1267
 msgid "Keys released"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1245
+#: packs/original/arrowpad/arrowpad.py:1261
+msgid ""
+"Desktop mode has taken all input, so other windows don't get it, and didn't give it back: tap Right Ctrl on a keyboard."
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad.py:1265
+msgid ""
+"Desktop mode had taken all input, so other windows didn't get it: given back."
+msgstr ""
+
+#: packs/original/arrowpad/arrowpad.py:1278
 msgid "Screen snip isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1246
+#: packs/original/arrowpad/arrowpad.py:1279
 msgid ""
 "The Snip button copies, saves, reads or reads aloud part of the screen, with Screen snip + Narrate. It isn't installed yet."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1257
+#: packs/original/arrowpad/arrowpad.py:1290
 msgid "Dictation isn't installed"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1258
+#: packs/original/arrowpad/arrowpad.py:1291
 msgid ""
 "The 🎤 button types what you say, with Dictation (speech to text, on the Frame itself). It isn't installed yet."
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1355
+#: packs/original/arrowpad/arrowpad.py:1388
 msgid "button size multiplier (default 1.0)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1356
+#: packs/original/arrowpad/arrowpad.py:1389
 msgid "ydotoold socket path"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1357
+#: packs/original/arrowpad/arrowpad.py:1390
 msgid "close a running pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1358
+#: packs/original/arrowpad/arrowpad.py:1391
 msgid "collapse a running pad to its chevron, or expand it"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1359
+#: packs/original/arrowpad/arrowpad.py:1392
 msgid "open in desktop mode (even from the VR menu)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1360
+#: packs/original/arrowpad/arrowpad.py:1393
 msgid "open as a floating VR window"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:1378
+#: packs/original/arrowpad/arrowpad.py:1411
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:216
+#: packs/original/arrowpad/arrowpad.py:231
 msgctxt "key legend"
 msgid "Bksp"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:216
+#: packs/original/arrowpad/arrowpad.py:231
 msgctxt "key legend"
 msgid "Esc"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:216
+#: packs/original/arrowpad/arrowpad.py:231
 msgctxt "key legend"
 msgid "Tab"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:217
+#: packs/original/arrowpad/arrowpad.py:232
 msgctxt "key legend"
 msgid "Del"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:217
+#: packs/original/arrowpad/arrowpad.py:232
 msgctxt "key legend"
 msgid "Enter"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:217
+#: packs/original/arrowpad/arrowpad.py:232
 msgctxt "key legend"
 msgid "Ins"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:218
+#: packs/original/arrowpad/arrowpad.py:233
 msgctxt "key legend"
 msgid "End"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:218
+#: packs/original/arrowpad/arrowpad.py:233
 msgctxt "key legend"
 msgid "Home"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:218
+#: packs/original/arrowpad/arrowpad.py:233
 msgctxt "key legend"
 msgid "PgUp"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:219
+#: packs/original/arrowpad/arrowpad.py:234
 msgctxt "key legend"
 msgid "Menu"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:219
+#: packs/original/arrowpad/arrowpad.py:234
 msgctxt "key legend"
 msgid "PgDn"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:219
+#: packs/original/arrowpad/arrowpad.py:234
 msgctxt "key legend"
 msgid "PrtSc"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:220
+#: packs/original/arrowpad/arrowpad.py:235
 msgctxt "key legend"
 msgid "Alt"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:220
+#: packs/original/arrowpad/arrowpad.py:235
 msgctxt "key legend"
 msgid "Ctrl"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:220
+#: packs/original/arrowpad/arrowpad.py:235
 msgctxt "key legend"
 msgid "Shift"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:221
+#: packs/original/arrowpad/arrowpad.py:236
 msgctxt "key legend"
 msgid "Super"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:223
+#: packs/original/arrowpad/arrowpad.py:238
 msgctxt "mouse button"
 msgid "Middle"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:223
+#: packs/original/arrowpad/arrowpad.py:238
 msgctxt "mouse button"
 msgid "Right"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:252
+#: packs/original/arrowpad/arrowpad.py:267
 msgid ""
 "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:253
+#: packs/original/arrowpad/arrowpad.py:268
 msgid "Copy (Ctrl+C)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:253
+#: packs/original/arrowpad/arrowpad.py:268
 msgid "Cut (Ctrl+X)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:253
+#: packs/original/arrowpad/arrowpad.py:268
 msgid "Paste (Ctrl+V)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:254
+#: packs/original/arrowpad/arrowpad.py:269
 msgid "F1–F12 layer (tap again to go back)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:254
+#: packs/original/arrowpad/arrowpad.py:269
 msgid "Select all (Ctrl+A)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:254
+#: packs/original/arrowpad/arrowpad.py:269
 msgid "Undo (Ctrl+Z)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:255
+#: packs/original/arrowpad/arrowpad.py:270
 msgid "Find (Ctrl+F)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:255
+#: packs/original/arrowpad/arrowpad.py:270
 msgid "Redo (Ctrl+Shift+Z)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:255
+#: packs/original/arrowpad/arrowpad.py:270
 msgid "Save (Ctrl+S)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:256
+#: packs/original/arrowpad/arrowpad.py:271
 msgid ""
 "Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:257
+#: packs/original/arrowpad/arrowpad.py:272
 msgid ""
 "Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:258
+#: packs/original/arrowpad/arrowpad.py:273
 msgid ""
 "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:259
+#: packs/original/arrowpad/arrowpad.py:274
 msgid "Right click: your next click becomes a right click"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:260
+#: packs/original/arrowpad/arrowpad.py:275
 msgid "Open the desktop's application menu (taps Super)"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:261
+#: packs/original/arrowpad/arrowpad.py:276
 msgid ""
 "Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:262
+#: packs/original/arrowpad/arrowpad.py:277
 msgid "Middle click: your next click becomes a middle click"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:263
+#: packs/original/arrowpad/arrowpad.py:278
 msgid ""
 "{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:265 packs/original/arrowpad/arrowpad.py:1014
+#: packs/original/arrowpad/arrowpad.py:280 packs/original/arrowpad/arrowpad.py:1029
 msgid "Pin: stop accidental moves"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:265
+#: packs/original/arrowpad/arrowpad.py:280
 msgid "Settings: theme and haptics"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:266
+#: packs/original/arrowpad/arrowpad.py:281
 msgid "Larger"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:266
+#: packs/original/arrowpad/arrowpad.py:281
 msgid "Reset position"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:266
+#: packs/original/arrowpad/arrowpad.py:281
 msgid "Smaller"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:270
+#: packs/original/arrowpad/arrowpad.py:285
 msgctxt "key legend"
 msgid "Tools"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:270
+#: packs/original/arrowpad/arrowpad.py:285
 msgctxt "key legend"
 msgid "Unstick"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:271
+#: packs/original/arrowpad/arrowpad.py:286
 msgctxt "key legend"
 msgid "Launcher"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:271
+#: packs/original/arrowpad/arrowpad.py:286
 msgctxt "key legend"
 msgid "Snip"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:281
+#: packs/original/arrowpad/arrowpad.py:296
 msgid "Graphite"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:285
+#: packs/original/arrowpad/arrowpad.py:300
 msgid "Midnight"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:292
+#: packs/original/arrowpad/arrowpad.py:307
 msgid "Light"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:292
+#: packs/original/arrowpad/arrowpad.py:307
 msgid "Normal"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:292 packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/patch.js:224 packs/original/scroll-strips/README.md
+#: packs/original/arrowpad/arrowpad.py:307 packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/patch.js:224 packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:293 packs/original/scroll-strips/patch.js:224
+#: packs/original/arrowpad/arrowpad.py:308 packs/original/scroll-strips/patch.js:224
 msgid "Haptics"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:293
+#: packs/original/arrowpad/arrowpad.py:308
 msgid "Theme"
 msgstr ""
 
@@ -3004,11 +3009,11 @@ msgstr ""
 msgid "arrowpad: desktop mode isn't running"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:744 packs/original/arrowpad/arrowpad.py:944 packs/original/arrowpad/arrowpad.py:1236 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
+#: packs/original/arrowpad/arrowpad.py:759 packs/original/arrowpad/arrowpad.py:959 packs/original/arrowpad/arrowpad.py:1253 packs/original/arrowpad/arrowpad.py:1267 packs/original/arrowpad/arrowpad.desktop:3 packs/original/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:744 packs/original/arrowpad/arrowpad.py:944
+#: packs/original/arrowpad/arrowpad.py:759 packs/original/arrowpad/arrowpad.py:959
 msgid "Arrow Pad (VR)"
 msgstr ""
 
