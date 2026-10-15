@@ -19,6 +19,7 @@ source:
 depends: [homebrew, speech]
 icon: {file: frame-tweaks-snip.png}
 run: {label: Snip}
+processes: ['^~/.local/share/arrowpad/venv/bin/python ~/.local/bin/frame-snip( |$)']
 settings:
   file: ~/.config/frame-tweaks/snip.json
   format: json

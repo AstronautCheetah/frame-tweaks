@@ -467,7 +467,7 @@ cmd_gui() {
     local qt="$HOME/.local/share/arrowpad/venv"
     if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
        kdialog --title "Frame Tweaks" --yesno "$(t 'Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist.')"; then
-        python3 -m venv "$qt" && pip_pinned "$qt" PyQt6 ||
+        ensure_qt_venv ||
             kdialog --sorry "$(t "Couldn't install PyQt6; using the simple checklist.")"
     fi
     if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then

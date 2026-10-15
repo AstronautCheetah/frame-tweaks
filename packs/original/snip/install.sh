@@ -5,11 +5,7 @@
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 
 # The selection window uses PyQt6 (shared with Arrow Pad and the NordVPN tray).
-if ! "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null; then
-    say "$(t 'Setting up PyQt6 (shared with Arrow Pad)')"
-    python3 -m venv "$QT_VENV"
-    pip_pinned "$QT_VENV" PyQt6 || die "$(t "couldn't install PyQt6")"
-fi
+ensure_qt_venv || die "$(t "couldn't install PyQt6")"
 
 # The narration panel is its own SteamVR overlay (like Arrow Pad): the openvr bindings, on
 # SteamVR's own arm64 library (the wheel only bundles an x86 one). Without them it's a window.

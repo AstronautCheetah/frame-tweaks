@@ -15,6 +15,8 @@ if [ -z "$keep" ]; then
 fi
 pkill -f "^$QT_VENV/bin/python $BIN/nordvpn-tray" 2>/dev/null || true
 restore_kconfig nordvpn
-remove_files "$ICONS/256x256/apps/frame-tweaks-nordvpn.png" "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$APPS/nordvpn-tray.desktop" "$HOME/.config/autostart/nordvpn-tray.desktop"
+remove_icon frame-tweaks-nordvpn
+remove_desktop nordvpn-tray.desktop
+remove_files "$BIN/nordvpn-wg" "$BIN/nordvpn-tray" "$HOME/.config/autostart/nordvpn-tray.desktop"
 # The PyQt6 venv is shared with Arrow Pad, Screen snip and the installer window.
 remove_qt_venv
