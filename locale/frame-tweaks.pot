@@ -328,7 +328,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:584 packs/original/adb-scrcpy/phone-touch.js:217 packs/original/scroll-strips/patch.js:285
+#: gui/frame-tweaks-gui.py:584 packs/original/adb-scrcpy/phone-touch.js:217 packs/original/scroll-strips/patch.js:287
 msgid "Reset to defaults"
 msgstr ""
 
@@ -2552,11 +2552,11 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:210 packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/patch.js:218 packs/original/scroll-strips/patch.js:222 packs/original/scroll-strips/README.md
+#: packs/original/arrowpad/arrowpad.py:210 packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/patch.js:224 packs/original/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
-#: packs/original/arrowpad/arrowpad.py:211 packs/original/scroll-strips/patch.js:222
+#: packs/original/arrowpad/arrowpad.py:211 packs/original/scroll-strips/patch.js:224
 msgid "Haptics"
 msgstr ""
 
@@ -3118,64 +3118,64 @@ msgstr ""
 msgid "Yellow"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/README.md
 msgid "Left"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:217 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/README.md
 msgid "Right"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:217
+#: packs/original/scroll-strips/patch.js:219
 msgid "Vertical strip"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:218 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/README.md
 msgid "Bottom"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:218
+#: packs/original/scroll-strips/patch.js:220
 msgid "Horizontal strip"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:218 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/README.md
 msgid "Top"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:219 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
 msgid "Thickness (cm)"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:220 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:222 packs/original/scroll-strips/README.md
 msgid "Gap from the window (cm)"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:221 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:223 packs/original/scroll-strips/README.md
 msgid "Set back behind the window (cm)"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:222 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:224 packs/original/scroll-strips/README.md
 msgid "On"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:233
+#: packs/original/scroll-strips/patch.js:235
 msgid ""
 "Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:277 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:279 packs/original/scroll-strips/README.md
 msgid "Colour"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:279 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:281 packs/original/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:295 packs/original/scroll-strips/README.md
+#: packs/original/scroll-strips/patch.js:297 packs/original/scroll-strips/README.md
 msgid "Scroll strips"
 msgstr ""
 
-#: packs/original/scroll-strips/patch.js:300
+#: packs/original/scroll-strips/patch.js:302
 msgid "For every window. Changes show at once."
 msgstr ""
 

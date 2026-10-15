@@ -283,6 +283,14 @@ VERSION, tags `vX.Y.Z` and drafts a GitHub release to review and publish. The ta
 it; the draft is only its page of notes on GitHub. Pre-releases
 (`vX.Y.Z-rc.N`) only reach the beta channel.
 
+**How many people use it** (Frame Tweaks itself never reports anything): GitHub counts clones
+(each install is one; updates may count too) and page views, but keeps only 14 days. The **Traffic**
+workflow saves them daily into `traffic.csv` on the draft release "traffic" (maintainers only),
+with each release's downloads. It needs a fine-grained token for this repository with
+**Administration: read** (what GitHub's traffic API asks for), as the secret `TRAFFIC_TOKEN`:
+`gh secret set TRAFFIC_TOKEN`, pasting the token when asked. Without it the workflow only warns.
+Read it with `gh release download traffic --pattern traffic.csv`.
+
 **Translations first.** The workflow stops unless the translation template is current and every
 language has every text (`dev/i18n.py stats --strict`), so before releasing: `dev/i18n.py
 extract` and `update`, then translate what's missing (`dev/i18n.py export LANG DIR`,

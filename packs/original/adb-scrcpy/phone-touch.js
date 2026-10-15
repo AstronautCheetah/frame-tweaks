@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 12;
+  const NAME = 'phone-touch', VERSION = 13;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -171,7 +171,7 @@
   };
   // Haptic ticks on the ⚙ and the settings' buttons, as on the dashboard's own (helpers looked up
   // now: lib.js may have been replaced since this patch loaded).
-  const buzz = (name) => { const H = window.__sftLib; H?.haptic?.(H.HAPTIC?.[name]); };
+  const buzz = (name) => window.__sftLib?.tick?.(name);
   const tap = () => ({ onMouseEnter: () => buzz('Enter'), onMouseDown: () => buzz('Snap') });
   const GEAR_SVG = 'M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1' +
     'l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1' +

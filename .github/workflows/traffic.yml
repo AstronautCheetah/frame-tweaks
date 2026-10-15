@@ -1,0 +1,59 @@
+name: Traffic
+# Counting without telemetry: Frame Tweaks itself never reports anything. GitHub counts clones
+# (each install and update is one) and page views, but keeps only the last 14 days; this saves
+# them daily, by date, in traffic.csv on the draft release "traffic" (a draft: only maintainers
+# see it), with each release's download counts. CONTRIBUTING.md, Releasing: reading it, and the
+# TRAFFIC_TOKEN secret it needs (GitHub's traffic API takes a token with Administration: read).
+on:
+  schedule:
+    - cron: "17 5 * * *"      # daily (any hour: the API gives whole days)
+  workflow_dispatch:
+permissions:
+  contents: write             # (the draft release that holds the file)
+concurrency:
+  group: traffic
+jobs:
+  save:
+    runs-on: ubuntu-24.04     # (named, not ubuntu-latest: a new Ubuntu comes in when we try it, not by surprise)
+    steps:
+      - name: Save the last 14 days into traffic.csv
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$TRAFFIC_TOKEN" ]; then
+            echo "::warning title=No TRAFFIC_TOKEN::Nothing saved: add the secret (CONTRIBUTING.md, Releasing)."
+            exit 0
+          fi
+          GH_TOKEN=$TRAFFIC_TOKEN gh api "repos/$REPO/traffic/clones" > clones.json
+          GH_TOKEN=$TRAFFIC_TOKEN gh api "repos/$REPO/traffic/views" > views.json
+          gh api "repos/$REPO/releases" --paginate \
+            --jq '[.[] | select(.draft | not) | {tag: .tag_name, downloads: ([.assets[].download_count] | add // 0)}]' > releases.json
+          gh release view traffic --repo "$REPO" >/dev/null 2>&1 ||
+            gh release create traffic --repo "$REPO" --draft --title "Traffic (maintainers only)" \
+              --notes "traffic.csv: daily clones, unique cloners, views and unique visitors, and release downloads (the Traffic workflow)."
+          gh release download traffic --repo "$REPO" --pattern traffic.csv 2>/dev/null || true
+          python3 - <<'PY'
+          import csv, json, os, time
+          rows = {}
+          if os.path.exists("traffic.csv"):
+              with open("traffic.csv") as f:
+                  rows = {r["date"]: r for r in csv.DictReader(f)}
+          for kind in ("clones", "views"):
+              for d in json.load(open(f"{kind}.json")).get(kind, []):
+                  day = d["timestamp"][:10]
+                  r = rows.setdefault(day, {"date": day})
+                  r[kind], r[f"unique_{kind}"] = d["count"], d["uniques"]
+          today = time.strftime("%Y-%m-%d", time.gmtime())
+          rows.setdefault(today, {"date": today})["release_downloads"] = ";".join(
+              f"{r['tag']}={r['downloads']}" for r in json.load(open("releases.json")))
+          cols = ["date", "clones", "unique_clones", "views", "unique_views", "release_downloads"]
+          with open("traffic.csv", "w", newline="") as f:
+              w = csv.DictWriter(f, cols)
+              w.writeheader()
+              for day in sorted(rows):
+                  w.writerow({c: rows[day].get(c, "") for c in cols})
+          print(f"{len(rows)} days")
+          PY
+          gh release upload traffic traffic.csv --repo "$REPO" --clobber

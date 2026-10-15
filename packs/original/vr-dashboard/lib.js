@@ -138,6 +138,10 @@
     } catch (e) {}
   };
 
-  window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount, HAPTIC, haptic };
+  // tick('Enter'): haptic by name, for patches (which look it up at each call, as window.__sftLib?.tick:
+  // this file can be replaced while they run).
+  const tick = (name) => haptic(HAPTIC[name]);
+
+  window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount, HAPTIC, haptic, tick };
   return 'loaded';
 })()

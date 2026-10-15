@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 20;
+  const NAME = 'scroll-strips', VERSION = 21;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -56,8 +56,11 @@
   if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
   const { el } = L, DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
   let PANEL = null, XFORM = null;                   // the dashboard's panel / transform (L.components)
+  // The settings and their defaults (the gear's panel and the installer window's settings page offer
+  // the same; one list, which the panel's Reset also goes back to).
+  const DEFAULTS = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, color: 'tint', haptics: true };
   const cfg = () => {
-    const c = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, haptics: true, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
+    const c = { ...DEFAULTS, ...(window.__sftPatchConfig?.[NAME] ?? {}) };
     c.thickness = Math.min(0.1, Math.max(0.015, Number(c.thickness) || 0.04));
     c.gap = Math.min(0.1, Math.max(0, Number(c.gap ?? 0.015) || 0));     // (0 is a choice: no gap)
     // Set back a little behind the window's plane, so SteamVR's own buttons by the window's edge
@@ -70,7 +73,7 @@
   // the faster; back across the centre reverses), let go to stop. A quick tap near an end pages.
   let drag = null;
   // (setting: Haptics; the helpers looked up now, not as loaded: lib.js may have been replaced since)
-  const tickle = (name) => { const H = window.__sftLib; if (cfg().haptics !== false) H?.haptic?.(H.HAPTIC?.[name]); };
+  const tickle = (name) => { if (cfg().haptics !== false) window.__sftLib?.tick?.(name); };
   const send = (target, dx, dy, page = 0) => {
     // The Android Mirror (with phone-touch running): scroll the phone itself, as its wheel. Keys
     // would go to the window the Steam session last saw clicked, and clicks on the mirror go to
@@ -211,7 +214,6 @@
   // ---- the gear (where the two strips would meet) and its settings panel ----
   // Saved through vr-dashboard's sftConfig binding into ~/.config/frame-tweaks/scroll-strips.json
   // (the installer window's settings page writes the same file).
-  const DEFAULTS = { vertical: 'right', horizontal: 'top', thickness: 0.04, gap: 0.015, back: 0.03, color: 'tint', haptics: true };
   const SWATCHES = [0, 0.08, 0.15, 0.33, 0.5, 0.58, 0.67, 0.75, 0.83, 0.92];   // hues, as the tint's 0..1
   const OPTIONS = [
     [N('Vertical strip'), 'vertical', [[N('Right'), 'right'], [N('Left'), 'left'], [N('Off'), 'off']]],
