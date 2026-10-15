@@ -96,7 +96,7 @@ except Exception:  # pragma: no cover
 
 # Linux input-event-codes.h
 EV_SYN, EV_KEY, SYN_REPORT = 0x00, 0x01, 0
-KEY_RIGHTCTRL = 97                       # (toggles the nested desktop's input grab: never sent)
+KEY_RIGHTCTRL = 97                       # (toggles the nested desktop's input grab: only Unstick sends it, when it's on)
 KEY_NAMES = {1: "Esc", 14: "Backspace", 15: "Tab", 28: "Enter", 29: "Ctrl", 42: "Shift", 54: "Shift", 56: "Alt",
              57: "Space", 97: "Right Ctrl", 100: "AltGr", 125: "Super", 126: "Super"}
 
@@ -162,6 +162,21 @@ def release_held_keys(devices=None):
             continue
         released[name] = keys
     return released
+
+
+UNSTICK_LOG = Path.home() / ".local/state/frame-tweaks/logs/unstick.log"     # (./install.sh report includes it)
+
+
+def unstick_log(line):
+    try:
+        UNSTICK_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with UNSTICK_LOG.open("a") as f:
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + line + "\n")
+        lines = UNSTICK_LOG.read_text().splitlines()
+        if len(lines) > 200:
+            UNSTICK_LOG.write_text("\n".join(lines[-100:]) + "\n")
+    except OSError:
+        pass
 
 
 def desktop_grabbed():
@@ -1222,18 +1237,36 @@ class ArrowPad(QWidget):
         held) and keep acting as if Shift, Ctrl, Alt or Super were down: send each one a full
         press and release, and let go of the pad's own modifiers. A keyboard that lost a key's
         release (Bluetooth) still holds it for everyone: let go of it there too. And say so when
-        it's desktop mode that has taken all input (Right Ctrl), which no key release undoes."""
+        it's desktop mode that has taken all input (Right Ctrl), which no key release undoes: then
+        give it back with a Right Ctrl tap, and check that it did. What it found goes to its log."""
         self.release_all_mods()
         self.yd.clear_stuck_modifiers()
         self.restyle()
         text = _("Shift, Ctrl, Alt and Super were pressed and let go.")
-        for device, keys in release_held_keys().items():
+        held = release_held_keys()
+        for device, keys in held.items():
             text += " " + _("{device} still held {keys}: released too.").format(
                 device=device, keys=", ".join(key_name(k) for k in keys))
-        if desktop_grabbed():
-            text += " " + _("Desktop mode has taken all input, so other windows don't get it: tap Right Ctrl on a "
-                            "keyboard to give it back.")
-        subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Keys released"), text], start_new_session=True)
+        found = "; ".join(f"{d}: {', '.join(key_name(k) for k in ks)}" for d, ks in held.items()) or "nothing"
+        if not desktop_grabbed():
+            unstick_log(f"held keys released: {found}; desktop mode's input grab: off")
+            subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Keys released"), text], start_new_session=True)
+            return
+        # Right Ctrl toggles the grab, so it's tapped only now, with the title saying it's on; the
+        # title shows whether it worked (the grab takes a moment to let go).
+        self.yd.tap(KEY_RIGHTCTRL)
+
+        def check():
+            if desktop_grabbed():
+                more = _("Desktop mode has taken all input, so other windows don't get it, and didn't give it "
+                         "back: tap Right Ctrl on a keyboard.")
+                unstick_log(f"held keys released: {found}; desktop mode's input grab: on, still on after Right Ctrl")
+            else:
+                more = _("Desktop mode had taken all input, so other windows didn't get it: given back.")
+                unstick_log(f"held keys released: {found}; desktop mode's input grab: on, given back (Right Ctrl)")
+            subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Keys released"), text + " " + more],
+                             start_new_session=True)
+        QTimer.singleShot(600, check)
 
     # ---- screen snip (snip/ tweak) --------------------------------------
     def snip(self):

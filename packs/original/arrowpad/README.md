@@ -100,7 +100,10 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   held down, tap this. It presses and releases each of them, and lets go of any key a keyboard
   or mouse still holds (a Bluetooth keyboard that lost a key's release keeps it down for every
   app). If desktop mode has taken all input (its title says "Press right control to **ungrab**
-  input"), its message says so: tap Right Ctrl on a keyboard to give it back.
+  input": typing and clicks go to the desktop instead of the window you're using), it gives it
+  back with a Right Ctrl tap and checks that it did; if not, its message says to tap Right Ctrl
+  on a keyboard. What it found goes to `~/.local/state/frame-tweaks/logs/unstick.log`, which
+  🐞 Report a problem includes.
 
 Key labels follow Frame Tweaks' language: the one chosen in the installer window's ⚙, else your
 keyboard's when the pad opens; they switch when the window's language changes. They use the

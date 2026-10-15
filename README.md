@@ -432,7 +432,7 @@ What stays in any case:
 | Apps show without icons in Steam's "+" menu | Install **Menu icons** (re-run it after installing new apps), then reopen the menu. |
 | "Another Frame Tweaks install, update or removal is running" | Wait for the other install window to finish; the lock is released when it closes. |
 | Letters come out in the wrong case, or every key acts as if Ctrl/Alt/Super is held | The desktop missed a key's release (often because focus moved to another VR window while the key was down), or a Bluetooth keyboard lost one and still holds the key. On Arrow Pad: **Tools → Unstick** (it releases both). Otherwise turn Caps Lock off, then exit and re-enter desktop mode. |
-| Windows and clicks in the desktop act strangely, and its title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. Press Right Ctrl once on a physical keyboard (Arrow Pad has no Right Ctrl) to turn it off. |
+| Typing and clicks go to the desktop instead of the window you're using, and the desktop's title says "Press right control to **ungrab** input" | **Right Ctrl** toggles the desktop's input grab. On Arrow Pad: **Tools → Unstick** gives it back (and says if it couldn't); or press Right Ctrl once on a keyboard. |
 | Something else | Installer window → **🐞 Report a problem**: it saves a report and opens the bug form to attach it to. In a terminal, `./install.sh report` saves it and prints the form's address. |
 
 ### Where the logs are

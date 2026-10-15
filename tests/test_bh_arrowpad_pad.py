@@ -135,19 +135,37 @@ class Unstick(PadTest):
         self.assertEqual(self.ap.keyboards(devices), {"/dev/input/event7": "Keyboard Craft Keyboard",
                                                       "/dev/input/event8": "Keyboard Craft Mouse"})
 
-    def test_says_what_it_did_and_how_to_undo_a_grab(self):
-        with mock.patch.object(self.ap, "release_held_keys", return_value={"Keyboard Craft Keyboard": [29, 14]}), \
-                mock.patch.object(self.ap, "desktop_grabbed", return_value=True), \
+    def unstick(self, held, grabbed):
+        """Unstick with these held keys and these answers to "is desktop mode's grab on?"; the
+        message it shows, after its check (600 ms)."""
+        from PyQt6.QtTest import QTest
+        self.ap.UNSTICK_LOG = self.tmp / "unstick.log"
+        with mock.patch.object(self.ap, "release_held_keys", return_value=held), \
+                mock.patch.object(self.ap, "desktop_grabbed", side_effect=grabbed), \
                 mock.patch.object(self.ap.subprocess, "Popen") as popen:
             self.pad.unstick()
-        text = popen.call_args[0][0][-1]
-        self.assertIn("Keyboard Craft Keyboard still held Ctrl, Backspace", text)
-        self.assertIn("tap Right Ctrl", text)
-        with mock.patch.object(self.ap, "release_held_keys", return_value={}), \
-                mock.patch.object(self.ap, "desktop_grabbed", return_value=False), \
-                mock.patch.object(self.ap.subprocess, "Popen") as popen:
-            self.pad.unstick()
-        self.assertEqual(popen.call_args[0][0][-1], "Shift, Ctrl, Alt and Super were pressed and let go.")
+            QTest.qWait(700)
+        return popen.call_args[0][0][-1]
+
+    def test_says_what_it_did(self):
+        text = self.unstick({"Keyboard Craft Keyboard": [29, 14]}, [False])
+        self.assertIn("Keyboard Craft Keyboard still held Ctrl, Backspace: released too", text)
+        self.assertNotIn(("tap", 97), self.keys.sent)                   # (no grab: no Right Ctrl)
+        self.assertEqual(self.unstick({}, [False]), "Shift, Ctrl, Alt and Super were pressed and let go.")
+        log = (self.tmp / "unstick.log").read_text()
+        self.assertIn("held keys released: Keyboard Craft Keyboard: Ctrl, Backspace; desktop mode's input grab: off", log)
+        self.assertIn("held keys released: nothing", log)
+
+    def test_gives_back_a_grab_and_checks(self):
+        """Desktop mode's input grab (title "...to ungrab input"): one Right Ctrl tap, then the title
+        says whether it let go."""
+        text = self.unstick({}, [True, False])
+        self.assertEqual(self.keys.sent.count(("tap", 97)), 1)
+        self.assertIn("Desktop mode had taken all input, so other windows didn't get it: given back.", text)
+        text = self.unstick({}, [True, True])
+        self.assertEqual(self.keys.sent.count(("tap", 97)), 2)
+        self.assertIn("didn't give it back: tap Right Ctrl on a keyboard", text)
+        self.assertIn("still on after Right Ctrl", (self.tmp / "unstick.log").read_text())
 
 
 class Mic(PadTest):
