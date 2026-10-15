@@ -10,6 +10,10 @@
   `./install.sh forget-settings`.
 
 ### Fixed
+- **Typing into Android Mirror:** a click on the mirror now gives it the keyboard focus, so your
+  keyboard and Steam's keyboard type on the phone. The keys went to the window you'd clicked
+  before (often the desktop): the see-through layer that takes the mirror's clicks kept the
+  focus from moving. It now hands the focus to the mirror, as SteamVR's own grab handle does.
 - **Less load on SteamVR from Arrow Pad and Screen snip's narration panel:** they read the
   controllers' grip only while a laser is on them (each read waits on SteamVR's shared property
   lock, which SteamVR and Steam use too), and the narration panel checks for events 10 times a

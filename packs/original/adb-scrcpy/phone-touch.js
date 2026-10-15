@@ -2,8 +2,9 @@
 // The Steam session maps the laser wrongly on a window narrower than its screen (every click on the
 // upright phone landed at the window's left edge). So a see-through layer of ours covers the mirror
 // window and takes the laser instead: where you press, drag and let go goes to phone-touch (through
-// its sftPhoneTouch binding), which sends them to the phone as touches. The layer is there only
-// while phone-touch runs (it sets window.__sftPhoneTouchAlive every 2 s). A gear below the window's
+// its sftPhoneTouch binding), which sends them to the phone as touches; a press also gives the mirror
+// the keyboard focus, as a click on the window would. The layer is there only while phone-touch runs
+// (it sets window.__sftPhoneTouchAlive every 2 s). A gear below the window's
 // lower-left corner opens its settings beside it (picture, smoothness, joystick speed; saved by
 // phone-touch in ~/.config/frame-tweaks/phone.conf, which it hands back as window.__sftPhoneTouchConf).
 // Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
@@ -14,13 +15,13 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 17;
+  const NAME = 'phone-touch', VERSION = 18;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
   const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
-  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, trail: [] };
+  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, focusPushes: 0, trail: [] };
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -93,6 +94,14 @@
     lastHover = 0;
     try { window.sftPhoneTouch(JSON.stringify({ a: 'leave' })); } catch (e) {}
   };
+  // Keys (a keyboard, Steam's keyboard) go to the window that has the dashboard's input focus,
+  // which a click on a window gives it. Here the click lands on our layer, which can't take focus:
+  // focus_target_sgid passes it on to the mirror, as SteamVR's own grab handle does. Should it not
+  // have arrived a moment later, the mirror asks for it.
+  const focusMirror = (f) => setTimeout(() => {
+    const focus = f.activePage?.inputFocus;
+    if (focus && !focus.mainPanelHasFocus) { stats.focusPushes++; focus.PushInputFocus?.(); }
+  }, 300);
   const buildLayer = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight, c = page && pictureSize(page);
@@ -105,6 +114,7 @@
     return el(XFORM, { key: `${f.frameID}-sft-touch`, parent_id: id, translation: { y: -H / 2, z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-touch-p`, width: W, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftPhoneTouch', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false },
+        focus_target_sgid: page.mainPanelSGID,
         ...(curveId ? { curvature_origin_id: curveId } : {}) },
         el('div', { style: { width: `${pxW}px`, height: `${pxH}px`, background: 'rgba(0, 0, 0, 0)' },
           onWheel: (ev) => onWheel(ev, c),
@@ -116,6 +126,7 @@
             if (touch) onUp(ev);                    // a new press ends a touch whose let-go went missing
             touch = { rect: ev.currentTarget.getBoundingClientRect(), size: c };
             send('down', ev);
+            focusMirror(f);
             window.addEventListener('mousemove', onMove, true);
             window.addEventListener('mouseup', onUp, true);
             window.addEventListener('pointerup', onUp, true);
@@ -316,7 +327,7 @@
             f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : null,
             f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
   };
-  const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f)]), () => buildLayer(f));
+  const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f), f.activePage?.mainPanelSGID ?? null]), () => buildLayer(f));
   const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
                                                settingsOpen.has(f.frameID), pending, hueOf(),
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
