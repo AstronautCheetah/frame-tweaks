@@ -14,7 +14,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 15;
+  const NAME = 'phone-touch', VERSION = 16;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -180,9 +180,18 @@
       }
       const m = mover(f);
       if (!m?.state?.xfTransform) return;       // (not mounted yet: next tick)
-      if (!m.state.sParentDevice) m.setState({ xfTransform: clone(c.xf) });    // (not while held)
-      carry = null;
-      snapshot(f);
+      if (m.state.sParentDevice || d.m_bBeingDragged) { carry = null; return; }   // (you took it: yours)
+      // Put back, and kept there for 6 s: the dashboard places the window again once it takes the
+      // phone's shape (phone-fit resizes it just after it appears), which undid a single move.
+      c.placedAt ??= Date.now();
+      const at = m.state.xfTransform.translation, want = c.xf.translation;
+      if (Math.abs(at.x - want.x) + Math.abs(at.y - want.y) + Math.abs(at.z - want.z) > 0.001) {
+        m.setState({ xfTransform: clone(c.xf) });
+      }
+      if (Date.now() - c.placedAt > 6000) {
+        carry = null;
+        snapshot(f);
+      }
     } catch (e) {
       carry = null;                             // (the dashboard changed: it stays where it came up)
     }
