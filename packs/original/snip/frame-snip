@@ -49,6 +49,7 @@ else:
 
 import ftconf  # noqa: E402  (settings files: lib/ftconf.py, installed beside i18n.py)
 import vrkit  # noqa: E402  (SteamVR poses, grips and haptics: lib/vrkit.py, the same)
+import needs  # noqa: E402  ("this needs a tweak that isn't installed": lib/needs.py, the same)
 from PyQt6.QtCore import (QEvent, QObject, QPoint, QPointF, QProcess, QProcessEnvironment, QRect, Qt, QTimer,
                           pyqtSignal)  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket                            # noqa: E402
@@ -321,6 +322,14 @@ def from_clipboard():
 
 def notify(title, body=""):
     subprocess.run(["notify-send", "-a", _("Screen snip + Narrate"), title, body[:300]], stderr=subprocess.DEVNULL)
+
+
+def tesseract_missing():
+    """Copy text and Narrate read the snip with Tesseract, which Screen snip installs (Homebrew)."""
+    needs.offer("snip", _("Tesseract is missing"),
+                _("Copy text and Narrate read the text in a snip with Tesseract, which Screen snip installs "
+                  "through Homebrew. It's missing now (removed from Homebrew?)."),
+                question=_("Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"))
 
 
 def ocr(img):
@@ -1461,7 +1470,7 @@ class Snip(QWidget):
     def copy_text(self):
         text = ocr(self.snipped())
         if text is None:
-            notify(_("Copy text needs Tesseract"), _("Reinstall Screen snip + Narrate in Frame Tweaks"))
+            tesseract_missing()
         elif not text:
             notify(_("No text found in the snip"))
         else:
@@ -1483,11 +1492,15 @@ class Snip(QWidget):
         snip = self.snipped()
         text = ocr(snip)
         if not text:
-            notify(_("No text found in the snip") if text == "" else _("Narrate needs Tesseract"),
-                   "" if text == "" else _("Reinstall Screen snip + Narrate in Frame Tweaks"))
+            if text == "":
+                notify(_("No text found in the snip"), "")
+            else:
+                tesseract_missing()
             return self.close()
         if not PIPER.exists() or not VOICE.exists():
-            notify(_("Narrate needs Piper"), _("Reinstall 'Speech engine' in Frame Tweaks"))
+            needs.offer("speech", _("Narrate needs the Speech engine"),
+                        _("Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), "
+                          "which isn't installed, or is missing its voice."))
             return self.close()
         # Pop the snip out and give the rest of VR back: the full-screen selection window closes.
         # In VR it's a panel of its own (a separate process, drawn like Arrow Pad); else a window.

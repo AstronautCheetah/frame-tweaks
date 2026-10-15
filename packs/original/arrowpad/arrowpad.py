@@ -83,6 +83,7 @@ from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLayout, QP
                              QVBoxLayout, QWidget)
 
 import ftconf  # noqa: E402  (settings files and logs: lib/ftconf.py, installed beside i18n.py)
+import needs  # noqa: E402  ("this needs a tweak that isn't installed": lib/needs.py, the same)
 
 try:  # controller haptics (optional): SteamVR Input via the openvr module
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1152,9 +1153,9 @@ class ArrowPad(QWidget):
             # Its own process and session: the selection window opens on the Steam session's display.
             subprocess.Popen([str(tool)], start_new_session=True)
         else:
-            subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Screen snip isn't installed"),
-                              _("Tick 'Screen snip + Narrate' in Frame Tweaks to use this button.")],
-                             start_new_session=True)
+            needs.offer("snip", _("Screen snip isn't installed"),
+                        _("The Snip button copies, saves, reads or reads aloud part of the screen, with "
+                          "Screen snip + Narrate. It isn't installed yet."))
 
     # ---- dictation ------------------------------------------------------
     def dictate(self):
@@ -1164,9 +1165,9 @@ class ArrowPad(QWidget):
             subprocess.Popen([str(tool)], start_new_session=True)
             QTimer.singleShot(300, self.restyle)
         else:
-            subprocess.Popen(["notify-send", "-a", _("Arrow Pad"), _("Dictation isn't installed"),
-                              _("Tick 'Dictation' in Frame Tweaks to use this button.")],
-                             start_new_session=True)
+            needs.offer("dictation", _("Dictation isn't installed"),
+                        _("The 🎤 button types what you say, with Dictation (speech to text, on the Frame "
+                          "itself). It isn't installed yet."))
 
     @staticmethod
     def dictation_state():
