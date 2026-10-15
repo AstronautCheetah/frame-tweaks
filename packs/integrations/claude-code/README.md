@@ -15,6 +15,7 @@ author: Anthropic
 source: {relation: from, url: https://code.claude.com/docs/en/setup}
 icon: {theme: utilities-terminal}
 run: {label: Open}
+app: Claude Code
 changes: "`~/.local/bin/claude` and `~/.local/share/claude` (Anthropic's installer)"
 access: Downloads and runs Anthropic's installer (`https://claude.ai/install.sh`) over HTTPS
 survives_updates: Yes (everything is in your home folder)

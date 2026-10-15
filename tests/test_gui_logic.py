@@ -354,13 +354,23 @@ class PreferencesPage(unittest.TestCase):
         self.assertIn("Settings are deleted.", page.leaving.text.text())
         window.uninstall_self.assert_not_called()                     # (asked first)
         page.leaving.yes.click()
-        window.uninstall_self.assert_called_once_with(keep_tweaks=True, settings="remove")
+        window.uninstall_self.assert_called_once_with(keep_tweaks=True, settings="remove", keep_apps=True)
+        self.assertFalse(boxes["Leave third-party apps installed"].isEnabled())        # (only with the tweaks going)
+        boxes["Uninstall every tweak first"].setChecked(True)
+        self.assertTrue(boxes["Leave third-party apps installed"].isChecked())          # (safe by default)
+        boxes["Leave third-party apps installed"].setChecked(False)
+        buttons["Uninstall Frame Tweaks…"].click()
+        self.assertIn("third-party apps too", page.leaving.text.text())
+        page.leaving.yes.click()
+        window.uninstall_self.assert_called_with(keep_tweaks=False, settings="remove", keep_apps=False)
 
     def test_window_runs_uninstall_self_as_planned(self):
         out = io.StringIO()
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(out):
             gui.Window.uninstall_self(mock.Mock(), keep_tweaks=False, settings="keep")
-        self.assertEqual(out.getvalue().strip(), "would run: ./install.sh uninstall-self --keep-settings")
+            gui.Window.uninstall_self(mock.Mock(), keep_tweaks=False, settings="keep", keep_apps=False)
+        self.assertEqual(out.getvalue().split("\n")[:2], ["would run: ./install.sh uninstall-self --keep-settings",
+                                                           "would run: ./install.sh uninstall-self --remove-apps --keep-settings"])
 
 
 if __name__ == "__main__":

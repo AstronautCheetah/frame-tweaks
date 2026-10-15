@@ -124,6 +124,14 @@ class Preferences(QWidget):
         rows.addWidget(self.drop_tweaks)
         rows.addWidget(self.about(_("Off: they stay installed and keep working, but nothing updates them, and "
                                     "removing them later takes Frame Tweaks again.")))
+        self.keep_apps = QCheckBox(_("Leave third-party apps installed"))
+        self.keep_apps.setChecked(True)                 # (the safe choice: other projects' apps, your work in them)
+        rows.addWidget(self.keep_apps)
+        apps = ", ".join(sorted(c["app"] for c in sft.components() if c["app"]))
+        self.keep_apps_about = self.about(_("Their tweaks stay installed, and the apps work as before: {apps}. "
+                                            "Off: they're uninstalled too.").format(apps=apps))
+        rows.addWidget(self.keep_apps_about)
+        self.drop_tweaks.toggled.connect(lambda on: (self.keep_apps.setEnabled(on), self.keep_apps_about.setEnabled(on)))
         self.drop_settings = QCheckBox(_("Delete the settings too"))
         self.drop_settings.setChecked(sft.uninstall_settings() == "remove")
         rows.addWidget(self.drop_settings)
@@ -210,8 +218,12 @@ class Preferences(QWidget):
 
     def ask_uninstall_self(self):
         lines = [_("Uninstall Frame Tweaks?"), ""]
-        lines.append(_("Every tweak is uninstalled first.") if self.drop_tweaks.isChecked()
-                     else _("The tweaks stay installed."))
+        if not self.drop_tweaks.isChecked():
+            lines.append(_("The tweaks stay installed."))
+        elif self.keep_apps.isChecked():
+            lines.append(_("Every tweak is uninstalled first, but those of third-party apps, which stay."))
+        else:
+            lines.append(_("Every tweak is uninstalled first, third-party apps too."))
         lines.append(_("Settings are deleted.") if self.drop_settings.isChecked() else _("Settings are kept."))
         lines.append(_("Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); "
                        "this window closes, and a terminal shows each step.").format(folder=sft.REPO))
@@ -221,7 +233,8 @@ class Preferences(QWidget):
     def uninstall_self(self):
         self.leaving.hide()
         self.window.uninstall_self(keep_tweaks=not self.drop_tweaks.isChecked(),
-                                   settings="remove" if self.drop_settings.isChecked() else "keep")
+                                   settings="remove" if self.drop_settings.isChecked() else "keep",
+                                   keep_apps=self.keep_apps.isChecked())
 
     def heading(self, text):
         h = QLabel(text)

@@ -15,6 +15,7 @@ source: {relation: uses, url: https://github.com/dnut/clipboard-sync}
 icon: {theme: edit-paste}
 run: {label: Restart}
 processes: [^~/.local/bin/clipboard-sync]
+app: clipboard-sync
 changes: >-
   `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary,
   pinned Rust toolchain), a KDE autostart entry

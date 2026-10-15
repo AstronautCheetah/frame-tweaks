@@ -192,7 +192,8 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
   app a tweak installs, is out.
 - **🐞 Report a problem** saves a diagnostics report and offers the bug form, with your version
   filled in, to attach it to; **🧩 Packs** manages extra packs of tweaks; **⚙** holds the
-  preferences (the language, and how the window behaves).
+  preferences: the language, what uninstalling does with settings, uninstalling Frame Tweaks
+  itself, and how the window behaves.
 - In VR, the controller's **B** goes back, **Y** goes to the top of the list, the left D-pad's
   up and down move the highlight between rows, and **A** ticks the row you point at.
 
@@ -209,6 +210,8 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh list               every tweak and what it does
 ./install.sh install signal     install (adds what it depends on: here, the wallet)
 ./install.sh uninstall arrowpad remove one (keeps its settings, unless ⚙ Preferences say to remove them)
+./install.sh uninstall --remove-settings arrowpad   remove one and its settings (--keep-settings: keep them)
+./install.sh forget-settings    delete the settings uninstalled tweaks left behind (--list: only show them)
 ./install.sh reinstall arrowpad remove and install again in one step (the ↻ button)
 ./install.sh status             health check, changes nothing
 ./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
@@ -224,6 +227,7 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh wallet-apps        apps using the wallet (add, --remove, --gate…; --help)
 ./install.sh timers             close-after timers (--set APP MINUTES, --headset…; --help)
 ./install.sh menu               put the Frame Tweaks app-menu entry back (--remove takes it out)
+./install.sh uninstall-self     uninstall Frame Tweaks itself (see Uninstalling, below)
 ./install.sh --version          which Frame Tweaks this is
 ```
 
@@ -288,33 +292,60 @@ install, and adb and ydotool keep the copy that works if a new build doesn't run
 The first things to stop working are the 🧪 experimental tweaks, after a SteamVR update; they
 switch themselves off, and Android Mirror stays usable as a plain window.
 
-## Removing everything
+## Settings
 
-In the window: **⚙ Preferences → Uninstalling Frame Tweaks**, with two choices: uninstall every
-tweak first (or leave them installed), and delete the settings too (or keep them). Or in a
-terminal:
+Each tweak keeps its settings in a few known places, listed in its manifest (`config:`): Arrow
+Pad's size and place in `~/.config/arrowpad.json`, Android Mirror's in
+`~/.config/frame-tweaks/phone.conf`, and so on. Your data is kept apart and is never removed
+with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's pairing keys
+(`~/.android`), Claude Code's `~/.claude`, saved reports (`~/frame-tweaks-debug-*.txt`).
+
+- **When you uninstall a tweak** its settings are kept, so it's set up as before if you install
+  it again. ⚙ Preferences → **Uninstalling a tweak** can make them go with it instead (for one
+  run: `./install.sh uninstall --remove-settings ID`, or `--keep-settings`). Removing them also
+  signs you out of Claude Desktop, removes VSCodium's extensions, and removes NordVPN's key
+  (setting it up again takes a new access token). A reinstall (↻) always keeps them.
+- **Settings left behind** by tweaks you've uninstalled: ⚙ Preferences → **Delete settings left
+  by uninstalled tweaks…** lists them and asks before deleting (`./install.sh forget-settings`;
+  `--list` only shows them). An installed tweak's settings are never touched, nor those of a
+  tweak whose status is still being checked.
+
+## Uninstalling
+
+In the window: **⚙ Preferences → Uninstalling Frame Tweaks**, with three choices:
+
+- **Uninstall every tweak first** (on), or leave them installed: they keep working, but nothing
+  updates them, and removing them later takes Frame Tweaks again (install it, and it finds them).
+- **Leave third-party apps installed** (on): the tweaks that install another project's app
+  (VSCodium, Claude Desktop, Claude Code, Full Keyboard, clipboard-sync) stay, with what they
+  need, so the apps and your work in them stay as they are.
+- **Delete the settings too** (starts as your choice for single tweaks): Frame Tweaks' own, and
+  those of the tweaks it uninstalls or uninstalled before; installed tweaks' stay.
+
+Or in a terminal:
 
 ```sh
-cd ~/frame-tweaks && ./install.sh uninstall-self --remove-settings   # everything
-./install.sh uninstall-self --keep-tweaks     # only Frame Tweaks: the tweaks stay and keep working
+cd ~/frame-tweaks && ./install.sh uninstall-self                 # tweaks, but third-party apps stay
+./install.sh uninstall-self --remove-apps --remove-settings      # everything
+./install.sh uninstall-self --keep-tweaks                        # only Frame Tweaks itself
 ```
 
-It uninstalls every tweak (the ones that depend on others first; it stops if one fails), removes
-the app-menu entry, the files the tweaks shared, the logs and the Python setup, and then
-`~/frame-tweaks` itself, unless it holds work of yours (changes, your own packs, commits not
-pushed): then it says so and leaves it. It keeps your own packs in `~/.local/share/frame-tweaks/packs`
-and backups of files still waiting to be put back. If SteamVR was running, VR dashboard patching
-puts SteamVR's own setting back when SteamVR stops, and what it needs for that goes then.
+It uninstalls the tweaks (the ones that depend on others first; it stops if one fails, so you
+can run it again), removes the app-menu entry and, once no tweak is left, the files the tweaks
+shared, the logs and the Python setup. Then it removes `~/frame-tweaks` itself, unless it holds
+work of yours (changes, your own packs, commits not pushed): then it says so and leaves it. It
+keeps your own packs in `~/.local/share/frame-tweaks/packs`, and backups of files still waiting
+to be put back. If SteamVR was running, VR dashboard patching puts SteamVR's own setting back
+when SteamVR stops, and what it needs for that goes then.
 
-**Settings left behind:** a tweak uninstalled while ⚙ Preferences said to keep its settings leaves
-them; **Delete settings left by uninstalled tweaks…** there (or `./install.sh forget-settings`)
-removes those, never an installed tweak's. Not removed either way: what you dictated
-(`~/.local/share/dictation-history.txt`) and saved reports (`~/frame-tweaks-debug-*.txt`).
+Tweaks of packs you turned off, or no longer trust, aren't uninstalled: it names them, and keeps
+what they share. To remove them too, turn their pack on (or trust it) first.
 
-`uninstall all` removes the tweaks of the packs in use: turn a pack back on (or trust it again)
-first if you turned it off.
+**Installing Frame Tweaks again** after leaving tweaks installed: it finds them (each tweak's
+status check looks at what's really there), at the version recorded, so updates and uninstalling
+work as before. A pack of your own needs trusting again if its settings were deleted.
 
-What stays:
+What stays in any case:
 
 - **Homebrew** (other programs may live in it), with the programs the tweaks installed through it
   (whisper.cpp, scrcpy, Tesseract, wl-clipboard). `./install.sh uninstall homebrew` prints
@@ -322,10 +353,8 @@ What stays:
 - **KWalletManager**, the Flathub app Shared KDE wallet installs, and the Flatpak setting that
   has Signal read its database key from the wallet (`flatpak override --user --show
   org.signal.Signal`): the key is there, so Signal needs it to open its messages.
-- **Your data in other apps' usual places**, such as the KDE wallet itself, adb pairing keys in
-  `~/.android`. Each tweak's uninstaller lists what it keeps as it runs.
-- **Each tweak's settings,** unless ⚙ Preferences → Uninstalling says to remove them (or you run
-  `./install.sh uninstall --remove-settings ID`).
+- **Your data in other apps' usual places**, such as the KDE wallet itself and adb's pairing
+  keys. Each tweak's uninstaller lists what it keeps as it runs.
 - The lines tweaks added to `~/.bashrc` (putting `~/.local/bin` and Homebrew on your `PATH`),
   and `~/.config/environment.d/10-local-bin.conf`. They are harmless; delete them by hand if you
   like.
