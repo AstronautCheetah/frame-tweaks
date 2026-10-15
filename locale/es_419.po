@@ -13,7 +13,7 @@ msgstr "Marca para instalar, desmarca para quitar"
 msgid "(hidden)"
 msgstr "(oculto)"
 
-#: gui/frame-tweaks-gui.py:1040 lib/sft.py:688
+#: gui/frame-tweaks-gui.py:1040 lib/sft.py:690
 msgid "Experimental: %s"
 msgstr "Experimental: %s"
 
@@ -299,7 +299,7 @@ msgstr "El navegador no respondió: el enlace está en el portapapeles."
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:372 install.sh:221 lib/common.sh:462 lib/link.sh:29 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:372 install.sh:221 lib/common.sh:462 lib/link.sh:38 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5
 msgid "not installed"
 msgstr "no instalado"
 
@@ -530,7 +530,7 @@ msgstr "✔ Frame Tweaks está actualizado ({version})."
 msgid "Show hidden ({n})"
 msgstr "Mostrar ocultos ({n})"
 
-#: gui/packs_page.py:113 lib/sft.py:940
+#: gui/packs_page.py:113 lib/sft.py:942
 msgid "(instead of {other}'s)"
 msgstr "(en lugar del de {other})"
 
@@ -549,11 +549,11 @@ msgid_plural "%d tweaks"
 msgstr[0] "%d ajuste"
 msgstr[1] "%d ajustes"
 
-#: gui/packs_page.py:126 lib/sft.py:895
+#: gui/packs_page.py:126 lib/sft.py:897
 msgid "Tweaks: %s"
 msgstr "Ajustes: %s"
 
-#: gui/packs_page.py:126 lib/sft.py:895
+#: gui/packs_page.py:126 lib/sft.py:897
 msgid "none"
 msgstr "ninguno"
 
@@ -663,12 +663,12 @@ msgid "Updating {name}…"
 msgstr "Actualizando {name}…"
 
 # needs review
-#: gui/packs_page.py:241 lib/sft.py:913
+#: gui/packs_page.py:241 lib/sft.py:915
 msgid "{name} is up to date."
 msgstr "{name} está al día."
 
 # needs review
-#: gui/packs_page.py:243 lib/sft.py:915
+#: gui/packs_page.py:243 lib/sft.py:917
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] "{name}: actualizado, cambió {n} archivo."
@@ -1534,7 +1534,7 @@ msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
 msgid "run what?"
 msgstr "¿ejecutar qué?"
 
-#: install.sh:722 lib/link.sh:32
+#: install.sh:722 lib/link.sh:41
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
@@ -1558,27 +1558,27 @@ msgstr "RV"
 msgid "desktop mode"
 msgstr "modo escritorio"
 
-#: lib/browser.py:308
+#: lib/browser.py:311
 msgid "Opened in {app} ({session})"
 msgstr "Abierto en {app} ({session})"
 
-#: lib/browser.py:315
+#: lib/browser.py:318
 msgid ""
 "Your default browser, {default}, can't open links, so {app} did. Choose one in System Settings → Default Applications → Web browser."
 msgstr ""
 "Tu navegador predeterminado, {default}, no puede abrir enlaces, así que lo abrió {app}. Elige uno en Preferencias del sistema → Aplicaciones predeterminadas → Navegador web."
 
-#: lib/browser.py:317
+#: lib/browser.py:320
 msgid ""
 "No default browser is set, so {app} opened it. Choose one in System Settings → Default Applications → Web browser."
 msgstr ""
 "No hay un navegador predeterminado, así que lo abrió {app}. Elige uno en Preferencias del sistema → Aplicaciones predeterminadas → Navegador web."
 
-#: lib/browser.py:363
+#: lib/browser.py:366
 msgid "No default app found."
 msgstr "No se encontró una app predeterminada."
 
-#: lib/browser.py:372
+#: lib/browser.py:375
 msgid "Couldn't open it."
 msgstr "No se pudo abrir."
 
@@ -1715,7 +1715,17 @@ msgid "Uninstalling %s with its own uninstaller:"
 msgstr "Desinstalando %s con su propio desinstalador:"
 
 # needs review
-#: lib/link.sh:27
+#: lib/link.sh:25
+msgid "Restart SteamVR to unload it (reboot, or: %s)."
+msgstr "Reinicia SteamVR para descargarlo (reinicia el equipo, o: %s)."
+
+# needs review
+#: lib/link.sh:35
+msgid "installed; restart SteamVR to load it"
+msgstr "instalado; reinicia SteamVR para cargarlo"
+
+# needs review
+#: lib/link.sh:36
 msgid "installed by its own installer (it updates its own way)"
 msgstr "instalado por su propio instalador (se actualiza a su manera)"
 
@@ -1737,260 +1747,260 @@ msgstr "Abrir Frame Tweaks"
 msgid "Open Frame Tweaks to install it?"
 msgstr "¿Abrir Frame Tweaks para instalarlo?"
 
-#: lib/sft.py:1015
+#: lib/sft.py:1017
 msgid "uninstall-settings takes keep or remove"
 msgstr "uninstall-settings acepta keep o remove"
 
-#: lib/sft.py:1044
+#: lib/sft.py:1046
 msgid "{id} has no settings; these do: {ids}"
 msgstr "{id} no tiene configuración; estos sí: {ids}"
 
-#: lib/sft.py:1052
+#: lib/sft.py:1054
 msgid "expected KEY=VALUE, got %s"
 msgstr "se esperaba CLAVE=VALOR, se recibió %s"
 
-#: lib/sft.py:1056
+#: lib/sft.py:1058
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr "{id} no tiene la opción {key}; tiene: {keys}"
 
-#: lib/sft.py:674
+#: lib/sft.py:676
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr "{key}: {text} no es uno de: {choices}"
 
-#: lib/sft.py:683 lib/sft.py:965 lib/sft.py:989 lib/sft.py:993 lib/sft.py:1021
+#: lib/sft.py:685 lib/sft.py:967 lib/sft.py:991 lib/sft.py:995 lib/sft.py:1023
 msgid "unknown component: %s"
 msgstr "componente desconocido: %s"
 
-#: lib/sft.py:686
+#: lib/sft.py:688
 msgid "Why: %s"
 msgstr "Por qué: %s"
 
-#: lib/sft.py:690
+#: lib/sft.py:692
 msgid "Needs: %s"
 msgstr "Necesita: %s"
 
-#: lib/sft.py:692
+#: lib/sft.py:694
 msgid "By: %s"
 msgstr "Por: %s"
 
-#: lib/sft.py:694
+#: lib/sft.py:696
 msgid "Source: %s"
 msgstr "Fuente: %s"
 
-#: lib/sft.py:696
+#: lib/sft.py:698
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 "Del paquete {pack} ({folder}), no forma parte de Frame Tweaks; se usa en lugar del de {other}"
 
-#: lib/sft.py:697
+#: lib/sft.py:699
 msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr "Del paquete {pack} ({folder}), no forma parte de Frame Tweaks"
 
-#: lib/sft.py:699
+#: lib/sft.py:701
 msgid "More: %s"
 msgstr "Más: %s"
 
-#: lib/sft.py:702
+#: lib/sft.py:704
 msgid "Run ({label}): {command}"
 msgstr "Ejecutar ({label}): {command}"
 
-#: lib/sft.py:704
+#: lib/sft.py:706
 msgid "Settings: %s"
 msgstr "Configuración: %s"
 
 # needs review
-#: lib/sft.py:728
+#: lib/sft.py:730
 msgid "git isn't installed"
 msgstr "git no está instalado"
 
 # needs review
-#: lib/sft.py:730
+#: lib/sft.py:732
 msgid "git took too long (no connection?)"
 msgstr "git tardó demasiado (¿sin conexión?)"
 
 # needs review
-#: lib/sft.py:734
+#: lib/sft.py:736
 msgid "git {command} failed"
 msgstr "git {command} falló"
 
 # needs review
-#: lib/sft.py:761
+#: lib/sft.py:763
 msgid ""
 "That isn't a link to a pack: give the address of its git repository, starting with https://"
 msgstr ""
 "Eso no es un enlace a un paquete: da la dirección de su repositorio git, que empieza con https://"
 
 # needs review
-#: lib/sft.py:763
+#: lib/sft.py:765
 msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} no es el nombre de una rama ni de una etiqueta"
 
 # needs review
-#: lib/sft.py:766
+#: lib/sft.py:768
 msgid "You have a pack in {folder} already: update it, or remove it first."
 msgstr "Ya tienes un paquete en {folder}: actualízalo o quítalo primero."
 
 # needs review
-#: lib/sft.py:774
+#: lib/sft.py:776
 msgid ""
 "There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
 msgstr ""
 "No hay un paquete en la raíz de {link}: ni pack.md ni carpetas de ajustes (docs/mods.md)."
 
 # needs review
-#: lib/sft.py:787
+#: lib/sft.py:789
 msgid "{pack} wasn't added from a link: change its folder yourself."
 msgstr "{pack} no se agregó desde un enlace: cambia tú mismo su carpeta."
 
 # needs review
-#: lib/sft.py:789
+#: lib/sft.py:791
 msgid ""
 "{pack} was added at a fixed version: to follow another one, remove it and add it again."
 msgstr ""
 "{pack} se agregó en una versión fija: para seguir otra, quítalo y vuelve a agregarlo."
 
 # needs review
-#: lib/sft.py:821
+#: lib/sft.py:823
 msgid "Only packs in {folder} can be removed here."
 msgstr "Aquí solo se pueden quitar paquetes de {folder}."
 
 # needs review
-#: lib/sft.py:825
+#: lib/sft.py:827
 msgid "Uninstall its tweaks first: {ids} ({command})."
 msgstr "Primero desinstala sus ajustes: {ids} ({command})."
 
 # needs review
-#: lib/sft.py:826
+#: lib/sft.py:828
 msgid ""
 "Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
 msgstr ""
 "Sus ajustes {ids} siguen instalados: vuelve a confiar en él para desinstalarlos ({command}) y luego quítalo."
 
-#: lib/sft.py:857
+#: lib/sft.py:859
 msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr "hay más de un paquete llamado {name}: indica su carpeta ({folders})"
 
-#: lib/sft.py:861
+#: lib/sft.py:863
 msgid "no pack {name}; see {command}"
 msgstr "no existe el paquete {name}; consulta {command}"
 
-#: lib/sft.py:868
+#: lib/sft.py:870
 msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
 msgstr "{pack} no es uno de los paquetes propios de Frame Tweaks: {command}"
 
-#: lib/sft.py:871
+#: lib/sft.py:873
 msgid "in use; its tweaks are listed"
 msgstr "en uso; sus ajustes aparecen en la lista"
 
-#: lib/sft.py:872
+#: lib/sft.py:874
 msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 "desactivado (sus ajustes instalados se quedan hasta que los desinstales)"
 
-#: lib/sft.py:877
+#: lib/sft.py:879
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
 "{pack} viene con Frame Tweaks, así que no hace falta confiar en él: {command}"
 
-#: lib/sft.py:880
+#: lib/sft.py:882
 msgid "trusted; its tweaks are listed now"
 msgstr "de confianza; sus ajustes ya aparecen en la lista"
 
-#: lib/sft.py:881
+#: lib/sft.py:883
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 "ya no se usa (sus ajustes instalados se quedan hasta que los desinstales)"
 
 # needs review
-#: lib/sft.py:893
+#: lib/sft.py:895
 msgid "Added the pack {name} in {folder}."
 msgstr "Se agregó el paquete {name} en {folder}."
 
 # needs review
-#: lib/sft.py:894
+#: lib/sft.py:896
 msgid "By {author}."
 msgstr "De {author}."
 
 # needs review
-#: lib/sft.py:898
+#: lib/sft.py:900
 msgid "Problems:"
 msgstr "Problemas:"
 
 # needs review
-#: lib/sft.py:899
+#: lib/sft.py:901
 msgid ""
 "It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
 msgstr ""
 "No se usa hasta que confíes en él: sus ajustes se ejecutarían como tú. Lee primero lo que hacen (el README.md de cada uno en esa carpeta) y luego: {command}"
 
 # needs review
-#: lib/sft.py:907
+#: lib/sft.py:909
 msgid "Removed the pack {name} ({folder})."
 msgstr "Se quitó el paquete {name} ({folder})."
 
 # needs review
-#: lib/sft.py:919
+#: lib/sft.py:921
 msgid ""
 "It isn't used until you trust it again. Read what changed first, then: {command}"
 msgstr ""
 "No se usa hasta que vuelvas a confiar en él. Lee primero lo que cambió y luego: {command}"
 
-#: lib/sft.py:927
+#: lib/sft.py:929
 msgid "official: in use"
 msgstr "oficial: en uso"
 
-#: lib/sft.py:928
+#: lib/sft.py:930
 msgid "official: turned off ({command})"
 msgstr "oficial: desactivado ({command})"
 
-#: lib/sft.py:929
+#: lib/sft.py:931
 msgid "trusted: in use"
 msgstr "de confianza: en uso"
 
-#: lib/sft.py:930
+#: lib/sft.py:932
 msgid "not trusted: not used ({command})"
 msgstr "sin confianza: no se usa ({command})"
 
-#: lib/sft.py:931
+#: lib/sft.py:933
 msgid "changed since you trusted it: not used until you trust it again"
 msgstr ""
 "cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
 
-#: lib/sft.py:943
+#: lib/sft.py:945
 msgid "problem: %s"
 msgstr "problema: %s"
 
-#: lib/sft.py:951
+#: lib/sft.py:953
 msgid "(default)"
 msgstr "(predeterminado)"
 
-#: lib/sft.py:965
+#: lib/sft.py:967
 msgid "%s what?"
 msgstr "¿%s qué?"
 
-#: lib/sft.py:968
+#: lib/sft.py:970
 msgid "Hidden in the installer window: %s"
 msgstr "Oculto en la ventana del instalador: %s"
 
-#: lib/sft.py:969
+#: lib/sft.py:971
 msgid "Shown in the installer window: %s"
 msgstr "Visible en la ventana del instalador: %s"
 
-#: lib/sft.py:976
+#: lib/sft.py:978
 msgid "unknown group {name}; groups: {groups}"
 msgstr "grupo desconocido {name}; grupos: {groups}"
 
-#: lib/sft.py:978
+#: lib/sft.py:980
 msgid "Group {name} hidden in the installer window."
 msgstr "Grupo {name} oculto en la ventana del instalador."
 
-#: lib/sft.py:979
+#: lib/sft.py:981
 msgid "Group {name} shown in the installer window."
 msgstr "Grupo {name} visible en la ventana del instalador."
 
 # needs review
-#: lib/sft.py:993
+#: lib/sft.py:995
 msgid "%s isn't linked"
 msgstr "%s no está vinculado"
 
@@ -4882,11 +4892,11 @@ msgstr ""
 msgid "Building %s from %s (a few minutes)"
 msgstr "Compilando %s desde %s (unos minutos)"
 
-#: packs/third-party/clipboard/install.sh:36 packs/third-party/recline/install.sh:20
+#: packs/third-party/clipboard/install.sh:36
 msgid "%s: not the pinned commit"
 msgstr "%s: no es el commit fijado"
 
-#: packs/third-party/clipboard/install.sh:38 packs/third-party/recline/install.sh:22
+#: packs/third-party/clipboard/install.sh:38
 msgid "%s's pinned commit isn't available upstream; using Frame Tweaks' copy"
 msgstr ""
 "El commit fijado de %s no está disponible en el repositorio original; se usa la copia de Frame Tweaks"
@@ -5005,155 +5015,27 @@ msgstr ""
 "Proyectos de otras personas para el Steam Frame, instalados y actualizados por Frame Tweaks: cada uno compilado o descargado desde una versión fijada y verificada de su código, en tu carpeta personal, y con el crédito para sus autores (su propio README va después del nuestro en la página de cada ajuste)."
 
 #: packs/third-party/recline/README.md
-msgid "Applies when you reinstall Recline, then restart SteamVR."
-msgstr "Se aplica cuando reinstalas Reclinar y luego reinicias SteamVR."
-
-#: packs/third-party/recline/README.md
-msgid "Keep the room view aligned while reclined"
-msgstr "Mantener alineada la vista de habitación al estar reclinado"
-
-#: packs/third-party/recline/README.md
 msgid ""
 "Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
 msgstr ""
 "Recuéstate y sigue jugando. Presiona un botón (o un atajo del control) y la dirección a la que miras queda nivelada y al frente en RV, a una altura de ojos elegida; Restablecer devuelve todo a su lugar. Funciona con apps nativas del Frame, y tus manos se mueven contigo."
 
 #: packs/third-party/recline/README.md
-msgid "No (the room view looks tilted while reclined)"
-msgstr "No (la vista de habitación se ve inclinada al estar reclinado)"
-
-#: packs/third-party/recline/README.md
 msgid "Recline"
 msgstr "Reclinar"
 
+# needs review
 #: packs/third-party/recline/README.md
 msgid ""
-"Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
+"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes."
 msgstr ""
-"Las opciones propias de Reclinar (rotación, altura de ojos, los atajos del control) están en su panel del menú principal de SteamVR."
-
-#: packs/third-party/recline/README.md
-msgid ""
-"SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
-msgstr ""
-"La opción Volver a centrar de SteamVR solo te gira; no puede inclinar el mundo, así que al acostarte terminas mirando el techo. Esto compila [Recline-VR](https://github.com/new-waifu/Recline-VR) desde su código fuente y lo instala por ti."
+"La opción Volver a centrar de SteamVR solo te gira; no puede inclinar el mundo, así que al acostarte terminas mirando el techo. Vinculado: [Recline-VR](https://github.com/new-waifu/Recline-VR) se compila e instala en el Frame por sí mismo, como lo describe su README."
 
 #: packs/third-party/recline/README.md
 msgid ""
 "Use VR lying down or reclined; one button makes your view level and forward"
 msgstr ""
 "Usa la RV acostado o reclinado; un botón deja tu vista nivelada y al frente"
-
-#: packs/third-party/recline/README.md
-msgid "Yes (adds a small library to the Frame's camera service)"
-msgstr "Sí (agrega una pequeña biblioteca al servicio de cámara del Frame)"
-
-#: packs/third-party/recline/check-system.sh:11
-msgid ""
-"SteamVR's vrpathreg, CMake, a C++ compiler and the Vulkan headers are there"
-msgstr ""
-"vrpathreg de SteamVR, CMake, un compilador de C++ y los encabezados de Vulkan están disponibles"
-
-#: packs/third-party/recline/check-system.sh:5
-msgid "SteamVR's vrpathreg"
-msgstr "vrpathreg de SteamVR"
-
-#: packs/third-party/recline/check-system.sh:7
-msgid "the Vulkan headers"
-msgstr "los encabezados de Vulkan"
-
-#: packs/third-party/recline/check-system.sh:9
-msgid "SteamOS no longer has: %s"
-msgstr "SteamOS ya no tiene: %s"
-
-#: packs/third-party/recline/install.sh:17
-msgid "Fetching Recline-VR %s from %s"
-msgstr "Descargando Recline-VR %s desde %s"
-
-#: packs/third-party/recline/install.sh:29
-msgid "Building it (under a minute) and running its tests"
-msgstr "Compilándolo (menos de un minuto) y ejecutando sus pruebas"
-
-#: packs/third-party/recline/install.sh:31
-msgid "Recline-VR: cmake failed"
-msgstr "Recline-VR: falló cmake"
-
-#: packs/third-party/recline/install.sh:32
-msgid "Recline-VR: the build failed"
-msgstr "Recline-VR: falló la compilación"
-
-#: packs/third-party/recline/install.sh:33
-msgid "Recline-VR: its tests failed; nothing was installed"
-msgstr "Recline-VR: fallaron sus pruebas; no se instaló nada"
-
-#: packs/third-party/recline/install.sh:35
-msgid ""
-"Recline-VR built without Vulkan; not installing (its fallback has crashed SteamVR's compositor)"
-msgstr ""
-"Recline-VR se compiló sin Vulkan; no se instala (su modo alternativo ha hecho fallar el compositor de SteamVR)"
-
-#: packs/third-party/recline/install.sh:44
-msgid ""
-"Room-view fix left out (setting); the room view will look tilted while reclined"
-msgstr ""
-"Se omitió la corrección de la vista de habitación (opción); la vista de habitación se verá inclinada al estar reclinado"
-
-#: packs/third-party/recline/install.sh:52
-msgid "Recline %s installed. Restart SteamVR to load it (reboot, or: %s)."
-msgstr ""
-"Reclinar %s instalado. Reinicia SteamVR para cargarlo (reinicia el equipo, o: %s)."
-
-#: packs/third-party/recline/install.sh:9
-msgid "can't build Recline: %s"
-msgstr "no se puede compilar Reclinar: %s"
-
-# needs review
-#: packs/third-party/recline/status.sh:12
-msgid "Recline %s installed; restart SteamVR to load it"
-msgstr "Reclinar %s instalado; reinicia SteamVR para cargarlo"
-
-# needs review
-#: packs/third-party/recline/status.sh:15
-msgid ""
-"Recline %s installed, but SteamVR didn't load it (check SteamVR's safe mode: SteamVR settings → Startup)"
-msgstr ""
-"Reclinar %s instalado, pero SteamVR no lo cargó (revisa el modo seguro de SteamVR: Configuración de SteamVR → Iniciar/Finalizar)"
-
-#: packs/third-party/recline/status.sh:16
-msgid "Recline %s loaded"
-msgstr "Reclinar %s cargado"
-
-#: packs/third-party/recline/status.sh:7
-msgid ""
-"Recline %s installed but its driver isn't registered (Reinstall fixes it)"
-msgstr ""
-"Reclinar %s instalado, pero su controlador no está registrado (Reinstalar lo corrige)"
-
-#: packs/third-party/recline/status.sh:8
-msgid "Recline %s installed (SteamVR isn't running)"
-msgstr "Reclinar %s instalado (SteamVR no está en ejecución)"
-
-#: packs/third-party/recline/uninstall.sh:11
-msgid ""
-"SteamVR isn't running, so Recline's panel couldn't be unregistered (SteamVR may still list it)"
-msgstr ""
-"SteamVR no está en ejecución, así que no se pudo quitar el registro del panel de Reclinar (SteamVR podría seguir mostrándolo)"
-
-#: packs/third-party/recline/uninstall.sh:15
-msgid "Kept Recline's panel options: ~/.config/recline-vr"
-msgstr ""
-"Se conservaron las opciones del panel de Reclinar: ~/.config/recline-vr"
-
-#: packs/third-party/recline/uninstall.sh:16
-msgid "Restart SteamVR to unload its driver (reboot, or: %s)."
-msgstr ""
-"Reinicia SteamVR para descargar su controlador (reinicia el equipo, o: %s)."
-
-#: packs/third-party/recline/uninstall.sh:8
-msgid ""
-"couldn't unregister Recline's panel from SteamVR; it will report it missing"
-msgstr ""
-"no se pudo quitar el registro del panel de Reclinar en SteamVR; lo reportará como faltante"
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3
 msgid "Frame Tweaks"
@@ -5306,3 +5188,116 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "older build: copied passwords stay in the other session, and it overwrites the clipboard every 10 minutes (Reinstall fixes it)"
 #~ msgstr ""
 #~ "compilación anterior: las contraseñas copiadas se quedan en la otra sesión, y sobrescribe el portapapeles cada 10 minutos (Reinstalar lo corrige)"
+
+#~ msgid "Applies when you reinstall Recline, then restart SteamVR."
+#~ msgstr "Se aplica cuando reinstalas Reclinar y luego reinicias SteamVR."
+
+#~ msgid "Keep the room view aligned while reclined"
+#~ msgstr "Mantener alineada la vista de habitación al estar reclinado"
+
+#~ msgid "No (the room view looks tilted while reclined)"
+#~ msgstr "No (la vista de habitación se ve inclinada al estar reclinado)"
+
+#~ msgid ""
+#~ "Recline's own options (rotation, eye height, the controller shortcuts) are on its panel in the SteamVR dashboard."
+#~ msgstr ""
+#~ "Las opciones propias de Reclinar (rotación, altura de ojos, los atajos del control) están en su panel del menú principal de SteamVR."
+
+#~ msgid ""
+#~ "SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you."
+#~ msgstr ""
+#~ "La opción Volver a centrar de SteamVR solo te gira; no puede inclinar el mundo, así que al acostarte terminas mirando el techo. Esto compila [Recline-VR](https://github.com/new-waifu/Recline-VR) desde su código fuente y lo instala por ti."
+
+#~ msgid "Yes (adds a small library to the Frame's camera service)"
+#~ msgstr "Sí (agrega una pequeña biblioteca al servicio de cámara del Frame)"
+
+#~ msgid ""
+#~ "SteamVR's vrpathreg, CMake, a C++ compiler and the Vulkan headers are there"
+#~ msgstr ""
+#~ "vrpathreg de SteamVR, CMake, un compilador de C++ y los encabezados de Vulkan están disponibles"
+
+#~ msgid "SteamVR's vrpathreg"
+#~ msgstr "vrpathreg de SteamVR"
+
+#~ msgid "the Vulkan headers"
+#~ msgstr "los encabezados de Vulkan"
+
+#~ msgid "SteamOS no longer has: %s"
+#~ msgstr "SteamOS ya no tiene: %s"
+
+#~ msgid "Fetching Recline-VR %s from %s"
+#~ msgstr "Descargando Recline-VR %s desde %s"
+
+#~ msgid "Building it (under a minute) and running its tests"
+#~ msgstr "Compilándolo (menos de un minuto) y ejecutando sus pruebas"
+
+#~ msgid "Recline-VR: cmake failed"
+#~ msgstr "Recline-VR: falló cmake"
+
+#~ msgid "Recline-VR: the build failed"
+#~ msgstr "Recline-VR: falló la compilación"
+
+#~ msgid "Recline-VR: its tests failed; nothing was installed"
+#~ msgstr "Recline-VR: fallaron sus pruebas; no se instaló nada"
+
+#~ msgid ""
+#~ "Recline-VR built without Vulkan; not installing (its fallback has crashed SteamVR's compositor)"
+#~ msgstr ""
+#~ "Recline-VR se compiló sin Vulkan; no se instala (su modo alternativo ha hecho fallar el compositor de SteamVR)"
+
+#~ msgid ""
+#~ "Room-view fix left out (setting); the room view will look tilted while reclined"
+#~ msgstr ""
+#~ "Se omitió la corrección de la vista de habitación (opción); la vista de habitación se verá inclinada al estar reclinado"
+
+#~ msgid "Recline %s installed. Restart SteamVR to load it (reboot, or: %s)."
+#~ msgstr ""
+#~ "Reclinar %s instalado. Reinicia SteamVR para cargarlo (reinicia el equipo, o: %s)."
+
+#~ msgid "can't build Recline: %s"
+#~ msgstr "no se puede compilar Reclinar: %s"
+
+#~ # needs review
+#~ msgid "Recline %s installed; restart SteamVR to load it"
+#~ msgstr "Reclinar %s instalado; reinicia SteamVR para cargarlo"
+
+#~ # needs review
+#~ msgid ""
+#~ "Recline %s installed, but SteamVR didn't load it (check SteamVR's safe mode: SteamVR settings → Startup)"
+#~ msgstr ""
+#~ "Reclinar %s instalado, pero SteamVR no lo cargó (revisa el modo seguro de SteamVR: Configuración de SteamVR → Iniciar/Finalizar)"
+
+#~ msgid "Recline %s loaded"
+#~ msgstr "Reclinar %s cargado"
+
+#~ msgid ""
+#~ "Recline %s installed but its driver isn't registered (Reinstall fixes it)"
+#~ msgstr ""
+#~ "Reclinar %s instalado, pero su controlador no está registrado (Reinstalar lo corrige)"
+
+#~ msgid "Recline %s installed (SteamVR isn't running)"
+#~ msgstr "Reclinar %s instalado (SteamVR no está en ejecución)"
+
+#~ msgid ""
+#~ "SteamVR isn't running, so Recline's panel couldn't be unregistered (SteamVR may still list it)"
+#~ msgstr ""
+#~ "SteamVR no está en ejecución, así que no se pudo quitar el registro del panel de Reclinar (SteamVR podría seguir mostrándolo)"
+
+#~ msgid "Kept Recline's panel options: ~/.config/recline-vr"
+#~ msgstr ""
+#~ "Se conservaron las opciones del panel de Reclinar: ~/.config/recline-vr"
+
+#~ msgid "Restart SteamVR to unload its driver (reboot, or: %s)."
+#~ msgstr ""
+#~ "Reinicia SteamVR para descargar su controlador (reinicia el equipo, o: %s)."
+
+#~ msgid ""
+#~ "couldn't unregister Recline's panel from SteamVR; it will report it missing"
+#~ msgstr ""
+#~ "no se pudo quitar el registro del panel de Reclinar en SteamVR; lo reportará como faltante"
+
+#~ # needs review
+#~ msgid ""
+#~ "Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
+#~ msgstr ""
+#~ "Eliminar la configuración también cierra tu sesión de Claude para escritorio y borra la clave de NordVPN (para volver a configurar NordVPN necesitarás un nuevo token de acceso)."

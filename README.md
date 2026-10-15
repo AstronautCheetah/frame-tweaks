@@ -117,6 +117,9 @@ update. They check those internals each time SteamVR starts and switch the affec
 (their status says so) until an update catches up; nothing else is affected. A few tweaks
 need **SteamVR restarted (or a reboot)** once after installing; the installer tells you which.
 
+🔗 marks linked projects: Frame Tweaks runs the project's own installer and uninstaller, as its
+README gives them, and it updates its own way ([docs/mods.md](docs/mods.md#linking-a-project)).
+
 Grouped as in the Frame Tweaks window. *Helpers* are installed automatically when a tweak needs
 them.
 
@@ -147,7 +150,7 @@ them.
 | ↩️ | [**Back to the previous window**](packs/original/float-return/) 🧪 | After you float the window the dashboard is showing out into the world, the dashboard shows the window it showed before (after 2.5 s), instead of an empty space; and when the shown window closes, it goes back to the one before instead of Steam. | SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does. |
 | ✋ | [**Pick up when floating**](packs/original/float-grab/) 🧪 | "Float in World" also picks the window up, as grabbing the bar under it does, so you place it in one go; your next click (or letting go of the trigger, if you're still holding it) puts it down. | In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one. |
 | 📜 | [**Scroll strips**](packs/original/scroll-strips/) 🧪 | Big scroll strips beside each window, docked in the dashboard or floating (right and top by default), easy to grab with the laser. Press and drag away from that point to scroll, faster the farther you go; let go to stop. Set them up in the Frame Tweaks window or from a gear beside each window in VR. | In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit. |
-| 🛋️ | [**Recline**](packs/third-party/recline/) 🧪 | Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you. | SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. This builds [Recline-VR](https://github.com/new-waifu/Recline-VR) from its source and installs it for you. |
+| 🛋️ | [**Recline**](packs/third-party/recline/) 🧪 🔗 | Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you. | SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes. |
 
 ### Privacy & security
 

@@ -21,10 +21,19 @@ case $action in
         [ -n "$cmd" ] || die "$(t "%s has no uninstall command here: see its README" "$name")"
         say "$(t "Uninstalling %s with its own uninstaller:" "$name")"
         echo "  $cmd"
-        bash -c "$cmd" ;;
+        bash -c "$cmd" || exit
+        [ "$(field restart)" = steamvr ] && say "$(t 'Restart SteamVR to unload it (reboot, or: %s).' "steamvr restart")"
+        true ;;
     status)
+        # restart: steamvr: SteamVR loads it only as it starts, so a SteamVR that started before
+        # the install hasn't (the installer window then offers to restart it).
+        restart=$(field restart)
         while IFS= read -r path; do
-            [ -e "${path/#\~/$HOME}" ] && status_ok "$(t "installed by its own installer (it updates its own way)")"
+            path=${path/#\~/$HOME}
+            [ -e "$path" ] || continue
+            [ "$restart" = steamvr ] && vr_started_before "$path" &&
+                status_restart "$(t 'installed; restart SteamVR to load it')"
+            status_ok "$(t "installed by its own installer (it updates its own way)")"
         done < <(field installed)
         status_missing "$(t 'not installed')" ;;
     run)

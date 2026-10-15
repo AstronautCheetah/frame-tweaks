@@ -15,6 +15,7 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -519,13 +520,26 @@ class LinkedProject(unittest.TestCase):
         self.assertIn("Linked, so they update their own way", r.stdout)
         self.assertEqual(self.linked_log(), ["installed"])
 
+    def test_restart_steamvr(self):
+        """restart: steamvr: installed after SteamVR started, it isn't loaded yet (the row offers to
+        restart SteamVR); uninstalling says so too. (pgrep and ps are stand-ins.)"""
+        (self.pack / "linked/README.md").write_text(LINKED.replace("  readme:", "  restart: steamvr\n  readme:"))
+        self.trust()
+        self.sh("install", "linked")
+        os.utime(self.home / "linked-project", (time.time() - 3600,) * 2)       # installed an hour ago
+        self.stub("pgrep", '[ "$*" = "-xo vrserver" ] && echo 4242 || exit 1')
+        for started, says in ((7200, "installed; restart SteamVR to load it"),
+                              (60, "installed by its own installer")):
+            self.stub("ps", f"echo {started}")
+            self.assertIn(says, self.sh("status", "linked").stdout, started)
+        self.assertIn("Restart SteamVR to unload it", self.sh("uninstall", "linked").stdout)
+
     def test_run(self):
         self.sh("install", "linked")
         self.assertEqual(self.sh("run", "linked").returncode, 0)
         for _ in range(50):                                             # (started in the background)
             if (self.home / "linked-ran").exists():
                 break
-            import time
             time.sleep(0.1)
         self.assertTrue((self.home / "linked-ran").exists())
 

@@ -55,7 +55,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | claude-desktop | The app in `~/.local/opt/claude-desktop`, `claude-desktop` and `claude-desktop-update` in `~/.local/bin`, an app-menu entry and icons | Downloads from Anthropic's apt repository (`downloads.claude.ai`) and checks the SHA256 it lists; Claude keeps your sign-in in the KDE wallet |
 | full-keyboard | A pinned release, installed by its own installer into `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
 | clipboard | `clipboard-sync` built from source into `~/.local/share/frame-tweaks/` (with a temporary, pinned Rust toolchain), a KDE autostart entry | Reads and writes both sessions' clipboards |
-| recline | Recline-VR built from source into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position); with the room-view fix, also inside the Frame's camera service |
+| recline | Whatever Recline-VR's own installer sets up (its README lists it): its source in `~/Recline-VR`, built and installed into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position), and inside the Frame's camera service for the room view |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 
