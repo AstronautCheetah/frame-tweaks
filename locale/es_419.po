@@ -5127,11 +5127,12 @@ msgstr "(libera unos 3.4 GB)"
 msgid "Full Keyboard (VR)"
 msgstr "Teclado completo (RV)"
 
+# needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks."
+"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
 msgstr ""
-"El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Esto instala Teclado completo desde una versión fijada y con suma de verificación comprobada, y lo mantiene actualizado junto con el resto de Frame Tweaks."
+"El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
@@ -5139,38 +5140,12 @@ msgid ""
 msgstr ""
 "Teclado completo de TaiKeid: un teclado de tamaño completo en el que escribes con los láseres de los controles, con flechas, teclas F, teclado numérico, Ctrl/Alt y Copiar/Pegar, para el menú principal y las apps del visor."
 
+# needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release"
+"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from its newest release"
 msgstr ""
-"El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde una versión verificada"
-
-#: packs/third-party/full-keyboard/install.sh:11
-msgid "Downloading Full Keyboard %s"
-msgstr "Descargando Teclado completo %s"
-
-#: packs/third-party/full-keyboard/install.sh:15
-msgid ""
-"Open 'Full Keyboard' from the VR dashboard's app launcher (VR session must be running)."
-msgstr ""
-"Abre 'Teclado completo' desde el lanzador de apps del menú principal de RV (la sesión de RV debe estar en ejecución)."
-
-#: packs/third-party/full-keyboard/install.sh:7
-msgid "Full Keyboard %s already installed"
-msgstr "Teclado completo %s ya está instalado"
-
-#: packs/third-party/full-keyboard/install.sh:9
-msgid "Full Keyboard is running: close it from its toolbar first"
-msgstr ""
-"Teclado completo está en ejecución: ciérralo primero desde su barra de herramientas"
-
-#: packs/third-party/full-keyboard/status.sh:4
-msgid "Full Keyboard not installed"
-msgstr "Teclado completo no instalado"
-
-#: packs/third-party/full-keyboard/uninstall.sh:3
-msgid "Full Keyboard is running: close it first"
-msgstr "Teclado completo está en ejecución: ciérralo primero"
+"El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde su versión más reciente"
 
 #: packs/third-party/pack.md
 msgid "3rd Party"
@@ -5491,3 +5466,34 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "couldn't unregister Recline's panel from SteamVR; it will report it missing"
 #~ msgstr ""
 #~ "no se pudo quitar el registro del panel de Reclinar en SteamVR; lo reportará como faltante"
+
+#~ msgid ""
+#~ "Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. This installs Full Keyboard from a pinned, checksum-checked release and keeps it updated with the rest of Frame Tweaks."
+#~ msgstr ""
+#~ "El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Esto instala Teclado completo desde una versión fijada y con suma de verificación comprobada, y lo mantiene actualizado junto con el resto de Frame Tweaks."
+
+#~ msgid ""
+#~ "TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from a checked release"
+#~ msgstr ""
+#~ "El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde una versión verificada"
+
+#~ msgid "Downloading Full Keyboard %s"
+#~ msgstr "Descargando Teclado completo %s"
+
+#~ msgid ""
+#~ "Open 'Full Keyboard' from the VR dashboard's app launcher (VR session must be running)."
+#~ msgstr ""
+#~ "Abre 'Teclado completo' desde el lanzador de apps del menú principal de RV (la sesión de RV debe estar en ejecución)."
+
+#~ msgid "Full Keyboard %s already installed"
+#~ msgstr "Teclado completo %s ya está instalado"
+
+#~ msgid "Full Keyboard is running: close it from its toolbar first"
+#~ msgstr ""
+#~ "Teclado completo está en ejecución: ciérralo primero desde su barra de herramientas"
+
+#~ msgid "Full Keyboard not installed"
+#~ msgstr "Teclado completo no instalado"
+
+#~ msgid "Full Keyboard is running: close it first"
+#~ msgstr "Teclado completo está en ejecución: ciérralo primero"
