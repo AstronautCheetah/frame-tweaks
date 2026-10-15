@@ -71,8 +71,16 @@ both.
     and a password manager's "don't keep this in the clipboard history" mark was dropped. Now
     the text goes only to the other clipboards, and the desktop's own X11 clipboard is left to
     KWin, which already passes copies between it and the desktop's Wayland one (text written
-    there went on to the Wayland side the same way). It also waits a moment when testing
-    whether two clipboards are really one.
+    there went on to the Wayland side the same way).
+
+    The same patch handles **passwords**: a copy its password manager marks secret (KeePassXC
+    does) is shared with the mark where the clipboard can carry it, and when the password
+    manager empties the clipboard after its timeout, the copies in the other session are emptied
+    too (before, they stayed). And **starting replaces nothing** that's on a clipboard: it used
+    to write test values into every clipboard to tell which were one, then the first text it
+    found, and it starts again every 10 minutes, so a file or image copied but not yet pasted was
+    replaced. Now only a clipboard with nothing at all on it gets the text the others hold (a
+    copy it had shared there goes when it restarts).
 - **Starts with desktop mode** through KDE autostart
   (`~/.config/autostart/clipboard-sync.desktop`). It needs the desktop session's environment;
   started from VR or as a background service, it wouldn't see the desktop's clipboard.
@@ -82,6 +90,9 @@ both.
 ## Good to know
 - Only text is shared. Images and files stay on the clipboard where you copied them, and paste
   there as usual; the other session gets a copied file's address as text.
+- A password copied from a password manager is shared too, so you can paste it in the other
+  session, and goes from there when the password manager clears it. Android Mirror can pass the
+  clipboard on to the phone: see its setting **Share the clipboard with the phone**.
 - The status line warns if it isn't running, if more than one copy is running, or if your build
   doesn't have the image patch yet (reinstall it to fix that).
 - If you have Homebrew's Rust installed and don't use it yourself, installing or removing this

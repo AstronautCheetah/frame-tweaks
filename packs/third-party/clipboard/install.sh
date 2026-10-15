@@ -25,7 +25,9 @@ say "$(t 'Building %s from %s (a few minutes)' clipboard-sync https://github.com
 # The pinned commit, plus two small changes. It only shares text: keep-images.patch, or a copied
 # image was replaced with the last text a moment later; keep-source.patch, or the text was also
 # written back where it was copied (directly, or through the desktop's own Xwayland, which KWin
-# links to its Wayland clipboard), replacing what the app put there (a file, formatted text).
+# links to its Wayland clipboard), replacing what the app put there (a file, formatted text). The
+# same patch shares a password with its password manager's mark and empties the copies when the
+# original is emptied, and replaces nothing at start-up (which comes round every 10 minutes).
 SRC="$HOME/.local/share/frame-tweaks/src/clipboard-sync"
 rev=$(sed -n 's/^rev=//p' "$TWEAK_DIR/pin")
 rm -rf "$SRC"
@@ -40,7 +42,7 @@ else      # gone upstream: Frame Tweaks' copy of that commit's source (dev/mirro
     tar -xzf "$BUILD/src.tar.gz" -C "$SRC" --strip-components=1
 fi
 for p in keep-images keep-source; do git -C "$SRC" apply "$TWEAK_DIR/$p.patch"; done
-echo keep-images keep-source > "$SRC/.sft-patched"
+echo keep-images keep-source:2 > "$SRC/.sft-patched"   # (status.sh: :2, passwords and a gentle start)
 # (Its build files go in the temporary folder too: with --path, cargo keeps them in $SRC/target,
 # about 350 MB that would stay.)
 cargo install --locked --force --path "$SRC" --root "$ROOT" --target-dir "$BUILD/target"
