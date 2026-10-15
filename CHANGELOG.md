@@ -93,6 +93,11 @@
   without the check, and without running the installed tweaks' installers again.
 
 ### Fixed
+- **Links with "Install Chromium" as the default browser:** SteamOS's placeholder (it only opens
+  the software store) was taken for a browser. Frame Tweaks now checks that the default browser
+  is one (any: Firefox, Chromium, Brave, …) and installed; if not, it opens links in an installed
+  browser, a running one first, and says how to set a default. A shell-wrapped launcher no
+  longer counts as running whenever any shell is.
 - **A floating Android Mirror stays where you put it** after Restart stream, or after it
   reconnects by itself: the new window goes back to the old one's place (it came back elsewhere
   when the new window came up floating rather than docked).

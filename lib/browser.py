@@ -15,6 +15,7 @@ session's environment so it reaches the running copy; if it isn't running, open 
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import urllib.parse
@@ -32,6 +33,7 @@ SESSION_KEYS = ("DISPLAY", "WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP", "XDG_SESSIO
                 "XDG_DESKTOP_PORTAL_DIR", "XAUTHORITY", "GDK_BACKEND", "QT_QPA_PLATFORM")
 REFERENCE = {DESKTOP: ("plasmashell",), VR: ("steam", "steamwebhelper")}
 WRAPPERS = {"env", "wallet-gate", "flatpak-spawn"}
+SHELLS = {"sh", "bash", "dash", "zsh"}
 
 
 def session_of(env):
@@ -105,22 +107,88 @@ def default_browser():
     return default_app("x-scheme-handler/https", "x-scheme-handler/http", "text/html")
 
 
+def usable(app_id):
+    """Whether app_id is installed and opens a link itself: not a placeholder that only offers to
+    install a browser (SteamOS's "Install Chromium" opens the software store, and without a
+    default of your own it's the system's first choice for links)."""
+    path = desktop_file(app_id) if app_id else None
+    if not path:
+        return False
+    keys = entry(path)
+    cmd = keys.get("Exec", "")
+    if "appstream:" in cmd or keys.get("Hidden") == "true":
+        return False
+    if keys.get("TryExec") and not (shutil.which(keys["TryExec"]) or Path(keys["TryExec"]).is_file()):
+        return False
+    try:
+        words = [w for w in shlex.split(cmd) if not re.match(r"^\w+=", w) and Path(w).name != "env"]
+    except ValueError:
+        return False
+    return bool(words) and bool(shutil.which(words[0]) or Path(words[0]).is_file())
+
+
+def installed_browsers():
+    """The usable apps that open https links, in the system's order of preference (each data
+    folder's mimeinfo.cache, yours first; then any other entry that says it takes them)."""
+    found = []
+    for d in data_dirs():
+        try:
+            lines = (Path(d) / "applications/mimeinfo.cache").read_text(errors="replace").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            if line.startswith("x-scheme-handler/https="):
+                found += [a for a in line.split("=", 1)[1].split(";") if a and a not in found]
+    for d in data_dirs():
+        for f in sorted((Path(d) / "applications").glob("*.desktop")):
+            if f.name not in found and "x-scheme-handler/https" in entry(f).get("MimeType", ""):
+                found.append(f.name)
+    return [a for a in found if usable(a)]
+
+
+def browser_choice():
+    """(browser, unusable default): the default browser; or, when that's no browser (a
+    placeholder, or uninstalled) or none is set, an installed one, one already running first,
+    with the default it stands in for ("" for none set). (None, …) without any browser."""
+    default = default_browser()
+    if usable(default):
+        return default, None
+    others = installed_browsers()
+    others.sort(key=lambda a: not running_sessions(a))       # (stable: running ones first)
+    choice = others[0] if others else None
+    if choice:
+        STOOD_IN[choice] = default or ""      # (for launch's note, without asking the system again)
+    return choice, default or ""
+
+
+STOOD_IN = {}           # browser chosen → the unusable default it stood in for ("" for none set)
+
+
 def target_app(target):
     """The default app for a URL, folder or file."""
     if target.startswith("file://"):
         target = urllib.parse.unquote(target[7:])
     if re.match(r"^[a-z][a-z0-9+.-]*://", target):
-        return default_browser()
+        return browser_choice()[0]
     if os.path.isdir(target):
         return default_app("inode/directory")
     kind = xdg_mime("query", "filetype", target)
     return default_app(kind) if kind else None
 
 
+def data_dirs():
+    """Where desktop entries live: XDG_DATA_HOME, XDG_DATA_DIRS, and Flatpak's exports (a
+    session's XDG_DATA_DIRS can leave them out)."""
+    dirs = [os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local/share")]
+    dirs += (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":")
+    for extra in (str(Path.home() / ".local/share/flatpak/exports/share"), "/var/lib/flatpak/exports/share"):
+        if extra not in dirs:
+            dirs.append(extra)
+    return [d for d in dirs if d]
+
+
 def desktop_file(app_id):
-    data = [os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local/share"))]
-    data += os.environ.get("XDG_DATA_DIRS", "/usr/local/share:/usr/share").split(":")
-    for d in data:
+    for d in data_dirs():
         f = Path(d) / "applications" / app_id
         if f.is_file():
             return f
@@ -152,6 +220,8 @@ def matcher(keys):
     if not words:
         return lambda pid, env: False
     name = Path(words[0]).name
+    if name in SHELLS:                        # ("sh -c …": every shell would match; can't tell)
+        return lambda pid, env: False
     return lambda pid, env: Path((proc_cmd(pid) or [""])[0]).name == name     # (read once: it may just have ended)
 
 
@@ -235,7 +305,19 @@ def launch(url):
         return None
     proc.had_link = before                     # (still_stuck leaves those alone)
     log(f"{url!r} -> {app} in {target} (from {session_of(os.environ)}; {'hand-off' if handoff else 'new window'})")
-    return _("Opened in {app} ({session})").format(app=browser_name(app), session=_(target)), proc, handoff
+    note = _("Opened in {app} ({session})").format(app=browser_name(app), session=_(target))
+    # proc.warning: the default isn't a browser (it stood in for it): what to set, for the caller to show
+    proc.warning = ""
+    if re.match(r"^[a-z][a-z0-9+.-]*://", url) and not url.startswith("file://"):
+        default = STOOD_IN.pop(app, None)
+        if default is not None:
+            log(f"the default browser {default or '(none set)'} can't open links; used {app}")
+            proc.warning = (_("Your default browser, {default}, can't open links, so {app} did. Choose one in "
+                              "System Settings → Default Applications → Web browser.") if default else
+                            _("No default browser is set, so {app} opened it. Choose one in System Settings → "
+                              "Default Applications → Web browser.")).format(
+                                  default=browser_name(default) if default else "", app=browser_name(app))
+    return note, proc, handoff
 
 
 def still_stuck(proc, url):
@@ -257,10 +339,10 @@ def still_stuck(proc, url):
 
 
 def open_url(url):
-    """Opens url; returns a short note on where it went, or None when it couldn't (the caller
-    falls back to its own way)."""
+    """Opens url; returns a short note on where it went (and what to set, when the default isn't
+    a browser), or None when it couldn't (the caller falls back to its own way)."""
     r = launch(url)
-    return r[0] if r else None
+    return " ".join(filter(None, (r[0] + ".", getattr(r[1], "warning", "")))) if r else None
 
 
 def open_path(path):
@@ -280,8 +362,11 @@ if __name__ == "__main__":
         if not p:
             sys.exit(_("No default app found."))
         app = p[0]
+        default = browser_choice()[1]
         print(f"app: {app}; running in: {', '.join(sorted(running_sessions(app))) or 'neither'}; "
-              f"this program: {session_of(os.environ)}; would open in: {p[1]}")
+              f"this program: {session_of(os.environ)}; would open in: {p[1]}"
+              + (f"; default browser {default or '(none set)'} can't open links, so this one instead"
+                 if default is not None and "://" in (args[1] if len(args) > 1 else "https:") else ""))
     else:
         note = open_url(args[0]) if "://" in args[0] and not args[0].startswith("file:") else open_path(args[0])
         print(note or _("Couldn't open it."))
