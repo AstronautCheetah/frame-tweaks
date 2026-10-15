@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.3 (2026-10-15)
 
 ### Added
 - **Recline is back** in 3rd Party (VR environment, 🧪): use VR lying down or reclined
