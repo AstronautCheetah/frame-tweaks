@@ -13,7 +13,7 @@ msgstr "Marca para instalar, desmarca para quitar"
 msgid "(hidden)"
 msgstr "(oculto)"
 
-#: gui/frame-tweaks-gui.py:1033 lib/sft.py:632
+#: gui/frame-tweaks-gui.py:1033 lib/sft.py:636
 msgid "Experimental: %s"
 msgstr "Experimental: %s"
 
@@ -73,7 +73,7 @@ msgstr "Leer"
 msgid "{version} available"
 msgstr "{version} disponible"
 
-#: gui/frame-tweaks-gui.py:1155 gui/frame-tweaks-gui.py:1177
+#: gui/frame-tweaks-gui.py:1155 gui/frame-tweaks-gui.py:1177 gui/packs_page.py:147
 msgid "Update"
 msgstr "Actualizar"
 
@@ -211,7 +211,7 @@ msgid "Still checking status; try again in a moment."
 msgstr ""
 "Todavía se está revisando el estado; vuelve a intentarlo en un momento."
 
-#: gui/frame-tweaks-gui.py:1454 install.sh:533
+#: gui/frame-tweaks-gui.py:1454 install.sh:534
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
 
@@ -261,12 +261,12 @@ msgid ""
 msgstr ""
 "Copia estos detalles, luego guarda un informe de diagnóstico y abre el formulario de error"
 
-#: gui/frame-tweaks-gui.py:177 install.sh:553
+#: gui/frame-tweaks-gui.py:177 install.sh:554
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 "Presiona Enter para cerrar, o presiona el botón X que flota abajo para cerrar."
 
-#: gui/frame-tweaks-gui.py:178 install.sh:552
+#: gui/frame-tweaks-gui.py:178 install.sh:553
 msgid "Press Enter to close…"
 msgstr "Presiona Enter para cerrar…"
 
@@ -292,7 +292,7 @@ msgstr "El navegador no respondió: el enlace está en el portapapeles."
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:372 install.sh:210 lib/common.sh:462 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
+#: gui/frame-tweaks-gui.py:372 install.sh:211 lib/common.sh:462 packs/original/menu-icons/status.sh:4 packs/original/snip/status.sh:4 packs/original/speech/status.sh:4 packs/original/tools/status.sh:3 packs/original/vr-dashboard/status.sh:5 packs/third-party/recline/status.sh:4
 msgid "not installed"
 msgstr "no instalado"
 
@@ -324,7 +324,7 @@ msgstr "Mostrar esta categoría otra vez"
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr "Ocultar toda la categoría de la lista (no quita nada)"
 
-#: gui/frame-tweaks-gui.py:440 gui/frame-tweaks-gui.py:463 gui/frame-tweaks-gui.py:696 gui/frame-tweaks-gui.py:1592 gui/packs_page.py:28 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:440 gui/frame-tweaks-gui.py:463 gui/frame-tweaks-gui.py:696 gui/frame-tweaks-gui.py:1592 gui/packs_page.py:36 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:251 packs/original/snip/frame-snip:530
 msgid "← Back"
 msgstr "← Volver"
 
@@ -423,7 +423,7 @@ msgstr "Restablecer valores predeterminados"
 msgid "Working… (a download can take a minute)"
 msgstr "Trabajando… (una descarga puede tardar un minuto)"
 
-#: gui/frame-tweaks-gui.py:652 packs/original/snip/frame-snip:604 install.sh:234
+#: gui/frame-tweaks-gui.py:652 packs/original/snip/frame-snip:604 install.sh:235
 msgid "Done."
 msgstr "Listo."
 
@@ -506,97 +506,203 @@ msgstr "✔ Frame Tweaks está actualizado ({version})."
 msgid "Show hidden ({n})"
 msgstr "Mostrar ocultos ({n})"
 
-#: gui/packs_page.py:106
-msgid "Yes: it runs as me"
-msgstr "Sí: se ejecuta como yo"
-
-#: gui/packs_page.py:107
-msgid "Trust this pack's current files"
-msgstr "Confiar en los archivos actuales de este paquete"
-
-#: gui/packs_page.py:110
-msgid "Trust…"
-msgstr "Confiar…"
-
-#: gui/packs_page.py:115
-msgid "Problems"
-msgstr "Problemas"
-
-#: gui/packs_page.py:14
-msgid "Comes with Frame Tweaks: in use"
-msgstr "Viene con Frame Tweaks: en uso"
-
-#: gui/packs_page.py:15
-msgid "Comes with Frame Tweaks: turned off, so its tweaks aren't listed"
-msgstr ""
-"Viene con Frame Tweaks: desactivado, así que sus ajustes no aparecen en la lista"
-
-#: gui/packs_page.py:16
-msgid "Trusted: its tweaks are listed"
-msgstr "De confianza: sus ajustes aparecen en la lista"
-
-#: gui/packs_page.py:17
-msgid "Not trusted yet: its tweaks aren't listed"
-msgstr "Aún no es de confianza: sus ajustes no aparecen en la lista"
-
-#: gui/packs_page.py:18
-msgid "Changed since you trusted it: not used until you trust it again"
-msgstr ""
-"Cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
-
-#: gui/packs_page.py:31
-msgid "Packs"
-msgstr "Paquetes"
-
-#: gui/packs_page.py:34
-msgid "Open packs folder"
-msgstr "Abrir carpeta de paquetes"
-
-#: gui/packs_page.py:39
-msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, put a pack in <code>{folder}</code>, then trust it below. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
-msgstr ""
-"Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Original, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, pon un paquete en <code>{folder}</code> y luego confía en él abajo. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
-
-#: gui/packs_page.py:79 lib/sft.py:721
+#: gui/packs_page.py:108 lib/sft.py:888
 msgid "(instead of {other}'s)"
 msgstr "(en lugar del de {other})"
 
-#: gui/packs_page.py:82
+#: gui/packs_page.py:111
 msgid "by {author}"
 msgstr "por {author}"
 
-#: gui/packs_page.py:87
+# needs review
+#: gui/packs_page.py:116
+msgid "From {link}"
+msgstr "De {link}"
+
+#: gui/packs_page.py:119
 msgid "%d tweak"
 msgid_plural "%d tweaks"
 msgstr[0] "%d ajuste"
 msgstr[1] "%d ajustes"
 
-#: gui/packs_page.py:89
+#: gui/packs_page.py:121 lib/sft.py:843
 msgid "Tweaks: %s"
 msgstr "Ajustes: %s"
 
-#: gui/packs_page.py:89
+#: gui/packs_page.py:121 lib/sft.py:843
 msgid "none"
 msgstr "ninguno"
 
-#: gui/packs_page.py:95 gui/packs_page.py:102
+#: gui/packs_page.py:128 gui/packs_page.py:135
 msgid "Stop using"
 msgstr "Dejar de usar"
 
-#: gui/packs_page.py:95
+#: gui/packs_page.py:128
 msgid "Use"
 msgstr "Usar"
 
-#: gui/packs_page.py:96
+#: gui/packs_page.py:129
 msgid "Its tweaks come back to the list"
 msgstr "Sus ajustes vuelven a la lista"
 
-#: gui/packs_page.py:97 gui/packs_page.py:103
+#: gui/packs_page.py:130 gui/packs_page.py:136
 msgid ""
 "Its tweaks leave the list; installed ones stay until you uninstall them"
 msgstr ""
 "Sus ajustes salen de la lista; los instalados se quedan hasta que los desinstales"
+
+#: gui/packs_page.py:139
+msgid "Yes: it runs as me"
+msgstr "Sí: se ejecuta como yo"
+
+#: gui/packs_page.py:140
+msgid "Trust this pack's current files"
+msgstr "Confiar en los archivos actuales de este paquete"
+
+#: gui/packs_page.py:143
+msgid "Trust…"
+msgstr "Confiar…"
+
+# needs review
+#: gui/packs_page.py:148
+msgid ""
+"Get its newer version from where it was added; it waits until you trust it again"
+msgstr ""
+"Obtener su versión más nueva desde donde se agregó; espera hasta que vuelvas a confiar en él"
+
+# needs review
+#: gui/packs_page.py:154
+msgid "Yes, delete it"
+msgstr "Sí, eliminarlo"
+
+# needs review
+#: gui/packs_page.py:158
+msgid "Remove…"
+msgstr "Quitar…"
+
+# needs review
+#: gui/packs_page.py:159
+msgid "Delete this pack from your packs folder"
+msgstr "Eliminar este paquete de tu carpeta de paquetes"
+
+#: gui/packs_page.py:164
+msgid "Problems"
+msgstr "Problemas"
+
+#: gui/packs_page.py:18
+msgid "Comes with Frame Tweaks: in use"
+msgstr "Viene con Frame Tweaks: en uso"
+
+#: gui/packs_page.py:19
+msgid "Comes with Frame Tweaks: turned off, so its tweaks aren't listed"
+msgstr ""
+"Viene con Frame Tweaks: desactivado, así que sus ajustes no aparecen en la lista"
+
+#: gui/packs_page.py:20
+msgid "Trusted: its tweaks are listed"
+msgstr "De confianza: sus ajustes aparecen en la lista"
+
+# needs review
+#: gui/packs_page.py:209
+msgid "That didn't work: {error}"
+msgstr "Eso no funcionó: {error}"
+
+#: gui/packs_page.py:21
+msgid "Not trusted yet: its tweaks aren't listed"
+msgstr "Aún no es de confianza: sus ajustes no aparecen en la lista"
+
+# needs review
+#: gui/packs_page.py:217
+msgid "Paste or type the link of a pack's git repository first."
+msgstr "Primero pega o escribe el enlace del repositorio git de un paquete."
+
+# needs review
+#: gui/packs_page.py:219
+msgid "Adding the pack…"
+msgstr "Agregando el paquete…"
+
+#: gui/packs_page.py:22
+msgid "Changed since you trusted it: not used until you trust it again"
+msgstr ""
+"Cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
+
+# needs review
+#: gui/packs_page.py:224
+msgid ""
+"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+msgstr ""
+"Se agregó {name}. No se usa hasta que confíes en él: sus ajustes se ejecutarían como tú. Lee primero lo que hacen (su enlace, o Abrir carpeta de paquetes) y luego Confiar… abajo."
+
+# needs review
+#: gui/packs_page.py:231
+msgid "Updating {name}…"
+msgstr "Actualizando {name}…"
+
+# needs review
+#: gui/packs_page.py:236 lib/sft.py:861
+msgid "{name} is up to date."
+msgstr "{name} está al día."
+
+# needs review
+#: gui/packs_page.py:238 lib/sft.py:863
+msgid "{name}: updated, {n} file changed."
+msgid_plural "{name}: updated, {n} files changed."
+msgstr[0] "{name}: actualizado, cambió {n} archivo."
+msgstr[1] "{name}: actualizado, cambiaron {n} archivos."
+
+# needs review
+#: gui/packs_page.py:240
+msgid ""
+"It isn't used until you trust it again: read what changed first, then Trust… below."
+msgstr ""
+"No se usa hasta que vuelvas a confiar en él: lee primero lo que cambió y luego Confiar… abajo."
+
+# needs review
+#: gui/packs_page.py:253
+msgid "Removed {name}."
+msgstr "Se quitó {name}."
+
+#: gui/packs_page.py:39
+msgid "Packs"
+msgstr "Paquetes"
+
+#: gui/packs_page.py:42
+msgid "Open packs folder"
+msgstr "Abrir carpeta de paquetes"
+
+# needs review
+#: gui/packs_page.py:47
+msgid ""
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+msgstr ""
+"Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Original, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, agrega uno desde su enlace abajo, o pon la carpeta de un paquete en <code>{folder}</code>; luego confía en él. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
+
+# needs review
+#: gui/packs_page.py:59
+msgid "Add a pack from a link:"
+msgstr "Agregar un paquete desde un enlace:"
+
+# needs review
+#: gui/packs_page.py:64
+msgid "Paste"
+msgstr "Pegar"
+
+# needs review
+#: gui/packs_page.py:65
+msgid "Paste the link from the clipboard"
+msgstr "Pegar el enlace desde el portapapeles"
+
+# needs review
+#: gui/packs_page.py:68
+msgid "Add"
+msgstr "Agregar"
+
+# needs review
+#: gui/packs_page.py:69
+msgid ""
+"Download the pack into your packs folder. Nothing of it runs until you trust it."
+msgstr ""
+"Descargar el paquete en tu carpeta de paquetes. Nada de él se ejecuta hasta que confíes en él."
 
 # needs review
 #: gui/prefs_page.py:101
@@ -646,7 +752,7 @@ msgstr "Eliminar la configuración que dejaron los ajustes desinstalados…"
 msgid "Delete them"
 msgstr "Eliminarla"
 
-#: gui/prefs_page.py:140 install.sh:354
+#: gui/prefs_page.py:140 install.sh:355
 msgid "Uninstalling Frame Tweaks"
 msgstr "Al desinstalar Frame Tweaks"
 
@@ -710,7 +816,7 @@ msgid ""
 msgstr ""
 "Un pulso suave cuando el láser pasa sobre un botón y uno más firme al hacer clic."
 
-#: gui/prefs_page.py:218 install.sh:297 install.sh:356
+#: gui/prefs_page.py:218 install.sh:298 install.sh:357
 msgid "No settings left behind by uninstalled tweaks."
 msgstr "Los ajustes desinstalados no dejaron configuración."
 
@@ -1105,152 +1211,152 @@ msgstr "se abre sin pedir la contraseña"
 msgid "under a minute"
 msgstr "menos de un minuto"
 
-#: install.sh:196
+#: install.sh:197
 msgid "(experimental)"
 msgstr "(experimental)"
 
-#: install.sh:198
+#: install.sh:199
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 "(experimental: depende de partes internas de SteamVR; consulta ./install.sh info ID)"
 
-#: install.sh:218
+#: install.sh:219
 msgid "install what? (./install.sh list)"
 msgstr "¿instalar qué? (./install.sh list)"
 
-#: install.sh:229 install.sh:268 packs/original/snip/install.sh:16 packs/original/snip/install.sh:19
+#: install.sh:230 install.sh:269 packs/original/snip/install.sh:16 packs/original/snip/install.sh:19
 msgid "%s failed"
 msgstr "%s falló"
 
-#: install.sh:233 install.sh:271
+#: install.sh:234 install.sh:272
 msgid "Failed: %s"
 msgstr "Falló: %s"
 
-#: install.sh:241
+#: install.sh:242
 msgid "uninstall what?"
 msgstr "¿desinstalar qué?"
 
-#: install.sh:248 install.sh:344
+#: install.sh:249 install.sh:345
 msgid "Nothing installed."
 msgstr "No hay nada instalado."
 
-#: install.sh:258
+#: install.sh:259
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 
-#: install.sh:265 install.sh:425
+#: install.sh:266 install.sh:426
 msgid "removing %s"
 msgstr "quitando %s"
 
-#: install.sh:284
+#: install.sh:285
 msgid ""
 "Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 "Se conservó su configuración: %s (para eliminarla también: ./install.sh uninstall --remove-settings %s)"
 
-#: install.sh:295 install.sh:366 install.sh:379 install.sh:412 lib/common.sh:419
+#: install.sh:296 install.sh:367 install.sh:380 install.sh:413 lib/common.sh:419
 msgid "removed %s"
 msgstr "se quitó %s"
 
-#: install.sh:322
+#: install.sh:323
 msgid ""
 "uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings"
 msgstr ""
 "uninstall-self acepta --keep-tweaks, --remove-apps, --remove-settings y --keep-settings"
 
-#: install.sh:327
+#: install.sh:328
 msgid "Uninstalling every tweak"
 msgstr "Desinstalando todos los ajustes"
 
-#: install.sh:342
+#: install.sh:343
 msgid ""
 "Frame Tweaks is still here: see what failed above, then run this again."
 msgstr ""
 "Frame Tweaks sigue aquí: revisa qué falló arriba y vuelve a ejecutar esto."
 
-#: install.sh:345
+#: install.sh:346
 msgid ""
 "Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
 msgstr ""
 "Se dejaron instaladas, como pediste: %s (para quitarlas también: ./install.sh uninstall-self --remove-apps)"
 
-#: install.sh:355
+#: install.sh:356
 msgid ""
 "Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again."
 msgstr ""
 "Siguen instalados, de paquetes que no están en uso (desactivados o sin confianza): %s. Para desinstalarlos también, vuelve a usar su paquete (./install.sh mods) y ejecuta esto de nuevo."
 
-#: install.sh:360
+#: install.sh:361
 msgid ""
 "Kept for the tweaks still installed (%s): ~/.local/share/frame-tweaks, ~/.local/state/frame-tweaks and their settings."
 msgstr ""
 "Se conservó para los ajustes que siguen instalados (%s): ~/.local/share/frame-tweaks, ~/.local/state/frame-tweaks y su configuración."
 
-#: install.sh:367
+#: install.sh:368
 msgid "Kept your own packs: %s"
 msgstr "Se conservaron tus propios paquetes: %s"
 
-#: install.sh:375
+#: install.sh:376
 msgid "Kept backups of files tweaks changed: %s"
 msgstr ""
 "Se conservaron las copias de seguridad de archivos que cambiaron los ajustes: %s"
 
-#: install.sh:380
+#: install.sh:381
 msgid ""
 "SteamVR's own setting goes back when SteamVR stops; then this goes too: %s"
 msgstr ""
 "La opción propia de SteamVR vuelve a su valor cuando SteamVR se detiene; entonces esto también se elimina: %s"
 
-#: install.sh:384
+#: install.sh:385
 msgid "Kept the settings: %s"
 msgstr "Se conservó la configuración: %s"
 
-#: install.sh:393 install.sh:414
+#: install.sh:394 install.sh:415
 msgid "Frame Tweaks is uninstalled."
 msgstr "Frame Tweaks está desinstalado."
 
-#: install.sh:397
+#: install.sh:398
 msgid "it is a git worktree"
 msgstr "es un worktree de git"
 
-#: install.sh:400
+#: install.sh:401
 msgid ""
 "it has files of yours: changes, your own packs in packs/, or a tmp/ folder"
 msgstr ""
 "tiene archivos tuyos: cambios, tus propios paquetes en packs/ o una carpeta tmp/"
 
-#: install.sh:402
+#: install.sh:403
 msgid "it has commits that are not pushed anywhere"
 msgstr "tiene commits que no se han subido a ningún lado"
 
-#: install.sh:404
+#: install.sh:405
 msgid "it has other worktrees or stashed changes"
 msgstr "tiene otros worktrees o cambios guardados con stash"
 
-#: install.sh:407
+#: install.sh:408
 msgid "it has your own packs in packs/"
 msgstr "tiene tus propios paquetes en packs/"
 
-#: install.sh:410
+#: install.sh:411
 msgid ""
 "Kept this folder, %s: %s. Delete it yourself when you no longer need it."
 msgstr ""
 "Se conservó esta carpeta, %s: %s. Elimínala tú cuando ya no la necesites."
 
-#: install.sh:420
+#: install.sh:421
 msgid "reinstall what?"
 msgstr "¿reinstalar qué?"
 
-#: install.sh:431
+#: install.sh:432
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr "--to necesita una versión, p. ej. v0.3.1"
 
-#: install.sh:434
+#: install.sh:435
 msgid "Updating the checkout"
 msgstr "Actualizando la copia local"
 
-#: install.sh:438
+#: install.sh:439
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
@@ -1258,147 +1364,147 @@ msgstr ""
 "Esta copia local y la rama main de GitHub se separaron. Si no tienes trabajo local que\n"
 "conservar: git reset --hard @{upstream}"
 
-#: install.sh:441
+#: install.sh:442
 msgid "git pull failed; not reinstalling"
 msgstr "git pull falló; no se reinstala"
 
-#: install.sh:445
+#: install.sh:446
 msgid "couldn't reach GitHub; not updating"
 msgstr "no se pudo conectar con GitHub; no se actualiza"
 
-#: install.sh:449
+#: install.sh:450
 msgid "no release found"
 msgstr "no se encontró ninguna versión"
 
 # needs review
-#: install.sh:454
+#: install.sh:455
 msgid ""
 "You're on %s, a test release newer than the newest stable release (%s): you stay on it until a newer stable release is out. To go back to %s now: %s"
 msgstr ""
 "Estás en %s, una versión de prueba más nueva que la versión estable más reciente (%s): te quedas en ella hasta que salga una versión estable más nueva. Para volver a %s ahora: %s"
 
-#: install.sh:457
+#: install.sh:458
 msgid "no release %s"
 msgstr "no existe la versión %s"
 
-#: install.sh:459
+#: install.sh:460
 msgid "Updating to %s (%s channel)"
 msgstr "Actualizando a %s (canal %s)"
 
-#: install.sh:463
+#: install.sh:464
 msgid "git checkout failed; not reinstalling"
 msgstr "git checkout falló; no se reinstala"
 
 # needs review
-#: install.sh:476
+#: install.sh:477
 msgid "channel stable|beta"
 msgstr "channel stable|beta"
 
 # needs review
-#: install.sh:479
+#: install.sh:480
 msgid ""
 "Updates now take test releases too (vX.Y.Z-rc.N: newer, less tested). To get the newest: %s"
 msgstr ""
 "Las actualizaciones ahora también toman versiones de prueba (vX.Y.Z-rc.N: más nuevas, menos probadas). Para obtener la más reciente: %s"
 
 # needs review
-#: install.sh:482
+#: install.sh:483
 msgid "Updates now take stable releases only."
 msgstr "Las actualizaciones ahora solo toman versiones estables."
 
 # needs review
-#: install.sh:484
+#: install.sh:485
 msgid ""
 "You're on %s, a test release: you move to the next stable release when it's out. To go back to the newest stable release now: %s"
 msgstr ""
 "Estás en %s, una versión de prueba: pasarás a la próxima versión estable cuando salga. Para volver ahora a la versión estable más reciente: %s"
 
-#: install.sh:491
+#: install.sh:492
 msgid "Nothing installed yet."
 msgstr "Todavía no hay nada instalado."
 
-#: install.sh:494
+#: install.sh:495
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 "Revisando las partes de SteamOS/SteamVR de las que dependen los ajustes"
 
-#: install.sh:503
+#: install.sh:504
 msgid ""
 "Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
 msgstr ""
 "¿Configurar la ventana completa del instalador? Necesita PyQt6 (unos 280 MB, compartido con el Teclado de flechas y la bandeja de NordVPN).\\n\\nNo = usar la lista simple."
 
-#: install.sh:505
+#: install.sh:506
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr "No se pudo instalar PyQt6; se usará la lista simple."
 
-#: install.sh:526
+#: install.sh:527
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 "Marca lo que quieras instalar. Desmarcar un ajuste instalado lo quita."
 
-#: install.sh:538
+#: install.sh:539
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 "No se seleccionó nada, así que no se quitará nada. Para quitar todo, usa: %s"
 
-#: install.sh:541
+#: install.sh:542
 msgid "Remove tweaks?"
 msgstr "¿Quitar ajustes?"
 
-#: install.sh:542
+#: install.sh:543
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 "Estos ajustes instalados se desmarcaron y se QUITARÁN:\\n\\n  %s\\n\\n¿Continuar?"
 
-#: install.sh:580
+#: install.sh:581
 msgid "stopped %s's running programs"
 msgstr "se detuvieron los programas en ejecución de %s"
 
-#: install.sh:603
+#: install.sh:604
 msgid "%s migration failed"
 msgstr "falló la migración de %s"
 
-#: install.sh:608
+#: install.sh:609
 msgid "%s what? (./install.sh list)"
 msgstr "¿%s qué? (./install.sh list)"
 
-#: install.sh:612
+#: install.sh:613
 msgid "%s: held (updates leave it as it is)"
 msgstr "%s: retenido (las actualizaciones no lo cambian)"
 
-#: install.sh:613
+#: install.sh:614
 msgid "%s: updated normally again"
 msgstr "%s: se actualiza normalmente otra vez"
 
-#: install.sh:623
+#: install.sh:624
 msgid "The bug form, with your version filled in: %s"
 msgstr "El formulario de error, con tu versión ya escrita: %s"
 
-#: install.sh:664
+#: install.sh:665
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
 
-#: install.sh:701
+#: install.sh:702
 msgid "run what?"
 msgstr "¿ejecutar qué?"
 
-#: install.sh:702
+#: install.sh:703
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
-#: install.sh:714
+#: install.sh:715
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr "Se quitó 'Frame Tweaks' del menú de apps."
 
-#: install.sh:715
+#: install.sh:716
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr "Se agregó 'Frame Tweaks' al menú de apps."
 
-#: install.sh:92
+#: install.sh:93
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
 msgstr "No se encontraron ajustes (python3 lib/sft.py mods dice por qué)"
 
@@ -1567,153 +1673,255 @@ msgstr "Abrir Frame Tweaks"
 msgid "Open Frame Tweaks to install it?"
 msgstr "¿Abrir Frame Tweaks para instalarlo?"
 
-#: lib/sft.py:618
+#: lib/sft.py:622
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr "{key}: {text} no es uno de: {choices}"
 
-#: lib/sft.py:627 lib/sft.py:746 lib/sft.py:769 lib/sft.py:795
+#: lib/sft.py:631 lib/sft.py:913 lib/sft.py:936 lib/sft.py:962
 msgid "unknown component: %s"
 msgstr "componente desconocido: %s"
 
-#: lib/sft.py:630
+#: lib/sft.py:634
 msgid "Why: %s"
 msgstr "Por qué: %s"
 
-#: lib/sft.py:634
+#: lib/sft.py:638
 msgid "Needs: %s"
 msgstr "Necesita: %s"
 
-#: lib/sft.py:636
+#: lib/sft.py:640
 msgid "By: %s"
 msgstr "Por: %s"
 
-#: lib/sft.py:638
+#: lib/sft.py:642
 msgid "Source: %s"
 msgstr "Fuente: %s"
 
-#: lib/sft.py:640
+#: lib/sft.py:644
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 "Del paquete {pack} ({folder}), no forma parte de Frame Tweaks; se usa en lugar del de {other}"
 
-#: lib/sft.py:641
+#: lib/sft.py:645
 msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr "Del paquete {pack} ({folder}), no forma parte de Frame Tweaks"
 
-#: lib/sft.py:643
+#: lib/sft.py:647
 msgid "More: %s"
 msgstr "Más: %s"
 
-#: lib/sft.py:646
+#: lib/sft.py:650
 msgid "Run ({label}): {command}"
 msgstr "Ejecutar ({label}): {command}"
 
-#: lib/sft.py:648
+#: lib/sft.py:652
 msgid "Settings: %s"
 msgstr "Configuración: %s"
 
-#: lib/sft.py:659
+# needs review
+#: lib/sft.py:676
+msgid "git isn't installed"
+msgstr "git no está instalado"
+
+# needs review
+#: lib/sft.py:678
+msgid "git took too long (no connection?)"
+msgstr "git tardó demasiado (¿sin conexión?)"
+
+# needs review
+#: lib/sft.py:682
+msgid "git {command} failed"
+msgstr "git {command} falló"
+
+# needs review
+#: lib/sft.py:709
+msgid ""
+"That isn't a link to a pack: give the address of its git repository, starting with https://"
+msgstr ""
+"Eso no es un enlace a un paquete: da la dirección de su repositorio git, que empieza con https://"
+
+# needs review
+#: lib/sft.py:711
+msgid "{ref} isn't a branch or tag name"
+msgstr "{ref} no es el nombre de una rama ni de una etiqueta"
+
+# needs review
+#: lib/sft.py:714
+msgid "You have a pack in {folder} already: update it, or remove it first."
+msgstr "Ya tienes un paquete en {folder}: actualízalo o quítalo primero."
+
+# needs review
+#: lib/sft.py:722
+msgid ""
+"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+msgstr ""
+"No hay un paquete en la raíz de {link}: ni pack.md ni carpetas de ajustes (docs/mods.md)."
+
+# needs review
+#: lib/sft.py:735
+msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr "{pack} no se agregó desde un enlace: cambia tú mismo su carpeta."
+
+# needs review
+#: lib/sft.py:737
+msgid ""
+"{pack} was added at a fixed version: to follow another one, remove it and add it again."
+msgstr ""
+"{pack} se agregó en una versión fija: para seguir otra, quítalo y vuelve a agregarlo."
+
+# needs review
+#: lib/sft.py:769
+msgid "Only packs in {folder} can be removed here."
+msgstr "Aquí solo se pueden quitar paquetes de {folder}."
+
+# needs review
+#: lib/sft.py:773
+msgid "Uninstall its tweaks first: {ids} ({command})."
+msgstr "Primero desinstala sus ajustes: {ids} ({command})."
+
+# needs review
+#: lib/sft.py:774
+msgid ""
+"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
+msgstr ""
+"Sus ajustes {ids} siguen instalados: vuelve a confiar en él para desinstalarlos ({command}) y luego quítalo."
+
+#: lib/sft.py:805
 msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr "hay más de un paquete llamado {name}: indica su carpeta ({folders})"
 
-#: lib/sft.py:663
+#: lib/sft.py:809
 msgid "no pack {name}; see {command}"
 msgstr "no existe el paquete {name}; consulta {command}"
 
-#: lib/sft.py:670
+#: lib/sft.py:816
 msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
 msgstr "{pack} no es uno de los paquetes propios de Frame Tweaks: {command}"
 
-#: lib/sft.py:673
+#: lib/sft.py:819
 msgid "in use; its tweaks are listed"
 msgstr "en uso; sus ajustes aparecen en la lista"
 
-#: lib/sft.py:674
+#: lib/sft.py:820
 msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 "desactivado (sus ajustes instalados se quedan hasta que los desinstales)"
 
-#: lib/sft.py:679
+#: lib/sft.py:825
 msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
 msgstr ""
 "{pack} viene con Frame Tweaks, así que no hace falta confiar en él: {command}"
 
-#: lib/sft.py:682
+#: lib/sft.py:828
 msgid "trusted; its tweaks are listed now"
 msgstr "de confianza; sus ajustes ya aparecen en la lista"
 
-#: lib/sft.py:683
+#: lib/sft.py:829
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 "ya no se usa (sus ajustes instalados se quedan hasta que los desinstales)"
 
-#: lib/sft.py:708
+# needs review
+#: lib/sft.py:841
+msgid "Added the pack {name} in {folder}."
+msgstr "Se agregó el paquete {name} en {folder}."
+
+# needs review
+#: lib/sft.py:842
+msgid "By {author}."
+msgstr "De {author}."
+
+# needs review
+#: lib/sft.py:846
+msgid "Problems:"
+msgstr "Problemas:"
+
+# needs review
+#: lib/sft.py:847
+msgid ""
+"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
+msgstr ""
+"No se usa hasta que confíes en él: sus ajustes se ejecutarían como tú. Lee primero lo que hacen (el README.md de cada uno en esa carpeta) y luego: {command}"
+
+# needs review
+#: lib/sft.py:855
+msgid "Removed the pack {name} ({folder})."
+msgstr "Se quitó el paquete {name} ({folder})."
+
+# needs review
+#: lib/sft.py:867
+msgid ""
+"It isn't used until you trust it again. Read what changed first, then: {command}"
+msgstr ""
+"No se usa hasta que vuelvas a confiar en él. Lee primero lo que cambió y luego: {command}"
+
+#: lib/sft.py:875
 msgid "official: in use"
 msgstr "oficial: en uso"
 
-#: lib/sft.py:709
+#: lib/sft.py:876
 msgid "official: turned off ({command})"
 msgstr "oficial: desactivado ({command})"
 
-#: lib/sft.py:710
+#: lib/sft.py:877
 msgid "trusted: in use"
 msgstr "de confianza: en uso"
 
-#: lib/sft.py:711
+#: lib/sft.py:878
 msgid "not trusted: not used ({command})"
 msgstr "sin confianza: no se usa ({command})"
 
-#: lib/sft.py:712
+#: lib/sft.py:879
 msgid "changed since you trusted it: not used until you trust it again"
 msgstr ""
 "cambió desde que confiaste en él: no se usa hasta que vuelvas a confiar en él"
 
-#: lib/sft.py:724
+#: lib/sft.py:891
 msgid "problem: %s"
 msgstr "problema: %s"
 
-#: lib/sft.py:732
+#: lib/sft.py:899
 msgid "(default)"
 msgstr "(predeterminado)"
 
-#: lib/sft.py:746
+#: lib/sft.py:913
 msgid "%s what?"
 msgstr "¿%s qué?"
 
-#: lib/sft.py:749
+#: lib/sft.py:916
 msgid "Hidden in the installer window: %s"
 msgstr "Oculto en la ventana del instalador: %s"
 
-#: lib/sft.py:750
+#: lib/sft.py:917
 msgid "Shown in the installer window: %s"
 msgstr "Visible en la ventana del instalador: %s"
 
-#: lib/sft.py:757
+#: lib/sft.py:924
 msgid "unknown group {name}; groups: {groups}"
 msgstr "grupo desconocido {name}; grupos: {groups}"
 
-#: lib/sft.py:759
+#: lib/sft.py:926
 msgid "Group {name} hidden in the installer window."
 msgstr "Grupo {name} oculto en la ventana del instalador."
 
-#: lib/sft.py:760
+#: lib/sft.py:927
 msgid "Group {name} shown in the installer window."
 msgstr "Grupo {name} visible en la ventana del instalador."
 
-#: lib/sft.py:789
+#: lib/sft.py:956
 msgid "uninstall-settings takes keep or remove"
 msgstr "uninstall-settings acepta keep o remove"
 
-#: lib/sft.py:818
+#: lib/sft.py:985
 msgid "{id} has no settings; these do: {ids}"
 msgstr "{id} no tiene configuración; estos sí: {ids}"
 
-#: lib/sft.py:826
+#: lib/sft.py:993
 msgid "expected KEY=VALUE, got %s"
 msgstr "se esperaba CLAVE=VALOR, se recibió %s"
 
-#: lib/sft.py:830
+#: lib/sft.py:997
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr "{id} no tiene la opción {key}; tiene: {keys}"
 
@@ -4962,3 +5170,8 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "While the laser is on this window: B goes back, Y to the top, A ticks the row it points at, the left D-pad moves through the rows. Takes effect when the window opens again."
 #~ msgstr ""
 #~ "Mientras el láser está sobre esta ventana: B vuelve atrás, Y va al principio, A marca la fila a la que apunta y la cruceta izquierda recorre las filas. Se aplica la próxima vez que abras la ventana."
+
+#~ msgid ""
+#~ "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Original, Integrations and 3rd Party, all in use unless you turn one off. To add more, put a pack in <code>{folder}</code>, then trust it below. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+#~ msgstr ""
+#~ "Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Original, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, pon un paquete en <code>{folder}</code> y luego confía en él abajo. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."

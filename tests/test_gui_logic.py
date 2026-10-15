@@ -330,6 +330,52 @@ class PacksPage(unittest.TestCase):
                 self.assertIn("Stop using", buttons())
         gui.sft.load(refresh=True)
 
+    def test_add_update_and_remove_from_a_link(self):
+        """A pack's link: Add brings it in, not trusted; Update says it's up to date; Remove… asks once more."""
+        import shutil
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        git_env = {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1", "GIT_AUTHOR_NAME": "t",
+                   "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t",
+                   "FRAME_TWEAKS_PACKS": ""}
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, git_env):
+            d = Path(d)
+            src = d / "their-pack"
+            shutil.copytree(ROOT / "examples/hello-pack", src)
+            for args in (["init", "-q"], ["add", "-A"], ["commit", "-qm", "pack"]):
+                subprocess.run(["git", "-C", str(src), *args], check=True, capture_output=True)
+            with mock.patch.object(gui.sft, "USER_PACKS", d / "packs"), mock.patch.object(gui.sft, "CONF", d), \
+                    mock.patch.object(gui.sft, "TRUSTED", d / "trusted"), \
+                    mock.patch.object(gui.sft, "INSTALLED", d / "installed"):
+                window = mock.Mock()
+                page = gui.Packs(window)
+                buttons = lambda: {b.text(): b for b in page.findChildren(QPushButton) if b.isVisibleTo(page)}
+
+                def wait():
+                    for _i in range(300):
+                        QApplication.processEvents()
+                        if page.job is None:
+                            return
+                        time.sleep(0.02)
+                    self.fail("still busy")
+                buttons()["Add"].click()
+                self.assertIn("Paste or type the link", page.notice.text())
+                page.link.setText(f"file://{src}")
+                buttons()["Add"].click()
+                wait()
+                self.assertIn("Added Hello pack. It isn't used until you trust it", page.notice.text())
+                self.assertTrue((d / "packs/their-pack/pack.md").is_file())
+                self.assertIn("Trust…", buttons())
+                buttons()["Update"].click()
+                wait()
+                self.assertEqual(page.notice.text(), "Hello pack is up to date.")
+                buttons()["Remove…"].click()
+                buttons()["Yes, delete it"].click()
+                self.assertEqual(page.notice.text(), "Removed Hello pack.")
+                self.assertFalse((d / "packs/their-pack").exists())
+                window.reload_tweaks.assert_called()
+        gui.sft.load(refresh=True)
+
 
 
 class PreferencesPage(unittest.TestCase):

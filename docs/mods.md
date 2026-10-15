@@ -16,6 +16,12 @@ uses most of what's described here.
 - **Your packs:** `~/.local/share/frame-tweaks/packs/<pack>/` (the installer window's
   **🧩 Packs → Open packs folder**). Packs elsewhere: list their folders in `FRAME_TWEAKS_PACKS`,
   separated by `:`.
+- **From a link:** a pack shared as a git repository (the pack at its top: its `pack.md` and
+  tweak folders) is added with **🧩 Packs → Add a pack from a link**, or `./install.sh mods add
+  LINK [BRANCH|TAG]`. It's cloned into your packs folder and, like any pack, isn't used until
+  you trust it. **Update** (`mods update PACK`) brings its newer version, which waits until you
+  trust it again; **Remove…** (`mods remove PACK`) deletes it once its tweaks are uninstalled.
+  Links start with `https://` (or `ssh://`, `git@host:`); a pack added at a tag stays at it.
 - **Trust:** a pack's tweaks run as you, with your files and passwords in reach, so a new pack
   is listed but not used until you trust it: **🧩 Packs → Trust…**, or
   `./install.sh mods trust "<pack name>"` (or its folder, if two packs share a name). Trust

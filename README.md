@@ -260,13 +260,16 @@ matter of its README.md. Frame Tweaks' own tweaks are in three official packs, a
 you turn one off: **Original**, written for the Frame ([`packs/original/`](packs/original/));
 **Integrations**, other projects' apps that Frame Tweaks fits to the Frame
 ([`packs/integrations/`](packs/integrations/)); and **3rd Party**, other projects' apps installed
-as they are ([`packs/third-party/`](packs/third-party/)). Put other packs in
-`~/.local/share/frame-tweaks/packs/` and trust them (**🧩 Packs** in the window). A pack's tweaks run as you, so only trust packs
-from people you trust. How to write one: [docs/mods.md](docs/mods.md).
+as they are ([`packs/third-party/`](packs/third-party/)). To try someone's pack, add it from
+its link (**🧩 Packs → Add a pack from a link**), or put its folder in
+`~/.local/share/frame-tweaks/packs/`; then trust it. A pack's tweaks run as you, so only trust
+packs from people you trust. How to write one: [docs/mods.md](docs/mods.md).
 
 ```text
 ./install.sh mods               packs, whether each is in use, problems
+./install.sh mods add LINK      add a pack from its git repository's link (not used until trusted)
 ./install.sh mods trust "My pack" use it (again after its files change); untrust to stop
+./install.sh mods update "My pack" its newer version (then trust it again); remove to delete it
 ./install.sh mods off "3rd Party" turn off one of the official packs; on to use it again
 ./install.sh mods check FOLDER  check a pack or a tweak without using it
 ```
