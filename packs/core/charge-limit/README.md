@@ -100,9 +100,20 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
 ## Good to know
 - **Only while the Frame is on.** Switched off, the Frame charges to 100% as before; asleep, it
   may too.
-- **Plugged in at the limit,** the Frame runs from the charger or power bank. If what you're
-  doing draws more power than that gives, the battery makes up the difference and drains, as
-  it would without the tweak; charging starts again 5% below the limit.
+- **Plugged in at the limit,** the Frame runs mostly from the charger or power bank, but the
+  battery still drains slowly: on a Frame plugged into a 45 W USB-C charger, holding at 80%, the
+  battery gave about 1 W (it went from 84% to 79% in 45 minutes). Charging starts again 5% below
+  the limit, so the battery goes back and forth between 75% and 80%.
+- **Desktop mode's battery icon says the charger is too weak; it isn't.** While the limit holds,
+  KDE's battery icon in desktop mode shows something like:
+
+  > Battery at 82%, plugged in but still discharging
+  >
+  > The power supply is not powerful enough to charge the battery
+
+  That's this tweak pausing the charging, not your charger: KDE only sees that power is plugged
+  in and the battery isn't charging, and guesses why. Once the battery is 5% below the limit,
+  it charges again and the message goes away.
 - **It doesn't drain a full battery to the limit:** plugged in at 100%, it stays at 100% until
   you use it on battery.
 - **Valve's own setting comes first.** If SteamOS adds a charge limit for the Frame (Steam →
