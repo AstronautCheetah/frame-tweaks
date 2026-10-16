@@ -349,8 +349,10 @@ class TestTweaks(Temp):
         if real:
             path = f"{stubs(self.d / 'norootns', unshare=f'[ "$1" = -rnm ] && exit 1; exec {real} "$@"')}:{path}"
         r = self.harness(repo, "quiet", path=path)
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("ok   quiet", r.stdout)
+        # (only that file: what another test run writes to the shared /tmp meanwhile is blamed too,
+        # as this way can't tell it apart, so a clean pass isn't asked for)
+        self.assertRegex(r.stdout, r"(?m)^(ok   quiet$|FAIL quiet: wrote outside the test home:)", r.stdout + r.stderr)
+        self.assertNotIn(str(log), r.stdout)
 
     @unittest.skipUnless(shutil.which("unshare") and subprocess.run(
         ["unshare", "-rnm", "sh", "-c", "mount -t tmpfs tmpfs /tmp"], capture_output=True).returncode == 0,
