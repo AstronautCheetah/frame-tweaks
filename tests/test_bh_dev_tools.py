@@ -140,8 +140,9 @@ class ReleaseNotes(Temp):
         self.assertEqual(self.read("CHANGELOG.md"), "# Changelog\n\n## Unreleased\n\n### Fixed\n- A fix.\n\n"
                                                     "## 0.6.1 (2026-10-14)\n\n- Old.\n")
         self.assertEqual(self.read("VERSION"), "0.6.2-rc.1\n")              # (so the commit has something in it)
+        # (AppStream's way to write a pre-release: "~", which comes before 0.6.2)
         self.assertRegex(self.read("share/metainfo/x.metainfo.xml"),
-                         r'<releases>\n    <release version="0\.6\.2-rc\.1" date="[0-9-]+" type="development"/>\n    <release version="0\.6\.1"/>')
+                         r'<releases>\n    <release version="0\.6\.2~rc\.1" date="[0-9-]+" type="development"/>\n    <release version="0\.6\.1"/>')
         (self.d / "CHANGELOG.md").write_text(self.read("CHANGELOG.md").replace("- A fix.\n", "- A fix.\n- Another.\n"))
         r = self.run_step(version="0.6.2")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
@@ -149,7 +150,7 @@ class ReleaseNotes(Temp):
         self.assertRegex(self.read("CHANGELOG.md"), r"\n## 0\.6\.2 \(\d{4}-\d\d-\d\d\)\n\n### Fixed\n- A fix\.\n- Another\.\n")
         self.assertEqual(self.read("VERSION"), "0.6.2\n")
         self.assertRegex(self.read("share/metainfo/x.metainfo.xml"), r'<releases>\n    <release version="0\.6\.2" date="[0-9-]+"/>\n'
-                                                                      r'    <release version="0\.6\.2-rc\.1" date="[0-9-]+" type="development"/>\n')
+                                                                      r'    <release version="0\.6\.2~rc\.1" date="[0-9-]+" type="development"/>\n')
 
 
 @unittest.skipUnless(shutil.which("git") and shutil.which("ssh-keygen"), "needs git and ssh-keygen")
