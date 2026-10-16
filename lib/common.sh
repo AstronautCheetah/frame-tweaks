@@ -287,19 +287,22 @@ install_desktop() {
 # If pip can't (no build of those versions for this Python, say after a SteamOS update moved
 # Python on), fall back to the newest versions with a warning: working beats exact.
 pip_pinned() {
-    local venv=$1; shift
-    "$venv/bin/pip" install -q -c "$REPO_DIR/lib/python-constraints.txt" "$@" && return
+    local venv=$1 quiet=(-q); shift
+    # (FRAME_TWEAKS_PIP_PROGRESS: show pip's download progress, for a setup someone is watching)
+    [ -z "${FRAME_TWEAKS_PIP_PROGRESS:-}" ] || quiet=()
+    "$venv/bin/pip" install "${quiet[@]}" -c "$REPO_DIR/lib/python-constraints.txt" "$@" && return
     warn "$(t "The tested versions of %s don't install on this Python (%s); trying the newest." "$*" "$("$venv/bin/python" -V 2>&1)")"
-    "$venv/bin/pip" install -q "$@"
+    "$venv/bin/pip" install "${quiet[@]}" "$@"
 }
 
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
-# ensure_qt_venv: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray
-# and the installer window); fails if it couldn't be installed.
+# ensure_qt_venv [MESSAGE]: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip, the
+# NordVPN tray and the installer window), saying MESSAGE (or what it is) as it starts; fails if it
+# couldn't be installed.
 ensure_qt_venv() {
     "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null && return 0
-    say "$(t 'Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)')"
+    say "${1:-$(t 'Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)')}"
     python3 -m venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
 }
 
