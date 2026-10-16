@@ -201,10 +201,12 @@ wallet in KWalletManager, or KWallet's idle timeout, only closes `kwalletd6`'s v
 `wallet-lock-sync` listens for the wallet being closed and then really locks it in `ksecretd`.
 **Lock Wallet** and the auto-lock do the same.
 
-The other way round, **KWalletManager can show the wallet closed while it's open.** It asks
-`kwalletd6`, which starts only when something asks for it (KWalletManager itself, say) and
-then knows only what it opened. The wallet unlocked earlier in `ksecretd` is open all the same,
-and apps get their secrets. The Wallet apps page shows `ksecretd`'s state, the one that counts.
+The other way round, `kwalletd6` counts as open only what was opened through it. One that
+starts after the wallet was unlocked (KWalletManager starts it), or that runs while the password
+dialog unlocks `ksecretd` directly, said "closed" while apps used the wallet. So
+`wallet-lock-sync` opens it in `kwalletd6` too, as "Frame Tweaks" (KWalletManager lists it among
+the wallet's applications), and KWalletManager shows it open. The Wallet apps page shows
+`ksecretd`'s state, the one that counts.
 
 ## Good to know
 - Apps routed to the shared wallet use the outer session's portals and notifications, so some

@@ -218,6 +218,10 @@
 - **Recline with Recline-VR 1.3:** Recline-VR 1.3 (out 2026-10-16) moved its programs into
   `bin/linuxarm64/` and removed the file Frame Tweaks checked, so after an install or ↻ Recline
   showed as not installed. Either place counts now, and its page gives the new `reclinectl` path.
+- **KWalletManager shows the wallet open while it is:** it asks `kwalletd6`, which counts only
+  what was opened through it. Started after the wallet was unlocked (KWalletManager starts it),
+  it said "closed" while Firefox and Signal used it. The wallet's watcher opens it there too now.
+  And after a SteamVR restart, the Wallet apps page counted "open for" from the unlock before it.
 - **⟳ Restart SteamVR works from desktop mode:** SteamOS's restart goes through the VR session's
   service manager, which the window in desktop mode couldn't reach ("Failed to connect to user
   scope bus"), and nothing happened, without a word. The uninstall of a SteamVR add-on no longer

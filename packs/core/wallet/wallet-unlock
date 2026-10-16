@@ -15,6 +15,9 @@ pops up as a floating VR window on the Steam session's display.
                            - when the wallet is closed (KWalletManager's Close, idle timeout),
                              really lock it (kwalletd6's close leaves ksecretd unlocked);
                            - whenever it gets unlocked, (re)start the auto-lock timer;
+                           - keep kwalletd6, what KWalletManager asks, in step: one started after
+                             an unlock, or running while this dialog unlocked ksecretd, said
+                             the wallet was closed while apps used it;
                            - replace ksecretd's own password prompt ("KDE Wallet Service",
                              floating in VR; while it's open every other unlock is ignored)
                              with this dialog, on the same display.
@@ -114,6 +117,19 @@ def ksecretd_open(conn):
         return bool(call(conn, new_method_call(KSECRETD, "isOpen", "s", (WALLET,)))[0])
     except Exception:
         return False
+
+
+def ksecretd_id():
+    """Which ksecretd holds the wallet (its pid and start time), or None. A wallet unlocked in an
+    earlier one (gone with a SteamVR restart, say) is another unlock: the Wallet apps page counted
+    "open for" from the first one."""
+    try:
+        with bus() as conn:
+            owner = call(conn, message_bus.GetNameOwner("org.kde.ksecretd"))[0]
+            pid = call(conn, message_bus.GetConnectionUnixProcessID(owner))[0]
+        return f"{pid}:{Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[19]}"
+    except Exception:
+        return None
 
 
 def lock(conn):
@@ -411,7 +427,9 @@ def schedule_lock():
             print(_("wallet-unlock: couldn't schedule the auto-lock: {error}").format(error=r.stderr.strip()),
                   file=sys.stderr, flush=True)
             return "?"
-        s = session()
+        s, holder = session(), ksecretd_id()
+        if s.get("ksecretd") != holder:           # (unlocked in another ksecretd: a new unlock)
+            s = {"ksecretd": holder}
         s.setdefault("unlocked", time.time())     # an app reopening the open wallet only moves the lock
         s["locks"] = deadline                     # (the timer's own time: the page shows this one)
         try:
@@ -419,6 +437,38 @@ def schedule_lock():
         except OSError:
             pass
     return hours
+
+
+class FrontEnd:
+    """Keeps kwalletd6 in step with ksecretd. kwalletd6 is what KWalletManager asks, and it
+    counts as open only what was opened through it: one started after an unlock (KWalletManager
+    starts it), or running while this dialog unlocked ksecretd directly, said "closed" while
+    Firefox and Signal used the wallet. So the watcher opens it there too, on a connection it
+    keeps: kwalletd6 drops a handle with its connection, and says the wallet closed (a lock)."""
+
+    def __init__(self):
+        self.conn = None
+        self.opened = -10.0      # (time.monotonic() of our open: its walletOpened isn't an app's)
+
+    def ours(self):
+        return time.monotonic() - self.opened < 5
+
+    def sync(self):
+        try:
+            with bus() as calls:
+                if not (call(calls, message_bus.NameHasOwner("org.kde.kwalletd6"))[0] and ksecretd_open(calls)):
+                    return              # (not running: not started for this; or the wallet is locked)
+                if call(calls, new_method_call(KWALLETD, "isOpen", "s", (WALLET,)))[0]:
+                    return
+            self.conn = self.conn or bus()
+            self.opened = time.monotonic()
+            call(self.conn, new_method_call(KWALLETD, "open", "sxs", (WALLET, 0, "Frame Tweaks")))
+            print(f"{time.strftime('%T')} wallet open in ksecretd, not kwalletd6 -> opened there too", flush=True)
+        except Exception as e:
+            print(f"front end: {e}", flush=True)
+            with contextlib.suppress(Exception):
+                self.conn.close()
+            self.conn = None
 
 
 def watch():
@@ -431,20 +481,33 @@ def watch():
     # The signals come on this connection, and the watcher's own calls go on another: a call waiting
     # for its reply drops whatever else arrives meanwhile (jeepney's blocking send_and_get_reply), so
     # the wallet opened again while this locked it went unnoticed, and nothing scheduled its auto-lock.
+    front = FrontEnd()
     with bus() as conn:
         for member in ("walletClosed", "allWalletsClosed", "walletOpened"):
             rule = MatchRule(type="signal", interface="org.kde.KWallet", member=member)
             call(conn, mb.AddMatch(rule))
+        rule = MatchRule(type="signal", sender="org.freedesktop.DBus", interface="org.freedesktop.DBus",
+                         member="NameOwnerChanged", path="/org/freedesktop/DBus")
+        rule.add_arg_condition(0, "org.kde.kwalletd6")
+        call(conn, mb.AddMatch(rule))
+        front.sync()
         while True:
             msg = conn.receive()
             if msg.header.message_type != MessageType.signal:
                 continue
             member = msg.header.fields.get(3)          # 3 = MEMBER
             body = msg.body
+            if member == "NameOwnerChanged":           # kwalletd6 started (by KWalletManager, say)
+                if len(body) > 2 and body[2]:
+                    front.sync()
+                continue
             if member == "walletOpened" and body and body[0] == WALLET:
+                if front.ours():                       # (ours, keeping kwalletd6 in step: not an app)
+                    continue
                 # Unlocked by any route: the 4-hour auto-lock counts from now.
                 hours = schedule_lock()
                 print(f"{time.strftime('%T')} wallet opened -> " + (f"auto-lock in {hours} h" if hours else "auto-lock off"), flush=True)
+                front.sync()
                 continue
             if member == "allWalletsClosed" or (member == "walletClosed" and body and body[0] == WALLET):
                 try:
