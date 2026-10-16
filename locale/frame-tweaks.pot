@@ -3503,6 +3503,10 @@ msgid "Narrate's voice"
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Next part"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "No text found in the snip"
 msgstr ""
 
@@ -3523,11 +3527,19 @@ msgid "Paused."
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Paused: part {part} of {count}"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Piper: natural"
 msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "Preparing…"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Previous part"
 msgstr ""
 
 #: packs/core/snip/frame-snip

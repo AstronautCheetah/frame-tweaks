@@ -105,7 +105,14 @@ or pull the trigger on an empty part of it and drag. It remembers the spot for n
 
 The panel has:
 
-- **Stop** / **Again** and **Pause** / **Resume** (icons; point at one to see its name).
+- **Stop** / **Again**, and **Pause** / **Resume** between **Previous part** and **Next part**
+  (icons; point at one to see its name).
+- **Previous part** / **Next part**: it reads a part (about a sentence) at a time, as in
+  "part 2 of 5", and these go to the start of the part before or the one after. Previous always
+  goes back a whole part (it doesn't first restart the one being read, as some music players
+  do). While paused, it stays paused, on the new part; **Resume** reads it from its start. Each
+  is greyed out where there's no part to go to (at the first or last), and once it's stopped or
+  done.
 - **Speed** **−** / **+**. A change applies at once: it reads sentence by sentence and starts
   the current sentence again.
 - **Show text** / **Show image**: the snip's picture, or the text read from it.

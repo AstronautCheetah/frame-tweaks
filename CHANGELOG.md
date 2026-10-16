@@ -9,6 +9,9 @@
   it with the reason, its box disabled), and `./install.sh install` skips it, so a fix for one
   SteamOS version doesn't break another. An installed one stays listed for you to remove
   ([docs/mods.md](docs/mods.md)).
+- **Screen snip narration: Previous part and Next part,** icons either side of Pause / Resume.
+  Narrate reads a part (about a sentence) at a time, and these move a part back or on, from
+  its start. While paused, it stays paused on the new part, and Resume reads it from there.
 
 ### Changed
 - **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a

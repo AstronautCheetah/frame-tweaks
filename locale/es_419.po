@@ -3893,6 +3893,11 @@ msgstr "Narrar con"
 msgid "Narrate's voice"
 msgstr "Voz de Narrar"
 
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Next part"
+msgstr "Parte siguiente"
+
 #: packs/core/snip/frame-snip
 msgid "No text found in the snip"
 msgstr "No se encontró texto en el recorte"
@@ -3913,6 +3918,11 @@ msgstr "Pausar"
 msgid "Paused."
 msgstr "En pausa."
 
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Paused: part {part} of {count}"
+msgstr "En pausa: parte {part} de {count}"
+
 #: packs/core/snip/frame-snip
 msgid "Piper: natural"
 msgstr "Piper: natural"
@@ -3920,6 +3930,11 @@ msgstr "Piper: natural"
 #: packs/core/snip/frame-snip
 msgid "Preparing…"
 msgstr "Preparando…"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Previous part"
+msgstr "Parte anterior"
 
 #: packs/core/snip/frame-snip
 msgid "Put the snip's image on the clipboard"
