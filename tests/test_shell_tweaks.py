@@ -85,19 +85,32 @@ class NordVPNStatus(Home):
         (self.home / ".config/nordvpn-wg/private_key").write_text("x")
 
     def nmcli(self, connections, active=""):
+        """connections: TYPE:AUTOCONNECT:NAME lines; active: TYPE:NAME lines."""
         self.stub("nmcli", f'if [ "$*" = "-t -f TYPE,NAME connection show --active" ]; then printf "{active}"; '
-                           f'else printf "{connections}"; fi')
+                           f'elif [ "$*" = "-t -f TYPE,AUTOCONNECT,NAME connection show" ]; then printf "{connections}"; '
+                           'else exit 1; fi')
 
     def test_no_locations_is_still_installed(self):
-        self.nmcli("802-11-wireless:Home\\n")
+        self.nmcli("802-11-wireless:yes:Home\\n")
         r = self.run_script("nordvpn/status.sh")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("0 location(s); disconnected", r.stdout)
 
     def test_counts_locations_and_shows_the_active_one(self):
-        self.nmcli("wireguard:NordVPN Canada\\nwireguard:NordVPN Japan\\n", "wireguard:NordVPN Japan\\n")
+        self.nmcli("wireguard:no:NordVPN Canada\\nwireguard:no:NordVPN Japan\\n802-11-wireless:yes:Home\\n",
+                   "wireguard:NordVPN Japan\\n")
         r = self.run_script("nordvpn/status.sh")
-        self.assertIn("2 location(s); connected via Japan", r.stdout)
+        self.assertEqual(r.stdout.strip(), "ok       2 location(s); connected via Japan")
+
+    def test_says_which_location_connects_at_startup(self):
+        # (nordvpn-wg autoconnect: NetworkManager's autoconnect on that one; the Wi-Fi's isn't ours)
+        conns = "802-11-wireless:yes:Home\\nwireguard:no:NordVPN Canada\\nwireguard:yes:NordVPN United States\\n"
+        self.nmcli(conns, "wireguard:NordVPN Canada\\n")
+        r = self.run_script("nordvpn/status.sh")
+        self.assertEqual(r.stdout.strip(), "ok       2 location(s); connected via Canada; connects at startup: United States")
+        self.nmcli(conns)
+        r = self.run_script("nordvpn/status.sh")
+        self.assertEqual(r.stdout.strip(), "ok       2 location(s); disconnected; connects at startup: United States")
 
 
 class ClipboardStatus(Home):

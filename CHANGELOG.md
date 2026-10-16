@@ -12,6 +12,12 @@
 - **Screen snip narration: Previous part and Next part,** icons either side of Pause / Resume.
   Narrate reads a part (about a sentence) at a time, and these move a part back or on, from
   its start. While paused, it stays paused on the new part, and Resume reads it from there.
+- **NordVPN: Connect at startup:** tick it in the tray's menu, and the location it names (the one
+  you're connected to, or else the one used last) connects by itself whenever the Frame starts,
+  in VR too, before desktop mode. It's NetworkManager's own autoconnect, kept to that one
+  location; ticking it doesn't connect now, and **Pick least-loaded servers** keeps it. In a
+  terminal, `nordvpn-wg autoconnect CA` (or `off`); `nordvpn-wg list` and `status`, and the
+  tweak's status, say which location connects at startup.
 
 ### Changed
 - **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a

@@ -5048,6 +5048,11 @@ msgid ""
 msgstr ""
 "El ícono de la bandeja se inicia con el modo escritorio (o abre 'Bandeja de NordVPN' ahora)."
 
+# needs review
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "Connect at startup ({location})"
+msgstr "Conectar al iniciar ({location})"
+
 #: packs/integrations/nordvpn/nordvpn-tray
 msgid "Connected: {location}"
 msgstr "Conectado: {location}"
@@ -5102,13 +5107,28 @@ msgstr "Bandeja de NordVPN"
 msgid "Tray menu for the NordVPN WireGuard connections"
 msgstr "Menú en la bandeja para las conexiones WireGuard de NordVPN"
 
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "(connects at startup)"
+msgstr "(se conecta al iniciar)"
+
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "(missing: run refresh)"
 msgstr "(falta: ejecuta refresh)"
 
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager refused the change: {reply}"
+msgstr "NetworkManager rechazó el cambio: {reply}"
+
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the connection: {reply}"
 msgstr "NetworkManager rechazó la conexión: {reply}"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "No NordVPN location connects at startup."
+msgstr "Ninguna ubicación de NordVPN se conecta al iniciar."
 
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "No token given."
@@ -5163,6 +5183,11 @@ msgstr "código de país desconocido {code}, omitido"
 msgid "{code} isn't configured (nordvpn-wg add {code_upper})"
 msgstr "{code} no está configurado (nordvpn-wg add {code_upper})"
 
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "{connection} connects at startup."
+msgstr "{connection} se conecta al iniciar."
+
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "{connection} {host} ({city}, load {load}%)"
 msgstr "{connection} {host} ({city}, carga {load}%)"
@@ -5175,9 +5200,19 @@ msgstr "La bandeja de NordVPN está en ejecución"
 msgid "%s location(s); connected via %s"
 msgstr "%s ubicación(es); conectado mediante %s"
 
+# needs review
+#: packs/integrations/nordvpn/status.sh
+msgid "%s location(s); connected via %s; connects at startup: %s"
+msgstr "%s ubicación(es); conectado mediante %s; se conecta al iniciar: %s"
+
 #: packs/integrations/nordvpn/status.sh
 msgid "%s location(s); disconnected"
 msgstr "%s ubicación(es); desconectado"
+
+# needs review
+#: packs/integrations/nordvpn/status.sh
+msgid "%s location(s); disconnected; connects at startup: %s"
+msgstr "%s ubicación(es); desconectado; se conecta al iniciar: %s"
 
 #: packs/integrations/nordvpn/status.sh
 msgid "not set up yet (run: %s)"

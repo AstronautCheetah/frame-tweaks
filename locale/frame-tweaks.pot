@@ -4562,6 +4562,10 @@ msgid ""
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-tray
+msgid "Connect at startup ({location})"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "Connected: {location}"
 msgstr ""
 
@@ -4615,11 +4619,23 @@ msgid "Tray menu for the NordVPN WireGuard connections"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "(connects at startup)"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "(missing: run refresh)"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager refused the change: {reply}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the connection: {reply}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "No NordVPN location connects at startup."
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -4675,6 +4691,10 @@ msgid "{code} isn't configured (nordvpn-wg add {code_upper})"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "{connection} connects at startup."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "{connection} {host} ({city}, load {load}%)"
 msgstr ""
 
@@ -4687,7 +4707,15 @@ msgid "%s location(s); connected via %s"
 msgstr ""
 
 #: packs/integrations/nordvpn/status.sh
+msgid "%s location(s); connected via %s; connects at startup: %s"
+msgstr ""
+
+#: packs/integrations/nordvpn/status.sh
 msgid "%s location(s); disconnected"
+msgstr ""
+
+#: packs/integrations/nordvpn/status.sh
+msgid "%s location(s); disconnected; connects at startup: %s"
 msgstr ""
 
 #: packs/integrations/nordvpn/status.sh

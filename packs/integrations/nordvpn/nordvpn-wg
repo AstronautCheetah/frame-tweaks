@@ -13,6 +13,8 @@ NordVPN tray icon (nordvpn-tray), or from here.
   nordvpn-wg remove CC [CC...]        remove locations
   nordvpn-wg refresh                  re-pick the least loaded server per location
   nordvpn-wg up CC | down | status    connect / disconnect / show
+  nordvpn-wg autoconnect CC | off     connect CC whenever the Frame starts (before desktop mode),
+                                      or none; without CC: which one does
 
 The token is used once and not stored. Your WireGuard private key is kept in
 ~/.config/nordvpn-wg/private_key (mode 600) so locations can be added later.
@@ -47,9 +49,12 @@ CONF = Path.home() / ".config/nordvpn-wg"
 KEY = CONF / "private_key"
 LOCATIONS = CONF / "locations"
 SERVERS = CONF / "servers.json"           # last server picked per location (for `list`)
+STARTUP = CONF / "autoconnect"            # the location that connects at startup (country code)
 DEFAULT_LOCATIONS = ["US", "CA", "GB", "NL", "CH", "DE", "JP"]
 PREFIX = "nordvpn-"                      # NetworkManager interface name prefix
 DNS = "103.86.96.100,103.86.99.100"      # NordVPN's DNS servers
+NM = "org.freedesktop.NetworkManager"
+TO_DISK, BLOCK_AUTOCONNECT = 0x1, 0x20    # AddConnection2 / Update2 flags
 
 
 def get(path, params=None, auth=None):
@@ -115,16 +120,42 @@ def active():
     return {l.split(":")[-1] for l in out.splitlines() if l.split(":")[-1].startswith(PREFIX)}
 
 
-def add_connection(name, iface, key, pub, endpoint):
+def starting(have=None):
+    """Names of our connections that NetworkManager connects by itself, at startup
+    (connection.autoconnect): one at most, unless changed by hand."""
+    out = nmcli("-t", "-f", "AUTOCONNECT,TYPE,NAME", "connection", "show")
+    names = {l.split(":", 2)[2].replace("\\:", ":") for l in out.splitlines() if l.startswith("yes:wireguard:")}
+    return sorted(names & set((existing() if have is None else have).values()))
+
+
+def startup_choice():
+    """The country code chosen to connect at startup, or None. Kept here too, so that a refresh,
+    which makes the connections anew, keeps it."""
+    try:
+        return STARTUP.read_text().strip().upper() or None
+    except FileNotFoundError:
+        return None
+
+
+def save_startup_choice(code):
+    CONF.mkdir(parents=True, exist_ok=True)
+    if code:
+        STARTUP.write_text(code + "\n")
+    else:
+        STARTUP.unlink(missing_ok=True)
+
+
+def add_connection(name, iface, key, pub, endpoint, autoconnect=False):
     """Save a WireGuard profile via NetworkManager's D-Bus API (AddConnection2).
     Unlike `nmcli connection import` this doesn't activate it, and the private
-    key never appears on a command line or in a temp file."""
+    key never appears on a command line or in a temp file. autoconnect: it connects
+    by itself from the next start on (not now: create() reconnects one that was)."""
     from jeepney import DBusAddress, MessageType, new_method_call
     from jeepney.io.blocking import open_dbus_connection
     ip4 = lambda a: struct.unpack("=I", socket.inet_aton(a))[0]   # network byte order
     settings = {
         "connection": {"id": ("s", name), "type": ("s", "wireguard"),
-                       "interface-name": ("s", iface), "autoconnect": ("b", False)},
+                       "interface-name": ("s", iface), "autoconnect": ("b", autoconnect)},
         "wireguard": {"private-key": ("s", key), "peers": ("aa{sv}", [{
             "public-key": ("s", pub), "endpoint": ("s", endpoint),
             "allowed-ips": ("as", ["0.0.0.0/0"]), "persistent-keepalive": ("u", 25)}])},
@@ -134,14 +165,36 @@ def add_connection(name, iface, key, pub, endpoint):
                  "dns-priority": ("i", -50)},     # use only Nord's DNS while connected
         "ipv6": {"method": ("s", "disabled")},
     }
-    nm = DBusAddress("/org/freedesktop/NetworkManager/Settings",
-                     bus_name="org.freedesktop.NetworkManager",
-                     interface="org.freedesktop.NetworkManager.Settings")
+    nm = DBusAddress("/org/freedesktop/NetworkManager/Settings", bus_name=NM, interface=NM + ".Settings")
+    flags = TO_DISK | (BLOCK_AUTOCONNECT if autoconnect else 0)
     with open_dbus_connection("SYSTEM") as conn:
         r = conn.send_and_get_reply(new_method_call(nm, "AddConnection2", "a{sa{sv}}ua{sv}",
-                                                    (settings, 1, {})))   # 1 = save to disk
+                                                    (settings, flags, {})))
         if r.header.message_type == MessageType.error:
             raise SystemExit(_("NetworkManager refused the connection: {reply}").format(reply=r.body))
+
+
+def set_autoconnect(name, on, block):
+    """Turn NetworkManager's autoconnect on or off for one connection, over D-Bus like
+    add_connection: its settings as they are, but for that one (they come without the private
+    key, which NetworkManager then keeps). block: don't connect it now, only from the next
+    start on. (`nmcli connection modify` can't hold it back: NetworkManager connects a changed
+    connection that autoconnects at once.)"""
+    from jeepney import DBusAddress, MessageType, new_method_call
+    from jeepney.io.blocking import open_dbus_connection
+    uuid = nmcli("-g", "connection.uuid", "connection", "show", name).strip()
+    settings = DBusAddress("/org/freedesktop/NetworkManager/Settings", bus_name=NM, interface=NM + ".Settings")
+    with open_dbus_connection("SYSTEM") as conn:
+        def call(obj, method, signature=None, body=()):
+            r = conn.send_and_get_reply(new_method_call(obj, method, signature, body))
+            if r.header.message_type == MessageType.error:
+                raise SystemExit(_("NetworkManager refused the change: {reply}").format(reply=r.body))
+            return r.body
+        path = call(settings, "GetConnectionByUuid", "s", (uuid,))[0]
+        con = DBusAddress(path, bus_name=NM, interface=NM + ".Settings.Connection")
+        s = call(con, "GetSettings")[0]
+        s["connection"]["autoconnect"] = ("b", on)
+        call(con, "Update2", "a{sa{sv}}ua{sv}", (s, TO_DISK | (BLOCK_AUTOCONNECT if block else 0), {}))
 
 
 def create(code, country, key):
@@ -150,7 +203,7 @@ def create(code, country, key):
     was_active = iface in active()
     if iface in existing():
         nmcli("connection", "delete", existing()[iface])
-    add_connection(con_name(country), iface, key, pub, f"{ip}:51820")
+    add_connection(con_name(country), iface, key, pub, f"{ip}:51820", autoconnect=code == startup_choice())
     picked = json.loads(SERVERS.read_text()) if SERVERS.exists() else {}
     picked[code] = f"{host} ({city})"
     SERVERS.write_text(json.dumps(picked, indent=1))
@@ -219,15 +272,40 @@ def cmd_remove(codes):
             nmcli("connection", "delete", have[iface])
         save_locations([l for l in locations() if l != code])
         print(_("removed {code}").format(code=code))
+        if code == startup_choice():
+            save_startup_choice(None)
+            print(_("No NordVPN location connects at startup."))
 
 
 def cmd_list():
     have, up = existing(), active()
+    start = starting(have)
     picked = json.loads(SERVERS.read_text()) if SERVERS.exists() else {}
     for code in locations():
         iface = PREFIX + code.lower()
         name = have.get(iface) or _("(missing: run refresh)")
-        print(f"{'●' if iface in up else ' '} {code}  {name:28} {picked.get(code, '') if iface in have else ''}")
+        line = f"{'●' if iface in up else ' '} {code}  {name:28} {picked.get(code, '') if iface in have else ''}"
+        print(line + ("  " + _("(connects at startup)") if have.get(iface) in start else ""))
+
+
+def cmd_autoconnect(code=None):
+    """Which location NetworkManager connects by itself whenever the Frame starts, before desktop
+    mode does: one (autoconnect on for it, off for every other) or none ("off")."""
+    have = existing()
+    if code is not None:
+        target = None if code.lower() == "off" else PREFIX + code.lower()
+        if target and target not in have:
+            raise SystemExit(_("{code} isn't configured (nordvpn-wg add {code_upper})").format(code=code, code_upper=code.upper()))
+        start, up = starting(have), active()
+        for iface, name in sorted(have.items(), key=lambda c: c[0] == target):   # (the others off first)
+            if (name in start) != (iface == target):
+                set_autoconnect(name, iface == target, block=iface == target and iface not in up)
+        save_startup_choice(code.upper() if target else None)
+    start = starting(have)
+    for name in start:
+        print(_("{connection} connects at startup.").format(connection=name))
+    if not start:
+        print(_("No NordVPN location connects at startup."))
 
 
 def cmd_up(code):
@@ -247,20 +325,21 @@ def cmd_down():
 
 
 def cmd_status():
-    up = active()
-    if not up:
-        print(_("NordVPN: disconnected"))
-        return
-    have = existing()
+    up, have = active(), existing()
     for iface in up:
         print(_("NordVPN: connected via {connection}").format(connection=have.get(iface, iface)))
-    try:
-        with urllib.request.urlopen("https://api.nordvpn.com/v1/helpers/ips/insights", timeout=10) as r:
-            info = json.load(r)
-        print(_("public IP {ip} ({city}, {country}), protected: {protected}").format(
-            ip=info.get("ip"), city=info.get("city"), country=info.get("country"), protected=info.get("protected")))
-    except Exception:
-        pass
+    if not up:
+        print(_("NordVPN: disconnected"))
+    else:
+        try:
+            with urllib.request.urlopen("https://api.nordvpn.com/v1/helpers/ips/insights", timeout=10) as r:
+                info = json.load(r)
+            print(_("public IP {ip} ({city}, {country}), protected: {protected}").format(
+                ip=info.get("ip"), city=info.get("city"), country=info.get("country"), protected=info.get("protected")))
+        except Exception:
+            pass
+    for name in starting(have):
+        print(_("{connection} connects at startup.").format(connection=name))
 
 
 def main():
@@ -286,6 +365,8 @@ def main():
         cmd_down()
     elif a[0] == "status":
         cmd_status()
+    elif a[0] == "autoconnect" and len(a) <= 2:
+        cmd_autoconnect(a[1] if len(a) == 2 else None)
     else:
         sys.exit(__doc__)
 

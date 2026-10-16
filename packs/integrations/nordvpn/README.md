@@ -66,6 +66,11 @@ tray icon**, which starts with desktop mode (or use **Tray** on this tweak's row
 disconnected, green connected, yellow working. Click it for a menu: pick a location, disconnect,
 show your public IP, or pick the least-loaded servers again.
 
+**Connect at startup (Canada)**, in the same menu, connects the VPN by itself whenever the Frame
+starts, in VR too, without waiting for desktop mode. Ticked, it names the location that does;
+unticked, the one ticking it would choose: the one you're connected to, or else the one you
+used last. Ticking it doesn't connect now; untick it to turn it off.
+
 From a terminal:
 
 ```sh
@@ -76,9 +81,12 @@ nordvpn-wg down          # disconnect
 nordvpn-wg add FR IT     # more locations (country codes: nordvpn-wg countries)
 nordvpn-wg remove JP
 nordvpn-wg refresh       # pick the least-loaded server again for every location
+nordvpn-wg autoconnect CA  # connect to CA whenever the Frame starts (list and status say so)
+nordvpn-wg autoconnect off # ... or to none
 ```
 
-Your locations are listed in `~/.config/nordvpn-wg/locations`.
+Your locations are listed in `~/.config/nordvpn-wg/locations`, and the one that connects at
+startup in `~/.config/nordvpn-wg/autoconnect`.
 
 ## How it works
 NordVPN's own Linux app installs into `/usr`, on SteamOS's read-only system partition, which
@@ -91,6 +99,13 @@ the system.
 Connections are created through NetworkManager's D-Bus API, so the private key never appears on
 a command line or in a temporary file, and creating one doesn't connect it.
 
+**Connect at startup** is NetworkManager's own `autoconnect`, on for that location's connection and
+off for the others, so NetworkManager connects it as the Frame starts, before desktop mode or the
+tray. Each location is a separate WireGuard interface, so NetworkManager would connect every one
+set to autoconnect: `nordvpn-wg` keeps it to one. It changes the setting over D-Bus too, asking
+NetworkManager not to connect it there and then (which changing it with `nmcli` would). A refresh
+makes the connections anew and keeps the choice.
+
 ## Good to know
 - Each location uses the server that was least loaded when it was created. Run
   `nordvpn-wg refresh` now and then; an active connection reconnects to its new server.
@@ -98,6 +113,9 @@ a command line or in a temporary file, and creating one doesn't connect it.
 - **IPv4 only:** IPv6 is turned off on the tunnel. On a network that has IPv6, IPv6 traffic goes
   around the VPN (check with `ip -6 addr show scope global`).
 - **No kill switch:** if the tunnel drops, traffic goes out normally.
+- **Connect at startup** and disconnecting: disconnect (or pick another location), and it stays
+  that way until the next start, when it connects again. Removing that location turns it off.
+  On a network with a sign-in page (a hotel's Wi-Fi), disconnect to sign in.
 - Your WireGuard private key is stored in the connection files (readable only by root) and in
   `~/.config/nordvpn-wg/private_key` (readable only by you), so locations can be added later.
   Removing the tweak deletes the connections, and the root-only copy with them. The copy in
