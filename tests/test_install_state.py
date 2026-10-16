@@ -605,6 +605,17 @@ class InstallState(unittest.TestCase):
         self.assertIn("\nName=Frame Tweaks\n", entry)
         self.assertIn(f"\nExec=env FRAME_TWEAKS_GUI=1 {ROOT}/install.sh gui\n", entry)
 
+    def test_steam_saving_its_settings_often_doesnt_stop_the_menu_language(self):
+        """Steam saves config.vdf several times in a few seconds: the service the path unit starts
+        had systemd's start limit (5 in 10 s), and hitting it failed the path unit for good."""
+        self.assertEqual(self.sh("menu").returncode, 0)
+        units = self.home / ".config/systemd/user"
+        service = (units / "frame-tweaks-menus.service").read_text().splitlines()
+        self.assertIn("StartLimitIntervalSec=0", service[:service.index("[Service]")])
+        self.assertIn("ExecStartPre=/usr/bin/sleep 1", service)            # (a burst, one run)
+        self.assertIn("PathChanged=%h/.local/share/Steam/config/config.vdf",
+                      (units / "frame-tweaks-menus.path").read_text().splitlines())
+
     def test_your_name_for_the_menu_entry_stays(self):
         entry = self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop"
         for change in (None, "Tweaks"):

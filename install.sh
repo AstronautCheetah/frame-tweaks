@@ -156,8 +156,12 @@ ensure_menu_language() {
     printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
         "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "PathChanged=%h/.config/frame-tweaks/language" "" \
         "[Install]" "WantedBy=default.target" > "$u/$MENU_UNIT.path.new"
-    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
-        "[Service]" "Type=oneshot" "ExecStart=/usr/bin/python3 $py menus" \
+    # (Steam saves config.vdf several times in a few seconds: started that often, the service hit
+    # systemd's start limit, and the path unit then gave up for good, with menus left in the old
+    # language. No limit, and a second's wait, so one run takes a burst of saves.)
+    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" \
+        "StartLimitIntervalSec=0" "" \
+        "[Service]" "Type=oneshot" "ExecStartPre=/usr/bin/sleep 1" "ExecStart=/usr/bin/python3 $py menus" \
         "# (It rewrites only Frame Tweaks' menu entries: the rest of the system is out of its reach.)" \
         "NoNewPrivileges=yes" "ProtectSystem=strict" "ProtectHome=read-only" \
         "ReadWritePaths=-%h/.local/share/applications -%h/.local/share/frame-tweaks/launcher-originals" \
