@@ -7,6 +7,8 @@
   link to the page and where its Star button is.
 
 ### For contributors
+- **The manifest tests no longer overwrite your hidden tweaks:** they wrote their own hidden list
+  over the real one (`~/.config/frame-tweaks/installer/hidden`) each time they ran.
 - **`dev/test-tweaks.sh` passes on a Frame in use:** what programs already running write to /tmp
   meanwhile (Android Mirror's adb log, a Narrate's sound files) no longer counts as written by
   a tweak outside its test home. Where user namespaces allow, the tweaks' scripts get a /tmp
