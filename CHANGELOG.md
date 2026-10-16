@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.10 (2026-10-16)
 
 ### Changed
 - **Claude Code is set aside** (not offered any more): Homebrew has it (`brew install --cask
