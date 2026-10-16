@@ -12,6 +12,11 @@
   template to be extracted again.
 
 ### Fixed
+- **📖 README shows all of the README:** after the first paragraph it showed blank lines with only
+  bits of code in them. A picture with a caption confused the window's Markdown reader, which then
+  dropped the text that came after; pictures with captions are now turned into ones it reads.
+- **A tweak's page scrolls as one:** below Back and the title, its facts and its README scroll
+  together, so a long table of facts no longer leaves the README a narrow strip to scroll in.
 - **Running the install command again over an install opens the window at once:** it updates, as
   `./install.sh update` does, and that re-ran every installed tweak's installer (minutes) even
   when it was on the newest release already. Now an update that changes nothing reinstalls
