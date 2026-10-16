@@ -66,13 +66,14 @@ def panel_anchor():
 
 
 def nm_connections():
-    """[(name, iface)] for our WireGuard profiles, and the active iface (or None)."""
-    out = subprocess.run(["nmcli", "-t", "-f", "NAME,TYPE,DEVICE", "connection", "show"],
+    """Our WireGuard profiles' names (sorted); the active one, the one NetworkManager connects at
+    startup (its autoconnect) and the one used last (each a name, or None)."""
+    out = subprocess.run(["nmcli", "-t", "-f", "NAME,TYPE,DEVICE,AUTOCONNECT,TIMESTAMP", "connection", "show"],
                          capture_output=True, text=True).stdout
-    profiles, active = [], None
+    profiles, active, startup, used = [], None, [], {}
     for line in out.splitlines():
         parts = line.replace("\\:", "\0").split(":")
-        if len(parts) < 3 or parts[1] != "wireguard":
+        if len(parts) < 5 or parts[1] != "wireguard":
             continue
         name = parts[0].replace("\0", ":")
         if not name.startswith("NordVPN "):
@@ -80,7 +81,11 @@ def nm_connections():
         profiles.append(name)
         if parts[2].startswith(PREFIX):
             active = name
-    return sorted(profiles), active
+        if parts[3] == "yes":
+            startup.append(name)
+        used[name] = int(parts[4]) if parts[4].isdigit() else 0
+    last = max(used, key=used.get) if any(used.values()) else None    # (0: not since it was made)
+    return sorted(profiles), active, min(startup, default=None), last
 
 
 class Tray:
@@ -94,7 +99,7 @@ class Tray:
         # Re-read the connection state whenever the menu opens (right-click included).
         self.menu.aboutToShow.connect(self.refresh)
         self.proc = None
-        self.active = None
+        self.active = self.startup = self.last = None
         self.profiles = []
         self.anchor = panel_anchor()
         self.refresh()
@@ -147,7 +152,7 @@ class Tray:
         self.build_menu()
 
     def update_state(self):
-        self.profiles, self.active = nm_connections()
+        self.profiles, self.active, self.startup, self.last = nm_connections()
         busy = self.proc and self.proc.state() != QProcess.ProcessState.NotRunning
         self.tray.setIcon(self.busy if busy else self.on if self.active else self.off)
         self.tray.setToolTip(_("NordVPN: {location}").format(location=self.active[8:]) if self.active else
@@ -176,6 +181,15 @@ class Tray:
         self.menu.addAction(_("Show public IP")).triggered.connect(lambda: self.run("status", note=True))
         self.menu.addAction(_("Pick least-loaded servers")).triggered.connect(
             lambda: self.run("refresh", note=True))
+        # NetworkManager connects it by itself as the Frame starts, before desktop mode (nordvpn-wg
+        # autoconnect). Ticked: the one that does; unticked: the one ticking it would choose.
+        start = self.startup or self.active or self.last or (profiles[0] if profiles else None)
+        if start:
+            self.menu.addSeparator()
+            auto = QAction(_("Connect at startup ({location})").format(location=start[8:]), self.menu,
+                           checkable=True, checked=bool(self.startup))
+            auto.triggered.connect(lambda on, c=self.code_for(start): self.run("autoconnect", c if on else "off", note=True))
+            self.menu.addAction(auto)
         self.menu.addSeparator()
         self.menu.addAction(_("Quit tray icon")).triggered.connect(self.app.quit)
 
