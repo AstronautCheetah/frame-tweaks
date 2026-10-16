@@ -763,6 +763,58 @@ class PreferencesPage(unittest.TestCase):
 
 
 
+class ReadmeShown(unittest.TestCase):
+    """📖 README: all of it. Qt's Markdown reader drops the text after an HTML block it can't
+    place, and a picture with a caption (<br><sub>…</sub>) was one: the page showed its first
+    paragraph, then blank lines with only the inline code left."""
+    def test_every_heading_and_the_text_after_a_captioned_picture(self):
+        import re
+        from PyQt6.QtWidgets import QApplication, QTextBrowser
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.ReadmePage(mock.Mock())
+        text = page.findChildren(QTextBrowser)[0].toPlainText()
+        src = (gui.REPO / "README.md").read_text()
+        for h in re.findall(r"^#{1,4} (.+)$", src, re.M):
+            self.assertIn(re.sub(r"[`*]", "", h).strip(), text)
+        self.assertIn("Typing is hard.", text)
+        self.assertNotRegex(text, r"(\n[ \t]*){4,}")                 # (no runs of blank lines)
+        self.assertNotRegex(text, r"</?(p|sub|br|img|details)\b")
+
+    def test_a_captioned_picture(self):
+        md = gui.plain_markdown('<p align="center"><img src="a.png" width="9" alt="A view"><br>\n'
+                                '<sub>What it shows,\nin two lines.</sub></p>\n\nAfter.\n')
+        self.assertEqual(md, "![A view](a.png)\n\n*What it shows, in two lines.*\n\nAfter.\n")
+
+
+class DetailsScroll(unittest.TestCase):
+    """A tweak's page scrolls as one below its header (Back, the title): a long table of facts
+    left the README a narrow strip to scroll in. The README is shown whole; a wheel over it, and a
+    link to one of its headings, scroll the page."""
+    def test_one_page(self):
+        from PyQt6.QtCore import QPoint, QPointF
+        from PyQt6.QtGui import QWheelEvent
+        from PyQt6.QtTest import QTest
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.Details(mock.Mock(latest={}), gui.component("charge-limit"), (1, "not installed"))
+        page.resize(1000, 600)
+        page.show()
+        QTest.qWait(100)
+        outer = page.scroll.verticalScrollBar()
+        self.assertEqual(page.readme.verticalScrollBar().maximum(), 0)          # (shown whole)
+        self.assertGreater(outer.maximum(), 0)
+        vp = page.readme.viewport()
+        at = QPointF(vp.width() / 2, 10)
+        QApplication.sendEvent(vp, QWheelEvent(at, QPointF(vp.mapToGlobal(at.toPoint())), QPoint(0, 0), QPoint(0, -240),
+                                               gui.Qt.MouseButton.NoButton, gui.Qt.KeyboardModifier.NoModifier,
+                                               gui.Qt.ScrollPhase.NoScrollPhase, False))
+        self.assertGreater(outer.value(), 0)
+        outer.setValue(0)
+        gui.to_heading(page.readme, "how-it-works")
+        self.assertGreater(outer.value(), 0)
+        page.close()
+
+
 class ContributeRow(unittest.TestCase):
     """The list ends with a row that isn't a tweak, under every group: how to help. (Built on a
     stand-in window: the real one would start SteamVR's button handling and the update check.)"""

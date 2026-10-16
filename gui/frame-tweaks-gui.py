@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6 import sip
-from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, QUrl
+from PyQt6.QtCore import QEvent, QObject, QPoint, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontMetrics, QIcon, QImage
 from PyQt6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
@@ -236,10 +236,18 @@ def readme_links(text, comp):
 
 def plain_markdown(text):
     """GitHub-style README HTML as Markdown the window can show (Qt's Markdown reader loses the
-    text around HTML blocks): centred pictures become pictures, folded <details> sections show
-    open with their summary in bold, and badges (pictures from the web) are left out."""
-    text = re.sub(r'<p[^>]*>\s*<img\b[^>]*?\bsrc="([^"]+)"[^>]*?\balt="([^"]*)"[^>]*>\s*</p>',
-                  lambda m: f"![{m[2]}]({m[1]})", text)
+    text after an HTML block it can't place, so none may be left): centred pictures become
+    pictures, with their caption (<br><sub>…</sub>) as a line in italics; folded <details>
+    sections show open with their summary in bold; badges (pictures from the web) are left out;
+    and any <br> or <sub> left over goes, its text kept."""
+    def picture(m):
+        img = re.search(r'<img\b[^>]*?\bsrc="([^"]+)"[^>]*?\balt="([^"]*)"', m[0])
+        caption = re.search(r"<sub>(.*?)</sub>", m[0], flags=re.S)
+        if not img:
+            return m[0]
+        return f"![{img[2]}]({img[1]})" + (f"\n\n*{' '.join(caption[1].split())}*" if caption else "")
+    text = re.sub(r"<p\b[^>]*>\s*<img\b.*?</p>", picture, text, flags=re.S)
+    text = re.sub(r"<br\s*/?>|</?sub>", "", text)
     text = re.sub(r"<details>\s*<summary>(.*?)</summary>", lambda m: f"**{m[1].strip()}**\n", text, flags=re.S)
     text = re.sub(r"</details>", "", text)
     text = re.sub(r"<!--.*?-->\n?", "", text, flags=re.S)
@@ -263,14 +271,65 @@ def readme_browser(text, comp):
 
 def to_heading(view, anchor):
     """A README's link to one of its own headings (#build-from-source, named as GitHub names
-    them): scroll there. (Qt's Markdown reader gives headings no anchors of their own.)"""
+    them): scroll there, in the README, or in the page around it when the README is shown whole
+    (full_height). (Qt's Markdown reader gives headings no anchors of their own.)"""
     block = view.document().begin()
     while block.isValid():
         if block.blockFormat().headingLevel() and \
                 re.sub(r"[^\w\- ]", "", block.text().strip().lower()).replace(" ", "-") == anchor:
-            view.verticalScrollBar().setValue(int(view.document().documentLayout().blockBoundingRect(block).top()))
+            top = int(view.document().documentLayout().blockBoundingRect(block).top())
+            area = view.parentWidget()
+            while area is not None and not isinstance(area, QScrollArea):
+                area = area.parentWidget()
+            if getattr(view, "whole", False) and area is not None:
+                area.verticalScrollBar().setValue(view.viewport().mapTo(area.widget(), QPoint(0, top)).y())
+            else:
+                view.verticalScrollBar().setValue(top)
             return
         block = block.next()
+
+
+class _FitHeight(QObject):
+    """(full_height's: a new width, a new height; a wheel over it scrolls the page around it)"""
+    def __init__(self, view):
+        super().__init__(view)
+        self.view = view
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Resize and obj is self.view:
+            QTimer.singleShot(0, self.view.fit)
+        elif ev.type() == QEvent.Type.Wheel:
+            area = self.view.parentWidget()
+            while area is not None and not isinstance(area, QScrollArea):
+                area = area.parentWidget()
+            if area is not None:
+                QApplication.sendEvent(area.verticalScrollBar(), ev)
+                return True
+        return False
+
+
+def full_height(view):
+    """A QTextBrowser shown whole, as tall as its text at its width, with no scroll bar of its own:
+    the page it's on scrolls instead (a wheel or laser scroll over it reaches the page)."""
+    view.whole = True
+    view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+    def fit(*_args):
+        if sip.isdeleted(view):
+            return
+        doc = view.document()
+        doc.setTextWidth(view.viewport().width())
+        height = int(doc.size().height()) + 2 * view.frameWidth() + 4
+        if view.height() != height:
+            view.setFixedHeight(height)
+    view.fit = fit
+    view.document().documentLayout().documentSizeChanged.connect(fit)
+    view.fitter = _FitHeight(view)
+    view.installEventFilter(view.fitter)
+    view.viewport().installEventFilter(view.fitter)
+    QTimer.singleShot(0, fit)
+    return view
 
 
 def fit_images(text, width=860):
@@ -494,7 +553,6 @@ class Details(QWidget):
             self.issue_label.setObjectName("issue")
             self.issue_label.setWordWrap(True)
             link_label(self.issue_label)
-            lay.addWidget(self.issue_label)
             self.show_issue(window.latest.get(comp["id"], "checking"))
 
         text, kind = status_text(state)
@@ -536,7 +594,6 @@ class Details(QWidget):
             f"<tr><td style='color:#6b7783;padding-right:12px' valign=top><b>{k}</b></td><td>{v}</td></tr>"
             for k, v in facts) + "</table>"))
         summary.setWordWrap(True)
-        lay.addWidget(summary)
 
         try:
             text = manifest.front_matter(comp["readme"].read_text())[1]
@@ -544,7 +601,22 @@ class Details(QWidget):
             text = "_" + _("No README.") + "_"
         # (Its opening, what it is and why, is in the table above already.)
         text = re.sub(r"<!-- generated:intro .*?<!-- /generated:intro -->\n*", "", text, flags=re.S)
-        lay.addWidget(readme_browser(text, comp), 1)
+        # Everything below the header scrolls as one page: a long table of facts used to leave the
+        # README a narrow strip to scroll in. (Back and the title stay where they are.)
+        body = QWidget()
+        rows = QVBoxLayout(body)
+        rows.setContentsMargins(0, 0, 0, 0)
+        if self.issue_label is not None:
+            rows.addWidget(self.issue_label)
+        rows.addWidget(summary)
+        self.readme = full_height(readme_browser(text, comp))
+        rows.addWidget(self.readme)
+        rows.addStretch(1)
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setWidget(body)
+        lay.addWidget(self.scroll, 1)
 
     def show_issue(self, latest):
         """latest: newest upstream tag, "checking", or None when it couldn't be fetched."""
