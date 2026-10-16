@@ -126,6 +126,43 @@
   tweak a pack brings later is looked up too (its page said "Checking for a newer release…" for
   good); and a second launch that finds the window stuck stops only the window, not an editor
   that has its file open.
+- **Arrow Pad's shortcuts and Dictation's typing on a French, German or other keyboard layout:**
+  both sent a US keyboard's keys, which the desktop reads with its own layout. On a French one,
+  Select all was Ctrl+Q (the app quit) and Undo Ctrl+W (the tab closed); on a German or Swiss one,
+  Undo and Redo were Ctrl+Y; and dictated text came out with the wrong letters and punctuation.
+  The keys now come from KDE's layout, worked out with libxkbcommon as KWin does: a shortcut's
+  letter is where that layout has it, and Dictation types each character with the key that types
+  it there (with Shift or AltGr, or a dead key first: ´ then e). Text with a character the layout
+  has no key for isn't typed at all; it's in the clipboard, and a notification says so. On a US
+  keyboard nothing changes.
+- **Arrow Pad's keys act once per press:** a laser wavering at a key's edge slides off the key and
+  back, and each slide counted. One Paste sent Ctrl+V three times, 🎤 started, stopped and
+  restarted dictation, Snip opened three times, and a tap on Ctrl left it locked. Buttons now act
+  once, when you let go on them (let go off the key to cancel); a modifier stays down until you
+  let go, and keys you hold (arrows, Bksp…) still go up as the pointer leaves them. In VR, a
+  laser's press whose release never arrived ends when that laser presses again, rather than
+  keeping a modifier down.
+- **Arrow Pad lets go of its keys when it goes away:** when desktop mode ended, the desktop pad
+  ended with it before letting go, and a Ctrl it had latched stayed down for the whole Frame
+  (every click a Ctrl+click). It now lets go first, and when it's stopped (an update, an
+  uninstall, which now gives it 2 seconds to close before stopping it); in VR, when the dashboard
+  closes, before anything is asked of SteamVR.
+- **Arrow Pad's Unstick gives desktop mode's input back in other languages:** it looked for the
+  English window title ("Press right control to ungrab input"), which KWin translates, so on a
+  German, French or Spanish desktop the grab was never given back. It now reads KWin's own
+  translations for desktop mode's language, and still sends Right Ctrl only when the title says
+  the grab is on. Another window's title that isn't UTF-8 no longer crashes the pad on Unstick.
+- **Scroll strips scroll again after the dashboard reloads,** and Android Mirror's touch layer
+  works again: a reloaded page got the bindings they call only with DevTools' Runtime domain on,
+  so the strips showed but didn't scroll, and the gear said to reinstall.
+- **Scroll strips stop when their release goes missing:** a release the page never saw left a
+  strip scrolling until the next click, each move of the laser elsewhere putting off the
+  3-second stop. Only moves on the strip itself keep it going now.
+- **Dashboard patches are checked against the dashboard page's own code:** the check searched
+  every bundle in SteamVR's dashboard folder, some of them other pages', so a piece found only
+  there counted as present. Installing a patch says "Active now." only once it is, and otherwise
+  what the patches service says. While a patch's panel isn't showing, the shared helpers no
+  longer wrap the dashboard's drawing again every 2 seconds, a layer deeper each time.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a

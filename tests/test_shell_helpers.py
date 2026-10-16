@@ -140,5 +140,41 @@ class SteamVRRestart(unittest.TestCase):
         self.assertEqual((r.returncode, r.stdout), (2, "restart  Load it\n"))      # (2: needs attention)
 
 
+
+class DashboardPatchInstalled(unittest.TestCase):
+    """install_dashboard_patch while SteamVR's patches service runs: "Active now." only once the
+    service has injected the patch (it said so after its 10 checks either way); otherwise what the
+    service says. In a throwaway home, with stand-ins for the service and systemctl."""
+
+    def install(self, status):
+        with tempfile.TemporaryDirectory() as home:
+            d = Path(home) / ".local/share/frame-tweaks/vr-dashboard"
+            d.mkdir(parents=True)
+            (d / "sft-dashboard").write_text(f"#!/bin/sh\n[ -n '{status}' ] && echo '{status}'\n"
+                                             f"[ '{status}' = 'curvature: patched' ]\n")
+            (d / "sft-dashboard").chmod(0o755)
+            (Path(home) / "stubs").mkdir()
+            (Path(home) / "stubs/systemctl").write_text("#!/bin/sh\nexit 3\n")    # (never the real one)
+            (Path(home) / "stubs/systemctl").chmod(0o755)
+            (Path(home) / "patch.js").write_text("")
+            script = (f"source {ROOT}/lib/common.sh 2>/dev/null; "
+                      'sysctl_user() { [ "$3" = sft-dashboard.service ]; }; sleep() { :; }; '   # (it runs; no waiting)
+                      f"install_dashboard_patch curvature {home}/patch.js")
+            env = {"HOME": home, "PATH": f"{home}/stubs:/usr/bin:/bin", "LANG": "C.UTF-8",
+                   "FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_LANG_RESOLVED": "en"}
+            r = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True, timeout=60)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            return r.stdout
+
+    def test_says_active_only_once_it_is(self):
+        self.assertIn("Active now.", self.install("curvature: patched"))
+        out = self.install("curvature: port open, not patched yet")
+        self.assertNotIn("Active now.", out)
+        self.assertIn("Not active yet: curvature: port open, not patched yet", out)
+        out = self.install("curvature: SteamVR changed (missing: a thing); off")
+        self.assertIn("Not active yet: curvature: SteamVR changed (missing: a thing); off", out)
+        self.assertIn("Not active yet: the dashboard patch service did not answer", self.install(""))
+
+
 if __name__ == "__main__":
     unittest.main()

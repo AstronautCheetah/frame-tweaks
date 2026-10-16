@@ -96,6 +96,11 @@ to use it:
 - Typing goes through [ydotool](../ydotool/), because KDE's Wayland desktop doesn't let ordinary
   programs send keys to other apps. Copying uses `wl-copy`, which the script points at the
   desktop's Wayland socket itself (shortcuts and launchers don't always say where it is).
+- ydotool types as on a US keyboard. With another keyboard layout in KDE (French, German,
+  Latin American…), each character is typed with the key that types it on that layout, with
+  Shift or AltGr, or a dead key first (´ then e for é), as you'd type it. Text with a
+  character your layout has no key for isn't typed at all: it's in the clipboard, and a
+  notification says so.
 - Whisper runs with `DISABLE_GAMESCOPE_WSI=1`, which keeps the Steam session's graphics layer
   out of its way.
 - If the GPU build of whisper.cpp from groffta's

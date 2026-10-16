@@ -1636,6 +1636,10 @@ msgid "Install Homebrew now?"
 msgstr ""
 
 #: lib/common.sh
+msgid "Not active yet: %s"
+msgstr ""
+
+#: lib/common.sh
 msgid ""
 "Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
 msgstr ""
@@ -1692,6 +1696,10 @@ msgstr ""
 
 #: lib/common.sh packs/core/charge-limit/install.sh
 msgid "sudo failed."
+msgstr ""
+
+#: lib/common.sh
+msgid "the dashboard patch service did not answer"
 msgstr ""
 
 #: lib/common.sh
@@ -3020,6 +3028,14 @@ msgid "No speech detected"
 msgstr ""
 
 #: packs/core/dictation/dictate
+msgid "Not typed: copied to the clipboard"
+msgstr ""
+
+#: packs/core/dictation/dictate
+msgid "Paste the text instead (Ctrl+V)."
+msgstr ""
+
+#: packs/core/dictation/dictate
 msgid "Still transcribing…"
 msgstr ""
 
@@ -3029,6 +3045,11 @@ msgstr ""
 
 #: packs/core/dictation/dictate
 msgid "Wait for the text before dictating again."
+msgstr ""
+
+#: packs/core/dictation/dictate
+msgid ""
+"Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
 msgstr ""
 
 #: packs/core/dictation/dictate.desktop

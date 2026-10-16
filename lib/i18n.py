@@ -124,23 +124,43 @@ def _steam_layout():
     return newest[1] if newest else None
 
 
-def _kde_layout():
-    """KDE's current layout (us, latam, …): the only one in kxkbrc, or the one KDE says is active."""
+def kde_keyboard():
+    """KDE's current keyboard layout, as KWin reads kxkbrc: {"layout": "fr", "variant": "oss",
+    "model": "pc104", "options": ""} for the only layout listed, or the one KDE says is active;
+    None without one. (lib/xkb.py types on it.)"""
     try:
         text = (Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "kxkbrc").read_text()
     except OSError:
         return None
-    m = re.search(r"^LayoutList=(.*)$", text, re.M)
-    layouts = [l.strip() for l in m[1].split(",") if l.strip()] if m else []
-    if len(layouts) <= 1:
-        return layouts[0] if layouts else None
-    try:
-        r = subprocess.run(["qdbus6", "org.kde.keyboard", "/Layouts", "getLayout"],
-                           capture_output=True, text=True, timeout=1)
-        i = int(r.stdout.strip())
-    except (OSError, ValueError, subprocess.TimeoutExpired):
-        i = 0
-    return layouts[i] if 0 <= i < len(layouts) else layouts[0]
+
+    def key(name):
+        m = re.search(rf"^{name}=(.*)$", text, re.M)
+        return m[1].strip() if m else ""
+    layouts, variants = [l.strip() for l in key("LayoutList").split(",")], [v.strip() for v in key("VariantList").split(",")]
+    i = 0
+    if len(layouts) > 1:
+        try:
+            r = subprocess.run(["qdbus6", "org.kde.keyboard", "/Layouts", "getLayout"],
+                               capture_output=True, text=True, timeout=1)
+            i = int(r.stdout.strip())
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            i = 0
+        i = i if 0 <= i < len(layouts) else 0
+    layout, variant = layouts[i], variants[i] if i < len(variants) else ""
+    m = re.match(r"([^()]+)\((.*)\)$", layout)          # (older KDE: the variant in brackets, "de(nodeadkeys)")
+    if m:
+        layout, variant = m[1], m[2]
+    if not layout:
+        return None
+    # (KWin's own defaults: model pc104; the options only with ResetOldOptions)
+    return {"layout": layout, "variant": variant, "model": key("Model") or "pc104",
+            "options": key("Options") if key("ResetOldOptions").lower() == "true" else ""}
+
+
+def _kde_layout():
+    """KDE's current layout (us, latam, …): the only one in kxkbrc, or the one KDE says is active."""
+    kb = kde_keyboard()
+    return kb["layout"] if kb else None
 
 
 def keyboard_language():

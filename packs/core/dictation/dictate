@@ -54,6 +54,28 @@ cue() { pw-play "$SOUNDS/$1.oga" 9>&- 2>/dev/null & }   # 9>&-: never hold the t
 log() { echo "$(date +%T) $*" >> "$LOG"; }
 alive() { [ -f "$1" ] && kill -0 "$(cat "$1")" 2>/dev/null; }
 
+# type_text TEXT: into the focused window. ydotool's own typing assumes a US keyboard, so on
+# another layout (KDE's, in desktop mode) the keys for each character come from that layout
+# (xkb.py, beside i18n.sh); text with a character the layout has no key for isn't typed at all
+# (it's in the clipboard). Fails (1) when nothing was typed.
+type_text() {
+    local out rc=0 keys
+    out=$(python3 "${FRAME_TWEAKS_PYLIB:-$HOME/.local/share/frame-tweaks/i18n}/xkb.py" ydotool "$1" 2>>"$LOG") || rc=$?
+    case $rc in
+        3) ydotool type --key-delay 2 -- "$1" 2>>"$LOG" || log "typing failed (is ydotoold running?)" ;;
+        0) read -ra keys <<<"$out"         # (CODE:1 / CODE:0, a key down / up, with Shift or AltGr around)
+           # 11 ms between key events: about ydotool type's pace (20 ms held, 2 between keys)
+           ydotool key --key-delay 11 "${keys[@]}" 2>>"$LOG" || log "typing failed (is ydotoold running?)" ;;
+        2) log "not typed: this keyboard layout has no key for $out"
+           notify "$(t 'Not typed: copied to the clipboard')" \
+               "$(t 'Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V).' "$out")"
+           return 1 ;;
+        *) log "not typed: this keyboard layout couldn't be read"
+           notify "$(t 'Not typed: copied to the clipboard')" "$(t 'Paste the text instead (Ctrl+V).')"
+           return 1 ;;
+    esac
+}
+
 if [ "${1:-}" = --status ]; then
     if alive "$PID"; then echo recording; elif alive "$BUSY"; then echo transcribing; else echo idle; fi
     exit 0
@@ -91,7 +113,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     log "text: $text"
     printf '%s' "$text" | setsid wl-copy 2>>"$LOG" || log "wl-copy failed (WAYLAND_DISPLAY=$WAYLAND_DISPLAY)"
     if [ -z "${DICTATE_NOTYPE:-}" ]; then
-        ydotool type --key-delay 2 -- "$text" 2>>"$LOG" || log "typing failed (is ydotoold running?)"
+        type_text "$text" || return 0          # (it said so)
     fi
     notify "$(t 'Copied to clipboard')" "$text"
 }

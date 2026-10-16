@@ -217,8 +217,12 @@ def listen():
                 time.sleep(3)
                 continue
             ws = Ws(url, timeout=None)
+            # Runtime.enable first: the page gets the bindings again after a reload only while the
+            # Runtime domain is on (without it the strips came back but didn't scroll, and the gear
+            # said to reinstall). (It also sends the page's console messages: read and dropped below.)
+            ws.send({"id": 1, "method": "Runtime.enable"})
             for i, name in enumerate(BINDINGS):
-                ws.send({"id": i + 1, "method": "Runtime.addBinding", "params": {"name": name}})
+                ws.send({"id": i + 2, "method": "Runtime.addBinding", "params": {"name": name}})
             while True:
                 m = ws.recv()
                 if m.get("method") == "Runtime.bindingCalled" and m["params"].get("name") in BINDINGS:
@@ -281,8 +285,18 @@ def requires(path):
 
 
 def dashboard_code():
-    try:                       # (no files at all, the folder gone or moved, is None too)
-        return "".join(f.read_text(errors="replace") for f in DASHBOARD.glob("*.js")) or None
+    """The code of the dashboard page the patches go into: the scripts systemui.html loads (not
+    every bundle in the folder, some of which other pages load: a marker found only there isn't in
+    the page). None without it (no files at all, the folder gone or moved)."""
+    try:
+        page = (DASHBOARD / "systemui.html").read_text(errors="replace")
+        root = DASHBOARD.resolve()
+        files = []
+        for src in re.findall(r"""<script\b[^>]*?\bsrc\s*=\s*["']([^"'?#]+)""", page, re.I):
+            f = (DASHBOARD / src).resolve()
+            if "://" not in src and root in f.parents and f.is_file():
+                files.append(f)
+        return "".join(f.read_text(errors="replace") for f in files) or None
     except OSError:
         return None
 

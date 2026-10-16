@@ -211,6 +211,28 @@ class Keyboard(unittest.TestCase):
             self.assertEqual(i18n.keyboard_language(), "es_419")
             self.assertEqual(i18n.wanted_languages(), ["es_419", "es", "en_US", "en"])
 
+    def test_kde_keyboard_as_kwin_reads_it(self):
+        """The layout and its variant (lib/xkb.py types on them), KWin's model default and the
+        options only with ResetOldOptions; the active one of several, as KDE says (qdbus6)."""
+        def keyboard(text, active="1"):
+            (self.d / "kxkbrc").write_text(text)
+            answer = subprocess.CompletedProcess([], 0, stdout=active + "\n")
+            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(self.d)}), \
+                    mock.patch.object(i18n.subprocess, "run", return_value=answer):
+                return i18n.kde_keyboard()
+        self.assertEqual(keyboard("[Layout]\nLayoutList=fr\nVariantList=oss\nUse=true\n"),
+                         {"layout": "fr", "variant": "oss", "model": "pc104", "options": ""})
+        self.assertEqual(keyboard("[Layout]\nLayoutList=us,de\nVariantList=,nodeadkeys\nModel=pc105\n"
+                                  "Options=lv3:ralt_switch\nResetOldOptions=true\n"),
+                         {"layout": "de", "variant": "nodeadkeys", "model": "pc105", "options": "lv3:ralt_switch"})
+        self.assertEqual(keyboard("[Layout]\nLayoutList=us,de(nodeadkeys)\nOptions=caps:none\n")["variant"],
+                         "nodeadkeys")                         # (older KDE: the variant in brackets)
+        self.assertEqual(keyboard("[Layout]\nLayoutList=us,de\n", active="nonsense")["layout"], "us")
+        self.assertIsNone(keyboard("[Layout]\nUse=true\n"))
+        (self.d / "kxkbrc").unlink()
+        with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(self.d)}):
+            self.assertIsNone(i18n.kde_keyboard())
+
     def test_off(self):
         self.steam(19)
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_KEYBOARD": "0"}, clear=True):
