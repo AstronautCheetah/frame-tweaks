@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.9 (2026-10-16)
 
 ### Added
 - **Tweaks are offered only where they're needed:** a tweak's optional `needed.sh` checks what
