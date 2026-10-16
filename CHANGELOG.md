@@ -32,6 +32,11 @@
   pausing the charging, not the charger. It also says the battery drains slowly while paused.
 
 ### For contributors
+- **Research notes:** [docs/research/battery-charge-limit.md](docs/research/battery-charge-limit.md)
+  records the measurements on a Frame and the studies behind Battery charge limit's decisions
+  (the pause as the only working control, the 1% swing, the 74 to 78% limits), and when to look
+  again; `sudo bash dev/charge-hold-test.sh` repeats the charger test after a SteamOS update.
+  The design notes link it, and now cover `needed.sh` too.
 - **The manifest tests no longer overwrite your hidden tweaks:** they wrote their own hidden list
   over the real one (`~/.config/frame-tweaks/installer/hidden`) each time they ran.
 - **`dev/test-tweaks.sh` passes on a Frame in use:** what programs already running write to /tmp

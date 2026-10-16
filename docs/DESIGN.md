@@ -188,6 +188,13 @@ uninstall. Then a tweak can keep what other tweaks left in its care; for example
   installed tweak, and so does every update.
 - **`update-check.sh`** prints the installed and latest upstream versions; the window offers an
   update when the second is newer.
+- **`needed.sh`** says whether this Frame needs the tweak: exit 0, or exit 1 with one line
+  saying why not (SteamOS now does it itself, say). It checks what the Frame has, a package's
+  version or a file, not the SteamOS version, which the beta and stable branches number
+  differently. `lib/sft.py` (`not_needed`) runs each once per process; one that isn't needed
+  and isn't installed is hidden like `hidden_by_default`, its box disabled, and
+  `./install.sh install` skips it. An installed one stays listed, updates reinstall it, and its
+  `status.sh` should say it can go.
 
 ### Holds
 
@@ -411,6 +418,15 @@ What isn't tested automatically:
   `status.sh` is wrong is updated or skipped wrongly.
 - **Not done yet** (from [roadmap.md](roadmap.md)): rate-limit messages for update hints.
 
+## Research notes
+
+Some decisions rest on measurements on a Frame and on published research. Those are recorded in
+[`docs/research/`](research/), with what was measured, what was read, and when to look again:
+
+- [Battery charge limit](research/battery-charge-limit.md): why the charger's pause switch is
+  the only control that works, why the battery still drains a little while paused, and why
+  charging resumes 1% below the limit and limits go down to 74% (micro-cycling studies).
+
 ## Considered and rejected
 
 - **Installing into the system** (`steamos-readonly disable` and pacman). SteamOS updates wipe
@@ -428,6 +444,10 @@ What isn't tested automatically:
   *Not adopting*).
 - **A testing channel of pull-request builds** (as Decky has): only tagged releases reach users;
   the beta channel takes tagged pre-releases (roadmap, *Not adopting*).
+- **Holding the battery still with the charger's current setting** (Battery charge limit):
+  `constant_charge_current` and `charging_enable` are accepted but ignored on SteamOS 0.5.6,
+  and the charging mode they don't apply in (QPH2) belongs to Valve's charger service
+  ([research](research/battery-charge-limit.md)).
 - **PyYAML for manifests.** SteamOS's Python may not have it; `lib/manifest.py` reads a strict
   subset with no dependency, and the tests compare it with PyYAML.
 - **Following `main` in `get.sh` and `update`.** Both install release tags since 0.3.0
