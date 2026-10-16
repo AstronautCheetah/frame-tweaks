@@ -1,5 +1,6 @@
 """get.sh, the bootstrap: it installs the newest release tag of the channel (stable, or beta with
-pre-releases ranked below their release), says so when there is no release, and on an existing
+pre-releases ranked below their release; given, or kept from before), says so when there is no
+release, runs install.sh by its full path (FRAME_TWEAKS_DIR relative too), and on an existing
 checkout runs ./install.sh update (signature check and all), stopping, without opening the old
 version, when that fails. Against a stand-in repository whose install.sh only logs how it was run
 (and fails "update" when FAIL_UPDATE is set)."""
@@ -26,8 +27,8 @@ class GetSh(unittest.TestCase):
         (self.tmp / "home").mkdir()
         self.src = self.tmp / "src"
         self.git(self.tmp, "init", "-q", str(self.src))
-        (self.src / "install.sh").write_text('#!/bin/bash\necho "install.sh $*" >> "$LOG"\n'
-                                             '[ "${1:-}" = update ] && [ -n "${FAIL_UPDATE:-}" ] && exit 1; exit 0\n')
+        (self.src / "install.sh").write_text('#!/bin/bash\necho "install.sh $*" >> "$LOG"\necho "$0" >> "$LOG.run-as"\n'
+                                             '[ "${1:-}" = update ] && [ -n "${FAIL_UPDATE:-}" ] && exit "$FAIL_UPDATE"; exit 0\n')
         (self.src / "install.sh").chmod(0o755)
         self.dest = self.tmp / "frame-tweaks"
 
@@ -76,6 +77,31 @@ class GetSh(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("stable or beta", r.stderr)
 
+    def test_a_channel_kept_from_before_counts_for_a_new_install(self):
+        """Installed again (its settings kept): ~/.config/frame-tweaks/channel says beta, as updates
+        read it, unless FRAME_TWEAKS_CHANNEL says otherwise."""
+        self.release("v0.10.0", "v0.11.0-rc.1")
+        channel = self.tmp / "home/.config/frame-tweaks/channel"
+        channel.parent.mkdir(parents=True)
+        channel.write_text("beta\n")
+        r = self.get()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.at(), "v0.11.0-rc.1")
+        shutil.rmtree(self.dest)
+        self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="stable").returncode, 0)
+        self.assertEqual(self.at(), "v0.10.0")
+
+    def test_a_relative_folder(self):
+        """FRAME_TWEAKS_DIR=frame-tweaks, relative: install.sh is run by its full path (by a
+        relative one with a folder in it, it couldn't find itself)."""
+        self.release("v0.10.0")
+        r = subprocess.run(["bash", str(ROOT / "get.sh")], cwd=self.tmp, capture_output=True, text=True, timeout=60,
+                           env={**self.env, "FRAME_TWEAKS_REPO": f"file://{self.src}", "FRAME_TWEAKS_DIR": "frame-tweaks"})
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.at(), "v0.10.0")
+        self.assertEqual(self.ran(), ["install.sh menu", "install.sh "])
+        self.assertEqual(Path(f"{self.log}.run-as").read_text().split(), [str(self.dest / "install.sh")] * 2)
+
     def test_beta_takes_a_pre_release_but_not_over_its_release(self):
         self.release("v0.10.0", "v0.11.0-rc.1")
         self.assertEqual(self.get(FRAME_TWEAKS_CHANNEL="beta").returncode, 0)
@@ -112,6 +138,19 @@ class GetSh(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0, r.stdout)
         self.assertEqual(self.at(), "v0.9.0")
         self.assertEqual(self.ran(), ["install.sh update"])
+
+
+    def test_an_update_where_a_tweak_failed_still_opens_the_window(self):
+        """update's exit 3: Frame Tweaks updated, but a tweak didn't install again. The window
+        shows which, so it's opened, unlike an update that couldn't happen."""
+        self.release("v0.9.0")
+        self.assertEqual(self.get().returncode, 0)
+        self.log.unlink()
+        self.release("v0.10.0")
+        r = self.get(FAIL_UPDATE="3")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Some tweaks didn't update", r.stdout)
+        self.assertEqual(self.ran(), ["install.sh update", "install.sh menu", "install.sh "])
 
 
 if __name__ == "__main__":

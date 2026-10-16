@@ -1,7 +1,8 @@
 """Shell tweaks with no other tests, run in a throwaway home with stand-ins for system tools:
-Firefox's user.js block (install, the old marker, uninstall resetting prefs.js) and NordVPN's
-status line; Shared clipboard's status with and without desktop mode; Mouse cursor fix not
-needed from gamescope 3.16.30; pinned downloads falling back to Frame Tweaks' copy."""
+Firefox's user.js block (install, the old marker, uninstall resetting prefs.js, status without a
+default profile) and NordVPN's status line; Shared clipboard's status with and without desktop
+mode, and from an older build; Mouse cursor fix not needed from gamescope 3.16.30; pinned
+downloads falling back to Frame Tweaks' copy."""
 import sys
 import hashlib
 import os
@@ -64,6 +65,13 @@ class Firefox(Home):
         self.assertNotIn("resistFingerprinting", prefs)
         self.assertIn("browser.startup.page", prefs)              # not ours: kept
         self.assertTrue((self.profile / "prefs.js.frame-tweaks-bak").exists())
+
+    def test_status_without_a_default_profile(self):
+        """installs.ini names no default profile: not installed, through status_missing (the check
+        stopped at a failing command, which now counts as "status check failed")."""
+        (self.profile.parent / "installs.ini").write_text("[X]\n")
+        r = self.run_script("firefox/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (1, "missing  no Firefox (Flathub) profile"))
 
     def test_uninstall_leaves_prefs_js_while_firefox_runs(self):
         self.run_script("firefox/install.sh")
@@ -162,6 +170,21 @@ class ClipboardStatus(Home):
 
     def test_not_running_with_desktop_mode_is_a_warning(self):
         self.assertEqual(self.status(False, True), (2, "warning  not running, though desktop mode is (Restart starts it)"))
+
+    def test_running_says_its_version(self):
+        v = self.home / ".local/share/frame-tweaks/clipboard-sync/VERSION"
+        v.parent.mkdir(parents=True)
+        v.write_text("0.3.0\n")
+        self.assertEqual(self.status(True, True), (0, "ok       clipboard-sync 0.3.0 running"))
+
+    def test_an_older_build_running_says_what_it_lacks(self):
+        """Built by an older Frame Tweaks (no VERSION file, as one still running from then): the
+        check stopped where it read that file, without a word, and the tweak read as not installed."""
+        self.assertEqual(self.status(True, True), (2, "warning  older build: replaces copied images with text (Reinstall fixes it)"))
+        patched = self.home / ".local/share/frame-tweaks/src/clipboard-sync/.sft-patched"
+        patched.parent.mkdir(parents=True)
+        patched.write_text("keep-images\nsync-sessions\n")
+        self.assertEqual(self.status(True, True), (0, "ok       clipboard-sync running"))
 
 
 class PinnedDownload(Home):

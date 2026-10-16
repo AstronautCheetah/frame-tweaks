@@ -171,6 +171,26 @@ class Status(unittest.TestCase):
             with mock.patch.object(gui.subprocess, "run", return_value=done):
                 self.assertEqual(gui.status("adb-scrcpy"), want, out)
 
+    def test_a_check_that_fails_isnt_not_installed(self):
+        """Exit 1 without "missing" or "restart" (a command in status.sh failed): installed by Frame
+        Tweaks (its record), it's "status check failed", with what the check said last; without a
+        record, not installed, as before. Another exit code (3 was RESTART, 4 UNLOAD): the same,
+        record or not. (./install.sh status_of has the same rule.)"""
+        for code, out, err, record, want in (
+                (1, "", "cat: x: No such file\n\n", True, (2, "status check failed: cat: x: No such file")),
+                (1, "", "", True, (2, "status check failed")),
+                (1, "", "boom\n", False, (1, "")),
+                (1, "missing  No\n", "", True, (1, "No")),
+                (1, "restart  Unload it\n", "", True, (gui.UNLOAD, "Unload it")),
+                (127, "", "\x1b[1;33mwarning:\x1b[0m x\nphone: command not found\n", False,
+                 (2, "status check failed: phone: command not found")),
+                (3, "", "", False, (2, "status check failed")),
+                (4, "", "", False, (2, "status check failed"))):
+            done = subprocess.CompletedProcess([], code, stdout=out, stderr=err)
+            with mock.patch.object(gui.subprocess, "run", return_value=done), \
+                    mock.patch.object(gui.sft, "installed_record", return_value=record):
+                self.assertEqual(gui.status("adb-scrcpy"), want, (code, out, err, record))
+
     def test_update_check_parsing(self):
         with tempfile.TemporaryDirectory() as d, \
                 mock.patch.object(gui, "component", return_value={"dir": Path(d) / "x"}):

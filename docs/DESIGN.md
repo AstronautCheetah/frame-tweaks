@@ -143,7 +143,12 @@ after asking) in place of the row's Run or Settings button.
 
 Status is also how Frame Tweaks knows what is installed. `uninstall all`, `update` and
 `check-system` all ask each tweak's `status.sh`, and count anything that doesn't exit 1 as
-installed. The version records in `installed/` are used only for migrations.
+installed. Exit 1 means "not installed" only with `status_missing`'s or `status_unload`'s
+line: a `status.sh` that stops at a failing command (`set -e`) says neither, and for a tweak
+with a version record in `installed/` that's "status check failed" (2), as is an exit code other
+than 0, 1 or 2. ("Not installed" had updates skip such a tweak and `forget-settings` delete its
+settings.) Otherwise the version records are used for migrations and for finishing an update
+that stopped partway (below).
 
 ### Uninstall
 
@@ -193,8 +198,8 @@ uninstall. Then a tweak can keep what other tweaks left in its care; for example
   version or a file, not the SteamOS version, which the beta and stable branches number
   differently. `lib/sft.py` (`not_needed`) runs each once per process; one that isn't needed
   and isn't installed is hidden like `hidden_by_default`, its box disabled, and
-  `./install.sh install` skips it. An installed one stays listed, updates reinstall it, and its
-  `status.sh` should say it can go.
+  `./install.sh install` skips it. An installed one stays listed, updates and reinstalls install
+  it again, and its `status.sh` should say it can go.
 
 ### Holds
 
@@ -215,14 +220,15 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
   script does the rest: migrations, a reinstall of everything installed (holds respected) and
   `check-system`. In a developer checkout on a branch it uses `git pull --ff-only` instead.
 - **Nothing to do.** When the checkout didn't move, the second stage is skipped, unless a tweak
-  it reinstalls (not held, not linked) was last installed by another version
+  it reinstalls (not held, not linked, still installed) was last installed by another version
   (`$STATE/installed/<id>`, written only when its installer succeeds): an update whose second
   stage failed or was cut short is finished by running it again. `--reinstall` runs it anyway.
 - **Channels.** Stable takes only `vX.Y.Z`. Beta (`beta` in `~/.config/frame-tweaks/channel`,
   or `FRAME_TWEAKS_CHANNEL=beta`) also takes pre-releases, sorted below the release they lead
   up to: `-` is replaced by `~` before `sort -V`. `get.sh`, `lib/common.sh` `newest_tag` and
   the window's update hint each implement this rule. `get.sh` writes a channel it's given into
-  that file (`./install.sh channel` and ⚙ Preferences do too). An update never moves to an
+  that file (`./install.sh channel` and ⚙ Preferences do too), and a new install reads it there
+  when none is given. An update never moves to an
   older release unless asked (`--to vX.Y.Z`, or `--to stable` for the newest stable one), so a
   tester back on stable stays on the test release until a newer stable one is out.
 - **Migrations are keyed by `VERSION`.** `installed/<id>` holds the `VERSION` that last
@@ -233,7 +239,9 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
 - **Releases** are made by the Release workflow
   ([`release.yml`](../.github/workflows/release.yml)). It turns CHANGELOG.md's
   `## Unreleased` section into the release notes, bumps `VERSION` and the AppStream metadata,
-  commits, tags and drafts a GitHub release.
+  commits, tags and drafts a GitHub release. A pre-release takes its notes from the section and
+  leaves it, so the release after it dates it with everything since the last release. The commit
+  and the tag are pushed together or not at all (`--atomic`).
 
 
 ## State on disk
@@ -414,8 +422,9 @@ What isn't tested automatically:
   Python packages are pinned by version only, and may fall back to the newest versions.
 - **Untrusting a pack doesn't uninstall its tweaks**, and `install.sh` only knows tweaks from
   packs in use. To remove one, trust the pack again first.
-- **Status is per tweak.** "Installed" means `status.sh` doesn't exit 1. A tweak whose
-  `status.sh` is wrong is updated or skipped wrongly.
+- **Status is per tweak.** "Installed" means `status.sh` doesn't exit 1 (or does without saying
+  "missing" or "restart", for a tweak with a version record). A tweak whose `status.sh` is wrong
+  is updated or skipped wrongly.
 - **Not done yet** (from [roadmap.md](roadmap.md)): rate-limit messages for update hints.
 
 ## Research notes

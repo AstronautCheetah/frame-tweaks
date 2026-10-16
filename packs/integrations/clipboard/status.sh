@@ -8,9 +8,9 @@ if ! pgrep -u "$(id -u)" -x clipboard-sync >/dev/null; then
 fi
 n=$(pgrep -u "$(id -u)" -x clipboard-sync | wc -l)
 [ "$n" -le 2 ] || status_warn "$(t '%s copies running (Restart fixes it)' "$n")"   # (each forks one helper)
-ver=$(cat "$HOME/.local/share/frame-tweaks/clipboard-sync/VERSION" 2>/dev/null)
+ver=$(cat "$HOME/.local/share/frame-tweaks/clipboard-sync/VERSION" 2>/dev/null || true)   # (|| true: with no such file, set -e stopped the check here)
 if [ -z "$ver" ]; then              # (built on the Frame by an older version: its changes, if it has them)
-    patched=$(cat "$HOME/.local/share/frame-tweaks/src/clipboard-sync/.sft-patched" 2>/dev/null)
+    patched=$(cat "$HOME/.local/share/frame-tweaks/src/clipboard-sync/.sft-patched" 2>/dev/null || true)
     [[ $patched == *keep-images* ]] || status_warn "$(t 'older build: replaces copied images with text (Reinstall fixes it)')"
     [[ $patched == *sync-sessions* ]] ||
         status_warn "$(t 'older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)')"

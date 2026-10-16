@@ -517,6 +517,16 @@ msgstr "no instalado"
 msgid "status check didn't finish (took over a minute)"
 msgstr "la revisión del estado no terminó (tardó más de un minuto)"
 
+# needs review
+#: gui/frame-tweaks-gui.py install.sh
+msgid "status check failed"
+msgstr "la revisión del estado falló"
+
+# needs review
+#: gui/frame-tweaks-gui.py install.sh
+msgid "status check failed: %s"
+msgstr "la revisión del estado falló: %s"
+
 #: gui/frame-tweaks-gui.py
 msgid "the pack {pack}, not part of Frame Tweaks"
 msgstr "el paquete {pack}, no forma parte de Frame Tweaks"
