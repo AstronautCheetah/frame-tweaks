@@ -293,8 +293,23 @@ test: {{offline: true}}
 
 class TestTweaks(Temp):
     """dev/test-tweaks.sh notices a write into the checkout (its copy in the work folder) and files
-    left in /tmp that kept an old date (as files unpacked from an archive do), but not a file a
-    program already running writes meanwhile (a live adb server's log)."""
+    left in /tmp that kept an old date (as files unpacked from an archive do), but not what a
+    program already running writes meanwhile: a file it has open (a live adb server's log), or,
+    where the scripts get a /tmp of their own, new files (a live Narrate's)."""
+
+    def harness(self, repo, *tweaks, path=None):
+        path = path or os.environ["PATH"]
+        if not shutil.which("bsdtar"):          # (the harness asks for it; these tweaks unpack nothing)
+            path = f"{stubs(self.d / 'bin', bsdtar='exit 1')}:{path}"
+        return subprocess.run(["bash", str(repo / "dev/test-tweaks.sh"), *tweaks],
+                              env={**os.environ, "PATH": path}, capture_output=True, text=True, timeout=300)
+
+    def writing(self, script):
+        """A program writing into /tmp from before the run to after it."""
+        writer = subprocess.Popen(["bash", "-c", script])
+        self.addCleanup(writer.wait)
+        self.addCleanup(writer.kill)
+        time.sleep(0.5)                           # (started, and written, before the run)
 
     def tweak(self, repo, tid, install):
         d = repo / "packs/core" / tid
@@ -323,22 +338,31 @@ class TestTweaks(Temp):
         self.assertRegex(out[1], rf"(?m)^    /tmp/ft-leak-{token}\.\w+/file$")
 
     def test_a_file_a_running_program_writes_isnt_the_tweaks(self):
+        """(Without a /tmp of their own: unshare refuses the namespace mapped as root.)"""
         repo = copy_repo(self.d / "repo")
         log = Path(f"/tmp/ft-held-{uuid.uuid4().hex[:12]}.log")
         self.addCleanup(log.unlink, missing_ok=True)
-        writer = subprocess.Popen(["bash", "-c", f'exec 3>>"{log}"; while :; do echo x >&3; sleep 0.2; done'])
-        self.addCleanup(writer.wait)
-        self.addCleanup(writer.kill)
-        for _ in range(100):                      # (open, and written, before the run starts)
-            if log.exists() and log.stat().st_size:
-                break
-            time.sleep(0.05)
+        self.writing(f'exec 3>>"{log}"; while :; do echo x >&3; sleep 0.2; done')
         self.tweak(repo, "quiet", ":")
+        real = shutil.which("unshare")
         path = os.environ["PATH"]
-        if not shutil.which("bsdtar"):
-            path = f"{stubs(self.d / 'bin', bsdtar='exit 1')}:{path}"
-        r = subprocess.run(["bash", str(repo / "dev/test-tweaks.sh"), "quiet"],
-                           env={**os.environ, "PATH": path}, capture_output=True, text=True, timeout=300)
+        if real:
+            path = f"{stubs(self.d / 'norootns', unshare=f'[ "$1" = -rnm ] && exit 1; exec {real} "$@"')}:{path}"
+        r = self.harness(repo, "quiet", path=path)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("ok   quiet", r.stdout)
+
+    @unittest.skipUnless(shutil.which("unshare") and subprocess.run(
+        ["unshare", "-rnm", "sh", "-c", "mount -t tmpfs tmpfs /tmp"], capture_output=True).returncode == 0,
+        "no namespace here that can have a /tmp of its own")
+    def test_new_files_a_running_program_writes_arent_the_tweaks(self):
+        repo = copy_repo(self.d / "repo")
+        folder = Path(f"/tmp/ft-narrate-{uuid.uuid4().hex[:12]}")
+        folder.mkdir()
+        self.addCleanup(shutil.rmtree, folder, ignore_errors=True)
+        self.writing(f'n=0; while :; do : > "{folder}/chunk-$((n++))"; sleep 0.1; done')
+        self.tweak(repo, "quiet", ":")
+        r = self.harness(repo, "quiet")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("ok   quiet", r.stdout)
 
