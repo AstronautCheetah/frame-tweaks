@@ -210,6 +210,11 @@
   updates), so a name or icon you'd given it went back. They're kept the same way now. If an
   update changes an entry's command and you'd changed it too, the update's is used: yours may
   not run any more.
+- **Recline with Recline-VR 1.3:** Recline-VR 1.3 (out 2026-10-16) moved its programs into
+  `bin/linuxarm64/` and removed the file Frame Tweaks checked, so after an install or ↻ Recline
+  showed as not installed. Either place counts now, and its page gives the new `reclinectl` path.
+- **Full Keyboard's page says when it shows:** only while the SteamVR dashboard is open,
+  whichever menu started it (it said "for the dashboard and desktop"), and how to move it.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a

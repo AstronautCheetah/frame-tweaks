@@ -4,11 +4,12 @@ emoji: ⌨️
 category: Convenience
 tier: core
 summary: >-
-  TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from its newest release
+  TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest
+  release
 what: >-
   TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with
-  arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the
-  headset.
+  arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste. It shows while the SteamVR dashboard is
+  open, and types into the app you're using, desktop mode's included.
 why: >-
   Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys.
   Linked: it installs from its newest release with its own installer, the way its README
@@ -40,7 +41,7 @@ undo: >-
 # Full Keyboard
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset.
+TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste. It shows while the SteamVR dashboard is open, and types into the app you're using, desktop mode's included.
 
 **Why on a Steam Frame:** Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes.
 <!-- /generated:intro -->
@@ -67,6 +68,12 @@ With the VR session running, open **Full Keyboard** from the dashboard's app lau
 text field, then type with the controller laser. Opening it again re-centres it. It's a separate
 app: the system keyboard button still opens Steam's keyboard. The full guide is TaiKeid's
 [README](https://github.com/TaiKeid/steam-frame-full-keyboard#readme).
+
+- **It shows only while the SteamVR dashboard is open**, whichever menu started it: closing the
+  dashboard hides it. To type into desktop mode, open the dashboard over it.
+- **To move it,** point at it and squeeze grip, with either hand; while you hold grip, the
+  thumbstick moves it nearer or farther. After opening it, let go of grip once first. It reads
+  the grip of the Frame's own controllers only.
 
 Not sure which keyboard to use? See the [keyboard guide](../../core/arrowpad/README.md#which-keyboard-when).
 

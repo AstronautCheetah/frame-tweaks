@@ -25,7 +25,7 @@ icon: {theme: go-down-skip}
 link:
   install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR pull --ff-only; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR; fi && ~/Recline-VR/install.sh
   uninstall: ~/.local/share/recline-vr/uninstall.sh && rm -rf ~/.local/share/recline-vr ~/Recline-VR
-  installed: ~/.local/share/recline-vr/recline_overlay
+  installed: [~/.local/share/recline-vr/bin/linuxarm64/recline_overlay, ~/.local/share/recline-vr/recline_overlay]
   restart: steamvr
   readme: https://github.com/new-waifu/Recline-VR#readme
 changes: >-
@@ -74,7 +74,8 @@ installs, and doesn't pin, check or change what they install.
 - **It undoes itself** when you sit up, get up, move away or take the headset off, because
   SteamVR's boundary is only right without it. The recline is never kept across SteamVR
   restarts.
-- **Command line:** `~/.local/share/recline-vr/reclinectl status` (also `recenter`, `reset`).
+- **Command line:** `~/.local/share/recline-vr/bin/linuxarm64/reclinectl status` (also `recenter`,
+  `reset`; before Recline-VR 1.3 it was `~/.local/share/recline-vr/reclinectl`).
 
 Recline-VR's [README](https://github.com/new-waifu/Recline-VR#readme) describes every panel option.
 
