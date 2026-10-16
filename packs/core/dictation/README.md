@@ -112,6 +112,8 @@ to use it:
 - **Taps are forgiving.** A second press within 0.7 s is ignored (a laser double-click). A
   press while a transcription is running is ignored too, with a "Still transcribing…" notice.
   Each recording has its own file, so a new one never overwrites one still being transcribed.
+  If a recording stops early by itself (the microphone gone, say), your next press, or the
+  auto-stop, still transcribes what it caught.
 - **No phantom text.** Whisper tends to invent phrases for silence ("Thanks for watching",
   "Subs by …"). A recording whose loudest moment stays under −40 dB counts as "no speech", and
   those stock phrases are dropped when they're the whole result.

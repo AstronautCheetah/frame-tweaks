@@ -82,6 +82,49 @@ class Firefox(Home):
         self.assertIn("Firefox is running", r.stderr + r.stdout)
         self.assertIn("resistFingerprinting", (self.profile / "prefs.js").read_text())
 
+    def test_uninstall_puts_back_what_you_had_set_yourself(self):
+        """Settings of ours you had set yourself before installing (HTTPS-only mode, strict
+        tracking protection, an English-pages choice of your own) are put back as they were,
+        not reset to Firefox's defaults; an update (install run again, with Firefox's copies of
+        ours in prefs.js by then) doesn't take ours for yours."""
+        mine = ['user_pref("browser.contentblocking.category", "strict");',
+                'user_pref("dom.security.https_only_mode", true);', 'user_pref("privacy.spoof_english", 1);']
+        prefs = self.profile / "prefs.js"
+        prefs.write_text("\n".join(['user_pref("browser.startup.page", 3);', *mine]) + "\n")
+        self.assertEqual(self.run_script("firefox/install.sh").returncode, 0)
+        # Firefox ran: it wrote ours into prefs.js (its English-pages value over yours)
+        prefs.write_text('user_pref("browser.contentblocking.category", "strict");\n'
+                         'user_pref("browser.startup.page", 3);\n'
+                         'user_pref("dom.security.https_only_mode", true);\n'
+                         'user_pref("privacy.resistFingerprinting", true);\n'
+                         'user_pref("privacy.spoof_english", 2);\n')
+        self.assertEqual(self.run_script("firefox/install.sh").returncode, 0)     # (an update)
+        r = self.run_script("firefox/uninstall.sh")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        after = prefs.read_text().splitlines()
+        self.assertNotIn('user_pref("privacy.resistFingerprinting", true);', after)
+        self.assertNotIn('user_pref("privacy.spoof_english", 2);', after)
+        for line in ['user_pref("browser.startup.page", 3);', *mine]:
+            self.assertEqual(after.count(line), 1, after)
+        # Installed again later: what's there then is recorded afresh, and put back the same way
+        prefs.write_text('user_pref("dom.security.https_only_mode", true);\n')
+        self.run_script("firefox/install.sh")
+        prefs.write_text('user_pref("dom.security.https_only_mode", true);\n'
+                         'user_pref("privacy.resistFingerprinting", true);\n')
+        self.run_script("firefox/uninstall.sh")
+        self.assertEqual(prefs.read_text(), 'user_pref("dom.security.https_only_mode", true);\n')
+
+    def test_installed_before_its_record_existed_resets_them_all(self):
+        """Installed by a version that didn't record yours: an update finds Firefox's copies of
+        ours in prefs.js and can't tell them from yours, so removing resets them all, as before."""
+        (self.profile / "user.js").write_text("// >>> frame-tweaks\n// <<< frame-tweaks\n")
+        prefs = self.profile / "prefs.js"
+        prefs.write_text('user_pref("dom.security.https_only_mode", true);\n'
+                         'user_pref("privacy.resistFingerprinting", true);\n')
+        self.assertEqual(self.run_script("firefox/install.sh").returncode, 0)     # (the update)
+        self.assertEqual(self.run_script("firefox/uninstall.sh").returncode, 0)
+        self.assertEqual(prefs.read_text(), "")
+
 
 class NordVPNStatus(Home):
     def setUp(self):

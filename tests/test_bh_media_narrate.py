@@ -1,15 +1,20 @@
 """Screen snip's narration (frame-snip), offline: stand-ins for Piper and pw-play (nothing is
 spoken), a throwaway home. "Read it again" after the end, a new speed while paused, Previous /
-Next (playing and paused, up to the first and last part), a paste whose clipboard owner doesn't
-answer, the ⚙ view following a new language, and an open VR panel (with a stand-in openvr)
-reading the next snip at the speed set under Narrate."""
+Next (playing and paused, up to the first and last part), a Pause as the last part ends, a
+Speech engine that fails (no sound file, or it doesn't start), a paste whose clipboard owner
+doesn't answer, the ⚙ view following a new language, and the VR panel (with a stand-in openvr):
+an open one reading the next snip at the speed set under Narrate, and closing cleanly when its
+OpenVR calls fail."""
+import io
 import json
 import os
+import signal
 import socket
 import subprocess
 import sys
 import tempfile
 import time
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -99,6 +104,14 @@ class Narration(unittest.TestCase):
             return False
         return True
 
+    @staticmethod
+    def proc_state(pid):
+        """A process's state letter (Z: ended, not yet reaped), or None once it's gone."""
+        try:
+            return Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[0]
+        except (OSError, IndexError):
+            return None
+
     def processes(self, w):
         """The narrator's QProcesses still around, once what was let go of is deleted."""
         from PyQt6.QtCore import QCoreApplication, QEvent, QProcess
@@ -182,6 +195,71 @@ class Narration(unittest.TestCase):
         self.assertFalse(w.narrator.paused)
         self.assertEqual(w.state.text(), "Reading aloud: part 1 of 3")
 
+    def test_pause_as_the_last_part_ends_still_finishes(self):
+        """Pause pressed after the last part's player ended, before Qt says so: it stayed
+        "Paused." at the end, and Stop (still offered) read it all again. Now it finishes."""
+        self.slow_player()
+        w = self.window("The only sentence, long enough to be read on its own.")
+        self.assertTrue(self.wait(lambda: self.playing()), w.state.text())
+        pid = self.playing()[-1][1]
+        os.kill(pid, signal.SIGKILL)               # it ends; no events handled meanwhile: Qt doesn't know
+        end = time.monotonic() + 5
+        while self.proc_state(pid) not in ("Z", None) and time.monotonic() < end:
+            time.sleep(0.01)
+        if self.proc_state(pid) != "Z":
+            self.skipTest("the player was reaped at once: Qt knows it ended")
+        w.pause_or_resume()                        # Pause
+        self.assertTrue(self.wait(lambda: w.state.text() == "Finished."), w.state.text())
+        self.assertFalse(w.narrator.paused)
+        self.assertEqual((w.toggle.toolTip(), w.pause_button.toolTip()), ("Read it again", "Pause"))
+        before = len(self.played())
+        w.stop_or_again()                          # Read it again
+        self.assertTrue(self.wait(lambda: len(self.played()) > before), w.state.text())
+
+    def test_a_speech_engine_that_makes_no_sound_is_tried_twice_then_stops(self):
+        """Piper ends without its sound file (with an error, or without one): it was started
+        again and again (143 times in 3 s), saying nothing. Now the part is tried once more, then
+        it stops there and says why; Read it again tries again."""
+        for code in (1, 0):
+            with self.subTest(exit=code):
+                self.log.write_text("")
+                stub_at(self.tmp / "stubs/piper", f'echo synth >> {self.log}; exit {code}')
+                w = self.window(TWO)
+                self.assertTrue(self.wait(lambda: w.narrator.stopped, 3), self.log.read_text())
+                self.wait(lambda: False, 0.3)
+                self.assertEqual(self.log.read_text().count("synth"), 2)
+                self.assertEqual(w.state.text(), "The Speech engine failed to read part 1.")
+                self.assertEqual(w.toggle.toolTip(), "Read it again")
+                self.assertFalse(w.pause_button.isEnabled())
+        stub_at(self.tmp / "stubs/piper", 'while [ $# -gt 0 ]; do [ "$1" = --output_file ] && out=$2; shift; done\n'
+                                         '/bin/cat > "$out"')
+        w.stop_or_again()                          # Read it again (Piper works again)
+        self.assertTrue(self.wait(lambda: self.played()), w.state.text())
+        self.assertEqual(w.toggle.toolTip(), "Stop")
+
+    def test_a_part_that_fails_stops_it_when_its_turn_comes(self):
+        """The second part fails while the first plays: the first is read to its end, then it
+        stops at the second, saying so."""
+        stub_at(self.tmp / "stubs/piper", 'while [ $# -gt 0 ]; do [ "$1" = --output_file ] && out=$2; shift; done\n'
+                                         f'text=$(/bin/cat); echo "synth $text" >> {self.log}\n'
+                                         'case "$text" in *second*) exit 1 ;; esac; printf %s "$text" > "$out"')
+        w = self.window(THREE)
+        self.assertTrue(self.wait(lambda: w.narrator.stopped, 5), w.state.text())
+        self.assertEqual(w.state.text(), "The Speech engine failed to read part 2.")
+        self.assertEqual(len(self.played()), 1)                          # the first, to its end
+        self.assertEqual(sum("second" in l for l in self.log.read_text().splitlines()), 2)
+
+    def test_a_speech_engine_that_doesnt_start_says_so(self):
+        """Piper missing (it can't start, so it never finishes): it said "Preparing…" for ever,
+        and Read it again read nothing. Now it says so, and Read it again tries again."""
+        with mock.patch.object(fs, "PIPER", self.tmp / "gone/piper"):
+            w = self.window(TWO)
+            self.assertTrue(self.wait(lambda: w.narrator.stopped, 3), w.state.text())
+            self.assertEqual(w.state.text(), "The Speech engine didn't start: reinstall it in Frame Tweaks.")
+            self.assertIsNone(w.narrator.synth)
+        w.stop_or_again()                          # Read it again, with Piper back
+        self.assertTrue(self.wait(lambda: self.played()), w.state.text())
+
     def test_a_clipboard_that_doesnt_answer_is_no_text(self):
         w = self.window(TWO)
         with mock.patch.object(fs, "nested_wayland", lambda: "/nonexistent/wayland-0"), \
@@ -199,6 +277,51 @@ class Narration(unittest.TestCase):
             fs.retranslate_tips(view)
         shown = {w.text() for w in view.findChildren(QLabel) + view.findChildren(QPushButton)}
         self.assertLessEqual(set(de.values()), shown)
+
+    # ---- The VR panel's own overlay (NarrationOverlay), with a stand-in openvr (below) whose
+    # calls start failing, as they would with SteamVR restarting under an open panel.
+    def panel(self):
+        from PyQt6.QtCore import QTimer
+        from PyQt6.QtGui import QImage
+        vr = types.ModuleType("openvr")
+        exec(FAKE_OPENVR, vr.__dict__)
+        # An exception that leaves a Qt slot goes to sys.excepthook: kept here (by default PyQt6
+        # aborts the program on one, and the tests with it)
+        self.escaped = []
+        for p in (mock.patch.dict(sys.modules, {"openvr": vr}),
+                  mock.patch.object(sys, "excepthook", lambda *e: self.escaped.append(e[1]))):
+            p.start()
+            self.addCleanup(p.stop)
+        w = fs.NarrationWindow(QImage(20, 20, QImage.Format.Format_RGB32), TWO, 1.0, panel=True)
+        self.addCleanup(lambda: w.narrator.cleanup())
+        w.show()
+        overlay = fs.NarrationOverlay(w)
+        self.addCleanup(overlay.close)
+        self.addCleanup(lambda: [t.stop() for t in overlay.findChildren(QTimer)])
+        return w, overlay, vr._vr.VROverlay.return_value
+
+    def test_an_openvr_error_in_its_timers_closes_it_cleanly(self):
+        """An error leaving one of its timers ended the program at once (PyQt6 aborts), with the
+        narration's files left behind. Now the panel closes as Close does."""
+        def gone(*_):
+            raise RuntimeError("SteamVR is gone")
+        for call in ("pollNextOverlayEvent", "setOverlayFromFile"):     # (its events; its picture)
+            with self.subTest(call=call):
+                w, overlay, ov = self.panel()
+                getattr(ov, call).side_effect = gone
+                err = io.StringIO()
+                with mock.patch.object(sys, "stderr", err):
+                    self.wait(lambda: not w.isVisible(), 3)
+                self.assertEqual(self.escaped, [])
+                self.assertFalse(w.isVisible())
+                self.assertTrue(w.narrator.stopped)
+                self.assertFalse(w.narrator.dir.exists())
+                self.assertIn("SteamVR is gone", err.getvalue())
+                calls = len(ov.mock_calls)
+                self.wait(lambda: False, 0.3)
+                self.assertEqual(len(ov.mock_calls), calls)          # its timers stopped too
+                overlay.close()
+                self.assertFalse(overlay.tex_dir.exists())
 
 
 # A stand-in for pyopenvr: every call succeeds, and there's no dashboard and no controller.

@@ -19,8 +19,9 @@ fi
 bat=$("$BIN/charge-limit" --battery) || status_warn "$(t 'No battery found')"
 cap=$(cat "$bat/capacity")
 limit=$("$BIN/charge-limit" --limit)
-[ -e "$RUN/full-once" ] && status_ok "$(t 'Charging to 100%% once (now %s%%), then stopping at %s%% again' "$cap" "$limit")"
+# (the limit off first: Charge to 100% once may be pending, with no limit to go back to)
 [ "$limit" = off ] && status_ok "$(t 'Limit off: charges to 100%% (now %s%%)' "$cap")"
+[ -e "$RUN/full-once" ] && status_ok "$(t 'Charging to 100%% once (now %s%%), then stopping at %s%% again' "$cap" "$limit")"
 # Paused but still charging (over 100 mA into the battery): the charger didn't take the pause.
 if [ "$(cat "$SWITCH")" = 1 ] && [ -e "$RUN/paused" ]; then
     [ "$(cat "$bat/current_now" 2>/dev/null || echo 0)" -gt 100000 ] &&

@@ -127,9 +127,12 @@ if [ -f "$LAST" ] && [ $(( (now - $(cat "$LAST")) / 1000000 )) -lt 700 ]; then
 fi
 echo "$now" > "$LAST"
 
-if alive "$PID"; then
+if [ -f "$PID" ]; then
+    # Stop, and transcribe. (A recording whose pw-record ended by itself, the microphone gone say,
+    # counts as one still running: what it caught is transcribed, not left behind for a new one.)
     wav=$(cat "$CUR")
-    kill -INT "$(cat "$PID")"; rm -f "$PID"
+    if alive "$PID"; then kill -INT "$(cat "$PID")"; else log "the recording had ended by itself"; fi
+    rm -f "$PID"
     echo $$ > "$BUSY"                 # mark busy before unlocking
     flock -u 9; exec 9>&-
     sleep 0.3
@@ -143,10 +146,10 @@ else
     rec=$!
     echo "$rec" > "$PID"; echo "$wav" > "$CUR"
     log "start pid $rec"
-    # Safety net: stop a forgotten recording after MAX_SECONDS (only if pw-record still runs: on
-    # a recording that already ended, the toggle would start a new one).
+    # Safety net: stop a forgotten recording after MAX_SECONDS (if it's still this one: the toggle
+    # then stops and transcribes it, or, if pw-record ended by itself, transcribes what it caught).
     ( exec 9>&-; sleep "$MAX_SECONDS"
-      if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ] && kill -0 "$rec" 2>/dev/null; then log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST"; exec "$0"; fi
+      if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST"; exec "$0"; fi
     ) >/dev/null 2>&1 &
     sleep 0.15; cue device-added
     notify "🎙 $(t 'Listening… (run again to stop)')"

@@ -16,7 +16,7 @@ sysctl_user daemon-reload
 if [ -e "$RULE" ] || [ -e "$KEEP" ]; then
     say "$(t 'Removing its udev rule needs your sudo (admin) password.')"
     if sudo -v && sudo rm -f "$RULE" "$KEEP"; then
-        sudo chown root "$SWITCH" 2>/dev/null
+        sudo chown root "$SWITCH" 2>/dev/null || true     # (no switch: nothing to hand back)
         say "$(t 'removed %s' "$RULE")"
     else
         warn "$(t "Left its udev rule; it only lets you pause charging. Remove it with: %s" "sudo rm $RULE $KEEP")"

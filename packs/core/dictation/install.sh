@@ -26,9 +26,10 @@ if [ ! -f "$MODELS/$MODEL" ]; then
     fetch_pinned dictation "$MODELS/$MODEL.part"     # pinned revision and SHA256 (dictation/pin)
     mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
 fi
-# Models older versions downloaded; the shared one replaces them.
+# Models older versions downloaded; the shared one replaces them, unless a DICTATE_MODEL line in
+# use names one. (Not one commented out: the example's, copied into every dictate.conf, names one.)
 for old in ggml-small.en-q5_1.bin ggml-base.en-q5_1.bin; do
-    if [ -f "$MODELS/$old" ] && ! grep -qs "$old" "$HOME/.config/frame-tweaks/dictate.conf"; then
+    if [ -f "$MODELS/$old" ] && ! grep -qsE "^[[:space:]]*DICTATE_MODEL=.*$old" "$HOME/.config/frame-tweaks/dictate.conf"; then
         rm -f "$MODELS/$old" && say "$(t 'Removed old model %s (replaced by the shared %s)' "$old" "$MODEL")"
     fi
 done

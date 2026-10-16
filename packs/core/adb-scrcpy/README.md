@@ -135,12 +135,16 @@ once).
 
 1. On the phone, turn on Developer options, then open *Developer options → Wireless debugging →
    Pair device with pairing code*. The phone must be on the same Wi-Fi as the Frame.
-2. On the Frame, in a terminal, run this straight away with the address, port and code the
-   phone shows (the code stops working when that dialog closes):
+2. On the Frame, in a terminal, run this straight away with the address and port the phone
+   shows, then type the six-digit code it shows when adb asks for it (the code stops working
+   when that dialog closes):
 
    ```sh
-   adb pair <ip>:<pairing-port> <code>
+   adb pair <ip>:<pairing-port>
    ```
+
+   (Typed at adb's prompt, the code stays out of your shell's history, and off adb's command
+   line, which other programs can read.)
 
 Later, if Android Mirror can't connect because the phone forgot the Frame (or it's a new phone),
 it offers **Pair it again**: open *Pair device with pairing code* on the phone, and enter the

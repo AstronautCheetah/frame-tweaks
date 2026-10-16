@@ -190,6 +190,9 @@ first=1
 while :; do
     if [ -n "$restart" ]; then
         restart=
+        # (a setting no longer in the file, after the gear's Reset to defaults say, is back to its
+        # default: reading the file again can't unset what it doesn't say)
+        unset PHONE_MAX_SIZE PHONE_BIT_RATE PHONE_MAX_FPS PHONE_STICK_SPEED PHONE_CLIPBOARD
         # shellcheck source=/dev/null
         [ -f "$CONF" ] && . "$CONF"
         STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHONE_MAX_FPS:-60}

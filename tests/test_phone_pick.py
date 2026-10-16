@@ -1,8 +1,11 @@
 """adb-scrcpy/phone: which phone it connects to. Fake avahi-browse/kdialog/adb/scrcpy in a
 throwaway home: one phone is taken and remembered, several are chosen from a list, a remembered
-phone that's missing can be waited for or swapped."""
+phone that's missing can be waited for or swapped; Restart stream after Reset to defaults. And
+the tweak's uninstall stopping adb's server in both sessions."""
 import sys
 import os
+import re
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -210,6 +213,25 @@ class PhonePick(unittest.TestCase):
         self.assertNotIn("phone-fit", log)                         # no narrow window: clicks land right
         self.assertNotIn("phone-touch 10.0.0.5", log)
 
+    def test_restart_after_reset_to_defaults_uses_the_defaults(self):
+        """The gear's Reset to defaults takes the settings' lines out of phone.conf, then Restart
+        stream: the new stream is at the defaults (reading the file again can't unset what the
+        file no longer says)."""
+        conf = ('PHONE_NAME="Pixel 9"\nPHONE_MAX_SIZE=1920\nPHONE_BIT_RATE=8M\nPHONE_MAX_FPS=90\n'
+                'PHONE_STICK_SPEED=25\nPHONE_CLIPBOARD=off\n')
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf=conf, extra={
+            # the first mirror: Reset to defaults, then Restart stream (phone-touch's SIGUSR1), and
+            # it runs until it's stopped; the restarted one closes
+            "scrcpy": 'echo "scrcpy $*" >> "$HOME/log"; [ -f "$HOME/reset" ] && exit 0; touch "$HOME/reset"; '
+                      '/usr/bin/sleep 0.5; printf \'PHONE_NAME="Pixel 9"\\n\' > "$HOME/.config/frame-tweaks/phone.conf"; '
+                      'kill -USR1 "$(cat "$XDG_RUNTIME_DIR/sft-phone.pid")"; exec /usr/bin/sleep 10',
+            "sleep": "exec /usr/bin/sleep 0.05"})
+        self.assertEqual(code, 0, log)
+        runs = [l for l in log.splitlines() if l.startswith("scrcpy ")]
+        self.assertEqual(len(runs), 2, log)
+        self.assertIn("--video-bit-rate=8M --max-size=1920 --max-fps=90 --no-clipboard-autosync", runs[0])
+        self.assertIn("--video-bit-rate=2M --max-size=1024 --max-fps=60 --window-title", runs[1])
+
     def test_steamvr_update_that_turns_its_patch_off_gets_a_plain_window(self):
         """vr-dashboard switched the layer's patch off: the narrow window had no layer to take the
         clicks, so they landed at its left edge."""
@@ -221,6 +243,36 @@ class PhonePick(unittest.TestCase):
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
         self.assertNotIn("phone-fit", log)
         self.assertNotIn("phone-touch 10.0.0.5", log)
+
+
+class Uninstall(unittest.TestCase):
+    def test_stops_adbs_server_in_both_sessions(self):
+        """Each session starts its own adb server, its socket in that session's runtime folder
+        (the adb wrapper's): VR's, and desktop mode's inside it (nested_plasma). Uninstalling
+        from either stops both; it stopped only its own session's."""
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        home = Path(tmp.name)
+        run = home / "run"                        # (the runtime folders: never the real ones)
+        (run / "nested_plasma").mkdir(parents=True)
+        for sock in (run / "adb.sock", run / "nested_plasma/adb.sock"):
+            os.mknod(sock, stat.S_IFSOCK | 0o600)
+        wrapper = re.search(r"write_file \"\$BIN/adb\" 755 <<'EOS'\n#!/bin/sh\n(.*?\n)EOS\n",
+                            (ROOT / "packs/core/adb-scrcpy/install.sh").read_text(), re.S)[1]
+        log = home / "log"
+        for session in (run, run / "nested_plasma"):
+            with self.subTest(session=session.name):
+                # adb as install.sh writes it; its adb.bin a stand-in saying which server it's asked to stop
+                stub(home / ".local/bin", "adb", wrapper)
+                stub(home / ".local/lib/android-tools", "adb.bin", f'echo "$ADB_SERVER_SOCKET $*" >> {log}')
+                log.write_text("")
+                env = sandbox_env(home, home / "stubs", XDG_RUNTIME_DIR=session)
+                r = subprocess.run(["bash", str(ROOT / "packs/core/adb-scrcpy/uninstall.sh")], env=env,
+                                   capture_output=True, text=True, timeout=30)
+                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+                stopped = set(log.read_text().splitlines())
+                self.assertLessEqual({f"localfilesystem:{run}/adb.sock kill-server",
+                                      f"localfilesystem:{run}/nested_plasma/adb.sock kill-server"}, stopped)
 
 
 if __name__ == "__main__":

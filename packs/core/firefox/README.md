@@ -21,7 +21,8 @@ access: –
 survives_updates: Yes (everything is in your home folder)
 undo: >-
   `./install.sh uninstall firefox` with Firefox closed (it also clears the settings from
-  `prefs.js`); if Firefox is running, quit it and run it again, or reset them in `about:config`
+  `prefs.js`, and puts back those you had set yourself before); if Firefox is running, quit it
+  and run it again, or reset them in `about:config`
 ---
 # Firefox privacy
 
@@ -78,15 +79,17 @@ hiding, every RFP Firefox reports the same values.
   An ad blocker such as uBlock Origin (from addons.mozilla.org) also blocks many fingerprinting
   scripts.
 - **Removing it** takes the block out of `user.js` and, if Firefox is closed, the same settings
-  out of `prefs.js` (a copy is kept as `prefs.js.frame-tweaks-bak`). If Firefox is running, quit
-  it and remove again, or reset the settings in `about:config`.
+  out of `prefs.js` (a copy is kept as `prefs.js.frame-tweaks-bak`). Those you had set yourself
+  before installing it, such as HTTPS-only mode, are put back as they were (recorded at install
+  in `~/.local/state/frame-tweaks/backups/firefox/`). If Firefox is running, quit it and remove
+  again, or reset the settings in `about:config`.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
 - **Changes:** Preferences in Firefox's profile (`user.js`)
-- **Undo:** `./install.sh uninstall firefox` with Firefox closed (it also clears the settings from `prefs.js`); if Firefox is running, quit it and run it again, or reset them in `about:config`
+- **Undo:** `./install.sh uninstall firefox` with Firefox closed (it also clears the settings from `prefs.js`, and puts back those you had set yourself before); if Firefox is running, quit it and run it again, or reset them in `about:config`
 <!-- /generated:changes -->
 
 ## Credits
