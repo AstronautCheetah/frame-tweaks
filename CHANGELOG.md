@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.7 (2026-10-16)
 
 ### Fixed
 - **Setting up the full installer window no longer reads as if it installed NordVPN's tray:** it
