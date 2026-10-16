@@ -620,9 +620,43 @@ def write_set(path, items):
     path.write_text("".join(f"{i}\n" for i in sorted(items)))
 
 
+# ---- not needed on this Frame ------------------------------------------------
+_NOT_NEEDED = {}
+
+
+def not_needed(rows=None, refresh=False):
+    """{id: why} for the tweaks this Frame doesn't need: their optional needed.sh exits 1 with one
+    line saying why (say, SteamOS now does it itself). It checks what the Frame has (a package's
+    version, a file), not the SteamOS version, which beta and stable count differently. Such a
+    tweak isn't offered: hidden in the list unless installed, skipped by ./install.sh install."""
+    if refresh:
+        _NOT_NEEDED.clear()
+    out = {}
+    for c in rows or components():
+        script = c["dir"] / "needed.sh" if c.get("dir") else None
+        if not (script and script.is_file()):
+            continue
+        if c["id"] not in _NOT_NEEDED:
+            try:
+                r = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=10)
+                why = (r.stdout.strip().splitlines() or [""])[0] if r.returncode == 1 else None
+            except (OSError, subprocess.SubprocessError):
+                why = None                              # (can't tell: offered, as before)
+            _NOT_NEEDED[c["id"]] = why
+        if _NOT_NEEDED[c["id"]] is not None:
+            out[c["id"]] = _NOT_NEEDED[c["id"]]
+    return out
+
+
+def installed_record(cid):
+    return (STATE / "installed" / cid).exists()
+
+
 # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
 def hidden(rows=None):
-    defaults = {c["id"] for c in (rows or components()) if "hidden-by-default" in c["flags"]}
+    rows = rows or components()
+    defaults = {c["id"] for c in rows if "hidden-by-default" in c["flags"]}
+    defaults |= {cid for cid in not_needed(rows) if not installed_record(cid)}   # (installed: its status says)
     return read_set(HIDDEN) | (defaults - read_set(SHOWN))
 
 
@@ -1095,6 +1129,9 @@ def main(argv):
                _("Group {name} shown in the installer window.")).format(name=repr(name)))
     elif cmd == "mods":
         mods(args)
+    elif cmd == "not-needed":                   # ID<TAB>why, for the tweaks this Frame doesn't need
+        for cid, why in not_needed().items():
+            print(f"{cid}\t{why}")
     elif cmd == "renamed" and len(args) == 1:   # a tweak's former id (formerly:): its id now
         new = load().get("renamed", {}).get(args[0])
         sys.exit(1) if not new else print(new)

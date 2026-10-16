@@ -636,6 +636,10 @@ class Details(QWidget):
                  (_("Made by"), md_text(comp["author"]))]
         if comp["experimental"]:
             facts.append((_("🧪 Experimental"), f"<span style='color:#e0b33a'>{md_text(comp['experimental'])}</span>"))
+        why_not = sft.not_needed([comp]).get(comp["id"])
+        if why_not is not None:
+            facts.append((_("Not needed"), "<span style='color:#e0b33a'>" + html.escape(
+                _("This Frame doesn't need it: %s") % why_not, quote=False) + "</span>"))
         if sft.sudo_note(comp):
             facts.append((_("Asks for sudo"), "<span style='color:#e0b33a'>" + html.escape(
                 _("Installing it asks for your sudo (admin) password in its terminal: %s") % sft.sudo_note(comp),
@@ -1194,6 +1198,7 @@ class Window(QWidget):
         self.show_hidden.setText(_("Show hidden ({n})").format(n=n_hidden))
         self.show_hidden.setEnabled(n_hidden > 0 or showing)
         self.boxes, self.status_labels, self.run_buttons, self.again_buttons = {}, {}, {}, {}
+        not_needed = sft.not_needed(self.rows)
         category = None
         for comp in self.rows:
             cid = comp["id"]
@@ -1219,6 +1224,10 @@ class Window(QWidget):
             state = self.state.get(cid)
             box.setChecked(self.wanted.get(cid, state[0] not in GONE if state else False))
             box.setToolTip(_("Tick to install, untick to remove"))
+            why_not = not_needed.get(cid)
+            if why_not is not None and not sft.installed_record(cid):    # (installed: untick to remove)
+                box.setEnabled(False)
+                box.setToolTip(_("Not needed on this Frame: %s") % why_not)
             box.toggled.connect(lambda on, c=cid: (self.wanted.__setitem__(c, on), self.update_apply()))
             self.boxes[cid] = box
             icon = QLabel()
@@ -1254,6 +1263,9 @@ class Window(QWidget):
             if cid in KNOWN_ISSUES:
                 info.setText(info.text() + "<br><span style='color:#e0b33a'>"
                              f"{html.escape(KNOWN_ISSUES[cid]['short'], quote=False)}</span>")
+            if why_not is not None:
+                info.setText(info.text() + "<br><span style='color:#e0b33a'>" + html.escape(
+                    _("Not needed on this Frame: %s") % why_not, quote=False) + "</span>")
             link = QLabel()
             if "|" in comp["source"]:
                 rel, url = comp["source"].split("|", 1)

@@ -198,6 +198,28 @@ class Packs(unittest.TestCase):
             (packs / "original/pack.md").write_text("---\nname: Mine too\n---\n")
             self.assertIn("original", [d.name for d in sft.pack_dirs()])
 
+    def test_a_tweak_this_frame_doesnt_need_is_hidden_unless_installed(self):
+        """needed.sh exit 1 (one line: why): hidden by default, like hidden_by_default, until
+        it's installed (then its status says so); exit 0, or no needed.sh: offered."""
+        d = self.tweak("mypack", "gone", extra="")
+        (d / "needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\necho more\nexit 1\n")
+        (self.tweak("mypack", "kept") / "needed.sh").write_text("#!/bin/bash\nexit 0\n")
+        self.tweak("mypack", "plain")
+        sft.set_trusted(d.parent, True)
+        rows = sft.load(refresh=True)["components"]
+        mine = [c for c in rows if c["id"] in ("gone", "kept", "plain")]
+        self.assertEqual(sft.not_needed(mine, refresh=True), {"gone": "SteamOS does it now"})
+        rows = mine
+        state = Path(self.tmp.name) / "state"
+        with mock.patch.object(sft, "STATE", state):
+            self.assertIn("gone", sft.hidden(rows))
+            self.assertFalse({"kept", "plain"} & sft.hidden(rows))
+            (state / "installed").mkdir(parents=True)
+            (state / "installed/gone").write_text("0.6.8\n")
+            self.assertNotIn("gone", sft.hidden(rows))
+            sft.set_hidden("gone", True)                    # (still yours to hide)
+            self.assertIn("gone", sft.hidden(rows))
+
     def test_formerly_a_tweaks_earlier_ids(self):
         """formerly: (a renamed tweak): its earlier ids still name it in depends:, and what's kept
         under one (install record, held, hidden) moves to its id once."""
