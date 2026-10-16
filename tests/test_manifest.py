@@ -132,7 +132,10 @@ class Packs(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         t = Path(self.tmp.name)
         self.user = t / "packs"
-        for name, value in (("USER_PACKS", self.user), ("TRUSTED", t / "trusted"), ("OFF_PACKS", t / "off"), ("CONF", t)):
+        # (every file under CONF: HIDDEN and the rest were made from the real one as sft loaded)
+        for name, value in (("USER_PACKS", self.user), ("TRUSTED", t / "trusted"), ("OFF_PACKS", t / "off"), ("CONF", t),
+                            ("HIDDEN", t / "hidden"), ("SHOWN", t / "shown"), ("COLLAPSED", t / "collapsed"),
+                            ("HIDDEN_CATS", t / "hidden-categories")):
             p = mock.patch.object(sft, name, value)
             p.start()
             self.addCleanup(p.stop)
