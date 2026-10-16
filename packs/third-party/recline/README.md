@@ -55,7 +55,8 @@ installs, and doesn't pin, check or change what they install.
 
 - **Install** (tick it): clones Recline-VR into `~/Recline-VR` and runs its `install.sh`, which
   builds it on the Frame, runs its tests and installs it into `~/.local/share/recline-vr` (under
-  a minute). **Then restart SteamVR**: SteamVR loads drivers only when it starts. Until then its
+  a minute). It builds Recline-VR's `main` branch, as its README says for the Frame; Recline-VR
+  keeps `main` at its latest release. **Then restart SteamVR**: SteamVR loads drivers only when it starts. Until then its
   row in the Frame Tweaks window says so and offers **⟳ Restart SteamVR** (every open app
   closes); rebooting works too.
 - **Update:** ↻ on its row pulls the latest Recline-VR and runs its installer again; then restart

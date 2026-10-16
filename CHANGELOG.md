@@ -246,6 +246,9 @@
   that watches the whole machine sets `run_alone = True` and runs by itself.
 - **Ruff** (`dev/check.sh lint`, `ruff.toml`): names that don't exist and unused imports, in
   every Python file (13 unused imports went). Mistakes only, no style.
+- **A daily look at the linked projects** (`dev/check-links.py`, `.github/workflows/linked.yml`,
+  an issue labelled `linked-check`): a release newer than the one last looked at
+  (`lib/tested-versions`), or a README that no longer names the file a link's status checks.
 - **Release workflow:** a pre-release takes its notes from `## Unreleased` and leaves the
   section as it is, so the release after it has every change since the last release (the test
   release dated the section, and the release then found none, or only what came after the test

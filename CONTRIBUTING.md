@@ -274,6 +274,13 @@ A tweak that installs another project shows that project's README below its own
 (`upstream_readme:` in its manifest). After bumping its pin, point `upstream_readme:` at the same
 version and run `dev/fetch-upstream-readmes.py <tweak>` and `dev/gen-docs.py`.
 
+A daily workflow (**Linked projects**, `dev/check-links.py`) does the same for the projects
+Frame Tweaks links to (Recline, Full Keyboard, Frametop), with an issue labelled `linked-check`.
+🔴 when a project's README no longer names the file its `link.installed` checks (a release may
+have moved it); 🟡 when it has a release newer than the one last looked at. Then read the
+release notes, check the link's commands and the tweak's page, and set `link-ID=TAG` in
+`lib/tested-versions`.
+
 After bumping a pin that has a `mirror=` line, run `dev/mirror-pins.sh` to upload Frame Tweaks'
 copy and its licence texts (a new pin needs `mirror=`, `license=` and `license_file=`, or
 `nomirror=` saying why it can't be copied).
