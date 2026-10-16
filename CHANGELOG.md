@@ -215,8 +215,19 @@
   showed as not installed. Either place counts now, and its page gives the new `reclinectl` path.
 - **Full Keyboard's page says when it shows:** only while the SteamVR dashboard is open,
   whichever menu started it (it said "for the dashboard and desktop"), and how to move it.
+- **Recline keeps up with Recline-VR's releases:** its status checks the uninstaller every
+  release puts in the same place, not one of its programs (1.3 moved them all), and "restart
+  SteamVR to load it" goes by when Frame Tweaks installed it, not by the dates the installer
+  gives its files. Its page no longer copies the shortcuts and paths that change between
+  releases (1.3 changed both): it links to Recline-VR's README for them, and says that
+  SteamVR's own recenter now reclines you.
 
 ### For pack authors
+- **A link's `installed:`** names a file the project documents and keeps (its uninstaller, a
+  launcher it tells you to run), not one inside its install that a release can move; a pattern
+  is refused (nothing is matched against it). With `restart: steamvr`, Frame Tweaks' own install
+  after SteamVR started counts, whatever date the installer gave the file
+  ([docs/mods.md](docs/mods.md)).
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
   check that stops at a failing command (`set -e`) now shows "status check failed" for a tweak
   Frame Tweaks installed, which stays installed. Add `|| true` where a command may fail

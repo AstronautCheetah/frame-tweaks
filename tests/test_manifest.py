@@ -458,6 +458,7 @@ class Packs(unittest.TestCase):
         self.assertIsNone(sft.script(c, "check-system"))
         for bad, says in (("link:\n  installed: ~/p\n", "link.install is missing"),
                           ("link:\n  install: x\n  installed: project\n", "link.installed must be a path"),
+                          ("link:\n  install: x\n  installed: ~/p/*/bin\n", "not a pattern"),
                           ("link:\n  install: x\n  installed: ~/p\n  readme: http://x\n", "https://"),
                           ("link:\n  install: x\n  installed: ~/p\n  restart: plasma\n", "link.restart can only be steamvr"),
                           ("link: x\n", "link must be a mapping")):

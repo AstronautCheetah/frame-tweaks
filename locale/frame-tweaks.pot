@@ -5010,7 +5010,7 @@ msgstr ""
 
 #: packs/third-party/recline/README.md
 msgid ""
-"Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you."
+"Lie back and keep playing. Recenter while lying back (SteamVR's own recenter) and the direction you're looking becomes level and forward in VR, at a chosen eye height; recentering upright puts everything back. It works for SteamVR apps, and your hands move with you."
 msgstr ""
 
 #: packs/third-party/recline/README.md
@@ -5024,7 +5024,7 @@ msgstr ""
 
 #: packs/third-party/recline/README.md
 msgid ""
-"Use VR lying down or reclined; one button makes your view level and forward"
+"Use VR lying down or reclined; recentering makes your view level and forward"
 msgstr ""
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
