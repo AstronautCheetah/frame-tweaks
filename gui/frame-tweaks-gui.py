@@ -1755,7 +1755,13 @@ class Window(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: steamvr restart")
             return
-        if not QProcess.startDetached("steamvr", ["restart"])[0]:
+        # (With the VR session's runtime folder and D-Bus: steamvr restart goes through the user
+        # service manager, which desktop mode's own can't reach. From the window in desktop mode
+        # it failed, "Failed to connect to user scope bus", where nobody saw it: the script had
+        # already exited fine.)
+        run = f"/run/user/{os.getuid()}"
+        if not QProcess.startDetached("env", [f"XDG_RUNTIME_DIR={run}", f"DBUS_SESSION_BUS_ADDRESS=unix:path={run}/bus",
+                                              "steamvr", "restart"])[0]:
             self.say(_("Couldn't restart SteamVR; restart it from its menu, or reboot."))
 
     def show_details(self, comp, back=None):

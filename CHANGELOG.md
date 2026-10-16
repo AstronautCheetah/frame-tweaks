@@ -213,6 +213,10 @@
 - **Recline with Recline-VR 1.3:** Recline-VR 1.3 (out 2026-10-16) moved its programs into
   `bin/linuxarm64/` and removed the file Frame Tweaks checked, so after an install or ↻ Recline
   showed as not installed. Either place counts now, and its page gives the new `reclinectl` path.
+- **⟳ Restart SteamVR works from desktop mode:** SteamOS's restart goes through the VR session's
+  service manager, which the window in desktop mode couldn't reach ("Failed to connect to user
+  scope bus"), and nothing happened, without a word. The uninstall of a SteamVR add-on no longer
+  suggests typing `steamvr restart`, which fails in a desktop-mode terminal the same way.
 - **Full Keyboard's page says when it shows:** only while the SteamVR dashboard is open,
   whichever menu started it (it said "for the dashboard and desktop"), and how to move it.
 - **Recline keeps up with Recline-VR's releases:** its status checks the uninstaller every

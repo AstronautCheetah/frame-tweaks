@@ -1911,8 +1911,10 @@ msgstr ""
 
 # needs review
 #: lib/link.sh
-msgid "Restart SteamVR to unload it (reboot, or: %s)."
-msgstr "Reinicia SteamVR para descargarlo (reinicia el equipo, o: %s)."
+msgid ""
+"Restart SteamVR to unload it: ⟳ Restart SteamVR on its row in the Frame Tweaks window, or reboot."
+msgstr ""
+"Reinicia SteamVR para descargarlo: ⟳ Reiniciar SteamVR en su fila de la ventana de Frame Tweaks, o reinicia el equipo."
 
 # needs review
 #: lib/link.sh
@@ -6107,3 +6109,7 @@ msgstr "Instalador de ajustes"
 #~ "Use VR lying down or reclined; one button makes your view level and forward"
 #~ msgstr ""
 #~ "Usa la RV acostado o reclinado; un botón deja tu vista nivelada y al frente"
+
+#~ # needs review
+#~ msgid "Restart SteamVR to unload it (reboot, or: %s)."
+#~ msgstr "Reinicia SteamVR para descargarlo (reinicia el equipo, o: %s)."
