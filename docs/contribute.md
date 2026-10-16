@@ -3,6 +3,14 @@
 Frame Tweaks is made by Steam Frame owners for Steam Frame owners, and there's room for more
 hands. You don't need to write code for most of these, and none of it needs much time.
 
+## A star ⭐
+
+The quickest help of all: if Frame Tweaks is useful to you, **give it a star on GitHub**. It
+helps other Frame owners find it. Open
+[AstronautCheetah/frame-tweaks](https://github.com/AstronautCheetah/frame-tweaks) and press
+**☆ Star** at the top right of the page (you need a free GitHub account, and you can take the
+star back any time).
+
 ## Ideas
 
 - **Suggest a third-party app or project to add.** Something you already use on your Frame that

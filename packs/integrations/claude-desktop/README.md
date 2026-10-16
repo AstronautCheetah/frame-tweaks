@@ -78,6 +78,10 @@ the same wallet in desktop mode and in VR, and it's listed on that tweak's **Wal
 - If the Frame Tweaks window warns that Claude can't reach the KDE wallet, quit Claude and open
   it again, so it keeps your sign-in.
 - Uninstalling closes Claude if it's open and removes the app, but keeps your Claude settings.
+- **"Hardware acceleration disabled"** after a restart: if Claude is open when the Frame restarts
+  or shuts down, its graphics go away under it, it takes that for repeated graphics problems and
+  turns hardware acceleration off. Turn it back on from Claude's **Help** menu, then quit and
+  open Claude again.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
