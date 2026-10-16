@@ -23,7 +23,10 @@ ft_version() {
 # The folder of the tweak whose script sourced this file (its own files), and tweak_dir <id> for
 # another tweak's: the installer passes the folders it found (FRAME_TWEAKS_DIRS, "id=folder"
 # lines, user packs included); a script run on its own falls back to the official packs.
-TWEAK_DIR="$(cd "$(dirname "${BASH_SOURCE[1]:-$0}")" && pwd)"
+# (A script run by a relative path that changes folder before sourcing this, as install.sh does
+# when run as frame-tweaks/install.sh, can't be found from here: then it's the folder it's in now,
+# rather than a cd that failed and, with set -e, stopped it.)
+TWEAK_DIR="$(cd "$(dirname "${BASH_SOURCE[1]:-$0}")" 2>/dev/null && pwd || pwd)"
 tweak_dir() {
     local line
     while IFS= read -r line; do
@@ -97,7 +100,7 @@ Homebrew's installer asks for your sudo (admin) password once, to create that fo
     [ -x "$BREW" ] || die "$(t "Homebrew didn't end up in /home/linuxbrew.")"
     # shellcheck disable=SC2016
     grep -qs 'linuxbrew/bin/brew shellenv' "$HOME/.bashrc" ||
-        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.bashrc"
+        append_line "$HOME/.bashrc" 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
     eval "$("$BREW" shellenv)"
     say "$(t 'Homebrew installed.')"
 }
@@ -133,9 +136,16 @@ migrate_legacy_dirs() {
     return 0
 }
 
+# append_line FILE LINE: LINE at the end of FILE, on a line of its own (appended to a file whose
+# last line has no newline, it was glued onto that line).
+append_line() {
+    [ ! -s "$1" ] || [ -z "$(tail -c1 "$1")" ] || echo >> "$1"
+    printf '%s\n' "$2" >> "$1"
+}
+
 # Make sure ~/.local/bin is on PATH for terminals and the desktop session.
 ensure_path() {
-    grep -qs 'HOME/.local/bin' "$HOME/.bashrc" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+    grep -qs 'HOME/.local/bin' "$HOME/.bashrc" || append_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
     mkdir -p "$HOME/.config/environment.d"
     [ -f "$HOME/.config/environment.d/10-local-bin.conf" ] ||
         echo 'PATH=$HOME/.local/bin:$PATH' > "$HOME/.config/environment.d/10-local-bin.conf"
@@ -299,9 +309,10 @@ pip_pinned() {
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 # ensure_qt_venv [MESSAGE]: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip, the
 # NordVPN tray and the installer window), saying MESSAGE (or what it is) as it starts; fails if it
-# couldn't be installed.
+# couldn't be installed. (QtWidgets, not just PyQt6: a setup cut short can leave PyQt6 there
+# without the parts the window needs.)
 ensure_qt_venv() {
-    "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null && return 0
+    "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null && return 0
     say "${1:-$(t 'Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)')}"
     python3 -m venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
 }

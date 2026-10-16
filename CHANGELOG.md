@@ -21,6 +21,59 @@
   it wakes; a lower battery still charges while asleep. Its status also says "Not charging until
   the battery is below 78% (now 98%)" rather than "Holding at 78%" when it's well over the limit,
   and warns if the watch on sleep isn't running.
+- **A tweak whose status check fails no longer reads as not installed:** a check that stopped
+  partway (a command in it failing) made an installed tweak look uninstalled, so updates skipped
+  it, and deleting the settings uninstalled tweaks left would have deleted its settings. It now
+  shows "status check failed", with the error, and counts as installed. Shared clipboard's check
+  did this while a build from an older version ran: it now says what that build lacks. Firefox's
+  says there's no profile when Firefox has no default one.
+- **Updates:** a tweak removed by hand no longer has every update after it run every installer
+  again, as if one hadn't finished; an update ends in failure when a tweak's installer fails (it
+  said all was well); going from a test release to its release runs the tweaks' migrations (the
+  test release ranked as the newer one); and in a copy without git, `./install.sh update`
+  leaves held tweaks as they are.
+- **↻ Reinstall keeps a tweak this Frame doesn't need:** reinstalling one that is installed (the
+  Mouse cursor fix on SteamOS 0.5.6, say) removed it, then skipped it as not needed.
+- **A tweak another one needs isn't removed while that one is installed with a warning:** only a
+  tweak whose status was all fine counted as installed there.
+- **Uninstalling Frame Tweaks keeps a folder with commits of yours:** a commit made in a release
+  checkout is on no branch, so it wasn't counted, and the folder was deleted with it.
+- **With every pack turned off, Frame Tweaks' own commands still run:** `./install.sh mods on core`
+  (the way back), `update`, `help`, `--version`, `debug-info` and `report` stopped with "No
+  tweaks found".
+- **`frame-tweaks/install.sh` runs from the folder above:** run by a relative path with a folder
+  in it, the installer stopped at once ("No such file or directory"), and `get.sh` with a
+  relative `FRAME_TWEAKS_DIR` did the same.
+- **A new install takes test releases if you chose them before:** `get.sh` read the channel only
+  from `FRAME_TWEAKS_CHANNEL`, not from `~/.config/frame-tweaks/channel`, where it keeps it.
+- **🐞 Report a problem keeps SteamOS's own names:** your user name (steamos, on the Frame) was
+  removed everywhere, so steamos-manager and /usr/lib/steamos read `<user>-manager` and
+  `/usr/lib/<user>`. It's now removed where it names you: a home folder, name@host, `user=`,
+  "for name" and `uid=1000(name)`.
+- **Setting up the full window:** it checks for the parts the window needs (PyQt6's widgets, not
+  just PyQt6), so a setup cut short is offered again rather than a window that can't open; the
+  copy of Python the window runs on is replaced whenever it differs from the original (it could
+  stay an old one); and the app-menu entry is never left empty (translating it failed, and it
+  was empty: it's in English then).
+- **A `~/.bashrc` whose last line has no newline:** the line tweaks add (Homebrew, and
+  `~/.local/bin` on PATH) was glued onto that last line, breaking both.
+
+### For pack authors
+- **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
+  check that stops at a failing command (`set -e`) now shows "status check failed" for a tweak
+  Frame Tweaks installed, which stays installed. Add `|| true` where a command may fail
+  ([docs/mods.md](docs/mods.md)).
+
+### For contributors
+- **Release workflow:** a pre-release takes its notes from `## Unreleased` and leaves the
+  section as it is, so the release after it has every change since the last release (the test
+  release dated the section, and the release then found none, or only what came after the test
+  release). The commit and the tag are pushed together or not at all (`git push --atomic`): a
+  tag could be published while main refused its commit.
+- **Traffic workflow:** with more than 30 releases it stopped (each page of releases came as a
+  list of its own); a failed download of the saved `traffic.csv` went unnoticed, and the upload
+  then replaced the history with the last 14 days (it now stops, and never saves fewer days than
+  it had); and a failed look for its draft release made a second one.
 
 ### For contributors
 - **Translations:** a `%` is a placeholder only in a text that's formatted (one with `%s`, `%d` or

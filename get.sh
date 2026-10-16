@@ -9,6 +9,7 @@ main() {
     REPO=${FRAME_TWEAKS_REPO:-https://github.com/AstronautCheetah/frame-tweaks.git}
     DIR=${FRAME_TWEAKS_DIR:-$HOME/frame-tweaks}
     [ -z "${FRAME_TWEAKS_DIR:-}" ] && [ -d "$HOME/steam-frame-tweaks/.git" ] && DIR=$HOME/steam-frame-tweaks   # its old name
+    DIR=$(realpath -m "$DIR")       # (a relative one: install.sh is run by its full path)
     # A channel given here is kept (./install.sh channel), so later updates take the same releases.
     case ${FRAME_TWEAKS_CHANNEL:-} in
         "") ;;
@@ -23,13 +24,20 @@ main() {
         # tweaks' installers run again if it's a new one (or an update didn't finish). (A plain
         # checkout here skipped both.)
         echo "Updating $DIR (./install.sh update)"
-        (cd "$DIR" && ./install.sh update)
+        # (3: updated, but a tweak didn't install again: no reason to stop, the window, opened
+        # below, shows which. Anything else: it couldn't update, so the old version isn't opened.)
+        rc=0
+        (cd "$DIR" && ./install.sh update) || rc=$?
+        [ "$rc" -eq 0 ] || [ "$rc" -eq 3 ] || exit "$rc"
+        [ "$rc" -eq 0 ] || echo "Some tweaks didn't update (see above); the window shows which."
     else
         # The newest release (a vX.Y.Z tag), not whatever is on main right now. Stable releases
-        # only (vX.Y.Z); FRAME_TWEAKS_CHANNEL=beta also takes pre-releases (vX.Y.Z-rc1), ranked
-        # below the release they lead up to ("-" → "~" sorts before the final version).
+        # only (vX.Y.Z); beta (FRAME_TWEAKS_CHANNEL=beta, or kept from before in
+        # ~/.config/frame-tweaks/channel) also takes pre-releases (vX.Y.Z-rc1), ranked below the
+        # release they lead up to ("-" → "~" sorts before the final version).
+        channel=${FRAME_TWEAKS_CHANNEL:-$(cat "$HOME/.config/frame-tweaks/channel" 2>/dev/null || true)}
         pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
-        [ "${FRAME_TWEAKS_CHANNEL:-stable}" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
+        [ "$channel" = beta ] && pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'
         # (|| true: with no release found, or GitHub out of reach, set -e would stop here without a word.)
         TAG=$(git ls-remote --tags --refs "$REPO" 'v*' | sed 's|.*refs/tags/||' | grep -E "$pattern" |
               sed 's/-/~/' | sort -V | sed 's/~/-/' | tail -1) || true

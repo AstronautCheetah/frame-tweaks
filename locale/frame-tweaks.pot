@@ -468,6 +468,14 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
+#: gui/frame-tweaks-gui.py install.sh
+msgid "status check failed"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py install.sh
+msgid "status check failed: %s"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py
 msgid "the pack {pack}, not part of Frame Tweaks"
 msgstr ""

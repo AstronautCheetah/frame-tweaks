@@ -1,7 +1,8 @@
 """lib/common.sh verify_release: ./install.sh update moves only to a release tag signed by a key
 in dev/release-signers as already installed; unsigned or wrongly signed tags are refused (a PGP
 signature, or a signed tag under another name, too), and a checkout from before signing (no
-signers file) isn't checked. And the update itself (Update). Uses throwaway SSH keys."""
+signers file) isn't checked. And the update itself (Update), and uninstall-self keeping a release
+checkout with commits of yours. Uses throwaway SSH keys."""
 import os
 import shutil
 import subprocess
@@ -244,6 +245,7 @@ class Update(unittest.TestCase):
         (self.home / "probe-fails").touch()                              # (installed, but its installer fails)
         r = self.update(co)
         self.assertIn("probe failed", r.stdout + r.stderr)
+        self.assertNotEqual(r.returncode, 0, r.stdout)                  # (it said all was well)
         self.assertEqual(self.at(co), self.commit("v0.0.2"))
         self.assertEqual(self.recorded(), "0.0.1")
         (self.home / "probe-fails").unlink()
@@ -252,6 +254,35 @@ class Update(unittest.TestCase):
         self.assertNotIn("up to date", r.stdout)
         self.assertEqual(self.recorded(), "0.0.2")
         self.assertIn("up to date", self.update(co).stdout)             # (and then it's done)
+
+    def test_a_record_of_a_tweak_no_longer_installed_doesnt_keep_updating(self):
+        """A tweak removed by hand, say, leaves its record of an older version: that isn't an
+        update to finish (every update after it ran every installer again)."""
+        co = self.checkout()
+        self.assertEqual(self.update(co).returncode, 0)                 # (to v0.0.2)
+        record = self.home / ".local/state/frame-tweaks/installed/probe"
+        record.parent.mkdir(parents=True, exist_ok=True)
+        record.write_text("0.0.1\n")                                    # (not installed)
+        r = self.update(co)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("up to date", r.stdout)
+
+    def test_uninstall_self_keeps_a_checkout_with_commits_of_yours(self):
+        """A release checkout is a detached tag, so a commit made there is on no branch: the
+        folder was deleted with it. A checkout with nothing of yours still goes."""
+        co = self.checkout()
+        (co / "mine.txt").write_text("mine\n")
+        self.git(co, "add", "mine.txt")
+        self.git(co, "commit", "-qm", "mine")
+        r = self.install(co, "uninstall-self", "--keep-tweaks", "--keep-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("it has commits that are not pushed anywhere", r.stdout)
+        self.assertTrue((co / "mine.txt").exists())
+        co = self.checkout()
+        r = self.install(co, "uninstall-self", "--keep-tweaks", "--keep-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn(f"removed {co}", r.stdout)
+        self.assertFalse(co.exists())
 
     def test_a_held_tweak_doesnt_keep_an_update_unfinished(self):
         co = self.checkout()

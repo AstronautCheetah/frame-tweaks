@@ -140,7 +140,10 @@ GONE = (1, UNLOAD)   # the codes of a tweak that isn't installed
 
 def status(cid):
     """(code, text): 0 ok, 1 not installed, 2 needs attention; a status.sh line "restart …" is
-    RESTART (exit 2: installed) or UNLOAD (exit 1: uninstalled), waiting for a SteamVR restart."""
+    RESTART (exit 2: installed) or UNLOAD (exit 1: uninstalled), waiting for a SteamVR restart.
+    A status.sh that stops without saying "missing" or "restart" (a command in it failed) didn't
+    find the tweak missing: installed by Frame Tweaks (its record), or with an exit code that
+    isn't 0, 1 or 2, it's 2, "status check failed" (./install.sh status_of has the same rule)."""
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
         r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
@@ -148,8 +151,12 @@ def status(cid):
         return 2, _("status check didn't finish (took over a minute)")
     out = r.stdout.strip()
     text = out.split(None, 1)[-1] if out else ""
-    if out.split(None, 1)[:1] == ["restart"] and r.returncode in (1, 2):
+    word = out.split(None, 1)[:1]
+    if word == ["restart"] and r.returncode in (1, 2):
         return {2: RESTART, 1: UNLOAD}[r.returncode], text
+    if r.returncode not in (0, 1, 2) or (r.returncode == 1 and word != ["missing"] and sft.installed_record(cid)):
+        said = [line for line in re.sub(r"\x1b\[[0-9;]*m", "", r.stderr or "").splitlines() if line.strip()]
+        return 2, (_("status check failed: %s") % said[-1].strip() if said else _("status check failed"))
     return r.returncode, text
 
 

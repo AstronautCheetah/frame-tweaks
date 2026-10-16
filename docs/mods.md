@@ -225,7 +225,11 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   SteamVR has restarted: the window then offers **⟳ Restart SteamVR** on its row. Once
   uninstalled, `status_unload` does the same while SteamVR still runs it (the row shows it as
   not installed). `vr_started_before FILE` tells whether the running SteamVR started before FILE
-  changed: keep a file whose time is the uninstall's for that.
+  changed: keep a file whose time is the uninstall's for that. Exit 1 means "not installed" only
+  with `status_missing`'s or `status_unload`'s line: a check that stops at a failing command
+  (`set -e`) shows "status check failed" for a tweak Frame Tweaks installed, which stays
+  installed (updates reinstall it, its settings are kept). So add `|| true` where a command may
+  fail, and say what's missing with `status_missing`.
 - `run.sh` (with `run:`): what the Run button does. Launch apps through their menu entry
   (`gtk-launch <id>`), so wallet gates apply.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one
@@ -237,8 +241,9 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   package's version (`pacman -Q`, `vercmp`) or a file, rather than the SteamOS version, which the
   beta and stable branches number differently. A tweak that isn't needed isn't offered: the
   window hides it (**Show hidden** lists it, saying why, with its box disabled), and
-  `./install.sh install` skips it. If it's installed already, it stays in the list, updates
-  reinstall it, and its `status.sh` should say it can be removed (the Mouse cursor fix does).
+  `./install.sh install` skips it. If it's installed already, it stays in the list, updates and
+  ↻ Reinstall install it again, and its `status.sh` should say it can be removed (the Mouse
+  cursor fix does).
 - `update-check.sh`: prints `<installed> <latest>` versions; the window offers an update when
   the second is newer.
 - `migrate.sh <old-version>`: runs before `install.sh` when the Frame Tweaks version that last

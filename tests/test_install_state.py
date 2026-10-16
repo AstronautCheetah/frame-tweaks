@@ -1,11 +1,16 @@
 """install.sh's own state, in a throwaway home with a trusted test pack whose one tweak ("probe")
 only logs to a file there: installed/<id> records the version, migrate.sh runs (with the old
-version) only when that record is older, hold/unhold and held tweaks being left alone during
-updates (FRAME_TWEAKS_UPDATING=1), the lock refusing a second run, the last five logs kept (and
-tweaks' own logs left alone), an uninstall keeping its settings or removing them (⚙ Preferences,
---remove-settings, and never on a reinstall), forget-settings deleting only what uninstalled
-tweaks left, uninstall-self (every tweak or none, settings or not), a failed uninstall reported, and debug-info's report without names
-and addresses. systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
+version) only when that record is older (a test release older than its release), hold/unhold and
+held tweaks being left alone during updates (FRAME_TWEAKS_UPDATING=1, and in a copy without
+git), the lock refusing a second run, the last five logs kept (and tweaks' own logs left alone),
+an uninstall keeping its settings or removing them (⚙ Preferences, --remove-settings, and never
+on a reinstall), forget-settings deleting only what uninstalled tweaks left, uninstall-self
+(every tweak or none, settings or not), a failed uninstall reported, a tweak another one needs
+kept, a reinstall keeping a tweak the Frame doesn't need, a status check that fails not taken
+for "not installed", an update forgetting the record of a tweak that's gone and failing when a
+tweak does, Frame Tweaks' own commands with no tweak loaded or run by a relative path, the
+app-menu entry whole, and debug-info's report without names and addresses (but SteamOS's own
+names kept). systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
 whatever HOME is."""
 import sys
 import fcntl
@@ -106,7 +111,8 @@ class InstallState(unittest.TestCase):
         self.assertEqual(r.stdout.split(), ["probe"], r.stdout + r.stderr)
 
     def sh(self, *args, **extra):
-        return subprocess.run([str(ROOT / "install.sh"), *args], env={**self.env, **extra}, stdin=subprocess.DEVNULL,
+        root = getattr(self, "root", ROOT)            # (UpdateWithoutGit: a copy of this repo)
+        return subprocess.run([str(root / "install.sh"), *args], env={**self.env, **extra}, stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=120)
 
     def log(self):
@@ -146,6 +152,27 @@ class InstallState(unittest.TestCase):
         self.assertEqual(self.log(), ["install", "install"])
         self.assertNotIn("not needed", self.sh("list").stdout)
 
+    def test_a_reinstall_keeps_a_tweak_the_frame_doesnt_need(self):
+        """↻ on an installed tweak this Frame doesn't need installs it again (its removal took the
+        record that said it was installed, and it was left removed), and so does an update without
+        that record. One that isn't installed is skipped, as install skips it."""
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\nexit 1\n")
+        self.trust()
+        self.installed_at(VERSION)
+        r = self.sh("reinstall", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["uninstall", "install"])
+        self.assertTrue((self.home / "probe-installed").exists())
+        self.assertTrue(self.record.exists())
+        self.record.unlink()
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["uninstall", "install", "install"])
+        self.assertEqual(self.sh("uninstall", "probe").returncode, 0)
+        r = self.sh("reinstall", "probe")
+        self.assertIn("Not needed on this Frame, so not installed: SteamOS does it now", r.stdout)
+        self.assertFalse((self.home / "probe-installed").exists())
+
     def test_reinstall_at_the_same_version_doesnt_migrate(self):
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         r = self.sh("install", "probe")
@@ -165,6 +192,15 @@ class InstallState(unittest.TestCase):
         r = self.sh("install", "probe")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.log(), ["install"])
+
+    def test_a_test_release_is_older_than_its_release(self):
+        """From X.Y.Z-rc.N to X.Y.Z the migration runs: ranked as release tags are (plain sort -V
+        put the test release after the release, so none ran)."""
+        old = VERSION.split("-")[0] + "-rc.0"   # (this version's, whether VERSION is a test release or not)
+        self.installed_at(old)
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), [f"migrate {old}", "install"])
 
     def test_never_installed_doesnt_migrate(self):
         self.assertEqual(self.sh("install", "probe").returncode, 0)
@@ -455,6 +491,120 @@ class InstallState(unittest.TestCase):
         self.assertEqual(self.log(), ["install", "uninstall"])
         self.assertEqual(self.record.read_text(), VERSION + "\n")     # (still installed)
 
+    def dependent(self):
+        """A second tweak, "needsprobe", that depends on the probe; installed, its status is a warning."""
+        d = self.pack / "needsprobe"
+        d.mkdir()
+        (d / "README.md").write_text(README.replace("title: Probe", "title: Needs Probe")
+                                     .replace("processes: []", "processes: []\ndepends: [probe]")
+                                     .replace("uninstall probe", "uninstall needsprobe")
+                                     .replace("config: [~/.config/probe.conf, ~/.config/probe]\n", ""))
+        for name, body in {"install.sh": "touch ~/needsprobe-installed", "uninstall.sh": "rm -f ~/needsprobe-installed",
+                           "status.sh": '[ -f ~/needsprobe-installed ] && { echo "warning  restart it"; exit 2; }\n'
+                                        'echo "missing  no"; exit 1'}.items():
+            (d / name).write_text(f"#!/bin/bash\n{body}\n")
+        self.trust()
+
+    def test_a_tweak_one_installed_needs_isnt_removed(self):
+        """Installed with a warning (status 2) is installed, as everywhere else: only status 0 was."""
+        self.dependent()
+        self.sh("install", "needsprobe")
+        self.assertTrue((self.home / "needsprobe-installed").exists())
+        r = self.sh("uninstall", "probe")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("probe is needed by needsprobe: uninstall needsprobe too, or keep probe", r.stdout)
+        self.assertTrue((self.home / "probe-installed").exists())
+        r = self.sh("uninstall", "needsprobe", "probe")                # (the two together: fine)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / "probe-installed").exists())
+
+    def test_an_update_forgets_the_record_of_a_tweak_no_longer_installed(self):
+        """Its files removed by hand, say: an update skips it, and its record (an older version's)
+        had every later update run again, as if one hadn't finished."""
+        self.installed_at("0.0.1")
+        (self.home / "probe-installed").unlink()
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Nothing installed yet.", r.stdout)
+        self.assertFalse(self.record.exists())
+        self.assertEqual(self.log(), [])
+
+    def test_an_update_fails_when_a_tweak_does(self):
+        """The update's second stage ended in success whatever happened; a warning in a status is
+        no failure."""
+        self.installed_at(VERSION)
+        (self.pack / "probe/install.sh").write_text('#!/bin/bash\necho install >> "$HOME/probe.log"; exit 1\n')
+        self.trust()
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 3, r.stdout)               # (3: updated, but a tweak didn't install again)
+        self.assertIn("Failed: probe", r.stdout)
+        (self.pack / "probe/install.sh").write_text(f"#!/bin/bash\n{SCRIPTS['install.sh']}\n")
+        (self.pack / "probe/status.sh").write_text('#!/bin/bash\necho "warning  restart it"; exit 2\n')
+        self.trust()
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("restart it", r.stdout)
+        self.assertEqual(self.log(), ["install", "install"])
+
+    def test_a_status_check_that_fails_isnt_not_installed(self):
+        """A status.sh that stops at a failing command (set -e) says neither "missing" nor "restart":
+        a tweak installed here (its record) is "status check failed", with what it said last, so
+        updates still reinstall it and forget-settings keeps its settings. Without a record it's not
+        installed, as before."""
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        (self.pack / "probe/status.sh").write_text('#!/bin/bash\nset -e\necho "cat: x: No such file" >&2\nfalse\n')
+        self.trust()
+        r = self.sh("status", "probe")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("status check failed: cat: x: No such file", r.stdout)
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["install", "install"])
+        self.assertIn("No settings left behind", self.sh("forget-settings").stdout)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        self.record.unlink()
+        r = self.sh("status", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout)              # (nothing installed: not a warning)
+        self.assertIn("not installed", r.stdout)
+
+    def test_frame_tweaks_own_commands_work_with_no_tweak(self):
+        """Every pack off or not trusted: Frame Tweaks' own commands still run, mods too (mods on
+        core is the way back)."""
+        (self.home / ".config/frame-tweaks/installer/trusted-packs").unlink()
+        self.assertIn("No tweaks found", self.sh("list").stderr)
+        for args in (("help",), ("-h",), ("--help",), ("version",), ("--version",), ("debug-info",), ("report",),
+                     ("_reinstall",), ("mods",)):
+            r = self.sh(*args)
+            self.assertEqual(r.returncode, 0, f"{args}: {r.stdout}{r.stderr}")
+            self.assertNotIn("No tweaks found", r.stderr, args)
+        self.assertEqual(self.sh("--version").stdout.strip(), self.sh("version").stdout.strip())
+        self.assertIn("Nothing installed yet.", self.sh("_reinstall").stdout)
+        r = self.sh("mods", "on", "core")                     # (last: Core's tweaks are back)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertNotIn("original", (self.home / ".config/frame-tweaks/installer/off-packs").read_text())
+
+    def test_run_by_a_relative_path(self):
+        """frame-tweaks/install.sh from the folder above: it changes into its folder, where
+        lib/common.sh looked for it by that path and stopped."""
+        for args, says in ((("--version",), VERSION.split("-")[0]), (("help",), "./install.sh install ID")):
+            r = subprocess.run([f"{ROOT.name}/install.sh", *args], cwd=ROOT.parent, env=self.env,
+                               stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=120)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn(says, r.stdout)
+
+    def test_the_menu_entry_is_whole_when_its_translation_fails(self):
+        """lib/i18n.py failing partway left the app-menu entry empty or cut short: it's the English
+        one then."""
+        python = shutil.which("python3", path=self.env["PATH"].split(os.pathsep, 1)[1])     # (the one after the stubs)
+        self.stub("python3", f'case "$*" in *"i18n.py desktop"*) echo "[Desktop"; exit 1 ;; esac\nexec {python} "$@"')
+        r = self.sh("menu")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        entry = (self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop").read_text()
+        self.assertTrue(entry.startswith("[Desktop Entry]\n"), entry)
+        self.assertIn("\nName=Frame Tweaks\n", entry)
+        self.assertIn(f"\nExec=env FRAME_TWEAKS_GUI=1 {ROOT}/install.sh gui\n", entry)
+
     def test_debug_info_removes_names_and_addresses(self):
         """Here from a log of an earlier run, which the report includes."""
         self.only_the_probe()
@@ -465,7 +615,8 @@ class InstallState(unittest.TestCase):
         logs.mkdir(parents=True)
         (logs / "20260101-000000-1-install.log").write_text(
             f"Connecting to {phone}…\nalice@{host}:{self.home}/x$ adb connect 192.168.1.23:37011\n"
-            "bluetooth aa:bb:cc:dd:ee:0f, fe80::1c2b:3aff:fe4d:5e6f%wlan0, mail bob.smith@example.com\n")
+            "bluetooth aa:bb:cc:dd:ee:0f, fe80::1c2b:3aff:fe4d:5e6f%wlan0, mail bob.smith@example.com\n"
+            "alice     4242  0.3  1.2 python3 sync.py (alice's)\n")      # (a name of your own: everywhere)
         r = self.sh("debug-info", USER="alice")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         report = Path(re.search(r"^Wrote (.+)$", r.stdout, re.M)[1]).read_text()
@@ -474,6 +625,27 @@ class InstallState(unittest.TestCase):
         self.assertIn("bluetooth <mac>, <ipv6>%wlan0, mail <email>", report)
         for secret in (phone, host, str(self.home), "alice", "192.168", "example.com"):
             self.assertNotIn(secret, report)
+
+    def test_debug_info_keeps_names_the_user_name_is_part_of(self):
+        """The Frame's user is steamos: the name goes where it's the user's (a home folder,
+        name@host, user=, "for", uid=1000(name)), not from steamos-manager or /usr/lib/steamos."""
+        self.only_the_probe()
+        self.stub("hostname", "echo frame-bob")
+        logs = self.state / "logs"
+        logs.mkdir(parents=True)
+        (logs / "20260101-000000-1-install.log").write_text(
+            "steamos-manager[812]: started; /usr/lib/steamos/x; steamos_x steamos.service\n"
+            "steamos@frame-bob:~$ id\nuid=1000(steamos) gid=1000(steamos) groups=1000(steamos),998(wheel)\n"
+            "[sudo] password for steamos: \nsession opened for user steamos(uid=1000) by USER=steamos\n"
+            "/home/steamos/x /run/media/steamos/card\n")
+        r = self.sh("debug-info", USER="steamos")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        report = Path(re.search(r"^Wrote (.+)$", r.stdout, re.M)[1]).read_text()
+        for line in ("steamos-manager[812]: started; /usr/lib/steamos/x; steamos_x steamos.service",
+                     "<user>@<host>:~$ id", "uid=1000(<user>) gid=1000(<user>) groups=1000(<user>),998(wheel)",
+                     "[sudo] password for <user>: ", "session opened for user <user>(uid=1000) by USER=<user>",
+                     "/home/<user>/x /run/media/<user>/card"):
+            self.assertIn(line + "\n", report)
 
 
 LINKED = """\
@@ -585,6 +757,41 @@ class LinkedProject(unittest.TestCase):
                 break
             time.sleep(0.1)
         self.assertTrue((self.home / "linked-ran").exists())
+
+
+class UpdateWithoutGit(unittest.TestCase):
+    """./install.sh update in a copy without git (from an archive, say): there's no checkout to
+    move, but it's an update all the same, so held tweaks are left as they are; and with no tweak
+    loaded, it runs too. (In a copy of this repo, never this checkout: here update would run git.
+    InstallState's home and probe pack.)"""
+    stub, trust, only_the_probe, sh, tearDown, log, installed_at = (
+        InstallState.stub, InstallState.trust, InstallState.only_the_probe, InstallState.sh, InstallState.tearDown,
+        InstallState.log, InstallState.installed_at)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.copy = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.copy.cleanup)
+        cls.root = Path(cls.copy.name) / "frame-tweaks"
+        shutil.copytree(ROOT, cls.root, ignore=shutil.ignore_patterns(".git", "tmp", "references", "__pycache__"))
+
+    def setUp(self):
+        InstallState.setUp(self)
+
+    def test_a_held_tweak_is_left_as_it_is(self):
+        self.installed_at("0.0.1")
+        self.assertEqual(self.sh("hold", "probe").returncode, 0)
+        r = self.sh("update")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("held: left as it is", r.stdout)
+        self.assertEqual(self.log(), [])                           # (neither migrated nor reinstalled)
+        self.assertEqual(self.record.read_text(), "0.0.1\n")
+
+    def test_with_no_tweak_loaded(self):
+        (self.home / ".config/frame-tweaks/installer/trusted-packs").unlink()
+        r = self.sh("update")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Nothing installed yet.", r.stdout)
 
 
 if __name__ == "__main__":

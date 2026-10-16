@@ -88,6 +88,26 @@ class QtVenv(unittest.TestCase):
         self.assertEqual(self.left(FRAME_TWEAKS_REINSTALL="1"), "kept")
 
 
+class Bashrc(unittest.TestCase):
+    """ensure_path (and need_brew, after installing Homebrew) add their line to ~/.bashrc once, on
+    a line of its own: to a file whose last line had no newline it was glued onto that line, and
+    then found there, so it stayed broken."""
+    LINE = 'export PATH="$HOME/.local/bin:$PATH"'
+
+    def bashrc(self, before):
+        return sh(f"{before}; ensure_path; ensure_path; cat ~/.bashrc; echo END")
+
+    def test_after_a_last_line_without_a_newline(self):
+        self.assertEqual(self.bashrc("printf 'alias ll=\"ls -l\"' > ~/.bashrc"), f'alias ll="ls -l"\n{self.LINE}\nEND')
+
+    def test_after_a_last_line_with_one(self):
+        self.assertEqual(self.bashrc("printf 'alias ll=\"ls -l\"\\n' > ~/.bashrc"), f'alias ll="ls -l"\n{self.LINE}\nEND')
+
+    def test_empty_or_none(self):
+        self.assertEqual(self.bashrc(": > ~/.bashrc"), f"{self.LINE}\nEND")
+        self.assertEqual(self.bashrc("rm -f ~/.bashrc"), f"{self.LINE}\nEND")
+
+
 
 class SteamVRRestart(unittest.TestCase):
     """status_restart: a status line the installer window turns into ⟳ Restart SteamVR. vr_started_before:

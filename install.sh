@@ -17,7 +17,8 @@
 #   ./install.sh update [--to vX.Y.Z | --to stable] [--reinstall]
 #                                    move to the newest (or given) release, re-run what's installed
 #                                    (--to stable: the newest stable one, e.g. back from a test release;
-#                                    already there, nothing is re-run unless --reinstall)
+#                                    already there, nothing is re-run unless --reinstall; exit 3:
+#                                    updated, but a tweak didn't install again)
 #   ./install.sh channel [stable|beta]  which releases updates take: stable, or test releases too
 #   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
 #   ./install.sh debug-info          write a redacted report for bug reports
@@ -92,8 +93,9 @@ while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
     LINKED[$id]=$linked; SUDO[$id]=$sudo
 done < <(python3 lib/sft.py registry)
-# (Frame Tweaks' own commands work without: every pack off or not trusted)
-[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel)$ ]] ||
+# (Frame Tweaks' own commands work without: every pack off or not trusted. mods too: "mods on
+# core" is the way back.)
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report)$ ]] ||
     { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
@@ -110,7 +112,12 @@ ensure_menu_entry() {
         else install -m644 "icons/frame-tweaks-$n.png" "$icons/${n}x$n/apps/$id.png"; fi
     done
     install -m644 icons/frame-tweaks.png "$icons/256x256/apps/frame-tweaks.png"   # the window's own icon
-    sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" | python3 lib/i18n.py desktop > "$apps/$id.desktop"
+    # (Written whole, in English if translating it fails: written straight from lib/i18n.py, a
+    # failure there left the menu entry empty.)
+    local entry
+    entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" | python3 lib/i18n.py desktop) && [[ -n $entry ]] ||
+        entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop")
+    [[ -z $entry ]] || printf '%s\n' "$entry" | write_file "$apps/$id.desktop"
     install -m644 "share/metainfo/$id.metainfo.xml" "$HOME/.local/share/metainfo/"
     rm -f "$apps/steam-frame-tweaks.desktop"          # its old name
     update-desktop-database -q "$apps" 2>/dev/null || true
@@ -173,8 +180,28 @@ tweak_script() {
 }
 
 # status <id>: prints the component's one-line status; returns 0 ok, 1 missing (or uninstalled,
-# waiting for a SteamVR restart), 2 warning (or installed, waiting for one)
-status_of() { tweak_script "$1" status 2>/dev/null; }
+# waiting for a SteamVR restart), 2 warning (or installed, waiting for one).
+# A status.sh that stops without saying "missing" or "restart" (a command in it failed: set -e)
+# didn't find the tweak missing. Installed by Frame Tweaks (its version record), or with an exit
+# code other than 0, 1 or 2, it's "status check failed" (2): as "not installed", updates skipped
+# it and forget-settings deleted its settings. Without a record, exit 1 is still not installed
+# (a pack's status.sh may say so in words of its own). (The window's status() has the same rule.)
+status_of() {
+    local out rc err word why
+    err=$(mktemp) || err=/dev/null
+    out=$(tweak_script "$1" status 2>"$err"); rc=$?
+    word=${out#"${out%%[![:space:]]*}"}; word=${word%%[[:space:]]*}       # (its first word)
+    if [[ $rc -gt 2 || ($rc -eq 1 && $word != missing && $word != restart && -f $STATE/installed/$1) ]]; then
+        why=$(sed -e 's/\x1b\[[0-9;]*m//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$err" | grep . | tail -1)   # (what it said last)
+        if [[ -n $why ]]; then out="warning  $(t 'status check failed: %s' "$why")"
+        else out="warning  $(t 'status check failed')"; fi
+        rc=2
+    fi
+    [[ $err == /dev/null ]] || rm -f "$err"
+    [[ -z $out ]] || printf '%s\n' "$out"
+    return $rc
+}
+is_installed() { status_of "$1" >/dev/null; [[ $? -ne 1 ]]; }     # (status 0 or 2)
 installed_ids() {           # every tweak that is installed (or half: status 0 or 2)
     local id
     for id in "${IDS[@]}"; do status_of "$id" >/dev/null; [[ $? -ne 1 ]] && echo "$id"; done
@@ -246,6 +273,10 @@ cmd_status() {
     return $worst
 }
 
+# The tweaks a reinstall or an update installs again: they were installed, so they're installed
+# again whatever their needed.sh says (docs/mods.md). (A reinstall removes the record that
+# says so first.)
+WAS_INSTALLED=()
 cmd_install() {
     [[ $# -eq 0 ]] && { echo "$(t 'install what? (./install.sh list)')" >&2; exit 1; }
     ensure_menu_entry
@@ -254,7 +285,7 @@ cmd_install() {
     local id why failed=()
     for id in $(with_deps "$@"); do
         bold "── $id: ${TITLE[$id]}"
-        if [[ ! -f $STATE/installed/$id ]] && why=$(not_needed "$id"); then
+        if [[ ! -f $STATE/installed/$id && " ${WAS_INSTALLED[*]} " != *" $id "* ]] && why=$(not_needed "$id"); then
             echo "$(t 'Not needed on this Frame, so not installed: %s' "$why")"; echo; continue
         fi
         if held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]]; then
@@ -286,10 +317,11 @@ cmd_uninstall() {
     check_ids "$@"
     local id other d
     for id in "$@"; do
-        # Refuse to remove something an installed component depends on.
+        # Refuse to remove something an installed component depends on (installed: status 0, or 2
+        # with a warning).
         for other in "${IDS[@]}"; do
             for d in ${DEPS[$other]}; do
-                if [[ $d == "$id" && " $* " != *" $other "* ]] && status_of "$other" >/dev/null; then
+                if [[ $d == "$id" && " $* " != *" $other "* ]] && is_installed "$other"; then
                     echo "$(t '%s is needed by %s: uninstall %s too, or keep %s' "$id" "$other" "$other" "$id")" >&2; exit 1
                 fi
             done
@@ -433,7 +465,8 @@ remove_checkout() {
     elif [[ -e .git ]]; then
         if [[ -n $(git status --porcelain --ignored --untracked-files=all 2>/dev/null | grep -vE '(^|/)__pycache__/|\.pyc$') ]]; then
             why=$(t 'it has files of yours: changes, your own packs in packs/, or a tmp/ folder')
-        elif [[ -n $(git log --branches --not --remotes --oneline 2>/dev/null | head -1) ]]; then
+        # (HEAD too: a release checkout is a detached tag, and commits made there are on no branch)
+        elif [[ -n $(git log HEAD --branches --not --remotes --tags --oneline 2>/dev/null | head -1) ]]; then
             why=$(t 'it has commits that are not pushed anywhere')
         elif [[ $(git worktree list 2>/dev/null | wc -l) -gt 1 || -n $(git stash list 2>/dev/null | head -1) ]]; then
             why=$(t 'it has other worktrees or stashed changes')
@@ -455,6 +488,7 @@ cmd_reinstall_ids() {
     [[ $# -eq 0 ]] && { echo "$(t 'reinstall what?')" >&2; exit 1; }
     check_ids "$@"
     local id
+    for id in "$@"; do is_installed "$id" && WAS_INSTALLED+=("$id"); done
     # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
     # dashboard patches of the tweaks that use the VR environment helper.)
     # (a linked project isn't removed first: its own installer, run again, updates it)
@@ -519,6 +553,7 @@ keep: git reset --hard @{upstream}")" >&2
         fi
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi
+    export FRAME_TWEAKS_UPDATING=1      # (no git: an update all the same, so holds count)
     cmd_reinstall
 }
 
@@ -541,17 +576,23 @@ cmd_channel() {
 }
 
 cmd_reinstall() {
-    local id installed=() linked=()
+    local id installed=() linked=() rc
     for id in "${IDS[@]}"; do
-        status_of "$id" >/dev/null; [[ $? -ne 1 ]] || continue
+        # (not installed: a version record it left would have every update run again: it goes)
+        is_installed "$id" || { forget_version "$id"; continue; }
         # (a linked project updates its own way: its installer isn't run with every update)
         if [[ -n ${LINKED[$id]:-} ]]; then linked+=("$id"); else installed+=("$id"); fi
     done
     [[ ${#linked[@]} -gt 0 ]] && say "$(t 'Linked, so they update their own way (their row: ↻ runs their installer again): %s' "${linked[*]}")"
     [[ ${#installed[@]} -eq 0 ]] && { t 'Nothing installed yet.'; echo; return; }
+    WAS_INSTALLED=("${installed[@]}")
     run_migrations "${installed[@]}"
-    cmd_install "${installed[@]}"
+    cmd_install "${installed[@]}"; rc=$?
     echo; bold "$(t 'Checking the SteamOS/SteamVR parts the tweaks rely on')"; cmd_check_system || true
+    # (2: all installed, with a warning to read. 3, not 1: Frame Tweaks itself is up to date, a
+    # tweak didn't install again, which get.sh tells from an update that couldn't happen.)
+    [[ $rc -eq 0 || $rc -eq 2 ]] && return 0
+    return 3
 }
 
 cmd_gui() {               # [--show ID]: open on that tweak's page
@@ -560,13 +601,15 @@ cmd_gui() {               # [--show ID]: open on that tweak's page
     # with Arrow Pad, Screen snip and the NordVPN tray, if they're installed). Offer to set it up;
     # otherwise fall back to kdialog's plain checklist. (Naming those tweaks in the question read
     # as if it installed them: it doesn't.)
+    # (QtWidgets, not just PyQt6: a setup cut short can leave PyQt6 there without the parts the
+    # window needs)
     local qt="$QT_VENV"
-    if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
+    if ! "$qt/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null &&
        kdialog --title "Frame Tweaks" --yesno "$(t "Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\n\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages.")"; then
         setup_window ||
             kdialog --sorry "$(t "Couldn't install PyQt6 (what happened: %s); using the simple checklist." "$WINDOW_LOG")"
     fi
-    if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then
+    if "$qt/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null; then
         open_window "$@" && return 0
         kdialog --sorry "$(t "The full window didn't open (what happened: %s); using the simple checklist." "$WINDOW_LOG")"
     fi
@@ -589,7 +632,7 @@ setup_window() {
             "$(t "About 280 MB, usually a minute or two: the window opens when it's done.")" 2>/dev/null
         cmd_setup_window >> "$WINDOW_LOG" 2>&1
     fi
-    "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null
+    "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null
 }
 cmd_setup_window() {              # (_setup-window: in the Konsole window setup_window opens)
     if PIP_LOG="$WINDOW_LOG" FRAME_TWEAKS_PIP_PROGRESS=1 ensure_qt_venv "$(t "Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done.")"; then
@@ -607,9 +650,12 @@ cmd_setup_window() {              # (_setup-window: in the Konsole window setup_
 open_window() {
     # A copy of the interpreter under its own name, so SteamVR gives the window its own
     # controller bindings (it keys them by program name; Arrow Pad also runs on Python).
-    local py="$QT_VENV/bin/sft-python" start=$SECONDS rc
-    cp -u "$(readlink -f "$QT_VENV/bin/python")" "$py" 2>/dev/null || true
-    "$py" -c 'import PyQt6' 2>/dev/null || py="$QT_VENV/bin/python"
+    # (Replaced whenever it differs: cp -u couldn't write over a copy of a read-only interpreter,
+    # as Homebrew's is, and kept a copy dated later than a changed one.)
+    local py="$QT_VENV/bin/sft-python" start=$SECONDS rc src
+    src=$(readlink -f "$QT_VENV/bin/python")
+    cmp -s "$src" "$py" || install -m755 "$src" "$py" 2>/dev/null || true
+    "$py" -c 'import PyQt6.QtWidgets' 2>/dev/null || py="$QT_VENV/bin/python"
     mkdir -p "$LOGS"
     echo "$(date '+%F %T') opening the window ($FT_BUILD)" >> "$WINDOW_LOG"
     "$py" gui/frame-tweaks-gui.py "$@" 2> >(tee -a "$WINDOW_LOG" >&2)
@@ -659,7 +705,7 @@ cmd_kdialog_gui() {
     exec konsole --separate -e bash -c "$cmd"
 }
 
-usage() { sed -n '2,/^#   \.\/install\.sh ID\.\.\./s/^# \{0,1\}//p' "$0"; }   # (the header, to the last command)
+usage() { sed -n '2,/^#   \.\/install\.sh ID\.\.\./s/^# \{0,1\}//p' "$REPO_DIR/install.sh"; }   # (the header, to the last command)
 
 # ---- stopping a tweak's programs ------------------------------------------------------------
 # A tweak's manifest lists the programs it runs (processes: pgrep -f patterns, ~ = $HOME).
@@ -696,12 +742,13 @@ forget_version() { rm -f "$STATE/installed/$1"; }
 held() { [[ -f "$STATE/held/$1" ]]; }
 # stale_tweaks: did another version install a tweak an update reinstalls (not held, not linked)?
 # Its record is written only when its installer succeeds, so this is what an update has yet to do.
+# (Only if it's still installed: an update doesn't reinstall one that isn't.)
 stale_tweaks() {
     local r id
     for r in "$STATE"/installed/*; do
         [[ -f $r ]] || continue; id=${r##*/}
         is_component "$id" && [[ -z ${LINKED[$id]:-} ]] && ! held "$id" || continue
-        [[ $(<"$r") == "$VERSION" ]] || return 0
+        [[ $(<"$r") != "$VERSION" ]] && is_installed "$id" && return 0
     done
     return 1
 }
@@ -713,7 +760,8 @@ run_migrations() {
         held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
         old=$(cat "$STATE/installed/$id")
         # Only from an older release: going back to an older one doesn't run them backwards.
-        [[ $old != "$VERSION" && $(printf '%s\n%s\n' "$old" "$VERSION" | sort -V | head -1) == "$old" ]] || continue
+        # (Ranked as releases are: 0.7.0-rc.2 before 0.7.0, which plain sort -V puts after it.)
+        tag_newer "$VERSION" "$old" || continue
         bold "── migrating $id from $old"
         bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $(t '%s migration failed' "$id")" >&2
     done
@@ -743,6 +791,16 @@ cmd_debug_info() {
     # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed -E ("Galaxy S24+ (Bob)").
     local phone; phone=$(bash -c '. "$HOME/.config/frame-tweaks/phone.conf" 2>/dev/null; printf %s "${PHONE_NAME:-}"' |
                          sed 's/[][\.*^$/&|(){}+?]/\\&/g')       # (read as phone does: it's shell-quoted)
+    # Your user name, everywhere as a word. The Frame's own, steamos, names nobody and is part of
+    # SteamOS's names (steamos-manager, /usr/lib/steamos): it's replaced only where it names you
+    # (in /home/NAME, NAME@host, user=NAME, "for NAME" and uid=1000(NAME)).
+    local u w='[^[:alnum:]_.-]' user=()
+    u=$(printf %s "${USER:-$(id -un)}" | sed 's/[][\.*^$/&|(){}+?]/\\&/g')
+    if [[ -n $u && $u != steamos ]]; then user=(-e "s/\b$u\b/<user>/g")
+    elif [[ -n $u ]]; then user=(-e "s#/(home|media)/$u($w|\$)#/\1/<user>\2#g" -e "s/(^|$w)$u@/\1<user>@/g"
+                         -e "s/([Uu][Ss][Ee][Rr]([Nn][Aa][Mm][Ee])?|LOGNAME)=$u($w|\$)/\1=<user>\3/g"
+                         -e "s/(\b[Ff]or( user)?|\b[Uu]ser) $u($w|\$)/\1 <user>\3/g" -e "s/([=,][0-9]+)\($u\)/\1(<user>)/g")
+    fi
     {
         echo "# Frame Tweaks debug info (user names, home path, host and phone names, IP, MAC and e-mail addresses removed)"
         echo "frame-tweaks: $FT_BUILD (release $VERSION); channel: $(release_channel)"
@@ -774,8 +832,9 @@ cmd_debug_info() {
         tail -20 "$LOGS/unstick.log" 2>/dev/null || true
         echo; echo "## the full window: setting it up and opening it, last 40"
         tail -40 "$WINDOW_LOG" 2>/dev/null || true
-    } | sed -E -e "s|$HOME|~|g" -e "s/\b$USER\b/<user>/g" -E -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \
-             -e 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/<ip>/g' -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' \
+    } | sed -E -e "s|$HOME|~|g" -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' "${user[@]}" \
+             -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \
+             -e 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/<ip>/g' \
              -e 's/\b([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}\b/<mac>/g' -e 's/\b([[:xdigit:]]{1,4}:){7}[[:xdigit:]]{1,4}\b|[[:xdigit:]]{0,4}(:[[:xdigit:]]{1,4})*::([[:xdigit:]]{1,4}:)*[[:xdigit:]]{0,4}/<ipv6>/g' \
              ${phone:+-e "s/$phone/<phone>/g"} \
         > "$out"
