@@ -172,7 +172,7 @@ them.
 
 | | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
-| 🔋 | [**Battery charge limit**](packs/core/charge-limit/) 🧪 *(sudo)* | Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge. | A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame. |
+| 🔋 | [**Battery charge limit**](packs/core/charge-limit/) 🧪 *(sudo)* | Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 1% below it, so the battery stays within 1% of the limit. Plugged in, the Frame then runs mostly from the charger or power bank. Charge to 100% once, in its settings, lifts the limit until the next full charge. | A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame. |
 
 ### Privacy & security
 

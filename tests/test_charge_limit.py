@@ -1,5 +1,5 @@
 """Battery charge limit (packs/core/charge-limit): charge-limit pauses the charger at the limit
-and lets it charge again 5% below, lifts only its own pause, follows the setting and Charge to
+and lets it charge again 1% below, lifts only its own pause, follows the setting and Charge to
 100% once, and lets the battery charge when it stops; its status says how it's holding, and when
 SteamOS has a charge limit of its own for the Frame. A folder laid out like /sys stands in for the
 battery and the charger."""
@@ -57,15 +57,16 @@ class ChargeLimit(unittest.TestCase):
     def paused(self):
         return self.switch.read_text().strip() == "1"
 
-    def test_pauses_at_the_limit_and_resumes_five_below(self):
-        for capacity, paused in ((79, False), (80, True), (81, True), (77, True), (76, True), (75, False), (78, False)):
+    def test_pauses_at_the_limit_and_resumes_one_below(self):
+        for capacity, paused in ((78, False), (79, False), (80, True), (81, True), (80, True), (79, False), (80, True)):
             self.battery(capacity)
             self.cl("--once")
             self.assertEqual(self.paused(), paused, capacity)
 
     def test_the_setting(self):
         self.assertEqual(self.cl("--limit"), "80\n")                   # (no settings yet: 80)
-        for value, means in (("90", "90"), ("off", "off"), ("7", "80"), ("x; rm -rf ~", "80"), ("100", "100")):
+        for value, means in (("90", "90"), ("74", "74"), ("76", "76"), ("78", "78"), ("off", "off"), ("7", "80"),
+                             ("x; rm -rf ~", "80"), ("100", "100")):
             self.limit(value)
             self.assertEqual(self.cl("--limit"), means + "\n", value)
         self.limit("90")

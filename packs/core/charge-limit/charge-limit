@@ -2,7 +2,7 @@
 # charge-limit (Frame Tweaks, packs/core/charge-limit): holds the Frame's battery at a charge
 # limit. At the limit it pauses the charger (its charging_pause switch, which the tweak's udev
 # rule makes yours), and RESUME_BELOW percent under it lets it charge again. Plugged in and
-# paused, the Frame runs from the charger and leaves the battery alone.
+# paused, the Frame runs mostly from the charger; the battery still gives a little (README).
 #   charge-limit --run          a check every 30 seconds (its user service); charging resumes when it stops
 #   charge-limit --once         one check
 #   charge-limit --full-once    charge to 100% once (until the battery is full, or the Frame restarts)
@@ -17,7 +17,7 @@ CONF=${FRAME_TWEAKS_CHARGE_CONF:-$HOME/.config/frame-tweaks/charge-limit.conf}
 # paused (the pause is ours), full-once; the user service's runtime folder (desktop mode has its own)
 RUN=${FRAME_TWEAKS_CHARGE_RUN:-/run/user/$(id -u)/charge-limit}
 DEFAULT=80
-RESUME_BELOW=5
+RESUME_BELOW=1        # (1%: small swings, which age the battery about as much as holding it; README)
 INTERVAL=${FRAME_TWEAKS_CHARGE_INTERVAL:-30}
 
 log() { printf '%s\n' "$*"; }

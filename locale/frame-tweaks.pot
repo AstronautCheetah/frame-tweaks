@@ -2752,7 +2752,7 @@ msgid "stopped a running Arrow Pad"
 msgstr ""
 
 #: packs/core/charge-limit/README.md
-msgid "80% (the battery wears least)"
+msgid "80% (the default)"
 msgstr ""
 
 #: packs/core/charge-limit/README.md
@@ -2779,12 +2779,12 @@ msgstr ""
 
 #: packs/core/charge-limit/README.md
 msgid ""
-"Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame runs from the charger or power bank and leaves the battery alone."
+"Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
 msgstr ""
 
 #: packs/core/charge-limit/README.md
 msgid ""
-"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
+"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 1% below it, so the battery stays within 1% of the limit. Plugged in, the Frame then runs mostly from the charger or power bank. Charge to 100% once, in its settings, lifts the limit until the next full charge."
 msgstr ""
 
 #: packs/core/charge-limit/README.md
@@ -2797,7 +2797,7 @@ msgstr ""
 
 #: packs/core/charge-limit/README.md
 msgid ""
-"Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
+"Stop charging at 80% (or 74 to 90%) while the Frame is on, for a battery that wears more slowly"
 msgstr ""
 
 #: packs/core/charge-limit/README.md
