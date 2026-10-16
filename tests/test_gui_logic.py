@@ -785,6 +785,18 @@ class ReadmeShown(unittest.TestCase):
                                 '<sub>What it shows,\nin two lines.</sub></p>\n\nAfter.\n')
         self.assertEqual(md, "![A view](a.png)\n\n*What it shows, in two lines.*\n\nAfter.\n")
 
+    def test_pictures_and_line_breaks_lose_nothing(self):
+        """Every picture in a paragraph, its attributes in any order and quoted any way; one with no
+        </p> ends where its HTML block does (a blank line), not at a later </p>; a <br> is a space;
+        code is left as it is."""
+        f = gui.plain_markdown
+        self.assertEqual(f('<p align=center><img src=a.png alt=A><img src="b.png" alt="B"></p>\n'),
+                         "![A](a.png) ![B](b.png)\n")
+        self.assertEqual(f("<p><img alt='A' src='a.png'>\n\nAfter.\n\n<p>x</p>\n"), "![A](a.png)\n\nAfter.\n\n<p>x</p>\n")
+        self.assertEqual(f("line one<br>line two"), "line one line two")
+        for kept in ("Use `<br>` here.", "```\na<br>b <sub>c</sub>\n```\n", "```\n<p><img src=a.png></p>\n```\n"):
+            self.assertEqual(f(kept), kept)
+
 
 class EveryPageShown(unittest.TestCase):
     """Every Markdown page the window shows (each tweak's README in the packs in use, the README,
@@ -827,31 +839,70 @@ class EveryPageShown(unittest.TestCase):
 
 class DetailsScroll(unittest.TestCase):
     """A tweak's page scrolls as one below its header (Back, the title): a long table of facts
-    left the README a narrow strip to scroll in. The README is shown whole; a wheel over it, and a
-    link to one of its headings, scroll the page."""
-    def test_one_page(self):
-        from PyQt6.QtCore import QPoint, QPointF
-        from PyQt6.QtGui import QWheelEvent
-        from PyQt6.QtTest import QTest
+    left the README a narrow strip to scroll in. The README is shown whole; a wheel over it, the
+    keys that scroll, and a link to one of its headings, scroll the page; Ctrl+wheel doesn't (it
+    zooms the README), and what's wider than it scrolls sideways in it."""
+    def setUp(self):
         from PyQt6.QtWidgets import QApplication
         self.app = QApplication.instance() or QApplication([])
+
+    def show(self, widget, width, height):
+        widget.resize(width, height)
+        widget.show()
+        self.addCleanup(widget.deleteLater)
+        self.addCleanup(widget.close)
+
+    def wait_for(self, done):
+        from PyQt6.QtTest import QTest
+        for _ in range(100):                      # (fit runs once the layout has settled)
+            if done():
+                return
+            QTest.qWait(20)
+
+    def wheel(self, view, dy, mods=gui.Qt.KeyboardModifier.NoModifier):
+        from PyQt6.QtCore import QPoint, QPointF
+        from PyQt6.QtGui import QWheelEvent
+        from PyQt6.QtWidgets import QApplication
+        vp = view.viewport()
+        at = QPointF(vp.width() / 2, 10)
+        QApplication.sendEvent(vp, QWheelEvent(at, QPointF(vp.mapToGlobal(at.toPoint())), QPoint(0, 0), QPoint(0, dy),
+                                               gui.Qt.MouseButton.NoButton, mods, gui.Qt.ScrollPhase.NoScrollPhase, False))
+
+    def test_one_page(self):
+        from PyQt6.QtGui import QKeyEvent
+        from PyQt6.QtWidgets import QApplication
         page = gui.Details(mock.Mock(latest={}), gui.component("charge-limit"), (1, "not installed"))
-        page.resize(1000, 600)
-        page.show()
-        QTest.qWait(100)
+        self.show(page, 1000, 600)
         outer = page.scroll.verticalScrollBar()
+        self.wait_for(lambda: outer.maximum() > 0)
         self.assertEqual(page.readme.verticalScrollBar().maximum(), 0)          # (shown whole)
         self.assertGreater(outer.maximum(), 0)
-        vp = page.readme.viewport()
-        at = QPointF(vp.width() / 2, 10)
-        QApplication.sendEvent(vp, QWheelEvent(at, QPointF(vp.mapToGlobal(at.toPoint())), QPoint(0, 0), QPoint(0, -240),
-                                               gui.Qt.MouseButton.NoButton, gui.Qt.KeyboardModifier.NoModifier,
-                                               gui.Qt.ScrollPhase.NoScrollPhase, False))
+        self.wheel(page.readme, -240)
         self.assertGreater(outer.value(), 0)
+        outer.setValue(0)
+        self.wheel(page.readme, -240, gui.Qt.KeyboardModifier.ControlModifier)
+        self.assertEqual(outer.value(), 0)
+        for key in (gui.Qt.Key.Key_PageDown, gui.Qt.Key.Key_End):
+            outer.setValue(0)
+            QApplication.sendEvent(page.readme, QKeyEvent(QKeyEvent.Type.KeyPress, key, gui.Qt.KeyboardModifier.NoModifier))
+            self.assertGreater(outer.value(), 0, key)
         outer.setValue(0)
         gui.to_heading(page.readme, "how-it-works")
         self.assertGreater(outer.value(), 0)
-        page.close()
+
+    def test_wider_than_the_page(self):
+        from PyQt6.QtWidgets import QScrollArea
+        view = gui.full_height(gui.readme_browser("Intro.\n\n![The window](docs/images/details.png)\n\nAfter.\n",
+                                                  {"official": True, "id": None, "dir": gui.REPO}))
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setWidget(view)
+        self.show(area, 400, 600)
+        bar = view.horizontalScrollBar()
+        self.wait_for(lambda: bar.maximum() > 0 and bar.isVisible())
+        self.assertGreater(bar.maximum(), 0)
+        self.assertTrue(bar.isVisible())
+        self.assertEqual(view.verticalScrollBar().maximum(), 0)                 # (the bar hides none of it)
 
 
 class ContributeRow(unittest.TestCase):

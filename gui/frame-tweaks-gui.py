@@ -25,7 +25,7 @@ from PyQt6 import sip
 from PyQt6.QtCore import QEvent, QObject, QPoint, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontMetrics, QIcon, QImage
-from PyQt6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QAbstractButton, QAbstractSlider, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
                              QVBoxLayout, QWidget)
 
@@ -239,15 +239,16 @@ def plain_markdown(text):
     text after an HTML block it can't place, so none may be left): centred pictures become
     pictures, with their caption (<br><sub>…</sub>) as a line in italics; folded <details>
     sections show open with their summary in bold; badges (pictures from the web) are left out;
-    and any <br> or <sub> left over goes, its text kept."""
+    and any <br> left over becomes a space, any <sub> goes, its text kept. Code is left as it is."""
     def picture(m):
-        img = re.search(r'<img\b[^>]*?\bsrc="([^"]+)"[^>]*?\balt="([^"]*)"', m[0])
+        imgs = [html_attrs(tag) for tag in re.findall(r"<img\b[^>]*>", m[0])]
         caption = re.search(r"<sub>(.*?)</sub>", m[0], flags=re.S)
-        if not img:
-            return m[0]
-        return f"![{img[2]}]({img[1]})" + (f"\n\n*{' '.join(caption[1].split())}*" if caption else "")
-    text = re.sub(r"<p\b[^>]*>\s*<img\b.*?</p>", picture, text, flags=re.S)
-    text = re.sub(r"<br\s*/?>|</?sub>", "", text)
+        return " ".join(f"![{a.get('alt', '')}]({a['src']})" for a in imgs if a.get("src")) + (
+            f"\n\n*{' '.join(caption[1].split())}*" if caption else "")
+    # (a picture's paragraph ends at its </p>, or where an HTML block does: a blank line)
+    text = in_prose(text, lambda b: re.sub(r"<p\b[^>]*>\s*<img\b(?:(?!<p\b|</p>|\n[ \t]*\n).)*(?:</p>|(?=\n[ \t]*\n)|\Z)",
+                                           picture, b, flags=re.S), blocks=True)
+    text = in_prose(text, lambda p: re.sub(r"</?sub>", "", re.sub(r"<br\s*/?>", " ", p)))
     text = literal_placeholders(text)
     text = re.sub(r"<details>\s*<summary>(.*?)</summary>", lambda m: f"**{m[1].strip()}**\n", text, flags=re.S)
     text = re.sub(r"</details>", "", text)
@@ -261,23 +262,30 @@ HTML_TAGS = {"a", "b", "i", "em", "strong", "code", "kbd", "img", "p", "br", "su
              "mark", "del", "ins", "abbr", "q"}
 
 
+def in_prose(text, fn, blocks=False):
+    """Markdown with fn applied to what isn't code: ``` blocks are left as they are; and, unless
+    blocks (fn given all the text between them), 4-space-indented lines and `inline code` too."""
+    def line(l):
+        if l.startswith("    "):
+            return l
+        return "".join(p if p.startswith("`") else fn(p) for p in re.split(r"(`[^`\n]*`)", l))
+    return "".join(b if b.startswith("```") else fn(b) if blocks else "\n".join(map(line, b.split("\n")))
+                   for b in re.split(r"(^```.*?^```)", text, flags=re.S | re.M))
+
+
+def html_attrs(tag):
+    """An HTML tag's attributes, lowercase names: quoted either way or not at all, in any order."""
+    return {k.lower(): v[1:-1] if v[:1] in "\"'" else v
+            for k, v in re.findall(r"""([\w-]+)\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+)""", tag)}
+
+
 def literal_placeholders(text):
     """A <placeholder> in prose ("NordVPN <country>") is an HTML tag to a Markdown reader: GitHub
     hides it, and Qt's drops all the text after it. Outside code, one that isn't an HTML tag (nor
     an <https://…> link) is shown as written."""
-    def prose(part):
-        part = re.split(r"(`[^`\n]*`)", part)                  # (inline code: as it is)
-        return "".join(p if p.startswith("`") else re.sub(
-            r"<(/?)([A-Za-z][\w.-]*)([^<>]*)>",
-            lambda m: m[0] if m[2].lower() in HTML_TAGS or ":" in m[0] else f"&lt;{m[1]}{m[2]}{m[3]}&gt;", p)
-            for p in part)
-    out = []
-    for block in re.split(r"(^```.*?^```)", text, flags=re.S | re.M):   # (code blocks: as they are)
-        if block.startswith("```"):
-            out.append(block)
-        else:
-            out.append("\n".join(l if l.startswith("    ") else prose(l) for l in block.split("\n")))
-    return "".join(out)
+    return in_prose(text, lambda p: re.sub(
+        r"<(/?)([A-Za-z][\w.-]*)([^<>]*)>",
+        lambda m: m[0] if m[2].lower() in HTML_TAGS or ":" in m[0] else f"&lt;{m[1]}{m[2]}{m[3]}&gt;", p))
 
 
 def readme_browser(text, comp):
@@ -304,9 +312,7 @@ def to_heading(view, anchor):
         if block.blockFormat().headingLevel() and \
                 re.sub(r"[^\w\- ]", "", block.text().strip().lower()).replace(" ", "-") == anchor:
             top = int(view.document().documentLayout().blockBoundingRect(block).top())
-            area = view.parentWidget()
-            while area is not None and not isinstance(area, QScrollArea):
-                area = area.parentWidget()
+            area = page_area(view)
             if getattr(view, "whole", False) and area is not None:
                 area.verticalScrollBar().setValue(view.viewport().mapTo(area.widget(), QPoint(0, top)).y())
             else:
@@ -315,38 +321,79 @@ def to_heading(view, anchor):
         block = block.next()
 
 
+def page_area(view):
+    """The scroll area a widget is on (a README shown whole: the page around it), or None."""
+    area = view.parentWidget()
+    while area is not None and not isinstance(area, QScrollArea):
+        area = area.parentWidget()
+    return area
+
+
+_Step = QAbstractSlider.SliderAction
+PAGE_KEYS = {Qt.Key.Key_Up: _Step.SliderSingleStepSub, Qt.Key.Key_Down: _Step.SliderSingleStepAdd,
+             Qt.Key.Key_PageUp: _Step.SliderPageStepSub, Qt.Key.Key_PageDown: _Step.SliderPageStepAdd,
+             Qt.Key.Key_Space: _Step.SliderPageStepAdd,
+             Qt.Key.Key_Home: _Step.SliderToMinimum, Qt.Key.Key_End: _Step.SliderToMaximum}
+
+
 class _FitHeight(QObject):
-    """(full_height's: a new width, a new height; a wheel over it scrolls the page around it)"""
+    """(full_height's: a new width, a new height; the wheel and the keys that scroll, over it or
+    in it, scroll the page around it, and a link Tab moves to is scrolled into view there. Ctrl+
+    wheel still zooms the README, and a sideways scroll moves a wide picture or code line.)"""
     def __init__(self, view):
         super().__init__(view)
         self.view = view
 
     def eventFilter(self, obj, ev):
+        if sip.isdeleted(self.view):                # (the viewport's last events, as it goes)
+            return False
         if ev.type() == QEvent.Type.Resize and obj is self.view:
             QTimer.singleShot(0, self.view.fit)
-        elif ev.type() == QEvent.Type.Wheel:
-            area = self.view.parentWidget()
-            while area is not None and not isinstance(area, QScrollArea):
-                area = area.parentWidget()
-            if area is not None:
-                QApplication.sendEvent(area.verticalScrollBar(), ev)
+            return False
+        area = page_area(self.view)
+        if area is None:
+            return False
+        if ev.type() == QEvent.Type.Wheel:
+            d = ev.angleDelta()
+            if ev.modifiers() & Qt.KeyboardModifier.ControlModifier or abs(d.x()) > abs(d.y()):
+                return False
+            QApplication.sendEvent(area.verticalScrollBar(), ev)
+            return True
+        if ev.type() == QEvent.Type.KeyPress and obj is self.view:
+            if ev.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab):
+                QTimer.singleShot(0, lambda: self.show_cursor(area))
+            elif ev.key() in PAGE_KEYS and not ev.modifiers() & ~(
+                    Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.KeypadModifier):
+                area.verticalScrollBar().triggerAction(PAGE_KEYS[ev.key()])
                 return True
         return False
 
+    def show_cursor(self, area):
+        if sip.isdeleted(self.view) or sip.isdeleted(area):
+            return
+        at = self.view.cursorRect()
+        p = self.view.viewport().mapTo(area.widget(), at.center())
+        area.ensureVisible(p.x(), p.y(), 20, at.height() + 20)
+
 
 def full_height(view):
-    """A QTextBrowser shown whole, as tall as its text at its width, with no scroll bar of its own:
-    the page it's on scrolls instead (a wheel or laser scroll over it reaches the page)."""
+    """A QTextBrowser shown whole, as tall as its text at its width, with no vertical scroll bar of
+    its own: the page it's on scrolls instead (a wheel, laser scroll or key over it reaches the
+    page). Its own horizontal bar shows when something is wider (a picture, a line of code)."""
     view.whole = True
     view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-    view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
     def fit(*_args):
         if sip.isdeleted(view):
             return
         doc = view.document()
-        doc.setTextWidth(view.viewport().width())
-        height = int(doc.size().height()) + 2 * view.frameWidth() + 4
+        width = view.viewport().width()
+        if doc.textWidth() != width:            # (setting it lays all of the README out again)
+            doc.setTextWidth(width)
+        wide = doc.size().width() > width + 1
+        height = int(doc.size().height()) + 2 * view.frameWidth() + 4 + (
+            view.horizontalScrollBar().sizeHint().height() if wide else 0)
         if view.height() != height:
             view.setFixedHeight(height)
     view.fit = fit
