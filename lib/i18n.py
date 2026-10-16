@@ -461,7 +461,12 @@ def relabel(path, catalogue=None):
     for g in groups:
         english = dict(re.findall(rf"(?m)^X-Frame-Tweaks-({'|'.join(MENU_KEYS)})=(.+)$", g))
         for key, en in english.items():
-            g = re.sub(rf"(?m)^{key}=.*$", lambda _m, k=key, e=en: f"{k}={cat.gettext(e)}", g)
+            # Only a label of ours (its English or a translation): one you gave it, in KDE's menu
+            # editor say, stays. (lib/menuedits.py frame_label: the same rule.)
+            ours = {en.strip(), cat.gettext(en).strip(),
+                    *(t.strip() for t in re.findall(rf"(?m)^{key}\[[^]]+\]=(.*)$", g))}
+            g = re.sub(rf"(?m)^{key}=(.*)$",
+                       lambda m, k=key, e=en, o=ours: f"{k}={cat.gettext(e)}" if m[1].strip() in o else m[0], g)
         out.append(g)
     new = "".join(out)
     if new == text:

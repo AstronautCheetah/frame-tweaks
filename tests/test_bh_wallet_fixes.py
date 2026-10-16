@@ -23,7 +23,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import sandbox_env, stub  # noqa: E402
+from helpers import kde_saves, sandbox_env, stub  # noqa: E402
 WALLET = ROOT / "packs/core/wallet"
 
 
@@ -204,6 +204,91 @@ class Launcher(Home):
                 contextlib.redirect_stdout(io.StringIO()) as out:
             self.wl.main()
         self.assertEqual(out.getvalue().split(), ["org.notes"])
+
+    def test_your_name_and_icon_stay_when_it_is_wrapped_again(self):
+        """A rename in KDE's menu editor (saved into the wrapper itself) went back the next time
+        the app was wrapped again: the wallet's install does it at every update."""
+        entry(self.flat / "org.notes.desktop", "/usr/bin/flatpak run --branch=stable org.notes @@u %U @@",
+              "Icon=org.notes", "Comment=Notes")
+        self.launcher("--gate", "org.notes")
+        menu = self.apps / "org.notes.desktop"
+        menu.write_text(kde_saves(menu.read_text(), Name="My notes", Icon="my-notes"))
+        entry(self.flat / "org.notes.desktop", "/usr/bin/flatpak run --branch=stable org.notes --new @@u %U @@",
+              "Icon=org.notes", "Comment=Notes, everywhere")           # (the app updated meanwhile)
+        self.launcher("--gate", "org.notes")
+        lines = menu.read_text().splitlines()
+        for line in ("Name=My notes", "Icon=my-notes", "Comment=Notes, everywhere", "X-FrameTweaks-Wallet=true",
+                     f"Exec={self.wl.GATE} {self.wl.WRAPPER} /usr/bin/flatpak run --branch=stable "
+                     "--talk-name=org.kde.kwalletd6 --talk-name=org.freedesktop.secrets org.notes --new @@u %U @@"):
+            self.assertIn(line, lines)
+        self.assertEqual(lines[0], "[Desktop Entry]")                  # (KDE had sorted the groups)
+
+    def test_your_command_options_stay_wrapped_as_asked(self):
+        entry(self.flat / "org.notes.desktop", "/usr/bin/flatpak run --branch=stable org.notes @@u %U @@")
+        self.launcher("--gate", "org.notes")
+        menu = self.apps / "org.notes.desktop"
+
+        def command():
+            return next(line[5:] for line in menu.read_text().splitlines() if line.startswith("Exec="))
+        menu.write_text(kde_saves(menu.read_text(), Exec=command().replace(" @@u", " --dark @@u")))
+        talk = "--talk-name=org.kde.kwalletd6 --talk-name=org.freedesktop.secrets"
+        self.launcher("--gate", "org.notes")
+        self.assertEqual(command(), f"{self.wl.GATE} {self.wl.WRAPPER} /usr/bin/flatpak run --branch=stable {talk} "
+                                    "org.notes --dark @@u %U @@")
+        self.launcher("--no-gate", "--no-shared", "org.notes")        # (what it added goes with its option)
+        self.assertEqual(command(), "/usr/bin/flatpak run --branch=stable org.notes --dark @@u %U @@")
+        self.launcher("--gate", "--electron", "org.notes")
+        self.launcher("--gate", "org.notes")                          # (once, however often it's rebuilt)
+        self.assertEqual(command(), f"{self.wl.GATE} {self.wl.WRAPPER} /usr/bin/flatpak run --branch=stable {talk} "
+                                    "org.notes --password-store=kwallet6 --dark @@u %U @@")
+        self.launcher("--remove", "org.notes")
+        self.assertEqual(command(), "/usr/bin/flatpak run --branch=stable org.notes --dark @@u %U @@")
+
+    def test_environment_variables_you_give_it_go_after_the_gate(self):
+        """KDE's menu editor writes them in front of the command (env VAR=… <the wrapper>): the gate
+        still runs first, and a Flatpak keeps its way to the wallet."""
+        entry(self.flat / "org.notes.desktop", "/usr/bin/flatpak run --branch=stable org.notes @@u %U @@")
+        self.launcher("--gate", "org.notes")
+        menu = self.apps / "org.notes.desktop"
+        command = next(line[5:] for line in menu.read_text().splitlines() if line.startswith("Exec="))
+        menu.write_text(kde_saves(menu.read_text(), Exec="env ELECTRON_OZONE_PLATFORM_HINT=wayland " + command))
+        self.launcher("--gate", "org.notes")
+        self.assertIn(f"Exec={self.wl.GATE} {self.wl.WRAPPER} env ELECTRON_OZONE_PLATFORM_HINT=wayland /usr/bin/flatpak "
+                      "run --branch=stable --talk-name=org.kde.kwalletd6 --talk-name=org.freedesktop.secrets org.notes "
+                      "@@u %U @@", menu.read_text().splitlines())
+        self.launcher("--remove", "org.notes")
+        self.assertIn("Exec=env ELECTRON_OZONE_PLATFORM_HINT=wayland /usr/bin/flatpak run --branch=stable org.notes "
+                      "@@u %U @@", menu.read_text().splitlines())
+
+    def test_your_edits_stay_when_the_protection_comes_off(self):
+        # A Flatpak's entry: an override of the same name, with your edits, as KDE's menu editor saves one.
+        entry(self.flat / "org.notes.desktop", "/usr/bin/flatpak run org.notes @@u %U @@")
+        self.launcher("--gate", "org.notes")
+        menu = self.apps / "org.notes.desktop"
+        menu.write_text(kde_saves(menu.read_text(), Name="My notes"))
+        self.launcher("--remove", "org.notes")
+        text = menu.read_text()
+        self.assertIn("Name=My notes", text.splitlines())
+        self.assertIn("Exec=/usr/bin/flatpak run org.notes @@u %U @@", text.splitlines())
+        self.assertNotIn("X-FrameTweaks-Wallet", text)
+        self.assertFalse((self.wl.BUILT_DIR / "org.notes.desktop").exists())
+        self.launcher("--gate", "org.notes")                          # (yours now: wrapped, and given back)
+        self.launcher("--remove", "org.notes")
+        self.assertEqual(menu.read_text(), text)
+        # An app's own entry, kept while it's wrapped: back with your edits.
+        own = self.apps / "my.app.desktop"
+        entry(own, "/opt/app/run %U")
+        self.launcher("--gate", "my.app")
+        own.write_text(kde_saves(own.read_text(), Icon="my-icon"))
+        self.launcher("--remove", "my.app")
+        self.assertIn("Icon=my-icon", own.read_text().splitlines())
+        self.assertIn("Exec=/opt/app/run %U", own.read_text().splitlines())
+        self.assertFalse((self.orig / "my.app.desktop").exists())
+        # Nothing changed: as before, the Flatpak's own entry shows again.
+        entry(self.flat / "org.chat.desktop", "/usr/bin/flatpak run org.chat")
+        self.launcher("--gate", "org.chat")
+        self.launcher("--remove", "org.chat")
+        self.assertFalse((self.apps / "org.chat.desktop").exists())
 
 
 class Timers(Home):
@@ -607,6 +692,38 @@ class Scripts(Home):
         run(uninstall)                                            # removing it still removes both
         self.assertFalse((apps / "dictate.desktop").exists())
         self.assertFalse((kept / "dictate.desktop").exists())
+
+    def test_a_name_you_gave_a_protected_entry_stays(self):
+        """Dictation's entry, password first, renamed in KDE's menu editor: the name stays through a
+        reinstall (↻) and a keyboard language change; uninstalling takes the copies kept for it."""
+        self.tool(self.stubs, "systemctl", "exit 0")
+        self.tool(self.stubs, "update-desktop-database", "exit 0")
+        (self.bin / "wallet-launcher").write_bytes((WALLET / "wallet-launcher").read_bytes())
+        (self.bin / "wallet-launcher").chmod(0o755)
+        menu = self.home / ".local/share/applications/dictate.desktop"
+        built = self.home / ".local/share/frame-tweaks/launcher-built/dictate.desktop"
+        desktop = ROOT / "packs/core/dictation/dictate.desktop"
+
+        def run(command, **env):
+            r = subprocess.run(["bash", "-c", f'source "{ROOT}/lib/common.sh"; {command}'], capture_output=True,
+                               text=True, timeout=60, env=sandbox_env(self.home, self.stubs, USER="test", **env))
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        uninstall = f'bash "{ROOT}/packs/core/dictation/uninstall.sh"'
+        run(f'install_desktop "{desktop}"')
+        run('"$BIN/wallet-launcher" --gate --no-shared dictate')
+        menu.write_text(kde_saves(menu.read_text(), Name="Talk to type"))
+        run(uninstall, FRAME_TWEAKS_REINSTALL=1)
+        run(f'install_desktop "{desktop}"')
+        self.assertIn("Name=Talk to type", menu.read_text().splitlines())
+        self.assertIn(f"Exec={self.bin}/wallet-gate {self.bin}/dictate", menu.read_text().splitlines())
+        run(f'python3 "{ROOT}/lib/i18n.py" menus', FRAME_TWEAKS_LANGUAGE="es_419")    # (the keyboard's, now Spanish)
+        lines = menu.read_text().splitlines()
+        self.assertIn("Name=Talk to type", lines)
+        self.assertIn("Comment=Inicia o detiene el dictado local con Whisper", lines)  # (ours: relabelled)
+        self.assertTrue(built.exists())
+        run(uninstall)
+        self.assertFalse(menu.exists())
+        self.assertFalse(built.exists())
 
 
 class Gh(Home):
