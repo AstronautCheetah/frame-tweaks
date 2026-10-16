@@ -12,7 +12,8 @@
   includes.
 - **Opening Frame Tweaks when it's already open elsewhere:** open in the other session (VR or
   desktop mode), a notification says so, since that's where it came to the front; a window that
-  doesn't answer (stuck) is closed, and a new one opens instead of nothing.
+  doesn't answer (stuck) is closed, and a new one opens instead of nothing. (A window still open
+  from before this update can't answer yet: the first launch after updating replaces it.)
 
 ## 0.6.7 (2026-10-16)
 
