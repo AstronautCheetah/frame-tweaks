@@ -10,7 +10,7 @@ what: >-
 why: >-
   Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze
   theme.
-author: Frame Tweaks (finding from lhns/steam-frame-nix)
+author: lhns (steam-frame-nix, the finding), applied by Frame Tweaks
 source:
   relation: fix from
   url: >-
