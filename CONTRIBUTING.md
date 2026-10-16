@@ -290,7 +290,9 @@ it; the draft is only its page of notes on GitHub.
 
 **Test releases for testers.** Tick **Pre-release** in the Release workflow: it tags
 `vX.Y.Z-rc.N` and drafts a release marked as a pre-release; publish it as one, so GitHub's
-"latest" stays on the stable release. Only people who opted in get it. Send testers this
+"latest" stays on the stable release. Its notes are what `## Unreleased` has so far, and the
+section stays as it is: the release after it dates it, with every change since the last
+release. Only people who opted in get it. Send testers this
 install command (it keeps their choice for later updates), or point them to ⚙ Preferences →
 **Get test releases too**:
 

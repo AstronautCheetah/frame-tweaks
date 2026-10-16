@@ -1,6 +1,8 @@
 """The maintainer and contributor tools (dev/, .github/workflows/) catch what they're for. Run on
 throwaway copies, with stand-ins for the network, gh and git (nothing leaves the machine):
-the Release workflow's version after a pre-release and its empty-notes check; dev/check-docs.py
+the Release workflow's version after a pre-release, its empty-notes check, its notes (a
+pre-release leaves CHANGELOG.md's section to the release) and its push (no tag without the
+commit); the Traffic workflow keeping the saved history and its draft release; dev/check-docs.py
 and HTML pictures; dev/gen-docs.py and an upstream README a tweak no longer names; dev/i18n.py
 keeping removed texts' translations; dev/check-pins.sh comparing a Hugging Face file at main;
 dev/check-upstream.sh reporting a check-pins.sh that stopped; dev/test-tweaks.sh catching writes
@@ -97,14 +99,19 @@ class ReleaseVersion(Temp):
 
 
 class ReleaseNotes(Temp):
-    def run_step(self, unreleased, version="0.6.2"):
-        (self.d / "CHANGELOG.md").write_text(f"# Changelog\n\n## Unreleased\n{unreleased}\n## 0.6.1 (2026-10-14)\n\n- Old.\n")
-        (self.d / "share/metainfo").mkdir(parents=True, exist_ok=True)
-        (self.d / "share/metainfo/x.metainfo.xml").write_text('<component>\n  <releases>\n    <release version="0.6.1"/>\n'
-                                                               '  </releases>\n</component>\n')
-        (self.d / "VERSION").write_text("0.6.1\n")
+    def run_step(self, unreleased=None, version="0.6.2"):
+        """The step, after a CHANGELOG.md with that Unreleased section (None: the files as they are)."""
+        if unreleased is not None:
+            (self.d / "CHANGELOG.md").write_text(f"# Changelog\n\n## Unreleased\n{unreleased}\n## 0.6.1 (2026-10-14)\n\n- Old.\n")
+            (self.d / "share/metainfo").mkdir(parents=True, exist_ok=True)
+            (self.d / "share/metainfo/x.metainfo.xml").write_text('<component>\n  <releases>\n    <release version="0.6.1"/>\n'
+                                                                   '  </releases>\n</component>\n')
+            (self.d / "VERSION").write_text("0.6.1\n")
         return subprocess.run(["bash", "-e", "-c", step_script("release.yml", "Changelog and VERSION")], cwd=self.d,
                               env={**os.environ, "V": version}, capture_output=True, text=True, timeout=30)
+
+    def read(self, name):
+        return (self.d / name).read_text()
 
     def test_an_empty_section_is_refused(self):
         r = self.run_step("\n")        # (the heading's blank line, nothing else)
@@ -113,14 +120,156 @@ class ReleaseNotes(Temp):
         self.assertEqual((self.d / "VERSION").read_text(), "0.6.1\n")
 
     def test_notes_changelog_version_metainfo(self):
+        r = self.run_step("\n### Fixed\n- A fix.\n")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("- A fix.", self.read("notes.md"))
+        self.assertNotIn("Old.", self.read("notes.md"))
+        self.assertRegex(self.read("CHANGELOG.md"), r"\n## 0\.6\.2 \(\d{4}-\d\d-\d\d\)\n\n### Fixed\n- A fix\.\n")
+        self.assertNotIn("Unreleased", self.read("CHANGELOG.md"))
+        self.assertEqual(self.read("VERSION"), "0.6.2\n")
+        self.assertRegex(self.read("share/metainfo/x.metainfo.xml"),
+                         r'<releases>\n    <release version="0\.6\.2" date="[0-9-]+"/>\n    <release version="0\.6\.1"/>')
+
+    def test_a_pre_release_leaves_the_section_to_its_release(self):
+        """A test release's notes are the section's, and CHANGELOG.md stays as it is: the release
+        after it then has every change since the last release. (The test release dated the
+        section, and the release found none, or had only what came after the test release.)"""
         r = self.run_step("\n### Fixed\n- A fix.\n", version="0.6.2-rc.1")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("- A fix.", (self.d / "notes.md").read_text())
-        self.assertNotIn("Old.", (self.d / "notes.md").read_text())
-        self.assertRegex((self.d / "CHANGELOG.md").read_text(), r"\n## 0\.6\.2-rc\.1 \(\d{4}-\d\d-\d\d\)\n")
-        self.assertEqual((self.d / "VERSION").read_text(), "0.6.2-rc.1\n")
-        self.assertRegex((self.d / "share/metainfo/x.metainfo.xml").read_text(),
+        self.assertIn("- A fix.", self.read("notes.md"))
+        self.assertEqual(self.read("CHANGELOG.md"), "# Changelog\n\n## Unreleased\n\n### Fixed\n- A fix.\n\n"
+                                                    "## 0.6.1 (2026-10-14)\n\n- Old.\n")
+        self.assertEqual(self.read("VERSION"), "0.6.2-rc.1\n")              # (so the commit has something in it)
+        self.assertRegex(self.read("share/metainfo/x.metainfo.xml"),
                          r'<releases>\n    <release version="0\.6\.2-rc\.1" date="[0-9-]+" type="development"/>\n    <release version="0\.6\.1"/>')
+        (self.d / "CHANGELOG.md").write_text(self.read("CHANGELOG.md").replace("- A fix.\n", "- A fix.\n- Another.\n"))
+        r = self.run_step(version="0.6.2")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.read("notes.md"), "\n### Fixed\n- A fix.\n- Another.\n\n")
+        self.assertRegex(self.read("CHANGELOG.md"), r"\n## 0\.6\.2 \(\d{4}-\d\d-\d\d\)\n\n### Fixed\n- A fix\.\n- Another\.\n")
+        self.assertEqual(self.read("VERSION"), "0.6.2\n")
+        self.assertRegex(self.read("share/metainfo/x.metainfo.xml"), r'<releases>\n    <release version="0\.6\.2" date="[0-9-]+"/>\n'
+                                                                      r'    <release version="0\.6\.2-rc\.1" date="[0-9-]+" type="development"/>\n')
+
+
+@unittest.skipUnless(shutil.which("git") and shutil.which("ssh-keygen"), "needs git and ssh-keygen")
+class ReleasePush(Temp):
+    """The Release workflow's last step, against a local "GitHub" (a bare repository) whose main
+    moved since the workflow's checkout: the push is refused, and the tag isn't published either.
+    (Pushed alone, it was a release whose commit main never got.)"""
+
+    def git(self, *args, cwd=None):
+        return subprocess.run(["git", *args], cwd=cwd or self.d, env=self.env, check=True,
+                              capture_output=True, text=True).stdout
+
+    def test_the_tag_goes_only_with_the_commit(self):
+        self.env = {**os.environ, "HOME": str(self.d), "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+        key = self.d / "key"
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", "release", "-f", str(key)], check=True)
+        origin, work, other = self.d / "origin.git", self.d / "work", self.d / "other"
+        self.git("init", "-q", "--bare", "-b", "main", str(origin))
+        self.git("init", "-q", "-b", "main", str(work))
+        pub = (self.d / "key.pub").read_text().split()
+        (work / "dev").mkdir()
+        (work / "dev/release-signers").write_text(f'release namespaces="git" {pub[0]} {pub[1]}\n')
+        (work / "VERSION").write_text("0.6.1\n")
+        self.git("add", "-A", cwd=work)
+        self.git("commit", "-qm", "one", cwd=work)
+        self.git("remote", "add", "origin", str(origin), cwd=work)
+        self.git("push", "-q", "origin", "main", cwd=work)
+        self.git("clone", "-q", str(origin), str(other))                    # (someone else's push meanwhile)
+        (other / "README.md").write_text("meanwhile\n")
+        self.git("add", "-A", cwd=other)
+        self.git("commit", "-qm", "meanwhile", cwd=other)
+        self.git("push", "-q", "origin", "main", cwd=other)
+        (work / "VERSION").write_text("0.6.2\n")                            # (as the step before leaves it)
+        bin_ = stubs(self.d / "bin", gh='echo "gh $*" >> "$HOME/gh.log"')
+        r = subprocess.run(["bash", "-e", "-c", step_script("release.yml", "Commit, tag, push, draft release")], cwd=work,
+                           env={**self.env, "PATH": f"{bin_}:{os.environ['PATH']}", "V": "0.6.2", "PRE": "false",
+                                "GH_TOKEN": "x", "SIGNING_KEY": key.read_text()},
+                           capture_output=True, text=True, timeout=60)
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.git("ls-remote", "--tags", str(origin)), "")
+        self.assertFalse((self.d / "gh.log").exists())                       # (no release drafted)
+
+
+class Traffic(Temp):
+    """The Traffic workflow's step, against a stand-in gh (GitHub's answers in files): the history
+    kept, with every release's downloads (one JSON object a line: over 30 releases, --paginate gave
+    an array a page); nothing saved when the saved file can't be downloaded, or when fewer days
+    would be saved than were; the draft release made only when GitHub says there's none."""
+    GH = r'''echo "gh $*" >> "$GHLOG"
+case "$1 $2" in
+    "api repos/o/r/traffic/clones") echo '{"clones": [{"timestamp": "2026-10-15T00:00:00Z", "count": 3, "uniques": 2}]}' ;;
+    "api repos/o/r/traffic/views") echo '{"views": [{"timestamp": "2026-10-15T00:00:00Z", "count": 9, "uniques": 4}]}' ;;
+    "api repos/o/r/releases?per_page=100") for i in $(seq 40); do echo "{\"tag\":\"v0.$i.0\",\"downloads\":$i}"; done ;;
+    "release view") case $VIEW in
+                        saved) echo traffic.csv ;;
+                        new) ;;
+                        none) echo "release not found" >&2; exit 1 ;;
+                        *) echo "HTTP 502: Bad Gateway" >&2; exit 1 ;;
+                    esac ;;
+    "release download") [ -z "$NO_DOWNLOAD" ] && cp "$SAVED" traffic.csv ;;
+    "release upload") cp traffic.csv "$UPLOADED" ;;
+esac'''
+    HEAD = "date,clones,unique_clones,views,unique_views,release_downloads\n"
+
+    def run_step(self, view, saved="", **env):
+        (self.d / "saved.csv").write_text(saved)
+        bin_ = stubs(self.d / "bin", gh=self.GH)
+        work = Path(tempfile.mkdtemp(dir=self.d))              # (each run's own, as a job's is)
+        return subprocess.run(["bash", "-e", "-c", step_script("traffic.yml", "Save the last 14 days into traffic.csv")],
+                              cwd=work, capture_output=True, text=True, timeout=60,
+                              env={**os.environ, "PATH": f"{bin_}:{os.environ['PATH']}", "GH_TOKEN": "x",
+                                   "TRAFFIC_TOKEN": "t", "REPO": "o/r", "VIEW": view, "NO_DOWNLOAD": "",
+                                   "GHLOG": str(self.d / "gh.log"), "SAVED": str(self.d / "saved.csv"),
+                                   "UPLOADED": str(self.d / "uploaded.csv"), **env})
+
+    def uploaded(self):
+        p = self.d / "uploaded.csv"
+        return p.read_text() if p.exists() else None
+
+    def created(self):
+        return "gh release create" in (self.d / "gh.log").read_text()
+
+    def test_the_history_is_kept_with_every_release(self):
+        days = "".join(f"2026-09-{d:02},1,1,2,2,\n" for d in range(1, 21))
+        r = self.run_step("saved", self.HEAD + days)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        csv = self.uploaded()
+        self.assertTrue(csv.startswith(self.HEAD + days), csv)
+        self.assertIn("\n2026-10-15,3,2,9,4,\n", csv)
+        self.assertIn(",v0.1.0=1;v0.2.0=2;", csv)
+        self.assertIn(";v0.40.0=40\n", csv)
+        self.assertFalse(self.created())
+
+    def test_a_download_that_fails_saves_nothing(self):
+        r = self.run_step("saved", self.HEAD + "2026-09-01,1,1,2,2,\n", NO_DOWNLOAD="1")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIsNone(self.uploaded())                      # (the 14 days alone, over the history)
+
+    def test_fewer_days_than_were_saved_arent_saved(self):
+        r = self.run_step("saved", self.HEAD + "2026-09-01,1,1,2,2,\n" * 5)      # (one day five times)
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("traffic.csv not saved", r.stdout)
+        self.assertIsNone(self.uploaded())
+
+    def test_the_draft_is_made_only_when_there_is_none(self):
+        r = self.run_step("down")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("HTTP 502", r.stderr)
+        self.assertFalse(self.created())                         # (it made a second one)
+        self.assertIsNone(self.uploaded())
+        r = self.run_step("none")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue(self.created())
+        self.assertIn("\n2026-10-15,3,2,9,4,", self.uploaded())
+        (self.d / "gh.log").unlink()
+        r = self.run_step("new")                                 # (made, with no file yet)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse(self.created())
+        self.assertNotIn("gh release download", (self.d / "gh.log").read_text())
 
 
 class CheckDocs(Temp):

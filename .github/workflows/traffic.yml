@@ -28,12 +28,25 @@ jobs:
           fi
           GH_TOKEN=$TRAFFIC_TOKEN gh api "repos/$REPO/traffic/clones" > clones.json
           GH_TOKEN=$TRAFFIC_TOKEN gh api "repos/$REPO/traffic/views" > views.json
-          gh api "repos/$REPO/releases" --paginate \
-            --jq '[.[] | select(.draft | not) | {tag: .tag_name, downloads: ([.assets[].download_count] | add // 0)}]' > releases.json
-          gh release view traffic --repo "$REPO" >/dev/null 2>&1 ||
+          # (one release a line: --paginate runs --jq on each page, so an array came out per page)
+          gh api "repos/$REPO/releases?per_page=100" --paginate \
+            --jq '.[] | select(.draft | not) | {tag: .tag_name, downloads: ([.assets[].download_count] | add // 0)}' > releases.jsonl
+          # The draft release that keeps traffic.csv: made only when GitHub says there's none (a
+          # look that failed made a second one), and its traffic.csv downloaded if it has one, or
+          # nothing is saved (the last 14 days uploaded over it would lose the rest).
+          if assets=$(gh release view traffic --repo "$REPO" --json assets --jq '.assets[].name' 2> view-error.txt); then
+            if grep -qx traffic.csv <<< "$assets"; then
+              gh release download traffic --repo "$REPO" --pattern traffic.csv
+            fi
+          elif grep -q "release not found" view-error.txt; then
             gh release create traffic --repo "$REPO" --draft --title "Traffic (maintainers only)" \
               --notes "traffic.csv: daily clones, unique cloners, views and unique visitors, and release downloads (the Traffic workflow)."
-          gh release download traffic --repo "$REPO" --pattern traffic.csv 2>/dev/null || true
+          else
+            cat view-error.txt >&2
+            exit 1
+          fi
+          before=0
+          [ ! -f traffic.csv ] || before=$(wc -l < traffic.csv)
           python3 - <<'PY'
           import csv, json, os, time
           rows = {}
@@ -46,8 +59,9 @@ jobs:
                   r = rows.setdefault(day, {"date": day})
                   r[kind], r[f"unique_{kind}"] = d["count"], d["uniques"]
           today = time.strftime("%Y-%m-%d", time.gmtime())
+          releases = [json.loads(line) for line in open("releases.jsonl") if line.strip()]
           rows.setdefault(today, {"date": today})["release_downloads"] = ";".join(
-              f"{r['tag']}={r['downloads']}" for r in json.load(open("releases.json")))
+              f"{r['tag']}={r['downloads']}" for r in releases)
           cols = ["date", "clones", "unique_clones", "views", "unique_views", "release_downloads"]
           with open("traffic.csv", "w", newline="") as f:
               w = csv.DictWriter(f, cols)
@@ -56,4 +70,9 @@ jobs:
                   w.writerow({c: rows[day].get(c, "") for c in cols})
           print(f"{len(rows)} days")
           PY
+          after=$(wc -l < traffic.csv)
+          if [ "$after" -lt "$before" ]; then
+            echo "::error title=traffic.csv not saved::It would go from $before lines to $after."
+            exit 1
+          fi
           gh release upload traffic traffic.csv --repo "$REPO" --clobber
