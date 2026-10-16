@@ -195,6 +195,8 @@
 - **Dictation's install removes the older Whisper models** that earlier versions downloaded, as
   it meant to: every `dictate.conf` has the example's commented-out line naming one, and that
   kept `ggml-base.en-q5_1.bin` for good. Only a `DICTATE_MODEL` setting in use keeps one now.
+- **Dictation's auto-stop timer goes with its recording:** a recording stopped by a press left its
+  timer sleeping out the auto-stop time (5 minutes) as a process of its own.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
