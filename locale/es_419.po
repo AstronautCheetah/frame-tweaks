@@ -1555,13 +1555,6 @@ msgstr "Se quitó 'Frame Tweaks' del menú de apps."
 
 # needs review
 #: install.sh
-msgid ""
-"Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
-msgstr ""
-"¿Configurar la ventana completa del instalador? Necesita PyQt6, el kit con el que se dibuja (unos 280 MB, en tu carpeta personal). No se instala nada más: eliges los ajustes en la ventana.\\n\\nNo = usar la lista simple: instala y quita los mismos ajustes, sin las páginas de detalles, estado y configuración."
-
-# needs review
-#: install.sh
 msgid "Setting up the full installer window"
 msgstr "Configurando la ventana completa del instalador"
 
@@ -6171,3 +6164,9 @@ msgstr "Instalador de ajustes"
 
 #~ msgid "%s installed"
 #~ msgstr "%s instalado"
+
+#~ # needs review
+#~ msgid ""
+#~ "Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
+#~ msgstr ""
+#~ "¿Configurar la ventana completa del instalador? Necesita PyQt6, el kit con el que se dibuja (unos 280 MB, en tu carpeta personal). No se instala nada más: eliges los ajustes en la ventana.\\n\\nNo = usar la lista simple: instala y quita los mismos ajustes, sin las páginas de detalles, estado y configuración."

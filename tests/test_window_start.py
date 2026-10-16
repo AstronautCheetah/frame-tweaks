@@ -1,5 +1,6 @@
-"""./install.sh gui never ends with nothing on screen: setting up PyQt6 happens where it can be
-seen (a Konsole window of its own, started from the app menu), and a window that ends with an
+"""./install.sh gui never ends with nothing on screen: setting up PyQt6 happens without a
+question, where it can be seen (a Konsole window of its own, under the splash, started from the
+app menu), and a window that ends with an
 error before it's shown leaves the simple checklist instead, saying so; both go to
 logs/window.log. PyQt6 without its widgets is set up again, and the window's own copy of Python
 follows the venv's. In a throwaway home: a stand-in Python, kdialog and konsole record what
@@ -25,9 +26,8 @@ class WindowStart(unittest.TestCase):
         self.stubs = self.home / "stubs"
         self.calls = self.home / "calls"
         for tool in ("kdialog", "konsole", "notify-send"):
-            # (kdialog: yes to the setup question, cancel for the checklist)
+            # (kdialog: cancel for the checklist)
             stub(self.stubs, tool, f'echo "{tool} $*" >> {self.calls}\n'
-                                   '[ "$1" = --title ] && [ "$3" = --yesno ] && exit 0\n'
                                    'case "$*" in *--checklist*) exit 1 ;; esac; exit 0')
         self.venv = self.home / ".local/share/arrowpad/venv/bin"
         self.venv.mkdir(parents=True)
@@ -64,7 +64,7 @@ class WindowStart(unittest.TestCase):
         self.assertNotIn("--checklist", self.calls.read_text() if self.calls.exists() else "")
 
     def test_pyqt6_without_its_widgets_is_set_up_again(self):
-        """import PyQt6 works but PyQt6.QtWidgets doesn't (a setup cut short): the setup is offered,
+        """import PyQt6 works but PyQt6.QtWidgets doesn't (a setup cut short): it's set up again,
         rather than a window that can't open."""
         p = self.venv / "python"
         p.write_text('#!/bin/bash\nif [ "$1" = -c ]; then [[ $2 == *QtWidgets* ]] && exit 1; exit 0; fi\n'
@@ -73,7 +73,7 @@ class WindowStart(unittest.TestCase):
         r = self.gui()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         calls = self.calls.read_text()
-        self.assertIn("It needs PyQt6, the toolkit it's drawn with", calls)
+        self.assertIn("_setup-window", calls)
         self.assertNotIn("the window ran", calls)
         self.assertIn("--checklist", calls)
 
@@ -96,8 +96,8 @@ class WindowStart(unittest.TestCase):
         r = self.gui()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         calls = self.calls.read_text()
-        self.assertIn("It needs PyQt6, the toolkit it's drawn with", calls)
-        self.assertIn(f"konsole --separate -e {ROOT}/install.sh _setup-window", calls)
+        self.assertNotIn("--yesno", calls)                       # (no question first)
+        self.assertIn(f"konsole --separate -e python3 {ROOT}/lib/splash.py -- {ROOT}/install.sh _setup-window", calls)
         self.assertIn("kdialog --sorry Couldn't install PyQt6", calls)
         self.assertIn("--checklist", calls)
         self.assertIn("setting up PyQt6 for the full window", self.log())

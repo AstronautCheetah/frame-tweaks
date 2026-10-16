@@ -13,6 +13,12 @@
   turns it off and `=still` stops the motion; KDE's animation speed set to instant stops it too.
   See it with `python3 lib/splash.py --demo`.
 
+### Changed
+- **The installer window sets itself up without asking:** the first time, PyQt6 (what the window
+  is drawn with, about 280 MB) is set up at once, under the new splash, instead of after a
+  question whose other answer was the simple checklist. The checklist is still there if the
+  setup fails. Started from the app menu, the setup shows in a terminal window of its own.
+
 ### For pack authors
 - **`dev/fresh-install.sh --beta`** runs the testers' one-liner (`… | FRAME_TWEAKS_CHANNEL=beta
   bash`), which takes the newest test release. Its window's PyQt6 setup now shows the splash too:

@@ -617,14 +617,14 @@ cmd_reinstall() {
 cmd_gui() {               # [--show ID]: open on that tweak's page
     ensure_menu_entry
     # The full window (hide rows, live status) needs PyQt6, the toolkit it's drawn with (shared
-    # with Arrow Pad, Screen snip and the NordVPN tray, if they're installed). Offer to set it up;
-    # otherwise fall back to kdialog's plain checklist. (Naming those tweaks in the question read
-    # as if it installed them: it doesn't.)
+    # with Arrow Pad, Screen snip and the NordVPN tray, if they're installed): set up without a
+    # question (it used to ask, with the simple checklist as the other answer: that's only a
+    # stand-in for when the window can't be had). kdialog's plain checklist is what's left if
+    # the setup fails.
     # (QtWidgets, not just PyQt6: a setup cut short can leave PyQt6 there without the parts the
     # window needs)
     local qt="$QT_VENV"
-    if ! "$qt/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null &&
-       kdialog --title "Frame Tweaks" --yesno "$(t "Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\n\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages.")"; then
+    if ! "$qt/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null; then
         setup_window ||
             kdialog --sorry "$(t "Couldn't install PyQt6 (what happened: %s); using the simple checklist." "$WINDOW_LOG")"
     fi
@@ -646,7 +646,7 @@ setup_window() {
         # (in this terminal, under the splash: the one-liner's first minute or two)
         python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window
     elif command -v konsole >/dev/null; then
-        konsole --separate -e "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
+        konsole --separate -e python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
     else
         notify-send -a "Frame Tweaks" "$(t 'Setting up the full installer window')" \
             "$(t "About 280 MB, usually a minute or two: the window opens when it's done.")" 2>/dev/null

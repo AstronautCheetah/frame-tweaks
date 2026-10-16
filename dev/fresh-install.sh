@@ -14,9 +14,9 @@
 #   --real         actions really happen (inside the sandbox). Default: a dry run
 #                  (FRAME_TWEAKS_DRY_RUN=1): installing, removing and Run only say what they'd do.
 #   --reuse-pyqt   lend the window a PyQt6 set up once (~/.cache/frame-tweaks/fresh-install-pyqt)
-#                  instead of downloading ~280 MB each time (and skip the question about it).
-#                  Without it, as for a new user, that setup runs in this terminal under the
-#                  installer's splash (lib/splash.py, in releases after 0.6.11).
+#                  instead of downloading ~280 MB each time. Without it, as for a new user, that
+#                  setup runs in this terminal under the installer's splash (lib/splash.py, in
+#                  releases after 0.6.11).
 #   --keep         keep the throwaway home afterwards (it says where); otherwise it's deleted
 #   --again DIR    open a kept one's window again (with --real or not, as you choose this time)
 #   --shell        a shell in the sandbox instead of the one-liner, to look around (commands from
