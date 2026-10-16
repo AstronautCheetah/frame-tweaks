@@ -1,5 +1,6 @@
 ---
 name: Core
+formerly: [original]          # (its folder before 0.6.6: a pack turned off as original stays off)
 author: Frame Tweaks
 api: 1
 categories: [Accessibility, Convenience, VR environment, System, Hardware, Privacy & security, Developer]

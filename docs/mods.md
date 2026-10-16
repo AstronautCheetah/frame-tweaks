@@ -56,6 +56,7 @@ author: Your name
 api: 1                         # the pack format it's written for (this version knows 1)
 categories: [Games]            # new categories, in order (after the official ones)
 order: [my-tweak, other-one]   # its tweaks' order (the rest follow, alphabetically)
+formerly: [old-folder]         # (an official pack) its folder's earlier names: turned off under one stays off
 ---
 What the pack is, for people reading it.
 ```
@@ -119,6 +120,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `config` | `[~/.config/my-tweak.json]` | Where it keeps its settings: files or folders under `~/.config/`, `~/.var/app/` or `~/.local/state/frame-tweaks/` (its `settings.file` counts without being listed). An uninstall keeps them and says so, or removes them when ⚙ Preferences → Uninstalling, or `--remove-settings`, says to. Data such as a history or keys belongs elsewhere, and stays. |
 | `app` | `Hello Viewer` | The name of another project's app it installs (Claude Desktop, say). Uninstalling Frame Tweaks leaves such tweaks, and what they depend on, installed unless asked to remove them, so the app and your work in it stay. |
 | `sudo` | `once, to add a udev rule that lets you pause charging` | When and why installing it asks for the sudo password; the window tags its row **sudo** and says so on its page, and the README tables mark it *(sudo)*. `homebrew`: only while Homebrew isn't installed (a tweak that calls `need_brew`). |
+| `formerly` | `[old-name]` | The tweak's earlier ids, after a rename (its folder's name). What Frame Tweaks keeps under one (its install record, held, hidden) moves to the new id once, `depends:` on one still finds it, and `./install.sh` says what it's called now. Moving a tweak to another pack needs nothing: ids are the same in every pack. |
 | `settings` | (below) | A settings page in the installer window, and `./install.sh settings ID`. |
 | `known_issue` | `{version, short, long, latest}` | A problem with an upstream version: `short` on its row, `long` on its details page, and a check whether `latest` (a GitHub releases API URL) has something newer than `version`. |
 | `wallet_apps` | `[org.signal.Signal]` | Apps it sets up to use the shared KDE wallet (the Wallet apps page says so). |

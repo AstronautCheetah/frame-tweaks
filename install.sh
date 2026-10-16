@@ -197,8 +197,12 @@ with_deps() {
 check_ids() {
     local id
     for id in "$@"; do
-        is_component "$id" ||
-            { echo "unknown component: $id (see ./install.sh list; a pack that isn't trusted: ./install.sh mods)" >&2; exit 1; }
+        is_component "$id" && continue
+        local now
+        if now=$(python3 lib/sft.py renamed "$id" 2>/dev/null); then
+            echo "$(t '%s is now called %s' "$id" "$now")" >&2; exit 1
+        fi
+        echo "unknown component: $id (see ./install.sh list; a pack that isn't trusted: ./install.sh mods)" >&2; exit 1
     done
 }
 
@@ -520,11 +524,13 @@ cmd_reinstall() {
 
 cmd_gui() {               # [--show ID]: open on that tweak's page
     ensure_menu_entry
-    # The full window (hide rows, live status) needs PyQt6, shared with Arrow Pad and the
-    # NordVPN tray. Offer to set it up; otherwise fall back to kdialog's plain checklist.
+    # The full window (hide rows, live status) needs PyQt6, the toolkit it's drawn with (shared
+    # with Arrow Pad, Screen snip and the NordVPN tray, if they're installed). Offer to set it up;
+    # otherwise fall back to kdialog's plain checklist. (Naming those tweaks in the question read
+    # as if it installed them: it doesn't.)
     local qt="$HOME/.local/share/arrowpad/venv"
     if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
-       kdialog --title "Frame Tweaks" --yesno "$(t 'Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\n\nNo = use the simple checklist.')"; then
+       kdialog --title "Frame Tweaks" --yesno "$(t "Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\n\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages.")"; then
         ensure_qt_venv ||
             kdialog --sorry "$(t "Couldn't install PyQt6; using the simple checklist.")"
     fi

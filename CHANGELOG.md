@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Setting up the full installer window no longer reads as if it installed NordVPN's tray:** it
+  needs PyQt6, the toolkit the window is drawn with, which Arrow Pad and NordVPN's tray also use
+  when they're installed. The question now says that nothing else is installed, and what the
+  simple checklist leaves out if you'd rather not set it up.
+
+### For pack authors
+- **`formerly:`** in a tweak's manifest lists its earlier ids after a rename: what Frame Tweaks
+  keeps under one moves to the new id once, `depends:` on one still finds it, and `./install.sh`
+  says what it's called now. In an official pack's `pack.md`, it lists the folder's earlier
+  names (Core's `original`).
+
 ## 0.6.6 (2026-10-16)
 
 ### Fixed

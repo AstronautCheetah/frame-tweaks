@@ -4,198 +4,198 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: gui/frame-tweaks-gui.py:1045
+#: gui/frame-tweaks-gui.py:1049
 msgid "Show hidden ({n})"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1072
+#: gui/frame-tweaks-gui.py:1076
 msgid "Tick to install, untick to remove"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1084
+#: gui/frame-tweaks-gui.py:1088
 msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1088 lib/sft.py:709
+#: gui/frame-tweaks-gui.py:1092 lib/sft.py:763
 msgid "Experimental: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1090
+#: gui/frame-tweaks-gui.py:1094
 msgid ""
 "Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1093 lib/sft.py:713
+#: gui/frame-tweaks-gui.py:1097 lib/sft.py:767
 msgid "Asks for your sudo password: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1095
+#: gui/frame-tweaks-gui.py:1099
 msgid ""
 "From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1096
+#: gui/frame-tweaks-gui.py:1100
 msgid "From the pack {pack}, not part of Frame Tweaks"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1102
+#: gui/frame-tweaks-gui.py:1106
 msgid "needs: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1118
+#: gui/frame-tweaks-gui.py:1122
 msgid "Open %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1134
+#: gui/frame-tweaks-gui.py:1138
 msgid "Details: what it is, why it's included, who made it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1141
+#: gui/frame-tweaks-gui.py:1145
 msgid "Hide"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1141
+#: gui/frame-tweaks-gui.py:1145
 msgid "Unhide"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1142
+#: gui/frame-tweaks-gui.py:1146
 msgid "Show this tweak in the list again"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1143
+#: gui/frame-tweaks-gui.py:1147
 msgid "Hide this tweak from the list (doesn't remove it)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1157 gui/frame-tweaks-gui.py:1358
+#: gui/frame-tweaks-gui.py:1161 gui/frame-tweaks-gui.py:1362
 msgid "Settings"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1192
+#: gui/frame-tweaks-gui.py:1196
 msgid ""
 "Have an idea for a tweak, or an app that belongs here? Found a bug, or speak another language? Every suggestion, report, translation and fix makes the Frame better for everyone who has one."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1197
+#: gui/frame-tweaks-gui.py:1201
 msgid "Get involved"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1218 gui/frame-tweaks-gui.py:1240
+#: gui/frame-tweaks-gui.py:1222 gui/frame-tweaks-gui.py:1244
 msgid "{version} available"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1219 gui/frame-tweaks-gui.py:1241 gui/packs_page.py:168
+#: gui/frame-tweaks-gui.py:1223 gui/frame-tweaks-gui.py:1245 gui/packs_page.py:168
 msgid "Update"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1230
+#: gui/frame-tweaks-gui.py:1234
 msgid "Close and reopen Frame Tweaks to use the new version."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1246
+#: gui/frame-tweaks-gui.py:1250
 msgid "Look for a newer Frame Tweaks release"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1246
+#: gui/frame-tweaks-gui.py:1250
 msgid "⟳ Check for updates"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1247
+#: gui/frame-tweaks-gui.py:1251
 msgid "Checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1248
+#: gui/frame-tweaks-gui.py:1252
 msgid "⬇ Update to {version}"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1249
+#: gui/frame-tweaks-gui.py:1253
 msgid "Install it: your tweaks are updated with it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1250
+#: gui/frame-tweaks-gui.py:1254
 msgid "Reopen Frame Tweaks to use the new version"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1250
+#: gui/frame-tweaks-gui.py:1254
 msgid "↻ Restart"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1266
+#: gui/frame-tweaks-gui.py:1270
 msgid "%d pack update"
 msgid_plural "%d pack updates"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/frame-tweaks-gui.py:1268
+#: gui/frame-tweaks-gui.py:1272
 msgid ""
 "Packs added from a link have a newer version where they came from: the Packs page says which"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1323
+#: gui/frame-tweaks-gui.py:1327
 msgid "Reinstall: remove it and install it again in one step (settings kept)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1324
+#: gui/frame-tweaks-gui.py:1328
 msgid "Reinstall (available once it's installed)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1335
+#: gui/frame-tweaks-gui.py:1339
 msgid "⟳ Restart SteamVR"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1340
+#: gui/frame-tweaks-gui.py:1344
 msgid "SteamVR loads it only as it starts. Every open app closes."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1341
+#: gui/frame-tweaks-gui.py:1345
 msgid "SteamVR runs it until it restarts. Every open app closes."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1349
+#: gui/frame-tweaks-gui.py:1353
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1350
+#: gui/frame-tweaks-gui.py:1354
 msgid "Tick it and Apply first"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1353
+#: gui/frame-tweaks-gui.py:1357
 msgid "⚙ Settings"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1358
+#: gui/frame-tweaks-gui.py:1362
 msgid "Settings (tick it and Apply first)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1360
+#: gui/frame-tweaks-gui.py:1364
 msgid "Help"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1365
+#: gui/frame-tweaks-gui.py:1369
 msgid "{label} (installs first if needed: tick it and Apply)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1367
+#: gui/frame-tweaks-gui.py:1371
 msgid "Nothing to launch: how to use it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1428
+#: gui/frame-tweaks-gui.py:1432
 msgid "Restart SteamVR?"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1429
+#: gui/frame-tweaks-gui.py:1433
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1431
+#: gui/frame-tweaks-gui.py:1435
 msgid "Restart SteamVR"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1438
+#: gui/frame-tweaks-gui.py:1442
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1455 gui/frame-tweaks-gui.py:1190
+#: gui/frame-tweaks-gui.py:1459 gui/frame-tweaks-gui.py:1194
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
@@ -203,77 +203,77 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1530 gui/prefs_page.py:195 packs/core/snip/frame-snip:1318
+#: gui/frame-tweaks-gui.py:1534 gui/prefs_page.py:195 packs/core/snip/frame-snip:1318
 msgid "Cancel"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1557
+#: gui/frame-tweaks-gui.py:1561
 msgid "Install: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1558
+#: gui/frame-tweaks-gui.py:1562
 msgid "Remove: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1559
+#: gui/frame-tweaks-gui.py:1563
 msgid "Nothing to change: tick or untick a tweak first"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1563
+#: gui/frame-tweaks-gui.py:1567
 msgid "Still checking status; try again in a moment."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1568 install.sh:557
+#: gui/frame-tweaks-gui.py:1572 install.sh:563
 msgid "Nothing to change."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1572
+#: gui/frame-tweaks-gui.py:1576
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1574
+#: gui/frame-tweaks-gui.py:1578
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1575
+#: gui/frame-tweaks-gui.py:1579
 msgid "Their settings and data are kept."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1576
+#: gui/frame-tweaks-gui.py:1580
 msgid "Remove them"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1621
+#: gui/frame-tweaks-gui.py:1625
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1694
+#: gui/frame-tweaks-gui.py:1698
 msgid "Something went wrong in the installer window"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1697
+#: gui/frame-tweaks-gui.py:1701
 msgid ""
 "Copy the details into a bug report. The window keeps working: go back and try again."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1703 gui/frame-tweaks-gui.py:1707
+#: gui/frame-tweaks-gui.py:1707 gui/frame-tweaks-gui.py:1711
 msgid "Copy for bug report"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1705
+#: gui/frame-tweaks-gui.py:1709
 msgid "Copied"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1709
+#: gui/frame-tweaks-gui.py:1713
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:192 install.sh:577
+#: gui/frame-tweaks-gui.py:192 install.sh:583
 msgid "Press Enter to close, or press the X button floating below to close."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:193 install.sh:576
+#: gui/frame-tweaks-gui.py:193 install.sh:582
 msgid "Press Enter to close…"
 msgstr ""
 
@@ -298,7 +298,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5 packs/third-party/menu-icons/status.sh:4
+#: gui/frame-tweaks-gui.py:387 install.sh:228 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5 packs/third-party/menu-icons/status.sh:4
 msgid "not installed"
 msgstr ""
 
@@ -330,7 +330,7 @@ msgstr ""
 msgid "Hide the whole category from the list (doesn't remove anything)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1706 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/core/snip/frame-snip:530
+#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1710 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/core/snip/frame-snip:530
 msgid "← Back"
 msgstr ""
 
@@ -448,7 +448,7 @@ msgstr ""
 msgid "Working… (a download can take a minute)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:677 packs/core/snip/frame-snip:604 install.sh:249
+#: gui/frame-tweaks-gui.py:677 packs/core/snip/frame-snip:604 install.sh:253
 msgid "Done."
 msgstr ""
 
@@ -468,63 +468,63 @@ msgstr ""
 msgid "🔑 Wallet apps"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:835
+#: gui/frame-tweaks-gui.py:839
 msgid "Preferences: the language, and how this window behaves"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:842
+#: gui/frame-tweaks-gui.py:846
 msgid "🧩 Packs"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:843
+#: gui/frame-tweaks-gui.py:847
 msgid "Where the tweaks come from; add other people's (docs/mods.md)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:846
+#: gui/frame-tweaks-gui.py:850
 msgid "Refresh"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:861
+#: gui/frame-tweaks-gui.py:865
 msgid ""
 "Tick to install, untick to remove, then Apply changes. Click a row for details, a category to fold it."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:871
+#: gui/frame-tweaks-gui.py:875
 msgid "📖 README"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:872
-msgid ""
-"What Frame Tweaks is, how to install, update and remove it, common issues"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:875 gui/frame-tweaks-gui.py:1708
-msgid "🐞 Report a problem"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py:876
 msgid ""
+"What Frame Tweaks is, how to install, update and remove it, common issues"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py:879 gui/frame-tweaks-gui.py:1712
+msgid "🐞 Report a problem"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py:880
+msgid ""
 "Save a diagnostics report (user names and paths removed) and open the bug form"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:879
+#: gui/frame-tweaks-gui.py:883
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:883 packs/core/arrowpad/arrowpad.py:281 packs/core/snip/frame-snip:697 packs/core/adb-scrcpy/phone:205
+#: gui/frame-tweaks-gui.py:887 packs/core/arrowpad/arrowpad.py:281 packs/core/snip/frame-snip:697 packs/core/adb-scrcpy/phone:205
 msgid "Close"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:982
+#: gui/frame-tweaks-gui.py:986
 msgid ""
 "Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use it."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:987
+#: gui/frame-tweaks-gui.py:991
 msgid "Couldn't check for updates (no connection to GitHub?)."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:989
+#: gui/frame-tweaks-gui.py:993
 msgid "✔ Frame Tweaks is up to date ({version})."
 msgstr ""
 
@@ -637,11 +637,11 @@ msgstr ""
 msgid "Updating {name}…"
 msgstr ""
 
-#: gui/packs_page.py:263 lib/sft.py:975
+#: gui/packs_page.py:263 lib/sft.py:1029
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py:265 lib/sft.py:977
+#: gui/packs_page.py:265 lib/sft.py:1031
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
@@ -660,7 +660,7 @@ msgstr ""
 msgid "(its README can't be read)"
 msgstr ""
 
-#: gui/packs_page.py:318 lib/sft.py:1002
+#: gui/packs_page.py:318 lib/sft.py:1056
 msgid "(instead of {other}'s)"
 msgstr ""
 
@@ -668,7 +668,7 @@ msgstr ""
 msgid "installed"
 msgstr ""
 
-#: gui/packs_page.py:320 lib/sft.py:944
+#: gui/packs_page.py:320 lib/sft.py:998
 msgid "none"
 msgstr ""
 
@@ -757,7 +757,7 @@ msgstr ""
 msgid "Delete them"
 msgstr ""
 
-#: gui/prefs_page.py:139 install.sh:369
+#: gui/prefs_page.py:139 install.sh:373
 msgid "Uninstalling Frame Tweaks"
 msgstr ""
 
@@ -817,7 +817,7 @@ msgid ""
 "A light tick when the laser moves onto a button, a firmer one on a click."
 msgstr ""
 
-#: gui/prefs_page.py:218 install.sh:312 install.sh:371
+#: gui/prefs_page.py:218 install.sh:316 install.sh:375
 msgid "No settings left behind by uninstalled tweaks."
 msgstr ""
 
@@ -1193,279 +1193,283 @@ msgstr ""
 msgid "opens without asking for the password"
 msgstr ""
 
-#: install.sh:209
+#: install.sh:203
+msgid "%s is now called %s"
+msgstr ""
+
+#: install.sh:213
 msgid "(experimental)"
 msgstr ""
 
-#: install.sh:210
+#: install.sh:214
 msgid "(asks for your sudo password)"
 msgstr ""
 
-#: install.sh:212
+#: install.sh:216
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 
-#: install.sh:233
+#: install.sh:237
 msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:244 install.sh:283 packs/core/snip/install.sh:16 packs/core/snip/install.sh:19
+#: install.sh:248 install.sh:287 packs/core/snip/install.sh:16 packs/core/snip/install.sh:19
 msgid "%s failed"
 msgstr ""
 
-#: install.sh:248 install.sh:286
+#: install.sh:252 install.sh:290
 msgid "Failed: %s"
 msgstr ""
 
-#: install.sh:256
+#: install.sh:260
 msgid "uninstall what?"
 msgstr ""
 
-#: install.sh:263 install.sh:359
+#: install.sh:267 install.sh:363
 msgid "Nothing installed."
 msgstr ""
 
-#: install.sh:273
+#: install.sh:277
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr ""
 
-#: install.sh:280 install.sh:443
+#: install.sh:284 install.sh:447
 msgid "removing %s"
 msgstr ""
 
-#: install.sh:299
+#: install.sh:303
 msgid ""
 "Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
-#: install.sh:310 install.sh:381 install.sh:394 install.sh:427 lib/common.sh:422 packs/core/charge-limit/uninstall.sh:20
+#: install.sh:314 install.sh:385 install.sh:398 install.sh:431 lib/common.sh:422 packs/core/charge-limit/uninstall.sh:20
 msgid "removed %s"
 msgstr ""
 
-#: install.sh:337
+#: install.sh:341
 msgid ""
 "uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings"
 msgstr ""
 
-#: install.sh:342
+#: install.sh:346
 msgid "Uninstalling every tweak"
 msgstr ""
 
-#: install.sh:357
+#: install.sh:361
 msgid ""
 "Frame Tweaks is still here: see what failed above, then run this again."
 msgstr ""
 
-#: install.sh:360
+#: install.sh:364
 msgid ""
 "Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
 msgstr ""
 
-#: install.sh:370
+#: install.sh:374
 msgid ""
 "Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again."
 msgstr ""
 
-#: install.sh:375
+#: install.sh:379
 msgid ""
 "Kept for the tweaks still installed (%s): ~/.local/share/frame-tweaks, ~/.local/state/frame-tweaks and their settings."
 msgstr ""
 
-#: install.sh:382
+#: install.sh:386
 msgid "Kept your own packs: %s"
 msgstr ""
 
-#: install.sh:390
+#: install.sh:394
 msgid "Kept backups of files tweaks changed: %s"
 msgstr ""
 
-#: install.sh:395
+#: install.sh:399
 msgid ""
 "SteamVR's own setting goes back when SteamVR stops; then this goes too: %s"
 msgstr ""
 
-#: install.sh:399
+#: install.sh:403
 msgid "Kept the settings: %s"
 msgstr ""
 
-#: install.sh:408 install.sh:429
+#: install.sh:412 install.sh:433
 msgid "Frame Tweaks is uninstalled."
 msgstr ""
 
-#: install.sh:412
+#: install.sh:416
 msgid "it is a git worktree"
 msgstr ""
 
-#: install.sh:415
+#: install.sh:419
 msgid ""
 "it has files of yours: changes, your own packs in packs/, or a tmp/ folder"
 msgstr ""
 
-#: install.sh:417
+#: install.sh:421
 msgid "it has commits that are not pushed anywhere"
 msgstr ""
 
-#: install.sh:419
+#: install.sh:423
 msgid "it has other worktrees or stashed changes"
 msgstr ""
 
-#: install.sh:422
+#: install.sh:426
 msgid "it has your own packs in packs/"
 msgstr ""
 
-#: install.sh:425
+#: install.sh:429
 msgid ""
 "Kept this folder, %s: %s. Delete it yourself when you no longer need it."
 msgstr ""
 
-#: install.sh:435
+#: install.sh:439
 msgid "reinstall what?"
 msgstr ""
 
-#: install.sh:450
+#: install.sh:454
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr ""
 
-#: install.sh:453
+#: install.sh:457
 msgid "Updating the checkout"
 msgstr ""
 
-#: install.sh:457
+#: install.sh:461
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
 msgstr ""
 
-#: install.sh:460
+#: install.sh:464
 msgid "git pull failed; not reinstalling"
 msgstr ""
 
-#: install.sh:464
+#: install.sh:468
 msgid "couldn't reach GitHub; not updating"
 msgstr ""
 
-#: install.sh:468
+#: install.sh:472
 msgid "no release found"
 msgstr ""
 
-#: install.sh:473
+#: install.sh:477
 msgid ""
 "You're on %s, a test release newer than the newest stable release (%s): you stay on it until a newer stable release is out. To go back to %s now: %s"
 msgstr ""
 
-#: install.sh:476
+#: install.sh:480
 msgid "no release %s"
 msgstr ""
 
-#: install.sh:478
+#: install.sh:482
 msgid "Updating to %s (%s channel)"
 msgstr ""
 
-#: install.sh:482
+#: install.sh:486
 msgid "git checkout failed; not reinstalling"
 msgstr ""
 
-#: install.sh:495
+#: install.sh:499
 msgid "channel stable|beta"
 msgstr ""
 
-#: install.sh:498
+#: install.sh:502
 msgid ""
 "Updates now take test releases too (vX.Y.Z-rc.N: newer, less tested). To get the newest: %s"
 msgstr ""
 
-#: install.sh:501
+#: install.sh:505
 msgid "Updates now take stable releases only."
 msgstr ""
 
-#: install.sh:503
+#: install.sh:507
 msgid ""
 "You're on %s, a test release: you move to the next stable release when it's out. To go back to the newest stable release now: %s"
 msgstr ""
 
-#: install.sh:514
+#: install.sh:518
 msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 
-#: install.sh:515
+#: install.sh:519
 msgid "Nothing installed yet."
 msgstr ""
 
-#: install.sh:518
+#: install.sh:522
 msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 
-#: install.sh:527
+#: install.sh:533
 msgid ""
-"Set up the full installer window? It needs PyQt6 (about 280 MB, shared with Arrow Pad and the NordVPN tray).\\n\\nNo = use the simple checklist."
+"Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
 msgstr ""
 
-#: install.sh:529
+#: install.sh:535
 msgid "Couldn't install PyQt6; using the simple checklist."
 msgstr ""
 
-#: install.sh:550
+#: install.sh:556
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 
-#: install.sh:562
+#: install.sh:568
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
 
-#: install.sh:565
+#: install.sh:571
 msgid "Remove tweaks?"
 msgstr ""
 
-#: install.sh:566
+#: install.sh:572
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
 
-#: install.sh:604
+#: install.sh:610
 msgid "stopped %s's running programs"
 msgstr ""
 
-#: install.sh:627
+#: install.sh:633
 msgid "%s migration failed"
 msgstr ""
 
-#: install.sh:632
+#: install.sh:638
 msgid "%s what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:636
+#: install.sh:642
 msgid "%s: held (updates leave it as it is)"
 msgstr ""
 
-#: install.sh:637
+#: install.sh:643
 msgid "%s: updated normally again"
 msgstr ""
 
-#: install.sh:647
+#: install.sh:653
 msgid "The bug form, with your version filled in: %s"
 msgstr ""
 
-#: install.sh:690
+#: install.sh:696
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr ""
 
-#: install.sh:727
+#: install.sh:733
 msgid "run what?"
 msgstr ""
 
-#: install.sh:728 lib/link.sh:52
+#: install.sh:734 lib/link.sh:52
 msgid "%s has nothing to run"
 msgstr ""
 
-#: install.sh:741
+#: install.sh:747
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
-#: install.sh:742
+#: install.sh:748
 msgid "Added 'Frame Tweaks' to the app menu."
 msgstr ""
 
@@ -1518,7 +1522,7 @@ msgstr ""
 
 #: lib/common.sh:302
 msgid ""
-"Setting up PyQt6 (about 280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray and the installer window)"
+"Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
 msgstr ""
 
 #: lib/common.sh:308
@@ -1654,256 +1658,256 @@ msgstr ""
 msgid "Open Frame Tweaks to install it?"
 msgstr ""
 
-#: lib/sft.py:1005
-msgid "problem: %s"
-msgstr ""
-
-#: lib/sft.py:1013
-msgid "(default)"
-msgstr ""
-
-#: lib/sft.py:1027
-msgid "%s what?"
-msgstr ""
-
-#: lib/sft.py:1030
-msgid "Hidden in the installer window: %s"
-msgstr ""
-
-#: lib/sft.py:1031
-msgid "Shown in the installer window: %s"
-msgstr ""
-
-#: lib/sft.py:1038
-msgid "unknown group {name}; groups: {groups}"
-msgstr ""
-
-#: lib/sft.py:1040
-msgid "Group {name} hidden in the installer window."
-msgstr ""
-
-#: lib/sft.py:1041
-msgid "Group {name} shown in the installer window."
-msgstr ""
-
-#: lib/sft.py:1055
-msgid "%s isn't linked"
-msgstr ""
-
-#: lib/sft.py:1077
-msgid "uninstall-settings takes keep or remove"
-msgstr ""
-
-#: lib/sft.py:1106
-msgid "{id} has no settings; these do: {ids}"
-msgstr ""
-
-#: lib/sft.py:1114
-msgid "expected KEY=VALUE, got %s"
-msgstr ""
-
-#: lib/sft.py:1118
-msgid "{id} has no setting {key}; it has: {keys}"
-msgstr ""
-
-#: lib/sft.py:686
-msgid "{key}: {text} isn't one of: {choices}"
-msgstr ""
-
-#: lib/sft.py:696
-msgid ""
-"once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
-msgstr ""
-
-#: lib/sft.py:704 lib/sft.py:1027 lib/sft.py:1051 lib/sft.py:1055 lib/sft.py:1083
-msgid "unknown component: %s"
-msgstr ""
-
-#: lib/sft.py:707
-msgid "Why: %s"
-msgstr ""
-
-#: lib/sft.py:711
-msgid "Needs: %s"
-msgstr ""
-
-#: lib/sft.py:715
-msgid "By: %s"
-msgstr ""
-
-#: lib/sft.py:717
-msgid "Source: %s"
-msgstr ""
-
-#: lib/sft.py:719
-msgid ""
-"From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
-msgstr ""
-
-#: lib/sft.py:720
-msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
-msgstr ""
-
-#: lib/sft.py:722
-msgid "More: %s"
-msgstr ""
-
-#: lib/sft.py:725
-msgid "Run ({label}): {command}"
-msgstr ""
-
-#: lib/sft.py:727
-msgid "Settings: %s"
-msgstr ""
-
-#: lib/sft.py:751
-msgid "git isn't installed"
-msgstr ""
-
-#: lib/sft.py:753
-msgid "git took too long (no connection?)"
-msgstr ""
-
-#: lib/sft.py:757
-msgid "git {command} failed"
-msgstr ""
-
-#: lib/sft.py:784
-msgid ""
-"That isn't a link to a pack: give the address of its git repository, starting with https://"
-msgstr ""
-
-#: lib/sft.py:786
-msgid "{ref} isn't a branch or tag name"
-msgstr ""
-
-#: lib/sft.py:789
-msgid "You have a pack in {folder} already: update it, or remove it first."
-msgstr ""
-
-#: lib/sft.py:797
-msgid ""
-"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
-msgstr ""
-
-#: lib/sft.py:810
-msgid "{pack} wasn't added from a link: change its folder yourself."
-msgstr ""
-
-#: lib/sft.py:812
-msgid ""
-"{pack} was added at a fixed version: to follow another one, remove it and add it again."
-msgstr ""
-
-#: lib/sft.py:870
-msgid "Only packs in {folder} can be removed here."
-msgstr ""
-
-#: lib/sft.py:874
-msgid "Uninstall its tweaks first: {ids} ({command})."
-msgstr ""
-
-#: lib/sft.py:875
-msgid ""
-"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
-msgstr ""
-
-#: lib/sft.py:906
-msgid "more than one pack is called {name}: give its folder ({folders})"
-msgstr ""
-
-#: lib/sft.py:910
-msgid "no pack {name}; see {command}"
-msgstr ""
-
-#: lib/sft.py:917
-msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
-msgstr ""
-
-#: lib/sft.py:920
-msgid "in use; its tweaks are listed"
-msgstr ""
-
-#: lib/sft.py:921
-msgid "turned off (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-
-#: lib/sft.py:926
-msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
-msgstr ""
-
-#: lib/sft.py:929
-msgid "trusted; its tweaks are listed now"
-msgstr ""
-
-#: lib/sft.py:930
-msgid "no longer used (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-
-#: lib/sft.py:942
-msgid "Added the pack {name} in {folder}."
-msgstr ""
-
-#: lib/sft.py:943
-msgid "By {author}."
-msgstr ""
-
-#: lib/sft.py:944
-msgid "Tweaks: %s"
-msgstr ""
-
-#: lib/sft.py:947
+#: lib/sft.py:1001
 msgid "Problems:"
 msgstr ""
 
-#: lib/sft.py:948
+#: lib/sft.py:1002
 msgid ""
 "It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
 msgstr ""
 
-#: lib/sft.py:958
+#: lib/sft.py:1012
 msgid "a newer version is out: {command}"
 msgstr ""
 
-#: lib/sft.py:959
+#: lib/sft.py:1013
 msgid "up to date"
 msgstr ""
 
-#: lib/sft.py:960
+#: lib/sft.py:1014
 msgid "couldn't check (no connection?)"
 msgstr ""
 
-#: lib/sft.py:962
+#: lib/sft.py:1016
 msgid "No packs added from a link."
 msgstr ""
 
-#: lib/sft.py:969
+#: lib/sft.py:1023
 msgid "Removed the pack {name} ({folder})."
 msgstr ""
 
-#: lib/sft.py:981
+#: lib/sft.py:1035
 msgid ""
 "It isn't used until you trust it again. Read what changed first, then: {command}"
 msgstr ""
 
-#: lib/sft.py:989
+#: lib/sft.py:1043
 msgid "official: in use"
 msgstr ""
 
-#: lib/sft.py:990
+#: lib/sft.py:1044
 msgid "official: turned off ({command})"
 msgstr ""
 
-#: lib/sft.py:991
+#: lib/sft.py:1045
 msgid "trusted: in use"
 msgstr ""
 
-#: lib/sft.py:992
+#: lib/sft.py:1046
 msgid "not trusted: not used ({command})"
 msgstr ""
 
-#: lib/sft.py:993
+#: lib/sft.py:1047
 msgid "changed since you trusted it: not used until you trust it again"
+msgstr ""
+
+#: lib/sft.py:1059
+msgid "problem: %s"
+msgstr ""
+
+#: lib/sft.py:1067
+msgid "(default)"
+msgstr ""
+
+#: lib/sft.py:1081
+msgid "%s what?"
+msgstr ""
+
+#: lib/sft.py:1084
+msgid "Hidden in the installer window: %s"
+msgstr ""
+
+#: lib/sft.py:1085
+msgid "Shown in the installer window: %s"
+msgstr ""
+
+#: lib/sft.py:1092
+msgid "unknown group {name}; groups: {groups}"
+msgstr ""
+
+#: lib/sft.py:1094
+msgid "Group {name} hidden in the installer window."
+msgstr ""
+
+#: lib/sft.py:1095
+msgid "Group {name} shown in the installer window."
+msgstr ""
+
+#: lib/sft.py:1118
+msgid "%s isn't linked"
+msgstr ""
+
+#: lib/sft.py:1140
+msgid "uninstall-settings takes keep or remove"
+msgstr ""
+
+#: lib/sft.py:1169
+msgid "{id} has no settings; these do: {ids}"
+msgstr ""
+
+#: lib/sft.py:1177
+msgid "expected KEY=VALUE, got %s"
+msgstr ""
+
+#: lib/sft.py:1181
+msgid "{id} has no setting {key}; it has: {keys}"
+msgstr ""
+
+#: lib/sft.py:740
+msgid "{key}: {text} isn't one of: {choices}"
+msgstr ""
+
+#: lib/sft.py:750
+msgid ""
+"once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
+msgstr ""
+
+#: lib/sft.py:758 lib/sft.py:1081 lib/sft.py:1114 lib/sft.py:1118 lib/sft.py:1146
+msgid "unknown component: %s"
+msgstr ""
+
+#: lib/sft.py:761
+msgid "Why: %s"
+msgstr ""
+
+#: lib/sft.py:765
+msgid "Needs: %s"
+msgstr ""
+
+#: lib/sft.py:769
+msgid "By: %s"
+msgstr ""
+
+#: lib/sft.py:771
+msgid "Source: %s"
+msgstr ""
+
+#: lib/sft.py:773
+msgid ""
+"From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
+msgstr ""
+
+#: lib/sft.py:774
+msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
+msgstr ""
+
+#: lib/sft.py:776
+msgid "More: %s"
+msgstr ""
+
+#: lib/sft.py:779
+msgid "Run ({label}): {command}"
+msgstr ""
+
+#: lib/sft.py:781
+msgid "Settings: %s"
+msgstr ""
+
+#: lib/sft.py:805
+msgid "git isn't installed"
+msgstr ""
+
+#: lib/sft.py:807
+msgid "git took too long (no connection?)"
+msgstr ""
+
+#: lib/sft.py:811
+msgid "git {command} failed"
+msgstr ""
+
+#: lib/sft.py:838
+msgid ""
+"That isn't a link to a pack: give the address of its git repository, starting with https://"
+msgstr ""
+
+#: lib/sft.py:840
+msgid "{ref} isn't a branch or tag name"
+msgstr ""
+
+#: lib/sft.py:843
+msgid "You have a pack in {folder} already: update it, or remove it first."
+msgstr ""
+
+#: lib/sft.py:851
+msgid ""
+"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+msgstr ""
+
+#: lib/sft.py:864
+msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr ""
+
+#: lib/sft.py:866
+msgid ""
+"{pack} was added at a fixed version: to follow another one, remove it and add it again."
+msgstr ""
+
+#: lib/sft.py:924
+msgid "Only packs in {folder} can be removed here."
+msgstr ""
+
+#: lib/sft.py:928
+msgid "Uninstall its tweaks first: {ids} ({command})."
+msgstr ""
+
+#: lib/sft.py:929
+msgid ""
+"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
+msgstr ""
+
+#: lib/sft.py:960
+msgid "more than one pack is called {name}: give its folder ({folders})"
+msgstr ""
+
+#: lib/sft.py:964
+msgid "no pack {name}; see {command}"
+msgstr ""
+
+#: lib/sft.py:971
+msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
+msgstr ""
+
+#: lib/sft.py:974
+msgid "in use; its tweaks are listed"
+msgstr ""
+
+#: lib/sft.py:975
+msgid "turned off (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+
+#: lib/sft.py:980
+msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
+msgstr ""
+
+#: lib/sft.py:983
+msgid "trusted; its tweaks are listed now"
+msgstr ""
+
+#: lib/sft.py:984
+msgid "no longer used (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+
+#: lib/sft.py:996
+msgid "Added the pack {name} in {folder}."
+msgstr ""
+
+#: lib/sft.py:997
+msgid "By {author}."
+msgstr ""
+
+#: lib/sft.py:998
+msgid "Tweaks: %s"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md

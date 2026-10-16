@@ -189,10 +189,49 @@ class Packs(unittest.TestCase):
         for name in ("core", "integrations", "third-party", "original/arrowpad/__pycache__", "mine"):
             (packs / name).mkdir(parents=True)
         dirs = [packs / "core", packs / "integrations", packs / "third-party"]
+        (packs / "core/pack.md").write_text("---\nname: Core\nformerly: [original]\n---\n")
         with mock.patch.object(sft, "CORE", dirs[0]), mock.patch.object(sft, "OFFICIAL_PACKS", dirs):
             self.assertEqual([d.name for d in sft.pack_dirs()][:4], ["core", "integrations", "third-party", "mine"])
             (packs / "original/pack.md").write_text("---\nname: Mine too\n---\n")
             self.assertIn("original", [d.name for d in sft.pack_dirs()])
+
+    def test_formerly_a_tweaks_earlier_ids(self):
+        """formerly: (a renamed tweak): its earlier ids still name it in depends:, and what's kept
+        under one (install record, held, hidden) moves to its id once."""
+        d = self.tweak("mypack", "hello", extra="formerly: [hi, hey]\n")
+        self.tweak("mypack", "hello2", extra="depends: [hi]\n")
+        sft.set_trusted(d.parent, True)
+        ids = self.ids()
+        self.assertEqual(ids["hello2"]["deps"], ["hello"])
+        self.assertEqual(sft.load()["renamed"], {"hi": "hello", "hey": "hello"})
+        state = Path(self.tmp.name) / "state"
+        for sub in ("installed", "held"):
+            (state / sub).mkdir(parents=True)
+            (state / sub / "hi").write_text("0.6.5\n")
+        sft.write_set(sft.HIDDEN, {"hi", "other"})
+        with mock.patch.object(sft, "STATE", state):
+            moved = sft.apply_formerly()
+            self.assertEqual(sft.apply_formerly(), [])                      # (once)
+        self.assertIn("installed/hi -> hello", moved)
+        self.assertEqual((state / "installed/hello").read_text(), "0.6.5\n")
+        self.assertTrue((state / "held/hello").exists() and not (state / "held/hi").exists())
+        self.assertEqual(sft.read_set(sft.HIDDEN), {"hello", "other"})
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            sft.main(["renamed", "hi"])
+        self.assertEqual(out.getvalue(), "hello\n")
+
+    def test_formerly_wrong(self):
+        for extra, says in (("formerly: [Not An Id]\n", "formerly must be"), ("formerly: [hello]\n", "formerly must be")):
+            d = self.tweak("mypack", "hello", extra=extra)
+            sft.set_trusted(d.parent, True)
+            self.assertNotIn("hello", self.ids(), extra)
+            self.assertTrue(any(says in p for p in sft.load()["problems"]), extra)
+        d = self.tweak("mypack", "hello", extra="formerly: [hello2]\n")      # (another tweak's id)
+        self.tweak("mypack", "hello2")
+        sft.set_trusted(d.parent, True)
+        self.assertNotIn("hello2", sft.load(refresh=True)["renamed"])
+        self.assertTrue(any("another tweak's id" in p for p in sft.load()["problems"]))
 
     def test_official_packs_share_the_category_order(self):
         cats = [sft.read_pack(p)[0]["categories"] for p in sft.OFFICIAL_PACKS]
