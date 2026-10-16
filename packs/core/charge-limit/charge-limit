@@ -3,8 +3,11 @@
 # limit. At the limit it pauses the charger (its charging_pause switch, which the tweak's udev
 # rule makes yours), and RESUME_BELOW percent under it lets it charge again. Plugged in and
 # paused, the Frame runs mostly from the charger; the battery still gives a little (README).
-#   charge-limit --run          a check every 30 seconds (its user service); charging resumes when it stops
+#   charge-limit --run          a check every 30 seconds (its user service); charging resumes when it stops.
+#                               It also starts charge-limit-sleep, which runs the next two around sleep.
 #   charge-limit --once         one check
+#   charge-limit --before-sleep the Frame is about to sleep: asleep, nothing checks the battery, so
+#                               near the limit (SLEEP_WITHIN percent under it, or over) charging pauses
 #   charge-limit --full-once    charge to 100% once (until the battery is full, or the Frame restarts)
 #   charge-limit --limit        the limit in use: a percentage, or off
 #   charge-limit --battery      the battery's folder in /sys
@@ -18,6 +21,8 @@ CONF=${FRAME_TWEAKS_CHARGE_CONF:-$HOME/.config/frame-tweaks/charge-limit.conf}
 RUN=${FRAME_TWEAKS_CHARGE_RUN:-/run/user/$(id -u)/charge-limit}
 DEFAULT=80
 RESUME_BELOW=1        # (1%: small swings, which age the battery about as much as holding it; README)
+SLEEP_WITHIN=10       # (lower than this under the limit, it charges on while asleep: not left low)
+SLEEPER=${FRAME_TWEAKS_CHARGE_SLEEPER:-$HOME/.local/bin/charge-limit-sleep}
 INTERVAL=${FRAME_TWEAKS_CHARGE_INTERVAL:-30}
 
 log() { printf '%s\n' "$*"; }
@@ -76,18 +81,33 @@ check() {
     return 0
 }
 
+before_sleep() {   # (charge-limit-sleep runs it as the Frame goes to sleep; it has a few seconds)
+    local bat cap lim
+    bat=$(battery) || return 0
+    [ -e "$SWITCH" ] && [ ! -e "$RUN/full-once" ] || return 0
+    cap=$(cat "$bat/capacity") lim=$(limit)
+    [ "$lim" = off ] && return 0
+    if [ "$cap" -ge $((lim - SLEEP_WITHIN)) ] && [ "$(cat "$SWITCH")" != 1 ]; then
+        set_switch 1 && log "charging paused for sleep at $cap% (limit $lim%)"
+    fi
+    return 0
+}
+
 case ${1:-} in
     --run)
-        trap 'release; exit 0' TERM INT
+        sleeper=
+        if [ -x "$SLEEPER" ]; then "$SLEEPER" "$0" & sleeper=$!; fi
+        trap '[ -n "$sleeper" ] && kill "$sleeper" 2>/dev/null; release; exit 0' TERM INT
         while :; do
             check
             sleep "$INTERVAL" & wait $!
         done ;;
     --once) check ;;
+    --before-sleep) before_sleep ;;
     --full-once)
         mkdir -p "$RUN" && touch "$RUN/full-once"
         check ;;
     --limit) limit ;;
     --battery) battery ;;
-    *) echo "usage: charge-limit --run | --once | --full-once | --limit | --battery" >&2; exit 2 ;;
+    *) echo "usage: charge-limit --run | --once | --before-sleep | --full-once | --limit | --battery" >&2; exit 2 ;;
 esac

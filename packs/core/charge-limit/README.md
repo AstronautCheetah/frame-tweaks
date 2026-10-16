@@ -22,7 +22,7 @@ experimental: >-
   service turns the pause off each time it starts; it's on again within 30 seconds. The status
   says if the switch is gone, or if the battery still charges while paused.
 icon: {theme: battery-080}
-processes: [~/.local/bin/charge-limit --run]
+processes: [~/.local/bin/charge-limit --run, ~/.local/bin/charge-limit-sleep]
 settings:
   file: ~/.config/frame-tweaks/charge-limit.conf
   format: shell
@@ -50,7 +50,7 @@ settings:
         Before a long session away from power: the limit is lifted until the battery is full (or
         the Frame restarts), then applies again. You don't need it otherwise.
 changes: >-
-  `charge-limit` in `~/.local/bin` and its user service; a udev rule
+  `charge-limit` and `charge-limit-sleep` in `~/.local/bin` and its user service; a udev rule
   (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through
   `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause
   switch yours each time the Frame starts
@@ -102,8 +102,11 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
 - **Its status** shows the limit and the battery level, and "not charging" while it holds.
 
 ## Good to know
-- **Only while the Frame is on.** Switched off, the Frame charges to 100% as before; asleep, it
-  may too.
+- **Asleep, the limit can't be checked,** so as the Frame goes to sleep, charging pauses if the
+  battery is within 10% of the limit (or over it): it doesn't charge past it overnight. Lower
+  than that, it charges on while asleep, so a nearly empty Frame isn't left low, and may go past
+  the limit; once awake, the limit applies again. Switched off, the Frame charges to 100% as
+  before.
 - **Plugged in at the limit,** the Frame runs mostly from the charger or power bank, but the
   battery still drains slowly: on a Frame plugged into a 45 W USB-C charger, holding at 80%, the
   battery gave about 1 W (it went from 84% to 79% in 45 minutes). Charging starts again 1% below
@@ -130,6 +133,11 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
   sets the charger's pause switch
   (`/sys/class/power_supply/pm8550b-charger/charging_pause`), and 1% below it clears it again.
   It never changes the charger's voltage or current, and it lifts only a pause it made itself.
+- `charge-limit-sleep`, which the service starts, holds a *delay* sleep lock from logind (as
+  SteamVR's own services do). When the Frame is about to sleep, logind gives it a moment to run
+  `charge-limit --before-sleep` (the pause near the limit), then the Frame sleeps; as it wakes,
+  it checks again at once. Before it, a Frame that went to sleep during one of the few minutes
+  of charging charged on to 100% overnight.
 - SteamOS's charger service (`deckard-charger`) clears the switch each time it starts; the next
   check sets it again. Stopping the service (uninstalling, or shutting down) clears it, so
   charging is never left paused.
@@ -157,7 +165,7 @@ to 78% limits. The measurements, the studies and when to test again are in
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (SteamOS updates keep the udev rule)
-- **Changes:** `charge-limit` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts
+- **Changes:** `charge-limit` and `charge-limit-sleep` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts
 - **🧪 Experimental:** Uses the Frame's charger driver directly (its charging pause switch). SteamOS's charger service turns the pause off each time it starts; it's on again within 30 seconds. The status says if the switch is gone, or if the battery still charges while paused.
 - **Unusual access:** Pauses and resumes the battery's charging. Asks for your sudo password once to add the udev rule, and again to remove it
 - **Undo:** `./install.sh uninstall charge-limit` (asks for your sudo password to remove the udev rule); the battery charges normally again

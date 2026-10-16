@@ -24,6 +24,9 @@ password once, to add a udev rule (%s) that SteamOS updates keep." "$RULE")"
 fi
 
 install -m755 "$TWEAK_DIR/charge-limit" "$BIN/"
+# Its watch on sleep (pauses charging near the limit before the Frame sleeps): D-Bus via jeepney.
+ensure_tweaks_venv
+install_py_tool "$TWEAK_DIR/charge-limit-sleep"
 mkdir -p "$HOME/.config/systemd/user"
 cp "$TWEAK_DIR/charge-limit.service" "$HOME/.config/systemd/user/"
 sysctl_user daemon-reload

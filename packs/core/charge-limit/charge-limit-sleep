@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""charge-limit-sleep (Frame Tweaks, packs/core/charge-limit): Battery charge limit's watch on
+sleep. Asleep, nothing checks the battery, so a Frame that went to sleep while charging charged
+on, to 100% overnight. This holds a "delay" sleep lock from logind, as SteamVR's services do:
+when the Frame is about to sleep, logind waits (a few seconds at most) while this runs
+`charge-limit --before-sleep`, which pauses charging near the limit, then lets it go. As it
+wakes, `charge-limit --once` checks again at once.
+  charge-limit-sleep CHARGE-LIMIT     (charge-limit --run starts it, with its own path)"""
+import subprocess
+import sys
+
+from jeepney import DBusAddress, MatchRule, MessageType, new_method_call
+from jeepney.bus_messages import message_bus
+from jeepney.io.blocking import open_dbus_connection
+
+LOGIN = DBusAddress("/org/freedesktop/login1", bus_name="org.freedesktop.login1",
+                    interface="org.freedesktop.login1.Manager")
+
+
+def inhibit(conn):
+    """The delay lock (a file descriptor): closing it lets the Frame sleep."""
+    r = conn.send_and_get_reply(new_method_call(LOGIN, "Inhibit", "ssss", (
+        "sleep", "Battery charge limit (Frame Tweaks)", "Pausing charging at the limit before sleep", "delay")))
+    if r.header.message_type == MessageType.error:
+        raise SystemExit(f"charge-limit-sleep: logind refused the sleep lock: {r.body}")
+    return r.body[0]
+
+
+def step(charge_limit, arg):
+    try:
+        subprocess.run([charge_limit, arg], timeout=4)
+    except (OSError, subprocess.SubprocessError) as e:
+        print(f"charge-limit-sleep: charge-limit {arg}: {e}", flush=True)
+
+
+def watch(conn, charge_limit):
+    conn.send_and_get_reply(message_bus.AddMatch(MatchRule(
+        type="signal", interface=LOGIN.interface, member="PrepareForSleep", path=LOGIN.object_path)))
+    lock = inhibit(conn)
+    while True:
+        msg = conn.receive()
+        if msg.header.message_type != MessageType.signal or msg.header.fields.get(3) != "PrepareForSleep":
+            continue
+        if msg.body and msg.body[0]:              # going to sleep
+            step(charge_limit, "--before-sleep")
+            if lock is not None:
+                lock.close()
+                lock = None
+        else:                                     # awake again
+            step(charge_limit, "--once")
+            if lock is None:
+                lock = inhibit(conn)
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    with open_dbus_connection("SYSTEM", enable_fds=True) as conn:
+        watch(conn, sys.argv[1])
+
+
+if __name__ == "__main__":
+    main()
