@@ -1282,6 +1282,11 @@ msgid "Frame Tweaks is uninstalled."
 msgstr ""
 
 #: install.sh
+msgid ""
+"Frame Tweaks is up to date (%s): nothing to reinstall. To run the installed tweaks' installers again anyway: %s"
+msgstr ""
+
+#: install.sh
 msgid "Kept backups of files tweaks changed: %s"
 msgstr ""
 

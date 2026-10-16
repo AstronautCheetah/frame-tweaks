@@ -207,6 +207,20 @@ class Update(unittest.TestCase):
         self.assertEqual(self.at(co), self.commit("v0.0.2"))
         self.assertIn("Nothing installed yet.", r.stdout)                # (the new version's second stage)
 
+    def test_already_the_newest_reinstalls_nothing(self):
+        """The install command run again over an install is an update: on the newest release
+        already, the installed tweaks' installers aren't all run again (minutes, before the window
+        opened); it says how to run them anyway."""
+        co = self.checkout()
+        self.assertEqual(self.update(co).returncode, 0)
+        r = self.update(co)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Frame Tweaks is up to date", r.stdout)
+        self.assertIn("./install.sh reinstall", r.stdout)
+        self.assertNotIn("Nothing installed yet.", r.stdout)            # (the second stage didn't run)
+        self.assertNotIn("Updating to", r.stdout)
+        self.assertEqual(self.at(co), self.commit("v0.0.2"))
+
     def test_test_releases_come_and_go_with_the_channel(self):
         """Beta: the test release. Stable again: no going back unasked, but --to stable goes back."""
         co = self.checkout()

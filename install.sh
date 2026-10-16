@@ -454,6 +454,7 @@ cmd_update() {
     local want=""
     [[ ${1:-} == --to ]] && { want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* || $want == stable ]] || want="v$want"; }
     if [[ -d .git ]]; then
+        local before; before=$(git rev-parse -q --verify HEAD)
         if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
             bold "$(t 'Updating the checkout')"
             if ! git pull --ff-only; then
@@ -480,11 +481,19 @@ keep: git reset --hard @{upstream}")" >&2
             fi
             git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "$(t 'no release %s' "$tag")" >&2; exit 1; }
             verify_release "$PWD" "$tag" || exit 1
-            bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"
+            [[ $(git rev-parse "refs/tags/$tag^{commit}") == "$before" ]] ||
+                bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"
             # (refs/tags/: the tag just verified, even if a branch has its name. A failed checkout,
             # local changes in the way say, stops here: the tree is the old one or half switched.)
             git -c advice.detachedHead=false checkout --quiet "refs/tags/$tag" ||
                 { echo "$(t 'git checkout failed; not reinstalling')" >&2; exit 1; }
+        fi
+        # Nothing changed (the newest already, as when the install command runs again over an
+        # install): the installed tweaks are as that version installs them, so their installers
+        # aren't run again (all of them, minutes, before the window opened).
+        if [[ $(git rev-parse -q --verify HEAD) == "$before" ]]; then
+            say "$(t "Frame Tweaks is up to date (%s): nothing to reinstall. To run the installed tweaks' installers again anyway: %s" "$FT_BUILD" "./install.sh reinstall")"
+            return 0
         fi
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi
