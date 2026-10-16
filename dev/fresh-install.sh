@@ -161,7 +161,7 @@ if [ -z "$shell" ]; then args+=(--new-session); fi
 for d in /home/linuxbrew /var/lib/flatpak /run/dbus; do
     if [ -d "$d" ]; then args+=(--tmpfs "$d"); fi
 done
-env=(HOME="$HOME" USER="$USER" LOGNAME="$USER" SHELL=/bin/bash TERM="${TERM:-xterm-256color}"
+env=(HOME="$HOME" USER="$USER" LOGNAME="$USER" SHELL=/bin/bash TERM="${TERM:-xterm-256color}" COLORTERM="${COLORTERM:-}"
      LANG="${LANG:-C.UTF-8}" PATH="$box/stubs:/usr/local/bin:/usr/bin:/bin"
      XDG_RUNTIME_DIR="$run" DBUS_SESSION_BUS_ADDRESS="unix:path=$run/bus"
      XDG_CURRENT_DESKTOP=KDE XDG_SESSION_DESKTOP=KDE KDE_FULL_SESSION=true KDE_SESSION_VERSION=6)

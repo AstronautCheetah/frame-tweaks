@@ -159,11 +159,13 @@ A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
 | `FRAME_TWEAKS_CHANNEL=beta` | Pre-releases too, for `get.sh` and updates. `get.sh` keeps it in `~/.config/frame-tweaks/channel` (as `./install.sh channel beta` and ⚙ Preferences do). |
 | `FRAME_TWEAKS_REPO=URL`, `FRAME_TWEAKS_DIR=DIR` | Where `get.sh` installs from, and into. |
 | `FRAME_TWEAKS_ALLOW_UNSIGNED=1` | Lets an update take a release the release key didn't sign: an emergency switch. |
+| `FRAME_TWEAKS_SPLASH=off` or `=still` | In a terminal, installs, removals and updates run without the animated logo above the output (`lib/splash.py`), or with it still. KDE's animation speed set to instant keeps it still too. `python3 lib/splash.py --demo` shows it with a pretend install. |
 | `ALARM_MIRROR=URL`, `ALARM_ALLOW_DOWNGRADE=1` | The Arch Linux ARM mirror to use; allow a package older than one installed before. |
 | `TEST_IGNORE=REGEX`, `TEST_WORK=DIR` | `dev/test-tweaks.sh`: paths other programs write meanwhile; keep its work folder there. |
 
 The installer sets more for the tweaks' scripts (`FRAME_TWEAKS_LIB`, `FRAME_TWEAKS_REINSTALL`,
-`FRAME_TWEAKS_UPDATING`): [docs/mods.md](docs/mods.md), "The scripts".
+`FRAME_TWEAKS_UPDATING`): [docs/mods.md](docs/mods.md), "The scripts". Under the splash, the
+command finds `FRAME_TWEAKS_SPLASH_TTY` set to its terminal (so `./install.sh` doesn't start another).
 
 ## Adding a tweak
 

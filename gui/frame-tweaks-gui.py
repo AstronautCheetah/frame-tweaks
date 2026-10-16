@@ -1960,12 +1960,14 @@ class Window(QWidget):
             print("would remove:", " ".join(remove) or "none")
             print("would install:", " ".join(add) or "none")
             return
-        steps = [f"cd {shlex.quote(str(REPO))}"]
+        steps = []
         if remove:
             steps.append("./install.sh uninstall " + " ".join(remove))
         if add:
             steps.append("./install.sh install " + " ".join(add))
-        cmd = " && ".join(steps) + f"; echo; read -rp {close_prompt()}"
+        # (one splash for both: ./install.sh run under lib/splash.py doesn't start another)
+        cmd = (f"cd {shlex.quote(str(REPO))} && python3 lib/splash.py -- bash -c {shlex.quote(' && '.join(steps))}"
+               f"; echo; read -rp {close_prompt()}")
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.changed(add + remove)))
         in_terminal(self.proc, cmd)

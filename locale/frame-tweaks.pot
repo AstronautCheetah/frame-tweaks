@@ -2005,6 +2005,22 @@ msgstr ""
 msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
+#: lib/splash.py packs/core/arrowpad/arrowpad.py
+msgid "Done"
+msgstr ""
+
+#: lib/splash.py
+msgid "Press any key to skip"
+msgstr ""
+
+#: lib/splash.py
+msgid "Stopped with an error (exit status {code})"
+msgstr ""
+
+#: lib/splash.py
+msgid "Working…"
+msgstr ""
+
 #: packs/core/adb-scrcpy/README.md
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
@@ -2471,10 +2487,6 @@ msgstr ""
 #: packs/core/arrowpad/arrowpad.py
 msgid ""
 "Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py
-msgid "Done"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
