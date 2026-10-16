@@ -1,7 +1,7 @@
 name: Release
 # Run by hand (Actions → Release → Run workflow). Turns CHANGELOG's "## Unreleased" section into
-# the new version's notes, bumps VERSION, commits, tags vX.Y.Z (or vX.Y.Z-rc.N) and drafts a
-# GitHub release.
+# the new version's notes (a pre-release leaves the section for the release), bumps VERSION,
+# commits, tags vX.Y.Z (or vX.Y.Z-rc.N) and drafts a GitHub release.
 on:
   workflow_dispatch:
     inputs:
@@ -66,7 +66,12 @@ jobs:
           grep -q '^## Unreleased' CHANGELOG.md || { echo 'CHANGELOG.md has no "## Unreleased" section'; exit 1; }
           awk '/^## Unreleased/{f=1; next} f && /^## /{exit} f' CHANGELOG.md > notes.md
           grep -q '[^[:space:]]' notes.md || { echo "the Unreleased section is empty"; exit 1; }
-          sed -i "s/^## Unreleased.*/## $V ($(date +%Y-%m-%d))/" CHANGELOG.md
+          # A pre-release takes its notes from the section and leaves it: the release it leads up
+          # to dates it, with everything since the last release in it.
+          case "$V" in
+            *-*) ;;
+            *) sed -i "s/^## Unreleased.*/## $V ($(date +%Y-%m-%d))/" CHANGELOG.md ;;
+          esac
           echo "$V" > VERSION
           type=""; case "$V" in *-*) type=' type="development"' ;; esac
           sed -i "s|  <releases>|  <releases>\n    <release version=\"$V\" date=\"$(date +%Y-%m-%d)\"$type/>|" share/metainfo/*.metainfo.xml
@@ -87,7 +92,9 @@ jobs:
           printf '%s\n' "$SIGNING_KEY" > "$key"
           git -c gpg.format=ssh -c user.signingkey="$key" tag -s "v$V" -m "v$V"
           git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile=dev/release-signers verify-tag "v$V"
-          git push origin HEAD:main "v$V"
+          # (both or neither: a tag out while main refused the commit, say because it moved
+          # meanwhile, would be a release whose commit main never gets)
+          git push --atomic origin HEAD:main "v$V"
           flags=(--draft --title "v$V" --notes-file notes.md)
           [ "$PRE" = true ] && flags+=(--prerelease)
           gh release create "v$V" "${flags[@]}"
