@@ -257,9 +257,9 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
 | `say`, `warn`, `die` | Messages; `die` exits. |
 | `ask "question?"` | Yes or no, in the terminal or a dialog. |
 | `ensure_path` | Puts `~/.local/bin` on PATH for terminals and the desktop. |
-| `install_desktop FILE` | A `.desktop` file into the app menu (`@BIN@` becomes `~/.local/bin`). |
+| `install_desktop FILE` | A `.desktop` file into the app menu (`@BIN@` becomes `~/.local/bin`). What someone changed in the entry since it was last written (a name or icon from KDE's menu editor) stays in the new version. |
 | `install_icon NAME` | `NAME.png` from the tweak's folder into the icon theme (Steam's VR menu finds it). |
-| `remove_desktop FILE...`, `remove_icon NAME` | Their undo, for `uninstall.sh` (including the copy kept while the wallet guards an entry). On a reinstall (↻), `remove_desktop` leaves the entry, so `install_desktop` keeps it guarded. |
+| `remove_desktop FILE...`, `remove_icon NAME` | Their undo, for `uninstall.sh` (including the copies kept of the entry as written and while the wallet guards it). On a reinstall (↻), `remove_desktop` leaves the entry, so `install_desktop` keeps it guarded. |
 | `brew_cmd NAME` | A command's path, on PATH or in Homebrew (for `status.sh`); fails without it. |
 | `remove_files PATH...` | Removes them, saying what went. |
 | `write_file DEST [MODE] < content` | Replaces a program (or any file) with new content by renaming a finished copy over it, so a running copy isn't changed under it. Use it, not `>` or `cp`, for anything in `~/.local/bin` (CI checks). |

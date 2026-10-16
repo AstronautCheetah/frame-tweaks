@@ -1,6 +1,8 @@
 """lib/menuedits.py: your edits to a menu entry, told from Frame Tweaks' own changes and kept when
 it writes the entry again (wallet-launcher's wrappers)."""
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -90,6 +92,36 @@ class WithYours(unittest.TestCase):
         self.assertEqual(menuedits.with_yours(BASE, {}), BASE)
         self.assertEqual(menuedits.with_yours(BASE, {("Gone", "Name"): None}), BASE)
 
+
+
+class Merge(unittest.TestCase):
+    def test_a_command_both_changed_is_the_new_versions(self):
+        """Yours may not run any more (the program moved): the new version's command wins; your
+        name stays."""
+        mine = BASE.replace("Name=Notes", "Name=Mine").replace("@@u %U @@", "--dark @@u %U @@")
+        new = BASE.replace("/usr/bin/flatpak run --branch=stable", "/usr/bin/flatpak run --branch=beta")
+        out = menuedits.merge(BASE, new, mine).splitlines()
+        self.assertIn("Name=Mine", out)
+        self.assertIn("Exec=/home/u/.local/bin/wallet-gate /usr/bin/flatpak run --branch=beta org.notes @@u %U @@", out)
+        out = menuedits.merge(BASE, BASE.replace("Write things down", "New comment"), mine).splitlines()
+        self.assertIn("Exec=/home/u/.local/bin/wallet-gate /usr/bin/flatpak run --branch=stable org.notes --dark "
+                      "@@u %U @@", out)                                # (only yours changed: yours)
+        self.assertIn("Comment=New comment", out)
+
+    def test_keep_from_the_command_line(self):
+        """lib/common.sh install_desktop: the new entry on stdin, out with your edits; as it is when
+        there's nothing to tell them by."""
+        d = Path(tempfile.mkdtemp())
+        self.addCleanup(subprocess.run, ["rm", "-rf", str(d)])
+        (d / "base").write_text(BASE)
+        (d / "current").write_text(kde_saves(BASE, Icon="mine"))
+
+        def keep(current, base):
+            return subprocess.run([sys.executable, str(Path(menuedits.__file__)), "keep", str(current), str(base)],
+                                  input=BASE, capture_output=True, text=True, check=True).stdout
+        self.assertIn("Icon=mine", keep(d / "current", d / "base").splitlines())
+        self.assertEqual(keep(d / "current", d / "none"), BASE)
+        self.assertEqual(keep(d / "none", d / "base"), BASE)
 
 if __name__ == "__main__":
     unittest.main()

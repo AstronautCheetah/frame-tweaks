@@ -205,6 +205,11 @@
   added to its command, was lost. A copy of the entry as written is kept now: what yours says
   differently goes into the new one, and stays when the protection is removed. A Frame Tweaks
   menu entry you renamed also keeps its name when the keyboard's language changes.
+- **Your changes to Frame Tweaks' own menu entries stay too:** a tweak's update wrote its entry
+  whole (Arrow Pad, Dictation, Screen snip, Frame Tweaks itself; Claude Desktop's at each of its
+  updates), so a name or icon you'd given it went back. They're kept the same way now. If an
+  update changes an entry's command and you'd changed it too, the update's is used: yours may
+  not run any more.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
