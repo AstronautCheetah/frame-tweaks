@@ -2,12 +2,15 @@
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import kde_saves, sandbox_env, stub  # noqa: E402
 
 
 def sh(script, stdin="", **env):
@@ -132,6 +135,37 @@ class DesktopEntry(unittest.TestCase):
             text = (home / ".local/share/applications/thing.desktop").read_text()
             self.assertIn("Name=Thing", text)
             self.assertIn(f"Exec={home}/.local/bin/thing", text)
+
+    def test_your_edits_stay_when_it_is_written_again(self):
+        """A rename or new icon from KDE's menu editor stays when the tweak's next update writes
+        its entry again; the update's own changes come through. Its uninstall takes the copy kept."""
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            stubs, home = d / "stubs", d / "home"
+            for name in ("systemctl", "update-desktop-database"):
+                stub(stubs, name, "exit 0")
+            desktop = d / "thing.desktop"
+            desktop.write_text("[Desktop Entry]\nType=Application\nName=Thing\nComment=Does a thing\n"
+                               "Exec=@BIN@/thing %U\nIcon=thing\n")
+
+            def run(command):
+                r = subprocess.run(["bash", "-c", f'source {ROOT}/lib/common.sh; {command}'], capture_output=True,
+                                   text=True, timeout=60, env=sandbox_env(home, stubs))
+                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            run(f'install_desktop "{desktop}"')
+            menu = home / ".local/share/applications/thing.desktop"
+            menu.write_text(kde_saves(menu.read_text(), Name="My thing", Icon="star"))
+            desktop.write_text(desktop.read_text().replace("Does a thing", "Does it better").replace(" %U", " --new %U"))
+            run(f'install_desktop "{desktop}"')
+            lines = menu.read_text().splitlines()
+            for line in ("Name=My thing", "Icon=star", "Comment=Does it better", f"Exec={home}/.local/bin/thing --new %U"):
+                self.assertIn(line, lines)
+            self.assertEqual(lines[0], "[Desktop Entry]")
+            run("remove_desktop thing.desktop")
+            self.assertFalse(menu.exists())
+            self.assertFalse((home / ".local/share/frame-tweaks/menu-built/thing.desktop").exists())
+            run(f'install_desktop "{desktop}"; remove_files "$APPS/thing.desktop"')    # (a pack's own way)
+            self.assertFalse((home / ".local/share/frame-tweaks/menu-built/thing.desktop").exists())
 
 
 class SteamVRRestart(unittest.TestCase):

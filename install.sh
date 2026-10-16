@@ -113,11 +113,17 @@ ensure_menu_entry() {
     done
     install -m644 icons/frame-tweaks.png "$icons/256x256/apps/frame-tweaks.png"   # the window's own icon
     # (Written whole, in English if translating it fails: written straight from lib/i18n.py, a
-    # failure there left the menu entry empty.)
-    local entry
+    # failure there left the menu entry empty. With what you've changed in it since it was last
+    # written, as lib/common.sh install_desktop does.)
+    local entry mine
     entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" | python3 lib/i18n.py desktop) && [[ -n $entry ]] ||
         entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop")
-    [[ -z $entry ]] || printf '%s\n' "$entry" | write_file "$apps/$id.desktop"
+    if [[ -n $entry ]]; then
+        mine=$(printf '%s\n' "$entry" | python3 lib/menuedits.py keep "$apps/$id.desktop" "$MENU_BUILT/$id.desktop") &&
+            [[ -n $mine ]] || mine=$entry
+        printf '%s\n' "$mine" | write_file "$apps/$id.desktop"
+        printf '%s\n' "$entry" | write_file "$MENU_BUILT/$id.desktop"
+    fi
     install -m644 "share/metainfo/$id.metainfo.xml" "$HOME/.local/share/metainfo/"
     rm -f "$apps/steam-frame-tweaks.desktop"          # its old name
     update-desktop-database -q "$apps" 2>/dev/null || true
@@ -157,7 +163,8 @@ ensure_menu_language() {
 remove_menu_entry() {
     local apps="$HOME/.local/share/applications" icons="$HOME/.local/share/icons/hicolor" n
     local id=io.github.AstronautCheetah.FrameTweaks
-    rm -f "$apps/$id.desktop" "$HOME/.local/share/metainfo/$id.metainfo.xml" "$icons/256x256/apps/frame-tweaks.png"
+    rm -f "$apps/$id.desktop" "$MENU_BUILT/$id.desktop" "$HOME/.local/share/metainfo/$id.metainfo.xml" \
+        "$icons/256x256/apps/frame-tweaks.png"
     if [[ ${1:-} != keep-language ]]; then
         sysctl_user disable --now "$MENU_UNIT.path" >/dev/null 2>&1 || true
         rm -f "$HOME/.config/systemd/user/$MENU_UNIT.path" "$HOME/.config/systemd/user/$MENU_UNIT.service"

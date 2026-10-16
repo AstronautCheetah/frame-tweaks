@@ -252,6 +252,7 @@ pin_version() { sed -n 's/^version=//p' "$(tweak_dir "$1")/pin"; }
 ICONS="$HOME/.local/share/icons/hicolor"
 LAUNCHER_ORIGINALS="$HOME/.local/share/frame-tweaks/launcher-originals"
 LAUNCHER_BUILT="$HOME/.local/share/frame-tweaks/launcher-built"     # (wallet-launcher's wrappers as it built them)
+MENU_BUILT="$HOME/.local/share/frame-tweaks/menu-built"     # (install_desktop's entries as it wrote them)
 
 # install_icon <name>: <name>.png from the tweak's folder (or the repo's icons/) into hicolor
 # (256x256).
@@ -263,18 +264,22 @@ install_icon() {
     touch "$ICONS"
 }
 
-# install_desktop <file.desktop>: copy into the app menu, expanding @BIN@. If the entry is
+# install_desktop <file.desktop>: copy into the app menu, expanding @BIN@. What you've changed in
+# the entry since it was last written (a new name or icon from KDE's menu editor) goes into the
+# new version (lib/menuedits.py: menu-built keeps each entry as written). If the entry is
 # wrapped by wallet-launcher (shared wallet / password gate), the new version becomes the
 # wrapper's original and the wrapper is re-applied, so the gate isn't silently dropped.
-# remove_desktop <file.desktop>...: install_desktop's undo: the entry, and the copies kept while
-# wallet-launcher wraps it (launcher-originals, launcher-built), then the menu refreshed. Not on
-# a reinstall (↻, FRAME_TWEAKS_REINSTALL): install_desktop, next, then re-applies the wrapper to
-# the new version.
+# remove_desktop <file.desktop>...: install_desktop's undo: the entry, the copy of it as written
+# and those kept while wallet-launcher wraps it (launcher-originals, launcher-built), then the
+# menu refreshed. Not on a reinstall (↻, FRAME_TWEAKS_REINSTALL): install_desktop, next, then
+# re-applies the wrapper to the new version.
 # (Without the kept copy it wrote a plain entry: the password gate was gone.)
 remove_desktop() {
     [ -z "${FRAME_TWEAKS_REINSTALL:-}" ] || return 0
     local name
-    for name in "$@"; do remove_files "$APPS/$name" "$LAUNCHER_ORIGINALS/$name" "$LAUNCHER_BUILT/$name"; done
+    for name in "$@"; do
+        remove_files "$APPS/$name" "$MENU_BUILT/$name" "$LAUNCHER_ORIGINALS/$name" "$LAUNCHER_BUILT/$name"
+    done
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS" 2>/dev/null || true
 }
@@ -286,7 +291,7 @@ remove_icon() {
 }
 
 install_desktop() {
-    local name entry; name=$(basename "$1")
+    local name entry mine; name=$(basename "$1")
     # (with its name and comment in each translated language: lib/i18n.py desktop. Made first, then
     # written whole, in English if translating it fails: piped straight in, a failure there left
     # the entry empty, and the tweak's install stopped.)
@@ -294,10 +299,13 @@ install_desktop() {
         entry=$(sed "s|@BIN@|$BIN|g" "$1")
     if [ -f "$LAUNCHER_ORIGINALS/$name" ] && [ -x "$BIN/wallet-launcher" ]; then
         printf '%s\n' "$entry" | write_file "$LAUNCHER_ORIGINALS/$name"
-        "$BIN/wallet-launcher" --reapply "${name%.desktop}" >/dev/null
+        "$BIN/wallet-launcher" --reapply "${name%.desktop}" >/dev/null     # (keeps your edits itself)
     else
-        printf '%s\n' "$entry" | write_file "$APPS/$name"
+        mine=$(printf '%s\n' "$entry" | python3 "$REPO_DIR/lib/menuedits.py" keep "$APPS/$name" "$MENU_BUILT/$name") &&
+            [ -n "$mine" ] || mine=$entry
+        printf '%s\n' "$mine" | write_file "$APPS/$name"
     fi
+    printf '%s\n' "$entry" | write_file "$MENU_BUILT/$name"
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS"
     # (its name in the keyboard's language, as for every entry: install.sh ensure_menu_language)
@@ -440,11 +448,13 @@ vr_started_before() {
     [ $(( $(date +%s) - age )) -lt "$(stat -c %Y "$1")" ]
 }
 
-# remove_files <path>...: delete if present, saying what went
+# remove_files <path>...: delete if present, saying what went. (With a menu entry, the copy of it
+# as written goes too, unsaid: install_desktop's, for a tweak that removes its entry this way.)
 remove_files() {
     local f
     for f in "$@"; do
         if [ -e "$f" ] || [ -L "$f" ]; then rm -rf -- "$f" && say "$(t 'removed %s' "$f")"; fi
+        [[ $f != "$APPS"/*.desktop ]] || rm -f -- "$MENU_BUILT/${f##*/}"
     done
 }
 

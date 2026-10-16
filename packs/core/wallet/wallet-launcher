@@ -57,6 +57,8 @@ OLD_BACKUP_DIR = APPS / ".wallet-launcher-originals"
 # Each wrapper as add() last built it: what the entry in APPS says differently is yours (a new
 # name or icon from KDE's menu editor, an option added to the command), kept when it's rebuilt.
 BUILT_DIR = HOME / ".local/share/frame-tweaks/launcher-built"
+# Frame Tweaks' own entries as it last wrote them (lib/common.sh install_desktop), wrapped or not.
+MENU_BUILT = HOME / ".local/share/frame-tweaks/menu-built"
 WRAPPER = str(HOME / ".local/bin/frame-outer-bus")
 GATE = str(HOME / ".local/bin/wallet-gate")
 GUARD = str(HOME / ".local/bin/signal-guard")   # retired (app-timers + --gate); dropped on rebuild
@@ -141,11 +143,17 @@ def unwrapped(cmd, original):
     return env + [a for a in args if a not in ADDED or a in keep]
 
 
-def keep_yours(app_id, built, now, original, electron, shared, gate):
-    """built (the new wrapper), with what you've changed in the wrapper since it was last built
-    (now: the entry in the menu). A command you changed is wrapped again as you left it."""
-    base = BUILT_DIR / f"{app_id}.desktop"
-    if f"{MARK}=true" not in now or not base.exists():
+def plain_words(cmd):
+    """A command as the app has it, whatever it's wrapped with: to tell whether the app's own
+    command changed (then a command you changed gives way to it: menuedits.merge)."""
+    env, args = command_parts(cmd)
+    return env + [a for a in args if a not in ADDED]
+
+
+def keep_yours(app_id, built, now, base, original, electron, shared, gate):
+    """built (the new wrapper), with what you've changed since base was written (now: the entry
+    in the menu). A command you changed is wrapped again as you left it."""
+    if base is None:
         return built
     commands = menuedits.keys(original)
 
@@ -155,7 +163,7 @@ def keep_yours(app_id, built, now, original, electron, shared, gate):
             return None if args is None else rewrite_exec(join_exec(args), app_id, electron, shared, gate)
         except NotWrappable:                  # (not one it can wrap: the new wrapper's command stands)
             return None
-    return menuedits.with_yours(built, menuedits.yours(base.read_text(), now), OWNED, command)
+    return menuedits.merge(base, built, now, OWNED, command, words=plain_words)
 
 
 # Electron apps that read the wallet only when told the password store explicitly. Without it,
@@ -184,9 +192,19 @@ def add(app_id, electron, shared=True, gate=None):
     app update, or another tweak adding its app, must not silently drop the password gate)."""
     src = source_for(app_id)
     original = src.read_text()
-    lines = original.splitlines()
     current = APPS / f"{app_id}.desktop"
     now = current.read_text() if current.exists() else ""
+    # What the entry says differently from what Frame Tweaks wrote there is yours: from the wrapper
+    # as it was built, or, for one of Frame Tweaks' own entries wrapped now, from that entry as it
+    # was written (then it's the original: your edits go on top, not into it).
+    base, written = BUILT_DIR / f"{app_id}.desktop", MENU_BUILT / f"{app_id}.desktop"
+    if f"{MARK}=true" in now:
+        base = base.read_text() if base.exists() else None
+    elif src == current and written.exists():
+        base = original = written.read_text()
+    else:
+        base = None
+    lines = original.splitlines()
     if gate is None:
         gate = f"{MARK}=true" in now and GATE in now
     # Re-applying (e.g. after an app update) keeps --password-store, even if not asked again.
@@ -199,7 +217,7 @@ def add(app_id, electron, shared=True, gate=None):
     except NotWrappable as e:
         sys.exit(str(e))
     APPS.mkdir(parents=True, exist_ok=True)
-    current.write_text(keep_yours(app_id, built, now, original, electron, shared, gate))
+    current.write_text(keep_yours(app_id, built, now, base, original, electron, shared, gate))
     BUILT_DIR.mkdir(parents=True, exist_ok=True)
     (BUILT_DIR / f"{app_id}.desktop").write_text(built)
     what = [w for w, on in ((_("shared wallet"), shared), (_("password required"), gate)) if on]
@@ -259,7 +277,7 @@ def remove(app_id):
         def command(group, yours):
             args, cmd = unwrapped(yours, commands.get((group, "Exec"))), commands.get((group, "Exec"), "")
             return None if args is None or args == shlex.split(cmd) else join_exec(args)
-        mine = menuedits.with_yours(text, menuedits.yours(base.read_text(), now), OWNED, command)
+        mine = menuedits.merge(base.read_text(), text, now, OWNED, command, words=plain_words)
     if menuedits.keys(mine) != menuedits.keys(text):
         target.write_text(mine)
         backup.unlink(missing_ok=True)

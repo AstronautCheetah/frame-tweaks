@@ -4,8 +4,13 @@ Frame Tweaks keeps a copy of the entry as it last wrote it. Whatever the entry s
 now is yours (a new name or icon from KDE's menu editor, an option added to its command), and
 goes into the new version too: a three-way merge, key by key, with that copy as the common
 ancestor. The entry's file name is its identity: KDE's menu editor saves a rename into the same
-file. (wallet-launcher; installed beside i18n.py: lib/common.sh install_i18n.)"""
+file. (wallet-launcher, lib/common.sh install_desktop; installed beside i18n.py: install_i18n.)
+
+  menuedits.py keep CURRENT BASE < NEW    # NEW with your edits to CURRENT since BASE, on stdout
+"""
 import shlex
+import sys
+from pathlib import Path
 
 # Put in the keyboard's language by lib/i18n.py relabel, from the entry's X-Frame-Tweaks-<key>
 # English (its MENU_KEYS): such a change isn't yours.
@@ -110,3 +115,33 @@ def with_yours(text, edits, owned=(), command=None):
         if len(out) == start + 2:          # (only removals: nothing to show)
             del out[start:]
     return "\n".join(out) + "\n"
+
+
+def merge(base, new, current, owned=(), command=None, words=shlex.split):
+    """new (the entry as Frame Tweaks writes it now), with your edits: what current (the entry in
+    the menu) says differently from base (as Frame Tweaks last wrote it). A command you changed
+    stays yours unless the new version changed it too: then it's the new one, as yours may not
+    run any more (a program moved, an option gone). words(command): how a command reads, to tell
+    whether it changed. owned, command: as with_yours."""
+    edits, b, n = yours(base, current), keys(base), keys(new)
+    for gk in [gk for gk in edits if gk[1] == "Exec"]:
+        try:
+            changed = words(b.get(gk, "")) != words(n.get(gk, ""))
+        except ValueError:
+            changed = True
+        if changed:
+            del edits[gk]
+    return with_yours(new, edits, owned, command)
+
+
+if __name__ == "__main__":
+    if sys.argv[1:2] == ["keep"] and len(sys.argv) == 4:
+        new = sys.stdin.read()
+        try:                                  # (either missing: nothing to tell yours by)
+            current, base = Path(sys.argv[2]).read_text(), Path(sys.argv[3]).read_text()
+        except (OSError, UnicodeDecodeError):
+            sys.stdout.write(new)
+        else:
+            sys.stdout.write(merge(base, new, current))
+    else:
+        sys.exit("menuedits.py keep CURRENT BASE < NEW")

@@ -712,6 +712,37 @@ class Scripts(Home):
         self.assertFalse((apps / "dictate.desktop").exists())
         self.assertFalse((kept / "dictate.desktop").exists())
 
+    def test_a_name_stays_through_protecting_and_unprotecting(self):
+        """Dictation's entry renamed, then given Password first (the entry as written becomes the
+        original: your name stays on top), updated, unprotected, and updated again."""
+        self.tool(self.stubs, "systemctl", "exit 0")
+        self.tool(self.stubs, "update-desktop-database", "exit 0")
+        (self.bin / "wallet-launcher").write_bytes((WALLET / "wallet-launcher").read_bytes())
+        (self.bin / "wallet-launcher").chmod(0o755)
+        menu = self.home / ".local/share/applications/dictate.desktop"
+        kept = self.home / ".local/share/frame-tweaks/launcher-originals/dictate.desktop"
+        desktop = ROOT / "packs/core/dictation/dictate.desktop"
+
+        def run(command):
+            r = subprocess.run(["bash", "-c", f'source "{ROOT}/lib/common.sh"; {command}'], capture_output=True,
+                               text=True, timeout=60, env=sandbox_env(self.home, self.stubs, USER="test"))
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+        def says(*lines):
+            for line in lines:
+                self.assertIn(line, menu.read_text().splitlines())
+        run(f'install_desktop "{desktop}"')
+        menu.write_text(kde_saves(menu.read_text(), Name="Talk to type"))
+        run('"$BIN/wallet-launcher" --gate --no-shared dictate')
+        says("Name=Talk to type", f"Exec={self.bin}/wallet-gate {self.bin}/dictate")
+        self.assertIn("Name=Dictate (toggle)", kept.read_text().splitlines())     # (the original, as written)
+        run(f'install_desktop "{desktop}"')                                       # (an update)
+        says("Name=Talk to type", f"Exec={self.bin}/wallet-gate {self.bin}/dictate")
+        run('"$BIN/wallet-launcher" --remove dictate')
+        says("Name=Talk to type", f"Exec={self.bin}/dictate")
+        run(f'install_desktop "{desktop}"')
+        says("Name=Talk to type", f"Exec={self.bin}/dictate")
+
     def test_a_name_you_gave_a_protected_entry_stays(self):
         """Dictation's entry, password first, renamed in KDE's menu editor: the name stays through a
         reinstall (↻) and a keyboard language change; uninstalling takes the copies kept for it."""

@@ -26,7 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import sandbox_env, stub  # noqa: E402
+from helpers import kde_saves, sandbox_env, stub  # noqa: E402
 VERSION = (ROOT / "VERSION").read_text().strip()
 
 README = """\
@@ -604,6 +604,16 @@ class InstallState(unittest.TestCase):
         self.assertTrue(entry.startswith("[Desktop Entry]\n"), entry)
         self.assertIn("\nName=Frame Tweaks\n", entry)
         self.assertIn(f"\nExec=env FRAME_TWEAKS_GUI=1 {ROOT}/install.sh gui\n", entry)
+
+    def test_your_name_for_the_menu_entry_stays(self):
+        entry = self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop"
+        for change in (None, "Tweaks"):
+            if change:
+                entry.write_text(kde_saves(entry.read_text(), Name=change))
+            r = self.sh("menu")
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Name=Tweaks", entry.read_text().splitlines())
+        self.assertIn(f"Exec=env FRAME_TWEAKS_GUI=1 {ROOT}/install.sh gui", entry.read_text().splitlines())
 
     def test_debug_info_removes_names_and_addresses(self):
         """Here from a log of an earlier run, which the report includes."""

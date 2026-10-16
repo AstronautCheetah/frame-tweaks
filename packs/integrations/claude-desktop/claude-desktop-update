@@ -50,12 +50,22 @@ echo "$VER" > "$OPT/.deb-version"
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/icons"
 cp -a "$T/root/usr/share/icons/hicolor" "$HOME/.local/share/icons/"
 ORIG="$HOME/.local/share/frame-tweaks/launcher-originals"   # wallet-launcher's originals
+BUILT="$HOME/.local/share/frame-tweaks/menu-built"          # each entry as written (lib/menuedits.py)
+mkdir -p "$BUILT"
 for d in "$T"/root/usr/share/applications/*.desktop; do
-    dest="$HOME/.local/share/applications/$(basename "$d")"
-    # Routed to the shared wallet (wallet/)? Refresh the original, then re-wrap it.
-    [ -f "$ORIG/$(basename "$d")" ] && dest="$ORIG/$(basename "$d")"
-    sed "s|^Exec=claude-desktop|Exec=$HOME/.local/bin/claude-desktop|" "$d" > "$dest"
-    [ "$dest" = "$ORIG/$(basename "$d")" ] && "$HOME/.local/bin/wallet-launcher" "$(basename "$d" .desktop)"
+    name=$(basename "$d") dest="$HOME/.local/share/applications/$(basename "$d")"
+    entry=$(sed "s|^Exec=claude-desktop|Exec=$HOME/.local/bin/claude-desktop|" "$d")
+    if [ -f "$ORIG/$name" ]; then
+        # Routed to the shared wallet (wallet/): refresh the original, then re-wrap it.
+        printf '%s\n' "$entry" > "$ORIG/$name"
+        "$HOME/.local/bin/wallet-launcher" "${name%.desktop}"
+    else
+        # (what you've changed in it since it was last written stays: a new name or icon)
+        mine=$(printf '%s\n' "$entry" | python3 "$HOME/.local/share/frame-tweaks/i18n/menuedits.py" keep "$dest" \
+            "$BUILT/$name" 2>/dev/null) && [ -n "$mine" ] || mine=$entry
+        printf '%s\n' "$mine" > "$dest"
+    fi
+    printf '%s\n' "$entry" > "$BUILT/$name"
 done
 update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
 t "Done. Launch 'Claude' from the app menu."; echo
