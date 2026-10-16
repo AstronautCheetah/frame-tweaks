@@ -150,6 +150,23 @@ matters more**: a limit 2% lower with a 1% swing keeps the old average with smal
 Both effects are small next to temperature and time spent at high charge. Hence 1% swings and
 the 74, 76 and 78% limits.
 
+## Sleep
+
+Asleep, the service can't run, so whatever the switch is set to as the Frame goes to sleep holds
+all night. On 16 October 2026, with a 78% limit and 1% swings, charging was turned back on at
+77% at 00:53:13; the Frame slept from 00:59:22 to 06:33:41 (`PM: suspend entry (deep)` in the
+system log) and woke at 99%. With small swings charging is on a few minutes at a time, so a
+Frame that goes to sleep plugged in often catches it on.
+
+Since then `charge-limit-sleep` holds a logind *delay* lock on sleep (the same kind SteamVR,
+XRService and UPower hold on the Frame: `busctl --system call org.freedesktop.login1
+/org/freedesktop/login1 org.freedesktop.login1.Manager ListInhibitors`), and on
+`PrepareForSleep` pauses charging when the battery is within 10% of the limit or over it, then
+releases the lock. Lower than that it lets the Frame charge while asleep, so a Frame put down
+nearly empty isn't left low, at the cost of possibly going past the limit that night. Watching
+the system bus with `busctl monitor` needs root; subscribing to the signal and taking the lock
+don't.
+
 ## Revisit when
 
 - **SteamOS gains a charge limit for the Frame** (`[battery_charge_limit]` in

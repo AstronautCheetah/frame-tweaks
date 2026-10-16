@@ -3206,8 +3206,20 @@ msgstr "No se encontró la batería"
 
 # needs review
 #: packs/core/charge-limit/status.sh
+msgid "Not charging until the battery is below %s%% (now %s%%)"
+msgstr "Sin cargar hasta que la batería baje del %s%% (ahora %s%%)"
+
+# needs review
+#: packs/core/charge-limit/status.sh
 msgid "Not running (Reinstall starts it)"
 msgstr "No se está ejecutando (reinstalarlo lo inicia)"
+
+# needs review
+#: packs/core/charge-limit/status.sh
+msgid ""
+"Not watching for sleep, so the battery can charge past the limit while the Frame is asleep (Reinstall fixes it)"
+msgstr ""
+"No vigila la suspensión, así que la batería puede cargar más allá del límite mientras el Frame está suspendido (Reinstalar lo arregla)"
 
 # needs review
 #: packs/core/charge-limit/status.sh

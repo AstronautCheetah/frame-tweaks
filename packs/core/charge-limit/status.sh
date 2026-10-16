@@ -13,6 +13,9 @@ done
 [ -e "$SWITCH" ] || status_warn "$(t "This SteamOS has no charger pause switch, so the limit can't work")"
 [ -w "$SWITCH" ] || status_warn "$(t "Can't pause charging: Reinstall it (it asks for your password)")"
 sysctl_user is-active --quiet charge-limit || status_warn "$(t "Not running (Reinstall starts it)")"
+if [ -x "$BIN/charge-limit-sleep" ] && ! pgrep -u "$(id -u)" -f "$BIN/charge-limit-sleep" >/dev/null; then
+    status_warn "$(t "Not watching for sleep, so the battery can charge past the limit while the Frame is asleep (Reinstall fixes it)")"
+fi
 bat=$("$BIN/charge-limit" --battery) || status_warn "$(t 'No battery found')"
 cap=$(cat "$bat/capacity")
 limit=$("$BIN/charge-limit" --limit)
@@ -22,6 +25,9 @@ limit=$("$BIN/charge-limit" --limit)
 if [ "$(cat "$SWITCH")" = 1 ] && [ -e "$RUN/paused" ]; then
     [ "$(cat "$bat/current_now" 2>/dev/null || echo 0)" -gt 100000 ] &&
         status_warn "$(t "Paused at %s%%, but the battery still charges: the Frame's charger ignored the pause" "$cap")"
+    # (well over it: charged while the Frame was asleep or off, or by Charge to 100% once)
+    [ "$cap" -gt $((limit + 2)) ] &&
+        status_ok "$(t 'Not charging until the battery is below %s%% (now %s%%)' "$limit" "$cap")"
     status_ok "$(t 'Holding at %s%% (battery %s%%, not charging)' "$limit" "$cap")"
 fi
 # (the service checks as it starts, then every 30 seconds)

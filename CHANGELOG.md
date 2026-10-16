@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Battery charge limit holds overnight:** asleep, nothing could check the battery, so a Frame
+  that went to sleep during one of the few minutes of charging charged on to 100% (here: 77% at
+  00:59, 99% at 06:33). Now, as the Frame goes to sleep, charging pauses if the battery is within
+  10% of the limit or over it (a logind delay lock gives it the moment), and it checks again as
+  it wakes; a lower battery still charges while asleep. Its status also says "Not charging until
+  the battery is below 78% (now 98%)" rather than "Holding at 78%" when it's well over the limit,
+  and warns if the watch on sleep isn't running.
+
 ## 0.6.9 (2026-10-16)
 
 ### Added

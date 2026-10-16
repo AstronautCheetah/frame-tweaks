@@ -10,7 +10,7 @@ paused="$XDG_RUNTIME_DIR_USER/charge-limit/paused"
 if [ -e "$paused" ] && [ "$(cat "$SWITCH" 2>/dev/null)" = 1 ]; then
     printf '0\n' > "$SWITCH" 2>/dev/null || warn "$(t "Couldn't let the battery charge again: restart the Frame.")"
 fi
-remove_files "$BIN/charge-limit" "$HOME/.config/systemd/user/charge-limit.service" "${paused%/*}"
+remove_files "$BIN/charge-limit" "$BIN/charge-limit-sleep" "$HOME/.config/systemd/user/charge-limit.service" "${paused%/*}"
 sysctl_user daemon-reload
 
 if [ -e "$RULE" ] || [ -e "$KEEP" ]; then

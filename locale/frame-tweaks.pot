@@ -2873,7 +2873,16 @@ msgid "No battery found"
 msgstr ""
 
 #: packs/core/charge-limit/status.sh
+msgid "Not charging until the battery is below %s%% (now %s%%)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
 msgid "Not running (Reinstall starts it)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid ""
+"Not watching for sleep, so the battery can charge past the limit while the Frame is asleep (Reinstall fixes it)"
 msgstr ""
 
 #: packs/core/charge-limit/status.sh
