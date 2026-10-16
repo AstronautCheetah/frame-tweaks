@@ -780,6 +780,10 @@ class Window(QWidget):
         self.details = None
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
         self.prefs = window_prefs()
+        try:                                         # (what's kept under a tweak's former id: formerly:)
+            sft.apply_formerly()
+        except OSError:
+            pass
         self.self_update = self.pool.submit(self_update_check) if self.prefs["update_check"] else None
         # packs added from a link whose source has a newer version (with Frame Tweaks' own check)
         self.pack_updates = set()

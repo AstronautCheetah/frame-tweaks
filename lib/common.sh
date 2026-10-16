@@ -299,7 +299,7 @@ TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 # and the installer window); fails if it couldn't be installed.
 ensure_qt_venv() {
     "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null && return 0
-    say "$(t 'Setting up PyQt6 (about 280 MB, shared by Arrow Pad, Screen snip, the NordVPN tray and the installer window)')"
+    say "$(t 'Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)')"
     python3 -m venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
 }
 

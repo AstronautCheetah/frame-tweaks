@@ -116,7 +116,7 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
-            "app", "link", "sudo")
+            "app", "link", "sudo", "formerly")
 # app: the name of the other project's app the tweak installs (Claude Desktop, Full Keyboard, …).
 # Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
@@ -171,7 +171,7 @@ def pack_dirs():
     FRAME_TWEAKS_PACKS (folders separated by :, each a pack). All but the official ones need trust."""
     out = list(OFFICIAL_PACKS)
     out += sorted(d for d in CORE.parent.iterdir() if d.is_dir() and d not in OFFICIAL_PACKS and not d.name.startswith(".")
-                  and not (d.name == "original" and not (d / "pack.md").exists()))   # (Core's old folder: what an update left)
+                  and not (d.name in former_packs() and not (d / "pack.md").exists()))   # (what an update left of one)
     if USER_PACKS.is_dir():
         out += sorted(d for d in USER_PACKS.iterdir() if d.is_dir() and not d.name.startswith("."))
     out += [Path(d).expanduser() for d in os.environ.get("FRAME_TWEAKS_PACKS", "").split(":") if d]
@@ -233,8 +233,16 @@ def set_trusted(d, trust):
 
 
 def off_packs():
-    """The official packs turned off, by folder name (e.g. {"third-party"}; Core's was "original")."""
-    return {"core" if name == "original" else name for name in read_set(OFF_PACKS)}
+    """The official packs turned off, by folder name (e.g. {"third-party"}); one turned off under
+    a former name (its pack.md formerly:) counts as its own."""
+    former = former_packs()
+    return {former.get(name, name) for name in read_set(OFF_PACKS)}
+
+
+def former_packs():
+    """{a former folder name: the official pack's folder now} (pack.md formerly:, e.g. Core's
+    [original])."""
+    return {old: d.name for d in OFFICIAL_PACKS for old in read_pack(d)[0]["formerly"]}
 
 
 def set_official(d, on):
@@ -346,6 +354,11 @@ def read_tweak(d):
     deps = data.get("depends", [])
     if not (isinstance(deps, list) and all(isinstance(x, str) for x in deps)):
         errs.append(f"{where}: depends must be a list of tweak ids")
+    formerly = data.get("formerly", [])
+    formerly = [formerly] if isinstance(formerly, str) else formerly
+    if not (isinstance(formerly, list) and all(isinstance(x, str) and ID.match(x) and x != cid for x in formerly)):
+        errs.append(f"{where}: formerly must be the tweak's earlier ids, like [old-name]")
+        formerly = []
     if "sudo" in data and not (isinstance(data["sudo"], str) and data["sudo"].strip()):
         errs.append(f"{where}: sudo must be text: when and why it asks for the sudo password (or homebrew)")
     link = data.get("link")
@@ -401,7 +414,7 @@ def read_tweak(d):
         what=data["what"], why=data["why"], author=data["author"],
         source=f"{src.get('relation', 'uses')}|{src['url']}" if src.get("url") else "",
         flags={"hidden-by-default"} if data.get("hidden_by_default") else set(),
-        experimental=data.get("experimental") or "", icon=icon, sudo=(data.get("sudo") or "").strip(),
+        experimental=data.get("experimental") or "", icon=icon, sudo=(data.get("sudo") or "").strip(), formerly=formerly,
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() or (link or {}).get("run") else None,
         link=link_paths(link) if link else None,
         processes=procs, settings=data.get("settings"),
@@ -455,7 +468,7 @@ def script(c, name):
 
 def read_pack(d):
     """(info, tweak folders in order, problems)"""
-    info, probs = {"name": d.name, "author": "", "api": 1, "categories": [], "order": [], "about": ""}, []
+    info, probs = {"name": d.name, "author": "", "api": 1, "categories": [], "order": [], "about": "", "formerly": []}, []
     if (d / "pack.md").is_file():
         try:
             data, body = manifest.front_matter((d / "pack.md").read_text())
@@ -466,7 +479,9 @@ def read_pack(d):
         except (OSError, ValueError) as e:              # (ValueError: a ManifestError, or not UTF-8)
             probs.append(f"{d.name}/pack.md: {e}")
     # (any pack's, trusted or not, is read: a wrong kind of value is a problem, and the default is used)
-    for k, default in (("name", d.name), ("author", ""), ("categories", []), ("order", [])):
+    if isinstance(info["formerly"], str):
+        info["formerly"] = [info["formerly"]]
+    for k, default in (("name", d.name), ("author", ""), ("categories", []), ("order", []), ("formerly", [])):
         v = info[k]
         ok = (isinstance(v, str) and (v or k == "author")) if isinstance(default, str) else (
             isinstance(v, list) and all(isinstance(x, str) for x in v))
@@ -528,6 +543,16 @@ def load(refresh=False):
                                     f"{c['id']!r}; to use this one instead, add  replaces: true")
                 continue
             comps[c["id"]] = c
+    # formerly: a tweak's earlier ids still name it (in depends:, say), unless another tweak has one
+    renamed = {}
+    for i, c in comps.items():
+        for old in c["formerly"]:
+            if old in comps or old in renamed:
+                problems.append(f"{i}: formerly: {old!r} is another tweak's id too; left out")
+            else:
+                renamed[old] = i
+    for c in comps.values():
+        c["deps"] = [renamed.get(x, x) for x in c["deps"]]
     # a tweak needing one that isn't there can't be installed
     while True:
         gone = [i for i, c in comps.items() if any(dep not in comps for dep in c["deps"])]
@@ -538,8 +563,37 @@ def load(refresh=False):
             del comps[i]
     rows = sorted(comps.values(), key=lambda c: cats.index(c["category"]))     # stable: pack order within
     rows = [translated(c) for c in rows]
-    _CACHE.update(components=rows, packs=packs, problems=problems)
+    _CACHE.update(components=rows, packs=packs, problems=problems, renamed=renamed)
     return _CACHE
+
+
+STATE = Path.home() / ".local/state/frame-tweaks"           # (install.sh's $STATE)
+
+
+def apply_formerly():
+    """What's kept under a tweak's former id (formerly: in its manifest) moves to its id, once:
+    its install record, held, unloaded and backups entries, and hidden or shown rows; and an
+    official pack turned off under a former folder name is recorded under its own. ./install.sh
+    and the window run this as they start. Returns what moved."""
+    moved = []
+    for old, new in load(refresh=True).get("renamed", {}).items():
+        for sub in ("installed", "held", "unloaded", "backups"):
+            src, dst = STATE / sub / old, STATE / sub / new
+            if (src.exists() or src.is_symlink()) and not (dst.exists() or dst.is_symlink()):
+                src.rename(dst)
+                moved.append(f"{sub}/{old} -> {new}")
+        for f in (HIDDEN, SHOWN):
+            ids = read_set(f)
+            if old in ids:
+                write_set(f, (ids - {old}) | {new})
+                moved.append(f"{f.name}: {old} -> {new}")
+    off = read_set(OFF_PACKS)
+    if off and off_packs() != off:
+        write_set(OFF_PACKS, off_packs())
+        moved.append(f"{OFF_PACKS.name}: {' '.join(sorted(off))} -> {' '.join(sorted(off_packs()))}")
+    if moved:
+        load(refresh=True)
+    return moved
 
 
 def components():
@@ -1041,7 +1095,16 @@ def main(argv):
                _("Group {name} shown in the installer window.")).format(name=repr(name)))
     elif cmd == "mods":
         mods(args)
+    elif cmd == "renamed" and len(args) == 1:   # a tweak's former id (formerly:): its id now
+        new = load().get("renamed", {}).get(args[0])
+        sys.exit(1) if not new else print(new)
+    elif cmd == "apply-formerly":               # move what's kept under former ids (./install.sh registry does it too)
+        print("\n".join(apply_formerly()))
     elif cmd == "registry":                     # for ./install.sh: one line per tweak, \x1f-separated
+        try:                                    # (./install.sh runs this as it starts: formerly: applies first)
+            apply_formerly()
+        except OSError as e:
+            print(f"formerly: {e}", file=sys.stderr)
         for c in components():                  # (a line break in a summary would start a row of its own)
             print("\x1f".join(re.sub(r"[\n\r\x1f]", " ", f) for f in [c["id"], c["title"], " ".join(c["deps"]),
                                                                   c["desc"], str(c["dir"]), "1" if c["experimental"] else "",
