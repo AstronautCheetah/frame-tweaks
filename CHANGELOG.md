@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+- **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a
+  link to the page and where its Star button is.
+
 ### For contributors
 - **The translation files change only when a text does:** their references name the file a text is
   in, not its line, so editing code no longer makes `dev/i18n.py check` (and CI) ask for the

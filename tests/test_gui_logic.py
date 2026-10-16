@@ -783,9 +783,10 @@ class ContributeRow(unittest.TestCase):
         window.show_contribute.assert_called_once()
         page = gui.ReadmePage(mock.Mock(), gui.REPO / "docs/contribute.md", "Help make Frame Tweaks better")
         text = page.findChildren(QTextBrowser)[0].toPlainText()
-        for part in ("Suggest a third-party app", "tweak nobody has written yet", "Report a bug",
-                     "Review a translation", "Add a language"):
+        for part in ("give it a star on GitHub", "Suggest a third-party app", "tweak nobody has written yet",
+                     "Report a bug", "Review a translation", "Add a language"):
             self.assertIn(part, text)
+        self.assertIn("https://github.com/AstronautCheetah/frame-tweaks", page.findChildren(QTextBrowser)[0].toHtml())
         holder.deleteLater()
 
 
