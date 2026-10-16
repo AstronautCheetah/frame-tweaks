@@ -66,8 +66,9 @@ on the **🔑 Wallet apps** page (the button on the Shared KDE wallet row in the
 window):
 
 - **Password first:** on.
-- **Close after:** Signal quits after **15 minutes** (unless you had already set a time) with
-  no keyboard, mouse or controller input, so opening it again needs the wallet again.
+- **Close after:** Signal quits after **15 minutes** (unless you had already set a time, or
+  Never) with the headset not worn and no keyboard or mouse input, so opening it again needs the
+  wallet again.
 - **Headset off:** off by default; turn it on to also quit Signal about 10 seconds after the
   headset is taken off.
 

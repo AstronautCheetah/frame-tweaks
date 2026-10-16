@@ -23,9 +23,13 @@ It derives the same key KDE's login-time auto-unlock (kwallet-pam) uses,
 PBKDF2-SHA512 over the wallet's salt, and hands it to ksecretd's pamOpen on the
 outer session bus. The password and key never appear on a command line.
 """
+import contextlib
+import fcntl
 import hashlib
 import json
+import math
 import os
+import re
 import subprocess
 import sys
 import time
@@ -90,6 +94,11 @@ def is_locked(conn):
     return not ksecretd_open(conn)
 
 
+def ksecretd_locked(conn):
+    """is_locked, without starting ksecretd: when it isn't running, it shows no prompt either."""
+    return bool(call(conn, message_bus.NameHasOwner("org.kde.ksecretd"))[0]) and not ksecretd_open(conn)
+
+
 def ksecretd_close(conn):
     """Fully close the wallet inside ksecretd. The Secret Service Lock only hides the
     secrets: the wallet stays loaded ("open" and "locked" at once), and then pamOpen
@@ -129,15 +138,20 @@ def session():
 
 
 def timer_lock_time():
-    """When the running auto-lock timer fires (its start + WALLET_LOCK_HOURS), else None."""
+    """When the running auto-lock timer fires (Unix time), else None. (A timer an older version
+    started counted down from its start: that + WALLET_LOCK_HOURS.)"""
     env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}", DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
-    r = subprocess.run(["systemctl", "--user", "show", "--timestamp=unix", "-p", "ActiveEnterTimestamp",
-                        "-p", "ActiveState", "wallet-autolock.timer"], env=env, capture_output=True, text=True)
+    r = subprocess.run(["systemctl", "--user", "show", "--timestamp=unix", "-p", "TimersCalendar",
+                        "-p", "ActiveEnterTimestamp", "-p", "ActiveState", "wallet-autolock.timer"],
+                       env=env, capture_output=True, text=True)
     props = dict(line.split("=", 1) for line in r.stdout.splitlines() if "=" in line)
-    started = props.get("ActiveEnterTimestamp", "").lstrip("@")
-    if props.get("ActiveState") != "active" or not started.isdigit():
+    if props.get("ActiveState") != "active":
         return None
-    return int(started) + float(lock_hours()) * 3600
+    at = re.search(r"\bnext_elapse=@(\d+)", props.get("TimersCalendar", ""))
+    if at:
+        return int(at[1])
+    started = props.get("ActiveEnterTimestamp", "").lstrip("@")
+    return int(started) + float(lock_hours()) * 3600 if started.isdigit() else None
 
 
 def idle_close_minutes():
@@ -230,21 +244,9 @@ def close_window(display, wid):
 
 def prompt_pending():
     """True if one of ksecretd's own password prompts is showing (VR display :0 or the
-    desktop). While it is, ksecretd ignores pamOpen, so a right password looks wrong."""
-    for display in (":0", os.environ.get("DISPLAY", ":2")):
-        try:
-            tree = subprocess.run(["xwininfo", "-root", "-tree"], env=dict(os.environ, DISPLAY=display),
-                                  capture_output=True, text=True, timeout=3).stdout
-        except (OSError, subprocess.SubprocessError):
-            continue
-        for line in tree.splitlines():
-            if '"KDE Wallet Service": ("ksecretd"' in line:
-                wid = line.split()[0]
-                info = subprocess.run(["xwininfo", "-id", wid], env=dict(os.environ, DISPLAY=display),
-                                      capture_output=True, text=True).stdout
-                if "IsViewable" in info:
-                    return True
-    return False
+    desktop). While it is, ksecretd ignores pamOpen, so a right password looks wrong. (The
+    broker's rule for a showing one: a 1-pixel window isn't.)"""
+    return bool(ksecretd_prompts())
 
 
 def ask_password(retry):
@@ -290,7 +292,6 @@ def ask_once(conn):
     started twice, a git push beside a gh call, ksecretd's prompt replaced) waits for that one
     and takes its answer instead of opening another dialog. Returns "unlocked" (this dialog
     unlocked it), "already" (another one did) or None (still locked: a dialog was cancelled)."""
-    import fcntl
     since = time.time()
     with open(ASKING, "a") as held:
         try:
@@ -321,7 +322,7 @@ def lock_hours():
     Wallet apps page), else 4."""
     for v in (os.environ.get("WALLET_LOCK_HOURS"), conf_value("WALLET_LOCK_HOURS")):
         try:
-            if v and float(v) > 0:
+            if v and 0 < float(v) < math.inf:
                 return v
         except ValueError:
             pass
@@ -354,50 +355,69 @@ def set_autolock(conn, on):
     return schedule_lock()
 
 
+# Held while the auto-lock is (re)scheduled: an unlock schedules it, and so does the watcher as it
+# sees the wallet open, a moment apart. (The second systemd-run found the first one's timer and
+# failed: "unlocked for ? hours".)
+SCHEDULING = Path(f"/run/user/{os.getuid()}/wallet-autolock.lock")
+
+
+@contextlib.contextmanager
+def scheduling():
+    with open(SCHEDULING, "a") as held:
+        fcntl.flock(held, fcntl.LOCK_EX)
+        yield
+
+
 def stop_lock_timer():
     env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}", DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
-    for cmd in (["stop", "wallet-autolock.timer", "wallet-autolock.service"],
-                ["reset-failed", "wallet-autolock.timer", "wallet-autolock.service"]):
-        subprocess.run(["systemctl", "--user", *cmd], env=env, stderr=subprocess.DEVNULL)
-    s = session()
-    s.pop("locks", None)
-    try:
-        SESSION.write_text(json.dumps(s))
-    except OSError:
-        pass
+    with scheduling():
+        for cmd in (["stop", "wallet-autolock.timer", "wallet-autolock.service"],
+                    ["reset-failed", "wallet-autolock.timer", "wallet-autolock.service"]):
+            subprocess.run(["systemctl", "--user", *cmd], env=env, stderr=subprocess.DEVNULL)
+        s = session()
+        s.pop("locks", None)
+        try:
+            SESSION.write_text(json.dumps(s))
+        except OSError:
+            pass
 
 
 def schedule_lock():
-    """(Re)start a transient systemd timer that locks the wallet later; None with auto-lock off."""
+    """(Re)start a transient systemd timer that locks the wallet later; None with auto-lock off.
+    It fires at a time on the clock (OnCalendar=@…), not after a countdown (OnActiveSec=): a
+    countdown started again at every systemctl daemon-reload (installers run one), and stood
+    still while the Frame slept, so the wallet stayed unlocked hours past the time the Wallet apps
+    page showed. A time that went by while the Frame slept fires as it wakes."""
     if not autolock_on():
         stop_lock_timer()
         return None
     hours = lock_hours()
     env = dict(os.environ, XDG_RUNTIME_DIR=f"/run/user/{os.getuid()}",
                DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
-    # Clear the previous timer *and* its service: a failed earlier run left a unit with this name
-    # behind, and systemd-run then refused the name, silently, so nothing locked the wallet.
-    for cmd in (["stop", "wallet-autolock.timer", "wallet-autolock.service"],
-                ["reset-failed", "wallet-autolock.timer", "wallet-autolock.service"]):
-        subprocess.run(["systemctl", "--user", *cmd], env=env, stderr=subprocess.DEVNULL)
-    r = subprocess.run(["systemd-run", "--user", "--quiet", "--unit=wallet-autolock",
-                        f"--on-active={hours}h", os.path.abspath(sys.argv[0]), "--lock"],
-                       env=env, capture_output=True, text=True)
-    if r.returncode != 0:
-        print(_("wallet-unlock: couldn't schedule the auto-lock: {error}").format(error=r.stderr.strip()),
-              file=sys.stderr, flush=True)
-        return "?"
-    s = session()
-    now = time.time()
-    s.setdefault("unlocked", now)         # an app reopening the open wallet only moves the lock
-    try:
-        s["locks"] = now + float(hours) * 3600
-    except ValueError:
-        s.pop("locks", None)
-    try:
-        SESSION.write_text(json.dumps(s))
-    except OSError:
-        pass
+    with scheduling():
+        deadline = math.ceil(time.time() + float(hours) * 3600)
+        if session().get("locks") == deadline and timer_lock_time() == deadline:
+            return hours                  # (just scheduled by the other one, to the second)
+        # Clear the previous timer *and* its service: a failed earlier run left a unit with this name
+        # behind, and systemd-run then refused the name, silently, so nothing locked the wallet.
+        for cmd in (["stop", "wallet-autolock.timer", "wallet-autolock.service"],
+                    ["reset-failed", "wallet-autolock.timer", "wallet-autolock.service"]):
+            subprocess.run(["systemctl", "--user", *cmd], env=env, stderr=subprocess.DEVNULL)
+        r = subprocess.run(["systemd-run", "--user", "--quiet", "--unit=wallet-autolock",
+                            f"--on-calendar=@{deadline}", "--timer-property=AccuracySec=1s",
+                            os.path.abspath(sys.argv[0]), "--lock"],
+                           env=env, capture_output=True, text=True)
+        if r.returncode != 0 and timer_lock_time() != deadline:
+            print(_("wallet-unlock: couldn't schedule the auto-lock: {error}").format(error=r.stderr.strip()),
+                  file=sys.stderr, flush=True)
+            return "?"
+        s = session()
+        s.setdefault("unlocked", time.time())     # an app reopening the open wallet only moves the lock
+        s["locks"] = deadline                     # (the timer's own time: the page shows this one)
+        try:
+            SESSION.write_text(json.dumps(s))
+        except OSError:
+            pass
     return hours
 
 
@@ -408,6 +428,9 @@ def watch():
     from jeepney.bus_messages import message_bus as mb
     import threading
     threading.Thread(target=broker, daemon=True).start()
+    # The signals come on this connection, and the watcher's own calls go on another: a call waiting
+    # for its reply drops whatever else arrives meanwhile (jeepney's blocking send_and_get_reply), so
+    # the wallet opened again while this locked it went unnoticed, and nothing scheduled its auto-lock.
     with bus() as conn:
         for member in ("walletClosed", "allWalletsClosed", "walletOpened"):
             rule = MatchRule(type="signal", interface="org.kde.KWallet", member=member)
@@ -425,26 +448,30 @@ def watch():
                 continue
             if member == "allWalletsClosed" or (member == "walletClosed" and body and body[0] == WALLET):
                 try:
-                    if not is_locked(conn) or ksecretd_open(conn):
-                        lock(conn)
-                        print(f"{time.strftime('%T')} wallet closed -> locked and closed in ksecretd", flush=True)
+                    with bus() as calls:
+                        if not is_locked(calls) or ksecretd_open(calls):
+                            lock(calls)
+                            print(f"{time.strftime('%T')} wallet closed -> locked and closed in ksecretd", flush=True)
                 except Exception as e:                  # keep watching even if one lock fails
                     print(f"lock failed: {e}", flush=True)
 
 
 def broker():
     """Replace ksecretd's own password prompt with ours. Only while the wallet is locked:
-    a ksecretd window on an unlocked wallet is an "allow this app?" question, left alone."""
+    a ksecretd window on an unlocked wallet is an "allow this app?" question, left alone. So it
+    asks ksecretd first, and lists the displays' windows (a few programs each time) only while
+    it's locked: doing that every 1.5 s took about 2.6% of a core all day."""
     exe = os.path.abspath(sys.argv[0])
+    conn = None
     while True:
         time.sleep(1.5)
         try:
-            prompts = ksecretd_prompts()
-            if not prompts:
+            conn = conn or bus()
+            if not ksecretd_locked(conn):
                 continue
-            with bus() as conn:
-                if not is_locked(conn):
-                    continue
+            prompts = ksecretd_prompts()
+            if not prompts or not ksecretd_locked(conn):     # (still locked, now there's one to close)
+                continue
             for display, wid in prompts:
                 close_window(display, wid)
                 print(f"{time.strftime('%T')} closed ksecretd's prompt on {display}; showing ours", flush=True)
@@ -455,6 +482,9 @@ def broker():
             subprocess.run([exe], env=env)              # our dialog; unlocks on success
         except Exception as e:                          # keep brokering whatever happens
             print(f"broker: {e}", flush=True)
+            with contextlib.suppress(Exception):        # (a new connection next time)
+                conn.close()
+            conn = None
 
 
 def notify(text):

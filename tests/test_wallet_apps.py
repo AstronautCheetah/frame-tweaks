@@ -153,11 +153,35 @@ class Timers(unittest.TestCase):
             (t / "signal-guard.conf").write_text("# signal-guard settings\nIDLE_MINUTES=20\nLOCK_ON_HEADSET_OFF=1\n")
             at.import_signal_guard()
             self.assertEqual(at.read_conf()["org.signal.Signal"], {"minutes": 20, "headset": True})
+            # Set to Never, it stays so when Signal is installed again (a reinstall, an update): that
+            # brought its 15 minutes back.
             at.set_timer("org.signal.Signal", 0)
             (t / "signal-guard.conf").unlink()
             at.set_timer("org.x", 5)
-            at.import_signal_guard()                         # no old settings: the 15-minute default
+            at.import_signal_guard()
+            self.assertNotIn("org.signal.Signal", at.read_conf())
+            with mock.patch("sys.argv", ["app-timers", "--list"]), contextlib.redirect_stdout(io.StringIO()) as listed:
+                at.main()
+            self.assertEqual(listed.getvalue(), "org.notes 60 headset\norg.x 5\n")      # (Never isn't a timer)
+            (t / "app-timers.conf").unlink()
+            at.import_signal_guard()                         # first time, no old settings: the 15-minute default
             self.assertEqual(at.read_conf()["org.signal.Signal"]["minutes"], 15)
+
+    def test_an_app_id_with_spaces(self):
+        # (a menu entry of your own, "My App.desktop": its timer was never read back)
+        t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
+        conf = t / ".config/frame-tweaks/app-timers.conf"
+        with mock.patch.multiple(at, CONF=conf, SIGNAL_CONF=t / "none"):
+            at.set_timer("My App", 15)
+            at.set_headset("My App", True)
+            at.set_timer("org.notes", 30)
+            self.assertEqual(at.read_conf(), {"My App": {"minutes": 15, "headset": True},
+                                              "org.notes": {"minutes": 30, "headset": False}})
+        # The page reads app-timers --list, whose app ids can have spaces too.
+        env = {"HOME": str(t), "FRAME_TWEAKS_PYLIB": str(ROOT / "lib")}
+        with mock.patch.object(wp, "APP_TIMERS", ROOT / "packs/core/wallet/app-timers"), mock.patch.dict(os.environ, env):
+            self.assertEqual(wp.app_timers(), {"My App": (15.0, True), "org.notes": (30.0, False)})
 
     def test_scope_names(self):
         pat = at.scope_pattern("org.notes")
@@ -181,6 +205,19 @@ class LockHours(unittest.TestCase):
             wp.set_lock_hours(8)
             self.assertEqual(wp.lock_hours(), 8)
             self.assertEqual((d / "wallet.conf").read_text(), "OTHER=1\nWALLET_LOCK_HOURS=8\n")
+
+    def test_unticking_password_first_on_a_password_only_entry_removes_it(self):
+        # (it kept the protection mark with nothing on, and read "password only")
+        page = mock.Mock()
+        app = {"id": "dictate", "name": "Dictate", "shared": False, "gate": True, "electron": False}
+        wp.WalletApps.set_gate(page, app, False)
+        page.run.assert_called_once_with(["--remove", "dictate"], "Dictate: removed")
+        page.reset_mock()
+        wp.WalletApps.set_gate(page, dict(app, shared=True), False)            # the shared wallet stays
+        page.run.assert_called_once_with(["--no-gate", "dictate"], "Dictate: opens without asking for the password")
+        page.reset_mock()
+        wp.WalletApps.set_gate(page, dict(app, gate=False), True)
+        page.run.assert_called_once_with(["--gate", "--no-shared", "dictate"], "Dictate: asks for the wallet password first")
 
     def test_dry_run_saves_nothing(self):
         d = Path(tempfile.mkdtemp())

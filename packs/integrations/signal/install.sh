@@ -10,7 +10,8 @@ flatpak info "$APP" >/dev/null 2>&1 || die "$(t 'Install Signal first (Discover,
 say "$(t 'Telling Signal to use KDE Wallet (kwallet6)')"
 flatpak override --user --env=SIGNAL_PASSWORD_STORE=kwallet6 "$APP"
 # The wallet's standard protections (Wallet apps in the installer window): the password first,
-# and a Close-after timer (15 minutes unless you've set one; Signal guard's settings carry over).
+# and a Close-after timer (15 minutes unless you've set one, Never included: it's kept as 0; Signal
+# guard's settings carry over).
 "$BIN/wallet-launcher" --gate "$APP"
 "$BIN/app-timers" --import-signal-guard
 # Signal guard (unlock first + idle quit) did the same for Signal alone: retired.

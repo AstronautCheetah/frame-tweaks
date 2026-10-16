@@ -57,6 +57,42 @@
   was empty: it's in English then).
 - **A `~/.bashrc` whose last line has no newline:** the line tweaks add (Homebrew, and
   `~/.local/bin` on PATH) was glued onto that last line, breaking both.
+- **The wallet locks when the Wallet apps page says it will:** its auto-lock was a countdown, which
+  started again at every `systemctl daemon-reload` (Frame Tweaks' installers run one) and stood
+  still while the Frame slept, so the wallet stayed unlocked hours past the time shown. It's now
+  set for a time on the clock: a reload doesn't move it, and if the time goes by while the Frame
+  sleeps, the wallet locks as it wakes. An unlock and the wallet's watcher setting it at the same
+  moment no longer end in "Wallet unlocked for ? hours", and a wallet unlocked again while the
+  watcher was still locking it gets its auto-lock too.
+- **Close after counts the time asleep, and wearing the headset:** the time the Frame spends
+  asleep now counts, and the key or the headset that wakes it no longer resets the idle time
+  first, so an app left open overnight closes as the Frame wakes, before whoever picks it up gets
+  to it. The VR controllers aren't input it can see, so an app used only with them was closed
+  mid-use: now wearing the headset (its proximity sensor) counts as activity too, and the Wallet
+  apps page says what counts: the headset not worn, and no keyboard or mouse input. **Headset
+  off** also closes its apps when the headset came off just before the Frame went to sleep.
+- **Reinstalling a tweak (↻) keeps Password first on its menu entry:** Dictation, Arrow Pad,
+  Screen snip, the NordVPN tray, Android Mirror and Claude Desktop lost it (and the shared wallet)
+  at every reinstall, and reinstalling the wallet tweak itself took it off every app but its own
+  three.
+- **`gh` from the installer window:** installing the wallet from the window set up no `gh` wrapper
+  (its Konsole has no Homebrew on the PATH), and removing it from there left git's credential
+  helper naming the deleted wrapper, so git couldn't sign in to GitHub. The install now looks in
+  Homebrew too, and the removal puts back the `gh` the wrapper ran (or, if that's gone, takes the
+  wrapper's helper line out). The `gh` helper is no longer added beside a github.com credential
+  helper of your own, and a `gh` of your own in `~/.local/bin` is no longer deleted.
+- **Signal's Close after: Never stays Never:** reinstalling Signal, or updating Frame Tweaks, set
+  it back to 15 minutes. (If an update already did, set Never once more: it's kept from then on.)
+- **Wallet apps page:** a Close after timer on an app whose id has spaces (a menu entry of your
+  own, "My App") now holds; unticking **Password first** on an entry with nothing else on now
+  removes its protection, instead of leaving it marked "password only" with no password; and a
+  link to a menu entry that's gone no longer makes the wallet read as not installed.
+- **The wallet's watcher uses less CPU:** it looked for KDE's own password prompt (a few programs
+  each time) every 1.5 s, about 2.6% of a core all day, and now does only while the wallet is
+  locked. The unlock dialog's check for an open KDE prompt now leaves out a 1-pixel ksecretd
+  window, as the watcher's always did.
+- **The wallet's install message** no longer says the wallet's password is empty when you've set
+  one.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
@@ -74,8 +110,6 @@
   list of its own); a failed download of the saved `traffic.csv` went unnoticed, and the upload
   then replaced the history with the last 14 days (it now stops, and never saves fewer days than
   it had); and a failed look for its draft release made a second one.
-
-### For contributors
 - **Translations:** a `%` is a placeholder only in a text that's formatted (one with `%s`, `%d` or
   `%%`): `dev/i18n.py import` no longer refuses "1% del" in a tweak's manifest text, and the tests
   now catch "100 % de" (a printf conversion) in a formatted one. Plural forms given for a text

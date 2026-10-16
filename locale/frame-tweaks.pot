@@ -998,7 +998,7 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid ""
-"Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
+"Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (the headset not worn, and no keyboard or mouse input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1093,7 +1093,7 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid ""
-"Quit the app after this long with no keyboard, mouse or controller input"
+"Quit the app after this long with the headset not worn and no keyboard or mouse input"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -4076,8 +4076,8 @@ msgstr ""
 #: packs/core/wallet/install.sh
 msgid ""
 "Add other wallet-using apps with:  %s   (--electron for Electron apps)\n"
-"SteamOS's stock wallet has an EMPTY password. To actually protect it, open\n"
-"KWalletManager → kdewallet → Change Password."
+"SteamOS's wallet comes with an empty password. If you haven't set one yet, open\n"
+"KWalletManager → kdewallet → Change Password: until you do, anyone can unlock it."
 msgstr ""
 
 #: packs/core/wallet/install.sh

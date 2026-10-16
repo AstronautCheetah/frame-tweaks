@@ -1109,11 +1109,12 @@ msgstr[1] "Agregar una app ({n} apps instaladas)"
 msgid "Also quit it about 10 s after the headset is taken off"
 msgstr "Cerrarla también unos 10 s después de quitarte el visor"
 
+# needs review
 #: gui/wallet_page.py
 msgid ""
-"Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
+"Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (the headset not worn, and no keyboard or mouse input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
 msgstr ""
-"Las apps de esta lista se abren con la <b>cartera de KDE compartida</b>, la misma en RV y en modo escritorio, así que los inicios de sesión y las claves que guardan se conservan y siguen cifrados. A las apps de Electron también se les indica que la usen (sin eso no pueden mantener una sesión iniciada). <b>Contraseña primero</b> pide la contraseña de la cartera antes de que se abra la app, cuando la cartera está bloqueada. <b>Cerrar después de</b> cierra la app tras ese tiempo sin actividad (sin uso del teclado, el mouse o el control), así que volver a abrirla requiere la cartera otra vez; <b>Al quitar el visor</b> también la cierra ~10 s después de quitarse el visor."
+"Las apps de esta lista se abren con la <b>cartera de KDE compartida</b>, la misma en RV y en modo escritorio, así que los inicios de sesión y las claves que guardan se conservan y siguen cifrados. A las apps de Electron también se les indica que la usen (sin eso no pueden mantener una sesión iniciada). <b>Contraseña primero</b> pide la contraseña de la cartera antes de que se abra la app, cuando la cartera está bloqueada. <b>Cerrar después de</b> cierra la app tras ese tiempo sin actividad (sin llevar puesto el visor ni usar el teclado o el mouse), así que volver a abrirla requiere la cartera otra vez; <b>Al quitar el visor</b> también la cierra ~10 s después de quitarse el visor."
 
 #: gui/wallet_page.py
 msgid ""
@@ -1210,11 +1211,12 @@ msgstr "Protegidas ({n})"
 msgid "Protected apps ask for the password before they open."
 msgstr "Las apps protegidas piden la contraseña antes de abrirse."
 
+# needs review
 #: gui/wallet_page.py
 msgid ""
-"Quit the app after this long with no keyboard, mouse or controller input"
+"Quit the app after this long with the headset not worn and no keyboard or mouse input"
 msgstr ""
-"Cerrar la app después de este tiempo sin actividad del teclado, el mouse o el control"
+"Cerrar la app después de este tiempo sin llevar puesto el visor ni usar el teclado o el mouse"
 
 #: gui/wallet_page.py
 msgid "Remove"
@@ -4504,15 +4506,16 @@ msgid "kwalletd6, ksecretd, kdialog and the Steam session's D-Bus present"
 msgstr ""
 "kwalletd6, ksecretd, kdialog y el D-Bus de la sesión de Steam presentes"
 
+# needs review
 #: packs/core/wallet/install.sh
 msgid ""
 "Add other wallet-using apps with:  %s   (--electron for Electron apps)\n"
-"SteamOS's stock wallet has an EMPTY password. To actually protect it, open\n"
-"KWalletManager → kdewallet → Change Password."
+"SteamOS's wallet comes with an empty password. If you haven't set one yet, open\n"
+"KWalletManager → kdewallet → Change Password: until you do, anyone can unlock it."
 msgstr ""
 "Agrega otras apps que usen la cartera con:  %s   (--electron para apps de Electron)\n"
-"La cartera de fábrica de SteamOS tiene una contraseña VACÍA. Para protegerla de verdad, abre\n"
-"KWalletManager → kdewallet → Cambiar contraseña."
+"La cartera de SteamOS viene con una contraseña vacía. Si todavía no le pusiste una, abre\n"
+"KWalletManager → kdewallet → Cambiar contraseña: hasta que lo hagas, cualquiera puede desbloquearla."
 
 #: packs/core/wallet/install.sh
 msgid ""
@@ -5988,3 +5991,22 @@ msgstr "Instalador de ajustes"
 
 #~ msgid "Makes the mouse pointer visible in desktop mode."
 #~ msgstr "Hace visible el puntero del mouse en modo escritorio."
+
+#~ msgid ""
+#~ "Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
+#~ msgstr ""
+#~ "Las apps de esta lista se abren con la <b>cartera de KDE compartida</b>, la misma en RV y en modo escritorio, así que los inicios de sesión y las claves que guardan se conservan y siguen cifrados. A las apps de Electron también se les indica que la usen (sin eso no pueden mantener una sesión iniciada). <b>Contraseña primero</b> pide la contraseña de la cartera antes de que se abra la app, cuando la cartera está bloqueada. <b>Cerrar después de</b> cierra la app tras ese tiempo sin actividad (sin uso del teclado, el mouse o el control), así que volver a abrirla requiere la cartera otra vez; <b>Al quitar el visor</b> también la cierra ~10 s después de quitarse el visor."
+
+#~ msgid ""
+#~ "Quit the app after this long with no keyboard, mouse or controller input"
+#~ msgstr ""
+#~ "Cerrar la app después de este tiempo sin actividad del teclado, el mouse o el control"
+
+#~ msgid ""
+#~ "Add other wallet-using apps with:  %s   (--electron for Electron apps)\n"
+#~ "SteamOS's stock wallet has an EMPTY password. To actually protect it, open\n"
+#~ "KWalletManager → kdewallet → Change Password."
+#~ msgstr ""
+#~ "Agrega otras apps que usen la cartera con:  %s   (--electron para apps de Electron)\n"
+#~ "La cartera de fábrica de SteamOS tiene una contraseña VACÍA. Para protegerla de verdad, abre\n"
+#~ "KWalletManager → kdewallet → Cambiar contraseña."

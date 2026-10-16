@@ -92,12 +92,16 @@ def app_timers():
     out = subprocess.run([str(APP_TIMERS), "--list"], capture_output=True, text=True).stdout
     timers = {}
     for line in out.splitlines():
-        parts = line.split()
-        if len(parts) in (2, 3):
-            try:
-                timers[parts[0]] = (float(parts[1]), parts[2:] == ["headset"])
-            except ValueError:
-                pass
+        # "app-id minutes [headset]", read from the end: an app id can have spaces ("My App")
+        app_id, _sp, minutes = line.rpartition(" ")
+        headset = minutes == "headset"
+        if headset:
+            app_id, _sp, minutes = app_id.rpartition(" ")
+        try:
+            if app_id:
+                timers[app_id] = (float(minutes), headset)
+        except ValueError:
+            pass
     return timers
 
 
@@ -316,8 +320,9 @@ class WalletApps(QWidget):
             "mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also "
             "told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for "
             "the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the "
-            "app after that long with no activity (no keyboard, mouse or controller input), so opening it "
-            "again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."))
+            "app after that long with no activity (the headset not worn, and no keyboard or mouse input), so "
+            "opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset "
+            "is taken off."))
         about.setWordWrap(True)
         about.setObjectName("desc")
         lay.addWidget(about)
@@ -492,7 +497,7 @@ class WalletApps(QWidget):
             b.clicked.connect(lambda _=False, st=step: self.set_timer(app, timer_step(minutes, st, floor)))
         less.setEnabled(minutes > floor)
         more.setEnabled(minutes < TIMER_STEPS[-1])
-        box.setToolTip(_("Quit the app after this long with no keyboard, mouse or controller input"))
+        box.setToolTip(_("Quit the app after this long with the headset not worn and no keyboard or mouse input"))
         for w in (label, less, value, more):
             lay.addWidget(w)
         off = QCheckBox(_("Headset off"))
@@ -529,6 +534,10 @@ class WalletApps(QWidget):
         QTimer.singleShot(0, self.fill)
 
     def set_gate(self, app, on):
+        if not on and not app["shared"] and not app["electron"]:
+            # The password was all it had ("password only"): unticked, it opens as it did before.
+            self.run(["--remove", app["id"]], _("{app}: removed").format(app=app["name"]))
+            return
         args = (["--gate"] if on else ["--no-gate"]) + ([] if app["shared"] else ["--no-shared"]) + [app["id"]]
         self.run(args, f"{app['name']}: " + (_("asks for the wallet password first") if on else
                                              _("opens without asking for the password")))
