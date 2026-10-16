@@ -204,16 +204,17 @@ class Packs(unittest.TestCase):
         d = self.tweak("mypack", "gone", extra="")
         (d / "needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\necho more\nexit 1\n")
         (self.tweak("mypack", "kept") / "needed.sh").write_text("#!/bin/bash\nexit 0\n")
+        (self.tweak("mypack", "failed") / "needed.sh").write_text("#!/bin/bash\nset -e\nfalse\necho never\n")
         self.tweak("mypack", "plain")
         sft.set_trusted(d.parent, True)
         rows = sft.load(refresh=True)["components"]
-        mine = [c for c in rows if c["id"] in ("gone", "kept", "plain")]
+        mine = [c for c in rows if c["id"] in ("gone", "kept", "failed", "plain")]   # (failed: exit 1, no why)
         self.assertEqual(sft.not_needed(mine, refresh=True), {"gone": "SteamOS does it now"})
         rows = mine
         state = Path(self.tmp.name) / "state"
         with mock.patch.object(sft, "STATE", state):
             self.assertIn("gone", sft.hidden(rows))
-            self.assertFalse({"kept", "plain"} & sft.hidden(rows))
+            self.assertFalse({"kept", "failed", "plain"} & sft.hidden(rows))
             (state / "installed").mkdir(parents=True)
             (state / "installed/gone").write_text("0.6.8\n")
             self.assertNotIn("gone", sft.hidden(rows))

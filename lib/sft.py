@@ -640,6 +640,7 @@ def not_needed(rows=None, refresh=False):
             try:
                 r = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=10)
                 why = (r.stdout.strip().splitlines() or [""])[0] if r.returncode == 1 else None
+                why = why or None                       # (exit 1 without a why: it failed, so offered)
             except (OSError, subprocess.SubprocessError):
                 why = None                              # (can't tell: offered, as before)
             _NOT_NEEDED[c["id"]] = why

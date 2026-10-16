@@ -426,6 +426,8 @@ Some decisions rest on measurements on a Frame and on published research. Those 
 - [Battery charge limit](research/battery-charge-limit.md): why the charger's pause switch is
   the only control that works, why the battery still drains a little while paused, and why
   charging resumes 1% below the limit and limits go down to 74% (micro-cycling studies).
+- [Mouse cursor fix](research/mouse-cursor.md): why it isn't offered from gamescope 3.16.30
+  (SteamOS 0.5.6), where SteamVR draws desktop mode's pointer itself.
 
 ## Considered and rejected
 

@@ -4816,11 +4816,13 @@ msgid ""
 msgstr ""
 
 #: packs/third-party/cursor/README.md
-msgid "Makes the mouse pointer visible in desktop mode"
+msgid ""
+"Makes the mouse pointer visible in desktop mode (SteamOS before 0.5.6)"
 msgstr ""
 
 #: packs/third-party/cursor/README.md
-msgid "Makes the mouse pointer visible in desktop mode."
+msgid ""
+"Makes the mouse pointer visible in desktop mode, on SteamOS before 0.5.6; from 0.5.6, SteamOS shows it itself."
 msgstr ""
 
 #: packs/third-party/cursor/README.md
@@ -4830,6 +4832,11 @@ msgstr ""
 #: packs/third-party/cursor/install.sh
 msgid ""
 "Installed. Takes effect after a reboot (or the next desktop-mode login)."
+msgstr ""
+
+#: packs/third-party/cursor/needed.sh
+msgid ""
+"SteamOS shows the pointer itself since gamescope 3.16.30 (this Frame has %s)"
 msgstr ""
 
 #: packs/third-party/cursor/status.sh
@@ -4842,6 +4849,11 @@ msgstr ""
 
 #: packs/third-party/cursor/status.sh
 msgid "installed; active after the next reboot"
+msgstr ""
+
+#: packs/third-party/cursor/status.sh
+msgid ""
+"not needed any more, and it adds a second pointer (a black X): uninstall it. %s"
 msgstr ""
 
 #: packs/third-party/cursor/status.sh

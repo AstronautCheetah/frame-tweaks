@@ -2,6 +2,8 @@
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 f="$HOME/.config/environment.d/90-kwin-software-cursor.conf"
 [ -f "$f" ] || status_missing "$(t 'cursor fix not installed')"
+why=$(bash "$(dirname "$0")/needed.sh") ||
+    status_warn "$(t 'not needed any more, and it adds a second pointer (a black X): uninstall it. %s' "$why")"
 # Is it active where it matters, in desktop mode's session? (This check may run from the VR
 # session, which never has it; KWin's own environment isn't readable, so ask Plasma's shell.)
 shell=$(pgrep -u "$(id -u)" -x plasmashell | head -1 || true)
