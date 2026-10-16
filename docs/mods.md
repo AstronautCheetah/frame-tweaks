@@ -43,7 +43,7 @@ my-pack/
   my-tweak/
     README.md        the manifest (front matter) and the tweak's documentation
     install.sh  uninstall.sh  status.sh
-    run.sh  check-system.sh  update-check.sh  migrate.sh  stopped.sh    (optional)
+    run.sh  check-system.sh  needed.sh  update-check.sh  migrate.sh  stopped.sh    (optional)
     ...              whatever the scripts install: programs, .desktop files, icons, pins
 ```
 
@@ -230,6 +230,13 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   (`gtk-launch <id>`), so wallet gates apply.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one
   line; exit 0 or 1); `./install.sh check-system` and updates run it.
+- `needed.sh`: whether this Frame needs the tweak at all: exit 0 if it does, exit 1 with one line
+  saying why if it doesn't (SteamOS now does it itself, say). Check what the Frame has, a
+  package's version (`pacman -Q`, `vercmp`) or a file, rather than the SteamOS version, which the
+  beta and stable branches number differently. A tweak that isn't needed isn't offered: the
+  window hides it (**Show hidden** lists it, saying why, with its box disabled), and
+  `./install.sh install` skips it. If it's installed already, it stays in the list, updates
+  reinstall it, and its `status.sh` should say it can be removed (the Mouse cursor fix does).
 - `update-check.sh`: prints `<installed> <latest>` versions; the window offers an update when
   the second is newer.
 - `migrate.sh <old-version>`: runs before `install.sh` when the Frame Tweaks version that last

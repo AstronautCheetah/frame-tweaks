@@ -208,12 +208,23 @@ check_ids() {
     done
 }
 
+# not_needed ID: its optional needed.sh says this Frame doesn't need it (SteamOS does it itself,
+# say): prints why, returns 0. (lib/sft.py not_needed, which hides it in the window.)
+not_needed() {
+    [[ -f ${DIR[$1]}/needed.sh ]] || return 1
+    local why
+    why=$(bash "${DIR[$1]}/needed.sh" 2>/dev/null) && return 1
+    [[ $? -eq 1 ]] || return 1                  # (it couldn't tell: offered, as before)
+    echo "${why%%$'\n'*}"
+}
+
 cmd_list() {
     bold "frame-tweaks $FT_BUILD"
-    local id
+    local id why
     for id in "${IDS[@]}"; do
-        printf '  %-15s %s%s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ $(t '(experimental)')}" \
-            "${SUDO[$id]:+ $(t '(asks for your sudo password)')}"
+        why=$(not_needed "$id") && why=" $(t '(not needed on this Frame: %s)' "$why")" || why=
+        printf '  %-15s %s%s%s%s\n' "$id" "${DESC[$id]}" "${EXPERIMENTAL[$id]:+ $(t '(experimental)')}" \
+            "${SUDO[$id]:+ $(t '(asks for your sudo password)')}" "$why"
     done
     [[ " ${EXPERIMENTAL[*]} " == *1* ]] && echo "$(t "(experimental: relies on SteamVR's internals; see ./install.sh info ID)")"
     return 0
@@ -240,9 +251,12 @@ cmd_install() {
     ensure_menu_entry
     [[ $1 == all ]] && set -- "${IDS[@]}"
     check_ids "$@"
-    local id failed=()
+    local id why failed=()
     for id in $(with_deps "$@"); do
         bold "── $id: ${TITLE[$id]}"
+        if [[ ! -f $STATE/installed/$id ]] && why=$(not_needed "$id"); then
+            echo "$(t 'Not needed on this Frame, so not installed: %s' "$why")"; echo; continue
+        fi
         if held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]]; then
             echo "held: left as it is (./install.sh unhold $id)"; echo; continue
         fi

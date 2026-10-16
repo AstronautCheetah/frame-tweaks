@@ -272,6 +272,16 @@ msgstr "Requiere"
 msgid "No README."
 msgstr "No hay README."
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Not needed"
+msgstr "No hace falta"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Not needed on this Frame: %s"
+msgstr "No hace falta en este Frame: %s"
+
 #: gui/frame-tweaks-gui.py install.sh
 msgid "Nothing to change."
 msgstr "Nada que cambiar."
@@ -432,6 +442,11 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr "Estos ajustes instalados se desmarcaron y se <b>quitarán</b>:"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "This Frame doesn't need it: %s"
+msgstr "Este Frame no lo necesita: %s"
 
 #: gui/frame-tweaks-gui.py
 msgid "Tick it and Apply first"
@@ -1367,6 +1382,11 @@ msgid ""
 msgstr ""
 "(experimental: depende de partes internas de SteamVR; consulta ./install.sh info ID)"
 
+# needs review
+#: install.sh
+msgid "(not needed on this Frame: %s)"
+msgstr "(no hace falta en este Frame: %s)"
+
 #: install.sh
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr "--to necesita una versión, p. ej. v0.3.1"
@@ -1461,6 +1481,11 @@ msgstr ""
 #: install.sh
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
 msgstr "No se encontraron ajustes (python3 lib/sft.py mods dice por qué)"
+
+# needs review
+#: install.sh
+msgid "Not needed on this Frame, so not installed: %s"
+msgstr "No hace falta en este Frame, así que no se instala: %s"
 
 #: install.sh
 msgid "Nothing installed yet."

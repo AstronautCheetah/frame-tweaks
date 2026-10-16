@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+- **Tweaks are offered only where they're needed:** a tweak's optional `needed.sh` checks what
+  the Frame has (a package's version, a file) and says why when it doesn't need the tweak, say
+  because SteamOS now does it itself. Such a tweak is hidden in the list (**Show hidden** lists
+  it with the reason, its box disabled), and `./install.sh install` skips it, so a fix for one
+  SteamOS version doesn't break another. An installed one stays listed for you to remove
+  ([docs/mods.md](docs/mods.md)).
+
 ### Changed
 - **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a
   link to the page and where its Star button is.

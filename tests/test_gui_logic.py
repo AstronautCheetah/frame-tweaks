@@ -613,6 +613,20 @@ class SudoTag(unittest.TestCase):
         self.assertNotIn("Asks for sudo", page_text("cursor"))
 
 
+class NotNeeded(unittest.TestCase):
+    """A tweak this Frame doesn't need (its needed.sh: exit 1, why) says so on its page."""
+    def test_page_says_why(self):
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+
+        def page_text(cid):
+            page = gui.Details(mock.Mock(), gui.component(cid), (1, "not installed"))
+            return " ".join(w.text() for w in page.findChildren(QLabel))
+        with mock.patch.object(gui.sft, "not_needed", lambda rows=None, refresh=False: {"cursor": "SteamOS does it"}):
+            self.assertIn("This Frame doesn't need it: SteamOS does it", page_text("cursor"))
+            self.assertNotIn("doesn't need it", page_text("charge-limit"))
+
+
 class PreferencesPage(unittest.TestCase):
     """⚙ Preferences → Uninstalling a tweak: the choice lands in the file ./install.sh uninstall
     reads, and the confirmation before removing says what happens to the settings."""

@@ -124,6 +124,28 @@ class InstallState(unittest.TestCase):
         self.assertEqual(self.record.read_text(), VERSION + "\n")
         self.assertEqual(self.log(), ["install"])
 
+    def test_a_tweak_this_frame_doesnt_need_isnt_installed(self):
+        """needed.sh exit 1: SteamOS does it itself, say. install skips it (all too) and list says
+        why; installed already, it's still reinstalled (an update), and needed.sh exit 0 installs."""
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\nexit 1\n")
+        self.trust()
+        for args in (("install", "probe"), ("install", "all")):
+            r = self.sh(*args)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn("Not needed on this Frame, so not installed: SteamOS does it now", r.stdout)
+        self.assertEqual(self.log(), [])
+        self.assertFalse(self.record.exists())
+        self.assertIn("(not needed on this Frame: SteamOS does it now)", self.sh("list").stdout)
+        self.installed_at(VERSION)
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.assertEqual(self.log(), ["install"])
+        self.record.unlink()
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\nexit 0\n")
+        self.trust()
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.assertEqual(self.log(), ["install", "install"])
+        self.assertNotIn("not needed", self.sh("list").stdout)
+
     def test_reinstall_at_the_same_version_doesnt_migrate(self):
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         r = self.sh("install", "probe")

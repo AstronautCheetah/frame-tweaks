@@ -243,6 +243,14 @@ msgstr ""
 msgid "No README."
 msgstr ""
 
+#: gui/frame-tweaks-gui.py
+msgid "Not needed"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Not needed on this Frame: %s"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py install.sh
 msgid "Nothing to change."
 msgstr ""
@@ -388,6 +396,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "These installed tweaks were unticked and will be <b>removed</b>:"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "This Frame doesn't need it: %s"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1247,6 +1259,10 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid "(not needed on this Frame: %s)"
+msgstr ""
+
+#: install.sh
 msgid "--to needs a release, e.g. v0.3.1"
 msgstr ""
 
@@ -1325,6 +1341,10 @@ msgstr ""
 
 #: install.sh
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
+msgstr ""
+
+#: install.sh
+msgid "Not needed on this Frame, so not installed: %s"
 msgstr ""
 
 #: install.sh
