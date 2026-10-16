@@ -499,6 +499,15 @@ class DryRun(unittest.TestCase):
         qprocess.startDetached.assert_not_called()
         self.assertEqual(out.getvalue(), "would run: steamvr restart\n")
         self.assertEqual(w.stack.currentIndex(), 0)
+        # With the VR session's runtime folder and D-Bus, wherever the window is: from desktop
+        # mode, steamvr restart couldn't reach the user service manager.
+        with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "",
+                                                                                         "XDG_RUNTIME_DIR": "/run/user/1/nested"}):
+            w.do_restart_steamvr()
+        program, args = qprocess.startDetached.call_args[0]
+        self.assertEqual((program, args[-2:]), ("env", ["steamvr", "restart"]))
+        self.assertIn(f"XDG_RUNTIME_DIR=/run/user/{os.getuid()}", args)
+        self.assertIn(f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{os.getuid()}/bus", args)
         w.state[comp["id"]] = (0, "loaded")                    # restarted: Settings again
         w.update_run(comp["id"])
         self.assertEqual(w.run_buttons[comp["id"]].text(), "⚙ Settings")

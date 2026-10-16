@@ -1716,7 +1716,8 @@ msgid ""
 msgstr ""
 
 #: lib/link.sh
-msgid "Restart SteamVR to unload it (reboot, or: %s)."
+msgid ""
+"Restart SteamVR to unload it: ⟳ Restart SteamVR on its row in the Frame Tweaks window, or reboot."
 msgstr ""
 
 #: lib/link.sh

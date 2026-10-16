@@ -30,7 +30,7 @@ case $action in
         PATH=$LINK_PATH bash -c "$cmd" || exit
         if [ "$(field restart)" = steamvr ]; then
             mkdir -p "${UNLOADED%/*}" && touch "$UNLOADED"
-            say "$(t 'Restart SteamVR to unload it (reboot, or: %s).' "steamvr restart")"
+            say "$(t 'Restart SteamVR to unload it: ⟳ Restart SteamVR on its row in the Frame Tweaks window, or reboot.')"
         fi ;;
     status)
         # restart: steamvr: SteamVR loads it only as it starts, so a SteamVR that started before
