@@ -73,8 +73,11 @@ jobs:
             *) sed -i "s/^## Unreleased.*/## $V ($(date +%Y-%m-%d))/" CHANGELOG.md ;;
           esac
           echo "$V" > VERSION
-          type=""; case "$V" in *-*) type=' type="development"' ;; esac
-          sed -i "s|  <releases>|  <releases>\n    <release version=\"$V\" date=\"$(date +%Y-%m-%d)\"$type/>|" share/metainfo/*.metainfo.xml
+          # (AppStream writes a pre-release with "~": 0.6.2~rc.1 comes before 0.6.2, where 0.6.2-rc.1
+          # would come after it, and appstreamcli calls the list out of order once 0.6.2 is out)
+          type=""; mv=$V
+          case "$V" in *-*) type=' type="development"'; mv=$(printf '%s' "$V" | sed 's/-/~/') ;; esac
+          sed -i "s|  <releases>|  <releases>\n    <release version=\"$mv\" date=\"$(date +%Y-%m-%d)\"$type/>|" share/metainfo/*.metainfo.xml
       - name: Commit, tag, push, draft release
         env:
           V: ${{ steps.v.outputs.version }}
