@@ -13,6 +13,12 @@
   turns it off and `=still` stops the motion; KDE's animation speed set to instant stops it too.
   See it with `python3 lib/splash.py --demo`.
 
+### For pack authors
+- **`dev/fresh-install.sh --beta`** runs the testers' one-liner (`… | FRAME_TWEAKS_CHANNEL=beta
+  bash`), which takes the newest test release. Its window's PyQt6 setup now shows the splash too:
+  without a controlling terminal (the sandbox is a session of its own) and with the script coming
+  from curl, the splash reads keys from the terminal its output goes to.
+
 ## 0.6.11 (2026-10-16)
 
 ### Added

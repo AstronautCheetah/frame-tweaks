@@ -4,6 +4,8 @@
 # the network), and its window opens on your desktop.
 #
 #   dev/fresh-install.sh                  the one-liner from GitHub (main's get.sh, the newest release)
+#   dev/fresh-install.sh --beta           the testers' one-liner (… | FRAME_TWEAKS_CHANNEL=beta bash): the
+#                                         newest test release (vX.Y.Z-rc.N), or release if that's newer
 #   dev/fresh-install.sh --from checkout  this checkout as it is now (changes to tracked files
 #                                         included, committed or not), as release v<VERSION>-local
 #                                         on the test-release channel (fresh installs take tags)
@@ -12,7 +14,9 @@
 #   --real         actions really happen (inside the sandbox). Default: a dry run
 #                  (FRAME_TWEAKS_DRY_RUN=1): installing, removing and Run only say what they'd do.
 #   --reuse-pyqt   lend the window a PyQt6 set up once (~/.cache/frame-tweaks/fresh-install-pyqt)
-#                  instead of downloading ~280 MB each time (and skip the question about it)
+#                  instead of downloading ~280 MB each time (and skip the question about it).
+#                  Without it, as for a new user, that setup runs in this terminal under the
+#                  installer's splash (lib/splash.py, in releases after 0.6.11).
 #   --keep         keep the throwaway home afterwards (it says where); otherwise it's deleted
 #   --again DIR    open a kept one's window again (with --real or not, as you choose this time)
 #   --shell        a shell in the sandbox instead of the one-liner, to look around (commands from
@@ -37,10 +41,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 die() { echo "fresh-install: $*" >&2; exit 1; }
 
-from=github real="" pyqt="" keep="" again="" shell=""
+from=github beta="" real="" pyqt="" keep="" again="" shell=""
 while [ $# -gt 0 ]; do
     case $1 in
         --from) from=${2:?--from: github, checkout or a tag}; shift ;;
+        --beta) beta=1 ;;
         --real) real=1 ;;
         --reuse-pyqt) pyqt=1 ;;
         --keep) keep=1 ;;
@@ -91,7 +96,9 @@ if [ -z "$again" ]; then
     oneliner='curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/get.sh | bash'
     channel=""
     case $from in
-        github) ;;
+        github)
+            # (the channel for bash, which runs get.sh, not for curl)
+            if [ -n "$beta" ]; then oneliner=${oneliner/%| bash/| FRAME_TWEAKS_CHANNEL=beta bash}; fi ;;
         checkout)
             tag="v$(cat VERSION)-local"; channel=beta
             src=$work/sandbox/src
@@ -106,6 +113,7 @@ if [ -z "$again" ]; then
             oneliner="FRAME_TWEAKS_REPO=file://$box/release.git bash $box/get.sh"
             cp get.sh "$work/sandbox/get.sh" ;;
         v[0-9]*)
+            [ -z "$beta" ] || die "--beta: the newest test release from GitHub; a tag is the release it names"
             git init -q --bare "$work/sandbox/release.git"
             git -C "$work/sandbox/release.git" fetch -q --depth 1 https://github.com/AstronautCheetah/frame-tweaks.git \
                 "refs/tags/$from:refs/tags/$from" || die "no release $from on GitHub"

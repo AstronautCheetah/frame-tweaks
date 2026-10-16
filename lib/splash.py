@@ -831,6 +831,18 @@ def wanted(out):
     return cols >= 60 and rows >= 20
 
 
+def keyboard(out):
+    """Where keys come from: stdin if it's the terminal, else the terminal (/dev/tty: the one-liner
+    reads its script from curl), else the one the output goes to (a process without a controlling
+    terminal, e.g. in dev/fresh-install.sh's sandbox, a session of its own). Raises OSError."""
+    if os.isatty(0):
+        return 0
+    try:
+        return os.open("/dev/tty", os.O_RDONLY)
+    except OSError:
+        return os.open(os.ttyname(out), os.O_RDONLY | os.O_NOCTTY)
+
+
 def plain(cmd):
     """The command as it would have run (marked, so ./install.sh doesn't start a splash again)."""
     try:
@@ -846,7 +858,7 @@ def run(cmd):
     if not wanted(out) or os.environ.get("FRAME_TWEAKS_SPLASH_TTY") == os.ttyname(out):
         plain(cmd)                   # (or already in the terminal a splash gave it: never one in another)
     try:
-        inp = 0 if os.isatty(0) else os.open("/dev/tty", os.O_RDONLY)
+        inp = keyboard(out)
         saved = termios.tcgetattr(inp)
     except (OSError, termios.error):
         plain(cmd)
