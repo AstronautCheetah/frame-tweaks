@@ -1402,11 +1402,6 @@ msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
 #: install.sh
-msgid ""
-"Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
-msgstr ""
-
-#: install.sh
 msgid "Setting up the full installer window"
 msgstr ""
 
