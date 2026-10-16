@@ -3,6 +3,7 @@ service's bindings and restarts; install.sh / uninstall.sh in a throwaway home."
 import sys
 import json
 import re
+import shlex
 import subprocess
 import tempfile
 import unittest
@@ -85,6 +86,28 @@ class DashboardCheck(unittest.TestCase):
         self.assertIsNone(code)
         self.assertEqual(sft.missing(PATCHES["curvature"], code), ["SteamVR's dashboard files"])
 
+    def test_only_the_scripts_the_page_loads(self):
+        """The markers are looked for in the scripts systemui.html loads, not in every bundle in the
+        folder: other pages load some of them, and a marker found only there isn't in the page."""
+        with tempfile.TemporaryDirectory() as d:
+            dash = Path(d) / "dashboard"
+            (dash / "libraries").mkdir(parents=True)
+            (Path(d) / "outside.js").write_text(" outside(")                # (not the dashboard's)
+            (dash / "systemui.html").write_text(
+                '<script defer="defer" src="libraries/libraries~1.js?contenthash=ab12"></script>\n'
+                "<script src='chunk~2.js'></script><script>inline()</script>\n"
+                '<script src="../outside.js"></script><script src="https://example.com/x.js"></script>\n')
+            (dash / "libraries/libraries~1.js").write_text("window.FrameStore=")
+            (dash / "chunk~2.js").write_text(" thing(")
+            (dash / "controllerbindingui.js").write_text(" other(")      # (another page's)
+            with mock.patch.object(sft, "DASHBOARD", dash):
+                code = sft.dashboard_code()
+                self.assertEqual(code, "window.FrameStore= thing(")
+                (dash / "systemui.html").write_text("<html>no scripts</html>")
+                self.assertIsNone(sft.dashboard_code())
+                (dash / "systemui.html").unlink()
+                self.assertIsNone(sft.dashboard_code())                  # (no page: every patch off)
+
     def test_patch_that_isnt_utf8(self):
         """A patch with a stray byte (a pack's, saved in another encoding) is still checked."""
         with tempfile.TemporaryDirectory() as d:
@@ -153,6 +176,29 @@ class Bindings(unittest.TestCase):
                 sft.listen()
             self.assertEqual(json.loads((Path(d) / "scroll-strips.json").read_text()), {"color": 0.5})
         keys.assert_not_called()
+
+
+class BindingsAfterAReload(unittest.TestCase):
+    def test_runtime_is_on_before_the_bindings(self):
+        """A page reload gets the bindings again only while the Runtime domain is on: without
+        Runtime.enable the strips came back but didn't scroll, and the gear said to reinstall."""
+        sent = []
+
+        class Page:
+            def __init__(self, url, timeout=None):
+                pass
+
+            def send(self, obj):
+                sent.append(obj["method"])
+
+            def recv(self):
+                raise OSError("closed")
+
+        with mock.patch.object(sft, "systemui", return_value="ws://127.0.0.1:1/devtools/page/1"), \
+                mock.patch.object(sft, "Ws", Page), mock.patch.object(sft.time, "sleep", side_effect=Stop):
+            with self.assertRaises(Stop):
+                sft.listen()
+        self.assertEqual(sent, ["Runtime.enable"] + ["Runtime.addBinding"] * len(sft.BINDINGS))
 
 
 class Watch(unittest.TestCase):
@@ -241,6 +287,26 @@ class Scripts(unittest.TestCase):
                                capture_output=True, text=True, timeout=60)
             self.assertEqual(r.returncode, 2, tweak + r.stdout + r.stderr)
             self.assertTrue(r.stdout.startswith("restart  waiting for a SteamVR restart"), tweak + r.stdout)
+
+    def unit(self, name):
+        return (self.home / ".config/systemd/user" / name).read_text()
+
+    def run_step(self, unit_text, step):
+        """Run a unit's Exec<step>= commands, as systemd would (a leading "-": its failure ignored)."""
+        for dash, cmd in re.findall(rf"^Exec{step}=(-?)(.+)$", unit_text, re.M):
+            try:
+                subprocess.run(shlex.split(cmd), env=sandbox_env(self.home, self.home / "stubs"),
+                               capture_output=True, text=True, timeout=60)
+            except OSError:
+                if not dash:
+                    raise
+
+    def vrsettings(self, value=None):
+        f = self.home / ".config/openvr/config/steamvr.vrsettings"
+        if value is not None:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text(json.dumps(value))
+        return json.loads(f.read_text())
 
     def test_unpatches_only_while_steamvr_runs(self):
         """(A test's throwaway home, as here, must never unpatch the real dashboard.)"""

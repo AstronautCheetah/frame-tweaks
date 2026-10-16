@@ -86,7 +86,10 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
 - **Hold to repeat:** holding a key holds it down, so the app's own key repeat works.
 - **Copy, Paste, Cut, Undo, Select all** (icons) send Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z and
   Ctrl+A. On the Tools layer, **Find**, **Redo** and **Save** send Ctrl+F, Ctrl+Shift+Z and
-  Ctrl+S.
+  Ctrl+S. The letter is wherever your keyboard layout in KDE has it (on a French keyboard, A
+  is where Q is on an English one).
+- Keys like these act when you let go of them, once, even if the laser wavered off the key and
+  back meanwhile; let go off the key to cancel.
 - **🖱R / 🖱M (right / middle click):** tap one, and your **next click anywhere** (laser or
   mouse, on a floating window or the desktop) becomes a right or middle click. The key stays lit
   until then. Only one can be on; tap it again to cancel. It also cancels itself after 10 s, and
@@ -100,10 +103,10 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   held down, tap this. It presses and releases each of them, and lets go of any key a keyboard
   or mouse still holds (a Bluetooth keyboard that lost a key's release keeps it down for every
   app). If desktop mode has taken all input (its title says "Press right control to **ungrab**
-  input": typing and clicks go to the desktop instead of the window you're using), it gives it
-  back with a Right Ctrl tap and checks that it did; if not, its message says to tap Right Ctrl
-  on a keyboard. What it found goes to `~/.local/state/frame-tweaks/logs/unstick.log`, which
-  🐞 Report a problem includes.
+  input", in desktop mode's language: typing and clicks go to the desktop instead of the window
+  you're using), it gives it back with a Right Ctrl tap and checks that it did; if not, its
+  message says to tap Right Ctrl on a keyboard. What it found goes to
+  `~/.local/state/frame-tweaks/logs/unstick.log`, which 🐞 Report a problem includes.
 
 Key labels follow Frame Tweaks' language: the one chosen in the installer window's ⚙, else your
 keyboard's when the pad opens; they switch when the window's language changes. They use the

@@ -218,11 +218,12 @@ fetch_mirror() {
 # and locale/*.po in ~/.local/share/frame-tweaks/i18n. A Python program adds that folder to
 # sys.path and imports _ from i18n; a bash program sources its i18n.sh (see arrowpad, adb-scrcpy).
 # (and the Python modules the programs share: lib/ftconf.py, settings files and logs; lib/vrkit.py,
-# SteamVR poses, grips and haptics; lib/needs.py, "this needs a tweak that isn't installed")
+# SteamVR poses, grips and haptics; lib/needs.py, "this needs a tweak that isn't installed";
+# lib/xkb.py, keys on the desktop's keyboard layout)
 install_i18n() {
     local d="$HOME/.local/share/frame-tweaks/i18n"
     mkdir -p "$d/locale"
-    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$REPO_DIR/lib/needs.py" "$d/"
+    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$REPO_DIR/lib/needs.py" "$REPO_DIR/lib/xkb.py" "$d/"
     find "$d/locale" -name '*.po' -delete
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }
@@ -463,12 +464,16 @@ install_dashboard_patch() {    # install_dashboard_patch NAME FILE
     install -m644 "$2" "$VR_DASHBOARD/patches/$1.js"
     if sysctl_user is-active --quiet sft-dashboard.service; then
         # The watcher looks every 5 s: wait for it, so the status shown next is the real one.
-        local _
+        local _ s=
         for _ in 1 2 3 4 5 6 7 8 9 10; do
-            "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null | grep -q ": patched$" && break
+            s=$("$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null) || true
+            [[ $s == *": patched" ]] && break
             sleep 1
         done
-        say "$(t 'Active now.')"
+        # ("Active now." only once it is: it said so after these 10 looks either way. Otherwise what
+        # the watcher says, "SteamVR changed (missing: …)" say.)
+        if [[ $s == *": patched" ]]; then say "$(t 'Active now.')"
+        else say "$(t 'Not active yet: %s' "${s:-$(t 'the dashboard patch service did not answer')}")"; fi
     elif sysctl_user is-active --quiet steamvr.service; then
         say "$(t 'Active from the next SteamVR start (reboot, or restart SteamVR from its menu).')"
     else

@@ -397,23 +397,25 @@ class OverlayHost:
             if visible:
                 self.ov.showOverlay(self.input_handle)
             else:
+                # Like Full Keyboard: closing the dashboard releases our input (a pending
+                # right/middle-click toggle would otherwise change a click you can't see coming).
+                # All of it before anything is asked of SteamVR, whose calls can fail (and a
+                # failure here ends the pad): the keys must be up whatever happens next.
+                self.hovered_devices.clear()
+                # ...the keys lasers hold down: a release may never reach the hidden panel (the
+                # key would repeat on), and one arriving later would latch a modifier again.
+                self.cancel_presses()
+                if self.pad.click_swap.armed:
+                    self.pad.click_swap.disarm("dashboard closed")
+                # ...and held modifiers: a locked Super or Ctrl would otherwise turn every click
+                # you make with the dashboard closed into Super/Ctrl+click.
+                self.pad.release_all_mods()
+                self.pad.restyle()
                 self.ov.hideOverlay(self.input_handle)
                 if self.cover is not None:
                     self.ov.hideOverlay(self.cover)
-                # Like Full Keyboard: closing the dashboard releases our input (a pending
-                # right/middle-click toggle would otherwise change a click you can't see coming).
-                self.hovered_devices.clear()
-                # ...and the keys lasers hold down: a release may never reach the hidden panel (the
-                # key would repeat on), and one arriving later would latch a modifier again.
-                self.cancel_presses()
                 if self.drag is not None:
-                    self.end_drag()
-                if self.pad.click_swap.armed:
-                    self.pad.click_swap.disarm("dashboard closed")
-                # ...and lets go of held modifiers: a locked Super or Ctrl would otherwise turn
-                # every click you make with the dashboard closed into Super/Ctrl+click.
-                self.pad.release_all_mods()
-                self.pad.restyle()
+                    self.end_drag()             # (it asks SteamVR where the panel is now)
             self.visible = visible
         # (only while a laser is on the pad, or it's carried by the grip: each read asks SteamVR
         # for controller properties, which other programs wait on too)
@@ -503,6 +505,12 @@ class OverlayHost:
                 if dev in getattr(self, "gripping", ()) or self.drag is not None:
                     continue                    # squeezing to grab: a trigger pull doesn't also type
                 if b is not None:
+                    old = self.pressed.pop(cursor, None)
+                    if old is not None:
+                        # This laser's last release never came: that press is over (a modifier's
+                        # lasts until its release, so it would have stayed down).
+                        self.send(old, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
+                        self.pad.let_go(old)
                     self.pressed[cursor] = b
                     # No redraw for the press itself: each reload of the overlay blinks, and the
                     # press is felt (haptic click). State changes (modifiers, layer, R/M, mic, pin,

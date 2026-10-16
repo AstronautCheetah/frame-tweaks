@@ -380,8 +380,10 @@ def serve(phone, sd, state):
                 time.sleep(3)
                 continue
             ws = sd.Ws(url, timeout=2)
-            ws.send({"id": 1, "method": "Runtime.addBinding", "params": {"name": BINDING}})
-            n, beat = 1, 0.0
+            # (Runtime.enable first: without it a reloaded page doesn't get the binding again)
+            ws.send({"id": 1, "method": "Runtime.enable"})
+            ws.send({"id": 2, "method": "Runtime.addBinding", "params": {"name": BINDING}})
+            n, beat = 2, 0.0
             publish(ws, state)
             while True:
                 now = time.monotonic()

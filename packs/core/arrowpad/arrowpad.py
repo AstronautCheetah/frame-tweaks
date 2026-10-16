@@ -17,9 +17,11 @@ How it works
 import argparse
 import array
 import fcntl
+import gettext
 import json
 import os
 import re
+import signal
 import socket
 import struct
 import subprocess
@@ -51,16 +53,24 @@ except ImportError:                       # (not installed by Frame Tweaks: Engl
 os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
 
+def desktop_env():
+    """Desktop mode's environment (its session manager's), or None when it isn't running."""
+    src = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "ksmserver"],
+                         capture_output=True, text=True).stdout.split()
+    if not src:
+        return None
+    text = Path(f"/proc/{src[0]}/environ").read_text(errors="replace")
+    return dict(kv.split("=", 1) for kv in text.split("\0") if "=" in kv)
+
+
 def pick_display(argv):
     """--desktop / --vr choose where the pad opens, whichever menu launched it.
     Desktop mode is a nested Plasma session with its own X display (:2 here) and
     X authority file; VR floating windows live on the Steam session's display :0."""
     if "--desktop" in argv:
-        src = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "ksmserver"],
-                             capture_output=True, text=True).stdout.split()
-        if not src:
+        env = desktop_env()
+        if env is None:
             sys.exit(_("arrowpad: desktop mode isn't running"))
-        env = dict(kv.split("=", 1) for kv in Path(f"/proc/{src[0]}/environ").read_text().split("\0") if "=" in kv)
         for k in ("DISPLAY", "XAUTHORITY"):
             if k in env:
                 os.environ[k] = env[k]
@@ -79,7 +89,8 @@ if TARGET == "vr":
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
 
-from PyQt6.QtCore import QEvent, QObject, QPoint, QRectF, QSize, Qt, QTimer  # noqa: E402
+from PyQt6.QtCore import (QEvent, QObject, QPoint, QRectF, QSize, Qt, QTimer, pyqtSignal,  # noqa: E402
+                          qFormatLogMessage, qInstallMessageHandler)
 from PyQt6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPainterPath  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLayout, QPushButton,  # noqa: E402
@@ -87,6 +98,10 @@ from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLayout, QP
 
 import ftconf  # noqa: E402  (settings files and logs: lib/ftconf.py, installed beside i18n.py)
 import needs  # noqa: E402  ("this needs a tweak that isn't installed": lib/needs.py, the same)
+try:
+    import xkb  # noqa: E402  (keys on the desktop's keyboard layout: lib/xkb.py, the same)
+except ImportError:                       # (without it: the keys of a US keyboard, as before)
+    xkb = None
 
 try:  # controller haptics (optional): SteamVR Input via the openvr module
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -179,16 +194,75 @@ def unstick_log(line):
         pass
 
 
+# Desktop mode's window title, KWin's own words: its name, then whether it has taken all input
+# ("…to ungrab input": Right Ctrl gives it back) or not ("…key to grab input"). KWin says them in
+# desktop mode's language, so they're looked up in its catalogue for that language too.
+KWIN_LOCALE = Path("/usr/share/locale")
+KWIN_NAME = ("KDE Wayland Compositor",
+             ("Title of nested KWin Wayland with Wayland socket identifier as argument", "KDE Wayland Compositor %1"))
+KWIN_GRABBED = ("Press right control to ungrab input", "Press right control to ungrab pointer")
+KWIN_FREE = ("Press right control key to grab input", "Press right control key to grab pointer")
+
+
+def desktop_languages():
+    """Desktop mode's languages, as KDE picks them (LANGUAGE, LC_ALL, LC_MESSAGES, LANG), else
+    this program's and the one Frame Tweaks speaks."""
+    try:
+        sources = [desktop_env() or os.environ]
+    except OSError:
+        sources = [os.environ]
+    langs = [lang for env in sources for var in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG")
+             for lang in env.get(var, "").split(":")]
+    if sources[0] is os.environ and i18n is not None:
+        langs += i18n.wanted_languages()
+    return [lang for lang in dict.fromkeys(langs) if lang and lang.split(".")[0] not in ("C", "POSIX")]
+
+
+def kwin_words(languages):
+    """KWin's words for the title in English and in these languages: (names, grabbed, free)."""
+    catalogues = []
+    for mo in gettext.find("kwin", str(KWIN_LOCALE), languages=languages, all=True):
+        try:
+            with open(mo, "rb") as f:
+                catalogues.append(gettext.GNUTranslations(f))
+        except Exception:                                # (a damaged catalogue: English, at least)
+            continue
+
+    def said(words):
+        out = set()
+        for w in words:
+            out.add(w[1] if isinstance(w, tuple) else w)
+            out.update(c.pgettext(*w) if isinstance(w, tuple) else c.gettext(w) for c in catalogues)
+        return out
+    return said(KWIN_NAME), said(KWIN_GRABBED), said(KWIN_FREE)
+
+
+def says_grabbed(title, names, grabbed, free):
+    """title is desktop mode's window saying it has taken all input: KWin's name for it, then the
+    "ungrab" hint, and not the "grab" one."""
+    if not any(re.match(re.escape(n).replace("%1", ".*?"), title) for n in names):
+        return False
+    hints = [g for g in grabbed if g in title]
+    for g in hints:
+        title = title.replace(g, "")
+    return bool(hints) and not any(f in title for f in free)
+
+
 def desktop_grabbed():
     """Whether desktop mode has taken all input: its window on the Steam session's display then
-    says "Press right control to ungrab input"."""
+    says "Press right control to ungrab input", in desktop mode's language. Nothing else counts:
+    the answer decides whether Right Ctrl, which toggles that, is sent."""
     try:
-        out = subprocess.run(["xwininfo", "-root", "-tree"], capture_output=True, text=True, timeout=5,
-                             env={**os.environ, "DISPLAY": ":0"}).stdout
+        out = subprocess.run(["xwininfo", "-root", "-tree"], capture_output=True, timeout=5,
+                             env={**os.environ, "DISPLAY": ":0", "LC_ALL": "C.UTF-8"}).stdout
     except (OSError, subprocess.TimeoutExpired):
         return False
-    m = re.search(r'"(KDE Wayland Compositor[^"]*)"', out)
-    return bool(m) and "ungrab" in m[1]
+    # (UTF-8, whatever this program's locale; another window's Latin-1 title, which isn't, crashed the pad)
+    titles = re.findall(r'^\s*0x[0-9a-fA-F]+ "(.*)":', out.decode("utf-8", errors="replace"), re.M)
+    words = kwin_words(desktop_languages())
+    return any(says_grabbed(t, *words) for t in titles)
+
+
 KEY = {
     "Esc": 1, "Tab": 15, "Bksp": 14, "Del": 111, "Enter": 28, "Ins": 110,
     "Home": 102, "End": 107, "PgUp": 104, "PgDn": 109,
@@ -196,12 +270,29 @@ KEY = {
     "Shift": 42, "Ctrl": 29, "Alt": 56, "Super": 125,
     "PrtSc": 99, "Menu": 127,
     **{f"F{n}": c for n, c in zip(range(1, 11), range(59, 69))}, "F11": 87, "F12": 88,
+    # The shortcuts' letters, where a US keyboard has them; sent where the desktop's layout has
+    # them (chord_keys: on a French keyboard, A is where Q is here).
     "A": 30, "C": 46, "V": 47, "X": 45, "Z": 44, "F": 33, "S": 31,
 }
 MODIFIERS = ("Ctrl", "Alt", "Super")
 MOUSE = ("RMB", "MMB")       # toggles: the next click becomes a right / middle click
 CHORDS = {"Copy": "C", "Paste": "V", "Cut": "X", "Undo": "Z", "All": "A",   # Ctrl + key(s)
           "Redo": ("Shift", "Z"), "Find": "F", "Save": "S"}
+
+
+def holds(name):
+    """name is a key that's down while its button is (arrows, Bksp…): not a modifier, nor a button
+    that does something once it's let go (Copy, 🎤, Tools…)."""
+    return name in KEY and name not in MODIFIERS
+
+
+def chord_keys(name):
+    """A shortcut's keys after Ctrl, its letter on the desktop's keyboard layout (on a French one
+    Ctrl+A was Ctrl+Q, Quit, and on a German one Undo was Ctrl+Y)."""
+    keys = CHORDS[name] if isinstance(CHORDS[name], tuple) else (CHORDS[name],)
+    return [xkb.letter_key(k, KEY[k]) if xkb is not None and len(k) == 1 else KEY[k] for k in keys]
+
+
 LAYERS = {
     # Keys found on more than one layer keep their place on all of them (Tools, Esc, Fn, the
     # modifiers, R/M, and the clipboard keys); only the rest change.
@@ -664,17 +755,40 @@ def icon_for(name):
 class KeyButton(QPushButton):
     """A key drawn the way Full Keyboard draws one: a darker side, and a fixed-size face that
     travels down by key_press_travel when pressed (over press_duration_ms), with a hover
-    gradient. State (property "state"): off, oneshot/held/locked (latched), active, busy."""
+    gradient. State (property "state"): off, oneshot/held/locked (latched), active, busy.
+
+    Qt says "released" each time a held pointer slides off the key, and "pressed" when it slides
+    back on (a laser's jitter at a key's edge does both), but "clicked" only once, when it's let
+    go on the key. lifted: the press is over, let go on the key or off it."""
+    lifted = pyqtSignal()
 
     def __init__(self, pad):
         super().__init__()
         self.pad = pad
         self._amount = 0.0
+        self.pressing = False
         from PyQt6.QtCore import QVariantAnimation
         self.anim = QVariantAnimation(self)
         self.anim.valueChanged.connect(self._set_amount)
         self.pressed.connect(lambda: self._animate(1.0))
         self.released.connect(lambda: self._animate(0.0))
+
+    def mousePressEvent(self, ev):
+        super().mousePressEvent(ev)
+        if ev.button() == Qt.MouseButton.LeftButton and self.isDown():
+            self.pressing = True
+
+    def mouseReleaseEvent(self, ev):
+        lift = self.pressing and ev.button() == Qt.MouseButton.LeftButton
+        # Let go off the key while Qt still had it down (no move said the pointer had left): Qt then
+        # lets go without a word, and a key stayed down. Say "released", as sliding off does.
+        silent = lift and self.isDown() and not self.hitButton(ev.position().toPoint())
+        super().mouseReleaseEvent(ev)
+        if silent:
+            self.released.emit()
+        if lift:
+            self.pressing = False
+            self.lifted.emit()
 
     def _set_amount(self, v):
         self._amount = float(v)
@@ -811,8 +925,12 @@ class ArrowPad(QWidget):
             for c, _key in enumerate(row):
                 b = KeyButton(self)
                 b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                # Keys held down (arrows, Bksp…) follow pressed / released; the rest act once, on
+                # clicked, and a modifier's press ends when it's lifted (KeyButton).
                 b.pressed.connect(lambda r=r, c=c: self.on_press(r, c))
                 b.released.connect(lambda r=r, c=c: self.on_release(r, c))
+                b.clicked.connect(lambda _=False, r=r, c=c: self.on_click(r, c))
+                b.lifted.connect(lambda r=r, c=c: self.let_go_at(r, c))
                 b.installEventFilter(self.hover_filter)
                 grid.addWidget(b, r, c)
                 self.buttons.append((r, c, b))
@@ -1128,6 +1246,8 @@ class ArrowPad(QWidget):
             self.haptics.pulse(kind, device, strength)
 
     def on_press(self, r, c):
+        if (r, c) in self.held:
+            return              # (slid back onto the key it's still pressing: the same press)
         self.pulse("press")
         name = self.held[(r, c)] = self.name_at(r, c)
         if name in MODIFIERS:
@@ -1145,11 +1265,23 @@ class ArrowPad(QWidget):
             self.yd.key(KEY[name], True)
 
     def on_release(self, r, c):
+        """Let go on the key, or slid off it: a key held down (↓, Bksp…) goes up. The rest wait for
+        the click (let go on the key) or the end of the press (let_go_at): sliding off and back on,
+        as a laser's jitter at a key's edge does, pasted three times and started dictation thrice."""
         # The key that was pressed: another laser may have switched the layer meanwhile (holding ↓
         # through a tap on Tools released Redo, and left ↓ held down).
-        name = self.held.pop((r, c), None) or self.name_at(r, c)
+        name = self.held.get((r, c))
         if self.overlay is not None:
-            self.overlay.log_input(f"     released {name!r} (row {r}, col {c})")
+            self.overlay.log_input(f"     released {name or self.name_at(r, c)!r} (row {r}, col {c})")
+        if holds(name):
+            del self.held[(r, c)]
+            self.yd.key(KEY[name], False)
+            self.release_oneshots()
+
+    def on_click(self, r, c):
+        """Let go on the key it pressed (once, however the pointer wandered meanwhile): what the
+        button does. A tap on a modifier latches it (one-shot; twice, locked)."""
+        name = self.held.pop((r, c), None)
         if name in MODIFIERS:
             chord = self.mod_pressing.pop(name, False)
             if self.mod_state[name] == "held":
@@ -1178,31 +1310,39 @@ class ArrowPad(QWidget):
             self.dictate()
         elif name in CHORDS:
             ctrl_held = self.mod_state["Ctrl"] != "off"
-            keys = CHORDS[name] if isinstance(CHORDS[name], tuple) else (CHORDS[name],)
-            codes = ([] if ctrl_held else [KEY["Ctrl"]]) + [KEY[k] for k in keys]
-            self.yd.tap(*codes)
+            self.yd.tap(*([] if ctrl_held else [KEY["Ctrl"]]), *chord_keys(name))
             self.release_oneshots()
-        elif name in KEY:
+
+    def let_go_at(self, r, c):
+        """A press that ends without a click (let go off the key, or taken back): let go of what it
+        holds down, its key or a modifier it pressed, without what a click would do (a tap, a
+        chord, a layer, dictation…)."""
+        name = self.held.pop((r, c), None)
+        if name in MODIFIERS:
+            self.mod_pressing.pop(name, None)
+            if self.mod_state[name] == "held":
+                self.mod_state[name] = "off"
+                self.yd.key(KEY[name], False)
+                self.restyle()
+        elif holds(name):
             self.yd.key(KEY[name], False)
             self.release_oneshots()
 
     def let_go(self, button):
-        """The VR overlay took a press back (a grab, the dashboard closing, Close): let go of what
-        it holds down, its key or a modifier it pressed, without what a release would do (a chord,
-        a layer, dictation…). Its release came off the key, which isn't a click: on_release won't run."""
+        """The VR overlay took a press back (a grab, the dashboard closing, Close): its release
+        came off the key, so it ended without a click (let_go_at, through KeyButton.lifted); this
+        makes sure of it."""
         for r, c, b in self.buttons:
-            if b is not button or (r, c) not in self.held:
-                continue
-            name = self.held.pop((r, c))
-            if name in MODIFIERS:
-                self.mod_pressing.pop(name, None)
-                if self.mod_state[name] == "held":
-                    self.mod_state[name] = "off"
-                    self.yd.key(KEY[name], False)
-                    self.restyle()
-            elif name in KEY:
-                self.yd.key(KEY[name], False)
-                self.release_oneshots()
+            if b is button:
+                self.let_go_at(r, c)
+
+    def release_keys(self):
+        """Let go of everything the pad holds down, keys and modifiers: it's going away, and
+        ydotoold's keyboard is the whole Frame's (a Ctrl left down turns every click into Ctrl+click)."""
+        for name in [n for n in self.held.values() if holds(n)]:
+            self.yd.key(KEY[name], False)
+        self.held.clear()
+        self.release_all_mods()
 
     def toggle_mod(self, name):
         now, state = time.monotonic(), self.mod_state[name]
@@ -1313,7 +1453,7 @@ class ArrowPad(QWidget):
             return
         if self.isVisible():
             self.save_config()
-            self.release_all_mods()
+            self.release_keys()
             self.click_swap.disarm("pad hidden")
             self.hide()
         else:
@@ -1334,7 +1474,7 @@ class ArrowPad(QWidget):
 
     def closeEvent(self, ev):
         self.save_config()
-        self.release_all_mods()   # never leave a modifier stuck down
+        self.release_keys()       # never leave a modifier (or a key) stuck down
         self.click_swap.disarm()  # nor the pointer grabbed
         if self.overlay:
             self.overlay.close()
@@ -1359,6 +1499,26 @@ class HoverHaptics(QObject):
 
 def default_socket():
     return os.environ.get("YDOTOOL_SOCKET") or str(RUN / ".ydotool_socket")
+
+
+def let_go_on_exit(pad):
+    """A pad that goes away lets go of what it holds down first (release_keys), not only one that
+    is closed. When desktop mode ends, Qt says "The X11 connection broke" and ends the program
+    there and then (no closeEvent): its message handler lets go first. A stop (SIGTERM: an update,
+    an uninstall) closes the pad as ✕ does."""
+    def message(kind, context, text):
+        try:
+            if "X11 connection broke" in text:
+                pad.release_keys()
+            sys.stderr.write(qFormatLogMessage(kind, context, text) + "\n")    # (as Qt would)
+        except Exception:                # (this runs inside Qt: an error here would abort the pad)
+            pass
+    qInstallMessageHandler(message)
+
+    def stop(*_args):
+        pad.release_keys()
+        QTimer.singleShot(0, pad.close)  # (from the event loop: not in the middle of whatever was running)
+    signal.signal(signal.SIGTERM, stop)
 
 
 def signal_running(command):
@@ -1412,6 +1572,7 @@ def main():
                    "Start it with: systemctl --user start ydotoold").format(socket=args.socket, error=e))
 
     pad = ArrowPad(yd, args.scale)
+    let_go_on_exit(pad)
     QLocalServer.removeServer(SERVER_NAME)   # stale socket from a crashed instance
     server = QLocalServer()
     server.listen(SERVER_NAME)

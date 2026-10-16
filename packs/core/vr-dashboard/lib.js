@@ -89,14 +89,14 @@
 
   // mount(key, render, side): draw render() (an array of pieces, or null) as the last child of
   // the dashboard app, redrawn every `every` ms and on redraw(); in the page corner `side`. Puts
-  // itself back if another patch's stop() drops it. Returns {redraw, stop}.
+  // itself back (a few times) if something drops it from the app's render. Returns {redraw, stop}.
   const mount = (key, render, side, every = 500) => {
     const D = window.Dashboard;
     const Base = D && Object.getPrototypeOf(D.constructor);
     if (!Base?.prototype?.isReactComponent) return null;
     const app = walk((fb) => fb.stateNode && typeof fb.stateNode.toggleDebugPointer === 'function')?.stateNode;
     if (!app) return null;
-    let on = true, mounted = 0, inst = null;
+    let on = true, mounted = 0, inst = null, wrapped = null, tries = 0;
     class Holder extends Base {
       componentDidMount() { mounted++; inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, every); }
       componentWillUnmount() { mounted--; if (inst === this) inst = null; clearInterval(this.timer); }
@@ -110,7 +110,7 @@
     }
     const attach = () => {
       const below = app.render;
-      app.render = function (...args) {
+      wrapped = app.render = function (...args) {
         const tree = below.apply(this, args);
         const kids = tree?.props?.children;
         if (!on || !tree || typeof tree !== 'object' || !Array.isArray(kids)) return tree;
@@ -120,7 +120,12 @@
       try { app.forceUpdate(); } catch (e) {}
     };
     attach();
-    const guard = setInterval(() => { if (on && !mounted) attach(); }, 2000);
+    // Not mounted: wrap the render again only if ours isn't it any more, and three times at most
+    // until it mounts (it wrapped every 2 s for as long as it wasn't, a layer deeper each time).
+    const guard = setInterval(() => {
+      if (mounted) tries = 0;
+      else if (on && app.render !== wrapped && tries < 3) { tries++; attach(); }
+    }, 2000);
     return {
       redraw: () => { try { inst?.forceUpdate(); } catch (e) {} },
       // (stays in the render chain, passing straight through: unwrapping could drop another's)

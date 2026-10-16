@@ -111,6 +111,36 @@ class Replaced(unittest.TestCase):
         the_phone.close.assert_called_once()
 
 
+class Stop(BaseException):
+    """Ends serve()'s endless loop in a test (time.sleep raises it)."""
+
+
+class BindingAfterAReload(unittest.TestCase):
+    def test_runtime_is_on_before_the_binding(self):
+        """As sft-dashboard's: a reloaded dashboard page gets the binding again only while the
+        Runtime domain is on (Runtime.enable before Runtime.addBinding)."""
+        import types
+        sent = []
+
+        class Page:                                          # the dashboard page's DevTools connection
+            rest = b"..."                                    # (a message waiting: no select())
+
+            def __init__(self, url, timeout=None):
+                pass
+
+            def send(self, obj):
+                sent.append(obj["method"])
+
+            def recv(self):
+                raise OSError("closed")                      # (then: wait and connect again)
+        sd = types.SimpleNamespace(systemui=lambda: "ws://127.0.0.1:1/devtools/page/1", Ws=Page)
+        with mock.patch.object(pt, "scrcpy_running", return_value=True), mock.patch.object(pt, "publish"), \
+                mock.patch.object(pt, "log"), mock.patch.object(pt.time, "sleep", side_effect=Stop):
+            with self.assertRaises(Stop):
+                pt.serve(mock.Mock(), sd, {})
+        self.assertEqual(sent[:2], ["Runtime.enable", "Runtime.addBinding"])
+
+
 class Joystick(unittest.TestCase):
     def rot_x(self, deg):
         c, s = pt.math.cos(pt.math.radians(deg)), pt.math.sin(pt.math.radians(deg))

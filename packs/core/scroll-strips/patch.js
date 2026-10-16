@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 21;
+  const NAME = 'scroll-strips', VERSION = 22;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -105,7 +105,10 @@
     }
   };
   const onMove = (ev) => {
-    if (!drag) return;
+    // Only moves on the strip being held: a release the page never sees left the drag on, and
+    // moves elsewhere (another panel's, in its own place on the page) kept it scrolling, each one
+    // putting off the stop for 3 s more, until the next click.
+    if (!drag || !drag.el?.contains(ev.target)) return;
     stats.moves++;
     drag.lastMove = Date.now();
     const pos = drag.axis === 'y' ? ev.clientY : ev.clientX;

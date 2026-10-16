@@ -1817,6 +1817,11 @@ msgstr "¿Instalar Homebrew ahora?"
 
 # needs review
 #: lib/common.sh
+msgid "Not active yet: %s"
+msgstr "Aún no está activo: %s"
+
+# needs review
+#: lib/common.sh
 msgid ""
 "Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
 msgstr ""
@@ -1881,6 +1886,11 @@ msgstr "se restauró la configuración de KDE que cambió %s"
 #: lib/common.sh packs/core/charge-limit/install.sh
 msgid "sudo failed."
 msgstr "sudo falló."
+
+# needs review
+#: lib/common.sh
+msgid "the dashboard patch service did not answer"
+msgstr "el servicio de parches del menú principal no respondió"
 
 #: lib/common.sh
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
@@ -3385,6 +3395,16 @@ msgstr "Escuchando… (ejecuta otra vez para detener)"
 msgid "No speech detected"
 msgstr "No se detectó voz"
 
+# needs review
+#: packs/core/dictation/dictate
+msgid "Not typed: copied to the clipboard"
+msgstr "No se escribió: se copió al portapapeles"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "Paste the text instead (Ctrl+V)."
+msgstr "Pega el texto en su lugar (Ctrl+V)."
+
 #: packs/core/dictation/dictate
 msgid "Still transcribing…"
 msgstr "Todavía transcribiendo…"
@@ -3396,6 +3416,13 @@ msgstr "Transcribiendo…"
 #: packs/core/dictation/dictate
 msgid "Wait for the text before dictating again."
 msgstr "Espera el texto antes de volver a dictar."
+
+# needs review
+#: packs/core/dictation/dictate
+msgid ""
+"Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
+msgstr ""
+"La disposición de tu teclado no tiene tecla para %s. Pega el texto en su lugar (Ctrl+V)."
 
 #: packs/core/dictation/dictate.desktop
 msgid "Dictate (toggle)"

@@ -2,7 +2,8 @@
 Firefox's user.js block (install, the old marker, uninstall resetting prefs.js, status without a
 default profile) and NordVPN's status line; Shared clipboard's status with and without desktop
 mode, and from an older build; Mouse cursor fix not needed from gamescope 3.16.30; pinned
-downloads falling back to Frame Tweaks' copy."""
+downloads falling back to Frame Tweaks' copy; Arrow Pad's uninstall giving a pad it asked to quit
+the time to close."""
 import sys
 import hashlib
 import os
@@ -236,6 +237,37 @@ class PinnedDownload(Home):
         r, _ = self.fetch(b"something else", with_mirror=False)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("differs from the pinned file", r.stderr)
+
+
+
+class ArrowPadUninstall(Home):
+    """Uninstalling asks a running pad to quit (it lets go of its keys and SteamVR as it closes),
+    then stops what's still running: it looked at once, and stopped a pad in the middle of closing."""
+
+    def setUp(self):
+        super().setUp()
+        self.log = self.home / "calls.log"
+        stub(self.home / ".local/bin", "arrowpad", f'echo "arrowpad $*" >> "{self.log}"')
+        self.stub("pkill", f'echo "pkill $*" >> "{self.log}"')
+        self.stub("update-desktop-database", "exit 0")
+
+    def uninstall(self, closes_after):
+        """A pad that's still there for its first `closes_after` looks (pgrep), or never (None)."""
+        n = self.home / "looks"
+        self.stub("pgrep", f'echo x >> "{n}"; ' + ("exit 0" if closes_after is None else
+                                                  f'[ "$(wc -l < "{n}")" -le {closes_after} ]'))
+        r = self.run_script("arrowpad/uninstall.sh")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        return self.log.read_text()
+
+    def test_a_pad_that_quits_isnt_stopped(self):
+        log = self.uninstall(closes_after=5)                 # (half a second)
+        self.assertIn("arrowpad --quit --desktop", log)
+        self.assertNotIn("pkill", log)
+
+    def test_one_that_doesnt_is(self):
+        log = self.uninstall(closes_after=None)
+        self.assertIn("pkill -f ^", log)
 
 
 if __name__ == "__main__":

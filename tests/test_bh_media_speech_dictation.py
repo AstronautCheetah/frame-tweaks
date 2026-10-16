@@ -7,6 +7,7 @@ setting the README lists is in the example settings file."""
 import sys
 import os
 import re
+import shlex
 import subprocess
 import tempfile
 import time
@@ -16,8 +17,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import sandbox_env, stub  # noqa: E402
+import xkb  # noqa: E402  (lib/, put on sys.path by helpers)
 SPEECH = ROOT / "packs/core/speech"
 DICTATION = ROOT / "packs/core/dictation"
+
+
+def xkb_compiles():
+    try:
+        xkb.Keymap("fr")
+        return True
+    except OSError:
+        return False
 
 
 def pin(path, key):
@@ -137,6 +147,67 @@ class DictateAutoStop(Home):
         self.assertEqual(log.count("record "), 1, log)
         status = subprocess.run(["bash", str(script), "--status"], env=env, capture_output=True, text=True, timeout=30)
         self.assertEqual(status.stdout.strip(), "idle")
+
+
+class DictateTyping(Home):
+    """The text goes to the focused window as typed keys. ydotool type assumes a US keyboard: on
+    another layout (KDE's) letters and punctuation came out wrong (azerty: "a" typed "q"), so there
+    each character's keys come from that layout (lib/xkb.py) and go out as ydotool key events, and
+    text with a character the layout has no key for isn't typed at all: it's in the clipboard, as
+    a notification says. One dictation each: started, then stopped and transcribed (stand-ins
+    record, transcribe and type)."""
+
+    def dictate(self, text, kxkbrc=None):
+        run = self.tmp / "run"
+        src = (DICTATION / "dictate").read_text()
+        script = self.tmp / "dictate"
+        script.write_text(src.replace("RUN=/run/user/$(id -u)\n", f"RUN={run}\n"))     # (not the real one)
+        script.chmod(0o755)
+        bin_ = self.home / ".local/bin"           # first on dictate's PATH: nothing real records, types or notifies
+        self.stub(bin_, "pw-record", "exec sleep 30 >/dev/null 2>&1")      # (until stopped; not holding output open)
+        self.stub(bin_, "pw-play", "exit 0")
+        self.stub(bin_, "ffprobe", "echo 1.5")
+        self.stub(bin_, "ffmpeg", 'echo "[Parsed_volumedetect_0] max_volume: -12.0 dB" >&2')
+        self.stub(bin_, "whisper-cli", f"printf '%s\\n' {shlex.quote(text)}")
+        self.stub(bin_, "wl-copy", f'echo "copied $(cat)" >> {self.log}')
+        self.stub(bin_, "ydotool", f'echo "ydotool $*" >> {self.log}')
+        self.stub(bin_, "notify-send", f'echo "notify $*" >> {self.log}')
+        if kxkbrc:
+            (self.home / ".config").mkdir(parents=True, exist_ok=True)
+            (self.home / ".config/kxkbrc").write_text(kxkbrc)
+        env = sandbox_env(self.home)
+        for _ in ("start", "stop"):
+            r = subprocess.run(["bash", str(script)], env=env, capture_output=True, text=True, timeout=60)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            time.sleep(0.8)                       # (a second press within 0.7 s is ignored)
+        for _ in range(100):                      # (the stop runs the transcription in the background)
+            if "notify" in self.log.read_text().split("copied", 1)[-1]:
+                break
+            time.sleep(0.1)
+        return [line for line in self.log.read_text().splitlines() if line.split()[0] in ("ydotool", "notify", "copied")]
+
+    def test_us_keyboard_types_as_before(self):
+        log = self.dictate("Hello, world.")
+        self.assertIn("ydotool type --key-delay 2 -- Hello, world. ", log)
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Hello, world. ")
+        log = self.dictate("Hi", "[Layout]\nLayoutList=us\nUse=true\n")
+        self.assertIn("ydotool type --key-delay 2 -- Hi", log)
+
+    @unittest.skipUnless(xkb_compiles(), "needs libxkbcommon and XKB's layouts")
+    def test_another_layout_types_its_keys(self):
+        log = self.dictate("Qa?", "[Layout]\nLayoutList=fr\nUse=true\n")
+        self.assertIn("copied Qa? ", log)                       # (a space after a sentence)
+        self.assertIn("ydotool key --key-delay 11 42:1 30:1 30:0 42:0 16:1 16:0 42:1 50:1 50:0 42:0 57:1 57:0", log)
+        self.assertFalse([line for line in log if line.startswith("ydotool type")])
+        self.assertTrue(log[-1].startswith("notify -a Dictation -t 1500 Copied to clipboard"))
+
+    @unittest.skipUnless(xkb_compiles(), "needs libxkbcommon and XKB's layouts")
+    def test_a_character_the_layout_cant_type(self):
+        log = self.dictate("Hola 漢字", "[Layout]\nLayoutList=latam\n")
+        self.assertIn("copied Hola 漢字", log)
+        self.assertFalse([line for line in log if line.startswith("ydotool")])        # nothing typed at all
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Not typed: copied to the clipboard "
+                                  "Your keyboard layout has no key for 漢字. Paste the text instead (Ctrl+V).")
 
 
 class DictateSettings(unittest.TestCase):
