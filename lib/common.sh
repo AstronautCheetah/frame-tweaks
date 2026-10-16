@@ -283,13 +283,17 @@ remove_icon() {
 }
 
 install_desktop() {
-    local name; name=$(basename "$1")
-    # (with its name and comment in each translated language: lib/i18n.py desktop)
+    local name entry; name=$(basename "$1")
+    # (with its name and comment in each translated language: lib/i18n.py desktop. Made first, then
+    # written whole, in English if translating it fails: piped straight in, a failure there left
+    # the entry empty, and the tweak's install stopped.)
+    entry=$(sed "s|@BIN@|$BIN|g" "$1" | python3 "$REPO_DIR/lib/i18n.py" desktop) && [ -n "$entry" ] ||
+        entry=$(sed "s|@BIN@|$BIN|g" "$1")
     if [ -f "$LAUNCHER_ORIGINALS/$name" ] && [ -x "$BIN/wallet-launcher" ]; then
-        sed "s|@BIN@|$BIN|g" "$1" | python3 "$REPO_DIR/lib/i18n.py" desktop | write_file "$LAUNCHER_ORIGINALS/$name"
+        printf '%s\n' "$entry" | write_file "$LAUNCHER_ORIGINALS/$name"
         "$BIN/wallet-launcher" --reapply "${name%.desktop}" >/dev/null
     else
-        sed "s|@BIN@|$BIN|g" "$1" | python3 "$REPO_DIR/lib/i18n.py" desktop | write_file "$APPS/$name"
+        printf '%s\n' "$entry" | write_file "$APPS/$name"
     fi
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS"
