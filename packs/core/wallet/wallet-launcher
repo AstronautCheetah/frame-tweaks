@@ -163,6 +163,22 @@ def keep_yours(app_id, built, now, original, electron, shared, gate):
 KNOWN_ELECTRON = {"com.anthropic.Claude"}
 
 
+def build(original, app_id, electron, shared, gate):
+    """The wrapper for app_id: its original entry (text), with these flags."""
+    out = []
+    for line in original.splitlines():
+        if line.startswith("Exec="):
+            line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate)
+        elif line.startswith("DBusActivatable=") and (shared or gate):
+            line = "DBusActivatable=false"   # otherwise the desktop starts it over D-Bus, not Exec=
+        elif line.startswith(MARK + "="):
+            continue
+        out.append(line)
+        if line == "[Desktop Entry]":
+            out.append(f"{MARK}=true")
+    return "\n".join(out) + "\n"
+
+
 def add(app_id, electron, shared=True, gate=None):
     """gate: True/False to set it, None to keep what the current entry has (re-wrapping after an
     app update, or another tweak adding its app, must not silently drop the password gate)."""
@@ -178,21 +194,10 @@ def add(app_id, electron, shared=True, gate=None):
     if src.parent == APPS and src.name == f"{app_id}.desktop":
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         (BACKUP_DIR / src.name).write_text("\n".join(lines) + "\n")
-    out = []
-    for line in lines:
-        if line.startswith("Exec="):
-            try:
-                line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate)
-            except NotWrappable as e:
-                sys.exit(str(e))
-        elif line.startswith("DBusActivatable=") and (shared or gate):
-            line = "DBusActivatable=false"   # otherwise the desktop starts it over D-Bus, not Exec=
-        elif line.startswith(MARK + "="):
-            continue
-        out.append(line)
-        if line == "[Desktop Entry]":
-            out.append(f"{MARK}=true")
-    built = "\n".join(out) + "\n"
+    try:
+        built = build(original, app_id, electron, shared, gate)
+    except NotWrappable as e:
+        sys.exit(str(e))
     APPS.mkdir(parents=True, exist_ok=True)
     current.write_text(keep_yours(app_id, built, now, original, electron, shared, gate))
     BUILT_DIR.mkdir(parents=True, exist_ok=True)
@@ -217,6 +222,25 @@ def migrate_backups():
             else:
                 f.unlink()
         OLD_BACKUP_DIR.rmdir()
+
+
+def record_built():
+    """The copy of a wrapper made before launcher-built/ was kept, if it's still as add() builds
+    it: what changes in it from then on is yours. (One that isn't can't be told from an app's
+    update: it goes on as before, until it's built again.)"""
+    for f in APPS.glob("*.desktop"):
+        base = BUILT_DIR / f.name
+        try:
+            text = f.read_text()
+            if base.exists() or f"{MARK}=true" not in text:
+                continue
+            built = build(source_for(f.stem).read_text(), f.stem, f.stem in KNOWN_ELECTRON or STORE in text,
+                          WRAPPER in text, GATE in text)
+        except (OSError, ValueError, SystemExit):    # (an app gone, a command it can't read)
+            continue
+        if menuedits.keys(built) == menuedits.keys(text):
+            BUILT_DIR.mkdir(parents=True, exist_ok=True)
+            base.write_text(built)
 
 
 def remove(app_id):
@@ -262,6 +286,7 @@ def main():
                     help=_("rebuild the wrapper from the (updated) original, keeping its flags"))
     a = ap.parse_args()
     migrate_backups()
+    record_built()
     if a.list:
         for f in sorted(APPS.glob("*.desktop")):
             try:

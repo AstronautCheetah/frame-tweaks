@@ -244,6 +244,25 @@ class Launcher(Home):
         self.launcher("--remove", "org.notes")
         self.assertEqual(command(), "/usr/bin/flatpak run --branch=stable org.notes --dark @@u %U @@")
 
+    def test_a_wrapper_from_before_gets_its_copy_if_it_is_unchanged(self):
+        """Wrapped by an earlier version (no copy kept): the copy is made while the wrapper is
+        exactly as it would be built, so a rename from then on stays. One that differs can't be
+        told from an app's update: it gets none."""
+        entry(self.flat / "org.notes.desktop", "/usr/bin/flatpak run org.notes @@u %U @@")
+        entry(self.flat / "org.chat.desktop", "/usr/bin/flatpak run org.chat")
+        self.launcher("--gate", "org.notes", "org.chat")
+        for f in self.wl.BUILT_DIR.iterdir():
+            f.unlink()                                                # (as an earlier version left them)
+        chat = self.apps / "org.chat.desktop"
+        chat.write_text(chat.read_text().replace("Name=App", "Name=Chat"))
+        self.launcher("--list")
+        self.assertTrue((self.wl.BUILT_DIR / "org.notes.desktop").exists())
+        self.assertFalse((self.wl.BUILT_DIR / "org.chat.desktop").exists())
+        notes = self.apps / "org.notes.desktop"
+        notes.write_text(kde_saves(notes.read_text(), Name="My notes"))
+        self.launcher("--gate", "org.notes")
+        self.assertIn("Name=My notes", notes.read_text().splitlines())
+
     def test_environment_variables_you_give_it_go_after_the_gate(self):
         """KDE's menu editor writes them in front of the command (env VAR=… <the wrapper>): the gate
         still runs first, and a Flatpak keeps its way to the wallet."""
