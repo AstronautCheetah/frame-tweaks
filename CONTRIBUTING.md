@@ -94,7 +94,10 @@ those. A check whose tool isn't installed is skipped, with a note saying how to 
 - `manifests`: every manifest is valid and names its scripts (`python3 lib/sft.py mods check
   FOLDER`), dependencies resolve, and every pin is complete ("Pinned downloads").
 - `tests`: the unit tests, several at a time (`dev/run-tests.py`: a process per test file, a
-  slow file in parts, the slowest first, by the times it keeps in `.cache/`). A test class that
+  slow file in parts, the slowest first, by the times it keeps in `.cache/`). On a Frame, VR comes
+  first: every check runs at the lowest priority, and while the headset is worn the tests run one
+  at a time, on the core VR needs least (taken off, every core again; `FRAME_TWEAKS_CHECKS=vr` or
+  `all` decides instead). On every core, they made VR stutter. A test class that
   watches the whole machine (new files in `/tmp`, say) sets `run_alone = True` and runs after
   the rest, by itself; a test that waits for something should wait until it happens, not a
   fixed time, as other tests share the machine. One file alone: `python3 -m unittest

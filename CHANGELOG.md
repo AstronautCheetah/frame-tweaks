@@ -237,6 +237,10 @@
 - **Faster checks:** the unit tests run several at a time (`dev/run-tests.py`: a process per
   test file, a slow file in parts, the slowest first), about 45 s instead of 150 on a Frame, and
   `dev/check.sh` leaves out the tweak check when nothing it installs changed since origin/main.
+  On a Frame, VR comes first: the checks run at the lowest priority, and while the headset is
+  worn, one test at a time on the core VR needs least (on every core, VR stuttered enough to
+  make its wearer sick); `FRAME_TWEAKS_CHECKS=vr` or `all` decides instead. CI runs the unit
+  tests and the other checks as two jobs side by side.
   Tests that waited a fixed time for something (a window starting its checks, a timer, a program
   writing its first file) wait until it happens: on a busy machine they failed. A test class
   that watches the whole machine sets `run_alone = True` and runs by itself.
