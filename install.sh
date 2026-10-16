@@ -43,6 +43,18 @@
 # partition, so OS updates don't undo it. Every installer is safe to re-run.
 set -uo pipefail
 cd "$(dirname "$(readlink -f "$0")")" || exit 1
+# In a terminal, the commands that take a while run under lib/splash.py: Frame Tweaks' logo,
+# animated, in the top half and the output below (all of it printed again at the end). Once per
+# terminal: it marks the one it runs the command in (FRAME_TWEAKS_SPLASH_TTY). FRAME_TWEAKS_SPLASH=off
+# turns it off, =still keeps the picture still.
+case ${1:-} in
+    install|uninstall|remove|reinstall|update|uninstall-self)
+        # (the terminal is read from /proc: in $(tty <&1), fd 1 is the pipe that collects the answer)
+        if [[ -t 1 && ${FRAME_TWEAKS_SPLASH:-} != off && ${FRAME_TWEAKS_SPLASH_TTY:-} != "$(readlink "/proc/$$/fd/1")" ]] &&
+           command -v python3 >/dev/null; then
+            exec python3 lib/splash.py -- "$PWD/install.sh" "$@"
+        fi ;;
+esac
 VERSION=$(cat VERSION 2>/dev/null || echo dev)
 # shellcheck source=lib/common.sh
 source lib/common.sh
@@ -631,7 +643,8 @@ setup_window() {
     mkdir -p "$LOGS"
     echo "$(date '+%F %T') setting up PyQt6 for the full window ($FT_BUILD)" >> "$WINDOW_LOG"
     if [ -t 1 ]; then
-        cmd_setup_window
+        # (in this terminal, under the splash: the one-liner's first minute or two)
+        python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window
     elif command -v konsole >/dev/null; then
         konsole --separate -e "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
     else

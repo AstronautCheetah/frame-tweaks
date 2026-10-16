@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **A new look for installs in a terminal:** Frame Tweaks' logo, its two sliders gliding, and its
+  name in pixel letters, first as a short splash (any key skips it), then in the top half of the
+  terminal while the install, removal or update runs in the bottom half, with a bar saying what's
+  being done and for how long. When it's over, the terminal is as it was, with the whole output in
+  it (and its scrollback) under a small banner. Questions, sudo's password prompt, progress bars
+  and Ctrl+C work as before. It's drawn in "▀" characters, two pixels to a cell, and nothing
+  sweeps across the whole screen, which is uncomfortable in the headset. `FRAME_TWEAKS_SPLASH=off`
+  turns it off and `=still` stops the motion; KDE's animation speed set to instant stops it too.
+  See it with `python3 lib/splash.py --demo`.
+
 ## 0.6.11 (2026-10-16)
 
 ### Added
