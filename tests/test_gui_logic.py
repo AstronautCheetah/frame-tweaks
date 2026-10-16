@@ -2,6 +2,7 @@
 import contextlib
 import io
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -451,6 +452,70 @@ class PacksPage(unittest.TestCase):
                 window.reload_tweaks.assert_called()
         gui.sft.load(refresh=True)
 
+
+
+class HandOver(unittest.TestCase):
+    """A second launch hands over to the open window, which answers with its session: open in
+    the other one, a notification says where; no answer (stuck), it's stopped and this launch
+    opens a window. (A plain socket server in a thread stands in for the open window.)"""
+    def serve(self, answer):
+        import socket
+        import threading
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        path = os.path.join(d, "server")
+        srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        srv.bind(path)
+        srv.listen(1)
+        self.addCleanup(srv.close)
+        self.got = []
+
+        def run():
+            conn, _ = srv.accept()
+            if answer is not None:
+                conn.sendall(answer.encode())
+            self.got.append(conn.recv(100).decode())
+            time.sleep(0.5)
+            conn.close()
+        self.server = threading.Thread(target=run, daemon=True)
+        self.server.start()
+        return path
+
+    def hand_over(self, answer, session_env):
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        path = self.serve(answer)
+        with mock.patch.object(gui, "SERVER", path), mock.patch.object(gui, "ANSWER_MS", 800), \
+                mock.patch.object(gui, "notify") as notify, mock.patch.object(gui, "stop_stuck_windows") as stop, \
+                mock.patch.dict(os.environ, session_env, clear=False):
+            done = gui.hand_over("clipboard")
+        self.server.join(5)                                    # (what it was sent: once it's read it)
+        return done, notify, stop
+
+    def test_open_in_the_other_session(self):
+        done, notify, stop = self.hand_over("VR", {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0"})
+        self.assertTrue(done)
+        self.assertEqual(notify.call_args[0][0], "Frame Tweaks is already open in VR")
+        stop.assert_not_called()
+        self.assertEqual(self.got, ["show clipboard"])
+
+    def test_open_in_this_session(self):
+        done, notify, stop = self.hand_over("desktop mode", {"XDG_CURRENT_DESKTOP": "KDE", "WAYLAND_DISPLAY": "wayland-0"})
+        self.assertTrue(done)
+        notify.assert_not_called()
+
+    def test_stuck(self):
+        done, notify, stop = self.hand_over(None, {"XDG_CURRENT_DESKTOP": "KDE"})
+        self.assertFalse(done)                                  # (this launch opens a window)
+        stop.assert_called_once()
+
+    def test_none_open(self):
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        with mock.patch.object(gui, "SERVER", os.path.join(tempfile.gettempdir(), "no-such-ft-server")), \
+                mock.patch.object(gui, "stop_stuck_windows") as stop:
+            self.assertFalse(gui.hand_over())
+        stop.assert_not_called()
 
 
 class PackInventory(unittest.TestCase):

@@ -1742,6 +1742,69 @@ class Window(QWidget):
 SERVER = f"frame-tweaks-gui-{os.getuid()}"
 
 
+ANSWER_MS = 3000      # (how long an open window has to answer a second launch before it's taken as stuck)
+
+
+def hand_over(tweak=""):
+    """One window: a second launch asks the open one to come forward (on that tweak) and exits
+    (True). The open one answers with its session: open in the other one (VR or desktop mode),
+    that's where it came forward, so a notification says so. No answer: it's stuck, and is
+    stopped so this launch opens a window instead of nothing (False, as with none open)."""
+    probe = QLocalSocket()
+    probe.connectToServer(SERVER)
+    if not probe.waitForConnected(300):
+        return False
+    probe.write(f"show {tweak}".strip().encode())
+    probe.waitForBytesWritten(300)
+    # (the answer can be in before the wait: the open window writes it as soon as it connects)
+    if probe.bytesAvailable() or probe.waitForReadyRead(ANSWER_MS) or probe.bytesAvailable():
+        there, here = bytes(probe.readAll()).decode(errors="replace").strip(), browser.session_of(os.environ)
+        if there and here and there != here:
+            notify(_("Frame Tweaks is already open in {session}").format(session=_(there)),
+                   _("It came to the front there. Close it there to open it here."))
+        return True
+    probe.abort()
+    stop_stuck_windows()
+    return False
+
+
+def notify(title, body):
+    """A notification, for a launch that opens no window of its own."""
+    try:
+        subprocess.Popen(["notify-send", "-a", "Frame Tweaks", title, body], start_new_session=True,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except OSError:
+        pass
+
+
+def stop_stuck_windows():
+    """The open window didn't answer a second launch: it's stuck (or one from before an update
+    that doesn't answer). Stop it, so the new one opens instead of nothing; noted in the log."""
+    import signal
+    try:
+        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", "gui/frame-tweaks-gui.py"],
+                             capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return
+    pids = [int(p) for p in out.split() if p.isdigit() and int(p) != os.getpid()]
+    for sig, wait in ((signal.SIGTERM, 2), (signal.SIGKILL, 0)):
+        for pid in pids:
+            try:
+                os.kill(pid, sig)
+            except OSError:
+                pass
+        deadline = time.monotonic() + wait
+        while wait and time.monotonic() < deadline and any(Path(f"/proc/{p}").exists() for p in pids):
+            time.sleep(0.1)
+    try:
+        log = Path.home() / ".local/state/frame-tweaks/logs/window.log"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("a") as f:
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + f"an open window didn't answer: stopped it ({pids})\n")
+    except OSError:
+        pass
+
+
 def watch_for_hangs(log_dir):
     """If the window stops responding (its event loop stalls 10 s), write where every thread is
     to log_dir/gui-hang-<time>.log: the next freeze leaves a clue instead of nothing."""
@@ -1776,12 +1839,7 @@ def main():
     # --show ID: open on that tweak's page (lib/needs.py: a feature that needs it, not installed).
     args = sys.argv[1:]
     tweak = args[args.index("--show") + 1] if "--show" in args[:-1] else ""
-    # One window: a second launch asks the running one to come forward (on that tweak) and exits.
-    probe = QLocalSocket()
-    probe.connectToServer(SERVER)
-    if probe.waitForConnected(300):
-        probe.write(f"show {tweak}".strip().encode())
-        probe.waitForBytesWritten(300)
+    if hand_over(tweak):
         return
     QLocalServer.removeServer(SERVER)
     server = QLocalServer()
@@ -1791,6 +1849,9 @@ def main():
 
     def come_forward():
         conn = server.nextPendingConnection()
+        if conn is not None:          # (the session it's open in: see above)
+            conn.write((browser.session_of(os.environ) or "").encode())
+            conn.flush()
         w.showNormal()
         w.raise_()
         w.activateWindow()

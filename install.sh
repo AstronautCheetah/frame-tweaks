@@ -48,6 +48,7 @@ FT_BUILD=$(ft_version)        # what to show: VERSION plus the commit, between r
 set +e     # common.sh turns on -e for tweak scripts; this script checks results itself
 STATE="$HOME/.local/state/frame-tweaks"
 LOGS="$STATE/logs"
+WINDOW_LOG="$LOGS/window.log"   # setting up and opening the full window (./install.sh report)
 migrate_legacy_dirs
 # The tweaks moved into packs/official/ (0.6): an update leaves their old folders behind
 # holding only Python's __pycache__ (git doesn't track it).
@@ -528,21 +529,63 @@ cmd_gui() {               # [--show ID]: open on that tweak's page
     # with Arrow Pad, Screen snip and the NordVPN tray, if they're installed). Offer to set it up;
     # otherwise fall back to kdialog's plain checklist. (Naming those tweaks in the question read
     # as if it installed them: it doesn't.)
-    local qt="$HOME/.local/share/arrowpad/venv"
+    local qt="$QT_VENV"
     if ! "$qt/bin/python" -c 'import PyQt6' 2>/dev/null &&
        kdialog --title "Frame Tweaks" --yesno "$(t "Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\n\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages.")"; then
-        ensure_qt_venv ||
-            kdialog --sorry "$(t "Couldn't install PyQt6; using the simple checklist.")"
+        setup_window ||
+            kdialog --sorry "$(t "Couldn't install PyQt6 (what happened: %s); using the simple checklist." "$WINDOW_LOG")"
     fi
     if "$qt/bin/python" -c 'import PyQt6' 2>/dev/null; then
-        # A copy of the interpreter under its own name, so SteamVR gives the window its own
-        # controller bindings (it keys them by program name; Arrow Pad also runs on Python).
-        local sft="$qt/bin/sft-python"
-        cp -u "$(readlink -f "$qt/bin/python")" "$sft" 2>/dev/null || true
-        if "$sft" -c 'import PyQt6' 2>/dev/null; then exec "$sft" gui/frame-tweaks-gui.py "$@"; fi
-        exec "$qt/bin/python" gui/frame-tweaks-gui.py "$@"
+        open_window "$@" && return 0
+        kdialog --sorry "$(t "The full window didn't open (what happened: %s); using the simple checklist." "$WINDOW_LOG")"
     fi
     cmd_kdialog_gui
+}
+
+# setup_window: PyQt6 for the full window, where you can see it happen: pip's progress in this
+# terminal, or (started from the app menu, with no terminal) in a Konsole window of its own. It
+# used to set up without a word for a minute or more, which looked like nothing happening; a
+# window closed then left it half done. pip's log goes to WINDOW_LOG either way.
+setup_window() {
+    mkdir -p "$LOGS"
+    echo "$(date '+%F %T') setting up PyQt6 for the full window ($FT_BUILD)" >> "$WINDOW_LOG"
+    if [ -t 1 ]; then
+        cmd_setup_window
+    elif command -v konsole >/dev/null; then
+        konsole --separate -e "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
+    else
+        notify-send -a "Frame Tweaks" "$(t 'Setting up the full installer window')" \
+            "$(t "About 280 MB, usually a minute or two: the window opens when it's done.")" 2>/dev/null
+        cmd_setup_window >> "$WINDOW_LOG" 2>&1
+    fi
+    "$QT_VENV/bin/python" -c 'import PyQt6' 2>/dev/null
+}
+cmd_setup_window() {              # (_setup-window: in the Konsole window setup_window opens)
+    if PIP_LOG="$WINDOW_LOG" FRAME_TWEAKS_PIP_PROGRESS=1 ensure_qt_venv "$(t "Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done.")"; then
+        echo "$(date '+%F %T') PyQt6 set up" >> "$WINDOW_LOG"
+        return 0
+    fi
+    echo "$(date '+%F %T') PyQt6 setup failed" >> "$WINDOW_LOG"
+    if [ -t 0 ]; then echo; read -rp "$(t "That didn't work (what happened: %s). Press Enter to close." "$WINDOW_LOG")" _; fi
+    return 1
+}
+
+# open_window: the full window (a second one hands over to the one already open, which says
+# where it is). One that ends with an error before it's shown (within 20 s) didn't open: the
+# caller says so and the simple checklist stands in, instead of nothing on screen.
+open_window() {
+    # A copy of the interpreter under its own name, so SteamVR gives the window its own
+    # controller bindings (it keys them by program name; Arrow Pad also runs on Python).
+    local py="$QT_VENV/bin/sft-python" start=$SECONDS rc
+    cp -u "$(readlink -f "$QT_VENV/bin/python")" "$py" 2>/dev/null || true
+    "$py" -c 'import PyQt6' 2>/dev/null || py="$QT_VENV/bin/python"
+    mkdir -p "$LOGS"
+    echo "$(date '+%F %T') opening the window ($FT_BUILD)" >> "$WINDOW_LOG"
+    "$py" gui/frame-tweaks-gui.py "$@" 2> >(tee -a "$WINDOW_LOG" >&2)
+    rc=$?
+    [[ $rc -eq 0 ]] && return 0
+    echo "$(date '+%F %T') the window ended with $rc after $((SECONDS - start)) s" >> "$WINDOW_LOG"
+    [[ $((SECONDS - start)) -ge 20 ]]
 }
 
 cmd_kdialog_gui() {
@@ -687,6 +730,8 @@ cmd_debug_info() {
         tail -20 "$LOGS/links.log" 2>/dev/null || true
         echo; echo "## Arrow Pad's Unstick: what it found, last 20"
         tail -20 "$LOGS/unstick.log" 2>/dev/null || true
+        echo; echo "## the full window: setting it up and opening it, last 40"
+        tail -40 "$WINDOW_LOG" 2>/dev/null || true
     } | sed -E -e "s|$HOME|~|g" -e "s/\b$USER\b/<user>/g" -E -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \
              -e 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/<ip>/g' -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' \
              -e 's/\b([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}\b/<mac>/g' -e 's/\b([[:xdigit:]]{1,4}:){7}[[:xdigit:]]{1,4}\b|[[:xdigit:]]{0,4}(:[[:xdigit:]]{1,4})*::([[:xdigit:]]{1,4}:)*[[:xdigit:]]{0,4}/<ipv6>/g' \
@@ -721,6 +766,7 @@ case ${1:-} in
     status|check) shift; cmd_status "$@" ;;
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
     _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;
+    _setup-window) cmd_setup_window ;;
     hold|unhold) cmd_hold "$@" ;;
     channel)     shift; cmd_channel "$@" ;;
     debug-info)  cmd_debug_info ;;

@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Setting up the full installer window shows its progress:** PyQt6 (about 280 MB) downloaded
+  without a word for a minute or more, which looked like nothing happening, and started from the
+  app menu there was nothing on screen at all. Now its progress shows in the terminal, or, from
+  the app menu, in a terminal window of its own; the window opens when it's done.
+- **The installer never ends with nothing on screen:** if the full window can't open, it says so
+  and the simple checklist opens instead. What happened goes to a log that 🐞 Report a problem
+  includes.
+- **Opening Frame Tweaks when it's already open elsewhere:** open in the other session (VR or
+  desktop mode), a notification says so, since that's where it came to the front; a window that
+  doesn't answer (stuck) is closed, and a new one opens instead of nothing.
+
 ## 0.6.7 (2026-10-16)
 
 ### Fixed
