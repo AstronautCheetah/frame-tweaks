@@ -128,6 +128,7 @@ def narrate():
     class Quiet(QObject):
         """The narrator, silent: says it's reading part 2 of 3."""
         progress, finished = pyqtSignal(int, int), pyqtSignal()
+        paused = stopped = False
 
         def __init__(self, text, speed):
             super().__init__()

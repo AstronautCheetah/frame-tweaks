@@ -1,7 +1,8 @@
 """Screen snip's narration (frame-snip), offline: stand-ins for Piper and pw-play (nothing is
-spoken), a throwaway home. "Read it again" after the end, a new speed while paused, a paste whose
-clipboard owner doesn't answer, the ⚙ view following a new language, and an open VR panel (with a
-stand-in openvr) reading the next snip at the speed set under Narrate."""
+spoken), a throwaway home. "Read it again" after the end, a new speed while paused, Previous /
+Next (playing and paused, up to the first and last part), a paste whose clipboard owner doesn't
+answer, the ⚙ view following a new language, and an open VR panel (with a stand-in openvr)
+reading the next snip at the speed set under Narrate."""
 import json
 import os
 import socket
@@ -80,6 +81,87 @@ class Narration(unittest.TestCase):
 
     def played(self):
         return [l for l in self.log.read_text().splitlines() if l.startswith("play ")]
+
+    def slow_player(self):
+        """A pw-play that plays until it's stopped (so the narration stays on its part), and logs its
+        process id (exec: the sleep's)."""
+        stub_at(self.tmp / "stubs/pw-play", f'echo "play $1 $$" >> {self.log}; exec /bin/sleep 60')
+
+    def playing(self):
+        """[(part, process id)] for each pw-play started, in order (slow_player)."""
+        return [(int(Path(wav).name.split("-")[0]), int(pid)) for _, wav, pid in map(str.split, self.played())]
+
+    @staticmethod
+    def alive(pid):
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        return True
+
+    def processes(self, w):
+        """The narrator's QProcesses still around, once what was let go of is deleted."""
+        from PyQt6.QtCore import QCoreApplication, QEvent, QProcess
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return w.narrator.findChildren(QProcess)
+
+    def skips(self, w):
+        return w.previous_button.isEnabled(), w.next_button.isEnabled()
+
+    def test_previous_and_next_move_a_part_up_to_the_first_and_last(self):
+        self.slow_player()
+        w = self.window(THREE)
+        self.assertEqual(self.skips(w), (False, False))                  # (nothing to move through yet)
+        self.assertTrue(self.wait(lambda: self.playing()), w.state.text())
+        self.assertEqual(w.state.text(), "Reading aloud: part 1 of 3")
+        self.assertEqual(self.skips(w), (False, True))                   # Previous: none before the first
+        for button, part, skips in ((w.next_button, 1, (True, True)), (w.next_button, 2, (True, False)),
+                                    (w.previous_button, 1, (True, True)), (w.previous_button, 0, (False, True))):
+            before = self.playing()
+            button.click()
+            self.assertEqual(w.narrator.i, part)
+            self.assertTrue(self.wait(lambda: len(self.playing()) > len(before)), self.log.read_text())
+            self.assertEqual(self.playing()[-1][0], part)                # that part, from its start
+            self.assertFalse(self.alive(before[-1][1]), "the part before it is still playing")
+            self.assertEqual(w.state.text(), f"Reading aloud: part {part + 1} of 3")
+            self.assertEqual(self.skips(w), skips)
+            self.assertNotIn(before[-1][1], [p.processId() for p in self.processes(w)])
+        w.narrator.skip(-1)                                              # (Previous is greyed out here)
+        self.assertEqual(w.narrator.i, 0)
+        self.wait(lambda: False, 0.3)
+        self.assertEqual(len(self.playing()), 5)
+        self.assertTrue(self.alive(self.playing()[-1][1]))               # still reading the first part
+        w.stop_or_again()                                                # Stop: nothing to move through
+        self.assertEqual(self.skips(w), (False, False))
+        self.assertFalse(any(self.alive(pid) for _, pid in self.playing()))
+        self.assertEqual(self.processes(w), [])
+
+    def test_previous_and_next_while_paused_stay_paused_there(self):
+        self.slow_player()
+        w = self.window(THREE)
+        self.assertTrue(self.wait(lambda: self.playing() and 1 in w.narrator.wavs and not w.narrator.synth),
+                        w.state.text())                                  # (the next part prepared, as it plays)
+        w.pause_or_resume()                                              # Pause, mid-sentence
+        first = self.playing()[0][1]
+        w.next_button.click()
+        self.assertTrue(w.narrator.paused)
+        self.assertEqual(w.narrator.i, 1)
+        self.assertEqual(w.state.text(), "Paused: part 2 of 3")
+        self.assertFalse(self.alive(first), "the paused part's player is still there")
+        w.next_button.click()
+        self.assertEqual((w.narrator.i, self.skips(w)), (2, (True, False)))
+        self.assertEqual(w.state.text(), "Paused: part 3 of 3")
+        self.assertTrue(self.wait(lambda: 2 in w.narrator.wavs))          # prepared while paused (only
+        w.previous_button.click()                                        # the next one was, playing)
+        self.assertEqual((w.narrator.i, self.skips(w)), (1, (True, True)))
+        self.assertEqual(w.state.text(), "Paused: part 2 of 3")
+        self.wait(lambda: False, 0.3)
+        self.assertEqual(len(self.playing()), 1, "it read while paused")
+        w.pause_or_resume()                                              # Resume: from part 2's start
+        self.assertTrue(self.wait(lambda: len(self.playing()) == 2), self.log.read_text())
+        self.assertEqual(self.playing()[-1][0], 1)
+        self.assertFalse(w.narrator.paused)
+        self.assertEqual(w.state.text(), "Reading aloud: part 2 of 3")
 
     def test_read_it_again_after_the_end_reads_again(self):
         w = self.window(TWO)
