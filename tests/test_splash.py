@@ -18,6 +18,7 @@ import termios
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import ROOT, sandbox_env  # noqa: E402
@@ -128,6 +129,21 @@ class Output(unittest.TestCase):
         self.assertEqual(self.stage.step, "Setting up PyQt6")
 
 
+class Setting(unittest.TestCase):
+    """⚙ Preferences' choice (~/.config/frame-tweaks/splash), with FRAME_TWEAKS_SPLASH first."""
+
+    def test_the_choice_and_what_goes_first(self):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(splash, "SETTING", Path(d) / "splash"), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_SPLASH": ""}):
+            self.assertEqual(splash.setting(), "on")              # (nothing chosen)
+            splash.set_setting("still")
+            self.assertEqual(splash.setting(), "still")
+            splash.set_setting("off")
+            self.assertEqual(splash.setting(), "off")
+            os.environ["FRAME_TWEAKS_SPLASH"] = "on"
+            self.assertEqual(splash.setting(), "on")              # (the variable goes first)
+
+
 class Layout(unittest.TestCase):
     def test_the_picture_fits(self):
         for cols in (60, 72, 80, 100, 120, 160, 220):
@@ -231,6 +247,16 @@ class Running(unittest.TestCase):
     def test_off(self):
         rc, out = in_pty([sys.executable, str(SPLASH), "--", "sh", "-c", "echo plain"],
                          {**self.env, "FRAME_TWEAKS_SPLASH": "off"})
+        self.assertEqual(rc, 0)
+        self.assertNotIn(b"\x1b[?1049h", out)
+        self.assertIn(b"plain", out)
+
+    def test_chosen_off_in_preferences(self):
+        off = Path(self.env["HOME"]) / "splash"
+        off.write_text("off\n")
+        env = {k: v for k, v in self.env.items() if k != "FRAME_TWEAKS_SPLASH"}
+        rc, out = in_pty([sys.executable, str(SPLASH), "--", "sh", "-c", "echo plain"],
+                         {**env, "FRAME_TWEAKS_SPLASH_FILE": str(off)})
         self.assertEqual(rc, 0)
         self.assertNotIn(b"\x1b[?1049h", out)
         self.assertIn(b"plain", out)

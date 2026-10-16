@@ -1067,6 +1067,31 @@ class PreferencesPage(unittest.TestCase):
                 self.assertEqual(gui.sft.uninstall_settings(), "keep")
                 self.assertFalse(buttons["Remove its settings too"].isChecked())
 
+    def test_the_look_of_installs_in_a_terminal(self):
+        """⚙ Preferences → Installing in a terminal: the choice lands in the file lib/splash.py
+        reads, and Show me runs its demo in a terminal."""
+        from PyQt6.QtCore import QProcess
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        import splash
+        self.app = QApplication.instance() or QApplication([])
+        env = {k: v for k, v in os.environ.items() if k != "FRAME_TWEAKS_DRY_RUN"}
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(splash, "SETTING", Path(d) / "splash"), \
+                mock.patch.dict(os.environ, {**env, "FRAME_TWEAKS_SPLASH": ""}, clear=True):
+            page = gui.Preferences(mock.Mock())
+            buttons = {b.text(): b for b in page.findChildren(QPushButton)}
+            self.assertTrue(buttons["Animated"].isChecked())          # (the default)
+            buttons["Output only"].click()
+            self.assertEqual((Path(d) / "splash").read_text(), "off\n")
+            self.assertEqual(splash.setting(), "off")
+            self.assertFalse(buttons["Animated"].isChecked())
+            buttons["Still"].click()
+            self.assertEqual(splash.setting(), "still")
+            with mock.patch.object(QProcess, "startDetached") as start:
+                buttons["Show me"].click()
+            program, args = start.call_args.args[:2]
+            self.assertEqual(program, "konsole")
+            self.assertIn("lib/splash.py --demo", args[-1])
+
     def test_deleting_what_uninstalled_tweaks_left(self):
         """Only tweaks known not to be installed: one still being checked counts as installed."""
         from PyQt6.QtWidgets import QApplication, QPushButton
@@ -1133,7 +1158,8 @@ class PreferencesPage(unittest.TestCase):
         self.app = QApplication.instance() or QApplication([])
         page = gui.Preferences(mock.Mock())
         headings = [w.text() for w in page.findChildren(QLabel) if w.objectName() == "name"]
-        self.assertEqual(headings, ["Language", "This window", "Updates", "Uninstalling a tweak", "Uninstalling Frame Tweaks"])
+        self.assertEqual(headings, ["Language", "This window", "Updates", "Installing in a terminal",
+                                    "Uninstalling a tweak", "Uninstalling Frame Tweaks"])
         self.assertEqual(len([f for f in page.findChildren(QFrame) if f.objectName() == "separator"]), 1)
 
     def test_a_question_scrolls_into_view(self):

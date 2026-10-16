@@ -869,6 +869,11 @@ msgstr ""
 msgid "Also delete the settings"
 msgstr "Eliminar también la configuración"
 
+# needs review
+#: gui/prefs_page.py
+msgid "Animated"
+msgstr "Animada"
+
 #: gui/prefs_page.py
 msgid "Couldn't delete: {paths}"
 msgstr "No se pudo eliminar: {paths}"
@@ -930,11 +935,22 @@ msgstr "Pulsos hápticos en los botones de esta ventana (en RV)"
 msgid "Homebrew itself is never removed: other programs may live in it."
 msgstr "Homebrew nunca se elimina: puede haber otros programas en él."
 
+# needs review
+#: gui/prefs_page.py
+msgid "Installing in a terminal"
+msgstr "Instalar en una terminal"
+
 #: gui/prefs_page.py
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
 msgstr ""
 "Su carpeta ({folder}) también se elimina, a menos que contenga trabajo tuyo (cambios, tus propios paquetes); esta ventana se cierra y una terminal muestra cada paso."
+
+# needs review
+#: gui/prefs_page.py
+msgid ""
+"KDE's animation speed set to instant (System Settings) keeps it still too."
+msgstr "La velocidad de las animaciones de KDE en instantánea (Preferencias del sistema) también la deja quieta."
 
 #: gui/prefs_page.py
 msgid "Keep its settings"
@@ -960,9 +976,19 @@ msgstr "Los ajustes desinstalados no dejaron configuración."
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr "Desactivado: solo cuando presionas ⟳ Buscar actualizaciones."
 
+# needs review
+#: gui/prefs_page.py
+msgid "Output only"
+msgstr "Solo la salida"
+
 #: gui/prefs_page.py
 msgid "Preferences"
 msgstr "Preferencias"
+
+# needs review
+#: gui/prefs_page.py
+msgid "Press any key to close"
+msgstr "Presiona cualquier tecla para cerrar"
 
 #: gui/prefs_page.py
 msgid "Remove its settings too"
@@ -991,8 +1017,18 @@ msgstr "La configuración se conserva."
 
 # needs review
 #: gui/prefs_page.py
+msgid "Show me"
+msgstr "Muéstrame"
+
+# needs review
+#: gui/prefs_page.py
 msgid "Stay on it"
 msgstr "Quedarme en ella"
+
+# needs review
+#: gui/prefs_page.py
+msgid "Still"
+msgstr "Quieta"
 
 # needs review
 #: gui/prefs_page.py
@@ -1067,6 +1103,12 @@ msgid ""
 "When you uninstall a tweak, its settings can stay, so it's set up as before if you install it again, or be removed along with it."
 msgstr ""
 "Cuando desinstalas un ajuste, su configuración puede quedarse, para que quede como antes si lo vuelves a instalar, o eliminarse junto con él."
+
+# needs review
+#: gui/prefs_page.py
+msgid ""
+"While an install, removal or update runs in a terminal, as this window's do: Frame Tweaks' logo above the output, animated or still, or the output alone."
+msgstr "Mientras una instalación, eliminación o actualización se ejecuta en una terminal, como las de esta ventana: el logo de Frame Tweaks sobre la salida, animado o quieto, o solo la salida."
 
 # needs review
 #: gui/prefs_page.py
@@ -1433,10 +1475,8 @@ msgstr "--to necesita una versión, p. ej. v0.3.1"
 
 # needs review
 #: install.sh
-msgid ""
-"About 280 MB, usually a minute or two: the window opens when it's done."
-msgstr ""
-"Unos 280 MB, normalmente uno o dos minutos: la ventana se abre cuando termina."
+msgid "About 280 MB to download: the window opens when it's done."
+msgstr "Unos 280 MB para descargar: la ventana se abre cuando termina."
 
 #: install.sh
 msgid "Added 'Frame Tweaks' to the app menu."
@@ -1541,6 +1581,12 @@ msgid ""
 msgstr ""
 "No se seleccionó nada, así que no se quitará nada. Para quitar todo, usa: %s"
 
+# needs review
+#: install.sh
+msgid ""
+"PyQt6, the toolkit it's drawn with: about 280 MB to download. The window opens when this is done."
+msgstr "PyQt6, el kit de herramientas con el que se dibuja: unos 280 MB para descargar. La ventana se abre cuando esto termina."
+
 #: install.sh
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr "Léelo antes de compartirlo; adjúntalo a un informe de error: %s"
@@ -1560,10 +1606,8 @@ msgstr "Configurando la ventana completa del instalador"
 
 # needs review
 #: install.sh
-msgid ""
-"Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done."
-msgstr ""
-"Configurando la ventana completa del instalador: PyQt6, el kit con el que se dibuja (unos 280 MB, normalmente uno o dos minutos). Se abre cuando esto termine."
+msgid "Setting up the installer window"
+msgstr "Preparando la ventana del instalador"
 
 #: install.sh
 msgid ""
@@ -1764,6 +1808,12 @@ msgstr ""
 msgid "desktop mode"
 msgstr "modo escritorio"
 
+# needs review
+#: lib/common.sh
+msgid ""
+"About 280 MB to download, shared by the installer window and the tweaks that use it."
+msgstr "Unos 280 MB para descargar, compartidos por la ventana del instalador y los ajustes que lo usan."
+
 #: lib/common.sh
 msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
@@ -1815,10 +1865,8 @@ msgstr "Aún no está activo: %s"
 
 # needs review
 #: lib/common.sh
-msgid ""
-"Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
-msgstr ""
-"Configurando PyQt6, un kit de ventanas (unos 280 MB, compartido por la ventana del instalador y los ajustes que lo usan)"
+msgid "Setting up PyQt6, a window toolkit"
+msgstr "Preparando PyQt6, un kit de herramientas para ventanas"
 
 #: lib/common.sh
 msgid ""
@@ -6170,3 +6218,21 @@ msgstr "Instalador de ajustes"
 #~ "Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
 #~ msgstr ""
 #~ "¿Configurar la ventana completa del instalador? Necesita PyQt6, el kit con el que se dibuja (unos 280 MB, en tu carpeta personal). No se instala nada más: eliges los ajustes en la ventana.\\n\\nNo = usar la lista simple: instala y quita los mismos ajustes, sin las páginas de detalles, estado y configuración."
+
+#~ # needs review
+#~ msgid ""
+#~ "About 280 MB, usually a minute or two: the window opens when it's done."
+#~ msgstr ""
+#~ "Unos 280 MB, normalmente uno o dos minutos: la ventana se abre cuando termina."
+
+#~ # needs review
+#~ msgid ""
+#~ "Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done."
+#~ msgstr ""
+#~ "Configurando la ventana completa del instalador: PyQt6, el kit con el que se dibuja (unos 280 MB, normalmente uno o dos minutos). Se abre cuando esto termine."
+
+#~ # needs review
+#~ msgid ""
+#~ "Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
+#~ msgstr ""
+#~ "Configurando PyQt6, un kit de ventanas (unos 280 MB, compartido por la ventana del instalador y los ajustes que lo usan)"

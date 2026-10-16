@@ -326,13 +326,15 @@ pip_pinned() {
 
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
-# ensure_qt_venv [MESSAGE]: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip, the
-# NordVPN tray and the installer window), saying MESSAGE (or what it is) as it starts; fails if it
-# couldn't be installed. (QtWidgets, not just PyQt6: a setup cut short can leave PyQt6 there
-# without the parts the window needs.)
+# ensure_qt_venv [TITLE [DETAILS]]: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip,
+# the NordVPN tray and the installer window), saying what it is as it starts; fails if it couldn't
+# be installed. TITLE is short (the splash's status bar shows it; DETAILS go on the next line), and
+# says nothing of how long it takes: that's the user's Internet connection. (QtWidgets, not just
+# PyQt6: a setup cut short can leave PyQt6 there without the parts the window needs.)
 ensure_qt_venv() {
     "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null && return 0
-    say "${1:-$(t 'Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)')}"
+    say "${1:-$(t 'Setting up PyQt6, a window toolkit')}"
+    echo "    ${2:-$(t 'About 280 MB to download, shared by the installer window and the tweaks that use it.')}"
     python3 -m venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
 }
 

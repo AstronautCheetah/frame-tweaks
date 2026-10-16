@@ -20,11 +20,13 @@ command that switches to the alternate screen (a pager, an editor) gets the whol
 it switches back. Konsole keeps no scrollback for a part of the screen scrolling on its own, and
 the splash draws on the alternate screen anyway, so the output is printed again at the end.
 
-It steps aside (the command runs as it would have) without a terminal to draw on, in one
-smaller than 60×20, with TERM=dumb or linux, outside UTF-8, with FRAME_TWEAKS_SPLASH=off, and if
-anything goes wrong drawing it (the output so far is printed and the command goes on). KDE's
-animation speed set to instant (System Settings), or FRAME_TWEAKS_SPLASH=still, keeps the
-picture still (and skips the splash). Any key skips the splash. The command finds FRAME_TWEAKS_SPLASH_TTY set to its terminal, so ./install.sh run in it
+⚙ Preferences → Installing in a terminal chooses: animated (the default), still (no splash, no
+motion) or plain output (~/.config/frame-tweaks/splash: on, still or off; FRAME_TWEAKS_SPLASH,
+with the same values, goes first). KDE's animation speed set to instant (System Settings) keeps
+it still too. It steps aside (the command runs as it would have) when set off, without a
+terminal to draw on, in one smaller than 60×20, with TERM=dumb or linux, outside UTF-8, and if
+anything goes wrong drawing it (the output so far is printed and the command goes on). Any key
+skips the splash. The command finds FRAME_TWEAKS_SPLASH_TTY set to its terminal, so ./install.sh run in it
 doesn't start another one."""
 import fcntl
 import locale
@@ -821,7 +823,7 @@ class Stage:
 # ---- running the command ----------------------------------------------------------------------
 
 def wanted(out):
-    if os.environ.get("FRAME_TWEAKS_SPLASH", "").lower() in ("off", "0", "no", "false"):
+    if setting() == "off":
         return False
     if not os.isatty(out) or os.environ.get("TERM", "") in ("", "dumb", "linux"):
         return False
@@ -829,6 +831,25 @@ def wanted(out):
         return False
     cols, rows = term_size(out)
     return cols >= 60 and rows >= 20
+
+
+SETTING = Path(os.environ.get("FRAME_TWEAKS_SPLASH_FILE") or Path.home() / ".config/frame-tweaks/splash")
+
+
+def setting():
+    """"on", "still" or "off": FRAME_TWEAKS_SPLASH, else ⚙ Preferences' choice, else on."""
+    v = os.environ.get("FRAME_TWEAKS_SPLASH", "").strip().lower()
+    if not v:
+        try:
+            v = SETTING.read_text().strip().lower()
+        except OSError:
+            v = ""
+    return "off" if v in ("off", "0", "no", "false") else "still" if v == "still" else "on"
+
+
+def set_setting(value):
+    SETTING.parent.mkdir(parents=True, exist_ok=True)
+    SETTING.write_text((value if value in ("still", "off") else "on") + "\n")
 
 
 def keyboard(out):
@@ -863,7 +884,7 @@ def run(cmd):
     except (OSError, termios.error):
         plain(cmd)
     cols, rows = term_size(out)
-    still = os.environ.get("FRAME_TWEAKS_SPLASH", "").lower() == "still" or kde_still()
+    still = setting() == "still" or kde_still()
     master, slave = os.openpty()
     termios.tcsetattr(slave, termios.TCSANOW, saved)
     stage = Stage(1, master, cols, rows, still)

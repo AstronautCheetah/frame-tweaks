@@ -45,12 +45,13 @@ set -uo pipefail
 cd "$(dirname "$(readlink -f "$0")")" || exit 1
 # In a terminal, the commands that take a while run under lib/splash.py: Frame Tweaks' logo,
 # animated, in the top half and the output below (all of it printed again at the end). Once per
-# terminal: it marks the one it runs the command in (FRAME_TWEAKS_SPLASH_TTY). FRAME_TWEAKS_SPLASH=off
-# turns it off, =still keeps the picture still.
+# terminal: it marks the one it runs the command in (FRAME_TWEAKS_SPLASH_TTY). ⚙ Preferences
+# (~/.config/frame-tweaks/splash) or FRAME_TWEAKS_SPLASH: off turns it off, still keeps it still.
 case ${1:-} in
     install|uninstall|remove|reinstall|update|uninstall-self)
         # (the terminal is read from /proc: in $(tty <&1), fd 1 is the pipe that collects the answer)
-        if [[ -t 1 && ${FRAME_TWEAKS_SPLASH:-} != off && ${FRAME_TWEAKS_SPLASH_TTY:-} != "$(readlink "/proc/$$/fd/1")" ]] &&
+        if [[ -t 1 && ${FRAME_TWEAKS_SPLASH:-$(cat "$HOME/.config/frame-tweaks/splash" 2>/dev/null)} != off &&
+              ${FRAME_TWEAKS_SPLASH_TTY:-} != "$(readlink "/proc/$$/fd/1")" ]] &&
            command -v python3 >/dev/null; then
             exec python3 lib/splash.py -- "$PWD/install.sh" "$@"
         fi ;;
@@ -649,13 +650,14 @@ setup_window() {
         konsole --separate -e python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
     else
         notify-send -a "Frame Tweaks" "$(t 'Setting up the full installer window')" \
-            "$(t "About 280 MB, usually a minute or two: the window opens when it's done.")" 2>/dev/null
+            "$(t "About 280 MB to download: the window opens when it's done.")" 2>/dev/null
         cmd_setup_window >> "$WINDOW_LOG" 2>&1
     fi
     "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null
 }
 cmd_setup_window() {              # (_setup-window: in the Konsole window setup_window opens)
-    if PIP_LOG="$WINDOW_LOG" FRAME_TWEAKS_PIP_PROGRESS=1 ensure_qt_venv "$(t "Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done.")"; then
+    if PIP_LOG="$WINDOW_LOG" FRAME_TWEAKS_PIP_PROGRESS=1 ensure_qt_venv "$(t 'Setting up the installer window')" \
+           "$(t "PyQt6, the toolkit it's drawn with: about 280 MB to download. The window opens when this is done.")"; then
         echo "$(date '+%F %T') PyQt6 set up" >> "$WINDOW_LOG"
         return 0
     fi

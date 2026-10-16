@@ -57,8 +57,8 @@ curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/
 
 This downloads the newest release into `~/frame-tweaks`, adds **Frame Tweaks** to the app menu
 (on the desktop and in Steam's VR "+" menu) and opens the installer window. The first time, it
-sets up what the window is drawn with (PyQt6, about 280 MB, usually a minute or two: its progress
-shows in the terminal); if that fails, or the window can't open, you get a simpler checklist.
+sets up what the window is drawn with (PyQt6, about 280 MB to download: its progress shows in the
+terminal); if that fails, or the window can't open, you get a simpler checklist.
 Until you tick a tweak and press **Apply changes**, that's all it installs: the menu entry (with a
 small user service that keeps it in your keyboard's language) and the window's Python setup.
 
