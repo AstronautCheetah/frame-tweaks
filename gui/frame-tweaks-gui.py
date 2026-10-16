@@ -34,8 +34,8 @@ sys.path.insert(0, str(REPO / "lib"))
 os.environ.setdefault("FRAME_TWEAKS_LIB", str(REPO / "lib"))   # (packs' scripts source the helpers through it)
 sys.path.insert(0, str(REPO / "gui"))           # (its pages, e.g. wallet_page.py)
 import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
-from sft import (COLLAPSED, CONF, HIDDEN_CATS, component, components, current_release, read_set,  # noqa: E402
-                 release_channel, run_label, write_set)
+from sft import (COLLAPSED, HIDDEN_CATS, component, components, current_release, release_channel,  # noqa: E402
+                 run_label, write_set)
 import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import manifest  # noqa: E402
 import i18n  # noqa: E402

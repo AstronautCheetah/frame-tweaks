@@ -56,17 +56,17 @@ Say in your pull request what you tested, and on what; the maintainer tests the 
    dev/install-hooks.sh
    ```
 
-2. Install what the checks use: Python 3.12 or newer, ShellCheck, and PyQt6 for the installer
-   window's tests. On Ubuntu or Debian:
+2. Install what the checks use: Python 3.12 or newer, ShellCheck, Ruff, and PyQt6 for the
+   installer window's tests. On Ubuntu or Debian:
 
    ```sh
    sudo apt install shellcheck python3-venv xvfb libarchive-tools appstream desktop-file-utils
-   python3 -m venv .venv && .venv/bin/pip install -c lib/python-constraints.txt PyQt6 pyyaml
+   python3 -m venv .venv && .venv/bin/pip install -c lib/python-constraints.txt PyQt6 pyyaml ruff
    ```
 
    On a minimal system (a container, say), Qt also needs `libegl1 libgl1 libxkbcommon0
    libfontconfig1 libxtst6`. Other distributions have the same tools under similar names. On a
-   Frame, only ShellCheck is missing (`brew install shellcheck`, with the
+   Frame, only ShellCheck and Ruff are missing (`brew install shellcheck ruff`, with the
    [Homebrew](packs/core/homebrew/) tweak), the full installer window's Python already has
    PyQt6 (`~/.local/share/arrowpad/venv`), and SteamOS's own `/usr/bin/python3` has PyYAML.
 
@@ -80,17 +80,25 @@ files, its manifest, and the helpers its scripts can use.
 
 `dev/check.sh` runs the checks CI runs, on any Linux PC; `dev/check.sh docs tests` runs just
 those. A check whose tool isn't installed is skipped, with a note saying how to get it. The
-checks:
+`tweaks` check is left out when nothing it installs changed since `origin/main` (CI, and
+`dev/check.sh tweaks`, run it anyway). The checks:
 
 - `shell`: ShellCheck (`shellcheck -x -S warning`) on every shell script and the libraries they
   source, and that programs in `~/.local/bin` are replaced with `write_file` (`lib/common.sh`),
   never written into.
 - `python`: every Python file compiles, the tweaks' modules too.
+- `lint`: Ruff finds what Python only finds when the line runs: a name that doesn't exist, an
+  import or variable never used (`ruff.toml`: those rules only, not style).
 - `i18n`: the translation template is current (`dev/i18n.py extract` updates it).
 - `commits`: your commits' messages ("Commit style", below).
 - `manifests`: every manifest is valid and names its scripts (`python3 lib/sft.py mods check
   FOLDER`), dependencies resolve, and every pin is complete ("Pinned downloads").
-- `tests`: the unit tests (`python3 -m unittest discover -s tests`). Some need PyQt6 and run
+- `tests`: the unit tests, several at a time (`dev/run-tests.py`: a process per test file, a
+  slow file in parts, the slowest first, by the times it keeps in `.cache/`). A test class that
+  watches the whole machine (new files in `/tmp`, say) sets `run_alone = True` and runs after
+  the rest, by itself; a test that waits for something should wait until it happens, not a
+  fixed time, as other tests share the machine. One file alone: `python3 -m unittest
+  tests/test_x.py`. Some need PyQt6 and run
   headless (`QT_QPA_PLATFORM=offscreen`); the click-swap test also uses Xvfb, the manifest
   reader's is compared with PyYAML's where it's installed, and the Arch Linux ARM ones need
   Arch's `vercmp` (a Frame has it). `dev/check.sh` finds a Python with PyQt6 (`PYTHON=…`,

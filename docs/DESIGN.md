@@ -52,7 +52,7 @@ The design follows from what the Frame is:
 | [`gui/`](../gui/) | The installer window (PyQt6): the list, details pages, Packs and Wallet apps pages. |
 | [`packs/core/<id>/`](../packs/core/) | One folder per tweak: `README.md` (its manifest, then its documentation), `install.sh`, `uninstall.sh`, `status.sh` and optional scripts. `pack.md` sets the order and categories. |
 | [`dev/`](../dev/) | Maintainer tools: docs generation and checks, pin checks and bumps, the mirror, the test harness, git hooks. |
-| [`tests/`](../tests/) | Unit tests (`python3 -m unittest discover -s tests`). |
+| [`tests/`](../tests/) | Unit tests (`dev/run-tests.py` runs them several at a time; one file: `python3 -m unittest tests/test_x.py`). |
 
 ### Manifests: the README is the source of truth
 
@@ -371,7 +371,9 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 its checks is one of [`dev/check.sh`](../dev/check.sh)'s, which a contributor runs the same way:
 
 - `shellcheck -x -S warning` on every shell script (and the sourced libraries, by their
-  `# shellcheck shell=` line), and `py_compile` on every Python file.
+  `# shellcheck shell=` line), `py_compile` on every Python file, and Ruff's mistake-finding
+  rules on every Python file ([`ruff.toml`](../ruff.toml): names that don't exist, unused
+  imports; no style).
 - Commit message format ([`dev/check-commit-msg.sh`](../dev/check-commit-msg.sh), commitizen's
   Conventional Commits rule). The same check runs in the `commit-msg` hook
   (`dev/install-hooks.sh` turns the hooks on), which can also refuse tool attribution lines in
@@ -379,8 +381,8 @@ its checks is one of [`dev/check.sh`](../dev/check.sh)'s, which a contributor ru
 - Manifest and installer self-checks: `lib/sft.py mods check` on each official pack and the example,
   `./install.sh list`, dependency resolution, every pin's fields, mirror lines, and exact
   versions in the Python constraints.
-- Unit tests (`tests/`), with Qt headless (`QT_QPA_PLATFORM=offscreen`) and Xvfb for the
-  click test. They cover the manifest reader against PyYAML, pack trust and replacement,
+- Unit tests (`tests/`), several at a time ([`dev/run-tests.py`](../dev/run-tests.py)), with Qt
+  headless (`QT_QPA_PLATFORM=offscreen`) and Xvfb for the click test. They cover the manifest reader against PyYAML, pack trust and replacement,
   settings shared with the VR panels, the window's logic (versions, channels, status
   parsing), shell helpers (including the mirror fallback and `alarm_fetch`'s signature,
   name and downgrade checks with a throwaway key: these need Arch's `vercmp`, so they run on a

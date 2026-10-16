@@ -5,7 +5,6 @@ temporary folder, restart-plasmashell waiting for (or killing) the old taskbar, 
 tweak's Run button going through its menu entry."""
 import sys
 import hashlib
-import os
 import re
 import shutil
 import subprocess

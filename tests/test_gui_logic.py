@@ -229,8 +229,8 @@ class Status(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             f = Path(d) / "sub" / "set"
             gui.write_set(f, {"Privacy & security", "System"})
-            self.assertEqual(gui.read_set(f), {"Privacy & security", "System"})
-        self.assertEqual(gui.read_set(Path("/nonexistent/x")), set())
+            self.assertEqual(gui.sft.read_set(f), {"Privacy & security", "System"})
+        self.assertEqual(gui.sft.read_set(Path("/nonexistent/x")), set())
 
     def test_latest_release_offline(self):
         with mock.patch.object(gui.urllib.request, "urlopen", side_effect=OSError("offline")):
@@ -979,7 +979,6 @@ class LinkedProject(unittest.TestCase):
     """A linked project (manifest link:): its page says it's linked and links its README; its status
     comes from lib/link.sh."""
     def test_page_and_status(self):
-        import shutil
         from PyQt6.QtWidgets import QApplication, QLabel
         self.app = QApplication.instance() or QApplication([])
         with tempfile.TemporaryDirectory() as d:

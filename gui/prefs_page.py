@@ -3,7 +3,6 @@ whether uninstalling a tweak removes its settings, and how this window behaves. 
 choices are kept in ~/.config/frame-tweaks/installer/window.json; the language in
 ~/.config/frame-tweaks/language; whether updates take test releases in ~/.config/frame-tweaks/channel;
 the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
-import html
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QRadioButton,

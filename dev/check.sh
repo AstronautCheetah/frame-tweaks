@@ -3,15 +3,19 @@
 # change can be checked before it's sent (CONTRIBUTING.md, "Checks"). Any Linux PC will do; none
 # of it needs a Frame.
 #   dev/check.sh                every check
-#   dev/check.sh docs tests     just these: shell python i18n commits manifests tests metadata
-#                               docs tweaks
+#   dev/check.sh docs tests     just these: shell python lint i18n commits manifests tests
+#                               metadata docs tweaks
 # A check whose tool is missing is skipped, with a note on how to get it (in CI, where every tool
-# is installed, a missing one fails instead). PYTHON=… picks the interpreter for the unit tests;
-# otherwise the first of .venv/bin/python, python3 and Arrow Pad's venv that has PyQt6.
+# is installed, a missing one fails instead). The tweak check, a minute of installs, is left out
+# when nothing it installs changed since origin/main (not in CI, and not when named). PYTHON=…
+# picks the interpreter for the unit tests; otherwise the first of .venv/bin/python, python3 and
+# Arrow Pad's venv that has PyQt6.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
-ALL=(shell python i18n commits manifests tests metadata docs tweaks)
+ALL=(shell python lint i18n commits manifests tests metadata docs tweaks)
 SKIP=125        # a check's status when it was skipped (no tool uses it)
+UNNEEDED=124    # ... when nothing it checks changed
+NAMED=${1:+1}   # (checks named on the command line run whatever changed)
 
 # Files git would commit (tracked, and new ones not ignored: what CI's checkout holds) with a
 # line matching $1; not Markdown, whose code examples can start a line with a shebang.
@@ -40,6 +44,14 @@ check_python() {
         python3 -m py_compile "$f" || bad=1
     done
     return $bad
+}
+
+# Mistakes Python finds only when the line runs: a name that doesn't exist, an unused import
+# (ruff.toml). Every Python file, those without .py by their shebang.
+check_lint() {
+    command -v ruff >/dev/null || { missing ruff "brew install ruff, or pipx install ruff"; return; }
+    # shellcheck disable=SC2046   # (file names without spaces, one per line)
+    ruff check --quiet $({ files_with '^#!/usr/bin/env python3'; git ls-files -co --exclude-standard -- '*.py'; } | sort -u)
 }
 
 check_i18n() { python3 dev/i18n.py check; }       # the translation template is current
@@ -95,7 +107,7 @@ check_tests() {
             "once: python3 -m venv .venv && .venv/bin/pip install -c lib/python-constraints.txt PyQt6 pyyaml"
         return
     fi
-    QT_QPA_PLATFORM=offscreen "$py" -m unittest discover -s tests ${CI:+-v}
+    QT_QPA_PLATFORM=offscreen "$py" dev/run-tests.py ${CI:+-v}     # (several at a time)
 }
 
 check_metadata() {      # the AppStream metadata and the desktop entry
@@ -111,7 +123,29 @@ check_metadata() {      # the AppStream metadata and the desktop entry
 
 check_docs() { python3 dev/check-docs.py && python3 dev/gen-docs.py --check; }
 
+# tweak_free FILE: a changed file the tweak check doesn't depend on (it installs from packs/, lib/,
+# examples/, icons/, share/ and install.sh).
+tweak_free() {
+    case $1 in
+        dev/test-tweaks.sh|dev/check.sh) return 1 ;;
+        tests/*|docs/*|locale/*|.github/*|dev/*|.gitignore|.cz.toml|ruff.toml) return 0 ;;
+        */*) return 1 ;;
+        *.md) return 0 ;;
+    esac
+    return 1
+}
+
 check_tweaks() {        # install → status → uninstall in a throwaway home (dev/test-tweaks.sh)
+    if [ -z "${CI:-}" ] && [ -z "$NAMED" ] && git rev-parse -q --verify origin/main >/dev/null; then
+        local f needed=
+        while IFS= read -r f; do
+            tweak_free "$f" || { needed=1; break; }
+        done < <(git diff --name-only origin/main; git ls-files -o --exclude-standard)
+        if [ -z "$needed" ]; then
+            echo "  not needed: nothing it installs changed since origin/main (dev/check.sh tweaks runs it)"
+            return $UNNEEDED
+        fi
+    fi
     command -v bsdtar >/dev/null || { missing bsdtar "apt install libarchive-tools"; return; }
     [ -n "${CI:-}" ] || python3 -c 'import ensurepip, venv' 2>/dev/null ||
         { missing "Python's venv module" "apt install python3-venv"; return; }
@@ -122,13 +156,14 @@ checks=("${@:-${ALL[@]}}")
 for c in "${checks[@]}"; do
     [[ " ${ALL[*]} " == *" $c "* ]] || { echo "unknown check: $c (one of: ${ALL[*]})" >&2; exit 2; }
 done
-failed=() skipped=()
+failed=() skipped=() unneeded=()
 for c in "${checks[@]}"; do
     echo "== $c"
     "check_$c"
-    case $? in 0) ;; "$SKIP") skipped+=("$c") ;; *) failed+=("$c") ;; esac
+    case $? in 0) ;; "$SKIP") skipped+=("$c") ;; "$UNNEEDED") unneeded+=("$c") ;; *) failed+=("$c") ;; esac
 done
 echo
 [ ${#skipped[@]} -eq 0 ] || echo "skipped (a tool is missing, see above): ${skipped[*]}"
+[ ${#unneeded[@]} -eq 0 ] || echo "not needed (nothing they check changed): ${unneeded[*]}"
 [ ${#failed[@]} -eq 0 ] || { echo "FAILED: ${failed[*]}"; exit 1; }
-echo "passed: $(( ${#checks[@]} - ${#skipped[@]} )) of ${#checks[@]} checks"
+echo "passed: $(( ${#checks[@]} - ${#skipped[@]} - ${#unneeded[@]} )) of ${#checks[@]} checks"

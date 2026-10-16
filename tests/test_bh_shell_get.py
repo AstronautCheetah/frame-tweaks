@@ -4,7 +4,6 @@ release, runs install.sh by its full path (FRAME_TWEAKS_DIR relative too), and o
 checkout runs ./install.sh update (signature check and all), stopping, without opening the old
 version, when that fails. Against a stand-in repository whose install.sh only logs how it was run
 (and fails "update" when FAIL_UPDATE is set)."""
-import os
 import shutil
 import subprocess
 import tempfile

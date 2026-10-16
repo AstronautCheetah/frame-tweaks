@@ -55,8 +55,9 @@ class WindowTest(unittest.TestCase):
         return w
 
     def settle(self, w):
-        """Until what the window started is in (collect, as its timer runs it)."""
-        for _ in range(250):
+        """Until what the window started is in (collect, as its timer runs it). (Up to 30 s: a
+        busy machine is slow.)"""
+        for _ in range(1500):
             if not (w.futures or w.update_futures or w.pack_check or w.self_update or getattr(w, "pack_job", None)):
                 return
             QTest.qWait(20)
@@ -159,7 +160,10 @@ class Closing(WindowTest):
             w = gui.Window()
             self.addCleanup(w.deleteLater)
             w.show()
-            QTest.qWait(50)
+            for _ in range(500):                # (until its checks have started: later on a busy machine)
+                if w.futures:
+                    break
+                QTest.qWait(20)
             self.assertTrue(w.futures)
             w.close()
             self.assertFalse(w.collector.isActive())

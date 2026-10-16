@@ -1,0 +1,7 @@
+# Ruff (dev/check.sh lint): only rules that find mistakes, not style. Pyflakes (F): a name that
+# doesn't exist, an import or variable never used, a definition that hides another; and syntax
+# errors (E9), including syntax newer than SteamOS's Python runs.
+target-version = "py312"
+
+[lint]
+select = ["F", "E9"]

@@ -3,7 +3,6 @@ and lets it charge again 1% below, lifts only its own pause, follows the setting
 100% once, and lets the battery charge when it stops; its status says how it's holding, and when
 SteamOS has a charge limit of its own for the Frame. A folder laid out like /sys stands in for the
 battery and the charger."""
-import os
 import signal
 import subprocess
 import sys
