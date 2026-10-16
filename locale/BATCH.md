@@ -29,7 +29,7 @@ result in the window (`FRAME_TWEAKS_LANGUAGE=es_419 ./install.sh gui`) and in a 
 
 ## The files
 
-`part-NN.json`: `[{"id": 1, "ctx": null, "msgid": "...", "plural": null, "where": ["file:line"]}]`.
+`part-NN.json`: `[{"id": 1, "ctx": null, "msgid": "...", "plural": null, "where": ["file"]}]` (the files it's in).
 `part-NN.LANG.json`: `{"1": "translation", "2": ["singular form", "plural form"]}` (a list for an
 entry with `plural`, one string per plural form of the language).
 

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### For contributors
+- **The translation files change only when a text does:** their references name the file a text is
+  in, not its line, so editing code no longer makes `dev/i18n.py check` (and CI) ask for the
+  template to be extracted again.
+
 ### Fixed
 - **⚙ Preferences scrolls to its questions:** **Uninstall Frame Tweaks…** (and deleting leftover
   settings, or going back to the stable release) opens its question below the button, at the

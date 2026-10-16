@@ -4,1942 +4,1942 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: gui/frame-tweaks-gui.py:1049
-msgid "Show hidden ({n})"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1076
-msgid "Tick to install, untick to remove"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1088
-msgid "(hidden)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1092 lib/sft.py:763
-msgid "Experimental: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1094
-msgid ""
-"Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1097 lib/sft.py:767
-msgid "Asks for your sudo password: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1099
-msgid ""
-"From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1100
-msgid "From the pack {pack}, not part of Frame Tweaks"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1106
-msgid "needs: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1122
-msgid "Open %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1138
-msgid "Details: what it is, why it's included, who made it"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1145
-msgid "Hide"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1145
-msgid "Unhide"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1146
-msgid "Show this tweak in the list again"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1147
-msgid "Hide this tweak from the list (doesn't remove it)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1161 gui/frame-tweaks-gui.py:1362
-msgid "Settings"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1196
-msgid ""
-"Have an idea for a tweak, or an app that belongs here? Found a bug, or speak another language? Every suggestion, report, translation and fix makes the Frame better for everyone who has one."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1201
-msgid "Get involved"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1222 gui/frame-tweaks-gui.py:1244
-msgid "{version} available"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1223 gui/frame-tweaks-gui.py:1245 gui/packs_page.py:168
-msgid "Update"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1234
-msgid "Close and reopen Frame Tweaks to use the new version."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1250
-msgid "Look for a newer Frame Tweaks release"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1250
-msgid "⟳ Check for updates"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1251
-msgid "Checking…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1252
-msgid "⬇ Update to {version}"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1253
-msgid "Install it: your tweaks are updated with it"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1254
-msgid "Reopen Frame Tweaks to use the new version"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1254
-msgid "↻ Restart"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1270
+#: gui/frame-tweaks-gui.py
 msgid "%d pack update"
 msgid_plural "%d pack updates"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/frame-tweaks-gui.py:1272
-msgid ""
-"Packs added from a link have a newer version where they came from: the Packs page says which"
+#: gui/frame-tweaks-gui.py
+msgid "(hidden)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:1327
-msgid "Reinstall: remove it and install it again in one step (settings kept)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1328
-msgid "Reinstall (available once it's installed)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1339
-msgid "⟳ Restart SteamVR"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1344
-msgid "SteamVR loads it only as it starts. Every open app closes."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1345
-msgid "SteamVR runs it until it restarts. Every open app closes."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1353
-msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1354
-msgid "Tick it and Apply first"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1357
-msgid "⚙ Settings"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1362
-msgid "Settings (tick it and Apply first)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1364
-msgid "Help"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1369
-msgid "{label} (installs first if needed: tick it and Apply)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1371
-msgid "Nothing to launch: how to use it"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1432
-msgid "Restart SteamVR?"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1433
-msgid ""
-"Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1435
-msgid "Restart SteamVR"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1442
-msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1459 gui/frame-tweaks-gui.py:1194
-msgid "Help make Frame Tweaks better"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:148
-msgid "status check didn't finish (took over a minute)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1534 gui/prefs_page.py:195 packs/core/snip/frame-snip:1318
-msgid "Cancel"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1561
-msgid "Install: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1562
-msgid "Remove: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1563
-msgid "Nothing to change: tick or untick a tweak first"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1567
-msgid "Still checking status; try again in a moment."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1572 install.sh:606
-msgid "Nothing to change."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1576
-msgid "These installed tweaks were unticked and will be <b>removed</b>:"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1578
-msgid "Their settings are removed too (⚙ Preferences); their data is kept."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1579
-msgid "Their settings and data are kept."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1580
-msgid "Remove them"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1625
-msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1698
-msgid "Something went wrong in the installer window"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1701
-msgid ""
-"Copy the details into a bug report. The window keeps working: go back and try again."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1707 gui/frame-tweaks-gui.py:1711
-msgid "Copy for bug report"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1709
-msgid "Copied"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1713
-msgid ""
-"Copy these details, then save a diagnostics report and open the bug form"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1763
-msgid "Frame Tweaks is already open in {session}"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:1764
-msgid "It came to the front there. Close it there to open it here."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:192 install.sh:626
-msgid "Press Enter to close, or press the X button floating below to close."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:193 install.sh:625
-msgid "Press Enter to close…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:289
-msgid "Copy the link"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:309
-msgid "Link copied"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:327
-msgid ""
-"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:336
-msgid "The browser didn't answer: the link is on the clipboard."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:385
-msgid "checking…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:387 install.sh:229 lib/common.sh:468 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5 packs/third-party/menu-icons/status.sh:4
-msgid "not installed"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:401
-msgid "hidden"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:404 packs/core/arrowpad/arrowpad.py:282 packs/core/snip/frame-snip:712 packs/core/snip/frame-snip:717
-msgid "Collapse"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:404 packs/core/arrowpad/arrowpad.py:282 packs/core/snip/frame-snip:743
-msgid "Expand"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:407
-msgid "Hide category"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:407
-msgid "Unhide category"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:409
-msgid "Show this category again"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:410
-msgid "Hide the whole category from the list (doesn't remove anything)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:455 gui/frame-tweaks-gui.py:478 gui/frame-tweaks-gui.py:721 gui/frame-tweaks-gui.py:1710 gui/packs_page.py:52 gui/prefs_page.py:44 gui/report_page.py:34 gui/wallet_page.py:262 packs/core/snip/frame-snip:530
-msgid "← Back"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:458
-msgid "About Frame Tweaks"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:465 gui/frame-tweaks-gui.py:544
-msgid "No README."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:503
-msgid "What it is"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:504
-msgid "Why it's included"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:505
-msgid "Made by"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:507
-msgid "🧪 Experimental"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:509
-msgid "Asks for sudo"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:510
-msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:514
-msgid ""
-"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:514
-msgid "🔗 Linked"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:517
-msgid "Its README"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:519
-msgid "Source"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:521
-msgid "Needs"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:521
-msgid "{tweaks} (installed automatically)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:523
-msgid "Status"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:525
-msgid "Pack"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:526
-msgid "Documentation"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:527
-msgid "{file} on GitHub"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:529
-msgid "From"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:530
-msgid "the pack {pack}, not part of Frame Tweaks"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:531
+#: gui/frame-tweaks-gui.py
 msgid "(used instead of {other}'s)"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:552
-msgid "⚠ Known issue."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:556
-msgid "Checking for a newer release…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:559
-msgid "Couldn't check for a newer release; see {link}its releases{end}."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:562
+#: gui/frame-tweaks-gui.py
 msgid ""
 "<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:567
-msgid "{version} is still the latest release."
+#: gui/frame-tweaks-gui.py
+msgid "About Frame Tweaks"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:627 packs/core/adb-scrcpy/phone-touch.js:290 packs/core/scroll-strips/patch.js:287
-msgid "Reset to defaults"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:660
-msgid "Working… (a download can take a minute)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:677 packs/core/snip/frame-snip:604 install.sh:254
-msgid "Done."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:678 gui/wallet_page.py:516 gui/wallet_page.py:528 gui/wallet_page.py:542 packs/core/snip/frame-snip:605
-msgid "Didn't work: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:699 gui/prefs_page.py:278 gui/prefs_page.py:302 gui/prefs_page.py:293
-msgid "Saved."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:708
-msgid "Back to the defaults."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:756
-msgid "🔑 Wallet apps"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:839
-msgid "Preferences: the language, and how this window behaves"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:846
-msgid "🧩 Packs"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:847
-msgid "Where the tweaks come from; add other people's (docs/mods.md)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:850
-msgid "Refresh"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:865
-msgid ""
-"Tick to install, untick to remove, then Apply changes. Click a row for details, a category to fold it."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:875
-msgid "📖 README"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:876
-msgid ""
-"What Frame Tweaks is, how to install, update and remove it, common issues"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:879 gui/frame-tweaks-gui.py:1712
-msgid "🐞 Report a problem"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:880
-msgid ""
-"Save a diagnostics report (user names and paths removed) and open the bug form"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py:883
+#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:887 packs/core/arrowpad/arrowpad.py:281 packs/core/snip/frame-snip:697 packs/core/adb-scrcpy/phone:205
+#: gui/frame-tweaks-gui.py
+msgid "Asks for sudo"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py lib/sft.py
+msgid "Asks for your sudo password: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Back to the defaults."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py gui/prefs_page.py packs/core/snip/frame-snip
+msgid "Cancel"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Checking for a newer release…"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Checking…"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
 msgid "Close"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:986
+#: gui/frame-tweaks-gui.py
+msgid "Close and reopen Frame Tweaks to use the new version."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Collapse"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Copied"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Copy for bug report"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Copy the details into a bug report. The window keeps working: go back and try again."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Copy the link"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Copy these details, then save a diagnostics report and open the bug form"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Couldn't check for a newer release; see {link}its releases{end}."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Couldn't check for updates (no connection to GitHub?)."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Details: what it is, why it's included, who made it"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "Didn't work: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Documentation"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip install.sh
+msgid "Done."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Expand"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py lib/sft.py
+msgid "Experimental: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Frame Tweaks is already open in {session}"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid ""
 "Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use it."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:991
-msgid "Couldn't check for updates (no connection to GitHub?)."
+#: gui/frame-tweaks-gui.py
+msgid "From"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:993
+#: gui/frame-tweaks-gui.py
+msgid "From the pack {pack}, not part of Frame Tweaks"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"From the pack {pack}, not part of Frame Tweaks; used instead of {other}'s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Get involved"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Have an idea for a tweak, or an app that belongs here? Found a bug, or speak another language? Every suggestion, report, translation and fix makes the Frame better for everyone who has one."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Help"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Help make Frame Tweaks better"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Hide"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Hide category"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Hide the whole category from the list (doesn't remove anything)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Hide this tweak from the list (doesn't remove it)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Install it: your tweaks are updated with it"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Install: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "It came to the front there. Close it there to open it here."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Its README"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Link copied"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Look for a newer Frame Tweaks release"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Made by"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Needs"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "No README."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py install.sh
+msgid "Nothing to change."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Nothing to change: tick or untick a tweak first"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Nothing to launch: how to use it"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Open %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Pack"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Packs added from a link have a newer version where they came from: the Packs page says which"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Preferences: the language, and how this window behaves"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py install.sh
+msgid "Press Enter to close, or press the X button floating below to close."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py install.sh
+msgid "Press Enter to close…"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Refresh"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Reinstall (available once it's installed)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Reinstall: remove it and install it again in one step (settings kept)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Remove them"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Remove: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Reopen Frame Tweaks to use the new version"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Reset to defaults"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Restart SteamVR"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Restart SteamVR?"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Save a diagnostics report (user names and paths removed) and open the bug form"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py gui/prefs_page.py
+msgid "Saved."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Settings"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Settings (tick it and Apply first)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Show hidden ({n})"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Show this category again"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Show this tweak in the list again"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Something went wrong in the installer window"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Source"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Status"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "SteamVR loads it only as it starts. Every open app closes."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "SteamVR runs it until it restarts. Every open app closes."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Still checking status; try again in a moment."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "The browser didn't answer: the link is on the clipboard."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Their settings and data are kept."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Their settings are removed too (⚙ Preferences); their data is kept."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "These installed tweaks were unticked and will be <b>removed</b>:"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Tick it and Apply first"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Tick to install, untick to remove"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Tick to install, untick to remove, then Apply changes. Click a row for details, a category to fold it."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Unhide"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Unhide category"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py gui/packs_page.py
+msgid "Update"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"What Frame Tweaks is, how to install, update and remove it, common issues"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "What it is"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Where the tweaks come from; add other people's (docs/mods.md)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Why it's included"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Working… (a download can take a minute)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "checking…"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "hidden"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "needs: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/third-party/menu-icons/status.sh
+msgid "not installed"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "status check didn't finish (took over a minute)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "the pack {pack}, not part of Frame Tweaks"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{file} on GitHub"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{label} (installs first if needed: tick it and Apply)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{tweaks} (installed automatically)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{version} available"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{version} is still the latest release."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "← Back"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "↻ Restart"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "⚙ Settings"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "⚠ Known issue."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "✔ Frame Tweaks is up to date ({version})."
 msgstr ""
 
-#: gui/packs_page.py:127
+#: gui/frame-tweaks-gui.py
+msgid "⟳ Check for updates"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "⟳ Restart SteamVR"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "⬇ Update to {version}"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "🐞 Report a problem"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "📖 README"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "🔑 Wallet apps"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "🔗 Linked"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "🧩 Packs"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "🧪 Experimental"
+msgstr ""
+
+#: gui/packs_page.py
 msgid "%d tweak"
 msgid_plural "%d tweaks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py:131
-msgid "tweak pack provided by {author}"
+#: gui/packs_page.py lib/sft.py
+msgid "(instead of {other}'s)"
 msgstr ""
 
-#: gui/packs_page.py:136
+#: gui/packs_page.py
+msgid "(its README can't be read)"
+msgstr ""
+
+#: gui/packs_page.py
 msgid "A newer version is out where it came from: Update gets it."
 msgstr ""
 
-#: gui/packs_page.py:139
-msgid "From {link}"
+#: gui/packs_page.py
+msgid "Add"
 msgstr ""
 
-#: gui/packs_page.py:149 gui/packs_page.py:156
-msgid "Stop using"
+#: gui/packs_page.py
+msgid "Add a pack from a link:"
 msgstr ""
 
-#: gui/packs_page.py:149
-msgid "Use"
-msgstr ""
-
-#: gui/packs_page.py:150
-msgid "Its tweaks come back to the list"
-msgstr ""
-
-#: gui/packs_page.py:151 gui/packs_page.py:157
-msgid ""
-"Its tweaks leave the list; installed ones stay until you uninstall them"
-msgstr ""
-
-#: gui/packs_page.py:160
-msgid "Yes: it runs as me"
-msgstr ""
-
-#: gui/packs_page.py:161
-msgid "Trust this pack's current files"
-msgstr ""
-
-#: gui/packs_page.py:164
-msgid "Trust…"
-msgstr ""
-
-#: gui/packs_page.py:171
-msgid ""
-"Get its newer version from where it was added; it waits until you trust it again"
-msgstr ""
-
-#: gui/packs_page.py:177
-msgid "Yes, delete it"
-msgstr ""
-
-#: gui/packs_page.py:181
-msgid "Remove…"
-msgstr ""
-
-#: gui/packs_page.py:182
-msgid "Delete this pack from your packs folder"
-msgstr ""
-
-#: gui/packs_page.py:187
-msgid "Problems"
-msgstr ""
-
-#: gui/packs_page.py:19
-msgid "Comes with Frame Tweaks: in use"
-msgstr ""
-
-#: gui/packs_page.py:20
-msgid "Comes with Frame Tweaks: turned off, so its tweaks aren't listed"
-msgstr ""
-
-#: gui/packs_page.py:21
-msgid "Trusted: its tweaks are listed"
-msgstr ""
-
-#: gui/packs_page.py:22
-msgid "Not trusted yet: its tweaks aren't listed"
-msgstr ""
-
-#: gui/packs_page.py:23
-msgid "Changed since you trusted it: not used until you trust it again"
-msgstr ""
-
-#: gui/packs_page.py:232
-msgid "That didn't work: {error}"
-msgstr ""
-
-#: gui/packs_page.py:240
-msgid "Paste or type the link of a pack's git repository first."
-msgstr ""
-
-#: gui/packs_page.py:242
-msgid "Adding the pack…"
-msgstr ""
-
-#: gui/packs_page.py:247
+#: gui/packs_page.py
 msgid ""
 "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
 msgstr ""
 
-#: gui/packs_page.py:254
+#: gui/packs_page.py
+msgid "Adding the pack…"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Changed since you trusted it: not used until you trust it again"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Comes with Frame Tweaks: in use"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Comes with Frame Tweaks: turned off, so its tweaks aren't listed"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Community packs: packs people shared, with their links"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Delete this pack from your packs folder"
+msgstr ""
+
+#: gui/packs_page.py
+msgid ""
+"Download the pack into your packs folder. Nothing of it runs until you trust it."
+msgstr ""
+
+#: gui/packs_page.py
+msgid ""
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+msgstr ""
+
+#: gui/packs_page.py
+msgid "From {link}"
+msgstr ""
+
+#: gui/packs_page.py
+msgid ""
+"Get its newer version from where it was added; it waits until you trust it again"
+msgstr ""
+
+#: gui/packs_page.py
+msgid ""
+"It isn't used until you trust it again: read what changed first, then Trust… below."
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Its tweaks come back to the list"
+msgstr ""
+
+#: gui/packs_page.py
+msgid ""
+"Its tweaks leave the list; installed ones stay until you uninstall them"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Not trusted yet: its tweaks aren't listed"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Open packs folder"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Packs"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Packs others share"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Paste"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Paste or type the link of a pack's git repository first."
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Paste the link from the clipboard"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Problems"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Removed {name}."
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Remove…"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Stop using"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "That didn't work: {error}"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Trust this pack's current files"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Trusted: its tweaks are listed"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Trust…"
+msgstr ""
+
+#: gui/packs_page.py
 msgid "Updating {name}…"
 msgstr ""
 
-#: gui/packs_page.py:263 lib/sft.py:1029
+#: gui/packs_page.py
+msgid "Use"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Yes, delete it"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "Yes: it runs as me"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "installed"
+msgstr ""
+
+#: gui/packs_page.py lib/sft.py
+msgid "none"
+msgstr ""
+
+#: gui/packs_page.py
+msgid "tweak pack provided by {author}"
+msgstr ""
+
+#: gui/packs_page.py lib/sft.py
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py:265 lib/sft.py:1031
+#: gui/packs_page.py lib/sft.py
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py:267
-msgid ""
-"It isn't used until you trust it again: read what changed first, then Trust… below."
-msgstr ""
-
-#: gui/packs_page.py:280
-msgid "Removed {name}."
-msgstr ""
-
-#: gui/packs_page.py:308
-msgid "(its README can't be read)"
-msgstr ""
-
-#: gui/packs_page.py:318 lib/sft.py:1056
-msgid "(instead of {other}'s)"
-msgstr ""
-
-#: gui/packs_page.py:319
-msgid "installed"
-msgstr ""
-
-#: gui/packs_page.py:320 lib/sft.py:998
-msgid "none"
-msgstr ""
-
-#: gui/packs_page.py:55
-msgid "Packs"
-msgstr ""
-
-#: gui/packs_page.py:58
-msgid "Open packs folder"
-msgstr ""
-
-#: gui/packs_page.py:63
-msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
-msgstr ""
-
-#: gui/packs_page.py:75
-msgid "Add a pack from a link:"
-msgstr ""
-
-#: gui/packs_page.py:80
-msgid "Paste"
-msgstr ""
-
-#: gui/packs_page.py:81
-msgid "Paste the link from the clipboard"
-msgstr ""
-
-#: gui/packs_page.py:84
-msgid "Add"
-msgstr ""
-
-#: gui/packs_page.py:85
-msgid ""
-"Download the pack into your packs folder. Nothing of it runs until you trust it."
-msgstr ""
-
-#: gui/packs_page.py:89
-msgid "Packs others share"
-msgstr ""
-
-#: gui/packs_page.py:90
-msgid "Community packs: packs people shared, with their links"
-msgstr ""
-
-#: gui/prefs_page.py:101
-msgid "Go back now"
-msgstr ""
-
-#: gui/prefs_page.py:101
-msgid "Stay on it"
-msgstr ""
-
-#: gui/prefs_page.py:112
-msgid "Uninstalling a tweak"
-msgstr ""
-
-#: gui/prefs_page.py:113
-msgid ""
-"When you uninstall a tweak, its settings can stay, so it's set up as before if you install it again, or be removed along with it."
-msgstr ""
-
-#: gui/prefs_page.py:115
-msgid ""
-"Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
-msgstr ""
-
-#: gui/prefs_page.py:117
-msgid ""
-"Your own data is never removed: your dictation history, adb's pairing keys and Claude Code's ~/.claude folder stay either way."
-msgstr ""
-
-#: gui/prefs_page.py:122
-msgid "Keep its settings"
-msgstr ""
-
-#: gui/prefs_page.py:122
-msgid "Remove its settings too"
-msgstr ""
-
-#: gui/prefs_page.py:133
-msgid "Delete settings left by uninstalled tweaks…"
-msgstr ""
-
-#: gui/prefs_page.py:136
-msgid "Delete them"
-msgstr ""
-
-#: gui/prefs_page.py:139 install.sh:374
-msgid "Uninstalling Frame Tweaks"
-msgstr ""
-
-#: gui/prefs_page.py:140
-msgid "What happens to the tweaks:"
-msgstr ""
-
-#: gui/prefs_page.py:145
-msgid "Uninstall the tweaks, but keep third-party apps"
-msgstr ""
-
-#: gui/prefs_page.py:146
-msgid ""
-"These stay installed and keep working, with the tweaks that installed them: {apps}."
-msgstr ""
-
-#: gui/prefs_page.py:147
-msgid "Uninstall every tweak, third-party apps too"
-msgstr ""
-
-#: gui/prefs_page.py:148
-msgid "Homebrew itself is never removed: other programs may live in it."
-msgstr ""
-
-#: gui/prefs_page.py:149
-msgid "Leave every tweak installed"
-msgstr ""
-
-#: gui/prefs_page.py:150
-msgid ""
-"They keep working, but nothing updates them, and removing them later takes Frame Tweaks again."
-msgstr ""
-
-#: gui/prefs_page.py:157
-msgid "Also delete the settings"
-msgstr ""
-
-#: gui/prefs_page.py:160
-msgid ""
-"Deletes Frame Tweaks' own settings and those of every tweak it removes, now or earlier. Tweaks that stay installed keep theirs. Off: all settings are kept, for a later install."
-msgstr ""
-
-#: gui/prefs_page.py:163
-msgid "Uninstall Frame Tweaks…"
-msgstr ""
-
-#: gui/prefs_page.py:167
-msgid "Uninstall"
-msgstr ""
-
-#: gui/prefs_page.py:20
-msgid "Haptic ticks on this window's buttons (in VR)"
-msgstr ""
-
-#: gui/prefs_page.py:21
+#: gui/prefs_page.py
 msgid ""
 "A light tick when the laser moves onto a button, a firmer one on a click."
 msgstr ""
 
-#: gui/prefs_page.py:22
-msgid "Look for a new Frame Tweaks release when this window opens"
+#: gui/prefs_page.py
+msgid "Also delete the settings"
 msgstr ""
 
-#: gui/prefs_page.py:225 install.sh:317 install.sh:376
-msgid "No settings left behind by uninstalled tweaks."
-msgstr ""
-
-#: gui/prefs_page.py:227
-msgid "Delete these settings? Their tweaks aren't installed."
-msgstr ""
-
-#: gui/prefs_page.py:23
-msgid "Off: only when you press ⟳ Check for updates."
-msgstr ""
-
-#: gui/prefs_page.py:240
+#: gui/prefs_page.py
 msgid "Couldn't delete: {paths}"
 msgstr ""
 
-#: gui/prefs_page.py:242
+#: gui/prefs_page.py
+msgid "Delete settings left by uninstalled tweaks…"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Delete them"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Delete these settings? Their tweaks aren't installed."
+msgstr ""
+
+#: gui/prefs_page.py
 msgid "Deleted {n} setting."
 msgid_plural "Deleted {n} settings."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/prefs_page.py:246
-msgid "Uninstall Frame Tweaks?"
+#: gui/prefs_page.py
+msgid ""
+"Deletes Frame Tweaks' own settings and those of every tweak it removes, now or earlier. Tweaks that stay installed keep theirs. Off: all settings are kept, for a later install."
 msgstr ""
 
-#: gui/prefs_page.py:248
-msgid "The tweaks are uninstalled first; third-party apps stay."
-msgstr ""
-
-#: gui/prefs_page.py:249
+#: gui/prefs_page.py
 msgid "Every tweak is uninstalled first, third-party apps too."
 msgstr ""
 
-#: gui/prefs_page.py:250
-msgid "The tweaks stay installed."
+#: gui/prefs_page.py
+msgid "Follow the keyboard (now: {language})"
 msgstr ""
 
-#: gui/prefs_page.py:251
-msgid "Settings are deleted."
-msgstr ""
-
-#: gui/prefs_page.py:251
-msgid "Settings are kept."
-msgstr ""
-
-#: gui/prefs_page.py:252
-msgid ""
-"Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
-msgstr ""
-
-#: gui/prefs_page.py:286
-msgid "Saved. ⟳ Check for updates finds test releases too."
-msgstr ""
-
-#: gui/prefs_page.py:288
-msgid ""
-"You're on {version}, a test release. Stay on it until the next stable release is out, or go back to the newest stable release now?"
-msgstr ""
-
-#: gui/prefs_page.py:47
-msgid "Preferences"
-msgstr ""
-
-#: gui/prefs_page.py:61 packs/core/snip/frame-snip:544 packs/core/speech/README.md
-msgid "Language"
-msgstr ""
-
-#: gui/prefs_page.py:62
+#: gui/prefs_page.py
 msgid ""
 "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
 msgstr ""
 
-#: gui/prefs_page.py:71
-msgid "Follow the keyboard (now: {language})"
-msgstr ""
-
-#: gui/prefs_page.py:84
-msgid "This window"
-msgstr ""
-
-#: gui/prefs_page.py:94
-msgid "Updates"
-msgstr ""
-
-#: gui/prefs_page.py:95
+#: gui/prefs_page.py
 msgid "Get test releases too"
 msgstr ""
 
-#: gui/prefs_page.py:99
+#: gui/prefs_page.py
+msgid "Go back now"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Haptic ticks on this window's buttons (in VR)"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Homebrew itself is never removed: other programs may live in it."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Keep its settings"
+msgstr ""
+
+#: gui/prefs_page.py packs/core/snip/frame-snip packs/core/speech/README.md
+msgid "Language"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Leave every tweak installed"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Look for a new Frame Tweaks release when this window opens"
+msgstr ""
+
+#: gui/prefs_page.py install.sh
+msgid "No settings left behind by uninstalled tweaks."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Off: only when you press ⟳ Check for updates."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Preferences"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Remove its settings too"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Saved. ⟳ Check for updates finds test releases too."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Settings are deleted."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Settings are kept."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Stay on it"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid ""
 "Test releases (such as 0.7.0-rc.1) come before a release, for people who try things first: newer, less tested. Off: stable releases only."
 msgstr ""
 
-#: gui/report_page.py:37
-msgid "Report a problem"
+#: gui/prefs_page.py
+msgid "The tweaks are uninstalled first; third-party apps stay."
 msgstr ""
 
-#: gui/report_page.py:45
+#: gui/prefs_page.py
+msgid "The tweaks stay installed."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"These stay installed and keep working, with the tweaks that installed them: {apps}."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"They keep working, but nothing updates them, and removing them later takes Frame Tweaks again."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "This window"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Uninstall"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Uninstall Frame Tweaks?"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Uninstall Frame Tweaks…"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Uninstall every tweak, third-party apps too"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Uninstall the tweaks, but keep third-party apps"
+msgstr ""
+
+#: gui/prefs_page.py install.sh
+msgid "Uninstalling Frame Tweaks"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Uninstalling a tweak"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Updates"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "What happens to the tweaks:"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"When you uninstall a tweak, its settings can stay, so it's set up as before if you install it again, or be removed along with it."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"You're on {version}, a test release. Stay on it until the next stable release is out, or go back to the newest stable release now?"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"Your own data is never removed: your dictation history, adb's pairing keys and Claude Code's ~/.claude folder stay either way."
+msgstr ""
+
+#: gui/report_page.py
+msgid "(Trying out the window: no report saved.)"
+msgstr ""
+
+#: gui/report_page.py
 msgid ""
 "1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
 msgstr ""
 
-#: gui/report_page.py:53
-msgid "📄 Open the report"
+#: gui/report_page.py
+msgid "Couldn't write the report (see {command})."
 msgstr ""
 
-#: gui/report_page.py:57
-msgid "🐞 Open the bug form"
+#: gui/report_page.py
+msgid "Report a problem"
 msgstr ""
 
-#: gui/report_page.py:64
-msgid "Saving the diagnostics report…"
-msgstr ""
-
-#: gui/report_page.py:68
-msgid "(Trying out the window: no report saved.)"
-msgstr ""
-
-#: gui/report_page.py:84
+#: gui/report_page.py
 msgid ""
 "Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
 msgstr ""
 
-#: gui/report_page.py:88
-msgid "Couldn't write the report (see {command})."
+#: gui/report_page.py
+msgid "Saving the diagnostics report…"
 msgstr ""
 
-#: gui/wallet_page.py:108
-msgid "under a minute"
+#: gui/report_page.py
+msgid "🐞 Open the bug form"
 msgstr ""
 
-#: gui/wallet_page.py:110
-msgid "{h} h {m} min"
+#: gui/report_page.py
+msgid "📄 Open the report"
 msgstr ""
 
-#: gui/wallet_page.py:146
-msgid "Wallet state unknown (is the Wallet tweak installed?)"
+#: gui/wallet_page.py
+msgid "(default 4 h)"
 msgstr ""
 
-#: gui/wallet_page.py:148
-msgid "🔒 Wallet locked."
-msgstr ""
-
-#: gui/wallet_page.py:149
-msgid "Protected apps ask for the password before they open."
-msgstr ""
-
-#: gui/wallet_page.py:150
-msgid "🔓 Wallet open"
-msgstr ""
-
-#: gui/wallet_page.py:152
-msgid "{wallet_open} for {time}."
-msgstr ""
-
-#: gui/wallet_page.py:159
-msgid "Locks by itself at {at} (in {time}), or sooner after {idle} unused."
-msgstr ""
-
-#: gui/wallet_page.py:162
-msgid "Locks by itself at {at} (in {time})."
-msgstr ""
-
-#: gui/wallet_page.py:164
-msgid "It stays unlocked until you lock it (auto-lock is off)."
-msgstr ""
-
-#: gui/wallet_page.py:166
-msgid "Locks by itself after {idle} unused."
-msgstr ""
-
-#: gui/wallet_page.py:168
-msgid "No automatic lock is scheduled."
-msgstr ""
-
-#: gui/wallet_page.py:174
-msgid "Never"
-msgstr ""
-
-#: gui/wallet_page.py:175 gui/wallet_page.py:110
-msgid "{h} h"
-msgstr ""
-
-#: gui/wallet_page.py:175 gui/wallet_page.py:111
-msgid "{m} min"
-msgstr ""
-
-#: gui/wallet_page.py:215
-msgid "System app"
-msgstr ""
-
-#: gui/wallet_page.py:215
-msgid "Your app"
-msgstr ""
-
-#: gui/wallet_page.py:229
-msgid "Frame Tweaks app"
-msgstr ""
-
-#: gui/wallet_page.py:265
-msgid "Wallet apps"
-msgstr ""
-
-#: gui/wallet_page.py:269
+#: gui/wallet_page.py
 msgid ""
 "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker to pick up, and it gets passed around to family and friends. But the apps you use in it can still hold sensitive things, like messages, notes and signed-in accounts. Here you can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the whole headset: the wallet is unlocked once when you need it, and locks again by itself."
 msgstr ""
 
-#: gui/wallet_page.py:283
-msgid "⏱ Extend timer"
-msgstr ""
-
-#: gui/wallet_page.py:293
-msgid "Auto-lock"
-msgstr ""
-
-#: gui/wallet_page.py:294
-msgid ""
-"Lock the wallet by itself: a set time after unlocking, or after 4 h unused"
-msgstr ""
-
-#: gui/wallet_page.py:297
-msgid "after unlocking:"
-msgstr ""
-
-#: gui/wallet_page.py:314
-msgid ""
-"Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
-msgstr ""
-
-#: gui/wallet_page.py:349
-msgid "Start the {time} countdown to the auto-lock again, from now"
-msgstr ""
-
-#: gui/wallet_page.py:351
-msgid "🔒 Lock now"
-msgstr ""
-
-#: gui/wallet_page.py:351
-msgid "🔓 Unlock…"
-msgstr ""
-
-#: gui/wallet_page.py:352
-msgid "Asks for the wallet password"
-msgstr ""
-
-#: gui/wallet_page.py:353
-msgid "Lock the wallet now: protected apps need the password again"
-msgstr ""
-
-#: gui/wallet_page.py:380
-msgid "(default 4 h)"
-msgstr ""
-
-#: gui/wallet_page.py:403
-msgid "Waiting for the wallet password (look for the dialog)…"
-msgstr ""
-
-#: gui/wallet_page.py:415
-msgid "Protected ({n})"
-msgstr ""
-
-#: gui/wallet_page.py:417
-msgid "Electron told to use it"
-msgstr ""
-
-#: gui/wallet_page.py:417 packs/core/wallet/wallet-launcher:133
-msgid "shared wallet"
-msgstr ""
-
-#: gui/wallet_page.py:419
-msgid "password only (keeps its own session)"
-msgstr ""
-
-#: gui/wallet_page.py:421
-msgid ""
-"Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here."
-msgstr ""
-
-#: gui/wallet_page.py:424
-msgid "Password first"
-msgstr ""
-
-#: gui/wallet_page.py:426
-msgid ""
-"Ask for the wallet password before the app opens (when the wallet is locked)"
-msgstr ""
-
-#: gui/wallet_page.py:428
-msgid "Remove"
-msgstr ""
-
-#: gui/wallet_page.py:429
-msgid "Open it the way it opened before (its original launcher)"
-msgstr ""
-
-#: gui/wallet_page.py:431
-msgid "{app}: removed"
-msgstr ""
-
-#: gui/wallet_page.py:435
+#: gui/wallet_page.py
 msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/wallet_page.py:439
-msgid "Electron app: will be told to use the wallet"
+#: gui/wallet_page.py
+msgid "Also quit it about 10 s after the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:441
-msgid "Protect"
+#: gui/wallet_page.py
+msgid ""
+"Apps listed here open with the <b>shared KDE wallet</b>, the same one in VR and in desktop mode, so the logins and keys they save are kept and stay encrypted. Electron apps are also told to use it (without that they can't keep a sign-in). <b>Password first</b> asks for the wallet password before the app opens, when the wallet is locked. <b>Close after</b> quits the app after that long with no activity (no keyboard, mouse or controller input), so opening it again needs the wallet again; <b>Headset off</b> also quits it ~10 s after the headset is taken off."
 msgstr ""
 
-#: gui/wallet_page.py:445
-msgid "{app}: protected. Reopen it if it's running."
+#: gui/wallet_page.py
+msgid ""
+"Ask for the wallet password before the app opens (when the wallet is locked)"
 msgstr ""
 
-#: gui/wallet_page.py:482
+#: gui/wallet_page.py
+msgid "Asks for the wallet password"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Auto-lock"
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Close after"
 msgstr ""
 
-#: gui/wallet_page.py:491
+#: gui/wallet_page.py
+msgid "Electron app: will be told to use the wallet"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Electron told to use it"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Frame Tweaks app"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Headset off"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "It stays unlocked until you lock it (auto-lock is off)."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid ""
+"Lock the wallet by itself: a set time after unlocking, or after 4 h unused"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Lock the wallet now: protected apps need the password again"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Locks by itself after {idle} unused."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Locks by itself at {at} (in {time}), or sooner after {idle} unused."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Locks by itself at {at} (in {time})."
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Longer"
 msgstr ""
 
-#: gui/wallet_page.py:491
-msgid "Shorter"
+#: gui/wallet_page.py
+msgid "Never"
 msgstr ""
 
-#: gui/wallet_page.py:495
+#: gui/wallet_page.py
+msgid "No automatic lock is scheduled."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Open it the way it opened before (its original launcher)"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Password first"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Protect"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Protected ({n})"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Protected apps ask for the password before they open."
+msgstr ""
+
+#: gui/wallet_page.py
 msgid ""
 "Quit the app after this long with no keyboard, mouse or controller input"
 msgstr ""
 
-#: gui/wallet_page.py:498
-msgid "Headset off"
+#: gui/wallet_page.py
+msgid "Remove"
 msgstr ""
 
-#: gui/wallet_page.py:501
-msgid "Also quit it about 10 s after the headset is taken off"
-msgstr ""
-
-#: gui/wallet_page.py:502
+#: gui/wallet_page.py
 msgid "Set a Close after time first"
 msgstr ""
 
-#: gui/wallet_page.py:514
-msgid "{app}: closes after {time} with no activity"
+#: gui/wallet_page.py
+msgid ""
+"Set up by the “{tweak}” tweak: reinstalling it (↻) adds it back if removed here."
 msgstr ""
 
-#: gui/wallet_page.py:515
-msgid "{app}: no timer"
+#: gui/wallet_page.py
+msgid "Shorter"
 msgstr ""
 
-#: gui/wallet_page.py:526
+#: gui/wallet_page.py
+msgid "Start the {time} countdown to the auto-lock again, from now"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "System app"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Waiting for the wallet password (look for the dialog)…"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Wallet apps"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Wallet state unknown (is the Wallet tweak installed?)"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Your app"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "after unlocking:"
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "also closes when the headset is taken off"
 msgstr ""
 
-#: gui/wallet_page.py:527
-msgid "no longer closes when the headset is taken off"
-msgstr ""
-
-#: gui/wallet_page.py:533
+#: gui/wallet_page.py
 msgid "asks for the wallet password first"
 msgstr ""
 
-#: gui/wallet_page.py:534
+#: gui/wallet_page.py
+msgid "no longer closes when the headset is taken off"
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "opens without asking for the password"
 msgstr ""
 
-#: install.sh:204
+#: gui/wallet_page.py
+msgid "password only (keeps its own session)"
+msgstr ""
+
+#: gui/wallet_page.py packs/core/wallet/wallet-launcher
+msgid "shared wallet"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "under a minute"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{app}: closes after {time} with no activity"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{app}: no timer"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{app}: protected. Reopen it if it's running."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{app}: removed"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{h} h"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{h} h {m} min"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{m} min"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{wallet_open} for {time}."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "⏱ Extend timer"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "🔒 Lock now"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "🔒 Wallet locked."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "🔓 Unlock…"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "🔓 Wallet open"
+msgstr ""
+
+#: install.sh packs/core/snip/install.sh
+msgid "%s failed"
+msgstr ""
+
+#: install.sh lib/link.sh
+msgid "%s has nothing to run"
+msgstr ""
+
+#: install.sh
+msgid "%s is needed by %s: uninstall %s too, or keep %s"
+msgstr ""
+
+#: install.sh
 msgid "%s is now called %s"
 msgstr ""
 
-#: install.sh:214
-msgid "(experimental)"
+#: install.sh
+msgid "%s migration failed"
 msgstr ""
 
-#: install.sh:215
+#: install.sh
+msgid "%s what? (./install.sh list)"
+msgstr ""
+
+#: install.sh
+msgid "%s: held (updates leave it as it is)"
+msgstr ""
+
+#: install.sh
+msgid "%s: updated normally again"
+msgstr ""
+
+#: install.sh
 msgid "(asks for your sudo password)"
 msgstr ""
 
-#: install.sh:217
+#: install.sh
+msgid "(experimental)"
+msgstr ""
+
+#: install.sh
 msgid ""
 "(experimental: relies on SteamVR's internals; see ./install.sh info ID)"
 msgstr ""
 
-#: install.sh:238
-msgid "install what? (./install.sh list)"
+#: install.sh
+msgid "--to needs a release, e.g. v0.3.1"
 msgstr ""
 
-#: install.sh:249 install.sh:288 packs/core/snip/install.sh:16 packs/core/snip/install.sh:19
-msgid "%s failed"
+#: install.sh
+msgid ""
+"About 280 MB, usually a minute or two: the window opens when it's done."
 msgstr ""
 
-#: install.sh:253 install.sh:291
+#: install.sh
+msgid "Added 'Frame Tweaks' to the app menu."
+msgstr ""
+
+#: install.sh
+msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
+msgstr ""
+
+#: install.sh
+msgid ""
+"Couldn't install PyQt6 (what happened: %s); using the simple checklist."
+msgstr ""
+
+#: install.sh
 msgid "Failed: %s"
 msgstr ""
 
-#: install.sh:261
-msgid "uninstall what?"
-msgstr ""
-
-#: install.sh:268 install.sh:364
-msgid "Nothing installed."
-msgstr ""
-
-#: install.sh:278
-msgid "%s is needed by %s: uninstall %s too, or keep %s"
-msgstr ""
-
-#: install.sh:285 install.sh:448
-msgid "removing %s"
-msgstr ""
-
-#: install.sh:304
-msgid ""
-"Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
-msgstr ""
-
-#: install.sh:315 install.sh:386 install.sh:399 install.sh:432 lib/common.sh:425 packs/core/charge-limit/uninstall.sh:20
-msgid "removed %s"
-msgstr ""
-
-#: install.sh:342
-msgid ""
-"uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings"
-msgstr ""
-
-#: install.sh:347
-msgid "Uninstalling every tweak"
-msgstr ""
-
-#: install.sh:362
+#: install.sh
 msgid ""
 "Frame Tweaks is still here: see what failed above, then run this again."
 msgstr ""
 
-#: install.sh:365
-msgid ""
-"Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
+#: install.sh
+msgid "Frame Tweaks is uninstalled."
 msgstr ""
 
-#: install.sh:375
-msgid ""
-"Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again."
+#: install.sh
+msgid "Kept backups of files tweaks changed: %s"
 msgstr ""
 
-#: install.sh:380
+#: install.sh
 msgid ""
 "Kept for the tweaks still installed (%s): ~/.local/share/frame-tweaks, ~/.local/state/frame-tweaks and their settings."
 msgstr ""
 
-#: install.sh:387
-msgid "Kept your own packs: %s"
-msgstr ""
-
-#: install.sh:395
-msgid "Kept backups of files tweaks changed: %s"
-msgstr ""
-
-#: install.sh:400
+#: install.sh
 msgid ""
-"SteamVR's own setting goes back when SteamVR stops; then this goes too: %s"
+"Kept its settings: %s (to remove them too: ./install.sh uninstall --remove-settings %s)"
 msgstr ""
 
-#: install.sh:404
+#: install.sh
 msgid "Kept the settings: %s"
 msgstr ""
 
-#: install.sh:413 install.sh:434
-msgid "Frame Tweaks is uninstalled."
-msgstr ""
-
-#: install.sh:417
-msgid "it is a git worktree"
-msgstr ""
-
-#: install.sh:420
-msgid ""
-"it has files of yours: changes, your own packs in packs/, or a tmp/ folder"
-msgstr ""
-
-#: install.sh:422
-msgid "it has commits that are not pushed anywhere"
-msgstr ""
-
-#: install.sh:424
-msgid "it has other worktrees or stashed changes"
-msgstr ""
-
-#: install.sh:427
-msgid "it has your own packs in packs/"
-msgstr ""
-
-#: install.sh:430
+#: install.sh
 msgid ""
 "Kept this folder, %s: %s. Delete it yourself when you no longer need it."
 msgstr ""
 
-#: install.sh:440
-msgid "reinstall what?"
+#: install.sh
+msgid "Kept your own packs: %s"
 msgstr ""
 
-#: install.sh:455
-msgid "--to needs a release, e.g. v0.3.1"
+#: install.sh
+msgid ""
+"Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
 msgstr ""
 
-#: install.sh:458
-msgid "Updating the checkout"
+#: install.sh
+msgid ""
+"Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 
-#: install.sh:462
+#: install.sh
+msgid "No tweaks found (python3 lib/sft.py mods says why)"
+msgstr ""
+
+#: install.sh
+msgid "Nothing installed yet."
+msgstr ""
+
+#: install.sh
+msgid "Nothing installed."
+msgstr ""
+
+#: install.sh
+msgid ""
+"Nothing was selected, so nothing will be removed. To remove everything, use: %s"
+msgstr ""
+
+#: install.sh
+msgid "Read it before sharing; attach it to a bug report: %s"
+msgstr ""
+
+#: install.sh
+msgid "Remove tweaks?"
+msgstr ""
+
+#: install.sh
+msgid "Removed 'Frame Tweaks' from the app menu."
+msgstr ""
+
+#: install.sh
+msgid ""
+"Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
+msgstr ""
+
+#: install.sh
+msgid "Setting up the full installer window"
+msgstr ""
+
+#: install.sh
+msgid ""
+"Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done."
+msgstr ""
+
+#: install.sh
+msgid ""
+"SteamVR's own setting goes back when SteamVR stops; then this goes too: %s"
+msgstr ""
+
+#: install.sh
+msgid ""
+"Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again."
+msgstr ""
+
+#: install.sh
+msgid "That didn't work (what happened: %s). Press Enter to close."
+msgstr ""
+
+#: install.sh
+msgid "The bug form, with your version filled in: %s"
+msgstr ""
+
+#: install.sh
+msgid ""
+"The full window didn't open (what happened: %s); using the simple checklist."
+msgstr ""
+
+#: install.sh
+msgid ""
+"These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
+msgstr ""
+
+#: install.sh
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
 msgstr ""
 
-#: install.sh:465
-msgid "git pull failed; not reinstalling"
-msgstr ""
-
-#: install.sh:469
-msgid "couldn't reach GitHub; not updating"
-msgstr ""
-
-#: install.sh:473
-msgid "no release found"
-msgstr ""
-
-#: install.sh:478
-msgid ""
-"You're on %s, a test release newer than the newest stable release (%s): you stay on it until a newer stable release is out. To go back to %s now: %s"
-msgstr ""
-
-#: install.sh:481
-msgid "no release %s"
-msgstr ""
-
-#: install.sh:483
-msgid "Updating to %s (%s channel)"
-msgstr ""
-
-#: install.sh:487
-msgid "git checkout failed; not reinstalling"
-msgstr ""
-
-#: install.sh:500
-msgid "channel stable|beta"
-msgstr ""
-
-#: install.sh:503
-msgid ""
-"Updates now take test releases too (vX.Y.Z-rc.N: newer, less tested). To get the newest: %s"
-msgstr ""
-
-#: install.sh:506
-msgid "Updates now take stable releases only."
-msgstr ""
-
-#: install.sh:508
-msgid ""
-"You're on %s, a test release: you move to the next stable release when it's out. To go back to the newest stable release now: %s"
-msgstr ""
-
-#: install.sh:519
-msgid ""
-"Linked, so they update their own way (their row: ↻ runs their installer again): %s"
-msgstr ""
-
-#: install.sh:520
-msgid "Nothing installed yet."
-msgstr ""
-
-#: install.sh:523
-msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
-msgstr ""
-
-#: install.sh:534
-msgid ""
-"Set up the full installer window? It needs PyQt6, the toolkit it's drawn with (about 280 MB, in your home folder). Nothing else is installed: you choose the tweaks in the window.\\n\\nNo = use the simple checklist instead: it installs and removes the same tweaks, without the details, status and settings pages."
-msgstr ""
-
-#: install.sh:536
-msgid ""
-"Couldn't install PyQt6 (what happened: %s); using the simple checklist."
-msgstr ""
-
-#: install.sh:540
-msgid ""
-"The full window didn't open (what happened: %s); using the simple checklist."
-msgstr ""
-
-#: install.sh:557
-msgid "Setting up the full installer window"
-msgstr ""
-
-#: install.sh:558
-msgid ""
-"About 280 MB, usually a minute or two: the window opens when it's done."
-msgstr ""
-
-#: install.sh:564
-msgid ""
-"Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done."
-msgstr ""
-
-#: install.sh:569
-msgid "That didn't work (what happened: %s). Press Enter to close."
-msgstr ""
-
-#: install.sh:599
+#: install.sh
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 
-#: install.sh:611
+#: install.sh
+msgid "Uninstalling every tweak"
+msgstr ""
+
+#: install.sh
+msgid "Updates now take stable releases only."
+msgstr ""
+
+#: install.sh
 msgid ""
-"Nothing was selected, so nothing will be removed. To remove everything, use: %s"
+"Updates now take test releases too (vX.Y.Z-rc.N: newer, less tested). To get the newest: %s"
 msgstr ""
 
-#: install.sh:614
-msgid "Remove tweaks?"
+#: install.sh
+msgid "Updating the checkout"
 msgstr ""
 
-#: install.sh:615
+#: install.sh
+msgid "Updating to %s (%s channel)"
+msgstr ""
+
+#: install.sh
 msgid ""
-"These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
+"You're on %s, a test release newer than the newest stable release (%s): you stay on it until a newer stable release is out. To go back to %s now: %s"
 msgstr ""
 
-#: install.sh:653
-msgid "stopped %s's running programs"
+#: install.sh
+msgid ""
+"You're on %s, a test release: you move to the next stable release when it's out. To go back to the newest stable release now: %s"
 msgstr ""
 
-#: install.sh:676
-msgid "%s migration failed"
+#: install.sh
+msgid "channel stable|beta"
 msgstr ""
 
-#: install.sh:681
-msgid "%s what? (./install.sh list)"
+#: install.sh
+msgid "couldn't reach GitHub; not updating"
 msgstr ""
 
-#: install.sh:685
-msgid "%s: held (updates leave it as it is)"
+#: install.sh
+msgid "git checkout failed; not reinstalling"
 msgstr ""
 
-#: install.sh:686
-msgid "%s: updated normally again"
+#: install.sh
+msgid "git pull failed; not reinstalling"
 msgstr ""
 
-#: install.sh:696
-msgid "The bug form, with your version filled in: %s"
+#: install.sh
+msgid "install what? (./install.sh list)"
 msgstr ""
 
-#: install.sh:741
-msgid "Read it before sharing; attach it to a bug report: %s"
+#: install.sh
+msgid "it has commits that are not pushed anywhere"
 msgstr ""
 
-#: install.sh:779
+#: install.sh
+msgid ""
+"it has files of yours: changes, your own packs in packs/, or a tmp/ folder"
+msgstr ""
+
+#: install.sh
+msgid "it has other worktrees or stashed changes"
+msgstr ""
+
+#: install.sh
+msgid "it has your own packs in packs/"
+msgstr ""
+
+#: install.sh
+msgid "it is a git worktree"
+msgstr ""
+
+#: install.sh
+msgid "no release %s"
+msgstr ""
+
+#: install.sh
+msgid "no release found"
+msgstr ""
+
+#: install.sh
+msgid "reinstall what?"
+msgstr ""
+
+#: install.sh lib/common.sh packs/core/charge-limit/uninstall.sh
+msgid "removed %s"
+msgstr ""
+
+#: install.sh
+msgid "removing %s"
+msgstr ""
+
+#: install.sh
 msgid "run what?"
 msgstr ""
 
-#: install.sh:780 lib/link.sh:52
-msgid "%s has nothing to run"
+#: install.sh
+msgid "stopped %s's running programs"
 msgstr ""
 
-#: install.sh:793
-msgid "Removed 'Frame Tweaks' from the app menu."
+#: install.sh
+msgid "uninstall what?"
 msgstr ""
 
-#: install.sh:794
-msgid "Added 'Frame Tweaks' to the app menu."
-msgstr ""
-
-#: install.sh:96
-msgid "No tweaks found (python3 lib/sft.py mods says why)"
-msgstr ""
-
-#: lib/browser.py:28
-msgid "VR"
-msgstr ""
-
-#: lib/browser.py:28
-msgid "desktop mode"
-msgstr ""
-
-#: lib/browser.py:311
-msgid "Opened in {app} ({session})"
-msgstr ""
-
-#: lib/browser.py:318
+#: install.sh
 msgid ""
-"Your default browser, {default}, can't open links, so {app} did. Choose one in System Settings → Default Applications → Web browser."
+"uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings"
 msgstr ""
 
-#: lib/browser.py:320
+#: lib/browser.py
+msgid "Couldn't open it."
+msgstr ""
+
+#: lib/browser.py
+msgid "No default app found."
+msgstr ""
+
+#: lib/browser.py
 msgid ""
 "No default browser is set, so {app} opened it. Choose one in System Settings → Default Applications → Web browser."
 msgstr ""
 
-#: lib/browser.py:366
-msgid "No default app found."
+#: lib/browser.py
+msgid "Opened in {app} ({session})"
 msgstr ""
 
-#: lib/browser.py:375
-msgid "Couldn't open it."
+#: lib/browser.py
+msgid "VR"
 msgstr ""
 
-#: lib/common.sh:102
-msgid "Homebrew installed."
-msgstr ""
-
-#: lib/common.sh:157
-msgid "Fetching %s"
-msgstr ""
-
-#: lib/common.sh:294
+#: lib/browser.py
 msgid ""
-"The tested versions of %s don't install on this Python (%s); trying the newest."
+"Your default browser, {default}, can't open links, so {app} did. Choose one in System Settings → Default Applications → Web browser."
 msgstr ""
 
-#: lib/common.sh:305
-msgid ""
-"Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
+#: lib/browser.py
+msgid "desktop mode"
 msgstr ""
 
-#: lib/common.sh:311
-msgid "Creating Python venv with jeepney"
-msgstr ""
-
-#: lib/common.sh:361
-msgid "restored %s"
-msgstr ""
-
-#: lib/common.sh:362
-msgid "removed %s (it didn't exist before)"
-msgstr ""
-
-#: lib/common.sh:386
-msgid "restored KDE settings changed by %s"
-msgstr ""
-
-#: lib/common.sh:457
-msgid "Active now."
-msgstr ""
-
-#: lib/common.sh:459
+#: lib/common.sh
 msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
 msgstr ""
 
-#: lib/common.sh:461
+#: lib/common.sh
 msgid "Active from the next SteamVR start."
 msgstr ""
 
-#: lib/common.sh:469
-msgid "installed (active while SteamVR runs)"
+#: lib/common.sh
+msgid "Active now."
 msgstr ""
 
-#: lib/common.sh:474
-msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
+#: lib/common.sh
+msgid "Creating Python venv with jeepney"
 msgstr ""
 
-#: lib/common.sh:475
-msgid "not responding"
+#: lib/common.sh
+msgid "Fetching %s"
 msgstr ""
 
-#: lib/common.sh:496
+#: lib/common.sh
+msgid "Homebrew didn't end up in /home/linuxbrew."
+msgstr ""
+
+#: lib/common.sh
+msgid "Homebrew installed."
+msgstr ""
+
+#: lib/common.sh
 msgid ""
-"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
+"Homebrew is required for this tweak. Install it from https://brew.sh and re-run."
 msgstr ""
 
-#: lib/common.sh:500
-msgid "This can mean it was tampered with. Check %s"
+#: lib/common.sh
+msgid "Homebrew's installer failed (see above)."
 msgstr ""
 
-#: lib/common.sh:51
+#: lib/common.sh
+msgid "Install Homebrew now?"
+msgstr ""
+
+#: lib/common.sh
+msgid ""
+"Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
+msgstr ""
+
+#: lib/common.sh
+msgid ""
+"The tested versions of %s don't install on this Python (%s); trying the newest."
+msgstr ""
+
+#: lib/common.sh
 msgid "These tweaks target the Steam Frame (aarch64); you're on %s."
 msgstr ""
 
-#: lib/common.sh:84
+#: lib/common.sh
+msgid "This can mean it was tampered with. Check %s"
+msgstr ""
+
+#: lib/common.sh
 msgid ""
 "This tweak needs Homebrew, a package manager that installs into /home/linuxbrew.\n"
 "That folder is outside SteamOS's system partition, so updates don't remove it.\n"
 "Homebrew's installer asks for your sudo (admin) password once, to create that folder."
 msgstr ""
 
-#: lib/common.sh:88 packs/core/charge-limit/install.sh:16
+#: lib/common.sh packs/core/charge-limit/install.sh
 msgid ""
 "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
 msgstr ""
 
-#: lib/common.sh:90
+#: lib/common.sh
+msgid "installed (active while SteamVR runs)"
+msgstr ""
+
+#: lib/common.sh
+msgid "not responding"
+msgstr ""
+
+#: lib/common.sh
 msgid ""
-"Homebrew is required for this tweak. Install it from https://brew.sh and re-run."
+"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 
-#: lib/common.sh:90
-msgid "Install Homebrew now?"
+#: lib/common.sh
+msgid "removed %s (it didn't exist before)"
 msgstr ""
 
-#: lib/common.sh:91 packs/core/charge-limit/install.sh:18
+#: lib/common.sh
+msgid "restored %s"
+msgstr ""
+
+#: lib/common.sh
+msgid "restored KDE settings changed by %s"
+msgstr ""
+
+#: lib/common.sh packs/core/charge-limit/install.sh
 msgid "sudo failed."
 msgstr ""
 
-#: lib/common.sh:95
-msgid "Homebrew's installer failed (see above)."
+#: lib/common.sh
+msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 
-#: lib/common.sh:97
-msgid "Homebrew didn't end up in /home/linuxbrew."
+#: lib/link.sh
+msgid "%s has no uninstall command here: see its README"
 msgstr ""
 
-#: lib/link.sh:21
+#: lib/link.sh
 msgid ""
 "Installing %s with its own installer (from the project, not checked by Frame Tweaks):"
 msgstr ""
 
-#: lib/link.sh:27
-msgid "%s has no uninstall command here: see its README"
-msgstr ""
-
-#: lib/link.sh:28
-msgid "Uninstalling %s with its own uninstaller:"
-msgstr ""
-
-#: lib/link.sh:33
+#: lib/link.sh
 msgid "Restart SteamVR to unload it (reboot, or: %s)."
 msgstr ""
 
-#: lib/link.sh:44
-msgid "installed; restart SteamVR to load it"
+#: lib/link.sh
+msgid "Uninstalling %s with its own uninstaller:"
 msgstr ""
 
-#: lib/link.sh:45
+#: lib/link.sh
 msgid "installed by its own installer (it updates its own way)"
 msgstr ""
 
-#: lib/link.sh:48
+#: lib/link.sh
+msgid "installed; restart SteamVR to load it"
+msgstr ""
+
+#: lib/link.sh
 msgid "uninstalled; restart SteamVR to unload it"
 msgstr ""
 
-#: lib/needs.py:38
+#: lib/needs.py
 msgid ""
 "Frame Tweaks isn't installed any more: get it again from its GitHub page."
 msgstr ""
 
-#: lib/needs.py:45
+#: lib/needs.py
 msgid "Not now"
 msgstr ""
 
-#: lib/needs.py:45
+#: lib/needs.py
 msgid "Open Frame Tweaks"
 msgstr ""
 
-#: lib/needs.py:45
+#: lib/needs.py
 msgid "Open Frame Tweaks to install it?"
 msgstr ""
 
-#: lib/sft.py:1001
-msgid "Problems:"
-msgstr ""
-
-#: lib/sft.py:1002
-msgid ""
-"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
-msgstr ""
-
-#: lib/sft.py:1012
-msgid "a newer version is out: {command}"
-msgstr ""
-
-#: lib/sft.py:1013
-msgid "up to date"
-msgstr ""
-
-#: lib/sft.py:1014
-msgid "couldn't check (no connection?)"
-msgstr ""
-
-#: lib/sft.py:1016
-msgid "No packs added from a link."
-msgstr ""
-
-#: lib/sft.py:1023
-msgid "Removed the pack {name} ({folder})."
-msgstr ""
-
-#: lib/sft.py:1035
-msgid ""
-"It isn't used until you trust it again. Read what changed first, then: {command}"
-msgstr ""
-
-#: lib/sft.py:1043
-msgid "official: in use"
-msgstr ""
-
-#: lib/sft.py:1044
-msgid "official: turned off ({command})"
-msgstr ""
-
-#: lib/sft.py:1045
-msgid "trusted: in use"
-msgstr ""
-
-#: lib/sft.py:1046
-msgid "not trusted: not used ({command})"
-msgstr ""
-
-#: lib/sft.py:1047
-msgid "changed since you trusted it: not used until you trust it again"
-msgstr ""
-
-#: lib/sft.py:1059
-msgid "problem: %s"
-msgstr ""
-
-#: lib/sft.py:1067
-msgid "(default)"
-msgstr ""
-
-#: lib/sft.py:1081
-msgid "%s what?"
-msgstr ""
-
-#: lib/sft.py:1084
-msgid "Hidden in the installer window: %s"
-msgstr ""
-
-#: lib/sft.py:1085
-msgid "Shown in the installer window: %s"
-msgstr ""
-
-#: lib/sft.py:1092
-msgid "unknown group {name}; groups: {groups}"
-msgstr ""
-
-#: lib/sft.py:1094
-msgid "Group {name} hidden in the installer window."
-msgstr ""
-
-#: lib/sft.py:1095
-msgid "Group {name} shown in the installer window."
-msgstr ""
-
-#: lib/sft.py:1118
+#: lib/sft.py
 msgid "%s isn't linked"
 msgstr ""
 
-#: lib/sft.py:1140
-msgid "uninstall-settings takes keep or remove"
+#: lib/sft.py
+msgid "%s what?"
 msgstr ""
 
-#: lib/sft.py:1169
-msgid "{id} has no settings; these do: {ids}"
+#: lib/sft.py
+msgid "(default)"
 msgstr ""
 
-#: lib/sft.py:1177
-msgid "expected KEY=VALUE, got %s"
+#: lib/sft.py
+msgid "Added the pack {name} in {folder}."
 msgstr ""
 
-#: lib/sft.py:1181
-msgid "{id} has no setting {key}; it has: {keys}"
+#: lib/sft.py
+msgid "By {author}."
 msgstr ""
 
-#: lib/sft.py:740
-msgid "{key}: {text} isn't one of: {choices}"
-msgstr ""
-
-#: lib/sft.py:750
-msgid ""
-"once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
-msgstr ""
-
-#: lib/sft.py:758 lib/sft.py:1081 lib/sft.py:1114 lib/sft.py:1118 lib/sft.py:1146
-msgid "unknown component: %s"
-msgstr ""
-
-#: lib/sft.py:761
-msgid "Why: %s"
-msgstr ""
-
-#: lib/sft.py:765
-msgid "Needs: %s"
-msgstr ""
-
-#: lib/sft.py:769
+#: lib/sft.py
 msgid "By: %s"
 msgstr ""
 
-#: lib/sft.py:771
-msgid "Source: %s"
+#: lib/sft.py
+msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
 msgstr ""
 
-#: lib/sft.py:773
+#: lib/sft.py
 msgid ""
 "From the pack {pack} ({folder}), not part of Frame Tweaks; used instead of {other}'s"
 msgstr ""
 
-#: lib/sft.py:774
-msgid "From the pack {pack} ({folder}), not part of Frame Tweaks"
+#: lib/sft.py
+msgid "Group {name} hidden in the installer window."
 msgstr ""
 
-#: lib/sft.py:776
-msgid "More: %s"
+#: lib/sft.py
+msgid "Group {name} shown in the installer window."
 msgstr ""
 
-#: lib/sft.py:779
-msgid "Run ({label}): {command}"
+#: lib/sft.py
+msgid "Hidden in the installer window: %s"
 msgstr ""
 
-#: lib/sft.py:781
-msgid "Settings: %s"
-msgstr ""
-
-#: lib/sft.py:805
-msgid "git isn't installed"
-msgstr ""
-
-#: lib/sft.py:807
-msgid "git took too long (no connection?)"
-msgstr ""
-
-#: lib/sft.py:811
-msgid "git {command} failed"
-msgstr ""
-
-#: lib/sft.py:838
+#: lib/sft.py
 msgid ""
-"That isn't a link to a pack: give the address of its git repository, starting with https://"
+"It isn't used until you trust it again. Read what changed first, then: {command}"
 msgstr ""
 
-#: lib/sft.py:840
-msgid "{ref} isn't a branch or tag name"
-msgstr ""
-
-#: lib/sft.py:843
-msgid "You have a pack in {folder} already: update it, or remove it first."
-msgstr ""
-
-#: lib/sft.py:851
+#: lib/sft.py
 msgid ""
-"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
 msgstr ""
 
-#: lib/sft.py:864
-msgid "{pack} wasn't added from a link: change its folder yourself."
-msgstr ""
-
-#: lib/sft.py:866
-msgid ""
-"{pack} was added at a fixed version: to follow another one, remove it and add it again."
-msgstr ""
-
-#: lib/sft.py:924
-msgid "Only packs in {folder} can be removed here."
-msgstr ""
-
-#: lib/sft.py:928
-msgid "Uninstall its tweaks first: {ids} ({command})."
-msgstr ""
-
-#: lib/sft.py:929
+#: lib/sft.py
 msgid ""
 "Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
 msgstr ""
 
-#: lib/sft.py:960
-msgid "more than one pack is called {name}: give its folder ({folders})"
+#: lib/sft.py
+msgid "More: %s"
 msgstr ""
 
-#: lib/sft.py:964
-msgid "no pack {name}; see {command}"
+#: lib/sft.py
+msgid "Needs: %s"
 msgstr ""
 
-#: lib/sft.py:971
-msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
+#: lib/sft.py
+msgid "No packs added from a link."
 msgstr ""
 
-#: lib/sft.py:974
+#: lib/sft.py
+msgid "Only packs in {folder} can be removed here."
+msgstr ""
+
+#: lib/sft.py
+msgid "Problems:"
+msgstr ""
+
+#: lib/sft.py
+msgid "Removed the pack {name} ({folder})."
+msgstr ""
+
+#: lib/sft.py
+msgid "Run ({label}): {command}"
+msgstr ""
+
+#: lib/sft.py
+msgid "Settings: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "Shown in the installer window: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "Source: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid ""
+"That isn't a link to a pack: give the address of its git repository, starting with https://"
+msgstr ""
+
+#: lib/sft.py
+msgid ""
+"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+msgstr ""
+
+#: lib/sft.py
+msgid "Tweaks: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "Uninstall its tweaks first: {ids} ({command})."
+msgstr ""
+
+#: lib/sft.py
+msgid "Why: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "You have a pack in {folder} already: update it, or remove it first."
+msgstr ""
+
+#: lib/sft.py
+msgid "a newer version is out: {command}"
+msgstr ""
+
+#: lib/sft.py
+msgid "changed since you trusted it: not used until you trust it again"
+msgstr ""
+
+#: lib/sft.py
+msgid "couldn't check (no connection?)"
+msgstr ""
+
+#: lib/sft.py
+msgid "expected KEY=VALUE, got %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "git isn't installed"
+msgstr ""
+
+#: lib/sft.py
+msgid "git took too long (no connection?)"
+msgstr ""
+
+#: lib/sft.py
+msgid "git {command} failed"
+msgstr ""
+
+#: lib/sft.py
 msgid "in use; its tweaks are listed"
 msgstr ""
 
-#: lib/sft.py:975
-msgid "turned off (installed tweaks of it stay until you uninstall them)"
+#: lib/sft.py
+msgid "more than one pack is called {name}: give its folder ({folders})"
 msgstr ""
 
-#: lib/sft.py:980
-msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
-msgstr ""
-
-#: lib/sft.py:983
-msgid "trusted; its tweaks are listed now"
-msgstr ""
-
-#: lib/sft.py:984
+#: lib/sft.py
 msgid "no longer used (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
-#: lib/sft.py:996
-msgid "Added the pack {name} in {folder}."
+#: lib/sft.py
+msgid "no pack {name}; see {command}"
 msgstr ""
 
-#: lib/sft.py:997
-msgid "By {author}."
+#: lib/sft.py
+msgid "not trusted: not used ({command})"
 msgstr ""
 
-#: lib/sft.py:998
-msgid "Tweaks: %s"
+#: lib/sft.py
+msgid "official: in use"
+msgstr ""
+
+#: lib/sft.py
+msgid "official: turned off ({command})"
+msgstr ""
+
+#: lib/sft.py
+msgid ""
+"once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
+msgstr ""
+
+#: lib/sft.py
+msgid "problem: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "trusted: in use"
+msgstr ""
+
+#: lib/sft.py
+msgid "trusted; its tweaks are listed now"
+msgstr ""
+
+#: lib/sft.py
+msgid "turned off (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+
+#: lib/sft.py
+msgid "uninstall-settings takes keep or remove"
+msgstr ""
+
+#: lib/sft.py
+msgid "unknown component: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "unknown group {name}; groups: {groups}"
+msgstr ""
+
+#: lib/sft.py
+msgid "up to date"
+msgstr ""
+
+#: lib/sft.py
+msgid "{id} has no setting {key}; it has: {keys}"
+msgstr ""
+
+#: lib/sft.py
+msgid "{id} has no settings; these do: {ids}"
+msgstr ""
+
+#: lib/sft.py
+msgid "{key}: {text} isn't one of: {choices}"
+msgstr ""
+
+#: lib/sft.py
+msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
+msgstr ""
+
+#: lib/sft.py
+msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
+msgstr ""
+
+#: lib/sft.py
+msgid ""
+"{pack} was added at a fixed version: to follow another one, remove it and add it again."
+msgstr ""
+
+#: lib/sft.py
+msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr ""
+
+#: lib/sft.py
+msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
@@ -1983,38 +1983,24 @@ msgid ""
 "Use your phone without taking the headset off. Google's `adb` tool doesn't run on the Frame's ARM processor, so this installs a build that does; in VR, the window takes the phone's shape."
 msgstr ""
 
-#: packs/core/adb-scrcpy/android-mirror.desktop:12
+#: packs/core/adb-scrcpy/android-mirror.desktop
 msgid "Choose phone…"
 msgstr ""
 
-#: packs/core/adb-scrcpy/android-mirror.desktop:4
+#: packs/core/adb-scrcpy/android-mirror.desktop
 msgid "Mirror and control an Android phone (scrcpy over wireless adb)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/install.sh:25
-msgid "couldn't put the new adb in place (the one before is in %s or %s)"
+#: packs/core/adb-scrcpy/install.sh
+msgid "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: %s"
 msgstr ""
 
-#: packs/core/adb-scrcpy/install.sh:27
+#: packs/core/adb-scrcpy/install.sh
 msgid ""
 "Arch Linux ARM's current adb doesn't run on this SteamOS; keeping the adb you have. Missing: %s"
 msgstr ""
 
-#: packs/core/adb-scrcpy/install.sh:29
-msgid "Arch Linux ARM's current adb doesn't run on this SteamOS. Missing: %s"
-msgstr ""
-
-#: packs/core/adb-scrcpy/install.sh:47
-msgid ""
-"SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
-msgstr ""
-
-#: packs/core/adb-scrcpy/install.sh:63
-msgid ""
-"In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both)."
-msgstr ""
-
-#: packs/core/adb-scrcpy/install.sh:64
+#: packs/core/adb-scrcpy/install.sh
 msgid ""
 "Done. One-time pairing: on the phone open Developer options → Wireless debugging →\n"
 "\"Pair device with pairing code\", then within the minute run:\n"
@@ -2022,230 +2008,192 @@ msgid ""
 "Afterwards just launch 'Android Mirror' (or run: phone)."
 msgstr ""
 
-#: packs/core/adb-scrcpy/install.sh:7
+#: packs/core/adb-scrcpy/install.sh
+msgid ""
+"In VR, the window keeps its width when the phone turns, and clicks on an upright phone land at its left edge (install a VR environment tweak to fix both)."
+msgstr ""
+
+#: packs/core/adb-scrcpy/install.sh
 msgid "Installing scrcpy (Homebrew)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone-fit:76
-msgid "phone-fit: no X display"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:141 packs/core/adb-scrcpy/README.md
-msgid "Picture size (long side, pixels)"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:142 packs/core/adb-scrcpy/README.md
-msgid "Bit rate (Mbit/s)"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:144
-msgid "Frame rate (fps, at most)"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
-msgid "Fast"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
-msgid "Joystick scrolling"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
-msgid "Medium"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:145 packs/core/adb-scrcpy/README.md
-msgid "Slow"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:148
-msgid "Clipboard with the phone"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:148 packs/core/adb-scrcpy/README.md
-msgid "Not shared"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:148 packs/core/adb-scrcpy/README.md
-msgid "Shared"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:297
-msgid "Restart stream"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:297
-msgid "Restart stream to apply"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch.js:316
+#: packs/core/adb-scrcpy/install.sh
 msgid ""
-"Picture and smoothness apply when the stream restarts; joystick speed at once."
+"SteamVR's OpenVR library not found: no joystick scrolling on the mirror."
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone-touch:104
-msgid ""
-"scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
+#: packs/core/adb-scrcpy/install.sh
+msgid "couldn't put the new adb in place (the one before is in %s or %s)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone-touch:118 packs/core/adb-scrcpy/phone:139 packs/core/adb-scrcpy/phone-touch.js:311 packs/core/adb-scrcpy/android-mirror.desktop:3 packs/core/adb-scrcpy/README.md
-msgid "Android Mirror"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch:118
-msgid "VR extras are off"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone-touch:91
-msgid "phone-touch: can't find scrcpy's server"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:106
-msgid ""
-"Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:106
-msgid "The phone didn't offer pairing"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:107
-msgid "Android Mirror: pair with %s"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:107
-msgid "The six-digit pairing code the phone shows:"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:107 packs/core/adb-scrcpy/phone:197 packs/core/adb-scrcpy/phone:204 packs/core/adb-scrcpy/phone:206 packs/core/adb-scrcpy/phone:209 packs/core/adb-scrcpy/phone:214 packs/core/adb-scrcpy/phone:216 packs/core/adb-scrcpy/phone:278 packs/core/adb-scrcpy/phone:287
-msgid "the phone"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:110
-msgid "Pairing didn't work"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:110
-msgid ""
-"adb said: %s\n"
-"\n"
-"Check the code and try again (a new code appears each time the phone's pairing dialog opens)."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:116
-msgid ""
-"Waiting for %s: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:122
+#: packs/core/adb-scrcpy/phone
 msgid "%s didn't appear"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:122
-msgid ""
-"It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
+#: packs/core/adb-scrcpy/phone
+msgid "%s isn't on the Wi-Fi with Wireless debugging on."
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:126 packs/core/adb-scrcpy/phone:209
-msgid ""
-"Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
+#: packs/core/adb-scrcpy/phone packs/core/tools/check-system.sh packs/core/vr-dashboard/check-system.sh
+msgid "%s not found"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:126
-msgid "the remembered phone"
+#: packs/core/adb-scrcpy/phone
+msgid "Android Mirror setup"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:130
-msgid "Looking for your phone on the Wi-Fi…"
+#: packs/core/adb-scrcpy/phone
+msgid "Android Mirror: %s"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:136
-msgid "No phone found"
+#: packs/core/adb-scrcpy/phone
+msgid "Android Mirror: pair with %s"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:136
-msgid ""
-"No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:139
+#: packs/core/adb-scrcpy/phone
 msgid ""
 "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:144 packs/core/adb-scrcpy/phone:145
-msgid "Which phone?"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:145
-msgid "Several are advertising: %s. Run: phone --pick"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:153
-msgid "Use %s instead"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:153
-msgid "Wait for %s"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:154
-msgid "%s isn't on the Wi-Fi with Wireless debugging on."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:158 packs/core/tools/check-system.sh:3 packs/core/vr-dashboard/check-system.sh:7
-msgid "%s not found"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:158
-msgid ""
-"It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:197 packs/core/adb-scrcpy/phone:214
+#: packs/core/adb-scrcpy/phone
 msgid "Connecting to %s…"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:202
+#: packs/core/adb-scrcpy/phone
+msgid "Couldn't connect to %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid ""
 "Couldn't connect to %s. adb said: %s\n"
 "\n"
 "If the phone forgot the Frame (or it's a new phone), pair them again."
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:205
+#: packs/core/adb-scrcpy/phone
 msgid "Forget %s"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:205
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Looking for your phone on the Wi-Fi…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "No phone found"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid "Pair it again"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:205
-msgid "this phone"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:206 packs/core/adb-scrcpy/phone:216
-msgid "Couldn't connect to %s"
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:206
-msgid "See Android Mirror's README for adb pair."
-msgstr ""
-
-#: packs/core/adb-scrcpy/phone:216
+#: packs/core/adb-scrcpy/phone
 msgid "Paired, but connecting still failed. adb said: %s"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:239
+#: packs/core/adb-scrcpy/phone
+msgid "Pairing didn't work"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Phone connection lost"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Phone not found"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Reconnecting…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "See Android Mirror's README for adb pair."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Several are advertising: %s. Run: phone --pick"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid "Starting the mirror…"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:249
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "The connection to %s was lost. Reconnecting…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid "The mirror didn't start"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:249
+#: packs/core/adb-scrcpy/phone
+msgid "The phone didn't offer pairing"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "The six-digit pairing code the phone shows:"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Use %s instead"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Wait for %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"Waiting for %s: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Which phone?"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"adb said: %s\n"
+"\n"
+"Check the code and try again (a new code appears each time the phone's pairing dialog opens)."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid ""
 "scrcpy stopped straight away. It said:\n"
 "\n"
@@ -2254,67 +2202,119 @@ msgid ""
 "If the phone asked to allow USB debugging or screen sharing, allow it and try again."
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:277
-msgid "Phone connection lost"
+#: packs/core/adb-scrcpy/phone
+msgid "the phone"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:277
-msgid "Reconnecting…"
+#: packs/core/adb-scrcpy/phone
+msgid "the remembered phone"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:278
-msgid "The connection to %s was lost. Reconnecting…"
+#: packs/core/adb-scrcpy/phone
+msgid "this phone"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:287
-msgid "Phone not found"
+#: packs/core/adb-scrcpy/phone-fit
+msgid "phone-fit: no X display"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:287
+#: packs/core/adb-scrcpy/phone-touch packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/android-mirror.desktop packs/core/adb-scrcpy/README.md
+msgid "Android Mirror"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch
+msgid "VR extras are off"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch
+msgid "phone-touch: can't find scrcpy's server"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch
 msgid ""
-"The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
+"scrcpy {version} isn't a version Frame Tweaks has been tested with ({tested}), so the mirror's VR extras are off: aimed laser clicks and joystick scrolling. It works as a plain window until a Frame Tweaks update."
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:50
-msgid "Android Mirror setup"
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Bit rate (Mbit/s)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:89
-msgid "Android Mirror: %s"
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Clipboard with the phone"
 msgstr ""
 
-#: packs/core/adb-scrcpy/phone:97
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Fast"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Frame rate (fps, at most)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Joystick scrolling"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Medium"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Not shared"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
 msgid ""
-"On the phone: Developer options → Wireless debugging → Pair device with pairing code. Waiting for it to show a code…"
+"Picture and smoothness apply when the stream restarts; joystick speed at once."
 msgstr ""
 
-#: packs/core/adb-scrcpy/status.sh:14
-msgid ""
-"scrcpy %s is untested (Frame Tweaks is tested with %s.x): the mirror works, its VR laser clicks and joystick scrolling are off"
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Picture size (long side, pixels)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/status.sh:15
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Restart stream"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Restart stream to apply"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Shared"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Slow"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh
 msgid "adb %s, scrcpy%s, phone launcher"
 msgstr ""
 
-#: packs/core/adb-scrcpy/status.sh:3
-msgid "adb not installed"
-msgstr ""
-
-#: packs/core/adb-scrcpy/status.sh:4
+#: packs/core/adb-scrcpy/status.sh
 msgid "adb installed but does not run (re-run ./install.sh adb-scrcpy)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/status.sh:7
+#: packs/core/adb-scrcpy/status.sh
+msgid "adb not installed"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh
 msgid ""
 "phone launcher or its menu entry missing (re-run ./install.sh adb-scrcpy)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/status.sh:8
+#: packs/core/adb-scrcpy/status.sh
+msgid ""
+"scrcpy %s is untested (Frame Tweaks is tested with %s.x): the mirror works, its VR laser clicks and joystick scrolling are off"
+msgstr ""
+
+#: packs/core/adb-scrcpy/status.sh
 msgid "scrcpy missing (brew install scrcpy)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/uninstall.sh:10
+#: packs/core/adb-scrcpy/uninstall.sh
 msgid ""
 "Kept adb's pairing keys (~/.android) and scrcpy (brew uninstall scrcpy)."
 msgstr ""
@@ -2342,387 +2342,387 @@ msgstr ""
 msgid "styled after"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad-vr.desktop:3
+#: packs/core/arrowpad/arrowpad-vr.desktop
 msgid "Arrow Pad (VR window)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad-vr.desktop:4
+#: packs/core/arrowpad/arrowpad-vr.desktop
 msgid "Arrow/navigation keys as their own floating VR window"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.desktop:4
+#: packs/core/arrowpad/arrowpad.desktop
 msgid "Floating arrow/navigation keys in desktop mode; never steals focus"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1029
-msgid "Pinned: tap to allow moving"
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Alt"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:105
-msgid "key {code}"
+#: packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
+msgid "Arrow Pad"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1075
-msgid "Done"
+#: packs/core/arrowpad/arrowpad.py
+msgid "Arrow Pad (VR)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1245
-msgid "Shift, Ctrl, Alt and Super were pressed and let go."
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Bksp"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1248
-msgid "{device} still held {keys}: released too."
+#: packs/core/arrowpad/arrowpad.py
+msgid "Copy (Ctrl+C)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1253 packs/core/arrowpad/arrowpad.py:1267
-msgid "Keys released"
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Ctrl"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1261
-msgid ""
-"Desktop mode has taken all input, so other windows don't get it, and didn't give it back: tap Right Ctrl on a keyboard."
+#: packs/core/arrowpad/arrowpad.py
+msgid "Cut (Ctrl+X)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1265
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Del"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
 msgid ""
 "Desktop mode had taken all input, so other windows didn't get it: given back."
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1278
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"Desktop mode has taken all input, so other windows don't get it, and didn't give it back: tap Right Ctrl on a keyboard."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Dictation isn't installed"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Done"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "End"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Enter"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Esc"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "F1–F12 layer (tap again to go back)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Find (Ctrl+F)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Graphite"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js
+msgid "Haptics"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Home"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Ins"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Keys released"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Larger"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Launcher"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Light"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Menu"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "mouse button"
+msgid "Middle"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Middle click: your next click becomes a middle click"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Midnight"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Normal"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Off"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Open the desktop's application menu (taps Super)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Paste (Ctrl+V)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "PgDn"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "PgUp"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Pin: stop accidental moves"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Pinned: tap to allow moving"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "PrtSc"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Redo (Ctrl+Shift+Z)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Reset position"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "mouse button"
+msgid "Right"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Right click: your next click becomes a right click"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Save (Ctrl+S)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
 msgid "Screen snip isn't installed"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1279
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Select all (Ctrl+A)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Settings: theme and haptics"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Shift"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Shift, Ctrl, Alt and Super were pressed and let go."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Smaller"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Snip"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Super"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Tab"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
 msgid ""
 "The Snip button copies, saves, reads or reads aloud part of the screen, with Screen snip + Narrate. It isn't installed yet."
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1290
-msgid "Dictation isn't installed"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:1291
+#: packs/core/arrowpad/arrowpad.py
 msgid ""
 "The 🎤 button types what you say, with Dictation (speech to text, on the Frame itself). It isn't installed yet."
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1388
-msgid "button size multiplier (default 1.0)"
+#: packs/core/arrowpad/arrowpad.py
+msgid "Theme"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1389
-msgid "ydotoold socket path"
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Tools"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1390
-msgid "close a running pad"
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1391
-msgid "collapse a running pad to its chevron, or expand it"
+#: packs/core/arrowpad/arrowpad.py
+msgid "Undo (Ctrl+Z)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1392
-msgid "open in desktop mode (even from the VR menu)"
+#: packs/core/arrowpad/arrowpad.py
+msgctxt "key legend"
+msgid "Unstick"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1393
-msgid "open as a floating VR window"
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:1411
+#: packs/core/arrowpad/arrowpad.py
 msgid ""
 "arrowpad: cannot reach ydotoold at {socket}: {error}\n"
 "Start it with: systemctl --user start ydotoold"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:231
-msgctxt "key legend"
-msgid "Bksp"
+#: packs/core/arrowpad/arrowpad.py
+msgid "arrowpad: desktop mode isn't running"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:231
-msgctxt "key legend"
-msgid "Esc"
+#: packs/core/arrowpad/arrowpad.py
+msgid "button size multiplier (default 1.0)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:231
-msgctxt "key legend"
-msgid "Tab"
+#: packs/core/arrowpad/arrowpad.py
+msgid "close a running pad"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:232
-msgctxt "key legend"
-msgid "Del"
+#: packs/core/arrowpad/arrowpad.py
+msgid "collapse a running pad to its chevron, or expand it"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:232
-msgctxt "key legend"
-msgid "Enter"
+#: packs/core/arrowpad/arrowpad.py
+msgid "key {code}"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:232
-msgctxt "key legend"
-msgid "Ins"
+#: packs/core/arrowpad/arrowpad.py
+msgid "open as a floating VR window"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:233
-msgctxt "key legend"
-msgid "End"
+#: packs/core/arrowpad/arrowpad.py
+msgid "open in desktop mode (even from the VR menu)"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:233
-msgctxt "key legend"
-msgid "Home"
+#: packs/core/arrowpad/arrowpad.py
+msgid "ydotoold socket path"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:233
-msgctxt "key legend"
-msgid "PgUp"
+#: packs/core/arrowpad/arrowpad.py
+msgid "{device} still held {keys}: released too."
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:234
-msgctxt "key legend"
-msgid "Menu"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:234
-msgctxt "key legend"
-msgid "PgDn"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:234
-msgctxt "key legend"
-msgid "PrtSc"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:235
-msgctxt "key legend"
-msgid "Alt"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:235
-msgctxt "key legend"
-msgid "Ctrl"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:235
-msgctxt "key legend"
-msgid "Shift"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:236
-msgctxt "key legend"
-msgid "Super"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:238
-msgctxt "mouse button"
-msgid "Middle"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:238
-msgctxt "mouse button"
-msgid "Right"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:267
-msgid ""
-"Dictation: tap to start (red), tap again to stop; yellow = transcribing, then it types"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:268
-msgid "Copy (Ctrl+C)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:268
-msgid "Cut (Ctrl+X)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:268
-msgid "Paste (Ctrl+V)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:269
-msgid "F1–F12 layer (tap again to go back)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:269
-msgid "Select all (Ctrl+A)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:269
-msgid "Undo (Ctrl+Z)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:270
-msgid "Find (Ctrl+F)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:270
-msgid "Redo (Ctrl+Shift+Z)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:270
-msgid "Save (Ctrl+S)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:271
-msgid ""
-"Tools layer: screen snip, dictation, editing shortcuts (tap again to go back)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:272
-msgid ""
-"Screen snip: select a rectangle, then copy it, save it, copy its text or read it aloud"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:273
-msgid ""
-"Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:274
-msgid "Right click: your next click becomes a right click"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:275
-msgid "Open the desktop's application menu (taps Super)"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:276
-msgid ""
-"Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:277
-msgid "Middle click: your next click becomes a middle click"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:278
+#: packs/core/arrowpad/arrowpad.py
 msgid ""
 "{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py:280 packs/core/arrowpad/arrowpad.py:1029
-msgid "Pin: stop accidental moves"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:280
-msgid "Settings: theme and haptics"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:281
-msgid "Larger"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:281
-msgid "Reset position"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:281
-msgid "Smaller"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:285
-msgctxt "key legend"
-msgid "Tools"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:285
-msgctxt "key legend"
-msgid "Unstick"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:286
-msgctxt "key legend"
-msgid "Launcher"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:286
-msgctxt "key legend"
-msgid "Snip"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:296
-msgid "Graphite"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:300
-msgid "Midnight"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:307
-msgid "Light"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:307
-msgid "Normal"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:307 packs/core/scroll-strips/patch.js:219 packs/core/scroll-strips/patch.js:220 packs/core/scroll-strips/patch.js:224 packs/core/scroll-strips/README.md
-msgid "Off"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:308 packs/core/scroll-strips/patch.js:224
-msgid "Haptics"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:308
-msgid "Theme"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:62
-msgid "arrowpad: desktop mode isn't running"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:759 packs/core/arrowpad/arrowpad.py:959 packs/core/arrowpad/arrowpad.py:1253 packs/core/arrowpad/arrowpad.py:1267 packs/core/arrowpad/arrowpad.desktop:3 packs/core/arrowpad/README.md
-msgid "Arrow Pad"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py:759 packs/core/arrowpad/arrowpad.py:959
-msgid "Arrow Pad (VR)"
-msgstr ""
-
-#: packs/core/arrowpad/check-system.sh:6
+#: packs/core/arrowpad/check-system.sh
 msgid "SteamVR's %s is gone: the VR pad can't start"
 msgstr ""
 
-#: packs/core/arrowpad/check-system.sh:7
+#: packs/core/arrowpad/check-system.sh
 msgid "SteamVR's OpenVR library and ydotoold's socket present"
 msgstr ""
 
-#: packs/core/arrowpad/check-system.sh:7
+#: packs/core/arrowpad/check-system.sh
 msgid "ydotoold's socket is missing (./install.sh status ydotool)"
 msgstr ""
 
-#: packs/core/arrowpad/install.sh:10 packs/core/snip/install.sh:8 packs/integrations/nordvpn/install.sh:10
-msgid "couldn't install PyQt6"
-msgstr ""
-
-#: packs/core/arrowpad/install.sh:21
-msgid ""
-"SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
-msgstr ""
-
-#: packs/core/arrowpad/install.sh:30
+#: packs/core/arrowpad/install.sh
 msgid ""
 "Done. Launch 'Arrow Pad' from the app menu (or: arrowpad --scale 1.5)."
 msgstr ""
 
-#: packs/core/arrowpad/status.sh:3
-msgid "arrowpad not installed"
+#: packs/core/arrowpad/install.sh
+msgid ""
+"SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
 msgstr ""
 
-#: packs/core/arrowpad/status.sh:4
+#: packs/core/arrowpad/install.sh packs/core/snip/install.sh packs/integrations/nordvpn/install.sh
+msgid "couldn't install PyQt6"
+msgstr ""
+
+#: packs/core/arrowpad/status.sh
 msgid "PyQt6 venv broken (re-run ./install.sh arrowpad)"
 msgstr ""
 
-#: packs/core/arrowpad/status.sh:5
+#: packs/core/arrowpad/status.sh
 msgid "arrowpad installed"
 msgstr ""
 
-#: packs/core/arrowpad/uninstall.sh:11
+#: packs/core/arrowpad/status.sh
+msgid "arrowpad not installed"
+msgstr ""
+
+#: packs/core/arrowpad/uninstall.sh
 msgid "stopped a running Arrow Pad"
 msgstr ""
 
@@ -2780,106 +2780,106 @@ msgid ""
 "once, to add a udev rule that lets you pause the battery's charging, and again to remove it"
 msgstr ""
 
-#: packs/core/charge-limit/check-system.sh:5
+#: packs/core/charge-limit/check-system.sh
 msgid "SteamOS no longer has: %s"
 msgstr ""
 
-#: packs/core/charge-limit/check-system.sh:5
-msgid "the charger's pause switch"
-msgstr ""
-
-#: packs/core/charge-limit/check-system.sh:7
+#: packs/core/charge-limit/check-system.sh
 msgid "The charger's pause switch is there"
 msgstr ""
 
-#: packs/core/charge-limit/full-once.sh:10
+#: packs/core/charge-limit/check-system.sh
+msgid "the charger's pause switch"
+msgstr ""
+
+#: packs/core/charge-limit/full-once.sh
 msgid "Charging to 100% once; then the limit applies again."
 msgstr ""
 
-#: packs/core/charge-limit/full-once.sh:5
+#: packs/core/charge-limit/full-once.sh
 msgid "Install Battery charge limit first."
 msgstr ""
 
-#: packs/core/charge-limit/full-once.sh:7
+#: packs/core/charge-limit/full-once.sh
 msgid "The limit is off: the battery already charges to 100%."
 msgstr ""
 
-#: packs/core/charge-limit/install.sh:13
+#: packs/core/charge-limit/install.sh
+msgid "Couldn't add the udev rule."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh
+msgid ""
+"Installed; the limit is off (its settings), so the battery charges to 100%."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh
+msgid "The battery now stops charging at %s%% while the Frame is on."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh
 msgid ""
 "The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
 "password once, to add a udev rule (%s) that SteamOS updates keep."
 msgstr ""
 
-#: packs/core/charge-limit/install.sh:22
-msgid "Couldn't add the udev rule."
+#: packs/core/charge-limit/status.sh
+msgid "Battery at %s%%, but charging isn't paused; see: %s"
 msgstr ""
 
-#: packs/core/charge-limit/install.sh:34
-msgid ""
-"Installed; the limit is off (its settings), so the battery charges to 100%."
-msgstr ""
-
-#: packs/core/charge-limit/install.sh:36
-msgid "The battery now stops charging at %s%% while the Frame is on."
-msgstr ""
-
-#: packs/core/charge-limit/status.sh:11
-msgid ""
-"SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
-msgstr ""
-
-#: packs/core/charge-limit/status.sh:13
-msgid "This SteamOS has no charger pause switch, so the limit can't work"
-msgstr ""
-
-#: packs/core/charge-limit/status.sh:14
+#: packs/core/charge-limit/status.sh
 msgid "Can't pause charging: Reinstall it (it asks for your password)"
 msgstr ""
 
-#: packs/core/charge-limit/status.sh:15
-msgid "Not running (Reinstall starts it)"
-msgstr ""
-
-#: packs/core/charge-limit/status.sh:16
-msgid "No battery found"
-msgstr ""
-
-#: packs/core/charge-limit/status.sh:19
+#: packs/core/charge-limit/status.sh
 msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
 msgstr ""
 
-#: packs/core/charge-limit/status.sh:20
+#: packs/core/charge-limit/status.sh
+msgid "Holding at %s%% (battery %s%%, not charging)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
 msgid "Limit off: charges to 100%% (now %s%%)"
 msgstr ""
 
-#: packs/core/charge-limit/status.sh:24
+#: packs/core/charge-limit/status.sh
+msgid "No battery found"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Not running (Reinstall starts it)"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
 msgid ""
 "Paused at %s%%, but the battery still charges: the Frame's charger ignored the pause"
 msgstr ""
 
-#: packs/core/charge-limit/status.sh:25
-msgid "Holding at %s%% (battery %s%%, not charging)"
+#: packs/core/charge-limit/status.sh
+msgid ""
+"SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
 msgstr ""
 
-#: packs/core/charge-limit/status.sh:29
-msgid "Battery at %s%%, but charging isn't paused; see: %s"
-msgstr ""
-
-#: packs/core/charge-limit/status.sh:30
+#: packs/core/charge-limit/status.sh
 msgid "Stops charging at %s%% (battery %s%%)"
 msgstr ""
 
-#: packs/core/charge-limit/uninstall.sh:11
+#: packs/core/charge-limit/status.sh
+msgid "This SteamOS has no charger pause switch, so the limit can't work"
+msgstr ""
+
+#: packs/core/charge-limit/uninstall.sh
 msgid "Couldn't let the battery charge again: restart the Frame."
 msgstr ""
 
-#: packs/core/charge-limit/uninstall.sh:17
-msgid "Removing its udev rule needs your sudo (admin) password."
-msgstr ""
-
-#: packs/core/charge-limit/uninstall.sh:22
+#: packs/core/charge-limit/uninstall.sh
 msgid ""
 "Left its udev rule; it only lets you pause charging. Remove it with: %s"
+msgstr ""
+
+#: packs/core/charge-limit/uninstall.sh
+msgid "Removing its udev rule needs your sudo (admin) password."
 msgstr ""
 
 #: packs/core/curvature/README.md
@@ -2905,7 +2905,7 @@ msgstr ""
 msgid "idea from"
 msgstr ""
 
-#: packs/core/curvature/status.sh:3
+#: packs/core/curvature/status.sh
 msgid "world windows start curved"
 msgstr ""
 
@@ -2936,93 +2936,93 @@ msgstr ""
 msgid "uses"
 msgstr ""
 
-#: packs/core/dictation/check-system.sh:7
+#: packs/core/dictation/check-system.sh
 msgid "PipeWire tools and ffmpeg present"
 msgstr ""
 
-#: packs/core/dictation/check-system.sh:7 packs/core/wallet/check-system.sh:7
+#: packs/core/dictation/check-system.sh packs/core/wallet/check-system.sh
 msgid "missing: %s"
 msgstr ""
 
-#: packs/core/dictation/dictate.desktop:3
-msgid "Dictate (toggle)"
-msgstr ""
-
-#: packs/core/dictation/dictate.desktop:4
-msgid "Start/stop local Whisper speech-to-text"
-msgstr ""
-
-#: packs/core/dictation/dictate:117
-msgid "Still transcribing…"
-msgstr ""
-
-#: packs/core/dictation/dictate:117
-msgid "Wait for the text before dictating again."
-msgstr ""
-
-#: packs/core/dictation/dictate:130
-msgid "Listening… (run again to stop)"
-msgstr ""
-
-#: packs/core/dictation/dictate:66
-msgid "Transcribing…"
-msgstr ""
-
-#: packs/core/dictation/dictate:74 packs/core/dictation/dictate:87
-msgid "No speech detected"
-msgstr ""
-
-#: packs/core/dictation/dictate:96
+#: packs/core/dictation/dictate
 msgid "Copied to clipboard"
 msgstr ""
 
-#: packs/core/dictation/install.sh:10
-msgid "Using whisper-frame's whisper-cli (no second copy)"
+#: packs/core/dictation/dictate
+msgid "Listening… (run again to stop)"
 msgstr ""
 
-#: packs/core/dictation/install.sh:14
-msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
+#: packs/core/dictation/dictate
+msgid "No speech detected"
 msgstr ""
 
-#: packs/core/dictation/install.sh:25
-msgid "Downloading Whisper model %s"
+#: packs/core/dictation/dictate
+msgid "Still transcribing…"
 msgstr ""
 
-#: packs/core/dictation/install.sh:32
-msgid "Removed old model %s (replaced by the shared %s)"
+#: packs/core/dictation/dictate
+msgid "Transcribing…"
 msgstr ""
 
-#: packs/core/dictation/install.sh:43
+#: packs/core/dictation/dictate
+msgid "Wait for the text before dictating again."
+msgstr ""
+
+#: packs/core/dictation/dictate.desktop
+msgid "Dictate (toggle)"
+msgstr ""
+
+#: packs/core/dictation/dictate.desktop
+msgid "Start/stop local Whisper speech-to-text"
+msgstr ""
+
+#: packs/core/dictation/install.sh
 msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
 msgstr ""
 
-#: packs/core/dictation/status.sh:3
-msgid "dictate not installed"
+#: packs/core/dictation/install.sh
+msgid "Downloading Whisper model %s"
 msgstr ""
 
-#: packs/core/dictation/status.sh:4
-msgid "no whisper-cli (re-run ./install.sh dictation)"
+#: packs/core/dictation/install.sh
+msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
 msgstr ""
 
-#: packs/core/dictation/status.sh:6
+#: packs/core/dictation/install.sh
+msgid "Removed old model %s (replaced by the shared %s)"
+msgstr ""
+
+#: packs/core/dictation/install.sh
+msgid "Using whisper-frame's whisper-cli (no second copy)"
+msgstr ""
+
+#: packs/core/dictation/status.sh
 msgid "Whisper model missing (re-run ./install.sh dictation)"
 msgstr ""
 
-#: packs/core/dictation/status.sh:7
-msgid "whisper-frame's engine"
+#: packs/core/dictation/status.sh
+msgid "dictate not installed"
 msgstr ""
 
-#: packs/core/dictation/status.sh:8
+#: packs/core/dictation/status.sh
 msgid "dictate ready (%s, small model)"
 msgstr ""
 
-#: packs/core/dictation/uninstall.sh:11
-msgid ""
-"Kept your dictation history (~/.local/share/dictation-history.txt); whisper-cpp (if any) stays in Homebrew."
+#: packs/core/dictation/status.sh
+msgid "no whisper-cli (re-run ./install.sh dictation)"
 msgstr ""
 
-#: packs/core/dictation/uninstall.sh:7
+#: packs/core/dictation/status.sh
+msgid "whisper-frame's engine"
+msgstr ""
+
+#: packs/core/dictation/uninstall.sh
 msgid "Kept the Whisper model: whisper-frame uses it too."
+msgstr ""
+
+#: packs/core/dictation/uninstall.sh
+msgid ""
+"Kept your dictation history (~/.local/share/dictation-history.txt); whisper-cpp (if any) stays in Homebrew."
 msgstr ""
 
 #: packs/core/firefox/README.md
@@ -3044,54 +3044,54 @@ msgid ""
 "The Frame's hardware (Adreno GPU, the VR desktop's unusual window sizes, touch input) is rare among browsers, so it's easy to fingerprint."
 msgstr ""
 
-#: packs/core/firefox/install.sh:19
+#: packs/core/firefox/install.sh
 msgid ""
 "%s has a '%s' line without its '%s' line: fix that by hand, then run this again."
 msgstr ""
 
-#: packs/core/firefox/install.sh:27
+#: packs/core/firefox/install.sh
 msgid "Anti-fingerprinting settings written to %s"
 msgstr ""
 
-#: packs/core/firefox/install.sh:29
-msgid "Removed our settings from user.js."
-msgstr ""
-
-#: packs/core/firefox/install.sh:33
+#: packs/core/firefox/install.sh
 msgid ""
 "Firefox is running: quit it and run this again, or reset the settings in about:config."
 msgstr ""
 
-#: packs/core/firefox/install.sh:38
+#: packs/core/firefox/install.sh
+msgid "Firefox is running: restart it to apply."
+msgstr ""
+
+#: packs/core/firefox/install.sh
+msgid "No Firefox profile yet: start Firefox (Flathub) once, then re-run."
+msgstr ""
+
+#: packs/core/firefox/install.sh
+msgid "Profile %s not found"
+msgstr ""
+
+#: packs/core/firefox/install.sh
+msgid "Removed our settings from user.js."
+msgstr ""
+
+#: packs/core/firefox/install.sh
 msgid ""
 "Reset them in prefs.js too (the previous copy: prefs.js.frame-tweaks-bak)."
 msgstr ""
 
-#: packs/core/firefox/install.sh:41
-msgid "Firefox is running: restart it to apply."
-msgstr ""
-
-#: packs/core/firefox/install.sh:6
-msgid "No Firefox profile yet: start Firefox (Flathub) once, then re-run."
-msgstr ""
-
-#: packs/core/firefox/install.sh:9
-msgid "Profile %s not found"
-msgstr ""
-
-#: packs/core/firefox/status.sh:5
-msgid "no Firefox (Flathub) profile"
-msgstr ""
-
-#: packs/core/firefox/status.sh:7
+#: packs/core/firefox/status.sh
 msgid "anti-fingerprinting settings not applied"
 msgstr ""
 
-#: packs/core/firefox/status.sh:8
+#: packs/core/firefox/status.sh
 msgid "applied; restart Firefox to activate"
 msgstr ""
 
-#: packs/core/firefox/status.sh:9
+#: packs/core/firefox/status.sh
+msgid "no Firefox (Flathub) profile"
+msgstr ""
+
+#: packs/core/firefox/status.sh
 msgid "resistFingerprinting active"
 msgstr ""
 
@@ -3114,7 +3114,7 @@ msgstr ""
 msgid "Pick up when floating"
 msgstr ""
 
-#: packs/core/float-grab/status.sh:3
+#: packs/core/float-grab/status.sh
 msgid "Float in World picks the window up"
 msgstr ""
 
@@ -3137,7 +3137,7 @@ msgid ""
 "SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
 msgstr ""
 
-#: packs/core/float-return/status.sh:3
+#: packs/core/float-return/status.sh
 msgid "back to the previous window after floating one"
 msgstr ""
 
@@ -3159,19 +3159,19 @@ msgstr ""
 msgid "The package manager several tweaks install their programs with"
 msgstr ""
 
-#: packs/core/homebrew/install.sh:5
+#: packs/core/homebrew/install.sh
 msgid "%s is ready: %s"
 msgstr ""
 
-#: packs/core/homebrew/status.sh:3
-msgid "Homebrew not installed"
-msgstr ""
-
-#: packs/core/homebrew/status.sh:5
+#: packs/core/homebrew/status.sh
 msgid "%s (%s packages)"
 msgstr ""
 
-#: packs/core/homebrew/uninstall.sh:3
+#: packs/core/homebrew/status.sh
+msgid "Homebrew not installed"
+msgstr ""
+
+#: packs/core/homebrew/uninstall.sh
 msgid ""
 "Homebrew was left installed: Dictation (wl-clipboard, whisper.cpp), Android Mirror (scrcpy),\n"
 "Screen snip (tesseract) and anything you installed yourself live in it.\n"
@@ -3292,68 +3292,68 @@ msgstr ""
 msgid "Yellow"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:219 packs/core/scroll-strips/README.md
-msgid "Left"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js:219 packs/core/scroll-strips/README.md
-msgid "Right"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js:219
-msgid "Vertical strip"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js:220 packs/core/scroll-strips/README.md
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Bottom"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:220
-msgid "Horizontal strip"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Colour"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:220 packs/core/scroll-strips/README.md
-msgid "Top"
+#: packs/core/scroll-strips/patch.js
+msgid "For every window. Changes show at once."
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:221 packs/core/scroll-strips/README.md
-msgid "Thickness (cm)"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js:222 packs/core/scroll-strips/README.md
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Gap from the window (cm)"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:223 packs/core/scroll-strips/README.md
-msgid "Set back behind the window (cm)"
+#: packs/core/scroll-strips/patch.js
+msgid "Horizontal strip"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:224 packs/core/scroll-strips/README.md
-msgid "On"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Left"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:235
+#: packs/core/scroll-strips/patch.js
 msgid ""
 "Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:279 packs/core/scroll-strips/README.md
-msgid "Colour"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "On"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:281 packs/core/scroll-strips/README.md
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:297 packs/core/scroll-strips/README.md
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Right"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Scroll strips"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js:302
-msgid "For every window. Changes show at once."
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Set back behind the window (cm)"
 msgstr ""
 
-#: packs/core/scroll-strips/status.sh:3
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Thickness (cm)"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Top"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js
+msgid "Vertical strip"
+msgstr ""
+
+#: packs/core/scroll-strips/status.sh
 msgid "scroll strips beside floating windows"
 msgstr ""
 
@@ -3390,276 +3390,276 @@ msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
 msgstr ""
 
-#: packs/core/snip/frame-snip.desktop:4
-msgid ""
-"Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud"
+#: packs/core/snip/frame-snip packs/core/speech/README.md
+msgid "Apply"
 msgstr ""
 
-#: packs/core/snip/frame-snip:103
-msgid "can't open the Steam session's display"
+#: packs/core/snip/frame-snip
+msgid "Applying… (a new language downloads its voice, about 60 MB)"
 msgstr ""
 
-#: packs/core/snip/frame-snip:111
-msgid "no focused window"
+#: packs/core/snip/frame-snip
+msgid "Changes apply when you press Apply."
 msgstr ""
 
-#: packs/core/snip/frame-snip:118
-msgid "couldn't read the window's picture"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1298
-msgid "Screen snip"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1304
-msgid ""
-"Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1317
+#: packs/core/snip/frame-snip
 msgid "Copy"
 msgstr ""
 
-#: packs/core/snip/frame-snip:1317
-msgid "Save"
+#: packs/core/snip/frame-snip
+msgid "Copy image"
 msgstr ""
 
-#: packs/core/snip/frame-snip:1318
-msgid "Narrate"
+#: packs/core/snip/frame-snip
+msgid "Copy text"
 msgstr ""
 
-#: packs/core/snip/frame-snip:1472
-msgid "Couldn't copy the snip"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1472
-msgid "Snip copied"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1472
-msgid "the desktop isn't available"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1479
-msgid "Couldn't save the snip"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1479
-msgid "Snip saved"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1487 packs/core/snip/frame-snip:1508
-msgid "No text found in the snip"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1490
-msgid "Couldn't copy the text"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1490
-msgid "Text copied"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1513
-msgid "Narrate needs the Speech engine"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1514
-msgid ""
-"Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), which isn't installed, or is missing its voice."
-msgstr ""
-
-#: packs/core/snip/frame-snip:1613 packs/core/snip/frame-snip:1610
-msgid "Couldn't take a snip"
-msgstr ""
-
-#: packs/core/snip/frame-snip:1613
-msgid "empty picture"
-msgstr ""
-
-#: packs/core/snip/frame-snip:324 packs/core/snip/frame-snip.desktop:3 packs/core/snip/README.md
-msgid "Screen snip + Narrate"
-msgstr ""
-
-#: packs/core/snip/frame-snip:329
-msgid "Tesseract is missing"
-msgstr ""
-
-#: packs/core/snip/frame-snip:330
+#: packs/core/snip/frame-snip
 msgid ""
 "Copy text and Narrate read the text in a snip with Tesseract, which Screen snip installs through Homebrew. It's missing now (removed from Homebrew?)."
 msgstr ""
 
-#: packs/core/snip/frame-snip:332
-msgid "Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"
-msgstr ""
-
-#: packs/core/snip/frame-snip:533
-msgid "Narrate's voice"
-msgstr ""
-
-#: packs/core/snip/frame-snip:538 packs/core/speech/README.md
-msgid "Narrate with"
-msgstr ""
-
-#: packs/core/snip/frame-snip:540
-msgid "Piper: natural"
-msgstr ""
-
-#: packs/core/snip/frame-snip:540
-msgid "eSpeak NG: fast"
-msgstr ""
-
-#: packs/core/snip/frame-snip:554 packs/core/speech/README.md
-msgid "Apply"
-msgstr ""
-
-#: packs/core/snip/frame-snip:555
-msgid "Download the chosen language's voice if needed, and switch"
-msgstr ""
-
-#: packs/core/snip/frame-snip:584
-msgid "Changes apply when you press Apply."
-msgstr ""
-
-#: packs/core/snip/frame-snip:593
-msgid "Reinstall the Speech engine in Frame Tweaks first."
-msgstr ""
-
-#: packs/core/snip/frame-snip:596
-msgid "Applying… (a new language downloads its voice, about 60 MB)"
-msgstr ""
-
-#: packs/core/snip/frame-snip:631 packs/core/snip/frame-snip:787
-msgid "Screen snip: narrating"
-msgstr ""
-
-#: packs/core/snip/frame-snip:653 packs/core/snip/frame-snip:765
-msgid "Preparing…"
-msgstr ""
-
-#: packs/core/snip/frame-snip:658 packs/core/snip/frame-snip:766 packs/core/snip/frame-snip:945
-msgid "Stop"
-msgstr ""
-
-#: packs/core/snip/frame-snip:662 packs/core/snip/frame-snip:767 packs/core/snip/frame-snip:935 packs/core/snip/frame-snip:947 packs/core/snip/frame-snip:954 packs/core/snip/frame-snip:924
-msgid "Pause"
-msgstr ""
-
-#: packs/core/snip/frame-snip:665 packs/core/snip/frame-snip:789 packs/core/snip/frame-snip:817
-msgid "Show text"
-msgstr ""
-
-#: packs/core/snip/frame-snip:666
-msgid "Switch between the snip's image and the text read from it"
-msgstr ""
-
-#: packs/core/snip/frame-snip:676
-msgid "Speed"
-msgstr ""
-
-#: packs/core/snip/frame-snip:681
-msgid "Copy image"
-msgstr ""
-
-#: packs/core/snip/frame-snip:682
-msgid "Put the snip's image on the clipboard"
-msgstr ""
-
-#: packs/core/snip/frame-snip:684 packs/core/snip/frame-snip:1317
-msgid "Copy text"
-msgstr ""
-
-#: packs/core/snip/frame-snip:685
-msgid "Put the text being read on the clipboard"
-msgstr ""
-
-#: packs/core/snip/frame-snip:688
-msgid "Paste: read the clipboard's text instead"
-msgstr ""
-
-#: packs/core/snip/frame-snip:699
-msgid "Snip something new: it's read here"
-msgstr ""
-
-#: packs/core/snip/frame-snip:702
-msgid "Settings: Narrate's voice and language"
-msgstr ""
-
-#: packs/core/snip/frame-snip:770
-msgid "Reading aloud: part {part} of {count}"
-msgstr ""
-
-#: packs/core/snip/frame-snip:789 packs/core/snip/frame-snip:817
-msgid "Show image"
-msgstr ""
-
-#: packs/core/snip/frame-snip:828 packs/core/snip/frame-snip:832
+#: packs/core/snip/frame-snip
 msgid "Couldn't copy (is desktop mode running?)"
 msgstr ""
 
-#: packs/core/snip/frame-snip:828
-msgid "Image copied to the clipboard."
+#: packs/core/snip/frame-snip
+msgid "Couldn't copy the snip"
 msgstr ""
 
-#: packs/core/snip/frame-snip:832
-msgid "Text copied to the clipboard."
+#: packs/core/snip/frame-snip
+msgid "Couldn't copy the text"
 msgstr ""
 
-#: packs/core/snip/frame-snip:837
-msgid "The clipboard has no text."
+#: packs/core/snip/frame-snip
+msgid "Couldn't save the snip"
 msgstr ""
 
-#: packs/core/snip/frame-snip:928
+#: packs/core/snip/frame-snip
+msgid "Couldn't take a snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Download the chosen language's voice if needed, and switch"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid ""
+"Drag a rectangle to snip, then adjust it with its handles  ·  Esc or right-click cancels"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Finished."
 msgstr ""
 
-#: packs/core/snip/frame-snip:929 packs/core/snip/frame-snip:953
-msgid "Read it again"
+#: packs/core/snip/frame-snip
+msgid "Image copied to the clipboard."
 msgstr ""
 
-#: packs/core/snip/frame-snip:936 packs/core/snip/frame-snip:946 packs/core/snip/frame-snip:925
-msgid "Reading aloud…"
+#: packs/core/snip/frame-snip
+msgid "Narrate"
 msgstr ""
 
-#: packs/core/snip/frame-snip:939
-msgid "Resume"
+#: packs/core/snip/frame-snip
+msgid "Narrate needs the Speech engine"
 msgstr ""
 
-#: packs/core/snip/frame-snip:940
+#: packs/core/snip/frame-snip
+msgid ""
+"Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), which isn't installed, or is missing its voice."
+msgstr ""
+
+#: packs/core/snip/frame-snip packs/core/speech/README.md
+msgid "Narrate with"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Narrate's voice"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "No text found in the snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Paste: read the clipboard's text instead"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Pause"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Paused."
 msgstr ""
 
-#: packs/core/snip/frame-snip:952
+#: packs/core/snip/frame-snip
+msgid "Piper: natural"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Preparing…"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Put the snip's image on the clipboard"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Put the text being read on the clipboard"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Read it again"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Reading aloud: part {part} of {count}"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Reading aloud…"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Reinstall the Speech engine in Frame Tweaks first."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Resume"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Save"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Screen snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip packs/core/snip/frame-snip.desktop packs/core/snip/README.md
+msgid "Screen snip + Narrate"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Screen snip: narrating"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Settings: Narrate's voice and language"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Show image"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Show text"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Snip copied"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Snip saved"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Snip something new: it's read here"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Speed"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Stop"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Stopped."
 msgstr ""
 
-#: packs/core/snip/install.sh:16
-msgid "Installing Tesseract (OCR)"
+#: packs/core/snip/frame-snip
+msgid "Switch between the snip's image and the text read from it"
 msgstr ""
 
-#: packs/core/snip/install.sh:19
-msgid "Installing %s"
+#: packs/core/snip/frame-snip
+msgid "Tesseract is missing"
 msgstr ""
 
-#: packs/core/snip/install.sh:32
+#: packs/core/snip/frame-snip
+msgid "Text copied"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Text copied to the clipboard."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "The clipboard has no text."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "can't open the Steam session's display"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "couldn't read the window's picture"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "eSpeak NG: fast"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "empty picture"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "no focused window"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "the desktop isn't available"
+msgstr ""
+
+#: packs/core/snip/frame-snip.desktop
+msgid ""
+"Select a rectangle of the window you're using: copy it, save it, copy its text or read it aloud"
+msgstr ""
+
+#: packs/core/snip/install.sh
 msgid ""
 "Done: Arrow Pad's Tools key, then Snip (or 'Screen snip + Narrate' in the app menu) starts a snip."
 msgstr ""
 
-#: packs/core/snip/status.sh:5
-msgid "Tesseract missing: Copy text and Narrate won't work (reinstall)"
+#: packs/core/snip/install.sh
+msgid "Installing %s"
 msgstr ""
 
-#: packs/core/snip/status.sh:6
+#: packs/core/snip/install.sh
+msgid "Installing Tesseract (OCR)"
+msgstr ""
+
+#: packs/core/snip/status.sh
 msgid "Piper or its voice missing: Narrate won't work (reinstall)"
 msgstr ""
 
-#: packs/core/snip/status.sh:7
+#: packs/core/snip/status.sh
+msgid "Tesseract missing: Copy text and Narrate won't work (reinstall)"
+msgstr ""
+
+#: packs/core/snip/status.sh
 msgid "snip ready (copy, save, copy text, narrate)"
 msgstr ""
 
-#: packs/core/snip/uninstall.sh:9
+#: packs/core/snip/uninstall.sh
 msgid ""
 "Kept Tesseract and wl-clipboard (%s) and your snips in ~/Pictures/Screenshots."
 msgstr ""
@@ -3777,46 +3777,46 @@ msgstr ""
 msgid "中文 (普通话)"
 msgstr ""
 
-#: packs/core/speech/install.sh:17
+#: packs/core/speech/install.sh
 msgid "Downloading Piper (speech)"
 msgstr ""
 
-#: packs/core/speech/install.sh:21
-msgid "the Piper download didn't contain %s"
-msgstr ""
-
-#: packs/core/speech/install.sh:33
-msgid "speech: unknown language '%s'; using English (US)"
-msgstr ""
-
-#: packs/core/speech/install.sh:40
+#: packs/core/speech/install.sh
 msgid "Downloading the %s voice (about 60 MB)"
 msgstr ""
 
-#: packs/core/speech/install.sh:47
-msgid ""
-"the %s voice didn't download, or isn't the expected file; nothing changed"
-msgstr ""
-
-#: packs/core/speech/install.sh:49
-msgid ""
-"the %s voice's settings didn't download, or aren't the expected file; nothing changed"
-msgstr ""
-
-#: packs/core/speech/install.sh:88
+#: packs/core/speech/install.sh
 msgid ""
 "Speech ready (%s): Narrate uses %s; speech-dispatcher apps use eSpeak NG."
 msgstr ""
 
-#: packs/core/speech/status.sh:6
-msgid "speech-dispatcher isn't set up (Orca has no voice): reinstall"
+#: packs/core/speech/install.sh
+msgid "speech: unknown language '%s'; using English (US)"
 msgstr ""
 
-#: packs/core/speech/status.sh:7
+#: packs/core/speech/install.sh
+msgid ""
+"the %s voice didn't download, or isn't the expected file; nothing changed"
+msgstr ""
+
+#: packs/core/speech/install.sh
+msgid ""
+"the %s voice's settings didn't download, or aren't the expected file; nothing changed"
+msgstr ""
+
+#: packs/core/speech/install.sh
+msgid "the Piper download didn't contain %s"
+msgstr ""
+
+#: packs/core/speech/status.sh
 msgid "Piper voice ready; speech-dispatcher uses espeak-ng"
 msgstr ""
 
-#: packs/core/speech/uninstall.sh:9
+#: packs/core/speech/status.sh
+msgid "speech-dispatcher isn't set up (Orca has no voice): reinstall"
+msgstr ""
+
+#: packs/core/speech/uninstall.sh
 msgid "speech-dispatcher is back to SteamOS's setup (no voice)."
 msgstr ""
 
@@ -3843,27 +3843,27 @@ msgstr ""
 msgid "Restart taskbar"
 msgstr ""
 
-#: packs/core/tools/check-system.sh:3
+#: packs/core/tools/check-system.sh
 msgid "%s present"
 msgstr ""
 
-#: packs/core/tools/install.sh:7
+#: packs/core/tools/install.sh
 msgid "Installed %s"
 msgstr ""
 
-#: packs/core/tools/restart-plasmashell:17
-msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
-msgstr ""
-
-#: packs/core/tools/restart-plasmashell:20
+#: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
 msgstr ""
 
-#: packs/core/tools/restart-plasmashell:20 packs/core/ydotool/run.sh:3 packs/integrations/clipboard/run.sh:7
+#: packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
 msgid "%s restarted"
 msgstr ""
 
-#: packs/core/tools/status.sh:3
+#: packs/core/tools/restart-plasmashell
+msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
+msgstr ""
+
+#: packs/core/tools/status.sh
 msgid "%s installed"
 msgstr ""
 
@@ -3886,50 +3886,50 @@ msgstr ""
 msgid "VR dashboard patching (helper)"
 msgstr ""
 
-#: packs/core/vr-dashboard/check-system.sh:6
-msgid "SteamVR dashboard code changed (%s): those patches stay off"
-msgstr ""
-
-#: packs/core/vr-dashboard/check-system.sh:7
+#: packs/core/vr-dashboard/check-system.sh
 msgid "SteamVR dashboard code as expected"
 msgstr ""
 
-#: packs/core/vr-dashboard/install.sh:84
+#: packs/core/vr-dashboard/check-system.sh
+msgid "SteamVR dashboard code changed (%s): those patches stay off"
+msgstr ""
+
+#: packs/core/vr-dashboard/install.sh
 msgid "Dashboard patches active."
 msgstr ""
 
-#: packs/core/vr-dashboard/install.sh:86
+#: packs/core/vr-dashboard/install.sh
 msgid ""
 "Installed. It starts working the next time SteamVR starts (reboot, or restart SteamVR\n"
 "from its menu): SteamVR opens the port it needs only at startup."
 msgstr ""
 
-#: packs/core/vr-dashboard/install.sh:90
+#: packs/core/vr-dashboard/install.sh
 msgid "Installed; active from the next SteamVR start."
 msgstr ""
 
-#: packs/core/vr-dashboard/sft-dashboard:362
-msgid "{name}: not installed"
-msgstr ""
-
-#: packs/core/vr-dashboard/sft-dashboard:374
+#: packs/core/vr-dashboard/sft-dashboard
 msgid "dashboard page not found"
 msgstr ""
 
-#: packs/core/vr-dashboard/sft-dashboard:381
+#: packs/core/vr-dashboard/sft-dashboard
+msgid "{name}: not installed"
+msgstr ""
+
+#: packs/core/vr-dashboard/sft-dashboard
 msgid "{name}: port open, not patched yet"
 msgstr ""
 
-#: packs/core/vr-dashboard/status.sh:10
-msgid "waiting for a SteamVR restart (reboot once)"
-msgstr ""
-
-#: packs/core/vr-dashboard/status.sh:13
+#: packs/core/vr-dashboard/status.sh
 msgid "%s dashboard patch(es); DevTools port open while SteamVR runs"
 msgstr ""
 
-#: packs/core/vr-dashboard/status.sh:7
+#: packs/core/vr-dashboard/status.sh
 msgid "installed, %s patch(es) (active while SteamVR runs)"
+msgstr ""
+
+#: packs/core/vr-dashboard/status.sh
+msgid "waiting for a SteamVR restart (reboot once)"
 msgstr ""
 
 #: packs/core/wallet/README.md
@@ -3959,267 +3959,267 @@ msgstr ""
 msgid "approach from"
 msgstr ""
 
-#: packs/core/wallet/app-timers:194
+#: packs/core/wallet/app-timers
 msgid "App timers"
 msgstr ""
 
-#: packs/core/wallet/app-timers:194
-msgid "{app} closed"
-msgstr ""
-
-#: packs/core/wallet/app-timers:292
-msgid "The headset was taken off."
-msgstr ""
-
-#: packs/core/wallet/app-timers:299
+#: packs/core/wallet/app-timers
 msgid "No activity for {minutes} minutes."
 msgstr ""
 
-#: packs/core/wallet/app-timers:312
-msgid "minutes must be a number"
+#: packs/core/wallet/app-timers
+msgid "The headset was taken off."
 msgstr ""
 
-#: packs/core/wallet/app-timers:320
+#: packs/core/wallet/app-timers
 msgid "idle {seconds}s"
 msgstr ""
 
-#: packs/core/wallet/app-timers:322
-msgid "{app_id}: {minutes} min, and headset off, {state}"
+#: packs/core/wallet/app-timers
+msgid "minutes must be a number"
 msgstr ""
 
-#: packs/core/wallet/app-timers:323
-msgid "{app_id}: {minutes} min, {state}"
-msgstr ""
-
-#: packs/core/wallet/app-timers:325
+#: packs/core/wallet/app-timers
 msgid "not running"
 msgstr ""
 
-#: packs/core/wallet/app-timers:325
+#: packs/core/wallet/app-timers
 msgid "running"
 msgstr ""
 
-#: packs/core/wallet/app-timers:88
+#: packs/core/wallet/app-timers
 msgid "{app_id} has no timer: set one first"
 msgstr ""
 
-#: packs/core/wallet/check-system.sh:6
+#: packs/core/wallet/app-timers
+msgid "{app_id}: {minutes} min, and headset off, {state}"
+msgstr ""
+
+#: packs/core/wallet/app-timers
+msgid "{app_id}: {minutes} min, {state}"
+msgstr ""
+
+#: packs/core/wallet/app-timers
+msgid "{app} closed"
+msgstr ""
+
+#: packs/core/wallet/check-system.sh
 msgid "Steam session D-Bus"
 msgstr ""
 
-#: packs/core/wallet/check-system.sh:7
+#: packs/core/wallet/check-system.sh
 msgid "kwalletd6, ksecretd, kdialog and the Steam session's D-Bus present"
 msgstr ""
 
-#: packs/core/wallet/install.sh:36
-msgid "Moving gh's plain-text token into the wallet"
-msgstr ""
-
-#: packs/core/wallet/install.sh:40 packs/core/wallet/status.sh:8
-msgid "gh token stored in plain text (re-run %s)"
-msgstr ""
-
-#: packs/core/wallet/install.sh:44
-msgid "Installing KWalletManager (Flathub)"
-msgstr ""
-
-#: packs/core/wallet/install.sh:62
-msgid ""
-"Wallet closes after %s minutes unused (WALLET_IDLE_MINUTES=… to change)"
-msgstr ""
-
-#: packs/core/wallet/install.sh:71
-msgid ""
-"Couldn't put the password gate on all of: %s. Those without a menu entry yet\n"
-"aren't gated; once they're installed, run: %s"
-msgstr ""
-
-#: packs/core/wallet/install.sh:74
+#: packs/core/wallet/install.sh
 msgid ""
 "Add other wallet-using apps with:  %s   (--electron for Electron apps)\n"
 "SteamOS's stock wallet has an EMPTY password. To actually protect it, open\n"
 "KWalletManager → kdewallet → Change Password."
 msgstr ""
 
-#: packs/core/wallet/run.sh:4
+#: packs/core/wallet/install.sh
+msgid ""
+"Couldn't put the password gate on all of: %s. Those without a menu entry yet\n"
+"aren't gated; once they're installed, run: %s"
+msgstr ""
+
+#: packs/core/wallet/install.sh
+msgid "Installing KWalletManager (Flathub)"
+msgstr ""
+
+#: packs/core/wallet/install.sh
+msgid "Moving gh's plain-text token into the wallet"
+msgstr ""
+
+#: packs/core/wallet/install.sh
+msgid ""
+"Wallet closes after %s minutes unused (WALLET_IDLE_MINUTES=… to change)"
+msgstr ""
+
+#: packs/core/wallet/install.sh packs/core/wallet/status.sh
+msgid "gh token stored in plain text (re-run %s)"
+msgstr ""
+
+#: packs/core/wallet/run.sh
 msgid "Lock it now with the Lock Wallet menu entry."
 msgstr ""
 
-#: packs/core/wallet/run.sh:4
+#: packs/core/wallet/run.sh
 msgid "Wallet already unlocked"
 msgstr ""
 
-#: packs/core/wallet/status.sh:12
-msgid "wallet unlocked with no auto-lock scheduled (run: %s)"
-msgstr ""
-
-#: packs/core/wallet/status.sh:15
-msgid "wallet locked; %s app launcher(s) routed/gated"
-msgstr ""
-
-#: packs/core/wallet/status.sh:16
-msgid "wallet unlocked; %s app launcher(s) routed/gated"
-msgstr ""
-
-#: packs/core/wallet/status.sh:18
-msgid "wallet %s; %s app launcher(s) routed/gated"
-msgstr ""
-
-#: packs/core/wallet/status.sh:3
-msgid "wallet tools not installed"
-msgstr ""
-
-#: packs/core/wallet/status.sh:4
-msgid "%s not running: closing the wallet would not lock it (re-run %s)"
-msgstr ""
-
-#: packs/core/wallet/status.sh:5
+#: packs/core/wallet/status.sh
 msgid "%s not running: apps with a timer won't be closed (re-run %s)"
 msgstr ""
 
-#: packs/core/wallet/uninstall.sh:23
+#: packs/core/wallet/status.sh
+msgid "%s not running: closing the wallet would not lock it (re-run %s)"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid "wallet %s; %s app launcher(s) routed/gated"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid "wallet locked; %s app launcher(s) routed/gated"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid "wallet tools not installed"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid "wallet unlocked with no auto-lock scheduled (run: %s)"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid "wallet unlocked; %s app launcher(s) routed/gated"
+msgstr ""
+
+#: packs/core/wallet/uninstall.sh
 msgid ""
 "Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet."
 msgstr ""
 
-#: packs/core/wallet/uninstall.sh:24
+#: packs/core/wallet/uninstall.sh
 msgid "Signal still needs the wallet: keep its kwallet6 setting (see %s)."
 msgstr ""
 
-#: packs/core/wallet/wallet-gate:15
+#: packs/core/wallet/wallet-gate
 msgid "%s not started"
 msgstr ""
 
-#: packs/core/wallet/wallet-gate:15
+#: packs/core/wallet/wallet-gate
 msgid "The wallet is still locked."
 msgstr ""
 
-#: packs/core/wallet/wallet-launcher:133
-msgid "password required"
-msgstr ""
-
-#: packs/core/wallet/wallet-launcher:162
-msgid "{app_id}: no wallet launcher"
-msgstr ""
-
-#: packs/core/wallet/wallet-launcher:163
-msgid "{app_id}: original launcher restored"
-msgstr ""
-
-#: packs/core/wallet/wallet-launcher:169
+#: packs/core/wallet/wallet-launcher
 msgid "also pass --password-store=kwallet6"
 msgstr ""
 
-#: packs/core/wallet/wallet-launcher:170
-msgid "stop requiring the wallet password"
-msgstr ""
-
-#: packs/core/wallet/wallet-launcher:172
-msgid "require the wallet password (wallet-unlock) before starting the app"
-msgstr ""
-
-#: packs/core/wallet/wallet-launcher:174
+#: packs/core/wallet/wallet-launcher
 msgid ""
 "don't move the app to the outer bus (for apps that don't use the wallet)"
 msgstr ""
 
-#: packs/core/wallet/wallet-launcher:178
-msgid "rebuild the wrapper from the (updated) original, keeping its flags"
-msgstr ""
-
-#: packs/core/wallet/wallet-launcher:189
+#: packs/core/wallet/wallet-launcher
 msgid "give at least one app ID"
 msgstr ""
 
-#: packs/core/wallet/wallet-launcher:80
-msgid "wallet-launcher: no desktop entry found for {app_id}"
+#: packs/core/wallet/wallet-launcher
+msgid "password required"
 msgstr ""
 
-#: packs/core/wallet/wallet-launcher:90
+#: packs/core/wallet/wallet-launcher
+msgid "rebuild the wrapper from the (updated) original, keeping its flags"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher
+msgid "require the wallet password (wallet-unlock) before starting the app"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher
+msgid "stop requiring the wallet password"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher
 msgid "wallet-launcher: can't find {app_id} in: {command}"
 msgstr ""
 
-#: packs/core/wallet/wallet-lock.desktop:3
+#: packs/core/wallet/wallet-launcher
+msgid "wallet-launcher: no desktop entry found for {app_id}"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher
+msgid "{app_id}: no wallet launcher"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher
+msgid "{app_id}: original launcher restored"
+msgstr ""
+
+#: packs/core/wallet/wallet-lock.desktop
 msgid "Lock Wallet"
 msgstr ""
 
-#: packs/core/wallet/wallet-lock.desktop:4
+#: packs/core/wallet/wallet-lock.desktop
 msgid ""
 "Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
 msgstr ""
 
-#: packs/core/wallet/wallet-unlock:251
-msgid "Wrong password (is Caps Lock on?). Try again:"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:252
-msgid "Password for the KDE wallet:"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:253 packs/core/wallet/wallet-unlock:275
-msgid "Unlock wallet"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:276
+#: packs/core/wallet/wallet-unlock
 msgid ""
 "A KDE Wallet password prompt is already open (look in VR, around the dashboard). While it is open the wallet ignores this dialog.\n"
 "\n"
 "Type the password there, or close that prompt and try again."
 msgstr ""
 
-#: packs/core/wallet/wallet-unlock:354
-msgid "wallet-unlock: couldn't schedule the auto-lock: {error}"
+#: packs/core/wallet/wallet-unlock
+msgid "Password for the KDE wallet:"
 msgstr ""
 
-#: packs/core/wallet/wallet-unlock:450
-msgid "wallet-unlock: the wallet is still unlocked (locking failed)"
+#: packs/core/wallet/wallet-unlock
+msgid "Unlock wallet"
 msgstr ""
 
-#: packs/core/wallet/wallet-unlock:456
-msgid "wallet locks in {hours} h"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:457
-msgid "auto-lock is off: the wallet stays unlocked until you lock it"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:460
-msgid "auto-lock off"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:461
-msgid "auto-lock on: the wallet locks in {hours} h"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:462
-msgid "auto-lock on"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:466
+#: packs/core/wallet/wallet-unlock
 msgid "Wallet already unlocked."
 msgstr ""
 
-#: packs/core/wallet/wallet-unlock:469
-msgid "Wallet unlocked; it locks again in {hours} h."
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:470
-msgid "Wallet unlocked (auto-lock is off)."
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:471
-msgid "Wallet unlocked"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:471
-msgid "Wallet unlocked for {hours} hours"
-msgstr ""
-
-#: packs/core/wallet/wallet-unlock:473
+#: packs/core/wallet/wallet-unlock
 msgid "Wallet still locked."
 msgstr ""
 
-#: packs/core/wallet/with-keyring:16
+#: packs/core/wallet/wallet-unlock
+msgid "Wallet unlocked"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "Wallet unlocked (auto-lock is off)."
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "Wallet unlocked for {hours} hours"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "Wallet unlocked; it locks again in {hours} h."
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "Wrong password (is Caps Lock on?). Try again:"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "auto-lock is off: the wallet stays unlocked until you lock it"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "auto-lock off"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "auto-lock on"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "auto-lock on: the wallet locks in {hours} h"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "wallet locks in {hours} h"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "wallet-unlock: couldn't schedule the auto-lock: {error}"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid "wallet-unlock: the wallet is still unlocked (locking failed)"
+msgstr ""
+
+#: packs/core/wallet/with-keyring
 msgid "wallet still locked"
 msgstr ""
 
@@ -4246,43 +4246,43 @@ msgstr ""
 msgid "ydotool (helper)"
 msgstr ""
 
-#: packs/core/ydotool/install.sh:14
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
-msgstr ""
-
-#: packs/core/ydotool/install.sh:16
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
-msgstr ""
-
-#: packs/core/ydotool/install.sh:24
-msgid "%s running (socket %s)"
-msgstr ""
-
-#: packs/core/ydotool/install.sh:26
+#: packs/core/ydotool/install.sh
 msgid "%s didn't start; see: %s"
 msgstr ""
 
-#: packs/core/ydotool/install.sh:6
+#: packs/core/ydotool/install.sh
 msgid ""
 "%s isn't writable. SteamOS normally grants it to the 'input' group: check 'groups'."
 msgstr ""
 
-#: packs/core/ydotool/status.sh:3 packs/integrations/clipboard/status.sh:3 packs/integrations/nordvpn/status.sh:3
+#: packs/core/ydotool/install.sh
+msgid "%s running (socket %s)"
+msgstr ""
+
+#: packs/core/ydotool/install.sh
+msgid ""
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+msgstr ""
+
+#: packs/core/ydotool/install.sh
+msgid ""
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+msgstr ""
+
+#: packs/core/ydotool/status.sh packs/integrations/clipboard/status.sh packs/integrations/nordvpn/status.sh
 msgid "%s not installed"
 msgstr ""
 
-#: packs/core/ydotool/status.sh:4
+#: packs/core/ydotool/status.sh packs/integrations/clipboard/status.sh
+msgid "%s running"
+msgstr ""
+
+#: packs/core/ydotool/status.sh
 msgid "%s service not running (%s)"
 msgstr ""
 
-#: packs/core/ydotool/status.sh:5
+#: packs/core/ydotool/status.sh
 msgid "%s socket missing"
-msgstr ""
-
-#: packs/core/ydotool/status.sh:6 packs/integrations/clipboard/status.sh:18
-msgid "%s running"
 msgstr ""
 
 #: packs/integrations/claude-code/README.md
@@ -4308,41 +4308,41 @@ msgstr ""
 msgid "from"
 msgstr ""
 
-#: packs/integrations/claude-code/install.sh:11
-msgid "Couldn't download Anthropic's installer."
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh:12
+#: packs/integrations/claude-code/install.sh
 msgid "Anthropic's installer failed (see above)."
 msgstr ""
 
-#: packs/integrations/claude-code/install.sh:13
+#: packs/integrations/claude-code/install.sh
+msgid "Claude Code is already installed at %s (%s); leaving it as it is."
+msgstr ""
+
+#: packs/integrations/claude-code/install.sh
+msgid "Couldn't download Anthropic's installer."
+msgstr ""
+
+#: packs/integrations/claude-code/install.sh
 msgid ""
 "Done. Open a terminal (Konsole) and run: claude\n"
 "The first run asks you to log in with your Claude account in a browser."
 msgstr ""
 
-#: packs/integrations/claude-code/install.sh:6
-msgid "Claude Code is already installed at %s (%s); leaving it as it is."
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh:9
+#: packs/integrations/claude-code/install.sh
 msgid "Installing Claude Code (Anthropic's installer, into your home folder)"
 msgstr ""
 
-#: packs/integrations/claude-code/status.sh:4
-msgid "Claude Code not installed"
-msgstr ""
-
-#: packs/integrations/claude-code/status.sh:5
+#: packs/integrations/claude-code/status.sh
 msgid "Claude Code %s (run: claude)"
 msgstr ""
 
-#: packs/integrations/claude-code/uninstall.sh:6
+#: packs/integrations/claude-code/status.sh
+msgid "Claude Code not installed"
+msgstr ""
+
+#: packs/integrations/claude-code/uninstall.sh
 msgid "Claude Code was installed with Homebrew; remove it with: %s"
 msgstr ""
 
-#: packs/integrations/claude-code/uninstall.sh:8
+#: packs/integrations/claude-code/uninstall.sh
 msgid "Kept your login and settings (~/.claude, ~/.claude.json)."
 msgstr ""
 
@@ -4365,38 +4365,38 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/integrations/claude-desktop/claude-desktop-update:33
-msgid "Claude Desktop already at %s"
-msgstr ""
-
-#: packs/integrations/claude-desktop/claude-desktop-update:37
+#: packs/integrations/claude-desktop/claude-desktop-update
 msgid ""
 "Claude Desktop %s is available, but Claude Desktop is open: quit it first,\n"
 "or run: claude-desktop-update --restart   (closes it, updates, and you reopen it)"
 msgstr ""
 
-#: packs/integrations/claude-desktop/claude-desktop-update:60
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid "Claude Desktop already at %s"
+msgstr ""
+
+#: packs/integrations/claude-desktop/claude-desktop-update
 msgid "Done. Launch 'Claude' from the app menu."
 msgstr ""
 
-#: packs/integrations/claude-desktop/install.sh:8
+#: packs/integrations/claude-desktop/install.sh
 msgid "Update later with: %s"
 msgstr ""
 
-#: packs/integrations/claude-desktop/status.sh:13
+#: packs/integrations/claude-desktop/status.sh
+msgid "Claude Desktop %s (update: claude-desktop-update)"
+msgstr ""
+
+#: packs/integrations/claude-desktop/status.sh
 msgid ""
 "Claude Desktop can't reach the KDE wallet this time, so it won't keep your sign-in: quit it and open it again"
 msgstr ""
 
-#: packs/integrations/claude-desktop/status.sh:15
-msgid "Claude Desktop %s (update: claude-desktop-update)"
-msgstr ""
-
-#: packs/integrations/claude-desktop/status.sh:4
+#: packs/integrations/claude-desktop/status.sh
 msgid "Claude Desktop not installed"
 msgstr ""
 
-#: packs/integrations/claude-desktop/status.sh:6
+#: packs/integrations/claude-desktop/status.sh
 msgid ""
 "Claude Desktop starts without the KDE wallet, so sign-ins aren't kept: reinstall it"
 msgstr ""
@@ -4416,68 +4416,68 @@ msgid ""
 "The Frame's VR session and its desktop mode each have their own clipboard, so text copied in one can't be pasted in the other."
 msgstr ""
 
-#: packs/integrations/clipboard/install.sh:18
+#: packs/integrations/clipboard/install.sh
+msgid "%s started"
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh
+msgid "%s starts with desktop mode."
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh
+msgid "Downloading %s %s"
+msgstr ""
+
+#: packs/integrations/clipboard/install.sh
 msgid ""
 "Homebrew's Rust (installed by older versions for this build) isn't needed any more; if you\n"
 "don't use it yourself: %s   (frees about 3.4 GB)"
 msgstr ""
 
-#: packs/integrations/clipboard/install.sh:41
-msgid "%s started"
-msgstr ""
-
-#: packs/integrations/clipboard/install.sh:43
-msgid "%s starts with desktop mode."
-msgstr ""
-
-#: packs/integrations/clipboard/install.sh:9
-msgid "Downloading %s %s"
-msgstr ""
-
-#: packs/integrations/clipboard/run.sh:4
+#: packs/integrations/clipboard/run.sh
 msgid "%s starts with it."
 msgstr ""
 
-#: packs/integrations/clipboard/run.sh:4
-msgid "Desktop mode isn't running"
-msgstr ""
-
-#: packs/integrations/clipboard/run.sh:4 packs/integrations/clipboard/run.sh:7 packs/integrations/clipboard/README.md
-msgid "Shared clipboard"
-msgstr ""
-
-#: packs/integrations/clipboard/run.sh:7
+#: packs/integrations/clipboard/run.sh
 msgid "Copy in VR, paste in the desktop, and back."
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:10
+#: packs/integrations/clipboard/run.sh
+msgid "Desktop mode isn't running"
+msgstr ""
+
+#: packs/integrations/clipboard/run.sh packs/integrations/clipboard/README.md
+msgid "Shared clipboard"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh
 msgid "%s copies running (Restart fixes it)"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:14
-msgid "older build: replaces copied images with text (Reinstall fixes it)"
+#: packs/integrations/clipboard/status.sh
+msgid "installed; starts with desktop mode"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:16
+#: packs/integrations/clipboard/status.sh
+msgid "not running, though desktop mode is (Restart starts it)"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh
 msgid ""
 "older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:6
-msgid "installed; starts with desktop mode"
+#: packs/integrations/clipboard/status.sh
+msgid "older build: replaces copied images with text (Reinstall fixes it)"
 msgstr ""
 
-#: packs/integrations/clipboard/status.sh:7
-msgid "not running, though desktop mode is (Restart starts it)"
+#: packs/integrations/clipboard/uninstall.sh
+msgid "(frees about 3.4 GB)"
 msgstr ""
 
-#: packs/integrations/clipboard/uninstall.sh:7
+#: packs/integrations/clipboard/uninstall.sh
 msgid ""
 "Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
-msgstr ""
-
-#: packs/integrations/clipboard/uninstall.sh:8
-msgid "(frees about 3.4 GB)"
 msgstr ""
 
 #: packs/integrations/nordvpn/README.md
@@ -4503,149 +4503,149 @@ msgstr ""
 msgid "Tray"
 msgstr ""
 
-#: packs/integrations/nordvpn/install.sh:22
+#: packs/integrations/nordvpn/install.sh
 msgid "Installed. Now run:  %s   (asks for your NordVPN access token once)"
 msgstr ""
 
-#: packs/integrations/nordvpn/install.sh:23
+#: packs/integrations/nordvpn/install.sh
 msgid ""
 "The tray icon starts with desktop mode (or launch 'NordVPN Tray' now)."
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-tray.desktop:3
-msgid "NordVPN Tray"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray.desktop:4
-msgid "Tray menu for the NordVPN WireGuard connections"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:153
-msgid "NordVPN: {location}"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:154 packs/integrations/nordvpn/nordvpn-wg:252
-msgid "NordVPN: disconnected"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:159
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "Connected: {location}"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-tray:160
-msgid "Disconnected"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:171
-msgid "No locations: run 'nordvpn-wg setup'"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:173
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "Disconnect"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-tray:176
-msgid "Show public IP"
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "Disconnected"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-tray:177
-msgid "Pick least-loaded servers"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:180
-msgid "Quit tray icon"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-tray:218
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid ""
 "Its icon lives in desktop mode's system tray: open desktop mode, and it starts there."
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-tray:234
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "No locations: run 'nordvpn-wg setup'"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray packs/integrations/nordvpn/nordvpn-wg
+msgid "NordVPN: disconnected"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "NordVPN: {location}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "Pick least-loaded servers"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "Quit tray icon"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
+msgid "Show public IP"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "nordvpn-tray: no system tray available"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:144
-msgid "NetworkManager refused the connection: {reply}"
+#: packs/integrations/nordvpn/nordvpn-tray.desktop
+msgid "NordVPN Tray"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:159
-msgid "{connection} {host} ({city}, load {load}%)"
+#: packs/integrations/nordvpn/nordvpn-tray.desktop
+msgid "Tray menu for the NordVPN WireGuard connections"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:165
-msgid "Run 'nordvpn-wg setup' first."
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:173
-msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:176
-msgid "NordVPN access token (input hidden): "
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:182
-msgid "No token given."
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:186
-msgid "NordVPN rejected the token (HTTP {code})."
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:200
-msgid "unknown country code {code}, skipped"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:209
-msgid "unknown country code {code} (see 'nordvpn-wg countries')"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:221
-msgid "removed {code}"
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg:229
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "(missing: run refresh)"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:236
-msgid "{code} isn't configured (nordvpn-wg add {code_upper})"
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager refused the connection: {reply}"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:246
-msgid "disconnected {connection}"
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "No token given."
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:256
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NordVPN access token (input hidden): "
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NordVPN rejected the token (HTTP {code})."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "NordVPN: connected via {connection}"
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:260
-msgid "public IP {ip} ({city}, {country}), protected: {protected}"
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Run 'nordvpn-wg setup' first."
 msgstr ""
 
-#: packs/integrations/nordvpn/nordvpn-wg:78
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "disconnected {connection}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "no WireGuard server found for country id {country_id}"
 msgstr ""
 
-#: packs/integrations/nordvpn/run.sh:5
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "public IP {ip} ({city}, {country}), protected: {protected}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "removed {code}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "unknown country code {code} (see 'nordvpn-wg countries')"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "unknown country code {code}, skipped"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "{code} isn't configured (nordvpn-wg add {code_upper})"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "{connection} {host} ({city}, load {load}%)"
+msgstr ""
+
+#: packs/integrations/nordvpn/run.sh
 msgid "NordVPN tray is running"
 msgstr ""
 
-#: packs/integrations/nordvpn/status.sh:4
-msgid "not set up yet (run: %s)"
-msgstr ""
-
-#: packs/integrations/nordvpn/status.sh:8
+#: packs/integrations/nordvpn/status.sh
 msgid "%s location(s); connected via %s"
 msgstr ""
 
-#: packs/integrations/nordvpn/status.sh:9
+#: packs/integrations/nordvpn/status.sh
 msgid "%s location(s); disconnected"
 msgstr ""
 
-#: packs/integrations/nordvpn/uninstall.sh:13
+#: packs/integrations/nordvpn/status.sh
+msgid "not set up yet (run: %s)"
+msgstr ""
+
+#: packs/integrations/nordvpn/uninstall.sh
 msgid "removed connection %s"
 msgstr ""
 
@@ -4677,58 +4677,58 @@ msgstr ""
 msgid "Signal: key in the wallet"
 msgstr ""
 
-#: packs/integrations/signal/check:5
+#: packs/integrations/signal/check
 msgid ""
 "Signal hasn't been started yet: the key will be created in the wallet on first launch."
 msgstr ""
 
-#: packs/integrations/signal/install.sh:10
-msgid "Telling Signal to use KDE Wallet (kwallet6)"
-msgstr ""
-
-#: packs/integrations/signal/install.sh:26
-msgid "Migrating existing key: Signal launch %s/2"
-msgstr ""
-
-#: packs/integrations/signal/install.sh:7
+#: packs/integrations/signal/install.sh
 msgid "Install Signal first (Discover, or: %s)"
 msgstr ""
 
-#: packs/integrations/signal/status.sh:10
-msgid "key in wallet; password first; closes after %s min idle"
+#: packs/integrations/signal/install.sh
+msgid "Migrating existing key: Signal launch %s/2"
 msgstr ""
 
-#: packs/integrations/signal/status.sh:11
-msgid "key in wallet; password first; no Close-after timer"
+#: packs/integrations/signal/install.sh
+msgid "Telling Signal to use KDE Wallet (kwallet6)"
 msgstr ""
 
-#: packs/integrations/signal/status.sh:4
+#: packs/integrations/signal/status.sh
 msgid "Signal (Flathub) not installed"
 msgstr ""
 
-#: packs/integrations/signal/status.sh:5
+#: packs/integrations/signal/status.sh
 msgid "Signal not set to use the wallet"
 msgstr ""
 
-#: packs/integrations/signal/status.sh:6
-msgid "plaintext key still on disk (start Signal once more)"
-msgstr ""
-
-#: packs/integrations/signal/status.sh:7
-msgid "uses the retired Signal guard (reinstall: ↻)"
-msgstr ""
-
-#: packs/integrations/signal/status.sh:8
+#: packs/integrations/signal/status.sh
 msgid ""
 "Signal opens without asking for the wallet password (Wallet apps: Password first)"
 msgstr ""
 
-#: packs/integrations/signal/uninstall.sh:7
+#: packs/integrations/signal/status.sh
+msgid "key in wallet; password first; closes after %s min idle"
+msgstr ""
+
+#: packs/integrations/signal/status.sh
+msgid "key in wallet; password first; no Close-after timer"
+msgstr ""
+
+#: packs/integrations/signal/status.sh
+msgid "plaintext key still on disk (start Signal once more)"
+msgstr ""
+
+#: packs/integrations/signal/status.sh
+msgid "uses the retired Signal guard (reinstall: ↻)"
+msgstr ""
+
+#: packs/integrations/signal/uninstall.sh
 msgid ""
 "Signal keeps its wallet password and Close-after timer: change them in Wallet apps."
 msgstr ""
 
-#: packs/integrations/signal/uninstall.sh:8
+#: packs/integrations/signal/uninstall.sh
 msgid ""
 "The kwallet6 setting stays: Signal's database key now lives in the wallet, and switching back would lock you out."
 msgstr ""
@@ -4750,28 +4750,28 @@ msgstr ""
 msgid "Mouse cursor fix"
 msgstr ""
 
-#: packs/third-party/cursor/install.sh:6
+#: packs/third-party/cursor/install.sh
 msgid ""
 "Installed. Takes effect after a reboot (or the next desktop-mode login)."
 msgstr ""
 
-#: packs/third-party/cursor/status.sh:10
-msgid "installed; active after the next reboot"
-msgstr ""
-
-#: packs/third-party/cursor/status.sh:11 packs/third-party/cursor/status.sh:13
-msgid "software cursor active"
-msgstr ""
-
-#: packs/third-party/cursor/status.sh:14
-msgid "installed (active in desktop mode after a reboot)"
-msgstr ""
-
-#: packs/third-party/cursor/status.sh:4
+#: packs/third-party/cursor/status.sh
 msgid "cursor fix not installed"
 msgstr ""
 
-#: packs/third-party/cursor/uninstall.sh:4
+#: packs/third-party/cursor/status.sh
+msgid "installed (active in desktop mode after a reboot)"
+msgstr ""
+
+#: packs/third-party/cursor/status.sh
+msgid "installed; active after the next reboot"
+msgstr ""
+
+#: packs/third-party/cursor/status.sh
+msgid "software cursor active"
+msgstr ""
+
+#: packs/third-party/cursor/uninstall.sh
 msgid "Takes effect after a reboot."
 msgstr ""
 
@@ -4817,24 +4817,24 @@ msgstr ""
 msgid "fix from"
 msgstr ""
 
-#: packs/third-party/menu-icons/check-system.sh:5
-msgid "Breeze no longer has %s"
-msgstr ""
-
-#: packs/third-party/menu-icons/check-system.sh:6
+#: packs/third-party/menu-icons/check-system.sh
 msgid "Breeze icons present"
 msgstr ""
 
-#: packs/third-party/menu-icons/install.sh:9
+#: packs/third-party/menu-icons/check-system.sh
+msgid "Breeze no longer has %s"
+msgstr ""
+
+#: packs/third-party/menu-icons/install.sh
 msgid ""
 "Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
 msgstr ""
 
-#: packs/third-party/menu-icons/menu-icons:99
+#: packs/third-party/menu-icons/menu-icons
 msgid "icon: {name}"
 msgstr ""
 
-#: packs/third-party/menu-icons/status.sh:6
+#: packs/third-party/menu-icons/status.sh
 msgid "%s icon(s) added for the \"+\" menu"
 msgstr ""
 
@@ -4866,15 +4866,15 @@ msgid ""
 "Use VR lying down or reclined; one button makes your view level and forward"
 msgstr ""
 
-#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:3
+#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
 msgid "Frame Tweaks"
 msgstr ""
 
-#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:4
-msgid "Tweak installer"
+#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
+msgid "Install, check and remove Steam Frame desktop-mode tweaks"
 msgstr ""
 
-#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop:5
-msgid "Install, check and remove Steam Frame desktop-mode tweaks"
+#: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
+msgid "Tweak installer"
 msgstr ""
 

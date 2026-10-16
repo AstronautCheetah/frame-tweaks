@@ -211,8 +211,13 @@ def template():
     lines = ['# Frame Tweaks: text to translate. Made by dev/i18n.py extract; don\'t edit by hand.',
              '# Translators: copy to LANG.po (dev/i18n.py new LANG), see locale/README.md.',
              'msgid ""', 'msgstr ""', '"Content-Type: text/plain; charset=UTF-8\\n"', '']
-    for (ctx, msgid, plural), where in sorted(entries.items(), key=lambda e: (e[1][0], e[0][1])):
-        lines.append("#: " + " ".join(dict.fromkeys(where)))
+    # Where each text is: its files, not their lines. With line numbers every edit above a text
+    # moved its reference, and the template (and every .po) changed without a text changing; now
+    # they change only when a text does. (Sorted by file, then text, so code moving in a file
+    # leaves the order alone too.)
+    files = {key: list(dict.fromkeys(re.sub(r":\d+$", "", w) for w in where)) for key, where in entries.items()}
+    for (ctx, msgid, plural), where in sorted(files.items(), key=lambda e: (e[1][0], e[0][1], e[0][0] or "")):
+        lines.append("#: " + " ".join(where))
         if ctx:
             lines.append("msgctxt " + quote(ctx))
         lines.append("msgid " + quote(msgid))
