@@ -4,15 +4,15 @@ emoji: 🗣️
 category: System
 tier: helper
 summary: >-
-  Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps;
-  installed with Screen snip + Narrate
+  Gives the Frame an offline voice, Piper, for Screen snip's Narrate (and espeak-ng for Orca on
+  SteamOS before 0.5.6); installed with Screen snip + Narrate
 what: >-
-  A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate,
-  and espeak-ng for KDE's screen reader (Orca) and other apps that speak through
-  speech-dispatcher. Installed automatically with Screen snip.
+  A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate.
+  On SteamOS before 0.5.6 it also gives KDE's screen reader (Orca) and other apps that speak
+  through speech-dispatcher a voice, espeak-ng. Installed automatically with Screen snip.
 why: >-
-  SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use,
-  so Orca and other talking apps stay silent.
+  SteamOS has no voice of its own. Before 0.5.6 it had speech-dispatcher, the service apps speak
+  through, but nothing for it to speak with; 0.5.6 removed speech-dispatcher and Orca.
 author: RHASSPY (Piper); espeak-ng contributors
 source: {relation: uses, url: https://github.com/rhasspy/piper}
 icon: {theme: audio-speakers-symbolic}
@@ -20,8 +20,9 @@ settings:
   file: ~/.config/frame-tweaks/speech.conf
   format: shell
   about: >-
-    The voice Screen snip's Narrate reads with, and the language of apps that speak through
-    speech-dispatcher. Both engines are open source and run on the Frame, offline.
+    The voice Screen snip's Narrate reads with (and, on SteamOS before 0.5.6, the language of apps
+    that speak through speech-dispatcher). Both engines are open source and run on the Frame,
+    offline.
   note: >-
     Press Apply to switch (a new language downloads its voice, about 60 MB).
   options:
@@ -58,9 +59,9 @@ settings:
       script: install.sh
       about: Downloads the chosen language's voice if needed and switches to it.
 changes: >-
-  Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a
-  speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on
-  uninstall)
+  Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned);
+  on SteamOS before 0.5.6, a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours
+  backed up, restored on uninstall)
 access: None beyond your home folder
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall speech` (after Screen snip + Narrate)"
@@ -68,15 +69,16 @@ undo: "`./install.sh uninstall speech` (after Screen snip + Narrate)"
 # Speech engine (helper)
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip.
+A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate. On SteamOS before 0.5.6 it also gives KDE's screen reader (Orca) and other apps that speak through speech-dispatcher a voice, espeak-ng. Installed automatically with Screen snip.
 
-**Why on a Steam Frame:** SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent.
+**Why on a Steam Frame:** SteamOS has no voice of its own. Before 0.5.6 it had speech-dispatcher, the service apps speak through, but nothing for it to speak with; 0.5.6 removed speech-dispatcher and Orca.
 <!-- /generated:intro -->
 
 ## Install
 
 You don't need to tick it: it's installed automatically with [Screen snip + Narrate](../snip/). To install
-it on its own (for example, to give Orca a voice), tick it in the Frame Tweaks window, or:
+it on its own (for example, to give Orca a voice on SteamOS before 0.5.6), tick it in the Frame
+Tweaks window, or:
 
 ```sh
 ./install.sh install speech
@@ -88,7 +90,7 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
 
 - **Narrate** in [Screen snip + Narrate](../snip/) reads the text in your snip aloud with Piper's voice.
 - **Orca**, KDE's screen reader, and other apps that speak through speech-dispatcher use
-  espeak-ng. It sounds more robotic than Piper but starts speaking faster, which suits a
+  espeak-ng (SteamOS before 0.5.6 only: 0.5.6 removed both). It sounds more robotic than Piper but starts speaking faster, which suits a
   screen reader. Orca's voice settings are in **System Settings → Accessibility → Screen Reader**.
 - To test it from a terminal: `spd-say "hello"`.
 
@@ -101,7 +103,7 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
 - **Language:** 18 languages, from English and the main European languages to Russian,
   Ukrainian, Arabic, Hindi and Mandarin. Each has a natural Piper voice (downloaded when you
   choose it, about 60 MB, checked against its SHA256) and the matching eSpeak NG voice. It also
-  becomes the default language of apps that speak through speech-dispatcher.
+  becomes the default language of apps that speak through speech-dispatcher (before 0.5.6).
 
 ## How it works
 
@@ -109,8 +111,10 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
   needed once it's installed. It uses the **LJ Speech** voice (US English). Both downloads are
   pinned to a checked version and SHA256 ([`pin`](pin), [`voice.pin`](voice.pin),
   [`voice-config.pin`](voice-config.pin)).
-- **espeak-ng** comes inside Piper's download. SteamOS already has speech-dispatcher's espeak-ng
-  module, just not espeak-ng itself, so a small wrapper runs that module with Piper's copy.
+- **espeak-ng** comes inside Piper's download. SteamOS before 0.5.6 has speech-dispatcher's
+  espeak-ng module, just not espeak-ng itself, so a small wrapper runs that module with Piper's
+  copy. SteamOS 0.5.6 removed speech-dispatcher (and Orca): there, Speech is only Narrate's
+  voice, and installing it again takes out a speech-dispatcher setup it made before.
 - speech-dispatcher reads a settings file in your home folder in place of the system one. This
   tweak writes `~/.config/speech-dispatcher/speechd.conf`, a copy of SteamOS's with espeak-ng
   added and made the default, plus `modules/espeak-ng.conf` next to it. If you already had these
@@ -120,13 +124,14 @@ It downloads Piper and its voice (the voice is about 60 MB). Nothing else to do.
 ## Good to know
 
 - You can't remove it while Screen snip + Narrate is installed: uninstall it first.
-- After uninstalling, speech-dispatcher is back to SteamOS's setup, which has no voice.
+- After uninstalling, speech-dispatcher (before 0.5.6) is back to SteamOS's setup, which has no
+  voice.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall)
+- **Changes:** Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); on SteamOS before 0.5.6, a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall)
 - **Unusual access:** None beyond your home folder
 - **Undo:** `./install.sh uninstall speech` (after Screen snip + Narrate)
 <!-- /generated:changes -->

@@ -1,10 +1,13 @@
 #!/bin/bash
 # Speech engine (helper): Piper (natural offline voice, used by Screen snip's Narrate) and the
-# espeak-ng it ships with, wired into speech-dispatcher, so Orca (Screen reader) and other apps
-# that speak through it have a voice. SteamOS has speech-dispatcher's espeak-ng module but not
-# espeak-ng itself, so without this they're silent.
+# espeak-ng it ships with, wired into speech-dispatcher where SteamOS has it, so Orca (Screen
+# reader) and other apps that speak through it have a voice. SteamOS before 0.5.6 had
+# speech-dispatcher's espeak-ng module but not espeak-ng itself; 0.5.6 removed speech-dispatcher.
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 D="$HOME/.local/share/frame-tweaks/speech"
+SDROOT=${FRAME_TWEAKS_SPEECHD_ROOT:-}
+SD_ETC="$SDROOT/etc/speech-dispatcher"
+SD_MODULE="$SDROOT/usr/lib/speech-dispatcher/speech-dispatcher-modules/sd_espeak-ng"
 mkdir -p "$D"
 # Older versions kept Piper and the voice inside Screen snip: move them over.
 OLD="$HOME/.local/share/frame-tweaks/snip"
@@ -62,27 +65,37 @@ APPLY
 # What Narrate reads (frame-snip): the engine, and eSpeak NG's voice for this language.
 printf 'engine=%s\nespeak_voice=%s\nlanguage=%s\n' "${engine:-piper}" "$espeak_voice" "$lang" > "$D/narrate.conf"
 
+narrator=$([ "$engine" = espeak-ng ] && echo "eSpeak NG" || echo Piper)
+C="$HOME/.config/speech-dispatcher"
+if [ ! -x "$SD_MODULE" ] || [ ! -f "$SD_ETC/speechd.conf" ] || [ ! -f "$SD_ETC/modules/espeak-ng.conf" ]; then
+    # No speech-dispatcher on this SteamOS: take out a setup made while it had one.
+    restore_file speech "$C/speechd.conf"
+    restore_file speech "$C/modules/espeak-ng.conf"
+    rmdir "$C/modules" "$C" 2>/dev/null || true
+    rm -f "$D/sd_espeak-ng"
+    say "$(t 'Speech ready (%s): Narrate uses %s.' "$label" "$narrator")"
+    exit 0
+fi
 # speech-dispatcher: its espeak-ng module, run with Piper's espeak-ng library and voice data.
 write_file "$D/sd_espeak-ng" 755 <<WRAP
 #!/bin/sh
 # speech-dispatcher's espeak-ng module with the espeak-ng that comes with Piper (Frame Tweaks).
 export LD_LIBRARY_PATH="$D/piper\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
 export ESPEAK_DATA_PATH="$D/piper"
-exec /usr/lib/speech-dispatcher/speech-dispatcher-modules/sd_espeak-ng "\$@"
+exec "$SD_MODULE" "\$@"
 WRAP
 # A user speechd.conf replaces the system one: start from it, add the module, make it the default.
-C="$HOME/.config/speech-dispatcher"
 backup_file speech "$C/speechd.conf"
 backup_file speech "$C/modules/espeak-ng.conf"
 mkdir -p "$C/modules"
-cp /etc/speech-dispatcher/modules/espeak-ng.conf "$C/modules/espeak-ng.conf"
+cp "$SD_ETC/modules/espeak-ng.conf" "$C/modules/espeak-ng.conf"
 # (its relative Include of clients/*.conf would look in ~/.config: point it at the system's)
-{ grep -v -E '^\s*(AddModule|DefaultModule)\b' /etc/speech-dispatcher/speechd.conf |
-      sed 's|^Include "clients/|Include "/etc/speech-dispatcher/clients/|' 
+{ grep -v -E '^\s*(AddModule|DefaultModule)\b' "$SD_ETC/speechd.conf" |
+      sed "s|^Include \"clients/|Include \"$SD_ETC/clients/|"
   echo "# Frame Tweaks (speech): espeak-ng from Piper's download"
   echo "AddModule \"espeak-ng\" \"$D/sd_espeak-ng\" \"espeak-ng.conf\""
   echo "DefaultModule espeak-ng"
   echo "DefaultLanguage \"${lang%%_*}\""; } > "$C/speechd.conf"
 # A running speech-dispatcher keeps its old (voiceless) setup: let the next client start it anew.
 pkill -u "$(id -u)" -x speech-dispatcher 2>/dev/null || true
-say "$(t 'Speech ready (%s): Narrate uses %s; speech-dispatcher apps use eSpeak NG.' "$label" "$([ "$engine" = espeak-ng ] && echo "eSpeak NG" || echo Piper)")"
+say "$(t 'Speech ready (%s): Narrate uses %s; speech-dispatcher apps use eSpeak NG.' "$label" "$narrator")"
