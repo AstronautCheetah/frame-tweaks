@@ -11,6 +11,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import uuid
 from pathlib import Path
@@ -292,7 +293,8 @@ test: {{offline: true}}
 
 class TestTweaks(Temp):
     """dev/test-tweaks.sh notices a write into the checkout (its copy in the work folder) and files
-    left in /tmp that kept an old date (as files unpacked from an archive do)."""
+    left in /tmp that kept an old date (as files unpacked from an archive do), but not a file a
+    program already running writes meanwhile (a live adb server's log)."""
 
     def tweak(self, repo, tid, install):
         d = repo / "packs/core" / tid
@@ -319,6 +321,26 @@ class TestTweaks(Temp):
         self.assertEqual(len(out), 2, r.stdout + r.stderr)
         self.assertTrue(out[1].startswith(": wrote outside the test home:\n"), out[1])
         self.assertRegex(out[1], rf"(?m)^    /tmp/ft-leak-{token}\.\w+/file$")
+
+    def test_a_file_a_running_program_writes_isnt_the_tweaks(self):
+        repo = copy_repo(self.d / "repo")
+        log = Path(f"/tmp/ft-held-{uuid.uuid4().hex[:12]}.log")
+        self.addCleanup(log.unlink, missing_ok=True)
+        writer = subprocess.Popen(["bash", "-c", f'exec 3>>"{log}"; while :; do echo x >&3; sleep 0.2; done'])
+        self.addCleanup(writer.wait)
+        self.addCleanup(writer.kill)
+        for _ in range(100):                      # (open, and written, before the run starts)
+            if log.exists() and log.stat().st_size:
+                break
+            time.sleep(0.05)
+        self.tweak(repo, "quiet", ":")
+        path = os.environ["PATH"]
+        if not shutil.which("bsdtar"):
+            path = f"{stubs(self.d / 'bin', bsdtar='exit 1')}:{path}"
+        r = subprocess.run(["bash", str(repo / "dev/test-tweaks.sh"), "quiet"],
+                           env={**os.environ, "PATH": path}, capture_output=True, text=True, timeout=300)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("ok   quiet", r.stdout)
 
     @unittest.skipUnless(subprocess.run(["unshare", "-cn", "true"], capture_output=True).returncode == 0
                          if shutil.which("unshare") else False, "no unprivileged network namespaces here")
