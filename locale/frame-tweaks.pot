@@ -2066,7 +2066,8 @@ msgstr ""
 msgid ""
 "Done. One-time pairing: on the phone open Developer options → Wireless debugging →\n"
 "\"Pair device with pairing code\", then within the minute run:\n"
-"    adb pair <ip>:<pairing-port> <code>\n"
+"    adb pair <ip>:<pairing-port>\n"
+"and type the code the phone shows when adb asks for it.\n"
 "Afterwards just launch 'Android Mirror' (or run: phone)."
 msgstr ""
 
@@ -3155,6 +3156,10 @@ msgid "Profile %s not found"
 msgstr ""
 
 #: packs/core/firefox/install.sh
+msgid "Put back the values you had set yourself before: %s"
+msgstr ""
+
+#: packs/core/firefox/install.sh
 msgid "Removed our settings from user.js."
 msgstr ""
 
@@ -3695,6 +3700,14 @@ msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "Text copied to the clipboard."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "The Speech engine didn't start: reinstall it in Frame Tweaks."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "The Speech engine failed to read part {part}."
 msgstr ""
 
 #: packs/core/snip/frame-snip

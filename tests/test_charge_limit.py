@@ -259,6 +259,48 @@ class ChargeLimit(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("SteamOS now has its own charge limit", text)
 
+    def test_status_while_charging_to_full_once(self):
+        """Until the battery is full it says so, and the limit it goes back to; with the limit
+        then turned off, that it's off (it said "then stopping at off% again")."""
+        self.run_dir.mkdir(parents=True)
+        (self.run_dir / "full-once").touch()
+        self.battery(85)
+        self.assertEqual(self.status(), (0, "ok       Charging to 100% once (now 85%), then stopping at 80% again"))
+        self.limit("off")
+        self.assertEqual(self.status(), (0, "ok       Limit off: charges to 100% (now 85%)"))
+
+    # ---- uninstall.sh -----------------------------------------------------------------------
+    def test_uninstall_finishes_without_the_switch(self):
+        """The charger's pause switch gone (a SteamOS that renamed it, say): handing it back to
+        root fails, and that ended the uninstall (set -e) right after its udev rule went. (A copy
+        of uninstall.sh whose system paths are in the throwaway home; sudo is a stand-in.)"""
+        etc = self.home / "etc"
+        etc.mkdir()
+        rule, keep = etc / "rule", etc / "keep"
+        rule.write_text("rule\n")
+        keep.write_text(f"{rule}\n")
+        src = (TWEAK / "uninstall.sh").read_text()
+        for old, new in (("/sys/class/power_supply/pm8550b-charger/charging_pause", self.home / "sys/gone/charging_pause"),
+                         ("/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules", rule),
+                         ("/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf", keep),
+                         ("$XDG_RUNTIME_DIR_USER/charge-limit/paused", self.run_dir / "paused")):
+            self.assertEqual(src.count(old), 1, old)              # (never the real ones)
+            src = src.replace(old, str(new))
+        script = self.home / "uninstall.sh"
+        script.write_text(src)
+        log = self.home / "sudo.log"
+        # sudo: removes files only in this home; chown fails on a file that isn't there, as it does
+        stub(self.stubs, "sudo", f'echo "sudo $*" >> {log}\ncase "$1" in -v) exit 0 ;;\n'
+                                 f'  rm) shift; for f in "$@"; do case "$f" in -f) ;; "{self.home}"/*) rm -f "$f" ;; *) exit 1 ;; esac; done ;;\n'
+                                 '  chown) [ -e "$3" ] || { echo "chown: cannot access $3" >&2; exit 1; } ;;\n  *) exit 1 ;; esac')
+        stub(self.stubs, "systemctl", "exit 0")
+        r = subprocess.run(["bash", str(script)], env={**self.env, "FRAME_TWEAKS_LIB": str(ROOT / "lib")},
+                           capture_output=True, text=True, timeout=30)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse(rule.exists() or keep.exists())
+        self.assertIn(f"chown root {self.home}/sys/gone/charging_pause", log.read_text())
+        self.assertIn(f"removed {rule}", r.stdout)
+
 
 
 class SleepWatch(unittest.TestCase):

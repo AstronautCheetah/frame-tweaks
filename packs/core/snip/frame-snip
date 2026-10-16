@@ -384,9 +384,13 @@ def sentences(text):
 class Narrator(QObject):
     """Reads text aloud with Piper, a sentence at a time (the next one is prepared while one plays),
     so it starts quickly and a speed change applies at once (the current sentence restarts).
-    Previous / Next (skip) move a whole part, playing or paused."""
+    Previous / Next (skip) move a whole part, playing or paused. A part the Speech engine fails
+    to make (it doesn't start, or ends without the sound) is tried once more; then it stops there
+    and says why (failed), rather than trying again and again."""
     progress = pyqtSignal(int, int)          # sentence index, count (also while paused there)
     finished = pyqtSignal()
+    failed = pyqtSignal(str, int)            # why (English, N_), the part's index: stopped there
+    TRIES = 2
 
     def __init__(self, text, speed):
         super().__init__()
@@ -394,6 +398,8 @@ class Narrator(QObject):
         self.dir = Path(tempfile.mkdtemp(prefix="snip-narrate-"))
         self.wavs = {}                       # index -> (speed, path) synthesized
         self.synth = None                    # (index, speed, QProcess) being synthesized
+        self.failures = {}                   # index -> times the Speech engine failed to make it
+        self.why = None                      # what went wrong the last time
         self.player = None
         self.i = 0
         self.stopped = False
@@ -403,12 +409,17 @@ class Narrator(QObject):
         self._synth(self.i)
 
     def _synth(self, i):
-        if i >= len(self.parts) or self.synth or (i in self.wavs and self.wavs[i][0] == self.speed):
+        if (self.stopped or i >= len(self.parts) or self.synth or self.failures.get(i, 0) >= self.TRIES
+                or (i in self.wavs and self.wavs[i][0] == self.speed)):
             return
         out = self.dir / f"{i}-{self.speed}.wav"
         proc = QProcess(self)
         speed = self.speed
+        self.synth = (i, speed, proc)        # (before it starts: one that can't start says so)
         proc.finished.connect(lambda *_: self._synthesized(i, speed, out, proc))
+        # One that can't start (Piper gone, say) never finishes: that's a failure too.
+        proc.errorOccurred.connect(lambda e: e == QProcess.ProcessError.FailedToStart
+                                   and self._synthesized(i, speed, out, proc, started=False))
         conf = narrate_conf()
         if conf.get("engine") == "espeak-ng" and ESPEAK.exists():
             env = QProcessEnvironment.systemEnvironment()
@@ -422,14 +433,20 @@ class Narrator(QObject):
                                     "--length_scale", f"{1 / speed:.3f}"])
         proc.write(self.parts[i].encode())
         proc.closeWriteChannel()
-        self.synth = (i, speed, proc)
 
-    def _synthesized(self, i, speed, out, proc):
+    def _synthesized(self, i, speed, out, proc, started=True):
+        if self.synth is None or self.synth[2] is not proc:
+            return                           # (already done with)
         self.synth = None
         proc.deleteLater()
         if self.stopped:
             return
-        if speed == self.speed and out.exists():
+        if not (started and proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
+                and out.is_file() and out.stat().st_size):
+            self.failures[i] = self.failures.get(i, 0) + 1       # (tried again, up to TRIES: _play)
+            self.why = (N_("The Speech engine failed to read part {part}.") if started
+                        else N_("The Speech engine didn't start: reinstall it in Frame Tweaks."))
+        elif speed == self.speed:
             self.wavs[i] = (speed, out)
         if self.player is None:
             self._play()
@@ -438,16 +455,20 @@ class Narrator(QObject):
     def _play(self):
         if self.stopped:
             return
-        if self.i < len(self.parts):         # where it is, even before it plays (Previous / Next count from it)
-            self.progress.emit(self.i, len(self.parts))
-        if self.paused:
-            return
-        if self.i >= len(self.parts):
+        if self.i >= len(self.parts):        # read to the end (before Pause: one pressed as the last
+            self.paused = False              # part ended isn't left standing, Stop then reading it again)
             self.finished.emit()
+            return
+        self.progress.emit(self.i, len(self.parts))    # where it is, even before it plays (Previous / Next count from it)
+        if self.paused:
             return
         w = self.wavs.get(self.i)
         if not w or w[0] != self.speed:
-            self._synth(self.i)              # not ready yet: plays when it is
+            if self.failures.get(self.i, 0) >= self.TRIES:
+                self.stop()                  # the Speech engine can't make this part: stop here, saying why
+                self.failed.emit(self.why, self.i)
+            else:
+                self._synth(self.i)          # not ready yet: plays when it is
             return
         self.player = QProcess(self)
         self.player.finished.connect(self._played)
@@ -494,6 +515,7 @@ class Narrator(QObject):
 
     def again(self):
         self.stopped, self.paused, self.i = False, False, 0
+        self.failures.clear()                # (a part that failed is tried again)
         self._play()
 
     def pause(self):
@@ -796,6 +818,7 @@ class NarrationWindow(QWidget):
         self.narrator = Narrator(text, self.speed)
         self.narrator.progress.connect(self.show_progress)
         self.narrator.finished.connect(self.done)
+        self.narrator.failed.connect(lambda why, i: self.show_stopped(why, part=i + 1))
         self.narrator.start()
         self.expand() if self.collapsed else self.fit()
 
@@ -964,8 +987,13 @@ class NarrationWindow(QWidget):
         self.next_button.setEnabled(on)
 
     def done(self):
-        tr_text(self.state, N_("Finished."))
+        self.show_stopped(N_("Finished."))
+
+    def show_stopped(self, text, **values):
+        """Read to the end, stopped, or stopped by a failure (text says which): Read it again."""
+        tr_text(self.state, text, **values)
         icon_button(self.toggle, "media-playlist-repeat", N_("Read it again"))
+        icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
         self.pause_button.setEnabled(False)
         self.enable_skips(False)
 
@@ -989,11 +1017,7 @@ class NarrationWindow(QWidget):
             self.narrator.again()
         else:
             self.narrator.stop()
-            tr_text(self.state, N_("Stopped."))
-            icon_button(self.toggle, "media-playlist-repeat", N_("Read it again"))
-            icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
-            self.pause_button.setEnabled(False)
-            self.enable_skips(False)
+            self.show_stopped(N_("Stopped."))
 
     def closeEvent(self, ev):
         self.narrator.cleanup()
@@ -1003,7 +1027,8 @@ class NarrationWindow(QWidget):
 class NarrationOverlay(QObject):
     """Shows a widget as its own SteamVR overlay, the way Arrow Pad does: laser clicks reach its
     buttons; a press elsewhere (its top bar, say) carries it with the controller until released.
-    It redraws only when the widget changes, behind a cover overlay so a reload doesn't blink."""
+    It redraws only when the widget changes, behind a cover overlay so a reload doesn't blink.
+    If SteamVR fails it (restarting under it, say), it closes the widget (lost)."""
     WIDTH_M = 0.6
     M_PER_PX = 0.6 / 880                         # constant scale: a collapsed panel is small too
 
@@ -1011,6 +1036,8 @@ class NarrationOverlay(QObject):
         super().__init__()
         import openvr
         self.vr, self.w = openvr, widget
+        self.gone = False                           # closed, or SteamVR failed (lost): no more timers
+        widget.destroyed.connect(self.stop)
         openvr.init(openvr.VRApplication_Overlay)
         self.ov, self.system = openvr.VROverlay(), openvr.VRSystem()
         key = f"frame-tweaks.snip.narration.{os.getpid()}"
@@ -1032,16 +1059,41 @@ class NarrationOverlay(QObject):
         self.offset = self.load_offset()            # the panel relative to the dashboard bar
         if not (self.offset and self.follow()):
             self.place_default()
-        QTimer(self, interval=100, timeout=self.follow).start()
+        QTimer(self, interval=100, timeout=self.guarded(self.follow)).start()
         self.tex_dir = Path(tempfile.mkdtemp(prefix="snip-panel-"))
         self.n, self.last_digest, self.cover_path, self.pressed, self.drag = 0, None, None, None, None
         self.render()
         self.ov.showOverlay(self.h)
         # Events 45x a second while a laser is on the panel (or it's carried or pressed), 10x
         # otherwise (only to notice one arriving; nothing is lost meanwhile: events queue)
-        self.poll_timer = QTimer(self, interval=22, timeout=self.poll)
+        self.poll_timer = QTimer(self, interval=22, timeout=self.guarded(self.poll))
         self.poll_timer.start()
-        QTimer(self, interval=200, timeout=self.render).start()
+        QTimer(self, interval=200, timeout=self.guarded(self.render)).start()
+
+    def guarded(self, work):
+        """A timer's work (it calls SteamVR): an error in it closes the panel (lost). Leaving the
+        timer, it would end the program at once (PyQt6 aborts on one), leaving its files behind."""
+        def run():
+            if self.gone:
+                return
+            try:
+                work()
+            except Exception as e:
+                self.lost(e)
+        return run
+
+    def lost(self, error):
+        """SteamVR failed (restarting, say), and the panel is gone from VR with it: close it as
+        Close does (the narration stops; a new snip opens a new panel), rather than read on unseen."""
+        self.stop()
+        print(f"frame-snip: SteamVR failed ({error!r}); closing the narration panel", file=sys.stderr)
+        self.w.close()
+
+    def stop(self):
+        """No more of the timers' work: the panel closed (its widget gone), or SteamVR failed."""
+        self.gone = True
+        for t in self.findChildren(QTimer):
+            t.stop()
 
     def size_m(self):
         """Overlay width from the widget's (constant metres per pixel); True if it changed."""
@@ -1211,7 +1263,7 @@ class NarrationOverlay(QObject):
         scale = self.vr.HmdVector2_t()
         scale.v[0], scale.v[1] = img.width(), img.height()
         self.ov.setOverlayMouseScale(self.h, scale)
-        QTimer.singleShot(120 if covered else 0, lambda: self.uncover(path))
+        QTimer.singleShot(120 if covered else 0, self.guarded(lambda: self.uncover(path)))
 
     def uncover(self, path):
         self.ov.showOverlay(self.h)

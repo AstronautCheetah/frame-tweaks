@@ -1272,7 +1272,8 @@ class CodeInAList(unittest.TestCase):
         self.app = QApplication.instance() or QApplication([])
         c = gui.component("adb-scrcpy")
         text = gui.readme_browser(manifest.front_matter(c["readme"].read_text())[1], c).toPlainText()
-        self.assertIn("adb pair <ip>:<pairing-port> <code>", text)
+        self.assertIn("adb pair <ip>:<pairing-port>", text)      # (the code is typed at adb's prompt)
+        self.assertNotIn("&lt;", text)
 
 
 class DetailsScroll(unittest.TestCase):

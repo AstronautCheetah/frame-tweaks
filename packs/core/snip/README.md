@@ -150,6 +150,10 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 - **Copy text** and the panel's **Paste** use `wl-copy` and `wl-paste` from Homebrew's
   `wl-clipboard`; installing Screen snip adds it if it isn't there yet.
 - Without SteamVR's OpenVR library, the narration panel opens as an ordinary window instead.
+- If the Speech engine fails on a part (it doesn't start, or makes no sound), Narrate tries that
+  part once more, then stops there and says so; **Again** tries again. If SteamVR fails under
+  the narration panel (restarting, say), the panel closes and the reading stops: Narrate opens
+  a new one.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes

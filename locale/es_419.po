@@ -2310,16 +2310,19 @@ msgid ""
 msgstr ""
 "El adb actual de Arch Linux ARM no funciona en este SteamOS; se conserva el adb que tienes. Falta: %s"
 
+# needs review
 #: packs/core/adb-scrcpy/install.sh
 msgid ""
 "Done. One-time pairing: on the phone open Developer options → Wireless debugging →\n"
 "\"Pair device with pairing code\", then within the minute run:\n"
-"    adb pair <ip>:<pairing-port> <code>\n"
+"    adb pair <ip>:<pairing-port>\n"
+"and type the code the phone shows when adb asks for it.\n"
 "Afterwards just launch 'Android Mirror' (or run: phone)."
 msgstr ""
 "Listo. Vinculación única: en el teléfono abre Opciones para desarrolladores → Depuración inalámbrica →\n"
 "\"Vincular dispositivo con un código de vinculación\", y antes de un minuto ejecuta:\n"
-"    adb pair <ip>:<pairing-port> <code>\n"
+"    adb pair <ip>:<pairing-port>\n"
+"y escribe el código que muestra el teléfono cuando adb lo pida.\n"
 "Después solo abre 'Espejo de Android' (o ejecuta: phone)."
 
 #: packs/core/adb-scrcpy/install.sh
@@ -3534,6 +3537,11 @@ msgstr ""
 msgid "Profile %s not found"
 msgstr "No se encontró el perfil %s"
 
+# needs review
+#: packs/core/firefox/install.sh
+msgid "Put back the values you had set yourself before: %s"
+msgstr "Se restauraron los valores que tenías antes: %s"
+
 #: packs/core/firefox/install.sh
 msgid "Removed our settings from user.js."
 msgstr "Se quitaron nuestras opciones de user.js."
@@ -4110,6 +4118,16 @@ msgstr "Texto copiado"
 #: packs/core/snip/frame-snip
 msgid "Text copied to the clipboard."
 msgstr "Texto copiado al portapapeles."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "The Speech engine didn't start: reinstall it in Frame Tweaks."
+msgstr "El motor de voz no se inició: reinstálalo en Frame Tweaks."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "The Speech engine failed to read part {part}."
+msgstr "El motor de voz no pudo leer la parte {part}."
 
 #: packs/core/snip/frame-snip
 msgid "The clipboard has no text."

@@ -64,5 +64,6 @@ else
 fi
 t "Done. One-time pairing: on the phone open Developer options → Wireless debugging →
 \"Pair device with pairing code\", then within the minute run:
-    adb pair <ip>:<pairing-port> <code>
+    adb pair <ip>:<pairing-port>
+and type the code the phone shows when adb asks for it.
 Afterwards just launch 'Android Mirror' (or run: phone)."; echo

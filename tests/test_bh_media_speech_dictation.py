@@ -2,8 +2,10 @@
 the tools that would download, record, play or notify. A speech.conf without a language (only
 the engine chosen, or reset) is English (US): nothing to download, a real language for
 speech-dispatcher. Without speech-dispatcher (SteamOS 0.5.6 removed it) Speech still installs, for
-Narrate, and an earlier speech-dispatcher setup is undone. A recording that ended by itself isn't "auto-stopped" into a new one. Every
-setting the README lists is in the example settings file."""
+Narrate, and an earlier speech-dispatcher setup is undone. A recording that ended by itself is
+transcribed (by the next press, or the auto-stop), not "auto-stopped" into a new one. Installing
+removes the models older versions downloaded, unless the settings use one. Every setting the
+README lists is in the example settings file."""
 import sys
 import os
 import re
@@ -124,29 +126,95 @@ class SpeechLanguage(Home):
 
 
 class DictateAutoStop(Home):
-    def test_a_recording_that_ended_by_itself_isnt_restarted(self):
-        """pw-record ended on its own (here: at once). The auto-stop timer then finds nothing to
-        stop; it must not run the toggle, which would start a new recording."""
-        run = self.tmp / "run"
+    def dictate(self, max_seconds):
+        """A copy of dictate with its runtime folder in the throwaway home, and stand-ins first on
+        its PATH: nothing real records, plays, notifies, transcribes, copies or types. pw-record
+        writes its file and ends at once, by itself (the microphone gone, say)."""
+        self.run = self.tmp / "run"
         src = (DICTATION / "dictate").read_text()
         self.assertIn("RUN=/run/user/$(id -u)\n", src)
         script = self.tmp / "dictate"
-        script.write_text(src.replace("RUN=/run/user/$(id -u)\n", f"RUN={run}\n"))     # (not the real one)
+        script.write_text(src.replace("RUN=/run/user/$(id -u)\n", f"RUN={self.run}\n"))     # (not the real one)
         script.chmod(0o755)
-        bin_ = self.home / ".local/bin"           # first on dictate's PATH: nothing real records, plays or notifies
-        self.stub(bin_, "pw-record", f'echo "record $*" >> {self.log}')
-        self.stub(bin_, "pw-play", "exit 0")
-        self.stub(bin_, "notify-send", f'echo "notify $*" >> {self.log}')
+        bin_ = self.home / ".local/bin"           # first on dictate's PATH
+        for name, body in (("pw-record", f'echo "record $*" >> {self.log}; for f; do :; done; echo RIFF > "$f"'),
+                           ("pw-play", "exit 0"), ("notify-send", f'echo "notify $*" >> {self.log}'),
+                           ("ffprobe", "echo 2.0"), ("ffmpeg", 'echo "[volumedetect] max_volume: -12.0 dB" >&2'),
+                           ("whisper-cli", f'echo "whisper $*" >> {self.log}; echo "Hello from the recording."'),
+                           ("wl-copy", f'echo "copy $(cat)" >> {self.log}'), ("ydotool", f'echo "ydotool $*" >> {self.log}')):
+            self.stub(bin_, name, body)
         (self.home / ".config/frame-tweaks").mkdir(parents=True)
-        (self.home / ".config/frame-tweaks/dictate.conf").write_text("DICTATE_MAX_SECONDS=1\n")
+        (self.home / ".config/frame-tweaks/dictate.conf").write_text(f"DICTATE_MAX_SECONDS={max_seconds}\n")
         env = sandbox_env(self.home)
-        r = subprocess.run(["bash", str(script)], env=env, capture_output=True, text=True, timeout=30)
+        return lambda *args: subprocess.run(["bash", str(script), *args], env=env, capture_output=True, text=True,
+                                            timeout=30)
+
+    def typed(self, seconds=5):
+        end = time.monotonic() + seconds
+        while "ydotool type" not in self.log.read_text() and time.monotonic() < end:
+            time.sleep(0.05)
+        return [l for l in self.log.read_text().splitlines() if l.startswith("ydotool type")]
+
+    def test_a_recording_that_ended_by_itself_is_transcribed_not_restarted(self):
+        """pw-record ended on its own. The auto-stop timer must not run the toggle into a new
+        recording (it once did): it transcribes what was recorded, as it does a recording still
+        running."""
+        dictate = self.dictate(1)
+        r = dictate()
         self.assertEqual(r.returncode, 0, r.stderr)
-        time.sleep(2.5)                           # the auto-stop timer (1 s) has run
+        self.assertEqual(self.typed(), ["ydotool type --key-delay 2 -- Hello from the recording. "])
         log = self.log.read_text()
         self.assertEqual(log.count("record "), 1, log)
-        status = subprocess.run(["bash", str(script), "--status"], env=env, capture_output=True, text=True, timeout=30)
-        self.assertEqual(status.stdout.strip(), "idle")
+        self.assertEqual(dictate("--status").stdout.strip(), "idle")
+
+    def test_the_next_press_transcribes_a_recording_that_ended_by_itself(self):
+        """Pressed again after pw-record ended by itself: that recording is transcribed (its file
+        kept as last.wav), as when it's still running. It started a new recording instead, the
+        last one's file left behind."""
+        dictate = self.dictate(2)
+        self.assertEqual(dictate().returncode, 0)
+        time.sleep(0.8)                           # (within 0.7 s, a press is a double tap: ignored)
+        r = dictate()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.typed(), ["ydotool type --key-delay 2 -- Hello from the recording. "])
+        self.assertEqual([p.name for p in (self.run / "dictate").glob("*.wav")], ["last.wav"])
+        time.sleep(1.5)                           # the auto-stop timer (2 s) finds nothing to do
+        log = self.log.read_text()
+        self.assertEqual((log.count("record "), log.count("whisper ")), (1, 1), log)
+        self.assertEqual(dictate("--status").stdout.strip(), "idle")
+
+
+class DictationInstall(Home):
+    def install(self, conf):
+        """dictation/install.sh in a throwaway home with dictate.conf saying conf, the shared model
+        there and two that older versions downloaded; stand-ins for Homebrew, systemctl and the
+        ydotool helper's installer. The models left afterwards."""
+        self.home = Path(tempfile.mkdtemp(dir=self.tmp))
+        models = self.home / ".local/share/whisper"
+        models.mkdir(parents=True)
+        for m in ("ggml-small-q8_0.bin", "ggml-small.en-q5_1.bin", "ggml-base.en-q5_1.bin"):
+            (models / m).write_text("")
+        (self.home / ".config/frame-tweaks").mkdir(parents=True)
+        (self.home / ".config/frame-tweaks/dictate.conf").write_text(conf)
+        stubs, ydotool = self.tmp / "stubs", self.tmp / "ydotool"
+        for name in ("brew", "systemctl"):
+            self.stub(stubs, name, f'echo "{name} $*" >> {self.log}')
+        self.stub(ydotool, "install.sh", f'echo "ydotool install" >> {self.log}')
+        env = sandbox_env(self.home, stubs, BREW_BIN=stubs / "brew", FRAME_TWEAKS_DIRS=f"ydotool={ydotool}")
+        r = subprocess.run(["bash", str(DICTATION / "install.sh")], env=env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        return sorted(p.name for p in models.iterdir())
+
+    def test_old_models_go_unless_dictate_conf_uses_one(self):
+        """The example settings (copied into every dictate.conf) name ggml-base.en-q5_1.bin in a
+        comment: that kept it for ever. Only a setting in use keeps an old model."""
+        example = (DICTATION / "dictate.conf.example").read_text()
+        self.assertIn('#DICTATE_MODEL="$HOME/.local/share/whisper/ggml-base.en-q5_1.bin"', example)
+        self.assertEqual(self.install(example), ["ggml-small-q8_0.bin"])
+        used = example + 'DICTATE_MODEL="$HOME/.local/share/whisper/ggml-base.en-q5_1.bin"\n'
+        self.assertEqual(self.install(used), ["ggml-base.en-q5_1.bin", "ggml-small-q8_0.bin"])
+        self.assertEqual(self.install('  DICTATE_MODEL=~/.local/share/whisper/ggml-small.en-q5_1.bin\n'),
+                         ["ggml-small-q8_0.bin", "ggml-small.en-q5_1.bin"])
 
 
 class DictateTyping(Home):

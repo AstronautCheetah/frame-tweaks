@@ -163,6 +163,38 @@
   there counted as present. Installing a patch says "Active now." only once it is, and otherwise
   what the patches service says. While a patch's panel isn't showing, the shared helpers no
   longer wrap the dashboard's drawing again every 2 seconds, a layer deeper each time.
+- **Battery charge limit:** removing it on a SteamOS without the charger's pause switch stopped
+  with an error, right after taking out its udev rule; it now finishes. Its status no longer says
+  "then stopping at off% again" when Charge to 100% once is pending with the limit turned off.
+- **Removing Firefox privacy keeps the settings you had before it:** it took all of its settings
+  out of `prefs.js`, yours too, so an HTTPS-only mode or strict tracking protection you had set
+  yourself went back to Firefox's defaults. Installing now records those of yours, and removing
+  puts them back as they were. (Installed by an earlier version, it can't tell yours from its
+  own: removing resets them all, as before.)
+- **Narrate stops, and says why, when the Speech engine fails:** if Piper ended without making a
+  part's sound, Narrate started it again and again (143 times in 3 seconds) without a word; if
+  it couldn't start at all, the panel said "Preparing…" for ever, and Read it again read nothing.
+  Now a part is tried once more, then Narrate stops there and says the Speech engine failed (or
+  didn't start); Read it again tries again.
+- **Narrate finishes when you pause just as the last part ends:** it stayed "Paused." at the
+  end, and Stop then read it all again.
+- **Narrate's VR panel closes cleanly when SteamVR fails under it:** an error from SteamVR in one
+  of its timers (SteamVR restarting, say) aborted the program, leaving the narration's files
+  behind. Now the narration stops and the panel closes, as with Close; a new snip opens a new one.
+- **Android Mirror's Restart stream after Reset to defaults** went on with the old picture size,
+  bit rate, frame rate and clipboard setting; it now restarts at the defaults.
+- **Android Mirror's removal stops adb in both sessions:** pairing from a terminal in desktop
+  mode starts a second adb server, in desktop mode's runtime folder, and removing the tweak
+  stopped only the one in its own session.
+- **Android Mirror's pairing instructions** (its README, and the message after installing) put
+  the pairing code on adb's command line, and so in your shell's history: they now say to run
+  `adb pair <ip>:<pairing-port>` and type the code when adb asks for it, as Pair it again does.
+- **Dictation transcribes a recording that stopped by itself** (the microphone gone, say) at your
+  next press, or at the auto-stop, as it does one still running. The next press started a new
+  recording instead, and the first one's file stayed in memory until the Frame restarted.
+- **Dictation's install removes the older Whisper models** that earlier versions downloaded, as
+  it meant to: every `dictate.conf` has the example's commented-out line naming one, and that
+  kept `ggml-base.en-q5_1.bin` for good. Only a `DICTATE_MODEL` setting in use keeps one now.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
