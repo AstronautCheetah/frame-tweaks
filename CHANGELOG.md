@@ -22,6 +22,11 @@
 ### Changed
 - **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a
   link to the page and where its Star button is.
+- **Battery charge limit swings by 1%, and can stop at 74%, 76% or 78% too:** charging starts
+  again 1% below the limit instead of 5%, so at 80% the battery stays between 79% and 80%.
+  Paused, the battery still gives a little power (the Frame's charger has no switch that holds
+  it still), so the band only sets the size of the swings; research on micro-cycles finds small
+  ones add little wear, and a lower limit lowers the average charge. The README has the details.
 - **Battery charge limit's README explains desktop mode's battery icon:** while the limit holds,
   KDE says the power supply "is not powerful enough to charge the battery". It's the tweak
   pausing the charging, not the charger. It also says the battery drains slowly while paused.

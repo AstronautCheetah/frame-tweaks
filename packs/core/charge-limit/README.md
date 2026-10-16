@@ -3,12 +3,12 @@ title: Battery charge limit
 emoji: 🔋
 category: Hardware
 tier: core
-summary: Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly
+summary: Stop charging at 80% (or 74 to 90%) while the Frame is on, for a battery that wears more slowly
 what: >-
   Charging stops when the battery reaches the limit you choose (80% unless you change it) and
-  starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and
-  leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the
-  next full charge.
+  starts again 1% below it, so the battery stays within 1% of the limit. Plugged in, the Frame
+  then runs mostly from the charger or power bank. Charge to 100% once, in its settings, lifts
+  the limit until the next full charge.
 why: >-
   A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot
   of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge
@@ -27,8 +27,8 @@ settings:
   file: ~/.config/frame-tweaks/charge-limit.conf
   format: shell
   about: >-
-    Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame
-    runs from the charger or power bank and leaves the battery alone.
+    Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame
+    runs mostly from the charger or power bank. A lower limit wears the battery a little less.
   note: >-
     Applies within 30 seconds.
   options:
@@ -36,7 +36,10 @@ settings:
       title: Stop charging at
       default: "80"
       choices:
-        - {label: "80% (the battery wears least)", value: "80"}
+        - {label: "74%", value: "74"}
+        - {label: "76%", value: "76"}
+        - {label: "78%", value: "78"}
+        - {label: "80% (the default)", value: "80"}
         - {label: "85%", value: "85"}
         - {label: "90%", value: "90"}
         - {label: "Off (charge to 100%)", value: "off"}
@@ -62,7 +65,7 @@ undo: >-
 # Battery charge limit
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge.
+Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 1% below it, so the battery stays within 1% of the limit. Plugged in, the Frame then runs mostly from the charger or power bank. Charge to 100% once, in its settings, lifts the limit until the next full charge.
 
 **Why on a Steam Frame:** A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame.
 <!-- /generated:intro -->
@@ -90,8 +93,9 @@ SteamOS's own rule makes the LEDs yours (`99-leds.rules`). Uninstalling asks for
 remove the rule. If your user has no password yet, set one first with `passwd` in Konsole.
 
 ## Use
-- **The limit:** ⚙ Settings on its row (or `./install.sh settings charge-limit`): 80% (the
-  default), 85%, 90% or Off. It applies within 30 seconds.
+- **The limit:** ⚙ Settings on its row (or `./install.sh settings charge-limit`): 74%, 76%, 78%,
+  80% (the default), 85%, 90% or Off. A lower limit wears the battery a little less. It applies
+  within 30 seconds.
 - **Charge to 100% once**, a button on the same page, is only for a long session away from
   power: the limit is lifted until the battery is full (or the Frame restarts), then applies
   again. You don't need it otherwise.
@@ -102,8 +106,9 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
   may too.
 - **Plugged in at the limit,** the Frame runs mostly from the charger or power bank, but the
   battery still drains slowly: on a Frame plugged into a 45 W USB-C charger, holding at 80%, the
-  battery gave about 1 W (it went from 84% to 79% in 45 minutes). Charging starts again 5% below
-  the limit, so the battery goes back and forth between 75% and 80%.
+  battery gave about 1 W (it went from 84% to 79% in 45 minutes). Charging starts again 1% below
+  the limit, so at 80% the battery goes back and forth between 79% and 80%: charging for a few
+  minutes about every ten. Swings that small add little wear (see "For maintainers").
 - **Desktop mode's battery icon says the charger is too weak; it isn't.** While the limit holds,
   KDE's battery icon in desktop mode shows something like:
 
@@ -112,8 +117,8 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
   > The power supply is not powerful enough to charge the battery
 
   That's this tweak pausing the charging, not your charger: KDE only sees that power is plugged
-  in and the battery isn't charging, and guesses why. Once the battery is 5% below the limit,
-  it charges again and the message goes away.
+  in and the battery isn't charging, and guesses why. Each time the battery is 1% below the
+  limit, it charges again for a few minutes and the message goes away until it's paused again.
 - **It doesn't drain a full battery to the limit:** plugged in at 100%, it stays at 100% until
   you use it on battery.
 - **Valve's own setting comes first.** If SteamOS adds a charge limit for the Frame (Steam →
@@ -123,7 +128,7 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
 ## How it works
 - `charge-limit --run` (a user service) checks the battery every 30 seconds. At the limit it
   sets the charger's pause switch
-  (`/sys/class/power_supply/pm8550b-charger/charging_pause`), and 5% below it clears it again.
+  (`/sys/class/power_supply/pm8550b-charger/charging_pause`), and 1% below it clears it again.
   It never changes the charger's voltage or current, and it lifts only a pause it made itself.
 - SteamOS's charger service (`deckard-charger`) clears the switch each time it starts; the next
   check sets it again. Stopping the service (uninstalling, or shutting down) clears it, so
@@ -146,8 +151,17 @@ The charger's other switches don't help: with `charging_enable=0`, or `constant_
 at 0, 50 or 100 mA (each read back as written), the battery kept charging at about +0.8 A, at
 once and after a pause and resume. Its `status_detailed` shows `QPH2: 1`, a charging mode
 SteamOS's charger service puts it in, where that current setting apparently isn't used. So the
-pause is the only control that works, and a narrower resume band would only make the same
-drain come back in smaller swings.
+pause is the only control that works.
+
+**Why it resumes 1% below the limit (5% before October 2026).** Either way the battery gives the
+same energy while paused, so the band only sets the size of the swings and their average. Studies
+of such micro-cycles found that swings of 2.5 to 5% around a fixed average charge aged cells
+about as much as storing them at that charge (Ćurić et al., *J. Power Sources* 689, 240705,
+2026), and that 0.5 to 2% micro-cycles added almost no wear, the smallest the least (Soto et al.,
+*J. Energy Storage* 55, 105343, 2022); for graphite/LiCoO₂ cells, the Frame's likely chemistry,
+capacity loss grows with both the swing and the average charge (Saxena et al., *J. Power
+Sources* 327, 2016). So a small swing is slightly better, and what matters more is the average:
+the lower limits (74 to 78%) lower it.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes

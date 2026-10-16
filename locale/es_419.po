@@ -3047,8 +3047,8 @@ msgstr "se cerró un Teclado de flechas en ejecución"
 
 # needs review
 #: packs/core/charge-limit/README.md
-msgid "80% (the battery wears least)"
-msgstr "80% (la batería se desgasta menos)"
+msgid "80% (the default)"
+msgstr "80% (predeterminado)"
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -3082,16 +3082,16 @@ msgstr "Cargar al 100% una vez"
 # needs review
 #: packs/core/charge-limit/README.md
 msgid ""
-"Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame runs from the charger or power bank and leaves the battery alone."
+"Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
 msgstr ""
-"La carga se detiene en este nivel y vuelve a empezar un 5% por debajo. Conectado y en el límite, el Frame funciona con el cargador o la batería externa y no usa la batería."
+"La carga se detiene en este nivel y vuelve a empezar un 1% por debajo. Conectado y en el límite, el Frame funciona sobre todo con el cargador o la batería externa. Un límite más bajo desgasta la batería un poco menos."
 
 # needs review
 #: packs/core/charge-limit/README.md
 msgid ""
-"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
+"Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 1% below it, so the battery stays within 1% of the limit. Plugged in, the Frame then runs mostly from the charger or power bank. Charge to 100% once, in its settings, lifts the limit until the next full charge."
 msgstr ""
-"La carga se detiene cuando la batería llega al límite que elijas (80%, si no lo cambias) y vuelve a empezar un 5% por debajo. Conectado, el Frame funciona entonces con el cargador o la batería externa y no usa la batería. Cargar al 100% una vez, en su configuración, quita el límite hasta la próxima carga completa."
+"La carga se detiene cuando la batería llega al límite que elijas (80%, si no lo cambias) y vuelve a empezar un 1% por debajo, así que la batería se mantiene cerca del límite, como mucho un 1% por debajo. Conectado, el Frame funciona entonces sobre todo con el cargador o la batería externa. Cargar al 100% una vez, en su configuración, quita el límite hasta la próxima carga completa."
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -3106,9 +3106,9 @@ msgstr "Dejar de cargar al"
 # needs review
 #: packs/core/charge-limit/README.md
 msgid ""
-"Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
+"Stop charging at 80% (or 74 to 90%) while the Frame is on, for a battery that wears more slowly"
 msgstr ""
-"Deja de cargar al 80% (o al 85 o 90%) mientras el Frame está encendido, para que la batería se desgaste más lento"
+"Deja de cargar al 80% (o entre 74 y 90%) mientras el Frame está encendido, para que la batería se desgaste más lento"
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -5918,3 +5918,25 @@ msgstr "Instalador de ajustes"
 #~ "The voice Screen snip's Narrate reads with, and the language of apps that speak through speech-dispatcher. Both engines are open source and run on the Frame, offline."
 #~ msgstr ""
 #~ "La voz con la que lee Narrar de Recorte de pantalla, y el idioma de las apps que hablan a través de speech-dispatcher. Ambos motores son de código abierto y funcionan en el Frame, sin conexión."
+
+#~ # needs review
+#~ msgid "80% (the battery wears least)"
+#~ msgstr "80% (la batería se desgasta menos)"
+
+#~ # needs review
+#~ msgid ""
+#~ "Charging stops at this level and starts again 5% below it. Plugged in at the limit, the Frame runs from the charger or power bank and leaves the battery alone."
+#~ msgstr ""
+#~ "La carga se detiene en este nivel y vuelve a empezar un 5% por debajo. Conectado y en el límite, el Frame funciona con el cargador o la batería externa y no usa la batería."
+
+#~ # needs review
+#~ msgid ""
+#~ "Charging stops when the battery reaches the limit you choose (80% unless you change it) and starts again 5% below it. Plugged in, the Frame then runs from the charger or power bank and leaves the battery alone. Charge to 100% once, in its settings, lifts the limit until the next full charge."
+#~ msgstr ""
+#~ "La carga se detiene cuando la batería llega al límite que elijas (80%, si no lo cambias) y vuelve a empezar un 5% por debajo. Conectado, el Frame funciona entonces con el cargador o la batería externa y no usa la batería. Cargar al 100% una vez, en su configuración, quita el límite hasta la próxima carga completa."
+
+#~ # needs review
+#~ msgid ""
+#~ "Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
+#~ msgstr ""
+#~ "Deja de cargar al 80% (o al 85 o 90%) mientras el Frame está encendido, para que la batería se desgaste más lento"
