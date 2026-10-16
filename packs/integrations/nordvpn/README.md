@@ -83,7 +83,8 @@ Your locations are listed in `~/.config/nordvpn-wg/locations`.
 ## How it works
 NordVPN's own Linux app installs into `/usr`, on SteamOS's read-only system partition, which
 every SteamOS update replaces. Instead, `nordvpn-wg` uses NordVPN's WireGuard servers (NordLynx)
-as ordinary **NetworkManager** connections, named "NordVPN <country>". NetworkManager keeps them
+as ordinary **NetworkManager** connections, named after their country ("NordVPN Japan", say).
+NetworkManager keeps them
 in `/etc/NetworkManager/system-connections`, which updates keep, and nothing is installed into
 the system.
 

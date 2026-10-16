@@ -15,6 +15,9 @@
 - **📖 README shows all of the README:** after the first paragraph it showed blank lines with only
   bits of code in them. A picture with a caption confused the window's Markdown reader, which then
   dropped the text that came after; pictures with captions are now turned into ones it reads.
+  The same happened on tweak pages: NordVPN's showed half its README, cut off at a "<country>" in
+  its text (GitHub hid that word too). Every page now gets the same clean-up, a placeholder like
+  that shows as written, and a test renders every page to check all of it shows.
 - **A tweak's page scrolls as one:** below Back and the title, its facts and its README scroll
   together, so a long table of facts no longer leaves the README a narrow strip to scroll in.
 - **Running the install command again over an install opens the window at once:** it updates, as
