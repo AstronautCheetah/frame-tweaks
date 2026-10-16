@@ -302,6 +302,10 @@ against a checksum fetched next to the file.
   scrcpy major version) and what is worth a look (newer versions). It re-enables its own
   schedule each run, because GitHub disables scheduled workflows in repositories without
   recent commits.
+- **Linked projects.** A daily workflow ([`linked.yml`](../.github/workflows/linked.yml),
+  [`dev/check-links.py`](../dev/check-links.py)) keeps an issue labelled `linked-check` for the
+  projects Frame Tweaks runs the installers of: a release newer than the one last looked at
+  (`lib/tested-versions`), or a README that no longer names the file the link's status checks.
 - **Bumping.** [`dev/bump-pin.py`](../dev/bump-pin.py) moves a pin, or the Python constraints,
   to upstream's newest version. It computes the SHA256 itself, cross-checks it against a
   published `.sha256` when there is one, and prints the upstream changes to read. Nothing is

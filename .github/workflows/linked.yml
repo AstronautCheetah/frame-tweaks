@@ -1,0 +1,33 @@
+name: Linked projects
+# Daily: has a project Frame Tweaks links to (a manifest's link:) put out a release since it was
+# last looked at, or stopped naming in its README the file its status checks? Keeps one issue
+# (label "linked-check") up to date with the answer; see dev/check-links.py. (Light: a few
+# requests to GitHub per project.)
+on:
+  schedule:
+    - cron: "41 7 * * *"        # every day, 07:41 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+  actions: write                # to keep this schedule switched on (below)
+concurrency:
+  group: linked-check
+jobs:
+  check:
+    runs-on: ubuntu-24.04     # (named, not ubuntu-latest: a new Ubuntu comes in when we try it, not by surprise)
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Check
+        run: dev/check-links.py > report.md || true; cat report.md
+      - name: Update the issue
+        run: |
+          dev/upstream-issue.sh report.md linked-check "Linked projects: releases to look at" "Daily dev/check-links.py"
+      # GitHub switches scheduled workflows off after 60 days without commits (as upstream.yml).
+      - name: Keep this schedule on
+        if: github.event_name == 'schedule'
+        run: gh api -X PUT "repos/$GH_REPO/actions/workflows/linked.yml/enable"

@@ -9,3 +9,8 @@ ydotool=1.0.4-2
 # flagged before anyone installs it.
 steamos-glibc=2.39
 steamos-glibcxx=3.4.34
+# The linked projects' releases last looked at (dev/check-links.py flags a newer one daily): its
+# notes read, the link and the tweak's page checked.
+link-recline=v1.3.0
+link-full-keyboard=0.6.0
+link-frametop=v0.2.2

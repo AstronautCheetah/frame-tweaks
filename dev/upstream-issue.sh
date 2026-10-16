@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# Keep one GitHub issue (label "upstream-check") in step with dev/check-upstream.sh's report, for
-# .github/workflows/upstream.yml: opened when the report lists anything, its text replaced (and a
-# comment added, so watchers are notified) only when the report changes, closed when all clear.
-#   dev/upstream-issue.sh REPORT.md       (needs gh, authenticated; GH_REPO set in CI)
+# Keep one GitHub issue in step with a report (dev/check-upstream.sh's, for
+# .github/workflows/upstream.yml; dev/check-links.py's, for linked.yml): opened when the report
+# lists anything, its text replaced (and a comment added, so watchers are notified) only when the
+# report changes, closed when all clear.
+#   dev/upstream-issue.sh REPORT.md [LABEL TITLE ABOUT]    (needs gh, authenticated; GH_REPO in CI)
 set -euo pipefail
 report=$1
+label=${2:-upstream-check}
+title=${3:-"Upstream check: outside changes to look at"}
+about=${4:-"Weekly dev/check-upstream.sh"}
 # (an empty report means dev/check-upstream.sh broke: fail the run rather than empty the issue)
 [ -s "$report" ] || { echo "upstream-issue: $report is empty; did dev/check-upstream.sh fail?" >&2; exit 1; }
-label=upstream-check
-title="Upstream check: outside changes to look at"
-gh label create "$label" --color FBCA04 --description "Weekly dev/check-upstream.sh" --force >/dev/null
+gh label create "$label" --color FBCA04 --description "$about" --force >/dev/null
 num=$(gh issue list --label "$label" --state open --json number --jq '.[0].number // empty')
 # (the first line is the date; compare the rest)
 body() { tail -n +2 "$1"; }
