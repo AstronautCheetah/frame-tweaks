@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.11 (2026-10-16)
 
 ### Added
 - **Desktop Recovery brings the taskbar back by itself:** a small watch starts with desktop mode
