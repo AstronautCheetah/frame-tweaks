@@ -207,6 +207,10 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
   check it out. Then it re-runs itself as `./install.sh _reinstall`, so the *new* version of the
   script does the rest: migrations, a reinstall of everything installed (holds respected) and
   `check-system`. In a developer checkout on a branch it uses `git pull --ff-only` instead.
+- **Nothing to do.** When the checkout didn't move, the second stage is skipped, unless a tweak
+  it reinstalls (not held, not linked) was last installed by another version
+  (`$STATE/installed/<id>`, written only when its installer succeeds): an update whose second
+  stage failed or was cut short is finished by running it again. `--reinstall` runs it anyway.
 - **Channels.** Stable takes only `vX.Y.Z`. Beta (`beta` in `~/.config/frame-tweaks/channel`,
   or `FRAME_TWEAKS_CHANNEL=beta`) also takes pre-releases, sorted below the release they lead
   up to: `-` is replaced by `~` before `sort -V`. `get.sh`, `lib/common.sh` `newest_tag` and

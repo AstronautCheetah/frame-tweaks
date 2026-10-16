@@ -20,7 +20,8 @@ main() {
     if [ -d "$DIR/.git" ]; then
         # Already installed: so this is an update, done as ./install.sh update does it: the newest
         # release, but only one signed by the release key this copy already has, and the installed
-        # tweaks' installers run again. (A plain checkout here skipped both.)
+        # tweaks' installers run again if it's a new one (or an update didn't finish). (A plain
+        # checkout here skipped both.)
         echo "Updating $DIR (./install.sh update)"
         (cd "$DIR" && ./install.sh update)
     else

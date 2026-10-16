@@ -14,9 +14,10 @@
 #                                    unless --remove-apps); this folder too, unless it holds work of yours
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
-#   ./install.sh update [--to vX.Y.Z | --to stable]
+#   ./install.sh update [--to vX.Y.Z | --to stable] [--reinstall]
 #                                    move to the newest (or given) release, re-run what's installed
-#                                    (--to stable: the newest stable one, e.g. back from a test release)
+#                                    (--to stable: the newest stable one, e.g. back from a test release;
+#                                    already there, nothing is re-run unless --reinstall)
 #   ./install.sh channel [stable|beta]  which releases updates take: stable, or test releases too
 #   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
 #   ./install.sh debug-info          write a redacted report for bug reports
@@ -451,8 +452,14 @@ cmd_reinstall_ids() {
 }
 
 cmd_update() {
-    local want=""
-    [[ ${1:-} == --to ]] && { want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* || $want == stable ]] || want="v$want"; }
+    local want="" again=""
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --to) want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* || $want == stable ]] || want="v$want"; shift 2 ;;
+            --reinstall) again=1; shift ;;
+            *) shift ;;
+        esac
+    done
     if [[ -d .git ]]; then
         local before; before=$(git rev-parse -q --verify HEAD)
         if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
@@ -489,10 +496,11 @@ keep: git reset --hard @{upstream}")" >&2
                 { echo "$(t 'git checkout failed; not reinstalling')" >&2; exit 1; }
         fi
         # Nothing changed (the newest already, as when the install command runs again over an
-        # install): the installed tweaks are as that version installs them, so their installers
-        # aren't run again (all of them, minutes, before the window opened).
-        if [[ $(git rev-parse -q --verify HEAD) == "$before" ]]; then
-            say "$(t "Frame Tweaks is up to date (%s): nothing to reinstall. To run the installed tweaks' installers again anyway: %s" "$FT_BUILD" "./install.sh reinstall")"
+        # install) and every tweak is as this version installs it: their installers aren't run
+        # again (all of them, minutes, before the window opened). After an update whose second
+        # stage failed or was cut short, the tweaks it didn't get to are older: they are run.
+        if [[ $(git rev-parse -q --verify HEAD) == "$before" && -z $again ]] && ! stale_tweaks; then
+            say "$(t "Frame Tweaks is up to date (%s): nothing to reinstall. To run the installed tweaks' installers again anyway: %s" "$FT_BUILD" "./install.sh update --reinstall")"
             return 0
         fi
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
@@ -672,6 +680,17 @@ stop_processes() {
 record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; }
 forget_version() { rm -f "$STATE/installed/$1"; }
 held() { [[ -f "$STATE/held/$1" ]]; }
+# stale_tweaks: did another version install a tweak an update reinstalls (not held, not linked)?
+# Its record is written only when its installer succeeds, so this is what an update has yet to do.
+stale_tweaks() {
+    local r id
+    for r in "$STATE"/installed/*; do
+        [[ -f $r ]] || continue; id=${r##*/}
+        is_component "$id" && [[ -z ${LINKED[$id]:-} ]] && ! held "$id" || continue
+        [[ $(<"$r") == "$VERSION" ]] || return 0
+    done
+    return 1
+}
 run_migrations() {
     local id old
     for id in "$@"; do
