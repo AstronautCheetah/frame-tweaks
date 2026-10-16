@@ -248,10 +248,36 @@ def plain_markdown(text):
         return f"![{img[2]}]({img[1]})" + (f"\n\n*{' '.join(caption[1].split())}*" if caption else "")
     text = re.sub(r"<p\b[^>]*>\s*<img\b.*?</p>", picture, text, flags=re.S)
     text = re.sub(r"<br\s*/?>|</?sub>", "", text)
+    text = literal_placeholders(text)
     text = re.sub(r"<details>\s*<summary>(.*?)</summary>", lambda m: f"**{m[1].strip()}**\n", text, flags=re.S)
     text = re.sub(r"</details>", "", text)
     text = re.sub(r"<!--.*?-->\n?", "", text, flags=re.S)
     return re.sub(r"^\[!\[[^\]]*\]\(https?://[^)]*\)\]\([^)]*\)\s*$", "", text, flags=re.M)
+
+
+HTML_TAGS = {"a", "b", "i", "em", "strong", "code", "kbd", "img", "p", "br", "sub", "sup", "details", "summary",
+             "div", "span", "table", "thead", "tbody", "tr", "td", "th", "ul", "ol", "li", "pre", "hr", "blockquote",
+             "h1", "h2", "h3", "h4", "h5", "h6", "picture", "source", "video", "small", "s", "u", "dl", "dt", "dd",
+             "mark", "del", "ins", "abbr", "q"}
+
+
+def literal_placeholders(text):
+    """A <placeholder> in prose ("NordVPN <country>") is an HTML tag to a Markdown reader: GitHub
+    hides it, and Qt's drops all the text after it. Outside code, one that isn't an HTML tag (nor
+    an <https://…> link) is shown as written."""
+    def prose(part):
+        part = re.split(r"(`[^`\n]*`)", part)                  # (inline code: as it is)
+        return "".join(p if p.startswith("`") else re.sub(
+            r"<(/?)([A-Za-z][\w.-]*)([^<>]*)>",
+            lambda m: m[0] if m[2].lower() in HTML_TAGS or ":" in m[0] else f"&lt;{m[1]}{m[2]}{m[3]}&gt;", p)
+            for p in part)
+    out = []
+    for block in re.split(r"(^```.*?^```)", text, flags=re.S | re.M):   # (code blocks: as they are)
+        if block.startswith("```"):
+            out.append(block)
+        else:
+            out.append("\n".join(l if l.startswith("    ") else prose(l) for l in block.split("\n")))
+    return "".join(out)
 
 
 def readme_browser(text, comp):
@@ -262,7 +288,7 @@ def readme_browser(text, comp):
     view.anchorClicked.connect(lambda u: follow_link(u.toString()) if u.scheme() else to_heading(view, u.fragment()))
     view.document().setDefaultStyleSheet(
         "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
-    view.setMarkdown(readme_links(text, comp))
+    view.setMarkdown(readme_links(plain_markdown(text), comp))     # (no HTML it can't place: plain_markdown)
     # (toHtml() pins the font and link colour it saw; dropping them keeps the window's style.)
     html_ = re.sub(r'<body style="[^"]*">', "<body>", fit_images(with_copy(view.toHtml())), count=1)
     view.setHtml(html_.replace("color:#0000ff;", "color:#7fb2e5;"))
@@ -519,7 +545,7 @@ class ReadmePage(QWidget):
         head.addWidget(title, 1)
         lay.addLayout(head)
         try:
-            text = plain_markdown((path or REPO / "README.md").read_text())
+            text = (path or REPO / "README.md").read_text()
         except OSError:
             text = "_" + _("No README.") + "_"
         lay.addWidget(readme_browser(text, {"official": True, "id": None, "dir": REPO}), 1)

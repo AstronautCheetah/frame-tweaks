@@ -786,6 +786,45 @@ class ReadmeShown(unittest.TestCase):
         self.assertEqual(md, "![A view](a.png)\n\n*What it shows, in two lines.*\n\nAfter.\n")
 
 
+class EveryPageShown(unittest.TestCase):
+    """Every Markdown page the window shows (each tweak's README in the packs in use, the README,
+    docs/contribute.md), rendered as it shows it: its headings there, no runs of blank lines, no
+    HTML in the text, and most of its words. Qt's Markdown reader drops the text after HTML it
+    can't place: a captioned picture blanked the README, a "<country>" half of NordVPN's page."""
+    def test_all_of_each(self):
+        import re
+        from PyQt6.QtWidgets import QApplication
+        import manifest
+        self.app = QApplication.instance() or QApplication([])
+        pages = [(f, {"official": True, "id": None, "dir": gui.REPO}, f.read_text())
+                 for f in (gui.REPO / "README.md", gui.REPO / "docs/contribute.md")]
+        for c in gui.sft.components():
+            body = manifest.front_matter(c["readme"].read_text())[1]
+            pages.append((c["readme"], c, re.sub(r"<!-- generated:intro .*?<!-- /generated:intro -->\n*", "", body, flags=re.S)))
+        for path, comp, src in pages:
+            with self.subTest(page=str(path)):
+                view = gui.readme_browser(src, comp)
+                text = view.toPlainText()
+                for h in re.findall(r"^#{1,4} (.+)$", re.sub(r"```.*?```", "", src, flags=re.S), re.M):
+                    self.assertIn(re.sub(r"[`*\[\]]|\(.*?\)", "", h).strip(), text)
+                self.assertNotRegex(text, r"(\n[ \t]*){4,}")
+                self.assertNotRegex(text, r"</?(p|sub|br|img|details|summary)\b")
+                words = len(re.sub(r"<[^>]+>|\(http[^)]*\)|[#*`>|\-]", "", src).split())
+                self.assertGreater(len(text.split()), 0.8 * words)
+
+    def test_a_placeholder_is_text(self):
+        f = gui.literal_placeholders
+        self.assertEqual(f('named "NordVPN <country>". After.'), 'named "NordVPN &lt;country&gt;". After.')
+        for kept in ("Run `ssh <host>` here.", "```\nexample <id>\n```", "See <https://example.org> and <b>bold</b>.",
+                     "    indented <code> line"):
+            self.assertEqual(f(kept), kept)
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        view = gui.readme_browser("Named NordVPN <country>.\n\nThe rest is here.\n", {"official": True, "id": None, "dir": gui.REPO})
+        self.assertIn("NordVPN <country>.", view.toPlainText())
+        self.assertIn("The rest is here.", view.toPlainText())
+
+
 class DetailsScroll(unittest.TestCase):
     """A tweak's page scrolls as one below its header (Back, the title): a long table of facts
     left the README a narrow strip to scroll in. The README is shown whole; a wheel over it, and a
