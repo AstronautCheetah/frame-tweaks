@@ -143,25 +143,15 @@ status checks for it: SteamOS Manager's device file for the Frame
 (`/usr/share/steamos-manager/devices/steam-frame.toml`) gaining a `[battery_charge_limit]`
 section, as the Steam Deck's has, which puts the setting in Steam's Settings → Power.
 
-**Why it can't hold the battery still (tested on SteamOS 0.5.6, October 2026).** Paused, the
-battery still gives part of the Frame's power (about −0.2 A at 8.3 V, roughly 1.7 W, on a 45 W
-USB-C charger), so it drifts down to the resume point and charges back up. Charging, the same
-charger covers everything and charges the battery at +0.8 A, so it isn't the charger's power.
-The charger's other switches don't help: with `charging_enable=0`, or `constant_charge_current`
-at 0, 50 or 100 mA (each read back as written), the battery kept charging at about +0.8 A, at
-once and after a pause and resume. Its `status_detailed` shows `QPH2: 1`, a charging mode
-SteamOS's charger service puts it in, where that current setting apparently isn't used. So the
-pause is the only control that works.
-
-**Why it resumes 1% below the limit (5% before October 2026).** Either way the battery gives the
-same energy while paused, so the band only sets the size of the swings and their average. Studies
-of such micro-cycles found that swings of 2.5 to 5% around a fixed average charge aged cells
-about as much as storing them at that charge (Ćurić et al., *J. Power Sources* 689, 240705,
-2026), and that 0.5 to 2% micro-cycles added almost no wear, the smallest the least (Soto et al.,
-*J. Energy Storage* 55, 105343, 2022); for graphite/LiCoO₂ cells, the Frame's likely chemistry,
-capacity loss grows with both the swing and the average charge (Saxena et al., *J. Power
-Sources* 327, 2016). So a small swing is slightly better, and what matters more is the average:
-the lower limits (74 to 78%) lower it.
+**Why it can't hold the battery still.** Paused, the battery still gives part of the Frame's
+power (about 1.7 W on a 45 W charger), and the charger's other controls (`charging_enable`,
+`constant_charge_current`) are accepted but ignored on SteamOS 0.5.6: the pause is the only
+control that works. **Why it resumes 1% below the limit (5% before October 2026):** the drain is
+the same either way, so the band only sets the swings and the average charge; studies of
+micro-cycles find small swings add little wear and the average matters more, hence also the 74
+to 78% limits. The measurements, the studies and when to test again are in
+[docs/research/battery-charge-limit.md](../../../docs/research/battery-charge-limit.md), and
+`sudo bash dev/charge-hold-test.sh` repeats the charger test.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
