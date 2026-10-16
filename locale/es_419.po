@@ -4375,27 +4375,26 @@ msgstr "speech-dispatcher no está configurado (Orca no tiene voz): reinstala"
 msgid "speech-dispatcher is back to SteamOS's setup (no voice)."
 msgstr "speech-dispatcher volvió a la configuración de SteamOS (sin voz)."
 
+# needs review
 #: packs/core/tools/README.md
 msgid ""
-"An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
+"Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
 msgstr ""
-"Una corrección para cuando haga falta, si al escritorio le desapareció la barra de tareas: un botón la recupera"
+"Recupera la barra de tareas del modo escritorio cuando desaparece: sola, o con un botón"
 
+# needs review
 #: packs/core/tools/README.md
 msgid ""
-"An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`)."
+"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
 msgstr ""
-"Una corrección para cuando haga falta, si al escritorio del modo escritorio le desapareció la barra de tareas (y la bandeja del sistema): un botón, **Reiniciar barra de tareas**, las recupera (`restart-plasmashell`)."
+"Recupera la barra de tareas (y la bandeja del sistema) del modo escritorio cuando desaparece. Un pequeño vigilante la vuelve a iniciar solo cuando se cierra mientras el modo escritorio está abierto, y un botón, **Reiniciar barra de tareas**, lo hace a mano (`restart-plasmashell`), también si está congelada."
 
-#: packs/core/tools/README.md
-msgid "Desktop Recovery"
-msgstr "Recuperación del escritorio"
-
+# needs review
 #: packs/core/tools/README.md
 msgid ""
-"In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session."
+"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
 msgstr ""
-"En el escritorio anidado del Frame, nada reinicia automáticamente una barra de tareas que falló, y hay que volver a iniciarla dentro de esa sesión."
+"En el escritorio anidado del Frame, nada reinicia una barra de tareas que se cerró, y hay que volver a iniciarla dentro de esa sesión. La capa gráfica de SteamOS para las apps de escritorio a veces hace que se desconecte la barra de tareas (un error de SteamOS, no algo que hayas hecho)."
 
 #: packs/core/tools/README.md
 msgid "Restart taskbar"
@@ -4408,6 +4407,19 @@ msgstr "%s presente"
 #: packs/core/tools/install.sh
 msgid "Installed %s"
 msgstr "Se instaló %s"
+
+# needs review
+#: packs/core/tools/install.sh
+msgid "The taskbar watch starts with desktop mode."
+msgstr ""
+"El vigilante de la barra de tareas se inicia con el modo escritorio."
+
+# needs review
+#: packs/core/tools/install.sh
+msgid ""
+"Watching the taskbar: if it closes while desktop mode runs, it comes back by itself."
+msgstr ""
+"Vigilando la barra de tareas: si se cierra mientras el modo escritorio está abierto, vuelve sola."
 
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
@@ -4422,9 +4434,35 @@ msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
 msgstr ""
 "No se encontró ninguna sesión de Plasma (ksmserver): ¿estás en modo escritorio?"
 
+# needs review
 #: packs/core/tools/status.sh
-msgid "%s installed"
-msgstr "%s instalado"
+msgid "installed without the taskbar watch (an older version): ↻ adds it"
+msgstr ""
+"instalado sin el vigilante de la barra de tareas (una versión anterior): ↻ lo agrega"
+
+# needs review
+#: packs/core/tools/status.sh
+msgid ""
+"installed; the taskbar watch isn't running in this desktop: ↻ starts it"
+msgstr ""
+"instalado; el vigilante de la barra de tareas no se está ejecutando en este escritorio: ↻ lo inicia"
+
+# needs review
+#: packs/core/tools/status.sh
+msgid "installed; watching the taskbar in desktop mode"
+msgstr ""
+"instalado; vigilando la barra de tareas en el modo escritorio"
+
+#: packs/core/tools/taskbar-guard packs/core/tools/README.md
+msgid "Desktop Recovery"
+msgstr "Recuperación del escritorio"
+
+# needs review
+#: packs/core/tools/taskbar-guard
+msgid ""
+"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+msgstr ""
+"La barra de tareas se sigue cerrando: se volvió a iniciar {n} veces en {minutes} minutos. Presiona Reiniciar barra de tareas en la fila de Recuperación del escritorio en Frame Tweaks cuando la necesites."
 
 #: packs/core/vr-dashboard/README.md
 msgid ""
@@ -6100,3 +6138,21 @@ msgstr "Instalador de ajustes"
 #~ msgid "Kept your login and settings (~/.claude, ~/.claude.json)."
 #~ msgstr ""
 #~ "Se conservaron tu sesión y tu configuración (~/.claude, ~/.claude.json)."
+
+#~ msgid ""
+#~ "An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
+#~ msgstr ""
+#~ "Una corrección para cuando haga falta, si al escritorio le desapareció la barra de tareas: un botón la recupera"
+
+#~ msgid ""
+#~ "An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`)."
+#~ msgstr ""
+#~ "Una corrección para cuando haga falta, si al escritorio del modo escritorio le desapareció la barra de tareas (y la bandeja del sistema): un botón, **Reiniciar barra de tareas**, las recupera (`restart-plasmashell`)."
+
+#~ msgid ""
+#~ "In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session."
+#~ msgstr ""
+#~ "En el escritorio anidado del Frame, nada reinicia automáticamente una barra de tareas que falló, y hay que volver a iniciarla dentro de esa sesión."
+
+#~ msgid "%s installed"
+#~ msgstr "%s instalado"

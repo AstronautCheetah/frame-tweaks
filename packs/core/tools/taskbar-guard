@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""taskbar-guard: Desktop Recovery's watch. It brings the desktop-mode taskbar back by itself when
+plasmashell (the taskbar, system tray and desktop) ends while desktop mode goes on.
+
+SteamOS switches its graphics layer (Gamescope WSI) on for every app in desktop mode. Now and
+then, as plasmashell's windows get new buffers, that layer sends KWin a request naming an object
+that's no longer the window it meant ("invalid arguments for
+wp_linux_drm_syncobj_manager_v1.get_surface"), and KWin disconnects plasmashell: the taskbar is
+gone, and in the Frame's nested desktop nothing starts it again (it isn't a systemd service there).
+
+Started with desktop mode (KDE autostart), in its environment, and ended with it. It waits on
+plasmashell and on desktop mode's KWin without polling (pidfds). When plasmashell ends and, a few
+seconds later, KWin still runs and no new plasmashell has started (a restart of its own, plasmashell
+--replace, the Restart taskbar button), it runs restart-plasmashell. At most 3 times in 10
+minutes: then it stops, with a notice, and the button is still there.
+"""
+import fcntl
+import os
+import select
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+GRACE = 8                     # seconds a new plasmashell has to show up before this starts one
+LIMIT, WINDOW = 3, 600        # restarts allowed in WINDOW seconds
+RESTART = str(Path.home() / ".local/bin/restart-plasmashell")
+
+
+def pid_of(name):
+    """The oldest process of this user with this name, or None."""
+    r = subprocess.run(["pgrep", "-o", "-u", str(os.getuid()), "-x", name], capture_output=True, text=True)
+    return int(r.stdout) if r.returncode == 0 and r.stdout.strip().isdigit() else None
+
+
+def alive(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def wait_any(pids):
+    """Wait until one of pids has ended, and say which."""
+    fds = {}
+    try:
+        for pid in pids:
+            try:
+                fds[os.pidfd_open(pid)] = pid
+            except ProcessLookupError:
+                return pid
+        poll = select.poll()
+        for fd in fds:
+            poll.register(fd, select.POLLIN)
+        return fds[poll.poll()[0][0]]
+    finally:
+        for fd in fds:
+            os.close(fd)
+
+
+def log(text):
+    print(f"{time.strftime('%T')} taskbar-guard: {text}", flush=True)
+
+
+def restart():
+    subprocess.run([RESTART], stdin=subprocess.DEVNULL)
+
+
+def notify(text):
+    subprocess.run(["notify-send", "-a", "Frame Tweaks", _("Desktop Recovery"), text], stderr=subprocess.DEVNULL)
+
+
+class Guard:
+    """The watch, with what it looks at and does passed in (the tests' stand-ins)."""
+
+    def __init__(self, pid_of=pid_of, alive=alive, wait_any=wait_any, sleep=time.sleep, now=time.monotonic,
+                 restart=restart, notify=notify):
+        self.pid_of, self.alive, self.wait_any, self.sleep, self.now = pid_of, alive, wait_any, sleep, now
+        self.restart, self.notify = restart, notify
+
+    def appears(self, name, seconds):
+        for _second in range(seconds):
+            pid = self.pid_of(name)
+            if pid:
+                return pid
+            self.sleep(1)
+        return self.pid_of(name)
+
+    def run(self):
+        """Watch until desktop mode ends; what ended it."""
+        kwin = self.pid_of("kwin_wayland")
+        if not kwin:
+            return "no desktop mode"
+        shell = self.appears("plasmashell", 120)      # (at login, it may not be up yet)
+        restarts = []
+        while shell:
+            if self.wait_any([shell, kwin]) == kwin:
+                return "desktop mode ended"
+            shell = self.appears("plasmashell", GRACE)
+            if not self.alive(kwin):
+                return "desktop mode ended"
+            if shell:
+                continue                                # (started again already)
+            t = self.now()
+            restarts = [r for r in restarts if t - r < WINDOW]
+            if len(restarts) >= LIMIT:
+                self.notify(_("The taskbar keeps closing: it was started again {n} times in {minutes} minutes. "
+                              "Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need "
+                              "it.").format(n=LIMIT, minutes=WINDOW // 60))
+                return "gave up"
+            restarts.append(t)
+            log("plasmashell ended while desktop mode runs: starting it again")
+            self.restart()
+            shell = self.appears("plasmashell", 15)
+        return "no plasmashell"
+
+
+def main():
+    # One watch per desktop session: the installer starts one, and so does the next login.
+    run = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}")
+    held = open(run / "frame-tweaks-taskbar-guard.lock", "w")
+    try:
+        fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return
+    log("watching the taskbar")
+    log(f"stopped: {Guard().run()}")
+
+
+if __name__ == "__main__":
+    main()
