@@ -4058,11 +4058,12 @@ msgid ""
 msgstr ""
 "Se conservaron Tesseract y wl-clipboard (%s) y tus recortes en ~/Pictures/Screenshots."
 
+# needs review
 #: packs/core/speech/README.md
 msgid ""
-"A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip."
+"A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate. On SteamOS before 0.5.6 it also gives KDE's screen reader (Orca) and other apps that speak through speech-dispatcher a voice, espeak-ng. Installed automatically with Screen snip."
 msgstr ""
-"Una voz para el Frame: Piper, una voz natural que funciona sin conexión, para Narrar de Recorte de pantalla, y espeak-ng para el lector de pantalla de KDE (Orca) y otras apps que hablan a través de speech-dispatcher. Se instala automáticamente con Recorte de pantalla."
+"Una voz para el Frame: Piper, una voz natural que funciona sin conexión, para Narrar de Recorte de pantalla. En SteamOS anterior a 0.5.6 también le da una voz, espeak-ng, al lector de pantalla de KDE (Orca) y a otras apps que hablan a través de speech-dispatcher. Se instala automáticamente con Recorte de pantalla."
 
 #: packs/core/speech/README.md
 msgid "Deutsch"
@@ -4092,11 +4093,12 @@ msgstr "Español (México)"
 msgid "Français"
 msgstr "Français"
 
+# needs review
 #: packs/core/speech/README.md
 msgid ""
-"Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps; installed with Screen snip + Narrate"
+"Gives the Frame an offline voice, Piper, for Screen snip's Narrate (and espeak-ng for Orca on SteamOS before 0.5.6); installed with Screen snip + Narrate"
 msgstr ""
-"Le da voz al Frame: Piper para Narrar de Recorte de pantalla, espeak-ng para Orca y otras apps; se instala con Recorte de pantalla + Narrar"
+"Le da al Frame una voz sin conexión, Piper, para Narrar de Recorte de pantalla (y espeak-ng para Orca en SteamOS anterior a 0.5.6); se instala con Recorte de pantalla + Narrar"
 
 #: packs/core/speech/README.md
 msgid "Italiano"
@@ -4128,21 +4130,23 @@ msgstr ""
 msgid "Speech engine (helper)"
 msgstr "Motor de voz (auxiliar)"
 
+# needs review
 #: packs/core/speech/README.md
 msgid ""
-"SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent."
+"SteamOS has no voice of its own. Before 0.5.6 it had speech-dispatcher, the service apps speak through, but nothing for it to speak with; 0.5.6 removed speech-dispatcher and Orca."
 msgstr ""
-"SteamOS incluye speech-dispatcher, el servicio a través del cual hablan las apps, pero ninguna voz que pueda usar, así que Orca y otras apps que hablan se quedan en silencio."
+"SteamOS no tiene voz propia. Antes de 0.5.6 tenía speech-dispatcher, el servicio a través del cual hablan las apps, pero nada con qué hablar; 0.5.6 quitó speech-dispatcher y Orca."
 
 #: packs/core/speech/README.md
 msgid "Svenska"
 msgstr "Svenska"
 
+# needs review
 #: packs/core/speech/README.md
 msgid ""
-"The voice Screen snip's Narrate reads with, and the language of apps that speak through speech-dispatcher. Both engines are open source and run on the Frame, offline."
+"The voice Screen snip's Narrate reads with (and, on SteamOS before 0.5.6, the language of apps that speak through speech-dispatcher). Both engines are open source and run on the Frame, offline."
 msgstr ""
-"La voz con la que lee Narrar de Recorte de pantalla, y el idioma de las apps que hablan a través de speech-dispatcher. Ambos motores son de código abierto y funcionan en el Frame, sin conexión."
+"La voz con la que lee Narrar de Recorte de pantalla (y, en SteamOS anterior a 0.5.6, el idioma de las apps que hablan a través de speech-dispatcher). Ambos motores son de código abierto y funcionan en el Frame, sin conexión."
 
 #: packs/core/speech/README.md
 msgid "Türkçe"
@@ -4184,6 +4188,11 @@ msgstr "Descargando Piper (voz)"
 msgid "Downloading the %s voice (about 60 MB)"
 msgstr "Descargando la voz %s (unos 60 MB)"
 
+# needs review
+#: packs/core/speech/install.sh
+msgid "Speech ready (%s): Narrate uses %s."
+msgstr "Voz lista (%s): Narrar usa %s."
+
 #: packs/core/speech/install.sh
 msgid ""
 "Speech ready (%s): Narrate uses %s; speech-dispatcher apps use eSpeak NG."
@@ -4209,6 +4218,11 @@ msgstr ""
 #: packs/core/speech/install.sh
 msgid "the Piper download didn't contain %s"
 msgstr "la descarga de Piper no contenía %s"
+
+# needs review
+#: packs/core/speech/status.sh
+msgid "Piper voice ready (this SteamOS has no speech-dispatcher)"
+msgstr "Voz de Piper lista (este SteamOS no tiene speech-dispatcher)"
 
 #: packs/core/speech/status.sh
 msgid "Piper voice ready; speech-dispatcher uses espeak-ng"
@@ -5804,3 +5818,23 @@ msgstr "Instalador de ajustes"
 
 #~ msgid "Couldn't install PyQt6; using the simple checklist."
 #~ msgstr "No se pudo instalar PyQt6; se usará la lista simple."
+
+#~ msgid ""
+#~ "A voice for the Frame: Piper, an offline, natural-sounding voice, for Screen snip's Narrate, and espeak-ng for KDE's screen reader (Orca) and other apps that speak through speech-dispatcher. Installed automatically with Screen snip."
+#~ msgstr ""
+#~ "Una voz para el Frame: Piper, una voz natural que funciona sin conexión, para Narrar de Recorte de pantalla, y espeak-ng para el lector de pantalla de KDE (Orca) y otras apps que hablan a través de speech-dispatcher. Se instala automáticamente con Recorte de pantalla."
+
+#~ msgid ""
+#~ "Gives the Frame a voice: Piper for Screen snip's Narrate, espeak-ng for Orca and other apps; installed with Screen snip + Narrate"
+#~ msgstr ""
+#~ "Le da voz al Frame: Piper para Narrar de Recorte de pantalla, espeak-ng para Orca y otras apps; se instala con Recorte de pantalla + Narrar"
+
+#~ msgid ""
+#~ "SteamOS includes speech-dispatcher, the service apps speak through, but no voice for it to use, so Orca and other talking apps stay silent."
+#~ msgstr ""
+#~ "SteamOS incluye speech-dispatcher, el servicio a través del cual hablan las apps, pero ninguna voz que pueda usar, así que Orca y otras apps que hablan se quedan en silencio."
+
+#~ msgid ""
+#~ "The voice Screen snip's Narrate reads with, and the language of apps that speak through speech-dispatcher. Both engines are open source and run on the Frame, offline."
+#~ msgstr ""
+#~ "La voz con la que lee Narrar de Recorte de pantalla, y el idioma de las apps que hablan a través de speech-dispatcher. Ambos motores son de código abierto y funcionan en el Frame, sin conexión."

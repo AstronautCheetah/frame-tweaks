@@ -132,9 +132,9 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
   [Tesseract](https://github.com/tesseract-ocr/tesseract), using its English data, on a
   picture scaled up 2× (small screen text reads better that way).
 - **Narrate** speaks with [Piper](https://github.com/rhasspy/piper), an offline neural voice,
-  with the LJ Speech voice. The Speech engine helper installs both, pinned by checksum. That
-  helper also gives SteamOS's speech-dispatcher a voice (it has none of its own), which KDE's
-  screen reader, Orca, uses.
+  with the LJ Speech voice. The Speech engine helper installs both, pinned by checksum. On
+  SteamOS before 0.5.6, that helper also gives speech-dispatcher a voice (it has none of its
+  own), which KDE's screen reader, Orca, uses; 0.5.6 removed both.
 - **Copy** offers the picture as PNG, BMP and HTML, because some apps don't take a PNG alone.
 
 ## Good to know

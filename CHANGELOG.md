@@ -15,6 +15,10 @@
   template to be extracted again.
 
 ### Fixed
+- **Speech engine installs on SteamOS 0.5.6:** 0.5.6 removed speech-dispatcher (and Orca), and
+  installing Speech, or Screen snip + Narrate with it, failed copying its settings. Speech now
+  installs as Narrate's voice alone there, and takes out the speech-dispatcher setup it made
+  under an earlier SteamOS. Its status no longer says speech-dispatcher uses espeak-ng.
 - **📖 README shows all of the README:** after the first paragraph it showed blank lines with only
   bits of code in them. A picture with a caption confused the window's Markdown reader, which then
   dropped the text that came after; pictures with captions are now turned into ones it reads.

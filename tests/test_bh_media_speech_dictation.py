@@ -1,7 +1,8 @@
 """The Speech engine's installer and Dictation's toggle, in a throwaway home with stand-ins for
 the tools that would download, record, play or notify. A speech.conf without a language (only
 the engine chosen, or reset) is English (US): nothing to download, a real language for
-speech-dispatcher. A recording that ended by itself isn't "auto-stopped" into a new one. Every
+speech-dispatcher. Without speech-dispatcher (SteamOS 0.5.6 removed it) Speech still installs, for
+Narrate, and an earlier speech-dispatcher setup is undone. A recording that ended by itself isn't "auto-stopped" into a new one. Every
 setting the README lists is in the example settings file."""
 import sys
 import os
@@ -37,8 +38,20 @@ class Home(unittest.TestCase):
 
 
 class SpeechLanguage(Home):
-    def install(self, conf):
-        self.home = Path(tempfile.mkdtemp(dir=self.tmp))
+    def speechd(self, present=True):
+        """A stand-in for SteamOS's speech-dispatcher (its settings and espeak-ng module), or none."""
+        root = Path(tempfile.mkdtemp(dir=self.tmp))
+        if present:
+            (root / "etc/speech-dispatcher/modules").mkdir(parents=True)
+            (root / "etc/speech-dispatcher/speechd.conf").write_text(
+                'Include "clients/*.conf"\nAddModule "espeak-ng" "sd_espeak-ng" "espeak-ng.conf"\n'
+                "DefaultModule espeak-ng\n")
+            (root / "etc/speech-dispatcher/modules/espeak-ng.conf").write_text("")
+            self.stub(root / "usr/lib/speech-dispatcher/speech-dispatcher-modules", "sd_espeak-ng", "exit 0")
+        return root
+
+    def install(self, conf, speechd=None, home=None):
+        self.home = home or Path(tempfile.mkdtemp(dir=self.tmp))
         self.log.write_text("")
         d = self.home / ".local/share/frame-tweaks/speech"
         # Installed already: Piper at the pinned version and the English (US) voice
@@ -47,14 +60,18 @@ class SpeechLanguage(Home):
         for f in ("voice.onnx", "voice.onnx.json"):
             (d / f).write_text("")
         (d / "voice.version").write_text(pin(SPEECH / "voice.pin", "version") + "\n")
-        (self.home / ".config/frame-tweaks").mkdir(parents=True)
+        (self.home / ".config/frame-tweaks").mkdir(parents=True, exist_ok=True)
         (self.home / ".config/frame-tweaks/speech.conf").write_text(conf)
         stubs = self.tmp / "stubs"     # no network; and never the real speech-dispatcher
         self.stub(stubs, "curl", f'echo "curl $*" >> {self.log}; exit 7')
         self.stub(stubs, "pkill", f'echo "pkill $*" >> {self.log}')
-        env = sandbox_env(self.home, stubs)
+        env = sandbox_env(self.home, stubs, FRAME_TWEAKS_SPEECHD_ROOT=speechd or self.speechd())
         r = subprocess.run(["bash", str(SPEECH / "install.sh")], env=env, capture_output=True, text=True, timeout=60)
         return r, d
+
+    def status(self, speechd):
+        env = sandbox_env(self.home, FRAME_TWEAKS_SPEECHD_ROOT=speechd)
+        return subprocess.run(["bash", str(SPEECH / "status.sh")], env=env, capture_output=True, text=True, timeout=30)
 
     def test_no_language_set_is_english_us(self):
         for conf, engine in (("SPEECH_ENGINE=espeak-ng\n", "espeak-ng"), ("", "piper")):   # engine chosen; reset
@@ -65,11 +82,35 @@ class SpeechLanguage(Home):
                 self.assertIn(f"engine={engine}\n", narrate)
                 self.assertIn("language=en_US\n", narrate)
                 self.assertIn("espeak_voice=en-us\n", narrate)
-                if Path("/etc/speech-dispatcher/speechd.conf").is_file() and \
-                        Path("/etc/speech-dispatcher/modules/espeak-ng.conf").is_file():   # (SteamOS has them)
-                    self.assertEqual(r.returncode, 0, r.stderr)
-                    sd = (self.home / ".config/speech-dispatcher/speechd.conf").read_text()
-                    self.assertIn('DefaultLanguage "en"', sd)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                sd = (self.home / ".config/speech-dispatcher/speechd.conf").read_text()
+                self.assertIn('DefaultLanguage "en"', sd)
+                self.assertIn("speech-dispatcher apps use eSpeak NG", r.stdout)
+
+    def test_without_speech_dispatcher_narrate_still_gets_its_voice(self):
+        r, d = self.install("", speechd=self.speechd(present=False))
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("engine=piper\n", (d / "narrate.conf").read_text())
+        self.assertFalse((self.home / ".config/speech-dispatcher").exists())
+        self.assertFalse((d / "sd_espeak-ng").exists())
+        self.assertIn("Narrate uses Piper", r.stdout)
+        self.assertNotIn("speech-dispatcher apps", r.stdout)
+        s = self.status(self.speechd(present=False))
+        self.assertEqual(s.returncode, 0, s.stdout + s.stderr)
+        self.assertNotIn("speech-dispatcher uses", s.stdout)
+
+    def test_an_earlier_setup_is_undone_once_speech_dispatcher_is_gone(self):
+        """Installed while SteamOS had speech-dispatcher, then SteamOS removed it: installing
+        again (an update, or Apply) takes Frame Tweaks' setup back out of ~/.config."""
+        r, d = self.install("")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        sd = self.home / ".config/speech-dispatcher/speechd.conf"
+        self.assertTrue(sd.is_file())
+        self.assertIn("speech-dispatcher uses espeak-ng", self.status(self.speechd()).stdout)
+        r, d = self.install("", speechd=self.speechd(present=False), home=self.home)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse(sd.exists())
+        self.assertFalse((d / "sd_espeak-ng").exists())
 
 
 class DictateAutoStop(Home):
