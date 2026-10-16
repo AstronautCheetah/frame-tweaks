@@ -36,7 +36,7 @@ def tweaks():
 
 
 def link(m):
-    """[**Claude Code**](packs/integrations/claude-code/) (command line): bold name, plain parenthetical."""
+    """[**NordVPN**](packs/integrations/nordvpn/) (WireGuard): bold name, plain parenthetical."""
     n = re.match(r"(.*?)( \(.*\))?$", m["name"])
     return f"[**{n[1]}**]({m['dir']}/){n[2] or ''}"
 

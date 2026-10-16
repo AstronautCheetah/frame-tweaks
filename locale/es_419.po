@@ -2682,7 +2682,7 @@ msgid ""
 msgstr ""
 "Teclado flotante con flechas, Home/End, teclas F, Ctrl/Alt/Super y un botón de dictado; nunca roba el foco"
 
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
 msgid "Open"
 msgstr "Abrir"
 
@@ -3678,7 +3678,7 @@ msgstr "Comodidad"
 msgid "Core"
 msgstr "Núcleo"
 
-#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
 msgid "Developer"
 msgstr "Desarrollo"
 
@@ -4887,74 +4887,6 @@ msgstr "servicio %s no está en ejecución (%s)"
 msgid "%s socket missing"
 msgstr "falta el socket de %s"
 
-#: packs/integrations/claude-code/README.md
-msgid ""
-"Anthropic's coding agent for the terminal (`claude`), installed into your home folder"
-msgstr ""
-"El agente de programación de Anthropic para la terminal (`claude`), instalado en tu carpeta personal"
-
-#: packs/integrations/claude-code/README.md
-msgid ""
-"Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone."
-msgstr ""
-"El instalador de Anthropic no necesita permisos de administrador, es compatible con el procesador ARM del Frame y pone todo en tu carpeta personal, así que las actualizaciones de SteamOS no lo tocan."
-
-#: packs/integrations/claude-code/README.md
-msgid "Claude Code (command line)"
-msgstr "Claude Code (línea de comandos)"
-
-#: packs/integrations/claude-code/README.md
-msgid ""
-"Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer."
-msgstr ""
-"Claude Code, el agente de programación de Anthropic para la terminal (`claude`), instalado con el instalador oficial de Anthropic."
-
-#: packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
-msgid "from"
-msgstr "de"
-
-#: packs/integrations/claude-code/install.sh
-msgid "Anthropic's installer failed (see above)."
-msgstr "El instalador de Anthropic falló (ver arriba)."
-
-#: packs/integrations/claude-code/install.sh
-msgid "Claude Code is already installed at %s (%s); leaving it as it is."
-msgstr "Claude Code ya está instalado en %s (%s); se deja como está."
-
-#: packs/integrations/claude-code/install.sh
-msgid "Couldn't download Anthropic's installer."
-msgstr "No se pudo descargar el instalador de Anthropic."
-
-#: packs/integrations/claude-code/install.sh
-msgid ""
-"Done. Open a terminal (Konsole) and run: claude\n"
-"The first run asks you to log in with your Claude account in a browser."
-msgstr ""
-"Listo. Abre una terminal (Konsole) y ejecuta: claude\n"
-"La primera vez te pide iniciar sesión con tu cuenta de Claude en un navegador."
-
-#: packs/integrations/claude-code/install.sh
-msgid "Installing Claude Code (Anthropic's installer, into your home folder)"
-msgstr ""
-"Instalando Claude Code (instalador de Anthropic, en tu carpeta personal)"
-
-#: packs/integrations/claude-code/status.sh
-msgid "Claude Code %s (run: claude)"
-msgstr "Claude Code %s (ejecuta: claude)"
-
-#: packs/integrations/claude-code/status.sh
-msgid "Claude Code not installed"
-msgstr "Claude Code no instalado"
-
-#: packs/integrations/claude-code/uninstall.sh
-msgid "Claude Code was installed with Homebrew; remove it with: %s"
-msgstr "Claude Code se instaló con Homebrew; quítalo con: %s"
-
-#: packs/integrations/claude-code/uninstall.sh
-msgid "Kept your login and settings (~/.claude, ~/.claude.json)."
-msgstr ""
-"Se conservaron tu sesión y tu configuración (~/.claude, ~/.claude.json)."
-
 #: packs/integrations/claude-desktop/README.md
 msgid ""
 "Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead."
@@ -4976,6 +4908,10 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 "Claude para escritorio, la app oficial de Anthropic para Linux (arm64), instalada en tu carpeta personal y actualizada con un solo comando."
+
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
+msgid "from"
+msgstr "de"
 
 #: packs/integrations/claude-desktop/claude-desktop-update
 msgid ""
@@ -6113,3 +6049,54 @@ msgstr "Instalador de ajustes"
 #~ # needs review
 #~ msgid "Restart SteamVR to unload it (reboot, or: %s)."
 #~ msgstr "Reinicia SteamVR para descargarlo (reinicia el equipo, o: %s)."
+
+#~ msgid ""
+#~ "Anthropic's coding agent for the terminal (`claude`), installed into your home folder"
+#~ msgstr ""
+#~ "El agente de programación de Anthropic para la terminal (`claude`), instalado en tu carpeta personal"
+
+#~ msgid ""
+#~ "Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone."
+#~ msgstr ""
+#~ "El instalador de Anthropic no necesita permisos de administrador, es compatible con el procesador ARM del Frame y pone todo en tu carpeta personal, así que las actualizaciones de SteamOS no lo tocan."
+
+#~ msgid "Claude Code (command line)"
+#~ msgstr "Claude Code (línea de comandos)"
+
+#~ msgid ""
+#~ "Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer."
+#~ msgstr ""
+#~ "Claude Code, el agente de programación de Anthropic para la terminal (`claude`), instalado con el instalador oficial de Anthropic."
+
+#~ msgid "Anthropic's installer failed (see above)."
+#~ msgstr "El instalador de Anthropic falló (ver arriba)."
+
+#~ msgid "Claude Code is already installed at %s (%s); leaving it as it is."
+#~ msgstr "Claude Code ya está instalado en %s (%s); se deja como está."
+
+#~ msgid "Couldn't download Anthropic's installer."
+#~ msgstr "No se pudo descargar el instalador de Anthropic."
+
+#~ msgid ""
+#~ "Done. Open a terminal (Konsole) and run: claude\n"
+#~ "The first run asks you to log in with your Claude account in a browser."
+#~ msgstr ""
+#~ "Listo. Abre una terminal (Konsole) y ejecuta: claude\n"
+#~ "La primera vez te pide iniciar sesión con tu cuenta de Claude en un navegador."
+
+#~ msgid "Installing Claude Code (Anthropic's installer, into your home folder)"
+#~ msgstr ""
+#~ "Instalando Claude Code (instalador de Anthropic, en tu carpeta personal)"
+
+#~ msgid "Claude Code %s (run: claude)"
+#~ msgstr "Claude Code %s (ejecuta: claude)"
+
+#~ msgid "Claude Code not installed"
+#~ msgstr "Claude Code no instalado"
+
+#~ msgid "Claude Code was installed with Homebrew; remove it with: %s"
+#~ msgstr "Claude Code se instaló con Homebrew; quítalo con: %s"
+
+#~ msgid "Kept your login and settings (~/.claude, ~/.claude.json)."
+#~ msgstr ""
+#~ "Se conservaron tu sesión y tu configuración (~/.claude, ~/.claude.json)."

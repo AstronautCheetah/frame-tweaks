@@ -7,7 +7,6 @@ order:
   - signal
   - nordvpn
   - clipboard
-  - claude-code
   - claude-desktop
 ---
 Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their
