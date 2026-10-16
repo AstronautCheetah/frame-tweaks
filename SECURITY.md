@@ -44,7 +44,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | homebrew | `/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew` | **Needs your sudo password once**, to create `/home/linuxbrew` |
 | tools | `~/.local/bin/restart-plasmashell` | – |
-| menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | ydotool | `ydotool` and `ydotoold` in `~/.local/bin` (Arch Linux ARM package, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall) | None beyond your home folder |
 | charge-limit | `charge-limit` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts | Pauses and resumes the battery's charging. Asks for your sudo password once to add the udev rule, and again to remove it |
@@ -56,6 +55,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | full-keyboard | Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry | A SteamVR overlay; types into the app you're using |
 | recline | Whatever Recline-VR's own installer sets up (its README lists it): its source in `~/Recline-VR`, built and installed into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR | Runs inside SteamVR as a driver (sees and adjusts every tracked device's position), and inside the Frame's camera service for the room view |
 | cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
+| menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 

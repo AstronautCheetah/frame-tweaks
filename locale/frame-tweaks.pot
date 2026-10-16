@@ -298,7 +298,7 @@ msgstr ""
 msgid "checking…"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/menu-icons/status.sh:4 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5 packs/third-party/menu-icons/status.sh:4
 msgid "not installed"
 msgstr ""
 
@@ -3142,50 +3142,6 @@ msgid ""
 "To remove it and everything in it, use Homebrew's own uninstaller:"
 msgstr ""
 
-#: packs/core/menu-icons/README.md
-msgid ""
-"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
-msgstr ""
-
-#: packs/core/menu-icons/README.md
-msgid ""
-"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
-msgstr ""
-
-#: packs/core/menu-icons/README.md
-msgid "Menu icons"
-msgstr ""
-
-#: packs/core/menu-icons/README.md
-msgid ""
-"Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
-msgstr ""
-
-#: packs/core/menu-icons/README.md
-msgid "fix from"
-msgstr ""
-
-#: packs/core/menu-icons/check-system.sh:5
-msgid "Breeze no longer has %s"
-msgstr ""
-
-#: packs/core/menu-icons/check-system.sh:6
-msgid "Breeze icons present"
-msgstr ""
-
-#: packs/core/menu-icons/install.sh:9
-msgid ""
-"Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
-msgstr ""
-
-#: packs/core/menu-icons/menu-icons:99
-msgid "icon: {name}"
-msgstr ""
-
-#: packs/core/menu-icons/status.sh:6
-msgid "%s icon(s) added for the \"+\" menu"
-msgstr ""
-
 #: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
 msgid "Accessibility"
 msgstr ""
@@ -3215,7 +3171,7 @@ msgstr ""
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/menu-icons/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr ""
 
@@ -4802,13 +4758,57 @@ msgid ""
 "TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from its newest release"
 msgstr ""
 
+#: packs/third-party/menu-icons/README.md
+msgid ""
+"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
+msgstr ""
+
+#: packs/third-party/menu-icons/README.md
+msgid ""
+"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
+msgstr ""
+
+#: packs/third-party/menu-icons/README.md
+msgid "Menu icons"
+msgstr ""
+
+#: packs/third-party/menu-icons/README.md
+msgid ""
+"Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
+msgstr ""
+
+#: packs/third-party/menu-icons/README.md
+msgid "fix from"
+msgstr ""
+
+#: packs/third-party/menu-icons/check-system.sh:5
+msgid "Breeze no longer has %s"
+msgstr ""
+
+#: packs/third-party/menu-icons/check-system.sh:6
+msgid "Breeze icons present"
+msgstr ""
+
+#: packs/third-party/menu-icons/install.sh:9
+msgid ""
+"Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
+msgstr ""
+
+#: packs/third-party/menu-icons/menu-icons:99
+msgid "icon: {name}"
+msgstr ""
+
+#: packs/third-party/menu-icons/status.sh:6
+msgid "%s icon(s) added for the \"+\" menu"
+msgstr ""
+
 #: packs/third-party/pack.md
 msgid "3rd Party"
 msgstr ""
 
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). A fix that's only a setting, such as the mouse cursor's, Frame Tweaks applies itself."
+"Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse cursor's and the menu icons', Frame Tweaks applies itself."
 msgstr ""
 
 #: packs/third-party/recline/README.md

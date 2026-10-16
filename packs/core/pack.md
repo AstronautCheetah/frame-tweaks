@@ -17,7 +17,6 @@ order:
   - firefox
   - homebrew
   - tools
-  - menu-icons
   - ydotool
   - speech
   - charge-limit

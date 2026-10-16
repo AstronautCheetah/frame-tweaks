@@ -330,7 +330,7 @@ msgstr "El navegador no respondió: el enlace está en el portapapeles."
 msgid "checking…"
 msgstr "revisando…"
 
-#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/menu-icons/status.sh:4 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5
+#: gui/frame-tweaks-gui.py:387 install.sh:224 lib/common.sh:465 lib/link.sh:49 packs/core/charge-limit/status.sh:6 packs/core/snip/status.sh:4 packs/core/speech/status.sh:4 packs/core/tools/status.sh:3 packs/core/vr-dashboard/status.sh:5 packs/third-party/menu-icons/status.sh:4
 msgid "not installed"
 msgstr "no instalado"
 
@@ -3494,54 +3494,6 @@ msgstr ""
 "Recorte de pantalla (tesseract) y todo lo que instalaste tú están en él.\n"
 "Para quitarlo junto con todo lo que contiene, usa el desinstalador propio de Homebrew:"
 
-#: packs/core/menu-icons/README.md
-msgid ""
-"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
-msgstr ""
-"Íconos para Konsole, Preferencias del sistema y otras apps que aparecen en blanco en el menú \"+\" de RV de Steam"
-
-#: packs/core/menu-icons/README.md
-msgid ""
-"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
-msgstr ""
-"Íconos para Konsole, Preferencias del sistema y otras apps que aparecen en blanco en el menú \"+\" de RV de Steam."
-
-#: packs/core/menu-icons/README.md
-msgid "Menu icons"
-msgstr "Íconos del menú"
-
-#: packs/core/menu-icons/README.md
-msgid ""
-"Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
-msgstr ""
-"Steam solo busca íconos en el tema hicolor; los íconos de estas apps solo existen en el tema Breeze de KDE."
-
-#: packs/core/menu-icons/README.md
-msgid "fix from"
-msgstr "corrección de"
-
-#: packs/core/menu-icons/check-system.sh:5
-msgid "Breeze no longer has %s"
-msgstr "Breeze ya no tiene %s"
-
-#: packs/core/menu-icons/check-system.sh:6
-msgid "Breeze icons present"
-msgstr "Íconos de Breeze presentes"
-
-#: packs/core/menu-icons/install.sh:9
-msgid ""
-"Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
-msgstr ""
-"Listo. El menú \"+\" de Steam los detecta solo (vuelve a abrirlo); vuelve a ejecutar después de instalar apps nuevas."
-
-#: packs/core/menu-icons/menu-icons:99
-msgid "icon: {name}"
-msgstr "ícono: {name}"
-
-#: packs/core/menu-icons/status.sh:6
-msgid "%s icon(s) added for the \"+\" menu"
-msgstr "%s ícono(s) agregado(s) para el menú \"+\""
-
 #: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
 msgid "Accessibility"
 msgstr "Accesibilidad"
@@ -3575,7 +3527,7 @@ msgstr "Hardware"
 msgid "Privacy & security"
 msgstr "Privacidad y seguridad"
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/menu-icons/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr "Sistema"
 
@@ -5281,6 +5233,54 @@ msgid ""
 msgstr ""
 "El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde su versión más reciente"
 
+#: packs/third-party/menu-icons/README.md
+msgid ""
+"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
+msgstr ""
+"Íconos para Konsole, Preferencias del sistema y otras apps que aparecen en blanco en el menú \"+\" de RV de Steam"
+
+#: packs/third-party/menu-icons/README.md
+msgid ""
+"Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu."
+msgstr ""
+"Íconos para Konsole, Preferencias del sistema y otras apps que aparecen en blanco en el menú \"+\" de RV de Steam."
+
+#: packs/third-party/menu-icons/README.md
+msgid "Menu icons"
+msgstr "Íconos del menú"
+
+#: packs/third-party/menu-icons/README.md
+msgid ""
+"Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme."
+msgstr ""
+"Steam solo busca íconos en el tema hicolor; los íconos de estas apps solo existen en el tema Breeze de KDE."
+
+#: packs/third-party/menu-icons/README.md
+msgid "fix from"
+msgstr "corrección de"
+
+#: packs/third-party/menu-icons/check-system.sh:5
+msgid "Breeze no longer has %s"
+msgstr "Breeze ya no tiene %s"
+
+#: packs/third-party/menu-icons/check-system.sh:6
+msgid "Breeze icons present"
+msgstr "Íconos de Breeze presentes"
+
+#: packs/third-party/menu-icons/install.sh:9
+msgid ""
+"Done. Steam's \"+\" menu picks them up on its own (reopen it); re-run after installing new apps."
+msgstr ""
+"Listo. El menú \"+\" de Steam los detecta solo (vuelve a abrirlo); vuelve a ejecutar después de instalar apps nuevas."
+
+#: packs/third-party/menu-icons/menu-icons:99
+msgid "icon: {name}"
+msgstr "ícono: {name}"
+
+#: packs/third-party/menu-icons/status.sh:6
+msgid "%s icon(s) added for the \"+\" menu"
+msgstr "%s ícono(s) agregado(s) para el menú \"+\""
+
 #: packs/third-party/pack.md
 msgid "3rd Party"
 msgstr "De terceros"
@@ -5288,9 +5288,9 @@ msgstr "De terceros"
 # needs review
 #: packs/third-party/pack.md
 msgid ""
-"Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). A fix that's only a setting, such as the mouse cursor's, Frame Tweaks applies itself."
+"Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse cursor's and the menu icons', Frame Tweaks applies itself."
 msgstr ""
-"Proyectos y correcciones de otras personas para el Steam Frame, con el crédito a sus autores. La mayoría están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, en tu carpeta personal, y se actualizan a su manera (↻ en su fila). Una corrección que es solo un ajuste, como la del cursor del mouse, la aplica Frame Tweaks."
+"Proyectos y correcciones de otras personas para el Steam Frame, con el crédito a sus autores. La mayoría están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, en tu carpeta personal, y se actualizan a su manera (↻ en su fila). Las correcciones que otros encontraron, como la del cursor del mouse y la de los íconos del menú, las aplica Frame Tweaks."
 
 #: packs/third-party/recline/README.md
 msgid ""
@@ -5728,3 +5728,9 @@ msgstr "Instala, revisa y quita ajustes del modo escritorio del Steam Frame"
 #~ "Other people's projects for the Steam Frame, credited to their authors. They're linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row)."
 #~ msgstr ""
 #~ "Proyectos de otras personas para el Steam Frame, con el crédito a sus autores. Están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, en tu carpeta personal, y se actualizan a su manera (↻ en su fila)."
+
+#~ # needs review
+#~ msgid ""
+#~ "Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). A fix that's only a setting, such as the mouse cursor's, Frame Tweaks applies itself."
+#~ msgstr ""
+#~ "Proyectos y correcciones de otras personas para el Steam Frame, con el crédito a sus autores. La mayoría están vinculados (🔗): Frame Tweaks ejecuta su propio instalador, como lo indica su README, en tu carpeta personal, y se actualizan a su manera (↻ en su fila). Una corrección que es solo un ajuste, como la del cursor del mouse, la aplica Frame Tweaks."

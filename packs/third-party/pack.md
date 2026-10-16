@@ -7,11 +7,12 @@ order:
   - full-keyboard
   - recline
   - cursor
+  - menu-icons
 ---
 Other people's projects and fixes for the Steam Frame, credited to their authors. Most are
 linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home
-folder, and they update their own way (↻ on their row). A fix that's only a setting, such as the
-mouse cursor's, Frame Tweaks applies itself.
+folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse
+cursor's and the menu icons', Frame Tweaks applies itself.
 
 How it's loaded: like [Core](../core/pack.md) and
 [Integrations](../integrations/pack.md), Frame Tweaks' other official packs, with the same
