@@ -507,7 +507,7 @@ msgstr "Listo."
 msgid "Didn't work: %s"
 msgstr "No funcionó: %s"
 
-#: gui/frame-tweaks-gui.py:699 gui/prefs_page.py:271 gui/prefs_page.py:295 gui/prefs_page.py:286
+#: gui/frame-tweaks-gui.py:699 gui/prefs_page.py:278 gui/prefs_page.py:302 gui/prefs_page.py:293
 msgid "Saved."
 msgstr "Guardado."
 
@@ -919,15 +919,15 @@ msgid ""
 msgstr ""
 "Un pulso suave cuando el láser pasa sobre un botón y uno más firme al hacer clic."
 
-#: gui/prefs_page.py:218 install.sh:317 install.sh:376
-msgid "No settings left behind by uninstalled tweaks."
-msgstr "Los ajustes desinstalados no dejaron configuración."
-
 #: gui/prefs_page.py:22
 msgid "Look for a new Frame Tweaks release when this window opens"
 msgstr "Buscar una nueva versión de Frame Tweaks al abrir esta ventana"
 
-#: gui/prefs_page.py:220
+#: gui/prefs_page.py:225 install.sh:317 install.sh:376
+msgid "No settings left behind by uninstalled tweaks."
+msgstr "Los ajustes desinstalados no dejaron configuración."
+
+#: gui/prefs_page.py:227
 msgid "Delete these settings? Their tweaks aren't installed."
 msgstr "¿Eliminar esta configuración? Sus ajustes no están instalados."
 
@@ -935,55 +935,55 @@ msgstr "¿Eliminar esta configuración? Sus ajustes no están instalados."
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr "Desactivado: solo cuando presionas ⟳ Buscar actualizaciones."
 
-#: gui/prefs_page.py:233
+#: gui/prefs_page.py:240
 msgid "Couldn't delete: {paths}"
 msgstr "No se pudo eliminar: {paths}"
 
-#: gui/prefs_page.py:235
+#: gui/prefs_page.py:242
 msgid "Deleted {n} setting."
 msgid_plural "Deleted {n} settings."
 msgstr[0] "Se eliminó {n} elemento de configuración."
 msgstr[1] "Se eliminaron {n} elementos de configuración."
 
-#: gui/prefs_page.py:239
+#: gui/prefs_page.py:246
 msgid "Uninstall Frame Tweaks?"
 msgstr "¿Desinstalar Frame Tweaks?"
 
-#: gui/prefs_page.py:241
+#: gui/prefs_page.py:248
 msgid "The tweaks are uninstalled first; third-party apps stay."
 msgstr "Primero se desinstalan los ajustes; las apps de terceros se quedan."
 
-#: gui/prefs_page.py:242
+#: gui/prefs_page.py:249
 msgid "Every tweak is uninstalled first, third-party apps too."
 msgstr ""
 "Primero se desinstalan todos los ajustes, también las apps de terceros."
 
-#: gui/prefs_page.py:243
+#: gui/prefs_page.py:250
 msgid "The tweaks stay installed."
 msgstr "Los ajustes siguen instalados."
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:251
 msgid "Settings are deleted."
 msgstr "La configuración se elimina."
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:251
 msgid "Settings are kept."
 msgstr "La configuración se conserva."
 
-#: gui/prefs_page.py:245
+#: gui/prefs_page.py:252
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
 msgstr ""
 "Su carpeta ({folder}) también se elimina, a menos que contenga trabajo tuyo (cambios, tus propios paquetes); esta ventana se cierra y una terminal muestra cada paso."
 
 # needs review
-#: gui/prefs_page.py:279
+#: gui/prefs_page.py:286
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr ""
 "Guardado. ⟳ Buscar actualizaciones también encuentra versiones de prueba."
 
 # needs review
-#: gui/prefs_page.py:281
+#: gui/prefs_page.py:288
 msgid ""
 "You're on {version}, a test release. Stay on it until the next stable release is out, or go back to the newest stable release now?"
 msgstr ""

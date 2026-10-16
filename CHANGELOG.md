@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **⚙ Preferences scrolls to its questions:** **Uninstall Frame Tweaks…** (and deleting leftover
+  settings, or going back to the stable release) opens its question below the button, at the
+  page's bottom, where it was easy to miss; the page now scrolls to show all of it.
+
 ## 0.6.8 (2026-10-16)
 
 ### Fixed

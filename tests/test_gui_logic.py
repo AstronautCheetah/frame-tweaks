@@ -704,6 +704,27 @@ class PreferencesPage(unittest.TestCase):
         self.assertEqual(headings, ["Language", "This window", "Updates", "Uninstalling a tweak", "Uninstalling Frame Tweaks"])
         self.assertEqual(len([f for f in page.findChildren(QFrame) if f.objectName() == "separator"]), 1)
 
+    def test_a_question_scrolls_into_view(self):
+        """Uninstall Frame Tweaks… opens its question below the button, at the page's bottom: the page
+        scrolls to show all of it (it was easy to miss)."""
+        from PyQt6.QtCore import QPoint
+        from PyQt6.QtTest import QTest
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.Preferences(mock.Mock())
+        page.resize(900, 500)
+        page.show()
+        QTest.qWait(50)
+        self.assertEqual(page.scroll.verticalScrollBar().value(), 0)
+        next(b for b in page.findChildren(QPushButton) if b.text() == "Uninstall Frame Tweaks…").click()
+        QTest.qWait(100)
+        box, view = page.leaving, page.scroll.viewport()
+        self.assertTrue(box.isVisible())
+        top, bottom = box.mapTo(view, QPoint(0, 0)).y(), box.mapTo(view, QPoint(0, box.height())).y()
+        self.assertGreater(page.scroll.verticalScrollBar().value(), 0)
+        self.assertTrue(0 <= top and bottom <= view.height(), (top, bottom, view.height()))
+        page.close()
+
     def test_test_releases(self):
         """Get test releases too: the channel ./install.sh reads. Unticked on a test release, it asks:
         stay on it, or go back to the newest stable release now (an update --to stable)."""

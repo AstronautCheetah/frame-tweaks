@@ -464,7 +464,7 @@ msgstr ""
 msgid "Didn't work: %s"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py:699 gui/prefs_page.py:271 gui/prefs_page.py:295 gui/prefs_page.py:286
+#: gui/frame-tweaks-gui.py:699 gui/prefs_page.py:278 gui/prefs_page.py:302 gui/prefs_page.py:293
 msgid "Saved."
 msgstr ""
 
@@ -825,15 +825,15 @@ msgid ""
 "A light tick when the laser moves onto a button, a firmer one on a click."
 msgstr ""
 
-#: gui/prefs_page.py:218 install.sh:317 install.sh:376
-msgid "No settings left behind by uninstalled tweaks."
-msgstr ""
-
 #: gui/prefs_page.py:22
 msgid "Look for a new Frame Tweaks release when this window opens"
 msgstr ""
 
-#: gui/prefs_page.py:220
+#: gui/prefs_page.py:225 install.sh:317 install.sh:376
+msgid "No settings left behind by uninstalled tweaks."
+msgstr ""
+
+#: gui/prefs_page.py:227
 msgid "Delete these settings? Their tweaks aren't installed."
 msgstr ""
 
@@ -841,50 +841,50 @@ msgstr ""
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr ""
 
-#: gui/prefs_page.py:233
+#: gui/prefs_page.py:240
 msgid "Couldn't delete: {paths}"
 msgstr ""
 
-#: gui/prefs_page.py:235
+#: gui/prefs_page.py:242
 msgid "Deleted {n} setting."
 msgid_plural "Deleted {n} settings."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/prefs_page.py:239
+#: gui/prefs_page.py:246
 msgid "Uninstall Frame Tweaks?"
 msgstr ""
 
-#: gui/prefs_page.py:241
+#: gui/prefs_page.py:248
 msgid "The tweaks are uninstalled first; third-party apps stay."
 msgstr ""
 
-#: gui/prefs_page.py:242
+#: gui/prefs_page.py:249
 msgid "Every tweak is uninstalled first, third-party apps too."
 msgstr ""
 
-#: gui/prefs_page.py:243
+#: gui/prefs_page.py:250
 msgid "The tweaks stay installed."
 msgstr ""
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:251
 msgid "Settings are deleted."
 msgstr ""
 
-#: gui/prefs_page.py:244
+#: gui/prefs_page.py:251
 msgid "Settings are kept."
 msgstr ""
 
-#: gui/prefs_page.py:245
+#: gui/prefs_page.py:252
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
 msgstr ""
 
-#: gui/prefs_page.py:279
+#: gui/prefs_page.py:286
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr ""
 
-#: gui/prefs_page.py:281
+#: gui/prefs_page.py:288
 msgid ""
 "You're on {version}, a test release. Stay on it until the next stable release is out, or go back to the newest stable release now?"
 msgstr ""
