@@ -264,8 +264,11 @@ install_icon() {
 # wrapped by wallet-launcher (shared wallet / password gate), the new version becomes the
 # wrapper's original and the wrapper is re-applied, so the gate isn't silently dropped.
 # remove_desktop <file.desktop>...: install_desktop's undo: the entry, and the copy kept while
-# wallet-launcher wraps it (launcher-originals), then the menu refreshed.
+# wallet-launcher wraps it (launcher-originals), then the menu refreshed. Not on a reinstall (↻,
+# FRAME_TWEAKS_REINSTALL): install_desktop, next, then re-applies the wrapper to the new version.
+# (Without the kept copy it wrote a plain entry: the password gate was gone.)
 remove_desktop() {
+    [ -z "${FRAME_TWEAKS_REINSTALL:-}" ] || return 0
     local name
     for name in "$@"; do remove_files "$APPS/$name" "$LAUNCHER_ORIGINALS/$name"; done
     update-desktop-database "$APPS" 2>/dev/null || true

@@ -9,11 +9,13 @@
   app-timers --run                  the watcher (the app-timers user service runs this)
   app-timers --import-signal-guard  take over Signal guard's settings (Signal's installer does)
 
-No activity means no input on any keyboard, mouse or controller (read from /dev/input, so it
-counts in both the desktop and VR sessions). Apps are found by the systemd scope they run in
+No activity means the headset isn't worn (its proximity sensor) and there's no keyboard or mouse
+input (read from /dev/input, so it counts in both the desktop and VR sessions). The Frame's VR
+controllers aren't input devices there: while you use them, wearing the headset is what counts.
+Time the Frame spends asleep counts too. Apps are found by the systemd scope they run in
 (app-flatpak-<id>-….scope, app-<id>-….scope), however they were started, else by their
 program, and asked to quit (SIGTERM, which Electron apps handle as a normal quit).
-Timers live in ~/.config/frame-tweaks/app-timers.conf: "app-id = minutes [headset]".
+Timers live in ~/.config/frame-tweaks/app-timers.conf: "app-id = minutes [headset]" (0: never).
 """
 import glob
 import os
@@ -54,45 +56,50 @@ HEADSET_OFF_GRACE = 10          # seconds off-head before closing
 
 
 # ---- settings ------------------------------------------------------------------------------
-def read_conf():
-    """app-id -> {"minutes": float, "headset": bool}."""
+# "app-id = minutes [headset]": an app id is everything before " = " (a menu entry's name can have
+# spaces, "My App.desktop").
+CONF_LINE = re.compile(r"\s*(.+?)\s*=\s*(\d+(?:\.\d+)?)\s*(headset)?\s*$")
+
+
+def read_conf(never_too=False):
+    """app-id -> {"minutes": float, "headset": bool}; never_too: also the apps set to Never
+    (minutes 0, kept so that Signal's installer doesn't give it its 15 minutes again)."""
     timers = {}
     if CONF.exists():
         for line in CONF.read_text().splitlines():
-            m = re.match(r"\s*([\w.@-]+)\s*=\s*(\d+(?:\.\d+)?)\s*(headset)?\s*$", line)
-            if m and float(m[2]) > 0:
+            m = None if line.lstrip().startswith("#") else CONF_LINE.match(line)
+            if m and (never_too or float(m[2]) > 0):
                 timers[m[1]] = {"minutes": float(m[2]), "headset": bool(m[3])}
     return timers
 
 
 def write_conf(timers):
     CONF.parent.mkdir(parents=True, exist_ok=True)
-    CONF.write_text("# app-id = minutes without activity before the app is closed [headset: also when\n"
-                    "# the headset is taken off]. Set in the installer window (Wallet apps) or app-timers.\n"
+    CONF.write_text("# app-id = minutes without activity before the app is closed (0: never) [headset: also\n"
+                    "# when the headset is taken off]. Set in the installer window (Wallet apps) or app-timers.\n"
                     + "".join(f"{a} = {t['minutes']:g}{' headset' if t['headset'] else ''}\n"
                               for a, t in sorted(timers.items())))
 
 
 def set_timer(app_id, minutes):
-    timers = read_conf()
-    if minutes > 0:
-        timers[app_id] = {"minutes": minutes, "headset": timers.get(app_id, {}).get("headset", False)}
-    else:
-        timers.pop(app_id, None)
+    timers = read_conf(never_too=True)
+    timers[app_id] = {"minutes": minutes, "headset": minutes > 0 and timers.get(app_id, {}).get("headset", False)}
     write_conf(timers)
 
 
 def set_headset(app_id, on):
-    timers = read_conf()
-    if app_id not in timers:
+    timers = read_conf(never_too=True)
+    if not timers.get(app_id, {}).get("minutes"):
         sys.exit(_("{app_id} has no timer: set one first").format(app_id=app_id))
     timers[app_id]["headset"] = on
     write_conf(timers)
 
 
 def import_signal_guard():
-    """Signal guard's IDLE_MINUTES / LOCK_ON_HEADSET_OFF become Signal's timer, once."""
-    timers = read_conf()
+    """Signal guard's IDLE_MINUTES / LOCK_ON_HEADSET_OFF become Signal's timer, once: not again
+    once Signal has a time, Never included (it ran at every Signal reinstall and update, and
+    turned Never back into 15 minutes)."""
+    timers = read_conf(never_too=True)
     if SIGNAL_ID in timers:
         return
     text = SIGNAL_CONF.read_text() if SIGNAL_CONF.exists() else ""
@@ -225,23 +232,64 @@ def has_user_input(data):
     return False
 
 
-def headset_worn():
+def headset_state():
+    """True: the headset is worn; False: it's off; None: no proximity sensor, or no reading."""
     if not PROX:
-        return True
+        return None
     try:
         raw = float(Path(PROX[0]).read_text())
     except (OSError, ValueError):
-        return True
+        return None
     return raw > 14             # SteamVR's rule: worn while raw > prox_far * 0.8; prox_far is ~17-18
 
 
+def boot_clock():
+    """Seconds since boot, the time asleep included (time.monotonic() stands still while the Frame
+    sleeps: a night asleep didn't count as idle, and the app was still open when it woke)."""
+    return time.clock_gettime(time.CLOCK_BOOTTIME)
+
+
+class Watch:
+    """What the watcher decides, apart from reading the devices; times are boot_clock()'s."""
+
+    def __init__(self, now):
+        self.last_active = now
+        self.off_since = None          # headset taken off at, for "headset" timers
+        self.closed = {}               # app-id -> the activity it was closed after: once per idle stretch
+
+    def seen(self, now, pressed, worn):
+        """Activity: keyboard or mouse input, or the headset worn. (The Frame's VR controllers
+        aren't input devices: using only them counted as idle, and an app was closed mid-use.)
+        worn: headset_state(); without a reading, the input alone counts, and Headset off waits."""
+        if pressed or worn:
+            self.last_active = now
+        self.off_since = (self.off_since or now) if worn is False else None
+
+    def due(self, now, timers, idle_too=True):
+        """[(app-id, why)]: the apps to close now (each only once per idle stretch, or per time the
+        headset is taken off)."""
+        due = {}
+        if self.off_since is not None and now - self.off_since >= HEADSET_OFF_GRACE:
+            due.update((a, _("The headset was taken off.")) for a, t in timers.items() if t["headset"])
+            self.off_since = float("inf")             # once per time it's taken off
+        idle = now - self.last_active
+        for app_id, t in timers.items():
+            if idle_too and idle >= t["minutes"] * 60 and self.closed.get(app_id) != self.last_active:
+                due.setdefault(app_id, _("No activity for {minutes} minutes.").format(minutes=f"{t['minutes']:g}"))
+        return list(due.items())
+
+    def close(self, due):
+        for app_id, why in due:
+            if quit_app(app_id, why):
+                self.closed[app_id] = self.last_active
+
+
 def run():
-    fds, last_scan, last_input, last_check = {}, 0.0, time.monotonic(), 0.0
+    fds, last_scan, last_check = {}, 0.0, 0.0
     conf_mtime, timers = None, {}
-    closed = set()                     # closed for this idle stretch: not again until input
-    off_since = None                   # headset taken off at (monotonic), for "headset" timers
+    watch = Watch(boot_clock())
+    asleep = boot_clock() - time.monotonic()        # time asleep since boot: the clocks' difference
     while True:
-        now = time.monotonic()
         try:
             mtime = CONF.stat().st_mtime
         except OSError:
@@ -253,8 +301,9 @@ def run():
                 os.close(f)
             fds.clear()
             time.sleep(10)
-            last_input = time.monotonic()
+            watch, asleep = Watch(boot_clock()), boot_clock() - time.monotonic()
             continue
+        now = boot_clock()
         if now - last_scan > 30:       # hot-plugged devices
             for path in input_devices():
                 if path not in fds:
@@ -264,40 +313,31 @@ def run():
                         pass
             last_scan = now
         ready, _w, _x = select.select(list(fds.values()), [], [], 2)
+        now = boot_clock()
+        # Back from sleep? Close what was due by then before anything counts as activity: the key
+        # press, or the headset, that woke the Frame would otherwise reset the idle time first.
+        if now - time.monotonic() - asleep > 30:
+            watch.close(watch.due(now, timers))
+            last_check = now
+        asleep = now - time.monotonic()
+        pressed = False
         for fd in ready:
             try:
-                if has_user_input(os.read(fd, EVENT_SIZE * 64)):
-                    last_input = time.monotonic()
-                    closed.clear()
+                pressed = has_user_input(os.read(fd, EVENT_SIZE * 64)) or pressed
             except OSError:            # unplugged
                 for p, f in list(fds.items()):
                     if f == fd:
                         os.close(f)
                         del fds[p]
-        now = time.monotonic()
-        idle = now - last_input
+        watch.seen(now, pressed, headset_state())
         try:
-            STATE.write_text(str(int(idle)))
+            STATE.write_text(str(int(now - watch.last_active)))
         except OSError:
             pass
-        on_head = [a for a, t in timers.items() if t["headset"]]
-        if on_head:
-            if headset_worn():
-                off_since = None
-            else:
-                off_since = off_since or now
-                if now - off_since >= HEADSET_OFF_GRACE:
-                    for app_id in on_head:
-                        if app_pids(app_id):
-                            quit_app(app_id, _("The headset was taken off."))
-                    off_since = float("inf")          # once per time it's taken off
-        if now - last_check < 15:      # finding processes costs a /proc scan: 4x a minute
-            continue
-        last_check = now
-        for app_id, t in timers.items():
-            if app_id not in closed and idle >= t["minutes"] * 60 and app_pids(app_id):
-                quit_app(app_id, _("No activity for {minutes} minutes.").format(minutes=f"{t['minutes']:g}"))
-                closed.add(app_id)
+        idle_check = now - last_check >= 15     # finding processes costs a /proc scan: 4x a minute
+        if idle_check:
+            last_check = now
+        watch.close(watch.due(now, timers, idle_check))
 
 
 def main():

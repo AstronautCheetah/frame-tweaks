@@ -3,7 +3,8 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 [ -x "$BIN/wallet-unlock" ] || status_missing "$(t 'wallet tools not installed')"
 sysctl_user is-active --quiet wallet-lock-sync || status_warn "$(t '%s not running: closing the wallet would not lock it (re-run %s)' wallet-lock-sync "./install.sh install wallet")"
 sysctl_user is-active --quiet app-timers || status_warn "$(t "%s not running: apps with a timer won't be closed (re-run %s)" app-timers "./install.sh install wallet")"
-n=$("$BIN/wallet-launcher" --list 2>/dev/null | wc -l)
+# (a failing --list must not stop this script, which then read as "not installed")
+n=$({ "$BIN/wallet-launcher" --list 2>/dev/null || true; } | wc -l)
 state=$("$BIN/wallet-unlock" --status 2>/dev/null || echo unknown)
 grep -q oauth_token "$HOME/.config/gh/hosts.yml" 2>/dev/null && status_warn "$(t 'gh token stored in plain text (re-run %s)' "./install.sh install wallet")"
 # (With Auto-lock off on the Wallet apps page, no timer is what was asked for.)

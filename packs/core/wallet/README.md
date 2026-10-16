@@ -32,8 +32,8 @@ changes: >-
   credential helper for github.com, if you have one, at that `gh`
 access: >-
   Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its
-  dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for
-  app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
+  dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app
+  timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
 survives_updates: Yes (everything is in your home folder)
 undo: >-
   `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the
@@ -97,8 +97,9 @@ The **🔑 Wallet apps** button on this tweak's row in the Frame Tweaks window o
 - **Protected** apps, each with:
   - **Password first:** if the wallet is locked, the app asks for the wallet password before it
     opens, and doesn't open without it.
-  - **Close after:** quits the app after that long with no keyboard, mouse or controller input
-    (5 minutes to 4 hours, or never). Opening it again then needs the wallet again.
+  - **Close after:** quits the app after that long with no activity: the headset not worn, and no
+    keyboard or mouse input (5 minutes to 4 hours, or never). Time the Frame spends asleep counts.
+    Opening it again then needs the wallet again.
   - **Headset off:** also quits it about 10 seconds after you take the headset off (needs a
     Close after time).
   - **Remove:** the app opens the way it did before.
@@ -123,7 +124,8 @@ app-timers --status        # which timed apps are running, and how long you've b
 ```
 
 Close-after timers are saved in `~/.config/frame-tweaks/app-timers.conf`
-(`app-id = minutes [headset]`), the auto-lock time in `~/.config/frame-tweaks/wallet.conf`.
+(`app-id = minutes [headset]`, 0 for never), the auto-lock time in
+`~/.config/frame-tweaks/wallet.conf`.
 
 **Terminal tools:** `with-keyring CMD` runs a command with the shared wallet as its keyring,
 unlocking it first if needed. If the GitHub CLI (`gh`) is installed, the installer adds a `gh`
@@ -176,10 +178,12 @@ through our dialog first. So:
   replaced) waits for that dialog instead of opening another, then takes its answer: unlocked,
   it goes ahead; cancelled, it gives up too, without asking again.
 
-**One auto-lock clock.** Whichever way the wallet gets unlocked, `wallet-lock-sync` restarts the
-auto-lock countdown (a systemd timer, `wallet-autolock.timer`) from then. The wallet also closes
-after 240 minutes unused (KWallet's own *Close When Idle* setting in `kwalletrc`, which the
-installer turns on; set `WALLET_IDLE_MINUTES` when installing to change it).
+**One auto-lock clock.** Whichever way the wallet gets unlocked, `wallet-lock-sync` sets the
+auto-lock for that long from then: a systemd timer, `wallet-autolock.timer`, for a time on the
+clock, so a `systemctl daemon-reload` doesn't start it again, and if the time goes by while the
+Frame sleeps, the wallet locks as it wakes. The wallet also closes after 240 minutes unused
+(KWallet's own *Close When Idle* setting in `kwalletrc`, which the installer turns on; set
+`WALLET_IDLE_MINUTES` when installing to change it).
 
 ### KDE 6 gotcha: ksecretd holds the wallet
 In KDE 6, `kwalletd6` is only a front end: **`ksecretd`** holds the unlocked wallet. Closing the
@@ -202,6 +206,8 @@ and apps get their secrets. The Wallet apps page shows `ksecretd`'s state, the o
   started from the VR "+" menu or Steam), otherwise by their program, unless that's a shell or
   interpreter (`sh -c …`, `python3 …`), which runs other programs too. It asks them to quit
   normally.
+- **Close after** can't see the VR controllers (they aren't input devices it can read): while you
+  use only them, wearing the headset is what keeps the app open.
 - "Password refused" although it's right? A ksecretd prompt is probably open in VR. Close it (or
   type the password there), then unlock again.
 
@@ -210,7 +216,7 @@ and apps get their secrets. The Wallet apps page shows `ksecretd`'s state, the o
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
 - **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`); points git's credential helper for github.com, if you have one, at that `gh`
-- **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard, mouse and controller activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
+- **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
 - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the original menu entries and the KDE settings it changed)
 <!-- /generated:changes -->
 

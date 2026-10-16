@@ -24,13 +24,21 @@ sysctl_user restart app-timers
 install_icon frame-tweaks-lock
 install_desktop "$TWEAK_DIR/wallet-lock.desktop"
 
-# gh (Homebrew) would store its token in plain text: no Secret Service on the desktop's bus.
-REAL_GH=$(PATH="${PATH//$BIN:/}" command -v gh || true)
+# gh (Homebrew) would store its token in plain text: no Secret Service on the desktop's bus. The
+# real gh: on PATH (not in ~/.local/bin, where this wrapper goes), else in Homebrew, which the
+# installer window's Konsole has no PATH for.
+REAL_GH=""
+while IFS= read -r g; do
+    [ -x "$g" ] && ! [ "$(dirname "$g")" -ef "$BIN" ] && { REAL_GH=$g; break; }
+done < <(type -ap gh || true; echo "${HOMEBREW_PREFIX:-${BREW%/bin/brew}}/bin/gh")
 if [ -n "$REAL_GH" ]; then
     printf '#!/bin/sh\n# gh with its token in the shared KDE wallet (see with-keyring)\nexec "$HOME/.local/bin/with-keyring" %s "$@"\n' "$REAL_GH" | write_file "$BIN/gh" 755
+    # git's credential helper, where it's gh's (gh auth setup-git). Not beside another one of yours:
+    # --replace-all adds a line when none matches.
     for h in https://github.com https://gist.github.com; do
-        git config --global --get "credential.$h.helper" >/dev/null 2>&1 &&
+        if git config --global --get-all "credential.$h.helper" '^!.*gh auth git-credential$' >/dev/null 2>&1; then
             git config --global --replace-all "credential.$h.helper" "!$BIN/gh auth git-credential" '^!.*gh auth git-credential$'
+        fi
     done
     if grep -q oauth_token "$HOME/.config/gh/hosts.yml" 2>/dev/null; then
         say "$(t "Moving gh's plain-text token into the wallet")"
@@ -72,5 +80,5 @@ if ! "$BIN/wallet-launcher" --gate "${apps[@]}"; then
 aren't gated; once they're installed, run: %s" "${apps[*]}" "wallet-launcher --gate <app-id>")"
 fi
 printf '\n%s\n' "$(t "Add other wallet-using apps with:  %s   (--electron for Electron apps)
-SteamOS's stock wallet has an EMPTY password. To actually protect it, open
-KWalletManager → kdewallet → Change Password." "wallet-launcher <app-id>")"
+SteamOS's wallet comes with an empty password. If you haven't set one yet, open
+KWalletManager → kdewallet → Change Password: until you do, anyone can unlock it." "wallet-launcher <app-id>")"

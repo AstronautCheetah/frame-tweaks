@@ -180,7 +180,10 @@ def main():
     migrate_backups()
     if a.list:
         for f in sorted(APPS.glob("*.desktop")):
-            text = f.read_text()
+            try:
+                text = f.read_text(errors="replace")
+            except OSError:                   # (a link to an entry that's gone, say)
+                continue
             if f"{MARK}=true" in text:
                 flags = [w for w, t in (("shared", WRAPPER), ("gate", GATE)) if t in text]
                 print(f"{f.stem:28} {' '.join(flags)}")
