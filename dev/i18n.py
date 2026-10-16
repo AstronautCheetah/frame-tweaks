@@ -274,14 +274,26 @@ def update(po, pot_text):
     po.write_text("\n\n".join(out) + "\n")
 
 
-PLACEHOLDER = re.compile(r"%(?:\([^)]+\))?[-+ #0]*\d*(?:\.\d+)?[sdifr%]|\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
+PLACEHOLDER = re.compile(r"\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
+# A text printf or Python's % formats has a conversion (%s, %d, %(name)s) or a %% in its English;
+# in other text (a tweak's manifest, say) a % is just a percent sign: "starts again 1% below".
+FORMAT_TEXT = re.compile(r"%(?:\([^)]+\))?[-+#0]*\d*(?:\.\d+)?[sdifxXr]|%%")
+# Its conversions as printf reads them, space flag included: "100 % de" in a format text is one.
+CONVERSION = re.compile(r"%(?:\([^)]+\))?[-+ #0']*\d*(?:\.\d+)?[sdifxXr%]")
+
+
+def placeholders(english, text):
+    found = PLACEHOLDER.findall(text)
+    if FORMAT_TEXT.search(english):
+        found += CONVERSION.findall(text)
+    return sorted(found)
 
 
 def problems(msgid, msgstr):
     """What a translation loses of its English: placeholders, HTML tags, newlines, and the
     spaces at either end."""
     out = []
-    want, got = sorted(PLACEHOLDER.findall(msgid)), sorted(PLACEHOLDER.findall(msgstr))
+    want, got = placeholders(msgid, msgid), placeholders(msgid, msgstr)
     if want != got:
         out.append(f"placeholders/tags {want} became {got}")
     for side, f in (("start", lambda x: x[:len(x) - len(x.lstrip())]), ("end", lambda x: x[len(x.rstrip()):])):
@@ -362,6 +374,9 @@ def import_(lang, outdir, mark=None):
         for row in rows:
             a = got.get(str(row["id"]))
             if a in (None, "", []):
+                continue
+            if isinstance(a, list) and (row["plural"] is None or not all(isinstance(x, str) for x in a)):
+                bad.append(f"{part.name} #{row['id']} {row['msgid'][:50]!r}: plural forms given for a text without a plural")
                 continue
             pairs = list(zip([row["msgid"], row["plural"]], a)) if isinstance(a, list) else [(row["msgid"], a)]
             probs = [p for en, tr in pairs for p in problems(en, tr)]

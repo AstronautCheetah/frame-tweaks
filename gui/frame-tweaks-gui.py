@@ -523,8 +523,9 @@ def status_text(code_text):
 class CategoryHeader(QWidget):
     """▾/▸ CATEGORY (n): click to collapse or expand (remembered); Hide/Unhide on the right."""
 
-    def __init__(self, window, category, count, collapsed, hidden):
+    def __init__(self, window, category, count, collapsed, hidden, key=None):
         super().__init__()
+        key = key or category                           # (the English name: what's remembered)
         self.setObjectName("cathead")
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 4, 0)
@@ -534,13 +535,13 @@ class CategoryHeader(QWidget):
         toggle.setObjectName("cattoggle")
         toggle.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         toggle.setToolTip(_("Expand") if collapsed else _("Collapse"))
-        toggle.clicked.connect(lambda: window.toggle_collapsed(category))
+        toggle.clicked.connect(lambda: window.toggle_collapsed(key))
         lay.addWidget(toggle, 1)
         hide = QPushButton(_("Unhide category") if hidden else _("Hide category"))
         hide.setObjectName("cathide")
         hide.setToolTip(_("Show this category again") if hidden else
                         _("Hide the whole category from the list (doesn't remove anything)"))
-        hide.clicked.connect(lambda: window.toggle_category_hidden(category))
+        hide.clicked.connect(lambda: window.toggle_category_hidden(key))
         lay.addWidget(hide)
 
 
@@ -1084,13 +1085,14 @@ class Window(QWidget):
         return sft.hidden(self.rows)
 
     def toggle_collapsed(self, category):
-        collapsed = read_set(COLLAPSED)
+        """category: its English name (category_en), whatever the window's language."""
+        collapsed = sft.read_categories(COLLAPSED, self.rows)
         collapsed ^= {category}
         write_set(COLLAPSED, collapsed)
         self.rebuild()
 
     def toggle_category_hidden(self, category):
-        sft.set_category_hidden(category, category not in read_set(HIDDEN_CATS))
+        sft.set_category_hidden(category, category not in sft.read_categories(HIDDEN_CATS, self.rows))
         self.rebuild()
 
     def toggle_hidden(self, cid):
@@ -1190,10 +1192,11 @@ class Window(QWidget):
             if item.widget():
                 item.widget().deleteLater()
         hidden = self.hidden()
-        hidden_cats = read_set(HIDDEN_CATS) & {c["category"] for c in self.rows}
-        collapsed = read_set(COLLAPSED)
+        # (groups by their English name, category_en: the shown one follows the language)
+        hidden_cats = sft.read_categories(HIDDEN_CATS, self.rows) & {c["category_en"] for c in self.rows}
+        collapsed = sft.read_categories(COLLAPSED, self.rows)
         showing = self.show_hidden.isChecked()
-        n_hidden = sum(1 for c in self.rows if c["id"] in hidden and c["category"] not in hidden_cats)
+        n_hidden = sum(1 for c in self.rows if c["id"] in hidden and c["category_en"] not in hidden_cats)
         n_hidden += len(hidden_cats)
         self.show_hidden.setText(_("Show hidden ({n})").format(n=n_hidden))
         self.show_hidden.setEnabled(n_hidden > 0 or showing)
@@ -1202,17 +1205,17 @@ class Window(QWidget):
         category = None
         for comp in self.rows:
             cid = comp["id"]
-            cat = comp["category"]
+            cat, key = comp["category"], comp["category_en"]
             is_hidden = cid in hidden
-            if cat in hidden_cats and not showing:
+            if key in hidden_cats and not showing:
                 continue
             if is_hidden and not showing:
                 continue
             if cat != category:
                 category = cat
                 count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden))
-                self.grid.addWidget(CategoryHeader(self, cat, count, cat in collapsed, cat in hidden_cats))
-            if cat in collapsed:
+                self.grid.addWidget(CategoryHeader(self, cat, count, key in collapsed, key in hidden_cats, key))
+            if key in collapsed:
                 continue
             row = Row(self, comp)
             self.row_widgets.append(row)

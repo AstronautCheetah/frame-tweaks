@@ -291,6 +291,9 @@ def remove_setting(p):
         f.unlink(missing_ok=True)
 
 
+SHELL_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")       # (a shell settings file's keys: variable names)
+
+
 def check_settings(st, cid, where):
     errs = []
     if not isinstance(st, dict):
@@ -308,9 +311,11 @@ def check_settings(st, cid, where):
         return errs + [f"{where}: settings.options must be a list"]
     for o in opts:
         if not (isinstance(o, dict) and isinstance(o.get("key"), str) and isinstance(o.get("title"), str)
-                and isinstance(o.get("choices"), list) and o["choices"]):
+                and isinstance(o.get("choices"), list) and o["choices"] and "default" in o):
             errs.append(f"{where}: each settings option needs key, title, default and choices")
             continue
+        if st.get("format") == "shell" and not SHELL_NAME.fullmatch(o["key"]):
+            errs.append(f"{where}: {o['key']!r}: a shell settings file's keys are variable names (A-Z, a-z, 0-9, _)")
         vals = []
         for c in o["choices"]:
             if not (isinstance(c, dict) and isinstance(c.get("label"), str) and "value" in c):
@@ -562,6 +567,8 @@ def load(refresh=False):
             problems.append(f"{i}: needs {', '.join(x for x in comps[i]['deps'] if x not in comps)}, which no pack has")
             del comps[i]
     rows = sorted(comps.values(), key=lambda c: cats.index(c["category"]))     # stable: pack order within
+    for c in rows:                                  # (the English name: what hidden and folded groups keep)
+        c["category_en"] = c["category"]
     rows = [translated(c) for c in rows]
     _CACHE.update(components=rows, packs=packs, problems=problems, renamed=renamed)
     return _CACHE
@@ -673,8 +680,34 @@ def set_hidden(cid, hide):
     write_set(SHOWN, shown)
 
 
+_CATEGORY_NAMES = {}
+
+
+def category_names(rows=None):
+    """{a group's name, in English or in any language Frame Tweaks has: its English name}. Hidden
+    and folded groups are kept by their English name, since the window shows them in the
+    keyboard's language, which can change (one folded in Spanish stayed folded only in Spanish)."""
+    english = frozenset(c.get("category_en", c["category"]) for c in (rows or components()))
+    if english not in _CATEGORY_NAMES:
+        names = {}
+        for po in sorted(i18n.LOCALE.glob("*.po")):
+            names.update({i18n.Catalogue([po.stem]).gettext(e): e for e in english})
+        names.update({e: e for e in english})
+        _CATEGORY_NAMES[english] = names
+    return _CATEGORY_NAMES[english]
+
+
+def read_categories(path, rows=None):
+    """The hidden (HIDDEN_CATS) or folded (COLLAPSED) groups, by English name, whatever language
+    they were saved in."""
+    names = category_names(rows)
+    return {names.get(s, s) for s in read_set(path)}
+
+
 def set_category_hidden(category, hide):
-    cats = read_set(HIDDEN_CATS)
+    """category: its English name (or its name in any language Frame Tweaks has)."""
+    category = category_names().get(category, category)
+    cats = read_categories(HIDDEN_CATS)
     cats = cats | {category} if hide else cats - {category}
     write_set(HIDDEN_CATS, cats)
 
@@ -721,6 +754,8 @@ def raw_setting(cid, key):
             return str(json.loads(s["file"].read_text()).get(key, ""))
         except (OSError, ValueError, AttributeError):
             return ""
+    if not SHELL_NAME.fullmatch(key):     # (${!2} would run a subscript's $(...): a[$(cmd)])
+        return ""
     try:   # a shell file: sourced, as the scripts do (values may be shell-quoted); the key goes in as $2
         return subprocess.run(["bash", "-c", '. "$1" 2>/dev/null; printf %s "${!2:-}"', "_", str(s["file"]), key],
                               capture_output=True, text=True, timeout=5).stdout
@@ -932,8 +967,11 @@ def pack_has_update(d):
 
 
 def packs_with_updates():
-    """Your packs added from a link whose source has a newer version: their pack entries (load())."""
-    return [p for p in load(refresh=True)["packs"] if removable(p) and pack_has_update(p["dir"])]
+    """Your packs added from a link whose source has a newer version: their pack entries (load()).
+    Only packs you trust: git reads a repository's own .git/config, which can run commands, so it
+    isn't run in one you haven't trusted (nor in one changed since)."""
+    return [p for p in load(refresh=True)["packs"]
+            if removable(p) and p["state"] == "trusted" and pack_has_update(p["dir"])]
 
 
 def pack_installed(p):
@@ -970,7 +1008,9 @@ def remove_pack(d):
 
 def check_folder(d):
     """(lines, bad): mods check of a pack, or of a single tweak folder."""
-    if (d / "README.md").is_file() and not (d / "pack.md").is_file():
+    single = (d / "README.md").is_file() and not (d / "pack.md").is_file() and not any(
+        (p / "README.md").is_file() for p in d.iterdir() if p.is_dir() and not p.name.startswith("."))
+    if single:                                     # (a pack's own README.md beside its tweaks: still a pack)
         folders, probs = [d], []
     else:                                          # (a pack: its pack.md is checked too)
         info, folders, probs = read_pack(d)
@@ -1080,18 +1120,19 @@ def mods(args):
                  "trusted": _("trusted: in use"),
                  "untrusted": _("not trusted: not used ({command})").format(command="./install.sh mods trust NAME"),
                  "changed": _("changed since you trusted it: not used until you trust it again")}[p["state"]]
-        name = p["name"] if p["label"] == p["name"] else f"{p['label']} [{p['name']}]"   # ([what mods on/off take])
-        print(f"{name}  ({p['dir']})  {state}")
+        # (a pack's own text, plain: an untrusted one's name could otherwise hold terminal escapes)
+        name = plain(p["name"]) if p["label"] == p["name"] else f"{plain(p['label'])} [{plain(p['name'])}]"
+        print(f"{name}  ({plain(str(p['dir']))})  {state}")
         if p["about"]:
-            print(f"    {p['about']}")
+            print(f"    {plain(p['about'])}")
         if p["state"] not in ("official", "off"):
             for t in p["tweaks"]:
                 c = used.get(t)
                 note = "" if not c or c["pack_dir"] != p["dir"] else (
                     "  " + _("(instead of {other}'s)").format(other=c["replaced"]) if c["replaced"] else "")
-                print(f"    {t}{note}")
+                print(f"    {plain(t)}{note}")
     for pr in data["problems"]:
-        print(_("problem: %s") % pr)
+        print(_("problem: %s") % plain(pr))
 
 
 def show_settings(cid):
@@ -1119,13 +1160,12 @@ def main(argv):
         print((_("Hidden in the installer window: %s") if cmd == "hide" else
                _("Shown in the installer window: %s")) % " ".join(args))
     elif cmd in ("hide-group", "unhide-group"):
-        cats = {c["category"] for c in components()}
+        names = category_names()                      # (its English name, or as the window shows it)
         name = " ".join(args)
-        if name not in cats and _(name) in cats:      # (its English name, in another language)
-            name = _(name)
-        if name not in cats:
-            sys.exit(_("unknown group {name}; groups: {groups}").format(name=repr(name), groups=", ".join(sorted(cats))))
-        set_category_hidden(name, cmd == "hide-group")
+        if name not in names:
+            groups = sorted({c["category"] for c in components()})
+            sys.exit(_("unknown group {name}; groups: {groups}").format(name=repr(name), groups=", ".join(groups)))
+        set_category_hidden(names[name], cmd == "hide-group")
         print((_("Group {name} hidden in the installer window.") if cmd == "hide-group" else
                _("Group {name} shown in the installer window.")).format(name=repr(name)))
     elif cmd == "mods":

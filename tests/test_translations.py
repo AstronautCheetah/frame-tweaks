@@ -9,10 +9,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BRACE = re.compile(r"(?<!\{)\{([A-Za-z_]\w*)?(?:[!:][^{}]*)?\}(?!\})")     # {name}, {name:>3}; not {{
-PRINTF = re.compile(r"%(?:\([A-Za-z_]\w*\))?[-#0+]*\d*(?:\.\d+)?[sdifxXr]")   # (not "50% de")
+# (dev/i18n.py's rule) A text printf or Python's % formats has a conversion or a %% in its English;
+# in it, a translation's "100 % de" is a conversion too (the space flag). In other text a % is
+# just a percent sign: "50% de" in a manifest's text is fine.
+FORMAT_TEXT = re.compile(r"%(?:\([A-Za-z_]\w*\))?[-#0+]*\d*(?:\.\d+)?[sdifxXr]|%%")
+PRINTF = re.compile(r"%(?:\([A-Za-z_]\w*\))?[-#0+ ']*\d*(?:\.\d+)?[sdifxXr]")
 
 
-def specs(text):
+def specs(text, english=None):
+    if not FORMAT_TEXT.search(english if english is not None else text):
+        return []
     return sorted(PRINTF.findall(text.replace("%%", "")))
 
 
@@ -49,7 +55,7 @@ class Placeholders(unittest.TestCase):
                         # never add or rename one.
                         self.assertLessEqual(set(BRACE.findall(s)), set(BRACE.findall(english)))
                         # Specifiers exactly as in the English (either form, for a plural one).
-                        self.assertIn(specs(s), [specs(msgid), specs(plural or msgid)])
+                        self.assertIn(specs(s, english), [specs(msgid), specs(plural or msgid)])
 
 
 if __name__ == "__main__":
