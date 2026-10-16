@@ -5,7 +5,7 @@ import html
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
-from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QCursor, QDesktopServices
 from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea, QToolTip,
                              QVBoxLayout, QWidget)
@@ -21,6 +21,15 @@ STATE = {"official": (N_("Comes with Frame Tweaks: in use"), "#5cc77a"),
          "trusted": (N_("Trusted: its tweaks are listed"), "#5cc77a"),
          "untrusted": (N_("Not trusted yet: its tweaks aren't listed"), "#e0b33a"),
          "changed": (N_("Changed since you trusted it: not used until you trust it again"), "#e0b33a")}
+
+
+def forget_update(window, d):
+    """The pack in folder d was updated, or removed: the window's "N pack updates" notice no
+    longer counts it."""
+    updates = getattr(window, "pack_updates", None)
+    if isinstance(updates, set) and d in updates:
+        updates.discard(d)
+        window.show_pack_updates()
 
 
 class PackRow(QWidget):
@@ -42,10 +51,10 @@ class Packs(QWidget):
     def __init__(self, window, follow_link=None, pool=None):
         super().__init__()
         self.window, self.follow = window, follow_link
-        # (adding or updating a pack is a git clone or pull: off this thread, looked at 5 times a second)
+        # (adding or updating a pack is a git clone or pull: off this thread, and the window looks
+        # for its end, which going Back meanwhile doesn't lose: start)
         self.pool = pool or ThreadPoolExecutor(max_workers=1)
-        self.job = None
-        self.timer = QTimer(self, interval=200, timeout=self.collect)
+        sft.load(refresh=True)                          # (packs may have changed since: read them as it opens)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
@@ -84,6 +93,7 @@ class Packs(QWidget):
         self.add_button = QPushButton(_("Add"))
         self.add_button.setToolTip(_("Download the pack into your packs folder. Nothing of it runs until you trust it."))
         self.add_button.clicked.connect(self.add)
+        self.add_button.setEnabled(not self.busy())
         add.addWidget(self.add_button)
         lay.addLayout(add)
         shared = QLabel(f"<a style='color:#7fb2e5' href='{COMMUNITY}'>" + html.escape(_("Packs others share")) + " ↗</a>")
@@ -104,6 +114,8 @@ class Packs(QWidget):
         scroll.setWidget(self.body)
         lay.addWidget(scroll, 1)
         self.confirming = self.removing = None
+        if self.busy():                                 # (still adding or updating one, from a page left since)
+            self.tell(self.window.pack_job[2], good=True)
         self.build()
 
     def build(self):
@@ -112,7 +124,7 @@ class Packs(QWidget):
             if w:
                 w.hide()                                 # (gone now, not only once it's deleted)
                 w.deleteLater()
-        data = sft.load(refresh=True)
+        data = sft.load()                               # (read as the page opened, and by what its buttons change)
         used = {c["id"]: c for c in data["components"]}
         shown = self.open_packs()
         for p in data["packs"]:
@@ -169,7 +181,7 @@ class Packs(QWidget):
                     if newer:
                         b.setObjectName("apply")
                     b.setToolTip(_("Get its newer version from where it was added; it waits until you trust it again"))
-                    b.setEnabled(self.job is None)
+                    b.setEnabled(not self.busy())
                     b.clicked.connect(lambda _=False, p=p: self.update(p))
                     g.addWidget(b)
                 if sft.removable(p):
@@ -206,21 +218,23 @@ class Packs(QWidget):
         self.notice.show()
 
     def start(self, work, done, saying):
-        """work() off this thread (a git clone or pull takes seconds); then done(its result)."""
-        if self.job is not None:
+        """work() off this thread (a git clone or pull takes seconds); then done(page, its result).
+        The window looks for its end (its finish_pack_job), so going Back meanwhile doesn't lose it:
+        page is the Packs page open by then (finished), or None."""
+        if self.busy():
             return
-        self.job = (self.pool.submit(work), done)
+        self.window.pack_job = (self.pool.submit(work), done, saying)
+        self.window.collecting()
         self.add_button.setEnabled(False)
         self.tell(saying, good=True)
         self.build()                                    # (its Update buttons dimmed meanwhile)
-        self.timer.start()
 
-    def collect(self):
-        fut, done = self.job
-        if not fut.done():
-            return
-        self.timer.stop()
-        self.job = None
+    def busy(self):
+        """Whether a pack is being added or updated (from this page, or one left since)."""
+        return isinstance(getattr(self.window, "pack_job", None), tuple)
+
+    def finished(self, fut, done):
+        """A pack job's end, on this page (the window's finish_pack_job)."""
         self.add_button.setEnabled(True)
         try:
             result = fut.result()
@@ -232,14 +246,14 @@ class Packs(QWidget):
             self.tell(_("That didn't work: {error}").format(error=e))
             self.build()
             return
-        done(result)
+        done(self, result)
 
     def add(self):
         link = self.link.text().strip()
         if not link:
             self.tell(_("Paste or type the link of a pack's git repository first."))
             return
-        self.start(lambda: sft.add_pack(link), self.added, _("Adding the pack…"))
+        self.start(lambda: sft.add_pack(link), lambda page, d: page and page.added(d), _("Adding the pack…"))
 
     def added(self, d):
         self.link.clear()
@@ -250,15 +264,16 @@ class Packs(QWidget):
         self.build()
 
     def update(self, p):
-        self.start(lambda: sft.update_pack(p["dir"]), lambda got: self.updated(p, got),
-                   _("Updating {name}…").format(name=sft.plain(p["name"])))
+        window = self.window
+
+        def done(page, got):
+            forget_update(window, p["dir"])             # (got it: the window's notice goes too)
+            if page is not None:
+                page.updated(p, got)
+        self.start(lambda: sft.update_pack(p["dir"]), done, _("Updating {name}…").format(name=sft.plain(p["name"])))
 
     def updated(self, p, got):
         name = sft.plain(p["name"])
-        updates = getattr(self.window, "pack_updates", None)
-        if isinstance(updates, set) and p["dir"] in updates:   # (got it: the window's notice goes too)
-            updates.discard(p["dir"])
-            self.window.show_pack_updates()
         if not got["files"]:
             self.tell(_("{name} is up to date.").format(name=name), good=True)
         else:
@@ -266,7 +281,6 @@ class Packs(QWidget):
                                len(got["files"])).format(name=name, n=len(got["files"])) + " "
                       + _("It isn't used until you trust it again: read what changed first, then Trust… below.")
                       + "".join("\n• " + line for line in got["log"]))
-            self.window.reload_tweaks()
         self.build()
 
     def remove(self, p):
@@ -278,6 +292,7 @@ class Packs(QWidget):
             self.build()
             return
         self.tell(_("Removed {name}.").format(name=sft.plain(p["name"])), good=True)
+        forget_update(self.window, p["dir"])            # (gone: the window's notice no longer counts it)
         self.window.reload_tweaks()
         self.build()
 

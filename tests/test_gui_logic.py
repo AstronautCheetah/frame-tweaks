@@ -142,6 +142,7 @@ class Versions(unittest.TestCase):
         w = gui.Window.__new__(gui.Window)
         w.latest_futures, w.update_futures, w.futures, w.self_update, w.details = {}, {}, {}, None, None
         w.pack_check, w.pack_update_label, w.pack_updates = found, QLabel(), set()
+        w.rows = gui.components()                               # (the packs read again: the same tweaks)
         w.collect()
         self.assertEqual(w.pack_updates, {Path("/p/one"), Path("/p/two")})
         self.assertIn("2 pack updates", w.pack_update_label.text())
@@ -160,6 +161,27 @@ class Status(unittest.TestCase):
         self.assertEqual(gui.status_text((1, "")), ("· not installed", "missing"))
         self.assertEqual(gui.status_text((gui.RESTART, "load")), ("⟳ load", "warn"))
         self.assertEqual(gui.status_text((gui.UNLOAD, "unload")), ("⟳ unload", "warn"))
+
+    def test_an_exit_code_status_sh_doesnt_give(self):
+        """status.sh ending some other way (127: a command missing, under set -e) is a warning,
+        installed as ./install.sh counts it: it said "not installed" while the row was ticked."""
+        self.assertEqual(gui.status_text((127, "")), ("! status check failed (exit 127)", "warn"))
+        self.assertNotIn(127, gui.GONE)
+
+    def test_a_tweak_gone_since_the_list_was_read(self):
+        """Its pack turned off or changed, its folder moved (by an update): its status is "not
+        available any more", not installed, and it has no update check. (Both raised TypeError,
+        which showed the error page and left the row "checking…".)"""
+        self.assertEqual(gui.status("no-such-tweak"), (gui.UNAVAILABLE, "not available any more"))
+        self.assertIsNone(gui.update_check("no-such-tweak"))
+        with tempfile.TemporaryDirectory() as d:
+            moved = dict(gui.component("clipboard"), dir=Path(d) / "gone")
+            with mock.patch.object(gui, "component", return_value=moved):
+                self.assertEqual(gui.status("clipboard"), (gui.UNAVAILABLE, "not available any more"))
+                self.assertIsNone(gui.update_check("clipboard"))
+        self.assertIn(gui.UNAVAILABLE, gui.GONE)
+        self.assertEqual(gui.status_text((gui.UNAVAILABLE, "not available any more")),
+                         ("· not available any more", "missing"))
 
     def test_restart_line(self):
         """status.sh's "restart" line is a status of its own: installed (exit 2) or uninstalled (exit 1);
@@ -215,6 +237,191 @@ class Status(unittest.TestCase):
             self.assertIsNone(gui.latest_release("https://example.invalid"))
 
 
+def collecting_window(**attrs):
+    """A Window with only what collect() looks at, none of its widgets: no row is shown, so only
+    what it knows changes."""
+    w = gui.Window.__new__(gui.Window)
+    w.latest_futures, w.update_futures, w.futures, w.self_update, w.pack_check = {}, {}, {}, None, None
+    w.state, w.updates, w.status_labels, w.details = {}, {}, {}, None
+    w.pool, w.update_apply, w.fit_list = mock.Mock(), mock.Mock(), mock.Mock()
+    for k, v in attrs.items():
+        setattr(w, k, v)
+    return w
+
+
+def finished(result=None, error=None):
+    from concurrent.futures import Future
+    f = Future()
+    if error is not None:
+        f.set_exception(error)
+    else:
+        f.set_result(result)
+    return f
+
+
+class Collect(unittest.TestCase):
+    """What the window does with its background checks' results (collect)."""
+    def test_a_check_that_failed_is_said_on_its_row(self):
+        """A status check that raised is a warning on its row: not "checking…" for good and the
+        error page; the other rows' results come in too."""
+        w = collecting_window()
+        w.futures = {"a": finished(error=TypeError("'NoneType' object is not subscriptable")),
+                     "clipboard": finished((0, "running"))}
+        w.collect()
+        self.assertEqual(w.state, {"a": (2, "status check failed: 'NoneType' object is not subscriptable"),
+                                   "clipboard": (0, "running")})
+        self.assertEqual(w.futures, {})
+
+    def test_a_row_sft_no_longer_has(self):
+        """(collect looked for its update-check.sh through sft's tweak, None by then: TypeError)"""
+        w = collecting_window()
+        w.futures = {"gone-tweak": finished((0, "fine"))}
+        w.collect()
+        self.assertEqual(w.state, {"gone-tweak": (0, "fine")})
+        w.pool.submit.assert_not_called()
+
+    def test_checks_cancelled_as_the_window_closes(self):
+        """Closing cancels the checks still waiting: collect leaves them (it raised CancelledError
+        for each, into window.log). (Closing stops it too: test_gui_window.py.)"""
+        from concurrent.futures import Future
+        cancelled = Future()
+        cancelled.cancel()
+        w = collecting_window(futures={"a": cancelled}, update_futures={"b": cancelled},
+                              latest_futures={"c": cancelled}, self_update=cancelled, latest={}, update_state="check")
+        w.collect()
+        self.assertEqual((w.state, w.updates, w.latest, w.futures, w.self_update), ({}, {}, {}, {}, None))
+
+    def test_refresh_drops_the_last_rounds_checks(self):
+        """Refresh (or terminals closing one after another) while the last round's checks still wait
+        for a worker: they're dropped, not run as well. (Three refreshes ran 75 status scripts.)"""
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        gate, runs = threading.Event(), []
+
+        def slow(cid):
+            runs.append(cid)
+            gate.wait(5)
+            return 1, ""
+        pool = ThreadPoolExecutor(max_workers=1)
+        self.addCleanup(pool.shutdown, cancel_futures=True)
+        w = gui.Window.__new__(gui.Window)
+        w.rows, w.futures, w.pool = [{"id": i} for i in ("a", "b", "c")], {}, pool
+        w.collecting, w.rebuild = mock.Mock(), mock.Mock()
+        with mock.patch.object(gui, "status", slow):
+            w.refresh()
+            first = dict(w.futures)
+            for _ in range(250):                       # (the worker took a's)
+                if runs:
+                    break
+                time.sleep(0.02)
+            w.refresh()
+            gate.set()
+            for f in w.futures.values():
+                f.result(timeout=5)
+        self.assertTrue(first["b"].cancelled() and first["c"].cancelled())
+        self.assertEqual(sorted(runs), ["a", "a", "b", "c"])
+
+    def test_an_update_found_goes_when_its_not_there(self):
+        """↑ X available · Update goes once the check finds nothing newer, once the tweak isn't
+        installed (its link installed it again), and once ↻ or Apply has run."""
+        w = collecting_window(state={"full-keyboard": (0, "installed")})
+        w.update_futures = {"full-keyboard": finished(("1.0.0", "1.1.0"))}
+        w.collect()
+        self.assertEqual(w.updates, {"full-keyboard": ("1.0.0", "1.1.0")})
+        w.update_futures = {"full-keyboard": finished(None)}               # (the app updated itself)
+        w.collect()
+        self.assertEqual(w.updates, {})
+        w.updates = {"full-keyboard": ("1.0.0", "1.1.0")}
+        w.futures = {"full-keyboard": finished((1, "not installed"))}      # (unticked and applied)
+        w.collect()
+        self.assertEqual(w.updates, {})
+        w.update_futures = {"full-keyboard": finished(("1.0.0", "1.1.0"))}   # (a check from before it went)
+        w.collect()
+        self.assertEqual(w.updates, {})
+        w.updates, w.refresh = {"full-keyboard": ("1.0.0", "1.1.0"), "arrowpad": ("1", "2")}, mock.Mock()
+        w.changed(["full-keyboard"])                                         # (↻ or Apply's terminal closed)
+        self.assertEqual(w.updates, {"arrowpad": ("1", "2")})
+        w.refresh.assert_called_once()
+        w.changed, w.wanted = mock.Mock(), {"arrowpad": True}
+        with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.object(gui, "in_terminal"), \
+                mock.patch.dict(os.environ):
+            os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+            w.run_reinstall("full-keyboard")
+            qprocess.return_value.finished.connect.call_args[0][0]()        # (its terminal closed)
+            w.changed.assert_called_with(["full-keyboard"])
+            w.run_changes(["arrowpad"], ["snip"])
+            qprocess.return_value.finished.connect.call_args[0][0]()
+            w.changed.assert_called_with(["arrowpad", "snip"])
+        self.assertEqual(w.wanted, {})
+
+    def test_a_tweaks_page_shows_its_status_as_it_comes(self):
+        """(it said "checking…" until it was opened again)"""
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.Details(mock.Mock(latest={}), gui.component("clipboard"), None)
+        status = lambda: next(w.text() for w in page.findChildren(QLabel) if "<b>Status</b>" in w.text())
+        self.assertIn("checking…", status())
+        w = collecting_window(details=page)
+        w.futures = {"arrowpad": finished((2, "needs a look"))}                 # (another tweak's)
+        w.collect()
+        self.assertIn("checking…", status())
+        w.futures = {"clipboard": finished((0, "running"))}                    # (its row isn't shown: hidden, say)
+        w.collect()
+        self.assertIn("✔ running", status())
+        self.assertNotIn("checking…", status())
+
+
+class Reload(unittest.TestCase):
+    """The list follows the tweaks sft read: as packs change under the window, or its language."""
+    def test_the_list_follows_the_packs(self):
+        """When sft read the packs again (opening Packs, Check for updates, a pack's update) and
+        they're not the list's any more, the list is read again: its rows asked sft for tweaks it no
+        longer had."""
+        w = gui.Window.__new__(gui.Window)
+        w.use_tweaks, w.rows = mock.Mock(), gui.components()
+        w.follow_packs()
+        w.use_tweaks.assert_not_called()
+        w.rows = gui.components()[:-1]                  # (one more since: a pack trusted outside the window)
+        w.follow_packs()
+        w.use_tweaks.assert_called_once()
+        w.rows = [dict(c, dir=Path("/elsewhere") / c["id"]) for c in gui.components()]   # (moved by an update)
+        w.follow_packs()
+        self.assertEqual(w.use_tweaks.call_count, 2)
+
+    def test_a_known_issue_a_pack_brings(self):
+        """Its newer release is looked for (only when the window opened, before: "Checking…" for
+        good on its page), once."""
+        w = gui.Window.__new__(gui.Window)
+        w.pool, w.latest, w.latest_futures, w.refresh, w.collecting = mock.Mock(), {}, {}, mock.Mock(), mock.Mock()
+        issue = {"version": "1.0", "short": "s", "long": "l", "latest": "https://api.github.com/repos/o/r/releases/latest"}
+        rows = gui.components() + [dict(gui.component("clipboard"), id="x-issue", known_issue=issue, settings=None)]
+        with mock.patch.object(gui, "components", return_value=rows), mock.patch.object(gui.sft, "load"), \
+                mock.patch.object(gui.sft, "settings_specs", return_value={}), mock.patch.object(gui.sft, "SETTINGS", {}), \
+                mock.patch.dict(gui.SETTINGS_PAGES), mock.patch.object(gui, "KNOWN_ISSUES", {}):
+            w.reload_tweaks()
+            self.assertIn(mock.call(gui.latest_release, issue["latest"]), w.pool.submit.call_args_list)
+            self.assertIn("x-issue", w.latest_futures)
+            w.pool.submit.reset_mock()
+            w.reload_tweaks()
+        w.pool.submit.assert_not_called()
+
+    def test_why_its_not_needed_follows_the_language(self):
+        """(a tweak's needed.sh says why in the window's language: it stayed in the one it opened in)"""
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(gui.sft._NOT_NEEDED):     # (what's known, kept)
+            (Path(d) / "needed.sh").write_text('echo "not here: $FRAME_TWEAKS_LANG_RESOLVED"; exit 1\n')
+            row = dict(gui.component("clipboard"), id="x-needs", dir=Path(d), known_issue=None)
+            with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "en"}):
+                self.assertEqual(gui.sft.not_needed([row], refresh=True), {"x-needs": "not here: en"})
+            w = gui.Window.__new__(gui.Window)
+            w.show_hidden, w.build_ui, w.refresh, w.update_newest = mock.Mock(), mock.Mock(), mock.Mock(), None
+            with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "es_419"}), \
+                    mock.patch.object(gui, "components", return_value=[row]), mock.patch.object(gui.sft, "load"), \
+                    mock.patch.object(gui.sft, "settings_specs", return_value={}), mock.patch.object(gui.sft, "SETTINGS", {}), \
+                    mock.patch.object(gui, "KNOWN_ISSUES", {}):
+                w.retranslate()
+                self.assertEqual(gui.sft.not_needed([row]), {"x-needs": "not here: es_419"})
+
+
 class Manifest(unittest.TestCase):
     def test_components_parse(self):
         rows = gui.components()
@@ -251,6 +458,22 @@ class DryRun(unittest.TestCase):
             w.run(comp)
         qprocess.startDetached.assert_not_called()
         self.assertIn("would run: bash", out.getvalue())
+
+    def test_run_where_the_tweak_is_now(self):
+        """Run starts the tweak where sft has it now, not where its row was read (an update moved its
+        folder: TypeError); gone altogether, it says so."""
+        comp = next(c for c in gui.components() if gui.run_label(c["id"]) and (c["dir"] / "run.sh").is_file()
+                    and c["id"] not in gui.PAGES)
+        w = gui.Window.__new__(gui.Window)
+        w.state, w.say = {}, mock.Mock()
+        stale = dict(comp, dir=Path("/nonexistent/moved") / comp["id"])
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.run(stale)
+            self.assertEqual(out.getvalue(), f"would run: bash {comp['dir'] / 'run.sh'}\n")
+            with mock.patch.object(gui, "component", return_value=stale):
+                w.run(stale)
+        self.assertIn("Close and reopen Frame Tweaks", w.say.call_args[0][0])
+        self.assertEqual(out.getvalue().count("would run"), 1)
 
     def test_restart_steamvr_button(self):
         """Waiting for a SteamVR restart: the row's button (Settings here) restarts SteamVR, once asked."""
@@ -353,6 +576,49 @@ class PageActions(unittest.TestCase):
             self.assertTrue((d / "done").exists())
             self.assertEqual((d / "runs").read_text(), "run\n")
             self.assertEqual(errors, [])
+            self.assertEqual(section.notice.text(), "Done")       # (the page opened again: not "Working…" for good)
+
+    def test_a_page_opened_again_says_how_it_goes(self):
+        """Opened again while its action runs, a settings page says so, its button dimmed, and how
+        it went at the end; another action meanwhile waits for it."""
+        from PyQt6.QtWidgets import QApplication, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "act.sh").write_text(f"sleep 0.5; touch {d}/done; echo Charging to 100% once\n")
+            (d / "other.sh").write_text(f"touch {d}/other\n")
+            act = {"label": "Charge to 100% once", "script": "act.sh", "dir": d}
+            spec = {"file": d / "x.json", "format": "json", "about": "", "note": "", "options": [],
+                    "actions": [act], "checkboxes": set(), "swatches": set(), "include": []}
+
+            class Window(QWidget):
+                def go_back(self):
+                    pass
+            window = Window()
+            self.addCleanup(window.deleteLater)
+            self.addCleanup(lambda: [p.kill() or p.waitForFinished(3000) for p in window.findChildren(gui.QProcess)])
+            with mock.patch.dict(gui.sft.SETTINGS, {"x-test": spec}), mock.patch.dict(os.environ):
+                os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+                first = gui.SettingsPage(window, "x-test")
+                first.setParent(window)
+                first.sections[0].actions[0][1].click()
+                first.deleteLater()                                     # ← Back
+                again = gui.SettingsPage(window, "x-test")
+                again.setParent(window)
+                button = again.sections[0].actions[0][1]
+                self.assertEqual(again.notice.text(), "Working… (a download can take a minute)")
+                self.assertFalse(button.isEnabled())
+                again.sections[0].act({"script": "other.sh", "dir": d})
+                self.assertEqual(again.notice.text(), "Another action is still running: try again once it's done.")
+                for _ in range(200):
+                    self.app.processEvents()
+                    if (d / "done").exists() and gui.running_action(window) is None:
+                        break
+                    time.sleep(0.05)
+                self.app.processEvents()
+                self.assertEqual(again.notice.text(), "Charging to 100% once")
+                self.assertTrue(button.isEnabled())
+                self.assertFalse((d / "other").exists())
 
 class Links(unittest.TestCase):
     """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
@@ -376,6 +642,19 @@ class Links(unittest.TestCase):
         html = page.findChild(QTextBrowser).toHtml()
         self.assertIn("copy:https://github.com/", html)
         self.assertNotIn('href="../', html)
+
+    def test_a_link_opens_when_browser_py_trips(self):
+        """lib/browser.py raising (over a desktop entry it can't read, say) opened no link at all:
+        the link opens the usual way instead, and its log says why."""
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        gone = FileNotFoundError(2, "No such file or directory", "/x/applications/gone.desktop")
+        for url, how in (("https://example.com/a", "launch"), ("file:///tmp/a.md", "open_path")):
+            with mock.patch.object(gui.browser, how, side_effect=gone), mock.patch.object(gui.browser, "log") as log, \
+                    mock.patch.object(gui, "QDesktopServices") as desktop:
+                gui.follow_link(url)
+            desktop.openUrl.assert_called_once_with(gui.QUrl(url))
+            self.assertIn("FileNotFoundError", log.call_args[0][0])
 
     def test_link_to_a_heading_scrolls_there(self):
         from PyQt6.QtCore import QUrl
@@ -436,12 +715,14 @@ class PacksPage(unittest.TestCase):
                     mock.patch.object(gui.sft, "INSTALLED", d / "installed"):
                 window = mock.Mock()
                 page = gui.Packs(window)
+                window.details = page
                 buttons = lambda: {b.text(): b for b in page.findChildren(QPushButton) if b.isVisibleTo(page)}
 
                 def wait():
                     for _i in range(300):
                         QApplication.processEvents()
-                        if page.job is None:
+                        gui.Window.finish_pack_job(window)          # (the window's collect finishes it)
+                        if not page.busy():
                             return
                         time.sleep(0.02)
                     self.fail("still busy")
@@ -465,13 +746,122 @@ class PacksPage(unittest.TestCase):
                 self.assertEqual(page.notice.text(), "Hello pack is up to date.")
                 self.assertEqual(window.pack_updates, set())                     # (got it: the notice goes)
                 window.show_pack_updates.assert_called()
+                window.pack_updates = {(d / "packs/their-pack").resolve()}     # (found newer again)
+                window.show_pack_updates.reset_mock()
                 buttons()["Remove…"].click()
                 buttons()["Yes, delete it"].click()
                 self.assertEqual(page.notice.text(), "Removed Hello pack.")
+                self.assertEqual(window.pack_updates, set())                     # (gone: its update too)
+                window.show_pack_updates.assert_called()
                 self.assertFalse((d / "packs/their-pack").exists())
                 window.reload_tweaks.assert_called()
         gui.sft.load(refresh=True)
 
+
+
+class PacksUnderTheWindow(unittest.TestCase):
+    """The Packs page shows the packs as read when it opened (and by what its buttons change): its
+    every click read them again, replacing sft's tweaks under the window's list. A pack update
+    still running when you go Back is finished by the window, which says nothing but follows it."""
+    def test_a_click_doesnt_read_them_again(self):
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        page = gui.Packs(mock.Mock())
+        with mock.patch.object(gui.sft, "load", wraps=gui.sft.load) as load:
+            page.toggle_inventory(gui.sft.THIRD_PARTY)
+            page.confirm(gui.sft.THIRD_PARTY)
+        self.assertTrue(load.called)
+        self.assertFalse([c for c in load.call_args_list if c.kwargs.get("refresh")])
+
+    def test_an_update_that_ends_after_back(self):
+        import threading
+        from PyQt6.QtCore import QCoreApplication, QEvent
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        gate = threading.Event()
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            shutil.copytree(ROOT / "examples/hello-pack", d / "packs" / "mine")
+            mine = (d / "packs" / "mine").resolve()
+
+            def update_pack(folder):                    # (git pull brought a change)
+                gate.wait(5)
+                (mine / "hello-frame/README.md").write_text((mine / "hello-frame/README.md").read_text() + "\nNew.\n")
+                gui.sft.load(refresh=True)
+                return {"files": ["hello-frame/README.md"], "log": ["a change"]}
+            origin = lambda folder: "https://example.org/mine.git" if Path(folder) == mine else None   # (added from a link)
+            with mock.patch.multiple(gui.sft, USER_PACKS=d / "packs", CONF=d, TRUSTED=d / "trusted",
+                                     pack_origin=origin, update_pack=update_pack), \
+                    mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
+                gui.sft.set_trusted(mine, True)
+                window = mock.Mock(details=None, pack_job=None, pack_updates={mine})
+                page = gui.Packs(window)
+                window.details = page
+                next(b for b in page.findChildren(QPushButton) if b.text() == "Update").click()
+                self.assertTrue(page.busy())
+                window.details = None                   # ← Back
+                page.deleteLater()
+                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+                again = gui.Packs(window)                # (and Packs again, while it runs)
+                self.assertEqual(again.notice.text(), "Updating Hello pack…")
+                self.assertFalse(again.add_button.isEnabled())
+                again.deleteLater()
+                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+                gate.set()
+                for _ in range(250):
+                    gui.Window.finish_pack_job(window)        # (the window's collect)
+                    if window.pack_job is None:
+                        break
+                    time.sleep(0.02)
+                self.assertIsNone(window.pack_job)
+                self.assertEqual(window.pack_updates, set())     # (got it: the window's notice goes)
+                window.show_pack_updates.assert_called()
+                window.follow_packs.assert_called_once()          # (its tweaks wait to be trusted again)
+                self.assertNotIn("hello-frame", [c["id"] for c in gui.sft.components()])
+        gui.sft.load(refresh=True)
+
+
+class StuckWindow(unittest.TestCase):
+    """A second launch that finds the open window stuck stops it, and only it: a Python running this
+    very script. (It stopped anything whose command line named gui/frame-tweaks-gui.py: an editor
+    with it open, say.)"""
+    def test_only_the_window(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "gui").mkdir()
+            script, other = d / "gui/frame-tweaks-gui.py", d / "other.py"
+            for f in (script, other):
+                f.write_text("import time\ntime.sleep(30)\n")
+            ours = []
+
+            def start(argv0, *args):                    # (a Python under another name, as exec -a gives it)
+                p = subprocess.Popen(["bash", "-c", 'exec -a "$0" "$@"', argv0, sys.executable, *args], cwd=d)
+                self.addCleanup(lambda: (p.poll() is None and p.kill(), p.wait()))
+                ours.append(p.pid)
+                for _ in range(100):                     # (until it shows its own command line)
+                    if Path(f"/proc/{p.pid}/cmdline").read_bytes().startswith(argv0.encode()):
+                        break
+                    time.sleep(0.02)
+                return p
+            window = start(str(d / "venv/bin/sft-python"), str(script))
+            from_repo = start(str(d / "venv/bin/python3"), "gui/frame-tweaks-gui.py")     # (as ./install.sh gives it)
+            editor = start("kate", str(script))
+            named = start("python3", str(other), str(script))
+            signalled, real_kill = [], os.kill
+
+            def kill(pid, sig):                         # (only ever these processes)
+                signalled.append(pid)
+                if pid in ours:
+                    real_kill(pid, sig)
+            with mock.patch.object(gui, "SCRIPT", script.resolve()), mock.patch.object(gui.os, "kill", kill), \
+                    mock.patch.object(Path, "home", lambda: d):
+                gui.stop_stuck_windows()
+            for p in (window, from_repo):
+                self.assertIsNotNone(p.wait(timeout=5))
+            self.assertIsNone(editor.poll())
+            self.assertIsNone(named.poll())
+            self.assertEqual(set(signalled), {window.pid, from_repo.pid})
+            self.assertIn("an open window didn't answer", (d / ".local/state/frame-tweaks/logs/window.log").read_text())
 
 
 class HandOver(unittest.TestCase):
@@ -871,6 +1261,20 @@ class EveryPageShown(unittest.TestCase):
         self.assertIn("The rest is here.", view.toPlainText())
 
 
+class CodeInAList(unittest.TestCase):
+    def test_an_indented_code_block_is_code(self):
+        """A ``` block indented in a list item is code: its <ip> was taken for HTML in prose and shown
+        as &lt;ip&gt;."""
+        import manifest
+        md = "1. Run this:\n\n   ```sh\n   adb pair <ip>:<port> <code>\n   ```\n\nThen <country>.\n"
+        self.assertEqual(gui.literal_placeholders(md), md.replace("<country>", "&lt;country&gt;"))
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        c = gui.component("adb-scrcpy")
+        text = gui.readme_browser(manifest.front_matter(c["readme"].read_text())[1], c).toPlainText()
+        self.assertIn("adb pair <ip>:<pairing-port> <code>", text)
+
+
 class DetailsScroll(unittest.TestCase):
     """A tweak's page scrolls as one below its header (Back, the title): a long table of facts
     left the README a narrow strip to scroll in. The README is shown whole; a wheel over it, the
@@ -923,6 +1327,30 @@ class DetailsScroll(unittest.TestCase):
         outer.setValue(0)
         gui.to_heading(page.readme, "how-it-works")
         self.assertGreater(outer.value(), 0)
+
+    def test_ctrl_wheel_zooms(self):
+        """Ctrl+wheel makes a README's text larger or smaller: the window's style sheet sets the
+        font's size, so QTextEdit's own zoom did nothing. Shown whole, the README grows with it."""
+        page = gui.Details(mock.Mock(latest={}), gui.component("charge-limit"), (1, "not installed"))
+        page.setStyleSheet(gui.STYLE)                                   # (the window's)
+        self.show(page, 1000, 600)
+        view, outer = page.readme, page.scroll.verticalScrollBar()
+        self.wait_for(lambda: outer.maximum() > 0)
+        size, height = view.document().size().height(), view.height()
+        self.wheel(view, 120, gui.Qt.KeyboardModifier.ControlModifier)
+        self.wait_for(lambda: view.height() > height)
+        self.assertGreater(view.document().size().height(), size)
+        self.assertGreater(view.height(), height)
+        self.assertEqual(outer.value(), 0)                              # (not scrolled)
+        self.wheel(view, -360, gui.Qt.KeyboardModifier.ControlModifier)
+        self.assertLess(view.document().size().height(), size)
+        readme = gui.ReadmePage(mock.Mock())                            # (📖 README: not shown whole)
+        readme.setStyleSheet(gui.STYLE)
+        self.show(readme, 1000, 600)
+        view = readme.findChild(gui.QTextBrowser)
+        size = view.document().size().height()
+        self.wheel(view, 120, gui.Qt.KeyboardModifier.ControlModifier)
+        self.assertGreater(view.document().size().height(), size)
 
     def test_wider_than_the_page(self):
         from PyQt6.QtWidgets import QScrollArea

@@ -30,6 +30,12 @@ msgstr ""
 msgid "About Frame Tweaks"
 msgstr "Acerca de Frame Tweaks"
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Another action is still running: try again once it's done."
+msgstr ""
+"Otra acción todavía se está ejecutando: vuelve a intentarlo cuando termine."
+
 #: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Aplicar cambios"
@@ -120,6 +126,13 @@ msgstr ""
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
 msgstr ""
 "No se pudo reiniciar SteamVR; reinícialo desde su menú o reinicia el equipo."
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Couldn't start {tweak}: its files aren't where they were when the list was read. Close and reopen Frame Tweaks."
+msgstr ""
+"No se pudo iniciar {tweak}: sus archivos ya no están donde estaban cuando se leyó la lista. Cierra y vuelve a abrir Frame Tweaks."
 
 #: gui/frame-tweaks-gui.py
 msgid "Details: what it is, why it's included, who made it"
@@ -509,6 +522,11 @@ msgstr "oculto"
 msgid "needs: %s"
 msgstr "requiere: %s"
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "not available any more"
+msgstr "ya no está disponible"
+
 #: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr "no instalado"
@@ -523,9 +541,19 @@ msgid "status check failed"
 msgstr "la revisión del estado falló"
 
 # needs review
+#: gui/frame-tweaks-gui.py
+msgid "status check failed (exit {code})"
+msgstr "la revisión del estado falló (código de salida {code})"
+
+# needs review
 #: gui/frame-tweaks-gui.py install.sh
 msgid "status check failed: %s"
 msgstr "la revisión del estado falló: %s"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "status check failed: {error}"
+msgstr "la revisión del estado falló: {error}"
 
 #: gui/frame-tweaks-gui.py
 msgid "the pack {pack}, not part of Frame Tweaks"
