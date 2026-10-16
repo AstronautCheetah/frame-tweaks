@@ -129,6 +129,57 @@ class Timers(Home):
         self.assertEqual(self.program(f"{self.home}/.local/bin/frame-outer-bus {prog} %U"), os.path.realpath(prog))
 
 
+class OneDialog(Home):
+    """Two unlock requests at once (Firefox started twice, a git push beside a gh call): one
+    password dialog; the other waits for it and takes its answer, unlocked or cancelled."""
+    def wallet_unlock(self):
+        """wallet-unlock with stand-ins for its D-Bus library (jeepney: not in every Python
+        here), and the shared modules from this checkout."""
+        import types
+        fake = {n: types.ModuleType(n) for n in ("jeepney", "jeepney.bus_messages", "jeepney.io", "jeepney.io.blocking")}
+        fake["jeepney"].DBusAddress = lambda *a, **k: None
+        fake["jeepney"].MessageType = types.SimpleNamespace(error=3, signal=4)
+        fake["jeepney"].new_method_call = lambda *a, **k: None
+        fake["jeepney.bus_messages"].message_bus = None
+        fake["jeepney.io.blocking"].open_dbus_connection = lambda *a, **k: None
+        with mock.patch.dict(sys.modules, fake), mock.patch.dict(os.environ, {"FRAME_TWEAKS_PYLIB": str(ROOT / "lib")}):
+            return load("wallet-unlock", self.home)
+
+    def run_two(self, answer):
+        import threading
+        wu = self.wallet_unlock()
+        wu.ASKING, wu.CANCELLED = self.home / "asking.lock", self.home / "cancelled"
+        state = {"locked": True, "dialogs": 0}
+        first_open, may_answer = threading.Event(), threading.Event()
+
+        def unlock(conn):                     # the dialog: open until told to answer
+            state["dialogs"] += 1
+            first_open.set()
+            may_answer.wait(10)
+            state["locked"] = not answer
+            return answer
+        results = {}
+        with mock.patch.object(wu, "unlock", unlock), mock.patch.object(wu, "is_locked", lambda conn: state["locked"]), \
+                contextlib.redirect_stderr(io.StringIO()):
+            a = threading.Thread(target=lambda: results.__setitem__("a", wu.ask_once(None)))
+            a.start()
+            self.assertTrue(first_open.wait(10))
+            b = threading.Thread(target=lambda: results.__setitem__("b", wu.ask_once(None)))
+            b.start()
+            b.join(0.5)
+            self.assertTrue(b.is_alive())              # (waiting for the open dialog)
+            may_answer.set()
+            a.join(10)
+            b.join(10)
+        return results, state["dialogs"]
+
+    def test_the_second_request_takes_the_first_dialogs_unlock(self):
+        self.assertEqual(self.run_two(True), ({"a": "unlocked", "b": "already"}, 1))
+
+    def test_a_cancelled_dialog_isnt_followed_by_another(self):
+        self.assertEqual(self.run_two(False), ({"a": None, "b": None}, 1))
+
+
 class Scripts(Home):
     """uninstall.sh and status.sh with stand-ins for systemctl and the wallet's programs."""
     def setUp(self):

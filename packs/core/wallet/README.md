@@ -171,6 +171,10 @@ through our dialog first. So:
   already running asks again after the auto-lock), the `wallet-lock-sync` service closes it
   (like pressing its ✕) and shows our dialog on the same display. A ksecretd window while the
   wallet is *unlocked* is an "allow this app?" question, and is left alone.
+- **One dialog at a time.** Anything that asks while our dialog is open (Firefox started twice,
+  a link opening it while you start it, a git push beside a `gh` call, a ksecretd prompt being
+  replaced) waits for that dialog instead of opening another, then takes its answer: unlocked,
+  it goes ahead; cancelled, it gives up too, without asking again.
 
 **One auto-lock clock.** Whichever way the wallet gets unlocked, `wallet-lock-sync` restarts the
 auto-lock countdown (a systemd timer, `wallet-autolock.timer`) from then. The wallet also closes
@@ -183,6 +187,11 @@ wallet in KWalletManager, or KWallet's idle timeout, only closes `kwalletd6`'s v
 `ksecretd` stays unlocked, and apps keep getting their secrets without a prompt. So
 `wallet-lock-sync` listens for the wallet being closed and then really locks it in `ksecretd`.
 **Lock Wallet** and the auto-lock do the same.
+
+The other way round, **KWalletManager can show the wallet closed while it's open.** It asks
+`kwalletd6`, which starts only when something asks for it (KWalletManager itself, say) and
+then knows only what it opened. The wallet unlocked earlier in `ksecretd` is open all the same,
+and apps get their secrets. The Wallet apps page shows `ksecretd`'s state, the one that counts.
 
 ## Good to know
 - Apps routed to the shared wallet use the outer session's portals and notifications, so some

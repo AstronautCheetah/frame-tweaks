@@ -4637,6 +4637,11 @@ msgstr "Contraseña de la cartera de KDE:"
 msgid "Unlock wallet"
 msgstr "Desbloquear cartera"
 
+# needs review
+#: packs/core/wallet/wallet-unlock
+msgid "Waiting for the wallet password dialog that's already open…"
+msgstr "Esperando el diálogo de contraseña de la cartera que ya está abierto…"
+
 #: packs/core/wallet/wallet-unlock
 msgid "Wallet already unlocked."
 msgstr "La cartera ya está desbloqueada."
