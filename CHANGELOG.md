@@ -7,6 +7,9 @@
   link to the page and where its Star button is.
 
 ### For contributors
+- **`dev/test-tweaks.sh` passes beside a running Android Mirror:** a file in /tmp that a program
+  already running has open (the adb server's log, written every few seconds) no longer counts
+  as one a tweak wrote outside its test home.
 - **The translation files change only when a text does:** their references name the file a text is
   in, not its line, so editing code no longer makes `dev/i18n.py check` (and CI) ask for the
   template to be extracted again.

@@ -5,7 +5,8 @@
 # fake home, or if uninstall leaves files behind that aren't the settings it promises to keep.
 #
 #   dev/test-tweaks.sh            the default set (runs anywhere, CI included)
-#   (TEST_IGNORE=REGEX: files outside the test home that other programs write meanwhile)
+#   (TEST_IGNORE=REGEX: files outside the test home that other programs write meanwhile; those
+#   that programs already running have open, such as a live adb server's log, are left out anyway)
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
 # No network for anything it runs, where user namespaces allow it: curl is a stand-in below, but
@@ -14,6 +15,11 @@ set -euo pipefail
 # script would make a running adb server log each one's loopback device into /tmp.) Without user
 # namespaces (some CI runners), it runs as before.
 if [ -z "${TEST_IN_NETNS:-}" ]; then
+    # Files in /tmp that programs already running have open (a live adb server's log, written
+    # every few seconds): they write them meanwhile, not the tweaks. Listed out here, as the
+    # namespace can't see other processes' open files.
+    TEST_HELD_OPEN=$(find /proc/[0-9]*/fd -maxdepth 1 \( -lname '/tmp/*' -o -lname '/var/tmp/*' \) -printf '%l\n' 2>/dev/null | sort -u || true)
+    export TEST_HELD_OPEN
     if unshare -cn true 2>/dev/null; then TEST_IN_NETNS=1 exec unshare -cn "$BASH" "$0" "$@"; fi
     echo "note: no network namespace here (unshare -cn), so the tweaks' scripts can reach the network" >&2
 fi
@@ -117,7 +123,8 @@ for t in "${TWEAKS[@]}"; do
                grep -vE '^\./\.local/share/frame-tweaks/i18n/' || true)    # (translations: shared by tweaks' programs)
         # (-cnewer: files unpacked from an archive keep its old dates; the checkout is searched on
         # its own, as it's inside $work)
-        outside=$({ find /tmp /var/tmp -cnewer "$marker" -type f 2>/dev/null | grep -v "^$work/"
+        outside=$({ find /tmp /var/tmp -cnewer "$marker" -type f 2>/dev/null | grep -v "^$work/" |
+                      grep -vxF -f <(printf '%s\n' "${TEST_HELD_OPEN:-}")
                     find "$REPO" -cnewer "$marker" -type f ! -path '*/__pycache__/*' 2>/dev/null; } |
                   { if [ -n "${TEST_IGNORE:-}" ]; then grep -vE "$TEST_IGNORE"; else cat; fi; } || true)
         if [ -n "$left" ]; then
