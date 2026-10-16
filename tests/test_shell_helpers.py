@@ -109,6 +109,31 @@ class Bashrc(unittest.TestCase):
 
 
 
+class DesktopEntry(unittest.TestCase):
+    """install_desktop writes a menu entry whole, in English when translating it fails: piped
+    straight from lib/i18n.py, a failure there left the entry empty (and, with pipefail, stopped
+    the tweak's install). (Stand-ins: python3 fails only for that; nothing real is started.)"""
+    def test_whole_in_english_when_translating_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            stubs, home = d / "stubs", d / "home"
+            stubs.mkdir()
+            home.mkdir()
+            for name, body in (("systemctl", "exit 0"), ("update-desktop-database", "exit 0"),
+                               ("python3", 'case "$*" in *"i18n.py desktop"*) exit 1 ;; esac; exec /usr/bin/python3 "$@"')):
+                (stubs / name).write_text(f"#!/bin/bash\n{body}\n")
+                (stubs / name).chmod(0o755)
+            desktop = d / "thing.desktop"
+            desktop.write_text("[Desktop Entry]\nType=Application\nName=Thing\nExec=@BIN@/thing\n")
+            r = subprocess.run(["bash", "-c", f'source {ROOT}/lib/common.sh; install_desktop "{desktop}"'],
+                               capture_output=True, text=True, timeout=60,
+                               env={**os.environ, "HOME": str(home), "PATH": f"{stubs}:{os.environ['PATH']}"})
+            self.assertEqual(r.returncode, 0, r.stderr)
+            text = (home / ".local/share/applications/thing.desktop").read_text()
+            self.assertIn("Name=Thing", text)
+            self.assertIn(f"Exec={home}/.local/bin/thing", text)
+
+
 class SteamVRRestart(unittest.TestCase):
     """status_restart: a status line the installer window turns into ⟳ Restart SteamVR. vr_started_before:
     has the running SteamVR started since a file changed (with pgrep and ps stand-ins)?"""

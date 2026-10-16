@@ -197,6 +197,8 @@
   kept `ggml-base.en-q5_1.bin` for good. Only a `DICTATE_MODEL` setting in use keeps one now.
 - **Dictation's auto-stop timer goes with its recording:** a recording stopped by a press left its
   timer sleeping out the auto-stop time (5 minutes) as a process of its own.
+- **A tweak's menu entry is written whole:** if translating it failed, its entry was left empty
+  and the tweak's install stopped; it's written in English then.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
