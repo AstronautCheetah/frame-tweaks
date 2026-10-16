@@ -28,8 +28,9 @@ changes: >-
   `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh`
   wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet**
   menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps'
-  menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`); points git's
-  credential helper for github.com, if you have one, at that `gh`
+  menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries
+  as written in `launcher-built`); points git's credential helper for github.com, if you have
+  one, at that `gh`
 access: >-
   Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its
   dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app
@@ -146,6 +147,14 @@ does (`keyring.enable`), without Nix:
   (`--talk-name=org.kde.kwalletd6 --talk-name=org.freedesktop.secrets`). An app's own entry in
   that folder is backed up in `~/.local/share/frame-tweaks/launcher-originals/`. A system app
   gets an override with the same name, which **Remove** deletes again.
+- What you change in such an entry yourself stays: a new name or icon from KDE's menu editor,
+  an option added to its command. The entry is written again whenever its protection is put on
+  again (the wallet's install does it at every update), so a copy of each entry as it was
+  written is kept in `~/.local/share/frame-tweaks/launcher-built/`: whatever yours says
+  differently goes into the new one, with the password gate and shared wallet put on your
+  command as before. **Remove** gives the original back with your changes too (for a Flatpak or
+  system app, as KDE's menu editor saves an edit: an entry of the same name in
+  `~/.local/share/applications`).
 - `frame-outer-bus CMD` runs a command on the outer session's D-Bus **and** its runtime folder,
   and keeps the window on the display it was started from. (Switching only the D-Bus address
   makes Flatpak Electron apps such as Signal hang at startup: the outer session's Flatpak portal
@@ -215,7 +224,7 @@ and apps get their secrets. The Wallet apps page shows `ksecretd`'s state, the o
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`); points git's credential helper for github.com, if you have one, at that `gh`
+- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries as written in `launcher-built`); points git's credential helper for github.com, if you have one, at that `gh`
 - **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
 - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the original menu entries and the KDE settings it changed)
 <!-- /generated:changes -->

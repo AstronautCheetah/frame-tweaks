@@ -48,3 +48,25 @@ def load_script(path, name=None):
     module = importlib.util.module_from_spec(importlib.util.spec_from_loader(name, loader))
     loader.exec_module(module)
     return module
+
+
+def kde_saves(text, group="Desktop Entry", **changes):
+    """A menu entry (text) as KDE's menu editor saves it after changes (key=value, "_" for "-"):
+    KConfig writes groups and keys sorted, without comments or blank lines, adds the editor's own
+    keys, and writes the command again (here: field codes quoted, which reads the same)."""
+    entry, g = {}, ""
+    for line in text.splitlines():
+        if line.startswith("["):
+            g = line.strip()[1:-1]
+        elif "=" in line and not line.startswith("#"):
+            k, v = line.split("=", 1)
+            entry[(g, k.strip())] = v.strip()
+    entry.update({(group, k.replace("_", "-")): v for k, v in changes.items()})
+    for k, v in (("Path", ""), ("Terminal", "false"), ("X-KDE-SubstituteUID", "false")):
+        entry.setdefault((group, k), v)
+    if (group, "Exec") in entry:
+        entry[(group, "Exec")] = entry[(group, "Exec")].replace(" %U", " '%U'")
+    out = []
+    for g in sorted({g for g, _k in entry}):
+        out += [f"[{g}]"] + [f"{k}={v}" for (gg, k), v in sorted(entry.items()) if gg == g] + [""]
+    return "\n".join(out)

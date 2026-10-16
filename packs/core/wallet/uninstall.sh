@@ -8,6 +8,7 @@ if [ -x "$BIN/wallet-launcher" ] && [ -z "${FRAME_TWEAKS_REINSTALL:-}" ]; then
     for f in "$APPS"/*.desktop; do
         grep -q '^X-FrameTweaks-Wallet=true' "$f" 2>/dev/null && "$BIN/wallet-launcher" --remove "$(basename "$f" .desktop)"
     done
+    rmdir "$LAUNCHER_BUILT" 2>/dev/null || true      # (each --remove took its app's copy)
 fi
 sysctl_user stop wallet-autolock.timer 2>/dev/null || true
 sysctl_user disable --now wallet-lock-sync 2>/dev/null || true

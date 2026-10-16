@@ -223,7 +223,8 @@ fetch_mirror() {
 install_i18n() {
     local d="$HOME/.local/share/frame-tweaks/i18n"
     mkdir -p "$d/locale"
-    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$REPO_DIR/lib/needs.py" "$REPO_DIR/lib/xkb.py" "$d/"
+    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$REPO_DIR/lib/needs.py" "$REPO_DIR/lib/xkb.py" \
+        "$REPO_DIR/lib/menuedits.py" "$d/"
     find "$d/locale" -name '*.po' -delete
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }
@@ -250,6 +251,7 @@ pin_version() { sed -n 's/^version=//p' "$(tweak_dir "$1")/pin"; }
 # applications/icon directories' mtime changes (writing an existing file doesn't change it).
 ICONS="$HOME/.local/share/icons/hicolor"
 LAUNCHER_ORIGINALS="$HOME/.local/share/frame-tweaks/launcher-originals"
+LAUNCHER_BUILT="$HOME/.local/share/frame-tweaks/launcher-built"     # (wallet-launcher's wrappers as it built them)
 
 # install_icon <name>: <name>.png from the tweak's folder (or the repo's icons/) into hicolor
 # (256x256).
@@ -264,14 +266,15 @@ install_icon() {
 # install_desktop <file.desktop>: copy into the app menu, expanding @BIN@. If the entry is
 # wrapped by wallet-launcher (shared wallet / password gate), the new version becomes the
 # wrapper's original and the wrapper is re-applied, so the gate isn't silently dropped.
-# remove_desktop <file.desktop>...: install_desktop's undo: the entry, and the copy kept while
-# wallet-launcher wraps it (launcher-originals), then the menu refreshed. Not on a reinstall (↻,
-# FRAME_TWEAKS_REINSTALL): install_desktop, next, then re-applies the wrapper to the new version.
+# remove_desktop <file.desktop>...: install_desktop's undo: the entry, and the copies kept while
+# wallet-launcher wraps it (launcher-originals, launcher-built), then the menu refreshed. Not on
+# a reinstall (↻, FRAME_TWEAKS_REINSTALL): install_desktop, next, then re-applies the wrapper to
+# the new version.
 # (Without the kept copy it wrote a plain entry: the password gate was gone.)
 remove_desktop() {
     [ -z "${FRAME_TWEAKS_REINSTALL:-}" ] || return 0
     local name
-    for name in "$@"; do remove_files "$APPS/$name" "$LAUNCHER_ORIGINALS/$name"; done
+    for name in "$@"; do remove_files "$APPS/$name" "$LAUNCHER_ORIGINALS/$name" "$LAUNCHER_BUILT/$name"; done
     update-desktop-database "$APPS" 2>/dev/null || true
     touch "$APPS" 2>/dev/null || true
 }

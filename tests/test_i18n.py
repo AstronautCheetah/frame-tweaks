@@ -317,6 +317,18 @@ class MenusAndDashboard(unittest.TestCase):
             self.assertTrue(i18n.relabel(mine))
         self.assertIn("Name=Lock Wallet", mine.read_text().splitlines())
 
+    def test_relabel_leaves_a_name_you_gave_it(self):
+        """A name of your own (KDE's menu editor writes Name=) isn't one of ours to translate."""
+        en, es = i18n.Catalogue([], self.d), i18n.Catalogue(["es"], self.d)
+        mine = self.d / "wallet-lock.desktop"
+        text = i18n.desktop("[Desktop Entry]\nName=Lock Wallet\n\n[Desktop Action x]\nName=Off\n", self.d, en)
+        mine.write_text(text.replace("Name=Lock Wallet\nX-Frame", "Name=Lock it all\nX-Frame", 1))
+        with mock.patch.object(i18n, "CATALOGUE", es):
+            self.assertTrue(i18n.relabel(mine))                    # (its action's name: ours)
+        lines = mine.read_text().splitlines()
+        self.assertIn("Name=Lock it all", lines)
+        self.assertIn("Name=Desactivado", lines)
+
     def test_dashboard_table(self):
         import importlib.machinery
         import importlib.util

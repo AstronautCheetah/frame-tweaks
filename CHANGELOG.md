@@ -199,6 +199,12 @@
   timer sleeping out the auto-stop time (5 minutes) as a process of its own.
 - **A tweak's menu entry is written whole:** if translating it failed, its entry was left empty
   and the tweak's install stopped; it's written in English then.
+- **Your changes to an app the wallet protects stay:** its menu entry is written again whenever
+  the protection is put on again (the wallet's install does it at every update), and that went
+  back to the app's original, so a new name or icon from KDE's menu editor, or an option you'd
+  added to its command, was lost. A copy of the entry as written is kept now: what yours says
+  differently goes into the new one, and stays when the protection is removed. A Frame Tweaks
+  menu entry you renamed also keeps its name when the keyboard's language changes.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a

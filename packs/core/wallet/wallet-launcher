@@ -11,6 +11,8 @@ This writes a launcher override into ~/.local/share/applications that starts
 the app on the outer bus (and, for Flatpaks, lets it talk to the wallet), so
 every launch, from the desktop menu or the VR "+" menu, uses the same wallet.
 Approach from lhns/steam-frame-nix (docs/launchers.md, `keyring.enable`).
+What you change in such an entry (its name or icon in KDE's menu editor, an
+option added to its command) stays when it's rebuilt or removed (lib/menuedits.py).
 
   wallet-launcher org.signal.Signal com.anthropic.Claude   # add
   wallet-launcher --electron some.electron.App             # also --password-store=kwallet6
@@ -39,6 +41,7 @@ except ImportError:                       # (not installed by Frame Tweaks: Engl
     def ngettext(singular, plural, n):
         return singular if n == 1 else plural
     N_ = _
+import menuedits  # noqa: E402  (your edits to an entry, kept: lib/menuedits.py, installed beside i18n.py)
 
 HOME = Path.home()
 APPS = HOME / ".local/share/applications"
@@ -51,10 +54,16 @@ MARK = "X-FrameTweaks-Wallet"
 # Outside APPS: Steam's "+" menu also lists entries in subfolders of APPS (duplicates).
 BACKUP_DIR = HOME / ".local/share/frame-tweaks/launcher-originals"
 OLD_BACKUP_DIR = APPS / ".wallet-launcher-originals"
+# Each wrapper as add() last built it: what the entry in APPS says differently is yours (a new
+# name or icon from KDE's menu editor, an option added to the command), kept when it's rebuilt.
+BUILT_DIR = HOME / ".local/share/frame-tweaks/launcher-built"
 WRAPPER = str(HOME / ".local/bin/frame-outer-bus")
 GATE = str(HOME / ".local/bin/wallet-gate")
 GUARD = str(HOME / ".local/bin/signal-guard")   # retired (app-timers + --gate); dropped on rebuild
 TALK = ["--talk-name=org.kde.kwalletd6", "--talk-name=org.freedesktop.secrets"]
+STORE = "--password-store=kwallet6"
+ADDED = TALK + [STORE]                          # what rewrite_exec adds to a command's arguments
+OWNED = (MARK, "DBusActivatable")               # keys of a wrapper that aren't yours to change
 
 
 def source_for(app_id):
@@ -80,22 +89,73 @@ def source_for(app_id):
     sys.exit(_("wallet-launcher: no desktop entry found for {app_id}").format(app_id=app_id))
 
 
-def rewrite_exec(cmd, app_id, electron, shared=True, gate=False):
-    args = shlex.split(cmd)
-    while args and args[0] in (GATE, WRAPPER, GUARD, "--"):   # re-run on an already wrapped entry
+def flatpak_run(args):
+    return len(args) > 1 and os.path.basename(args[0]) == "flatpak" and args[1] == "run"
+
+
+def join_exec(args):
+    # Field codes (%U, @@u) must stay unquoted.
+    return " ".join(a if re.fullmatch(r"%[a-zA-Z]|@@[a-z]?", a) else shlex.quote(a) for a in args)
+
+
+class NotWrappable(ValueError):
+    pass
+
+
+def command_parts(cmd):
+    """(env, args): cmd's `env VAR=…` in front, if any (KDE's menu editor writes the environment
+    variables you give an entry there), and its program and arguments, without the programs
+    rewrite_exec puts in front (before or after that env)."""
+    args, env = shlex.split(cmd), []
+    while args and args[0] in (GATE, WRAPPER, GUARD, "--"):   # (an already wrapped entry)
         args = args[1:]
-    if (shared or electron) and len(args) > 1 and os.path.basename(args[0]) == "flatpak" and args[1] == "run":
+    if args and os.path.basename(args[0]) == "env":
+        n = next((i for i, a in enumerate(args[1:], 1) if "=" not in a), len(args))
+        env, args = args[:n], args[n:]
+        while args and args[0] in (GATE, WRAPPER, GUARD, "--"):
+            args = args[1:]
+    return env, args
+
+
+def rewrite_exec(cmd, app_id, electron, shared=True, gate=False):
+    env, args = command_parts(cmd)
+    store = [STORE] if electron and STORE not in args else []
+    if (shared or electron) and flatpak_run(args):
         idx = next((i for i, a in enumerate(args) if a == app_id), None)
         if idx is None:
-            sys.exit(_("wallet-launcher: can't find {app_id} in: {command}").format(app_id=app_id, command=cmd))
+            raise NotWrappable(_("wallet-launcher: can't find {app_id} in: {command}").format(app_id=app_id, command=cmd))
         extra = [t for t in TALK if t not in args] if shared else []
-        args = args[:idx] + extra + [app_id] + (["--password-store=kwallet6"] if electron else []) + args[idx + 1:]
-    elif electron:                            # (after env VAR=…: the program's own option)
-        i = next((i for i, a in enumerate(args) if os.path.basename(a) != "env" and "=" not in a), 0)
-        args = args[:i + 1] + ["--password-store=kwallet6"] + args[i + 1:]
-    out = ([GATE] if gate else []) + ([WRAPPER] if shared else []) + args
-    # Field codes (%U, @@u) must stay unquoted.
-    return " ".join(a if re.fullmatch(r"%[a-zA-Z]|@@[a-z]?", a) else shlex.quote(a) for a in out)
+        args = args[:idx] + extra + [app_id] + store + args[idx + 1:]
+    elif store:                               # (after env VAR=…: the program's own option)
+        args = args[:1] + store + args[1:]
+    return join_exec(([GATE] if gate else []) + ([WRAPPER] if shared else []) + env + args)
+
+
+def unwrapped(cmd, original):
+    """cmd without what rewrite_exec put in: the programs in front, and the wallet options the
+    original command (if any) didn't have itself. None if cmd can't be read."""
+    try:
+        (env, args), keep = command_parts(cmd), shlex.split(original or "")
+    except ValueError:
+        return None
+    return env + [a for a in args if a not in ADDED or a in keep]
+
+
+def keep_yours(app_id, built, now, original, electron, shared, gate):
+    """built (the new wrapper), with what you've changed in the wrapper since it was last built
+    (now: the entry in the menu). A command you changed is wrapped again as you left it."""
+    base = BUILT_DIR / f"{app_id}.desktop"
+    if f"{MARK}=true" not in now or not base.exists():
+        return built
+    commands = menuedits.keys(original)
+
+    def command(group, yours):
+        args = unwrapped(yours, commands.get((group, "Exec")))
+        try:
+            return None if args is None else rewrite_exec(join_exec(args), app_id, electron, shared, gate)
+        except NotWrappable:                  # (not one it can wrap: the new wrapper's command stands)
+            return None
+    return menuedits.with_yours(built, menuedits.yours(base.read_text(), now), OWNED, command)
 
 
 # Electron apps that read the wallet only when told the password store explicitly. Without it,
@@ -107,20 +167,24 @@ def add(app_id, electron, shared=True, gate=None):
     """gate: True/False to set it, None to keep what the current entry has (re-wrapping after an
     app update, or another tweak adding its app, must not silently drop the password gate)."""
     src = source_for(app_id)
-    lines = src.read_text().splitlines()
+    original = src.read_text()
+    lines = original.splitlines()
     current = APPS / f"{app_id}.desktop"
+    now = current.read_text() if current.exists() else ""
     if gate is None:
-        gate = current.exists() and f"{MARK}=true" in current.read_text() and GATE in current.read_text()
+        gate = f"{MARK}=true" in now and GATE in now
     # Re-applying (e.g. after an app update) keeps --password-store, even if not asked again.
-    electron = electron or app_id in KNOWN_ELECTRON or (
-        current.exists() and "--password-store=kwallet6" in current.read_text())
+    electron = electron or app_id in KNOWN_ELECTRON or STORE in now
     if src.parent == APPS and src.name == f"{app_id}.desktop":
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         (BACKUP_DIR / src.name).write_text("\n".join(lines) + "\n")
     out = []
     for line in lines:
         if line.startswith("Exec="):
-            line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate)
+            try:
+                line = "Exec=" + rewrite_exec(line[5:], app_id, electron, shared, gate)
+            except NotWrappable as e:
+                sys.exit(str(e))
         elif line.startswith("DBusActivatable=") and (shared or gate):
             line = "DBusActivatable=false"   # otherwise the desktop starts it over D-Bus, not Exec=
         elif line.startswith(MARK + "="):
@@ -128,8 +192,11 @@ def add(app_id, electron, shared=True, gate=None):
         out.append(line)
         if line == "[Desktop Entry]":
             out.append(f"{MARK}=true")
+    built = "\n".join(out) + "\n"
     APPS.mkdir(parents=True, exist_ok=True)
-    (APPS / f"{app_id}.desktop").write_text("\n".join(out) + "\n")
+    current.write_text(keep_yours(app_id, built, now, original, electron, shared, gate))
+    BUILT_DIR.mkdir(parents=True, exist_ok=True)
+    (BUILT_DIR / f"{app_id}.desktop").write_text(built)
     what = [w for w, on in ((_("shared wallet"), shared), (_("password required"), gate)) if on]
     print(f"{app_id}: {', '.join(what)}")
 
@@ -153,13 +220,30 @@ def migrate_backups():
 
 
 def remove(app_id):
-    target, backup = APPS / f"{app_id}.desktop", BACKUP_DIR / f"{app_id}.desktop"
-    if backup.exists():
-        backup.replace(target)
-    elif target.exists() and f"{MARK}=true" in target.read_text():
-        target.unlink()
-    else:
+    target, backup, base = (d / f"{app_id}.desktop" for d in (APPS, BACKUP_DIR, BUILT_DIR))
+    now = target.read_text() if target.exists() else ""
+    if not backup.exists() and f"{MARK}=true" not in now:
         print(_("{app_id}: no wallet launcher").format(app_id=app_id)); return
+    # The original goes back with what you'd changed in the wrapper, as KDE's menu editor saves an
+    # edit: for a Flatpak's or system app's entry, an override of the same name.
+    original = backup if backup.exists() else next(
+        (d / f"{app_id}.desktop" for d in SOURCES + SYSTEM_SOURCES if (d / f"{app_id}.desktop").exists()), None)
+    text = mine = original.read_text() if original else ""
+    if f"{MARK}=true" in now and base.exists() and original:
+        commands = menuedits.keys(text)
+
+        def command(group, yours):
+            args, cmd = unwrapped(yours, commands.get((group, "Exec"))), commands.get((group, "Exec"), "")
+            return None if args is None or args == shlex.split(cmd) else join_exec(args)
+        mine = menuedits.with_yours(text, menuedits.yours(base.read_text(), now), OWNED, command)
+    if menuedits.keys(mine) != menuedits.keys(text):
+        target.write_text(mine)
+        backup.unlink(missing_ok=True)
+    elif backup.exists():
+        backup.replace(target)
+    else:
+        target.unlink()
+    base.unlink(missing_ok=True)
     print(_("{app_id}: original launcher restored").format(app_id=app_id))
 
 
@@ -199,7 +283,7 @@ def main():
                 remove(app)          # no wrapper left to rebuild (its app was removed): the original goes back
                 continue
             shared, gate = flags_of(app)
-            add(app, "--password-store=kwallet6" in current.read_text(), shared, gate)
+            add(app, STORE in current.read_text(), shared, gate)
         else:
             add(app, a.electron, not a.no_shared, True if a.gate else False if a.no_gate else None)
     os.system("update-desktop-database -q ~/.local/share/applications 2>/dev/null")
