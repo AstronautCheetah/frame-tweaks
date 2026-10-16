@@ -41,13 +41,21 @@ def jeepney_stand_ins():
     is a tuple saying what it asks: ("call", method), ("NameHasOwner", name), ("AddMatch", rule).
     Nothing reaches a real bus."""
     fake = {n: types.ModuleType(n) for n in ("jeepney", "jeepney.bus_messages", "jeepney.io", "jeepney.io.blocking")}
-    fake["jeepney"].DBusAddress = lambda *a, **k: None
+    fake["jeepney"].DBusAddress = lambda *a, **k: k.get("bus_name")
     fake["jeepney"].MessageType = types.SimpleNamespace(method_return=2, error=3, signal=4)
-    fake["jeepney"].new_method_call = lambda address, method, *a: ("call", method)
-    fake["jeepney"].MatchRule = lambda **k: k
+    # (kwalletd6's calls say so: ("call", "kwalletd6.isOpen"); ksecretd's and the rest's don't)
+    fake["jeepney"].new_method_call = lambda address, method, *a: (
+        "call", f"kwalletd6.{method}" if address == "org.kde.kwalletd6" else method)
+
+    class MatchRule(dict):
+        def add_arg_condition(self, argno, value):
+            self[f"arg{argno}"] = value
+    fake["jeepney"].MatchRule = MatchRule
     fake["jeepney.bus_messages"].message_bus = types.SimpleNamespace(
         NameHasOwner=lambda name: ("NameHasOwner", name), AddMatch=lambda rule: ("AddMatch", rule),
-        StartServiceByName=lambda name: ("StartServiceByName", name))
+        StartServiceByName=lambda name: ("StartServiceByName", name),
+        GetNameOwner=lambda name: ("GetNameOwner", name),
+        GetConnectionUnixProcessID=lambda name: ("GetConnectionUnixProcessID", name))
 
     def no_bus(*a, **k):
         raise AssertionError("a test reached for a real D-Bus")
@@ -75,9 +83,10 @@ class FakeConn:
     its reply, and drops whatever else arrives meanwhile (there's no filter). answer(message)
     gives a reply's body; incoming: the signals still to come, once the match rules are in."""
     def __init__(self, answer, incoming=()):
-        self.answer, self.incoming = answer, deque(incoming)
+        self.answer, self.incoming, self.sent = answer, deque(incoming), []
 
     def send_and_get_reply(self, message):
+        self.sent.append(message)
         if message[0] != "AddMatch":
             self.incoming.clear()           # (arrived while it waited for its reply: dropped)
         return types.SimpleNamespace(header=types.SimpleNamespace(message_type=2, fields={}), body=self.answer(message))
@@ -100,8 +109,8 @@ class FakeConn:
         return False
 
 
-def wallet_signal(member):
-    return types.SimpleNamespace(header=types.SimpleNamespace(message_type=4, fields={3: member}), body=("kdewallet",))
+def wallet_signal(member, body=("kdewallet",)):
+    return types.SimpleNamespace(header=types.SimpleNamespace(message_type=4, fields={3: member}), body=body)
 
 
 def ksecretd(state):
@@ -515,6 +524,19 @@ class AutoLock(Home):
         self.assertEqual(json.loads(self.wu.SESSION.read_text())["locks"], self.DEADLINE)     # what the page shows
         self.assertEqual(self.wu.timer_lock_time(), self.DEADLINE)                             # (--info, without it)
 
+    def test_a_wallet_unlocked_in_another_ksecretd_is_another_unlock(self):
+        """(a SteamVR restart ended the ksecretd it was unlocked in: the Wallet apps page counted
+        "open for" from that unlock, hours before the one in use)"""
+        self.wu.SESSION.write_text(json.dumps({"ksecretd": "100:5", "unlocked": 1.0, "locks": 2}))
+        with mock.patch.object(self.wu, "ksecretd_id", lambda: "100:5"):
+            self.wu.schedule_lock()                                # (the same one: an app reopening it)
+        self.assertEqual(json.loads(self.wu.SESSION.read_text())["unlocked"], 1.0)
+        self.timer[0] = None
+        with mock.patch.object(self.wu, "ksecretd_id", lambda: "200:9"):
+            self.wu.schedule_lock()
+        s = json.loads(self.wu.SESSION.read_text())
+        self.assertEqual((s["unlocked"], s["ksecretd"]), (self.NOW, "200:9"))
+
     def test_an_unlock_and_the_watcher_schedule_it_at_once(self):
         # (the second systemd-run found the first one's timer: "Wallet unlocked for ? hours")
         self.both_stopped = threading.Barrier(2)
@@ -549,6 +571,83 @@ class Watcher(Home):
                 wu.watch()
         self.assertTrue(state["locked"])           # the close became a lock in ksecretd
         self.assertEqual(scheduled, [1])           # and the open after it was seen
+
+
+class FrontEnd(Home):
+    """kwalletd6, what KWalletManager asks, kept in step with ksecretd: one started after an
+    unlock said the wallet was closed while Firefox and Signal used it (it counts only what was
+    opened through it)."""
+    def bus(self, state):
+        """Stand-in connections: kwalletd6 running unless state["kwalletd6"] is False, the wallet
+        open there if state["front"], open in ksecretd unless state["locked"]; opens recorded."""
+        def answer(message):
+            kind, what = message
+            if kind == "NameHasOwner":
+                return (state.get(what.rsplit(".", 1)[1], True),)
+            if what == "kwalletd6.isOpen":
+                return (state.get("front", False),)
+            if what == "kwalletd6.open":
+                state["front"] = True
+                state["opens"] += 1
+                return (123,)
+            if what == "isOpen":
+                return (not state.get("locked"),)
+            return ()
+        made = []
+
+        def bus():
+            made.append(FakeConn(answer))
+            return made[-1]
+        return bus, made
+
+    def test_it_opens_the_wallet_in_kwalletd6_only_when_kwalletd6_says_closed(self):
+        wu = wallet_unlock(self.home)
+        for state, opens in (({}, 1),                              # running, behind: opened there
+                             ({"front": True}, 0),                 # in step already
+                             ({"kwalletd6": False}, 0),            # not running: not started for this
+                             ({"locked": True}, 0)):               # locked: nothing to show open
+            state["opens"] = 0
+            bus, made = self.bus(state)
+            front = wu.FrontEnd()
+            with mock.patch.object(wu, "bus", bus), contextlib.redirect_stdout(io.StringIO()):
+                front.sync()
+                front.sync()                                       # (once: then it's in step)
+            self.assertEqual(state["opens"], opens, state)
+            if opens:
+                self.assertIs(front.conn, made[1])                 # (its handle's connection, kept)
+                self.assertTrue(front.ours())
+
+    def test_the_watcher_catches_kwalletd6_starting_and_its_own_open_isnt_an_apps(self):
+        """KWalletManager starting kwalletd6 after the unlock: the watcher opens the wallet there,
+        and the walletOpened that causes doesn't move the auto-lock; an app's later open does."""
+        wu = wallet_unlock(self.home)
+        state, scheduled = {"opens": 0, "kwalletd6": False}, []
+        bus, made = self.bus(state)
+        started = wallet_signal("NameOwnerChanged", ("org.kde.kwalletd6", "", ":1.9"))
+        listening = FakeConn(lambda m: (), [started, wallet_signal("walletOpened")])
+
+        def buses():
+            if not made:
+                made.append(listening)
+                return listening
+            return bus()
+        received = listening.receive
+
+        def receive(timeout=None):
+            msg = received(timeout)
+            if msg is started:
+                state["kwalletd6"] = True
+            return msg
+        listening.receive = receive
+        with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
+                mock.patch.multiple(wu, bus=buses, broker=lambda: None, schedule_lock=lambda: scheduled.append(1) or "4"):
+            with self.assertRaises(Done):
+                wu.watch()
+        self.assertEqual(state["opens"], 1)
+        self.assertEqual(scheduled, [])                            # (our open: the lock stays put)
+        self.assertIn({"type": "signal", "sender": "org.freedesktop.DBus", "interface": "org.freedesktop.DBus",
+                       "member": "NameOwnerChanged", "path": "/org/freedesktop/DBus", "arg0": "org.kde.kwalletd6"},
+                      [m[1] for m in listening.sent if m[0] == "AddMatch"])
 
 
 class Broker(Home):
