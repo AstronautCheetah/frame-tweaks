@@ -11,6 +11,11 @@
   bug, not Frame Tweaks'. Reinstall Desktop Recovery (↻) to get the watch.
 
 ### For pack authors
+- **`dev/fresh-install.sh`: a fresh install without touching yours.** It runs the one-liner (from
+  GitHub, a chosen release, or your clone as it is) in a throwaway home inside a sandbox, and
+  opens the window on your desktop: a dry run unless you pass `--real`. Your home, wallet, user
+  services, Homebrew, Flatpaks, other processes and the Frame's own network services are out of
+  its reach (CONTRIBUTING.md, "Trying a change").
 - **`dev/test-tweaks.sh` stands in for `pgrep` and `pkill`:** nothing runs in its throwaway home.
   The real ones saw this machine's desktop, so a tweak starting something in desktop mode as it
   installs started it in the real one.

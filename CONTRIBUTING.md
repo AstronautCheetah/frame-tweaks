@@ -135,6 +135,14 @@ A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
   language chosen in ⚙, a pack trusted or turned off, hidden rows): add `HOME=$(mktemp -d)` to
   keep even that out of your own settings. For extra safety, put a stand-in `konsole` first on
   your `PATH` (the window runs installs in Konsole).
+- **A fresh install, as a new user gets it**, without touching yours: `dev/fresh-install.sh`
+  runs the one-liner in a throwaway home inside a sandbox (bubblewrap and pasta, both on
+  SteamOS), and its window opens on your desktop. In the sandbox your home, wallet, systemd user
+  services, Homebrew, Flatpaks and other processes are out of sight, and so are the Frame's own
+  network services (SteamVR's dashboard); it's a dry run unless you pass `--real`. `--from
+  checkout` installs your clone as it is now (`--from v0.6.9`: that release), `--reuse-pyqt`
+  saves downloading the window's PyQt6 each time, and `--keep` keeps the home (`--again DIR`
+  opens its window again). `dev/fresh-install.sh --help` has the rest.
 - **On a Frame:** `./install.sh install ID` in your clone installs your copy of the tweak, and
   `./install.sh status ID` checks it. (On a PC it installs too, for real, into your home folder,
   and the Homebrew ones and Battery charge limit ask for sudo: use `dev/test-tweaks.sh` there.) `./install.sh gui` and `./install.sh menu` point the
