@@ -3,11 +3,11 @@ title: Recline
 emoji: 🛋️
 category: VR environment
 tier: extras
-summary: Use VR lying down or reclined; one button makes your view level and forward
+summary: Use VR lying down or reclined; recentering makes your view level and forward
 what: >-
-  Lie back and keep playing. Press one button (or a controller shortcut) and the direction
-  you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything
-  back. It works for native apps on the Frame, and your hands move with you.
+  Lie back and keep playing. Recenter while lying back (SteamVR's own recenter) and the direction
+  you're looking becomes level and forward in VR, at a chosen eye height; recentering upright
+  puts everything back. It works for SteamVR apps, and your hands move with you.
 why: >-
   SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves
   you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR)
@@ -25,7 +25,7 @@ icon: {theme: go-down-skip}
 link:
   install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR pull --ff-only; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR; fi && ~/Recline-VR/install.sh
   uninstall: ~/.local/share/recline-vr/uninstall.sh && rm -rf ~/.local/share/recline-vr ~/Recline-VR
-  installed: [~/.local/share/recline-vr/bin/linuxarm64/recline_overlay, ~/.local/share/recline-vr/recline_overlay]
+  installed: ~/.local/share/recline-vr/uninstall.sh
   restart: steamvr
   readme: https://github.com/new-waifu/Recline-VR#readme
 changes: >-
@@ -44,7 +44,7 @@ undo: "Uncheck it, or `./install.sh uninstall recline`: Recline-VR's own uninsta
 # Recline
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Lie back and keep playing. Press one button (or a controller shortcut) and the direction you're looking becomes level and forward in VR, at a chosen eye height; Reset puts everything back. It works for native apps on the Frame, and your hands move with you.
+Lie back and keep playing. Recenter while lying back (SteamVR's own recenter) and the direction you're looking becomes level and forward in VR, at a chosen eye height; recentering upright puts everything back. It works for SteamVR apps, and your hands move with you.
 
 **Why on a Steam Frame:** SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes.
 <!-- /generated:intro -->
@@ -66,26 +66,26 @@ installs, and doesn't pin, check or change what they install.
   options stay in `~/.config/recline-vr`.
 
 ## Use
-- **The Recline panel** in the SteamVR dashboard: *Recline recenter*, *Reset to normal*,
-  rotation (*Full* or *Level only*) and eye height.
-- **Controller shortcuts** (right controller, hold grip + trigger + bumper): **Y** reclines,
-  **X** resets, **A** shows the panel. They work while a game runs, but not while the
-  dashboard is open. Change them from the panel (*Edit controller bindings*).
+- **Recenter while lying back:** with *Recline on SteamVR's recenter when tilted over* (on in
+  new installs), SteamVR's own recenter reclines you, and recentering upright undoes it.
+- **The Recline panel** in the SteamVR dashboard: *Recline recenter*, *Reset to normal* and
+  its options; *Edit controller bindings* sets its controller shortcuts.
 - **It undoes itself** when you sit up, get up, move away or take the headset off, because
   SteamVR's boundary is only right without it. The recline is never kept across SteamVR
   restarts.
-- **Command line:** `~/.local/share/recline-vr/bin/linuxarm64/reclinectl status` (also `recenter`,
-  `reset`; before Recline-VR 1.3 it was `~/.local/share/recline-vr/reclinectl`).
+- **Command line:** `reclinectl status` (also `recenter`, `reset`).
 
-Recline-VR's [README](https://github.com/new-waifu/Recline-VR#readme) describes every panel option.
+Recline-VR's [README](https://github.com/new-waifu/Recline-VR#using-it) has the rest: every panel
+option, the default shortcuts and where `reclinectl` is. (They change with its releases, so
+they're not copied here.)
 
 ## Good to know
 - **The boundary** is drawn un-rotated, so it looks tilted while you're reclined.
 - **The room view** stays level through a small library Recline-VR adds to the Frame's camera
   service. If it can't load, the room view looks tilted while reclined
   (`~/.local/share/recline-vr/xrshim.log` says why).
-- **Not loading?** Check that SteamVR's safe mode hasn't turned it off (SteamVR settings →
-  Startup) and look for `[recline]` in `~/.local/share/Steam/logs/vrserver.txt`.
+- **Not loading?** Its panel's status line, or `reclinectl status`, says why; more in its
+  [Troubleshooting](https://github.com/new-waifu/Recline-VR#troubleshooting).
 - **Install and uninstall while SteamVR runs:** its panel can only be registered and
   unregistered then.
 

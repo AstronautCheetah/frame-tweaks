@@ -446,6 +446,8 @@ def check_link(link, where):
     if not (isinstance(paths, list) and paths and all(isinstance(x, str) and re.match(r"^(~/|/)\S", x) for x in paths)):
         errs.append(f"{where}: link.installed must be a path (or a list of them, any one will do) that "
                     "exists once it's installed, e.g. ~/frametop")
+    elif any(re.search(r"[*?[]", x) for x in paths):
+        errs.append(f"{where}: link.installed: a path, not a pattern (nothing is matched against it)")
     if "readme" in link and not (isinstance(link["readme"], str) and link["readme"].startswith("https://")):
         errs.append(f"{where}: link.readme must be an https:// address")
     if "restart" in link and link["restart"] != "steamvr":

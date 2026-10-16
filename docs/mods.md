@@ -292,7 +292,7 @@ its manifest's `link:` says what they'd do.
 link:
   install: curl -fsSL https://example.org/get.sh | bash     # its own install command
   uninstall: curl -fsSL https://example.org/uninstall.sh | bash   # optional
-  installed: [~/project, ~/.local/share/project]   # any of these existing means it's installed
+  installed: ~/.local/share/project/uninstall.sh   # a file its README names (a list: any of them)
   run: gtk-launch project-settings                 # optional: what the Run button starts
   readme: https://github.com/someone/project#readme   # its README, linked (not copied)
   restart: steamvr                                 # optional: SteamVR loads it only as it starts
@@ -303,10 +303,14 @@ run: {label: Open}                                 # the Run button's label, wit
   ask its own questions. `lib/link.sh` does the scripts' part. One thing differs from running
   them yourself: `xdg-open vrmonitor://…`, which SteamVR's `vrpathreg` runs to tell its monitor
   app (not on the Frame) about a new driver, does nothing instead of failing noisily.
-- **Status** is "installed" while any `installed` path exists. With `restart: steamvr` (a SteamVR
-  driver, say), a path that changed after SteamVR started means it isn't loaded yet, and an
-  uninstall after SteamVR started means SteamVR still runs it: either way the row offers
-  ⟳ Restart SteamVR until SteamVR has restarted.
+- **Status** is "installed" while any `installed` path exists. Name a file the project's README
+  documents and keeps from release to release (its uninstaller, a launcher it tells you to run),
+  not one inside its install: Recline-VR 1.3 moved its programs into a new folder, and a check
+  naming one of them read "not installed" until Frame Tweaks changed. A path, not a pattern.
+- With `restart: steamvr` (a SteamVR driver, say), an install by Frame Tweaks (or a change to the
+  path) after SteamVR started means it isn't loaded yet, and an uninstall after SteamVR started
+  means SteamVR still runs it: either way the row offers ⟳ Restart SteamVR until SteamVR has
+  restarted.
 - **Updates:** ↻ runs its installer again, which updates most projects; Frame Tweaks' own updates
   leave it alone (it updates its own way).
 - The other fields are as for any tweak; `changes`, `access` and `undo` describe what the

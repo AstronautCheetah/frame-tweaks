@@ -35,12 +35,16 @@ case $action in
     status)
         # restart: steamvr: SteamVR loads it only as it starts, so a SteamVR that started before
         # the install hasn't, and one that started before the uninstall still runs it (the
-        # installer window offers to restart it either way).
+        # installer window offers to restart it either way). The install: Frame Tweaks' record of
+        # it, rewritten by every install and ↻, or a newer change to the path. (Not the path's
+        # date alone: an installer that copies with cp -p keeps the date the file had in the
+        # project, often older than SteamVR.)
         restart=$(field restart)
         while IFS= read -r path; do
             path=${path/#\~/$HOME}
             [ -e "$path" ] || continue
-            [ "$restart" = steamvr ] && vr_started_before "$path" &&
+            [ "$restart" = steamvr ] &&
+                { vr_started_before "$HOME/.local/state/frame-tweaks/installed/$id" || vr_started_before "$path"; } &&
                 status_restart "$(t 'installed; restart SteamVR to load it')"
             status_ok "$(t "installed by its own installer (it updates its own way)")"
         done < <(field installed)

@@ -731,7 +731,8 @@ class LinkedProject(unittest.TestCase):
         (self.pack / "linked/README.md").write_text(LINKED.replace("  readme:", "  restart: steamvr\n  readme:"))
         self.trust()
         self.sh("install", "linked")
-        os.utime(self.home / "linked-project", (time.time() - 3600,) * 2)       # installed an hour ago
+        for f in (self.home / "linked-project", self.home / ".local/state/frame-tweaks/installed/linked"):
+            os.utime(f, (time.time() - 3600,) * 2)                          # installed an hour ago
         self.stub("pgrep", '[ "$*" = "-xo vrserver" ] && echo 4242 || exit 1')
         for started, says in ((7200, "installed; restart SteamVR to load it"),
                               (60, "installed by its own installer")):
@@ -747,6 +748,18 @@ class LinkedProject(unittest.TestCase):
             self.assertEqual(r.returncode, code, r.stdout)          # (not installed, either way)
         self.sh("install", "linked")                                    # (installing again forgets it)
         self.assertFalse((self.home / ".local/state/frame-tweaks/unloaded/linked").exists())
+
+    def test_an_install_whose_file_keeps_an_old_date_still_asks_for_a_restart(self):
+        """An installer that copies with cp -p keeps a file's date from the project (Recline-VR's
+        uninstall.sh): older than SteamVR, it read as loaded already. The install is Frame Tweaks'
+        own record of it."""
+        (self.pack / "linked/README.md").write_text(LINKED.replace("  readme:", "  restart: steamvr\n  readme:"))
+        self.trust()
+        self.sh("install", "linked")
+        os.utime(self.home / "linked-project", (time.time() - 86400,) * 2)     # its date: a day old
+        self.stub("pgrep", '[ "$*" = "-xo vrserver" ] && echo 4242 || exit 1')
+        self.stub("ps", "echo 60")                                           # SteamVR: started a minute ago
+        self.assertIn("installed; restart SteamVR to load it", self.sh("status", "linked").stdout)
 
     def test_vrmonitor_links_go_nowhere(self):
         """SteamVR's vrpathreg runs xdg-open vrmonitor://driverinstalled as a driver is registered;
