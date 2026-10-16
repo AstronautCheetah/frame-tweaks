@@ -5,7 +5,7 @@ choices are kept in ~/.config/frame-tweaks/installer/window.json; the language i
 the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
 import html
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QRadioButton,
                              QScrollArea, QVBoxLayout, QWidget)
 
@@ -51,7 +51,7 @@ class Preferences(QWidget):
         body = QWidget()
         rows = QVBoxLayout(body)
         rows.setSpacing(10)
-        scroll = QScrollArea()
+        self.scroll = scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(body)
@@ -205,6 +205,13 @@ class Preferences(QWidget):
         rows.addWidget(box)
         return box
 
+    def ask(self, box):
+        """Show a question box and scroll it into view: it opens below its button, which may be at
+        the bottom of the page (Uninstall Frame Tweaks…), so it was easy to miss. (Once the page
+        has laid it out: its place isn't known until then.)"""
+        box.show()
+        QTimer.singleShot(0, lambda: self.scroll.ensureWidgetVisible(box, 0, 16))
+
     def installed(self):
         """The tweaks that are (or may be) installed: any whose status isn't known yet counts."""
         state = getattr(self.window, "state", {}) or {}
@@ -219,7 +226,7 @@ class Preferences(QWidget):
             return
         self.leftovers.text.setText(_("Delete these settings? Their tweaks aren't installed.") + "\n\n" + "\n".join(
             f"{sft.translated(c)['title']}: {p}" for c, p in self.found))
-        self.leftovers.show()
+        self.ask(self.leftovers)
 
     def delete_leftovers(self):
         failed = []
@@ -245,7 +252,7 @@ class Preferences(QWidget):
         lines.append(_("Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); "
                        "this window closes, and a terminal shows each step.").format(folder=sft.REPO))
         self.leaving.text.setText("\n".join(lines))
-        self.leaving.show()
+        self.ask(self.leaving)
 
     def uninstall_self(self):
         self.leaving.hide()
@@ -281,7 +288,7 @@ class Preferences(QWidget):
             self.going_back.text.setText(_("You're on {version}, a test release. Stay on it until the next stable "
                                            "release is out, or go back to the newest stable release now?").format(
                                                version=current))
-            self.going_back.show()
+            self.ask(self.going_back)
         else:
             self.window.say(_("Saved."), good=True)
 
