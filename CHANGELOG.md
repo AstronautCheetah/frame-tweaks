@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.6 (2026-10-16)
 
 ### Fixed
 - **The Packs page's tweak lists no longer tag Dictation, Screen snip and Android Mirror sudo
