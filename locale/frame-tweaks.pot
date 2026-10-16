@@ -4197,6 +4197,10 @@ msgid "Unlock wallet"
 msgstr ""
 
 #: packs/core/wallet/wallet-unlock
+msgid "Waiting for the wallet password dialog that's already open…"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
 msgid "Wallet already unlocked."
 msgstr ""
 

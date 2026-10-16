@@ -280,6 +280,39 @@ def unlock(conn):
     return False
 
 
+# One password dialog at a time (ask_once): held while one is open; when one was last cancelled.
+ASKING = Path(f"/run/user/{os.getuid()}/wallet-unlock.lock")
+CANCELLED = Path(f"/run/user/{os.getuid()}/wallet-unlock.cancelled")
+
+
+def ask_once(conn):
+    """Ask for the password unless a dialog is open already. A request meanwhile (Firefox
+    started twice, a git push beside a gh call, ksecretd's prompt replaced) waits for that one
+    and takes its answer instead of opening another dialog. Returns "unlocked" (this dialog
+    unlocked it), "already" (another one did) or None (still locked: a dialog was cancelled)."""
+    import fcntl
+    since = time.time()
+    with open(ASKING, "a") as held:
+        try:
+            fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(_("Waiting for the wallet password dialog that's already open…"), file=sys.stderr, flush=True)
+            fcntl.flock(held, fcntl.LOCK_EX)
+            if not is_locked(conn):
+                return "already"
+            try:
+                if CANCELLED.stat().st_mtime >= since:   # cancelled while this one waited: no again
+                    return None
+            except OSError:
+                pass
+        if not is_locked(conn):
+            return "already"
+        if unlock(conn):
+            return "unlocked"
+        CANCELLED.touch()
+        return None
+
+
 LOCK_CONF = Path.home() / ".config/frame-tweaks/wallet.conf"
 
 
@@ -464,7 +497,9 @@ def main():
             sys.exit(__doc__)
         elif not is_locked(conn):
             print(_("Wallet already unlocked."))
-        elif unlock(conn):
+        elif (asked := ask_once(conn)) == "already":
+            print(_("Wallet already unlocked."))
+        elif asked:
             hours = schedule_lock()
             print(_("Wallet unlocked; it locks again in {hours} h.").format(hours=hours) if hours else
                   _("Wallet unlocked (auto-lock is off)."))

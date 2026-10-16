@@ -29,6 +29,11 @@
   template to be extracted again.
 
 ### Fixed
+- **One wallet password dialog at a time:** Firefox started twice, a link opening it while you
+  start it, or a git push beside a `gh` call each opened their own "Unlock wallet" dialog while
+  the wallet was locked. Now the later ones wait for the dialog that's open and take its answer
+  (unlocked, or cancelled without asking again). The wallet's README also explains why
+  KWalletManager can show the wallet closed while it's open.
 - **Speech engine installs on SteamOS 0.5.6:** 0.5.6 removed speech-dispatcher (and Orca), and
   installing Speech, or Screen snip + Narrate with it, failed copying its settings. Speech now
   installs as Narrate's voice alone there, and takes out the speech-dispatcher setup it made
