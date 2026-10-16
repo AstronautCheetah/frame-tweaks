@@ -93,6 +93,39 @@
   window, as the watcher's always did.
 - **The wallet's install message** no longer says the wallet's password is empty when you've set
   one.
+- **The installer window follows packs that change under it:** a pack edited or turned off
+  outside the window, then the Packs page or Check for updates (or a pack's Update still running
+  when you went Back), left the list with tweaks it no longer had. Checking them again showed the
+  error page and left their rows "checking…" for good, and Run on one did the same. The list now
+  follows the packs whenever they're read again, the Packs page reads them as it opens rather than
+  at every click, and a pack's update that ends after you went Back is finished by the window. A
+  row whose tweak went (its folder moved by an update, say) says "not available any more".
+- **Web links open with a broken app entry around:** a desktop entry linking to an app since
+  removed stopped every web link (READMEs, a tweak's page, Packs, the bug form) from opening when
+  the default browser couldn't be used. Such entries are left out, and a link the browser helper
+  can't open opens the usual way.
+- **"↑ X available · Update" goes when it's no longer so:** it stayed after the tweak was updated
+  or uninstalled, and its Update then installed it again. It goes when nothing newer is found,
+  when the tweak isn't installed, and once ↻ or Apply changes has run.
+- **Every row's buttons fit the window:** it could be made narrower than its rows, which cut off
+  Hide, ↻, ⓘ and then Run (below about 930 pixels wide; 970 in Spanish). It's never narrower than
+  its widest row now, and a long Run button (⟳ Restart SteamVR) isn't squeezed below its text.
+- **The installer window's pages:** a tweak's page shows its status as the check comes in (it
+  said "checking…" until opened again); Ctrl+wheel makes a README's text larger or smaller (it
+  did nothing); a settings action opened again while it runs (Charge to 100% once, the Speech
+  engine's Apply) says how it goes, where it said "Working…" for good; removing a pack takes it
+  out of the "N pack updates" notice; a command in a list item (Android Mirror's
+  `adb pair <ip>:<pairing-port> <code>`) shows `<ip>`, not `&lt;ip&gt;`; and the error page's Back
+  closes the page that was open, which kept the window from following the keyboard's language.
+- **Status checks:** one that ends some other way (127: a command missing) says "status check
+  failed (exit 127)", a warning, where it said "not installed" for a row counted as installed.
+  Refresh drops the last round's checks that haven't started (three refreshes ran 75 status
+  scripts), closing the window while it checks no longer fills window.log with errors, and a
+  check that fails in the window is said on its row instead of the error page.
+- **Smaller fixes:** why a tweak isn't needed follows the window's language; a known issue of a
+  tweak a pack brings later is looked up too (its page said "Checking for a newer release…" for
+  good); and a second launch that finds the window stuck stops only the window, not an editor
+  that has its file open.
 
 ### For pack authors
 - **`status.sh` exits 1 for "not installed" through `status_missing` (or `status_unload`):** a
@@ -114,6 +147,10 @@
   `%%`): `dev/i18n.py import` no longer refuses "1% del" in a tweak's manifest text, and the tests
   now catch "100 % de" (a printf conversion) in a formatted one. Plural forms given for a text
   without a plural are reported instead of stopping the import.
+- **`tests/test_gui_window.py`** builds the installer window as it opens, with nothing of the
+  machine's run (statuses from a stand-in, no update checks, its settings and packs in a throwaway
+  folder), for what only the real window shows: its list as packs change, its narrowest width,
+  its error page, closing it.
 
 ## 0.6.9 (2026-10-16)
 

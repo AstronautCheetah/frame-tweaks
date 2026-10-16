@@ -117,7 +117,10 @@ def usable(app_id):
     path = desktop_file(app_id) if app_id else None
     if not path:
         return False
-    keys = entry(path)
+    try:
+        keys = entry(path)
+    except OSError:                                    # (unreadable: not one to use)
+        return False
     cmd = keys.get("Exec", "")
     if "appstream:" in cmd or keys.get("Hidden") == "true":
         return False
@@ -144,7 +147,13 @@ def installed_browsers():
                 found += [a for a in line.split("=", 1)[1].split(";") if a and a not in found]
     for d in data_dirs():
         for f in sorted((Path(d) / "applications").glob("*.desktop")):
-            if f.name not in found and "x-scheme-handler/https" in entry(f).get("MimeType", ""):
+            if f.name in found or not f.is_file():         # (a link to an app since removed, say)
+                continue
+            try:
+                takes = "x-scheme-handler/https" in entry(f).get("MimeType", "")
+            except OSError:                                # (one it can't read: the others still count)
+                continue
+            if takes:
                 found.append(f.name)
     return [a for a in found if usable(a)]
 

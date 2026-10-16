@@ -28,6 +28,10 @@ msgid "About Frame Tweaks"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "Another action is still running: try again once it's done."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr ""
 
@@ -107,6 +111,11 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Couldn't restart SteamVR; restart it from its menu, or reboot."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Couldn't start {tweak}: its files aren't where they were when the list was read. Close and reopen Frame Tweaks."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -460,6 +469,10 @@ msgstr ""
 msgid "needs: %s"
 msgstr ""
 
+#: gui/frame-tweaks-gui.py
+msgid "not available any more"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
@@ -472,8 +485,16 @@ msgstr ""
 msgid "status check failed"
 msgstr ""
 
+#: gui/frame-tweaks-gui.py
+msgid "status check failed (exit {code})"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py install.sh
 msgid "status check failed: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "status check failed: {error}"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py

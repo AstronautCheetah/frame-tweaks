@@ -24,7 +24,7 @@ from pathlib import Path
 from PyQt6 import sip
 from PyQt6.QtCore import QEvent, QObject, QPoint, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
-from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontMetrics, QIcon, QImage
+from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontInfo, QFontMetrics, QIcon, QImage
 from PyQt6.QtWidgets import (QAbstractButton, QAbstractSlider, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
                              QVBoxLayout, QWidget)
@@ -135,7 +135,8 @@ QRadioButton::indicator:checked {{ image: url({_BOX}/radio-checked.svg); }}
 
 RESTART = 3      # a status code of the window's own: installed, but SteamVR loads it only as it starts
 UNLOAD = 4       # and: uninstalled, but SteamVR runs what it loaded until it restarts
-GONE = (1, UNLOAD)   # the codes of a tweak that isn't installed
+UNAVAILABLE = 256    # and: its pack or folder went since the list was read (no program exits with 256)
+GONE = (1, UNLOAD, UNAVAILABLE)   # the codes of a tweak that isn't installed
 
 
 def status(cid):
@@ -143,7 +144,11 @@ def status(cid):
     RESTART (exit 2: installed) or UNLOAD (exit 1: uninstalled), waiting for a SteamVR restart.
     A status.sh that stops without saying "missing" or "restart" (a command in it failed) didn't
     find the tweak missing: installed by Frame Tweaks (its record), or with an exit code that
-    isn't 0, 1 or 2, it's 2, "status check failed" (./install.sh status_of has the same rule)."""
+    isn't 0, 1 or 2, it's 2, "status check failed" (./install.sh status_of has the same rule).
+    UNAVAILABLE: its pack or folder went since the window read the list."""
+    c = component(cid)
+    if c is None or sft.script(c, "status") is None:     # (its pack or folder went since the list was read)
+        return UNAVAILABLE, _("not available any more")
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
         r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
@@ -162,7 +167,10 @@ def status(cid):
 
 def update_check(cid):
     """(installed, latest) when <id>/update-check.sh reports a newer upstream version, else None."""
-    script = component(cid)["dir"] / "update-check.sh"
+    c = component(cid)
+    script = c["dir"] / "update-check.sh" if c else None
+    if script is None or not script.is_file():           # (its pack or folder went since the list was read)
+        return None
     try:
         out = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=20).stdout.split()
     except (OSError, subprocess.TimeoutExpired):
@@ -270,14 +278,15 @@ HTML_TAGS = {"a", "b", "i", "em", "strong", "code", "kbd", "img", "p", "br", "su
 
 
 def in_prose(text, fn, blocks=False):
-    """Markdown with fn applied to what isn't code: ``` blocks are left as they are; and, unless
-    blocks (fn given all the text between them), 4-space-indented lines and `inline code` too."""
+    """Markdown with fn applied to what isn't code: ``` blocks are left as they are (indented ones
+    too, in a list item); and, unless blocks (fn given all the text between them), 4-space-indented
+    lines and `inline code` too."""
     def line(l):
         if l.startswith("    "):
             return l
         return "".join(p if p.startswith("`") else fn(p) for p in re.split(r"(`[^`\n]*`)", l))
-    return "".join(b if b.startswith("```") else fn(b) if blocks else "\n".join(map(line, b.split("\n")))
-                   for b in re.split(r"(^```.*?^```)", text, flags=re.S | re.M))
+    return "".join(b if b.lstrip(" \t").startswith("```") else fn(b) if blocks else "\n".join(map(line, b.split("\n")))
+                   for b in re.split(r"(^[ \t]*```.*?^[ \t]*```)", text, flags=re.S | re.M))
 
 
 def html_attrs(tag):
@@ -301,6 +310,8 @@ def readme_browser(text, comp):
     view = QTextBrowser()
     view.setOpenLinks(False)
     view.anchorClicked.connect(lambda u: follow_link(u.toString()) if u.scheme() else to_heading(view, u.fragment()))
+    view.zoomer = _Zoom(view)                       # (Ctrl+wheel)
+    view.viewport().installEventFilter(view.zoomer)
     view.document().setDefaultStyleSheet(
         "a { color: #7fb2e5; } code { background: #1c232a; } pre { background: #1c232a; }")
     view.setMarkdown(readme_links(plain_markdown(text), comp))     # (no HTML it can't place: plain_markdown)
@@ -336,6 +347,34 @@ def page_area(view):
     return area
 
 
+class _Zoom(QObject):
+    """(readme_browser's: Ctrl+wheel over a README makes its text larger or smaller: zoom.)"""
+    def __init__(self, view):
+        super().__init__(view)
+        self.view = view
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Wheel and ev.modifiers() & Qt.KeyboardModifier.ControlModifier \
+                and not sip.isdeleted(self.view):
+            zoom(self.view, ev.angleDelta().y())
+            return True
+        return False
+
+
+def zoom(view, delta):
+    """A README's text larger (delta > 0) or smaller by 2 px a wheel notch (120), from 10 to 40 px.
+    Its own style sheet does it: QTextEdit's zoom changes the font the window's style sheet sets
+    (14 px), so it changed nothing. A README shown whole is fitted to its new height."""
+    view.zoom_delta = getattr(view, "zoom_delta", 0) + delta
+    notches = int(view.zoom_delta / 120)            # (a touchpad's small steps add up to one)
+    if not notches:
+        return
+    view.zoom_delta -= notches * 120
+    view.setStyleSheet(f"font-size: {max(10, min(40, QFontInfo(view.font()).pixelSize() + 2 * notches))}px;")
+    if getattr(view, "fit", None):
+        view.fit()
+
+
 _Step = QAbstractSlider.SliderAction
 PAGE_KEYS = {Qt.Key.Key_Up: _Step.SliderSingleStepSub, Qt.Key.Key_Down: _Step.SliderSingleStepAdd,
              Qt.Key.Key_PageUp: _Step.SliderPageStepSub, Qt.Key.Key_PageDown: _Step.SliderPageStepAdd,
@@ -346,7 +385,7 @@ PAGE_KEYS = {Qt.Key.Key_Up: _Step.SliderSingleStepSub, Qt.Key.Key_Down: _Step.Sl
 class _FitHeight(QObject):
     """(full_height's: a new width, a new height; the wheel and the keys that scroll, over it or
     in it, scroll the page around it, and a link Tab moves to is scrolled into view there. Ctrl+
-    wheel still zooms the README, and a sideways scroll moves a wide picture or code line.)"""
+    wheel still zooms the README (_Zoom), and a sideways scroll moves a wide picture or code line.)"""
     def __init__(self, view):
         super().__init__(view)
         self.view = view
@@ -446,17 +485,28 @@ def follow_link(url):
     if url.startswith("copy:"):
         QApplication.clipboard().setText(url[5:])
         QToolTip.showText(QCursor.pos(), _("Link copied"))
-    elif url.startswith(("https:", "http:")) and (r := browser.launch(url)):
+    elif url.startswith(("https:", "http:")) and (r := opened(browser.launch, url)):
         note, proc, handoff = r
         QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
         if getattr(proc, "warning", ""):                # (the default browser isn't one: what to set)
             window_say(proc.warning)
         if handoff:                                    # the browser runs there already: did it answer?
             QTimer.singleShot(8000, lambda: browser.still_stuck(proc, url) and stuck_link(url))
-    elif url.startswith("file:") and (note := browser.open_path(url)):
+    elif url.startswith("file:") and (note := opened(browser.open_path, url)):
         QToolTip.showText(QCursor.pos(), note)
     else:
         QDesktopServices.openUrl(QUrl(url))
+
+
+def opened(how, url):
+    """how(url) (lib/browser.py's), or None when it couldn't, or tripped over something of this
+    machine's (a desktop entry it can't read, say): then the link opens the usual way instead of
+    not at all. (Noted in its log, which the diagnostics report has.)"""
+    try:
+        return how(url)
+    except Exception as e:
+        browser.log(f"couldn't open {url!r}: {type(e).__name__}: {e}")
+        return None
 
 
 def stuck_link(url):
@@ -523,7 +573,12 @@ def status_text(code_text):
     if code_text is None:
         return _("checking…"), "checking"
     code, text = code_text
-    return ({0: "✔ " + text, 2: "! " + text, RESTART: "⟳ " + text, UNLOAD: "⟳ " + text}.get(code, "· " + _("not installed")),
+    if code not in (0, 1, 2, RESTART, UNLOAD, UNAVAILABLE):
+        # (status.sh ended some other way, a command missing under set -e, say: installed, as
+        # ./install.sh counts it, and worth a look)
+        return "! " + _("status check failed (exit {code})").format(code=code), "warn"
+    return ({0: "✔ " + text, 2: "! " + text, RESTART: "⟳ " + text, UNLOAD: "⟳ " + text,
+             UNAVAILABLE: "· " + text}.get(code, "· " + _("not installed")),
             {0: "ok", 2: "warn", RESTART: "warn", UNLOAD: "warn"}.get(code, "missing"))
 
 
@@ -636,7 +691,6 @@ class Details(QWidget):
             link_label(self.issue_label)
             self.show_issue(window.latest.get(comp["id"], "checking"))
 
-        text, kind = status_text(state)
         rel, url = comp["source"].split("|", 1) if "|" in comp["source"] else ("", "")
         rel = _(rel) if rel else rel                        # (uses, from, …: dev/i18n.py collects them)
         facts = [(_("What it is"), md_text(comp["what"])),
@@ -662,8 +716,8 @@ class Details(QWidget):
             facts.append((_("Source"), f"{html.escape(rel)} <a style='color:#7fb2e5' href='{url}'>{url}</a>"))
         if comp["deps"]:
             facts.append((_("Needs"), _("{tweaks} (installed automatically)").format(tweaks=", ".join(comp["deps"]))))
-        colour = {"ok": "#5cc77a", "warn": "#e0b33a"}.get(kind, "#9aa6b2")
-        facts.append((_("Status"), f"<span style='color:{colour}'>{html.escape(text)}</span>"))
+        self.status_at = len(facts)                         # (show_state puts a new one there)
+        facts.append((_("Status"), ""))
         if comp["official"]:
             facts.append((_("Pack"), html.escape(_(comp["pack"]))))
             facts.append((_("Documentation"), f"<a style='color:#7fb2e5' href='{GITHUB}/packs/{comp['pack_dir'].name}/{comp['id']}'>"
@@ -674,11 +728,9 @@ class Details(QWidget):
                           + "</span>" + (" " + _("(used instead of {other}'s)").format(other=html.escape(comp["replaced"]))
                                          if comp["replaced"] else "")
                           + f"<br><a style='color:#7fb2e5' href='{comp['readme'].as_uri()}'>{html.escape(str(comp['dir']))}</a>"))
-        summary = link_label(QLabel())
-        summary.setText(with_copy("<table cellspacing=6>" + "".join(
-            f"<tr><td style='color:#6b7783;padding-right:12px' valign=top><b>{k}</b></td><td>{v}</td></tr>"
-            for k, v in facts) + "</table>"))
-        summary.setWordWrap(True)
+        self.facts, self.summary = facts, link_label(QLabel())
+        self.summary.setWordWrap(True)
+        self.show_state(state)
 
         try:
             text = manifest.front_matter(comp["readme"].read_text())[1]
@@ -693,7 +745,7 @@ class Details(QWidget):
         rows.setContentsMargins(0, 0, 0, 0)
         if self.issue_label is not None:
             rows.addWidget(self.issue_label)
-        rows.addWidget(summary)
+        rows.addWidget(self.summary)
         self.readme = full_height(readme_browser(text, comp))
         rows.addWidget(self.readme)
         rows.addStretch(1)
@@ -702,6 +754,16 @@ class Details(QWidget):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scroll.setWidget(body)
         lay.addWidget(self.scroll, 1)
+
+    def show_state(self, state):
+        """The table of facts, with this status ((code, text) as the window keeps it; None while
+        it's being checked): the window gives it each new one, as it does the tweak's row."""
+        text, kind = status_text(state)
+        colour = {"ok": "#5cc77a", "warn": "#e0b33a"}.get(kind, "#9aa6b2")
+        self.facts[self.status_at] = (_("Status"), f"<span style='color:{colour}'>{html.escape(text)}</span>")
+        self.summary.setText(with_copy("<table cellspacing=6>" + "".join(
+            f"<tr><td style='color:#6b7783;padding-right:12px' valign=top><b>{k}</b></td><td>{v}</td></tr>"
+            for k, v in self.facts) + "</table>"))
 
     def show_issue(self, latest):
         """latest: newest upstream tag, "checking", or None when it couldn't be fetched."""
@@ -723,6 +785,27 @@ class Details(QWidget):
             text += ("<br><span style='color:#9aa6b2'>"
                      + _("{version} is still the latest release.").format(version=html.escape(latest)) + "</span>")
         self.issue_label.setText(with_copy(text))
+
+
+def action_command(a):
+    """A settings action's command (a: one of its manifest's settings: actions)."""
+    return ["bash", str(a["dir"] / a["script"]), *a.get("args", [])]
+
+
+def running_action(window):
+    """The settings action running in the background, or None (one at a time: SettingsSection.act)."""
+    return next((p for p in window.findChildren(QProcess, "action")
+                 if p.state() != QProcess.ProcessState.NotRunning), None)
+
+
+def action_said(proc):
+    """How a settings action that ended went: its last line of output, or "Didn't work: …" with it."""
+    lines = [re.sub(r"\x1b\[[0-9;]*m", "", l).strip() for l in
+             bytes(proc.readAll()).decode(errors="replace").splitlines()]
+    lines = [l for l in lines if l and "#" not in l[:3]]          # (not curl's progress bar)
+    ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
+    last = lines[-1] if lines else _("Done.")
+    return last if ok else _("Didn't work: %s") % last
 
 
 class SettingsSection(QWidget):
@@ -797,6 +880,7 @@ class SettingsSection(QWidget):
             lay.addSpacing(10)
             lay.addLayout(row)
             self.actions.append((a, b, note))
+        self.commands = {"\0".join(action_command(a)) for a in self.spec["actions"]}
         self.show_actions()
 
     def show_actions(self):
@@ -809,36 +893,40 @@ class SettingsSection(QWidget):
     def act(self, a):
         """Run the action's script in the background (a download can take a while); its last line
         of output says how it went. It's the window's process (going Back mustn't stop it), so
-        one at a time: a page opened again meanwhile doesn't start a second."""
-        cmd = ["bash", str(a["dir"] / a["script"]), *a.get("args", [])]
+        one at a time: a page opened again meanwhile doesn't start a second, but says how the one
+        running goes."""
+        cmd = action_command(a)
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", " ".join(cmd))
             return
-        self.notice.setText(_("Working… (a download can take a minute)"))
-        if any(p.state() != QProcess.ProcessState.NotRunning for p in self.window().findChildren(QProcess, "action")):
+        running = running_action(self.window())
+        if running is not None and running.property("command") != "\0".join(cmd):
+            self.notice.setText(_("Another action is still running: try again once it's done."))
             return
+        if running is None:
+            running = QProcess(self.window())
+            running.setObjectName("action")
+            running.setProperty("command", "\0".join(cmd))       # (what a page opened again looks for)
+            running.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+            running.finished.connect(lambda *_args, p=running: (p.setProperty("said", action_said(p)), p.deleteLater()))
+            running.start(cmd[0], cmd[1:])
+        self.follow(running)
+
+    def follow(self, proc):
+        """Working… on this section's page until proc, its action, ends (started here, or from a
+        page closed since); then how it went (action_said)."""
+        self.notice.setText(_("Working… (a download can take a minute)"))
         for _a, b, _note in self.actions:
             b.setEnabled(False)
-        proc = QProcess(self.window())
-        proc.setObjectName("action")
-        proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
 
         def done(*_args):
-            proc.deleteLater()
             if sip.isdeleted(self):             # (its page was closed meanwhile)
                 return
-            lines = [re.sub(r"\x1b\[[0-9;]*m", "", l).strip() for l in
-                     bytes(proc.readAll()).decode(errors="replace").splitlines()]
-            lines = [l for l in lines if l and "#" not in l[:3]]          # (not curl's progress bar)
-            ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
-            last = lines[-1] if lines else _("Done.")
-            self.notice.setText(last if ok else _("Didn't work: %s") % last)
+            self.notice.setText(proc.property("said") or _("Done."))
             for _a, b, _note in self.actions:
                 b.setEnabled(True)
             self.show_actions()
         proc.finished.connect(done)
-        proc.start(cmd[0], cmd[1:])
-        self.action_proc = proc
 
     def show_choices(self):
         for (key, _text), (b, value) in self.buttons.items():
@@ -900,6 +988,10 @@ class SettingsPage(QWidget):
             self.sections.append(SettingsSection(other, self.notice))
             col.addWidget(self.sections[-1])
         col.addStretch(1)
+        running = running_action(window)         # (one of its actions, started from this page closed since)
+        for section in self.sections:
+            if running is not None and running.property("command") in section.commands:
+                section.follow(running)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -914,6 +1006,8 @@ PAGES = {"wallet": (N_("🔑 Wallet apps"), WalletApps)}         # (label: trans
 
 
 class Window(QWidget):
+    pack_job = None         # a pack being added or updated from a link, (future, done, saying): finish_pack_job
+
     def __init__(self):
         super().__init__()
         # The build this window runs: the checkout can change under it (an update in a terminal,
@@ -932,8 +1026,8 @@ class Window(QWidget):
         self.pool = ThreadPoolExecutor(max_workers=4)
         self.futures = {}
         self.latest = {}              # id -> newest upstream tag (known-issue rows), None if unknown
-        self.latest_futures = {cid: self.pool.submit(latest_release, i["latest"])
-                               for cid, i in KNOWN_ISSUES.items()}
+        self.latest_futures = {}
+        self.check_known_issues()
         self.details = None
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
         self.prefs = window_prefs()
@@ -1079,6 +1173,7 @@ class Window(QWidget):
         sft.SETTINGS = sft.settings_specs()
         KNOWN_ISSUES = {c["id"]: c["known_issue"] for c in components() if c["known_issue"]}
         self.rows = components()
+        sft.not_needed(self.rows, refresh=True)          # (why one isn't needed, as its needed.sh says: in the new language)
         self.build_ui()
         self.show_hidden.blockSignals(True)
         self.show_hidden.setChecked(showing)
@@ -1108,6 +1203,8 @@ class Window(QWidget):
 
     # ---- status, in the background ------------------------------------------------
     def refresh(self):
+        for fut in self.futures.values():            # (the last round's still waiting for a worker: not run as well)
+            fut.cancel()
         self.state = {}
         self.futures = {c["id"]: self.pool.submit(status, c["id"]) for c in self.rows}
         self.collecting()
@@ -1128,11 +1225,14 @@ class Window(QWidget):
         for cid, fut in list(self.latest_futures.items()):
             if fut.done():
                 del self.latest_futures[cid]
+                if fut.cancelled():                      # (the window closing)
+                    continue
                 self.latest[cid] = fut.result()
                 if getattr(self.details, "comp", {}).get("id") == cid:
                     self.details.show_issue(self.latest[cid])
         if self.self_update is not None and self.self_update.done():
-            newest, self.self_update = self.self_update.result(), None
+            newest = None if self.self_update.cancelled() else self.self_update.result()
+            self.self_update = None
             if newest:
                 self.show_newest(newest)
                 if self.update_state in ("check", "checking"):
@@ -1158,23 +1258,40 @@ class Window(QWidget):
             self.pack_check = None
             self.pack_updates = {p["dir"] for p in found}
             self.show_pack_updates()
+            self.follow_packs()                          # (it read the packs again: one changed outside, say)
             if isinstance(self.details, Packs):
                 self.details.build()
+        self.finish_pack_job()
+        shown = False
         for cid, fut in list(self.update_futures.items()):
             if fut.done():
                 del self.update_futures[cid]
-                if fut.result():
-                    self.updates[cid] = fut.result()
-                    self.show_status(cid)
+                found = None if fut.cancelled() or fut.exception() is not None else fut.result()
+                state = self.state.get(cid)
+                if found and (state is None or state[0] not in GONE):
+                    self.updates[cid] = found
+                else:                                    # (up to date now, or uninstalled meanwhile)
+                    self.updates.pop(cid, None)
+                self.show_status(cid)
+                shown = True
         for cid, fut in list(self.futures.items()):
             if fut.done():
                 del self.futures[cid]
-                self.state[cid] = fut.result()
-                if self.state[cid][0] not in GONE and (component(cid)["dir"] / "update-check.sh").exists():
+                if fut.cancelled():                      # (the window closing)
+                    continue
+                try:
+                    self.state[cid] = fut.result()
+                except Exception as e:                   # (said on its row, rather than "checking…" for good)
+                    self.state[cid] = (2, _("status check failed: {error}").format(error=str(e) or type(e).__name__))
+                c = component(cid)
+                if self.state[cid][0] in GONE:
+                    self.updates.pop(cid, None)          # (not installed: nothing to update)
+                elif c is not None and (c["dir"] / "update-check.sh").exists():
                     self.update_futures[cid] = self.pool.submit(update_check, cid)
+                self.show_status(cid)
+                shown = True
                 if cid in self.status_labels:
                     label = self.status_labels[cid]
-                    self.show_status(cid)
                     text, kind = status_text(self.state[cid])
                     label.setProperty("status", kind)
                     label.style().unpolish(label)
@@ -1187,8 +1304,10 @@ class Window(QWidget):
                         box.setChecked(self.state[cid][0] not in GONE)
                         box.blockSignals(False)
                 self.update_apply()
+        if shown:
+            self.fit_list()                              # (a status can make its row wider)
         busy = (self.futures or self.latest_futures or self.update_futures or self.self_update is not None
-                or self.pack_check is not None)
+                or self.pack_check is not None or self.pack_job is not None)
         self.collect_every(100 if busy else 1000)
 
     # ---- layout -----------------------------------------------------------------
@@ -1338,6 +1457,22 @@ class Window(QWidget):
         self.add_contribute_row()
         self.grid.addStretch(1)
         self.update_apply()
+        self.fit_list()
+
+    def fit_list(self):
+        """The window is never narrower than the list's widest row: the list doesn't scroll
+        sideways, so the buttons past a row's right edge (Hide, ↻, ⓘ, then Run) couldn't be reached.
+        Nor is a Run button narrower than its text: the style sheet's min-width, set again each time
+        it's styled (update_run), would let a narrow window squeeze "⟳ Restart SteamVR" to that.
+        (Each row measured itself: rows just built aren't shown yet, so the list's layout leaves
+        them out until they are.)"""
+        for button in self.run_buttons.values():
+            button.setMinimumWidth(button.sizeHint().width())
+        rows = (self.grid.itemAt(i).widget() for i in range(self.grid.count()))
+        widest = max((r.minimumSizeHint().width() for r in rows if r is not None), default=0)
+        margins = self.grid.contentsMargins()
+        bar = self.scroll.verticalScrollBar().sizeHint().width()
+        self.scroll.setMinimumWidth(widest + margins.left() + margins.right() + bar + 2 * self.scroll.frameWidth())
 
     def add_contribute_row(self):
         """The list's last row, under every group whatever the packs' order (and whichever groups
@@ -1378,7 +1513,10 @@ class Window(QWidget):
         self.grid.addWidget(row)
 
     def show_status(self, cid):
-        """Status text, plus an Update link when upstream has a newer version."""
+        """Status text, plus an Update link when upstream has a newer version; and on the tweak's
+        page, if that's open, its status."""
+        if isinstance(getattr(self, "details", None), Details) and self.details.comp["id"] == cid:
+            self.details.show_state(self.state.get(cid))
         label = self.status_labels.get(cid)
         if label is None:
             return
@@ -1480,8 +1618,15 @@ class Window(QWidget):
             return
         full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
-        self.proc.finished.connect(lambda *_: self.refresh())
+        self.proc.finished.connect(lambda *_: self.changed([cid]))
         in_terminal(self.proc, full)
+
+    def changed(self, ids):
+        """The terminal that installed, reinstalled or removed these tweaks closed: an update found
+        for them before is in now (or went with them), and every row is checked again."""
+        for cid in ids:
+            self.updates.pop(cid, None)
+        self.refresh()
 
     def update_again(self, cid):
         """The ↻ Reinstall button: only for installed tweaks."""
@@ -1563,7 +1708,12 @@ class Window(QWidget):
         if label is None:
             self.show_details(comp)
             return
-        cmd = sft.script(comp, "run")                 # (its run.sh, or a linked project's run: command)
+        c = component(comp["id"])
+        cmd = sft.script(c, "run") if c else None      # (its run.sh, or a linked project's run: command)
+        if cmd is None:                                 # (its folder went since the list was read: an update, say)
+            self.say(_("Couldn't start {tweak}: its files aren't where they were when the list was read. "
+                       "Close and reopen Frame Tweaks.").format(tweak=comp["title"]))
+            return
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # (some restart things: Plasma, ydotoold)
             print("would run:", " ".join(cmd))
             return
@@ -1647,20 +1797,59 @@ class Window(QWidget):
 
     def show_packs(self):
         self.close_details()
-        self.details = Packs(self, follow_link, self.pool)
+        self.details = Packs(self, follow_link, self.pool)          # (it reads the packs anew)
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
+        self.follow_packs()
 
     def reload_tweaks(self):
         """After a pack was trusted or dropped: the list, settings and known issues anew."""
-        global KNOWN_ISSUES
         sft.load(refresh=True)
+        self.use_tweaks()
+
+    def follow_packs(self):
+        """sft read the packs again (the Packs page opening, Check for updates, a pack added or
+        updated from a link): if the tweaks in use aren't the list's any more (a pack changed or
+        turned off outside the window, say), the list follows. Its rows would ask sft for tweaks it
+        no longer has."""
+        if [(c["id"], c["dir"]) for c in components()] != [(c["id"], c["dir"]) for c in self.rows]:
+            self.use_tweaks()
+
+    def use_tweaks(self):
+        """The list, settings and known issues of the tweaks sft has read."""
+        global KNOWN_ISSUES
         sft.SETTINGS = sft.settings_specs()
         SETTINGS_PAGES.clear()
         SETTINGS_PAGES.update({cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS})
         KNOWN_ISSUES = {c["id"]: c["known_issue"] for c in components() if c["known_issue"]}
+        self.check_known_issues()
         self.rows = components()
         self.refresh()
+
+    def check_known_issues(self):
+        """Has a known issue's app a newer release? Looked for once each, in the background: as the
+        window opens, and for a tweak a pack brings later."""
+        for cid, issue in KNOWN_ISSUES.items():
+            if cid not in self.latest and cid not in self.latest_futures:
+                self.latest_futures[cid] = self.pool.submit(latest_release, issue["latest"])
+                self.collecting()
+
+    def finish_pack_job(self):
+        """A pack added or updated from a link (the Packs page's start), once its git clone or pull
+        is done: its end goes to the Packs page open then (going Back meanwhile doesn't lose it),
+        and the list follows the tweaks in use."""
+        job = self.pack_job
+        if job is None or not job[0].done():
+            return
+        self.pack_job = None
+        fut, done, _saying = job
+        if fut.cancelled():                          # (the window closing)
+            return
+        if isinstance(self.details, Packs):
+            self.details.finished(fut, done)
+        elif fut.exception() is None:
+            done(None, fut.result())                 # (no page to tell: the window's part only)
+        self.follow_packs()
 
     def close_details(self):
         if self.details is not None:
@@ -1772,7 +1961,7 @@ class Window(QWidget):
             steps.append("./install.sh install " + " ".join(add))
         cmd = " && ".join(steps) + f"; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)            # don't block the window while Konsole runs
-        self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.refresh()))
+        self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.changed(add + remove)))
         in_terminal(self.proc, cmd)
 
     def uninstall_self(self, keep_tweaks, settings, keep_apps=True):
@@ -1875,7 +2064,7 @@ class Window(QWidget):
         copy.clicked.connect(lambda: (QApplication.clipboard().setText(text.toPlainText()),
                                       copy.setText(_("Copied"))))
         back = QPushButton(_("← Back"))
-        back.clicked.connect(lambda: (copy.setText(_("Copy for bug report")), self.stack.setCurrentIndex(0)))
+        back.clicked.connect(lambda: (copy.setText(_("Copy for bug report")), self.close_details()))
         report = QPushButton(_("🐞 Report a problem"))
         report.setToolTip(_("Copy these details, then save a diagnostics report and open the bug form"))
         report.clicked.connect(lambda: (QApplication.clipboard().setText(text.toPlainText()), self.show_report()))
@@ -1900,6 +2089,7 @@ class Window(QWidget):
     def closeEvent(self, ev):
         if self.vr_buttons:
             self.vr_buttons.close()
+        self.collector.stop()                       # (the jobs it would look at are cancelled now)
         self.pool.shutdown(wait=False, cancel_futures=True)
         for proc in self.findChildren(QProcess):    # (stopped as the window goes: their finished
             proc.blockSignals(True)                 # would refresh it, with the pool shut down)
@@ -1948,12 +2138,7 @@ def stop_stuck_windows():
     """The open window didn't answer a second launch: it's stuck (or one from before an update
     that doesn't answer). Stop it, so the new one opens instead of nothing; noted in the log."""
     import signal
-    try:
-        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", "gui/frame-tweaks-gui.py"],
-                             capture_output=True, text=True, timeout=5).stdout
-    except (OSError, subprocess.TimeoutExpired):
-        return
-    pids = [int(p) for p in out.split() if p.isdigit() and int(p) != os.getpid()]
+    pids = window_pids()
     for sig, wait in ((signal.SIGTERM, 2), (signal.SIGKILL, 0)):
         for pid in pids:
             try:
@@ -1970,6 +2155,31 @@ def stop_stuck_windows():
             f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + f"an open window didn't answer: stopped it ({pids})\n")
     except OSError:
         pass
+
+
+SCRIPT = Path(__file__).resolve()
+
+
+def window_pids():
+    """This user's other processes running this window: a Python (./install.sh runs it as
+    sft-python) given this very script. Not an editor that has it open, say, nor any other command
+    line that only names it."""
+    try:
+        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", "frame-tweaks-gui.py"],
+                             capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    pids = []
+    for pid in (int(p) for p in out.split() if p.isdigit() and int(p) != os.getpid()):
+        try:
+            argv = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace").split("\0")
+            cwd = os.readlink(f"/proc/{pid}/cwd")          # (./install.sh gives it as gui/frame-tweaks-gui.py)
+        except OSError:                                      # (it ended meanwhile)
+            continue
+        if len(argv) > 1 and re.fullmatch(r"sft-python|python[\d.]*", Path(argv[0]).name) \
+                and (Path(cwd) / argv[1]).resolve() == SCRIPT:
+            pids.append(pid)
+    return pids
 
 
 def watch_for_hangs(log_dir):

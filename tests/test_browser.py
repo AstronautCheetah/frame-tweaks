@@ -111,6 +111,21 @@ class DefaultBrowser(unittest.TestCase):
         self.assertTrue(browser.usable("chromium.desktop"))
         self.assertEqual(browser.installed_browsers(), ["chromium.desktop", "com.brave.Browser.desktop"])
 
+    def test_a_broken_entry_is_left_out(self):
+        """A desktop entry that links to an app since removed, or one that can't be read, is left out:
+        the first raised FileNotFoundError, and then no web link opened at all."""
+        (self.apps / "aaa-gone.desktop").symlink_to(self.apps / "nowhere" / "gone.desktop")
+        locked = self.apps / "locked.desktop"
+        locked.write_text("[Desktop Entry]\nName=Locked\n")
+        locked.chmod(0)
+        self.addCleanup(locked.chmod, 0o644)
+        with open(self.apps / "mimeinfo.cache", "a") as f:
+            f.write("x-scheme-handler/https=locked.desktop;aaa-gone.desktop;\n")
+        self.assertEqual(browser.installed_browsers(), ["chromium.desktop", "com.brave.Browser.desktop"])
+        with mock.patch.object(browser, "default_browser", return_value=None), \
+                mock.patch.object(browser, "running_sessions", return_value=set()):
+            self.assertEqual(browser.browser_choice(), ("chromium.desktop", ""))
+
     def test_any_default_browser_is_used(self):
         with mock.patch.object(browser, "default_browser", return_value="com.brave.Browser.desktop"):
             self.assertEqual(browser.browser_choice(), ("com.brave.Browser.desktop", None))
