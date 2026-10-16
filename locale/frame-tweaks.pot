@@ -2393,7 +2393,7 @@ msgid ""
 "Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
 msgstr ""
 
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
 msgid "Open"
 msgstr ""
 
@@ -3280,7 +3280,7 @@ msgstr ""
 msgid "Core"
 msgstr ""
 
-#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
 msgid "Developer"
 msgstr ""
 
@@ -4407,67 +4407,6 @@ msgstr ""
 msgid "%s socket missing"
 msgstr ""
 
-#: packs/integrations/claude-code/README.md
-msgid ""
-"Anthropic's coding agent for the terminal (`claude`), installed into your home folder"
-msgstr ""
-
-#: packs/integrations/claude-code/README.md
-msgid ""
-"Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone."
-msgstr ""
-
-#: packs/integrations/claude-code/README.md
-msgid "Claude Code (command line)"
-msgstr ""
-
-#: packs/integrations/claude-code/README.md
-msgid ""
-"Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer."
-msgstr ""
-
-#: packs/integrations/claude-code/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
-msgid "from"
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh
-msgid "Anthropic's installer failed (see above)."
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh
-msgid "Claude Code is already installed at %s (%s); leaving it as it is."
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh
-msgid "Couldn't download Anthropic's installer."
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh
-msgid ""
-"Done. Open a terminal (Konsole) and run: claude\n"
-"The first run asks you to log in with your Claude account in a browser."
-msgstr ""
-
-#: packs/integrations/claude-code/install.sh
-msgid "Installing Claude Code (Anthropic's installer, into your home folder)"
-msgstr ""
-
-#: packs/integrations/claude-code/status.sh
-msgid "Claude Code %s (run: claude)"
-msgstr ""
-
-#: packs/integrations/claude-code/status.sh
-msgid "Claude Code not installed"
-msgstr ""
-
-#: packs/integrations/claude-code/uninstall.sh
-msgid "Claude Code was installed with Homebrew; remove it with: %s"
-msgstr ""
-
-#: packs/integrations/claude-code/uninstall.sh
-msgid "Kept your login and settings (~/.claude, ~/.claude.json)."
-msgstr ""
-
 #: packs/integrations/claude-desktop/README.md
 msgid ""
 "Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead."
@@ -4485,6 +4424,10 @@ msgstr ""
 #: packs/integrations/claude-desktop/README.md
 msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
+msgstr ""
+
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
+msgid "from"
 msgstr ""
 
 #: packs/integrations/claude-desktop/claude-desktop-update

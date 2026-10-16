@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+- **Claude Code is set aside** (not offered any more): Homebrew has it (`brew install --cask
+  claude-code`), and Frame Tweaks offers only what you can't get from Discover or Homebrew. An
+  installed Claude Code stays, with your sign-in and history in `~/.claude`.
+
 ### Fixed
 - **Hidden and folded groups stay so in another language:** the window kept them by their
   translated names, so when its language followed the keyboard to another, they came back. They're

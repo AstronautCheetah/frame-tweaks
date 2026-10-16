@@ -187,7 +187,6 @@ them.
 
 | | Tweak | What you get | Why on a Steam Frame |
 |---|---|---|---|
-| 🤖 | [**Claude Code**](packs/integrations/claude-code/) (command line) | Claude Code, Anthropic's coding agent for the terminal (`claude`), installed with Anthropic's own installer. | Anthropic's installer needs no admin rights and supports the Frame's ARM processor, and it puts everything in your home folder, so SteamOS updates leave it alone. |
 | 🤖 | [**Claude Desktop**](packs/integrations/claude-desktop/) | Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command. | Anthropic ships it as an apt package for Ubuntu and Debian. SteamOS has no apt and its system files are read-only, so this unpacks the package into your home folder instead. |
 <!-- /generated:tweaks -->
 
@@ -325,8 +324,7 @@ release and re-runs the installer of every tweak you have installed (on the newe
 already, it changes nothing, unless an earlier update didn't finish:
 `./install.sh update --reinstall` runs the installers again anyway). It first checks that the
 release is signed by Frame Tweaks' release key and refuses one that isn't. Nothing updates on its
-own: a tweak only changes when you update. (The one exception is Claude Code, which updates itself
-the way Anthropic's installer sets it up.)
+own: a tweak only changes when you update.
 
 - **Packs:** Frame Tweaks' own packs come with its releases, so a change to them, even to their
   text only, arrives with the next release. For packs added from a link, **⟳ Check for updates**
@@ -356,7 +354,7 @@ Each tweak keeps its settings in a few known places, listed in its manifest (`co
 Pad's size and place in `~/.config/arrowpad.json`, Android Mirror's in
 `~/.config/frame-tweaks/phone.conf`, and so on. Your data is kept apart and is never removed
 with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's pairing keys
-(`~/.android`), Claude Code's `~/.claude`, saved reports (`~/frame-tweaks-debug-*.txt`).
+(`~/.android`), saved reports (`~/frame-tweaks-debug-*.txt`).
 
 - **When you uninstall a tweak** its settings are kept, so it's set up as before if you install
   it again. ⚙ Preferences → **Uninstalling a tweak** can make them go with it instead (for one
@@ -373,7 +371,7 @@ with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's
 In the window: **⚙ Preferences → Uninstalling Frame Tweaks**. First, what happens to the tweaks:
 
 - **Uninstall the tweaks, but keep third-party apps** (the default): the tweaks that install
-  another project's app (Homebrew, Claude Desktop, Claude Code, Full Keyboard, clipboard-sync)
+  another project's app (Homebrew, Claude Desktop, Full Keyboard, clipboard-sync)
   stay, with what they need, so those apps and your work in them stay as they are.
 - **Uninstall every tweak, third-party apps too.** Homebrew itself is never removed by Frame
   Tweaks, even then: other programs may live in it, so its tweak only shows Homebrew's own
