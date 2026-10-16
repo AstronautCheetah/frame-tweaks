@@ -5,8 +5,9 @@
 # fake home, or if uninstall leaves files behind that aren't the settings it promises to keep.
 #
 #   dev/test-tweaks.sh            the default set (runs anywhere, CI included)
-#   (TEST_IGNORE=REGEX: files outside the test home that other programs write meanwhile; those
-#   that programs already running have open, such as a live adb server's log, are left out anyway)
+#   (TEST_IGNORE=REGEX: files outside the test home that other programs write meanwhile, where the
+#   scripts can't have a /tmp of their own; those that programs already running have open, such
+#   as a live adb server's log, are left out anyway)
 #   dev/test-tweaks.sh cursor     just these
 set -euo pipefail
 # No network for anything it runs, where user namespaces allow it: curl is a stand-in below, but
@@ -14,12 +15,29 @@ set -euo pipefail
 # dashboard). One empty network namespace for the whole run, -c: the same uid inside. (One per
 # script would make a running adb server log each one's loopback device into /tmp.) Without user
 # namespaces (some CI runners), it runs as before.
+#
+# And where it can, a /tmp and /var/tmp of their own (an empty tmpfs each), so what's written there
+# is all theirs: on a Frame in use, programs write to the real ones meanwhile (a live adb server's
+# log, a Narrate's sound files), which isn't the tweaks'. Mounting them takes a namespace mapped as
+# root; the scripts run in one inside it mapped back to this uid (unshare --map-user, util-linux
+# 2.38). A checkout in /tmp (as the tests make) is bound back in at its place. Not with TEST_WORK
+# in /tmp, which would be in the private one and gone afterwards.
 if [ -z "${TEST_IN_NETNS:-}" ]; then
-    # Files in /tmp that programs already running have open (a live adb server's log, written
-    # every few seconds): they write them meanwhile, not the tweaks. Listed out here, as the
-    # namespace can't see other processes' open files.
+    # (where there's no /tmp of their own: files in it that programs already running have open
+    # are theirs. Listed out here, as the namespace can't see other processes' open files.)
     TEST_HELD_OPEN=$(find /proc/[0-9]*/fd -maxdepth 1 \( -lname '/tmp/*' -o -lname '/var/tmp/*' \) -printf '%l\n' 2>/dev/null | sort -u || true)
     export TEST_HELD_OPEN
+    # (--no-canonicalize: mount would resolve /proc/self/fd/9 to the path, now the empty one)
+    private_tmp='exec 9<"$3" && mount -t tmpfs tmpfs /tmp && mount -t tmpfs tmpfs /var/tmp &&
+        case $3 in /tmp/*|/var/tmp/*) mkdir -p "$3" && mount --no-canonicalize --bind /proc/self/fd/9 "$3" ;; esac &&
+        exec 9<&- unshare -U --map-user="$1" --map-group="$2" "${@:4}"'
+    checkout=$(cd "$(dirname "$0")/.." && pwd -P)
+    case $(realpath -m "${TEST_WORK:-/}") in
+        /tmp|/tmp/*|/var/tmp|/var/tmp/*) ;;
+        *) if unshare -rnm "$BASH" -c "$private_tmp" _ "$(id -u)" "$(id -g)" "$checkout" true 2>/dev/null; then
+               TEST_IN_NETNS=1 exec unshare -rnm "$BASH" -c "$private_tmp" _ "$(id -u)" "$(id -g)" "$checkout" "$BASH" "$0" "$@"
+           fi ;;
+    esac
     if unshare -cn true 2>/dev/null; then TEST_IN_NETNS=1 exec unshare -cn "$BASH" "$0" "$@"; fi
     echo "note: no network namespace here (unshare -cn), so the tweaks' scripts can reach the network" >&2
 fi
