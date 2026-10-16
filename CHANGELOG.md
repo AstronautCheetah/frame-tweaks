@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.8 (2026-10-16)
 
 ### Fixed
 - **Setting up the full installer window shows its progress:** PyQt6 (about 280 MB) downloaded
