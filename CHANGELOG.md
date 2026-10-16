@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Desktop Recovery brings the taskbar back by itself:** a small watch starts with desktop mode
+  and, when the taskbar closes while desktop mode runs, starts it again a few seconds later (at
+  most 3 times in 10 minutes; then it stops and says so, and **Restart taskbar** is still there).
+  The taskbar disappears because SteamOS's graphics layer for desktop apps (Gamescope WSI) sends
+  KWin a request about a window that's no longer there, and KWin disconnects the app: a SteamOS
+  bug, not Frame Tweaks'. Reinstall Desktop Recovery (↻) to get the watch.
+
+### For pack authors
+- **`dev/test-tweaks.sh` stands in for `pgrep` and `pkill`:** nothing runs in its throwaway home.
+  The real ones saw this machine's desktop, so a tweak starting something in desktop mode as it
+  installs started it in the real one.
+
 ## 0.6.10 (2026-10-16)
 
 ### Changed

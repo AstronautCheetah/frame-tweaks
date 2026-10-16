@@ -64,14 +64,16 @@ read -ra DEFAULT <<<"$(sft test-list)"
 TWEAKS=("${@:-${DEFAULT[@]}}")
 stubs="$work/stubs"; mkdir -p "$stubs"
 # KDE's config tools are real when present (they only write into the fake home), else stubbed.
-stub_cmds=(systemctl flatpak brew kdialog notify-send nmcli qdbus qdbus6 busctl gtk-launch sudo gpgv)
+# (pgrep and pkill: nothing runs in a throwaway home. The real ones saw this machine's desktop,
+# and a tweak starting something in desktop mode as it installs started it in the real one.)
+stub_cmds=(systemctl flatpak brew kdialog notify-send nmcli qdbus qdbus6 busctl gtk-launch sudo gpgv pgrep pkill)
 command -v kwriteconfig6 >/dev/null || stub_cmds+=(kwriteconfig6)
 for cmd in "${stub_cmds[@]}"; do
     cat > "$stubs/$cmd" <<STUB
 #!/bin/bash
 echo "$cmd \$*" >> "$work/calls.log"
 case "$cmd \$1 \$2" in "systemctl --user is-active"*|"systemctl is-active"*) exit 3 ;; esac
-case "$cmd \$1" in "flatpak info"|"busctl "*) exit 1 ;; esac    # nothing installed / running
+case "$cmd \$1" in "flatpak info"|"busctl "*|"pgrep "*|"pkill "*) exit 1 ;; esac    # nothing installed / running
 case "$cmd" in brew) [ "\$1" = --version ] && echo "Homebrew 0.0-test"; [ "\$1" = shellenv ] && echo ":";
                      [ "\$1" = --prefix ] && echo /home/linuxbrew/.linuxbrew; [ "\$1" = list ] && true ;; esac
 exit 0

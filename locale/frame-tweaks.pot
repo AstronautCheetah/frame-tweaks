@@ -3940,21 +3940,17 @@ msgstr ""
 
 #: packs/core/tools/README.md
 msgid ""
-"An as-needed fix for a desktop whose taskbar has gone missing: one button brings it back"
+"Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
 msgstr ""
 
 #: packs/core/tools/README.md
 msgid ""
-"An as-needed fix for a desktop-mode desktop whose taskbar (and system tray) has gone missing: one button, **Restart taskbar**, brings them back (`restart-plasmashell`)."
-msgstr ""
-
-#: packs/core/tools/README.md
-msgid "Desktop Recovery"
+"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
 msgstr ""
 
 #: packs/core/tools/README.md
 msgid ""
-"In the Frame's nested desktop, nothing restarts a crashed taskbar automatically, and it has to be relaunched inside that session."
+"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
 msgstr ""
 
 #: packs/core/tools/README.md
@@ -3967,6 +3963,15 @@ msgstr ""
 
 #: packs/core/tools/install.sh
 msgid "Installed %s"
+msgstr ""
+
+#: packs/core/tools/install.sh
+msgid "The taskbar watch starts with desktop mode."
+msgstr ""
+
+#: packs/core/tools/install.sh
+msgid ""
+"Watching the taskbar: if it closes while desktop mode runs, it comes back by itself."
 msgstr ""
 
 #: packs/core/tools/restart-plasmashell
@@ -3982,7 +3987,25 @@ msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
 msgstr ""
 
 #: packs/core/tools/status.sh
-msgid "%s installed"
+msgid "installed without the taskbar watch (an older version): ↻ adds it"
+msgstr ""
+
+#: packs/core/tools/status.sh
+msgid ""
+"installed; the taskbar watch isn't running in this desktop: ↻ starts it"
+msgstr ""
+
+#: packs/core/tools/status.sh
+msgid "installed; watching the taskbar in desktop mode"
+msgstr ""
+
+#: packs/core/tools/taskbar-guard packs/core/tools/README.md
+msgid "Desktop Recovery"
+msgstr ""
+
+#: packs/core/tools/taskbar-guard
+msgid ""
+"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
 msgstr ""
 
 #: packs/core/vr-dashboard/README.md
