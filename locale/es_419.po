@@ -5489,18 +5489,19 @@ msgid ""
 msgstr ""
 "El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
 
+# needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset."
+"TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste. It shows while the SteamVR dashboard is open, and types into the app you're using, desktop mode's included."
 msgstr ""
-"Teclado completo de TaiKeid: un teclado de tamaño completo en el que escribes con los láseres de los controles, con flechas, teclas F, teclado numérico, Ctrl/Alt y Copiar/Pegar, para el menú principal y las apps del visor."
+"Teclado completo de TaiKeid: un teclado de tamaño completo en el que escribes con los láseres de los controles, con flechas, teclas F, teclado numérico, Ctrl/Alt y Copiar/Pegar. Aparece mientras el menú principal de SteamVR está abierto y escribe en la app que estás usando, incluidas las del modo escritorio."
 
 # needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from its newest release"
+"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
 msgstr ""
-"El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde su versión más reciente"
+"El teclado de RV de tamaño completo de TaiKeid, que aparece con el menú principal de SteamVR, instalado desde su versión más reciente"
 
 #: packs/third-party/menu-icons/README.md
 msgid ""
@@ -6083,3 +6084,14 @@ msgstr "Instalador de ajustes"
 #~ "Agrega otras apps que usen la cartera con:  %s   (--electron para apps de Electron)\n"
 #~ "La cartera de fábrica de SteamOS tiene una contraseña VACÍA. Para protegerla de verdad, abre\n"
 #~ "KWalletManager → kdewallet → Cambiar contraseña."
+
+#~ msgid ""
+#~ "TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste, for the dashboard and the apps on the headset."
+#~ msgstr ""
+#~ "Teclado completo de TaiKeid: un teclado de tamaño completo en el que escribes con los láseres de los controles, con flechas, teclas F, teclado numérico, Ctrl/Alt y Copiar/Pegar, para el menú principal y las apps del visor."
+
+#~ # needs review
+#~ msgid ""
+#~ "TaiKeid's full-size VR keyboard for the dashboard and desktop, installed from its newest release"
+#~ msgstr ""
+#~ "El teclado de RV de tamaño completo de TaiKeid para el menú principal y el escritorio, instalado desde su versión más reciente"
