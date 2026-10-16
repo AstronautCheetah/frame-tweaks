@@ -98,7 +98,8 @@ class SystemApp(unittest.TestCase):
         apps, sysd = t / "apps", t / "sys"
         entry(sysd, "org.kde.dolphin", "dolphin %u", DBusActivatable="true")
         out = io.StringIO()                  # (what it reports, kept out of the test output)
-        with mock.patch.multiple(wl, APPS=apps, SOURCES=[], SYSTEM_SOURCES=[sysd], BACKUP_DIR=t / "orig"), \
+        with mock.patch.multiple(wl, APPS=apps, SOURCES=[], SYSTEM_SOURCES=[sysd], BACKUP_DIR=t / "orig",
+                                 BUILT_DIR=t / "built"), \
                 contextlib.redirect_stdout(out):
             wl.add("org.kde.dolphin", electron=False, shared=True, gate=True)
             text = (apps / "org.kde.dolphin.desktop").read_text()
