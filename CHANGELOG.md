@@ -223,6 +223,14 @@
   ([docs/mods.md](docs/mods.md)).
 
 ### For contributors
+- **Faster checks:** the unit tests run several at a time (`dev/run-tests.py`: a process per
+  test file, a slow file in parts, the slowest first), about 45 s instead of 150 on a Frame, and
+  `dev/check.sh` leaves out the tweak check when nothing it installs changed since origin/main.
+  Tests that waited a fixed time for something (a window starting its checks, a timer, a program
+  writing its first file) wait until it happens: on a busy machine they failed. A test class
+  that watches the whole machine sets `run_alone = True` and runs by itself.
+- **Ruff** (`dev/check.sh lint`, `ruff.toml`): names that don't exist and unused imports, in
+  every Python file (13 unused imports went). Mistakes only, no style.
 - **Release workflow:** a pre-release takes its notes from `## Unreleased` and leaves the
   section as it is, so the release after it has every change since the last release (the test
   release dated the section, and the release then found none, or only what came after the test

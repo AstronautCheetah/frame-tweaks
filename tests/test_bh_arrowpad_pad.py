@@ -224,7 +224,10 @@ class Unstick(PadTest):
                 mock.patch.object(self.ap, "desktop_grabbed", side_effect=grabbed), \
                 mock.patch.object(self.ap.subprocess, "Popen") as popen:
             self.pad.unstick()
-            QTest.qWait(700)
+            for _ in range(500):                # (its check after 600 ms: later on a busy machine)
+                if popen.called:
+                    break
+                QTest.qWait(20)
         return popen.call_args[0][0][-1]
 
     def test_says_what_it_did(self):
@@ -514,7 +517,10 @@ class GoingAway(PadTest):
         with mock.patch.object(self.pad, "close") as close:
             self.handlers[signal.SIGTERM](signal.SIGTERM, None)
             self.assertEqual(received(self.ydotoold), [(125, 1), (125, 0)])
-            QTest.qWait(50)
+            for _ in range(250):                # (closed from the event loop: later on a busy machine)
+                if close.called:
+                    break
+                QTest.qWait(20)
         close.assert_called_once_with()
 
     def test_the_dashboard_closing(self):

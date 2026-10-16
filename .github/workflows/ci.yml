@@ -40,6 +40,10 @@ jobs:
           fi
       - name: Python syntax
         run: dev/check.sh python
+      - name: Python mistakes (Ruff, ruff.toml)
+        run: |
+          python3 -m pip install --quiet ruff==0.17.1
+          dev/check.sh lint
       # The pack check pack authors use in their own repositories (docs/mods.md, Sharing a pack).
       - name: The pack check for pack authors, on the example pack
         uses: ./.github/actions/check-pack

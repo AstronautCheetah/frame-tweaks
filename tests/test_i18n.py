@@ -330,8 +330,6 @@ class MenusAndDashboard(unittest.TestCase):
         self.assertIn("Name=Desactivado", lines)
 
     def test_dashboard_table(self):
-        import importlib.machinery
-        import importlib.util
         sd = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sd")
         js = self.d / "p.js"
         js.write_text("const T = (s) => s, N = (s) => s;\nconst O = [[N('Off'), 'off']];\nel('div', {}, T('Colour'), 'Other');\n")

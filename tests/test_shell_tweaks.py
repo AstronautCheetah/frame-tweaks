@@ -6,7 +6,6 @@ downloads falling back to Frame Tweaks' copy; Arrow Pad's uninstall giving a pad
 the time to close."""
 import sys
 import hashlib
-import os
 import subprocess
 import tempfile
 import unittest

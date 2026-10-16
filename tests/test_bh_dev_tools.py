@@ -445,6 +445,7 @@ class TestTweaks(Temp):
     left in /tmp that kept an old date (as files unpacked from an archive do), but not what a
     program already running writes meanwhile: a file it has open (a live adb server's log), or,
     where the scripts get a /tmp of their own, new files (a live Narrate's)."""
+    run_alone = True        # (dev/run-tests.py: without a /tmp of its own, other tests' files are new there)
 
     def harness(self, repo, *tweaks, path=None):
         path = path or os.environ["PATH"]
@@ -453,12 +454,17 @@ class TestTweaks(Temp):
         return subprocess.run(["bash", str(repo / "dev/test-tweaks.sh"), *tweaks],
                               env={**os.environ, "PATH": path}, capture_output=True, text=True, timeout=300)
 
-    def writing(self, script):
-        """A program writing into /tmp from before the run to after it."""
+    def writing(self, script, first):
+        """A program writing into /tmp from before the run to after it: started, and its first
+        file there (first), before the run. (A fixed half second wasn't always enough on a busy
+        machine.)"""
         writer = subprocess.Popen(["bash", "-c", script])
         self.addCleanup(writer.wait)
         self.addCleanup(writer.kill)
-        time.sleep(0.5)                           # (started, and written, before the run)
+        deadline = time.monotonic() + 20
+        while not first.exists() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        self.assertTrue(first.exists(), "the writer didn't start")
 
     def tweak(self, repo, tid, install):
         d = repo / "packs/core" / tid
@@ -491,7 +497,7 @@ class TestTweaks(Temp):
         repo = copy_repo(self.d / "repo")
         log = Path(f"/tmp/ft-held-{uuid.uuid4().hex[:12]}.log")
         self.addCleanup(log.unlink, missing_ok=True)
-        self.writing(f'exec 3>>"{log}"; while :; do echo x >&3; sleep 0.2; done')
+        self.writing(f'exec 3>>"{log}"; while :; do echo x >&3; sleep 0.2; done', log)
         self.tweak(repo, "quiet", ":")
         real = shutil.which("unshare")
         path = os.environ["PATH"]
@@ -511,7 +517,7 @@ class TestTweaks(Temp):
         folder = Path(f"/tmp/ft-narrate-{uuid.uuid4().hex[:12]}")
         folder.mkdir()
         self.addCleanup(shutil.rmtree, folder, ignore_errors=True)
-        self.writing(f'n=0; while :; do : > "{folder}/chunk-$((n++))"; sleep 0.1; done')
+        self.writing(f'n=0; while :; do : > "{folder}/chunk-$((n++))"; sleep 0.1; done', folder / "chunk-0")
         self.tweak(repo, "quiet", ":")
         r = self.harness(repo, "quiet")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

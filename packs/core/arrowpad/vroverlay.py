@@ -19,7 +19,7 @@ import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sy
 import openvr
 import vrkit  # noqa: E402
 from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt, QTimer
-from PyQt6.QtGui import QImage, QMouseEvent
+from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton
 
 KEY = "frame-tweaks.arrowpad"

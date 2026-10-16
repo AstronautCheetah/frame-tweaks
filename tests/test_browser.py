@@ -175,7 +175,7 @@ class StuckHandoff(unittest.TestCase):
         """A browser launch still holding the link after the hand-off time is stuck ("already
         running, but is not responding"): it's stopped, and the window puts the link on the
         clipboard instead."""
-        import subprocess, sys, time
+        import subprocess, sys
         url = "https://example.com/stuck-test?x=1&y=2"
         p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", url])
         self.addCleanup(lambda: p.poll() is None and p.kill())
