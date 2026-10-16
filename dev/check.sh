@@ -10,8 +10,13 @@
 # when nothing it installs changed since origin/main (not in CI, and not when named). PYTHON=…
 # picks the interpreter for the unit tests; otherwise the first of .venv/bin/python, python3 and
 # Arrow Pad's venv that has PyQt6.
+# VR first: every check runs at the lowest CPU priority, and while the Frame's headset is worn
+# the tests and the tweak check keep to one core (dev/run-tests.py: FRAME_TWEAKS_CHECKS=vr or
+# all decides instead). On every core they made VR stutter.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
+renice -n 19 -p $$ >/dev/null 2>&1 || true
+ionice -c 2 -n 7 -p $$ 2>/dev/null || true
 ALL=(shell python lint i18n commits manifests tests metadata docs tweaks)
 SKIP=125        # a check's status when it was skipped (no tool uses it)
 UNNEEDED=124    # ... when nothing it checks changed
@@ -149,7 +154,8 @@ check_tweaks() {        # install → status → uninstall in a throwaway home (
     command -v bsdtar >/dev/null || { missing bsdtar "apt install libarchive-tools"; return; }
     [ -n "${CI:-}" ] || python3 -c 'import ensurepip, venv' 2>/dev/null ||
         { missing "Python's venv module" "apt install python3-venv"; return; }
-    dev/test-tweaks.sh
+    local pin; pin=$(python3 dev/run-tests.py --pin 2>/dev/null) || pin=
+    if [ -n "$pin" ]; then taskset -c "$pin" dev/test-tweaks.sh; else dev/test-tweaks.sh; fi
 }
 
 checks=("${@:-${ALL[@]}}")

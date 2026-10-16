@@ -367,8 +367,10 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 
 ## Testing and CI
 
-[`ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests. Each of
-its checks is one of [`dev/check.sh`](../dev/check.sh)'s, which a contributor runs the same way:
+[`ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests, in two
+jobs side by side: the unit tests, and every other check. Each check is one of
+[`dev/check.sh`](../dev/check.sh)'s, which a contributor runs the same way (on a Frame, VR first:
+at the lowest priority, and on one core while the headset is worn, [`dev/run-tests.py`](../dev/run-tests.py)):
 
 - `shellcheck -x -S warning` on every shell script (and the sourced libraries, by their
   `# shellcheck shell=` line), `py_compile` on every Python file, and Ruff's mistake-finding

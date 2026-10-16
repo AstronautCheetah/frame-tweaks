@@ -12,8 +12,10 @@ permissions:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
+# Two jobs side by side: the unit tests, the longest, and every other check. (One after the
+# other, they took over five minutes.)
 jobs:
-  lint:
+  checks:
     runs-on: ubuntu-24.04     # (named, not ubuntu-latest: a new Ubuntu comes in when we try it, not by surprise)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -55,14 +57,6 @@ jobs:
           dev/check.sh commits
       - name: Manifests, dependencies and pins
         run: dev/check.sh manifests
-      - name: Unit tests
-        env:
-          FRAME_TWEAKS_I18N_LENIENT: ${{ github.event_name == 'pull_request' && '1' || '' }}   # (as above)
-        run: |
-          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 xvfb libxtst6 >/dev/null
-          # the PyQt6 users get (lib/python-constraints.txt); pyyaml: tests compare our manifest reader with it
-          python3 -m pip install --quiet -c lib/python-constraints.txt PyQt6 pyyaml
-          dev/check.sh tests
       - name: AppStream metadata and desktop entry
         run: |
           sudo apt-get install -y appstream desktop-file-utils >/dev/null
@@ -73,3 +67,21 @@ jobs:
         run: |
           sudo apt-get install -y libarchive-tools     # bsdtar, as on SteamOS
           dev/check.sh tweaks
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Refresh the package index (a stale runner index gives 404s)
+        run: sudo apt-get update -qq
+      - name: Unit tests
+        env:
+          # On a pull request, an out-of-date translation template is a warning (the checks job's
+          # translation step).
+          FRAME_TWEAKS_I18N_LENIENT: ${{ github.event_name == 'pull_request' && '1' || '' }}
+        run: |
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 xvfb libxtst6 >/dev/null
+          # the PyQt6 users get (lib/python-constraints.txt); pyyaml: tests compare our manifest reader with it
+          python3 -m pip install --quiet -c lib/python-constraints.txt PyQt6 pyyaml
+          dev/check.sh tests
