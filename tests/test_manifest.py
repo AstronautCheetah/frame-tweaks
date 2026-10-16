@@ -381,6 +381,67 @@ class Packs(unittest.TestCase):
             self.assertNotIn("hello", self.ids(), key)
             self.assertTrue(any(f"hello: {key}" in p for p in sft.load()["problems"]), key)
 
+    def test_a_settings_option_needs_a_default_and_a_shell_key_a_variable_name(self):
+        """Without default: (a null choice made it look present) every command crashed as sft
+        loaded, mods untrust included; a shell file's key like a[$(cmd)] would run cmd when the
+        setting is read (bash's ${!key}). Both leave the tweak out, saying why."""
+        opts = "settings:\n  file: ~/.config/x.conf\n  format: shell\n  options:\n"
+        cases = {"needs key, title, default and choices":
+                 opts + "    - {key: A, title: A, choices: [{label: Auto, value: null}, {label: Fast, value: fast}]}\n",
+                 "keys are variable names":
+                 opts + "    - {key: \"a[$(touch x)]\", title: A, default: a, choices: [{label: A, value: a}]}\n"}
+        for says, extra in cases.items():
+            d = self.tweak("mypack", "hello", extra=extra)
+            sft.set_trusted(d.parent, True)
+            self.assertNotIn("hello", self.ids(), says)
+            self.assertTrue(any(says in p for p in sft.load()["problems"]), (says, sft.load()["problems"]))
+            sft.settings_specs()                                                  # (and no crash)
+
+    def test_mods_check_sees_a_pack_with_its_own_readme(self):
+        """A shared pack often has a README.md at its top and no pack.md (optional): it's still a
+        pack, its tweaks checked, as load() treats it; only a folder with no tweak folders in it is
+        a single tweak."""
+        d = self.tweak("my-pack", "hello")
+        (d.parent / "README.md").write_text("# My pack\n")
+        lines, bad = sft.check_folder(d.parent)
+        self.assertEqual(bad, 0, lines)
+        self.assertIn("ok  hello", lines)
+        lines, bad = sft.check_folder(d)                                          # (a single tweak)
+        self.assertEqual((bad, lines[-1]), (0, "ok  hello"))
+
+    def test_update_checks_run_git_only_in_trusted_packs(self):
+        """Looking for a pack's updates runs git in its folder, and git reads that repository's own
+        .git/config, which can run commands (here remote.origin.uploadpack, used by ls-remote).
+        So a pack you haven't trusted (or that changed since) is never looked at."""
+        import subprocess
+        d = self.tweak("their-pack", "hello")
+        mark = Path(self.tmp.name) / "ran"
+        env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        run = lambda *a: subprocess.run(["git", *a], cwd=d.parent, env=env, check=True, capture_output=True)
+        run("init", "-q", "-b", "main")
+        run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "x")
+        run("remote", "add", "origin", "https://example.invalid/their-pack.git")
+        run("config", "remote.origin.uploadpack", f"touch {mark}; git-upload-pack")
+        with mock.patch.object(sft, "pack_has_update", wraps=sft.pack_has_update) as check:
+            self.assertEqual(sft.packs_with_updates(), [])
+            check.assert_not_called()
+        self.assertFalse(mark.exists())
+        sft.set_trusted(d.parent, True)
+        with mock.patch.object(sft, "pack_has_update", return_value=True) as check:
+            self.assertEqual([p["name"] for p in sft.packs_with_updates()], ["their-pack"])
+
+    def test_mods_lists_a_packs_own_text_without_control_characters(self):
+        """An untrusted pack's name could hold terminal escapes that rewrite its line to look like
+        an official pack's "official: in use"."""
+        self.tweak("evil", "hello", pack_md='---\nname: "x\x1b[2K\x1b[1GCore  official: in use"\n---\n')
+        self.assertIn("\x1b", sft.read_pack(self.user / "evil")[0]["name"])        # (the escape got in)
+        sft.load(refresh=True)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            sft.mods([])
+        self.assertIn("official: in use", out.getvalue())                       # (it's listed)
+        self.assertNotIn("\x1b", out.getvalue())
+
     def test_a_link_needs_no_scripts_and_says_what_it_runs(self):
         """link: (docs/mods.md, Linking a project): no scripts, and lib/link.sh runs in their place."""
         good = ("link:\n  install: curl -fsSL https://example.org/get.sh | bash\n"

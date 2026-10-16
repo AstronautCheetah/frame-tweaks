@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### Fixed
+- **Hidden and folded groups stay so in another language:** the window kept them by their
+  translated names, so when its language followed the keyboard to another, they came back. They're
+  kept by their English names now, and ones saved in another language are still recognised.
+- **Pack safety:** looking for a community pack's updates ran git in its folder before you trusted
+  it, and git reads a repository's own settings, which can run commands: only trusted packs are
+  looked at now. `./install.sh mods` shows packs' own text without control characters, which
+  could make an untrusted pack's line look like an official one. A settings option without a
+  `default:` (or a shell settings file whose keys aren't variable names) leaves its tweak out,
+  as a mistake, instead of making every command fail, `mods untrust` included.
+- **`./install.sh mods check` and the pack check action** treat a pack with its own README.md and
+  no pack.md as a pack, checking its tweaks, as Frame Tweaks loads it.
 - **Battery charge limit holds overnight:** asleep, nothing could check the battery, so a Frame
   that went to sleep during one of the few minutes of charging charged on to 100% (here: 77% at
   00:59, 99% at 06:33). Now, as the Frame goes to sleep, charging pauses if the battery is within
@@ -10,6 +21,12 @@
   it wakes; a lower battery still charges while asleep. Its status also says "Not charging until
   the battery is below 78% (now 98%)" rather than "Holding at 78%" when it's well over the limit,
   and warns if the watch on sleep isn't running.
+
+### For contributors
+- **Translations:** a `%` is a placeholder only in a text that's formatted (one with `%s`, `%d` or
+  `%%`): `dev/i18n.py import` no longer refuses "1% del" in a tweak's manifest text, and the tests
+  now catch "100 % de" (a printf conversion) in a formatted one. Plural forms given for a text
+  without a plural are reported instead of stopping the import.
 
 ## 0.6.9 (2026-10-16)
 

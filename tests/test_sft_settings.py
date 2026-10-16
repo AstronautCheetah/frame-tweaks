@@ -126,6 +126,9 @@ class ReadWrite(unittest.TestCase):
         mark = Path(self.d.name) / "ran"
         self.assertEqual(sft.raw_setting("adb-scrcpy", f'X}}"; touch {mark}; echo "${{Y'), "")
         self.assertFalse(mark.exists())
+        # (bash's ${!key} evaluates an array subscript's $(...): a[$(cmd)] would have run cmd)
+        self.assertEqual(sft.raw_setting("adb-scrcpy", f"a[$(touch {mark})]"), "")
+        self.assertFalse(mark.exists())
 
 
 class HiddenRows(unittest.TestCase):
@@ -149,7 +152,22 @@ class HiddenRows(unittest.TestCase):
                     contextlib.redirect_stdout(io.StringIO()):
                 sft.load(refresh=True)
                 sft.main(["hide-group", "System"])
-                self.assertEqual(sft.read_set(sft.HIDDEN_CATS), {"Sistema"})
+                self.assertEqual(sft.read_set(sft.HIDDEN_CATS), {"System"})     # (kept by its English name)
+                sft.main(["unhide-group", "Sistema"])                            # (or as the window shows it)
+                self.assertEqual(sft.read_set(sft.HIDDEN_CATS), set())
+
+    def test_a_group_hidden_or_folded_in_one_language_stays_so_in_another(self):
+        """Saved by its translated name (before), a group came back when the window's language
+        changed: its names in every language Frame Tweaks has now map to the English one."""
+        self.addCleanup(lambda: sft.load(refresh=True))
+        with tempfile.TemporaryDirectory() as d:
+            folded = Path(d) / "collapsed-categories"
+            spanish = i18n.Catalogue(["es_419"]).gettext("Privacy & security")
+            self.assertNotEqual(spanish, "Privacy & security")                   # (it has a translation)
+            folded.write_text(f"{spanish}\nDeveloper\n")
+            rows = sft.load(refresh=True)["components"]
+            self.assertTrue({"Privacy & security", "Developer"} <= {c["category_en"] for c in rows})
+            self.assertEqual(sft.read_categories(folded, rows), {"Privacy & security", "Developer"})
 
 
 class Experimental(unittest.TestCase):
