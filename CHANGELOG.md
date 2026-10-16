@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.12 (2026-10-16)
 
 ### Added
 - **A new look for installs in a terminal:** Frame Tweaks' logo, its two sliders gliding, and its
