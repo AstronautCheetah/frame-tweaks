@@ -140,9 +140,11 @@ A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
   SteamOS), and its window opens on your desktop. In the sandbox your home, wallet, systemd user
   services, Homebrew, Flatpaks and other processes are out of sight, and so are the Frame's own
   network services (SteamVR's dashboard); it's a dry run unless you pass `--real`. `--from
-  checkout` installs your clone as it is now (`--from v0.6.9`: that release), `--reuse-pyqt`
-  saves downloading the window's PyQt6 each time, and `--keep` keeps the home (`--again DIR`
-  opens its window again). `dev/fresh-install.sh --help` has the rest.
+  checkout` installs your clone as it is now (`--from v0.6.9`: that release; `--beta`: the
+  testers' one-liner, which takes the newest test release), `--reuse-pyqt` saves downloading the
+  window's PyQt6 each time (without it, that setup shows the installer's splash, as a new user
+  sees it), and `--keep` keeps the home (`--again DIR` opens its window again).
+  `dev/fresh-install.sh --help` has the rest.
 - **On a Frame:** `./install.sh install ID` in your clone installs your copy of the tweak, and
   `./install.sh status ID` checks it. (On a PC it installs too, for real, into your home folder,
   and the Homebrew ones and Battery charge limit ask for sudo: use `dev/test-tweaks.sh` there.) `./install.sh gui` and `./install.sh menu` point the

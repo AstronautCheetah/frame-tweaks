@@ -219,6 +219,15 @@ class Running(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn(b"the-last-line", out)
 
+    def test_without_a_controlling_terminal(self):
+        # (the one-liner reads its script from curl, and dev/fresh-install.sh's sandbox is a session
+        # of its own: the keys come from the terminal the output goes to)
+        rc, out = in_pty(["setsid", "-w", "sh", "-c", 'echo | "$0" "$1" -- sh -c "echo from-the-command"',
+                          sys.executable, str(SPLASH)], self.env)
+        self.assertEqual(rc, 0)
+        self.assertIn(b"\x1b[?1049h", out)
+        self.assertIn(b"from-the-command", out)
+
     def test_off(self):
         rc, out = in_pty([sys.executable, str(SPLASH), "--", "sh", "-c", "echo plain"],
                          {**self.env, "FRAME_TWEAKS_SPLASH": "off"})
