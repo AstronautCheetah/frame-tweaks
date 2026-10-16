@@ -9,15 +9,18 @@
   being done and for how long. When it's over, the terminal is as it was, with the whole output in
   it (and its scrollback) under a small banner. Questions, sudo's password prompt, progress bars
   and Ctrl+C work as before. It's drawn in "▀" characters, two pixels to a cell, and nothing
-  sweeps across the whole screen, which is uncomfortable in the headset. `FRAME_TWEAKS_SPLASH=off`
-  turns it off and `=still` stops the motion; KDE's animation speed set to instant stops it too.
-  See it with `python3 lib/splash.py --demo`.
+  sweeps across the whole screen, which is uncomfortable in the headset. **⚙ Preferences →
+  Installing in a terminal** chooses animated, still or the output only, and **Show me** shows
+  it (`FRAME_TWEAKS_SPLASH=on|still|off` goes first); KDE's animation speed set to instant keeps
+  it still too. Or see it with `python3 lib/splash.py --demo`.
 
 ### Changed
 - **The installer window sets itself up without asking:** the first time, PyQt6 (what the window
   is drawn with, about 280 MB) is set up at once, under the new splash, instead of after a
   question whose other answer was the simple checklist. The checklist is still there if the
-  setup fails. Started from the app menu, the setup shows in a terminal window of its own.
+  setup fails. Started from the app menu, the setup shows in a terminal window of its own. Its
+  messages no longer say how long it takes ("usually a minute or two"): that depends on your
+  Internet connection.
 
 ### For pack authors
 - **`dev/fresh-install.sh --beta`** runs the testers' one-liner (`… | FRAME_TWEAKS_CHANNEL=beta

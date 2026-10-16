@@ -773,6 +773,10 @@ msgid "Also delete the settings"
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Animated"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid "Couldn't delete: {paths}"
 msgstr ""
 
@@ -829,8 +833,17 @@ msgid "Homebrew itself is never removed: other programs may live in it."
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Installing in a terminal"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid ""
 "Its folder ({folder}) goes too, unless it holds work of yours (changes, your own packs); this window closes, and a terminal shows each step."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"KDE's animation speed set to instant (System Settings) keeps it still too."
 msgstr ""
 
 #: gui/prefs_page.py
@@ -858,7 +871,15 @@ msgid "Off: only when you press ⟳ Check for updates."
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Output only"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid "Preferences"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Press any key to close"
 msgstr ""
 
 #: gui/prefs_page.py
@@ -883,7 +904,15 @@ msgid "Settings are kept."
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Show me"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid "Stay on it"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Still"
 msgstr ""
 
 #: gui/prefs_page.py
@@ -952,6 +981,11 @@ msgstr ""
 #: gui/prefs_page.py
 msgid ""
 "When you uninstall a tweak, its settings can stay, so it's set up as before if you install it again, or be removed along with it."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"While an install, removal or update runs in a terminal, as this window's do: Frame Tweaks' logo above the output, animated or still, or the output alone."
 msgstr ""
 
 #: gui/prefs_page.py
@@ -1296,8 +1330,7 @@ msgid "--to needs a release, e.g. v0.3.1"
 msgstr ""
 
 #: install.sh
-msgid ""
-"About 280 MB, usually a minute or two: the window opens when it's done."
+msgid "About 280 MB to download: the window opens when it's done."
 msgstr ""
 
 #: install.sh
@@ -1390,6 +1423,11 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid ""
+"PyQt6, the toolkit it's drawn with: about 280 MB to download. The window opens when this is done."
+msgstr ""
+
+#: install.sh
 msgid "Read it before sharing; attach it to a bug report: %s"
 msgstr ""
 
@@ -1406,8 +1444,7 @@ msgid "Setting up the full installer window"
 msgstr ""
 
 #: install.sh
-msgid ""
-"Setting up the full installer window: PyQt6, the toolkit it's drawn with (about 280 MB, usually a minute or two). It opens when this is done."
+msgid "Setting up the installer window"
 msgstr ""
 
 #: install.sh
@@ -1590,6 +1627,11 @@ msgstr ""
 
 #: lib/common.sh
 msgid ""
+"About 280 MB to download, shared by the installer window and the tweaks that use it."
+msgstr ""
+
+#: lib/common.sh
+msgid ""
 "Active from the next SteamVR start (reboot, or restart SteamVR from its menu)."
 msgstr ""
 
@@ -1635,8 +1677,7 @@ msgid "Not active yet: %s"
 msgstr ""
 
 #: lib/common.sh
-msgid ""
-"Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
+msgid "Setting up PyQt6, a window toolkit"
 msgstr ""
 
 #: lib/common.sh

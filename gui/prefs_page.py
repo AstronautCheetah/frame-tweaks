@@ -2,9 +2,13 @@
 whether uninstalling a tweak removes its settings, and how this window behaves. The window's own
 choices are kept in ~/.config/frame-tweaks/installer/window.json; the language in
 ~/.config/frame-tweaks/language; whether updates take test releases in ~/.config/frame-tweaks/channel;
-the uninstall choice in ~/.config/frame-tweaks/uninstall-settings."""
+the uninstall choice in ~/.config/frame-tweaks/uninstall-settings; the look of installs in a
+terminal in ~/.config/frame-tweaks/splash (lib/splash.py)."""
 
-from PyQt6.QtCore import Qt, QTimer
+import os
+import shlex
+
+from PyQt6.QtCore import QProcess, Qt, QTimer
 from PyQt6.QtWidgets import (QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QRadioButton,
                              QScrollArea, QVBoxLayout, QWidget)
 
@@ -12,6 +16,7 @@ import i18n  # (lib/ is on the path)
 import ftconf
 from i18n import _, N_, ngettext
 import sft
+import splash
 
 WINDOW = sft.CONF / "window.json"
 # key: (default, label, explanation)
@@ -98,6 +103,30 @@ class Preferences(QWidget):
         rows.addWidget(self.about(_("Test releases (such as 0.7.0-rc.1) come before a release, for people who try "
                                     "things first: newer, less tested. Off: stable releases only.")))
         self.going_back = self.ask_box(rows, _("Go back now"), lambda: self.go_back_to_stable(), no_label=_("Stay on it"))
+
+        # Installing in a terminal: Frame Tweaks' logo above the output (lib/splash.py, which reads
+        # the choice for this window's installs and the terminal's alike).
+        rows.addWidget(self.heading(_("Installing in a terminal")))
+        rows.addWidget(self.note(_("While an install, removal or update runs in a terminal, as this window's do: "
+                                   "Frame Tweaks' logo above the output, animated or still, or the output alone.")))
+        grid = QHBoxLayout()
+        grid.setSpacing(6)
+        self.splash_buttons = {}
+        for value, label in (("on", _("Animated")), ("still", _("Still")), ("off", _("Output only"))):
+            b = QPushButton(label)
+            b.setCheckable(True)
+            b.setChecked(value == splash.setting())
+            b.setObjectName("choice")
+            b.clicked.connect(lambda _on=False, v=value: self.choose_splash(v))
+            grid.addWidget(b)
+            self.splash_buttons[value] = b
+        grid.addSpacing(12)
+        show = QPushButton(_("Show me"))
+        show.clicked.connect(lambda: self.show_splash())
+        grid.addWidget(show)
+        grid.addStretch(1)
+        rows.addLayout(grid)
+        rows.addWidget(self.about(_("KDE's animation speed set to instant (System Settings) keeps it still too.")))
 
         # (below a line: what removes things)
         line = QFrame()
@@ -275,6 +304,21 @@ class Preferences(QWidget):
         for v, b in self.uninstall_buttons.items():
             b.setChecked(v == value)
         self.window.say(_("Saved."), good=True)
+
+    def choose_splash(self, value):
+        splash.set_setting(value)
+        for v, b in self.splash_buttons.items():
+            b.setChecked(v == value)
+        self.window.say(_("Saved."), good=True)
+
+    def show_splash(self):
+        """A pretend install in a terminal (lib/splash.py --demo), as the choice has it."""
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would show: lib/splash.py --demo")
+            return
+        script = (f"python3 {shlex.quote(str(sft.REPO / 'lib/splash.py'))} --demo; echo; "
+                  f"read -rsn1 -p {shlex.quote(_('Press any key to close'))}")
+        QProcess.startDetached("konsole", ["--separate", "-e", "bash", "-c", script])
 
     def choose_channel(self, on):
         sft.set_release_channel("beta" if on else "stable")
