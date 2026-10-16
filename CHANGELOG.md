@@ -23,7 +23,9 @@
 - **Running the install command again over an install opens the window at once:** it updates, as
   `./install.sh update` does, and that re-ran every installed tweak's installer (minutes) even
   when it was on the newest release already. Now an update that changes nothing reinstalls
-  nothing; `./install.sh reinstall` runs the installers again when you want that.
+  nothing, except the tweaks an earlier update didn't finish (one whose installer failed, or
+  that was stopped partway); `./install.sh update --reinstall` runs the installers again when
+  you want that.
 - **⚙ Preferences scrolls to its questions:** **Uninstall Frame Tweaks…** (and deleting leftover
   settings, or going back to the stable release) opens its question below the button, at the
   page's bottom, where it was easy to miss; the page now scrolls to show all of it.

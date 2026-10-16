@@ -322,7 +322,8 @@ Or, in the Frame Tweaks window: **⟳ Check for updates**, then **⬇ Update to 
 **↻ Restart** when it's done (the window also checks when it opens). Running the install command
 again does the same. This moves to the newest
 release and re-runs the installer of every tweak you have installed (on the newest release
-already, it changes nothing: `./install.sh reinstall` runs the installers again). It first checks that the
+already, it changes nothing, unless an earlier update didn't finish:
+`./install.sh update --reinstall` runs the installers again anyway). It first checks that the
 release is signed by Frame Tweaks' release key and refuses one that isn't. Nothing updates on its
 own: a tweak only changes when you update. (The one exception is Claude Code, which updates itself
 the way Anthropic's installer sets it up.)

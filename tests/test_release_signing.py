@@ -116,7 +116,8 @@ class Update(unittest.TestCase):
     """./install.sh update in a release checkout: to the newest signed tag (checked out as the tag,
     even when a branch has its name), and stopping before the reinstall when the checkout fails.
     In a copy of this repo with two releases signed by a throwaway key, and a throwaway home with
-    the official packs off (none of their scripts run) and a do-nothing tweak in their place."""
+    the official packs off (none of their scripts run) and a do-nothing tweak in their place
+    (installed, it leaves a file in the home; it fails while the home has probe-fails)."""
 
     @classmethod
     def setUpClass(cls):
@@ -148,6 +149,7 @@ class Update(unittest.TestCase):
             if n > 1:
                 with open(cls.src / "README.md", "a") as readme:
                     readme.write(f"\nRelease {n}.\n")
+            (cls.src / "VERSION").write_text(tag[1:] + "\n")                  # (as a release sets it)
             cls.git(cls.src, "add", "-A")
             cls.git(cls.src, "commit", "-qm", f"release {n}")
             cls.git(cls.src, *sign, tag, "-m", tag)
@@ -155,9 +157,10 @@ class Update(unittest.TestCase):
         (cls.pack / "probe").mkdir(parents=True)
         (cls.pack / "pack.md").write_text("---\nname: Probe pack\napi: 1\n---\n")
         (cls.pack / "probe/README.md").write_text(PROBE)
-        for name in ("install.sh", "uninstall.sh"):
-            (cls.pack / "probe" / name).write_text("#!/bin/bash\n")
-        (cls.pack / "probe/status.sh").write_text('#!/bin/bash\necho "missing  no"; exit 1\n')
+        (cls.pack / "probe/install.sh").write_text('#!/bin/bash\n[[ ! -e ~/probe-fails ]] && touch ~/probe-installed\n')
+        (cls.pack / "probe/uninstall.sh").write_text('#!/bin/bash\nrm -f ~/probe-installed\n')
+        (cls.pack / "probe/status.sh").write_text(
+            '#!/bin/bash\n[[ -e ~/probe-installed ]] && { echo "ok       installed"; exit 0; }\necho "missing  no"; exit 1\n')
         (cls.tmp / "stubs").mkdir()
         (cls.tmp / "stubs/systemctl").write_text("#!/bin/bash\nexit 0\n")     # (sysctl_user: not the real one)
         (cls.tmp / "stubs/systemctl").chmod(0o755)
@@ -189,6 +192,13 @@ class Update(unittest.TestCase):
         return subprocess.run([str(co / "install.sh"), "update", *args], env=self.run_env(), stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=120)
 
+    def install(self, co, *args):
+        return subprocess.run([str(co / "install.sh"), *args], env=self.run_env(), stdin=subprocess.DEVNULL,
+                              capture_output=True, text=True, timeout=120)
+
+    def recorded(self):
+        return (self.home / ".local/state/frame-tweaks/installed/probe").read_text().strip()
+
     def channel(self, co, *args):
         return subprocess.run([str(co / "install.sh"), "channel", *args], env=self.run_env(), stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=60)
@@ -216,10 +226,40 @@ class Update(unittest.TestCase):
         r = self.update(co)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("Frame Tweaks is up to date", r.stdout)
-        self.assertIn("./install.sh reinstall", r.stdout)
+        self.assertIn("./install.sh update --reinstall", r.stdout)
         self.assertNotIn("Nothing installed yet.", r.stdout)            # (the second stage didn't run)
         self.assertNotIn("Updating to", r.stdout)
         self.assertEqual(self.at(co), self.commit("v0.0.2"))
+        r = self.update(co, "--reinstall")                               # (what it says to run)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Nothing installed yet.", r.stdout)
+
+    def test_an_update_that_didnt_finish_is_finished_by_running_it_again(self):
+        """The checkout moves before the installers run: one that failed (or the update stopped
+        partway) is still older, so running update again runs them, not "up to date"."""
+        co = self.checkout()
+        r = self.install(co, "install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.recorded(), "0.0.1")
+        (self.home / "probe-fails").touch()                              # (installed, but its installer fails)
+        r = self.update(co)
+        self.assertIn("probe failed", r.stdout + r.stderr)
+        self.assertEqual(self.at(co), self.commit("v0.0.2"))
+        self.assertEqual(self.recorded(), "0.0.1")
+        (self.home / "probe-fails").unlink()
+        r = self.update(co)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertNotIn("up to date", r.stdout)
+        self.assertEqual(self.recorded(), "0.0.2")
+        self.assertIn("up to date", self.update(co).stdout)             # (and then it's done)
+
+    def test_a_held_tweak_doesnt_keep_an_update_unfinished(self):
+        co = self.checkout()
+        self.assertEqual(self.install(co, "install", "probe").returncode, 0)
+        self.assertEqual(self.install(co, "hold", "probe").returncode, 0)
+        self.assertEqual(self.update(co).returncode, 0)
+        self.assertEqual(self.recorded(), "0.0.1")                      # (left as it is)
+        self.assertIn("up to date", self.update(co).stdout)
 
     def test_test_releases_come_and_go_with_the_channel(self):
         """Beta: the test release. Stable again: no going back unasked, but --to stable goes back."""
