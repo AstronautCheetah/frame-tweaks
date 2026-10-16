@@ -140,7 +140,7 @@ class InstallState(unittest.TestCase):
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         self.assertEqual(self.log(), ["install"])
         self.record.unlink()
-        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\nexit 0\n")
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\nexit 1\n")     # (failed, no why: needed)
         self.trust()
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         self.assertEqual(self.log(), ["install", "install"])

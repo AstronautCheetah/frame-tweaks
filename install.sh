@@ -214,7 +214,7 @@ not_needed() {
     [[ -f ${DIR[$1]}/needed.sh ]] || return 1
     local why
     why=$(bash "${DIR[$1]}/needed.sh" 2>/dev/null) && return 1
-    [[ $? -eq 1 ]] || return 1                  # (it couldn't tell: offered, as before)
+    [[ $? -eq 1 && -n $why ]] || return 1       # (it couldn't tell, or failed without a why: offered)
     echo "${why%%$'\n'*}"
 }
 

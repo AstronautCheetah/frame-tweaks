@@ -231,7 +231,9 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one
   line; exit 0 or 1); `./install.sh check-system` and updates run it.
 - `needed.sh`: whether this Frame needs the tweak at all: exit 0 if it does, exit 1 with one line
-  saying why if it doesn't (SteamOS now does it itself, say). Check what the Frame has, a
+  saying why if it doesn't (SteamOS now does it itself, say). Exit 1 without that line counts as
+  needed, so a check that fails (`common.sh` stops a script at the first failing command) never
+  hides a tweak. Check what the Frame has, a
   package's version (`pacman -Q`, `vercmp`) or a file, rather than the SteamOS version, which the
   beta and stable branches number differently. A tweak that isn't needed isn't offered: the
   window hides it (**Show hidden** lists it, saying why, with its box disabled), and

@@ -1,7 +1,7 @@
 """Shell tweaks with no other tests, run in a throwaway home with stand-ins for system tools:
 Firefox's user.js block (install, the old marker, uninstall resetting prefs.js) and NordVPN's
-status line; Shared clipboard's status with and without desktop mode; pinned downloads falling
-back to Frame Tweaks' copy."""
+status line; Shared clipboard's status with and without desktop mode; Mouse cursor fix not
+needed from gamescope 3.16.30; pinned downloads falling back to Frame Tweaks' copy."""
 import sys
 import hashlib
 import os
@@ -111,6 +111,37 @@ class NordVPNStatus(Home):
         self.nmcli(conns)
         r = self.run_script("nordvpn/status.sh")
         self.assertEqual(r.stdout.strip(), "ok       2 location(s); disconnected; connects at startup: United States")
+
+
+class CursorNotNeeded(Home):
+    """Mouse cursor fix: not needed from gamescope 3.16.30 (SteamVR draws desktop mode's pointer
+    itself); installed there, its status asks to uninstall it. (pacman is a stand-in.)"""
+    def gamescope(self, version):
+        self.stub("pacman", f'[ "$*" = "-Q gamescope" ] && echo "gamescope {version}"')
+
+    def test_needed_before_gamescope_3_16_30_only(self):
+        for version, needed in (("3.16.28-2", True), ("3.16.29-1", True), ("3.16.30-1", False), ("3.16.31-1", False),
+                                ("3.17.0-1", False), ("3.16.3-1", True)):
+            self.gamescope(version)
+            r = self.run_script("cursor/needed.sh")
+            self.assertEqual(r.returncode, 0 if needed else 1, version)
+            if not needed:
+                self.assertIn(f"this Frame has {version}", r.stdout)
+        self.stub("pacman", "exit 1")                      # (no pacman, or no gamescope: offered)
+        self.assertEqual(self.run_script("cursor/needed.sh").returncode, 0)
+
+    def test_installed_where_not_needed_is_a_warning(self):
+        conf = self.home / ".config/environment.d/90-kwin-software-cursor.conf"
+        conf.parent.mkdir(parents=True)
+        conf.write_text("KWIN_FORCE_SW_CURSOR=1\n")
+        self.stub("pgrep", "exit 1")                       # (no desktop mode running)
+        self.gamescope("3.16.30-1")
+        r = self.run_script("cursor/status.sh")
+        self.assertEqual(r.returncode, 2, r.stdout)
+        self.assertIn("second pointer (a black X): uninstall it", r.stdout)
+        self.gamescope("3.16.28-2")
+        r = self.run_script("cursor/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (0, "ok       installed (active in desktop mode after a reboot)"))
 
 
 class ClipboardStatus(Home):

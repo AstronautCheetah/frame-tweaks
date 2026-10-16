@@ -20,6 +20,11 @@
   tweak's status, say which location connects at startup.
 
 ### Changed
+- **Mouse cursor fix isn't offered from SteamOS 0.5.6:** its gamescope (3.16.30) has SteamVR draw
+  desktop mode's pointer itself, and with the fix you got two, its large one and a black X. On
+  those versions it's hidden (Show hidden says why) and, if installed, its status asks you to
+  uninstall it; older versions still get it. A tweak's `needed.sh` that fails without saying
+  why no longer counts as "not needed".
 - **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a
   link to the page and where its Star button is.
 - **Battery charge limit swings by 1%, and can stop at 74%, 76% or 78% too:** charging starts

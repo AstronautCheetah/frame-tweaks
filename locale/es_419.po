@@ -5322,13 +5322,19 @@ msgid ""
 msgstr ""
 "En modo escritorio en el Frame, el mouse se mueve pero su puntero no se ve: el escritorio lo dibuja en una capa aparte que la vista del visor no incluye."
 
+# needs review
 #: packs/third-party/cursor/README.md
-msgid "Makes the mouse pointer visible in desktop mode"
-msgstr "Hace visible el puntero del mouse en modo escritorio"
+msgid ""
+"Makes the mouse pointer visible in desktop mode (SteamOS before 0.5.6)"
+msgstr ""
+"Hace visible el puntero del mouse en el modo escritorio (SteamOS anterior a 0.5.6)"
 
+# needs review
 #: packs/third-party/cursor/README.md
-msgid "Makes the mouse pointer visible in desktop mode."
-msgstr "Hace visible el puntero del mouse en modo escritorio."
+msgid ""
+"Makes the mouse pointer visible in desktop mode, on SteamOS before 0.5.6; from 0.5.6, SteamOS shows it itself."
+msgstr ""
+"Hace visible el puntero del mouse en el modo escritorio, en SteamOS anterior a 0.5.6; a partir de 0.5.6, SteamOS lo muestra por sí mismo."
 
 #: packs/third-party/cursor/README.md
 msgid "Mouse cursor fix"
@@ -5339,6 +5345,13 @@ msgid ""
 "Installed. Takes effect after a reboot (or the next desktop-mode login)."
 msgstr ""
 "Instalado. Surte efecto después de reiniciar el equipo (o al próximo inicio de sesión en modo escritorio)."
+
+# needs review
+#: packs/third-party/cursor/needed.sh
+msgid ""
+"SteamOS shows the pointer itself since gamescope 3.16.30 (this Frame has %s)"
+msgstr ""
+"SteamOS muestra el puntero por sí mismo desde gamescope 3.16.30 (este Frame tiene %s)"
 
 #: packs/third-party/cursor/status.sh
 msgid "cursor fix not installed"
@@ -5351,6 +5364,13 @@ msgstr "instalado (activo en modo escritorio después de reiniciar el equipo)"
 #: packs/third-party/cursor/status.sh
 msgid "installed; active after the next reboot"
 msgstr "instalado; activo después del próximo reinicio"
+
+# needs review
+#: packs/third-party/cursor/status.sh
+msgid ""
+"not needed any more, and it adds a second pointer (a black X): uninstall it. %s"
+msgstr ""
+"ya no hace falta, y agrega un segundo puntero (una X negra): desinstálalo. %s"
 
 #: packs/third-party/cursor/status.sh
 msgid "software cursor active"
@@ -5940,3 +5960,9 @@ msgstr "Instalador de ajustes"
 #~ "Stop charging at 80% (or 85 or 90%) while the Frame is on, for a battery that wears more slowly"
 #~ msgstr ""
 #~ "Deja de cargar al 80% (o al 85 o 90%) mientras el Frame está encendido, para que la batería se desgaste más lento"
+
+#~ msgid "Makes the mouse pointer visible in desktop mode"
+#~ msgstr "Hace visible el puntero del mouse en modo escritorio"
+
+#~ msgid "Makes the mouse pointer visible in desktop mode."
+#~ msgstr "Hace visible el puntero del mouse en modo escritorio."
