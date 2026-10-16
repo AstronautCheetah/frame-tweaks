@@ -183,6 +183,27 @@ class DictateAutoStop(Home):
         self.assertEqual((log.count("record "), log.count("whisper ")), (1, 1), log)
         self.assertEqual(dictate("--status").stdout.strip(), "idle")
 
+    def test_stopping_a_recording_ends_its_auto_stop_timer(self):
+        """A recording stopped by a press left its auto-stop timer sleeping out MAX_SECONDS (300 by
+        default) as a process of its own: it goes with the recording now."""
+        dictate = self.dictate(300)
+        self.stub(self.home / ".local/bin", "pw-record",                       # (records until stopped)
+                  f'echo "record $*" >> {self.log}; for f; do :; done; echo RIFF > "$f"; exec sleep 30 >/dev/null 2>&1 </dev/null')
+        self.assertEqual(dictate().returncode, 0)
+        timer = int((self.run / "dictate/autostop.pid").read_text())
+        os.kill(timer, 0)                                                     # (it's there)
+        time.sleep(0.8)                           # (within 0.7 s, a press is a double tap: ignored)
+        self.assertEqual(dictate().returncode, 0)
+        for _ in range(60):
+            try:
+                os.kill(timer, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(0.05)
+        else:
+            self.fail("the auto-stop timer is still running")
+        self.assertFalse((self.run / "dictate/autostop.pid").exists())
+
 
 class DictationInstall(Home):
     def install(self, conf):

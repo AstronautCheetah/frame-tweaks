@@ -48,6 +48,7 @@ PID="$STATE/rec.pid"        # pid of the running pw-record
 CUR="$STATE/rec.current"    # path of the file being recorded
 BUSY="$STATE/busy.pid"      # pid of a running transcription
 LAST="$STATE/last-toggle"   # time of the last toggle, to ignore double taps
+TIMER="$STATE/autostop.pid" # pid of the recording's auto-stop timer, ended with the recording
 
 notify() { notify-send -a Dictation -t 1500 "$@" 2>/dev/null; }
 cue() { pw-play "$SOUNDS/$1.oga" 9>&- 2>/dev/null & }   # 9>&-: never hold the toggle lock
@@ -133,6 +134,9 @@ if [ -f "$PID" ]; then
     wav=$(cat "$CUR")
     if alive "$PID"; then kill -INT "$(cat "$PID")"; else log "the recording had ended by itself"; fi
     rm -f "$PID"
+    # Its auto-stop timer goes too (it slept on for MAX_SECONDS; only if it's still a dictate).
+    t=$(cat "$TIMER" 2>/dev/null) && grep -qs dictate "/proc/$t/cmdline" && kill "$t" 2>/dev/null
+    rm -f "$TIMER"
     echo $$ > "$BUSY"                 # mark busy before unlocking
     flock -u 9; exec 9>&-
     sleep 0.3
@@ -148,9 +152,14 @@ else
     log "start pid $rec"
     # Safety net: stop a forgotten recording after MAX_SECONDS (if it's still this one: the toggle
     # then stops and transcribes it, or, if pw-record ended by itself, transcribes what it caught).
-    ( exec 9>&-; sleep "$MAX_SECONDS"
-      if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST"; exec "$0"; fi
+    # (Its sleep in the background, so that the stop above, killing it, ends the sleep too.)
+    ( exec 9>&-; trap 'kill "$s" 2>/dev/null; exit 0' TERM
+      sleep "$MAX_SECONDS" & s=$!; wait "$s"
+      if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then
+          log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST" "$TIMER"; exec "$0"     # ($TIMER: that's us)
+      fi
     ) >/dev/null 2>&1 &
+    echo $! > "$TIMER"
     sleep 0.15; cue device-added
     notify "🎙 $(t 'Listening… (run again to stop)')"
 fi
