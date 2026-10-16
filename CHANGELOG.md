@@ -5,6 +5,9 @@
 ### Changed
 - **Help make Frame Tweaks better** starts with the quickest help: a star on GitHub, with a
   link to the page and where its Star button is.
+- **Battery charge limit's README explains desktop mode's battery icon:** while the limit holds,
+  KDE says the power supply "is not powerful enough to charge the battery". It's the tweak
+  pausing the charging, not the charger. It also says the battery drains slowly while paused.
 
 ### For contributors
 - **The manifest tests no longer overwrite your hidden tweaks:** they wrote their own hidden list
