@@ -859,8 +859,18 @@ def info(cid):
 # waits to be trusted again; remove deletes it once its tweaks are uninstalled.
 INSTALLED = Path.home() / ".local/state/frame-tweaks/installed"     # install records (./install.sh)
 LINK = re.compile(r"^(https://|ssh://|git@[\w.-]+:|file://)[^\s]+$")
-# (no ext:: transport, which runs a command; no submodules; never a password prompt)
-GIT = ["git", "-c", "protocol.ext.allow=never", "-c", "submodule.recurse=false"]
+# (no ext:: transport, which runs a command; no submodules; never a password prompt; and none of
+# the repository's own settings that run a command: hooks, an upload-pack or ssh command, an
+# fsmonitor. A pack's .git/config is checked before git runs in it: pack_git_ok.)
+GIT = ["git", "-c", "protocol.ext.allow=never", "-c", "submodule.recurse=false", "-c", "core.hooksPath=/dev/null",
+       "-c", "core.fsmonitor=false", "-c", "core.sshCommand=ssh", "-c", "remote.origin.uploadpack=git-upload-pack",
+       "-c", "remote.origin.receivepack=git-receive-pack"]
+# What a clone made by `mods add` has in its .git/config. Anything else there (a filter, which git
+# runs on pull, an include, a credential helper, a URL rewrite…) didn't come from Frame Tweaks, and
+# trusting a pack covers its files, not its .git folder.
+CLONE_CONFIG = re.compile(r"core\.(repositoryformatversion|filemode|bare|logallrefupdates|symlinks|ignorecase"
+                          r"|precomposeunicode)|remote\.origin\.(url|fetch)|branch\.[^\s]+\.(remote|merge)"
+                          r"|extensions\.(objectformat|refstorage)", re.IGNORECASE)
 
 
 class PackError(Exception):
@@ -894,9 +904,17 @@ def pack_folder_name(link):
     return re.sub(r"[^A-Za-z0-9._-]", "-", name).strip(".-") or "pack"
 
 
+def pack_git_ok(d):
+    """Whether a pack's .git/config holds only what a clone sets: read as a file (git config
+    --file runs nothing in it)."""
+    out = git("config", "--file", str(Path(d) / ".git/config"), "--name-only", "--list", check=False)
+    return out is not None and all(CLONE_CONFIG.fullmatch(k.strip()) for k in out.splitlines() if k.strip())
+
+
 def pack_origin(d):
-    """The link a pack was added from (mods add), or None."""
-    if not (Path(d) / ".git").is_dir():
+    """The link a pack was added from (mods add), or None (also when its git settings aren't a
+    clone's own: pack_git_ok)."""
+    if not (Path(d) / ".git").is_dir() or not pack_git_ok(d):
         return None
     out = git("remote", "get-url", "origin", cwd=d, check=False)
     return plain(out) or None if out else None
@@ -931,6 +949,14 @@ def add_pack(link, ref=None):
 def update_pack(d):
     """The newer version of a pack added from a link: {"files": changed files, "log": commit subjects}."""
     d = Path(d)
+    p = next((x for x in load(refresh=True)["packs"] if x["dir"] == d.resolve()), None)
+    if p is None or p["state"] != "trusted":
+        # (git runs in its folder: only in a pack you've trusted, as for looking for updates)
+        raise PackError(_("{pack} isn't trusted: trust it first ({command}), or remove it and add it again.").format(
+            pack=d.name, command=f'./install.sh mods trust "{d}"'))
+    if (d / ".git").is_dir() and not pack_git_ok(d):
+        raise PackError(_("{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act "
+                          "on them: remove the pack and add it again.").format(pack=d.name))
     if not pack_origin(d):
         raise PackError(_("{pack} wasn't added from a link: change its folder yourself.").format(pack=d.name))
     if git("symbolic-ref", "-q", "HEAD", cwd=d, check=False) is None:
@@ -1081,7 +1107,15 @@ def mods(args):
     if args == ["updates"]:
         found = 0
         for p in load()["packs"]:
-            if not (removable(p) and pack_origin(p["dir"])):
+            if not removable(p):
+                continue
+            if p["state"] != "trusted":         # (git runs in its folder: only in a pack you've trusted)
+                if (p["dir"] / ".git").is_dir():
+                    found += 1
+                    print(f"{plain(p['name'])}: " + _("not checked: not trusted ({command})").format(
+                        command=f'./install.sh mods trust "{p["dir"]}"'))
+                continue
+            if not pack_origin(p["dir"]):
                 continue
             found += 1
             news = pack_has_update(p["dir"])

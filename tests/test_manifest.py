@@ -430,6 +430,53 @@ class Packs(unittest.TestCase):
         with mock.patch.object(sft, "pack_has_update", return_value=True) as check:
             self.assertEqual([p["name"] for p in sft.packs_with_updates()], ["their-pack"])
 
+    def git_pack(self, name, **config):
+        """A pack that is a git repository with an origin, and these settings in its .git/config."""
+        import subprocess
+        d = self.tweak(name, "hello")
+        env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        run = lambda *a: subprocess.run(["git", *a], cwd=d.parent, env=env, check=True, capture_output=True)
+        run("init", "-q", "-b", "main")
+        run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "x")
+        run("remote", "add", "origin", "https://example.invalid/pack.git")
+        for k, v in config.items():
+            run("config", k.replace("__", "."), v)
+        return d.parent
+
+    def test_the_terminal_checks_and_updates_only_trusted_packs(self):
+        """./install.sh mods updates and mods update PACK (and the window's Update button) ran git
+        in any pack; 0.6.10 kept only the window's own check to trusted ones."""
+        mark = Path(self.tmp.name) / "ran"
+        d = self.git_pack("their-pack", remote__origin__uploadpack=f"touch {mark}; git-upload-pack")
+        sft.load(refresh=True)                              # (as a new ./install.sh run has it)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            sft.mods(["updates"])
+        self.assertIn("not checked: not trusted", out.getvalue())
+        with self.assertRaises(sft.PackError) as e:
+            sft.update_pack(d)
+        self.assertIn("isn't trusted", str(e.exception))
+        self.assertFalse(mark.exists())
+
+    def test_a_packs_git_settings_that_run_commands_are_refused(self):
+        """Trusting a pack covers its files, not its .git folder: settings git acts on (a filter it
+        runs on pull, an upload-pack command) came from elsewhere. Git isn't run in such a pack,
+        and the repository's own hooks and commands are overridden anyway."""
+        mark = Path(self.tmp.name) / "ran"
+        for setting in ({"filter__x__smudge": f"touch {mark}"}, {"remote__origin__uploadpack": f"touch {mark}"},
+                        {"include__path": "/tmp/elsewhere"}):
+            with self.subTest(setting=setting):
+                d = self.git_pack("pack-" + str(len(str(setting))), **setting)
+                sft.set_trusted(d, True)
+                self.assertFalse(sft.pack_git_ok(d))
+                self.assertIsNone(sft.pack_origin(d))
+                with self.assertRaises(sft.PackError) as e:
+                    sft.update_pack(d)
+                self.assertIn(".git/config", str(e.exception))
+        self.assertFalse(mark.exists())
+        self.assertTrue(sft.pack_git_ok(self.git_pack("fine")))
+        self.assertIn("core.hooksPath=/dev/null", sft.GIT)
+
     def test_mods_lists_a_packs_own_text_without_control_characters(self):
         """An untrusted pack's name could hold terminal escapes that rewrite its line to look like
         an official pack's "official: in use"."""
