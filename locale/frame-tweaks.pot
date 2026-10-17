@@ -4053,6 +4053,11 @@ msgstr ""
 
 #: packs/core/tools/taskbar-guard
 msgid ""
+"The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+msgstr ""
+
+#: packs/core/tools/taskbar-guard
+msgid ""
 "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
 msgstr ""
 
