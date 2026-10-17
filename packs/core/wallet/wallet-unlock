@@ -438,7 +438,7 @@ def schedule_lock(at=None):
         s, holder = session(), ksecretd_id()
         if s.get("ksecretd") != holder:           # (unlocked in another ksecretd: a new unlock)
             s = {"ksecretd": holder}
-        s.setdefault("unlocked", time.time())     # an app reopening the open wallet only moves the lock
+        s.setdefault("unlocked", time.time())     # (the same unlock: Extend keeps when it was)
         s["locks"] = deadline                     # (the timer's own time: the page shows this one)
         try:
             SESSION.write_text(json.dumps(s))
@@ -455,6 +455,13 @@ def open_in_kwalletd6():
                 bool(call(calls, new_method_call(KWALLETD, "isOpen", "s", (WALLET,)))[0])
     except Exception:
         return False                    # (can't tell: closed, as it said)
+
+
+def lock_set():
+    """Whether the auto-lock is set for the unlock in this ksecretd (its timer running, the session
+    saying so): an app opening the wallet then isn't a new unlock."""
+    s = session()
+    return bool(s.get("locks")) and s.get("ksecretd") == ksecretd_id() and timer_lock_time() is not None
 
 
 def keep_auto_lock():
@@ -557,7 +564,14 @@ def watch():
             if member == "walletOpened" and body and body[0] == WALLET:
                 if front.ours():                       # (ours, keeping kwalletd6 in step: not an app)
                     continue
-                # Unlocked by any route: the 4-hour auto-lock counts from now.
+                if lock_set():
+                    # An app opening the wallet that's unlocked already: the auto-lock stays where it
+                    # is, counted from the unlock or the last Extend, as the Wallet apps page shows it.
+                    # (It moved later with every app's open: the owner's choice was the unlock.)
+                    print(f"{time.strftime('%T')} wallet opened by an app; auto-lock stays", flush=True)
+                    front.sync()
+                    continue
+                # Unlocked by any route: the auto-lock counts from now.
                 hours = schedule_lock()
                 print(f"{time.strftime('%T')} wallet opened -> " + (f"auto-lock in {hours} h" if hours else "auto-lock off"), flush=True)
                 front.sync()
