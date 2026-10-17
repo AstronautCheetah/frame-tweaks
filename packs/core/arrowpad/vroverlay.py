@@ -7,8 +7,12 @@ mouse events are fed back into its buttons. Keys then reach the app you were usi
 haptics go to the controller that's pointing (an overlay being pointed at has input focus).
 
 Like Full Keyboard: visible while the dashboard is, Reset puts it in front of you, +/- change
-its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that.
+its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that. While Steam's
+keyboard shows, SteamVR hides where the controllers are from other programs (its keyboard
+privacy), so a drag then slides the panel in its own plane after the laser instead, and a note
+under the panel says so.
 """
+import contextlib
 import glob
 import hashlib
 import math
@@ -19,9 +23,15 @@ import time
 import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sys.path)
 import openvr
 import vrkit  # noqa: E402
-from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt, QTimer
-from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtCore import QEvent, QPoint, QPointF, QRectF, Qt, QTimer
+from PyQt6.QtGui import QColor, QFont, QFontMetricsF, QImage, QMouseEvent, QPainter
 from PyQt6.QtWidgets import QApplication, QPushButton
+
+try:
+    from i18n import _                  # (beside ftconf: arrowpad.py puts that folder on sys.path)
+except ImportError:
+    def _(text):
+        return text
 
 KEY = "frame-tweaks.arrowpad"
 # The texture goes to SteamVR as a PNG file (SetOverlayFromFile), not SetOverlayRaw: on the Frame
@@ -47,6 +57,31 @@ FOLLOW = (DASHBOARD_BAR, DASHBOARD_MAIN)       # what the pad rides along with
 PLACE = (DASHBOARD_MAIN, DASHBOARD_BAR)        # what Reset puts it beneath
 GAP_BELOW, TOWARD_VIEWER, PITCH_DEG = 0.06, 0.24, 50
 FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of the headset
+# The note under the panel while it slides (Steam's keyboard open): its width, the gap above it,
+# and how long it stays after you let go (time to finish reading).
+NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS = 0.36, 0.02, 3000
+NOTE_PX, NOTE_PAD_PX, NOTE_FONT_PX = 900, 28, 34     # its picture: width, margin, text size
+
+
+def note_image(text):
+    """The note's picture: text in a dark rounded box, as wide as NOTE_PX and as tall as it needs."""
+    font = QFont(QApplication.font())
+    font.setPixelSize(NOTE_FONT_PX)
+    flags = int(Qt.AlignmentFlag.AlignCenter) | int(Qt.TextFlag.TextWordWrap)
+    inner = NOTE_PX - 2 * NOTE_PAD_PX
+    h = int(QFontMetricsF(font).boundingRect(QRectF(0, 0, inner, 10000), flags, text).height()) + 2 * NOTE_PAD_PX
+    img = QImage(NOTE_PX, h, QImage.Format.Format_ARGB32_Premultiplied)
+    img.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(img)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    painter.setPen(Qt.PenStyle.NoPen)
+    painter.setBrush(QColor(11, 16, 22, 235))
+    painter.drawRoundedRect(QRectF(0, 0, NOTE_PX, h), 22, 22)
+    painter.setFont(font)
+    painter.setPen(QColor("#ffffff"))
+    painter.drawText(QRectF(NOTE_PAD_PX, NOTE_PAD_PX, inner, h - 2 * NOTE_PAD_PX), flags, text)
+    painter.end()
+    return img
 
 
 class OverlayHost:
@@ -96,6 +131,8 @@ class OverlayHost:
         except Exception:
             self.grips = None
         self.drag = None                # (device, offset, controller start, depth axis) while dragging
+        #                                 (offset None: sliding after the laser; start: the point grabbed)
+        self.laser_at = {}              # controller -> where its laser last was on the pad (widget px)
         self.last_device = None         # controller behind the latest laser event
         self.last_render = 0.0
         self.ticks = 0
@@ -296,6 +333,53 @@ class OverlayHost:
         self.ov.setOverlayTransformAbsolute(self.input_handle, openvr.TrackingUniverseStanding, m)
         if getattr(self, "cover", None) is not None:
             self.ov.setOverlayTransformAbsolute(self.cover, openvr.TrackingUniverseStanding, m)
+        if getattr(self, "note_shown", False):
+            self.place_note()
+
+    # ---- the note under the panel while it slides ---------------------------------------------
+    def show_slide_note(self):
+        """Sliding because Steam's keyboard is open: a note under the panel says why it only
+        slides. (A note that fails is left out: the slide goes on.)"""
+        try:
+            if getattr(self, "note", None) is None:
+                self.note = self.ov.createOverlay(KEY + ".note", "Arrow Pad")    # (display only: no input)
+                self.ov.setOverlaySortOrder(self.note, 11)
+                self.ov.setOverlayWidthInMeters(self.note, NOTE_WIDTH)
+            text = _("While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move "
+                     "it closer, further away or turn it.")
+            # (a file name for each text: SteamVR caches overlay images by path, see render)
+            path = f"{TEX_DIR}/arrowpad-note-{os.getpid()}-{hashlib.blake2b(text.encode(), digest_size=4).hexdigest()}.png"
+            if getattr(self, "note_path", None) != path:
+                img = note_image(text)
+                img.save(path, "PNG")
+                self.note_aspect = img.height() / img.width()
+                self.ov.setOverlayFromFile(self.note, path)
+                if getattr(self, "note_path", None):
+                    with contextlib.suppress(OSError):
+                        os.remove(self.note_path)
+                self.note_path = path
+            self.note_shown = True
+            self.place_note()
+            self.ov.showOverlay(self.note)
+        except Exception as e:
+            self.log_input(f"note: {type(e).__name__}: {e}")
+
+    def place_note(self):
+        """Just below the panel's bottom edge, in its plane, moving with it."""
+        w, h = self.size
+        k = getattr(self, "shown_width", self.width_m) / (w or 1)                     # metres a pixel
+        down = h * k / 2 + NOTE_GAP + NOTE_WIDTH * self.note_aspect / 2
+        m = [[r[0], r[1], r[2], r[3] - r[1] * down] for r in self.pose]
+        self.ov.setOverlayTransformAbsolute(self.note, openvr.TrackingUniverseStanding, vrkit.hmd34(openvr, m))
+
+    def hide_note(self, unless_sliding=False):
+        if not getattr(self, "note_shown", False) or getattr(self, "closed", False):
+            return
+        if unless_sliding and self.drag is not None and self.drag[1] is None:
+            return                              # (sliding again: it stays)
+        self.note_shown = False
+        with contextlib.suppress(Exception):
+            self.ov.hideOverlay(self.note)
 
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""
@@ -431,6 +515,7 @@ class OverlayHost:
                 self.ov.hideOverlay(self.input_handle)
                 if self.cover is not None:
                     self.ov.hideOverlay(self.cover)
+                self.hide_note()
                 if self.drag is not None:
                     self.end_drag()             # (it asks SteamVR where the panel is now)
             self.visible = visible
@@ -445,7 +530,7 @@ class OverlayHost:
         for d, held, pressed in grips:
             # Squeeze while that controller's laser is on the pad: grab it (keys included).
             if pressed and d in self.hovered_devices and self.drag is None and not self.pad.pinned:
-                self.start_drag(d, grip=True)
+                self.start_drag(d, grip=True, at=self.laser_at.get(d))
         if self.drag is not None and self.grip_drag and self.drag[0] not in self.gripping:
             self.end_drag()
         if self.drag is not None:
@@ -478,6 +563,7 @@ class OverlayHost:
 
     def pump(self, handle):
         ev = openvr.VREvent_t()
+        slide_to = None                         # (sliding: only the laser's latest spot counts)
         # pyopenvr returns (result, event): test the result, or this loops forever.
         while not getattr(self, "closed", False) and self.ov.pollNextOverlayEvent(handle, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
@@ -500,6 +586,13 @@ class OverlayHost:
                 if now - self.last_button_time.get((t, cursor), -1.0) < 0.06:
                     continue
                 self.last_button_time[(t, cursor)] = now
+            if t in (getattr(openvr, "VREvent_KeyboardCharInput", None), getattr(openvr, "VREvent_KeyboardClosed", None)):
+                # Steam's keyboard follows the laser's focus: touching the pad reopens it for the pad,
+                # and what's typed on it then comes here. Logged to find out how much (never what:
+                # it can be a password), not typed anywhere.
+                self.log_input("Steam's keyboard: " + ("closed" if t == openvr.VREvent_KeyboardClosed else
+                               f"{len(bytes(ev.data.keyboard.cNewInput).rstrip(bytes(1)))} byte(s) typed to the pad"))
+                continue
             if t == openvr.VREvent_FocusLeave:
                 if dev == openvr.k_unTrackedDeviceIndexInvalid:
                     self.hovered_devices.clear()
@@ -510,8 +603,12 @@ class OverlayHost:
             if t == openvr.VREvent_MouseMove:
                 pos = self.to_widget(ev.data.mouse)
                 self.hovered_devices.add(dev)
+                self.laser_at[dev] = pos
                 if self.drag is not None:
-                    self.drag_follow()
+                    if self.drag[1] is not None:
+                        self.drag_follow()
+                    elif dev == self.drag[0]:
+                        slide_to = pos
                 else:
                     self.set_hover(self.button_at(pos), dev)
                     if cursor in self.pressed:
@@ -535,7 +632,7 @@ class OverlayHost:
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
                 elif not self.pad.pinned:
                     # Trigger on the background also grabs (until the trigger is released).
-                    self.start_drag(dev, grip=False)
+                    self.start_drag(dev, grip=False, at=pos)
             elif t == openvr.VREvent_MouseButtonUp:
                 pos = self.to_widget(ev.data.mouse)
                 b = self.pressed.pop(cursor, None)
@@ -543,6 +640,8 @@ class OverlayHost:
                     self.send(b, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
                 if self.drag is not None and not self.grip_drag and self.drag[0] == dev:
                     self.end_drag()
+        if slide_to is not None and self.drag is not None and self.drag[1] is None:
+            self.slide(slide_to)
 
     def cancel_presses(self):
         """Take back the presses lasers hold (a grab, the dashboard closing, Close): a release off
@@ -553,19 +652,28 @@ class OverlayHost:
             self.pad.let_go(b)
         self.pressed.clear()
 
-    def start_drag(self, dev, grip):
-        """Grab: the panel follows the controller rigidly, like Full Keyboard's grab. (Moving it
-        by laser coordinates on the panel ran away.)"""
+    def start_drag(self, dev, grip, at=None):
+        """Grab: the panel follows the controller rigidly, like Full Keyboard's grab. Where
+        SteamVR won't say where the controller is (Steam's keyboard showing: its keyboard privacy
+        hides the controllers from other programs, and the grab did nothing), it slides in its
+        own plane after the laser instead, from `at` (where the laser is on it, widget px)."""
         ctrl = self.device_matrix(dev)
-        if ctrl is None:
+        if ctrl is None and at is None:
             return
         self.cancel_presses()                       # a grab cancels presses in progress
         self.grip_drag = grip
+        if ctrl is None:
+            self.drag = (dev, None, (at.x(), at.y()), None)
+            self.log_input(f"grab by device {dev}: its pose is hidden (Steam's keyboard?): sliding after the laser")
+            self.show_slide_note()
+            return
         self.drag = (dev, vrkit.relative(ctrl, self.pose),
                      [ctrl[r][3] for r in range(3)], self.depth_axis())
 
     def end_drag(self):
         self.drag, self.grip_drag = None, False
+        if getattr(self, "note_shown", False):           # (a few seconds more, to finish reading it)
+            QTimer.singleShot(NOTE_LINGER_MS, lambda: self.hide_note(unless_sliding=True))
         if self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         else:
@@ -625,11 +733,27 @@ class OverlayHost:
         n = math.hypot(v[0], v[2])
         return [v[0] / n, 0.0, v[2] / n] if n > 1e-3 else None
 
+    SLIDE_GAIN = 0.5
+
+    def slide(self, pos):
+        """Sliding: the laser is at pos (widget px) on the panel. Move the panel in its own plane
+        to bring the point grabbed back under it, half the way each time: the laser's spot can
+        be from before the last move (SteamVR applies a move a frame later), and going the whole
+        way on that overshoots, and runs away (as moving by laser coordinates once did)."""
+        _dev, _offset, (gx, gy), _axis = self.drag
+        k = getattr(self, "shown_width", self.width_m) / (self.size[0] or 1)       # metres a pixel
+        dx, dy = (pos.x() - gx) * k, (gy - pos.y()) * k        # along the panel's x and y (pixels go down)
+        for i in range(3):
+            self.pose[i][3] += self.SLIDE_GAIN * (self.pose[i][0] * dx + self.pose[i][1] * dy)
+        self.apply_pose()
+
     def drag_follow(self):
         """While grabbed: overlay = controller now x (controller at grab)^-1 x overlay at grab,
         and the controller's push/pull along the head-to-pad direction is amplified
         (DEPTH_GAIN), so the pad can be sent far away or brought close without walking."""
         dev, offset, start, axis = self.drag
+        if offset is None:
+            return                              # (sliding: on the laser's moves, in pump)
         ctrl = self.device_matrix(dev)
         if ctrl is None:
             return
@@ -657,6 +781,11 @@ class OverlayHost:
             self.ov.destroyOverlay(self.input_handle)
             if self.cover is not None:
                 self.ov.destroyOverlay(self.cover)
+            if getattr(self, "note", None) is not None:
+                self.ov.destroyOverlay(self.note)
+            if getattr(self, "note_path", None):
+                with contextlib.suppress(OSError):
+                    os.remove(self.note_path)
             openvr.shutdown()       # disconnect cleanly (exiting while connected can crash)
         except Exception:
             pass

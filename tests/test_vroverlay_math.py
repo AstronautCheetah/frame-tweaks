@@ -15,8 +15,9 @@ from helpers import load_script  # noqa: E402
 def load():
     # vroverlay imports openvr and Qt at the top; the geometry needs neither.
     fake = {"openvr": types.ModuleType("openvr"), "PyQt6": types.ModuleType("PyQt6")}
-    for m, names in {"QtCore": ("QEvent", "QPoint", "QPointF", "Qt", "QTimer"),
-                     "QtGui": ("QImage", "QMouseEvent"), "QtWidgets": ("QApplication", "QPushButton")}.items():
+    for m, names in {"QtCore": ("QEvent", "QPoint", "QPointF", "QRectF", "Qt", "QTimer"),
+                     "QtGui": ("QColor", "QFont", "QFontMetricsF", "QImage", "QMouseEvent", "QPainter"),
+                     "QtWidgets": ("QApplication", "QPushButton")}.items():
         mod = types.ModuleType("PyQt6." + m)
         for n in names:
             setattr(mod, n, object)
@@ -284,6 +285,133 @@ class Grips(unittest.TestCase):
         o.poll()
         o.grips.poll.assert_called_once_with()
         self.assertEqual(o.grips.pause.call_count, 1)
+
+
+class Point:
+    def __init__(self, x, y):
+        self._x, self._y = x, y
+
+    def x(self):
+        return self._x
+
+    def y(self):
+        return self._y
+
+
+class SlideWhileTheKeyboardShows(unittest.TestCase):
+    """While Steam's keyboard shows, SteamVR hides where the controllers are from other programs
+    (its keyboard privacy), and grabbing the pad did nothing. It slides in its own plane after the
+    laser then, half the way per laser move, so a spot from before the last move can't make it
+    run away (as moving by laser coordinates once did)."""
+
+    def host(self, v):
+        o = v.OverlayHost.__new__(v.OverlayHost)
+        o.pressed, o.drag, o.grip_drag, o.laser_at = {}, None, False, {}
+        o.width_m, o.input_size = 0.5, (500, 400)              # 1 mm a pixel
+        o.pose = [[1, 0, 0, 0.0], [0, 0.6, -0.8, 1.0], [0, 0.8, 0.6, -1.0]]   # tilted back
+        o.apply_pose = lambda: None
+        o.device_matrix = lambda dev: None                     # (hidden)
+        o.log_input = lambda msg: None
+        o.pad = types.SimpleNamespace(pinned=False)
+        return o
+
+    def test_it_slides_in_its_plane(self):
+        v = load()
+        o = self.host(v)
+        o.start_drag(1, grip=False, at=Point(100, 100))
+        self.assertEqual((o.drag[0], o.drag[1], o.drag[2]), (1, None, (100, 100)))
+        o.slide(Point(150, 100))                               # 5 cm right: half of it
+        self.assertEqual([round(r[3], 6) for r in o.pose], [0.025, 1.0, -1.0])
+        o.slide(Point(100, 50))                                # 5 cm up the tilted panel
+        self.assertEqual([round(r[3], 6) for r in o.pose], [0.025, 1.015, -0.98])
+        self.assertEqual([r[:3] for r in o.pose], [[1, 0, 0], [0, 0.6, -0.8], [0, 0.8, 0.6]])   # not turned
+
+    def test_it_catches_up_without_running_away(self):
+        """The laser held on a spot 20 cm to the right; each laser position SteamVR reports is
+        from the pose before the last move (a frame late)."""
+        v = load()
+        o = self.host(v)
+        o.start_drag(1, grip=False, at=Point(100, 100))
+        before = 0.0
+        for _ in range(40):
+            seen = before                                       # (the pose SteamVR measured against)
+            before = o.pose[0][3]
+            o.slide(Point(100 + (0.2 - seen) * 1000, 100))
+            self.assertLess(o.pose[0][3], 0.2 * 1.3)            # no wild overshoot
+        self.assertAlmostEqual(o.pose[0][3], 0.2, places=3)
+
+    def test_a_note_under_the_pad_says_why(self):
+        """Sliding: a note just under the pad (the owner's ask), moving with it, gone a few seconds
+        after you let go, unless you're sliding it again by then."""
+        v = load()
+        o = self.host(v)
+        del o.apply_pose                                       # (the real one: the note follows)
+        o.input_handle, o.cover = 7, None
+        calls, timers = [], []
+        o.ov = types.SimpleNamespace(
+            createOverlay=lambda key, name: calls.append(("create", key)) or 9,
+            setOverlaySortOrder=lambda h, n: None, setOverlayWidthInMeters=lambda h, w: None,
+            setOverlayFromFile=lambda h, path: calls.append(("image", h)),
+            setOverlayTransformAbsolute=lambda h, u, m: calls.append(("place", h, [round(r[3], 6) for r in m])),
+            showOverlay=lambda h: calls.append(("show", h)), hideOverlay=lambda h: calls.append(("hide", h)))
+        v.openvr.TrackingUniverseStanding = 1
+        v.QTimer = types.SimpleNamespace(singleShot=lambda ms, f: timers.append((ms, f)))
+        o.distance_from_head, o.remember_offset, o.ease_level, o.save = (lambda: 0.0), (lambda: None), (lambda: None), (lambda: None)
+        picture = types.SimpleNamespace(save=lambda path, fmt: None, height=lambda: 200, width=lambda: 900)
+        with mock.patch.object(v, "note_image", lambda text: picture), mock.patch.object(v.vrkit, "hmd34", lambda vr, m: m):
+            o.start_drag(1, grip=False, at=Point(100, 100))
+            self.assertEqual(calls[:2], [("create", "frame-tweaks.arrowpad.note"), ("image", 9)])
+            # Its centre: half the pad's height (0.2 m), the gap, half its own (0.04 m) down the pad's y.
+            self.assertEqual(calls[2:], [("place", 9, [0.0, 0.844, -1.208]), ("show", 9)])
+            calls.clear()
+            o.slide(Point(150, 100))
+            self.assertEqual(calls, [("place", 7, [0.025, 1.0, -1.0]), ("place", 9, [0.025, 0.844, -1.208])])
+            o.end_drag()
+            self.assertEqual([ms for ms, _f in timers], [3000])
+            o.start_drag(1, grip=False, at=Point(100, 100))     # sliding again before it's gone
+            calls.clear()
+            timers.pop(0)[1]()
+            self.assertEqual(calls, [])                         # (it stays)
+            o.end_drag()
+            timers.pop(0)[1]()
+            self.assertEqual(calls, [("hide", 9)])
+
+    def test_a_controller_it_can_see_is_followed_as_before(self):
+        v = load()
+        o = self.host(v)
+        o.device_matrix = lambda dev: [[1, 0, 0, 0.0], [0, 1, 0, 1.0], [0, 0, 1, 0.0]]
+        o.depth_axis = lambda: None
+        o.start_drag(1, grip=False, at=Point(100, 100))
+        self.assertIsNotNone(o.drag[1])
+
+    def test_only_the_lasers_latest_spot_moves_it(self):
+        v = load()
+        o = self.host(v)
+        o.start_drag(1, grip=True, at=Point(100, 100))
+        moves = iter([(1, 120), (2, 400), (1, 140)])           # (device, x): the other laser's too
+
+        def poll(handle, ev):
+            nxt = next(moves, None)
+            if nxt is None:
+                return (False, ev)
+            ev.trackedDeviceIndex, ev.data.mouse.x = nxt
+            return (True, ev)
+
+        class Ev:
+            eventType = 300
+            trackedDeviceIndex = 1
+            data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=0, y=300, cursorIndex=0))
+        v.openvr.VREvent_t = Ev
+        v.openvr.VREvent_MouseMove, v.openvr.VREvent_MouseButtonDown, v.openvr.VREvent_MouseButtonUp = 300, 301, 302
+        v.openvr.VREvent_FocusLeave = 304
+        v.QPoint = Point
+        o.ov = types.SimpleNamespace(pollNextOverlayEvent=poll)
+        o.hovered_devices, o.front = set(), 0
+        slid = []
+        o.slide = lambda pos: slid.append((pos.x(), pos.y()))
+        o.pump("A")
+        self.assertEqual(slid, [(140, 100)])
+        self.assertEqual(o.laser_at[2].x(), 400)
 
 
 class Reset(unittest.TestCase):

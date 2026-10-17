@@ -10,6 +10,10 @@
   virtual keyboard before it types (only those that are down, so no stray Shift or Alt taps), and
   Arrow Pad turns its own off when it sees Dictation start or finish, so it doesn't show a Ctrl
   that isn't on.
+- **Arrow Pad couldn't be moved while Steam's keyboard was showing:** SteamVR hides where the
+  controllers are from other programs while its keyboard is open (keyboard privacy), so grabbing
+  the pad did nothing. It now slides flat along its own surface after the laser instead, and a
+  small note under the pad says why it can only slide until the keyboard closes.
 
 ## 0.6.14 (2026-10-17)
 
