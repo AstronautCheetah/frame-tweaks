@@ -108,6 +108,9 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   you're using), it gives it back with a Right Ctrl tap and checks that it did; if not, its
   message says to tap Right Ctrl on a keyboard. What it found goes to
   `~/.local/state/frame-tweaks/logs/unstick.log`, which 🐞 Report a problem includes.
+  In VR, while desktop mode has taken all input, a note under the pad says so (and to tap
+  Unstick); it goes once input is back. It shares its spot with the note about sliding while
+  Steam's keyboard is open: with both, one note shows both messages.
 
 Key labels follow Frame Tweaks' language: the one chosen in the installer window's ⚙, else your
 keyboard's when the pad opens; they switch when the window's language changes. They use the
@@ -187,6 +190,9 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   poses from every other program while its keyboard is open (its log says
   `AddSystemBehaviorFlag SystemBehaviorFlag_SystemKeyboardPrivacy`), so a grab can't follow the
   controller. The pad then slides in its own plane to keep the point you grabbed under the laser.
+- **Desktop mode's input grab:** while the VR pad shows, it looks at desktop mode's window title
+  every 2 s (`xwininfo` on `:0`, off the pad's own thread) for KWin's "…to ungrab input", and
+  says so in its note while that lasts.
 - **Steam's keyboard and the pad:** Steam's keyboard follows the laser's focus (SteamVR logs
   `Reopening keyboard follow overlay focus`), so a press on the pad hands it to the pad: what's typed
   next comes to the pad (`VREvent_KeyboardCharInput`), and SteamVR's dashboard places the keyboard

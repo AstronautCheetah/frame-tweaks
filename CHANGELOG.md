@@ -9,6 +9,11 @@
   whether to keep it on; with no answer within a minute, the mirror closes, the Frame
   disconnects from the phone, and Android Mirror's programs stop. *Restart stream* starts the
   time again.
+- **Arrow Pad warns when desktop mode has taken all input:** after a Right Ctrl, desktop mode
+  keeps everything you type in VR, so typing in a floating window went into the desktop instead.
+  A note under the pad now says so, and to tap Unstick (under Tools) to give it back. It shares
+  its spot with the note about sliding while Steam's keyboard is open; with both, one note shows
+  both messages.
 
 ### Fixed
 - **Dictation with Ctrl on:** a Ctrl latched or locked on Arrow Pad (or Alt or Super) was still

@@ -2981,6 +2981,11 @@ msgstr ""
 
 #: packs/core/arrowpad/vroverlay.py
 msgid ""
+"Desktop mode has taken all input, so what you type goes to the desktop, not to other windows. Tap Unstick (under Tools) to give it back."
+msgstr ""
+
+#: packs/core/arrowpad/vroverlay.py
+msgid ""
 "While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move it closer, further away or turn it."
 msgstr ""
 
