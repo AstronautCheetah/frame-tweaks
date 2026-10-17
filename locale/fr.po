@@ -3957,12 +3957,10 @@ msgstr ""
 msgid "Charge to 100% once"
 msgstr "Charger à 100 % une fois"
 
-# needs review
 #: packs/core/charge-limit/README.md
 msgid ""
-"Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
+"Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less. The level is the battery's own reading, as KDE shows it; Steam's dashboard shows a higher figure for the same charge (about 8 points more around 80%: 78% here is 86% there)."
 msgstr ""
-"La charge s'arrête à ce niveau et reprend 1 % en dessous. Branché à la limite, le Frame fonctionne surtout sur le chargeur ou la batterie externe. Une limite plus basse use un peu moins la batterie."
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -4052,6 +4050,26 @@ msgstr ""
 "L'interrupteur de pause du chargeur appartient à root. Pour qu'il soit à vous, votre mot de passe sudo\n"
 "(administrateur) est demandé une fois, pour ajouter une règle udev (%s) que les mises à jour de SteamOS conservent."
 
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; charging stops at %s%%"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; charging to 100%% once, then stopping at %s%% again"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; holding at the %s%% limit, not charging"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; not charging until it's below %s%%"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; the limit is off: it charges to 100%%"
+msgstr ""
+
 # needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery at %s%%, but charging isn't paused; see: %s"
@@ -4065,30 +4083,8 @@ msgstr ""
 
 # needs review
 #: packs/core/charge-limit/status.sh
-msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
-msgstr ""
-"Charge à 100 %% une fois (actuellement %s %%), puis de nouveau arrêt à %s %%"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Holding at %s%% (battery %s%%, not charging)"
-msgstr "Maintien à %s %% (batterie à %s %%, pas en charge)"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Limit off: charges to 100%% (now %s%%)"
-msgstr "Limite désactivée : charge jusqu'à 100 %% (actuellement %s %%)"
-
-# needs review
-#: packs/core/charge-limit/status.sh
 msgid "No battery found"
 msgstr "Aucune batterie trouvée"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Not charging until the battery is below %s%% (now %s%%)"
-msgstr ""
-"Pas de charge tant que la batterie n'est pas sous %s %% (actuellement %s %%)"
 
 # needs review
 #: packs/core/charge-limit/status.sh
@@ -4115,11 +4111,6 @@ msgid ""
 "SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
 msgstr ""
 "SteamOS a maintenant sa propre limite de charge (Steam → Paramètres → Alimentation) : utilisez-la, et désinstallez cet ajustement"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Stops charging at %s%% (battery %s%%)"
-msgstr "Arrête la charge à %s %% (batterie à %s %%)"
 
 # needs review
 #: packs/core/charge-limit/status.sh
@@ -6877,3 +6868,31 @@ msgstr "Installateur d'ajustements"
 #~ "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
 #~ msgstr ""
 #~ "Pour cette fenêtre, le Pavé fléché, l'outil Capture d'écran, les entrées de menu et les panneaux VR. Suivre le clavier : le clavier VR de Steam en VR, la disposition de KDE en mode bureau ; une disposition QWERTY ou anglaise garde la langue du système."
+
+#~ # needs review
+#~ msgid ""
+#~ "Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
+#~ msgstr ""
+#~ "La charge s'arrête à ce niveau et reprend 1 % en dessous. Branché à la limite, le Frame fonctionne surtout sur le chargeur ou la batterie externe. Une limite plus basse use un peu moins la batterie."
+
+#~ # needs review
+#~ msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
+#~ msgstr ""
+#~ "Charge à 100 %% une fois (actuellement %s %%), puis de nouveau arrêt à %s %%"
+
+#~ # needs review
+#~ msgid "Holding at %s%% (battery %s%%, not charging)"
+#~ msgstr "Maintien à %s %% (batterie à %s %%, pas en charge)"
+
+#~ # needs review
+#~ msgid "Limit off: charges to 100%% (now %s%%)"
+#~ msgstr "Limite désactivée : charge jusqu'à 100 %% (actuellement %s %%)"
+
+#~ # needs review
+#~ msgid "Not charging until the battery is below %s%% (now %s%%)"
+#~ msgstr ""
+#~ "Pas de charge tant que la batterie n'est pas sous %s %% (actuellement %s %%)"
+
+#~ # needs review
+#~ msgid "Stops charging at %s%% (battery %s%%)"
+#~ msgstr "Arrête la charge à %s %% (batterie à %s %%)"

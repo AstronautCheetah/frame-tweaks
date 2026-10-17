@@ -20,18 +20,18 @@ bat=$("$BIN/charge-limit" --battery) || status_warn "$(t 'No battery found')"
 cap=$(cat "$bat/capacity")
 limit=$("$BIN/charge-limit" --limit)
 # (the limit off first: Charge to 100% once may be pending, with no limit to go back to)
-[ "$limit" = off ] && status_ok "$(t 'Limit off: charges to 100%% (now %s%%)' "$cap")"
-[ -e "$RUN/full-once" ] && status_ok "$(t 'Charging to 100%% once (now %s%%), then stopping at %s%% again' "$cap" "$limit")"
+[ "$limit" = off ] && status_ok "$(t 'Battery %s%%; the limit is off: it charges to 100%%' "$cap")"
+[ -e "$RUN/full-once" ] && status_ok "$(t 'Battery %s%%; charging to 100%% once, then stopping at %s%% again' "$cap" "$limit")"
 # Paused but still charging (over 100 mA into the battery): the charger didn't take the pause.
 if [ "$(cat "$SWITCH")" = 1 ] && [ -e "$RUN/paused" ]; then
     [ "$(cat "$bat/current_now" 2>/dev/null || echo 0)" -gt 100000 ] &&
         status_warn "$(t "Paused at %s%%, but the battery still charges: the Frame's charger ignored the pause" "$cap")"
     # (well over it: charged while the Frame was asleep or off, or by Charge to 100% once)
     [ "$cap" -gt $((limit + 2)) ] &&
-        status_ok "$(t 'Not charging until the battery is below %s%% (now %s%%)' "$limit" "$cap")"
-    status_ok "$(t 'Holding at %s%% (battery %s%%, not charging)' "$limit" "$cap")"
+        status_ok "$(t "Battery %s%%; not charging until it's below %s%%" "$cap" "$limit")"
+    status_ok "$(t 'Battery %s%%; holding at the %s%% limit, not charging' "$cap" "$limit")"
 fi
 # (the service checks as it starts, then every 30 seconds)
 [ "$cap" -ge "$limit" ] &&
     status_warn "$(t "Battery at %s%%, but charging isn't paused; see: %s" "$cap" "journalctl --user -u charge-limit")"
-status_ok "$(t 'Stops charging at %s%% (battery %s%%)' "$limit" "$cap")"
+status_ok "$(t 'Battery %s%%; charging stops at %s%%' "$cap" "$limit")"

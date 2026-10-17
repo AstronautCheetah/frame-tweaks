@@ -3945,12 +3945,10 @@ msgstr ""
 msgid "Charge to 100% once"
 msgstr "Eenmalig tot 100% laden"
 
-# needs review
 #: packs/core/charge-limit/README.md
 msgid ""
-"Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
+"Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less. The level is the battery's own reading, as KDE shows it; Steam's dashboard shows a higher figure for the same charge (about 8 points more around 80%: 78% here is 86% there)."
 msgstr ""
-"Het laden stopt op dit niveau en begint weer 1% eronder. Is de Frame aangesloten en op de limiet, dan draait hij vooral op de lader of powerbank. Een lagere limiet laat de batterij iets minder slijten."
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -4039,6 +4037,26 @@ msgstr ""
 "De pauzeschakelaar van de lader is van root. Om hem van jou te maken, vraagt dit één keer je sudo-wachtwoord\n"
 "(beheerder), om een udev-regel (%s) toe te voegen die SteamOS-updates behouden."
 
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; charging stops at %s%%"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; charging to 100%% once, then stopping at %s%% again"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; holding at the %s%% limit, not charging"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; not charging until it's below %s%%"
+msgstr ""
+
+#: packs/core/charge-limit/status.sh
+msgid "Battery %s%%; the limit is off: it charges to 100%%"
+msgstr ""
+
 # needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery at %s%%, but charging isn't paused; see: %s"
@@ -4052,28 +4070,8 @@ msgstr ""
 
 # needs review
 #: packs/core/charge-limit/status.sh
-msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
-msgstr "Eenmalig tot 100%% laden (nu %s%%), daarna weer stoppen bij %s%%"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Holding at %s%% (battery %s%%, not charging)"
-msgstr "Blijft op %s%% (batterij %s%%, laadt niet)"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Limit off: charges to 100%% (now %s%%)"
-msgstr "Limiet uit: laadt tot 100%% (nu %s%%)"
-
-# needs review
-#: packs/core/charge-limit/status.sh
 msgid "No battery found"
 msgstr "Geen batterij gevonden"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Not charging until the battery is below %s%% (now %s%%)"
-msgstr "Laadt niet tot de batterij onder %s%% zakt (nu %s%%)"
 
 # needs review
 #: packs/core/charge-limit/status.sh
@@ -4100,11 +4098,6 @@ msgid ""
 "SteamOS now has its own charge limit (Steam → Settings → Power): use that, and uninstall this"
 msgstr ""
 "SteamOS heeft nu een eigen laadlimiet (Steam → Instellingen → Energiebeheer): gebruik die en verwijder deze aanpassing"
-
-# needs review
-#: packs/core/charge-limit/status.sh
-msgid "Stops charging at %s%% (battery %s%%)"
-msgstr "Stopt met laden bij %s%% (batterij %s%%)"
 
 # needs review
 #: packs/core/charge-limit/status.sh
@@ -6850,3 +6843,29 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
 #~ msgstr ""
 #~ "Voor dit venster, Pijltjesblok, Schermknipsel, de menu-items en de VR-panelen. Het toetsenbord volgen: het VR-toetsenbord van Steam in VR, de indeling van KDE in bureaubladmodus; met een QWERTY- of Engelse indeling blijft de systeemtaal."
+
+#~ # needs review
+#~ msgid ""
+#~ "Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
+#~ msgstr ""
+#~ "Het laden stopt op dit niveau en begint weer 1% eronder. Is de Frame aangesloten en op de limiet, dan draait hij vooral op de lader of powerbank. Een lagere limiet laat de batterij iets minder slijten."
+
+#~ # needs review
+#~ msgid "Charging to 100%% once (now %s%%), then stopping at %s%% again"
+#~ msgstr "Eenmalig tot 100%% laden (nu %s%%), daarna weer stoppen bij %s%%"
+
+#~ # needs review
+#~ msgid "Holding at %s%% (battery %s%%, not charging)"
+#~ msgstr "Blijft op %s%% (batterij %s%%, laadt niet)"
+
+#~ # needs review
+#~ msgid "Limit off: charges to 100%% (now %s%%)"
+#~ msgstr "Limiet uit: laadt tot 100%% (nu %s%%)"
+
+#~ # needs review
+#~ msgid "Not charging until the battery is below %s%% (now %s%%)"
+#~ msgstr "Laadt niet tot de batterij onder %s%% zakt (nu %s%%)"
+
+#~ # needs review
+#~ msgid "Stops charging at %s%% (battery %s%%)"
+#~ msgstr "Stopt met laden bij %s%% (batterij %s%%)"
