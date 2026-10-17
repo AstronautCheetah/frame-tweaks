@@ -329,3 +329,25 @@ class Running(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DemoInYourLanguage(unittest.TestCase):
+    """Preferences' Show me plays a pretend install (--demo): its words go through the translations
+    (they were English whatever language was chosen)."""
+
+    def test_every_line_is_translated(self):
+        import contextlib
+        import io
+        import re
+        out = io.StringIO()
+        with mock.patch.object(splash, "_", lambda t: "«" + t + "»"), mock.patch.object(splash.time, "sleep"), \
+                contextlib.redirect_stdout(out):
+            splash.demo_child()
+        lines = [l for l in re.sub(r"\x1b\[[0-9;]*m", "", out.getvalue()).replace("\r", "\n").splitlines()
+                 if l.strip() and "MB" not in l]
+        for line in lines:
+            if line.startswith("── "):
+                self.assertTrue(line.endswith("»") or line.endswith(": ydotool"), line)   # (a title: translated)
+            else:
+                self.assertIn("«", line, line)
+        self.assertIn("«Done.»", lines)

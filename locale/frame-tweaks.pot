@@ -154,7 +154,7 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip install.sh
+#: gui/frame-tweaks-gui.py lib/splash.py packs/core/snip/frame-snip install.sh
 msgid "Done."
 msgstr ""
 
@@ -778,7 +778,7 @@ msgstr ""
 msgid "Yes: it runs as me"
 msgstr ""
 
-#: gui/packs_page.py
+#: gui/packs_page.py lib/splash.py
 msgid "installed"
 msgstr ""
 
@@ -1735,10 +1735,6 @@ msgid "Not active yet: %s"
 msgstr ""
 
 #: lib/common.sh
-msgid "Setting up PyQt6, a window toolkit"
-msgstr ""
-
-#: lib/common.sh
 msgid ""
 "The tested versions of %s don't install on this Python (%s); trying the newest."
 msgstr ""
@@ -2113,12 +2109,48 @@ msgstr ""
 msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
+#: lib/splash.py
+msgid "Added {name} to the app menu"
+msgstr ""
+
+#: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
+msgid "Arrow Pad"
+msgstr ""
+
 #: lib/splash.py packs/core/arrowpad/arrowpad.py
 msgid "Done"
 msgstr ""
 
 #: lib/splash.py
+msgid "Fetching {name} (Arch Linux ARM, signature checked)"
+msgstr ""
+
+#: lib/splash.py
+msgid "Installed {programs} in {folder}"
+msgstr ""
+
+#: lib/splash.py
+msgid "Linking {program} into {folder}"
+msgstr ""
+
+#: lib/splash.py
+msgid "Narrate's voice: {voice}"
+msgstr ""
+
+#: lib/splash.py
 msgid "Press any key to skip"
+msgstr ""
+
+#: lib/splash.py packs/core/snip/frame-snip packs/core/snip/frame-snip.desktop packs/core/snip/README.md
+msgid "Screen snip + Narrate"
+msgstr ""
+
+#: lib/splash.py lib/common.sh
+msgid "Setting up PyQt6, a window toolkit"
+msgstr ""
+
+#: lib/splash.py
+msgid "Setting up {name}'s Python packages"
 msgstr ""
 
 #: lib/splash.py
@@ -2127,6 +2159,14 @@ msgstr ""
 
 #: lib/splash.py
 msgid "Working…"
+msgstr ""
+
+#: lib/splash.py packs/core/wallet/app-timers
+msgid "running"
+msgstr ""
+
+#: lib/splash.py
+msgid "{name} is ready: {keys} shows it"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
@@ -2636,10 +2676,6 @@ msgstr ""
 #: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
 msgid "Alt"
-msgstr ""
-
-#: packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
-msgid "Arrow Pad"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
@@ -3877,10 +3913,6 @@ msgstr ""
 msgid "Screen snip"
 msgstr ""
 
-#: packs/core/snip/frame-snip packs/core/snip/frame-snip.desktop packs/core/snip/README.md
-msgid "Screen snip + Narrate"
-msgstr ""
-
 #: packs/core/snip/frame-snip
 msgid "Screen snip: narrating"
 msgstr ""
@@ -4361,10 +4393,6 @@ msgstr ""
 
 #: packs/core/wallet/app-timers
 msgid "not running"
-msgstr ""
-
-#: packs/core/wallet/app-timers
-msgid "running"
 msgstr ""
 
 #: packs/core/wallet/app-timers

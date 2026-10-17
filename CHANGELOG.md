@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Changed
+- **Preferences' "Show me" (installing in a terminal) speaks your language:** the pretend install
+  it plays was always in English. It now prints what a real install would, in the language chosen
+  for Frame Tweaks.
 - **Diagnostics reports go to your Downloads folder:** `~/Downloads/frame-tweaks-debug-….txt`
   instead of the home folder, which they cluttered, and where Flatpak apps such as Firefox (for
   the bug form) can read them.

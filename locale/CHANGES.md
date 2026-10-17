@@ -18,3 +18,17 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `gui/report_page.py:57`
   - was: "📄 Open the report"
   - now: "📋 Copy the report"
+- New in `lib/splash.py:1183`
+  - now: "Fetching {name} (Arch Linux ARM, signature checked)"
+- New in `lib/splash.py:1184`
+  - now: "Installed {programs} in {folder}"
+- New in `lib/splash.py:1186`
+  - now: "Setting up {name}'s Python packages"
+- New in `lib/splash.py:1187`
+  - now: "Added {name} to the app menu"
+- New in `lib/splash.py:1188`
+  - now: "{name} is ready: {keys} shows it"
+- New in `lib/splash.py:1189`
+  - now: "Linking {program} into {folder}"
+- New in `lib/splash.py:1190`
+  - now: "Narrate's voice: {voice}"
