@@ -100,6 +100,8 @@ class PackLinks(unittest.TestCase):
         downloading it."""
         self.assertIn("No packs added from a link", self.mods("updates").stdout)
         self.mods("add", self.link)
+        self.assertIn("Hello pack: not checked: not trusted", self.mods("updates").stdout)   # (git runs only in a trusted one)
+        self.mods("trust", str(self.packs / "hello-pack"))
         self.assertEqual(self.mods("updates").stdout, "Hello pack: up to date\n")
         with open(self.src / "hello-frame/install.sh", "a") as f:
             f.write("# a change\n")
@@ -108,6 +110,7 @@ class PackLinks(unittest.TestCase):
         self.assertIn("Hello pack: a newer version is out: ./install.sh mods update", out)
         self.assertNotIn("a change", self.git(self.packs / "hello-pack", "log", "--all", "--format=%s"))   # (nothing fetched)
         self.mods("update", str(self.packs / "hello-pack"))
+        self.mods("trust", str(self.packs / "hello-pack"))                  # (changed: trusted again)
         self.assertEqual(self.mods("updates").stdout, "Hello pack: up to date\n")
         shutil.rmtree(self.src)                                              # (gone, or offline)
         self.assertEqual(self.mods("updates").stdout, "Hello pack: couldn't check (no connection?)\n")
@@ -115,6 +118,7 @@ class PackLinks(unittest.TestCase):
     def test_a_fixed_version_has_no_updates(self):
         self.git(self.src, "tag", "v1")
         self.mods("add", self.link, "v1")
+        self.mods("trust", str(self.packs / "hello-pack"))
         with open(self.src / "pack.md", "a") as f:
             f.write("\nMore.\n")
         self.commit("later")
@@ -126,6 +130,7 @@ class PackLinks(unittest.TestCase):
         self.assertIn("wasn't added from a link", r.stderr)
         self.git(self.src, "tag", "v1")
         self.mods("add", self.link, "v1")
+        self.mods("trust", str(self.packs / "hello-pack"))
         r = self.mods("update", str(self.packs / "hello-pack"))
         self.assertIn("added at a fixed version", r.stderr)
 
