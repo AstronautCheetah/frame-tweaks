@@ -23,10 +23,11 @@ run: {label: Open}
 settings:
   file: ~/.config/frame-tweaks/phone.conf
   format: shell
-  about: The phone mirror's stream, joystick scrolling, and its clipboard.
+  about: The phone mirror's stream, joystick scrolling, its clipboard, and when it disconnects by itself.
   note: >-
     Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's
-    Restart stream, in VR). Joystick speed applies at once.
+    Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects
+    after, counted from when you change it.
   options:
     - key: PHONE_MAX_SIZE
       title: "Picture size (long side, pixels)"
@@ -76,6 +77,17 @@ settings:
       choices:
         - {label: Shared, value: "both"}
         - {label: Not shared, value: "off"}
+    - key: PHONE_TIMEOUT
+      title: Disconnect by itself after
+      default: "60"
+      choices:
+        - {label: Never, value: "0"}
+        - {label: "15 minutes", value: "15"}
+        - {label: "30 minutes", value: "30"}
+        - {label: "1 hour", value: "60"}
+        - {label: "2 hours", value: "120"}
+        - {label: "4 hours", value: "240"}
+        - {label: "8 hours", value: "480"}
   actions:
     - label: "Forget {PHONE_NAME}"
       script: phone
@@ -157,7 +169,8 @@ choosing it by default.
    run `phone` in a terminal).
 
 The phone's screen opens in a window; click and type in it as on the phone. Close the window
-to stop.
+to stop. Left on, it disconnects by itself after an hour (see [Settings](#settings)), so a
+mirror forgotten overnight doesn't empty the phone's battery.
 
 **Which phone:** if only one phone is advertising wireless debugging, Android Mirror uses it and
 remembers it. If there are several, it asks which. If the remembered phone isn't there, it
@@ -193,11 +206,20 @@ Change these with the **⚙ Settings** button on its row in Frame Tweaks, with t
 | Frame rate (at most, `PHONE_MAX_FPS`) | 60 | 30, 60, or one of the Frame's refresh rates, 72 to 144 |
 | Joystick scrolling (`PHONE_STICK_SPEED`) | Medium | Slow, Medium, Fast |
 | Share the clipboard with the phone (`PHONE_CLIPBOARD`) | Shared (`both`) | Shared, Not shared (`off`) |
+| Disconnect by itself after (`PHONE_TIMEOUT`, minutes) | 1 hour (`60`) | Never (`0`), 15 or 30 minutes, 1, 2, 4 or 8 hours |
 
 The defaults are enough for VR and keep the Wi-Fi link light; a heavier stream can fall
 behind the phone. Picture size, bit rate, frame rate and the clipboard apply the next time the
 mirror starts (or after *Restart stream* in VR); joystick speed applies at once. The chosen
 phone is saved in the same file (`PHONE_NAME`).
+
+**Disconnecting by itself.** A mirror left on keeps the phone streaming its screen, which drains
+its battery (one left on all night emptied it). So once the mirror has been on for the time set
+(an hour unless you change it), a small window asks whether to keep it on. Answer **Keep it on**
+for another round of the same time; with no answer within a minute (or **Disconnect**), the
+mirror closes, the Frame disconnects from the phone, and a notification says so. The time
+counts from when the mirror opened; changing the setting while it's open applies at once,
+counted from the change.
 
 **The clipboard with the phone.** Shared (scrcpy's way): what you paste in the mirror (Ctrl+V)
 is first copied to the phone, and whatever the phone copies comes to the Frame's clipboard, and
@@ -219,6 +241,9 @@ its own; Ctrl+V in the mirror pastes the phone's clipboard.
   looks the phone up on the local network (mDNS), connects, and starts scrcpy.
 - **Reconnecting:** `phone` checks every 5 seconds that the phone still answers. If the
   connection drops, it closes the frozen picture and reconnects (for up to a minute).
+- **Disconnecting by itself:** at the same checks, `phone` reads `PHONE_TIMEOUT` from its
+  settings file and, once that time is up, asks with `kdialog`; with no answer it stops scrcpy and
+  runs `adb disconnect`. Reconnects and *Restart stream* don't restart the count.
 - **In VR**, `phone-fit` gives the window the phone screen's shape. The Steam session makes
   every app window 1920×1080, so an upright phone would otherwise sit between wide black bars.
   A dashboard patch (`patch.js`) keeps the window's long side at 0.8 m, so turning the phone

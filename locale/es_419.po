@@ -1270,7 +1270,7 @@ msgstr "Se bloquea sola a las {at} (en {time})."
 msgid "Longer"
 msgstr "Más tiempo"
 
-#: gui/wallet_page.py
+#: gui/wallet_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Never"
 msgstr "Nunca"
 
@@ -2363,6 +2363,30 @@ msgid "Working…"
 msgstr "Trabajando…"
 
 #: packs/core/adb-scrcpy/README.md
+msgid "1 hour"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "15 minutes"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "2 hours"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "30 minutes"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "4 hours"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "8 hours"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
 msgid ""
 "Android Mirror stops connecting to this phone by default. Next time it takes the phone in sight, or asks which if there are several."
 msgstr ""
@@ -2377,12 +2401,10 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 "Cuadros por segundo (fps, como máximo; 72-144: las frecuencias de actualización del Steam Frame)"
 
-# needs review
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
-"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -2401,11 +2423,10 @@ msgid ""
 msgstr ""
 "Muestra la pantalla de tu teléfono Android en una ventana donde puedes hacer clic, escribir y desplazarte, por Wi-Fi (scrcpy con la depuración inalámbrica de Android). Encuentra el teléfono en la red por sí solo."
 
-# needs review
 #: packs/core/adb-scrcpy/README.md
-msgid "The phone mirror's stream, joystick scrolling, and its clipboard."
+msgid ""
+"The phone mirror's stream, joystick scrolling, its clipboard, and when it disconnects by itself."
 msgstr ""
-"La transmisión del espejo del teléfono, el desplazamiento con joystick y su portapapeles."
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -2473,12 +2494,38 @@ msgid "%s didn't appear"
 msgstr "%s no apareció"
 
 #: packs/core/adb-scrcpy/phone
+msgid "%s h"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "%s h %s min"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"%s has been mirrored for %s. Android Mirror disconnects in a minute so the phone's battery can rest, unless you keep it on."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid "%s isn't on the Wi-Fi with Wireless debugging on."
 msgstr "%s no está en la Wi-Fi con la Depuración inalámbrica activada."
+
+#: packs/core/adb-scrcpy/phone
+msgid "%s min"
+msgstr ""
 
 #: packs/core/adb-scrcpy/phone packs/core/tools/check-system.sh packs/core/vr-dashboard/check-system.sh
 msgid "%s not found"
 msgstr "%s no encontrado"
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"%s was mirrored for %s, so Android Mirror disconnected to save its battery. Open Android Mirror to connect again; the time is in its settings."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Android Mirror disconnected"
+msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid "Android Mirror setup"
@@ -2491,6 +2538,10 @@ msgstr "Espejo de Android: %s"
 #: packs/core/adb-scrcpy/phone
 msgid "Android Mirror: pair with %s"
 msgstr "Espejo de Android: vincular con %s"
+
+#: packs/core/adb-scrcpy/phone
+msgid "Android Mirror: still using it?"
+msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid ""
@@ -2537,6 +2588,10 @@ msgid ""
 "It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again."
 msgstr ""
 "Dejó de aparecer en la Wi-Fi. Comprueba que su Depuración inalámbrica siga activada y vuelve a intentarlo."
+
+#: packs/core/adb-scrcpy/phone
+msgid "Keep it on"
+msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid "Looking for your phone on the Wi-Fi…"
@@ -2613,6 +2668,10 @@ msgstr "Se perdió la conexión con %s. Reconectando…"
 #: packs/core/adb-scrcpy/phone
 msgid "The mirror didn't start"
 msgstr "El espejo no se inició"
+
+#: packs/core/adb-scrcpy/phone
+msgid "The phone"
+msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid "The phone didn't offer pairing"
@@ -2698,6 +2757,30 @@ msgid ""
 msgstr ""
 "scrcpy {version} no es una versión con la que se haya probado Frame Tweaks ({tested}), así que los extras de RV del espejo están desactivados: clics apuntados con el láser y desplazamiento con joystick. Funciona como una ventana normal hasta una actualización de Frame Tweaks."
 
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "1 h"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "15 min"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "2 h"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "30 min"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "4 h"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "8 h"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr "Tasa de bits (Mbit/s)"
@@ -2706,6 +2789,10 @@ msgstr "Tasa de bits (Mbit/s)"
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Clipboard with the phone"
 msgstr "Portapapeles con el teléfono"
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Disconnect by itself after"
+msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Fast"
@@ -2730,9 +2817,8 @@ msgstr "Sin compartir"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid ""
-"Picture and smoothness apply when the stream restarts; joystick speed at once."
+"Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once."
 msgstr ""
-"La imagen y la fluidez se aplican al reiniciar la transmisión; la velocidad del joystick, de inmediato."
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
@@ -5280,7 +5366,7 @@ msgstr "Conectar al iniciar ({location})"
 msgid "Connected: {location}"
 msgstr "Conectado: {location}"
 
-#: packs/integrations/nordvpn/nordvpn-tray
+#: packs/integrations/nordvpn/nordvpn-tray packs/core/adb-scrcpy/phone
 msgid "Disconnect"
 msgstr "Desconectar"
 
@@ -6329,3 +6415,19 @@ msgstr "Instalador de ajustes"
 #~ "Setting up PyQt6, a window toolkit (about 280 MB, shared by the installer window and the tweaks that use it)"
 #~ msgstr ""
 #~ "Configurando PyQt6, un kit de ventanas (unos 280 MB, compartido por la ventana del instalador y los ajustes que lo usan)"
+
+#~ # needs review
+#~ msgid ""
+#~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once."
+#~ msgstr ""
+#~ "La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato."
+
+#~ # needs review
+#~ msgid "The phone mirror's stream, joystick scrolling, and its clipboard."
+#~ msgstr ""
+#~ "La transmisión del espejo del teléfono, el desplazamiento con joystick y su portapapeles."
+
+#~ msgid ""
+#~ "Picture and smoothness apply when the stream restarts; joystick speed at once."
+#~ msgstr ""
+#~ "La imagen y la fluidez se aplican al reiniciar la transmisión; la velocidad del joystick, de inmediato."

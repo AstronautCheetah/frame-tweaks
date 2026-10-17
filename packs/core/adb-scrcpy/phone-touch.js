@@ -146,6 +146,10 @@
     // (scrcpy's clipboard sync: the Frame's to the phone when you paste in the mirror, the phone's
     // here whenever it copies; off: --no-clipboard-autosync)
     [N('Clipboard with the phone'), 'PHONE_CLIPBOARD', [[N('Shared'), 'both'], [N('Not shared'), 'off']], true],
+    // (minutes; `phone` reads it at each check, so it applies at once, counted from the change)
+    [N('Disconnect by itself after'), 'PHONE_TIMEOUT',
+     [[N('Never'), '0'], [N('15 min'), '15'], [N('30 min'), '30'], [N('1 h'), '60'], [N('2 h'), '120'], [N('4 h'), '240'],
+      [N('8 h'), '480']], false],
   ];
   // A restart (Restart stream, or phone reconnecting) makes a new window, which the dashboard docks
   // or floats somewhere of its own. Where a floating mirror was (and whether its settings were
@@ -226,7 +230,7 @@
     }
   };
   const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15',
-                     PHONE_CLIPBOARD: 'both' };
+                     PHONE_CLIPBOARD: 'both', PHONE_TIMEOUT: '60' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
   let redraw = () => {};
@@ -313,7 +317,7 @@
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
-             T('Picture and smoothness apply when the stream restarts; joystick speed at once.')))));
+             T('Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once.')))));
   };
   const buildExtras = (f) => {
     const page = f.activePage, sz = page?.size;

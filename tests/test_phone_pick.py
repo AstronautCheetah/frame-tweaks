@@ -245,6 +245,74 @@ class PhonePick(unittest.TestCase):
         self.assertNotIn("phone-touch 10.0.0.5", log)
 
 
+class AutoDisconnect(unittest.TestCase):
+    """A mirror left on drained the phone's battery overnight: after PHONE_TIMEOUT minutes it asks
+    (a minute) whether to keep it on, and with no answer closes the mirror and disconnects. Minutes
+    are seconds here (PHONE_MINUTE); the mirror runs until it's stopped."""
+    setUp, run_phone = PhonePick.setUp, PhonePick.run_phone
+    PHONES = [("Pixel 9", "10.0.0.5", 4000)]
+    MIRROR = 'echo "scrcpy $*" >> "$HOME/log"; exec /usr/bin/sleep 20'
+    # kdialog --yesno: logged with the time; answers from $HOME/answers (one per ask: yes, no; none
+    # left: never answers)
+    ASK = ('echo "kdialog $(date +%s.%N) $*" >> "$HOME/log"; a=$(head -1 "$HOME/answers" 2>/dev/null); '
+           'sed -i 1d "$HOME/answers" 2>/dev/null; case "$a" in yes) exit 0;; no) exit 1;; esac; exec /usr/bin/sleep 20')
+
+    def run_auto(self, conf, answers="", mirror=None, minute=1):
+        (Path(self.tmp.name) / "answers").write_text(answers)
+        return self.run_phone(self.PHONES, conf='PHONE_NAME="Pixel 9"\n' + conf, env={"PHONE_MINUTE": minute}, extra={
+            "scrcpy": mirror or self.MIRROR, "kdialog": self.ASK, "sleep": "exec /usr/bin/sleep 0.05",
+            "notify-send": 'echo "notify $*" >> "$HOME/log"'})
+
+    def test_no_answer_disconnects(self):
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n")
+        self.assertEqual(code, 0, log)
+        self.assertEqual(log.count("--yesno"), 1, log)
+        self.assertIn("Keep it on", log)
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
+        self.assertIn("notify -a Phone Android Mirror disconnected Pixel 9 was mirrored for 1 min", log)
+        self.assertNotIn("--title Android Mirror --", log)           # (the mirror window's own title)
+
+    def test_keep_it_on_asks_again_after_the_same_time(self):
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", answers="yes\n")
+        self.assertEqual(log.count("--yesno"), 2, log)
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
+
+    def test_disconnect_answer_goes_at_once(self):
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", answers="no\n")
+        self.assertEqual(log.count("--yesno"), 1, log)
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
+
+    def test_never(self):
+        """PHONE_TIMEOUT=0: the mirror stays until it's closed."""
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=0\n", mirror='echo "scrcpy $*" >> "$HOME/log"; /usr/bin/sleep 2.5')
+        self.assertEqual(code, 0, log)
+        self.assertNotIn("--yesno", log)
+        self.assertNotIn("adb disconnect", log)
+
+    def test_a_change_counts_from_then(self):
+        """Changed while the mirror is open (the gear, the settings page): it applies to that mirror,
+        counted from the change (1 minute set after 2.5 minutes open doesn't disconnect at once)."""
+        conf = Path(self.tmp.name) / ".config/frame-tweaks/phone.conf"
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=0\n", minute=2, mirror=(
+            'echo "scrcpy $*" >> "$HOME/log"; /usr/bin/sleep 2.5; '
+            f'echo PHONE_TIMEOUT=1 >> "{conf}"; echo "changed $(date +%s.%N)" >> "$HOME/log"; exec /usr/bin/sleep 20'))
+        changed = float(next(l.split()[1] for l in log.splitlines() if l.startswith("changed ")))
+        asked = float(next(l.split()[1] for l in log.splitlines() if "--yesno" in l))
+        self.assertGreaterEqual(asked - changed, 1.0, log)
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
+
+    def test_reset_to_defaults_is_back_to_an_hour(self):
+        """Reset to defaults takes PHONE_TIMEOUT out of the file: an hour again, not the value the
+        mirror started with."""
+        conf = Path(self.tmp.name) / ".config/frame-tweaks/phone.conf"
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=2\n", mirror=(
+            'echo "scrcpy $*" >> "$HOME/log"; /usr/bin/sleep 0.5; '
+            f'printf \'PHONE_NAME="Pixel 9"\\n\' > "{conf}"; /usr/bin/sleep 3.5'))
+        self.assertEqual(code, 0, log)
+        self.assertNotIn("--yesno", log)
+        self.assertNotIn("adb disconnect", log)
+
+
 class Uninstall(unittest.TestCase):
     def test_stops_adbs_server_in_both_sessions(self):
         """Each session starts its own adb server, its socket in that session's runtime folder
