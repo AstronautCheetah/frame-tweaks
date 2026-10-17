@@ -15,10 +15,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script, sandbox_env, stub  # noqa: E402
 sft = load_script(ROOT / "packs/core/vr-dashboard" / "sft-dashboard", "sft")
 def _patches():
-    """Every dashboard patch a tweak installs: install_dashboard_patch NAME FILE in its install.sh."""
+    """Every dashboard patch a tweak installs: install_dashboard_patch NAME FILE in its install.sh
+    (or, vr-dashboard's own, install FILE "$D/patches/NAME.js")."""
     found = {}
     for inst in ROOT.glob("packs/*/*/install.sh"):
         for name, rel in re.findall(r'install_dashboard_patch\s+(\S+)\s+"\$TWEAK_DIR/([^"]+)"', inst.read_text()):
+            found[name] = inst.parent / rel
+        for rel, name in re.findall(r'install -m644 "\$TWEAK_DIR/([^"]+)" "\$D/patches/([^"/]+)\.js"', inst.read_text()):
             found[name] = inst.parent / rel
     return found
 
@@ -67,7 +70,7 @@ class ArmRestore(unittest.TestCase):
 class DashboardCheck(unittest.TestCase):
     def test_every_patch_is_found(self):
         self.assertGreaterEqual(set(PATCHES), {"curvature", "float-return", "float-grab", "scroll-strips",
-                                               "phone-rotate", "phone-touch", "arrowpad-keyboard"})
+                                               "phone-rotate", "phone-touch", "panel-keyboard"})
         for path in PATCHES.values():
             self.assertTrue(path.is_file(), path)
 

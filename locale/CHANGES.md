@@ -7,4 +7,9 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 `dev/i18n.py export` hands translators what a changed text was, and its old translation, to
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
-Nothing waiting: no English text has changed since the languages last caught up.
+## 2026-10-17
+- New in `packs/core/snip/frame-snip:1414`
+  - now: "While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it closer, further away or turn it."
+- Changed in `packs/core/vr-dashboard/README.md`
+  - was: "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
+  - now: "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own patch keeps Steam's keyboard with the window you're typing in when you press a Frame Tweaks panel (Arrow Pad, Screen snip's narration panel)."

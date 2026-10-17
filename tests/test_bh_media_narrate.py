@@ -323,6 +323,51 @@ class Narration(unittest.TestCase):
                 overlay.close()
                 self.assertFalse(overlay.tex_dir.exists())
 
+    def test_with_the_controllers_hidden_it_slides_after_the_laser(self):
+        """Steam's keyboard open: SteamVR hides the controllers from other programs (the stand-in
+        has none either), and carrying the panel did nothing. It slides in its own plane after the
+        laser instead, half the way each time (Arrow Pad's), with a note under it that goes a while
+        after you let go."""
+        from PyQt6.QtCore import QPoint
+        w, overlay, ov = self.panel()
+        overlay.poll_timer.stop()
+        vr = sys.modules["openvr"]
+        vr.VREvent_MouseMove, vr.VREvent_MouseButtonDown, vr.VREvent_MouseButtonUp, vr.VREvent_FocusLeave = 1, 2, 3, 4
+        queue = []
+
+        def next_event(_handle, ev):
+            if not queue:
+                return (False, None)
+            t, at = queue.pop(0)
+            ev.eventType, ev.trackedDeviceIndex = t, 1
+            ev.data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=at.x(), y=w.height() - at.y()))
+            return (True, ev)
+        vr.VREvent_t = lambda: types.SimpleNamespace()
+        ov.pollNextOverlayEvent.side_effect = next_event
+        empty = next(QPoint(x, y) for y in range(w.height() - 5, 5, -7) for x in range(5, w.width() - 5, 7)
+                     if overlay.button_at(QPoint(x, y)) is None)
+        before = [row[3] for row in overlay.pose]
+        queue[:] = [(2, empty)]
+        overlay.poll()
+        self.assertIsNotNone(overlay.drag)
+        self.assertIsNone(overlay.drag[1])                                  # (sliding, not carried)
+        self.assertIsNotNone(overlay.note)
+        self.assertIn(mock.call(overlay.key + ".note", "Screen snip"), ov.createOverlay.call_args_list)
+        queue[:] = [(1, empty + QPoint(100, 0)), (1, empty + QPoint(100, 40))]
+        overlay.poll()                                                     # (only the latest spot counts)
+        moved = [overlay.pose[i][3] - before[i] for i in range(3)]
+        k = 0.5 * overlay.M_PER_PX
+        want = [k * (overlay.pose[i][0] * 100 - overlay.pose[i][1] * 40) for i in range(3)]
+        for got, exp in zip(moved, want):
+            self.assertAlmostEqual(got, exp)
+        with mock.patch.object(overlay, "NOTE_LINGER_MS", 10):
+            queue[:] = [(3, empty + QPoint(100, 40))]
+            overlay.poll()
+            self.assertIsNone(overlay.drag)
+            self.assertTrue(self.wait(lambda: overlay.note is None, 2))
+        ov.destroyOverlay.assert_called()
+        self.assertEqual(self.escaped, [])
+
 
 # A stand-in for pyopenvr: every call succeeds, and there's no dashboard and no controller.
 FAKE_OPENVR = '''from unittest import mock

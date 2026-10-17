@@ -8,7 +8,9 @@ summary: >-
 what: >-
   The shared part of the VR environment tweaks (Curved world windows, Back to the previous window,
   Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard
-  while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically.
+  while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own
+  patch keeps Steam's keyboard with the window you're typing in when you press a Frame Tweaks
+  panel (Arrow Pad, Screen snip's narration panel).
 why: >-
   SteamVR's dashboard, the menu and window space you use in the headset, has no settings for
   these behaviours. It's a web page, so small patches added to it while SteamVR runs can change
@@ -39,7 +41,7 @@ test: {offline: true}
 # VR dashboard patching (helper)
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically.
+The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own patch keeps Steam's keyboard with the window you're typing in when you press a Frame Tweaks panel (Arrow Pad, Screen snip's narration panel).
 
 **Why on a Steam Frame:** SteamVR's dashboard, the menu and window space you use in the headset, has no settings for these behaviours. It's a web page, so small patches added to it while SteamVR runs can change them.
 <!-- /generated:intro -->
@@ -61,6 +63,11 @@ waiting for that.
 ## Use
 Nothing to do here. Each VR environment tweak is one patch; tick or untick those tweaks in the
 Frame Tweaks window, and the running dashboard picks up the change within a few seconds.
+
+One patch is its own, `panel-keyboard`. Steam's keyboard follows the laser: pressing a Frame
+Tweaks panel ([Arrow Pad](../arrowpad/), [Screen snip](../snip/)'s narration panel) while you type
+took the keyboard away from your window (what you typed next went nowhere) and moved it. The
+patch gives it straight back to the window it was open for, where it was.
 
 ## How it works
 - SteamVR's dashboard is a web page (`systemui`) in its own web helper. With the setting

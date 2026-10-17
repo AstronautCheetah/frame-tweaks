@@ -14,7 +14,7 @@ if pgrep -f "$pad" >/dev/null; then
     clear_stuck_modifiers
     say "$(t 'stopped a running Arrow Pad')"
 fi
-remove_dashboard_patch arrowpad-keyboard
+remove_dashboard_patch arrowpad-keyboard      # (its own, before 0.6.19: vr-dashboard's panel-keyboard now)
 remove_icon frame-tweaks-arrowpad
 remove_desktop arrowpad.desktop arrowpad-vr.desktop
 remove_files "$BIN/arrowpad" "$HOME/.local/share/arrowpad/arrowpad.py" "$HOME/.local/share/arrowpad/vroverlay.py" "$HOME/.local/share/arrowpad/haptics.py" "$HOME/.local/share/arrowpad/vr" "$HOME/.local/share/arrowpad/__pycache__"
