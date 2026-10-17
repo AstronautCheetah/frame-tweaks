@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Recline says when it has an update:** its row now shows "↑ 1.4.0 available · Update" when
+  Recline-VR publishes a new release, as Full Keyboard's does; Update (or ↻) installs it, then
+  restart SteamVR. It used to look up to date until you pressed ↻.
+
 ## 0.6.18 (2026-10-17)
 
 ### Added
