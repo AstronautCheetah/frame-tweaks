@@ -2970,9 +2970,10 @@ msgctxt "key legend"
 msgid "Bksp"
 msgstr "Retro"
 
+# needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Close (hold it)"
-msgstr ""
+msgstr "Cerrar (mantenlo presionado)"
 
 #: packs/core/arrowpad/arrowpad.py
 msgid "Copy (Ctrl+C)"
@@ -3047,9 +3048,10 @@ msgstr "Grafito"
 msgid "Haptics"
 msgstr "Respuesta háptica"
 
+# needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Hold ✕ to close Arrow Pad"
-msgstr ""
+msgstr "Mantén presionada ✕ para cerrar el Teclado de flechas"
 
 #: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
@@ -3399,10 +3401,12 @@ msgstr ""
 msgid "Charge to 100% once"
 msgstr "Cargar al 100% una vez"
 
+# needs review
 #: packs/core/charge-limit/README.md
 msgid ""
 "Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less. The level is the battery's own reading, as KDE shows it; Steam's dashboard shows a higher figure for the same charge (about 8 points more around 80%: 78% here is 86% there)."
 msgstr ""
+"La carga se detiene en este nivel y vuelve a empezar un 1% por debajo. Conectado y en el límite, el Frame funciona sobre todo con el cargador o la batería externa. Un límite más bajo desgasta la batería un poco menos. El nivel es la lectura de la propia batería, como la muestra KDE; el menú principal de Steam muestra una cifra más alta para la misma carga (unos 8 puntos más cerca del 80%: 78% aquí son 86% allí)."
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -3491,25 +3495,31 @@ msgstr ""
 "El interruptor de pausa del cargador pertenece a root. Para que sea tuyo, esto pide tu contraseña de sudo\n"
 "(administrador) una vez, para agregar una regla de udev (%s) que las actualizaciones de SteamOS conservan."
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; charging stops at %s%%"
-msgstr ""
+msgstr "Batería al %s%%; la carga se detiene al %s%%"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; charging to 100%% once, then stopping at %s%% again"
 msgstr ""
+"Batería al %s%%; cargando al 100%% una vez, después se detendrá otra vez al %s%%"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; holding at the %s%% limit, not charging"
-msgstr ""
+msgstr "Batería al %s%%; se mantiene en el límite del %s%%, sin cargar"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; not charging until it's below %s%%"
-msgstr ""
+msgstr "Batería al %s%%; sin cargar hasta que baje del %s%%"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; the limit is off: it charges to 100%%"
-msgstr ""
+msgstr "Batería al %s%%; el límite está desactivado: carga al 100%%"
 
 # needs review
 #: packs/core/charge-limit/status.sh
