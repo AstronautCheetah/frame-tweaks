@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -49,6 +50,15 @@ class Yours(unittest.TestCase):
                          {("Desktop Entry", "Name"): "Lock up"})
         self.assertEqual(menuedits.yours("[Desktop Entry]\nName=Lock Wallet\n", "[Desktop Entry]\nName=Notes\n"),
                          {("Desktop Entry", "Name"): "Notes"})          # (no X-Frame-Tweaks-Name: not one of ours)
+
+    def test_a_label_in_a_language_the_entry_doesnt_carry_isnt_yours(self):
+        """An entry installed before a language was added has no line for it; relabelled into it,
+        its name isn't an edit of yours to keep (a reinstall kept Arrow Pad's French name)."""
+        base = "[Desktop Entry]\nName=Lock Wallet\nX-Frame-Tweaks-Name=Lock Wallet\nName[es]=Bloquear cartera\n"
+        french = base.replace("\nName=Lock Wallet\n", "\nName=Verrouiller le portefeuille\n")
+        with mock.patch.object(menuedits, "translations_of", lambda en: {"Verrouiller le portefeuille"}):
+            self.assertEqual(menuedits.yours(base, french), {})
+        self.assertIsInstance(menuedits.translations_of("Lock Wallet"), set)   # (the real i18n.py beside it)
 
 
 class WithYours(unittest.TestCase):

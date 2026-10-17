@@ -395,6 +395,21 @@ class MenusAndDashboard(unittest.TestCase):
         self.assertIn("Name=Lock it all", lines)
         self.assertIn("Name=Desactivado", lines)
 
+    def test_relabel_from_a_language_the_entry_doesnt_carry(self):
+        """An entry installed before a language was added has no line for it: switched to that
+        language, then to another, its label there looked typed and stayed (Arrow Pad and the rest
+        stayed French in Steam's "+" menu with English chosen in Preferences)."""
+        en = i18n.Catalogue([], self.d)
+        mine = self.d / "wallet-lock.desktop"
+        mine.write_text(i18n.desktop("[Desktop Entry]\nName=Lock Wallet\n", self.d, en))   # (es_419 only)
+        (self.d / "fr.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Lock Wallet"\nmsgstr "Verrouiller le portefeuille"\n')
+        for languages, want in ((["fr"], "Verrouiller le portefeuille"), (["es"], "Bloquear cartera"),
+                                (["fr"], "Verrouiller le portefeuille"), ([], "Lock Wallet")):
+            with mock.patch.object(i18n, "CATALOGUE", i18n.Catalogue(languages, self.d)):
+                i18n.relabel(mine)
+            self.assertIn(f"Name={want}", mine.read_text().splitlines(), languages)
+        self.assertEqual(i18n.translations_of("Lock Wallet", self.d), {"Bloquear cartera", "Verrouiller le portefeuille"})
+
     def test_dashboard_table(self):
         sd = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sd")
         js = self.d / "p.js"
