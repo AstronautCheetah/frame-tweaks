@@ -984,6 +984,10 @@ msgid "This window"
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Translate it yourself"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid ""
 "Translations are made by machine first, checked against SteamVR's, Steam's and KDE's own wording, then confirmed by people who speak the language."
 msgstr ""

@@ -14,6 +14,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "{language}: {n} of {total} texts not yet confirmed."
 - New in `gui/prefs_page.py:215`
   - now: "Check a translation (right or wrong)"
+- New in `gui/prefs_page.py:216`
+  - now: "Translate it yourself"
 - New in `gui/report_page.py:105`
   - now: "Saved as {file}"
 - New in `gui/report_page.py:106`

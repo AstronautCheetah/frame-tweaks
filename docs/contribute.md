@@ -42,8 +42,11 @@ star back any time).
   many texts each language still has to confirm is in the
   [Translations needed](https://github.com/AstronautCheetah/frame-tweaks/issues?q=is%3Aissue+label%3Atranslations)
   issue.
-- **Add a language.** The texts go out as files you can translate in any editor or tool, and
-  come back checked: [translating Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks/blob/main/locale/README.md).
+- **Translate it into your language**, a new one, or properly, one made by machine. The texts go
+  out as files you can translate in any editor or tool, and come back checked:
+  [offer a translation](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_volunteer.yml)
+  (or **Translate it yourself** in ⚙ Preferences), and
+  [translating Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks/blob/main/locale/README.md).
 
 ## Code and docs
 

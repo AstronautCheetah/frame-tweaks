@@ -23,6 +23,14 @@ BUG_FORM = "https://github.com/AstronautCheetah/frame-tweaks/issues/new?template
 TRANSLATION_FORM = "https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_check.yml"
 
 
+VOLUNTEER_FORM = "https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_volunteer.yml"
+
+
+def volunteer_form_url(language=""):
+    """The form to offer a translation (a new language, or one made by machine), language filled in."""
+    return VOLUNTEER_FORM + ("&" + urllib.parse.urlencode({"language": language}) if language else "")
+
+
 def translation_form_url(language):
     """The translation check form, with the language (its code and name) and the version filled in."""
     return TRANSLATION_FORM + "&" + urllib.parse.urlencode({"language": language, "version": sft.build_version()})
