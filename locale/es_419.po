@@ -1178,9 +1178,8 @@ msgstr "(Probando la ventana: no se guardó ningún informe)."
 
 #: gui/report_page.py
 msgid ""
-"1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+"1. Read the report below: it's plain text, and nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
-"1. Lee el informe: es texto simple, y nada de él se envía a ningún lado a menos que lo adjuntes.<br>2. Abre el formulario de error (en GitHub; ahí inicias sesión), cuenta qué pasó y qué esperabas, y arrastra el informe a su casilla Diagnostics report."
 
 #: gui/report_page.py
 msgid "Couldn't write the report (see {command})."
@@ -1205,8 +1204,12 @@ msgid "🐞 Open the bug form"
 msgstr "🐞 Abrir el formulario de error"
 
 #: gui/report_page.py
-msgid "📄 Open the report"
-msgstr "📄 Abrir el informe"
+msgid "📋 Copied"
+msgstr ""
+
+#: gui/report_page.py
+msgid "📋 Copy the report"
+msgstr ""
 
 #: gui/wallet_page.py
 msgid "(default 4 h)"
@@ -6523,3 +6526,11 @@ msgstr "Instalador de ajustes"
 #~ # needs review
 #~ msgid "Stops charging at %s%% (battery %s%%)"
 #~ msgstr "Deja de cargar al %s%% (batería al %s%%)"
+
+#~ msgid ""
+#~ "1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+#~ msgstr ""
+#~ "1. Lee el informe: es texto simple, y nada de él se envía a ningún lado a menos que lo adjuntes.<br>2. Abre el formulario de error (en GitHub; ahí inicias sesión), cuenta qué pasó y qué esperabas, y arrastra el informe a su casilla Diagnostics report."
+
+#~ msgid "📄 Open the report"
+#~ msgstr "📄 Abrir el informe"

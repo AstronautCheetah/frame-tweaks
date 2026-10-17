@@ -1041,7 +1041,7 @@ msgstr ""
 
 #: gui/report_page.py
 msgid ""
-"1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+"1. Read the report below: it's plain text, and nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
 
 #: gui/report_page.py
@@ -1066,7 +1066,11 @@ msgid "🐞 Open the bug form"
 msgstr ""
 
 #: gui/report_page.py
-msgid "📄 Open the report"
+msgid "📋 Copied"
+msgstr ""
+
+#: gui/report_page.py
+msgid "📋 Copy the report"
 msgstr ""
 
 #: gui/wallet_page.py

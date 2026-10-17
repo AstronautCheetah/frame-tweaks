@@ -1484,3 +1484,31 @@ class ControllerButtonsOff(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReportProblem(unittest.TestCase):
+    """🐞 Report a problem shows the report on its page, with a Copy button. It opened it in the
+    text editor, which in VR started Kate (a Flatpak), and SteamOS's Holo portal crashes as a KDE
+    Flatpak starts there (five times in a row on 2026-10-17)."""
+
+    def test_shown_here_and_copied_never_handed_to_another_app(self):
+        import concurrent.futures
+        import types
+        import report_page
+        from PyQt6.QtWidgets import QApplication
+        app = QApplication.instance() or QApplication([])  # noqa: F841  (kept: a dropped one is gone)
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "frame-tweaks-debug-20261017-131638.txt"
+            f.write_text("Frame Tweaks 0.6.17\nstatus: ok\n")
+            done = concurrent.futures.Future()
+            done.set_result(subprocess.CompletedProcess([], 0, stdout=f"Wrote {f}\n", stderr=""))
+            opened = []
+            with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": ""}):
+                page = report_page.ReportPage(types.SimpleNamespace(go_back=lambda: None), opened.append,
+                                              types.SimpleNamespace(submit=lambda *a, **k: done), ROOT)
+            page.collect()
+            self.assertEqual(page.view.toPlainText(), f.read_text())
+            self.assertTrue(page.copy.isEnabled())
+            page.copy.click()
+            self.assertEqual(QApplication.clipboard().text(), f.read_text())
+            self.assertEqual(opened, [])                        # (nothing opened in another app)
