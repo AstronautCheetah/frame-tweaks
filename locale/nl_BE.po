@@ -112,7 +112,7 @@ msgstr ""
 "Kiezen welke apps met de gedeelde KDE-portefeuille openen; hem vergrendelen of ontgrendelen"
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
 msgid "Close"
 msgstr "Sluiten"
 
@@ -3447,6 +3447,10 @@ msgctxt "key legend"
 msgid "Bksp"
 msgstr "⌫"
 
+#: packs/core/arrowpad/arrowpad.py
+msgid "Close (hold it)"
+msgstr ""
+
 # needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Copy (Ctrl+C)"
@@ -3532,6 +3536,10 @@ msgstr "Grafiet"
 #: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js
 msgid "Haptics"
 msgstr "Haptische feedback"
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Hold ✕ to close Arrow Pad"
+msgstr ""
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py

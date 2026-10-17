@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Changed
+- **Arrow Pad's ✕ Close needs a short hold:** a press aimed past the pad, at the dashboard's menu
+  behind it, closed it. ✕ now turns red while held and closes after 0.8 seconds; let go sooner
+  and a note says to hold it.
 - **The charge limit's status starts with the battery level:** "Battery 76%; charging stops at
   78%" (it was "Stops charging at 78% (battery 76%)", easy to read as the battery at 78%). Its
   settings and README also say why Steam's dashboard shows more for the same charge: Steam

@@ -8,6 +8,10 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-10-17
+- New in `packs/core/arrowpad/arrowpad.py:1545`
+  - now: "Hold ✕ to close Arrow Pad"
+- New in `packs/core/arrowpad/arrowpad.py:383`
+  - now: "Close (hold it)"
 - Changed in `packs/core/charge-limit/README.md`
   - was: "Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less."
   - now: "Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less. The level is the battery's own reading, as KDE shows it; Steam's dashboard shows a higher figure for the same charge (about 8 points more around 80%: 78% here is 86% there)."

@@ -123,6 +123,8 @@ languages get the English legends.
 The toolbar above the keys has, from left to right: ⚙ **Settings**, 📌 **Pin**, ⌖ **Reset
 position**, **−** / **+** (size) and, on the right, ⌄ **Collapse** and ✕ **Close**. Pin stops
 accidental moves; its icon shows whether it's on (an upright pin) or off (tilted and crossed out).
+Close needs a short hold (it turns red, and closes after 0.8 s), so a press aimed past the pad, at
+the dashboard's menu behind it, doesn't close it; let go sooner and it says so.
 Collapse folds the pad down to just its chevron, ⌃ **Expand**, which stays where it was, under
 the pointer or the laser, as on Screen snip's panel; the pad remembers it next time.
 
