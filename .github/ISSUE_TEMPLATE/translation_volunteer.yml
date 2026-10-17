@@ -1,0 +1,56 @@
+name: Translate Frame Tweaks
+description: Offer to translate Frame Tweaks into your language, a new one or one made by machine
+title: "Translation: "
+labels: [translations]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! Frame Tweaks has about 1,200 texts: the installer window, the terminal messages,
+        the tweaks' own programs (Arrow Pad, Screen snip, Android Mirror…) and the menu entries.
+        Its translations are made by machine first; a person who speaks the language is what
+        makes them right. You can start a new language, or go over one made by machine (Latin
+        American Spanish, French and Flemish so far), as much or as little as you like.
+
+        How it works: [translating Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks/blob/main/locale/README.md).
+        The texts come as files you can work on in any editor or translation tool (Poedit,
+        Lokalize, or plain JSON), each with where it's shown, and they're checked before they go in.
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: Its name, and where it's spoken if that matters (e.g. "Deutsch", "Português (Brasil)").
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What you'd like to do
+      options:
+        - Start a new language
+        - Go over a machine translation (right or wrong, text by text)
+        - Translate some of it (a tweak, a page)
+    validations:
+      required: true
+  - type: dropdown
+    id: speaker
+    attributes:
+      label: You and this language
+      options:
+        - Native speaker
+        - Fluent
+    validations:
+      required: true
+  - type: dropdown
+    id: how
+    attributes:
+      label: How you'd like to work
+      options:
+        - Files I edit and send back (a .po file in Poedit or Lokalize, or JSON)
+        - A pull request on GitHub
+        - Not sure yet
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Terms you'd want to settle first, how much time you have, questions.

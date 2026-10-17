@@ -39,6 +39,9 @@ but no person has checked yet: a machine's, or one made without the full context
 are still unconfirmed, and links to a [translation check](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_check.yml)
 form (language and version filled in), for "it reads right" as much as for corrections. A
 confirmed language's marks come off with `import --reviewed`; corrections go in as any other.
+Someone who'd rather translate, a new language or a native pass over a machine-made one, offers
+through [Translate Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_volunteer.yml)
+(Preferences: **Translate it yourself**).
 
 Translating a lot at once (a new language, or catching up)? [BATCH.md](BATCH.md): export the
 untranslated texts as JSON, translate them, and import them with checks. Each language keeps its

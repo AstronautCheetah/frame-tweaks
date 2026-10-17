@@ -1179,6 +1179,9 @@ class PreferencesPage(unittest.TestCase):
         self.assertEqual(len(opened), 1)
         self.assertIn("template=translation_check.yml", opened[0])
         self.assertIn("language=fr+%28Fran%C3%A7ais%29", opened[0])
+        note.linkActivated.emit("volunteer")
+        self.assertIn("template=translation_volunteer.yml", opened[1])
+        self.assertIn("language=Fran%C3%A7ais", opened[1])
 
     def test_explanations_are_plain_text(self):
         """(they were escaped as HTML and shown as plain text: "they&#x27;re")"""
@@ -1459,7 +1462,7 @@ class ContributeRow(unittest.TestCase):
         page = gui.ReadmePage(mock.Mock(), gui.REPO / "docs/contribute.md", "Help make Frame Tweaks better")
         text = page.findChildren(QTextBrowser)[0].toPlainText()
         for part in ("give it a star on GitHub", "Suggest a third-party app", "tweak nobody has written yet",
-                     "Report a bug", "Check a translation", "Add a language"):
+                     "Report a bug", "Check a translation", "Translate it into your language"):
             self.assertIn(part, text)
         self.assertIn("https://github.com/AstronautCheetah/frame-tweaks", page.findChildren(QTextBrowser)[0].toHtml())
         holder.deleteLater()

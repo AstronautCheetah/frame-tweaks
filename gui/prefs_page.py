@@ -18,7 +18,7 @@ import ftconf
 from i18n import _, N_, ngettext
 import sft
 import splash
-from report_page import translation_form_url
+from report_page import translation_form_url, volunteer_form_url
 
 WINDOW = sft.CONF / "window.json"
 # key: (default, label, explanation)
@@ -212,7 +212,8 @@ class Preferences(QWidget):
                 language=names.get(lang, lang), n=counts[0], total=counts[1]), quote=False)
         link = "<a style='color:#7fb2e5' href='{0}'>{1}</a>"             # (the window's link colour)
         text += ("<br>" + link.format("contribute", html.escape(_("Help make Frame Tweaks better"), quote=False)) +
-                 " · " + link.format("check", html.escape(_("Check a translation (right or wrong)"), quote=False)))
+                 " · " + link.format("check", html.escape(_("Check a translation (right or wrong)"), quote=False)) +
+                 " · " + link.format("volunteer", html.escape(_("Translate it yourself"), quote=False)))
         label = QLabel(text)
         label.setObjectName("desc")
         label.setWordWrap(True)
@@ -224,6 +225,9 @@ class Preferences(QWidget):
     def translation_link(self, link, lang, names):
         if link == "contribute":
             self.window.show_contribute()
+        elif self.follow is not None and link == "volunteer":
+            # (a new language, or a native pass over one made by machine: the one shown, if not English)
+            self.follow(volunteer_form_url(names.get(lang, lang) if lang else ""))
         elif self.follow is not None:
             code = lang or "en"
             self.follow(translation_form_url(f"{code} ({names.get(code, code)})"))
