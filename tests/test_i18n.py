@@ -147,6 +147,18 @@ class PreferenceAndAnnouncement(unittest.TestCase):
             i18n.withdraw()
             self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
 
+    def test_a_window_that_died_isnt_followed(self):
+        """A window ended without withdrawing (a SteamVR restart, a kill): every program followed
+        its language until the Frame restarted."""
+        gone = subprocess.Popen(["true"])
+        gone.wait()
+        i18n._write(i18n.ANNOUNCED, f"es_419\n{gone.pid}\n")
+        self.assertIsNone(i18n.announced())
+        i18n._write(i18n.ANNOUNCED, f"es_419\n{os.getpid()}\n")
+        self.assertEqual(i18n.announced(), "es_419")
+        i18n._write(i18n.ANNOUNCED, "en\n")                      # (one written before: as it says)
+        self.assertEqual(i18n.announced(), "en")
+
     def test_programs_follow_the_window(self):
         """The window announces; a Qt program watching switches (inotify, no polling)."""
         from PyQt6.QtCore import QCoreApplication, QObject

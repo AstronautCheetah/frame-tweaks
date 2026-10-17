@@ -214,8 +214,10 @@ def _write(path, text):
 
 
 def announce(language):
-    """The installer window: tell the running programs which language it shows now."""
-    value = (language or "en") + "\n"
+    """The installer window: tell the running programs which language it shows now. Its pid goes
+    with it: a window that died (a SteamVR restart, a kill) never withdrew it, and every program
+    followed a window that wasn't there, until the Frame restarted."""
+    value = f"{language or 'en'}\n{os.getpid()}\n"
     if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
         return                                        # (a try-out window changes nothing)
     try:
@@ -225,12 +227,26 @@ def announce(language):
         pass
 
 
-def announced():
-    """The language the installer window shows now, if it's open (it withdraws it on closing)."""
+def window_running(pid):
+    """Whether pid is the installer window (or this program itself)."""
+    if pid == os.getpid():
+        return True
     try:
-        return ANNOUNCED.read_text().strip() or None
+        return b"frame-tweaks-gui" in Path(f"/proc/{pid}/cmdline").read_bytes()
+    except OSError:
+        return False
+
+
+def announced():
+    """The language the installer window shows now, if it's open (it withdraws it on closing; one
+    that died is told by its pid)."""
+    try:
+        words = ANNOUNCED.read_text().split()
     except OSError:
         return None
+    if not words or (len(words) > 1 and words[1].isdigit() and not window_running(int(words[1]))):
+        return None
+    return words[0]
 
 
 def withdraw():
@@ -250,10 +266,7 @@ def follow_announcements(owner, changed):
 
     def look(*_args):
         global CATALOGUE
-        try:
-            lang = ANNOUNCED.read_text().strip()
-        except OSError:
-            return
+        lang = announced()
         if lang and lang != (CATALOGUE.language or "en"):
             CATALOGUE = Catalogue([] if lang == "en" else [lang])
             changed()
