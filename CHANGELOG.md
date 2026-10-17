@@ -11,15 +11,13 @@
 - **Tick or untick a whole category:** two boxes beside each category's name in the installer
   window tick or untick every tweak in it (the ones it shows), as clicking each would; nothing is
   installed or removed until Apply changes.
-
 - **Move Arrow Pad and Screen snip's panel anywhere while Steam's keyboard is open (VR):** with
   the keyboard open, SteamVR hides where your controllers are from other programs, so the panels
   could only slide flat. Now SteamVR's own grab bar, as under a desktop window, shows under each
   of them while the keyboard is open: hold it and the panel moves with your hand as a floating
   window does, turned and tilted with it, nearer or further with the thumbstick, and stays where
-  you let go. The panel is only told where that was,
-  never where your controllers are. It comes with the VR environment helper.
-
+  you let go. The panel is only told where that was, never where your controllers are. It comes
+  with the VR environment helper.
 - **Narration volume:** Screen snip's narration panel has Volume down and Volume up buttons
   (icons), after Next part. The narration's own volume, from 100% down to 10%, remembered, and a
   change is heard at once, mid-sentence. **Show text** moved to the bottom row, beside the left
