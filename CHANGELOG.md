@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.19 (2026-10-17)
 
 ### Added
 - **Linked projects say when they have an update:** Recline's row now shows "↑ 1.4.0 available ·
