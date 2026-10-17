@@ -1163,32 +1163,37 @@ def passthrough(master, pid, inp, saved):
 # ---- a pretend install, to see it --------------------------------------------------------------
 
 def demo_child():
+    """What a real install prints (some of it its very words), in Frame Tweaks' language: it
+    showed English whatever language was chosen."""
     w = sys.stdout.write
 
     def say(text, pause=0.35):
         w(text + "\n")
         sys.stdout.flush()
         time.sleep(pause)
-    say("\x1b[1;34m==>\x1b[0m Setting up PyQt6, a window toolkit (about 280 MB)", 0.6)
+    say("\x1b[1;34m==>\x1b[0m " + _("Setting up PyQt6, a window toolkit"), 0.6)
     for i in range(0, 101, 4):
         bar = "━" * (i * 30 // 100) + "\x1b[2m" + "━" * (30 - i * 30 // 100) + "\x1b[0m"
         w("\r   \x1b[35m%s\x1b[0m %3d%% · %.1f/62.4 MB" % (bar, i, 62.4 * i / 100))
         sys.stdout.flush()
         time.sleep(0.08)
     w("\n")
-    for tid, title, lines in (("ydotool", "ydotool", ["Fetching ydotool 1.0.4-2 (Arch Linux ARM, signature checked)",
-                                                    "Installed ydotool and ydotoold in ~/.local/bin"]),
-                              ("arrowpad", "Arrow Pad", ["Creating Arrow Pad's Python setup",
-                                                         "Added Arrow Pad to the app menu",
-                                                         "\x1b[32m✔\x1b[0m Arrow Pad is ready: Ctrl+Alt+A shows it"]),
-                              ("snip", "Screen snip", ["Linking frame-snip into ~/.local/bin",
-                                                       "Narrate's voice: Piper (offline)"])):
+    pad, snip = _("Arrow Pad"), _("Screen snip + Narrate")
+    for tid, title, lines in (
+            ("ydotool", "ydotool", [_("Fetching {name} (Arch Linux ARM, signature checked)").format(name="ydotool 1.0.4-2"),
+                                    _("Installed {programs} in {folder}").format(programs="ydotool, ydotoold",
+                                                                                 folder="~/.local/bin")]),
+            ("arrowpad", pad, [_("Setting up {name}'s Python packages").format(name=pad),
+                               _("Added {name} to the app menu").format(name=pad),
+                               "\x1b[32m✔\x1b[0m " + _("{name} is ready: {keys} shows it").format(name=pad, keys="Ctrl+Alt+A")]),
+            ("snip", snip, [_("Linking {program} into {folder}").format(program="frame-snip", folder="~/.local/bin"),
+                            _("Narrate's voice: {voice}").format(voice="Piper")])):
         say("\x1b[1m── %s: %s\x1b[0m" % (tid, title), 0.5)
         for line in lines:
             say("  " + line, 0.45)
         say("", 0.2)
-    say("\x1b[1mDone.\x1b[0m", 0.3)
-    for tid, st in (("ydotool", "running"), ("arrowpad", "installed"), ("snip", "installed")):
+    say("\x1b[1m" + _("Done.") + "\x1b[0m", 0.3)
+    for tid, st in (("ydotool", _("running")), ("arrowpad", _("installed")), ("snip", _("installed"))):
         say("  \x1b[32m✔\x1b[0m %-15s %s" % (tid, st), 0.08)
 
 
