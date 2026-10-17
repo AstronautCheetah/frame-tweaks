@@ -2,6 +2,7 @@
 import math
 import os
 import sys
+import time
 import types
 import unittest
 from pathlib import Path
@@ -415,6 +416,85 @@ class SlideWhileTheKeyboardShows(unittest.TestCase):
         o.pump("A")
         self.assertEqual(slid, [(140, 100)])
         self.assertEqual(o.laser_at[2].x(), 400)
+
+
+class DesktopGrabNote(unittest.TestCase):
+    """Desktop mode can take all input (its window then says "...to ungrab input"), and what's
+    typed anywhere in VR goes to the desktop, a floating window's typing too. The note under the
+    pad says so: the same note as the slide's message, the two one under the other when both apply
+    (the owner's ask: they mustn't cover each other)."""
+
+    def host(self, v):
+        o = SlideWhileTheKeyboardShows.host(self, v)
+        o.input_handle, o.cover = 7, None
+        self.calls, self.texts, self.timers = [], [], []
+        o.ov = types.SimpleNamespace(
+            createOverlay=lambda key, name: self.calls.append("create") or 9,
+            setOverlaySortOrder=lambda h, n: None, setOverlayWidthInMeters=lambda h, w: None,
+            setOverlayFromFile=lambda h, path: None, setOverlayTransformAbsolute=lambda h, u, m: None,
+            showOverlay=lambda h: self.calls.append("show"), destroyOverlay=lambda h: self.calls.append("destroy"))
+        v.openvr.TrackingUniverseStanding = 1
+        v.QTimer = types.SimpleNamespace(singleShot=lambda ms, f: self.timers.append(f))
+        o.distance_from_head, o.remember_offset, o.ease_level, o.save = (lambda: 0.0), (lambda: None), (lambda: None), (lambda: None)
+        picture = types.SimpleNamespace(save=lambda path, fmt: None, height=lambda: 200, width=lambda: 900)
+        for patch in (mock.patch.object(v, "note_image", lambda text: self.texts.append(text) or picture),
+                      mock.patch.object(v.vrkit, "hmd34", lambda vr, m: m)):
+            patch.start()
+            self.addCleanup(patch.stop)
+        return o
+
+    def test_both_messages_share_one_note(self):
+        v = load()
+        o = self.host(v)
+        slide, grab = o.note_message("slide"), o.note_message("grab")
+        o.set_note("grab", True)
+        self.assertEqual((self.texts[-1], self.calls), (grab, ["create", "show"]))
+        o.start_drag(1, grip=False, at=Point(100, 100))       # Steam's keyboard open: it slides
+        self.assertEqual(self.texts[-1], slide + "\n\n" + grab)   # (the slide's on top)
+        self.assertEqual(self.calls.count("create"), 1)         # (one note, not two over each other)
+        o.end_drag()
+        self.timers.pop(0)()                                   # a few seconds later
+        self.assertEqual(self.texts[-1], grab)
+        self.assertNotIn("destroy", self.calls)
+        o.set_note("grab", False)
+        self.assertEqual(self.calls[-1], "destroy")
+
+    def wait(self, o):
+        for _ in range(200):
+            if not o.grab_checking:
+                return
+            time.sleep(0.005)
+        self.fail("the check didn't finish")
+
+    def test_looked_at_off_the_gui_thread_every_2_s(self):
+        v = load()
+        o = self.host(v)
+        asked = []
+        o.pad = types.SimpleNamespace(pinned=False, grabbed_by_desktop=lambda: asked.append(1) or True)
+        o.watch_grab()
+        self.wait(o)
+        o.watch_grab()                                         # (its answer, the next tick)
+        self.assertEqual((len(asked), self.texts[-1]), (1, o.note_message("grab")))
+        o.watch_grab()
+        self.assertEqual(len(asked), 1)                        # (not again before GRAB_CHECK_S)
+        o.hide_note()                                          # the dashboard closed
+        o.watch_grab()                                         # open again, still taken: back
+        self.assertEqual(self.calls.count("create"), 2)
+        o.pad.grabbed_by_desktop = lambda: False               # Unstick gave it back
+        o.grab_checked -= v.GRAB_CHECK_S
+        o.watch_grab()
+        self.wait(o)
+        o.watch_grab()
+        self.assertEqual(self.calls[-1], "destroy")
+
+    def test_a_failing_check_is_no_grab(self):
+        v = load()
+        o = self.host(v)
+        o.pad = types.SimpleNamespace(pinned=False, grabbed_by_desktop=lambda: 1 / 0)
+        o.watch_grab()
+        self.wait(o)
+        o.watch_grab()
+        self.assertEqual(self.calls, [])
 
 
 class Reset(unittest.TestCase):

@@ -12,6 +12,7 @@ keyboard shows, SteamVR hides where the controllers are from other programs (its
 privacy), so a drag then slides the panel in its own plane after the laser instead, and a note
 under the panel says so. Steam's keyboard follows the laser's focus; the dashboard patch
 (keyboard-patch.js) hands it back to the window it was typing into when it comes to the panel.
+While desktop mode has taken all input (Right Ctrl), the same note says so too.
 """
 import contextlib
 import glob
@@ -19,6 +20,7 @@ import hashlib
 import math
 import os
 import sys
+import threading
 import time
 
 import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sys.path)
@@ -58,9 +60,11 @@ FOLLOW = (DASHBOARD_BAR, DASHBOARD_MAIN)       # what the pad rides along with
 PLACE = (DASHBOARD_MAIN, DASHBOARD_BAR)        # what Reset puts it beneath
 GAP_BELOW, TOWARD_VIEWER, PITCH_DEG = 0.06, 0.24, 50
 FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of the headset
-# The note under the panel while it slides (Steam's keyboard open): its width, the gap above it,
-# and how long it stays after you let go (time to finish reading).
-NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS = 0.36, 0.02, 3000
+# The note under the panel: why it only slides (Steam's keyboard open), and that desktop mode has
+# taken all input. Its width, the gap above it, how long the slide's message stays after you let go
+# (time to finish reading), and how often desktop mode's window title is looked at.
+NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS, GRAB_CHECK_S = 0.36, 0.02, 3000, 2.0
+NOTE_ORDER = ("slide", "grab")      # its messages, top to bottom
 NOTE_PX, NOTE_PAD_PX, NOTE_FONT_PX = 900, 28, 34     # its picture: width, margin, text size
 
 
@@ -337,13 +341,37 @@ class OverlayHost:
         if getattr(self, "note_shown", False):
             self.place_note()
 
-    # ---- the note under the panel while it slides ---------------------------------------------
-    def show_slide_note(self):
-        """Sliding because Steam's keyboard is open: a note under the panel says why it only
-        slides. (A note that fails is left out: the slide goes on.)"""
-        try:
-            text = _("While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move "
+    # ---- the note under the panel ---------------------------------------------------------------
+    def note_message(self, reason):
+        if reason == "slide":
+            return _("While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move "
                      "it closer, further away or turn it.")
+        return _("Desktop mode has taken all input, so what you type goes to the desktop, not to other "
+                 "windows. Tap Unstick (under Tools) to give it back.")
+
+    def set_note(self, reason, on):
+        """One of the note's messages on or off. One note shows them all, one under the other in
+        NOTE_ORDER, so two never cover each other; with none left, it goes."""
+        shown = getattr(self, "note_reasons", ())
+        want = tuple(r for r in NOTE_ORDER if (on and r == reason) or (r != reason and r in shown))
+        if want == shown and bool(want) == getattr(self, "note_shown", False):
+            return
+        if not want:
+            self.hide_note()
+            return
+        self.note_reasons = want
+        self.show_note("\n\n".join(self.note_message(r) for r in want))
+
+    def end_slide_note(self):
+        """A few seconds after a slide: its message goes, unless it's sliding again."""
+        if self.drag is not None and self.drag[1] is None:
+            return
+        self.set_note("slide", False)
+
+    def show_note(self, text):
+        """The note shows text, just below the panel. (A note that fails is left out: what it's
+        about goes on.)"""
+        try:
             # (a file name for each text: SteamVR caches overlay images by path, see render)
             path = f"{TEX_DIR}/arrowpad-note-{os.getpid()}-{hashlib.blake2b(text.encode(), digest_size=4).hexdigest()}.png"
             if getattr(self, "note_path", None) != path:
@@ -368,6 +396,31 @@ class OverlayHost:
         except Exception as e:
             self.log_input(f"note: {type(e).__name__}: {e}")
 
+    def watch_grab(self):
+        """Desktop mode can take all input (Right Ctrl; its window then says "...to ungrab input"):
+        what you type anywhere in VR goes to the desktop then, a floating window's typing too. Looked
+        at every GRAB_CHECK_S while the panel shows, off this thread (it runs xwininfo and pgrep);
+        the note says so while it lasts."""
+        check = getattr(getattr(self, "pad", None), "grabbed_by_desktop", None)
+        if check is None:
+            return
+        now = time.monotonic()
+        if not getattr(self, "grab_checking", False) and now - getattr(self, "grab_checked", -GRAB_CHECK_S) >= GRAB_CHECK_S:
+            self.grab_checked, self.grab_checking = now, True
+            threading.Thread(target=self.check_grab, args=(check,), daemon=True).start()
+        grabbed = bool(getattr(self, "grab_seen", False))
+        if grabbed != ("grab" in getattr(self, "note_reasons", ())):
+            self.log_input(f"desktop mode's input grab: {'on' if grabbed else 'off'}")
+            self.set_note("grab", grabbed)
+
+    def check_grab(self, check):
+        try:
+            self.grab_seen = bool(check())
+        except Exception:
+            self.grab_seen = False
+        finally:
+            self.grab_checking = False
+
     def place_note(self):
         """Just below the panel's bottom edge, in its plane, moving with it."""
         w, h = self.size
@@ -376,14 +429,14 @@ class OverlayHost:
         m = [[r[0], r[1], r[2], r[3] - r[1] * down] for r in self.pose]
         self.ov.setOverlayTransformAbsolute(self.note, openvr.TrackingUniverseStanding, vrkit.hmd34(openvr, m))
 
-    def hide_note(self, unless_sliding=False):
-        """Gone: destroyed, not hidden. SteamVR at times kept showing an overlay it was told to hide,
-        a few seconds after it was shown (isOverlayVisible still said so seconds later, and so did
-        hiding it again; 2026-10-16, SteamOS 0.5.6). The next slide makes it again."""
+    def hide_note(self):
+        """Gone, all its messages: destroyed, not hidden. SteamVR at times kept showing an overlay it
+        was told to hide, a few seconds after it was shown (isOverlayVisible still said so seconds
+        later, and so did hiding it again; 2026-10-16, SteamOS 0.5.6). The next message makes it
+        again."""
+        self.note_reasons = ()
         if not getattr(self, "note_shown", False) or getattr(self, "closed", False):
             return
-        if unless_sliding and self.drag is not None and self.drag[1] is None:
-            return                              # (sliding again: it stays)
         self.note_shown = False
         note, self.note = self.note, None
         with contextlib.suppress(Exception):
@@ -545,6 +598,8 @@ class OverlayHost:
             self.drag_follow()                  # every tick, not just on laser moves
         elif visible and self.ticks % 5 == 0:
             self.follow_dashboard()             # ride along with the dashboard, ~10x a second
+        if visible:
+            self.watch_grab()
         self.pump(self.input_handle)            # the only overlay that takes laser input
         if self.dirty and visible and not getattr(self, "closed", False):   # (Close in pump: disconnected)
             self.render()
@@ -675,15 +730,15 @@ class OverlayHost:
         if ctrl is None:
             self.drag = (dev, None, (at.x(), at.y()), None)
             self.log_input(f"grab by device {dev}: its pose is hidden (Steam's keyboard?): sliding after the laser")
-            self.show_slide_note()
+            self.set_note("slide", True)
             return
         self.drag = (dev, vrkit.relative(ctrl, self.pose),
                      [ctrl[r][3] for r in range(3)], self.depth_axis())
 
     def end_drag(self):
         self.drag, self.grip_drag = None, False
-        if getattr(self, "note_shown", False):           # (a few seconds more, to finish reading it)
-            QTimer.singleShot(NOTE_LINGER_MS, lambda: self.hide_note(unless_sliding=True))
+        if "slide" in getattr(self, "note_reasons", ()):   # (a few seconds more, to finish reading it)
+            QTimer.singleShot(NOTE_LINGER_MS, self.end_slide_note)
         if self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         else:

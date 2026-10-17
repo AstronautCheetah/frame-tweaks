@@ -218,8 +218,19 @@ def desktop_languages():
     return [lang for lang in dict.fromkeys(langs) if lang and lang.split(".")[0] not in ("C", "POSIX")]
 
 
+_kwin_words = {}
+
+
 def kwin_words(languages):
-    """KWin's words for the title in English and in these languages: (names, grabbed, free)."""
+    """KWin's words for the title in English and in these languages: (names, grabbed, free).
+    Read once for each set of languages (the VR panel asks every 2 s)."""
+    key = (str(KWIN_LOCALE), tuple(languages))
+    if key not in _kwin_words:
+        _kwin_words[key] = read_kwin_words(languages)
+    return _kwin_words[key]
+
+
+def read_kwin_words(languages):
     catalogues = []
     for mo in gettext.find("kwin", str(KWIN_LOCALE), languages=languages, all=True):
         try:
@@ -1400,6 +1411,10 @@ class ArrowPad(QWidget):
                 self.mod_state[m] = "off"
 
     # ---- stuck keys -----------------------------------------------------
+    def grabbed_by_desktop(self):
+        """For the VR panel's note: desktop mode has taken all input."""
+        return desktop_grabbed()
+
     def unstick(self):
         """The desktop can miss a key's release (focus moved to another VR window while it was
         held) and keep acting as if Shift, Ctrl, Alt or Super were down: send each one a full
