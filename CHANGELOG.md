@@ -21,6 +21,13 @@
   editor; in VR that started Kate, and SteamOS's own desktop portal crashes when a KDE app from
   Flathub starts there (a SteamOS bug: KWalletManager does it too).
 
+### Fixed
+- **"The last update didn't finish" when nothing had failed:** the window decided from the
+  versions the tweaks were installed with, so once the Frame Tweaks folder had moved on some
+  other way (a `git pull`), it offered ⬇ Finish the update, which ran every tweak's installer
+  again. An update now marks itself until it's through, and only an update really cut short
+  (its terminal closed, Ctrl+C) is offered to finish.
+
 ## 0.6.17 (2026-10-17)
 
 ### Changed
