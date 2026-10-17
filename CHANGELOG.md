@@ -1,5 +1,51 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Battery charge limit overnight, again:** the check every 30 seconds could lift the pause made
+  for sleep in the seconds before the Frame fell asleep (logind waits for SteamVR's and others'
+  sleep locks), so it charged to 100%. The pause now holds until the Frame wakes; waking, the
+  sleep lock is taken again first, and a sleep straight after waking isn't missed.
+- **Packs' git can't run commands:** checking or updating a pack (`./install.sh mods updates`,
+  `mods update`, the Packs page's Update) ran git in packs you hadn't trusted, and git acts on a
+  repository's own settings, which can run commands. Only trusted packs are checked or updated, and
+  git runs in one only if its `.git` settings are the ones adding it made.
+- **Arrow Pad:** 🎤 started Dictation with a latched Ctrl/Alt/Super still down, so every letter
+  typed became Ctrl+letter; Snip and Launcher let a latched modifier go too. A crash no longer
+  leaves modifiers down, one failing SteamVR call no longer ends the VR panel, and Reset with no
+  headset pose no longer crashes it.
+- **Wallet:** ↻ on the wallet left an unlocked wallet with no auto-lock; updates turned Password
+  first back on for KWalletManager, Signal and Claude Desktop; with no wallet made yet, every
+  protected app (KWalletManager too) refused to open; Frame Tweaks' own menu entry, protected,
+  lost its password gate when rewritten. Also: a slow unlock no longer looks like a wrong password,
+  and the Wallet apps page no longer says "open for 9 h" right after unlocking.
+- **Desktop Recovery's taskbar watch** carries on when KWin restarts after a crash (it stopped),
+  doesn't spin on a taskbar that ended but wasn't collected yet, and says when it couldn't start
+  the taskbar again.
+- **Menus in your keyboard's language:** Steam saving its settings several times in a few
+  seconds stopped the watcher that relabels them, until something restarted it.
+- **The splash:** commands run under it no longer ignore SIGPIPE (Python's setting leaked into
+  every install), piped input stays the command's, Ctrl+C during the splash reaches the command,
+  and a command ending during it shows ✔/✖ and keeps its exit status; several terminal-state fixes.
+- **The window** offers **⬇ Finish the update** after an update cut short (it said "up to date"),
+  and opens with every pack turned off (it stayed shut). `./install.sh update` refuses an option it
+  doesn't know (it updated anyway), and git's background maintenance no longer holds the install
+  lock. A window that died is no longer followed for its language until the Frame restarts.
+- **Uninstalling Frame Tweaks** lets go of tweaks no pack has any more (it asked for a pack that
+  doesn't exist and kept everything shared), and keeps a copy without git (it deleted your edits).
+- **Recline** keeps a `~/Recline-VR` clone of yours on uninstall; **Claude Desktop's updater**
+  can't hang on a stalled connection or leave Claude Desktop deleted; the **dashboard service**
+  rides out a reply cut short as SteamVR starts or stops.
+
+### For contributors
+- `dev/run-tests.py`: Ctrl+C stops the run (queued parts used to start one after another); with
+  the headset on, every thread of a test is pinned, every second, and a failed sensor read keeps
+  the last state; a part that ends without its results fails. `dev/check.sh` stops on a
+  `FRAME_TWEAKS_CHECKS` it doesn't know. `dev/fresh-install.sh`'s sandbox: read-only control
+  groups, its own `/dev/shm` and `/var/tmp`, no X11 with Wayland there, and `--from checkout` works
+  on a test release's VERSION. The release workflow numbers a test release after the highest.
+
 ## 0.6.12 (2026-10-16)
 
 ### Added
