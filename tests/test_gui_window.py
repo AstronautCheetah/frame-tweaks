@@ -128,6 +128,49 @@ class PacksChangeUnderIt(WindowTest):
         self.assertEqual(self.errors, [])
 
 
+class TickACategory(WindowTest):
+    """The category's two boxes, beside its name: tick or untick every tweak in it that the list
+    shows, as clicking each box would (nothing runs until Apply changes)."""
+
+    def buttons(self, w, category):
+        head = next(h for h in w.findChildren(gui.CategoryHeader) if category.upper() in
+                    h.findChild(QPushButton, "cattoggle").text())
+        return head.findChildren(QPushButton, "cattick")
+
+    def test_tick_and_untick_all(self):
+        w = self.window()
+        cat = next(c["category_en"] for c in w.rows if c["id"] == "arrowpad")
+        ids = [c["id"] for c in w.rows if c["category_en"] == cat and c["id"] in w.boxes]
+        self.assertGreater(len(ids), 1)
+        tick, untick = self.buttons(w, cat)
+        tick.click()
+        self.assertTrue(all(w.boxes[i].isChecked() for i in ids))
+        self.assertEqual(sorted(w.pending_changes()[0]), sorted(ids))          # (none installed here)
+        self.assertTrue(w.apply_button.isEnabled())
+        others = [c["id"] for c in w.rows if c["category_en"] != cat and c["id"] in w.boxes]
+        self.assertFalse(any(w.boxes[i].isChecked() for i in others))          # (its own only)
+        untick.click()
+        self.assertFalse(any(w.boxes[i].isChecked() for i in ids))
+        self.assertEqual(w.pending_changes(), ([], []))
+
+    def test_a_folded_category_and_hidden_rows(self):
+        w = self.window()
+        cat = next(c["category_en"] for c in w.rows if c["id"] == "arrowpad")
+        w.toggle_collapsed(cat)
+        self.settle(w)
+        self.assertNotIn("arrowpad", w.boxes)
+        self.buttons(w, cat)[0].click()
+        self.assertIn("arrowpad", w.pending_changes()[0])                     # (wanted, without a box)
+        with mock.patch.object(w, "hidden", lambda: {"arrowpad"}):
+            w.wanted.clear()
+            w.tick_category(cat, True)
+            self.assertNotIn("arrowpad", w.wanted)                            # (hidden: not shown, not ticked)
+        with mock.patch.object(gui.sft, "not_needed", lambda rows=None, refresh=False: {"arrowpad": "no"}):
+            w.wanted.clear()
+            w.tick_category(cat, True)
+            self.assertNotIn("arrowpad", w.wanted)                            # (not needed: not offered)
+
+
 class Narrowest(WindowTest):
     def test_every_rows_buttons_at_the_narrowest(self):
         """The list doesn't scroll sideways: at its narrowest the window still fits every row's

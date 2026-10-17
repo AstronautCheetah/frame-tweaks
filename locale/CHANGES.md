@@ -8,6 +8,10 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-10-17
+- New in `gui/frame-tweaks-gui.py:628`
+  - now: "Tick every tweak in this category"
+- New in `gui/frame-tweaks-gui.py:629`
+  - now: "Untick every tweak in this category (installed ones are removed when you apply the changes)"
 - New in `packs/core/snip/frame-snip:1414`
   - now: "While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it closer, further away or turn it."
 - Changed in `packs/core/vr-dashboard/README.md`

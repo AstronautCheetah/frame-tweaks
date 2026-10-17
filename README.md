@@ -216,7 +216,8 @@ SteamVR's dashboard: the picture at the top of this page shows some of them.
 Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" menu.
 
 - **Tick** a tweak to install it, **untick** it to remove it, then press **Apply changes**.
-  Anything a tweak depends on is added for you.
+  Anything a tweak depends on is added for you. The two boxes beside a category's name tick or
+  untick every tweak in it.
 - **Click a row** for its details page: what it is, why it's there, who made it, what it changes,
   and its README.
 - The row's **▶** button opens what the tweak provides (Arrow Pad, Dictate, the NordVPN
