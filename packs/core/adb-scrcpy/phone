@@ -175,9 +175,10 @@ clipboard() { [ "${PHONE_CLIPBOARD:-both}" = off ] && echo --no-clipboard-autosy
 
 # Auto-disconnect: a mirror left on keeps the phone streaming (one went on all night and emptied its
 # battery). After PHONE_TIMEOUT minutes (60 unless set; 0: never) it asks, for a minute, whether to
-# keep it on; with no answer it closes the mirror and disconnects the phone. The time counts from
-# when the mirror opened, or from when the setting was last changed: it's read from the file at
-# each check, so a change (in the settings or the mirror's gear) applies to this mirror, from then.
+# keep it on; with no answer it closes the mirror and disconnects the phone (close_all). The time
+# counts from when the mirror opened, its stream was last restarted, or the setting was last
+# changed: it's read from the file at each check, so a change (in the settings or the mirror's
+# gear) applies to this mirror, from then.
 MINUTE=${PHONE_MINUTE:-60}                 # (seconds in a minute: the tests make it shorter)
 timeout_minutes() {
     local m
@@ -207,6 +208,18 @@ keep_on() {
     wait "$k"
 }
 
+# After the auto-disconnect nothing of Android Mirror's stays on: scrcpy (the mirror window), its VR
+# helpers (they'd go within seconds of it anyway), the phone's connection, and adb's background
+# server when no other device is connected to it.
+close_all() {
+    kill "$pid" 2>/dev/null
+    for _ in 1 2 3 4 5 6; do kill -0 "$pid" 2>/dev/null || break; sleep 0.5; done
+    kill -9 "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
+    pkill -u "$(id -u)" -f "$HOME/.local/bin/phone-(touch|fit)( |$)" 2>/dev/null
+    adb disconnect "$dev" >/dev/null 2>&1
+    adb devices 2>/dev/null | grep -q "$(printf '\t')" || adb kill-server >/dev/null 2>&1
+}
+
 # A wireless connection can die without scrcpy noticing (the phone changed network or address,
 # e.g. after switching profile): the picture just freezes. Check the phone answers every 5 s;
 # after 3 misses, close the frozen mirror and reconnect at the phone's current address.
@@ -226,7 +239,7 @@ first=1
 opened=$(date +%s) since=$(date +%s) limit=$(timeout_minutes) timed_out=
 while :; do
     if [ -n "$restart" ]; then
-        restart=
+        restart='' since=$(date +%s)            # (Restart stream: the time counts again from now)
         # (a setting no longer in the file, after the gear's Reset to defaults say, is back to its
         # default: reading the file again can't unset what it doesn't say)
         unset PHONE_MAX_SIZE PHONE_BIT_RATE PHONE_MAX_FPS PHONE_STICK_SPEED PHONE_CLIPBOARD
@@ -307,8 +320,7 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
         [ "$misses" -ge 3 ] && break
     done
     if [ -n "$timed_out" ]; then
-        kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
-        adb disconnect "$dev" >/dev/null 2>&1
+        close_all
         notify-send -a Phone "$(t 'Android Mirror disconnected')" "$(t "%s was mirrored for %s, so Android Mirror disconnected to save its battery. Open Android Mirror to connect again; the time is in its settings." \
             "${PHONE_NAME:-$(t 'The phone')}" "$(span $((($(date +%s) - opened) / MINUTE)))")"
         exit 0

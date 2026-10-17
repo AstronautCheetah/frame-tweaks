@@ -269,6 +269,7 @@ class AutoDisconnect(unittest.TestCase):
         self.assertEqual(log.count("--yesno"), 1, log)
         self.assertIn("Keep it on", log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
+        self.assertIn("adb kill-server", log)                        # (no other device on adb: nothing left on)
         self.assertIn("notify -a Phone Android Mirror disconnected Pixel 9 was mirrored for 1 min", log)
         self.assertNotIn("--title Android Mirror --", log)           # (the mirror window's own title)
 
@@ -281,6 +282,30 @@ class AutoDisconnect(unittest.TestCase):
         code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", answers="no\n")
         self.assertEqual(log.count("--yesno"), 1, log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
+
+    def test_adbs_server_stays_for_another_device(self):
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n")
+        self.assertIn("adb kill-server", log)
+        adb = ('echo "adb $*" >> "$HOME/log"; [ "$1" = connect ] && echo "connected to $2"; '
+               '[ "$1" = devices ] && printf "List of devices attached\\nemulator-5554\\tdevice\\n"; exit 0')
+        (Path(self.tmp.name) / "log").write_text("")
+        code, log, _ = self.run_phone(self.PHONES, conf='PHONE_NAME="Pixel 9"\nPHONE_TIMEOUT=1\n', env={"PHONE_MINUTE": 1},
+                                      extra={"scrcpy": self.MIRROR, "kdialog": self.ASK, "adb": adb,
+                                             "sleep": "exec /usr/bin/sleep 0.05", "notify-send": 'echo "notify $*" >> "$HOME/log"'})
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
+        self.assertNotIn("adb kill-server", log)
+
+    def test_restart_stream_counts_again(self):
+        """Restart stream (the gear) starts the time again: asked a full period after it."""
+        mirror = ('echo "scrcpy $*" >> "$HOME/log"; if [ ! -f "$HOME/restarted" ]; then touch "$HOME/restarted"; '
+                  '/usr/bin/sleep 2; echo "restart $(date +%s.%N)" >> "$HOME/log"; kill -USR1 $PPID; fi; '
+                  'exec /usr/bin/sleep 20')
+        # (4 s "minutes", counted in whole seconds: asked 3-4 s after the restart, ~1.5 s without it)
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", minute=4, mirror=mirror)
+        restarted = float(next(l.split()[1] for l in log.splitlines() if l.startswith("restart ")))
+        asked = float(next(l.split()[1] for l in log.splitlines() if "--yesno" in l))
+        self.assertEqual(log.count("scrcpy -s"), 2, log)
+        self.assertGreaterEqual(asked - restarted, 3.0, log)
 
     def test_never(self):
         """PHONE_TIMEOUT=0: the mirror stays until it's closed."""

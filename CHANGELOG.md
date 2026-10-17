@@ -6,8 +6,9 @@
 - **Android Mirror disconnects by itself:** a mirror left on overnight kept the phone streaming
   until its battery was empty. After an hour (or the time you choose in Android Mirror's
   settings, or with the gear in VR: 15 minutes to 8 hours, or never), a small window asks
-  whether to keep it on; with no answer within a minute, the mirror closes and the Frame
-  disconnects from the phone.
+  whether to keep it on; with no answer within a minute, the mirror closes, the Frame
+  disconnects from the phone, and Android Mirror's programs stop. *Restart stream* starts the
+  time again.
 
 ### Fixed
 - **Dictation with Ctrl on:** a Ctrl latched or locked on Arrow Pad (or Alt or Super) was still
