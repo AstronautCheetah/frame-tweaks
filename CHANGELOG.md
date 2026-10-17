@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.16 (2026-10-17)
 
 ### Added
 - **French and Flemish Dutch:** Frame Tweaks now speaks French and Flemish Dutch (Dutch from the
