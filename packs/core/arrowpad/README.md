@@ -187,6 +187,13 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   poses from every other program while its keyboard is open (its log says
   `AddSystemBehaviorFlag SystemBehaviorFlag_SystemKeyboardPrivacy`), so a grab can't follow the
   controller. The pad then slides in its own plane to keep the point you grabbed under the laser.
+- **Typing on Steam's keyboard after touching the pad:** Steam's keyboard follows the laser's
+  focus (SteamVR logs `Reopening keyboard follow overlay focus`), so a press on the pad hands it to
+  the pad, and what's typed on it comes to the pad as `VREvent_KeyboardCharInput`. The pad types it
+  on the desktop through ydotoold, on the desktop's layout, with its latched modifiers: Ctrl on the
+  pad, then C on Steam's keyboard, is Ctrl+C. Its log (`/run/user/1000/arrowpad-input.log`) counts
+  the keys, never what they were. The keyboard also moves to another spot when that happens;
+  SteamVR's dashboard decides where it goes, and there's no setting for that yet.
 - **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
   Python GUI toolkit. The [NordVPN](../../integrations/nordvpn/) tray and Screen snip use the same one.
 

@@ -10,8 +10,10 @@ Like Full Keyboard: visible while the dashboard is, Reset puts it in front of yo
 its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that. While Steam's
 keyboard shows, SteamVR hides where the controllers are from other programs (its keyboard
 privacy), so a drag then slides the panel in its own plane after the laser instead, and a note
-under the panel says so.
+under the panel says so. Steam's keyboard follows the laser's focus, so after a press on the
+panel what's typed on it comes here; the pad types it on the desktop.
 """
+import codecs
 import contextlib
 import glob
 import hashlib
@@ -337,6 +339,28 @@ class OverlayHost:
             self.place_note()
 
     # ---- the note under the panel while it slides ---------------------------------------------
+    def steam_keyboard(self, t, ev):
+        """Steam's keyboard follows the laser's focus: touching the pad reopens it for the pad, and
+        what's typed on it then comes here, up to 8 bytes of UTF-8 an event (a character can be
+        split across two). The pad types it on the desktop (ArrowPad.type_from_steam_keyboard).
+        Logged as counts, never what was typed (it can be a password)."""
+        if getattr(self, "kb_text", None) is None:
+            self.kb_text = codecs.getincrementaldecoder("utf-8")("replace")
+        if t == openvr.VREvent_KeyboardClosed:
+            self.kb_text.reset()
+            self.log_input("Steam's keyboard: closed")
+            return
+        text = self.kb_text.decode(bytes(ev.data.keyboard.cNewInput).split(bytes(1))[0])
+        if not text:
+            return
+        try:
+            typed, missing = self.pad.type_from_steam_keyboard(text)
+        except Exception as e:
+            self.log_input(f"Steam's keyboard: couldn't type it: {type(e).__name__}")
+            return
+        self.log_input(f"Steam's keyboard: typed {typed} key(s) for it" +
+                       (f", {missing} character(s) with no key on the layout" if missing else ""))
+
     def show_slide_note(self):
         """Sliding because Steam's keyboard is open: a note under the panel says why it only
         slides. (A note that fails is left out: the slide goes on.)"""
@@ -594,11 +618,7 @@ class OverlayHost:
                     continue
                 self.last_button_time[(t, cursor)] = now
             if t in (getattr(openvr, "VREvent_KeyboardCharInput", None), getattr(openvr, "VREvent_KeyboardClosed", None)):
-                # Steam's keyboard follows the laser's focus: touching the pad reopens it for the pad,
-                # and what's typed on it then comes here. Logged to find out how much (never what:
-                # it can be a password), not typed anywhere.
-                self.log_input("Steam's keyboard: " + ("closed" if t == openvr.VREvent_KeyboardClosed else
-                               f"{len(bytes(ev.data.keyboard.cNewInput).rstrip(bytes(1)))} byte(s) typed to the pad"))
+                self.steam_keyboard(t, ev)
                 continue
             if t == openvr.VREvent_FocusLeave:
                 if dev == openvr.k_unTrackedDeviceIndexInvalid:
