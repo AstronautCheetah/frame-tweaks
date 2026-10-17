@@ -1001,6 +1001,21 @@ def packs_with_updates():
             if removable(p) and p["state"] == "trusted" and pack_has_update(p["dir"])]
 
 
+def unfinished_update():
+    """The tweaks an update hasn't installed again yet (./install.sh stale_tweaks): an install
+    record from another version, not held, not linked. An update cut short (its terminal closed,
+    Ctrl+C) left them, and the window then said "up to date"."""
+    try:
+        version = (REPO / "VERSION").read_text().strip()
+        records = {f.name: f.read_text().strip() for f in INSTALLED.iterdir() if f.is_file()}
+    except OSError:
+        return []
+    held = STATE / "held"
+    return sorted(c["id"] for c in components()
+                  if c["id"] in records and records[c["id"]] != version and not c.get("link")
+                  and not (held / c["id"]).exists())
+
+
 def pack_installed(p):
     """A pack's tweaks that are installed (an install record), but not those another pack in use provides."""
     try:

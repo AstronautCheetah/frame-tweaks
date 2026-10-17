@@ -78,7 +78,10 @@ shopt -u nullglob
 rmdir packs/official 2>/dev/null     # (only if that left it empty)
 
 # One install/uninstall/update at a time (installer window and terminal alike). The lock is on
-# fd 8; tweak scripts run with it closed, so a background process they start can't keep it.
+# fd 8; tweak scripts run with it closed, so a background process they start can't keep it. So
+# does git, whose maintenance (gc --auto) goes on in the background: holding the lock, it made
+# the update's second stage find "another install running".
+git() { command git "$@" 8>&-; }
 take_lock() {
     mkdir -p "$STATE"
     exec 8>"$STATE/install.lock"
@@ -108,7 +111,9 @@ while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo; do
 done < <(python3 lib/sft.py registry)
 # (Frame Tweaks' own commands work without: every pack off or not trusted. mods too: "mods on
 # core" is the way back.)
-[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report)$ ]] ||
+# (gui too: with every pack turned off on the Packs page, the window, opened from the menu, said
+# nothing and stayed shut; it's where they're turned on again)
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window)$ ]] ||
     { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
@@ -535,8 +540,10 @@ cmd_update() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             --to) want=${2:?"$(t '--to needs a release, e.g. v0.3.1')"}; [[ $want == v* || $want == stable ]] || want="v$want"; shift 2 ;;
+            --to=*) want=${1#--to=}; [[ $want == v* || $want == stable ]] || want="v$want"; shift ;;
             --reinstall) again=1; shift ;;
-            *) shift ;;
+            # (one it doesn't know isn't skipped: --reinstal, say, then updated everything to the newest)
+            *) echo "$(t 'update: unknown option %s (--to vX.Y.Z | --to stable | --reinstall)' "$1")" >&2; exit 2 ;;
         esac
     done
     if [[ -d .git ]]; then
