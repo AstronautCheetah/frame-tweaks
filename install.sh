@@ -132,9 +132,16 @@ ensure_menu_entry() {
     entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" | python3 lib/i18n.py desktop) && [[ -n $entry ]] ||
         entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop")
     if [[ -n $entry ]]; then
-        mine=$(printf '%s\n' "$entry" | python3 lib/menuedits.py keep "$apps/$id.desktop" "$MENU_BUILT/$id.desktop") &&
-            [[ -n $mine ]] || mine=$entry
-        printf '%s\n' "$mine" | write_file "$apps/$id.desktop"
+        if [[ -f $LAUNCHER_ORIGINALS/$id.desktop && -x $BIN/wallet-launcher ]]; then
+            # (protected on the Wallet apps page: the new original goes under it, and the wrapper is
+            # built on it again. Merged in as an entry of yours, the password gate was dropped.)
+            printf '%s\n' "$entry" | write_file "$LAUNCHER_ORIGINALS/$id.desktop"
+            "$BIN/wallet-launcher" --reapply "$id" >/dev/null
+        else
+            mine=$(printf '%s\n' "$entry" | python3 lib/menuedits.py keep "$apps/$id.desktop" "$MENU_BUILT/$id.desktop") &&
+                [[ -n $mine ]] || mine=$entry
+            printf '%s\n' "$mine" | write_file "$apps/$id.desktop"
+        fi
         printf '%s\n' "$entry" | write_file "$MENU_BUILT/$id.desktop"
     fi
     install -m644 "share/metainfo/$id.metainfo.xml" "$HOME/.local/share/metainfo/"

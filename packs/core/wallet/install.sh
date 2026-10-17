@@ -75,7 +75,8 @@ flatpak info org.signal.Signal >/dev/null 2>&1 && apps+=(org.signal.Signal)
 [ -f "$APPS/com.anthropic.Claude.desktop" ] && apps+=(com.anthropic.Claude)
 # --gate: open through our unlock dialog first, so these never trigger ksecretd's own
 # prompt (the one that floats in VR and blocks every other unlock while it's open).
-if ! "$BIN/wallet-launcher" --gate "${apps[@]}"; then
+# (--gate-if-new: an app you've unticked Password first for keeps that through updates)
+if ! "$BIN/wallet-launcher" --gate-if-new "${apps[@]}"; then
     while IFS= read -r line; do warn "$line"; done <<< "$(t "Couldn't put the password gate on all of: %s. Those without a menu entry yet
 aren't gated; once they're installed, run: %s" "${apps[*]}" "wallet-launcher --gate <app-id>")"
 fi

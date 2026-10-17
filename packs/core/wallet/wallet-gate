@@ -1,6 +1,8 @@
 #!/bin/bash
 # wallet-gate CMD...: run CMD only once the KDE wallet is unlocked. If it's locked,
-# wallet-unlock asks for the password in a dialog on this display.
+# wallet-unlock asks for the password in a dialog on this display. With no wallet made yet,
+# there's nothing to unlock: CMD runs (KWalletManager, protected too, is what makes one).
+[ -e "$HOME/.local/share/kwalletd/kdewallet.kwl" ] || exec "$@"
 if ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
     # Translations (lib/i18n.sh; the copy install_i18n puts here), else English. Only here: it
     # runs python3, and this wraps every launch.

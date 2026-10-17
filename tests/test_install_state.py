@@ -616,6 +616,24 @@ class InstallState(unittest.TestCase):
         self.assertIn("PathChanged=%h/.local/share/Steam/config/config.vdf",
                       (units / "frame-tweaks-menus.path").read_text().splitlines())
 
+    def test_a_protected_menu_entry_keeps_its_password_gate(self):
+        """Frame Tweaks' own entry protected on the Wallet apps page: written as an entry of yours
+        merged in, its command changed under the gate's mark, and the gate was gone. Its original
+        is renewed and the wrapper built on it again, as install_desktop does."""
+        app_id = "io.github.AstronautCheetah.FrameTweaks"
+        originals = self.home / ".local/share/frame-tweaks/launcher-originals"
+        originals.mkdir(parents=True)
+        (originals / f"{app_id}.desktop").write_text("[Desktop Entry]\nName=old\n")
+        log = self.home / "launcher.log"
+        launcher = self.home / ".local/bin/wallet-launcher"
+        launcher.parent.mkdir(parents=True, exist_ok=True)
+        launcher.write_text(f'#!/bin/bash\necho "$*" >> {log}\n')
+        launcher.chmod(0o755)
+        r = self.sh("menu")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(log.read_text(), f"--reapply {app_id}\n")
+        self.assertIn(f"Exec=env FRAME_TWEAKS_GUI=1 {ROOT}/install.sh gui", (originals / f"{app_id}.desktop").read_text())
+
     def test_your_name_for_the_menu_entry_stays(self):
         entry = self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop"
         for change in (None, "Tweaks"):
