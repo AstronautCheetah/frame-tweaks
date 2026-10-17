@@ -886,6 +886,7 @@ class ArrowPad(QWidget):
         THEME.update(THEMES.get(cfg.get("theme", "graphite"), THEMES["graphite"]))
         self.haptic_level = cfg.get("haptics", "normal") if cfg.get("haptics") in HAPTIC_LEVELS else "normal"
         self.mod_pressing = {}          # modifier held down by a laser -> used in a chord yet?
+        self.dictation_was = "idle"     # (refresh_mic: Dictation's state at the last look)
         self.held = {}                  # (row, col) -> the key its press sent (the layer can change)
 
         outer = QVBoxLayout(self)
@@ -1313,10 +1314,7 @@ class ArrowPad(QWidget):
         elif name in MOUSE:
             self.toggle_click(name)
         elif name == "🎤":
-            # Dictation types through the same ydotoold: with Ctrl still down, every letter was a
-            # Ctrl+letter (W closes the tab, Q quits). Latched or locked, they all let go first.
-            self.release_all_mods()
-            self.restyle()
+            self.let_go_for_dictation()
             self.dictate()
         elif name in CHORDS:
             ctrl_held = self.mod_state["Ctrl"] != "off"
@@ -1373,6 +1371,26 @@ class ArrowPad(QWidget):
                 self.mod_state[m] = "off"
                 self.yd.key(KEY[m], False)
         self.restyle()
+
+    def let_go_for_dictation(self):
+        """Dictation types through the same ydotoold: with Ctrl still down, every letter was a
+        Ctrl+letter (W closes the tab, Q quits). It lets go of every modifier before it types now,
+        however it was started (🎤, a shortcut, the menu), so the pad's latched and locked ones go
+        off with it, on 🎤 and when the pad sees dictation start or end: the pad never shows a
+        Ctrl that isn't down. Not one a laser holds (letting go ends it). Alt and Super go up
+        around F24, as Dictation lets them go: alone, that'd be a tap (a menu bar, the launcher)."""
+        F24 = 194
+        latched = [m for m, s in self.mod_state.items() if s != "off" and m not in self.mod_pressing]
+        tap = any(m in ("Alt", "Super") for m in latched)
+        if tap:
+            self.yd.key(F24, True)
+        for m in latched:
+            self.yd.key(KEY[m], False)
+            self.mod_state[m] = "off"
+        if tap:
+            self.yd.key(F24, False)
+        if latched:
+            self.restyle()
 
     def release_all_mods(self):
         self.mod_pressing.clear()
@@ -1453,6 +1471,10 @@ class ArrowPad(QWidget):
         return "idle"
 
     def refresh_mic(self):
+        state = self.dictation_state()
+        if state != self.dictation_was and "idle" in (state, self.dictation_was):    # started, or ended
+            self.let_go_for_dictation()
+        self.dictation_was = state
         if self.isVisible():
             self.restyle()
 

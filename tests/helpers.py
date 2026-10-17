@@ -29,11 +29,13 @@ def stub(folder, name, body):
 def sandbox_env(home, stubs=None, path=("/usr/bin", "/bin"), **extra):
     """The environment for a program run in a throwaway home: nothing of this session's but USER,
     the stubs first on PATH, and English (whatever language this machine's keyboard or an open
-    installer window has: their announcement is looked for in the home, not /run/user)."""
+    installer window has: their announcement is looked for in the home, not /run/user; and no
+    keyboards: which keys are down on ydotoold's isn't read from this machine's)."""
     home = Path(home)
     env = {"HOME": str(home), "USER": os.environ.get("USER", "u"), "LANG": "C.UTF-8",
            "PATH": os.pathsep.join(([str(stubs)] if stubs else []) + list(path)),
            "FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_LANG_RESOLVED": "en", "FRAME_TWEAKS_KEYBOARD": "0",
+           "FRAME_TWEAKS_INPUT": str(home / ".no-input-devices"),
            "FRAME_TWEAKS_ANNOUNCE_FILE": str(home / ".announced-language"),
            "FRAME_TWEAKS_PYLIB": str(ROOT / "lib")}      # (the shared modules: the repo's, not an installed copy)
     env.update({k: str(v) for k, v in extra.items()})

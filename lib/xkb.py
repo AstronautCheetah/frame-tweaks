@@ -7,8 +7,12 @@ layout: the key that types "a" on a US keyboard types "q" on a French one, so Ct
 of its own is typed with a dead key where the layout has one (´ then e for é), as people type it.
 
 Installed beside i18n.py (lib/common.sh install_i18n), for the programs tweaks install.
-Dictation runs `python3 xkb.py ydotool TEXT`: the `ydotool key` events that type TEXT."""
+Dictation runs `python3 xkb.py ydotool TEXT`: the `ydotool key` events that type TEXT; and before
+typing, `python3 xkb.py let-go`: those that let go of the modifiers held down on ydotoold's
+keyboard (Arrow Pad's latched Ctrl turned dictated text into shortcuts: Ctrl+W, Ctrl+Q)."""
 import ctypes
+import fcntl
+import glob
 import os
 import sys
 import time
@@ -21,6 +25,14 @@ LEVELS = ((), (SHIFT,), (ALTGR,), (SHIFT, ALTGR))     # the modifiers tried, few
 CHECK_EVERY = 5.0                # seconds: Arrow Pad looks at the layout no more than once per this
 KEYPAD = range(0xff80, 0xffbe)   # keypad keysyms: KP_Add types "+" too, but isn't a typing key
 DEAD = range(0xfe50, 0xfe94)     # dead keysyms (dead_grave … dead_longsolidusoverlay)
+# Let go before typing: Shift (both), Ctrl; then Alt, AltGr and Super (both), which go up while F24
+# (bound to nothing) is down: let go alone, they'd be a tap (a menu bar, the app launcher). Same keys
+# as lib/common.sh's clear_stuck_modifiers, and never Right Ctrl.
+PLAIN_MODIFIERS = (42, 54, 29)
+TAP_MODIFIERS = (56, 100, 125, 126)
+F24 = 194
+YDOTOOLD = "ydotoold virtual device"     # (the name of ydotoold's keyboard)
+KEY_MAX = 0x2ff
 
 
 class Names(ctypes.Structure):
@@ -222,12 +234,51 @@ def letter_key(letter, us_code):
         return us_code
 
 
+def key_bits(event):
+    """The keys down on /dev/input/<event>, as the kernel's bitmap (EVIOCGKEY)."""
+    bits = bytearray((KEY_MAX + 8) // 8)
+    with open(f"/dev/input/{event}", "rb", buffering=0) as dev:
+        fcntl.ioctl(dev, (2 << 30) | (len(bits) << 16) | (ord("E") << 8) | 0x18, bits)
+    return bits
+
+
+def keys_down(read=key_bits):
+    """The keys the kernel has down on ydotoold's keyboard, or None where that can't be read:
+    ydotoold isn't running, or its device can't be opened (only the input group can)."""
+    down, found = set(), False
+    for name in sorted(glob.glob(os.path.join(os.environ.get("FRAME_TWEAKS_INPUT", "/sys/class/input"),
+                                              "event*", "device", "name"))):
+        try:
+            with open(name) as f:
+                if f.read().strip() != YDOTOOLD:
+                    continue
+            bits = read(name.split(os.sep)[-3])
+        except OSError:
+            continue
+        found = True
+        down |= {code for code in range(len(bits) * 8) if bits[code // 8] >> (code % 8) & 1}
+    return down if found else None
+
+
+def let_go(down):
+    """`ydotool key` events that let go of the modifiers in down (None, unknown: all of them, as
+    the kernel drops the release of a key that's up; but F24 then goes down and up for nothing)."""
+    plain = [f"{m}:0" for m in PLAIN_MODIFIERS if down is None or m in down]
+    tap = [f"{m}:0" for m in TAP_MODIFIERS if down is None or m in down]
+    return plain + ([f"{F24}:1", *tap, f"{F24}:0"] if tap else [])
+
+
 def main(argv):
     """xkb.py ydotool TEXT: prints the `ydotool key` events that type TEXT on KDE's current layout
     (exit 0); exit 3 for the plain US layout (ydotool type is right there); exit 2, printing them,
-    when characters have no key on the layout; 1 when the layout can't be compiled."""
+    when characters have no key on the layout; 1 when the layout can't be compiled.
+    xkb.py let-go: prints the `ydotool key` events that let go of the modifiers held down on
+    ydotoold's keyboard (nothing when none is)."""
+    if argv[1:] == ["let-go"]:
+        print(" ".join(let_go(keys_down())))
+        return 0
     if len(argv) != 3 or argv[1] != "ydotool":
-        print("xkb.py ydotool TEXT", file=sys.stderr)
+        print("xkb.py ydotool TEXT | xkb.py let-go", file=sys.stderr)
         return 1
     kb = kde_keyboard()
     if is_us(kb):

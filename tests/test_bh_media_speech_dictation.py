@@ -282,6 +282,15 @@ class DictateTyping(Home):
         log = self.dictate("Hi", "[Layout]\nLayoutList=us\nUse=true\n")
         self.assertIn("ydotool type --key-delay 2 -- Hi", log)
 
+    def test_modifiers_held_down_go_up_first(self):
+        """Arrow Pad's latched Ctrl, down on the same ydotoold keyboard, turned the text into
+        shortcuts (Ctrl+W closes the tab, Ctrl+Q quits): they go up before the typing. (Which are
+        down can't be read here: all of them; a release of a key that's up goes nowhere.)"""
+        log = self.dictate("Hello.")
+        self.assertEqual([line for line in log if line.startswith("ydotool")],
+                         ["ydotool key --key-delay 11 42:0 54:0 29:0 194:1 56:0 100:0 125:0 126:0 194:0",
+                          "ydotool type --key-delay 2 -- Hello. "])
+
     @unittest.skipUnless(xkb_compiles(), "needs libxkbcommon and XKB's layouts")
     def test_another_layout_types_its_keys(self):
         log = self.dictate("Qa?", "[Layout]\nLayoutList=fr\nUse=true\n")
