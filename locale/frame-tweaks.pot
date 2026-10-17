@@ -87,7 +87,7 @@ msgstr ""
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
 msgid "Close"
 msgstr ""
 
@@ -2649,6 +2649,10 @@ msgid "Bksp"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
+msgid "Close (hold it)"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
 msgid "Copy (Ctrl+C)"
 msgstr ""
 
@@ -2714,6 +2718,10 @@ msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js
 msgid "Haptics"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Hold ✕ to close Arrow Pad"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py

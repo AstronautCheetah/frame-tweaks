@@ -113,7 +113,7 @@ msgstr ""
 "Choisir quelles applications s'ouvrent avec le portefeuille KDE partagé ; le verrouiller ou le déverrouiller"
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
 msgid "Close"
 msgstr "Fermer"
 
@@ -3459,6 +3459,10 @@ msgctxt "key legend"
 msgid "Bksp"
 msgstr "⌫"
 
+#: packs/core/arrowpad/arrowpad.py
+msgid "Close (hold it)"
+msgstr ""
+
 # needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Copy (Ctrl+C)"
@@ -3544,6 +3548,10 @@ msgstr "Graphite"
 #: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js
 msgid "Haptics"
 msgstr "Retour haptique"
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Hold ✕ to close Arrow Pad"
+msgstr ""
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py

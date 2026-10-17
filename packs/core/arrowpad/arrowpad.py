@@ -94,7 +94,7 @@ from PyQt6.QtCore import (QEvent, QObject, QPoint, QRectF, QSize, Qt, QtMsgType,
 from PyQt6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPainterPath  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLayout, QPushButton,  # noqa: E402
-                             QVBoxLayout, QWidget)
+                             QToolTip, QVBoxLayout, QWidget)
 
 import ftconf  # noqa: E402  (settings files and logs: lib/ftconf.py, installed beside i18n.py)
 import needs  # noqa: E402  ("this needs a tweak that isn't installed": lib/needs.py, the same)
@@ -380,13 +380,16 @@ TIPS = {"🎤": N_("Dictation: tap to start (red), tap again to stop; yellow = t
         **{m: N_("{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand")
            for m in MODIFIERS if m != "Super"}}
 TOOL_TIPS = {"settings": N_("Settings: theme and haptics"), "pin": N_("Pin: stop accidental moves"),
-             "reset": N_("Reset position"), "smaller": N_("Smaller"), "larger": N_("Larger"), "close": N_("Close"),
+             "reset": N_("Reset position"), "smaller": N_("Smaller"), "larger": N_("Larger"), "close": N_("Close (hold it)"),
              "fold": N_("Collapse"), "unfold": N_("Expand")}
 # Keys whose legend is a word rather than a key name (translated where shown).
 # (context "key legend": a translation short enough for a key, e.g. "Herram." for Herramientas)
 WORDS = {"Tools": NP_("key legend", "Tools"), "Unstick": NP_("key legend", "Unstick"),
          "Snip": NP_("key legend", "Snip"), "Launcher": NP_("key legend", "Launcher")}
 DOUBLE_TAP = 0.4
+# ✕ closes the pad only when held this long: a stray press, aimed past the VR panel at the
+# dashboard's app list behind it, closed it (2026-10-17). Let go sooner, and it says so.
+HOLD_TO_CLOSE_MS = 800
 SCALE_MIN, SCALE_MAX, SCALE_STEP = 0.6, 2.0, 0.1
 RUN = Path(f"/run/user/{os.getuid()}")
 CONFIG = Path.home() / f".config/arrowpad{'-vr' if TARGET == 'vr' else ''}.json"
@@ -428,6 +431,7 @@ QPushButton[state="busy"]    {{ background: #d9a400; color: black; }}
 QPushButton[tool="true"] {{ background: {t['key_bottom']}; border-bottom: none; }}
 QPushButton[tool="true"]:hover {{ background: {t['hover']}; }}
 QPushButton[tool="true"][state="locked"] {{ background: {t['latched']}; border: none; }}
+QPushButton[tool="true"][state="armed"] {{ background: #c0392b; }}
 QLabel {{ color: {t['legend']}; }}
 """
 
@@ -925,7 +929,11 @@ class ArrowPad(QWidget):
         self.tools["reset"].clicked.connect(self.reset_position)
         self.tools["smaller"].clicked.connect(lambda: self.resize_step(-1))
         self.tools["larger"].clicked.connect(lambda: self.resize_step(+1))
-        self.tools["close"].clicked.connect(self.close)
+        # (a hold, not a click: HOLD_TO_CLOSE_MS)
+        self.close_armed = False
+        self.close_timer = QTimer(self, singleShot=True, interval=HOLD_TO_CLOSE_MS, timeout=self.close_held)
+        self.tools["close"].pressed.connect(self.arm_close)
+        self.tools["close"].released.connect(self.disarm_close)
         # (a lambda: clicked passes `checked` (False), which would land in place= and skip
         # keeping the chevron under the laser)
         self.tools["fold"].clicked.connect(lambda: self.toggle_collapsed())
@@ -1518,6 +1526,38 @@ class ArrowPad(QWidget):
             ftconf.write_text(CONFIG, json.dumps(self.cfg))
         except OSError:
             pass
+
+    def arm_close(self):
+        """✕ pressed: red while it's held; held HOLD_TO_CLOSE_MS, the pad closes."""
+        self.close_armed = True
+        self.set_state(self.tools["close"], "armed")
+        self.close_timer.start()
+
+    def disarm_close(self):
+        """✕ let go (or slid off): sooner than the hold, nothing closes, and it says how."""
+        if not self.close_armed:
+            return
+        early = self.close_timer.isActive()
+        self.close_timer.stop()
+        self.close_armed = False
+        self.set_state(self.tools["close"], "off")
+        if early:
+            text = _("Hold ✕ to close Arrow Pad")
+            if self.overlay is not None:
+                self.overlay.show_hint(text)        # (under the VR panel: no tooltips there)
+            else:
+                b = self.tools["close"]
+                QToolTip.showText(b.mapToGlobal(b.rect().bottomLeft()), text, b)
+
+    def close_held(self):
+        """The hold is up: closes if ✕ is still held down. (Let go off it, Qt says nothing: no
+        "released" for a release with no move off the button first, as the VR panel's are.)"""
+        if self.close_armed and self.tools["close"].isDown():
+            self.close_armed = False
+            self.close()
+        elif self.close_armed:
+            self.close_armed = False
+            self.set_state(self.tools["close"], "off")
 
     def closeEvent(self, ev):
         self.save_config()

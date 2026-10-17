@@ -232,6 +232,45 @@ class SlideNote(PadTest):
         self.assertEqual(long.pixelColor(v.NOTE_PX // 2, 2).alpha(), 235)   # (the dark box, see-through a little)
 
 
+class HoldToClose(PadTest):
+    """✕ closes the pad only when held (HOLD_TO_CLOSE_MS): a stray press, aimed past the VR panel at
+    the dashboard's app list behind it, closed it."""
+    def setUp(self):
+        super().setUp()
+        self.closed, self.hints = [], []
+        for p in (mock.patch.object(self.pad, "close", lambda: self.closed.append(1)),
+                  mock.patch.object(self.ap.QToolTip, "showText", lambda pos, text, w=None: self.hints.append(text))):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_a_tap_doesnt_close_and_says_how(self):
+        b = self.pad.tools["close"]
+        self.mouse(b, "press")
+        self.assertEqual(b.property("state"), "armed")              # (red while held)
+        self.mouse(b, "release")
+        self.assertEqual((self.closed, self.hints), ([], ["Hold ✕ to close Arrow Pad"]))
+        self.assertEqual(b.property("state"), "off")
+        self.assertFalse(self.pad.close_timer.isActive())
+
+    def test_held_it_closes(self):
+        b = self.pad.tools["close"]
+        self.mouse(b, "press")
+        self.assertEqual(self.pad.close_timer.interval(), self.ap.HOLD_TO_CLOSE_MS)
+        self.pad.close_timer.timeout.emit()                         # (held long enough)
+        self.assertEqual(self.closed, [1])
+        self.mouse(b, "release")
+        self.assertEqual(self.hints, [])
+
+    def test_let_go_off_it_doesnt_close(self):
+        """Let go off ✕ (Qt sends no "released" for that, as the VR panel's taken-back presses
+        are): when the hold is up, it isn't held any more, so nothing closes."""
+        b = self.pad.tools["close"]
+        self.mouse(b, "press")
+        self.mouse(b, "release", on=False)
+        self.pad.close_timer.timeout.emit()
+        self.assertEqual((self.closed, b.property("state")), ([], "off"))
+
+
 class TakenBack(PadTest):
     def test_a_press_the_vr_panel_takes_back_lets_go_of_its_key(self):
         """A grab (or the dashboard closing) takes presses back with a release off the key, which

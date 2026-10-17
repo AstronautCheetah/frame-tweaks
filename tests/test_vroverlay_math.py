@@ -459,6 +459,19 @@ class DesktopGrabNote(unittest.TestCase):
         o.set_note("grab", False)
         self.assertEqual(self.calls[-1], "destroy")
 
+    def test_the_hold_hint_goes_on_top_and_goes_by_itself(self):
+        """Hold ✕ to close: no tooltips in VR, so the note says it, above the others, for a while."""
+        v = load()
+        o = self.host(v)
+        o.set_note("grab", True)
+        o.show_hint("Hold ✕ to close Arrow Pad")
+        self.assertEqual(self.texts[-1], "Hold ✕ to close Arrow Pad\n\n" + o.note_message("grab"))
+        o.show_hint("Hold ✕ to close Arrow Pad")                # (again: the first one's timer is stale)
+        self.timers.pop(0)()
+        self.assertIn("Hold", self.texts[-1])
+        self.timers.pop(0)()
+        self.assertEqual(self.texts[-1], o.note_message("grab"))
+
     def wait(self, o):
         for _ in range(200):
             if not o.grab_checking:

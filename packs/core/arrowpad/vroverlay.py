@@ -64,7 +64,7 @@ FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of
 # taken all input. Its width, the gap above it, how long the slide's message stays after you let go
 # (time to finish reading), and how often desktop mode's window title is looked at.
 NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS, GRAB_CHECK_S = 0.36, 0.02, 3000, 2.0
-NOTE_ORDER = ("slide", "grab")      # its messages, top to bottom
+NOTE_ORDER = ("hint", "slide", "grab")     # its messages, top to bottom
 NOTE_PX, NOTE_PAD_PX, NOTE_FONT_PX = 900, 28, 34     # its picture: width, margin, text size
 
 
@@ -186,7 +186,8 @@ class OverlayHost:
             return                  # (nothing shows: checked again within 0.1 s of the dashboard opening)
         p = self.pad
         sig = (p.layer, tuple(p.mod_state.values()), p.dictation_state(), p.pinned, p.lang, p.scale,
-               p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"), p.collapsed)
+               p.click_swap.armed, p.settings_page.isVisible(), p.haptic_level, p.cfg.get("theme"), p.collapsed,
+               getattr(p, "close_armed", False))
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             # Colour the buttons for this state *before* the redraw: the pad's own mic refresh
@@ -343,6 +344,8 @@ class OverlayHost:
 
     # ---- the note under the panel ---------------------------------------------------------------
     def note_message(self, reason):
+        if reason == "hint":
+            return getattr(self, "hint_text", "")
         if reason == "slide":
             return _("While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move "
                      "it closer, further away or turn it.")
@@ -361,6 +364,14 @@ class OverlayHost:
             return
         self.note_reasons = want
         self.show_note("\n\n".join(self.note_message(r) for r in want))
+
+    def show_hint(self, text):
+        """A short hint under the panel (Hold ✕ to close), for NOTE_LINGER_MS; another resets it."""
+        self.hint_text = text
+        self.hint_shown = getattr(self, "hint_shown", 0) + 1
+        mine = self.hint_shown
+        self.set_note("hint", True)
+        QTimer.singleShot(NOTE_LINGER_MS, lambda: mine == self.hint_shown and self.set_note("hint", False))
 
     def end_slide_note(self):
         """A few seconds after a slide: its message goes, unless it's sliding again."""
