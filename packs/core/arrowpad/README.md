@@ -24,7 +24,7 @@ processes: [^~/.local/share/arrowpad/venv/bin/python ~/.local/share/arrowpad/arr
 config: [~/.config/arrowpad.json, ~/.config/arrowpad-vr.json]
 changes: >-
   `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two
-  app-menu entries
+  app-menu entries; with the VR environment helper, a dashboard patch (`arrowpad-keyboard`)
 access: >-
   Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from
   its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam
@@ -192,8 +192,14 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   the pad, and what's typed on it comes to the pad as `VREvent_KeyboardCharInput`. The pad types it
   on the desktop through ydotoold, on the desktop's layout, with its latched modifiers: Ctrl on the
   pad, then C on Steam's keyboard, is Ctrl+C. Its log (`/run/user/1000/arrowpad-input.log`) counts
-  the keys, never what they were. The keyboard also moves to another spot when that happens;
-  SteamVR's dashboard decides where it goes, and there's no setting for that yet.
+  the keys, never what they were.
+- **Steam's keyboard stays put:** reopened for the pad, SteamVR's dashboard places the keyboard
+  "undocked", at a spot tied to where the dashboard first appeared (not where you moved it) and
+  tilted differently, so it jumped. With the [VR environment helper](../vr-dashboard/) installed
+  (any VR environment tweak brings it), a dashboard patch (`keyboard-patch.js`, `arrowpad-keyboard`)
+  tells the dashboard it's docked for the pad too, so it stays where it is for the dashboard's
+  windows and moves with the dashboard. Arrow Pad doesn't install the helper for this: it opens
+  the dashboard's DevTools port while SteamVR runs.
 - **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
   Python GUI toolkit. The [NordVPN](../../integrations/nordvpn/) tray and Screen snip use the same one.
 
@@ -212,7 +218,7 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two app-menu entries
+- **Changes:** `~/.local/bin/arrowpad`, `~/.local/share/arrowpad` (including a ~280 MB PyQt6 venv), two app-menu entries; with the VR environment helper, a dashboard patch (`arrowpad-keyboard`)
 - **Unusual access:** Types through ydotool. In VR: a SteamVR overlay; reads each controller's grip position (from its 3D model's state, as Full Keyboard does). **The R/M keys grab the pointer on the Steam display (`:0`) for one click** (at most 10 s) and replay it with XTEST
 - **Undo:** `./install.sh uninstall arrowpad` (keeps your settings: `~/.config/arrowpad.json` and `~/.config/arrowpad-vr.json`)
 <!-- /generated:changes -->

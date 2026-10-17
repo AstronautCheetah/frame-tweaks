@@ -3278,6 +3278,11 @@ msgstr ""
 
 #: packs/core/arrowpad/install.sh
 msgid ""
+"In VR, Steam's keyboard moves when you press the pad (install a VR environment tweak to keep it in place)."
+msgstr ""
+
+#: packs/core/arrowpad/install.sh
+msgid ""
 "SteamVR's arm64 OpenVR library not found: Arrow Pad works without controller haptics."
 msgstr ""
 "No se encontró la biblioteca OpenVR arm64 de SteamVR: el Teclado de flechas funciona sin la respuesta háptica de los controles."

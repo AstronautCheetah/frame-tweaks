@@ -27,6 +27,10 @@
   the pad instead of the window you were typing in. The pad now types it there, Enter, Backspace,
   Tab and the arrows included, on your keyboard layout. A Ctrl, Alt or Super you tapped on the pad
   applies to the next key from Steam's keyboard too (Ctrl on the pad, then C: copy).
+- **Steam's keyboard jumped when you pressed Arrow Pad:** the keyboard follows the laser, and for
+  Arrow Pad SteamVR put it at another spot, tied to where the dashboard first appeared, so it
+  jumped (far, once you'd moved the dashboard) and back again on the next window. With a VR
+  environment tweak installed, it now stays where it is and moves with the dashboard.
 
 ## 0.6.14 (2026-10-17)
 

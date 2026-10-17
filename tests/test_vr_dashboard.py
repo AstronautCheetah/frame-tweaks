@@ -67,7 +67,7 @@ class ArmRestore(unittest.TestCase):
 class DashboardCheck(unittest.TestCase):
     def test_every_patch_is_found(self):
         self.assertGreaterEqual(set(PATCHES), {"curvature", "float-return", "float-grab", "scroll-strips",
-                                               "phone-rotate", "phone-touch"})
+                                               "phone-rotate", "phone-touch", "arrowpad-keyboard"})
         for path in PATCHES.values():
             self.assertTrue(path.is_file(), path)
 
