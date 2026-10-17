@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.17 (2026-10-17)
 
 ### Changed
 - **Arrow Pad's ✕ Close needs a short hold:** a press aimed past the pad, at the dashboard's menu
