@@ -26,7 +26,7 @@ from PyQt6.QtCore import QEvent, QObject, QPoint, QProcess, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontInfo, QFontMetrics, QIcon, QImage
 from PyQt6.QtWidgets import (QAbstractButton, QAbstractSlider, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
-                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QToolTip,
+                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser,
                              QVBoxLayout, QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -59,6 +59,7 @@ from wallet_page import FLATPAK_ICONS, WalletApps  # noqa: E402  (Wallet apps pa
 from packs_page import Packs  # noqa: E402  (Packs page)
 from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences page)
 from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
+import link_tip  # noqa: E402  (the pop-up after a click on a link)
 GITHUB = "https://github.com/AstronautCheetah/frame-tweaks/tree/main"
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 BREEZE = Path("/usr/share/icons/breeze-dark")
@@ -484,16 +485,16 @@ def follow_link(url):
     opens the usual way."""
     if url.startswith("copy:"):
         QApplication.clipboard().setText(url[5:])
-        QToolTip.showText(QCursor.pos(), _("Link copied"))
+        link_tip.show(_("Link copied"))
     elif url.startswith(("https:", "http:")) and (r := opened(browser.launch, url)):
         note, proc, handoff = r
-        QToolTip.showText(QCursor.pos(), note)          # (it may have opened in the other session)
+        link_tip.show(note)          # (it may have opened in the other session)
         if getattr(proc, "warning", ""):                # (the default browser isn't one: what to set)
             window_say(proc.warning)
         if handoff:                                    # the browser runs there already: did it answer?
             QTimer.singleShot(8000, lambda: browser.still_stuck(proc, url) and stuck_link(url))
     elif url.startswith("file:") and (note := opened(browser.open_path, url)):
-        QToolTip.showText(QCursor.pos(), note)
+        link_tip.show(note)
     else:
         QDesktopServices.openUrl(QUrl(url))
 
@@ -522,7 +523,7 @@ def window_say(text):
         if hasattr(w, "say"):
             w.say(text)
             return
-    QToolTip.showText(QCursor.pos(), _("The browser didn't answer: the link is on the clipboard."))
+    link_tip.show(_("The browser didn't answer: the link is on the clipboard."))
 
 
 def link_label(label):
