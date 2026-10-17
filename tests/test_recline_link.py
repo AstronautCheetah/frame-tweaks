@@ -67,5 +67,37 @@ class ReclineUninstall(unittest.TestCase):
         self.assertIn("&& touch ~/Recline-VR/.git/frame-tweaks-cloned; fi", link_command("install"))
 
 
+class ReclineUpdateCheck(unittest.TestCase):
+    """Its update-check.sh: the installed VERSION against where GitHub's latest-release link leads
+    (a stand-in curl), as "<installed> <newest>" for the window's update hint, or nothing."""
+    SCRIPT = ROOT / "packs/third-party/recline/update-check.sh"
+
+    def run_check(self, version, headers="HTTP/2 302\r\nlocation: https://github.com/new-waifu/Recline-VR/releases/tag/v1.4.0\r\n\r\n"):
+        with tempfile.TemporaryDirectory() as d:
+            home, bin_ = Path(d, "home"), Path(d, "bin")
+            bin_.mkdir()
+            curl = bin_ / "curl"
+            curl.write_text("#!/bin/sh\nprintf '%s' \"$HEADERS\"\n" if headers else "#!/bin/sh\nexit 6\n")
+            curl.chmod(0o755)
+            if version is not None:
+                (home / ".local/share/recline-vr").mkdir(parents=True)
+                (home / ".local/share/recline-vr/VERSION").write_text(version + "\n")
+            env = dict(os.environ, HOME=str(home), PATH=f"{bin_}:{os.environ['PATH']}", HEADERS=headers or "")
+            return subprocess.run(["bash", str(self.SCRIPT)], env=env, capture_output=True, text=True).stdout
+
+    def test_versions(self):
+        for version, want in (("v1.3.0", "1.3.0 1.4.0\n"),
+                              ("v1.4.0", "1.4.0 1.4.0\n"),
+                              ("v1.3.0+3.14d0169-dirty", "1.3.0+3.14d0169 1.4.0\n"),
+                              ("unknown+14d0169", ""),          # (no tag to compare)
+                              (None, "")):                      # (not installed)
+            with self.subTest(version=version):
+                self.assertEqual(self.run_check(version), want)
+
+    def test_offline_says_nothing(self):
+        self.assertEqual(self.run_check("v1.3.0", headers=None), "")
+        self.assertEqual(self.run_check("v1.3.0", headers="HTTP/2 404\r\n\r\n"), "")
+
+
 if __name__ == "__main__":
     unittest.main()
