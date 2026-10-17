@@ -120,9 +120,13 @@ The panel has:
   do). While paused, it stays paused, on the new part; **Resume** reads it from its start. Each
   is greyed out where there's no part to go to (at the first or last), and once it's stopped or
   done.
+- **Volume down** / **Volume up** (a speaker with − or +), after Next part: in tenths, from 100%
+  (as loud as it's made) down to 10%, remembered for next time. A change applies to the part being
+  read at once.
 - **Speed** **−** / **+**. A change applies at once: it reads sentence by sentence and starts
   the current sentence again.
-- **Show text** / **Show image**: the snip's picture, or the text read from it.
+- **Show text** / **Show image** (bottom row, beside the left Collapse): the snip's picture, or
+  the text read from it.
 - **Snip** (the dashed rectangle, as on Arrow Pad): snip something new; it's read in this panel.
 - **Copy image** and **Copy text**.
 - **Paste** (icon): read the clipboard's text instead. It's shown in place of the snip.

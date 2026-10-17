@@ -4013,6 +4013,14 @@ msgid "The clipboard has no text."
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Volume down"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Volume up"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid ""
 "While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it closer, further away or turn it."
 msgstr ""
