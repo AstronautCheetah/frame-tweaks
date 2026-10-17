@@ -633,6 +633,12 @@ class InstallState(unittest.TestCase):
         r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertFalse((self.state / "update-unfinished").exists())
+        (self.state / "update-unfinished").write_text(VERSION + "\n")
+        (self.pack / "probe/install.sh").write_text('#!/bin/bash\nexit 1\n')         # (a tweak that fails)
+        self.trust()
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 3, r.stdout)
+        self.assertTrue((self.state / "update-unfinished").exists())          # (the next update runs it again)
 
     def test_run_by_a_relative_path(self):
         """frame-tweaks/install.sh from the folder above: it changes into its folder, where

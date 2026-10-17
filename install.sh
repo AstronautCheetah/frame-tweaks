@@ -647,8 +647,9 @@ cmd_reinstall() {
     WAS_INSTALLED=("${installed[@]}")
     run_migrations "${installed[@]}"
     cmd_install "${installed[@]}"; rc=$?
-    # (through: a tweak that didn't install again is said so, and isn't an update cut short)
-    [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && rm -f "$UPDATE_MARK"
+    # (through, every tweak installed again: the mark goes. One that failed keeps it, so the next
+    # update, or the window's ⬇ Finish the update, runs that one's installer again.)
+    [[ -n ${FRAME_TWEAKS_UPDATING:-} && ( $rc -eq 0 || $rc -eq 2 ) ]] && rm -f "$UPDATE_MARK"
     echo; bold "$(t 'Checking the SteamOS/SteamVR parts the tweaks rely on')"; cmd_check_system || true
     # (2: all installed, with a warning to read. 3, not 1: Frame Tweaks itself is up to date, a
     # tweak didn't install again, which get.sh tells from an update that couldn't happen.)
