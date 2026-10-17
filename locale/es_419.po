@@ -504,6 +504,11 @@ msgstr "Estos ajustes instalados se desmarcaron y se <b>quitarán</b>:"
 msgid "This Frame doesn't need it: %s"
 msgstr "Este Frame no lo necesita: %s"
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Tick every tweak in this category"
+msgstr "Marcar todos los ajustes de esta categoría"
+
 #: gui/frame-tweaks-gui.py
 msgid "Tick it and Apply first"
 msgstr "Márcalo y aplica los cambios primero"
@@ -525,6 +530,13 @@ msgstr "Mostrar"
 #: gui/frame-tweaks-gui.py
 msgid "Unhide category"
 msgstr "Mostrar categoría"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Untick every tweak in this category (installed ones are removed when you apply the changes)"
+msgstr ""
+"Desmarcar todos los ajustes de esta categoría (los instalados se quitan al aplicar los cambios)"
 
 #: gui/frame-tweaks-gui.py gui/packs_page.py
 msgid "Update"
@@ -3439,6 +3451,13 @@ msgstr ""
 "Mientras el teclado de Steam está abierto, el Teclado de flechas solo se puede deslizar. Cierra el teclado para acercarlo, alejarlo o girarlo."
 
 # needs review
+#: packs/core/arrowpad/vroverlay.py
+msgid ""
+"While Steam's keyboard is open, Arrow Pad only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
+msgstr ""
+"Mientras el teclado de Steam está abierto, el Teclado de flechas solo se desliza al arrastrarlo. Para acercarlo, alejarlo o girarlo, usa la barra que está debajo."
+
+# needs review
 #: packs/core/charge-limit/README.md
 msgid "80% (the default)"
 msgstr "80% (predeterminado)"
@@ -4469,6 +4488,30 @@ msgstr "El motor de voz no pudo leer la parte {part}."
 msgid "The clipboard has no text."
 msgstr "El portapapeles no tiene texto."
 
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Volume down"
+msgstr "Bajar el volumen"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Volume up"
+msgstr "Subir el volumen"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid ""
+"While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it closer, further away or turn it."
+msgstr ""
+"Mientras el teclado de Steam está abierto, este panel solo se puede deslizar. Cierra el teclado para acercarlo, alejarlo o girarlo."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid ""
+"While Steam's keyboard is open, this panel only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
+msgstr ""
+"Mientras el teclado de Steam está abierto, este panel solo se desliza al arrastrarlo. Para acercarlo, alejarlo o girarlo, usa la barra que está debajo."
+
 #: packs/core/snip/frame-snip
 msgid "can't open the Steam session's display"
 msgstr "no se puede abrir la pantalla de la sesión de Steam"
@@ -4817,11 +4860,12 @@ msgid ""
 msgstr ""
 "El menú principal de SteamVR, con el menú y el espacio de ventanas que usas en el visor, no tiene opciones para estos comportamientos. Es una página web, así que pequeños parches que se le agregan mientras SteamVR se ejecuta pueden cambiarlos."
 
+# needs review
 #: packs/core/vr-dashboard/README.md
 msgid ""
-"The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
+"The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own patches help Frame Tweaks' panels in VR (Arrow Pad, Screen snip's narration panel) with Steam's keyboard: pressing one leaves the keyboard with the window you're typing in, and while it's open, SteamVR's grab bar under each panel moves it anywhere."
 msgstr ""
-"La parte compartida de los ajustes del entorno de RV (Ventanas curvas en el mundo, Volver a la ventana anterior, Tomar al hacer flotar, Franjas de desplazamiento): pone sus pequeños parches en el menú principal de SteamVR mientras SteamVR se ejecuta. Espejo de Android también lo usa cuando está instalado. Se instala automáticamente."
+"La parte compartida de los ajustes del entorno de RV (Ventanas curvas en el mundo, Volver a la ventana anterior, Tomar al hacer flotar, Franjas de desplazamiento): pone sus pequeños parches en el menú principal de SteamVR mientras SteamVR se ejecuta. Espejo de Android también lo usa cuando está instalado. Se instala automáticamente. Sus propios parches ayudan a los paneles de Frame Tweaks en RV (el Teclado de flechas, el panel de narración del Recorte de pantalla) con el teclado de Steam: al presionar uno, el teclado se queda con la ventana en la que escribes y, mientras está abierto, la barra para agarrar de SteamVR debajo de cada panel lo mueve a cualquier lugar."
 
 #: packs/core/vr-dashboard/README.md
 msgid "VR dashboard patching (helper)"
@@ -6599,3 +6643,8 @@ msgstr "Instalador de ajustes"
 #~ "Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
 #~ msgstr ""
 #~ "Se guardó <b>{file}</b>: las versiones de Frame Tweaks y de SteamOS, el estado de cada ajuste y los registros recientes, sin nombres de usuario, rutas, nombres de equipo y de teléfono ni direcciones."
+
+#~ msgid ""
+#~ "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
+#~ msgstr ""
+#~ "La parte compartida de los ajustes del entorno de RV (Ventanas curvas en el mundo, Volver a la ventana anterior, Tomar al hacer flotar, Franjas de desplazamiento): pone sus pequeños parches en el menú principal de SteamVR mientras SteamVR se ejecuta. Espejo de Android también lo usa cuando está instalado. Se instala automáticamente."
