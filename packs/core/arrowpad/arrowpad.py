@@ -293,6 +293,12 @@ def chord_keys(name):
     return [xkb.letter_key(k, KEY[k]) if xkb is not None and len(k) == 1 else KEY[k] for k in keys]
 
 
+# What Steam's VR keyboard sends for its keys that type no character (its SendText: Steam's sp.js).
+STEAM_KEYBOARD_KEYS = {"\b": KEY["Bksp"], "\n": KEY["Enter"], "\r": KEY["Enter"], "\t": KEY["Tab"],
+                       "\x1b[D": KEY["←"], "\x1b[C": KEY["→"], "\x1b[A": KEY["↑"], "\x1b[B": KEY["↓"]}
+STEAM_KEYBOARD_TOKEN = re.compile(r"\x1b\[[A-D]|.", re.DOTALL)
+
+
 LAYERS = {
     # Keys found on more than one layer keep their place on all of them (Tools, Esc, Fn, the
     # modifiers, R/M, and the clipboard keys); only the rest change.
@@ -1391,6 +1397,42 @@ class ArrowPad(QWidget):
             self.yd.key(F24, False)
         if latched:
             self.restyle()
+
+    def type_from_steam_keyboard(self, text):
+        """Steam's keyboard follows the laser's focus: touching the pad reopens it for the pad, and
+        what's typed on it then comes here instead of to the window it was typing into (it was
+        lost). Typed there through ydotoold, on the desktop's layout (lib/xkb.py), with the pad's
+        latched modifiers (Ctrl on the pad, then C on Steam's keyboard: Ctrl+C), which then go off
+        as after a key of the pad's. Returns (keys typed, characters with no key on the layout):
+        only those counts are logged, never what was typed (it can be a password)."""
+        held = {KEY[m] for m, s in self.mod_state.items() if s != "off"}
+        typed = missing = 0
+        km = None
+        for token in STEAM_KEYBOARD_TOKEN.findall(text):
+            keys = [(STEAM_KEYBOARD_KEYS[token], ())] if token in STEAM_KEYBOARD_KEYS else None
+            if keys is None:
+                try:
+                    km = km or (xkb.typing_keymap() if xkb is not None else None)
+                    keys = km.keys(token) if km is not None else None
+                except Exception:
+                    keys = None
+            if not keys:
+                missing += 1
+                continue
+            for code, mods in keys:
+                mods = [m for m in mods if m not in held]      # (a latched one is down already)
+                for m in mods:
+                    self.yd.key(m, True)
+                self.yd.key(code, True)
+                self.yd.key(code, False)
+                for m in reversed(mods):
+                    self.yd.key(m, False)
+            typed += 1
+        if typed:
+            for m in self.mod_pressing:
+                self.mod_pressing[m] = True        # (one a laser holds down: used in a chord)
+            self.release_oneshots()
+        return typed, missing
 
     def release_all_mods(self):
         self.mod_pressing.clear()

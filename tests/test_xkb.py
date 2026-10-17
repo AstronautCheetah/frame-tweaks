@@ -119,6 +119,15 @@ class CurrentLayout(unittest.TestCase):
         xkb._current["at"] = None
         self.assertEqual(xkb.letter_key("A", 30), 30)
 
+    def test_typing_keymap(self):
+        """What Arrow Pad types Steam's keyboard's text with: the current layout's, else the US one."""
+        self.assertEqual(xkb.typing_keymap().layout, "us")                  # no kxkbrc: a US keyboard
+        (self.config / "kxkbrc").write_text("[Layout]\nLayoutList=fr\nUse=true\n")
+        xkb._current["at"] = None
+        self.assertEqual(xkb.typing_keymap().keys("a"), [(16, ())])
+        with mock.patch.dict(xkb._lib, {"lib": None}), mock.patch.dict(xkb._keymaps, clear=True):
+            self.assertIsNone(xkb.typing_keymap())                         # no libxkbcommon
+
 
 @unittest.skipUnless(compiles(), "needs libxkbcommon and XKB's layouts")
 class Command(unittest.TestCase):

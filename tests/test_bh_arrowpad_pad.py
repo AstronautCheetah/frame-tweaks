@@ -232,6 +232,44 @@ class SlideNote(PadTest):
         self.assertEqual(long.pixelColor(v.NOTE_PX // 2, 2).alpha(), 235)   # (the dark box, see-through a little)
 
 
+class SteamKeyboard(PadTest):
+    """Steam's keyboard follows the laser's focus: after a press on the VR pad, what's typed on it
+    comes to the pad, which types it on the desktop (it was lost)."""
+    def setUp(self):
+        super().setUp()
+        self.ap.xkb._current.update(at=None)        # (no kxkbrc here: US, whatever a test before left)
+
+    def test_its_keys_that_type_no_character(self):
+        self.assertEqual(self.pad.type_from_steam_keyboard("\b\n\t\x1b[D\x1b[C\x1b[A\x1b[B"), (7, 0))
+        self.assertEqual(self.keys.sent, [(c, d) for c in (14, 28, 15, 105, 106, 103, 108) for d in (True, False)])
+
+    @unittest.skipUnless(layouts_compile(), "needs libxkbcommon and XKB's layouts")
+    def test_letters_on_the_desktops_layout(self):
+        self.assertEqual(self.pad.type_from_steam_keyboard("aA"), (2, 0))
+        self.assertEqual(self.keys.sent, [(30, True), (30, False), (42, True), (30, True), (30, False), (42, False)])
+
+    @unittest.skipUnless(layouts_compile(), "needs libxkbcommon and XKB's layouts")
+    def test_a_ctrl_tapped_on_the_pad_goes_with_the_next_key(self):
+        """Ctrl on the pad, then C on Steam's keyboard: Ctrl+C, and Ctrl goes off, as after a pad key."""
+        self.tap("Ctrl")
+        self.keys.sent.clear()
+        self.pad.type_from_steam_keyboard("c")
+        self.assertEqual(self.keys.sent, [(46, True), (46, False), (29, False)])
+        self.assertEqual(self.pad.mod_state["Ctrl"], "off")
+
+    def test_a_locked_ctrl_stays_on(self):
+        self.tap("Ctrl")
+        self.tap("Ctrl")
+        self.assertEqual(self.pad.mod_state["Ctrl"], "locked")
+        self.keys.sent.clear()
+        self.pad.type_from_steam_keyboard("\b")
+        self.assertEqual((self.keys.sent, self.pad.mod_state["Ctrl"]), ([(14, True), (14, False)], "locked"))
+
+    def test_a_character_with_no_key_is_counted_not_typed(self):
+        self.assertEqual(self.pad.type_from_steam_keyboard("☃\n"), (1, 1))
+        self.assertEqual(self.keys.sent, [(28, True), (28, False)])
+
+
 class TakenBack(PadTest):
     def test_a_press_the_vr_panel_takes_back_lets_go_of_its_key(self):
         """A grab (or the dashboard closing) takes presses back with a release off the key, which
@@ -460,11 +498,13 @@ def overlay_host(test):
     ov = types.ModuleType("openvr")
     ov.VREvent_MouseMove, ov.VREvent_MouseButtonDown, ov.VREvent_MouseButtonUp = 300, 301, 302
     ov.VREvent_FocusLeave, ov.k_unTrackedDeviceIndexInvalid = 304, 2 ** 32 - 1
+    ov.VREvent_KeyboardClosed, ov.VREvent_KeyboardCharInput = 1200, 1201
 
     class Ev:
         def __init__(self):
             self.eventType, self.trackedDeviceIndex = 0, 1
-            self.data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=0.0, y=0.0, cursorIndex=0))
+            self.data = types.SimpleNamespace(mouse=types.SimpleNamespace(x=0.0, y=0.0, cursorIndex=0),
+                                              keyboard=types.SimpleNamespace(cNewInput=b""))
     ov.VREvent_t = Ev
     with mock.patch.dict(sys.modules, {"openvr": ov}):
         v = module("vroverlay", PAD / "vroverlay.py")
@@ -478,6 +518,27 @@ def overlay_host(test):
     o.log_input = lambda msg: None                                       # (not /run/user's log)
     o.poll_error = 0.0
     return o
+
+
+class SteamKeyboardInVR(PadTest):
+    def test_what_it_sends_the_pad_is_typed_and_only_counted_in_the_log(self):
+        """Through the VR panel's pump: up to 8 bytes an event, a character split across two."""
+        o = overlay_host(self)
+        logged = []
+        o.log_input = logged.append
+        queue = [(1201, b"\x1b[D"), (1201, b"\xe2\x98"), (1201, b"\x83"), (1200, b"")]
+
+        def poll(handle, ev):
+            if not queue:
+                return (False, ev)
+            ev.eventType, ev.data.keyboard.cNewInput = queue.pop(0)
+            return (True, ev)
+        o.ov, o.last_button_time = types.SimpleNamespace(pollNextOverlayEvent=poll), {}
+        o.pump(1)
+        self.assertEqual(self.keys.sent, [(105, True), (105, False)])          # ← (☃ has no key)
+        self.assertEqual(logged, ["Steam's keyboard: typed 1 key(s) for it",
+                                  "Steam's keyboard: typed 0 key(s) for it, 1 character(s) with no key on the layout",
+                                  "Steam's keyboard: closed"])
 
 
 class WanderInVR(PadTest):
