@@ -122,6 +122,27 @@ class Output(unittest.TestCase):
         self.stage.frame(time.monotonic())
         self.assertTrue(self.out)
 
+    def test_a_resize_while_paused_reaches_the_command(self):
+        self.feed(b"\x1b[?1049h")                                          # (a pager)
+        for cols, rows in ((58, 18), (120, 40), (0, 0)):                   # (0×0 crashed making a picture)
+            self.stage.resize(cols, rows)
+            size = struct.unpack("HHHH", fcntl.ioctl(self.slave, termios.TIOCGWINSZ, b"\0" * 8))[:2]
+            self.assertEqual(size, (max(1, rows), max(1, cols)))
+
+    def test_what_came_before_a_pager_is_written_first(self):
+        """A switch to the pager clears the screen: the text before it in the same read was
+        written after the clear, onto the pager's screen."""
+        written = self.feed(b"text-before\r\n\x1b[?1049hPAGER")
+        self.assertLess(written.find(b"text-before"), written.find(b"\x1b[2J"))
+
+    def test_an_unchanged_picture_writes_nothing(self):
+        self.stage.still, self.stage.still_art = True, None
+        self.stage.frame(self.stage.start + 10.0)
+        self.assertTrue(self.out)
+        self.out.clear()
+        self.stage.frame(self.stage.start + 10.2)   # (the same second: nothing in it changed)
+        self.assertEqual(self.out, [])
+
     def test_what_is_being_done(self):
         self.feed("\x1b[1m── arrowpad: Arrow Pad\x1b[0m\r\n".encode())
         self.assertEqual(self.stage.step, "arrowpad: Arrow Pad")
@@ -142,6 +163,9 @@ class Setting(unittest.TestCase):
             self.assertEqual(splash.setting(), "off")
             os.environ["FRAME_TWEAKS_SPLASH"] = "on"
             self.assertEqual(splash.setting(), "on")              # (the variable goes first)
+            os.environ["FRAME_TWEAKS_SPLASH"] = ""
+            splash.SETTING.write_bytes(b"\xff\xfe")
+            self.assertEqual(splash.setting(), "on")              # (a file that isn't text: on, not a crash)
 
 
 class Layout(unittest.TestCase):
@@ -250,6 +274,39 @@ class Running(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertNotIn(b"\x1b[?1049h", out)
         self.assertIn(b"plain", out)
+
+    def test_the_command_doesnt_ignore_sigpipe(self):
+        """Python ignores SIGPIPE, and a command exec'd from it did too, with all it started:
+        under the splash and when it steps aside."""
+        show = "grep SigIgn /proc/self/status"
+        for env in (self.env, {**self.env, "FRAME_TWEAKS_SPLASH": "off"}):
+            rc, out = in_pty([sys.executable, str(SPLASH), "--", "sh", "-c", show], env)
+            mask = int(out.split(b"SigIgn:")[1].split()[0], 16)
+            self.assertFalse(mask & (1 << 12), env.get("FRAME_TWEAKS_SPLASH"))       # (SIGPIPE is 13)
+
+    def test_piped_input_stays_the_commands(self):
+        rc, out = in_pty(["sh", "-c", 'echo yes-please | "$0" "$1" -- sh -c "read x; echo got:\$x"',
+                          sys.executable, str(SPLASH)], self.env)
+        self.assertEqual(rc, 0)
+        self.assertIn(b"\x1b[?1049h", out)
+        self.assertIn(b"got:yes-please", out)
+
+    def test_a_command_ending_during_the_splash(self):
+        """Its output and ✖ came only after the splash had gone; the exit status is kept."""
+        env = {k: v for k, v in self.env.items() if k != "FRAME_TWEAKS_SPLASH"}
+        rc, out = in_pty([sys.executable, str(SPLASH), "--", "sh", "-c", "echo quick-output; exit 4"], env)
+        self.assertEqual(rc, 4)
+        shown = out[:out.rindex(b"\x1b[?1049l")]
+        self.assertIn(b"exit status 4", shown)
+        self.assertIn(b"quick-output", shown)
+
+    def test_ctrl_c_during_the_splash_reaches_the_command(self):
+        env = {k: v for k, v in self.env.items() if k != "FRAME_TWEAKS_SPLASH"}
+        start = time.monotonic()
+        rc, out = in_pty([sys.executable, str(SPLASH), "--", "sh", "-c", "sleep 10"], env,
+                         keys=[(b"\x1b[?1049h", b"\x03")])
+        self.assertLess(time.monotonic() - start, 6)
+        self.assertNotEqual(rc, 0)
 
     def test_chosen_off_in_preferences(self):
         off = Path(self.env["HOME"]) / "splash"
