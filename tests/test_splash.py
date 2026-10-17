@@ -137,10 +137,12 @@ class Output(unittest.TestCase):
 
     def test_an_unchanged_picture_writes_nothing(self):
         self.stage.still, self.stage.still_art = True, None
-        self.stage.frame(self.stage.start + 10.0)
+        # (well inside one second: start + 10.0 - start can come out as 9.999…, and the clock then
+        # read 0:09, then 0:10, which failed this now and then in CI)
+        self.stage.frame(self.stage.start + 10.3)
         self.assertTrue(self.out)
         self.out.clear()
-        self.stage.frame(self.stage.start + 10.2)   # (the same second: nothing in it changed)
+        self.stage.frame(self.stage.start + 10.6)   # (the same second: nothing in it changed)
         self.assertEqual(self.out, [])
 
     def test_what_is_being_done(self):
