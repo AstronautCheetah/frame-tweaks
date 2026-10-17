@@ -23,6 +23,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -203,6 +204,25 @@ def gear_icon():
     return QIcon(pm)
 
 
+def volume_icon(louder):
+    """Volume down / up: a speaker with − or + (Breeze's quiet and loud speakers, one sound wave
+    against two, look alike at the panel's size). Drawn like the gear, in its colour."""
+    from PyQt6.QtSvg import QSvgRenderer
+    sign = "M15 12h8" + ("M19 8v8" if louder else "")
+    icon = QIcon()
+    for colour, mode in (("#e8ecf0", QIcon.Mode.Normal), ("#3a434d", QIcon.Mode.Disabled)):   # (the panel's disabled colour)
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+               f'<path fill="{colour}" d="M2 9h4l5-4.5v15L6 15H2z"/>'
+               f'<path stroke="{colour}" stroke-width="2.4" stroke-linecap="round" fill="none" d="{sign}"/></svg>').encode()
+        pm = QPixmap(64, 64)
+        pm.fill(Qt.GlobalColor.transparent)
+        p = QPainter(pm)
+        QSvgRenderer(svg).render(p)
+        p.end()
+        icon.addPixmap(pm, mode)
+    return icon
+
+
 def start_snip():
     """A new snip, as Arrow Pad's Snip key starts one (its own process and session)."""
     subprocess.Popen([os.path.abspath(sys.argv[0])], start_new_session=True)
@@ -364,6 +384,35 @@ def save_speed(v):
     ftconf.update_json(SETTINGS, {"speed": v})
 
 
+VOLUMES = [round(0.1 * i, 1) for i in range(1, 11)]       # the narration's own volume (100%: as made)
+PACTL = shutil.which("pactl") or "/home/linuxbrew/.linuxbrew/bin/pactl"    # (Homebrew's, for the volume)
+
+
+def load_volume():
+    try:
+        v = float(ftconf.read_json(SETTINGS).get("volume", 1.0))
+    except (TypeError, ValueError):
+        v = 1.0
+    return min(VOLUMES, key=lambda x: abs(x - v))
+
+
+def save_volume(v):
+    ftconf.update_json(SETTINGS, {"volume": v})
+
+
+def set_stream_volume(name, volume):
+    """The volume of the part playing now (pw-play's stream, named after its file), at once:
+    through PipeWire's PulseAudio side (pactl). Without pactl, or if it's gone, the next part has it."""
+    try:
+        out = subprocess.run([PACTL, "-f", "json", "list", "sink-inputs"], capture_output=True, text=True, timeout=3).stdout
+        for stream in json.loads(out or "[]"):
+            if stream.get("properties", {}).get("media.name") == name:
+                subprocess.run([PACTL, "set-sink-input-volume", str(stream["index"]), f"{volume:.2f}"],
+                               capture_output=True, timeout=3)
+    except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError):
+        pass
+
+
 def sentences(text):
     """Speakable chunks: sentences, long ones split at commas, short ones joined."""
     parts = [p.strip() for p in re.split(r"(?<=[.!?:;])\s+|\n{2,}", text.replace("\r", "")) if p.strip()]
@@ -393,9 +442,9 @@ class Narrator(QObject):
     failed = pyqtSignal(str, int)            # why (English, N_), the part's index: stopped there
     TRIES = 2
 
-    def __init__(self, text, speed):
+    def __init__(self, text, speed, volume=1.0):
         super().__init__()
-        self.parts, self.speed = sentences(text), speed
+        self.parts, self.speed, self.volume = sentences(text), speed, volume
         self.dir = Path(tempfile.mkdtemp(prefix="snip-narrate-"))
         self.wavs = {}                       # index -> (speed, path) synthesized
         self.synth = None                    # (index, speed, QProcess) being synthesized
@@ -473,7 +522,8 @@ class Narrator(QObject):
             return
         self.player = QProcess(self)
         self.player.finished.connect(self._played)
-        self.player.start("pw-play", [str(w[1])])
+        self.playing = str(w[1])
+        self.player.start("pw-play", ["--volume", f"{self.volume:.2f}", self.playing])
         self._synth(self.i + 1)
 
     def _played(self, *_):
@@ -501,6 +551,13 @@ class Narrator(QObject):
         self.speed = speed
         self._drop_player()
         self._play()
+
+    def set_volume(self, volume):
+        """New volume: the part playing changes at once (off the window's thread: pactl), the next
+        ones start at it."""
+        self.volume = volume
+        if self.player is not None:
+            threading.Thread(target=set_stream_volume, args=(self.playing, volume), daemon=True).start()
 
     def skip(self, d):
         """Previous (-1) / Next (1): the start of that part, at once. Paused, it stays paused there
@@ -709,12 +766,17 @@ class NarrationWindow(QWidget):
         self.previous_button.clicked.connect(lambda: self.narrator.skip(-1))
         self.pause_button.clicked.connect(self.pause_or_resume)
         self.next_button.clicked.connect(lambda: self.narrator.skip(1))
-        for b in (self.previous_button, self.pause_button, self.next_button):
+        # Volume down / up (the narration's own, remembered)
+        self.volume = load_volume()
+        self.quieter, self.louder = QPushButton(), QPushButton()
+        icon_button(self.quieter, "audio-volume-low", N_("Volume down"))
+        icon_button(self.louder, "audio-volume-high", N_("Volume up"))
+        self.quieter.setIcon(volume_icon(False))
+        self.louder.setIcon(volume_icon(True))
+        self.quieter.clicked.connect(lambda: self.step_volume(-1))
+        self.louder.clicked.connect(lambda: self.step_volume(1))
+        for b in (self.previous_button, self.pause_button, self.next_button, self.quieter, self.louder):
             row.addWidget(b)
-        self.view_button = tr_text(QPushButton(), N_("Show text"))
-        tr_tip(self.view_button, N_("Switch between the snip's image and the text read from it"))
-        self.view_button.clicked.connect(self.toggle_view)
-        row.addWidget(self.view_button)
         row.addStretch(1)
         self.slower, self.faster = QPushButton("−"), QPushButton("+")
         self.speed_label = QLabel()
@@ -753,6 +815,10 @@ class NarrationWindow(QWidget):
         gear.clicked.connect(self.open_config)
         close.clicked.connect(self.close)
         right_lay.addWidget(close)
+        # Show text / Show image: on the left, after Collapse (the panel's)
+        self.view_button = tr_text(QPushButton(), N_("Show text"))
+        tr_tip(self.view_button, N_("Switch between the snip's image and the text read from it"))
+        self.view_button.clicked.connect(self.toggle_view)
         self.collapse_buttons = []
         if panel:
             collapse_left = QPushButton()
@@ -762,7 +828,6 @@ class NarrationWindow(QWidget):
             collapse_left.setStyleSheet("min-width: 0px; padding: 11px 12px;")
             collapse_left.clicked.connect(lambda: self.collapse(collapse_left))
             left_lay.addWidget(collapse_left)
-            left_lay.addStretch(1)
             collapse = tr_text(QPushButton(), N_("Collapse"), " ")
             collapse.setIcon(breeze("expand"))
             collapse.setIconSize(QSize(30, 30))
@@ -771,13 +836,15 @@ class NarrationWindow(QWidget):
             right_lay.addWidget(collapse)
             self.collapse_buttons = [collapse_left, collapse]
         self.collapse_button = self.collapse_buttons[-1] if panel else None    # the one last used
+        left_lay.addWidget(self.view_button)
+        left_lay.addStretch(1)
         row2.addWidget(left)
         row2.addStretch(1)
         for b in (gear, snip, self.copy_image_button, copy, paste):
             row2.addWidget(b)
         row2.addStretch(1)
         row2.addWidget(right)
-        for b in (gear, snip, self.copy_image_button, copy, paste, close) + ((collapse,) if panel else ()):
+        for b in (gear, snip, self.copy_image_button, copy, paste, close, self.view_button) + ((collapse,) if panel else ()):
             b.setStyleSheet("padding: 12px 14px; font-size: 20px;")        # (a narrower row)
         self.row1, self.row2, self.left_end, self.right_end = row, row2, left, right
         self.ensurePolished()
@@ -799,6 +866,7 @@ class NarrationWindow(QWidget):
         self.config = None                        # the ⚙ settings view (built when opened)
         self.outer = outer
         self.show_speed()
+        self.show_volume()
         self.load(image, text)
 
     def load(self, image, text):
@@ -816,7 +884,7 @@ class NarrationWindow(QWidget):
         icon_button(self.pause_button, "media-playback-pause", N_("Pause"))
         self.pause_button.setEnabled(True)
         self.enable_skips(False)
-        self.narrator = Narrator(text, self.speed)
+        self.narrator = Narrator(text, self.speed, self.volume)
         self.narrator.progress.connect(self.show_progress)
         self.narrator.finished.connect(self.done)
         self.narrator.failed.connect(lambda why, i: self.show_stopped(why, part=i + 1))
@@ -902,8 +970,12 @@ class NarrationWindow(QWidget):
             self.config.setFixedWidth(w)
             self.setFixedSize(w, self.config.sizeHint().height())
         else:
-            # (styled sizes are known once shown: the left end as wide as the right centres the middle)
-            self.left_end.setMinimumWidth(self.right_end.sizeHint().width())
+            # (styled sizes are known once shown: both ends as wide as the wider centres the middle)
+            for end in (self.left_end, self.right_end):
+                end.setMinimumWidth(0)
+            ends = max(self.left_end.sizeHint().width(), self.right_end.sizeHint().width())
+            for end in (self.left_end, self.right_end):
+                end.setMinimumWidth(ends)
             w = max(780, min(900, self.pic_width + 36),
                     *(r.sizeHint().width() + 36 for r in (self.row1, self.row2)))
             self.full.setFixedWidth(w)
@@ -963,6 +1035,17 @@ class NarrationWindow(QWidget):
         self.speed_label.setText(f"{self.speed:g}×")
         self.slower.setEnabled(self.speed > SPEEDS[0])
         self.faster.setEnabled(self.speed < SPEEDS[-1])
+
+    def show_volume(self):
+        self.quieter.setEnabled(self.volume > VOLUMES[0])
+        self.louder.setEnabled(self.volume < VOLUMES[-1])
+
+    def step_volume(self, d):
+        self.volume = VOLUMES[min(max(0, VOLUMES.index(self.volume) + d), len(VOLUMES) - 1)]
+        self.show_volume()
+        save_volume(self.volume)
+        if self.narrator is not None:
+            self.narrator.set_volume(self.volume)
 
     def step(self, d):
         i = min(max(0, SPEEDS.index(self.speed) + d), len(SPEEDS) - 1)

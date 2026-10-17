@@ -19,6 +19,11 @@
   (thumbstick) or turned, and stays where you let go. The panel is only told where that was,
   never where your controllers are. It comes with the VR environment helper.
 
+- **Narration volume:** Screen snip's narration panel has Volume down and Volume up buttons
+  (icons), after Next part. The narration's own volume, from 100% down to 10%, remembered, and a
+  change is heard at once, mid-sentence. **Show text** moved to the bottom row, beside the left
+  Collapse button.
+
 ### Fixed
 - **Screen snip's narration panel and Steam's keyboard (VR), as on Arrow Pad:** pressing the
   panel while you typed took the keyboard away from your window (what you typed next went

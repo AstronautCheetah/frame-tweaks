@@ -63,7 +63,8 @@ class Narration(unittest.TestCase):
         # Piper writes the file it's asked for; pw-play "plays" for a moment. PATH has only these.
         stub_at(stubs / "piper", 'while [ $# -gt 0 ]; do [ "$1" = --output_file ] && out=$2; shift; done\n'
                               f'/bin/cat > "$out"; echo "synth $out" >> {self.log}')
-        stub_at(stubs / "pw-play", f'echo "play $1" >> {self.log}; exec /bin/sleep 0.3')
+        # (pw-play --volume V FILE: the file is the last argument)
+        stub_at(stubs / "pw-play", f'echo "play ${{@: -1}}" >> {self.log}; echo "volume $2" >> {self.log}.volume; exec /bin/sleep 0.3')
         for p in (mock.patch.dict(os.environ, {"PATH": str(stubs)}), mock.patch.object(fs, "PIPER", stubs / "piper"),
                   mock.patch.object(tempfile, "tempdir", str(self.tmp))):        # (its sound files go here)
             p.start()
@@ -90,7 +91,7 @@ class Narration(unittest.TestCase):
     def slow_player(self):
         """A pw-play that plays until it's stopped (so the narration stays on its part), and logs its
         process id (exec: the sleep's)."""
-        stub_at(self.tmp / "stubs/pw-play", f'echo "play $1 $$" >> {self.log}; exec /bin/sleep 60')
+        stub_at(self.tmp / "stubs/pw-play", f'echo "play ${{@: -1}} $$" >> {self.log}; exec /bin/sleep 60')
 
     def playing(self):
         """[(part, process id)] for each pw-play started, in order (slow_player)."""
@@ -194,6 +195,37 @@ class Narration(unittest.TestCase):
                         self.log.read_text())
         self.assertFalse(w.narrator.paused)
         self.assertEqual(w.state.text(), "Reading aloud: part 1 of 3")
+
+    def test_volume_down_and_up(self):
+        """Its own volume, in tenths, remembered: the next parts start at it, and the part
+        playing changes at once (pactl, by the stream's name: the part's file)."""
+        stubs = self.tmp / "stubs"
+        stub_at(stubs / "pactl", 'echo "pactl $*" >> ' + f"{self.log}.pactl" + '\n'
+                                  'if [ "$1" = -f ]; then printf \'[{"index": 7, "properties": {"media.name": "%s"}}]\' '
+                                  '"$(/bin/cat ' + f"{self.tmp}/now" + ')"; fi')
+        self.slow_player()
+        stub_at(stubs / "pw-play", f'echo "play ${{@: -1}} $$" >> {self.log}; echo "volume $2" >> {self.log}.volume; '
+                                   f'echo -n "${{@: -1}}" > {self.tmp}/now; exec /bin/sleep 60')
+        with mock.patch.object(fs, "PACTL", str(stubs / "pactl")):
+            w = self.window(THREE)
+            self.assertEqual(w.volume, 1.0)
+            self.assertFalse(w.louder.isEnabled())                        # (100%: as loud as it goes)
+            self.assertTrue(self.wait(lambda: self.playing()))
+            w.step_volume(-1)
+            w.step_volume(-1)
+            self.assertEqual(w.volume, 0.8)
+            self.assertTrue(w.louder.isEnabled())
+            self.assertTrue(self.wait(lambda: "set-sink-input-volume 7 0.80" in (self.tmp / "log.pactl").read_text()
+                                      if (self.tmp / "log.pactl").exists() else False), self.log.read_text())
+            self.assertEqual(fs.load_volume(), 0.8)                       # (remembered)
+            w.narrator.skip(1)                                            # the next part starts at it
+            self.assertTrue(self.wait(lambda: len(self.playing()) == 2))
+        self.assertEqual(Path(f"{self.log}.volume").read_text().split("\n")[:2], ["volume 1.00", "volume 0.80"])
+        for _ in range(12):
+            w.step_volume(-1)
+        self.assertEqual(w.volume, 0.1)
+        self.assertFalse(w.quieter.isEnabled())
+        fs.save_volume(1.0)
 
     def test_pause_as_the_last_part_ends_still_finishes(self):
         """Pause pressed after the last part's player ended, before Qt says so: it stayed
