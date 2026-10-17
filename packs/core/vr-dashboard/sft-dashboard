@@ -363,7 +363,7 @@ def watch():
                     results.append(f"{n}: {ws_eval(url, p.read_text(errors='replace'))}")
                     injected.add(n)
                 result = "; ".join(results) or "no patches installed"
-        except OSError as e:
+        except Exception as e:           # (OSError, and a reply cut short as SteamVR starts or stops)
             result = f"waiting for SteamVR's DevTools port ({e.__class__.__name__})"
         if result != last:
             print(result, flush=True)
