@@ -493,8 +493,9 @@ Help is welcome, and much of it doesn't need a Frame:
 
 - **Reports from your Frame**, especially on SteamOS and SteamVR versions not listed under
   [Tested on](#tested-on): what works, what doesn't (**🐞 Report a problem**).
-- **Translations:** [locale/README.md](locale/README.md). Latin American Spanish is the first;
-  others are welcome.
+- **Translations:** [locale/README.md](locale/README.md). Frame Tweaks speaks Latin American
+  Spanish, French and Flemish Dutch so far (the French and Flemish not yet checked by a native
+  speaker); others, and reviews, are welcome.
 - **Fixes and new tweaks.** A tweak is a folder with a README (whose front matter is its
   manifest), `install.sh`, `status.sh` and `uninstall.sh`. The installer, the tweaks' scripts
   and the installer window can all be checked on an ordinary Linux PC with one command

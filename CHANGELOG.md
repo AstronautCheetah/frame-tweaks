@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **French and Flemish Dutch:** Frame Tweaks now speaks French and Flemish Dutch (Dutch from the
+  Netherlands uses the Flemish), alongside Latin American Spanish: choose them in ⚙ Preferences,
+  or they follow your keyboard. A native speaker hasn't checked them yet; corrections are
+  welcome (locale/README.md).
+
 ## 0.6.15 (2026-10-17)
 
 ### Added

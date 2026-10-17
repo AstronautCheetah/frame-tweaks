@@ -1,0 +1,29 @@
+# Official fr wording of what Frame Tweaks names in other software, from their own
+# translations (dev/i18n-terms.py; don't edit by hand). Columns: English, official,
+# source, other wordings seen, how many of our texts use it.
+English	official	source	alternatives	used
+1 hour	1 heure	Steam		1
+Apply changes	Appliquer les modifications	Claude Desktop		1
+Caps Lock	Verr. Maj	Claude Desktop	Verr Maj (Claude Desktop); Verr Maj (Qt); Verr. Maj. (KDE)	1
+Change Password	Modifier le mot de passe	Steam		1
+Copied to clipboard	Copié dans le presse-papiers	Claude Desktop		1
+Copy image	Copier l'image	Claude Desktop		1
+English (UK)	Anglais (Royaume-Uni)	KDE		1
+English (US)	Anglais (US)	KDE		1
+Float in World	Faire flotter les vues	SteamVR		4
+Link copied	Lien copié	Steam		1
+Made by	Créé par	Claude Desktop	Développé par (Claude Desktop)	1
+Not now	Pas maintenant	Android	Plus tard (Android)	1
+Pair device with pairing code	Associer l'appareil avec un code d'association	Android		1
+Remove them	Les supprimer	Claude Desktop		1
+Reset to defaults	Rétablir les valeurs par défaut	Claude Desktop	Réinitialiser les paramètres par défaut (Claude Desktop)	1
+Restart SteamVR	Redémarrer SteamVR	SteamVR		4
+Right Ctrl	Ctrl droite	KDE		1
+Show text	Afficher le texte	KDE		1
+Steam Deck	Steam Deck	Steam		1
+Steam Frame	Steam Frame	Steam		6
+Stop charging at	Arrêter la charge à	KDE		1
+System Settings	Paramètres du système	Steam	Configuration du système (KDE)	5
+Text copied	Texte copié	Claude Desktop		1
+Toggle Curvature	Activer/désactiver la courbure	SteamVR		3
+up to date	à jour	KDE		1

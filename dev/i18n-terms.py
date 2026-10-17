@@ -119,7 +119,8 @@ def android_strings(folder):
 
 def android(lang):
     base, _sep, region = lang.partition("_")
-    folder = {"es_419": "values-es-rUS", "zh_CN": "values-zh-rCN", "zh_TW": "values-zh-rTW", "nb": "values-nb"}.get(
+    folder = {"es_419": "values-es-rUS", "zh_CN": "values-zh-rCN", "zh_TW": "values-zh-rTW", "nb": "values-nb",
+              "nl_BE": "values-nl"}.get(          # (no Belgian Dutch of its own: Dutch)
         lang, f"values-{base}-r{region}" if region else f"values-{base}")
     a, b = android_strings("values"), android_strings(folder)
     yield from ((a[k], b[k]) for k in a if k in b)

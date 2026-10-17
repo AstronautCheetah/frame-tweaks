@@ -1,0 +1,22 @@
+# Official nl_BE wording of what Frame Tweaks names in other software, from their own
+# translations (dev/i18n-terms.py; don't edit by hand). Columns: English, official,
+# source, other wordings seen, how many of our texts use it.
+English	official	source	alternatives	used
+1 hour	1 uur	Steam		1
+15 minutes	15 minuten	KDE		1
+30 minutes	30 minuten	KDE		1
+Caps Lock	CapsLock	KDE		1
+Change Password	Wachtwoord wijzigen	Steam		1
+Copied to clipboard	Gekopieerd naar klembord	KDE		1
+English (UK)	Engels (GB)	KDE		1
+English (US)	Engels (VS)	KDE		1
+Float in World	In wereld zweven	SteamVR		4
+Link copied	Link gekopieerd	Steam		1
+Not now	Niet nu	Android		1
+Pair device with pairing code	Apparaat koppelen met koppelingscode	Android		1
+Restart SteamVR	SteamVR herstarten	SteamVR		4
+Right Ctrl	Rechter Ctrl-toets	KDE		1
+Show text	Tekst tonen	KDE		1
+Stop charging at	Laden stoppen bij	KDE		1
+System Settings	Systeeminstellingen	Steam		5
+Toggle Curvature	Kromming in-/uitschakelen	SteamVR		3
