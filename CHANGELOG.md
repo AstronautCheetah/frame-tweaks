@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.13 (2026-10-17)
 
 ### Changed
 - **Quitting an app doesn't lock the wallet:** when the last app using KDE's wallet service
