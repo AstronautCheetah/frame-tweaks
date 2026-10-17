@@ -71,6 +71,9 @@ Shortcuts*, and, if you like, that key to a controller button in Steam Input. St
 A sentence that ends in `.`, `?` or `!` gets a space after it, so the next dictation carries
 on naturally. The **▶ Dictate** button in the Frame Tweaks window does the same as the shortcut.
 
+Before typing, Dictation lets go of any Ctrl, Alt, Super or Shift still held down on the virtual
+keyboard (latched or locked on Arrow Pad, say), so the text doesn't turn into shortcuts.
+
 On Arrow Pad, the 🎤 key turns red while recording and yellow while transcribing.
 `dictate --status` prints the same thing in a terminal: `idle`, `recording` or `transcribing`.
 

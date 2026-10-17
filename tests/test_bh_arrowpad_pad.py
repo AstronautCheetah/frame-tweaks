@@ -170,6 +170,35 @@ class LatchedModifiers(PadTest):
         self.assertEqual(self.pad.mod_state["Ctrl"], "off")
         self.assertEqual(self.pad.mod_state["Alt"], "off")
 
+    def test_dictation_started_elsewhere_lets_them_go(self):
+        """Dictation lets go of the modifiers on ydotoold's keyboard before it types, however it
+        was started (its shortcut, the menu): the pad's go off with it, as it starts and as it ends
+        (one latched meanwhile), so the pad doesn't show a Ctrl that isn't down. Alt and Super go
+        up around F24 (alone, that'd be a tap: the launcher); one a laser holds stays."""
+        state = ["idle"]
+        self.pad.dictation_state = lambda: state[0]
+
+        def dictation(now):
+            self.keys.sent.clear()
+            state[0] = now
+            self.pad.refresh_mic()
+            return self.keys.sent
+
+        self.tap("Ctrl", layer="tools")                      # latched
+        self.tap("Super")
+        self.tap("Super")                                    # locked
+        self.assertEqual(dictation("recording"), [(194, True), (29, False), (125, False), (194, False)])
+        self.assertEqual(self.pad.mod_state, {"Ctrl": "off", "Alt": "off", "Super": "off"})
+        self.tap("Ctrl")
+        self.assertEqual(dictation("transcribing"), [])      # (going on: Ctrl+something meanwhile is yours)
+        self.assertEqual(self.pad.mod_state["Ctrl"], "oneshot")
+        self.assertEqual(dictation("idle"), [(29, False)])    # (it typed: Ctrl was let go)
+        self.assertEqual(self.pad.mod_state["Ctrl"], "off")
+        self.mouse(self.at("Alt")[2], "press")               # a laser holding Alt
+        self.assertEqual(dictation("recording"), [])
+        self.assertEqual(self.pad.mod_state["Alt"], "held")
+        self.mouse(self.at("Alt")[2], "release")
+
     def test_snip_lets_a_latched_modifier_go(self):
         self.tap("Ctrl", layer="tools")
         seen = []

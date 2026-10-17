@@ -2,6 +2,7 @@
 with libxkbcommon as KWin does (Arrow Pad's shortcuts and Dictation's typing on non-US layouts).
 The layouts are XKB's own (xkeyboard-config); skipped where libxkbcommon or they are missing."""
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -139,6 +140,72 @@ class Command(unittest.TestCase):
         self.assertEqual(self.run_xkb("[Layout]\nLayoutList=fr\n", "aQ"), (0, "16:1 16:0 42:1 30:1 30:0 42:0"))
         self.assertEqual(self.run_xkb("[Layout]\nLayoutList=us\nVariantList=intl\n", "'")[0], 0)   # (' is a dead key)
         self.assertEqual(self.run_xkb("[Layout]\nLayoutList=fr\n", "a漢"), (2, "漢"))
+
+
+def bits(*codes):
+    """A key bitmap (EVIOCGKEY's) with these keys down."""
+    b = bytearray((xkb.KEY_MAX + 8) // 8)
+    for code in codes:
+        b[code // 8] |= 1 << (code % 8)
+    return b
+
+
+class LetGo(unittest.TestCase):
+    """xkb.py let-go, as Dictation runs it before typing: Arrow Pad's latched Ctrl, down on the
+    same ydotoold keyboard, turned dictated text into shortcuts (Ctrl+W closes the tab). The
+    modifiers down there go up, and only those (both Shifts tapped is a search in some programs);
+    Alt and Super around F24, so their release isn't a tap (a menu bar, the launcher); never Right
+    Ctrl. Where it can't tell which are down, all of them (a release of a key that's up goes
+    nowhere)."""
+    EVERY = "42:0 54:0 29:0 194:1 56:0 100:0 125:0 126:0 194:0"
+
+    def sysfs(self, devices):
+        """A /sys/class/input with these {event: name} devices."""
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        for event, name in devices.items():
+            (Path(tmp.name) / event / "device").mkdir(parents=True)
+            (Path(tmp.name) / event / "device/name").write_text(name + "\n")
+        return tmp.name
+
+    def test_only_the_modifiers_down(self):
+        self.assertEqual(xkb.let_go({29, 30}), ["29:0"])
+        self.assertEqual(xkb.let_go({42, 29, 125}), ["42:0", "29:0", "194:1", "125:0", "194:0"])
+        self.assertEqual(xkb.let_go({56}), ["194:1", "56:0", "194:0"])
+        self.assertEqual(xkb.let_go(set()), [])
+        self.assertEqual(xkb.let_go({97}), [])                  # (Right Ctrl: desktop mode's input grab)
+        self.assertEqual(xkb.let_go(None), self.EVERY.split())
+
+    def test_the_keys_down_on_ydotoolds_keyboard(self):
+        root = self.sysfs({"event0": "Keyboard Craft Keyboard", "event4": "ydotoold virtual device"})
+        opened = []
+
+        def read(event):
+            opened.append(event)
+            return {"event0": bits(42), "event4": bits(29, 30)}[event]
+
+        def denied(event):
+            raise PermissionError(13, "Permission denied")
+
+        with mock.patch.dict(os.environ, FRAME_TWEAKS_INPUT=root):
+            self.assertEqual(xkb.keys_down(read), {29, 30})
+            self.assertEqual(opened, ["event4"])               # (a keyboard of yours isn't read)
+            self.assertIsNone(xkb.keys_down(denied))           # (not in the input group)
+        with mock.patch.dict(os.environ, FRAME_TWEAKS_INPUT=self.sysfs({"event0": "Keyboard Craft Keyboard"})):
+            self.assertIsNone(xkb.keys_down(read))             # (ydotoold isn't running)
+
+    def test_command(self):
+        with tempfile.TemporaryDirectory() as home:
+            r = subprocess.run([sys.executable, str(ROOT / "lib/xkb.py"), "let-go"],
+                               env=sandbox_env(home), capture_output=True, text=True, timeout=60)
+        self.assertEqual((r.returncode, r.stdout.strip()), (0, self.EVERY))
+
+    def test_the_keys_unstick_clears(self):
+        """The same modifiers as lib/common.sh's clear_stuck_modifiers (Arrow Pad's Unstick)."""
+        clear = re.search(r'^CLEAR_MODIFIERS="(.*)"$', (ROOT / "lib/common.sh").read_text(), re.M).group(1)
+        codes = {int(e.split(":")[0]) for e in clear.split()} - {xkb.F24}
+        self.assertLessEqual(codes, set(xkb.PLAIN_MODIFIERS + xkb.TAP_MODIFIERS))
+        self.assertNotIn(xkb.RIGHT_CTRL, xkb.PLAIN_MODIFIERS + xkb.TAP_MODIFIERS)
 
 
 if __name__ == "__main__":

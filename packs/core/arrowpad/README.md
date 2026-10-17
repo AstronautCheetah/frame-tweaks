@@ -80,7 +80,8 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   tap it again to go back.
 - **Ctrl, Alt, Super:** tap once and it applies to the next key only. Double-tap to lock it
   (it gets an outline) until you tap it again. A modifier that's on also applies to mouse
-  clicks (Ctrl+click, Alt+click). Super shows the Steam Frame logo.
+  clicks (Ctrl+click, Alt+click). Super shows the Steam Frame logo. Dictation turns them off
+  when it starts and when it types, so its text doesn't become shortcuts.
 - **Two hands (VR):** hold Ctrl, Alt or Super with one controller's laser and press a key with
   the other. The modifier applies to that key and lets go when you release it.
 - **Hold to repeat:** holding a key holds it down, so the app's own key repeat works.

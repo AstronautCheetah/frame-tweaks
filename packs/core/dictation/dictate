@@ -59,9 +59,19 @@ alive() { [ -f "$1" ] && kill -0 "$(cat "$1")" 2>/dev/null; }
 # another layout (KDE's, in desktop mode) the keys for each character come from that layout
 # (xkb.py, beside i18n.sh); text with a character the layout has no key for isn't typed at all
 # (it's in the clipboard). Fails (1) when nothing was typed.
+# A modifier held down on ydotoold's keyboard (Arrow Pad's Ctrl, latched or locked) would turn the
+# text into shortcuts (Ctrl+W closes the tab, Ctrl+Q quits), so those are let go first (xkb.py let-go:
+# only the ones down; Alt and Super around F24, so that's no tap opening a menu).
 type_text() {
-    local out rc=0 keys
-    out=$(python3 "${FRAME_TWEAKS_PYLIB:-$HOME/.local/share/frame-tweaks/i18n}/xkb.py" ydotool "$1" 2>>"$LOG") || rc=$?
+    local out rc=0 keys mods xkb="${FRAME_TWEAKS_PYLIB:-$HOME/.local/share/frame-tweaks/i18n}/xkb.py"
+    out=$(python3 "$xkb" ydotool "$1" 2>>"$LOG") || rc=$?
+    if [ $rc = 0 ] || [ $rc = 3 ]; then
+        read -ra mods <<<"$(python3 "$xkb" let-go 2>>"$LOG")"
+        if [ ${#mods[@]} -gt 0 ]; then
+            log "letting go of modifiers: ${mods[*]}"
+            ydotool key --key-delay 11 "${mods[@]}" 2>>"$LOG"
+        fi
+    fi
     case $rc in
         3) ydotool type --key-delay 2 -- "$1" 2>>"$LOG" || log "typing failed (is ydotoold running?)" ;;
         0) read -ra keys <<<"$out"         # (CODE:1 / CODE:0, a key down / up, with Shift or AltGr around)

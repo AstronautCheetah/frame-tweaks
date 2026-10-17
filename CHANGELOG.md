@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Dictation with Ctrl on:** a Ctrl latched or locked on Arrow Pad (or Alt or Super) was still
+  down when Dictation typed, so each letter went out as a shortcut: Ctrl+W closed the tab, Ctrl+Q
+  quit the app. 0.6.13 fixed this for Arrow Pad's 🎤 only; Dictation started with its shortcut or
+  from the menu still typed that way. Dictation now lets go of the modifiers held down on the
+  virtual keyboard before it types (only those that are down, so no stray Shift or Alt taps), and
+  Arrow Pad turns its own off when it sees Dictation start or finish, so it doesn't show a Ctrl
+  that isn't on.
+
 ## 0.6.14 (2026-10-17)
 
 ### Changed
