@@ -1228,6 +1228,10 @@ def main(argv):
         sys.exit(1) if not new else print(new)
     elif cmd == "apply-formerly":               # move what's kept under former ids (./install.sh registry does it too)
         print("\n".join(apply_formerly()))
+    elif cmd == "known-ids" and not args:
+        # (every pack's tweaks, in use or not: off, not trusted, changed; ./install.sh uninstall-self
+        # tells those from tweaks no pack has any more)
+        print("\n".join(sorted({t for p in load()["packs"] for t in p["tweaks"]})))
     elif cmd == "registry":                     # for ./install.sh: one line per tweak, \x1f-separated
         try:                                    # (./install.sh runs this as it starts: formerly: applies first)
             apply_formerly()
