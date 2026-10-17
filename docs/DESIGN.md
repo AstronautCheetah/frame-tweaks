@@ -192,7 +192,8 @@ uninstall. Then a tweak can keep what other tweaks left in its care; for example
   there, prints one line and exits 0 or 1. `./install.sh check-system` runs it for every
   installed tweak, and so does every update.
 - **`update-check.sh`** prints the installed and latest upstream versions; the window offers an
-  update when the second is newer.
+  update when the second is newer. A linked project's `version:` does the same against its
+  newest GitHub release (`lib/link.sh update-check`).
 - **`needed.sh`** says whether this Frame needs the tweak: exit 0, or exit 1 with one line
   saying why not (SteamOS now does it itself, say). It checks what the Frame has, a package's
   version or a file, not the SteamOS version, which the beta and stable branches number

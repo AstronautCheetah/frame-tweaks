@@ -508,6 +508,9 @@ class Packs(unittest.TestCase):
                           ("link:\n  install: x\n  installed: ~/p/*/bin\n", "not a pattern"),
                           ("link:\n  install: x\n  installed: ~/p\n  readme: http://x\n", "https://"),
                           ("link:\n  install: x\n  installed: ~/p\n  restart: plasma\n", "link.restart can only be steamvr"),
+                          ("link:\n  install: x\n  installed: ~/p\n  version: cat ~/p/VERSION\n", "looked up on GitHub"),
+                          ("link:\n  install: x\n  installed: ~/p\n  version: [a]\n  readme: https://github.com/a/b\n",
+                           "link.version must be one command line"),
                           ("link: x\n", "link must be a mapping")):
             (d / "README.md").write_text(TWEAK.format(id="linked", title="Mine", category="Mods", extra=bad))
             sft.set_trusted(self.user / "mine", True)

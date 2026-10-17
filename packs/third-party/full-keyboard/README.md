@@ -27,6 +27,7 @@ link:
   install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/TaiKeid/steam-frame-full-keyboard/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'framekeyboard-.*-aarch64\.tar\.gz' SHA256SUMS) && v=${f#framekeyboard-} && v=${v%-aarch64.tar.gz} && if [ -e ~/.local/share/framekeyboard/releases/$v ]; then echo "Full Keyboard $v, its newest release, is already installed"; else curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && bash "${f%.tar.gz}/install.sh"; fi
   uninstall: rm -f ~/.local/bin/framekeyboard ~/.local/share/applications/framekeyboard.desktop && rm -rf ~/.local/share/framekeyboard
   installed: ~/.local/share/framekeyboard/current
+  version: basename "$(readlink ~/.local/share/framekeyboard/current)"
   run: gtk-launch framekeyboard
   readme: https://github.com/TaiKeid/steam-frame-full-keyboard#readme
 changes: >-

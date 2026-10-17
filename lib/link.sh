@@ -4,7 +4,7 @@
 # project's own install and uninstall commands, as its README gives them, in the terminal it
 # opens for installs (they may ask questions); nothing of the project is pinned, checked, copied
 # or patched here, so the project's own channel is what's trusted.
-#   lib/link.sh install|uninstall|status|run ID
+#   lib/link.sh install|uninstall|status|run|update-check ID
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 action=${1:?} id=${2:?}
 field() { python3 "$REPO_DIR/lib/sft.py" link "$id" "$1"; }
@@ -55,5 +55,17 @@ case $action in
         cmd=$(field run)
         [ -n "$cmd" ] || die "$(t '%s has nothing to run' "$name")"
         exec bash -c "$cmd" ;;
-    *) die "lib/link.sh install|uninstall|status|run ID" ;;
+    update-check)
+        # "<installed> <newest>" for the window's update hint (↻ then installs it): what its version:
+        # command prints, and its GitHub project's newest release, from where the "latest release"
+        # link leads (no API: no rate limit). Nothing when either is missing, or the installed
+        # one isn't a version ("unknown": built without its tags).
+        cmd=$(field version) repo=$(field github)
+        [ -n "$cmd" ] && [ -n "$repo" ] || exit 1
+        cur=$(PATH=$LINK_PATH bash -c "$cmd" 2>/dev/null | head -1) cur=${cur#v}
+        case $cur in [0-9]*) ;; *) exit 1 ;; esac
+        latest=$(curl -fsI --max-time 8 "https://github.com/$repo/releases/latest" |
+                 sed -n 's|^[Ll]ocation: .*/releases/tag/v\{0,1\}\([^[:space:]]*\).*|\1|p' | head -1)
+        [ -n "$latest" ] && echo "$cur $latest" ;;
+    *) die "lib/link.sh install|uninstall|status|run|update-check ID" ;;
 esac
