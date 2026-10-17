@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
 
 class FromTheBugHunt(unittest.TestCase):
-    """The 2026-10-17 bug hunt: every thread pinned, a failed sensor read, a part that ends
+    """The second 2026-10-16 bug hunt: every thread pinned, a failed sensor read, a part that ends
     without its results, and Ctrl+C."""
     def test_every_thread_is_pinned(self):
         """sched_setaffinity(pid) sets one thread: a Qt test's other threads stayed on every core."""
