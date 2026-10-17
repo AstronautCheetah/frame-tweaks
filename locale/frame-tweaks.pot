@@ -445,6 +445,10 @@ msgid "This Frame doesn't need it: %s"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "Tick every tweak in this category"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Tick it and Apply first"
 msgstr ""
 
@@ -463,6 +467,11 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Unhide category"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Untick every tweak in this category (installed ones are removed when you apply the changes)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py gui/packs_page.py

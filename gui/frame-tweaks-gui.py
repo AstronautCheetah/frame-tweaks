@@ -22,11 +22,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6 import sip
-from PyQt6.QtCore import QEvent, QObject, QPoint, QProcess, Qt, QTimer, QUrl
+from PyQt6.QtCore import QEvent, QObject, QPoint, QProcess, QRect, QSize, Qt, QTimer, QUrl
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
-from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontInfo, QFontMetrics, QIcon, QImage
+from PyQt6.QtGui import QCursor, QDesktopServices, QFont, QFontInfo, QFontMetrics, QIcon, QImage, QPainter, QPixmap
 from PyQt6.QtWidgets import (QAbstractButton, QAbstractSlider, QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel,
-                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser,
+                             QPushButton, QScrollArea, QStackedWidget, QStyle, QStyleOptionButton, QTextBrowser,
                              QVBoxLayout, QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -72,6 +72,7 @@ QWidget#cathead QPushButton#cattoggle { background: transparent; border: none; t
                   font-size: 13px; font-weight: 700; color: #7fb2e5; letter-spacing: 1px; padding: 10px 4px 2px 4px; }
 QWidget#cathead QPushButton#cattoggle:hover { color: #a9cdf0; }
 QWidget#cathead QPushButton#cathide { padding: 3px 10px; font-size: 12px; margin-top: 8px; }
+QWidget#cathead QPushButton#cattick { padding: 3px; margin-top: 8px; }
 QLabel#category { font-size: 13px; font-weight: 700; color: #7fb2e5; letter-spacing: 1px;
                   padding: 10px 4px 2px 4px; }
 QLabel#name { font-size: 15px; font-weight: 600; }
@@ -584,12 +585,35 @@ def status_text(code_text):
             {0: "ok", 2: "warn", RESTART: "warn", UNLOAD: "warn"}.get(code, "missing"))
 
 
+def box_icon(ticked, window, size=22):
+    """A row's checkbox as a picture, ticked or not, drawn as the window draws its boxes (a box of
+    its own, so with its style sheet): the category's Tick all and Untick all buttons."""
+    ratio = QApplication.instance().devicePixelRatio() if QApplication.instance() else 1.0
+    pm = QPixmap(round(size * max(ratio, 2.0)), round(size * max(ratio, 2.0)))   # (sharp when scaled up in VR)
+    pm.setDevicePixelRatio(max(ratio, 2.0))
+    pm.fill(Qt.GlobalColor.transparent)
+    box = QCheckBox(window)
+    box.hide()
+    box.ensurePolished()
+    opt = QStyleOptionButton()
+    opt.initFrom(box)
+    opt.rect = QRect(0, 0, size, size)
+    opt.state |= QStyle.StateFlag.State_Enabled | (QStyle.StateFlag.State_On if ticked else QStyle.StateFlag.State_Off)
+    painter = QPainter(pm)
+    box.style().drawPrimitive(QStyle.PrimitiveElement.PE_IndicatorCheckBox, opt, painter, box)
+    painter.end()
+    box.deleteLater()
+    return QIcon(pm)
+
+
 class CategoryHeader(QWidget):
-    """▾/▸ CATEGORY (n): click to collapse or expand (remembered); Hide/Unhide on the right."""
+    """▾/▸ CATEGORY (n) ☑ ☐: click it (or the empty part of the header) to collapse or expand
+    (remembered); its two boxes tick or untick every tweak in it; Hide/Unhide on the right."""
 
     def __init__(self, window, category, count, collapsed, hidden, key=None):
         super().__init__()
         key = key or category                           # (the English name: what's remembered)
+        self.toggle_collapsed = lambda: window.toggle_collapsed(key)
         self.setObjectName("cathead")
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 4, 0)
@@ -599,14 +623,32 @@ class CategoryHeader(QWidget):
         toggle.setObjectName("cattoggle")
         toggle.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         toggle.setToolTip(_("Expand") if collapsed else _("Collapse"))
-        toggle.clicked.connect(lambda: window.toggle_collapsed(key))
-        lay.addWidget(toggle, 1)
+        toggle.clicked.connect(self.toggle_collapsed)
+        lay.addWidget(toggle)
+        for ticked, tip in ((True, _("Tick every tweak in this category")),
+                            (False, _("Untick every tweak in this category (installed ones are removed when you "
+                                      "apply the changes)"))):
+            b = QPushButton()
+            b.setObjectName("cattick")
+            b.setIcon(box_icon(ticked, window))
+            b.setIconSize(QSize(22, 22))
+            b.setToolTip(tip)
+            b.setAccessibleName(tip)
+            b.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            b.clicked.connect(lambda _c=False, on=ticked: window.tick_category(key, on))
+            lay.addWidget(b)
+        lay.addStretch(1)
         hide = QPushButton(_("Unhide category") if hidden else _("Hide category"))
         hide.setObjectName("cathide")
         hide.setToolTip(_("Show this category again") if hidden else
                         _("Hide the whole category from the list (doesn't remove anything)"))
         hide.clicked.connect(lambda: window.toggle_category_hidden(key))
         lay.addWidget(hide)
+
+    def mouseReleaseEvent(self, ev):
+        """The empty part of the header folds it too, as the whole header did."""
+        if ev.button() == Qt.MouseButton.LeftButton:
+            self.toggle_collapsed()
 
 
 class Row(QWidget):
@@ -1194,6 +1236,26 @@ class Window(QWidget):
         collapsed ^= {category}
         write_set(COLLAPSED, collapsed)
         self.rebuild()
+
+    def tick_category(self, category, on):
+        """Tick (on) or untick every tweak in a category (its English name) that the list shows:
+        not the hidden ones (unless shown), and when ticking, not those this Frame doesn't need.
+        As if each box were clicked: nothing is installed or removed until Apply changes. (A
+        folded category has no boxes: what's wanted is set all the same.)"""
+        hidden, showing = self.hidden(), self.show_hidden.isChecked()
+        not_needed = sft.not_needed(self.rows) if on else {}
+        for c in self.rows:
+            cid = c["id"]
+            if c["category_en"] != category or (cid in hidden and not showing):
+                continue
+            if cid in not_needed and not sft.installed_record(cid):
+                continue
+            box = self.boxes.get(cid)
+            if box is not None:
+                box.setChecked(on)                      # (its toggled sets wanted)
+            else:
+                self.wanted[cid] = on
+        self.update_apply()
 
     def toggle_category_hidden(self, category):
         sft.set_category_hidden(category, category not in sft.read_categories(HIDDEN_CATS, self.rows))

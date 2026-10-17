@@ -8,6 +8,9 @@
   installs it, then restart SteamVR. It used to look up to date until you pressed ↻. Any linked
   project can do the same with one line in its manifest, `version:` (docs/mods.md, Linking a
   project), and needs no change when it publishes its next release.
+- **Tick or untick a whole category:** two boxes beside each category's name in the installer
+  window tick or untick every tweak in it (the ones it shows), as clicking each would; nothing is
+  installed or removed until Apply changes.
 
 ### Fixed
 - **Screen snip's narration panel and Steam's keyboard (VR), as on Arrow Pad:** pressing the
