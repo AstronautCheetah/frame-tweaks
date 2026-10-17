@@ -5,6 +5,7 @@ choices are kept in ~/.config/frame-tweaks/installer/window.json; the language i
 the uninstall choice in ~/.config/frame-tweaks/uninstall-settings; the look of installs in a
 terminal in ~/.config/frame-tweaks/splash (lib/splash.py)."""
 
+import html
 import os
 import shlex
 
@@ -17,6 +18,7 @@ import ftconf
 from i18n import _, N_, ngettext
 import sft
 import splash
+from report_page import translation_form_url
 
 WINDOW = sft.CONF / "window.json"
 # key: (default, label, explanation)
@@ -39,9 +41,10 @@ def set_window_pref(key, value):
 
 
 class Preferences(QWidget):
-    def __init__(self, window):
+    def __init__(self, window, follow_link=None):
         super().__init__()
         self.window = window
+        self.follow = follow_link            # (opens a web link where a browser runs: the window's)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()
@@ -84,6 +87,7 @@ class Preferences(QWidget):
             grid.addWidget(b)
         grid.addStretch(1)
         rows.addLayout(grid)
+        rows.addWidget(self.translations_note(names))
 
         rows.addWidget(self.heading(_("This window")))
         prefs = window_prefs()
@@ -195,6 +199,34 @@ class Preferences(QWidget):
         self.leaving = self.ask_box(rows, _("Uninstall"), lambda: self.uninstall_self(), danger=True)
 
         rows.addStretch(1)
+
+    def translations_note(self, names):
+        """How the translations are made, how many of this language's wait for a person's check, and
+        two ways to help: the Help make Frame Tweaks better page, and the translation check form."""
+        lang = i18n.CATALOGUE.language
+        text = html.escape(_("Translations are made by machine first, checked against SteamVR's, Steam's and KDE's "
+                             "own wording, then confirmed by people who speak the language."), quote=False)
+        counts = i18n.unconfirmed()
+        if counts and counts[0]:
+            text += " " + html.escape(_("{language}: {n} of {total} texts not yet confirmed.").format(
+                language=names.get(lang, lang), n=counts[0], total=counts[1]), quote=False)
+        link = "<a style='color:#7fb2e5' href='{0}'>{1}</a>"             # (the window's link colour)
+        text += ("<br>" + link.format("contribute", html.escape(_("Help make Frame Tweaks better"), quote=False)) +
+                 " · " + link.format("check", html.escape(_("Check a translation (right or wrong)"), quote=False)))
+        label = QLabel(text)
+        label.setObjectName("desc")
+        label.setWordWrap(True)
+        label.setTextFormat(Qt.TextFormat.RichText)
+        label.setOpenExternalLinks(False)
+        label.linkActivated.connect(lambda link, lang=lang: self.translation_link(link, lang, names))
+        return label
+
+    def translation_link(self, link, lang, names):
+        if link == "contribute":
+            self.window.show_contribute()
+        elif self.follow is not None:
+            code = lang or "en"
+            self.follow(translation_form_url(f"{code} ({names.get(code, code)})"))
 
     def about(self, text):
         """An option's explanation, under it (plain text: an apostrophe is an apostrophe)."""

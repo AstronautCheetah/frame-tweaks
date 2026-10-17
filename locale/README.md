@@ -35,6 +35,11 @@ but no person has checked yet: a machine's, or one made without the full context
 --review` lists the marked ones, with their translations, for a reviewer; an import with
 `--reviewed` takes the mark off (or delete the line by hand).
 
+**From people who use it:** the window's ⚙ Preferences says how many of the language's texts
+are still unconfirmed, and links to a [translation check](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_check.yml)
+form (language and version filled in), for "it reads right" as much as for corrections. A
+confirmed language's marks come off with `import --reviewed`; corrections go in as any other.
+
 Translating a lot at once (a new language, or catching up)? [BATCH.md](BATCH.md): export the
 untranslated texts as JSON, translate them, and import them with checks. Each language keeps its
 terms and tone in [glossary/](glossary/) (Spanish: [glossary/es_419.md](glossary/es_419.md)).

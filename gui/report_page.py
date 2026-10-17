@@ -20,6 +20,14 @@ import sft
 BUG_FORM = "https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=bug_report.yml"
 
 
+TRANSLATION_FORM = "https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_check.yml"
+
+
+def translation_form_url(language):
+    """The translation check form, with the language (its code and name) and the version filled in."""
+    return TRANSLATION_FORM + "&" + urllib.parse.urlencode({"language": language, "version": sft.build_version()})
+
+
 def bug_form_url(tweak=""):
     query = {"version": sft.build_version()}
     if tweak:

@@ -33,9 +33,14 @@ star back any time).
 
 ## Translations
 
-- **Review a translation** in a language you speak: wording that reads oddly, a term that isn't
-  what SteamVR or KDE call it, a text that doesn't fit its button. Translations marked as needing
-  review are listed in the [Translations needed](https://github.com/AstronautCheetah/frame-tweaks/issues?q=is%3Aissue+label%3Atranslations)
+- **Check a translation** in a language you speak. The translations are made by machine first,
+  then checked against SteamVR's, Steam's and KDE's own wording; a person confirming them is what's
+  missing. Say it reads right, or what to fix (wording that reads oddly, a term that isn't what
+  SteamVR or KDE call it, a text that doesn't fit its button):
+  [a translation check](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_check.yml),
+  or **Check a translation** in ⚙ Preferences, which fills in your language and version. How
+  many texts each language still has to confirm is in the
+  [Translations needed](https://github.com/AstronautCheetah/frame-tweaks/issues?q=is%3Aissue+label%3Atranslations)
   issue.
 - **Add a language.** The texts go out as files you can translate in any editor or tool, and
   come back checked: [translating Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks/blob/main/locale/README.md).

@@ -1808,7 +1808,7 @@ class Window(QWidget):
 
     def show_prefs(self):
         self.close_details()
-        self.details = Preferences(self)
+        self.details = Preferences(self, follow_link)
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 

@@ -442,6 +442,23 @@ NAMES = {"en": "English", "es_419": "Español (Latinoamérica)", "es": "Español
          "nb": "Norsk bokmål", "cs": "Čeština", "hu": "Magyar", "ro": "Română", "tr": "Türkçe", "el": "Ελληνικά"}
 
 
+def unconfirmed(language=None, folder=None):
+    """(texts not yet checked by a person, texts translated) in a language's file (the one Frame
+    Tweaks speaks now if none given), or None (English, or no file). Translations start out made by
+    machine, marked "# needs review" until someone who speaks the language confirms them
+    (locale/README.md); Preferences says how many."""
+    lang = language or CATALOGUE.language
+    if not lang:
+        return None
+    try:
+        text = (Path(folder or LOCALE) / f"{lang}.po").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    marked = sum(1 for block in re.split(r"\n\s*\n", text)
+                 if not block.lstrip().startswith("#~") and "# needs review" in block.splitlines())
+    return marked, sum(1 for (_ctx, msgid) in parse_po(text) if msgid)
+
+
 def available():
     """[(code, name)]: English and every translation there's a file for."""
     return [("en", NAMES["en"])] + [(f.stem, NAMES.get(f.stem, f.stem)) for f in sorted(LOCALE.glob("*.po"))]

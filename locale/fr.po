@@ -271,7 +271,7 @@ msgid "Help"
 msgstr "Aide"
 
 # needs review
-#: gui/frame-tweaks-gui.py
+#: gui/frame-tweaks-gui.py gui/prefs_page.py
 msgid "Help make Frame Tweaks better"
 msgstr "Aidez à améliorer Frame Tweaks"
 
@@ -1051,6 +1051,10 @@ msgstr "Supprimer aussi les paramètres"
 msgid "Animated"
 msgstr "Animé"
 
+#: gui/prefs_page.py
+msgid "Check a translation (right or wrong)"
+msgstr ""
+
 # needs review
 #: gui/prefs_page.py
 msgid "Couldn't delete: {paths}"
@@ -1270,6 +1274,11 @@ msgstr ""
 msgid "This window"
 msgstr "Cette fenêtre"
 
+#: gui/prefs_page.py
+msgid ""
+"Translations are made by machine first, checked against SteamVR's, Steam's and KDE's own wording, then confirmed by people who speak the language."
+msgstr ""
+
 # needs review
 #: gui/prefs_page.py
 msgid "Uninstall"
@@ -1342,6 +1351,10 @@ msgid ""
 "Your own data is never removed: your dictation history, adb's pairing keys and Claude Code's ~/.claude folder stay either way."
 msgstr ""
 "Vos propres données ne sont jamais supprimées : votre historique de dictée, les clés d'association d'adb et le dossier ~/.claude de Claude Code restent dans tous les cas."
+
+#: gui/prefs_page.py
+msgid "{language}: {n} of {total} texts not yet confirmed."
+msgstr ""
 
 # needs review
 #: gui/report_page.py

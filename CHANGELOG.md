@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+- **Help check the translations:** ⚙ Preferences now says, under Language, that translations
+  are made by machine first and then confirmed by people who speak the language, and how many
+  of your language's texts are still unconfirmed. Two links follow: Help make Frame Tweaks
+  better, and Check a translation, a new GitHub form (your language and version filled in) for
+  saying a translation reads right, or what to fix.
+
 ### Changed
 - **Preferences' "Show me" (installing in a terminal) speaks your language:** the pretend install
   it plays was always in English. It now prints what a real install would, in the language chosen

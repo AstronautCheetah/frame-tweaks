@@ -1,0 +1,61 @@
+name: Translation check
+description: Say whether Frame Tweaks' text in your language reads right (or what's wrong)
+title: "Translation check: "
+labels: [translations]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Frame Tweaks' translations are made by machine first, then checked against
+        SteamVR's, Steam's and KDE's own wording. A person who speaks the language confirming
+        them is what's still missing: "this reads right" helps as much as a correction. The
+        **Check a translation** link in the installer window's ⚙ Preferences fills in your language
+        and version.
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: Its code and name, e.g. "fr (Français)" or "nl_BE (Nederlands (België))".
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Frame Tweaks version
+      description: Filled in from the window; or the first line of `./install.sh version`.
+  - type: dropdown
+    id: verdict
+    attributes:
+      label: How it reads
+      options:
+        - Right as it is (I confirm it)
+        - Mostly right, a few things to fix (below)
+        - Often wrong or hard to understand
+    validations:
+      required: true
+  - type: textarea
+    id: checked
+    attributes:
+      label: What you looked at
+      description: |
+        Which parts: the installer window (which pages), Arrow Pad, Screen snip, Android Mirror,
+        the VR panels, the terminal messages, the menu entries…
+    validations:
+      required: true
+  - type: textarea
+    id: fixes
+    attributes:
+      label: What to change
+      description: |
+        For each: where it is, what it says now, and what it should say (the English too, if
+        you can see it: ⚙ Preferences → English shows it). A screenshot helps.
+      placeholder: |
+        Arrow Pad, the Tools key: "Herram." should be "Herramientas" (the key has room)
+  - type: dropdown
+    id: speaker
+    attributes:
+      label: You and this language
+      options:
+        - Native speaker
+        - Fluent
+        - I speak it some
