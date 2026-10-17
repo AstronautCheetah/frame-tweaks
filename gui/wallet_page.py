@@ -17,6 +17,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout,
                              QWidget)
 
+import i18n  # noqa: E402
 from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
 
 from sft import components  # (the tweaks: which one set up an app; lib/ is on the path)
@@ -52,7 +53,7 @@ def frame_tweaks_entries():
 
 
 def desktop_entry(path):
-    """Keys of a .desktop file's [Desktop Entry] group (unlocalised)."""
+    """Keys of a .desktop file's [Desktop Entry] group (Name[fr] and the like too: i18n.entry_name)."""
     keys, section = {}, None
     try:
         lines = Path(path).read_text(errors="replace").splitlines()
@@ -79,7 +80,7 @@ def protected_apps():
             continue
         e = desktop_entry(f)
         cmd = e.get("Exec", "")
-        apps.append({"id": f.stem, "name": e.get("Name", f.stem), "icon": e.get("Icon", ""),
+        apps.append({"id": f.stem, "name": i18n.entry_name(e, f.stem), "icon": e.get("Icon", ""),
                      "shared": "/.local/bin/frame-outer-bus" in cmd, "gate": "/.local/bin/wallet-gate" in cmd,
                      "electron": "--password-store=kwallet6" in cmd})
     return sorted(apps, key=lambda a: a["name"].lower())
@@ -233,7 +234,7 @@ def wallet_candidates(protected_ids):
                     kind_here = N_("Frame Tweaks app")
                 else:
                     kind_here = kind
-                seen[f.stem] = {"id": f.stem, "name": e.get("Name", f.stem), "icon": e.get("Icon", ""),
+                seen[f.stem] = {"id": f.stem, "name": i18n.entry_name(e, f.stem), "icon": e.get("Icon", ""),
                                 "kind": kind_here, "exec": e.get("Exec", "")}
     return sorted((a for a in seen.values() if a), key=lambda a: a["name"].lower())
 

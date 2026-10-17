@@ -523,6 +523,23 @@ def translations_of(english, folder=None):
     return _every_translation[folder].get(english, set())
 
 
+def entry_name(keys, fallback="", catalogue=None):
+    """The name to show for a menu entry ([Desktop Entry] keys, localised ones included), in the
+    language Frame Tweaks speaks now. One of Frame Tweaks' own: its English (X-Frame-Tweaks-Name)
+    translated, not its plain Name=, which is whatever language the menus were last put in (the
+    Wallet apps page showed Arrow Pad and the rest in French with English chosen). Another app:
+    its Name[language] if it has one, else its Name."""
+    cat = catalogue or CATALOGUE
+    english = keys.get("X-Frame-Tweaks-Name")
+    if english:
+        return cat.gettext(english)
+    if cat.language:
+        for code in dict.fromkeys((cat.language, cat.language.split("_")[0])):
+            if keys.get(f"Name[{code}]"):
+                return keys[f"Name[{code}]"]
+    return keys.get("Name") or fallback
+
+
 def relabel(path, catalogue=None):
     """Put a Frame Tweaks menu entry's plain Name/GenericName/Comment in the current language
     (from its X-Frame-Tweaks-… English). True if the file changed."""

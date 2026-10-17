@@ -7,7 +7,9 @@
   switched back, Arrow Pad, Android Mirror and the other Frame Tweaks entries in Steam's "+" menu
   could stay in that language. An entry installed before a language was added didn't know that
   language's name for itself, took it for one you had typed, and left it. They now recognise
-  every language's name, and a reinstall no longer keeps such a name as one of yours.
+  every language's name, and a reinstall no longer keeps such a name as one of yours. The
+  window's Wallet apps page, which showed those names, now names Frame Tweaks' own apps in the
+  window's language whatever the menus say, and other apps in it too where they have the name.
 
 ## 0.6.16 (2026-10-17)
 
