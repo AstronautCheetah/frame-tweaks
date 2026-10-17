@@ -1348,12 +1348,10 @@ msgstr ""
 msgid "(Trying out the window: no report saved.)"
 msgstr "(Essai de la fenêtre : aucun rapport enregistré.)"
 
-# needs review
 #: gui/report_page.py
 msgid ""
-"1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+"1. Read the report below: it's plain text, and nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
-"1. Lisez le rapport : c'est du texte brut, et rien n'en est envoyé nulle part, sauf si vous le joignez.<br>2. Ouvrez le formulaire de signalement (sur GitHub, où vous vous connectez), décrivez ce qui s'est passé et ce que vous attendiez, puis faites glisser le rapport dans sa case « Diagnostics report »."
 
 # needs review
 #: gui/report_page.py
@@ -1382,10 +1380,13 @@ msgstr "Enregistrement du rapport de diagnostic…"
 msgid "🐞 Open the bug form"
 msgstr "🐞 Ouvrir le formulaire de signalement"
 
-# needs review
 #: gui/report_page.py
-msgid "📄 Open the report"
-msgstr "📄 Ouvrir le rapport"
+msgid "📋 Copied"
+msgstr ""
+
+#: gui/report_page.py
+msgid "📋 Copy the report"
+msgstr ""
 
 # needs review
 #: gui/wallet_page.py
@@ -6914,3 +6915,13 @@ msgstr "Installateur d'ajustements"
 #~ # needs review
 #~ msgid "Stops charging at %s%% (battery %s%%)"
 #~ msgstr "Arrête la charge à %s %% (batterie à %s %%)"
+
+#~ # needs review
+#~ msgid ""
+#~ "1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+#~ msgstr ""
+#~ "1. Lisez le rapport : c'est du texte brut, et rien n'en est envoyé nulle part, sauf si vous le joignez.<br>2. Ouvrez le formulaire de signalement (sur GitHub, où vous vous connectez), décrivez ce qui s'est passé et ce que vous attendiez, puis faites glisser le rapport dans sa case « Diagnostics report »."
+
+#~ # needs review
+#~ msgid "📄 Open the report"
+#~ msgstr "📄 Ouvrir le rapport"

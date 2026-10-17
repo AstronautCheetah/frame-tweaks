@@ -1342,12 +1342,10 @@ msgstr ""
 msgid "(Trying out the window: no report saved.)"
 msgstr "(Het venster wordt uitgeprobeerd: geen rapport opgeslagen.)"
 
-# needs review
 #: gui/report_page.py
 msgid ""
-"1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+"1. Read the report below: it's plain text, and nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
-"1. Lees het rapport: het is platte tekst en er wordt niets van verstuurd, tenzij je het bijvoegt.<br>2. Open het bugformulier (op GitHub; je meldt je daar aan), vertel wat er gebeurde en wat je verwachtte, en sleep het rapport naar het vak Diagnostics report."
 
 # needs review
 #: gui/report_page.py
@@ -1376,10 +1374,13 @@ msgstr "Diagnoserapport opslaan…"
 msgid "🐞 Open the bug form"
 msgstr "🐞 Het bugformulier openen"
 
-# needs review
 #: gui/report_page.py
-msgid "📄 Open the report"
-msgstr "📄 Het rapport openen"
+msgid "📋 Copied"
+msgstr ""
+
+#: gui/report_page.py
+msgid "📋 Copy the report"
+msgstr ""
 
 # needs review
 #: gui/wallet_page.py
@@ -6886,3 +6887,13 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ # needs review
 #~ msgid "Stops charging at %s%% (battery %s%%)"
 #~ msgstr "Stopt met laden bij %s%% (batterij %s%%)"
+
+#~ # needs review
+#~ msgid ""
+#~ "1. Read the report: it's plain text, and nothing in it is sent anywhere unless you attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, and drag the report into its Diagnostics report box."
+#~ msgstr ""
+#~ "1. Lees het rapport: het is platte tekst en er wordt niets van verstuurd, tenzij je het bijvoegt.<br>2. Open het bugformulier (op GitHub; je meldt je daar aan), vertel wat er gebeurde en wat je verwachtte, en sleep het rapport naar het vak Diagnostics report."
+
+#~ # needs review
+#~ msgid "📄 Open the report"
+#~ msgstr "📄 Het rapport openen"

@@ -1,7 +1,10 @@
 """The installer window's 🐞 Report a problem page: it saves the diagnostics report
 (./install.sh debug-info: versions, status, recent logs; user names, paths and addresses
-removed), says where, and opens the bug form with the version filled in, to attach it to.
-Nothing is sent anywhere by itself."""
+removed), shows it right here (with a Copy button), and opens the bug form with the version
+filled in, to paste or attach it to. Nothing is sent anywhere by itself.
+It used to open the report in your text editor: in VR that started Kate, a Flatpak, as a VR
+window, and SteamOS's Holo portal crashes as a KDE Flatpak starts there (five times in a row on
+2026-10-17; KWalletManager did it too). Shown here, no other app starts."""
 import html
 import os
 import subprocess
@@ -9,7 +12,7 @@ import urllib.parse
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from i18n import _
 import sft
@@ -42,25 +45,31 @@ class ReportPage(QWidget):
         self.text.setWordWrap(True)
         self.text.setTextFormat(Qt.TextFormat.RichText)
         lay.addWidget(self.text)
-        steps = QLabel(_("1. Read the report: it's plain text, and nothing in it is sent anywhere unless you "
-                         "attach it.<br>2. Open the bug form (on GitHub; you sign in there), say what happened "
-                         "and what you expected, and drag the report into its Diagnostics report box."))
+        steps = QLabel(_("1. Read the report below: it's plain text, and nothing in it is sent anywhere unless "
+                         "you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what "
+                         "happened and what you expected, then paste the report into its Diagnostics report box "
+                         "(📋 Copy the report), or attach the saved file."))
         steps.setWordWrap(True)
         steps.setTextFormat(Qt.TextFormat.RichText)
         steps.setObjectName("desc")
         lay.addWidget(steps)
         buttons = QHBoxLayout()
-        self.open_report = QPushButton(_("📄 Open the report"))
-        self.open_report.setEnabled(False)
-        self.open_report.clicked.connect(lambda: self.path and self.follow(Path(self.path).as_uri()))
-        buttons.addWidget(self.open_report)
+        self.copy = QPushButton(_("📋 Copy the report"))
+        self.copy.setEnabled(False)
+        self.copy.clicked.connect(self.copy_report)
+        buttons.addWidget(self.copy)
         form = QPushButton(_("🐞 Open the bug form"))
         form.setObjectName("apply")
         form.clicked.connect(lambda: self.follow(bug_form_url()))
         buttons.addWidget(form)
         buttons.addStretch(1)
         lay.addLayout(buttons)
-        lay.addStretch(1)
+        # The report itself, read-only (in its columns: a fixed-width font)
+        self.view = QPlainTextEdit()
+        self.view.setReadOnly(True)
+        self.view.setStyleSheet("font-family: monospace;")
+        self.view.hide()
+        lay.addWidget(self.view, 1)
         self.text.setText(_("Saving the diagnostics report…"))
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: ./install.sh debug-info")
@@ -80,9 +89,18 @@ class ReportPage(QWidget):
         path = next((l.split(" ", 1)[1] for l in r.stdout.splitlines() if l.startswith("Wrote ")), None)
         if path:
             self.path = path
-            self.open_report.setEnabled(True)
+            try:
+                self.view.setPlainText(Path(path).read_text(errors="replace"))
+                self.view.show()
+                self.copy.setEnabled(True)
+            except OSError:
+                pass
             self.text.setText(_("Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's "
                                 "status and recent logs, with user names, paths, host and phone names and "
                                 "addresses removed.").format(file=html.escape(path.replace(str(Path.home()), "~"))))
         else:
             self.text.setText(_("Couldn't write the report (see {command}).").format(command="./install.sh debug-info"))
+
+    def copy_report(self):
+        QApplication.clipboard().setText(self.view.toPlainText())
+        self.copy.setText(_("📋 Copied"))

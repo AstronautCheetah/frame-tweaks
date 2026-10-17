@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **🐞 Report a problem shows the report in the window:** with a 📋 Copy button, to paste it into
+  the bug form (or attach the saved file, as before). It used to open the report in your text
+  editor; in VR that started Kate, and SteamOS's own desktop portal crashes when a KDE app from
+  Flathub starts there (a SteamOS bug: KWalletManager does it too).
+
 ## 0.6.17 (2026-10-17)
 
 ### Changed
