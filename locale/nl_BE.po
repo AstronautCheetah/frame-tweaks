@@ -3447,9 +3447,10 @@ msgctxt "key legend"
 msgid "Bksp"
 msgstr "⌫"
 
+# needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Close (hold it)"
-msgstr ""
+msgstr "Sluiten (ingedrukt houden)"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -3537,9 +3538,10 @@ msgstr "Grafiet"
 msgid "Haptics"
 msgstr "Haptische feedback"
 
+# needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Hold ✕ to close Arrow Pad"
-msgstr ""
+msgstr "Houd ✕ ingedrukt om Pijltjesblok te sluiten"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -3953,10 +3955,12 @@ msgstr ""
 msgid "Charge to 100% once"
 msgstr "Eenmalig tot 100% laden"
 
+# needs review
 #: packs/core/charge-limit/README.md
 msgid ""
 "Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame runs mostly from the charger or power bank. A lower limit wears the battery a little less. The level is the battery's own reading, as KDE shows it; Steam's dashboard shows a higher figure for the same charge (about 8 points more around 80%: 78% here is 86% there)."
 msgstr ""
+"Het laden stopt op dit niveau en begint weer 1% eronder. Is de Frame aangesloten en op de limiet, dan draait hij vooral op de lader of powerbank. Een lagere limiet laat de batterij iets minder slijten. Het niveau is wat de batterij zelf meet, zoals KDE het toont; het dashboard van Steam toont voor dezelfde lading een hoger getal (zo'n 8 punten meer rond 80%: 78% hier is 86% daar)."
 
 # needs review
 #: packs/core/charge-limit/README.md
@@ -4045,25 +4049,30 @@ msgstr ""
 "De pauzeschakelaar van de lader is van root. Om hem van jou te maken, vraagt dit één keer je sudo-wachtwoord\n"
 "(beheerder), om een udev-regel (%s) toe te voegen die SteamOS-updates behouden."
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; charging stops at %s%%"
-msgstr ""
+msgstr "Batterij %s%%; het laden stopt bij %s%%"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; charging to 100%% once, then stopping at %s%% again"
-msgstr ""
+msgstr "Batterij %s%%; eenmalig tot 100%% laden, daarna weer stoppen bij %s%%"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; holding at the %s%% limit, not charging"
-msgstr ""
+msgstr "Batterij %s%%; blijft op de limiet van %s%%, laadt niet"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; not charging until it's below %s%%"
-msgstr ""
+msgstr "Batterij %s%%; laadt niet tot ze onder %s%% zakt"
 
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; the limit is off: it charges to 100%%"
-msgstr ""
+msgstr "Batterij %s%%; de limiet staat uit: laadt tot 100%%"
 
 # needs review
 #: packs/core/charge-limit/status.sh
