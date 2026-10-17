@@ -4,6 +4,30 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
+#: get.sh
+msgid "Couldn't find a release of %s"
+msgstr ""
+
+#: get.sh
+msgid "FRAME_TWEAKS_CHANNEL: stable or beta"
+msgstr ""
+
+#: get.sh
+msgid "Installing %s into %s"
+msgstr ""
+
+#: get.sh
+msgid "Release channel: %s"
+msgstr ""
+
+#: get.sh
+msgid "Some tweaks didn't update (see above); the window shows which."
+msgstr ""
+
+#: get.sh
+msgid "Updating %s (./install.sh update)"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py
 msgid "%d pack update"
 msgid_plural "%d pack updates"
@@ -826,7 +850,7 @@ msgstr ""
 
 #: gui/prefs_page.py
 msgid ""
-"For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
+"For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the language Steam is set to (or the system's)."
 msgstr ""
 
 #: gui/prefs_page.py

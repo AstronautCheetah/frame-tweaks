@@ -154,3 +154,61 @@ class GetSh(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(shutil.which("git"), "needs git")
+class GetShLanguage(unittest.TestCase):
+    """get.sh's own words come before Frame Tweaks' translations are on the machine, so they carry
+    theirs (dev/i18n.py writes them in), in the language Frame Tweaks would pick: Steam's own
+    interface language too (SteamOS keeps LANG at en_US.UTF-8 whatever the Frame was set up in)."""
+    def setUp(self):
+        import sys
+        from unittest import mock
+        sys.path.insert(0, str(ROOT / "tests"))
+        from helpers import load_script
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp)
+        locale = self.tmp / "locale"
+        locale.mkdir()
+        for lang, text in (("fr", "Impossible de trouver une version de %s"),
+                           ("nl_BE", "Geen versie van %s gevonden ('t is \\\\ raar)")):
+            (locale / f"{lang}.po").write_text(f'msgid ""\nmsgstr ""\n\nmsgid "Couldn\'t find a release of %s"\n'
+                                               f'msgstr "{text}"\n')
+        tool = load_script(ROOT / "dev/i18n.py", "i18n_tool_get")
+        with mock.patch.object(tool, "LOCALE", locale):
+            self.script = self.tmp / "get.sh"
+            self.script.write_text(tool.get_sh_text((ROOT / "get.sh").read_text()))
+        (self.tmp / "home/.steam").mkdir(parents=True)
+
+    def say(self, steam="english", **env):
+        (self.tmp / "home/.steam/registry.vdf").write_text(
+            '"Registry"\n{\n\t"HKCU"\n\t{\n\t\t"Software"\n\t\t{\n\t\t\t"Valve"\n\t\t\t{\n\t\t\t\t"Steam"\n'
+            f'\t\t\t\t{{\n\t\t\t\t\t"language"\t\t"{steam}"\n\t\t\t\t}}\n\t\t\t}}\n\t\t}}\n\t}}\n}}\n')
+        r = subprocess.run(["bash", str(self.script)], capture_output=True, text=True, timeout=60,
+                           env={"HOME": str(self.tmp / "home"), "PATH": "/usr/bin:/bin", "LANG": "en_US.UTF-8",
+                                "GIT_CONFIG_NOSYSTEM": "1", "FRAME_TWEAKS_REPO": str(self.tmp / "no-such-repo"),
+                                "FRAME_TWEAKS_DIR": str(self.tmp / "ft"), **env})
+        self.assertEqual(r.returncode, 1)
+        return r.stderr.strip().splitlines()[-1]
+
+    def test_in_steams_language(self):
+        repo = self.tmp / "no-such-repo"
+        self.assertEqual(self.say("french"), f"Impossible de trouver une version de {repo}")
+        self.assertEqual(self.say("dutch"), f"Geen versie van {repo} gevonden ('t is \\ raar)")   # (nl: the Flemish)
+        self.assertEqual(self.say("english"), f"Couldn't find a release of {repo}")
+
+    def test_a_language_set_on_purpose_wins(self):
+        repo = self.tmp / "no-such-repo"
+        self.assertEqual(self.say("english", LANG="fr_CA.UTF-8"), f"Impossible de trouver une version de {repo}")
+        self.assertEqual(self.say("dutch", FRAME_TWEAKS_LANGUAGE="fr"), f"Impossible de trouver une version de {repo}")
+        (self.tmp / "home/.config/frame-tweaks").mkdir(parents=True)
+        (self.tmp / "home/.config/frame-tweaks/language").write_text("en\n")          # (chosen in ⚙ Preferences)
+        self.assertEqual(self.say("french"), f"Couldn't find a release of {repo}")
+        self.assertEqual(self.say("french", FRAME_TWEAKS_KEYBOARD="0", FRAME_TWEAKS_PREFERENCE_FILE="/dev/null"),
+                         f"Couldn't find a release of {repo}")                         # (no guessing)
+
+    def test_the_real_get_sh_is_current(self):
+        """dev/i18n.py update keeps its block as the translations have it (check fails otherwise)."""
+        from helpers import load_script
+        tool = load_script(ROOT / "dev/i18n.py", "i18n_tool_get2")
+        self.assertEqual(tool.get_sh_text((ROOT / "get.sh").read_text()), (ROOT / "get.sh").read_text())

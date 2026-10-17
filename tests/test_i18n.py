@@ -18,6 +18,9 @@ from helpers import load_script  # noqa: E402
 sys.path.insert(0, str(ROOT / "lib"))
 import i18n  # noqa: E402
 
+# (this machine's Steam language isn't in the tests: SteamLanguage below gives each its own)
+i18n.STEAM_REGISTRY = Path("/nonexistent/.steam/registry.vdf")
+
 PO = textwrap.dedent('''\
     msgid ""
     msgstr ""
@@ -178,6 +181,57 @@ class PreferenceAndAnnouncement(unittest.TestCase):
                 import time
                 time.sleep(0.02)
             self.assertEqual(heard, ["Cerrar"])
+
+
+class SteamLanguage(unittest.TestCase):
+    """Steam's own interface language (registry.vdf): SteamOS keeps LANG at en_US.UTF-8 whatever
+    language the Frame was set up in, so without it a French or Flemish Frame (no layout of its own
+    on Steam's VR keyboard) got English everywhere, the installer's first words included."""
+    def setUp(self):
+        self.reg = Path(tempfile.mkdtemp()) / "registry.vdf"
+        self.addCleanup(shutil.rmtree, self.reg.parent, True)
+        for p in (mock.patch.object(i18n, "STEAM_REGISTRY", self.reg),
+                  mock.patch.dict(i18n._steam_language, {"mtime": None, "value": None}),
+                  mock.patch.object(i18n, "keyboard_language", lambda: None)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def steam(self, language):
+        self.reg.write_text('"Registry"\n{\n\t"HKCU"\n\t{\n\t\t"Software"\n\t\t{\n\t\t\t"Valve"\n\t\t\t{\n'
+                            '\t\t\t\t"Steamsteamglobal"\n\t\t\t\t{\n\t\t\t\t\t"language"\t\t"english"\n\t\t\t\t}\n'
+                            f'\t\t\t\t"Steam"\n\t\t\t\t{{\n\t\t\t\t\t"language"\t\t"{language}"\n'
+                            '\t\t\t\t\t"CompletedOOBE"\t\t"1"\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n')
+        os.utime(self.reg, (self.reg.stat().st_atime, self.reg.stat().st_mtime + len(language)))   # (read again)
+
+    def test_steams_language_beats_steamos_default_lang(self):
+        with mock.patch.dict(os.environ, {"LANG": "en_US.UTF-8"}, clear=True):
+            self.steam("french")
+            self.assertEqual(i18n.wanted_languages(), ["fr"])
+            self.steam("dutch")
+            self.assertEqual(i18n.wanted_languages(), ["nl"])
+            self.assertEqual(i18n.pick(["nl"], ROOT / "locale").name, "nl_BE.po")   # (Flemish, for Dutch)
+            self.steam("latam")
+            self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
+
+    def test_english_or_unknown_says_nothing(self):
+        with mock.patch.dict(os.environ, {"LANG": "de_DE.UTF-8"}, clear=True):
+            self.steam("english")
+            self.assertEqual(i18n.wanted_languages(), ["de_DE", "de"])
+            self.steam("klingon")
+            self.assertEqual(i18n.wanted_languages(), ["de_DE", "de"])
+            self.reg.unlink()
+            self.assertEqual(i18n.wanted_languages(), ["de_DE", "de"])
+
+    def test_a_language_set_on_purpose_beats_it(self):
+        """The keyboard's, KDE's language setting (LANGUAGE), a choice in Preferences."""
+        self.steam("french")
+        with mock.patch.dict(os.environ, {"LANGUAGE": "es_419", "LANG": "en_US.UTF-8"}, clear=True):
+            self.assertEqual(i18n.wanted_languages(), ["es_419", "es"])
+        with mock.patch.object(i18n, "keyboard_language", lambda: "de"), \
+                mock.patch.dict(os.environ, {"LANG": "en_US.UTF-8"}, clear=True):
+            self.assertEqual(i18n.wanted_languages(), ["de", "fr"])
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_KEYBOARD": "0", "LANG": "en_US.UTF-8"}, clear=True):
+            self.assertEqual(i18n.wanted_languages(), ["en_US", "en"])       # (no guessing from the machine)
 
 
 class Keyboard(unittest.TestCase):

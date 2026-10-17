@@ -5,6 +5,30 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: get.sh
+msgid "Couldn't find a release of %s"
+msgstr ""
+
+#: get.sh
+msgid "FRAME_TWEAKS_CHANNEL: stable or beta"
+msgstr ""
+
+#: get.sh
+msgid "Installing %s into %s"
+msgstr ""
+
+#: get.sh
+msgid "Release channel: %s"
+msgstr ""
+
+#: get.sh
+msgid "Some tweaks didn't update (see above); the window shows which."
+msgstr ""
+
+#: get.sh
+msgid "Updating %s (./install.sh update)"
+msgstr ""
+
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "%d pack update"
@@ -930,9 +954,8 @@ msgstr "Seguir el teclado (ahora: {language})"
 
 #: gui/prefs_page.py
 msgid ""
-"For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
+"For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the language Steam is set to (or the system's)."
 msgstr ""
-"Para esta ventana, el Teclado de flechas, el Recorte de pantalla, las entradas del menú y los paneles de RV. Si sigue el teclado: el teclado de RV de Steam en RV y la distribución de KDE en modo escritorio; una distribución QWERTY o en inglés mantiene el idioma del sistema."
 
 # needs review
 #: gui/prefs_page.py
@@ -6449,3 +6472,8 @@ msgstr "Instalador de ajustes"
 #~ "Picture and smoothness apply when the stream restarts; joystick speed at once."
 #~ msgstr ""
 #~ "La imagen y la fluidez se aplican al reiniciar la transmisión; la velocidad del joystick, de inmediato."
+
+#~ msgid ""
+#~ "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
+#~ msgstr ""
+#~ "Para esta ventana, el Teclado de flechas, el Recorte de pantalla, las entradas del menú y los paneles de RV. Si sigue el teclado: el teclado de RV de Steam en RV y la distribución de KDE en modo escritorio; una distribución QWERTY o en inglés mantiene el idioma del sistema."

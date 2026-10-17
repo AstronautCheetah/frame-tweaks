@@ -5,6 +5,30 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: get.sh
+msgid "Couldn't find a release of %s"
+msgstr ""
+
+#: get.sh
+msgid "FRAME_TWEAKS_CHANNEL: stable or beta"
+msgstr ""
+
+#: get.sh
+msgid "Installing %s into %s"
+msgstr ""
+
+#: get.sh
+msgid "Release channel: %s"
+msgstr ""
+
+#: get.sh
+msgid "Some tweaks didn't update (see above); the window shows which."
+msgstr ""
+
+#: get.sh
+msgid "Updating %s (./install.sh update)"
+msgstr ""
+
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "%d pack update"
@@ -1065,12 +1089,10 @@ msgstr ""
 msgid "Follow the keyboard (now: {language})"
 msgstr "Suivre le clavier (actuellement : {language})"
 
-# needs review
 #: gui/prefs_page.py
 msgid ""
-"For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
+"For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the language Steam is set to (or the system's)."
 msgstr ""
-"Pour cette fenêtre, le Pavé fléché, l'outil Capture d'écran, les entrées de menu et les panneaux VR. Suivre le clavier : le clavier VR de Steam en VR, la disposition de KDE en mode bureau ; une disposition QWERTY ou anglaise garde la langue du système."
 
 # needs review
 #: gui/prefs_page.py
@@ -6840,3 +6862,9 @@ msgstr ""
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
 msgid "Tweak installer"
 msgstr "Installateur d'ajustements"
+
+#~ # needs review
+#~ msgid ""
+#~ "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the system's language."
+#~ msgstr ""
+#~ "Pour cette fenêtre, le Pavé fléché, l'outil Capture d'écran, les entrées de menu et les panneaux VR. Suivre le clavier : le clavier VR de Steam en VR, la disposition de KDE en mode bureau ; une disposition QWERTY ou anglaise garde la langue du système."
