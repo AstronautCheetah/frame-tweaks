@@ -104,10 +104,11 @@ squeeze the grip while pointing at it (anywhere, buttons included) and let go to
 or pull the trigger on an empty part of it and drag. It remembers the spot for next time.
 
 **With Steam's keyboard open,** SteamVR hides where your controllers are from other programs, so
-the panel can only slide after the laser (in its own plane); a note under it says so. Close the
-keyboard to bring it closer, send it further away or turn it. Pressing the panel while you type
-doesn't take the keyboard away from the window you're typing in, as long as the
-[VR environment helper](../vr-dashboard/) is installed (any VR environment tweak brings it).
+the panel can only slide after the laser (in its own plane); a note under it says so. With the
+[VR environment helper](../vr-dashboard/) installed (any VR environment tweak brings it), SteamVR's
+own grab bar shows under the panel then: hold it to move the panel anywhere, closer, further away
+or turned, as a desktop window's. And pressing the panel while you type doesn't take the
+keyboard away from the window you're typing in.
 
 The panel has:
 

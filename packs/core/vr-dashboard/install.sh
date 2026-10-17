@@ -13,6 +13,9 @@ install -m644 "$TWEAK_DIR/lib.js" "$D/lib.js"            # helpers the patches s
 # leaves Steam's keyboard with the window you're typing in. (Before 0.6.19 Arrow Pad installed one
 # for itself, arrowpad-keyboard: this one replaces it.)
 install -m644 "$TWEAK_DIR/panel-keyboard.js" "$D/patches/panel-keyboard.js"
+# And while Steam's keyboard is open, SteamVR's own grab bar under each of those panels, to move
+# it anywhere (the keyboard hides the controllers from the panels themselves: they only slide).
+install -m644 "$TWEAK_DIR/panel-grab.js" "$D/patches/panel-grab.js"
 rm -f "$D/patches/arrowpad-keyboard.js"
 
 # Older versions: this lived inside Curved world windows (sft-curvature). Move its patch over.

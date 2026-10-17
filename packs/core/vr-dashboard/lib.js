@@ -83,9 +83,14 @@
 
   // Our pieces are drawn from the dashboard's one shared page (about 1860 x 2048). Placed after
   // its own content they moved whenever that changed size, which showed as jitter, and tall ones
-  // ran off the page: each patch gets a fixed corner of its own at the bottom.
-  const area = (side) => ({ position: 'absolute', bottom: '0px', width: '920px', [side]: '0px',
-                            textAlign: side === 'right' ? 'right' : 'left' });
+  // ran off the page: each patch gets a fixed spot of its own. A panel shows whatever the page
+  // has at its spot, so two patches sharing one showed each other's pieces. 'left' and 'right':
+  // the bottom corners (the scroll strips; Android Mirror's pieces); 'right-mid': the right
+  // side, 900 px up (panel-grab), between those and the dashboard's own controls at the top.
+  const area = (side) => {
+    const [edge, up] = side === 'right-mid' ? ['right', '900px'] : [side, '0px'];
+    return { position: 'absolute', bottom: up, width: '920px', [edge]: '0px', textAlign: edge === 'right' ? 'right' : 'left' };
+  };
 
   // mount(key, render, side): draw render() (an array of pieces, or null) as the last child of
   // the dashboard app, redrawn every `every` ms and on redraw(); in the page corner `side`. Puts

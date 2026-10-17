@@ -10,9 +10,10 @@ Like Full Keyboard: visible while the dashboard is, Reset puts it in front of yo
 its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that. While Steam's
 keyboard shows, SteamVR hides where the controllers are from other programs (its keyboard
 privacy), so a drag then slides the panel in its own plane after the laser instead, and a note
-under the panel says so. Steam's keyboard follows the laser's focus; the dashboard patch
-(vr-dashboard's panel-keyboard.js) hands it back to the window it was typing into when it comes
-to the panel.
+under the panel says so. With the VR environment helper, SteamVR's own grab bar shows under the
+panel then (its panel-grab patch, vrkit.DashboardGrab), and moves it anywhere. Steam's keyboard
+follows the laser's focus; the dashboard patch (vr-dashboard's panel-keyboard.js) hands it back
+to the window it was typing into when it comes to the panel.
 While desktop mode has taken all input (Right Ctrl), the same note says so too.
 """
 import contextlib
@@ -48,6 +49,9 @@ DEPTH_GAIN = 3.0                     # dragging: push/pull moves the pad 3x as f
 DEPTH_MIN, DEPTH_MAX = 0.25, 3.5     # dragging: keep the pad this far from your head (m, horizontally)
 POSE_EPSILON = 0.0015                # ignore anchor jitter below 1.5 mm (and ~0.1°)
 TEX_DIR = f"/run/user/{os.getuid()}"
+# The VR environment helper's patch that puts SteamVR's grab bar under the panel while Steam's
+# keyboard is open (vrkit.DashboardGrab): the slide's note points to the bar only when it's there.
+GRAB_PATCH = os.path.expanduser("~/.local/share/frame-tweaks/vr-dashboard/patches/panel-grab.js")
 MAX_DISTANCE = 4.0       # metres from the headset; further than that, bring it back
 WIDTH_DEFAULT, WIDTH_MIN, WIDTH_MAX, WIDTH_STEP = 0.55, 0.30, 2.0, 0.05
 # Placement like Full Keyboard: anchored to Steam's dashboard (its main panel while visible, else
@@ -138,6 +142,13 @@ class OverlayHost:
         if not (self.offset and self.follow_dashboard()) or self.distance_from_head() > MAX_DISTANCE:
             self.reset_position()
         self.visible = False
+        # SteamVR's grab bar under the pad while Steam's keyboard is open (the VR environment
+        # helper's panel-grab patch): while it's held the pad hides, a picture of it moving instead.
+        try:
+            self.dash_grab = vrkit.DashboardGrab(KEY)
+        except Exception:
+            self.dash_grab = None
+        self.dash_held = False
         # ~45 Hz event pump while the dashboard shows the pad; 5 Hz while it's closed (only to
         # notice it opening: nothing can be pressed or grabbed then)
         self.poll_error = 0.0
@@ -328,6 +339,9 @@ class OverlayHost:
         if reason == "hint":
             return getattr(self, "hint_text", "")
         if reason == "slide":
+            if os.path.exists(GRAB_PATCH):
+                return _("While Steam's keyboard is open, Arrow Pad only slides when you drag it. To move it "
+                         "closer, further away or turn it, use the bar under it.")
             return _("While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move "
                      "it closer, further away or turn it.")
         return _("Desktop mode has taken all input, so what you type goes to the desktop, not to other "
@@ -549,7 +563,8 @@ class OverlayHost:
         visible = self._dash
         if visible != self.visible:
             if visible:
-                self.ov.showOverlay(self.input_handle)
+                if not self.dash_held:          # (held by SteamVR's bar: its picture shows instead)
+                    self.ov.showOverlay(self.input_handle)
             else:
                 # Like Full Keyboard: closing the dashboard releases our input (a pending
                 # right/middle-click toggle would otherwise change a click you can't see coming).
@@ -586,9 +601,10 @@ class OverlayHost:
                 self.start_drag(d, grip=True, at=self.laser_at.get(d))
         if self.drag is not None and self.grip_drag and self.drag[0] not in self.gripping:
             self.end_drag()
+        self.dashboard_grab(visible)
         if self.drag is not None:
             self.drag_follow()                  # every tick, not just on laser moves
-        elif visible and self.ticks % 5 == 0:
+        elif visible and self.ticks % 5 == 0 and not self.dash_held:
             self.follow_dashboard()             # ride along with the dashboard, ~10x a second
         if visible:
             self.watch_grab()
@@ -598,6 +614,46 @@ class OverlayHost:
         timer, want = getattr(self, "timer", None), self.FAST_MS if self.visible else self.IDLE_MS
         if timer is not None and timer.interval() != want:
             timer.setInterval(want)
+
+    def dashboard_grab(self, visible):
+        """SteamVR's grab bar under the pad while Steam's keyboard is open (vrkit.DashboardGrab):
+        say where the pad is and what it looks like; while the bar is held, hide (a picture of the
+        pad moves instead); let go, take the picture's place, as a grab's end does."""
+        g = getattr(self, "dash_grab", None)
+        if g is None or getattr(self, "closed", False):
+            return
+        w, h = self.input_size
+        width = getattr(self, "shown_width", self.width_m)
+        if w and h:
+            g.announce(self.pose, width, width * h / w, visible, getattr(self, "_last_path", None))
+        what = g.poll()
+        if what is None:
+            return
+        kind, pose = what
+        self.log_input(f"SteamVR's grab bar: {kind}" + (" (where it was)" if kind == "dropped" and not pose else ""))
+        if kind == "held":
+            self.dash_held = True
+            self.cancel_presses()
+            self.drag, self.grip_drag = None, False
+            self.ov.hideOverlay(self.input_handle)
+            if self.cover is not None:
+                self.ov.hideOverlay(self.cover)
+            self.hide_note()
+            return
+        self.dash_held = False
+        if pose:
+            self.pose = pose
+            self.apply_pose()
+            if self.distance_from_head() > MAX_DISTANCE:
+                self.reset_position()
+            else:
+                self.remember_offset()          # the new spot, relative to the dashboard
+                self.ease_level()
+            self.save()
+        if self.visible:
+            self.ov.showOverlay(self.input_handle)
+        if w and h:
+            g.announce(self.pose, width, width * h / w, self.visible, getattr(self, "_last_path", None), now=True)
 
     INPUT_LOG = f"{TEX_DIR}/arrowpad-input.log"
 
@@ -834,6 +890,8 @@ class OverlayHost:
             return
         self.cancel_presses()       # (a key the other laser holds would stay down after we exit)
         self.closed = True
+        if getattr(self, "dash_grab", None) is not None:
+            self.dash_grab.close()
         try:
             self.ov.destroyOverlay(self.input_handle)
             if self.cover is not None:

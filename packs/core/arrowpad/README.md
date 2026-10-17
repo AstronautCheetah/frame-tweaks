@@ -143,7 +143,11 @@ walking; up, down and sideways move it one to one. It stays between 0.25 and 3.5
 When you let go, a slight sideways lean (under 5°) eases level. While Steam's keyboard is
 showing, SteamVR hides where your controllers are from other programs, so then the pad slides
 flat along its own surface after the laser instead (up, down and sideways only), and a small
-note under it says so.
+note under it says so. To move it anywhere then, closer, further away or turned, use **SteamVR's
+grab bar** that shows under the pad while the keyboard is open (with the
+[VR environment helper](../vr-dashboard/), which any VR environment tweak installs): hold it
+with the trigger, as the bar under a desktop window, and the pad goes where you let go
+(the thumbstick pushes it away or pulls it closer while you hold it).
 
 ### Which keyboard when?
 
@@ -192,6 +196,11 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   poses from every other program while its keyboard is open (its log says
   `AddSystemBehaviorFlag SystemBehaviorFlag_SystemKeyboardPrivacy`), so a grab can't follow the
   controller. The pad then slides in its own plane to keep the point you grabbed under the laser.
+  SteamVR's own dashboard can still move things, so the VR environment helper's `panel-grab`
+  patch puts SteamVR's grab bar under the pad then. While it's held, the pad hides and a picture
+  of it (drawn by the dashboard) follows your hand; let go, and the pad is told only where that
+  was (`$XDG_RUNTIME_DIR/frame-tweaks/panels`, `lib/vrkit.py` DashboardGrab): no controller pose
+  reaches it.
 - **Desktop mode's input grab:** while the VR pad shows, it looks at desktop mode's window title
   every 2 s (`xwininfo` on `:0`, off the pad's own thread) for KWin's "…to ungrab input", and
   says so in its note while that lasts.

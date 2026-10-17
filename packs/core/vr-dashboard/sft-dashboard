@@ -12,6 +12,9 @@ Back to the previous window, and any later dashboard tweak.
 A patch's settings, if any, are ~/.config/frame-tweaks/NAME.json, handed to the page as
 window.__sftPatchConfig[NAME]. Patches can ask for actions the page can't do itself through
 bindings this service registers on the page (sftScroll: scrolling; see scroll() below).
+Frame Tweaks' own VR panels (Arrow Pad, Screen snip's) say where they are in
+$XDG_RUNTIME_DIR/frame-tweaks/panels (lib/vrkit.py DashboardGrab): this hands that to the
+panel-grab patch while Steam's keyboard is open, and tells a panel where its bar left it.
 
 A patch is patches/NAME.js: an expression that registers itself as window.__sftPatches[NAME]
 = {version, stop}. Header lines "// requires: what | exact text" name pieces of SteamVR's
@@ -44,6 +47,9 @@ PORT = 8087
 DASHBOARD = Path("/opt/steamvr/resources/webinterface/dashboard")
 CHECK_FILE = Path(f"/run/user/{os.getuid()}/sft-dashboard.status")
 CONF_DIR = Path.home() / ".config/frame-tweaks"      # patch settings: NAME.json (set in the installer window)
+RUN = Path(f"/run/user/{os.getuid()}")
+PANELS = RUN / "frame-tweaks/panels"                 # Frame Tweaks' VR panels (lib/vrkit.py DashboardGrab)
+PANEL_KEY = re.compile(r"^frame-tweaks\.[A-Za-z0-9._-]{1,80}$")
 BASE = {"window.FrameStore": "window.FrameStore="}     # every patch starts from FrameStore
 
 
@@ -205,7 +211,102 @@ def save_config(req):
     tmp.replace(CONF_DIR / f"{name}.json")
 
 
-BINDINGS = {"sftScroll": scroll, "sftConfig": save_config}
+# Frame Tweaks' VR panels and the panel-grab patch: SteamVR's grab bar under each while Steam's
+# keyboard is open (it hides the controllers from other programs). The page asks for the panels
+# (sftPanels {want}) while the keyboard shows; a bar held and let go (sftPanelGrab {key, state:
+# held | dropped, t, r}) goes to the panel's PANELS/KEY.grab.json. Held, the page gets the
+# panel's picture to move instead (window.__sftPanelPictures[KEY], a data: URL: the page can't
+# read files). No controller pose passes through here: only where a panel was let go.
+PANEL_WANT = threading.Event()
+PICTURE_MAX = 4 << 20
+
+
+def panel(key):
+    """A panel's announcement (KEY.json), if its program still runs; else None."""
+    try:
+        data = json.loads((PANELS / f"{key}.json").read_text())
+        os.kill(int(data["pid"]), 0)
+        return data
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def panels():
+    """{key: {t, r, w, h, visible}} of the panels whose programs run."""
+    out = {}
+    for f in sorted(PANELS.glob("frame-tweaks.*.json")) if PANELS.is_dir() else []:
+        key = f.name[:-len(".json")]
+        if key.endswith(".grab") or not PANEL_KEY.match(key):
+            continue
+        data = panel(key)
+        if data:
+            out[key] = {k: data.get(k) for k in ("t", "r", "w", "h", "visible")}
+    return out
+
+
+def want_panels(req):
+    """sftPanels {want}: the page wants the panels while Steam's keyboard shows."""
+    (PANEL_WANT.set if req.get("want") else PANEL_WANT.clear)()
+
+
+def picture_url(key):
+    """The panel's current picture as a data: URL, or None (only a PNG in the runtime folder)."""
+    data = panel(key)
+    try:
+        f = Path(data["picture"]).resolve()
+        if f.suffix != ".png" or RUN not in f.parents or f.stat().st_size > PICTURE_MAX:
+            return None
+        return "data:image/png;base64," + base64.b64encode(f.read_bytes()).decode()
+    except (OSError, TypeError, KeyError, ValueError):
+        return None
+
+
+def grab(req, url=None):
+    """sftPanelGrab {key, state, t, r}: its bar was held (the picture goes to the page), or let go
+    (where, for the panel)."""
+    key, state = req.get("key"), req.get("state")
+    if not (isinstance(key, str) and PANEL_KEY.match(key) and state in ("held", "dropped") and panel(key)):
+        return
+    out = {"seq": time.time_ns(), "state": state}
+    if state == "dropped":
+        try:
+            t = {k: float(req["t"][k]) for k in "xyz"}
+            r = {k: float(req["r"][k]) for k in "wxyz"}
+            if all(abs(v) < 100 for v in (*t.values(), *r.values())):
+                out.update(t=t, r=r)
+        except (KeyError, TypeError, ValueError):
+            pass                                  # (no place: it stays where it was)
+    tmp = PANELS / f".{key}.grab.json.tmp"
+    tmp.write_text(json.dumps(out))
+    tmp.replace(PANELS / f"{key}.grab.json")
+    if state == "held":
+        pic = picture_url(key)
+        if pic and (url := url or systemui()):
+            ws_eval(url, f"(window.__sftPanelPictures ??= {{}})[{json.dumps(key)}] = {json.dumps(pic)};"
+                         " window.__sftPatches?.['panel-grab']?.redraw?.(); 'ok'", timeout=10)
+
+
+def relay_panels():
+    """While the page wants them: the panels, again whenever one moved or came or went."""
+    last, url = None, None
+    while True:
+        if not PANEL_WANT.wait(1.0):
+            last = None                           # (wanted again: sent again)
+            continue
+        try:
+            now = panels()
+            if now != last:
+                url = url or systemui()
+                if url:
+                    ws_eval(url, f"window.__sftPanels = {json.dumps(now)};"
+                                 " window.__sftPatches?.['panel-grab']?.panelsChanged?.(); 'ok'")
+                    last = now
+        except Exception:                         # (the page went away: look it up again)
+            url, last = None, None
+        time.sleep(0.2)
+
+
+BINDINGS = {"sftScroll": scroll, "sftConfig": save_config, "sftPanels": want_panels, "sftPanelGrab": grab}
 
 
 def listen():
@@ -328,6 +429,7 @@ def config_expr(name, path):
 def watch():
     code, last, injected = dashboard_code(), None, None      # (injected: None until the page is seen)
     threading.Thread(target=listen, daemon=True).start()
+    threading.Thread(target=relay_panels, daemon=True).start()
     while True:
         found = patches()
         lib_bad = missing(LIB, code) if LIB.exists() else ["lib.js"]

@@ -12,6 +12,13 @@
   window tick or untick every tweak in it (the ones it shows), as clicking each would; nothing is
   installed or removed until Apply changes.
 
+- **Move Arrow Pad and Screen snip's panel anywhere while Steam's keyboard is open (VR):** with
+  the keyboard open, SteamVR hides where your controllers are from other programs, so the panels
+  could only slide flat. Now SteamVR's own grab bar, as under a desktop window, shows under each
+  of them while the keyboard is open: hold it and the panel follows your hand, nearer, further
+  (thumbstick) or turned, and stays where you let go. The panel is only told where that was,
+  never where your controllers are. It comes with the VR environment helper.
+
 ### Fixed
 - **Screen snip's narration panel and Steam's keyboard (VR), as on Arrow Pad:** pressing the
   panel while you typed took the keyboard away from your window (what you typed next went
