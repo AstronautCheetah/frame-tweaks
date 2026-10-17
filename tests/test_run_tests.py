@@ -1,6 +1,9 @@
 """dev/run-tests.py's pace: VR first. While the headset is worn, one part at a time on the core
 VR's real-time threads use least; on every core, the tests made VR stutter enough to make its
 wearer sick. (A fake /proc, and a file standing in for the proximity sensor.)"""
+import os
+import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -103,3 +106,74 @@ class Pace(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FromTheBugHunt(unittest.TestCase):
+    """The 2026-10-17 bug hunt: every thread pinned, a failed sensor read, a part that ends
+    without its results, and Ctrl+C."""
+    def test_every_thread_is_pinned(self):
+        """sched_setaffinity(pid) sets one thread: a Qt test's other threads stayed on every core."""
+        child = subprocess.Popen([sys.executable, "-c", "import threading, time\n"
+                                  "threading.Thread(target=time.sleep, args=(30,), daemon=True).start()\n"
+                                  "print('ready', flush=True); time.sleep(30)"], stdout=subprocess.PIPE, text=True)
+        self.addCleanup(child.kill)
+        child.stdout.readline()
+        core = max(os.sched_getaffinity(0))
+        rt.pin(child.pid, {core})
+        tasks = os.listdir(f"/proc/{child.pid}/task")
+        self.assertGreaterEqual(len(tasks), 2)
+        for tid in tasks:
+            self.assertEqual(os.sched_getaffinity(int(tid)), {core})
+
+    def test_a_failed_sensor_read_keeps_what_it_said(self):
+        with tempfile.TemporaryDirectory() as d:
+            prox = Path(d) / "prox"
+            prox.write_text("17.5\n")
+            with mock.patch.object(rt, "PROX", [str(prox)]), mock.patch.object(rt, "vr_core", lambda usable: 7):
+                pace = rt.Pace(3, "auto")
+                pace.done.set()
+                self.assertTrue(pace.vr)
+                prox.write_text("")                         # (a read that fails: was "off", every core)
+                self.assertIsNone(rt.worn())
+                self.assertTrue(pace.wants_vr())
+
+    def test_a_part_that_ends_without_its_results_failed(self):
+        class Quiet:
+            pid, returncode = os.getpid(), 0
+
+            def communicate(self):
+                return ("", None)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(rt.subprocess, "Popen", lambda *a, **k: Quiet()):
+            names, rc, output, got = rt.run((["test_x"], ["test_x.A.test_a"]), False, Path(d) / "none.json",
+                                            rt.Pace(1, "all"))
+        self.assertEqual(rc, 1)
+        self.assertIn("ended without its results", output)
+        self.assertEqual(rt.signal_name(35), "signal 35")
+        self.assertEqual(rt.signal_name(9), "SIGKILL")
+
+    def test_ctrl_c_stops_the_run(self):
+        """Ctrl+C killed the parts running, then every part still queued started, one after
+        another, silently."""
+        with tempfile.TemporaryDirectory() as d:
+            tests, marks = Path(d) / "tests", Path(d) / "started"
+            tests.mkdir()
+            marks.mkdir()
+            for i in range(5):
+                (tests / f"test_slow{i}.py").write_text(
+                    "import pathlib, time, unittest\n"
+                    "class T(unittest.TestCase):\n"
+                    f"    def test_it(self):\n        pathlib.Path({str(marks)!r}, '{i}').touch()\n"
+                    "        time.sleep(30)\n")
+            env = {**os.environ, "FRAME_TWEAKS_TESTS": str(tests), "FRAME_TWEAKS_CHECKS": "all"}
+            runner = subprocess.Popen([sys.executable, str(ROOT / "dev/run-tests.py"), "-j", "2"], env=env,
+                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+            self.addCleanup(lambda: runner.poll() is None and os.killpg(runner.pid, signal.SIGKILL))
+            for _ in range(200):
+                if len(os.listdir(marks)) >= 2:
+                    break
+                time.sleep(0.05)
+            os.killpg(runner.pid, signal.SIGINT)            # (Ctrl+C: the terminal's whole group)
+            runner.communicate(timeout=15)
+            time.sleep(1)
+            self.assertEqual(runner.returncode, 130)
+            self.assertEqual(len(os.listdir(marks)), 2)

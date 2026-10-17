@@ -38,7 +38,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TESTS = ROOT / "tests"
+TESTS = Path(os.environ.get("FRAME_TWEAKS_TESTS") or ROOT / "tests")     # (another folder: for its own tests)
 CACHE = ROOT / ".cache/test-durations.json"
 # The Frame's headset proximity sensor, read as packs/core/wallet/app-timers does (worn: > 14).
 # (FRAME_TWEAKS_PROX=FILE stands in for it, for tests.)
@@ -50,11 +50,26 @@ VR = ("vrcompositor", "vrserver", "gamescope", "XRService")
 
 
 def worn():
-    """The headset is on. (No sensor, not a Frame: no.)"""
+    """The headset is on (no sensor, not a Frame: no); None if the sensor couldn't be read just
+    now (then what it said last stands: a failed read counted as "off", every core)."""
+    if not PROX:
+        return False
     try:
         return float(Path(PROX[0]).read_text()) > 14
-    except (IndexError, OSError, ValueError):
-        return False
+    except (OSError, ValueError):
+        return None
+
+
+def pin(pid, cpus):
+    """Every thread of pid to cpus. (sched_setaffinity(pid) sets one thread: a Qt test's other
+    threads, and what they start, stayed on every core.)"""
+    try:
+        tids = os.listdir(f"/proc/{pid}/task")
+    except OSError:
+        tids = [str(pid)]
+    for tid in tids:
+        with contextlib.suppress(OSError, ValueError):
+            os.sched_setaffinity(int(tid), cpus)
 
 
 def cores(text):
@@ -122,7 +137,10 @@ class Pace:
             threading.Thread(target=self.watch, daemon=True).start()
 
     def wants_vr(self):
-        return self.mode == "vr" or (self.mode == "auto" and worn())
+        if self.mode != "auto":
+            return self.mode == "vr"
+        w = worn()
+        return getattr(self, "vr", False) if w is None else w
 
     def cpus(self):
         if not self.vr:
@@ -134,17 +152,15 @@ class Pace:
     def watch(self):
         while not self.done.wait(1):
             vr = self.wants_vr()
-            if vr == self.vr:
-                continue
-            with self.cond:
-                self.vr = vr
-                self.ever_vr |= vr
-                self.ever_all |= not vr
-                self.cond.notify_all()
-            if vr:                         # (now: what runs goes to VR's spare core)
-                for pid in descendants(os.getpid()):
-                    with contextlib.suppress(OSError):
-                        os.sched_setaffinity(pid, self.cpus())
+            if vr != self.vr:
+                with self.cond:
+                    self.vr = vr
+                    self.ever_vr |= vr
+                    self.ever_all |= not vr
+                    self.cond.notify_all()
+            if vr:                         # (what runs goes to VR's spare core: every second, and
+                for pid in descendants(os.getpid()):           # every thread, whatever started since)
+                    pin(pid, self.cpus())
 
     @contextlib.contextmanager
     def slot(self):
@@ -231,23 +247,47 @@ def child(names, out, verbose):
     sys.exit(not result.wasSuccessful())
 
 
+STOPPING = threading.Event()               # (Ctrl+C: no more parts start)
+RUNNING, RUNNING_LOCK = set(), threading.Lock()
+
+
 def run(part, verbose, out, pace):
     names, tids = part
+    nothing = {"run": 0, "failures": 0, "errors": 1, "skipped": 0, "took": {}}
     with pace.slot() as cpus:
+        if STOPPING.is_set():
+            return names, -signal.SIGINT, "", nothing
         start = time.monotonic()
         p = subprocess.Popen([sys.executable, __file__, "--child", str(out), *(["-v"] if verbose else []), *names],
-                             cwd=TESTS, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        with contextlib.suppress(OSError):
-            os.sched_setaffinity(p.pid, cpus)      # (what it starts keeps to them too)
-        output = p.communicate()[0]
+                             cwd=TESTS, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                             errors="replace")
+        with RUNNING_LOCK:
+            RUNNING.add(p)
+        pin(p.pid, cpus)                       # (what it starts keeps to them too)
+        try:
+            output = p.communicate()[0]
+        finally:
+            with RUNNING_LOCK:
+                RUNNING.discard(p)
         seconds = time.monotonic() - start
+    rc = p.returncode
     try:
         got = json.loads(out.read_text())
     except (OSError, ValueError):          # (it ended before it could say: an import failed, say)
-        got = {"run": 0, "failures": 0, "errors": 1, "skipped": 0, "took": {}}
+        got = nothing
+        if rc == 0:                        # (and said nothing wrong: os._exit(0) in a test, say)
+            rc = 1
+            output += "\n(ended without its results)"
     if not got["took"] and tids:           # (an older Python: the part's time, shared out)
         got["took"] = {t: seconds / len(tids) for t in tids}
-    return names, p.returncode, output, got
+    return names, rc, output, got
+
+
+def signal_name(n):
+    try:
+        return signal.Signals(n).name
+    except ValueError:
+        return f"signal {n}"
 
 
 def main():
@@ -264,7 +304,7 @@ def main():
     if mode not in ("auto", "vr", "all"):
         sys.exit(f"FRAME_TWEAKS_CHECKS={mode}: auto (the default), vr or all")
     if a.pin:                              # (dev/check.sh, for its other checks)
-        vr = mode == "vr" or (mode == "auto" and worn())
+        vr = mode == "vr" or (mode == "auto" and worn() is not False)      # (a failed read: pinned, to be safe)
         print(vr_core(sorted(os.sched_getaffinity(0))) if vr else "")
         return
     gentle()
@@ -286,17 +326,29 @@ def main():
         running = [pool.submit(run, p, a.verbose, Path(tmp) / f"{i}.json", pace) for i, p in enumerate(parts)]
         results = (done.result() for done in concurrent.futures.as_completed(running))    # (each as it ends)
         then = (run(p, a.verbose, Path(tmp) / f"alone-{i}.json", pace) for i, p in enumerate(last))
-        for names, rc, output, got in itertools.chain(results, then):
-            for k in totals:
-                totals[k] += got[k]
-            took.update(got["took"])
-            if rc or a.verbose:
-                label = names[0] if len(names) == 1 else f"{names[0]} … ({len(names)} tests)"
-                how = f"ended by {signal.Signals(-rc).name}" if rc < 0 else "failed" if rc else ""
-                print(f"── {label}", how, flush=True)
-                print(output.rstrip(), flush=True)
-            if rc:
-                failed.append(names[0])
+        try:
+            for names, rc, output, got in itertools.chain(results, then):
+                for k in totals:
+                    totals[k] += got[k]
+                took.update(got["took"])
+                if rc or a.verbose:
+                    label = names[0] if len(names) == 1 else f"{names[0]} … ({len(names)} tests)"
+                    how = f"ended by {signal_name(-rc)}" if rc < 0 else "failed" if rc else ""
+                    print(f"── {label}", how, flush=True)
+                    print(output.rstrip(), flush=True)
+                if rc:
+                    failed.append(names[0])
+        except KeyboardInterrupt:
+            # (Ctrl+C: leaving the pool waited for every part still queued, which then started one
+            # after another, silently. None starts now, and those running end.)
+            STOPPING.set()
+            pool.shutdown(wait=False, cancel_futures=True)
+            with RUNNING_LOCK:
+                for p in RUNNING:
+                    with contextlib.suppress(OSError):
+                        p.kill()
+            print("\nStopped (Ctrl+C).", flush=True)
+            sys.exit(130)
     CACHE.parent.mkdir(exist_ok=True)
     CACHE.write_text(json.dumps({t: round(took[t], 3) for t in ids if t in took}, indent=0, sort_keys=True))
     pacing = (f"{pace.jobs} at a time" if not pace.ever_vr

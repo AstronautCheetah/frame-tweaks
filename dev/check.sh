@@ -145,7 +145,8 @@ check_tweaks() {        # install → status → uninstall in a throwaway home (
         local f needed=
         while IFS= read -r f; do
             tweak_free "$f" || { needed=1; break; }
-        done < <(git diff --name-only origin/main; git ls-files -o --exclude-standard)
+        done < <(git diff --name-only --no-renames origin/main; git ls-files -o --exclude-standard)
+        # (--no-renames: a file moved out of packs/ into docs/ is listed by its old place too)
         if [ -z "$needed" ]; then
             echo "  not needed: nothing it installs changed since origin/main (dev/check.sh tweaks runs it)"
             return $UNNEEDED
@@ -154,7 +155,9 @@ check_tweaks() {        # install → status → uninstall in a throwaway home (
     command -v bsdtar >/dev/null || { missing bsdtar "apt install libarchive-tools"; return; }
     [ -n "${CI:-}" ] || python3 -c 'import ensurepip, venv' 2>/dev/null ||
         { missing "Python's venv module" "apt install python3-venv"; return; }
-    local pin; pin=$(python3 dev/run-tests.py --pin 2>/dev/null) || pin=
+    # (a FRAME_TWEAKS_CHECKS it doesn't know stops here, saying so: hidden, the minute-long check
+    # ran on every core with the headset on)
+    local pin; pin=$(python3 dev/run-tests.py --pin) || return 1
     if [ -n "$pin" ]; then taskset -c "$pin" dev/test-tweaks.sh; else dev/test-tweaks.sh; fi
 }
 

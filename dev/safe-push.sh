@@ -37,7 +37,8 @@ for c in "${new[@]}"; do
     fi
 done
 tip=$(git -C "$replay" rev-parse HEAD)
-git -C "$replay" push origin "$tip:refs/heads/main"
+git -C "$replay" push origin "$tip:refs/heads/main" ||
+    { echo "safe-push: the push was refused; the replay is in $replay (dev/agent-worktree.sh remove, or git worktree remove)." >&2; exit 1; }
 git fetch -q origin main
 if [ "$(git rev-parse origin/main)" != "$tip" ]; then
     echo "safe-push: origin/main isn't at the replayed commit $tip; leaving $replay for inspection." >&2

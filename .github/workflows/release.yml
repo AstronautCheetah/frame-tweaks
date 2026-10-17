@@ -55,7 +55,8 @@ jobs:
           esac
           v="$major.$minor.$patch"
           if [ "$PRE" = true ]; then
-            n=$(git tag -l "v$v-rc.*" | wc -l); v="$v-rc.$((n + 1))"
+            # (after the highest: counting them gave one that exists when an earlier one was deleted)
+            n=$(git tag -l "v$v-rc.*" | sed -n 's/.*-rc\.\([0-9]*\)$/\1/p' | sort -n | tail -1); v="$v-rc.$((${n:-0} + 1))"
           fi
           git rev-parse -q --verify "refs/tags/v$v" && { echo "v$v already exists"; exit 1; }
           echo "version=$v" >> "$GITHUB_OUTPUT"
