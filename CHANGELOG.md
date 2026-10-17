@@ -22,15 +22,11 @@
   controllers are from other programs while its keyboard is open (keyboard privacy), so grabbing
   the pad did nothing. It now slides flat along its own surface after the laser instead, and a
   small note under the pad says why it can only slide until the keyboard closes.
-- **Typing on Steam's keyboard stopped after touching Arrow Pad:** Steam's keyboard follows the
-  laser, so a press on the pad handed the keyboard to the pad, and what you typed next went to
-  the pad instead of the window you were typing in. The pad now types it there, Enter, Backspace,
-  Tab and the arrows included, on your keyboard layout. A Ctrl, Alt or Super you tapped on the pad
-  applies to the next key from Steam's keyboard too (Ctrl on the pad, then C: copy).
-- **Steam's keyboard jumped when you pressed Arrow Pad:** the keyboard follows the laser, and for
-  Arrow Pad SteamVR put it at another spot, tied to where the dashboard first appeared, so it
-  jumped (far, once you'd moved the dashboard) and back again on the next window. With a VR
-  environment tweak installed, it now stays where it is and moves with the dashboard.
+- **Pressing Arrow Pad took Steam's keyboard away from your window:** Steam's keyboard follows
+  the laser, so a press on the pad handed the keyboard to the pad: what you typed next went
+  nowhere, and the keyboard jumped to another spot (far, once you'd moved the dashboard). With a
+  VR environment tweak installed, the keyboard now goes straight back to the window you were
+  typing in, so typing carries on there and the keyboard stays where it was.
 
 ## 0.6.14 (2026-10-17)
 

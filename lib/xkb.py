@@ -222,20 +222,6 @@ def current():
     return _keymaps[key]
 
 
-def typing_keymap():
-    """The Keymap to type text with: KDE's current layout's (current()), else the US one; None
-    without libxkbcommon."""
-    km = current()
-    if km is None:
-        if "us" not in _keymaps:
-            try:
-                _keymaps["us"] = Keymap("us")
-            except OSError:
-                _keymaps["us"] = None
-        km = _keymaps["us"]
-    return km
-
-
 def letter_key(letter, us_code):
     """The key for a Ctrl+letter shortcut on the desktop's layout: the one that types `letter`
     there. us_code (its key on a US keyboard) when the layout or libxkbcommon can't be read, or

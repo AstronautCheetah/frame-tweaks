@@ -187,19 +187,18 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   poses from every other program while its keyboard is open (its log says
   `AddSystemBehaviorFlag SystemBehaviorFlag_SystemKeyboardPrivacy`), so a grab can't follow the
   controller. The pad then slides in its own plane to keep the point you grabbed under the laser.
-- **Typing on Steam's keyboard after touching the pad:** Steam's keyboard follows the laser's
-  focus (SteamVR logs `Reopening keyboard follow overlay focus`), so a press on the pad hands it to
-  the pad, and what's typed on it comes to the pad as `VREvent_KeyboardCharInput`. The pad types it
-  on the desktop through ydotoold, on the desktop's layout, with its latched modifiers: Ctrl on the
-  pad, then C on Steam's keyboard, is Ctrl+C. Its log (`/run/user/1000/arrowpad-input.log`) counts
-  the keys, never what they were.
-- **Steam's keyboard stays put:** reopened for the pad, SteamVR's dashboard places the keyboard
-  "undocked", at a spot tied to where the dashboard first appeared (not where you moved it) and
-  tilted differently, so it jumped. With the [VR environment helper](../vr-dashboard/) installed
-  (any VR environment tweak brings it), a dashboard patch (`keyboard-patch.js`, `arrowpad-keyboard`)
-  tells the dashboard it's docked for the pad too, so it stays where it is for the dashboard's
-  windows and moves with the dashboard. Arrow Pad doesn't install the helper for this: it opens
-  the dashboard's DevTools port while SteamVR runs.
+- **Steam's keyboard and the pad:** Steam's keyboard follows the laser's focus (SteamVR logs
+  `Reopening keyboard follow overlay focus`), so a press on the pad hands it to the pad: what's typed
+  next comes to the pad (`VREvent_KeyboardCharInput`), and SteamVR's dashboard places the keyboard
+  "undocked", at a spot tied to where the dashboard first appeared, so it jumped. The pad can't type
+  it on for you: its keys go to the desktop's focused window, which needn't be the one you were
+  typing in (it went to the KDE desktop in the dashboard, not a floating window). So with the
+  [VR environment helper](../vr-dashboard/) installed (any VR environment tweak brings it), a
+  dashboard patch (`keyboard-patch.js`, `arrowpad-keyboard`) gives the keyboard straight back to the
+  window it was open for: typing carries on there, and the keyboard stays where it was. Without the
+  helper, what's typed after a press on the pad is lost; the pad never types it, and its log
+  (`/run/user/1000/arrowpad-input.log`) only counts it. Arrow Pad doesn't install the helper for
+  this: it opens the dashboard's DevTools port while SteamVR runs.
 - **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
   Python GUI toolkit. The [NordVPN](../../integrations/nordvpn/) tray and Screen snip use the same one.
 
