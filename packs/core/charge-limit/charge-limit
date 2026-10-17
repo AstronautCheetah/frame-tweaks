@@ -7,7 +7,10 @@
 #                               It also starts charge-limit-sleep, which runs the next two around sleep.
 #   charge-limit --once         one check
 #   charge-limit --before-sleep the Frame is about to sleep: asleep, nothing checks the battery, so
-#                               near the limit (SLEEP_WITHIN percent under it, or over) charging pauses
+#                               near the limit (SLEEP_WITHIN percent under it, or over) charging pauses,
+#                               and stays paused until --after-sleep (the checks every 30 s leave it:
+#                               one between this and the Frame falling asleep had lifted it)
+#   charge-limit --after-sleep  awake again (or the sleep didn't happen): a check, as usual
 #   charge-limit --full-once    charge to 100% once (until the battery is full, or the Frame restarts)
 #   charge-limit --limit        the limit in use: a percentage, or off
 #   charge-limit --battery      the battery's folder in /sys
@@ -17,7 +20,8 @@ set -u
 SYSFS=${FRAME_TWEAKS_POWER_SUPPLY:-/sys/class/power_supply}
 SWITCH=${FRAME_TWEAKS_CHARGE_SWITCH:-$SYSFS/pm8550b-charger/charging_pause}
 CONF=${FRAME_TWEAKS_CHARGE_CONF:-$HOME/.config/frame-tweaks/charge-limit.conf}
-# paused (the pause is ours), full-once; the user service's runtime folder (desktop mode has its own)
+# paused (the pause is ours), full-once, sleep-hold (paused for sleep: kept until --after-sleep, or
+# 10 minutes, should the wake be missed); the user service's runtime folder (desktop mode has its own)
 RUN=${FRAME_TWEAKS_CHARGE_RUN:-/run/user/$(id -u)/charge-limit}
 DEFAULT=80
 RESUME_BELOW=1        # (1%: small swings, which age the battery about as much as holding it; README)
@@ -58,6 +62,10 @@ release() {     # lift our pause, if it's still ours
     rm -f "$RUN/paused"
 }
 
+held_for_sleep() {
+    [ -n "$(find "$RUN/sleep-hold" -mmin -10 2>/dev/null)" ]
+}
+
 check() {
     local bat cap lim paused
     bat=$(battery) || { log "no battery found under $SYSFS"; return 1; }
@@ -75,7 +83,7 @@ check() {
         [ "$paused" = 1 ] && [ -e "$RUN/paused" ] && set_switch 0 && log "charging allowed (no limit) at $cap%"
     elif [ "$cap" -ge "$lim" ]; then
         [ "$paused" = 1 ] && [ -e "$RUN/paused" ] || { set_switch 1 && log "charging paused at $cap% (limit $lim%)"; }
-    elif [ "$cap" -le $((lim - RESUME_BELOW)) ] && [ "$paused" = 1 ] && [ -e "$RUN/paused" ]; then
+    elif [ "$cap" -le $((lim - RESUME_BELOW)) ] && [ "$paused" = 1 ] && [ -e "$RUN/paused" ] && ! held_for_sleep; then
         set_switch 0 && log "charging again at $cap% (limit $lim%)"
     fi
     return 0
@@ -87,14 +95,18 @@ before_sleep() {   # (charge-limit-sleep runs it as the Frame goes to sleep; it 
     [ -e "$SWITCH" ] && [ ! -e "$RUN/full-once" ] || return 0
     cap=$(cat "$bat/capacity") lim=$(limit)
     [ "$lim" = off ] && return 0
-    if [ "$cap" -ge $((lim - SLEEP_WITHIN)) ] && [ "$(cat "$SWITCH")" != 1 ]; then
-        set_switch 1 && log "charging paused for sleep at $cap% (limit $lim%)"
+    if [ "$cap" -ge $((lim - SLEEP_WITHIN)) ]; then
+        mkdir -p "$RUN" && touch "$RUN/sleep-hold"
+        if [ "$(cat "$SWITCH")" != 1 ]; then
+            set_switch 1 && log "charging paused for sleep at $cap% (limit $lim%)"
+        fi
     fi
     return 0
 }
 
 case ${1:-} in
     --run)
+        rm -f "$RUN/sleep-hold"
         sleeper=
         if [ -x "$SLEEPER" ]; then "$SLEEPER" "$0" & sleeper=$!; fi
         trap '[ -n "$sleeper" ] && kill "$sleeper" 2>/dev/null; release; exit 0' TERM INT
@@ -104,10 +116,13 @@ case ${1:-} in
         done ;;
     --once) check ;;
     --before-sleep) before_sleep ;;
+    --after-sleep)
+        rm -f "$RUN/sleep-hold"
+        check ;;
     --full-once)
         mkdir -p "$RUN" && touch "$RUN/full-once"
         check ;;
     --limit) limit ;;
     --battery) battery ;;
-    *) echo "usage: charge-limit --run | --once | --before-sleep | --full-once | --limit | --battery" >&2; exit 2 ;;
+    *) echo "usage: charge-limit --run | --once | --before-sleep | --after-sleep | --full-once | --limit | --battery" >&2; exit 2 ;;
 esac

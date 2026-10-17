@@ -142,7 +142,7 @@ class ChargeLimit(unittest.TestCase):
         self.battery(77)
         self.cl("--before-sleep")
         self.battery(76)                                                  # awake, a little lower
-        self.cl("--once")
+        self.cl("--after-sleep")
         self.assertFalse(self.paused())                                   # its own pause: lifted
         self.limit("off")
         self.switch.write_text("0\n")
@@ -152,6 +152,26 @@ class ChargeLimit(unittest.TestCase):
         self.run_dir.mkdir(parents=True, exist_ok=True)
         (self.run_dir / "full-once").touch()
         self.cl("--before-sleep")
+        self.assertFalse(self.paused())
+
+    def test_a_check_just_before_sleep_keeps_the_pause(self):
+        """logind waits a few seconds for the other sleep locks after --before-sleep: the 30 s
+        check landing then lifted the pause below the limit (77% of 78%), and the Frame charged to
+        100% overnight. It stays until --after-sleep; a hold left by a missed wake lasts 10 minutes."""
+        self.limit("78")
+        self.battery(77)
+        self.cl("--before-sleep")
+        self.assertTrue(self.paused())
+        self.cl("--once")                                                 # the check, before it sleeps
+        self.assertTrue(self.paused())
+        self.cl("--after-sleep")                                          # awake
+        self.assertFalse(self.paused())
+        self.cl("--before-sleep")
+        hold = self.run_dir / "sleep-hold"
+        old = time.time() - 11 * 60
+        import os
+        os.utime(hold, (old, old))
+        self.cl("--once")
         self.assertFalse(self.paused())
 
     def test_the_service_starts_the_sleep_watch(self):
@@ -334,10 +354,22 @@ class SleepWatch(unittest.TestCase):
             return types.SimpleNamespace(header=types.SimpleNamespace(message_type=4, fields={3: "PrepareForSleep"}),
                                          body=(going,))
 
+        import collections
+        import contextlib
+
         class Conn:
+            """jeepney's blocking connection: signals matching a filter go to its queue, also
+            while it waits for a reply (here: the Frame goes back to sleep during the lock
+            request made on waking)."""
             def __init__(self):
                 self.locks, self.matches = [], []
                 self.inbox = [signal_msg(True), signal_msg(False)]
+                self.queue = None
+
+            @contextlib.contextmanager
+            def filter(self, rule, bufsize=1):
+                self.queue = collections.deque(maxlen=bufsize)
+                yield self.queue
 
             def send_and_get_reply(self, msg):
                 if msg[0] == "match":
@@ -346,12 +378,16 @@ class SleepWatch(unittest.TestCase):
                 self.assertion = msg
                 lock = Lock()
                 self.locks.append(lock)
+                if len(self.locks) == 2:
+                    self.queue.append(signal_msg(True))       # (asleep again, before the reply)
                 return types.SimpleNamespace(header=types.SimpleNamespace(message_type=2), body=(lock,))
 
-            def receive(self):
-                if not self.inbox:
-                    raise EOFError
-                return self.inbox.pop(0)
+            def recv_until_filtered(self, queue):
+                if not queue:
+                    if not self.inbox:
+                        raise EOFError
+                    queue.append(self.inbox.pop(0))
+                return queue.popleft()
         conn, steps = Conn(), []
 
         def run(cmd, timeout):
@@ -362,10 +398,12 @@ class SleepWatch(unittest.TestCase):
         self.assertEqual(conn.assertion[1], "Inhibit")
         self.assertEqual(conn.assertion[2][0], "sleep")
         self.assertEqual(conn.assertion[2][3], "delay")
-        # before sleep: --before-sleep while the lock is still held; awake: --once, then a new lock
+        # before sleep: --before-sleep while the lock is still held; awake: a new lock first, then
+        # --after-sleep; the sleep that came during that lock request isn't lost
         self.assertEqual(steps, [(["/x/charge-limit", "--before-sleep"], [False]),
-                                 (["/x/charge-limit", "--once"], [True])])
-        self.assertEqual([lock.closed for lock in conn.locks], [True, False])
+                                 (["/x/charge-limit", "--after-sleep"], [True, False]),
+                                 (["/x/charge-limit", "--before-sleep"], [True, False])])
+        self.assertEqual([lock.closed for lock in conn.locks], [True, True])
 
 
 if __name__ == "__main__":

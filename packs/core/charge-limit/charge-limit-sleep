@@ -4,7 +4,8 @@ sleep. Asleep, nothing checks the battery, so a Frame that went to sleep while c
 on, to 100% overnight. This holds a "delay" sleep lock from logind, as SteamVR's services do:
 when the Frame is about to sleep, logind waits (a few seconds at most) while this runs
 `charge-limit --before-sleep`, which pauses charging near the limit, then lets it go. As it
-wakes, `charge-limit --once` checks again at once.
+wakes (or the sleep is called off), it takes the lock again first (should the Frame go straight
+back to sleep), then `charge-limit --after-sleep` lets the checks lift that pause again.
   charge-limit-sleep CHARGE-LIMIT     (charge-limit --run starts it, with its own path)"""
 import subprocess
 import sys
@@ -34,22 +35,23 @@ def step(charge_limit, arg):
 
 
 def watch(conn, charge_limit):
-    conn.send_and_get_reply(message_bus.AddMatch(MatchRule(
-        type="signal", interface=LOGIN.interface, member="PrepareForSleep", path=LOGIN.object_path)))
-    lock = inhibit(conn)
-    while True:
-        msg = conn.receive()
-        if msg.header.message_type != MessageType.signal or msg.header.fields.get(3) != "PrepareForSleep":
-            continue
-        if msg.body and msg.body[0]:              # going to sleep
-            step(charge_limit, "--before-sleep")
-            if lock is not None:
-                lock.close()
-                lock = None
-        else:                                     # awake again
-            step(charge_limit, "--once")
-            if lock is None:
-                lock = inhibit(conn)
+    rule = MatchRule(type="signal", interface=LOGIN.interface, member="PrepareForSleep", path=LOGIN.object_path)
+    conn.send_and_get_reply(message_bus.AddMatch(rule))
+    # (a filter's queue keeps the signals that come while it waits for a reply, to a lock request
+    # say: without one, jeepney drops them, and that sleep went by without --before-sleep)
+    with conn.filter(rule, bufsize=8) as signals:
+        lock = inhibit(conn)
+        while True:
+            msg = conn.recv_until_filtered(signals)
+            if msg.body and msg.body[0]:              # going to sleep
+                step(charge_limit, "--before-sleep")
+                if lock is not None:
+                    lock.close()
+                    lock = None
+            else:                                     # awake again, or the sleep was called off
+                if lock is None:
+                    lock = inhibit(conn)
+                step(charge_limit, "--after-sleep")
 
 
 def main():
