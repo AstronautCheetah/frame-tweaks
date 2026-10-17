@@ -353,7 +353,7 @@ Each tweak keeps its settings in a few known places, listed in its manifest (`co
 Pad's size and place in `~/.config/arrowpad.json`, Android Mirror's in
 `~/.config/frame-tweaks/phone.conf`, and so on. Your data is kept apart and is never removed
 with settings: what you dictated (`~/.local/share/dictation-history.txt`), adb's pairing keys
-(`~/.android`), saved reports (`~/frame-tweaks-debug-*.txt`).
+(`~/.android`), saved reports (`~/Downloads/frame-tweaks-debug-*.txt`).
 
 - **When you uninstall a tweak** its settings are kept, so it's set up as before if you install
   it again. ⚙ Preferences → **Uninstalling a tweak** can make them go with it instead (for one
@@ -445,8 +445,9 @@ What stays in any case:
 - **SteamVR drivers, Recline included:** `~/.local/share/Steam/logs/vrserver.txt`.
 
 `./install.sh debug-info` (or **🐞 Report a problem**) gathers the recent install logs, the status of
-every tweak and the services' recent lines into one file in your home folder
-(`~/frame-tweaks-debug-….txt`). Your user name, home folder, host and phone names, and IP, MAC
+every tweak and the services' recent lines into one file in your Downloads folder
+(`~/Downloads/frame-tweaks-debug-….txt`, where Flatpak apps such as Firefox can read it too). Your
+user name, home folder, host and phone names, and IP, MAC
 and e-mail addresses are removed, but read it before you share it.
 
 ## Good to know about the Frame
