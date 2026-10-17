@@ -5,6 +5,8 @@
 # when only one is advertising, chosen from a list when there are several (phone --pick: choose
 # again). When it isn't in sight you can wait for it or use another one.
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
+# Left on, it disconnects by itself after PHONE_TIMEOUT minutes (1 hour unless set; 0: never), so
+# a mirror forgotten overnight doesn't drain the phone's battery.
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 # Translations (lib/i18n.sh; the copy install_i18n puts here), else English
 # shellcheck source=/dev/null
@@ -171,6 +173,40 @@ STREAM_MAX=${PHONE_MAX_SIZE:-1024} BIT_RATE=${PHONE_BIT_RATE:-2M} MAX_FPS=${PHON
 # copies (then on to the desktop and VR with the Shared clipboard tweak).
 clipboard() { [ "${PHONE_CLIPBOARD:-both}" = off ] && echo --no-clipboard-autosync; return 0; }
 
+# Auto-disconnect: a mirror left on keeps the phone streaming (one went on all night and emptied its
+# battery). After PHONE_TIMEOUT minutes (60 unless set; 0: never) it asks, for a minute, whether to
+# keep it on; with no answer it closes the mirror and disconnects the phone. The time counts from
+# when the mirror opened, or from when the setting was last changed: it's read from the file at
+# each check, so a change (in the settings or the mirror's gear) applies to this mirror, from then.
+MINUTE=${PHONE_MINUTE:-60}                 # (seconds in a minute: the tests make it shorter)
+timeout_minutes() {
+    local m
+    # shellcheck source=/dev/null
+    m=$(unset PHONE_TIMEOUT; [ -f "$CONF" ] && . "$CONF" >/dev/null 2>&1; printf '%s' "${PHONE_TIMEOUT:-60}")
+    [[ $m =~ ^[0-9]+$ ]] || m=60
+    echo "$((10#$m))"
+}
+span() {                                   # span MINUTES: 45 min, 2 h, 1 h 30 min
+    if [ "$1" -lt 60 ]; then t '%s min' "$1"
+    elif [ $(($1 % 60)) -eq 0 ]; then t '%s h' $(($1 / 60))
+    else t '%s h %s min' $(($1 / 60)) $(($1 % 60)); fi
+}
+# keep_on: the question, a minute long (kdialog, on the display you're using); 0: keep it on.
+keep_on() {
+    command -v kdialog >/dev/null || return 1
+    local k
+    kdialog --title "$(t 'Android Mirror: still using it?')" --yes-label "$(t 'Keep it on')" --no-label "$(t 'Disconnect')" \
+        --yesno "$(t "%s has been mirrored for %s. Android Mirror disconnects in a minute so the phone's battery can rest, unless you keep it on." \
+                   "${PHONE_NAME:-$(t 'The phone')}" "$(span $((($(date +%s) - opened) / MINUTE)))")" >/dev/null 2>&1 </dev/null &
+    k=$!
+    for _ in $(seq $((MINUTE * 2))); do kill -0 "$k" 2>/dev/null || break; sleep 0.5; done
+    if kill -0 "$k" 2>/dev/null; then                      # no answer: it goes
+        kill "$k" 2>/dev/null; wait "$k" 2>/dev/null
+        return 1
+    fi
+    wait "$k"
+}
+
 # A wireless connection can die without scrcpy noticing (the phone changed network or address,
 # e.g. after switching profile): the picture just freezes. Check the phone answers every 5 s;
 # after 3 misses, close the frozen mirror and reconnect at the phone's current address.
@@ -187,6 +223,7 @@ restart=
 trap 'restart=1; kill "$pid" 2>/dev/null' USR1
 SCRCPY_LOG="$RUN/phone-scrcpy.log"                         # what scrcpy said, for a failure message
 first=1
+opened=$(date +%s) since=$(date +%s) limit=$(timeout_minutes) timed_out=
 while :; do
     if [ -n "$restart" ]; then
         restart=
@@ -261,9 +298,21 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
     while kill -0 "$pid" 2>/dev/null; do
         sleep 5 & wait $!                      # (a restart request interrupts the wait)
         [ -n "$restart" ] && break
+        m=$(timeout_minutes) now=$(date +%s)
+        [ "$m" != "$limit" ] && limit=$m since=$now               # (changed: counts from now)
+        if [ "$limit" -gt 0 ] && [ $((now - since)) -ge $((limit * MINUTE)) ]; then
+            if keep_on; then since=$(date +%s); else timed_out=1; break; fi
+        fi
         if alive; then misses=0; else misses=$((misses + 1)); fi
         [ "$misses" -ge 3 ] && break
     done
+    if [ -n "$timed_out" ]; then
+        kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
+        adb disconnect "$dev" >/dev/null 2>&1
+        notify-send -a Phone "$(t 'Android Mirror disconnected')" "$(t "%s was mirrored for %s, so Android Mirror disconnected to save its battery. Open Android Mirror to connect again; the time is in its settings." \
+            "${PHONE_NAME:-$(t 'The phone')}" "$(span $((($(date +%s) - opened) / MINUTE)))")"
+        exit 0
+    fi
     if [ -n "$restart" ]; then
         kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
         continue                               # same phone, new settings
