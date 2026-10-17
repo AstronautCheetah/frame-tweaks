@@ -398,6 +398,7 @@ def pgettext(context, text):
 # The languages' own names, for choosing one (a language without an entry shows its code).
 NAMES = {"en": "English", "es_419": "Español (Latinoamérica)", "es": "Español", "pt_BR": "Português (Brasil)",
          "pt": "Português", "de": "Deutsch", "fr": "Français", "it": "Italiano", "nl": "Nederlands",
+         "nl_BE": "Nederlands (België)",
          "pl": "Polski", "ru": "Русский", "uk": "Українська", "ja": "日本語", "ko": "한국어",
          "zh_CN": "简体中文", "zh_TW": "繁體中文", "sv": "Svenska", "da": "Dansk", "fi": "Suomi",
          "nb": "Norsk bokmål", "cs": "Čeština", "hu": "Magyar", "ro": "Română", "tr": "Türkçe", "el": "Ελληνικά"}

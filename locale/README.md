@@ -9,7 +9,12 @@ Lokalize, Weblate, or a text editor.
   makes it from the code and the tweaks' README front matter.
 - `<language>.po` (for example `de.po`, `pt_BR.po`, `es_419.po` for Latin American Spanish) is
   one language's translation. A language without its own file uses another of the same
-  language: Spanish from Spain or Mexico (`es`, `es_MX`) uses `es_419.po` until there's an `es.po`.
+  language: Spanish from Spain or Mexico (`es`, `es_MX`) uses `es_419.po` until there's an `es.po`,
+  and Dutch from the Netherlands (`nl`) uses `nl_BE.po` (Flemish).
+- Today: `es_419.po` (Latin American Spanish), `fr.po` (French) and `nl_BE.po` (Flemish Dutch),
+  each with its glossary in [glossary/](glossary/). The French and Flemish came from a translation
+  helper, checked against their glossaries and the official SteamVR, Steam, KDE and Android
+  wording, and are marked `# needs review` until a native speaker reads them.
 
 ## Adding a language
 

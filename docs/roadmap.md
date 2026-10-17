@@ -66,7 +66,7 @@ next to the idea it inspired.
   not working reliably yet, so it's off (`CONTROLLER_BUTTONS` in the window) and out of ⚙
   Preferences until it does; the window's haptic ticks don't depend on it. *(ProtonUp-Qt)*
 - [x] **Translations** of the installer window, the installer's messages and the tweaks' programs
-  (gettext `.po` files, locale/README.md; Latin American Spanish first). Still to come: a
+  (gettext `.po` files, locale/README.md; Latin American Spanish, then French and Flemish Dutch). Still to come: a
   translation platform (Weblate) once there are outside translators. *(Decky, ProtonUp-Qt)*
 - [ ] **Screen snip: text recognition (OCR) in more languages.** Today it reads English only:
   Homebrew's Tesseract brings just `eng.traineddata`, and frame-snip doesn't pass `-l`. Plan:
