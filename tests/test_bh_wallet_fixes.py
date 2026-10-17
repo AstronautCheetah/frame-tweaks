@@ -556,6 +556,16 @@ class AutoLock(Home):
         s = json.loads(self.wu.SESSION.read_text())
         self.assertEqual((s["unlocked"], s["ksecretd"]), (self.NOW, "200:9"))
 
+    def test_what_counts_as_the_lock_set(self):
+        """lock_set: the auto-lock's timer running and the session saying it, for this ksecretd (an
+        app opening the wallet then leaves the time alone)."""
+        with mock.patch.object(self.wu, "ksecretd_id", lambda: "5:5"):
+            self.assertFalse(self.wu.lock_set())                  # (nothing set yet)
+            self.wu.schedule_lock()
+            self.assertTrue(self.wu.lock_set())
+        with mock.patch.object(self.wu, "ksecretd_id", lambda: "6:6"):
+            self.assertFalse(self.wu.lock_set())                  # (another ksecretd: a new unlock)
+
     def test_an_unlock_and_the_watcher_schedule_it_at_once(self):
         # (the second systemd-run found the first one's timer: "Wallet unlocked for ? hours")
         self.both_stopped = threading.Barrier(2)
@@ -585,7 +595,7 @@ class Watcher(Home):
             made.append(FakeConn(ksecretd(state)) if made else listening)
             return made[-1]
         with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
-                mock.patch.multiple(wu, bus=bus, broker=lambda: None, keep_auto_lock=lambda: None,
+                mock.patch.multiple(wu, bus=bus, broker=lambda: None, keep_auto_lock=lambda: None, lock_set=lambda: False,
                                     open_in_kwalletd6=lambda: False, schedule_lock=lambda: scheduled.append(1) or "4"):
             with self.assertRaises(Done):
                 wu.watch()
@@ -654,6 +664,27 @@ class FrontEndHandle(Home):
                 front.forget()                                 # (walletClosed(123): ours idled out)
                 front.sync(only_while_open_there=True)
             self.assertEqual(state["opens"], reopened, apps_open)
+
+
+class AppOpening(Home):
+    """An app opening the wallet that's unlocked already: the auto-lock stays at the time set at
+    the unlock (it moved later with every open). A new unlock sets it, as before."""
+    def test_the_auto_lock_counts_from_the_unlock(self):
+        for lock_set, scheduled in ((True, []), (False, [1])):
+            wu = wallet_unlock(self.home)
+            state, calls = {"locked": False}, []
+            listening = FakeConn(ksecretd(state), [wallet_signal("walletOpened")])
+            made = []
+
+            def bus():
+                made.append(FakeConn(ksecretd(state)) if made else listening)
+                return made[-1]
+            with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
+                    mock.patch.multiple(wu, bus=bus, broker=lambda: None, keep_auto_lock=lambda: None,
+                                        lock_set=lambda: lock_set, schedule_lock=lambda: calls.append(1) or "4"):
+                with self.assertRaises(Done):
+                    wu.watch()
+            self.assertEqual(calls, scheduled, lock_set)
 
 
 class AppQuitting(Home):
@@ -747,7 +778,7 @@ class FrontEnd(Home):
             return msg
         listening.receive = receive
         with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
-                mock.patch.multiple(wu, bus=buses, broker=lambda: None, keep_auto_lock=lambda: None,
+                mock.patch.multiple(wu, bus=buses, broker=lambda: None, keep_auto_lock=lambda: None, lock_set=lambda: False,
                                     schedule_lock=lambda: scheduled.append(1) or "4"):
             with self.assertRaises(Done):
                 wu.watch()

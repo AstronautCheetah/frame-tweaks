@@ -94,7 +94,8 @@ The **🔑 Wallet apps** button on this tweak's row in the Frame Tweaks window o
 - **Auto-lock:** ticked by default. Untick it and the wallet stays unlocked until you lock it:
   no countdown, and KDE's own lock after 4 hours unused is turned off too.
 - **After unlocking:** − / + between 1 and 24 hours (default 4 hours). The new time counts from
-  the next unlock or the next **Extend timer**.
+  the next unlock or the next **Extend timer**. An app opening the wallet while it's unlocked
+  doesn't move it: the time the page shows is the time it locks.
 - **Protected** apps, each with:
   - **Password first:** if the wallet is locked, the app asks for the wallet password before it
     opens, and doesn't open without it.

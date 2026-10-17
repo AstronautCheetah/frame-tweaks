@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **The wallet's auto-lock counts from the unlock:** each app opening the already-unlocked wallet
+  moved the auto-lock later, so it could keep the wallet unlocked well past the time the Wallet
+  apps page showed. Only an unlock or **Extend timer** sets it now.
+
 ## 0.6.13 (2026-10-17)
 
 ### Changed
