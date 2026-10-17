@@ -22,6 +22,7 @@ import subprocess
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -583,6 +584,27 @@ class InstallState(unittest.TestCase):
         r = self.sh("mods", "on", "core")                     # (last: Core's tweaks are back)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertNotIn("original", (self.home / ".config/frame-tweaks/installer/off-packs").read_text())
+
+    def test_update_refuses_an_option_it_doesnt_know(self):
+        """--reinstal (a typo) was skipped, and the update went to the newest release, every
+        tweak's installer run again."""
+        r = self.sh("update", "--reinstal")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("unknown option --reinstal", r.stdout + r.stderr)      # (through the log's tee)
+
+    def test_an_update_cut_short_is_known(self):
+        """The window said "up to date" after an update whose terminal was closed midway: the
+        checkout was new, the tweaks not reinstalled. (lib/sft.py unfinished_update, as
+        stale_tweaks; held and linked tweaks aren't reinstalled by an update.)"""
+        import sft
+        records = self.state / "installed"
+        records.mkdir(parents=True, exist_ok=True)
+        for tid, version in (("ydotool", "0.0.1"), ("tools", VERSION), ("speech", "0.0.1"), ("recline", "0.0.1")):
+            (records / tid).write_text(version + "\n")
+        (self.state / "held").mkdir(parents=True, exist_ok=True)
+        (self.state / "held/speech").touch()
+        with mock.patch.multiple(sft, INSTALLED=records, STATE=self.state):
+            self.assertEqual(sft.unfinished_update(), ["ydotool"])
 
     def test_run_by_a_relative_path(self):
         """frame-tweaks/install.sh from the folder above: it changes into its folder, where

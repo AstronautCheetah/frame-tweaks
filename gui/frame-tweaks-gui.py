@@ -1231,8 +1231,11 @@ class Window(QWidget):
                 if getattr(self.details, "comp", {}).get("id") == cid:
                     self.details.show_issue(self.latest[cid])
         if self.self_update is not None and self.self_update.done():
-            newest = None if self.self_update.cancelled() else self.self_update.result()
-            self.self_update = None
+            job, self.self_update = self.self_update, None       # (cleared first: a check that failed came back every tick)
+            try:
+                newest = None if job.cancelled() else job.result()
+            except Exception:
+                newest = None
             if newest:
                 self.show_newest(newest)
                 if self.update_state in ("check", "checking"):
@@ -1245,8 +1248,13 @@ class Window(QWidget):
                            "it.").format(version=sft.build_version()), good=True)
             elif self.update_state == "checking":
                 self.set_update_state("check")
+                left = sft.unfinished_update() if newest == "" else []
                 if newest is None:                       # (offline, say: not "up to date")
                     self.say(_("Couldn't check for updates (no connection to GitHub?)."))
+                elif left:                               # (an update cut short: the checkout's new, these aren't)
+                    self.set_update_state("finish")
+                    self.say(_("The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the "
+                               "update does it.").format(tweaks=", ".join(left)))
                 else:
                     self.say(_("✔ Frame Tweaks is up to date ({version}).").format(version=self.running_build()),
                                              good=True)
@@ -1536,7 +1544,9 @@ class Window(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
-        after = "" if cid else "; echo; echo " + shlex.quote(_("Close and reopen Frame Tweaks to use the new version."))
+        # (0 updated, 3 updated but a tweak didn't install again; else it didn't update: no "reopen")
+        after = "" if cid else ("; rc=$?; if [ $rc -eq 0 ] || [ $rc -eq 3 ]; then echo; echo "
+                                + shlex.quote(_("Close and reopen Frame Tweaks to use the new version.")) + "; fi")
         full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh(),
@@ -1556,7 +1566,8 @@ class Window(QWidget):
                      "checking": (_("Checking…"), ""),
                      "update": (_("⬇ Update to {version}").format(version=newest),
                                 _("Install it: your tweaks are updated with it")),
-                     "restart": (_("↻ Restart"), _("Reopen Frame Tweaks to use the new version"))}[state]
+                     "restart": (_("↻ Restart"), _("Reopen Frame Tweaks to use the new version")),
+                     "finish": (_("⬇ Finish the update"), _("Install the tweaks the last update didn't get to"))}[state]
         b.setText(text)
         b.setToolTip(tip)
         b.setEnabled(state != "checking")
@@ -1584,7 +1595,7 @@ class Window(QWidget):
             if self.pack_check is None:
                 self.pack_check = self.pool.submit(sft.packs_with_updates)
             self.collecting()
-        elif self.update_state == "update":
+        elif self.update_state in ("update", "finish"):
             self.run_update(None)
         elif self.update_state == "restart":
             self.restart_self()
