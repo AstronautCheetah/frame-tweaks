@@ -28,7 +28,9 @@ settings:
   format: shell
   about: >-
     Charging stops at this level and starts again 1% below it. Plugged in at the limit, the Frame
-    runs mostly from the charger or power bank. A lower limit wears the battery a little less.
+    runs mostly from the charger or power bank. A lower limit wears the battery a little less. The
+    level is the battery's own reading, as KDE shows it; Steam's dashboard shows a higher figure for
+    the same charge (about 8 points more around 80%: 78% here is 86% there).
   note: >-
     Applies within 30 seconds.
   options:
@@ -102,6 +104,10 @@ remove the rule. If your user has no password yet, set one first with `passwd` i
 - **Its status** shows the limit and the battery level, and "not charging" while it holds.
 
 ## Good to know
+- **Steam shows a higher figure.** The limit, KDE and Frame Tweaks all go by the battery's own
+  fuel gauge (`/sys/class/power_supply/*/capacity`). Steam's dashboard (SteamVR's battery level)
+  shows its own conversion of that reading, about 8 points more around 80% (measured 74→82 up to
+  78→86), so with the limit at 78% Steam shows about 86% when charging stops. That's expected.
 - **Asleep, the limit can't be checked,** so as the Frame goes to sleep, charging pauses if the
   battery is within 10% of the limit (or over it): it doesn't charge past it overnight. Lower
   than that, it charges on while asleep, so a nearly empty Frame isn't left low, and may go past

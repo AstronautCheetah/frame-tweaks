@@ -242,10 +242,10 @@ class ChargeLimit(unittest.TestCase):
         return r.returncode, r.stdout.strip()
 
     def test_status(self):
-        self.assertEqual(self.status(), (0, "ok       Stops charging at 80% (battery 70%)"))
+        self.assertEqual(self.status(), (0, "ok       Battery 70%; charging stops at 80%"))
         self.battery(82, current=0)
         self.cl("--once")
-        self.assertEqual(self.status(), (0, "ok       Holding at 80% (battery 82%, not charging)"))
+        self.assertEqual(self.status(), (0, "ok       Battery 82%; holding at the 80% limit, not charging"))
         self.battery(82, current=900000)                                # (the charger ignored the pause)
         self.assertEqual(self.status()[0], 2)
         self.assertIn("still charges", self.status()[1])
@@ -257,9 +257,9 @@ class ChargeLimit(unittest.TestCase):
         self.assertIn("charging isn't paused", text)
         self.switch.write_text("1\n")                                   # well over it (charged asleep)
         self.battery(98, current=0)
-        self.assertEqual(self.status(), (0, "ok       Not charging until the battery is below 80% (now 98%)"))
+        self.assertEqual(self.status(), (0, "ok       Battery 98%; not charging until it's below 80%"))
         self.limit("off")
-        self.assertEqual(self.status(), (0, "ok       Limit off: charges to 100% (now 98%)"))
+        self.assertEqual(self.status(), (0, "ok       Battery 98%; the limit is off: it charges to 100%"))
 
     def test_status_says_when_the_sleep_watch_isnt_running(self):
         sleeper = self.home / ".local/bin/charge-limit-sleep"
@@ -271,7 +271,7 @@ class ChargeLimit(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("Not watching for sleep", text)
         stub(self.stubs, "pgrep", "echo 42")
-        self.assertEqual(self.status(), (0, "ok       Stops charging at 80% (battery 70%)"))
+        self.assertEqual(self.status(), (0, "ok       Battery 70%; charging stops at 80%"))
 
     def test_status_says_when_steamos_has_its_own(self):
         code, text = self.status("[battery_charge_limit]\nsuggested_minimum_limit = 10\n")
@@ -284,9 +284,9 @@ class ChargeLimit(unittest.TestCase):
         self.run_dir.mkdir(parents=True)
         (self.run_dir / "full-once").touch()
         self.battery(85)
-        self.assertEqual(self.status(), (0, "ok       Charging to 100% once (now 85%), then stopping at 80% again"))
+        self.assertEqual(self.status(), (0, "ok       Battery 85%; charging to 100% once, then stopping at 80% again"))
         self.limit("off")
-        self.assertEqual(self.status(), (0, "ok       Limit off: charges to 100% (now 85%)"))
+        self.assertEqual(self.status(), (0, "ok       Battery 85%; the limit is off: it charges to 100%"))
 
     # ---- uninstall.sh -----------------------------------------------------------------------
     def test_uninstall_finishes_without_the_switch(self):

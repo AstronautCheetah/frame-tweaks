@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+- **The charge limit's status starts with the battery level:** "Battery 76%; charging stops at
+  78%" (it was "Stops charging at 78% (battery 76%)", easy to read as the battery at 78%). Its
+  settings and README also say why Steam's dashboard shows more for the same charge: Steam
+  converts the battery's reading its own way, about 8 points higher around 80%.
+
 ### Fixed
 - **Menu entries stuck in another language:** after you tried a language in ⚙ Preferences and
   switched back, Arrow Pad, Android Mirror and the other Frame Tweaks entries in Steam's "+" menu
