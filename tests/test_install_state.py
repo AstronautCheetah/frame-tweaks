@@ -619,7 +619,20 @@ class InstallState(unittest.TestCase):
         (self.state / "held").mkdir(parents=True, exist_ok=True)
         (self.state / "held/speech").touch()
         with mock.patch.multiple(sft, INSTALLED=records, STATE=self.state):
+            # Without the update's mark, older records alone aren't one cut short: a checkout moved
+            # some other way (git pull, a developer's work) said so, and Finish the update ran every
+            # tweak's installer again.
+            self.assertEqual(sft.unfinished_update(), [])
+            (self.state / "update-unfinished").write_text(VERSION + "\n")
             self.assertEqual(sft.unfinished_update(), ["ydotool"])
+
+    def test_the_update_mark_goes_once_the_tweaks_are_installed_again(self):
+        """An update marks itself until its reinstall stage is through; cut short, the mark stays."""
+        self.installed_at("0.0.1")
+        (self.state / "update-unfinished").write_text(VERSION + "\n")
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.state / "update-unfinished").exists())
 
     def test_run_by_a_relative_path(self):
         """frame-tweaks/install.sh from the folder above: it changes into its folder, where

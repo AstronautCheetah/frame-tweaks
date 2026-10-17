@@ -608,9 +608,11 @@ keep: git reset --hard @{upstream}")" >&2
             say "$(t "Frame Tweaks is up to date (%s): nothing to reinstall. To run the installed tweaks' installers again anyway: %s" "$FT_BUILD" "./install.sh update --reinstall")"
             return 0
         fi
+        mark_update
         FRAME_TWEAKS_UPDATING=1 exec ./install.sh _reinstall   # re-exec so the new version of this script runs
     fi
     export FRAME_TWEAKS_UPDATING=1      # (no git: an update all the same, so holds count)
+    mark_update
     cmd_reinstall
 }
 
@@ -645,6 +647,8 @@ cmd_reinstall() {
     WAS_INSTALLED=("${installed[@]}")
     run_migrations "${installed[@]}"
     cmd_install "${installed[@]}"; rc=$?
+    # (through: a tweak that didn't install again is said so, and isn't an update cut short)
+    [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && rm -f "$UPDATE_MARK"
     echo; bold "$(t 'Checking the SteamOS/SteamVR parts the tweaks rely on')"; cmd_check_system || true
     # (2: all installed, with a warning to read. 3, not 1: Frame Tweaks itself is up to date, a
     # tweak didn't install again, which get.sh tells from an update that couldn't happen.)
@@ -799,11 +803,20 @@ stop_processes() {
 record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; }
 forget_version() { rm -f "$STATE/installed/$1"; }
 held() { [[ -f "$STATE/held/$1" ]]; }
-# stale_tweaks: did another version install a tweak an update reinstalls (not held, not linked)?
+# An update marks itself (UPDATE_MARK) from the moment it has moved the checkout until it has run the
+# tweaks' installers again: left behind, it was cut short (its terminal closed, Ctrl+C), and the
+# tweaks it didn't get to are run by the next update (the window: ⬇ Finish the update). Only then:
+# the install records alone said "didn't finish" for a checkout moved some other way (git pull, a
+# developer's own work), and Finish the update ran every tweak's installer again (2026-10-17).
+UPDATE_MARK="$STATE/update-unfinished"
+mark_update() { mkdir -p "$STATE"; echo "$VERSION" > "$UPDATE_MARK"; }
+# stale_tweaks: an update was cut short, and another version installed a tweak it reinstalls (not
+# held, not linked)?
 # Its record is written only when its installer succeeds, so this is what an update has yet to do.
 # (Only if it's still installed: an update doesn't reinstall one that isn't.)
 stale_tweaks() {
     local r id
+    [[ -f $UPDATE_MARK ]] || return 1
     for r in "$STATE"/installed/*; do
         [[ -f $r ]] || continue; id=${r##*/}
         is_component "$id" && [[ -z ${LINKED[$id]:-} ]] && ! held "$id" || continue

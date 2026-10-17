@@ -1006,7 +1006,11 @@ def packs_with_updates():
 def unfinished_update():
     """The tweaks an update hasn't installed again yet (./install.sh stale_tweaks): an install
     record from another version, not held, not linked. An update cut short (its terminal closed,
-    Ctrl+C) left them, and the window then said "up to date"."""
+    Ctrl+C) left them, and the window then said "up to date". Only after an update cut short (its
+    mark, update-unfinished, left behind): a checkout moved some other way (git pull, a developer's
+    own work) isn't one, and Finish the update ran every tweak's installer again."""
+    if not (STATE / "update-unfinished").exists():
+        return []
     try:
         version = (REPO / "VERSION").read_text().strip()
         records = {f.name: f.read_text().strip() for f in INSTALLED.iterdir() if f.is_file()}
