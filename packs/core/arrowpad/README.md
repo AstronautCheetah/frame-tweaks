@@ -146,8 +146,9 @@ flat along its own surface after the laser instead (up, down and sideways only),
 note under it says so. To move it anywhere then, closer, further away or turned, use **SteamVR's
 grab bar** that shows under the pad while the keyboard is open (with the
 [VR environment helper](../vr-dashboard/), which any VR environment tweak installs): hold it
-with the trigger, as the bar under a desktop window, and the pad goes where you let go
-(the thumbstick pushes it away or pulls it closer while you hold it).
+with the trigger, as the bar under a floating window: the pad moves with your hand, turned and
+tilted with it, and stays where you let go (the thumbstick pushes it away or pulls it closer
+while you hold it).
 
 ### Which keyboard when?
 

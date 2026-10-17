@@ -76,8 +76,10 @@ Another is `panel-grab`. While Steam's keyboard is open, SteamVR hides where you
 from every other program (so an app can't tell what you type from how your hands move), and
 Frame Tweaks' panels can only slide after the laser. SteamVR's own dashboard can still move
 things: this patch puts the grab bar it draws under desktop windows under each panel, for as
-long as the keyboard is open. Hold it with the trigger and a picture of the panel follows your
-hand (the thumbstick pushes it away or pulls it closer); let go, and the panel takes its place.
+long as the keyboard is open, and moves the panel as the dashboard moves a window floating in
+the world. Hold it with the trigger and a picture of the panel is pinned to your hand, turned
+and tilted with it (the thumbstick pushes it away or pulls it closer); let go, and the panel
+takes its place.
 The panel is told only where you let go, never where your controller is. They say where they
 are, and get told where they went, through small files in `$XDG_RUNTIME_DIR/frame-tweaks/panels`
 that the service relays.
