@@ -70,7 +70,8 @@ def programs(shebang):
 CODE = sorted({*ROOT.glob("gui/*.py"), ROOT / "gui/frame-tweaks-gui.py", *ROOT.glob("lib/*.py"),
                *ROOT.glob("packs/core/*/*.py"), *ROOT.glob("packs/integrations/*/*.py"), *ROOT.glob("packs/third-party/*/*.py"),
                *programs(rb"#!.*python")})
-SHELL = sorted({ROOT / "install.sh", *ROOT.glob("lib/*.sh"), *ROOT.glob("packs/core/*/*.sh"),
+GET_SH = ROOT / "get.sh"           # (the bootstrap: its texts carry their own translations, below)
+SHELL = sorted({ROOT / "install.sh", GET_SH, *ROOT.glob("lib/*.sh"), *ROOT.glob("packs/core/*/*.sh"),
                 *ROOT.glob("packs/integrations/*/*.sh"), *ROOT.glob("packs/third-party/*/*.sh"), *programs(rb"#!.*(/bash|/sh\b|env bash)")})
 JS = sorted(p for pack in ("core", "integrations", "third-party") for p in ROOT.glob(f"packs/{pack}/*/*.js"))
 DESKTOP = sorted([*ROOT.glob("share/applications/*.desktop"),
@@ -115,10 +116,10 @@ def from_code():
     return out
 
 
-def from_shell():
+def from_shell(files=None):
     """{(None, msgid, None): [where, …]} from t '...' in the shell scripts."""
     out = {}
-    for f in SHELL:
+    for f in SHELL if files is None else files:
         text = f.read_text(errors="replace")
         for m in T_CALL.finditer(text):
             if re.search(r"(^|\s)#", text[text.rfind("\n", 0, m.start()) + 1:m.start()]):
@@ -385,6 +386,43 @@ def todo(text):
     return out
 
 
+# ---- get.sh: its texts come before Frame Tweaks' translations are on the machine -----------------
+GET_SH_BLOCK = re.compile(r"(\n *# BEGIN translations[^\n]*\n)(.*?)(\n *# END translations)", re.S)
+
+
+def bash_word(s):
+    return "$'" + s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\t", "\\t") + "'"
+
+
+def get_sh_block():
+    """get.sh's translations block: its texts, in each language that has them."""
+    wanted = sorted({m for (_c, m, _p) in from_shell([GET_SH])})
+    pairs, langs = [], []
+    for po in sorted(LOCALE.glob("*.po")):
+        done = i18n.parse_po(po.read_text())
+        mine = [(m, done[(None, m)][0]) for m in wanted if done.get((None, m), [""])[0]]
+        if mine:
+            langs.append(po.stem)
+            pairs += [(f"{po.stem}|{m}", tr) for m, tr in mine]
+    lines = [f'    GET_LANGS="{" ".join(langs)}"', "    declare -gA GET_TR=("]
+    lines += [f"        [{bash_word(k)}]={bash_word(v)}" for k, v in pairs]
+    return "\n".join(lines + ["    )"])
+
+
+def get_sh_text(text):
+    """get.sh's text with its block as the translations have it now."""
+    return GET_SH_BLOCK.sub(lambda m: m[1] + get_sh_block() + m[3], text, count=1)
+
+
+def write_get_sh():
+    """Bring get.sh's block up to date (only from the repo's own translations: tests use others)."""
+    if LOCALE.resolve() == (ROOT / "locale").resolve() and GET_SH.exists():
+        text = GET_SH.read_text()
+        new = get_sh_text(text)
+        if new != text:
+            GET_SH.write_text(new)
+
+
 def obsolete(text):
     """The #~ blocks of a .po text: removed texts, kept for their translations."""
     return [b for b in re.split(r"\n\s*\n", text.strip()) if b.lstrip().startswith("#~")]
@@ -416,6 +454,7 @@ def update(po, pot_text):
     out += ["\n".join("#~ " + l for l in b.splitlines() if not l.startswith("#:")) for b in gone]
     po.write_text("\n\n".join(out) + "\n")
     tidy_changes()
+    write_get_sh()
 
 
 PLACEHOLDER = re.compile(r"\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
@@ -536,6 +575,7 @@ def import_(lang, outdir, mark=None):
             answers[(row["ctx"], row["msgid"])] = a
     fill(po, answers, mark)
     tidy_changes()
+    write_get_sh()
     print(f"locale/{po.name}: {len(answers)} texts put in"
           + {"add": ", marked as needing review", "clear": ", marked as reviewed"}.get(mark, ""))
     if bad:
@@ -589,6 +629,8 @@ def main():
             sys.exit("\n".join(shell_problems()))
         if not POT.exists() or POT.read_text() != text + "\n":
             sys.exit("locale/frame-tweaks.pot is out of date: run dev/i18n.py extract (and update)")
+        if GET_SH.exists() and get_sh_text(GET_SH.read_text()) != GET_SH.read_text():
+            sys.exit("get.sh's own translations are out of date: run dev/i18n.py update")
         print("translation template up to date")
     elif cmd == "new" and len(sys.argv) > 2 and re.fullmatch(r"[a-z]{2,3}(_([A-Z]{2}|[0-9]{3}))?", sys.argv[2]):
         po = LOCALE / f"{sys.argv[2]}.po"

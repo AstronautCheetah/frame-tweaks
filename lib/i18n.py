@@ -5,8 +5,10 @@ locale/frame-tweaks.pot (dev/i18n.py makes and updates both; see locale/README.m
 text with _("..."), ngettext(singular, plural, n) or pgettext(context, "..."); text without a
 translation stays English. The language, best first: FRAME_TWEAKS_LANGUAGE (to choose one; "en": English), the
 active keyboard's language (Steam's VR keyboard in the VR session, KDE's layout in desktop mode;
-an English one says nothing), then the usual LANGUAGE, LC_ALL, LC_MESSAGES or LANG. A language
-without its own file uses one for the same language elsewhere (es, es_MX → es_419.po).
+an English one says nothing), the usual LANGUAGE, LC_ALL or LC_MESSAGES, Steam's own interface
+language (chosen at the Frame's first setup or in Steam's settings; English says nothing), then
+LANG (SteamOS sets it to en_US.UTF-8 whatever language was chosen). A language without its own
+file uses one for the same language elsewhere (es, es_MX → es_419.po; nl → nl_BE.po).
 
 Shell scripts: lib/i18n.sh (t 'Text with %s' ARGS), which reads `python3 i18n.py bash`.
 Installed programs use a copy in ~/.local/share/frame-tweaks/i18n (lib/common.sh install_i18n).
@@ -97,6 +99,16 @@ XKB_LAYOUTS = {"latam": "es_419", "es": "es", "de": "de", "at": "de", "ch": "de"
                "kr": "ko", "cn": "zh_CN", "tw": "zh_TW", "hu": "hu", "ro": "ro", "bg": "bg", "vn": "vi",
                "th": "th", "il": "he", "ara": "ar", "ir": "fa"}
 _keyboard = {"at": None, "value": None, "files": {}}
+# Steam's interface language (its "language" in registry.vdf: Valve's names) → ours. SteamOS keeps
+# LANG at en_US.UTF-8 whatever language the Frame was set up in; this is where that choice is.
+STEAM_REGISTRY = Path.home() / ".steam/registry.vdf"
+STEAM_LANGUAGES = {"latam": "es_419", "spanish": "es", "french": "fr", "dutch": "nl", "german": "de",
+                   "brazilian": "pt_BR", "portuguese": "pt", "italian": "it", "russian": "ru", "polish": "pl",
+                   "japanese": "ja", "koreana": "ko", "schinese": "zh_CN", "tchinese": "zh_TW", "swedish": "sv",
+                   "danish": "da", "finnish": "fi", "norwegian": "nb", "czech": "cs", "hungarian": "hu",
+                   "romanian": "ro", "turkish": "tr", "ukrainian": "uk", "bulgarian": "bg", "greek": "el",
+                   "thai": "th", "vietnamese": "vi", "indonesian": "id"}
+_steam_language = {"mtime": None, "value": None}
 
 
 def _steam_layout():
@@ -161,6 +173,28 @@ def _kde_layout():
     """KDE's current layout (us, latam, …): the only one in kxkbrc, or the one KDE says is active."""
     kb = kde_keyboard()
     return kb["layout"] if kb else None
+
+
+def steam_language():
+    """Steam's interface language as ours ("fr"), or None (English, another it doesn't know, or no
+    Steam). Read again only when Steam saved the file. FRAME_TWEAKS_KEYBOARD=0 turns this off too:
+    neither guess from the machine."""
+    if os.environ.get("FRAME_TWEAKS_KEYBOARD") == "0":
+        return None
+    try:
+        mtime = os.stat(STEAM_REGISTRY).st_mtime
+    except OSError:
+        return None
+    if _steam_language["mtime"] != mtime:
+        try:
+            text = STEAM_REGISTRY.read_text(encoding="utf-8", errors="replace")
+            m = (re.search(r'"Steam"\s*\{[^{}]*?"language"\s+"([^"]+)"', text)
+                 or re.search(r'"language"\s+"([^"]+)"', text))
+            value = STEAM_LANGUAGES.get(m[1].lower()) if m else None
+        except OSError:
+            value = None
+        _steam_language.update(mtime=mtime, value=value)
+    return _steam_language["value"]
 
 
 def keyboard_language():
@@ -288,7 +322,8 @@ INHERIT = True
 def wanted_languages():
     """The languages to try, best first: FRAME_TWEAKS_LANGUAGE, the one chosen in ⚙ Preferences,
     (for a program) the installer window's while it's open, then the parent's choice, the active
-    keyboard's, then gettext's usual variables; each also without its region (de_AT → de)."""
+    keyboard's, then gettext's usual variables with Steam's interface language just before LANG;
+    each also without its region (de_AT → de)."""
     asked = os.environ.get("FRAME_TWEAKS_LANGUAGE", "").split(".")[0]
     if asked in ("C", "POSIX") or asked.split("_")[0] == "en":
         return []                                     # (English, en_US too, whatever the keyboard or session)
@@ -302,8 +337,10 @@ def wanted_languages():
             return [] if pick == "en" else [pick, pick.split("_")[0]]
     names = []
     kb = keyboard_language()
-    for var in ("FRAME_TWEAKS_LANGUAGE", "keyboard", "LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
-        value = kb or "" if var == "keyboard" else os.environ.get(var, "")
+    # (gettext's variables, best first, with Steam's language just above LANG: SteamOS's LANG is
+    # en_US whatever language the Frame was set up in)
+    for var in ("FRAME_TWEAKS_LANGUAGE", "keyboard", "LANGUAGE", "LC_ALL", "LC_MESSAGES", "steam", "LANG"):
+        value = (kb or "") if var == "keyboard" else (steam_language() or "") if var == "steam" else os.environ.get(var, "")
         if not value:
             continue
         for part in value.split(":"):

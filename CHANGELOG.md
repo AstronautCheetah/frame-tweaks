@@ -8,6 +8,14 @@
   or they follow your keyboard. A native speaker hasn't checked them yet; corrections are
   welcome (locale/README.md).
 
+### Fixed
+- **Frame Tweaks spoke English on a Frame set up in another language:** SteamOS keeps the system
+  language at English whatever language you chose, so unless your keyboard layout said otherwise,
+  everything was in English. Frame Tweaks now also follows the language Steam is set to (after
+  your keyboard and any language you chose for the desktop), and so do the menu entries. The
+  first lines the install command prints, before Frame Tweaks is downloaded, are in your language
+  too.
+
 ## 0.6.15 (2026-10-17)
 
 ### Added

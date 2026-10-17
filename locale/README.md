@@ -53,12 +53,18 @@ choice; kept in `~/.config/frame-tweaks/language`). Left on "Follow the keyboard
 `FRAME_TWEAKS_LANGUAGE`, the language follows **the keyboard you're typing with**:
 Steam's VR keyboard in VR (its layout chosen in Steam's keyboard settings), KDE's keyboard layout
 in desktop mode. An English, QWERTY or other layout that doesn't say which language (Dvorak,
-Colemak) leaves the choice to the session (`LANGUAGE`, `LC_ALL`, `LC_MESSAGES`, then `LANG`).
+Colemak) leaves the choice to the session's `LANGUAGE`, `LC_ALL` or `LC_MESSAGES`, then **Steam's
+own language** (the one the Frame was set up in, or chosen in Steam's settings: `~/.steam/registry.vdf`;
+English says nothing), then `LANG`. SteamOS keeps `LANG` at `en_US.UTF-8` whatever the language,
+so without Steam's, a Frame set up in French or Dutch got English. The very first words, from
+`get.sh` before Frame Tweaks is downloaded, follow the same choice (without the keyboard): they
+carry their own translations, which `dev/i18n.py update` writes into it from the `.po` files.
 The installer window looks at the keyboard at most every 5 seconds and switches when you're on
 its list. It then announces the change (`/run/user/<uid>/frame-tweaks/language`): Arrow Pad and
 Screen snip, already open, switch with it (`i18n.follow_announcements`; they don't look at the
 keyboard themselves). Scripts and other programs use the language they found when they started.
-`FRAME_TWEAKS_KEYBOARD=0` turns the keyboard check off. Anything not translated shows in English.
+`FRAME_TWEAKS_KEYBOARD=0` turns the keyboard check off, and Steam's language with it. Anything not
+translated shows in English.
 
 ## Keeping up
 

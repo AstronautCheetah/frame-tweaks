@@ -65,7 +65,7 @@ class Preferences(QWidget):
         rows.addWidget(self.heading(_("Language")))
         note = QLabel(_("For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. "
                         "Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; "
-                        "a QWERTY or English layout keeps the system's language."))
+                        "a QWERTY or English layout keeps the language Steam is set to (or the system's)."))
         note.setObjectName("desc")
         note.setWordWrap(True)
         rows.addWidget(note)
