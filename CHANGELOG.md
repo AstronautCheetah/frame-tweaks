@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.14 (2026-10-17)
 
 ### Changed
 - **The pop-up after clicking a link is bigger and stays longer:** what it did ("Opening in
