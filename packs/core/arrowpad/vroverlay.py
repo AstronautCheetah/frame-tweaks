@@ -341,10 +341,6 @@ class OverlayHost:
         """Sliding because Steam's keyboard is open: a note under the panel says why it only
         slides. (A note that fails is left out: the slide goes on.)"""
         try:
-            if getattr(self, "note", None) is None:
-                self.note = self.ov.createOverlay(KEY + ".note", "Arrow Pad")    # (display only: no input)
-                self.ov.setOverlaySortOrder(self.note, 11)
-                self.ov.setOverlayWidthInMeters(self.note, NOTE_WIDTH)
             text = _("While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move "
                      "it closer, further away or turn it.")
             # (a file name for each text: SteamVR caches overlay images by path, see render)
@@ -353,11 +349,18 @@ class OverlayHost:
                 img = note_image(text)
                 img.save(path, "PNG")
                 self.note_aspect = img.height() / img.width()
-                self.ov.setOverlayFromFile(self.note, path)
                 if getattr(self, "note_path", None):
                     with contextlib.suppress(OSError):
                         os.remove(self.note_path)
                 self.note_path = path
+            if getattr(self, "note", None) is None:
+                self.note = self.ov.createOverlay(KEY + ".note", "Arrow Pad")    # (display only: no input)
+                self.ov.setOverlaySortOrder(self.note, 11)
+                self.ov.setOverlayWidthInMeters(self.note, NOTE_WIDTH)
+                self.note_loaded = None
+            if self.note_loaded != path:
+                self.ov.setOverlayFromFile(self.note, path)
+                self.note_loaded = path
             self.note_shown = True
             self.place_note()
             self.ov.showOverlay(self.note)
@@ -373,13 +376,17 @@ class OverlayHost:
         self.ov.setOverlayTransformAbsolute(self.note, openvr.TrackingUniverseStanding, vrkit.hmd34(openvr, m))
 
     def hide_note(self, unless_sliding=False):
+        """Gone: destroyed, not hidden. SteamVR at times kept showing an overlay it was told to hide,
+        a few seconds after it was shown (isOverlayVisible still said so seconds later, and so did
+        hiding it again; 2026-10-16, SteamOS 0.5.6). The next slide makes it again."""
         if not getattr(self, "note_shown", False) or getattr(self, "closed", False):
             return
         if unless_sliding and self.drag is not None and self.drag[1] is None:
             return                              # (sliding again: it stays)
         self.note_shown = False
+        note, self.note = self.note, None
         with contextlib.suppress(Exception):
-            self.ov.hideOverlay(self.note)
+            self.ov.destroyOverlay(note)
 
     def reset_position(self):
         """Beneath the dashboard like Full Keyboard (or in front of the headset without one)."""

@@ -353,7 +353,7 @@ class SlideWhileTheKeyboardShows(unittest.TestCase):
             setOverlaySortOrder=lambda h, n: None, setOverlayWidthInMeters=lambda h, w: None,
             setOverlayFromFile=lambda h, path: calls.append(("image", h)),
             setOverlayTransformAbsolute=lambda h, u, m: calls.append(("place", h, [round(r[3], 6) for r in m])),
-            showOverlay=lambda h: calls.append(("show", h)), hideOverlay=lambda h: calls.append(("hide", h)))
+            showOverlay=lambda h: calls.append(("show", h)), destroyOverlay=lambda h: calls.append(("destroy", h)))
         v.openvr.TrackingUniverseStanding = 1
         v.QTimer = types.SimpleNamespace(singleShot=lambda ms, f: timers.append((ms, f)))
         o.distance_from_head, o.remember_offset, o.ease_level, o.save = (lambda: 0.0), (lambda: None), (lambda: None), (lambda: None)
@@ -374,7 +374,10 @@ class SlideWhileTheKeyboardShows(unittest.TestCase):
             self.assertEqual(calls, [])                         # (it stays)
             o.end_drag()
             timers.pop(0)[1]()
-            self.assertEqual(calls, [("hide", 9)])
+            self.assertEqual(calls, [("destroy", 9)])           # (destroyed: SteamVR kept some hidden ones showing)
+            calls.clear()
+            o.start_drag(1, grip=False, at=Point(100, 100))     # the next slide makes it again
+            self.assertEqual([c[0] for c in calls], ["create", "image", "place", "show"])
 
     def test_a_controller_it_can_see_is_followed_as_before(self):
         v = load()
