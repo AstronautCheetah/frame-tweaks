@@ -135,7 +135,10 @@ squeeze the grip while that controller points anywhere on the pad (a squeeze nev
 hold the trigger on the pad's background, then move your hand. Pushing the controller away or
 pulling it closer moves the pad three times as far, so you can send it further off without
 walking; up, down and sideways move it one to one. It stays between 0.25 and 3.5 m from you.
-When you let go, a slight sideways lean (under 5°) eases level.
+When you let go, a slight sideways lean (under 5°) eases level. While Steam's keyboard is
+showing, SteamVR hides where your controllers are from other programs, so then the pad slides
+flat along its own surface after the laser instead (up, down and sideways only), and a small
+note under it says so.
 
 ### Which keyboard when?
 
@@ -180,6 +183,10 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   ordinary window, may not get them.
 - **Grip:** the dashboard hides the grip button from apps, so the pad reads it the way Full
   Keyboard does: from how far the grip part of the controller's 3D model has moved.
+- **Moving it while Steam's keyboard shows:** SteamVR's keyboard privacy hides the controllers'
+  poses from every other program while its keyboard is open (its log says
+  `AddSystemBehaviorFlag SystemBehaviorFlag_SystemKeyboardPrivacy`), so a grab can't follow the
+  controller. The pad then slides in its own plane to keep the point you grabbed under the laser.
 - **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
   Python GUI toolkit. The [NordVPN](../../integrations/nordvpn/) tray and Screen snip use the same one.
 

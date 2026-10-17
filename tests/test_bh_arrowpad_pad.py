@@ -219,6 +219,19 @@ class LatchedModifiers(PadTest):
         self.assertEqual(self.keys.sent, [("tap", self.ap.KEY["Super"])])
 
 
+class SlideNote(PadTest):
+    def test_the_note_is_drawn_and_wraps(self):
+        """The note under the pad while it slides (Steam's keyboard open): its words fit, wrapped."""
+        with mock.patch.dict(sys.modules, {"openvr": types.ModuleType("openvr")}):   # (a stand-in)
+            v = module("vroverlay", PAD / "vroverlay.py")
+        short, long = v.note_image("Slide"), v.note_image("While Steam's keyboard is open, Arrow Pad can only "
+                                                          "slide. Close the keyboard to move it closer, further "
+                                                          "away or turn it.")
+        self.assertEqual((short.width(), long.width()), (v.NOTE_PX, v.NOTE_PX))
+        self.assertGreater(long.height(), short.height() * 1.5)          # (more than one line)
+        self.assertEqual(long.pixelColor(v.NOTE_PX // 2, 2).alpha(), 235)   # (the dark box, see-through a little)
+
+
 class TakenBack(PadTest):
     def test_a_press_the_vr_panel_takes_back_lets_go_of_its_key(self):
         """A grab (or the dashboard closing) takes presses back with a release off the key, which
@@ -459,7 +472,7 @@ def overlay_host(test):
     test.addCleanup(test.pad.hide)
     test.app.processEvents()
     o = v.OverlayHost.__new__(v.OverlayHost)
-    o.pad, o.pressed, o.drag, o.gripping, o.hovered_devices = test.pad, {}, None, set(), set()
+    o.pad, o.pressed, o.drag, o.gripping, o.hovered_devices, o.laser_at = test.pad, {}, None, set(), set(), {}
     o.hover, o.front, o.handles, o.input_handle = None, 0, [1], 1
     o.input_size = (test.pad.width(), test.pad.height())
     o.log_input = lambda msg: None                                       # (not /run/user's log)

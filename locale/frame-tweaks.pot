@@ -2883,6 +2883,11 @@ msgstr ""
 msgid "stopped a running Arrow Pad"
 msgstr ""
 
+#: packs/core/arrowpad/vroverlay.py
+msgid ""
+"While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move it closer, further away or turn it."
+msgstr ""
+
 #: packs/core/charge-limit/README.md
 msgid "80% (the default)"
 msgstr ""

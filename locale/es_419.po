@@ -3216,6 +3216,11 @@ msgstr "arrowpad no instalado"
 msgid "stopped a running Arrow Pad"
 msgstr "se cerró un Teclado de flechas en ejecución"
 
+#: packs/core/arrowpad/vroverlay.py
+msgid ""
+"While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move it closer, further away or turn it."
+msgstr ""
+
 # needs review
 #: packs/core/charge-limit/README.md
 msgid "80% (the default)"
