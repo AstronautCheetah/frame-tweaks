@@ -31,12 +31,24 @@ def keys(text):
     return entry
 
 
+def translations_of(english):
+    """Every language file's translation of english (lib/i18n.py, beside this file), or none."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import i18n
+        return i18n.translations_of(english)
+    except Exception:                         # (no i18n.py, or no language files: the entry's own)
+        return set()
+
+
 def frame_label(entry, group, key, value):
-    """value is a label Frame Tweaks gave key (its English, or a translation the entry carries),
-    not one you typed. entry: keys(). (lib/i18n.py relabel goes by the same rule.)"""
+    """value is a label Frame Tweaks gave key (its English, or a translation: the entry's own or any
+    language file's, as an entry installed before a language was added has no line for it), not
+    one you typed. entry: keys(). (lib/i18n.py relabel goes by the same rule.)"""
     english = entry.get((group, f"X-Frame-Tweaks-{key}"))
     return english is not None and (value == english or any(
-        g == group and k.startswith(f"{key}[") and v == value for (g, k), v in entry.items()))
+        g == group and k.startswith(f"{key}[") and v == value for (g, k), v in entry.items())
+        or value.strip() in translations_of(english.strip()))
 
 
 def _same(group, key, old, new, base):

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Menu entries stuck in another language:** after you tried a language in ⚙ Preferences and
+  switched back, Arrow Pad, Android Mirror and the other Frame Tweaks entries in Steam's "+" menu
+  could stay in that language. An entry installed before a language was added didn't know that
+  language's name for itself, took it for one you had typed, and left it. They now recognise
+  every language's name, and a reinstall no longer keeps such a name as one of yours.
+
 ## 0.6.16 (2026-10-17)
 
 ### Added

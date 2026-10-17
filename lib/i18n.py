@@ -372,6 +372,7 @@ def pick(languages, folder):
 class Catalogue:
     def __init__(self, languages=None, folder=LOCALE):
         self.messages, self.header, self.language, self.file = {}, "", None, None
+        self.folder = folder
         f = pick(wanted_languages() if languages is None else languages, folder)
         if f:
             text = f.read_text(encoding="utf-8")
@@ -498,6 +499,30 @@ def desktop(text, folder=LOCALE, catalogue=None):
     return "\n".join(out) + "\n"
 
 
+_every_translation = {}
+
+
+def translations_of(english, folder=None):
+    """Every translation of english (a text without a context) in the language files there are.
+    For telling a label Frame Tweaks gave from one you typed, whichever language put it there: an
+    entry installed before a language was added has no line of its own for it, so after a switch
+    to that language and on to another, its label there looked typed, and stayed (Arrow Pad and
+    the rest stayed French in Steam's "+" menu with English chosen)."""
+    folder = Path(folder or LOCALE)
+    if folder not in _every_translation:
+        found = {}
+        for po in sorted(folder.glob("*.po")):
+            try:
+                messages = parse_po(po.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError):
+                continue
+            for (ctx, msgid), strs in messages.items():
+                if ctx is None and strs and strs[0]:
+                    found.setdefault(msgid, set()).add(strs[0].strip())
+        _every_translation[folder] = found
+    return _every_translation[folder].get(english, set())
+
+
 def relabel(path, catalogue=None):
     """Put a Frame Tweaks menu entry's plain Name/GenericName/Comment in the current language
     (from its X-Frame-Tweaks-… English). True if the file changed."""
@@ -512,9 +537,10 @@ def relabel(path, catalogue=None):
     for g in groups:
         english = dict(re.findall(rf"(?m)^X-Frame-Tweaks-({'|'.join(MENU_KEYS)})=(.+)$", g))
         for key, en in english.items():
-            # Only a label of ours (its English or a translation): one you gave it, in KDE's menu
-            # editor say, stays. (lib/menuedits.py frame_label: the same rule.)
-            ours = {en.strip(), cat.gettext(en).strip(),
+            # Only a label of ours (its English or a translation, the entry's own or any language
+            # file's): one you gave it, in KDE's menu editor say, stays. (lib/menuedits.py
+            # frame_label: the same rule.)
+            ours = {en.strip(), cat.gettext(en).strip(), *translations_of(en.strip(), cat.folder),
                     *(t.strip() for t in re.findall(rf"(?m)^{key}\[[^]]+\]=(.*)$", g))}
             g = re.sub(rf"(?m)^{key}=(.*)$",
                        lambda m, k=key, e=en, o=ours: f"{k}={cat.gettext(e)}" if m[1].strip() in o else m[0], g)
