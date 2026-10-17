@@ -2951,7 +2951,7 @@ msgstr ""
 
 #: packs/core/arrowpad/install.sh
 msgid ""
-"In VR, Steam's keyboard moves when you press the pad (install a VR environment tweak to keep it in place)."
+"In VR, pressing the pad takes Steam's keyboard away from the window you're typing in (install a VR environment tweak to fix that)."
 msgstr ""
 
 #: packs/core/arrowpad/install.sh
