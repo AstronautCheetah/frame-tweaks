@@ -354,6 +354,7 @@ def fade(row, f):
 SEQ = re.compile(rb"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(?:\x07|\x1b\\)|[P^_X][\s\S]*?\x1b\\"
                  rb"|[ -/]*[0-OQ-WYZ\\`-~])")
 SGR_RESET = re.compile(r"^(?:0?|0;.*)$")
+ALT_SCREEN = re.compile(rb"\x1b\[\?[0-9;]*(?:1049|1047|47)[0-9;]*[hl]$")
 
 
 class Transcript:
@@ -531,13 +532,16 @@ class Stage:
         self.cols, self.rows = cols, rows
         small = cols < 60 or rows < 16
         self.top = self.top_rows(rows)
-        self.picture = Picture(cols, 2 * (self.top - 1), 2 * rows, self.still)
+        if not small:                       # (none for a tiny one: 0×0 crashed making it)
+            self.picture = Picture(cols, 2 * (self.top - 1), 2 * rows, self.still)
+            self.still_art = None
         self.prev = []
         if first:
             return
         if small:
             if not self.paused:
                 self.pause()
+            set_size(self.master, rows, cols)       # (paused or not, the command has the whole terminal)
             return
         if self.paused and not self.alt_by_child:
             self.resume()
@@ -555,6 +559,9 @@ class Stage:
             try:
                 n = os.write(self.out, data)
             except InterruptedError:
+                continue
+            except BlockingIOError:             # (a terminal left non-blocking: wait until it takes more)
+                select.select([], [self.out], [], 1)
                 continue
             data = data[n:]
 
@@ -610,6 +617,10 @@ class Stage:
         for m in SEQ.finditer(data):
             if m.start() > pos:
                 out.append(self.text(data[pos:m.start()]))
+            if ALT_SCREEN.match(m.group()) and out:
+                # (a pager starting or ending: what came before it is written first, on the screen it was for)
+                self.show(b"".join(out))
+                out = []
             out.append(self.sequence(m.group()))
             pos = m.end()
         rest = data[pos:]
@@ -627,7 +638,9 @@ class Stage:
             self.carry_since = self.carry_since or now
         else:
             self.carry_since = 0.0
-        chunk = b"".join(out)
+        self.show(b"".join(out))
+
+    def show(self, chunk):
         if chunk:
             if self.intro:
                 self.held.append(chunk)
@@ -746,7 +759,12 @@ class Stage:
             cycle = (t - INTRO) % 7.0
             if cycle < 1.1:
                 shine = cycle / 1.1 * 1.3 - 0.15
-        out = self.art(self.top - 1, 0, t, p.y0, shine=shine)
+        if self.still:
+            if self.still_art is None:
+                self.still_art = self.art(self.top - 1, 0, t, p.y0)
+            out = list(self.still_art)
+        else:
+            out = self.art(self.top - 1, 0, t, p.y0, shine=shine)
         out.append(self.status(t))
         return out
 
@@ -770,6 +788,7 @@ class Stage:
         """Only the cells that changed since the last frame, between a save and a restore of the
         command's cursor (and its colours and origin mode)."""
         out = ["\x1b7\x1b[?25l\x1b[?6l"]
+        changed = False
         prev = self.prev
         for r, row in enumerate(rows):
             old = prev[r] if r < len(prev) else None
@@ -779,6 +798,7 @@ class Stage:
                     x += 1
                     continue
                 out.append("\x1b[%d;%dH" % (r + 1, x + 1))
+                changed = True
                 last = None
                 while x < n and not (old is not None and x < len(old) and old[x] == row[x]):
                     fg, bg, ch = row[x]
@@ -794,7 +814,7 @@ class Stage:
         if self.cursor_visible and not self.intro:
             out.append("\x1b[?25h")
         self.prev = rows
-        if len(out) > 3:
+        if changed:
             self.write("".join(out))
 
     # -- the end
@@ -829,6 +849,11 @@ def wanted(out):
         return False
     if "utf" not in (locale.getpreferredencoding(False) or "").lower().replace("-", ""):
         return False
+    try:
+        if os.tcgetpgrp(out) != os.getpgrp():       # (run in the background: ./install.sh … &)
+            return False
+    except OSError:
+        pass                                    # (not this process's terminal: no session of its own to be in the background of)
     cols, rows = term_size(out)
     return cols >= 60 and rows >= 20
 
@@ -842,7 +867,7 @@ def setting():
     if not v:
         try:
             v = SETTING.read_text().strip().lower()
-        except OSError:
+        except (OSError, UnicodeDecodeError):
             v = ""
     return "off" if v in ("off", "0", "no", "false") else "still" if v == "still" else "on"
 
@@ -864,39 +889,64 @@ def keyboard(out):
         return os.open(os.ttyname(out), os.O_RDONLY | os.O_NOCTTY)
 
 
+def tty_path(fd):
+    """The terminal fd is, as ./install.sh reads it (readlink /proc/$$/fd/1: the two must agree, or
+    it starts a splash again and again); None if it can't be read."""
+    try:
+        return os.readlink(f"/proc/self/fd/{fd}")
+    except OSError:
+        return None
+
+
+def default_signals():
+    """Python ignores SIGPIPE (and SIGXFSZ), and a command exec'd from it would too, with whatever
+    it starts: a pipeline's writer then keeps going after its reader has gone."""
+    for sig in (signal.SIGPIPE, signal.SIGXFSZ):
+        signal.signal(sig, signal.SIG_DFL)
+
+
 def plain(cmd):
     """The command as it would have run (marked, so ./install.sh doesn't start a splash again)."""
-    try:
-        os.environ["FRAME_TWEAKS_SPLASH_TTY"] = os.ttyname(1)
-    except OSError:
-        os.environ["FRAME_TWEAKS_SPLASH_TTY"] = "none"
+    os.environ["FRAME_TWEAKS_SPLASH_TTY"] = (tty_path(1) if os.isatty(1) else None) or "none"
     sys.stdout.flush()
+    default_signals()
     os.execvp(cmd[0], cmd)
 
 
 def run(cmd):
     out = 1
-    if not wanted(out) or os.environ.get("FRAME_TWEAKS_SPLASH_TTY") == os.ttyname(out):
+    if not wanted(out) or os.environ.get("FRAME_TWEAKS_SPLASH_TTY") == tty_path(out):
         plain(cmd)                   # (or already in the terminal a splash gave it: never one in another)
+    resized = [False]
+
+    def on_winch(*_a):
+        resized[0] = True
+    signal.signal(signal.SIGWINCH, on_winch)    # (before the size is read: a resize in between counts)
     try:
         inp = keyboard(out)
         saved = termios.tcgetattr(inp)
+        cols, rows = term_size(out)
+        still = setting() == "still" or kde_still()
+        master, slave = os.openpty()
+        termios.tcsetattr(slave, termios.TCSANOW, saved)
+        stage = Stage(1, master, cols, rows, still)
+        set_size(slave, stage.child_rows(), cols)
+        name = tty_path(slave) or os.ttyname(slave)
+        piped = not os.isatty(0)
+        pid = os.fork()
     except (OSError, termios.error):
+        signal.signal(signal.SIGWINCH, signal.SIG_DFL)
         plain(cmd)
-    cols, rows = term_size(out)
-    still = setting() == "still" or kde_still()
-    master, slave = os.openpty()
-    termios.tcsetattr(slave, termios.TCSANOW, saved)
-    stage = Stage(1, master, cols, rows, still)
-    set_size(slave, stage.child_rows(), cols)
-    name = os.ttyname(slave)
-    pid = os.fork()
     if pid == 0:
         try:
             os.setsid()
             fcntl.ioctl(slave, termios.TIOCSCTTY, 0)
-            for fd in (0, 1, 2):
+            # (input piped or redirected stays the command's: yes | ./install.sh …; sudo asks
+            # through the terminal, /dev/tty, either way)
+            for fd in ((1, 2) if piped else (0, 1, 2)):
                 os.dup2(slave, fd)
+            for fd in {master, slave, inp} - {0, 1, 2}:
+                os.close(fd)                    # (held here, the terminal outlived a splash that died)
             os.environ["FRAME_TWEAKS_SPLASH_TTY"] = name
             leader(cmd)
         except BaseException as e:
@@ -904,17 +954,12 @@ def run(cmd):
         os._exit(127)
     os.close(slave)
     status = None
-    resized = [False]
-
-    def on_winch(*_a):
-        resized[0] = True
 
     def on_end(sig, _f):
         try:
             os.killpg(pid, sig)          # (the command and what it runs: its own session)
         except OSError:
             pass
-    signal.signal(signal.SIGWINCH, on_winch)
     for sig in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
         signal.signal(sig, on_end)
     _("Working…")                    # (the translations, loaded now rather than mid-frame)
@@ -928,16 +973,22 @@ def run(cmd):
     finally:
         try:
             stage.finish()
+        except OSError:                          # (the terminal is gone: closed)
+            pass
+        try:
             termios.tcsetattr(inp, termios.TCSADRAIN, saved)
-        except (OSError, termios.error):         # (the terminal is gone: closed)
+        except (OSError, termios.error):
             pass
     try:
         stage.replay()
     except OSError:
         pass
+    if status is None:
+        status = stage.result                    # (known already when drawing failed after the end)
     if broken is not None:
         sys.stderr.write("(splash: %s: %s)\n" % (type(broken).__name__, broken))
-        status = passthrough(master, pid)
+        if status is None:
+            status = passthrough(master, pid, inp, saved)
     if status is None:
         status = reap(pid, block=True)
     return status
@@ -951,6 +1002,7 @@ def leader(cmd):
     exit status is the command's."""
     pid = os.fork()
     if pid == 0:
+        default_signals()
         os.execvp(cmd[0], cmd)
     for sig in (signal.SIGINT, signal.SIGQUIT, signal.SIGTSTP):
         signal.signal(sig, signal.SIG_IGN)      # (Ctrl+C is for the command)
@@ -1022,9 +1074,10 @@ def loop(stage, master, inp, pid, resized):
                 keys = b""
             if not keys:
                 open_in = False
-            elif stage.intro:
+            elif stage.intro and not any(c in keys for c in b"\x03\x1c\x1a"):
                 stage.end_intro()                    # (that key only skips the splash)
             else:
+                stage.end_intro()                    # (Ctrl+C, Ctrl+\, Ctrl+Z: for the command too)
                 try:
                     os.write(master, keys)
                 except OSError:
@@ -1033,6 +1086,7 @@ def loop(stage, master, inp, pid, resized):
         if status is None:
             status = reap(pid)
             if status is not None:
+                stage.result = status
                 drain_until = now + 0.3              # (what's still on its way; a daemon it left may keep the terminal open)
                 if stage.intro:
                     stage.end_intro()
@@ -1050,6 +1104,7 @@ def loop(stage, master, inp, pid, resized):
     if status is None:
         status = reap(pid, block=True)
     stage.result = status
+    stage.end_intro()                            # (it ended before the splash did: its output, and ✔ or ✖)
     if not stage.paused and not stage.still:
         end = time.monotonic() + HOLD
         while time.monotonic() < end:
@@ -1060,22 +1115,49 @@ def loop(stage, master, inp, pid, resized):
     return status
 
 
-def passthrough(master, pid):
-    """The rest of the command's output as it is (after the picture failed)."""
-    while True:
-        try:
-            r, _w, _x = select.select([master], [], [], 0.5)
-            if r:
-                data = os.read(master, 65536)
+def passthrough(master, pid, inp, saved):
+    """The rest of the command's output as it is, and keys to it (after the picture failed): until
+    it has ended and its output is drained."""
+    status, until, out_ok = None, None, True
+    try:
+        tty.setraw(inp)
+    except (OSError, termios.error):
+        pass
+    try:
+        while until is None or time.monotonic() < until:
+            try:
+                r, _w, _x = select.select([master, inp], [], [], 0.2)
+            except InterruptedError:
+                continue
+            if inp in r:
+                try:
+                    keys = os.read(inp, 1024)
+                    if keys:
+                        os.write(master, keys)
+                except OSError:
+                    pass
+            if master in r:
+                try:
+                    data = os.read(master, 65536)
+                except OSError:
+                    data = b""
                 if not data:
                     break
-                os.write(1, data)
-        except OSError:
-            break
-        st = reap(pid)
-        if st is not None:
-            return st
-    return reap(pid, block=True)
+                if out_ok:
+                    try:
+                        os.write(1, data)
+                    except OSError:
+                        out_ok = False           # (the terminal is gone: read on, so the command isn't stuck)
+            if status is None:
+                status = reap(pid)
+                if status is not None:
+                    until = time.monotonic() + 0.3
+    finally:
+        try:
+            termios.tcsetattr(inp, termios.TCSADRAIN, saved)
+        except (OSError, termios.error):
+            pass
+    return status if status is not None else reap(pid, block=True)
 
 
 # ---- a pretend install, to see it --------------------------------------------------------------
