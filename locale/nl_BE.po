@@ -579,6 +579,11 @@ msgstr "Deze Frame heeft het niet nodig: %s"
 
 # needs review
 #: gui/frame-tweaks-gui.py
+msgid "Tick every tweak in this category"
+msgstr "Alle aanpassingen in deze categorie aanvinken"
+
+# needs review
+#: gui/frame-tweaks-gui.py
 msgid "Tick it and Apply first"
 msgstr "Eerst aanvinken en Wijzigingen toepassen"
 
@@ -603,6 +608,13 @@ msgstr "Weer tonen"
 #: gui/frame-tweaks-gui.py
 msgid "Unhide category"
 msgstr "Categorie weer tonen"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Untick every tweak in this category (installed ones are removed when you apply the changes)"
+msgstr ""
+"Alle aanpassingen in deze categorie uitvinken (geïnstalleerde worden verwijderd als je de wijzigingen toepast)"
 
 # needs review
 #: gui/frame-tweaks-gui.py gui/packs_page.py
@@ -3992,6 +4004,13 @@ msgstr ""
 "Zolang het toetsenbord van Steam open is, kan Pijltjesblok alleen schuiven. Sluit het toetsenbord om het dichterbij of verder weg te zetten, of te draaien."
 
 # needs review
+#: packs/core/arrowpad/vroverlay.py
+msgid ""
+"While Steam's keyboard is open, Arrow Pad only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
+msgstr ""
+"Zolang het toetsenbord van Steam open is, schuift Pijltjesblok alleen als je het versleept. Gebruik de balk eronder om het dichterbij of verder weg te zetten, of te draaien."
+
+# needs review
 #: packs/core/charge-limit/README.md
 msgid "80% (the default)"
 msgstr "80% (standaard)"
@@ -5195,6 +5214,30 @@ msgstr "Er staat geen tekst op het klembord."
 
 # needs review
 #: packs/core/snip/frame-snip
+msgid "Volume down"
+msgstr "Volume verlagen"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Volume up"
+msgstr "Volume verhogen"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid ""
+"While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it closer, further away or turn it."
+msgstr ""
+"Zolang het toetsenbord van Steam open is, kan dit paneel alleen schuiven. Sluit het toetsenbord om het dichterbij of verder weg te zetten, of te draaien."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid ""
+"While Steam's keyboard is open, this panel only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
+msgstr ""
+"Zolang het toetsenbord van Steam open is, schuift dit paneel alleen als je het versleept. Gebruik de balk eronder om het dichterbij of verder weg te zetten, of te draaien."
+
+# needs review
+#: packs/core/snip/frame-snip
 msgid "can't open the Steam session's display"
 msgstr "kan het scherm van de Steam-sessie niet openen"
 
@@ -5601,9 +5644,9 @@ msgstr ""
 # needs review
 #: packs/core/vr-dashboard/README.md
 msgid ""
-"The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
+"The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own patches help Frame Tweaks' panels in VR (Arrow Pad, Screen snip's narration panel) with Steam's keyboard: pressing one leaves the keyboard with the window you're typing in, and while it's open, SteamVR's grab bar under each panel moves it anywhere."
 msgstr ""
-"Het gedeelde deel van de aanpassingen voor de VR-omgeving (Gebogen zwevende vensters, Terug naar het vorige venster, Oppakken bij zweven, Scrolstroken): het zet hun kleine patches in het SteamVR-dashboard terwijl SteamVR draait. Android-spiegel gebruikt het ook als het er is. Wordt automatisch geïnstalleerd."
+"Het gedeelde deel van de aanpassingen voor de VR-omgeving (Gebogen zwevende vensters, Terug naar het vorige venster, Oppakken bij zweven, Scrolstroken): het zet hun kleine patches in het SteamVR-dashboard terwijl SteamVR draait. Android-spiegel gebruikt het ook als het er is. Wordt automatisch geïnstalleerd. Zijn eigen patches helpen de VR-panelen van Frame Tweaks (Pijltjesblok, het voorleespaneel van Schermknipsel) met het toetsenbord van Steam: als je er een indrukt, blijft het toetsenbord bij het venster waarin je typt, en zolang het open is, verplaatst de grijpbalk van SteamVR onder elk paneel het naar waar je maar wilt."
 
 # needs review
 #: packs/core/vr-dashboard/README.md
@@ -6962,3 +7005,9 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
 #~ msgstr ""
 #~ "<b>{file}</b> opgeslagen: de versies van Frame Tweaks en SteamOS, de status en recente logboeken van elke aanpassing, zonder gebruikersnamen, paden, host- en telefoonnamen en adressen."
+
+#~ # needs review
+#~ msgid ""
+#~ "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
+#~ msgstr ""
+#~ "Het gedeelde deel van de aanpassingen voor de VR-omgeving (Gebogen zwevende vensters, Terug naar het vorige venster, Oppakken bij zweven, Scrolstroken): het zet hun kleine patches in het SteamVR-dashboard terwijl SteamVR draait. Android-spiegel gebruikt het ook als het er is. Wordt automatisch geïnstalleerd."
