@@ -15,8 +15,9 @@
 - **Move Arrow Pad and Screen snip's panel anywhere while Steam's keyboard is open (VR):** with
   the keyboard open, SteamVR hides where your controllers are from other programs, so the panels
   could only slide flat. Now SteamVR's own grab bar, as under a desktop window, shows under each
-  of them while the keyboard is open: hold it and the panel follows your hand, nearer, further
-  (thumbstick) or turned, and stays where you let go. The panel is only told where that was,
+  of them while the keyboard is open: hold it and the panel moves with your hand as a floating
+  window does, turned and tilted with it, nearer or further with the thumbstick, and stays where
+  you let go. The panel is only told where that was,
   never where your controllers are. It comes with the VR environment helper.
 
 - **Narration volume:** Screen snip's narration panel has Volume down and Volume up buttons
