@@ -5,29 +5,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+# needs review
 #: get.sh
 msgid "Couldn't find a release of %s"
-msgstr ""
+msgstr "Geen versie van %s gevonden"
 
+# needs review
 #: get.sh
 msgid "FRAME_TWEAKS_CHANNEL: stable or beta"
-msgstr ""
+msgstr "FRAME_TWEAKS_CHANNEL: stable of beta"
 
+# needs review
 #: get.sh
 msgid "Installing %s into %s"
-msgstr ""
+msgstr "%s installeren in %s"
 
+# needs review
 #: get.sh
 msgid "Release channel: %s"
-msgstr ""
+msgstr "Versiekanaal: %s"
 
+# needs review
 #: get.sh
 msgid "Some tweaks didn't update (see above); the window shows which."
 msgstr ""
+"Sommige aanpassingen zijn niet bijgewerkt (zie hierboven); het venster toont welke."
 
+# needs review
 #: get.sh
 msgid "Updating %s (./install.sh update)"
-msgstr ""
+msgstr "%s bijwerken (./install.sh update)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1087,10 +1094,12 @@ msgstr "Eerst worden alle aanpassingen verwijderd, ook apps van derden."
 msgid "Follow the keyboard (now: {language})"
 msgstr "Het toetsenbord volgen (nu: {language})"
 
+# needs review
 #: gui/prefs_page.py
 msgid ""
 "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the language Steam is set to (or the system's)."
 msgstr ""
+"Voor dit venster, Pijltjesblok, Schermknipsel, de menu-items en de VR-panelen. Het toetsenbord volgen: het VR-toetsenbord van Steam in VR, de indeling van KDE in bureaubladmodus; met een QWERTY- of Engelse indeling blijft de taal die in Steam is ingesteld (of de systeemtaal)."
 
 # needs review
 #: gui/prefs_page.py

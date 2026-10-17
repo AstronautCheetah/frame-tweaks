@@ -13,8 +13,26 @@ set -euo pipefail
 # its own (keyboard included) takes over.
 texts() {
     # BEGIN translations (dev/i18n.py update; don't edit by hand)
-    GET_LANGS=""
+    GET_LANGS="es_419 fr nl_BE"
     declare -gA GET_TR=(
+        [$'es_419|Couldn\'t find a release of %s']=$'No se encontró ninguna versión de %s'
+        [$'es_419|FRAME_TWEAKS_CHANNEL: stable or beta']=$'FRAME_TWEAKS_CHANNEL: stable o beta'
+        [$'es_419|Installing %s into %s']=$'Instalando %s en %s'
+        [$'es_419|Release channel: %s']=$'Canal de versiones: %s'
+        [$'es_419|Some tweaks didn\'t update (see above); the window shows which.']=$'Algunos ajustes no se actualizaron (ver arriba); la ventana muestra cuáles.'
+        [$'es_419|Updating %s (./install.sh update)']=$'Actualizando %s (./install.sh update)'
+        [$'fr|Couldn\'t find a release of %s']=$'Impossible de trouver une version de %s'
+        [$'fr|FRAME_TWEAKS_CHANNEL: stable or beta']=$'FRAME_TWEAKS_CHANNEL : stable ou beta'
+        [$'fr|Installing %s into %s']=$'Installation de %s dans %s'
+        [$'fr|Release channel: %s']=$'Canal des versions : %s'
+        [$'fr|Some tweaks didn\'t update (see above); the window shows which.']=$'Certains ajustements n\'ont pas été mis à jour (voir ci-dessus) ; la fenêtre indique lesquels.'
+        [$'fr|Updating %s (./install.sh update)']=$'Mise à jour de %s (./install.sh update)'
+        [$'nl_BE|Couldn\'t find a release of %s']=$'Geen versie van %s gevonden'
+        [$'nl_BE|FRAME_TWEAKS_CHANNEL: stable or beta']=$'FRAME_TWEAKS_CHANNEL: stable of beta'
+        [$'nl_BE|Installing %s into %s']=$'%s installeren in %s'
+        [$'nl_BE|Release channel: %s']=$'Versiekanaal: %s'
+        [$'nl_BE|Some tweaks didn\'t update (see above); the window shows which.']=$'Sommige aanpassingen zijn niet bijgewerkt (zie hierboven); het venster toont welke.'
+        [$'nl_BE|Updating %s (./install.sh update)']=$'%s bijwerken (./install.sh update)'
     )
     # END translations
 }

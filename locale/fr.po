@@ -5,29 +5,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+# needs review
 #: get.sh
 msgid "Couldn't find a release of %s"
-msgstr ""
+msgstr "Impossible de trouver une version de %s"
 
+# needs review
 #: get.sh
 msgid "FRAME_TWEAKS_CHANNEL: stable or beta"
-msgstr ""
+msgstr "FRAME_TWEAKS_CHANNEL : stable ou beta"
 
+# needs review
 #: get.sh
 msgid "Installing %s into %s"
-msgstr ""
+msgstr "Installation de %s dans %s"
 
+# needs review
 #: get.sh
 msgid "Release channel: %s"
-msgstr ""
+msgstr "Canal des versions : %s"
 
+# needs review
 #: get.sh
 msgid "Some tweaks didn't update (see above); the window shows which."
 msgstr ""
+"Certains ajustements n'ont pas été mis à jour (voir ci-dessus) ; la fenêtre indique lesquels."
 
+# needs review
 #: get.sh
 msgid "Updating %s (./install.sh update)"
-msgstr ""
+msgstr "Mise à jour de %s (./install.sh update)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1089,10 +1096,12 @@ msgstr ""
 msgid "Follow the keyboard (now: {language})"
 msgstr "Suivre le clavier (actuellement : {language})"
 
+# needs review
 #: gui/prefs_page.py
 msgid ""
 "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the language Steam is set to (or the system's)."
 msgstr ""
+"Pour cette fenêtre, le Pavé fléché, l'outil Capture d'écran, les entrées de menu et les panneaux VR. Suivre le clavier : le clavier VR de Steam en VR, la disposition de KDE en mode bureau ; une disposition QWERTY ou anglaise garde la langue choisie dans Steam (ou celle du système)."
 
 # needs review
 #: gui/prefs_page.py

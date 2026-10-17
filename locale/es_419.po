@@ -5,29 +5,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+# needs review
 #: get.sh
 msgid "Couldn't find a release of %s"
-msgstr ""
+msgstr "No se encontró ninguna versión de %s"
 
+# needs review
 #: get.sh
 msgid "FRAME_TWEAKS_CHANNEL: stable or beta"
-msgstr ""
+msgstr "FRAME_TWEAKS_CHANNEL: stable o beta"
 
+# needs review
 #: get.sh
 msgid "Installing %s into %s"
-msgstr ""
+msgstr "Instalando %s en %s"
 
+# needs review
 #: get.sh
 msgid "Release channel: %s"
-msgstr ""
+msgstr "Canal de versiones: %s"
 
+# needs review
 #: get.sh
 msgid "Some tweaks didn't update (see above); the window shows which."
 msgstr ""
+"Algunos ajustes no se actualizaron (ver arriba); la ventana muestra cuáles."
 
+# needs review
 #: get.sh
 msgid "Updating %s (./install.sh update)"
-msgstr ""
+msgstr "Actualizando %s (./install.sh update)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -952,10 +959,12 @@ msgstr ""
 msgid "Follow the keyboard (now: {language})"
 msgstr "Seguir el teclado (ahora: {language})"
 
+# needs review
 #: gui/prefs_page.py
 msgid ""
 "For this window, Arrow Pad, Screen snip, the menu entries and the VR panels. Following the keyboard: Steam's VR keyboard in VR, KDE's layout in desktop mode; a QWERTY or English layout keeps the language Steam is set to (or the system's)."
 msgstr ""
+"Para esta ventana, el Teclado de flechas, el Recorte de pantalla, las entradas del menú y los paneles de RV. Si sigue el teclado: el teclado de RV de Steam en RV y la distribución de KDE en modo escritorio; una distribución QWERTY o en inglés mantiene el idioma configurado en Steam (o el del sistema)."
 
 # needs review
 #: gui/prefs_page.py
