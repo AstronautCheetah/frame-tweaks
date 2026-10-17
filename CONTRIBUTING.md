@@ -237,9 +237,12 @@ different translations. Build text with placeholders inside the translated strin
 sentences. A tweak's title, summary, what, why and settings labels are translated
 automatically. Translators: see [locale/README.md](locale/README.md).
 
-**English only is fine.** You don't need to translate anything, or speak another language:
-write your text in English, marked as above, and the maintainers translate it before the next
-release. Until then it shows in English, in every language. What helps:
+**Changes are made in English only**, by everyone, maintainers included: write your text in
+English, marked as above, and leave the translations alone. They're done in one pass just before
+a release (Releasing, below), every language at once; until then a new text shows in English in
+every language. Each `dev/i18n.py extract` notes the texts it added or changed in
+[locale/CHANGES.md](locale/CHANGES.md) (where, and what a changed text was), so that pass knows
+exactly what to translate and what to adjust. What helps:
 
 - Mark every text people see, including tooltips and messages (`tests/test_marked_text.py`
   finds Qt text that isn't marked). Names (Frame Tweaks, NordVPN, SteamVR) stay as they are.
@@ -344,10 +347,19 @@ with each release's downloads. It needs a fine-grained token for this repository
 Read it with `gh release download traffic --pattern traffic.csv`.
 
 **Translations first.** The workflow stops unless the translation template is current and every
-language has every text (`dev/i18n.py stats --strict`), so before releasing: `dev/i18n.py
-extract` and `update`, then translate what's missing (`dev/i18n.py export LANG DIR`,
-[locale/BATCH.md](locale/BATCH.md)). Texts marked as needing review don't hold a release up.
-"Release with texts not translated yet" overrides it, for an urgent fix: they show in English.
+language has every text (`dev/i18n.py todo --strict`). So the translation pass comes just before
+releasing:
+
+1. `dev/i18n.py extract` and `update`, then `dev/i18n.py todo`: what each language still has to
+   translate, as new texts and changed ones. [locale/CHANGES.md](locale/CHANGES.md) lists the
+   English changes behind them.
+2. For each language: `dev/i18n.py export LANG DIR`, translate, `dev/i18n.py import LANG DIR`
+   ([locale/BATCH.md](locale/BATCH.md)). A changed text comes with what it was and its old
+   translation, to adjust rather than start again.
+3. `dev/i18n.py todo` again: it says "complete" for every language, and CHANGES.md is empty.
+
+Texts marked as needing review don't hold a release up. "Release with texts not translated yet"
+overrides it, for an urgent fix: they show in English.
 
 **Release tags are signed** with an SSH key: the workflow signs with the private key in the
 repository secret `RELEASE_SIGNING_KEY`, and `./install.sh update` refuses a release whose tag

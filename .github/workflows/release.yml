@@ -30,14 +30,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
-      # Before each release, a translation pass brings every language to every text
-      # (CONTRIBUTING.md, Releasing). Texts marked as needing review count as translated.
+      # Changes are made in English only; just before each release, a translation pass brings
+      # every language to every text (CONTRIBUTING.md, Releasing; `dev/i18n.py todo` says what's
+      # left, locale/CHANGES.md what changed). Texts marked as needing review count as translated.
       - name: Translations are current and complete (dev/i18n.py)
         env:
           ALLOW: ${{ inputs.allow_untranslated }}
         run: |
           python3 dev/i18n.py check
-          if [ "$ALLOW" = true ]; then python3 dev/i18n.py stats; else python3 dev/i18n.py stats --strict; fi
+          if [ "$ALLOW" = true ]; then python3 dev/i18n.py todo; else python3 dev/i18n.py todo --strict; fi
       - name: Work out the version
         id: v
         env:
