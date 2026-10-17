@@ -57,10 +57,14 @@ keyboard themselves). Scripts and other programs use the language they found whe
 
 ## Keeping up
 
-When the code or a tweak's text changes, `dev/i18n.py extract` refreshes the template and
-`dev/i18n.py update` brings every `.po` file in line with it: translations are kept, new text
-appears untranslated, and text that's gone is kept at the end as `#~` comments.
-`dev/i18n.py stats` shows how far each language is.
+Changes are made in English only; the translations catch up in one pass just before a release
+(CONTRIBUTING.md, Releasing). When the code or a tweak's text changes, `dev/i18n.py extract`
+refreshes the template and notes each new or changed text in [CHANGES.md](CHANGES.md): where it
+is and, for a changed one, what it was. `dev/i18n.py update` brings every `.po` file in line with
+the template: translations are kept, new text appears untranslated, and text that's gone is kept
+at the end as `#~` comments (an export still offers it to adjust). An entry leaves CHANGES.md
+once every language has its text. `dev/i18n.py todo` shows what each language has left (new and
+changed texts), `dev/i18n.py stats` how far each language is.
 
 ## Marking text in the code
 

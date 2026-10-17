@@ -3,7 +3,12 @@
 
   dev/i18n.py extract      write locale/frame-tweaks.pot: every text marked in the code
                            (Python: _("..."), ngettext, pgettext; shell: t '...') and the
-                           official tweaks' manifest text
+                           official tweaks' manifest text; and note each text that's new or
+                           whose English changed in locale/CHANGES.md (where, and what it was)
+  dev/i18n.py todo [--strict]
+                           before a release: what each language still has to translate (new
+                           texts, changed ones) and review (--strict: fail if anything's left;
+                           the release workflow)
   dev/i18n.py check        fail if the .pot is out of date (CI)
   dev/i18n.py new LANG     start locale/LANG.po from the .pot (LANG: de, pt_BR, es_419, …)
   dev/i18n.py update       bring every locale/*.po up to date with the .pot (translations kept;
@@ -18,7 +23,9 @@
                            current translation, for a review pass; --review: those marked as
                            needing review), as
                            JSON files of N entries (default 150) in DIR: part-01.json, … for a
-                           translator or a translation helper (locale/BATCH.md)
+                           translator or a translation helper (locale/BATCH.md). A text whose
+                           English changed carries what it was ("was") and LANG's translation of
+                           that ("was_translation"), from locale/CHANGES.md
   dev/i18n.py import LANG DIR [--needs-review | --reviewed]
                            put DIR's answers (part-01.LANG.json: {"id": "text" or [forms]}) into
                            LANG.po, after checking each keeps the placeholders, tags and spacing
@@ -27,10 +34,12 @@
 
 A translation marked "# needs review" (a translator comment, which every gettext tool keeps) is
 used like any other; only the tools count it. (Fuzzy, Poedit's "Needs work", hides it instead.)"""
-import json
 import ast
+import difflib
+import json
 import re
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -203,11 +212,17 @@ def from_manifests():
     return out
 
 
-def template():
+def collect():
+    """{(context, msgid, plural): [file:line, …]}: every marked text, and where it is."""
     entries = {}
     for source in (from_code(), from_shell(), from_js(), from_desktop(), from_manifests()):
         for key, where in source.items():
             entries.setdefault(key, []).extend(where)
+    return entries
+
+
+def template(entries=None):
+    entries = collect() if entries is None else entries
     lines = ['# Frame Tweaks: text to translate. Made by dev/i18n.py extract; don\'t edit by hand.',
              '# Translators: copy to LANG.po (dev/i18n.py new LANG), see locale/README.md.',
              'msgid ""', 'msgstr ""', '"Content-Type: text/plain; charset=UTF-8\\n"', '']
@@ -242,6 +257,134 @@ def entries_of(text):
     return out
 
 
+# ---- English changes waiting for translation (locale/CHANGES.md) -------------------------------
+# Translations are done just before a release, all at once (CONTRIBUTING.md, Translations): in
+# between, the English changes freely. So each extract notes what it changed, where, and what a
+# changed text was; translators then adjust the old translation instead of hunting for the change.
+CHANGES_HEAD = """# English text changes to translate
+
+`dev/i18n.py extract` adds to this each time it refreshes the template: each text that's new, or
+whose English changed, with where it is (as of that change) and, for a changed one, what it was.
+An entry goes by itself once every language has its text translated (`dev/i18n.py update`,
+`import`): what's here is the translation work waiting for the next release (`dev/i18n.py todo`).
+`dev/i18n.py export` hands translators what a changed text was, and its old translation, to
+adjust. Texts are JSON strings (`\\n` is a new line). Don't edit by hand."""
+SIMILAR = 0.5          # how alike a gone text and a new one in the same file are, to be one text changed
+ENTRY = re.compile(r"^- (New|Changed) in `([^`]*)`$")
+FIELD = re.compile(r"^  - (context|was|now|plural): (.*)$")
+
+
+def changes_file():
+    return LOCALE / "CHANGES.md"
+
+
+def read_changes():
+    """[{date, where, ctx, was, now, plural}] of locale/CHANGES.md (was: None for a new text)."""
+    f = changes_file()
+    if not f.exists():
+        return []
+    out, date, cur = [], None, None
+    for line in f.read_text().splitlines():
+        if line.startswith("## "):
+            date = line[3:].strip()
+        elif m := ENTRY.match(line):
+            cur = {"date": date, "where": m[2], "ctx": None, "was": None, "now": None, "plural": None}
+            out.append(cur)
+        elif (m := FIELD.match(line)) and cur is not None:
+            cur["ctx" if m[1] == "context" else m[1]] = json.loads(m[2])
+    return [e for e in out if e["now"] is not None]
+
+
+def write_changes(log):
+    lines = [CHANGES_HEAD]
+    if not log:
+        lines += ["", "Nothing waiting: no English text has changed since the languages last caught up."]
+    for date in sorted({e["date"] for e in log}):
+        lines += ["", f"## {date}"]
+        for e in sorted((e for e in log if e["date"] == date), key=lambda e: (e["where"], e["now"])):
+            lines.append(f"- {'New' if e['was'] is None else 'Changed'} in `{e['where']}`")
+            for field, name in (("ctx", "context"), ("was", "was"), ("now", "now"), ("plural", "plural")):
+                if e[field] is not None:
+                    lines.append(f"  - {name}: {json.dumps(e[field], ensure_ascii=False)}")
+    changes_file().write_text("\n".join(lines) + "\n")
+
+
+def translated_everywhere(log):
+    """The log without the texts every language has translated (none without a language)."""
+    done = [i18n.parse_po(po.read_text()) for po in sorted(LOCALE.glob("*.po"))]
+    return [e for e in log if not (done and all((e["ctx"], e["now"]) in d for d in done))]
+
+
+def tidy_changes():
+    """After translations came in: drop what's done from the log (if there is one)."""
+    if changes_file().exists():
+        write_changes(translated_everywhere(read_changes()))
+
+
+def log_changes(old_pot, entries, today=None):
+    """Note in the log what this extract changed, against the template it replaces (old_pot):
+    each text it didn't have, as a change of the gone text it's most like in the same file (or
+    new), where it is now; a text changed again before it was translated keeps what it first was;
+    one changed back, or gone, goes."""
+    old = {(c, m): (p, {f for l in b.splitlines() if l.startswith("#:") for f in l[2:].split()})
+           for c, m, p, b in entries_of(old_pot) if m}
+    new = {(c, m): (p, where) for (c, m, p), where in entries.items()}
+    added = [k for k in new if k not in old]
+    gone = [k for k in old if k not in new]
+    scored = []
+    for a in added:
+        files = {re.sub(r":\d+$", "", w) for w in new[a][1]}
+        for g in gone:
+            if g[0] == a[0] and files & old[g][1]:
+                score = difflib.SequenceMatcher(None, g[1], a[1]).ratio()
+                if score >= SIMILAR:
+                    scored.append((score, a, g))
+    pairs, used = {}, set()
+    for _score, a, g in sorted(scored, key=lambda s: -s[0]):
+        if a not in pairs and g not in used:
+            pairs[a] = g
+            used.add(g)
+    log = read_changes()
+    today = today or time.strftime("%Y-%m-%d")
+
+    def logged(key):
+        return next((e for e in log if (e["ctx"], e["now"]) == key), None)
+    for a in added:
+        plural, where = new[a][0], new[a][1][0]
+        if a in pairs and (e := logged(pairs[a])):              # changed again: still what it was
+            e.update(now=a[1], plural=plural, where=where, date=today)
+            if e["was"] == a[1]:
+                log.remove(e)                                  # (back to what's translated)
+        elif a in pairs:
+            log.append({"date": today, "where": where, "ctx": a[0], "was": pairs[a][1], "now": a[1], "plural": plural})
+        elif not logged(a):
+            log.append({"date": today, "where": where, "ctx": a[0], "was": None, "now": a[1], "plural": plural})
+    for g in gone:
+        if g not in used and (e := logged(g)):
+            log.remove(e)                                      # (waiting, and gone again)
+    write_changes(translated_everywhere(log))
+
+
+def earlier_translations(text):
+    """{(context, msgid): [msgstr…]} of a .po text, its #~ (removed) texts included."""
+    gone = "\n\n".join(re.sub(r"^#~ ", "", b, flags=re.M) for b in obsolete(text))
+    return {**i18n.parse_po(gone), **i18n.parse_po(text)}
+
+
+def todo(text):
+    """[(language, new, changed, to review)]: what each language still has to do."""
+    want = [(c, m) for c, m, _, _ in entries_of(text) if m]
+    was = {(e["ctx"], e["now"]): e["was"] for e in read_changes() if e["was"] is not None}
+    out = []
+    for po in sorted(LOCALE.glob("*.po")):
+        t = po.read_text()
+        done, before = i18n.parse_po(t), earlier_translations(t)
+        missing = [k for k in want if k not in done]
+        changed = sum(1 for k in missing if k in was and (k[0], was[k]) in before)
+        out.append((po.stem, len(missing) - changed, changed, len(needs_review(t))))
+    return out
+
+
 def obsolete(text):
     """The #~ blocks of a .po text: removed texts, kept for their translations."""
     return [b for b in re.split(r"\n\s*\n", text.strip()) if b.lstrip().startswith("#~")]
@@ -272,6 +415,7 @@ def update(po, pot_text):
     gone = [b for k, b in old.items() if k not in used and k[1] != "" and re.search(r'^msgstr(\[\d+\])? (""\n)?"(?!")', b, re.M)]
     out += ["\n".join("#~ " + l for l in b.splitlines() if not l.startswith("#:")) for b in gone]
     po.write_text("\n\n".join(out) + "\n")
+    tidy_changes()
 
 
 PLACEHOLDER = re.compile(r"\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
@@ -315,6 +459,8 @@ def export(lang, outdir, size=150, every=False, review=False):
         sys.exit(f"no locale/{po.name}: nothing of {lang}'s to review")
     done = i18n.parse_po(po.read_text()) if po.exists() else {}
     marked = needs_review(po.read_text()) if review else set()
+    before = earlier_translations(po.read_text()) if po.exists() else {}
+    was = {(e["ctx"], e["now"]): e["was"] for e in read_changes() if e["was"] is not None}
     rows = []
     for ctx, msgid, plural, block in entries_of(template()):
         if msgid == "" or (review and (ctx, msgid) not in marked) or (not every and not review and (ctx, msgid) in done):
@@ -323,6 +469,10 @@ def export(lang, outdir, size=150, every=False, review=False):
         row = {"id": len(rows) + 1, "ctx": ctx, "msgid": msgid, "plural": plural, "where": where}
         if (ctx, msgid) in done:                      # (--all: a second pass revises what's there)
             row["current"] = done[(ctx, msgid)] if plural else done[(ctx, msgid)][0]
+        elif (ctx, msgid) in was:                     # (its English changed: what it was, to adjust)
+            row["was"] = was[(ctx, msgid)]
+            if (ctx, row["was"]) in before:
+                row["was_translation"] = before[(ctx, row["was"])] if plural else before[(ctx, row["was"])][0]
         rows.append(row)
     outdir.mkdir(parents=True, exist_ok=True)
     parts = [rows[i:i + size] for i in range(0, len(rows), size)]
@@ -385,6 +535,7 @@ def import_(lang, outdir, mark=None):
                 continue
             answers[(row["ctx"], row["msgid"])] = a
     fill(po, answers, mark)
+    tidy_changes()
     print(f"locale/{po.name}: {len(answers)} texts put in"
           + {"add": ", marked as needing review", "clear": ", marked as reviewed"}.get(mark, ""))
     if bad:
@@ -422,11 +573,17 @@ def report(text, most=40):
 
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    text = template()
+    entries = collect()
+    text = template(entries)
     if cmd == "extract":
         LOCALE.mkdir(exist_ok=True)
+        old = POT.read_text() if POT.exists() else None
         POT.write_text(text + "\n")
         print(f"{POT.relative_to(ROOT)}: {len(entries_of(text)) - 1} texts")
+        if old is not None and old != text + "\n":
+            log_changes(old, entries)
+            n = len(read_changes())
+            print(f"{changes_file().relative_to(ROOT)}: {n} English change{'s' * (n != 1)} waiting for translation")
     elif cmd == "check":
         if shell_problems():
             sys.exit("\n".join(shell_problems()))
@@ -458,6 +615,21 @@ def main():
             sys.exit("not every text is translated: dev/i18n.py export LANG DIR (locale/BATCH.md)")
     elif cmd == "report":
         print(report(text))
+    elif cmd == "todo":
+        rows, log = todo(text), read_changes()
+        print("Translation work before the next release (locale/BATCH.md):")
+        for lang, new, changed, review in rows:
+            left = new + changed
+            print(f"  {lang:8} " + (f"{left} to translate ({new} new, {changed} changed)" if left else "complete")
+                  + (f"; {review} to review (not needed for a release)" if review else ""))
+        if not rows:
+            print("  no translations yet")
+        print(f"English changes waiting ({changes_file().relative_to(ROOT)}): "
+              f"{sum(e['was'] is None for e in log)} new, {sum(e['was'] is not None for e in log)} changed")
+        if any(new + changed for _l, new, changed, _r in rows):
+            print("Next: dev/i18n.py export LANG DIR, translate, dev/i18n.py import LANG DIR")
+            if "--strict" in sys.argv:
+                sys.exit("not every text is translated (dev/i18n.py todo)")
     elif cmd == "export" and len(sys.argv) > 3:
         size = int(sys.argv[sys.argv.index("--size") + 1]) if "--size" in sys.argv else 150
         export(sys.argv[2], Path(sys.argv[3]), size, "--all" in sys.argv, "--review" in sys.argv)

@@ -30,6 +30,9 @@ result in the window (`FRAME_TWEAKS_LANGUAGE=es_419 ./install.sh gui`) and in a 
 ## The files
 
 `part-NN.json`: `[{"id": 1, "ctx": null, "msgid": "...", "plural": null, "where": ["file"]}]` (the files it's in).
+A text whose English changed since it was translated also has `"was"` (its old English, from
+[CHANGES.md](CHANGES.md)) and, when the language had it, `"was_translation"`: adjust that to the
+new English rather than translating from scratch, so the wording stays as it was where it can.
 `part-NN.LANG.json`: `{"1": "translation", "2": ["singular form", "plural form"]}` (a list for an
 entry with `plural`, one string per plural form of the language).
 
@@ -44,4 +47,6 @@ language, from `es_419.md`'s list of terms):
 > message, a status line. Keep placeholders (`%s`, `%d`, `{name}`, `%%`), HTML tags, Markdown,
 > emoji and symbols, `\n`, and spaces at either end exactly; a `{name}` may move. Keep commands,
 > paths, key names (Esc, Ctrl) and product names. Short texts stay short. A text that is only a
-> name comes back unchanged. List any entry you weren't sure about.
+> name comes back unchanged. An entry with `"was_translation"` changed its English (`"was"`):
+> change that translation as little as the new English needs. List any entry you weren't sure
+> about.
