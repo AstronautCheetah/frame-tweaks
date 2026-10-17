@@ -154,6 +154,42 @@ class PadTest(unittest.TestCase):
         self.mouse(b, "release", on=let_go_on)
 
 
+class LatchedModifiers(PadTest):
+    """A modifier tapped (latched for the next key) or locked: the buttons that start something
+    else let it go first."""
+    def test_dictation_types_without_a_modifier_down(self):
+        """Dictation types through the same ydotoold: Ctrl still down made every letter Ctrl+letter."""
+        self.tap("Ctrl")                                    # latched: down
+        self.tap("Alt")
+        self.tap("Alt")                                     # locked
+        seen = []
+        with mock.patch.object(self.pad, "dictate", lambda: seen.append(list(self.keys.sent))):
+            self.tap("🎤", layer="tools")
+        self.assertIn((self.ap.KEY["Ctrl"], False), seen[0])
+        self.assertIn((self.ap.KEY["Alt"], False), seen[0])
+        self.assertEqual(self.pad.mod_state["Ctrl"], "off")
+        self.assertEqual(self.pad.mod_state["Alt"], "off")
+
+    def test_snip_lets_a_latched_modifier_go(self):
+        self.tap("Ctrl", layer="tools")
+        seen = []
+        with mock.patch.object(self.pad, "snip", lambda: seen.append(list(self.keys.sent))):
+            self.tap("Snip", layer="tools")
+        self.assertIn((self.ap.KEY["Ctrl"], False), seen[0])
+
+    def test_the_launcher_with_super_latched(self):
+        """Super latched is down already: letting it go is the tap (a second press was dropped,
+        and Super was up while the pad showed it latched)."""
+        self.tap("Super", layer="tools")
+        self.keys.sent.clear()
+        self.tap("Launcher", layer="tools")
+        self.assertEqual(self.keys.sent, [(self.ap.KEY["Super"], False)])
+        self.assertEqual(self.pad.mod_state["Super"], "off")
+        self.keys.sent.clear()
+        self.tap("Launcher", layer="tools")
+        self.assertEqual(self.keys.sent, [("tap", self.ap.KEY["Super"])])
+
+
 class TakenBack(PadTest):
     def test_a_press_the_vr_panel_takes_back_lets_go_of_its_key(self):
         """A grab (or the dashboard closing) takes presses back with a release off the key, which
@@ -398,6 +434,7 @@ def overlay_host(test):
     o.hover, o.front, o.handles, o.input_handle = None, 0, [1], 1
     o.input_size = (test.pad.width(), test.pad.height())
     o.log_input = lambda msg: None                                       # (not /run/user's log)
+    o.poll_error = 0.0
     return o
 
 
@@ -508,6 +545,21 @@ class GoingAway(PadTest):
         self.assertEqual(sorted(received(self.ydotoold)), [(29, 0), (108, 0)])
         self.assertIn("The X11 connection broke", err.getvalue())       # (still printed, as Qt does)
 
+    def test_an_error_qt_aborts_on(self):
+        """An error PyQt6 doesn't catch (a SteamVR call failing in the VR panel, say) aborts the
+        pad through a fatal message: its handler lets go first, as for the X11 connection."""
+        from PyQt6.QtCore import QtMsgType
+        self.tap("Ctrl")
+        self.tap("Alt")
+        self.tap("Alt")                                     # locked
+        received(self.ydotoold)
+        handlers = []
+        with mock.patch.object(self.ap, "qInstallMessageHandler", handlers.append):
+            self.ap.let_go_on_exit(self.pad)
+        with mock.patch.object(sys, "stderr", io.StringIO()):
+            handlers[0](QtMsgType.QtFatalMsg, None, "Unhandled Python exception")
+        self.assertEqual(sorted(received(self.ydotoold)), [(29, 0), (56, 0)])
+
     def test_a_stop(self):
         """SIGTERM (an update or an uninstall stopping it): it lets go, then closes as ✕ does."""
         from PyQt6.QtTest import QTest
@@ -525,7 +577,8 @@ class GoingAway(PadTest):
 
     def test_the_dashboard_closing(self):
         """VR: when the dashboard closes, the panel lets go of everything before it asks SteamVR to
-        hide (a SteamVR call that fails ends the pad, and the keys stayed down)."""
+        hide (a SteamVR call that failed ended the pad, and the keys stayed down). A call that
+        fails is let go now: the pad goes on, and the next tick tries again."""
         from PyQt6.QtCore import QEvent, Qt
         o = overlay_host(self)
         self.tap("Ctrl")
@@ -540,9 +593,26 @@ class GoingAway(PadTest):
         o.ov = types.SimpleNamespace(isDashboardVisible=lambda: False, hideOverlay=gone)
         o.ticks, o._dash, o.visible, o.cover, o.input_handle = 0, True, True, None, 7
         o.grips, o.dirty = None, False
-        with self.assertRaises(RuntimeError):
+        with mock.patch.object(sys, "stderr", io.StringIO()) as err:
             o.poll()
+        self.assertIn("SteamVR went away", err.getvalue())
         self.assertEqual(sorted(received(self.ydotoold)), [(29, 0), (108, 0)])
+
+    def test_placed_without_a_headset_pose(self):
+        """Reset (or a start) with neither a dashboard bar to follow nor a headset pose (SteamVR
+        starting again): it crashed on None. Now: where it is, or in front of where you'd stand."""
+        o = overlay_host(self)
+        o.reset_position.__globals__["openvr"].k_unTrackedDeviceIndex_Hmd = 0      # (the stand-in's)
+        o.device_matrix = lambda index: None
+        o.dashboard_anchor = lambda keys=None: None
+        o.width_m = 0.5
+        o.apply_pose = o.remember_offset = o.save = lambda: None
+        o.pose = None
+        o.reset_position()
+        self.assertAlmostEqual(o.pose[1][3], 1.6 - 0.5, delta=0.6)             # (about head height, a bit under)
+        before = [row[:] for row in o.pose]
+        o.reset_position()
+        self.assertEqual(o.pose, before)
 
 
 class DesktopGrabbed(PadTest):

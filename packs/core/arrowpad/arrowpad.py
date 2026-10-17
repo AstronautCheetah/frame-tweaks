@@ -89,7 +89,7 @@ if TARGET == "vr":
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
 
-from PyQt6.QtCore import (QEvent, QObject, QPoint, QRectF, QSize, Qt, QTimer, pyqtSignal,  # noqa: E402
+from PyQt6.QtCore import (QEvent, QObject, QPoint, QRectF, QSize, Qt, QtMsgType, QTimer, pyqtSignal,  # noqa: E402
                           qFormatLogMessage, qInstallMessageHandler)
 from PyQt6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPainterPath  # noqa: E402
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket  # noqa: E402
@@ -1295,18 +1295,28 @@ class ArrowPad(QWidget):
             else:
                 self.toggle_mod(name)
         elif name == "Launcher":
-            self.yd.tap(KEY["Super"])
+            if self.mod_state["Super"] != "off":     # Super already down (latched): letting it go is the tap
+                self.mod_state["Super"] = "off"
+                self.yd.key(KEY["Super"], False)
+            else:
+                self.yd.tap(KEY["Super"])
+            self.release_oneshots()
         elif name in ("Fn", "Tools"):
             target = {"Fn": "fn", "Tools": "tools"}[name]
             self.layer = target if self.layer != target else "nav"
             self.relabel()
         elif name == "Snip":
+            self.release_oneshots()
             self.snip()
         elif name == "Unstick":
             self.unstick()
         elif name in MOUSE:
             self.toggle_click(name)
         elif name == "🎤":
+            # Dictation types through the same ydotoold: with Ctrl still down, every letter was a
+            # Ctrl+letter (W closes the tab, Q quits). Latched or locked, they all let go first.
+            self.release_all_mods()
+            self.restyle()
             self.dictate()
         elif name in CHORDS:
             ctrl_held = self.mod_state["Ctrl"] != "off"
@@ -1504,11 +1514,12 @@ def default_socket():
 def let_go_on_exit(pad):
     """A pad that goes away lets go of what it holds down first (release_keys), not only one that
     is closed. When desktop mode ends, Qt says "The X11 connection broke" and ends the program
-    there and then (no closeEvent): its message handler lets go first. A stop (SIGTERM: an update,
-    an uninstall) closes the pad as ✕ does."""
+    there and then (no closeEvent); so does any fatal message, such as PyQt6's for an error in
+    Python it didn't catch (it aborts the pad): its message handler lets go first. A stop
+    (SIGTERM: an update, an uninstall) closes the pad as ✕ does."""
     def message(kind, context, text):
         try:
-            if "X11 connection broke" in text:
+            if "X11 connection broke" in text or kind == QtMsgType.QtFatalMsg:
                 pad.release_keys()
             sys.stderr.write(qFormatLogMessage(kind, context, text) + "\n")    # (as Qt would)
         except Exception:                # (this runs inside Qt: an error here would abort the pad)
