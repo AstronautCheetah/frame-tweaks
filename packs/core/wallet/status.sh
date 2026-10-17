@@ -15,5 +15,6 @@ fi
 case $state in
     locked) status_ok "$(t 'wallet locked; %s app launcher(s) routed/gated' "$n")" ;;
     unlocked) status_ok "$(t 'wallet unlocked; %s app launcher(s) routed/gated' "$n")" ;;
+    *) status_warn "$(t "wallet-unlock can't tell whether the wallet is locked: protected apps won't open (re-run %s)" "./install.sh install wallet")" ;;
 esac
 status_ok "$(t 'wallet %s; %s app launcher(s) routed/gated' "$state" "$n")"

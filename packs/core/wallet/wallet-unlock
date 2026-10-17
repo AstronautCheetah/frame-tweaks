@@ -277,15 +277,21 @@ def unlock(conn):
     ensure_ksecretd(conn)
     if ksecretd_open(conn):          # stuck "open but locked": pamOpen would be ignored
         ksecretd_close(conn)
-    salt = SALT.read_bytes()
+    try:
+        salt = SALT.read_bytes()
+    except OSError:                  # (no wallet made at login: KWalletManager makes one)
+        subprocess.run(["kdialog", "--title", _("Unlock wallet"), "--sorry",
+                        _("There's no KDE wallet here to unlock with a password yet (kdewallet, made at "
+                          "login). KWalletManager can make one.")])
+        return False
     for attempt in range(3):
         pw = ask_password(attempt > 0)
         if pw is None:
-            return False
+            return not is_locked(conn)     # (a slow unlock that landed meanwhile counts)
         key = hashlib.pbkdf2_hmac("sha512", pw.encode(), salt, 50000, 56)
         del pw
         conn.send(new_method_call(KSECRETD, "pamOpen", "sayi", (WALLET, key, 0)))
-        for _poll in range(20):        # pamOpen has no reply; poll the result
+        for _poll in range(50):        # pamOpen has no reply; poll the result (5 s: a busy Frame is slow)
             time.sleep(0.1)
             if not is_locked(conn):
                 return True
@@ -398,7 +404,7 @@ def stop_lock_timer():
             pass
 
 
-def schedule_lock():
+def schedule_lock(at=None):
     """(Re)start a transient systemd timer that locks the wallet later; None with auto-lock off.
     It fires at a time on the clock (OnCalendar=@…), not after a countdown (OnActiveSec=): a
     countdown started again at every systemctl daemon-reload (installers run one), and stood
@@ -412,6 +418,8 @@ def schedule_lock():
                DBUS_SESSION_BUS_ADDRESS=OUTER_BUS)
     with scheduling():
         deadline = math.ceil(time.time() + float(hours) * 3600)
+        if at is not None and time.time() + 60 < at < deadline:
+            deadline = int(at)                   # (the time it had: kept, when the watcher starts again)
         if session().get("locks") == deadline and timer_lock_time() == deadline:
             return hours                  # (just scheduled by the other one, to the second)
         # Clear the previous timer *and* its service: a failed earlier run left a unit with this name
@@ -437,6 +445,22 @@ def schedule_lock():
         except OSError:
             pass
     return hours
+
+
+def keep_auto_lock():
+    """The watcher starting (a reinstall, an update): an unlocked wallet with no auto-lock
+    scheduled gets one, at the time it had if that's still to come. It was scheduled only on the
+    next unlock, so after ↻ the wallet stayed unlocked past the time the page showed."""
+    try:
+        with bus() as calls:
+            unlocked = bool(call(calls, message_bus.NameHasOwner("org.kde.ksecretd"))[0]) and ksecretd_open(calls)
+        if not unlocked or not autolock_on() or timer_lock_time() is not None:
+            return
+        s = session()
+        hours = schedule_lock(at=s.get("locks") if s.get("ksecretd") == ksecretd_id() else None)
+        print(f"{time.strftime('%T')} unlocked with no auto-lock -> auto-lock in {hours} h", flush=True)
+    except Exception as e:
+        print(f"auto-lock: {e}", flush=True)
 
 
 class FrontEnd:
@@ -491,6 +515,7 @@ def watch():
         rule.add_arg_condition(0, "org.kde.kwalletd6")
         call(conn, mb.AddMatch(rule))
         front.sync()
+        keep_auto_lock()
         while True:
             msg = conn.receive()
             if msg.header.message_type != MessageType.signal:
@@ -515,6 +540,9 @@ def watch():
                         if not is_locked(calls) or ksecretd_open(calls):
                             lock(calls)
                             print(f"{time.strftime('%T')} wallet closed -> locked and closed in ksecretd", flush=True)
+                        else:                           # (closed already, not by lock(): its session and timer go too)
+                            SESSION.unlink(missing_ok=True)
+                            stop_lock_timer()
                 except Exception as e:                  # keep watching even if one lock fails
                     print(f"lock failed: {e}", flush=True)
 

@@ -209,7 +209,9 @@ def add(app_id, electron, shared=True, gate=None):
         gate = f"{MARK}=true" in now and GATE in now
     # Re-applying (e.g. after an app update) keeps --password-store, even if not asked again.
     electron = electron or app_id in KNOWN_ELECTRON or STORE in now
-    if src.parent == APPS and src.name == f"{app_id}.desktop":
+    if src.parent == APPS and src.name == f"{app_id}.desktop" and f"{MARK}=true" not in original:
+        # (never the wrapper itself as the original: Remove then put a wrapper back, running
+        # wallet-gate after the wallet's uninstall had deleted it)
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         (BACKUP_DIR / src.name).write_text("\n".join(lines) + "\n")
     try:
@@ -296,6 +298,8 @@ def main():
     ap.add_argument("--no-gate", action="store_true", help=_("stop requiring the wallet password"))
     ap.add_argument("--gate", action="store_true",
                     help=_("require the wallet password (wallet-unlock) before starting the app"))
+    ap.add_argument("--gate-if-new", action="store_true",
+                    help=_("require it for apps not protected yet; the others keep their choice (installers)"))
     ap.add_argument("--no-shared", action="store_true",
                     help=_("don't move the app to the outer bus (for apps that don't use the wallet)"))
     ap.add_argument("--remove", action="store_true")
@@ -328,7 +332,11 @@ def main():
             shared, gate = flags_of(app)
             add(app, STORE in current.read_text(), shared, gate)
         else:
-            add(app, a.electron, not a.no_shared, True if a.gate else False if a.no_gate else None)
+            gate = True if a.gate else False if a.no_gate else None
+            if a.gate_if_new:          # (an update runs the installers again: Password first unticked stays so)
+                current = APPS / f"{app}.desktop"
+                gate = None if current.exists() and f"{MARK}=true" in current.read_text() else True
+            add(app, a.electron, not a.no_shared, gate)
     os.system("update-desktop-database -q ~/.local/share/applications 2>/dev/null")
     os.utime(APPS)   # Steam's "+" menu rescans when this directory's mtime changes
 

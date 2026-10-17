@@ -177,6 +177,25 @@ class Launcher(Home):
         self.assertIn("/opt/app/v2", (self.apps / "my.app.desktop").read_text())
         self.assertIn("/opt/app/v2", (self.orig / "my.app.desktop").read_text())
 
+    def test_an_update_keeps_password_first_unticked(self):
+        """The wallet's and Signal's installers passed --gate every time, and ./install.sh update
+        runs them: Password first, unticked on the Wallet apps page, came back on."""
+        entry(self.flat / "org.chat.desktop", "/usr/bin/flatpak run org.chat @@u %U @@")
+        self.launcher("--gate-if-new", "org.chat")
+        self.assertIn(self.wl.GATE, (self.apps / "org.chat.desktop").read_text())      # (new: gated)
+        self.launcher("--no-gate", "org.chat")                                          # (unticked)
+        self.launcher("--gate-if-new", "org.chat")                                      # (an update)
+        self.assertNotIn(self.wl.GATE, (self.apps / "org.chat.desktop").read_text())
+        self.assertIn(f"{self.wl.MARK}=true", (self.apps / "org.chat.desktop").read_text())
+
+    def test_the_wrapper_is_never_kept_as_the_original(self):
+        """With no original kept, the wrapper itself was saved as it: Remove then put a wrapper
+        back, running wallet-gate after the wallet's uninstall had deleted it."""
+        entry(self.apps / "x.app.desktop", f"{self.wl.GATE} /opt/x %U", f"{self.wl.MARK}=true")
+        self.launcher("--gate", "x.app")
+        backup = self.orig / "x.app.desktop"
+        self.assertFalse(backup.exists() and f"{self.wl.MARK}=true" in backup.read_text())
+
     def test_password_first_alone_still_runs_exec(self):
         entry(self.flat / "org.kde.wm.desktop", "/usr/bin/flatpak run org.kde.wm @@ %F @@", "DBusActivatable=true")
         self.launcher("--gate", "--no-shared", "org.kde.wm")
@@ -566,11 +585,57 @@ class Watcher(Home):
             made.append(FakeConn(ksecretd(state)) if made else listening)
             return made[-1]
         with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
-                mock.patch.multiple(wu, bus=bus, broker=lambda: None, schedule_lock=lambda: scheduled.append(1) or "4"):
+                mock.patch.multiple(wu, bus=bus, broker=lambda: None, keep_auto_lock=lambda: None,
+                                    schedule_lock=lambda: scheduled.append(1) or "4"):
             with self.assertRaises(Done):
                 wu.watch()
         self.assertTrue(state["locked"])           # the close became a lock in ksecretd
         self.assertEqual(scheduled, [1])           # and the open after it was seen
+
+
+class FromTheBugHunt(Home):
+    """The 2026-10-17 bug hunt: the auto-lock after ↻, an unlock that's slow or lands after a
+    cancel, no wallet made yet, and ksecretd closing the wallet by itself."""
+    def test_the_watcher_starting_schedules_a_missing_auto_lock(self):
+        """↻ stopped the timer, and the watcher scheduled one only at the next unlock: the wallet
+        stayed unlocked past the time the page showed. It keeps that time if it's still to come."""
+        wu = wallet_unlock(self.home)
+        wu.SESSION.write_text(json.dumps({"ksecretd": "7:7", "locks": 2_000_000_000}))
+        calls = []
+        for timer, locked, scheduled in ((None, False, [2_000_000_000]), (1234, False, []), (None, True, [])):
+            calls.clear()
+            with mock.patch.multiple(wu, bus=lambda: FakeConn(ksecretd({"locked": locked})), autolock_on=lambda: True,
+                                     timer_lock_time=lambda: timer, ksecretd_id=lambda: "7:7",
+                                     schedule_lock=lambda at=None: calls.append(at) or "4"), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                wu.keep_auto_lock()
+            self.assertEqual(calls, scheduled, (timer, locked))
+
+    def test_a_reinstall_leaves_the_auto_lock_timer(self):
+        script = (ROOT / "packs/core/wallet/uninstall.sh").read_text()
+        self.assertIn('[ -n "${FRAME_TWEAKS_REINSTALL:-}" ] || sysctl_user stop wallet-autolock.timer', script)
+
+    def test_no_wallet_made_yet(self):
+        """No kdewallet.salt: the unlock crashed, and every protected app (KWalletManager, which
+        makes the wallet, too) said "the wallet is still locked"."""
+        wu = wallet_unlock(self.home)
+        wu.SALT = self.home / "kwalletd/kdewallet.salt"
+        shown = []
+        with mock.patch.multiple(wu, ensure_ksecretd=lambda conn: None, ksecretd_open=lambda conn: False,
+                                 subprocess=types.SimpleNamespace(run=lambda cmd, **k: shown.append(cmd))):
+            self.assertFalse(wu.unlock(None))
+        self.assertIn("--sorry", shown[0])
+        gate = (ROOT / "packs/core/wallet/wallet-gate").read_text()
+        self.assertIn('[ -e "$HOME/.local/share/kwalletd/kdewallet.kwl" ] || exec "$@"', gate)
+
+    def test_an_unlock_that_lands_after_cancel_counts(self):
+        wu = wallet_unlock(self.home)
+        wu.SALT = self.home / "salt"
+        wu.SALT.write_bytes(b"0" * 56)
+        locked = [True]
+        with mock.patch.multiple(wu, ensure_ksecretd=lambda conn: None, ksecretd_open=lambda conn: False,
+                                 is_locked=lambda conn: locked[0], ask_password=lambda retry: locked.__setitem__(0, False)):
+            self.assertTrue(wu.unlock(None))         # (cancelled, but the unlock before it landed)
 
 
 class FrontEnd(Home):
@@ -640,7 +705,8 @@ class FrontEnd(Home):
             return msg
         listening.receive = receive
         with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
-                mock.patch.multiple(wu, bus=buses, broker=lambda: None, schedule_lock=lambda: scheduled.append(1) or "4"):
+                mock.patch.multiple(wu, bus=buses, broker=lambda: None, keep_auto_lock=lambda: None,
+                                    schedule_lock=lambda: scheduled.append(1) or "4"):
             with self.assertRaises(Done):
                 wu.watch()
         self.assertEqual(state["opens"], 1)

@@ -10,7 +10,8 @@ if [ -x "$BIN/wallet-launcher" ] && [ -z "${FRAME_TWEAKS_REINSTALL:-}" ]; then
     done
     rmdir "$LAUNCHER_BUILT" 2>/dev/null || true      # (each --remove took its app's copy)
 fi
-sysctl_user stop wallet-autolock.timer 2>/dev/null || true
+# (not on a reinstall: the wallet stays unlocked, and the auto-lock it has should still come)
+[ -n "${FRAME_TWEAKS_REINSTALL:-}" ] || sysctl_user stop wallet-autolock.timer 2>/dev/null || true
 sysctl_user disable --now wallet-lock-sync 2>/dev/null || true
 sysctl_user disable --now app-timers 2>/dev/null || true
 # git's credential helper goes back from the gh wrapper to the real gh, the one the wrapper runs

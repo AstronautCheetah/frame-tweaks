@@ -12,7 +12,7 @@ flatpak override --user --env=SIGNAL_PASSWORD_STORE=kwallet6 "$APP"
 # The wallet's standard protections (Wallet apps in the installer window): the password first,
 # and a Close-after timer (15 minutes unless you've set one, Never included: it's kept as 0; Signal
 # guard's settings carry over).
-"$BIN/wallet-launcher" --gate "$APP"
+"$BIN/wallet-launcher" --gate-if-new "$APP"
 "$BIN/app-timers" --import-signal-guard
 # Signal guard (unlock first + idle quit) did the same for Signal alone: retired.
 pkill -f "^python3 $BIN/signal-guard( |$)" 2>/dev/null || true
