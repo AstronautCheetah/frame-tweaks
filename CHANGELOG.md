@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.15 (2026-10-17)
 
 ### Added
 - **Android Mirror disconnects by itself:** a mirror left on overnight kept the phone streaming
