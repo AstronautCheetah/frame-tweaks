@@ -1496,7 +1496,7 @@ class ReportProblem(unittest.TestCase):
         import types
         import report_page
         from PyQt6.QtWidgets import QApplication
-        app = QApplication.instance() or QApplication([])  # noqa: F841  (kept: a dropped one is gone)
+        app = QApplication.instance() or QApplication([])      # (kept: a dropped one is gone)
         with tempfile.TemporaryDirectory() as d:
             f = Path(d) / "frame-tweaks-debug-20261017-131638.txt"
             f.write_text("Frame Tweaks 0.6.17\nstatus: ok\n")
@@ -1506,7 +1506,16 @@ class ReportProblem(unittest.TestCase):
             with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": ""}):
                 page = report_page.ReportPage(types.SimpleNamespace(go_back=lambda: None), opened.append,
                                               types.SimpleNamespace(submit=lambda *a, **k: done), ROOT)
+            page.resize(900, 600)
+            page.show()
+            app.processEvents()
+            where = lambda: (page.copy.geometry(), page.view.geometry())     # noqa: E731
+            before = where()
+            self.assertEqual(page.view.placeholderText(), "Saving the diagnostics report…")   # (in the report's box)
             page.collect()
+            app.processEvents()
+            self.assertEqual(where(), before)                    # (nothing moves when it's done)
+            self.assertIn("frame-tweaks-debug-20261017-131638.txt", page.saved.text())
             self.assertEqual(page.view.toPlainText(), f.read_text())
             self.assertTrue(page.copy.isEnabled())
             page.copy.click()

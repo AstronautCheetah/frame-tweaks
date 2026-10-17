@@ -1350,7 +1350,7 @@ msgstr "(Essai de la fenêtre : aucun rapport enregistré.)"
 
 #: gui/report_page.py
 msgid ""
-"1. Read the report below: it's plain text, and nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+"1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
 
 # needs review
@@ -1363,12 +1363,9 @@ msgstr "Impossible d'écrire le rapport (voir {command})."
 msgid "Report a problem"
 msgstr "Signaler un problème"
 
-# needs review
 #: gui/report_page.py
-msgid ""
-"Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
+msgid "Saved as {file}"
 msgstr ""
-"<b>{file}</b> enregistré : versions de Frame Tweaks et de SteamOS, état de chaque ajustement et journaux récents, sans les noms d'utilisateur, les chemins, ni les noms et adresses de l'hôte et des téléphones."
 
 # needs review
 #: gui/report_page.py
@@ -6925,3 +6922,9 @@ msgstr "Installateur d'ajustements"
 #~ # needs review
 #~ msgid "📄 Open the report"
 #~ msgstr "📄 Ouvrir le rapport"
+
+#~ # needs review
+#~ msgid ""
+#~ "Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
+#~ msgstr ""
+#~ "<b>{file}</b> enregistré : versions de Frame Tweaks et de SteamOS, état de chaque ajustement et journaux récents, sans les noms d'utilisateur, les chemins, ni les noms et adresses de l'hôte et des téléphones."
