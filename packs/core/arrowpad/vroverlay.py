@@ -13,6 +13,7 @@ import glob
 import hashlib
 import math
 import os
+import sys
 import time
 
 import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sys.path)
@@ -116,6 +117,7 @@ class OverlayHost:
         self.visible = False
         # ~45 Hz event pump while the dashboard shows the pad; 5 Hz while it's closed (only to
         # notice it opening: nothing can be pressed or grabbed then)
+        self.poll_error = 0.0
         self.timer = QTimer(pad, interval=self.FAST_MS, timeout=self.poll)
         self.timer.start()
         QTimer(pad, interval=100, timeout=self.mark_dirty).start()   # state changes (mic etc.)
@@ -317,6 +319,10 @@ class OverlayHost:
             org = [anchor[i][3] for i in range(3)]
         else:
             head = self.device_matrix(openvr.k_unTrackedDeviceIndex_Hmd)
+            if head is None:            # (no headset pose: SteamVR starting again, say)
+                if self.pose:
+                    return              # where it is, until Reset finds the headset
+                head = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 1.6], [0.0, 0.0, 1.0, 0.0]]   # where you'd stand
             fx, fz = -head[0][2], -head[2][2]
             n = math.hypot(fx, fz) or 1.0
             fx, fz = fx / n, fz / n
@@ -387,6 +393,17 @@ class OverlayHost:
         # changes on presses and state changes; hovering is felt (haptic tick), not drawn.
 
     def poll(self):
+        """The event pump (a timer's): a SteamVR call failing in it (SteamVR restarting, say) is
+        let go, and the next one tries again. Out of the timer, PyQt6 would abort the pad."""
+        try:
+            self.poll_once()
+        except Exception as e:
+            now = time.monotonic()
+            if now - self.poll_error > 5:
+                print(f"vroverlay: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+                self.poll_error = now
+
+    def poll_once(self):
         if getattr(self, "closed", False):
             return
         self.ticks += 1
