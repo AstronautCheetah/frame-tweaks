@@ -24,6 +24,13 @@ write_file "$BIN/arrowpad" 755 <<EOS
 #!/bin/sh
 exec "$VENV/bin/python" "$HOME/.local/share/arrowpad/arrowpad.py" "\$@"
 EOS
+# In VR, Steam's keyboard stays put when you press the pad (a dashboard patch; only with the VR
+# environment helper, which the VR environment tweaks install: it isn't pulled in for this).
+if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
+    install_dashboard_patch arrowpad-keyboard "$TWEAK_DIR/keyboard-patch.js"
+else
+    say "$(t "In VR, Steam's keyboard moves when you press the pad (install a VR environment tweak to keep it in place).")"
+fi
 install_icon frame-tweaks-arrowpad
 install_desktop "$TWEAK_DIR/arrowpad.desktop"
 install_desktop "$TWEAK_DIR/arrowpad-vr.desktop"
