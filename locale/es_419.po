@@ -2364,27 +2364,27 @@ msgstr "Trabajando…"
 
 #: packs/core/adb-scrcpy/README.md
 msgid "1 hour"
-msgstr ""
+msgstr "1 hora"
 
 #: packs/core/adb-scrcpy/README.md
 msgid "15 minutes"
-msgstr ""
+msgstr "15 minutos"
 
 #: packs/core/adb-scrcpy/README.md
 msgid "2 hours"
-msgstr ""
+msgstr "2 horas"
 
 #: packs/core/adb-scrcpy/README.md
 msgid "30 minutes"
-msgstr ""
+msgstr "30 minutos"
 
 #: packs/core/adb-scrcpy/README.md
 msgid "4 hours"
-msgstr ""
+msgstr "4 horas"
 
 #: packs/core/adb-scrcpy/README.md
 msgid "8 hours"
-msgstr ""
+msgstr "8 horas"
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -2405,6 +2405,7 @@ msgstr ""
 msgid ""
 "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
+"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -2427,6 +2428,7 @@ msgstr ""
 msgid ""
 "The phone mirror's stream, joystick scrolling, its clipboard, and when it disconnects by itself."
 msgstr ""
+"La transmisión del espejo del teléfono, el desplazamiento con joystick, su portapapeles y cuándo se desconecta solo."
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -2495,16 +2497,17 @@ msgstr "%s no apareció"
 
 #: packs/core/adb-scrcpy/phone
 msgid "%s h"
-msgstr ""
+msgstr "%s h"
 
 #: packs/core/adb-scrcpy/phone
 msgid "%s h %s min"
-msgstr ""
+msgstr "%s h %s min"
 
 #: packs/core/adb-scrcpy/phone
 msgid ""
 "%s has been mirrored for %s. Android Mirror disconnects in a minute so the phone's battery can rest, unless you keep it on."
 msgstr ""
+"%s se está reflejando desde hace %s. Espejo de Android se desconectará en un minuto para que la batería del teléfono descanse, a menos que lo mantengas activo."
 
 #: packs/core/adb-scrcpy/phone
 msgid "%s isn't on the Wi-Fi with Wireless debugging on."
@@ -2512,7 +2515,7 @@ msgstr "%s no está en la Wi-Fi con la Depuración inalámbrica activada."
 
 #: packs/core/adb-scrcpy/phone
 msgid "%s min"
-msgstr ""
+msgstr "%s min"
 
 #: packs/core/adb-scrcpy/phone packs/core/tools/check-system.sh packs/core/vr-dashboard/check-system.sh
 msgid "%s not found"
@@ -2522,10 +2525,11 @@ msgstr "%s no encontrado"
 msgid ""
 "%s was mirrored for %s, so Android Mirror disconnected to save its battery. Open Android Mirror to connect again; the time is in its settings."
 msgstr ""
+"%s se reflejó durante %s, así que Espejo de Android se desconectó para cuidar su batería. Abre Espejo de Android para volver a conectarte; el tiempo está en su configuración."
 
 #: packs/core/adb-scrcpy/phone
 msgid "Android Mirror disconnected"
-msgstr ""
+msgstr "Espejo de Android se desconectó"
 
 #: packs/core/adb-scrcpy/phone
 msgid "Android Mirror setup"
@@ -2541,7 +2545,7 @@ msgstr "Espejo de Android: vincular con %s"
 
 #: packs/core/adb-scrcpy/phone
 msgid "Android Mirror: still using it?"
-msgstr ""
+msgstr "Espejo de Android: ¿lo sigues usando?"
 
 #: packs/core/adb-scrcpy/phone
 msgid ""
@@ -2591,7 +2595,7 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid "Keep it on"
-msgstr ""
+msgstr "Mantenerlo activo"
 
 #: packs/core/adb-scrcpy/phone
 msgid "Looking for your phone on the Wi-Fi…"
@@ -2671,7 +2675,7 @@ msgstr "El espejo no se inició"
 
 #: packs/core/adb-scrcpy/phone
 msgid "The phone"
-msgstr ""
+msgstr "El teléfono"
 
 #: packs/core/adb-scrcpy/phone
 msgid "The phone didn't offer pairing"
@@ -2759,27 +2763,27 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "1 h"
-msgstr ""
+msgstr "1 h"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "15 min"
-msgstr ""
+msgstr "15 min"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "2 h"
-msgstr ""
+msgstr "2 h"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "30 min"
-msgstr ""
+msgstr "30 min"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "4 h"
-msgstr ""
+msgstr "4 h"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "8 h"
-msgstr ""
+msgstr "8 h"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
@@ -2792,7 +2796,7 @@ msgstr "Portapapeles con el teléfono"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
-msgstr ""
+msgstr "Desconectarse solo después de"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Fast"
@@ -2819,6 +2823,7 @@ msgstr "Sin compartir"
 msgid ""
 "Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once."
 msgstr ""
+"La imagen y la fluidez se aplican al reiniciar la transmisión; la velocidad del joystick y la desconexión, de inmediato."
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
@@ -3278,8 +3283,9 @@ msgstr ""
 
 #: packs/core/arrowpad/install.sh
 msgid ""
-"In VR, Steam's keyboard moves when you press the pad (install a VR environment tweak to keep it in place)."
+"In VR, pressing the pad takes Steam's keyboard away from the window you're typing in (install a VR environment tweak to fix that)."
 msgstr ""
+"En RV, tocar el Teclado de flechas le quita el teclado de Steam a la ventana en la que escribes (instala un ajuste de entorno de RV para corregirlo)."
 
 #: packs/core/arrowpad/install.sh
 msgid ""
@@ -3311,11 +3317,13 @@ msgstr "se cerró un Teclado de flechas en ejecución"
 msgid ""
 "Desktop mode has taken all input, so what you type goes to the desktop, not to other windows. Tap Unstick (under Tools) to give it back."
 msgstr ""
+"El modo escritorio tomó toda la entrada, así que lo que escribes va al escritorio, no a otras ventanas. Toca Soltar (en Herram.) para devolverla."
 
 #: packs/core/arrowpad/vroverlay.py
 msgid ""
 "While Steam's keyboard is open, Arrow Pad can only slide. Close the keyboard to move it closer, further away or turn it."
 msgstr ""
+"Mientras el teclado de Steam está abierto, el Teclado de flechas solo se puede deslizar. Cierra el teclado para acercarlo, alejarlo o girarlo."
 
 # needs review
 #: packs/core/charge-limit/README.md

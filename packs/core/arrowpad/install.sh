@@ -29,7 +29,7 @@ EOS
 if [ -x "$VR_DASHBOARD/sft-dashboard" ]; then
     install_dashboard_patch arrowpad-keyboard "$TWEAK_DIR/keyboard-patch.js"
 else
-    say "$(t "In VR, Steam's keyboard moves when you press the pad (install a VR environment tweak to keep it in place).")"
+    say "$(t "In VR, pressing the pad takes Steam's keyboard away from the window you're typing in (install a VR environment tweak to fix that).")"
 fi
 install_icon frame-tweaks-arrowpad
 install_desktop "$TWEAK_DIR/arrowpad.desktop"
