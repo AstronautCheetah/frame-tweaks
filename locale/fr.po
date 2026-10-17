@@ -1051,9 +1051,10 @@ msgstr "Supprimer aussi les paramètres"
 msgid "Animated"
 msgstr "Animé"
 
+# needs review
 #: gui/prefs_page.py
 msgid "Check a translation (right or wrong)"
-msgstr ""
+msgstr "Vérifier une traduction (juste ou non)"
 
 # needs review
 #: gui/prefs_page.py
@@ -1274,14 +1275,17 @@ msgstr ""
 msgid "This window"
 msgstr "Cette fenêtre"
 
+# needs review
 #: gui/prefs_page.py
 msgid "Translate it yourself"
-msgstr ""
+msgstr "Traduire vous-même"
 
+# needs review
 #: gui/prefs_page.py
 msgid ""
 "Translations are made by machine first, checked against SteamVR's, Steam's and KDE's own wording, then confirmed by people who speak the language."
 msgstr ""
+"Les traductions sont d'abord faites par machine, vérifiées par rapport aux termes de SteamVR, Steam et KDE, puis confirmées par des personnes qui parlent la langue."
 
 # needs review
 #: gui/prefs_page.py
@@ -1356,19 +1360,22 @@ msgid ""
 msgstr ""
 "Vos propres données ne sont jamais supprimées : votre historique de dictée, les clés d'association d'adb et le dossier ~/.claude de Claude Code restent dans tous les cas."
 
+# needs review
 #: gui/prefs_page.py
 msgid "{language}: {n} of {total} texts not yet confirmed."
-msgstr ""
+msgstr "{language} : {n} textes sur {total} pas encore confirmés."
 
 # needs review
 #: gui/report_page.py
 msgid "(Trying out the window: no report saved.)"
 msgstr "(Essai de la fenêtre : aucun rapport enregistré.)"
 
+# needs review
 #: gui/report_page.py
 msgid ""
 "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
+"1. Lisez le rapport ci-dessous : les versions de Frame Tweaks et de SteamOS, l'état de chaque ajustement et les journaux récents, sans noms d'utilisateur, chemins, noms d'hôte et de téléphone ni adresses. Rien n'en est envoyé nulle part, sauf si vous l'ajoutez au formulaire.<br>2. Ouvrez le formulaire de signalement (sur GitHub, où vous vous connectez), décrivez ce qui s'est passé et ce que vous attendiez, puis collez le rapport dans sa case « Diagnostics report » (« 📋 Copier le rapport »), ou joignez le fichier enregistré."
 
 # needs review
 #: gui/report_page.py
@@ -1380,9 +1387,10 @@ msgstr "Impossible d'écrire le rapport (voir {command})."
 msgid "Report a problem"
 msgstr "Signaler un problème"
 
+# needs review
 #: gui/report_page.py
 msgid "Saved as {file}"
-msgstr ""
+msgstr "Enregistré sous {file}"
 
 # needs review
 #: gui/report_page.py
@@ -1394,13 +1402,15 @@ msgstr "Enregistrement du rapport de diagnostic…"
 msgid "🐞 Open the bug form"
 msgstr "🐞 Ouvrir le formulaire de signalement"
 
+# needs review
 #: gui/report_page.py
 msgid "📋 Copied"
-msgstr ""
+msgstr "📋 Copié"
 
+# needs review
 #: gui/report_page.py
 msgid "📋 Copy the report"
-msgstr ""
+msgstr "📋 Copier le rapport"
 
 # needs review
 #: gui/wallet_page.py
@@ -2757,9 +2767,10 @@ msgstr ""
 msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} n'est pas un nom de branche ou d'étiquette"
 
+# needs review
 #: lib/splash.py
 msgid "Added {name} to the app menu"
-msgstr ""
+msgstr "{name} ajouté au menu des applications"
 
 # needs review
 #: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
@@ -2771,21 +2782,25 @@ msgstr "Pavé fléché"
 msgid "Done"
 msgstr "Terminé"
 
+# needs review
 #: lib/splash.py
 msgid "Fetching {name} (Arch Linux ARM, signature checked)"
-msgstr ""
+msgstr "Téléchargement de {name} (Arch Linux ARM, signature vérifiée)"
 
+# needs review
 #: lib/splash.py
 msgid "Installed {programs} in {folder}"
-msgstr ""
+msgstr "{programs} installé(s) dans {folder}"
 
+# needs review
 #: lib/splash.py
 msgid "Linking {program} into {folder}"
-msgstr ""
+msgstr "Lien de {program} dans {folder}"
 
+# needs review
 #: lib/splash.py
 msgid "Narrate's voice: {voice}"
-msgstr ""
+msgstr "Voix de lecture : {voice}"
 
 # needs review
 #: lib/splash.py
@@ -2802,9 +2817,10 @@ msgstr "Capture d'écran + Lecture"
 msgid "Setting up PyQt6, a window toolkit"
 msgstr "Préparation de PyQt6, une bibliothèque graphique"
 
+# needs review
 #: lib/splash.py
 msgid "Setting up {name}'s Python packages"
-msgstr ""
+msgstr "Préparation des paquets Python de {name}"
 
 # needs review
 #: lib/splash.py
@@ -2821,9 +2837,10 @@ msgstr "En cours…"
 msgid "running"
 msgstr "en cours d'exécution"
 
+# needs review
 #: lib/splash.py
 msgid "{name} is ready: {keys} shows it"
-msgstr ""
+msgstr "{name} est prêt : {keys} l'affiche"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md

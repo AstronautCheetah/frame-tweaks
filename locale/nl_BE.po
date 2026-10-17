@@ -1050,9 +1050,10 @@ msgstr "Ook de instellingen wissen"
 msgid "Animated"
 msgstr "Geanimeerd"
 
+# needs review
 #: gui/prefs_page.py
 msgid "Check a translation (right or wrong)"
-msgstr ""
+msgstr "Een vertaling controleren (juist of niet)"
 
 # needs review
 #: gui/prefs_page.py
@@ -1268,14 +1269,17 @@ msgstr ""
 msgid "This window"
 msgstr "Dit venster"
 
+# needs review
 #: gui/prefs_page.py
 msgid "Translate it yourself"
-msgstr ""
+msgstr "Zelf vertalen"
 
+# needs review
 #: gui/prefs_page.py
 msgid ""
 "Translations are made by machine first, checked against SteamVR's, Steam's and KDE's own wording, then confirmed by people who speak the language."
 msgstr ""
+"Vertalingen worden eerst door een machine gemaakt, getoetst aan de eigen woorden van SteamVR, Steam en KDE, en daarna bevestigd door mensen die de taal spreken."
 
 # needs review
 #: gui/prefs_page.py
@@ -1350,19 +1354,22 @@ msgid ""
 msgstr ""
 "Je eigen gegevens worden nooit verwijderd: je dicteergeschiedenis, de koppelingssleutels van adb en de map ~/.claude van Claude Code blijven hoe dan ook."
 
+# needs review
 #: gui/prefs_page.py
 msgid "{language}: {n} of {total} texts not yet confirmed."
-msgstr ""
+msgstr "{language}: {n} van de {total} teksten nog niet bevestigd."
 
 # needs review
 #: gui/report_page.py
 msgid "(Trying out the window: no report saved.)"
 msgstr "(Het venster wordt uitgeprobeerd: geen rapport opgeslagen.)"
 
+# needs review
 #: gui/report_page.py
 msgid ""
 "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
+"1. Lees het rapport hieronder: de versies van Frame Tweaks en SteamOS, de status van elke aanpassing en recente logs, zonder gebruikersnamen, paden, host- en telefoonnamen en adressen. Er wordt niets van verstuurd, tenzij je het aan het formulier toevoegt.<br>2. Open het bugformulier (op GitHub; je meldt je daar aan), vertel wat er gebeurde en wat je verwachtte, en plak het rapport in het vak Diagnostics report (📋 Het rapport kopiëren), of voeg het opgeslagen bestand toe."
 
 # needs review
 #: gui/report_page.py
@@ -1374,9 +1381,10 @@ msgstr "Kon het rapport niet schrijven (zie {command})."
 msgid "Report a problem"
 msgstr "Een probleem melden"
 
+# needs review
 #: gui/report_page.py
 msgid "Saved as {file}"
-msgstr ""
+msgstr "Opgeslagen als {file}"
 
 # needs review
 #: gui/report_page.py
@@ -1388,13 +1396,15 @@ msgstr "Diagnoserapport opslaan…"
 msgid "🐞 Open the bug form"
 msgstr "🐞 Het bugformulier openen"
 
+# needs review
 #: gui/report_page.py
 msgid "📋 Copied"
-msgstr ""
+msgstr "📋 Gekopieerd"
 
+# needs review
 #: gui/report_page.py
 msgid "📋 Copy the report"
-msgstr ""
+msgstr "📋 Het rapport kopiëren"
 
 # needs review
 #: gui/wallet_page.py
@@ -2747,9 +2757,10 @@ msgstr ""
 msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} is geen branch- of tagnaam"
 
+# needs review
 #: lib/splash.py
 msgid "Added {name} to the app menu"
-msgstr ""
+msgstr "{name} toegevoegd aan het appmenu"
 
 # needs review
 #: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
@@ -2761,21 +2772,25 @@ msgstr "Pijltjesblok"
 msgid "Done"
 msgstr "Klaar"
 
+# needs review
 #: lib/splash.py
 msgid "Fetching {name} (Arch Linux ARM, signature checked)"
-msgstr ""
+msgstr "{name} ophalen (Arch Linux ARM, handtekening gecontroleerd)"
 
+# needs review
 #: lib/splash.py
 msgid "Installed {programs} in {folder}"
-msgstr ""
+msgstr "{programs} geïnstalleerd in {folder}"
 
+# needs review
 #: lib/splash.py
 msgid "Linking {program} into {folder}"
-msgstr ""
+msgstr "{program} koppelen in {folder}"
 
+# needs review
 #: lib/splash.py
 msgid "Narrate's voice: {voice}"
-msgstr ""
+msgstr "Stem van Voorlezen: {voice}"
 
 # needs review
 #: lib/splash.py
@@ -2792,9 +2807,10 @@ msgstr "Schermknipsel + Voorlezen"
 msgid "Setting up PyQt6, a window toolkit"
 msgstr "PyQt6 klaarzetten, een toolkit voor vensters"
 
+# needs review
 #: lib/splash.py
 msgid "Setting up {name}'s Python packages"
-msgstr ""
+msgstr "De Python-pakketten van {name} instellen"
 
 # needs review
 #: lib/splash.py
@@ -2811,9 +2827,10 @@ msgstr "Bezig…"
 msgid "running"
 msgstr "actief"
 
+# needs review
 #: lib/splash.py
 msgid "{name} is ready: {keys} shows it"
-msgstr ""
+msgstr "{name} is klaar: {keys} toont het"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
