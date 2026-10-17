@@ -3,9 +3,11 @@
 ## Unreleased
 
 ### Added
-- **Recline says when it has an update:** its row now shows "↑ 1.4.0 available · Update" when
-  Recline-VR publishes a new release, as Full Keyboard's does; Update (or ↻) installs it, then
-  restart SteamVR. It used to look up to date until you pressed ↻.
+- **Linked projects say when they have an update:** Recline's row now shows "↑ 1.4.0 available ·
+  Update" when Recline-VR publishes a new release, as Full Keyboard's already did; Update (or ↻)
+  installs it, then restart SteamVR. It used to look up to date until you pressed ↻. Any linked
+  project can do the same with one line in its manifest, `version:` (docs/mods.md, Linking a
+  project), and needs no change when it publishes its next release.
 
 ## 0.6.18 (2026-10-17)
 

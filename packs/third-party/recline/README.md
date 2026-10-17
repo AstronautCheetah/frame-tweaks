@@ -27,6 +27,7 @@ link:
   uninstall: >-
     ~/.local/share/recline-vr/uninstall.sh && rm -rf ~/.local/share/recline-vr && { [ ! -e ~/Recline-VR/.git/frame-tweaks-cloned ] || [ -n "$(git -C ~/Recline-VR status --porcelain)" ] || [ -n "$(git -C ~/Recline-VR log --oneline '@{u}..' 2>/dev/null)" ] || rm -rf ~/Recline-VR; }
   installed: ~/.local/share/recline-vr/uninstall.sh
+  version: sed 's/-dirty$//' ~/.local/share/recline-vr/VERSION
   restart: steamvr
   readme: https://github.com/new-waifu/Recline-VR#readme
 changes: >-

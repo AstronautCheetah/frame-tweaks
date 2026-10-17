@@ -14,7 +14,6 @@ checks (Recline-VR 1.3 did). Prints a Markdown report; exits 1 if something need
 """
 import json
 import os
-import re
 import subprocess
 import sys
 import urllib.error
@@ -25,6 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
 import manifest  # noqa: E402
+from sft import github_repo  # noqa: E402
 
 
 def get(url):
@@ -50,9 +50,8 @@ def links():
         link = meta.get("link")
         if not link:
             continue
-        where = " ".join(str(v) for v in ((meta.get("source") or {}).get("url"), link.get("readme")) if v)
-        m = re.search(r"github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?(?:[/#]|\s|$)", where)
-        yield readme.parent.name, meta.get("title", readme.parent.name), link, m[1] if m else None
+        yield (readme.parent.name, meta.get("title", readme.parent.name), link,
+               github_repo((meta.get("source") or {}).get("url"), link.get("readme")))
 
 
 def tested():

@@ -245,7 +245,7 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   ↻ Reinstall install it again, and its `status.sh` should say it can be removed (the Mouse
   cursor fix does).
 - `update-check.sh`: prints `<installed> <latest>` versions; the window offers an update when
-  the second is newer.
+  the second is newer. (A link needs none: its `version:`, below.)
 - `migrate.sh <old-version>`: runs before `install.sh` when the Frame Tweaks version that last
   installed it was older (to move a setting to a new place, say).
 - `stopped.sh`: runs after its `processes` were stopped.
@@ -296,6 +296,7 @@ link:
   run: gtk-launch project-settings                 # optional: what the Run button starts
   readme: https://github.com/someone/project#readme   # its README, linked (not copied)
   restart: steamvr                                 # optional: SteamVR loads it only as it starts
+  version: cat ~/.local/share/project/VERSION      # optional: prints the installed version
 run: {label: Open}                                 # the Run button's label, with link.run
 ```
 
@@ -312,7 +313,11 @@ run: {label: Open}                                 # the Run button's label, wit
   means SteamVR still runs it: either way the row offers ⟳ Restart SteamVR until SteamVR has
   restarted.
 - **Updates:** ↻ runs its installer again, which updates most projects; Frame Tweaks' own updates
-  leave it alone (it updates its own way).
+  leave it alone (it updates its own way). With `version:`, a command that prints the installed
+  version (a leading `v` is dropped; nothing, or something that doesn't start with a digit, means
+  "don't know"), its row says when the project has a newer release on GitHub (↑ *version*
+  available · Update), compared with the tag of its newest release. Its GitHub address comes from
+  `source.url` or `readme`. Nothing to change here when it publishes the next one.
 - The other fields are as for any tweak; `changes`, `access` and `undo` describe what the
   project's installer does. Name the app in `app:` if it should stay installed when Frame Tweaks
   itself is uninstalled.

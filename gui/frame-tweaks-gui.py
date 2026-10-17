@@ -167,13 +167,14 @@ def status(cid):
 
 
 def update_check(cid):
-    """(installed, latest) when <id>/update-check.sh reports a newer upstream version, else None."""
+    """(installed, latest) when its update check (<id>/update-check.sh, or a link's version:)
+    reports a newer upstream version, else None."""
     c = component(cid)
-    script = c["dir"] / "update-check.sh" if c else None
-    if script is None or not script.is_file():           # (its pack or folder went since the list was read)
+    cmd = sft.script(c, "update-check") if c else None
+    if cmd is None:                                      # (its pack or folder went since the list was read)
         return None
     try:
-        out = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=20).stdout.split()
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=20).stdout.split()
     except (OSError, subprocess.TimeoutExpired):
         return None
     if len(out) == 2 and version_tuple(out[1]) > version_tuple(out[0]):
@@ -1294,7 +1295,7 @@ class Window(QWidget):
                 c = component(cid)
                 if self.state[cid][0] in GONE:
                     self.updates.pop(cid, None)          # (not installed: nothing to update)
-                elif c is not None and (c["dir"] / "update-check.sh").exists():
+                elif c is not None and sft.script(c, "update-check") is not None:
                     self.update_futures[cid] = self.pool.submit(update_check, cid)
                 self.show_status(cid)
                 shown = True
