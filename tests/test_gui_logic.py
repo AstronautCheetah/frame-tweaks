@@ -1160,6 +1160,26 @@ class PreferencesPage(unittest.TestCase):
             page.leaving.yes.click()
             window.uninstall_self.assert_called_once_with(keep_tweaks=keep_tweaks, settings="remove", keep_apps=keep_apps)
 
+    def test_translations_note_and_its_two_links(self):
+        """Under Language: how the translations are made, how many of this language's texts wait for
+        a person, and two ways to help: the Help make Frame Tweaks better page, and the translation
+        check form (language and version filled in)."""
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        window, opened = mock.Mock(), []
+        fr = gui.i18n.Catalogue(["fr"])
+        with mock.patch.object(gui.i18n, "CATALOGUE", fr), mock.patch.object(gui.i18n, "unconfirmed", lambda: (12, 1228)):
+            page = gui.Preferences(window, opened.append)
+        note = next(lb for lb in page.findChildren(QLabel) if "href='check'" in lb.text())
+        self.assertIn("12", note.text())
+        self.assertIn("1228", note.text())
+        note.linkActivated.emit("contribute")
+        window.show_contribute.assert_called_once_with()
+        note.linkActivated.emit("check")
+        self.assertEqual(len(opened), 1)
+        self.assertIn("template=translation_check.yml", opened[0])
+        self.assertIn("language=fr+%28Fran%C3%A7ais%29", opened[0])
+
     def test_explanations_are_plain_text(self):
         """(they were escaped as HTML and shown as plain text: "they&#x27;re")"""
         from PyQt6.QtWidgets import QApplication, QLabel
@@ -1439,7 +1459,7 @@ class ContributeRow(unittest.TestCase):
         page = gui.ReadmePage(mock.Mock(), gui.REPO / "docs/contribute.md", "Help make Frame Tweaks better")
         text = page.findChildren(QTextBrowser)[0].toPlainText()
         for part in ("give it a star on GitHub", "Suggest a third-party app", "tweak nobody has written yet",
-                     "Report a bug", "Review a translation", "Add a language"):
+                     "Report a bug", "Check a translation", "Add a language"):
             self.assertIn(part, text)
         self.assertIn("https://github.com/AstronautCheetah/frame-tweaks", page.findChildren(QTextBrowser)[0].toHtml())
         holder.deleteLater()

@@ -423,6 +423,15 @@ class MenusAndDashboard(unittest.TestCase):
         self.assertEqual((i18n.entry_name(other, catalogue=en), i18n.entry_name(other, catalogue=fr)), ("Notes", "Bloc-notes"))
         self.assertEqual(i18n.entry_name({}, "notes", catalogue=fr), "notes")
 
+    def test_unconfirmed_counts_the_texts_waiting_for_a_person(self):
+        (self.d / "fr.po").write_text('msgid ""\nmsgstr ""\n\n# needs review\nmsgid "Lock Wallet"\nmsgstr "Verrouiller"\n\n'
+                                      'msgid "Off"\nmsgstr "Désactivé"\n\nmsgid "Colour"\nmsgstr ""\n\n'
+                                      '#~ # needs review\n#~ msgid "Old"\n#~ msgstr "Vieux"\n')
+        self.assertEqual(i18n.unconfirmed("fr", self.d), (1, 2))
+        self.assertIsNone(i18n.unconfirmed("de", self.d))
+        with mock.patch.object(i18n, "CATALOGUE", i18n.Catalogue([], self.d)):
+            self.assertIsNone(i18n.unconfirmed(folder=self.d))               # (English: nothing to confirm)
+
     def test_dashboard_table(self):
         sd = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sd")
         js = self.d / "p.js"

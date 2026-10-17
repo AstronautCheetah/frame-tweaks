@@ -8,6 +8,12 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-10-17
+- New in `gui/prefs_page.py:207`
+  - now: "Translations are made by machine first, checked against SteamVR's, Steam's and KDE's own wording, then confirmed by people who speak the language."
+- New in `gui/prefs_page.py:211`
+  - now: "{language}: {n} of {total} texts not yet confirmed."
+- New in `gui/prefs_page.py:215`
+  - now: "Check a translation (right or wrong)"
 - New in `gui/report_page.py:105`
   - now: "Saved as {file}"
 - New in `gui/report_page.py:106`
