@@ -846,7 +846,12 @@ cmd_report() {
 }
 
 cmd_debug_info() {
-    local out; out="$HOME/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
+    # In your Downloads folder (the one xdg-user-dir names, else ~/Downloads), not the home folder:
+    # less clutter there, and Flatpak apps (Firefox, for the bug form) may read Downloads.
+    local dir; dir=$(xdg-user-dir DOWNLOAD 2>/dev/null) || true
+    [[ -n $dir && $dir != "$HOME" ]] || dir="$HOME/Downloads"     # (it says $HOME when none is set)
+    mkdir -p "$dir"
+    local out; out="$dir/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
     # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed -E ("Galaxy S24+ (Bob)").
     local phone; phone=$(bash -c '. "$HOME/.config/frame-tweaks/phone.conf" 2>/dev/null; printf %s "${PHONE_NAME:-}"' |
                          sed 's/[][\.*^$/&|(){}+?]/\\&/g')       # (read as phone does: it's shell-quoted)

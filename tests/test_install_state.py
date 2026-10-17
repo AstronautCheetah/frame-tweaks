@@ -702,6 +702,17 @@ class InstallState(unittest.TestCase):
         for secret in (phone, host, str(self.home), "alice", "192.168", "example.com"):
             self.assertNotIn(secret, report)
 
+    def test_debug_info_saves_into_downloads(self):
+        """Not the home folder (clutter), but Downloads, where Flatpak apps may read it: the one
+        xdg-user-dir names, else ~/Downloads."""
+        self.only_the_probe()
+        r = self.sh("debug-info")
+        self.assertEqual(Path(re.search(r"^Wrote (.+)$", r.stdout, re.M)[1]).parent, self.home / "Downloads")
+        (self.home / ".config").mkdir(exist_ok=True)
+        (self.home / ".config/user-dirs.dirs").write_text('XDG_DOWNLOAD_DIR="$HOME/Téléchargements"\n')
+        r = self.sh("debug-info")
+        self.assertEqual(Path(re.search(r"^Wrote (.+)$", r.stdout, re.M)[1]).parent, self.home / "Téléchargements")
+
     def test_debug_info_keeps_names_the_user_name_is_part_of(self):
         """The Frame's user is steamos: the name goes where it's the user's (a home folder,
         name@host, user=, "for", uid=1000(name)), not from steamos-manager or /usr/lib/steamos."""

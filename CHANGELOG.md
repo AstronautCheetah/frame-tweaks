@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Changed
+- **Diagnostics reports go to your Downloads folder:** `~/Downloads/frame-tweaks-debug-….txt`
+  instead of the home folder, which they cluttered, and where Flatpak apps such as Firefox (for
+  the bug form) can read them.
 - **🐞 Report a problem shows the report in the window:** with a 📋 Copy button, to paste it into
   the bug form (or attach the saved file, as before). It used to open the report in your text
   editor; in VR that started Kate, and SteamOS's own desktop portal crashes when a KDE app from
