@@ -10,7 +10,8 @@ OPT="$HOME/.local/opt/claude-desktop"
 # shellcheck source=/dev/null
 source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
     t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
-P=$(curl -fsSL $REPO/dists/stable/main/binary-arm64/Packages)
+# (a time limit: a stalled connection hung the install's terminal for good)
+P=$(curl -fsSL --max-time 60 --retry 2 --retry-delay 3 "$REPO/dists/stable/main/binary-arm64/Packages")
 VER=$(echo "$P" | grep ^Version: | sort -V -k2 | tail -1 | cut -d' ' -f2)
 BLOCK=$(echo "$P" | awk -v v="$VER" '/^Package:/{b=""} {b=b $0 "\n"} /^$/ && b ~ "Version: " v "\n" {print b; exit} END{if (b ~ "Version: " v "\n") print b}')
 F=$(echo "$BLOCK" | grep ^Filename: | head -1 | cut -d' ' -f2)
@@ -44,7 +45,10 @@ curl -fL# --retry 3 --retry-all-errors --retry-delay 3 -o "$T/pkg.deb" "$REPO/$F
 echo "$H  $T/pkg.deb" | sha256sum -c --quiet
 bsdtar -xf "$T/pkg.deb" -C "$T" data.tar.xz && mkdir "$T/root" && tar -xf "$T/data.tar.xz" -C "$T/root"
 pkill -f "^$OPT/" || true          # only reached when it isn't running, or with --restart
-rm -rf "$OPT" && mkdir -p "$(dirname "$OPT")" && cp -a "$T/root/usr/lib/claude-desktop" "$OPT"
+# (copied beside it first, then swapped in: deleted first, a copy that failed (disk full) left no
+# Claude Desktop at all)
+mkdir -p "$(dirname "$OPT")" && rm -rf "$OPT.new" && cp -a "$T/root/usr/lib/claude-desktop" "$OPT.new" &&
+    rm -rf "$OPT" && mv "$OPT.new" "$OPT" || { rm -rf "$OPT.new"; exit 1; }
 echo "$VER" > "$OPT/.deb-version"
 
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/icons"

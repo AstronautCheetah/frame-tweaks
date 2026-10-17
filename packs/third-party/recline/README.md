@@ -23,14 +23,16 @@ experimental: >-
   and `reclinectl status` say so) until Recline-VR catches up.
 icon: {theme: go-down-skip}
 link:
-  install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR pull --ff-only; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR; fi && ~/Recline-VR/install.sh
-  uninstall: ~/.local/share/recline-vr/uninstall.sh && rm -rf ~/.local/share/recline-vr ~/Recline-VR
+  install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR pull --ff-only; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR && touch ~/Recline-VR/.git/frame-tweaks-cloned; fi && ~/Recline-VR/install.sh
+  uninstall: >-
+    ~/.local/share/recline-vr/uninstall.sh && rm -rf ~/.local/share/recline-vr && { [ ! -e ~/Recline-VR/.git/frame-tweaks-cloned ] || [ -n "$(git -C ~/Recline-VR status --porcelain)" ] || [ -n "$(git -C ~/Recline-VR log --oneline '@{u}..' 2>/dev/null)" ] || rm -rf ~/Recline-VR; }
   installed: ~/.local/share/recline-vr/uninstall.sh
   restart: steamvr
   readme: https://github.com/new-waifu/Recline-VR#readme
 changes: >-
   Whatever Recline-VR's own installer sets up (its README lists it): its source in
-  `~/Recline-VR`, built and installed into `~/.local/share/recline-vr`; its SteamVR driver
+  `~/Recline-VR` (removed with it only if Frame Tweaks cloned it and it holds no changes of
+  yours), built and installed into `~/.local/share/recline-vr`; its SteamVR driver
   registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start
   with SteamVR
 access: >-
@@ -94,7 +96,7 @@ they're not copied here.)
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder); after a SteamVR update Recline-VR checks SteamVR's internals and turns off what changed. Updating needs SteamOS's compiler, CMake and git
-- **Changes:** Whatever Recline-VR's own installer sets up (its README lists it): its source in `~/Recline-VR`, built and installed into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR
+- **Changes:** Whatever Recline-VR's own installer sets up (its README lists it): its source in `~/Recline-VR` (removed with it only if Frame Tweaks cloned it and it holds no changes of yours), built and installed into `~/.local/share/recline-vr`; its SteamVR driver registered (`~/.config/openvr/openvrpaths.vrpath`) and its dashboard panel registered to start with SteamVR
 - **🧪 Experimental:** Hooks into SteamVR's driver interface, and (for the room view) into the Frame's camera service. Recline-VR checks those internals each time SteamVR starts and turns the affected part off if they changed (the driver doesn't load, or the room view looks tilted while reclined; its panel and `reclinectl status` say so) until Recline-VR catches up.
 - **Unusual access:** Runs inside SteamVR as a driver (sees and adjusts every tracked device's position), and inside the Frame's camera service for the room view
 - **Undo:** Uncheck it, or `./install.sh uninstall recline`: Recline-VR's own uninstaller; then restart SteamVR
