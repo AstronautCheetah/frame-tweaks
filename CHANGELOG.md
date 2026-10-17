@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.18 (2026-10-17)
 
 ### Added
 - **Help check the translations:** ⚙ Preferences now says, under Language, that translations
