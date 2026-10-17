@@ -586,7 +586,7 @@ class Watcher(Home):
             return made[-1]
         with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
                 mock.patch.multiple(wu, bus=bus, broker=lambda: None, keep_auto_lock=lambda: None,
-                                    schedule_lock=lambda: scheduled.append(1) or "4"):
+                                    open_in_kwalletd6=lambda: False, schedule_lock=lambda: scheduled.append(1) or "4"):
             with self.assertRaises(Done):
                 wu.watch()
         self.assertTrue(state["locked"])           # the close became a lock in ksecretd
@@ -638,6 +638,45 @@ class FromTheBugHunt(Home):
             self.assertTrue(wu.unlock(None))         # (cancelled, but the unlock before it landed)
 
 
+class FrontEndHandle(Home):
+    """The watcher's own handle in kwalletd6 idling out (Close When Idle): another while apps
+    still use the wallet there, none when it was the last (the wallet unused: it closes, a lock)."""
+    def test_its_handle_idling_out(self):
+        wu = wallet_unlock(self.home)
+        for apps_open, reopened in ((True, 1), (False, 0)):
+            state = {"opens": 0, "front": apps_open}
+            bus, made = FrontEnd.bus(self, state)
+            front = wu.FrontEnd()
+            with mock.patch.object(wu, "bus", bus), contextlib.redirect_stdout(io.StringIO()):
+                front.sync()
+                self.assertEqual(front.handle, 123)
+                state["opens"], state["front"] = 0, apps_open     # (ours gone: open there only if apps hold it)
+                front.forget()                                 # (walletClosed(123): ours idled out)
+                front.sync(only_while_open_there=True)
+            self.assertEqual(state["opens"], reopened, apps_open)
+
+
+class AppQuitting(Home):
+    """An app with a handle in kwalletd6 quitting (Signal): kwalletd6 says the wallet closed. Still
+    open there (the watcher's handle holds it), it isn't locked; really closed, it is."""
+    def test_quitting_an_app_doesnt_lock_the_wallet(self):
+        for still_open, locked in ((True, False), (False, True)):
+            wu = wallet_unlock(self.home)
+            state = {"locked": False}
+            listening = FakeConn(ksecretd(state), [wallet_signal("walletClosed")])
+            made = []
+
+            def bus():
+                made.append(FakeConn(ksecretd(state)) if made else listening)
+                return made[-1]
+            with mock.patch.dict(sys.modules, jeepney_stand_ins()), contextlib.redirect_stdout(io.StringIO()), \
+                    mock.patch.multiple(wu, bus=bus, broker=lambda: None, keep_auto_lock=lambda: None,
+                                        open_in_kwalletd6=lambda: still_open):
+                with self.assertRaises(Done):
+                    wu.watch()
+            self.assertEqual(state["locked"], locked, still_open)
+
+
 class FrontEnd(Home):
     """kwalletd6, what KWalletManager asks, kept in step with ksecretd: one started after an
     unlock said the wallet was closed while Firefox and Signal used it (it counts only what was
@@ -665,10 +704,13 @@ class FrontEnd(Home):
             return made[-1]
         return bus, made
 
-    def test_it_opens_the_wallet_in_kwalletd6_only_when_kwalletd6_says_closed(self):
+    def test_it_holds_its_own_handle_in_kwalletd6_while_unlocked(self):
+        """Its own, also when apps have the wallet open there: when the last of them quit (Signal),
+        kwalletd6 said the wallet closed, which locked it for every app (the owner's choice:
+        quitting an app doesn't lock the wallet)."""
         wu = wallet_unlock(self.home)
         for state, opens in (({}, 1),                              # running, behind: opened there
-                             ({"front": True}, 0),                 # in step already
+                             ({"front": True}, 1),                 # open there by apps: ours too
                              ({"kwalletd6": False}, 0),            # not running: not started for this
                              ({"locked": True}, 0)):               # locked: nothing to show open
             state["opens"] = 0
@@ -676,7 +718,7 @@ class FrontEnd(Home):
             front = wu.FrontEnd()
             with mock.patch.object(wu, "bus", bus), contextlib.redirect_stdout(io.StringIO()):
                 front.sync()
-                front.sync()                                       # (once: then it's in step)
+                front.sync()                                       # (once: then it's held)
             self.assertEqual(state["opens"], opens, state)
             if opens:
                 self.assertIs(front.conn, made[1])                 # (its handle's connection, kept)

@@ -204,9 +204,15 @@ wallet in KWalletManager, or KWallet's idle timeout, only closes `kwalletd6`'s v
 The other way round, `kwalletd6` counts as open only what was opened through it. One that
 starts after the wallet was unlocked (KWalletManager starts it), or that runs while the password
 dialog unlocks `ksecretd` directly, said "closed" while apps used the wallet. So
-`wallet-lock-sync` opens it in `kwalletd6` too, as "Frame Tweaks" (KWalletManager lists it among
-the wallet's applications), and KWalletManager shows it open. The Wallet apps page shows
-`ksecretd`'s state, the one that counts.
+`wallet-lock-sync` holds it open in `kwalletd6` too while it's unlocked, as "Frame Tweaks"
+(KWalletManager lists it among the wallet's applications), and KWalletManager shows it open. The
+Wallet apps page shows `ksecretd`'s state, the one that counts.
+
+**Quitting an app doesn't lock the wallet.** When the last app using `kwalletd6` (Signal, say)
+quits, `kwalletd6` would say the wallet closed, and that locks it for every app, Firefox and `gh`
+included; holding its own handle there, `wallet-lock-sync` keeps that from happening. The wallet
+locks at the auto-lock time, with **Lock now**, or after the idle time with nobody using it
+(when `wallet-lock-sync`'s handle idles out while apps still use theirs, it takes another).
 
 ## Good to know
 - Apps routed to the shared wallet use the outer session's portals and notifications, so some

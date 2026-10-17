@@ -447,6 +447,16 @@ def schedule_lock(at=None):
     return hours
 
 
+def open_in_kwalletd6():
+    """Whether kwalletd6 still has the wallet open (some handle there: ours, or an app's)."""
+    try:
+        with bus() as calls:
+            return bool(call(calls, message_bus.NameHasOwner("org.kde.kwalletd6"))[0]) and \
+                bool(call(calls, new_method_call(KWALLETD, "isOpen", "s", (WALLET,)))[0])
+    except Exception:
+        return False                    # (can't tell: closed, as it said)
+
+
 def keep_auto_lock():
     """The watcher starting (a reinstall, an update): an unlocked wallet with no auto-lock
     scheduled gets one, at the time it had if that's still to come. It was scheduled only on the
@@ -464,35 +474,48 @@ def keep_auto_lock():
 
 
 class FrontEnd:
-    """Keeps kwalletd6 in step with ksecretd. kwalletd6 is what KWalletManager asks, and it
-    counts as open only what was opened through it: one started after an unlock (KWalletManager
-    starts it), or running while this dialog unlocked ksecretd directly, said "closed" while
-    Firefox and Signal used the wallet. So the watcher opens it there too, on a connection it
-    keeps: kwalletd6 drops a handle with its connection, and says the wallet closed (a lock)."""
+    """Keeps kwalletd6 in step with ksecretd, holding a handle of its own there ("Frame Tweaks")
+    while the wallet is unlocked. kwalletd6 is what KWalletManager asks, and it counts as open only
+    what was opened through it: one started after an unlock said "closed" while Firefox and
+    Signal used the wallet. And when the last app with a handle there quits (Signal), kwalletd6
+    says the wallet closed, which locks it for every app: whether that happened depended on
+    whether this held a handle. It always does now (the owner's choice: quitting an app doesn't
+    lock the wallet). Its handle idling out (Close When Idle) while apps still hold theirs, it
+    takes another; idling out last, that's the wallet unused: it closes, and is locked."""
 
     def __init__(self):
         self.conn = None
+        self.handle = None
         self.opened = -10.0      # (time.monotonic() of our open: its walletOpened isn't an app's)
 
     def ours(self):
         return time.monotonic() - self.opened < 5
 
-    def sync(self):
+    def forget(self):
+        """Our handle is gone (the wallet closed or locked, kwalletd6 started again, ours idled out)."""
+        with contextlib.suppress(Exception):
+            self.conn.close()
+        self.conn = self.handle = None
+
+    def sync(self, only_while_open_there=False):
+        """Hold our handle while ksecretd has the wallet open (only_while_open_there: only if apps
+        keep it open in kwalletd6: ours idled out)."""
         try:
             with bus() as calls:
                 if not (call(calls, message_bus.NameHasOwner("org.kde.kwalletd6"))[0] and ksecretd_open(calls)):
                     return              # (not running: not started for this; or the wallet is locked)
-                if call(calls, new_method_call(KWALLETD, "isOpen", "s", (WALLET,)))[0]:
+                if self.conn is not None:
+                    return              # (ours is held)
+                if only_while_open_there and not call(calls, new_method_call(KWALLETD, "isOpen", "s", (WALLET,)))[0]:
                     return
-            self.conn = self.conn or bus()
+            self.conn = bus()
             self.opened = time.monotonic()
-            call(self.conn, new_method_call(KWALLETD, "open", "sxs", (WALLET, 0, "Frame Tweaks")))
-            print(f"{time.strftime('%T')} wallet open in ksecretd, not kwalletd6 -> opened there too", flush=True)
+            self.handle = call(self.conn, new_method_call(KWALLETD, "open", "sxs", (WALLET, 0, "Frame Tweaks")))[0]
+            print(f"{time.strftime('%T')} wallet open in ksecretd -> holding it open in kwalletd6 too", flush=True)
         except Exception as e:
             print(f"front end: {e}", flush=True)
-            with contextlib.suppress(Exception):
-                self.conn.close()
-            self.conn = None
+            self.forget()
+            self.opened = -10.0  # (no open of ours: a walletOpened now is an app's, with its auto-lock)
 
 
 def watch():
@@ -522,9 +545,14 @@ def watch():
                 continue
             member = msg.header.fields.get(3)          # 3 = MEMBER
             body = msg.body
-            if member == "NameOwnerChanged":           # kwalletd6 started (by KWalletManager, say)
+            if member == "NameOwnerChanged":           # kwalletd6 started (by KWalletManager, say), or ended
+                front.forget()                         # (a handle in the one before is no handle)
                 if len(body) > 2 and body[2]:
                     front.sync()
+                continue
+            if member == "walletClosed" and body and front.handle is not None and body[0] == front.handle:
+                front.forget()                         # (ours idled out: another, if apps still use it)
+                front.sync(only_while_open_there=True)
                 continue
             if member == "walletOpened" and body and body[0] == WALLET:
                 if front.ours():                       # (ours, keeping kwalletd6 in step: not an app)
@@ -535,6 +563,13 @@ def watch():
                 front.sync()
                 continue
             if member == "allWalletsClosed" or (member == "walletClosed" and body and body[0] == WALLET):
+                if member == "walletClosed" and open_in_kwalletd6():
+                    # (an app with a handle there quit, Signal say: the wallet is still open, ours
+                    # holds it. Quitting an app doesn't lock the wallet: the owner's choice.)
+                    print(f"{time.strftime('%T')} an app closed the wallet; still open in kwalletd6 -> left unlocked",
+                          flush=True)
+                    continue
+                front.forget()                         # (closed: ours with it)
                 try:
                     with bus() as calls:
                         if not is_locked(calls) or ksecretd_open(calls):

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+- **Quitting an app doesn't lock the wallet:** when the last app using KDE's wallet service
+  (Signal, say) quit, the service said the wallet closed, and that locked it for every app,
+  Firefox and `gh` included, but only sometimes (it depended on timing). Now it never does: the
+  wallet locks at its auto-lock time, with **Lock now**, or after its idle time unused.
+
 ### Fixed
 - **Battery charge limit overnight, again:** the check every 30 seconds could lift the pause made
   for sleep in the seconds before the Frame fell asleep (logind waits for SteamVR's and others'
