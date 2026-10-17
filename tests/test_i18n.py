@@ -410,6 +410,19 @@ class MenusAndDashboard(unittest.TestCase):
             self.assertIn(f"Name={want}", mine.read_text().splitlines(), languages)
         self.assertEqual(i18n.translations_of("Lock Wallet", self.d), {"Bloquear cartera", "Verrouiller le portefeuille"})
 
+    def test_entry_name_in_the_language_spoken_now(self):
+        """The Wallet apps page and the browser's name in messages: one of Frame Tweaks' own entries
+        by its English, translated now (its Name= was left in French: the page showed French with
+        English chosen); another app by its Name[language], else its Name."""
+        (self.d / "fr.po").write_text('msgid ""\nmsgstr ""\n\nmsgid "Lock Wallet"\nmsgstr "Verrouiller le portefeuille"\n')
+        en, fr = i18n.Catalogue([], self.d), i18n.Catalogue(["fr_CA"], self.d)
+        ours = {"Name": "Verrouiller le portefeuille", "X-Frame-Tweaks-Name": "Lock Wallet"}
+        self.assertEqual(i18n.entry_name(ours, catalogue=en), "Lock Wallet")
+        self.assertEqual(i18n.entry_name(ours, catalogue=fr), "Verrouiller le portefeuille")
+        other = {"Name": "Notes", "Name[fr]": "Bloc-notes"}
+        self.assertEqual((i18n.entry_name(other, catalogue=en), i18n.entry_name(other, catalogue=fr)), ("Notes", "Bloc-notes"))
+        self.assertEqual(i18n.entry_name({}, "notes", catalogue=fr), "notes")
+
     def test_dashboard_table(self):
         sd = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sd")
         js = self.d / "p.js"

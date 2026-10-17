@@ -22,6 +22,7 @@ import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import i18n  # noqa: E402
 from i18n import _, N_  # noqa: E402  (translations: locale/README.md)
 import ftconf  # noqa: E402
 
@@ -286,7 +287,7 @@ def plan(url):
 
 def browser_name(app_id):
     path = desktop_file(app_id)
-    return (entry(path).get("Name") if path else None) or app_id.removesuffix(".desktop")
+    return (i18n.entry_name(entry(path)) if path else None) or app_id.removesuffix(".desktop")
 
 
 LOG = Path.home() / ".local/state/frame-tweaks/logs/links.log"
