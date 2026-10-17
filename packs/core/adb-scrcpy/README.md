@@ -217,9 +217,10 @@ phone is saved in the same file (`PHONE_NAME`).
 its battery (one left on all night emptied it). So once the mirror has been on for the time set
 (an hour unless you change it), a small window asks whether to keep it on. Answer **Keep it on**
 for another round of the same time; with no answer within a minute (or **Disconnect**), the
-mirror closes, the Frame disconnects from the phone, and a notification says so. The time
-counts from when the mirror opened; changing the setting while it's open applies at once,
-counted from the change.
+mirror closes, the Frame disconnects from the phone, Android Mirror's helpers and adb's background
+program stop too (adb only when no other device is connected to it), and a notification says so.
+The time counts from when the mirror opened or its stream was last restarted (*Restart stream*);
+changing the setting while it's open applies at once, counted from the change.
 
 **The clipboard with the phone.** Shared (scrcpy's way): what you paste in the mirror (Ctrl+V)
 is first copied to the phone, and whatever the phone copies comes to the Frame's clipboard, and
@@ -243,7 +244,8 @@ its own; Ctrl+V in the mirror pastes the phone's clipboard.
   connection drops, it closes the frozen picture and reconnects (for up to a minute).
 - **Disconnecting by itself:** at the same checks, `phone` reads `PHONE_TIMEOUT` from its
   settings file and, once that time is up, asks with `kdialog`; with no answer it stops scrcpy and
-  runs `adb disconnect`. Reconnects and *Restart stream* don't restart the count.
+  its helpers (`phone-touch`, `phone-fit`), runs `adb disconnect`, and `adb kill-server` when no
+  other device is connected. *Restart stream* restarts the count; reconnects don't.
 - **In VR**, `phone-fit` gives the window the phone screen's shape. The Steam session makes
   every app window 1920×1080, so an upright phone would otherwise sit between wide black bars.
   A dashboard patch (`patch.js`) keeps the window's long side at 0.8 m, so turning the phone
