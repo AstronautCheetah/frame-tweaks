@@ -653,6 +653,20 @@ class Links(unittest.TestCase):
         self.assertIn("copy:https://github.com/", html)
         self.assertNotIn('href="../', html)
 
+    def test_the_pop_up_after_a_link_is_twice_a_tooltip(self):
+        """The owner's ask: the pop-up by the pointer ("Link copied", "Opening in Firefox…") twice a
+        tooltip's size and twice as long (Qt's: small, and gone too soon in VR)."""
+        from PyQt6.QtWidgets import QApplication, QToolTip
+        self.app = QApplication.instance() or QApplication([])
+        with mock.patch.object(gui.link_tip.QToolTip, "showText") as shown:
+            gui.follow_link("copy:https://example.com/x")
+        _pos, text, _w, _rect, msecs = shown.call_args[0]
+        self.assertIn("Link copied", text)
+        size = QToolTip.font().pointSizeF()
+        self.assertIn(f"font-size:{size * 2:g}pt" if size > 0 else "px", text)
+        self.assertEqual(msecs, 2 * gui.link_tip.qt_time("Link copied"))
+        self.assertEqual(msecs, 20000)
+
     def test_a_link_opens_when_browser_py_trips(self):
         """lib/browser.py raising (over a desktop entry it can't read, say) opened no link at all:
         the link opens the usual way instead, and its log says why."""

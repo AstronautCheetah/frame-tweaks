@@ -7,10 +7,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QCursor, QDesktopServices
-from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea, QToolTip,
+from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
                              QVBoxLayout, QWidget)
 
 import browser  # (lib/ is on the path)
+import link_tip
 from i18n import _, N_, ngettext  # (translations: locale/README.md)
 import sft
 
@@ -362,6 +363,6 @@ class Packs(QWidget):
         # xdg-open from the VR session would pick Kate.
         note = browser.open_path(str(sft.USER_PACKS))
         if note:
-            QToolTip.showText(QCursor.pos(), note)
+            link_tip.show(note)
         else:
             subprocess.Popen(["xdg-open", str(sft.USER_PACKS)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

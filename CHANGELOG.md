@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Changed
+- **The pop-up after clicking a link is bigger and stays longer:** what it did ("Opening in
+  Firefox in desktop mode", "Link copied"), by the pointer, now in twice the text size and for
+  twice as long (20 seconds, more for long ones). Open folder on the Packs page shows the same.
 - **The wallet's auto-lock counts from the unlock:** each app opening the already-unlocked wallet
   moved the auto-lock later, so it could keep the wallet unlocked well past the time the Wallet
   apps page showed. Only an unlock or **Extend timer** sets it now.
