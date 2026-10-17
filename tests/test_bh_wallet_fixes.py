@@ -594,7 +594,7 @@ class Watcher(Home):
 
 
 class FromTheBugHunt(Home):
-    """The 2026-10-17 bug hunt: the auto-lock after ↻, an unlock that's slow or lands after a
+    """The second 2026-10-16 bug hunt: the auto-lock after ↻, an unlock that's slow or lands after a
     cancel, no wallet made yet, and ksecretd closing the wallet by itself."""
     def test_the_watcher_starting_schedules_a_missing_auto_lock(self):
         """↻ stopped the timer, and the watcher scheduled one only at the next unlock: the wallet
