@@ -207,6 +207,10 @@ msgid "Install it: your tweaks are updated with it"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "Install the tweaks the last update didn't get to"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Install: %s"
 msgstr ""
 
@@ -396,6 +400,11 @@ msgid "The browser didn't answer: the link is on the clipboard."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Their settings and data are kept."
 msgstr ""
 
@@ -547,6 +556,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "⟳ Restart SteamVR"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "⬇ Finish the update"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1388,6 +1401,10 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid "Kept this folder, to run this again: %s"
+msgstr ""
+
+#: install.sh
 msgid "Kept your own packs: %s"
 msgstr ""
 
@@ -1399,6 +1416,11 @@ msgstr ""
 #: install.sh
 msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
+msgstr ""
+
+#: install.sh
+msgid ""
+"No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go."
 msgstr ""
 
 #: install.sh
@@ -1559,6 +1581,11 @@ msgid "it is a git worktree"
 msgstr ""
 
 #: install.sh
+msgid ""
+"it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own"
+msgstr ""
+
+#: install.sh
 msgid "no release %s"
 msgstr ""
 
@@ -1593,6 +1620,10 @@ msgstr ""
 #: install.sh
 msgid ""
 "uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings"
+msgstr ""
+
+#: install.sh
+msgid "update: unknown option %s (--to vX.Y.Z | --to stable | --reinstall)"
 msgstr ""
 
 #: lib/browser.py
@@ -1960,6 +1991,10 @@ msgid "no pack {name}; see {command}"
 msgstr ""
 
 #: lib/sft.py
+msgid "not checked: not trusted ({command})"
+msgstr ""
+
+#: lib/sft.py
 msgid "not trusted: not used ({command})"
 msgstr ""
 
@@ -2030,11 +2065,21 @@ msgstr ""
 
 #: lib/sft.py
 msgid ""
+"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
+msgstr ""
+
+#: lib/sft.py
+msgid ""
 "{pack} was added at a fixed version: to follow another one, remove it and add it again."
 msgstr ""
 
 #: lib/sft.py
 msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr ""
+
+#: lib/sft.py
+msgid ""
+"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
 msgstr ""
 
 #: lib/sft.py
@@ -4271,6 +4316,11 @@ msgstr ""
 msgid "wallet unlocked; %s app launcher(s) routed/gated"
 msgstr ""
 
+#: packs/core/wallet/status.sh
+msgid ""
+"wallet-unlock can't tell whether the wallet is locked: protected apps won't open (re-run %s)"
+msgstr ""
+
 #: packs/core/wallet/uninstall.sh
 msgid ""
 "Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet."
@@ -4307,6 +4357,11 @@ msgstr ""
 
 #: packs/core/wallet/wallet-launcher
 msgid "rebuild the wrapper from the (updated) original, keeping its flags"
+msgstr ""
+
+#: packs/core/wallet/wallet-launcher
+msgid ""
+"require it for apps not protected yet; the others keep their choice (installers)"
 msgstr ""
 
 #: packs/core/wallet/wallet-launcher
@@ -4351,6 +4406,11 @@ msgstr ""
 
 #: packs/core/wallet/wallet-unlock
 msgid "Password for the KDE wallet:"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid ""
+"There's no KDE wallet here to unlock with a password yet (kdewallet, made at login). KWalletManager can make one."
 msgstr ""
 
 #: packs/core/wallet/wallet-unlock

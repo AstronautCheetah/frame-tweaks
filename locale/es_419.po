@@ -231,6 +231,11 @@ msgstr "Ocultar este ajuste de la lista (no lo quita)"
 msgid "Install it: your tweaks are updated with it"
 msgstr "Instálala: tus ajustes se actualizan con ella"
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Install the tweaks the last update didn't get to"
+msgstr "Instalar los ajustes a los que no llegó la última actualización"
+
 #: gui/frame-tweaks-gui.py
 msgid "Install: %s"
 msgstr "Instalar: %s"
@@ -443,6 +448,13 @@ msgstr ""
 msgid "The browser didn't answer: the link is on the clipboard."
 msgstr "El navegador no respondió: el enlace está en el portapapeles."
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
+msgstr ""
+"La última actualización no terminó: {tweaks} no se volvieron a instalar. ⬇ Terminar la actualización lo hace."
+
 #: gui/frame-tweaks-gui.py
 msgid "Their settings and data are kept."
 msgstr "Su configuración y sus datos se conservan."
@@ -608,6 +620,11 @@ msgstr "⟳ Buscar actualizaciones"
 #: gui/frame-tweaks-gui.py
 msgid "⟳ Restart SteamVR"
 msgstr "⟳ Reiniciar SteamVR"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "⬇ Finish the update"
+msgstr "⬇ Terminar la actualización"
 
 #: gui/frame-tweaks-gui.py
 msgid "⬇ Update to {version}"
@@ -1541,6 +1558,11 @@ msgid ""
 msgstr ""
 "Se conservó esta carpeta, %s: %s. Elimínala tú cuando ya no la necesites."
 
+# needs review
+#: install.sh
+msgid "Kept this folder, to run this again: %s"
+msgstr "Se conservó esta carpeta, para volver a ejecutar esto: %s"
+
 #: install.sh
 msgid "Kept your own packs: %s"
 msgstr "Se conservaron tus propios paquetes: %s"
@@ -1557,6 +1579,13 @@ msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 "Vinculados, así que se actualizan a su manera (en su fila, ↻ vuelve a ejecutar su instalador): %s"
+
+# needs review
+#: install.sh
+msgid ""
+"No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go."
+msgstr ""
+"Ya no forman parte de Frame Tweaks, así que no se desinstalan desde aquí: %s (el README de cada uno decía cómo se instaló). Sus registros se borran."
 
 #: install.sh
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
@@ -1738,6 +1767,13 @@ msgstr "tiene tus propios paquetes en packs/"
 msgid "it is a git worktree"
 msgstr "es un worktree de git"
 
+# needs review
+#: install.sh
+msgid ""
+"it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own"
+msgstr ""
+"no es una copia de git, así que no se pueden distinguir tus cambios de los de Frame Tweaks"
+
 #: install.sh
 msgid "no release %s"
 msgstr "no existe la versión %s"
@@ -1775,6 +1811,11 @@ msgid ""
 "uninstall-self takes --keep-tweaks, --remove-apps, --remove-settings and --keep-settings"
 msgstr ""
 "uninstall-self acepta --keep-tweaks, --remove-apps, --remove-settings y --keep-settings"
+
+# needs review
+#: install.sh
+msgid "update: unknown option %s (--to vX.Y.Z | --to stable | --reinstall)"
+msgstr "update: opción desconocida %s (--to vX.Y.Z | --to stable | --reinstall)"
 
 #: lib/browser.py
 msgid "Couldn't open it."
@@ -2192,6 +2233,11 @@ msgstr ""
 msgid "no pack {name}; see {command}"
 msgstr "no existe el paquete {name}; consulta {command}"
 
+# needs review
+#: lib/sft.py
+msgid "not checked: not trusted ({command})"
+msgstr "no revisado: no es de confianza ({command})"
+
 #: lib/sft.py
 msgid "not trusted: not used ({command})"
 msgstr "sin confianza: no se usa ({command})"
@@ -2269,6 +2315,13 @@ msgstr "{pack} no es uno de los paquetes propios de Frame Tweaks: {command}"
 # needs review
 #: lib/sft.py
 msgid ""
+"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
+msgstr ""
+"{pack} no es de confianza: confía en él primero ({command}), o quítalo y agrégalo de nuevo."
+
+# needs review
+#: lib/sft.py
+msgid ""
 "{pack} was added at a fixed version: to follow another one, remove it and add it again."
 msgstr ""
 "{pack} se agregó en una versión fija: para seguir otra, quítalo y vuelve a agregarlo."
@@ -2277,6 +2330,13 @@ msgstr ""
 #: lib/sft.py
 msgid "{pack} wasn't added from a link: change its folder yourself."
 msgstr "{pack} no se agregó desde un enlace: cambia tú mismo su carpeta."
+
+# needs review
+#: lib/sft.py
+msgid ""
+"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
+msgstr ""
+"La configuración de git de {pack} (.git/config) no es la que se creó al agregarlo, y git actuaría según ella: quita el paquete y agrégalo de nuevo."
 
 # needs review
 #: lib/sft.py
@@ -4758,6 +4818,13 @@ msgid "wallet unlocked; %s app launcher(s) routed/gated"
 msgstr ""
 "cartera desbloqueada; %s lanzador(es) de apps redirigido(s)/protegido(s)"
 
+# needs review
+#: packs/core/wallet/status.sh
+msgid ""
+"wallet-unlock can't tell whether the wallet is locked: protected apps won't open (re-run %s)"
+msgstr ""
+"wallet-unlock no puede saber si la cartera está bloqueada: las apps protegidas no se abrirán (vuelve a ejecutar %s)"
+
 #: packs/core/wallet/uninstall.sh
 msgid ""
 "Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet."
@@ -4798,6 +4865,13 @@ msgstr "se requiere contraseña"
 msgid "rebuild the wrapper from the (updated) original, keeping its flags"
 msgstr ""
 "reconstruir el envoltorio desde el original (actualizado), conservando sus opciones"
+
+# needs review
+#: packs/core/wallet/wallet-launcher
+msgid ""
+"require it for apps not protected yet; the others keep their choice (installers)"
+msgstr ""
+"pedirla para las apps que aún no están protegidas; las demás conservan su elección (instaladores)"
 
 #: packs/core/wallet/wallet-launcher
 msgid "require the wallet password (wallet-unlock) before starting the app"
@@ -4848,6 +4922,13 @@ msgstr ""
 #: packs/core/wallet/wallet-unlock
 msgid "Password for the KDE wallet:"
 msgstr "Contraseña de la cartera de KDE:"
+
+# needs review
+#: packs/core/wallet/wallet-unlock
+msgid ""
+"There's no KDE wallet here to unlock with a password yet (kdewallet, made at login). KWalletManager can make one."
+msgstr ""
+"Aún no hay aquí una cartera de KDE que desbloquear con una contraseña (kdewallet, creada al iniciar sesión). KWalletManager puede crear una."
 
 #: packs/core/wallet/wallet-unlock
 msgid "Unlock wallet"
