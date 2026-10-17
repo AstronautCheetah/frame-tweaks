@@ -28,6 +28,10 @@ def bug_form_url(tweak=""):
 
 
 class ReportPage(QWidget):
+    """Laid out the same while the report is being saved and once it is (no jump when it's done):
+    the steps, the buttons (Copy greyed until there's a report; where it was saved beside them),
+    and the report's box, which says it's being saved until the report fills it."""
+
     def __init__(self, window, follow_link, pool, repo):
         super().__init__()
         self.window, self.follow, self.path = window, follow_link, None
@@ -41,14 +45,11 @@ class ReportPage(QWidget):
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
-        self.text = QLabel()
-        self.text.setWordWrap(True)
-        self.text.setTextFormat(Qt.TextFormat.RichText)
-        lay.addWidget(self.text)
-        steps = QLabel(_("1. Read the report below: it's plain text, and nothing in it is sent anywhere unless "
-                         "you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what "
-                         "happened and what you expected, then paste the report into its Diagnostics report box "
-                         "(📋 Copy the report), or attach the saved file."))
+        steps = QLabel(_("1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and "
+                         "recent logs, with user names, paths, host and phone names and addresses removed. Nothing in "
+                         "it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you "
+                         "sign in there), say what happened and what you expected, then paste the report into its "
+                         "Diagnostics report box (📋 Copy the report), or attach the saved file."))
         steps.setWordWrap(True)
         steps.setTextFormat(Qt.TextFormat.RichText)
         steps.setObjectName("desc")
@@ -63,18 +64,22 @@ class ReportPage(QWidget):
         form.clicked.connect(lambda: self.follow(bug_form_url()))
         buttons.addWidget(form)
         buttons.addStretch(1)
+        self.saved = QLabel()                    # (where it was saved: on the buttons' line, so nothing moves)
+        self.saved.setObjectName("desc")
+        self.saved.setTextFormat(Qt.TextFormat.RichText)
+        buttons.addWidget(self.saved)
         lay.addLayout(buttons)
-        # The report itself, read-only (in its columns: a fixed-width font)
+        # The report itself, read-only (in its columns: a fixed-width font); until it's there, its box
+        # says what's happening.
         self.view = QPlainTextEdit()
         self.view.setReadOnly(True)
         self.view.setStyleSheet("font-family: monospace;")
-        self.view.hide()
         lay.addWidget(self.view, 1)
-        self.text.setText(_("Saving the diagnostics report…"))
+        self.view.setPlaceholderText(_("Saving the diagnostics report…"))
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: ./install.sh debug-info")
             self.done = None
-            self.text.setText(_("(Trying out the window: no report saved.)"))
+            self.view.setPlaceholderText(_("(Trying out the window: no report saved.)"))
             return
         self.done = pool.submit(subprocess.run, [str(repo / "install.sh"), "debug-info"],
                                 capture_output=True, text=True)
@@ -87,19 +92,17 @@ class ReportPage(QWidget):
         self.timer.stop()
         r = self.done.result()
         path = next((l.split(" ", 1)[1] for l in r.stdout.splitlines() if l.startswith("Wrote ")), None)
-        if path:
-            self.path = path
-            try:
-                self.view.setPlainText(Path(path).read_text(errors="replace"))
-                self.view.show()
-                self.copy.setEnabled(True)
-            except OSError:
-                pass
-            self.text.setText(_("Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's "
-                                "status and recent logs, with user names, paths, host and phone names and "
-                                "addresses removed.").format(file=html.escape(path.replace(str(Path.home()), "~"))))
-        else:
-            self.text.setText(_("Couldn't write the report (see {command}).").format(command="./install.sh debug-info"))
+        try:
+            text = Path(path).read_text(errors="replace") if path else None
+        except OSError:
+            text = None
+        if text is None:
+            self.view.setPlaceholderText(_("Couldn't write the report (see {command}).").format(command="./install.sh debug-info"))
+            return
+        self.path = path
+        self.view.setPlainText(text)
+        self.copy.setEnabled(True)
+        self.saved.setText(_("Saved as {file}").format(file="<b>" + html.escape(path.replace(str(Path.home()), "~")) + "</b>"))
 
     def copy_report(self):
         QApplication.clipboard().setText(self.view.toPlainText())

@@ -1178,7 +1178,7 @@ msgstr "(Probando la ventana: no se guardó ningún informe)."
 
 #: gui/report_page.py
 msgid ""
-"1. Read the report below: it's plain text, and nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+"1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
 
 #: gui/report_page.py
@@ -1190,10 +1190,8 @@ msgid "Report a problem"
 msgstr "Informar un problema"
 
 #: gui/report_page.py
-msgid ""
-"Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
+msgid "Saved as {file}"
 msgstr ""
-"Se guardó <b>{file}</b>: las versiones de Frame Tweaks y de SteamOS, el estado de cada ajuste y los registros recientes, sin nombres de usuario, rutas, nombres de equipo y de teléfono ni direcciones."
 
 #: gui/report_page.py
 msgid "Saving the diagnostics report…"
@@ -6534,3 +6532,8 @@ msgstr "Instalador de ajustes"
 
 #~ msgid "📄 Open the report"
 #~ msgstr "📄 Abrir el informe"
+
+#~ msgid ""
+#~ "Saved <b>{file}</b>: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed."
+#~ msgstr ""
+#~ "Se guardó <b>{file}</b>: las versiones de Frame Tweaks y de SteamOS, el estado de cada ajuste y los registros recientes, sin nombres de usuario, rutas, nombres de equipo y de teléfono ni direcciones."
