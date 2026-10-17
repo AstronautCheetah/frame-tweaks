@@ -448,14 +448,26 @@ cmd_uninstall_self() {
         [[ ${#left[@]} -eq 0 ]] || say "$(t 'Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)' "$(IFS=,; echo "${left[*]}" | sed 's/,/, /g')")"
     fi
     # Tweaks of packs not in use (turned off, or no longer trusted) aren't listed, but their
-    # install record says they're there, using what's shared: they count as installed.
-    local others=() r
+    # install record says they're there, using what's shared: they count as installed, and this
+    # folder stays, to run this again once their pack is back. A record no pack has any more (a
+    # tweak set aside, in packs/attic) can't be undone from here: named, its record goes. (Counted
+    # as from a pack not in use, it kept everything shared for good, with advice nobody could follow.)
+    local others=() gone=() r known again=
+    known=" $(python3 lib/sft.py known-ids | tr '\n' ' ') "
     for r in "$STATE"/installed/*; do
-        [[ -e $r ]] && ! is_component "${r##*/}" && others+=("${r##*/}")
+        [[ -e $r ]] && ! is_component "${r##*/}" || continue
+        if [[ $known == *" ${r##*/} "* ]]; then others+=("${r##*/}"); else gone+=("${r##*/}"); fi
     done
     installed=$(installed_ids; [[ ${#others[@]} -eq 0 ]] || printf '%s\n' "${others[@]}")
     bold "$(t 'Uninstalling Frame Tweaks')"
-    [[ ${#others[@]} -eq 0 ]] || say "$(t 'Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again.' "${others[*]}")"
+    if [[ ${#others[@]} -gt 0 ]]; then
+        say "$(t 'Still installed, from packs not in use (turned off, or not trusted): %s. To uninstall them too, use their pack again (./install.sh mods), then run this again.' "${others[*]}")"
+        again=1
+    fi
+    if [[ ${#gone[@]} -gt 0 ]]; then
+        say "$(t "No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go." "${gone[*]}")"
+        for r in "${gone[@]}"; do rm -f "$STATE/installed/$r"; done
+    fi
     [[ $settings == remove ]] && cmd_forget_settings | grep -v "^$(t 'No settings left behind by uninstalled tweaks.')$"
     if [[ -n $installed ]]; then
         remove_menu_entry keep-language
@@ -485,7 +497,11 @@ cmd_uninstall_self() {
         [[ $settings == remove ]] && remove_files "$HOME/.config/frame-tweaks"
     fi
     [[ $settings == keep ]] && [[ -d $HOME/.config/frame-tweaks ]] && say "$(t 'Kept the settings: %s' "$HOME/.config/frame-tweaks")"
-    remove_checkout
+    if [[ -n $again ]]; then                    # (to run this again, as it says)
+        say "$(t 'Kept this folder, to run this again: %s' "$PWD")"
+    else
+        remove_checkout
+    fi
 }
 
 # remove_checkout: this folder goes, unless something of yours is in it.
@@ -509,6 +525,8 @@ remove_checkout() {
         fi
     elif [[ -n $(find packs -mindepth 1 -maxdepth 1 -type d ! -name core ! -name original ! -name integrations ! -name third-party -print -quit) ]]; then
         why=$(t 'it has your own packs in packs/')
+    else                                        # (a copy without git: a download, say)
+        why=$(t "it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own")
     fi
     if [[ -n $why ]]; then
         say "$(t 'Kept this folder, %s: %s. Delete it yourself when you no longer need it.' "$here" "$why")"

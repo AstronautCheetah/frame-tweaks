@@ -329,15 +329,30 @@ class InstallState(unittest.TestCase):
 
     def test_uninstall_self_counts_tweaks_of_packs_not_in_use(self):
         """A tweak from a pack turned off or no longer trusted isn't listed, but its install record
-        is there: what it shares stays."""
+        is there: what it shares stays, and so does this folder, to run it again as it says."""
+        self.shared_files()
+        r = self.sh("mods", "off", "3rd Party")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        (self.state / "installed").mkdir(parents=True, exist_ok=True)
+        (self.state / "installed/recline").write_text("0.6.1\n")
+        r = self.sh("uninstall-self", "--remove-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("from packs not in use (turned off, or not trusted): recline", r.stdout)
+        self.assertIn("Kept this folder, to run this again", r.stdout)
+        self.assertTrue((self.home / ".local/share/frame-tweaks/i18n").is_dir())
+        self.assertTrue((self.state / "installed/recline").exists())
+
+    def test_uninstall_self_lets_go_of_tweaks_no_pack_has(self):
+        """A record no pack has any more (a tweak set aside): counted as from a pack not in use, it
+        kept everything shared for good, with advice nobody could follow."""
         self.shared_files()
         (self.state / "installed").mkdir(parents=True, exist_ok=True)
         (self.state / "installed/set-aside").write_text("0.6.1\n")
         r = self.sh("uninstall-self", "--remove-settings")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("from packs not in use (turned off, or not trusted): set-aside", r.stdout)
-        self.assertTrue((self.home / ".local/share/frame-tweaks/i18n").is_dir())
-        self.assertTrue((self.state / "installed/set-aside").exists())
+        self.assertIn("No longer part of Frame Tweaks, so not uninstalled from here: set-aside", r.stdout)
+        self.assertNotIn("packs not in use", r.stdout)
+        self.assertFalse((self.home / ".local/share/frame-tweaks/i18n").exists())
 
     def test_uninstall_self_with_every_pack_off(self):
         (self.home / ".config/frame-tweaks/installer/trusted-packs").unlink()     # (the probe's pack too)
@@ -851,6 +866,16 @@ class UpdateWithoutGit(unittest.TestCase):
 
     def setUp(self):
         InstallState.setUp(self)
+
+    def test_uninstalling_frame_tweaks_keeps_a_copy_without_git(self):
+        """With no git, changes of yours in it can't be told from Frame Tweaks' own: it was
+        deleted, edits included (only your own packs in packs/ kept it)."""
+        shutil.rmtree(self.root / "packs/attic", ignore_errors=True)      # (a maintainer's own: kept it already)
+        (self.root / "my-notes.txt").write_text("mine\n")
+        r = self.sh("uninstall-self", "--keep-settings", FRAME_TWEAKS_KEEP_CHECKOUT="")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("isn't a git checkout", r.stdout)
+        self.assertTrue((self.root / "my-notes.txt").exists())
 
     def test_a_held_tweak_is_left_as_it_is(self):
         self.installed_at("0.0.1")
