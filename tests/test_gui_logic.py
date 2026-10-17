@@ -126,7 +126,8 @@ class Versions(unittest.TestCase):
             w.latest_futures, w.update_futures, w.futures, w.self_update, w.update_state = {}, {}, {}, done, "checking"
             w.pack_check, w.build_at_start = None, "0.6.3+19.abc1234"
             w.set_update_state, w.say = mock.Mock(), mock.Mock()
-            with mock.patch.object(gui.sft, "build_version", return_value=now):
+            with mock.patch.object(gui.sft, "build_version", return_value=now), \
+                    mock.patch.object(gui.sft, "unfinished_update", return_value=[]):    # (not this Frame's records)
                 w.collect()
             w.set_update_state.assert_called_once_with(state)
             self.assertIn(says, w.say.call_args[0][0])
@@ -747,6 +748,7 @@ class PacksPage(unittest.TestCase):
                 self.assertIn("Added Hello pack. It isn't used until you trust it", page.notice.text())
                 self.assertTrue((d / "packs/their-pack/pack.md").is_file())
                 self.assertIn("Trust…", buttons())
+                gui.sft.set_trusted(d / "packs/their-pack", True)             # (only a trusted pack updates)
                 window.pack_updates = {(d / "packs/their-pack").resolve()}     # (Check for updates found one)
                 page.build()
                 self.assertTrue(any("A newer version is out" in w.text() for w in page.findChildren(QLabel)))

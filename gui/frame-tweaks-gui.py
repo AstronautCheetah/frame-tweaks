@@ -1247,12 +1247,11 @@ class Window(QWidget):
                 self.say(_("Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use "
                            "it.").format(version=sft.build_version()), good=True)
             elif self.update_state == "checking":
-                self.set_update_state("check")
                 left = sft.unfinished_update() if newest == "" else []
+                self.set_update_state("finish" if left else "check")
                 if newest is None:                       # (offline, say: not "up to date")
                     self.say(_("Couldn't check for updates (no connection to GitHub?)."))
                 elif left:                               # (an update cut short: the checkout's new, these aren't)
-                    self.set_update_state("finish")
                     self.say(_("The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the "
                                "update does it.").format(tweaks=", ".join(left)))
                 else:

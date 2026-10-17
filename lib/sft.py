@@ -949,6 +949,8 @@ def add_pack(link, ref=None):
 def update_pack(d):
     """The newer version of a pack added from a link: {"files": changed files, "log": commit subjects}."""
     d = Path(d)
+    if not (d / ".git").is_dir():
+        raise PackError(_("{pack} wasn't added from a link: change its folder yourself.").format(pack=d.name))
     p = next((x for x in load(refresh=True)["packs"] if x["dir"] == d.resolve()), None)
     if p is None or p["state"] != "trusted":
         # (git runs in its folder: only in a pack you've trusted, as for looking for updates)
