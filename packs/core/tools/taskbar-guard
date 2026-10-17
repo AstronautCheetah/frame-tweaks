@@ -9,10 +9,12 @@ wp_linux_drm_syncobj_manager_v1.get_surface"), and KWin disconnects plasmashell:
 gone, and in the Frame's nested desktop nothing starts it again (it isn't a systemd service there).
 
 Started with desktop mode (KDE autostart), in its environment, and ended with it. It waits on
-plasmashell and on desktop mode's KWin without polling (pidfds). When plasmashell ends and, a few
-seconds later, KWin still runs and no new plasmashell has started (a restart of its own, plasmashell
---replace, the Restart taskbar button), it runs restart-plasmashell. At most 3 times in 10
-minutes: then it stops, with a notice, and the button is still there.
+plasmashell and on desktop mode's KWin without polling (pidfds); a KWin that crashed is started
+again by kwin_wayland_wrapper (and plasmashell reconnects to it), so a new one carries the watch
+on. When plasmashell ends and, a few seconds later, KWin still runs and no new plasmashell has
+started (a restart of its own, plasmashell --replace, the Restart taskbar button), it runs
+restart-plasmashell. At most 3 times in 10 minutes: then it stops, with a notice, and the button
+is still there; a restart that fails says so too.
 """
 import fcntl
 import os
@@ -41,13 +43,12 @@ def pid_of(name):
 
 
 def alive(pid):
+    """Running: one that has ended, but its parent hasn't collected yet (a zombie), isn't."""
     try:
-        os.kill(pid, 0)
-        return True
-    except ProcessLookupError:
+        with open(f"/proc/{pid}/stat", "rb") as f:
+            return f.read().rsplit(b")", 1)[1].split()[0] != b"Z"
+    except (OSError, IndexError):
         return False
-    except PermissionError:
-        return True
 
 
 def wait_any(pids):
@@ -88,13 +89,21 @@ class Guard:
         self.pid_of, self.alive, self.wait_any, self.sleep, self.now = pid_of, alive, wait_any, sleep, now
         self.restart, self.notify = restart, notify
 
-    def appears(self, name, seconds):
-        for _second in range(seconds):
+    def appears(self, name, seconds, besides=None):
+        """Its pid, once one is running (within seconds), other than besides (the one that ended:
+        until it's collected, pgrep still finds it)."""
+        for _second in range(seconds + 1):
             pid = self.pid_of(name)
-            if pid:
+            if pid and pid != besides and self.alive(pid):
                 return pid
-            self.sleep(1)
-        return self.pid_of(name)
+            if _second < seconds:
+                self.sleep(1)
+        return None
+
+    def desktop(self, kwin):
+        """KWin's pid: this one, or a new one if it crashed and kwin_wayland_wrapper started it
+        again; None when desktop mode has ended."""
+        return kwin if self.alive(kwin) else self.appears("kwin_wayland", GRACE, besides=kwin)
 
     def run(self):
         """Watch until desktop mode ends; what ended it."""
@@ -105,9 +114,15 @@ class Guard:
         restarts = []
         while shell:
             if self.wait_any([shell, kwin]) == kwin:
-                return "desktop mode ended"
-            shell = self.appears("plasmashell", GRACE)
-            if not self.alive(kwin):
+                kwin = self.desktop(kwin)
+                if not kwin:
+                    return "desktop mode ended"
+                if self.alive(shell):
+                    continue                            # (KWin again, and plasmashell with it)
+            ended = shell
+            shell = self.appears("plasmashell", GRACE, besides=ended)
+            kwin = self.desktop(kwin)
+            if not kwin:
                 return "desktop mode ended"
             if shell:
                 continue                                # (started again already)
@@ -121,7 +136,9 @@ class Guard:
             restarts.append(t)
             log("plasmashell ended while desktop mode runs: starting it again")
             self.restart()
-            shell = self.appears("plasmashell", 15)
+            shell = self.appears("plasmashell", 15, besides=ended)
+        self.notify(_("The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's "
+                      "row in Frame Tweaks to try once more."))
         return "no plasmashell"
 
 

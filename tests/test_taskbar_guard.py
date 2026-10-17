@@ -24,13 +24,14 @@ class Desktop:
 
     def __init__(self, *events, later=None, restart_starts=True):
         self.procs = {"kwin_wayland": 10, "plasmashell": 20}
+        self.zombies = {}                    # name: pid of one that ended, not collected yet (pgrep finds it)
         self.events, self.later = list(events), dict(later or {})
         self.clock, self.next_pid = 0, 100
         self.restarts, self.notices = [], []
         self.restart_starts = restart_starts
 
     def pid_of(self, name):
-        return self.procs.get(name)
+        return self.procs.get(name) or self.zombies.get(name)
 
     def alive(self, pid):
         return pid in self.procs.values()
@@ -59,7 +60,13 @@ class Desktop:
         if what == "kwin":
             self.procs.clear()
             return 10
+        if what == "kwin-crash":             # kwin_wayland_wrapper starts a new one a second later
+            old = self.procs.pop("kwin_wayland")
+            self.later[self.clock + 1] = ("kwin_wayland", old + 1)
+            return old
         pid = self.procs.pop("plasmashell")
+        if what == "shell-zombie":
+            self.zombies["plasmashell"] = pid
         assert pid in pids, (pid, pids)
         return pid
 
@@ -117,9 +124,25 @@ class Watch(unittest.TestCase):
         self.assertEqual(len(d.restarts), 6)
         self.assertEqual(d.notices, [])
 
-    def test_a_restart_that_fails_ends_the_watch(self):
+    def test_a_restart_that_fails_ends_the_watch_and_says_so(self):
         d = Desktop(("shell", 60), restart_starts=False)
         self.assertEqual(d.watch(), "no plasmashell")
+        self.assertEqual(len(d.restarts), 1)
+        self.assertEqual(len(d.notices), 1)
+        self.assertIn("Restart taskbar", d.notices[0])
+
+    def test_kwin_starting_again_after_a_crash_keeps_the_watch(self):
+        """kwin_wayland_wrapper starts a new KWin after a crash, and plasmashell reconnects to it
+        (QT_WAYLAND_RECONNECT): the watch carried on with the old KWin's pid and ended."""
+        d = Desktop(("kwin-crash", 60), ("shell", 60), ("kwin", 60))
+        self.assertEqual(d.watch(), "desktop mode ended")
+        self.assertEqual(len(d.restarts), 1)                # (the taskbar closing later: still brought back)
+
+    def test_a_taskbar_not_collected_yet_isnt_a_new_one(self):
+        """One that ended but whose parent hasn't collected it yet: pgrep still finds it. Taken for
+        a new one, the watch spun on it."""
+        d = Desktop(("shell-zombie", 60), ("kwin", 600))
+        self.assertEqual(d.watch(), "desktop mode ended")
         self.assertEqual(len(d.restarts), 1)
 
     def test_outside_desktop_mode_it_does_nothing(self):

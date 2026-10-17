@@ -4516,6 +4516,13 @@ msgstr "Recuperación del escritorio"
 # needs review
 #: packs/core/tools/taskbar-guard
 msgid ""
+"The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+msgstr ""
+"No se pudo volver a iniciar la barra de tareas. Presiona Reiniciar barra de tareas en la fila de Recuperación del escritorio en Frame Tweaks para intentarlo otra vez."
+
+# needs review
+#: packs/core/tools/taskbar-guard
+msgid ""
 "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
 msgstr ""
 "La barra de tareas se sigue cerrando: se volvió a iniciar {n} veces en {minutes} minutos. Presiona Reiniciar barra de tareas en la fila de Recuperación del escritorio en Frame Tweaks cuando la necesites."
