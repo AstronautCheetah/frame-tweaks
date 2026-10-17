@@ -12,6 +12,7 @@ The selection window opens on the Steam session's display, so it shows up as a V
 Tools: Tesseract (OCR, Homebrew), Piper (speech, offline), wl-copy (clipboard; the Shared
 clipboard tweak carries it to VR windows).
 """
+import contextlib
 import ctypes
 import ctypes.util
 import json
@@ -1027,10 +1028,18 @@ class NarrationWindow(QWidget):
 class NarrationOverlay(QObject):
     """Shows a widget as its own SteamVR overlay, the way Arrow Pad does: laser clicks reach its
     buttons; a press elsewhere (its top bar, say) carries it with the controller until released.
-    It redraws only when the widget changes, behind a cover overlay so a reload doesn't blink.
-    If SteamVR fails it (restarting under it, say), it closes the widget (lost)."""
+    While Steam's keyboard is open SteamVR hides the controllers from other programs (its keyboard
+    privacy), so a carry then slides it in its own plane after the laser instead, and a note under
+    it says so (as on Arrow Pad). It redraws only when the widget changes, behind a cover overlay
+    so a reload doesn't blink. If SteamVR fails it (restarting under it, say), it closes the
+    widget (lost). (Steam's keyboard, which follows the laser to the panel, is given back to the
+    window you were typing in by the VR environment helper's panel-keyboard patch.)"""
     WIDTH_M = 0.6
     M_PER_PX = 0.6 / 880                         # constant scale: a collapsed panel is small too
+    SLIDE_GAIN = 0.5                             # sliding: half the way to the laser each time (Arrow Pad's)
+    # The note under it while it slides: its width, the gap above it, how long it stays after you
+    # let go (time to finish reading). Arrow Pad's.
+    NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS = 0.36, 0.02, 3000
 
     def __init__(self, widget):
         super().__init__()
@@ -1040,9 +1049,10 @@ class NarrationOverlay(QObject):
         widget.destroyed.connect(self.stop)
         openvr.init(openvr.VRApplication_Overlay)
         self.ov, self.system = openvr.VROverlay(), openvr.VRSystem()
-        key = f"frame-tweaks.snip.narration.{os.getpid()}"
+        self.key = key = f"frame-tweaks.snip.narration.{os.getpid()}"   # (panel-keyboard: "frame-tweaks.")
         self.h = self.ov.createOverlay(key, "Screen snip")
         self.cover = self.ov.createOverlay(key + ".cover", "Screen snip")
+        self.note = None                            # the note under it while it can only slide
         self.ov.setOverlayInputMethod(self.h, openvr.VROverlayInputMethod_Mouse)
         self.ov.setOverlaySortOrder(self.h, 10)
         self.ov.setOverlaySortOrder(self.cover, 11)
@@ -1052,6 +1062,7 @@ class NarrationOverlay(QObject):
         self.hover_button = None                    # the button under the laser (for its tick)
         self.grip_drag = False                      # the current carry is a grip squeeze
         self.hovered = set()                        # controllers whose laser is on the panel
+        self.laser_at = {}                          # where each one's laser is on it (widget px)
         try:
             self.grips = vrkit.GripReader(openvr)
         except Exception:
@@ -1214,6 +1225,8 @@ class NarrationOverlay(QObject):
         m = vrkit.hmd34(self.vr, self.pose)
         for o in (self.h, self.cover) if cover else (self.h,):
             self.ov.setOverlayTransformAbsolute(o, self.vr.TrackingUniverseStanding, m)
+        if self.note is not None:
+            self.place_note()
 
     def render(self):
         resized = self.w.width() != self.width_px or self.w.height() != getattr(self, "height_px", 0)
@@ -1291,6 +1304,7 @@ class NarrationOverlay(QObject):
 
     def poll(self):
         vr, ev = self.vr, self.vr.VREvent_t()
+        slide_to = None
         while self.ov.pollNextOverlayEvent(self.h, ev)[0]:
             t, dev = ev.eventType, ev.trackedDeviceIndex
             if t == vr.VREvent_FocusLeave:
@@ -1302,7 +1316,11 @@ class NarrationOverlay(QObject):
                 continue
             if t == vr.VREvent_MouseMove:
                 self.hovered.add(dev)
-                b = self.button_at(self.to_widget(ev.data.mouse))
+                pos = self.laser_at[dev] = self.to_widget(ev.data.mouse)
+                if self.drag is not None and self.drag[1] is None and dev == self.drag[0]:
+                    slide_to = pos                             # (sliding: only its latest spot counts)
+                    continue
+                b = self.button_at(pos)
                 if b is not self.hover_button:
                     self.hover_button = b
                     if b is not None and b.isEnabled():
@@ -1317,17 +1335,14 @@ class NarrationOverlay(QObject):
                     self.pressed = b
                     self.send(b, QEvent.Type.MouseButtonPress, pos, Qt.MouseButton.LeftButton)
                 else:                                          # elsewhere: carry the panel
-                    ctrl = self.device_pose(dev)
-                    if ctrl is not None:
-                        self.drag = (dev, vrkit.relative(ctrl, self.pose))
+                    self.start_drag(dev, pos)
             elif t == vr.VREvent_MouseButtonUp:
                 pos = self.to_widget(ev.data.mouse)
                 if self.pressed is not None:
                     self.send(self.pressed, QEvent.Type.MouseButtonRelease, pos, Qt.MouseButton.NoButton)
                     self.pressed = None
                 if self.drag is not None and not self.grip_drag:
-                    self.drag = None
-                    self.save_offset()                     # remembered relative to the dashboard
+                    self.end_drag()
         # Grip to carry it, as on Arrow Pad and Full Keyboard: squeeze while that controller's
         # laser is on the panel (buttons included), let go to put it down. (Read only then: each
         # read asks SteamVR for controller properties, which other programs wait on too.)
@@ -1338,25 +1353,93 @@ class NarrationOverlay(QObject):
             self.grips.pause()                  # (a grip squeezed elsewhere doesn't grab the panel)
         held = {d for d, h, _ in grips if h}
         for d, _, pressed in grips:
-            if pressed and d in self.hovered and self.drag is None:
-                ctrl = self.device_pose(d)
-                if ctrl is not None:
-                    if self.pressed is not None:           # a squeeze cancels a press in progress
-                        self.send(self.pressed, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
-                        self.pressed = None
-                    self.drag, self.grip_drag = (d, vrkit.relative(ctrl, self.pose)), True
+            if pressed and d in self.hovered and self.drag is None and self.start_drag(d, self.laser_at.get(d), grip=True):
+                if self.pressed is not None:               # a squeeze cancels a press in progress
+                    self.send(self.pressed, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
+                    self.pressed = None
         if self.drag is not None and self.grip_drag and self.drag[0] not in held:
-            self.drag, self.grip_drag = None, False
-            self.save_offset()
-        if self.drag is not None:
+            self.end_drag()
+        if self.drag is not None and self.drag[1] is not None:
             ctrl = self.device_pose(self.drag[0])
             if ctrl is not None:
                 self.pose = vrkit.rigid_mul(ctrl, self.drag[1])
                 self.apply_pose()
+        if slide_to is not None and self.drag is not None and self.drag[1] is None:
+            self.slide(slide_to)
         busy = self.hovered or self.drag is not None or self.pressed is not None
         timer = getattr(self, "poll_timer", None)
         if timer is not None and timer.interval() != (22 if busy else 100):
             timer.setInterval(22 if busy else 100)
+
+    def start_drag(self, dev, at, grip=False):
+        """Carry it: it follows the controller rigidly, (dev, offset, None). Where SteamVR won't
+        say where the controller is (Steam's keyboard open: its keyboard privacy), it slides in its
+        own plane after the laser instead, from `at` (where the laser is on it, widget px): (dev,
+        None, at), with the note under it. False: neither (no pose, no laser spot)."""
+        ctrl = self.device_pose(dev)
+        if ctrl is None and at is None:
+            return False
+        self.grip_drag = grip
+        if ctrl is None:
+            self.drag = (dev, None, (at.x(), at.y()))
+            self.show_note()
+        else:
+            self.drag = (dev, vrkit.relative(ctrl, self.pose), None)
+        return True
+
+    def end_drag(self):
+        sliding = self.drag is not None and self.drag[1] is None
+        self.drag, self.grip_drag = None, False
+        self.save_offset()                                 # remembered relative to the dashboard
+        if sliding:                                        # (a few seconds more, to finish reading it)
+            QTimer.singleShot(self.NOTE_LINGER_MS, self.guarded(self.end_note))
+
+    def slide(self, pos):
+        """Sliding: the laser is at pos (widget px). Move the panel in its own plane to bring the
+        point grabbed back under it, half the way each time, as Arrow Pad does: the laser's spot
+        can be from before the last move (SteamVR applies a move a frame later), and going the
+        whole way on that overshoots."""
+        gx, gy = self.drag[2]
+        dx, dy = (pos.x() - gx) * self.M_PER_PX, (gy - pos.y()) * self.M_PER_PX     # (pixels go down)
+        for i in range(3):
+            self.pose[i][3] += self.SLIDE_GAIN * (self.pose[i][0] * dx + self.pose[i][1] * dy)
+        self.apply_pose()
+
+    def show_note(self):
+        """The note under the panel while it can only slide. (One that fails is left out: it only
+        explains.)"""
+        if self.note is not None:
+            return
+        try:
+            img = vrkit.note_image(_("While Steam's keyboard is open, this panel can only slide. Close the "
+                                     "keyboard to move it closer, further away or turn it."))
+            path = str(self.tex_dir / "note.png")
+            img.save(path, "PNG")
+            self.note_aspect = img.height() / img.width()
+            self.note = self.ov.createOverlay(self.key + ".note", "Screen snip")     # (display only: no input)
+            self.ov.setOverlaySortOrder(self.note, 12)
+            self.ov.setOverlayWidthInMeters(self.note, self.NOTE_WIDTH)
+            self.ov.setOverlayFromFile(self.note, path)
+            self.place_note()
+            self.ov.showOverlay(self.note)
+        except Exception as e:
+            print(f"frame-snip: the note under the panel: {e!r}", file=sys.stderr)
+            self.end_note()
+
+    def place_note(self):
+        """Just below the panel's bottom edge, in its plane, moving with it."""
+        down = self.height_m() / 2 + self.NOTE_GAP + self.NOTE_WIDTH * self.note_aspect / 2
+        m = [[r[0], r[1], r[2], r[3] - r[1] * down] for r in self.pose]
+        self.ov.setOverlayTransformAbsolute(self.note, self.vr.TrackingUniverseStanding, vrkit.hmd34(self.vr, m))
+
+    def end_note(self):
+        """The note goes, unless it's sliding again: destroyed, not hidden (SteamVR at times kept
+        showing an overlay it was told to hide: Arrow Pad's hide_note)."""
+        if self.note is None or (self.drag is not None and self.drag[1] is None):
+            return
+        note, self.note = self.note, None
+        with contextlib.suppress(Exception):
+            self.ov.destroyOverlay(note)
 
     def haptic(self, dev, kind):
         """A tick on the controller pointing at a button, a firmer one on a press (Arrow Pad's and
@@ -1368,8 +1451,9 @@ class NarrationOverlay(QObject):
 
     def close(self):
         try:
-            for o in (self.h, self.cover):
-                self.ov.destroyOverlay(o)
+            for o in (self.h, self.cover, self.note):
+                if o is not None:
+                    self.ov.destroyOverlay(o)
             self.vr.shutdown()
         except Exception:
             pass

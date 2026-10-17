@@ -9,6 +9,11 @@ mkdir -p "$D/patches" "$U/steamvr.service.d" "$HOME/.config/frame-tweaks"
 install_i18n
 install -m755 "$TWEAK_DIR/sft-dashboard" "$D/sft-dashboard"
 install -m644 "$TWEAK_DIR/lib.js" "$D/lib.js"            # helpers the patches share
+# Its own patch: pressing a Frame Tweaks panel in VR (Arrow Pad, Screen snip's narration panel)
+# leaves Steam's keyboard with the window you're typing in. (Before 0.6.19 Arrow Pad installed one
+# for itself, arrowpad-keyboard: this one replaces it.)
+install -m644 "$TWEAK_DIR/panel-keyboard.js" "$D/patches/panel-keyboard.js"
+rm -f "$D/patches/arrowpad-keyboard.js"
 
 # Older versions: this lived inside Curved world windows (sft-curvature). Move its patch over.
 OLD="$HOME/.local/share/frame-tweaks/curvature"

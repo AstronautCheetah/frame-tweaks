@@ -11,7 +11,8 @@ its width in 5 cm steps (0.30–2 m), drag the panel to move it, Pin stops that.
 keyboard shows, SteamVR hides where the controllers are from other programs (its keyboard
 privacy), so a drag then slides the panel in its own plane after the laser instead, and a note
 under the panel says so. Steam's keyboard follows the laser's focus; the dashboard patch
-(keyboard-patch.js) hands it back to the window it was typing into when it comes to the panel.
+(vr-dashboard's panel-keyboard.js) hands it back to the window it was typing into when it comes
+to the panel.
 While desktop mode has taken all input (Right Ctrl), the same note says so too.
 """
 import contextlib
@@ -26,8 +27,8 @@ import time
 import ftconf  # noqa: E402  (beside i18n.py: arrowpad.py puts that folder on sys.path)
 import openvr
 import vrkit  # noqa: E402
-from PyQt6.QtCore import QEvent, QPoint, QPointF, QRectF, Qt, QTimer
-from PyQt6.QtGui import QColor, QFont, QFontMetricsF, QImage, QMouseEvent, QPainter
+from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt, QTimer
+from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton
 
 try:
@@ -65,28 +66,8 @@ FORWARD, BELOW = 0.55, 0.30          # fallback without a dashboard: in front of
 # (time to finish reading), and how often desktop mode's window title is looked at.
 NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS, GRAB_CHECK_S = 0.36, 0.02, 3000, 2.0
 NOTE_ORDER = ("hint", "slide", "grab")     # its messages, top to bottom
-NOTE_PX, NOTE_PAD_PX, NOTE_FONT_PX = 900, 28, 34     # its picture: width, margin, text size
-
-
-def note_image(text):
-    """The note's picture: text in a dark rounded box, as wide as NOTE_PX and as tall as it needs."""
-    font = QFont(QApplication.font())
-    font.setPixelSize(NOTE_FONT_PX)
-    flags = int(Qt.AlignmentFlag.AlignCenter) | int(Qt.TextFlag.TextWordWrap)
-    inner = NOTE_PX - 2 * NOTE_PAD_PX
-    h = int(QFontMetricsF(font).boundingRect(QRectF(0, 0, inner, 10000), flags, text).height()) + 2 * NOTE_PAD_PX
-    img = QImage(NOTE_PX, h, QImage.Format.Format_ARGB32_Premultiplied)
-    img.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(img)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.setPen(Qt.PenStyle.NoPen)
-    painter.setBrush(QColor(11, 16, 22, 235))
-    painter.drawRoundedRect(QRectF(0, 0, NOTE_PX, h), 22, 22)
-    painter.setFont(font)
-    painter.setPen(QColor("#ffffff"))
-    painter.drawText(QRectF(NOTE_PAD_PX, NOTE_PAD_PX, inner, h - 2 * NOTE_PAD_PX), flags, text)
-    painter.end()
-    return img
+NOTE_PX = vrkit.NOTE_PX                    # its picture's width (vrkit.note_image, Screen snip's too)
+note_image = vrkit.note_image
 
 
 class OverlayHost:
@@ -662,7 +643,7 @@ class OverlayHost:
                 self.last_button_time[(t, cursor)] = now
             if t in (getattr(openvr, "VREvent_KeyboardCharInput", None), getattr(openvr, "VREvent_KeyboardClosed", None)):
                 # Steam's keyboard follows the laser's focus: touching the pad reopens it for the pad.
-                # The dashboard patch (keyboard-patch.js) hands it straight back to the window it was
+                # The dashboard patch (panel-keyboard.js) hands it straight back to the window it was
                 # typing into; whatever still comes here is never typed: the desktop's focused window
                 # needn't be that one (typed on, it went to the KDE desktop in the dashboard, not the
                 # floating window you were typing in). Logged as a count (never what: a password?).

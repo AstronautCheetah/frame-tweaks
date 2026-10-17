@@ -5,10 +5,13 @@ importing this needs no SteamVR.
 - Poses: 3x4 rigid transforms as lists of rows (rotation | translation).
 - Haptics: a direct pulse to the controller, which reaches it while the dashboard has input
   focus (SteamVR Input's vibration doesn't). TICK: Arrow Pad's and Full Keyboard's feel.
-- GripReader: grip squeezes, read the way Full Keyboard reads them."""
+- GripReader: grip squeezes, read the way Full Keyboard reads them.
+- note_image: the picture of the note shown under a panel (why it only slides: Steam's keyboard
+  open), drawn with Qt (imported only then)."""
 import math
 
 TICK = {"hover": 1000, "press": 3999}        # µs: a light tick on hover, a firmer one on a press
+NOTE_PX, NOTE_PAD_PX, NOTE_FONT_PX = 900, 28, 34     # a note's picture: width, margin, text size
 
 
 def rigid_mul(a, b):
@@ -51,6 +54,32 @@ def direct_pulse(vr, system, device, us):
         return False
     system.triggerHapticPulse(device, 0, int(max(1, min(3999, us))))
     return True
+
+
+def note_image(text):
+    """A note's picture: text in a dark rounded box, as wide as NOTE_PX and as tall as it needs."""
+    from PyQt6.QtCore import QRectF, Qt
+    from PyQt6.QtGui import QColor, QFont, QFontMetricsF, QImage, QPainter
+    from PyQt6.QtWidgets import QApplication
+    if QApplication.instance() is None:         # (Qt ends the program on fonts without one)
+        raise RuntimeError("a note's picture needs a running QApplication")
+    font = QFont(QApplication.font())
+    font.setPixelSize(NOTE_FONT_PX)
+    flags = int(Qt.AlignmentFlag.AlignCenter) | int(Qt.TextFlag.TextWordWrap)
+    inner = NOTE_PX - 2 * NOTE_PAD_PX
+    h = int(QFontMetricsF(font).boundingRect(QRectF(0, 0, inner, 10000), flags, text).height()) + 2 * NOTE_PAD_PX
+    img = QImage(NOTE_PX, h, QImage.Format.Format_ARGB32_Premultiplied)
+    img.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(img)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    painter.setPen(Qt.PenStyle.NoPen)
+    painter.setBrush(QColor(11, 16, 22, 235))
+    painter.drawRoundedRect(QRectF(0, 0, NOTE_PX, h), 22, 22)
+    painter.setFont(font)
+    painter.setPen(QColor("#ffffff"))
+    painter.drawText(QRectF(NOTE_PAD_PX, NOTE_PAD_PX, inner, h - 2 * NOTE_PAD_PX), flags, text)
+    painter.end()
+    return img
 
 
 class GripReader:

@@ -9,6 +9,15 @@
   project can do the same with one line in its manifest, `version:` (docs/mods.md, Linking a
   project), and needs no change when it publishes its next release.
 
+### Fixed
+- **Screen snip's narration panel and Steam's keyboard (VR), as on Arrow Pad:** pressing the
+  panel while you typed took the keyboard away from your window (what you typed next went
+  nowhere) and moved it; now the keyboard goes straight back to the window, where it was. The
+  dashboard patch that does it for Arrow Pad now does it for every Frame Tweaks panel, and comes
+  with the VR environment helper (any VR environment tweak installs it). And while the keyboard
+  is open, the panel couldn't be moved at all (SteamVR hides the controllers then): it now
+  slides after the laser, with a note under it saying why.
+
 ## 0.6.18 (2026-10-17)
 
 ### Added

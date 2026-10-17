@@ -103,6 +103,12 @@ it doesn't take a place in the dashboard); it starts under the dashboard and fol
 squeeze the grip while pointing at it (anywhere, buttons included) and let go to put it down,
 or pull the trigger on an empty part of it and drag. It remembers the spot for next time.
 
+**With Steam's keyboard open,** SteamVR hides where your controllers are from other programs, so
+the panel can only slide after the laser (in its own plane); a note under it says so. Close the
+keyboard to bring it closer, send it further away or turn it. Pressing the panel while you type
+doesn't take the keyboard away from the window you're typing in, as long as the
+[VR environment helper](../vr-dashboard/) is installed (any VR environment tweak brings it).
+
 The panel has:
 
 - **Stop** / **Again**, and **Pause** / **Resume** between **Previous part** and **Next part**
