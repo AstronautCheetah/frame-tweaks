@@ -45,7 +45,8 @@ def stubs(d, **scripts):
 
 
 def copy_repo(dest):
-    shutil.copytree(ROOT, dest, ignore=shutil.ignore_patterns(".git", "tmp", "references", "__pycache__"))
+    shutil.copytree(ROOT, dest, ignore=shutil.ignore_patterns(".git", "tmp", "references", "__pycache__", ".venv",
+                                                              ".cache", ".ruff_cache"))
     return dest
 
 
@@ -91,6 +92,11 @@ class ReleaseVersion(Temp):
         self.assertEqual(self.version("0.7.0-rc.1", "minor", tags=("v0.7.0-rc.1",))[1], "0.7.0")
         self.assertEqual(self.version("0.7.0-rc.1", "major", tags=("v0.7.0-rc.1",))[1], "1.0.0")
         self.assertEqual(self.version("1.0.0-rc.1", "major", tags=("v1.0.0-rc.1",))[1], "1.0.0")
+
+    def test_after_a_test_release_was_deleted(self):
+        """rc.1 and rc.3 left (rc.2 deleted): counting them gave rc.3, which exists."""
+        tags = ("v0.6.1", "v0.6.2-rc.1", "v0.6.2-rc.3")
+        self.assertEqual(self.version("0.6.2-rc.3", "patch", pre=True, tags=tags)[1], "0.6.2-rc.4")
 
     def test_an_existing_tag_is_refused(self):
         rc, _v, out = self.version("0.6.1", "patch", tags=("v0.6.2",))

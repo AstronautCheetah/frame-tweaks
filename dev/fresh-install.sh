@@ -29,9 +29,10 @@
 #   are out of reach;
 # - it has its own process list: pgrep and pkill see only its own, and nothing it starts outlives it;
 # - Homebrew (/home/linuxbrew), system Flatpaks (/var/lib/flatpak) and the system D-Bus are hidden,
-#   and /dev/uinput is masked (nothing in it can type into your desktop);
+#   /dev/uinput is masked and the desktop's X11 display left out (nothing in it can type into your
+#   desktop), and your services' control groups are read-only (nothing in it can stop them);
 # - the network works, but this Frame's own services (127.0.0.1: SteamVR's dashboard, adb, …)
-#   aren't reachable; /tmp is its own.
+#   aren't reachable; /tmp, /var/tmp and /dev/shm are its own.
 # Stand-ins: systemctl and systemd-run log and succeed (services report inactive), sudo and pkexec
 # refuse, steamvr logs. Their calls: calls.log in the sandbox folder (kept with --keep).
 #
@@ -70,7 +71,8 @@ else
     work=$(mktemp -d "${XDG_CACHE_HOME:-$HOME/.cache}/frame-tweaks/fresh-install.XXXXXX")
     mkdir -p "$work/home" "$work/sandbox/stubs"
 fi
-info=$work/sandbox/bwrap-info.json
+# (outside the sandbox's own folder, which it can write: the pid in it is killed on the way out)
+info=$work/bwrap-info.json
 cleanup() {
     # The sandbox ends with this script (Ctrl+C included): its first process, and with it
     # everything in it. (Ending only the window ends too soon: under 20 s, Frame Tweaks takes that
@@ -100,7 +102,8 @@ if [ -z "$again" ]; then
             # (the channel for bash, which runs get.sh, not for curl)
             if [ -n "$beta" ]; then oneliner=${oneliner/%| bash/| FRAME_TWEAKS_CHANNEL=beta bash}; fi ;;
         checkout)
-            tag="v$(cat VERSION)-local"; channel=beta
+            # (on main after a test release, VERSION is X.Y.Z-rc.N: one more "-" and get.sh found no release)
+            tag="v$(cat VERSION)"; if [[ $tag == *-* ]]; then tag="$tag.local"; else tag="$tag-local"; fi; channel=beta
             src=$work/sandbox/src
             mkdir -p "$src"
             git ls-files -z | tar --null --no-recursion --ignore-failed-read -T - -cf - 2>/dev/null | tar -C "$src" -xf -
@@ -163,7 +166,8 @@ args=(--dev-bind / / --unshare-user --uid "$uid" --gid "$(id -g)" --unshare-pid 
       --bind "$work/home" "$HOME"
       --perms 0700 --tmpfs "$run"
       --bind "$work/sandbox" "$box"
-      --tmpfs /tmp
+      --tmpfs /tmp --tmpfs /var/tmp --tmpfs /dev/shm
+      --ro-bind /sys/fs/cgroup /sys/fs/cgroup
       --ro-bind /dev/null /dev/uinput)
 if [ -z "$shell" ]; then args+=(--new-session); fi
 for d in /home/linuxbrew /var/lib/flatpak /run/dbus; do
@@ -180,7 +184,8 @@ if [ -n "${WAYLAND_DISPLAY:-}" ]; then
     args+=(--bind "$wl" "$run/wayland-0")
     env+=(WAYLAND_DISPLAY=wayland-0 XDG_SESSION_TYPE=wayland)
 fi
-if [ -n "${DISPLAY:-}" ] && [ -d /tmp/.X11-unix ]; then
+# (X11 only without Wayland: an X program can type into the other X windows)
+if [ -z "${WAYLAND_DISPLAY:-}" ] && [ -n "${DISPLAY:-}" ] && [ -d /tmp/.X11-unix ]; then
     args+=(--bind /tmp/.X11-unix /tmp/.X11-unix)
     env+=(DISPLAY="$DISPLAY")
     if [ -f "${XAUTHORITY:-}" ]; then

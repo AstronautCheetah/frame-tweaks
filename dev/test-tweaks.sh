@@ -53,7 +53,8 @@ work=${TEST_WORK:-$(mktemp -d)}; [ -n "${TEST_WORK:-}" ] || trap 'rm -rf "$work"
 # Run from a copy of the repo, so pins can point at the fixtures below without any checksum
 # bypass in the real scripts.
 REPO="$work/repo"; mkdir -p "$REPO"
-tar -C "$PWD" --exclude=./.git --exclude=./references --exclude=./tmp -cf - . | tar -C "$REPO" -xf -
+tar -C "$PWD" --exclude=./.git --exclude=./references --exclude=./tmp --exclude=./.venv --exclude=./.cache \
+    --exclude=./.ruff_cache -cf - . | tar -C "$REPO" -xf -       # (.venv: a contributor's PyQt6, 280 MB)
 # The packs: the official ones and the example (examples/hello-pack), trusted in a scratch
 # settings folder the way a user trusts a pack.
 export FRAME_TWEAKS_PACKS="$REPO/examples/hello-pack"
@@ -134,7 +135,9 @@ for t in "${TWEAKS[@]}"; do
     before=$(snapshot "$home")
     marker="$work/marker"; touch "$marker"; sleep 1
     step=install
-    if run install.sh "$t" && { step=status; run status.sh "$t"; rc=$?; [ $rc -ne 1 ]; } && step=uninstall && run uninstall.sh "$t"; then
+    # (status: 0 ok, 2 warning or restart; 1 is "not installed", and anything else a status.sh
+    # that broke (127: a command it needs missing), which the window shows as a failed check)
+    if run install.sh "$t" && { step=status; run status.sh "$t"; rc=$?; [ $rc -eq 0 ] || [ $rc -eq 2 ]; } && step=uninstall && run uninstall.sh "$t"; then
         after=$(snapshot "$home")
         # (caches that desktop tools regenerate don't count)
         left=$(comm -13 <(echo "$before") <(echo "$after") | grep -vxF -f <({ printf '%s\n' $PATHSET; sft test-keeps "$t"; } | sed 's|^|./|') |
