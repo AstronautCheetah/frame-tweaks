@@ -12,8 +12,12 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Tick every tweak in this category"
 - New in `gui/frame-tweaks-gui.py:629`
   - now: "Untick every tweak in this category (installed ones are removed when you apply the changes)"
+- New in `packs/core/arrowpad/vroverlay.py:343`
+  - now: "While Steam's keyboard is open, Arrow Pad only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
 - New in `packs/core/snip/frame-snip:1414`
   - now: "While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it closer, further away or turn it."
+- New in `packs/core/snip/frame-snip:1459`
+  - now: "While Steam's keyboard is open, this panel only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
 - Changed in `packs/core/vr-dashboard/README.md`
   - was: "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
-  - now: "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own patch keeps Steam's keyboard with the window you're typing in when you press a Frame Tweaks panel (Arrow Pad, Screen snip's narration panel)."
+  - now: "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically. Its own patches help Frame Tweaks' panels in VR (Arrow Pad, Screen snip's narration panel) with Steam's keyboard: pressing one leaves the keyboard with the window you're typing in, and while it's open, SteamVR's grab bar under each panel moves it anywhere."

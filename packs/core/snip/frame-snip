@@ -1033,13 +1033,16 @@ class NarrationOverlay(QObject):
     it says so (as on Arrow Pad). It redraws only when the widget changes, behind a cover overlay
     so a reload doesn't blink. If SteamVR fails it (restarting under it, say), it closes the
     widget (lost). (Steam's keyboard, which follows the laser to the panel, is given back to the
-    window you were typing in by the VR environment helper's panel-keyboard patch.)"""
+    window you were typing in by the VR environment helper's panel-keyboard patch; and while it's
+    open, that helper's panel-grab patch puts SteamVR's own grab bar under the panel, to move it
+    anywhere: vrkit.DashboardGrab.)"""
     WIDTH_M = 0.6
     M_PER_PX = 0.6 / 880                         # constant scale: a collapsed panel is small too
     SLIDE_GAIN = 0.5                             # sliding: half the way to the laser each time (Arrow Pad's)
     # The note under it while it slides: its width, the gap above it, how long it stays after you
     # let go (time to finish reading). Arrow Pad's.
     NOTE_WIDTH, NOTE_GAP, NOTE_LINGER_MS = 0.36, 0.02, 3000
+    GRAB_PATCH = Path.home() / ".local/share/frame-tweaks/vr-dashboard/patches/panel-grab.js"
 
     def __init__(self, widget):
         super().__init__()
@@ -1053,6 +1056,11 @@ class NarrationOverlay(QObject):
         self.h = self.ov.createOverlay(key, "Screen snip")
         self.cover = self.ov.createOverlay(key + ".cover", "Screen snip")
         self.note = None                            # the note under it while it can only slide
+        try:                                        # SteamVR's grab bar under it while the keyboard is open
+            self.dash_grab = vrkit.DashboardGrab(key)
+        except Exception:
+            self.dash_grab = None
+        self.dash_held, self.picture = False, None
         self.ov.setOverlayInputMethod(self.h, openvr.VROverlayInputMethod_Mouse)
         self.ov.setOverlaySortOrder(self.h, 10)
         self.ov.setOverlaySortOrder(self.cover, 11)
@@ -1071,7 +1079,9 @@ class NarrationOverlay(QObject):
         if not (self.offset and self.follow()):
             self.place_default()
         QTimer(self, interval=100, timeout=self.guarded(self.follow)).start()
-        self.tex_dir = Path(tempfile.mkdtemp(prefix="snip-panel-"))
+        # (in the runtime folder: the VR environment helper's service reads its pictures there)
+        run = os.environ.get("XDG_RUNTIME_DIR")
+        self.tex_dir = Path(tempfile.mkdtemp(prefix="snip-panel-", dir=run if run and os.path.isdir(run) else None))
         self.n, self.last_digest, self.cover_path, self.pressed, self.drag = 0, None, None, None, None
         self.render()
         self.ov.showOverlay(self.h)
@@ -1160,7 +1170,7 @@ class NarrationOverlay(QObject):
 
     def follow(self):
         """Pose = dashboard anchor x the remembered offset (follows the dashboard when it moves)."""
-        if self.drag is not None or not getattr(self, "offset", None):
+        if self.drag is not None or self.dash_held or not getattr(self, "offset", None):
             return False
         if getattr(self, "height_px", 0) and (self.w.width(), self.w.height()) != (self.width_px, self.height_px):
             return True                       # a resize is pending: render() places it (pivot / top edge)
@@ -1229,6 +1239,8 @@ class NarrationOverlay(QObject):
             self.place_note()
 
     def render(self):
+        if self.dash_held:
+            return                                  # (hidden: SteamVR's bar moves its picture)
         resized = self.w.width() != self.width_px or self.w.height() != getattr(self, "height_px", 0)
         if resized and self.cover_path is not None:
             # A new size (Collapse / Expand, a new snip): the old picture stretched to the new size
@@ -1269,6 +1281,7 @@ class NarrationOverlay(QObject):
         self.n += 1
         path = str(self.tex_dir / f"panel-{self.n}.png")      # new name each time (SteamVR caches by name)
         img.save(path, "PNG")
+        self.picture = path
         covered = self.cover_path is not None
         if covered:
             self.ov.showOverlay(self.cover)                   # the old picture on top while it reloads
@@ -1303,6 +1316,7 @@ class NarrationOverlay(QObject):
         return t
 
     def poll(self):
+        self.dashboard_grab()
         vr, ev = self.vr, self.vr.VREvent_t()
         slide_to = None
         while self.ov.pollNextOverlayEvent(self.h, ev)[0]:
@@ -1371,6 +1385,36 @@ class NarrationOverlay(QObject):
         if timer is not None and timer.interval() != (22 if busy else 100):
             timer.setInterval(22 if busy else 100)
 
+    def dashboard_grab(self):
+        """SteamVR's grab bar under the panel while Steam's keyboard is open (vrkit.DashboardGrab):
+        say where it is and what it looks like; while the bar is held, hide (a picture of it moves
+        instead); let go, take the picture's place."""
+        g = self.dash_grab
+        if g is None or not getattr(self, "pose", None):
+            return
+        g.announce(self.pose, self.width_px * self.M_PER_PX, self.height_m(), True, self.picture)
+        what = g.poll()
+        if what is None:
+            return
+        kind, pose = what
+        if kind == "held":
+            self.dash_held = True
+            if self.pressed is not None:
+                self.send(self.pressed, QEvent.Type.MouseButtonRelease, QPoint(-1, -1), Qt.MouseButton.NoButton)
+                self.pressed = None
+            self.drag, self.grip_drag = None, False
+            for o in (self.h, self.cover):
+                self.ov.hideOverlay(o)
+            self.end_note()
+            return
+        self.dash_held = False
+        if pose:
+            self.pose = pose
+            self.apply_pose()
+            self.save_offset()                          # remembered relative to the dashboard
+        self.ov.showOverlay(self.h)
+        g.announce(self.pose, self.width_px * self.M_PER_PX, self.height_m(), True, self.picture, now=True)
+
     def start_drag(self, dev, at, grip=False):
         """Carry it: it follows the controller rigidly, (dev, offset, None). Where SteamVR won't
         say where the controller is (Steam's keyboard open: its keyboard privacy), it slides in its
@@ -1411,8 +1455,11 @@ class NarrationOverlay(QObject):
         if self.note is not None:
             return
         try:
-            img = vrkit.note_image(_("While Steam's keyboard is open, this panel can only slide. Close the "
-                                     "keyboard to move it closer, further away or turn it."))
+            img = vrkit.note_image(
+                _("While Steam's keyboard is open, this panel only slides when you drag it. To move it closer, "
+                  "further away or turn it, use the bar under it.") if self.GRAB_PATCH.exists() else
+                _("While Steam's keyboard is open, this panel can only slide. Close the keyboard to move it "
+                  "closer, further away or turn it."))
             path = str(self.tex_dir / "note.png")
             img.save(path, "PNG")
             self.note_aspect = img.height() / img.width()
@@ -1450,6 +1497,8 @@ class NarrationOverlay(QObject):
             pass
 
     def close(self):
+        if self.dash_grab is not None:
+            self.dash_grab.close()
         try:
             for o in (self.h, self.cover, self.note):
                 if o is not None:

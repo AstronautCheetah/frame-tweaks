@@ -288,7 +288,11 @@ class Narration(unittest.TestCase):
         # An exception that leaves a Qt slot goes to sys.excepthook: kept here (by default PyQt6
         # aborts the program on one, and the tests with it)
         self.escaped = []
+        panels = tempfile.TemporaryDirectory()          # (its DashboardGrab files: not the real runtime folder's)
+        self.addCleanup(panels.cleanup)
+        self.panels = Path(panels.name)
         for p in (mock.patch.dict(sys.modules, {"openvr": vr}),
+                  mock.patch.object(fs.vrkit.DashboardGrab, "PANELS", self.panels),
                   mock.patch.object(sys, "excepthook", lambda *e: self.escaped.append(e[1]))):
             p.start()
             self.addCleanup(p.stop)
@@ -367,6 +371,32 @@ class Narration(unittest.TestCase):
             self.assertTrue(self.wait(lambda: overlay.note is None, 2))
         ov.destroyOverlay.assert_called()
         self.assertEqual(self.escaped, [])
+
+    def test_steamvrs_grab_bar_moves_it(self):
+        """While Steam's keyboard is open, SteamVR's grab bar under the panel (the VR environment
+        helper's panel-grab patch): held, the panel hides (a picture of it moves instead); let go,
+        it's where the picture was, and remembers the spot."""
+        w, overlay, ov = self.panel()
+        overlay.poll_timer.stop()
+        overlay.poll()
+        said = json.loads((self.panels / f"{overlay.key}.json").read_text())
+        self.assertEqual(said["w"], round(overlay.width_px * overlay.M_PER_PX, 4))
+        self.assertTrue(said["picture"].endswith(".png"))
+        grab = self.panels / f"{overlay.key}.grab.json"
+        grab.write_text(json.dumps({"seq": 1, "state": "held"}))
+        overlay.poll()
+        self.assertTrue(overlay.dash_held)
+        ov.hideOverlay.assert_any_call(overlay.h)
+        t = {"x": 0.3, "y": 1.1, "z": -0.7}
+        with mock.patch.object(overlay, "save_offset") as saved:
+            grab.write_text(json.dumps({"seq": 2, "state": "dropped", "t": t, "r": said["r"]}))
+            overlay.poll()
+        self.assertFalse(overlay.dash_held)
+        self.assertEqual([round(overlay.pose[i][3], 4) for i in range(3)], [0.3, 1.1, -0.7])
+        saved.assert_called_once()
+        ov.showOverlay.assert_called_with(overlay.h)
+        overlay.close()
+        self.assertFalse((self.panels / f"{overlay.key}.json").exists())
 
 
 # A stand-in for pyopenvr: every call succeeds, and there's no dashboard and no controller.
