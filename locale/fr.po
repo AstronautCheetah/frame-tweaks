@@ -4152,6 +4152,13 @@ msgstr ""
 "(administrateur) est demandé une fois, pour ajouter une règle udev (%s) que les mises à jour de SteamOS conservent."
 
 # needs review
+#: packs/core/charge-limit/needed.sh
+msgid ""
+"withdrawn for new installs while a SteamOS charger bug can leave a Frame unable to charge (SteamOS #2879)"
+msgstr ""
+"retiré pour les nouvelles installations tant qu'un bug de charge de SteamOS peut empêcher un Frame de se recharger (SteamOS #2879)"
+
+# needs review
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; charging stops at %s%%"
 msgstr "Batterie à %s %% ; la charge s'arrête à %s %%"
