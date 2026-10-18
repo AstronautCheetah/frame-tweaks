@@ -66,6 +66,12 @@
   Vulkan) draws straight to gamescope, so the snip came out black or didn't open. Then it now
   uses gamescope's own screenshot of what it shows.
 
+### For contributors
+- **`dev/fetch-upstream-readmes.py` fetches only over HTTPS from GitHub:** a picture in an upstream
+  README at a `file:` address (a file of yours, such as gh's token) or on another host was read and
+  saved into `upstream/`, ready to commit. Now it stays a link, with a warning, and redirects away
+  from GitHub are refused.
+
 ## 0.6.19 (2026-10-17)
 
 ### Added
