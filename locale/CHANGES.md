@@ -33,6 +33,12 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Use this other %s"
 - New in `packs/core/adb-scrcpy/phone:222`
   - now: "The %s on the Wi-Fi isn't the phone Android Mirror knows by that name: it's another phone with the same name, the same phone after a factory reset, or a device posing as it."
+- New in `packs/core/firefox/install.sh:18`
+  - now: "%s is a link, or not a plain file. Firefox's sandbox can write there, so Frame Tweaks leaves the profile alone: remove it, then run this again."
+- New in `packs/core/firefox/install.sh:20`
+  - now: "Firefox's profile %s isn't a folder inside Firefox's own, so Frame Tweaks leaves it alone."
+- New in `packs/core/firefox/install.sh:42`
+  - now: "Couldn't write %s"
 - New in `packs/core/ydotool/install.sh:14`
   - now: "ydotool didn't start"
 - Changed in `packs/core/ydotool/install.sh:18`

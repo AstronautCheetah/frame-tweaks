@@ -66,6 +66,13 @@ settings are in [user.js](user.js), with a comment on each.
 The main one is `privacy.resistFingerprinting` (RFP), the Tor Browser approach: instead of
 hiding, every RFP Firefox reports the same values.
 
+Firefox's sandbox can write everything in its own folder (`~/.var/app/org.mozilla.firefox`),
+and the tweak runs outside the sandbox, so it never follows a link there: a compromised Firefox
+could plant one to have the tweak write or copy your other files. If the profile `installs.ini`
+names isn't a folder inside Firefox's own, or `user.js`, `prefs.js` or
+`prefs.js.frame-tweaks-bak` is a link (or not a plain file), it stops, says so and changes
+nothing. Each file it changes is replaced by a new one (readable only by you), not written into.
+
 ## Good to know
 - **Cover Your Tracks still says "unique".** In our tests it showed about 18 bits even with
   everything working. The values it flags (Firefox on Linux, RFP's font list, the letterboxed

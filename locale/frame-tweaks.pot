@@ -3483,7 +3483,16 @@ msgid ""
 msgstr ""
 
 #: packs/core/firefox/install.sh
+msgid ""
+"%s is a link, or not a plain file. Firefox's sandbox can write there, so Frame Tweaks leaves the profile alone: remove it, then run this again."
+msgstr ""
+
+#: packs/core/firefox/install.sh
 msgid "Anti-fingerprinting settings written to %s"
+msgstr ""
+
+#: packs/core/firefox/install.sh
+msgid "Couldn't write %s"
 msgstr ""
 
 #: packs/core/firefox/install.sh
@@ -3493,6 +3502,11 @@ msgstr ""
 
 #: packs/core/firefox/install.sh
 msgid "Firefox is running: restart it to apply."
+msgstr ""
+
+#: packs/core/firefox/install.sh
+msgid ""
+"Firefox's profile %s isn't a folder inside Firefox's own, so Frame Tweaks leaves it alone."
 msgstr ""
 
 #: packs/core/firefox/install.sh

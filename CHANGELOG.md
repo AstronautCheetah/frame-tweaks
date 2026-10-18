@@ -41,6 +41,13 @@
   with the clipboard shared (the default), the phone can put anything into the Frame's clipboard,
   and Shared clipboard passes it on to the desktop and VR, so a compromised phone could swap what
   you copied for something else. **Share the clipboard with the phone → Not shared** turns it off.
+- **Firefox privacy never follows a link in Firefox's own folder:** Firefox's sandbox can write its
+  profile, and removing the tweak copied `prefs.js` over `prefs.js.frame-tweaks-bak` even when that
+  was a link, so a compromised Firefox could have had it overwrite a file of yours (your `.bashrc`,
+  say) outside its sandbox. Now the tweak stops before it changes anything, and says why, when a
+  file it reads or writes there is a link or not a plain file, or when the profile `installs.ini`
+  names isn't a folder inside Firefox's own. It replaces the files it changes instead of writing
+  into them.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
