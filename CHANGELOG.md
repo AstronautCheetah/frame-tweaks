@@ -55,6 +55,11 @@
   remember the password at all, and sudo forgets the password as soon as Homebrew's installer ends,
   and before and after each tweak's script in an install, uninstall, reinstall or update, so each
   one asks for its own.
+- **What you dictate is readable only by you:** Dictation's history
+  (`~/.local/share/dictation-history.txt`) was created readable by every user of the Frame, and
+  only your home folder kept others out. It's now yours alone; an existing one changes at your next
+  dictation, or when Dictation is reinstalled or updated. Dictation's log and recordings, Arrow
+  Pad's input log and the notes under its VR panel are now yours alone too.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with

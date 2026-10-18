@@ -66,7 +66,8 @@ Shortcuts*, and, if you like, that key to a controller button in Steam Input. St
 2. Press it again. A second chime, then after a few seconds the text is
    - typed into the window you're using,
    - copied to the clipboard,
-   - added to `~/.local/share/dictation-history.txt`, with the date and time.
+   - added to `~/.local/share/dictation-history.txt`, with the date and time (only you can
+     read it).
 
 A sentence that ends in `.`, `?` or `!` gets a space after it, so the next dictation carries
 on naturally. The **▶ Dictate** button in the Frame Tweaks window does the same as the shortcut.
@@ -122,7 +123,7 @@ to use it:
   those stock phrases are dropped when they're the whole result.
 - **Something went wrong?** The log is `/run/user/$UID/dictate/dictate.log`, and the last
   recording is kept as `/run/user/$UID/dictate/last.wav` so you can listen to it. Both go away
-  when the headset restarts.
+  when the headset restarts, and like the history, only you can read them.
 - **Nothing typed, but the text was copied?** ydotool may need a restart: **▶ Restart** on the
   ydotool row in Frame Tweaks.
 

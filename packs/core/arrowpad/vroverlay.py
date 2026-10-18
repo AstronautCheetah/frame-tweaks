@@ -49,6 +49,19 @@ DEPTH_GAIN = 3.0                     # dragging: push/pull moves the pad 3x as f
 DEPTH_MIN, DEPTH_MAX = 0.25, 3.5     # dragging: keep the pad this far from your head (m, horizontally)
 POSE_EPSILON = 0.0015                # ignore anchor jitter below 1.5 mm (and ~0.1°)
 TEX_DIR = f"/run/user/{os.getuid()}"
+
+
+def private_file(path):
+    """path, a file only you can read: made so before anything is written in it (an empty one if
+    it wasn't there; what an older one holds is kept). Arrow Pad's input log and notes hold what
+    you pressed and read: yours only, not only because of the folder they're in."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT, 0o600)
+    try:
+        os.fchmod(fd, 0o600)
+    finally:
+        os.close(fd)
+
+
 # The VR environment helper's patch that puts SteamVR's grab bar under the panel while Steam's
 # keyboard is open (vrkit.DashboardGrab): the slide's note points to the bar only when it's there.
 GRAB_PATCH = os.path.expanduser("~/.local/share/frame-tweaks/vr-dashboard/patches/panel-grab.js")
@@ -382,6 +395,7 @@ class OverlayHost:
             path = f"{TEX_DIR}/arrowpad-note-{os.getpid()}-{hashlib.blake2b(text.encode(), digest_size=4).hexdigest()}.png"
             if getattr(self, "note_path", None) != path:
                 img = note_image(text)
+                private_file(path)
                 img.save(path, "PNG")
                 self.note_aspect = img.height() / img.width()
                 if getattr(self, "note_path", None):
@@ -658,8 +672,15 @@ class OverlayHost:
     INPUT_LOG = f"{TEX_DIR}/arrowpad-input.log"
 
     def log_input(self, msg):
-        """Presses and releases as SteamVR reports them and where they land (for diagnosis)."""
+        """Presses and releases as SteamVR reports them and where they land (for diagnosis). The
+        keys you pressed are yours only (private_file): the log, the new one started when it gets
+        long, and the one before it (.1), an older Arrow Pad's too."""
+        with contextlib.suppress(OSError):
+            private_file(self.INPUT_LOG)
         ftconf.append_log(self.INPUT_LOG, msg, stamp="%H:%M:%S.ms")
+        for f in (self.INPUT_LOG, self.INPUT_LOG + ".1"):
+            with contextlib.suppress(OSError):
+                os.chmod(f, 0o600)
 
     def describe(self, w):
         if w is None:

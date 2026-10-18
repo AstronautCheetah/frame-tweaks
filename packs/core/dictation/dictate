@@ -43,7 +43,11 @@ STATE=$RUN/dictate
 HISTORY="$HOME/.local/share/dictation-history.txt"
 LOG="$STATE/dictate.log"
 SOUNDS=/usr/share/sounds/ocean/stereo
-mkdir -p "$STATE"
+# What you said stays yours: the history, the log (which has the text too) and the recordings
+# are readable by you alone, not only because of the folders they're in. (An older history is
+# made so at the next dictation, and the folder of an older log and recordings now.)
+umask 077
+mkdir -p "$STATE" && chmod 700 "$STATE"
 PID="$STATE/rec.pid"        # pid of the running pw-record
 CUR="$STATE/rec.current"    # path of the file being recorded
 BUSY="$STATE/busy.pid"      # pid of a running transcription
@@ -120,6 +124,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     if [ -z "$text" ]; then log "no speech"; notify "$(t 'No speech detected')"; return; fi
     # Trailing space after a finished sentence, so the next dictation flows on.
     [[ "$text" =~ [.?!]$ ]] && text="$text "
+    [ ! -f "$HISTORY" ] || chmod 600 "$HISTORY"          # (an older one was readable by everyone)
     printf '%s\t%s\n' "$(date '+%F %T')" "$text" >> "$HISTORY"
     log "text: $text"
     printf '%s' "$text" | setsid wl-copy 2>>"$LOG" || log "wl-copy failed (WAYLAND_DISPLAY=$WAYLAND_DISPLAY)"
