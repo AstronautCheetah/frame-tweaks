@@ -157,28 +157,41 @@ ensure_path() {
 alarm_fetch() {
     # Newest <name> package from Arch Linux ARM, verified against ALARM's build key (shipped in
     # lib/keys, fingerprint 68B3537F39A313B3E574D06777193F152BDBE6A6) before it's unpacked.
-    local repo=$1 name=$2 dest=$3 file t mirror
+    # (Over HTTPS only, redirects included: --proto.)
+    local repo=$1 name=$2 dest=$3 file t mirror https=(--proto '=https' --proto-redir '=https')
     for mirror in "$ALARM_MIRROR" $ALARM_FALLBACK; do
-        file=$(curl -fsSL --max-time 20 "$mirror/$repo/" |
+        file=$(curl "${https[@]}" -fsSL --max-time 20 "$mirror/$repo/" |
             grep -oE "\"$name-[0-9][^\"/]*-aarch64\.pkg\.tar\.(xz|zst)\"" | tr -d '"' | sort -V | tail -1) || true
         [ -n "$file" ] && break
     done
     [ -n "$file" ] || die "package $name not found in ALARM $repo"
     say "$(t 'Fetching %s' "$file")"
     t=$(mktemp -d)
-    curl -fsSL -o "$t/$file" "$mirror/$repo/$file" && curl -fsSL -o "$t/$file.sig" "$mirror/$repo/$file.sig" ||
+    curl "${https[@]}" -fsSL -o "$t/$file" "$mirror/$repo/$file" &&
+        curl "${https[@]}" -fsSL -o "$t/$file.sig" "$mirror/$repo/$file.sig" ||
         { rm -rf "$t"; die "download of $file failed"; }
     gpgv --keyring "$REPO_DIR/lib/keys/archlinuxarm.gpg" "$t/$file.sig" "$t/$file" 2>/dev/null ||
         { rm -rf "$t"; die "$file: bad or missing Arch Linux ARM signature; not installing it"; }
-    # The signature proves ALARM built it, not that it's the package asked for or not an older
-    # one: check the signed package's own name, and refuse a version older than the last one
-    # installed (a mirror replaying an old, vulnerable build). ALARM_ALLOW_DOWNGRADE=1 overrides.
-    local info got ver seen="$HOME/.local/state/frame-tweaks/alarm/$name"
+    # The signature proves ALARM built it, not that it's the package asked for, for this Frame, or
+    # not an older one: check the signed package's own name and architecture (aarch64, or any),
+    # and refuse a version older than the last one installed (a mirror replaying an old,
+    # vulnerable build) or, on a first install too, than the one this release was tested with
+    # (lib/tested-versions). ALARM_ALLOW_DOWNGRADE=1 overrides the version checks.
+    local info got arch ver tested seen="$HOME/.local/state/frame-tweaks/alarm/$name"
     info=$(bsdtar -xOf "$t/$file" .PKGINFO 2>/dev/null) || true
     got=$(sed -n 's/^pkgname = //p' <<<"$info"); ver=$(sed -n 's/^pkgver = //p' <<<"$info")
+    arch=$(sed -n 's/^arch = //p' <<<"$info")
     [ "$got" = "$name" ] || { rm -rf "$t"; die "$file: contains package '$got', not $name; not installing it"; }
-    if [ -f "$seen" ] && [ "$(vercmp "$ver" "$(cat "$seen")")" -lt 0 ] && [ "${ALARM_ALLOW_DOWNGRADE:-}" != 1 ]; then
-        rm -rf "$t"; die "$name $ver is older than the $(cat "$seen") installed before; not installing it"
+    [ "$arch" = aarch64 ] || [ "$arch" = any ] ||
+        { rm -rf "$t"; die "$(t "%s is built for '%s', not aarch64; not installing it" "$file" "$arch")"; }
+    tested=$(sed -n "s/^$name=//p" "$REPO_DIR/lib/tested-versions" 2>/dev/null) || true
+    if [ "${ALARM_ALLOW_DOWNGRADE:-}" != 1 ]; then
+        if [ -f "$seen" ] && [ "$(vercmp "$ver" "$(cat "$seen")")" -lt 0 ]; then
+            rm -rf "$t"; die "$name $ver is older than the $(cat "$seen") installed before; not installing it"
+        fi
+        if [ -n "$tested" ] && [ "$(vercmp "$ver" "$tested")" -lt 0 ]; then
+            rm -rf "$t"; die "$(t '%s %s is older than the %s this release was tested with; not installing it' "$name" "$ver" "$tested")"
+        fi
     fi
     mkdir -p "$(dirname "$seen")" && printf '%s\n' "$ver" > "$seen"
     mkdir -p "$dest"
@@ -188,10 +201,13 @@ alarm_fetch() {
 
 # runs_here <binary> [library-dir]: whether the system can load it (ldd finds every library,
 # at a recent enough version). A newer Arch Linux ARM build can need a newer glibc or library
-# than SteamOS has; installers then keep the copy that works. Prints what's missing.
+# than SteamOS has; installers then keep the copy that works. Prints what's missing. (For a
+# program linked to libraries, as every one installed this way is: one ldd can't load at all,
+# "not a dynamic executable" (a build for another architecture, say), doesn't run here either.)
 runs_here() {
-    local missing
-    missing=$(LD_LIBRARY_PATH="${2:-}${2:+${LD_LIBRARY_PATH:+:}}${LD_LIBRARY_PATH:-}" ldd "$1" 2>&1 | grep 'not found' || true)
+    local out missing=
+    out=$(LD_LIBRARY_PATH="${2:-}${2:+${LD_LIBRARY_PATH:+:}}${LD_LIBRARY_PATH:-}" ldd "$1" 2>&1) || missing=${out:-ldd failed}
+    [ -n "$missing" ] || missing=$(grep 'not found' <<<"$out" || true)
     [ -z "$missing" ] || { sed 's/^[[:space:]]*//' <<<"$missing" | paste -sd ';' -; return 1; }
 }
 
@@ -312,16 +328,71 @@ install_desktop() {
     sysctl_user start --no-block frame-tweaks-menus.service 2>/dev/null || true
 }
 
-# pip_pinned <venv> <package>...: install at the tested versions (lib/python-constraints.txt).
-# If pip can't (no build of those versions for this Python, say after a SteamOS update moved
-# Python on), fall back to the newest versions with a warning: working beats exact.
+# pip_pinned <venv> <package>...: install at the tested versions (lib/python-constraints.txt),
+# tried twice (a dropped connection). A tested version these packages need that PyPI has no build
+# of for this Python and system (say, after a SteamOS update moved Python on) is replaced by the
+# newest that has one, with a warning: working beats exact. Only that one: the other tested
+# versions stay. Not when PyPI couldn't be reached, nor when that version is gone from PyPI (a
+# hijacked account could delete it, to have its own newer one taken), nor for any other failure:
+# then it fails, and says which.
 pip_pinned() {
-    local venv=$1 quiet=(-q); shift
+    local venv=$1 quiet=(-q) tmp pin name code why=other needs=() missing=() cons="$REPO_DIR/lib/python-constraints.txt"
+    shift
     # (FRAME_TWEAKS_PIP_PROGRESS: show pip's download progress, for a setup someone is watching)
     [ -z "${FRAME_TWEAKS_PIP_PROGRESS:-}" ] || quiet=()
-    "$venv/bin/pip" install "${quiet[@]}" -c "$REPO_DIR/lib/python-constraints.txt" "$@" && return
-    warn "$(t "The tested versions of %s don't install on this Python (%s); trying the newest." "$*" "$("$venv/bin/python" -V 2>&1)")"
-    "$venv/bin/pip" install "${quiet[@]}" "$@"
+    # (pip's messages are kept to tell why it failed; these are its words for a connection lost,
+    # refused or failing)
+    local offline='Retrying \(Retry|[Cc]onnection|timed out|name resolution|[Uu]nreachable|SSL|[Pp]roxy|[Mm]ax retries'
+    offline+='|not enough bytes|[Ii]ncomplete|HTTP error|Server Error'
+    tmp=$(mktemp -d)
+    for _ in 1 2; do
+        if "$venv/bin/pip" install "${quiet[@]}" -c "$cons" "$@" 2>"$tmp/said"; then
+            cat "$tmp/said" >&2; rm -rf "$tmp"; return 0
+        fi
+        cat "$tmp/said" >&2
+    done
+    # Not the connection? Then which tested versions do these need (pip resolves them, at the
+    # newest, as built packages: the kind that install here), and has PyPI no build of one here?
+    # Asked for each on its own, pip lists the versions it has instead, or names the Python one needs.
+    if grep -qE "$offline" "$tmp/said"; then why=offline
+    elif "$venv/bin/pip" install -q --dry-run --ignore-installed --only-binary :all: --report "$tmp/needs" "$@" \
+            >/dev/null 2>"$tmp/said"; then
+        mapfile -t needs < <("$venv/bin/python" -c 'import json, re, sys
+n = lambda s: re.sub(r"[-_.]+", "-", s).lower()
+got = {n(p["metadata"]["name"]) for p in json.load(open(sys.argv[1]))["install"]}
+for pin in open(sys.argv[2]).read().split("\n"):
+    if "==" in pin and not pin.startswith("#") and n(pin.split("==")[0]) in got: print(pin)' "$tmp/needs" "$cons")
+        why=
+        for pin in "${needs[@]}"; do
+            "$venv/bin/pip" install -q --dry-run --no-deps --only-binary :all: "$pin" >/dev/null 2>"$tmp/said" && continue
+            if grep -qiE '\(from versions: [0-9]|Requires-Python|requires? a different python' "$tmp/said"; then
+                missing+=("$pin")
+            else
+                why=other; grep -qE "$offline" "$tmp/said" && why=offline; break
+            fi
+        done
+        [ ${#missing[@]} -gt 0 ] || why=${why:-other}
+    elif grep -qE "$offline" "$tmp/said"; then why=offline
+    fi
+    # Still on PyPI? One that isn't was deleted: no reason to take another. (Nor if PyPI can't say.)
+    for pin in "${missing[@]}"; do
+        [ -z "$why" ] || break
+        name=${pin%%==*}; name=${name,,}
+        code=$(curl --proto '=https' --proto-redir '=https' -sL --max-time 30 --retry 2 -o /dev/null -w '%{http_code}' \
+            "https://pypi.org/pypi/${name//[_.]/-}/${pin#*==}/json" 2>/dev/null) || true
+        if [ "$code" = 404 ]; then why="gone $pin"; elif [ "$code" != 200 ]; then why=offline; fi
+    done
+    case $why in
+        offline) warn "$(t "Couldn't reach PyPI to install %s: check the Internet connection, then try again." "$*")" ;;
+        gone\ *) warn "$(t "%s, the tested version, is no longer on PyPI, so %s isn't installed: a deleted release isn't replaced by another one. Please report this." \
+                     "${why#gone }" "$*")" ;;
+        other) warn "$(t "Couldn't install %s (see above)." "$*")" ;;
+        *) grep -vxF -f <(printf '%s\n' "${missing[@]}") "$cons" > "$tmp/cons" || true
+           warn "$(t "PyPI has no build of %s for this Python (%s) and system; installing the newest %s that has one instead. The other tested versions stay." \
+               "${missing[*]}" "$("$venv/bin/python" -V 2>&1)" "${missing[*]%%==*}")"
+           if "$venv/bin/pip" install "${quiet[@]}" -c "$tmp/cons" "$@"; then rm -rf "$tmp"; return 0; fi ;;
+    esac
+    rm -rf "$tmp"; return 1
 }
 
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).

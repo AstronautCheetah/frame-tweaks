@@ -85,9 +85,10 @@ done
 # (gpgv above is a stand-in too: the fixture package isn't signed. alarm_fetch's real signature
 # check is exercised separately, against a real package, when pins or keys change.)
 fx="$work/fixtures"; mkdir -p "$fx/pkg/usr/bin"
-printf '#!/bin/sh\nexit 0\n' > "$fx/pkg/usr/bin/ydotool"; cp "$fx/pkg/usr/bin/ydotool" "$fx/pkg/usr/bin/ydotoold"
+# (real programs ldd can load, as runs_here wants; and true --help, like ydotool's, exits 0)
+cp "$(type -P true)" "$fx/pkg/usr/bin/ydotool"; cp "$fx/pkg/usr/bin/ydotool" "$fx/pkg/usr/bin/ydotoold"
 chmod +x "$fx/pkg/usr/bin/"*
-printf 'pkgname = ydotool\npkgver = 1.0.4-2\n' > "$fx/pkg/.PKGINFO"
+printf 'pkgname = ydotool\npkgver = 1.0.4-2\narch = aarch64\n' > "$fx/pkg/.PKGINFO"
 (cd "$fx/pkg" && tar -cJf "$fx/ydotool.pkg.tar.xz" .PKGINFO usr)
 echo '<a href="ydotool-1.0.4-2-aarch64.pkg.tar.xz">' > "$fx/listing.html"
 head -c 1024 /dev/zero > "$fx/model.bin"; : > "$fx/sig"

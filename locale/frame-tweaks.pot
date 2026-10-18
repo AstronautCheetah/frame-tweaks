@@ -1711,6 +1711,20 @@ msgstr ""
 
 #: lib/common.sh
 msgid ""
+"%s %s is older than the %s this release was tested with; not installing it"
+msgstr ""
+
+#: lib/common.sh
+msgid "%s is built for '%s', not aarch64; not installing it"
+msgstr ""
+
+#: lib/common.sh
+msgid ""
+"%s, the tested version, is no longer on PyPI, so %s isn't installed: a deleted release isn't replaced by another one. Please report this."
+msgstr ""
+
+#: lib/common.sh
+msgid ""
 "About 280 MB to download, shared by the installer window and the tweaks that use it."
 msgstr ""
 
@@ -1725,6 +1739,15 @@ msgstr ""
 
 #: lib/common.sh
 msgid "Active now."
+msgstr ""
+
+#: lib/common.sh
+msgid "Couldn't install %s (see above)."
+msgstr ""
+
+#: lib/common.sh
+msgid ""
+"Couldn't reach PyPI to install %s: check the Internet connection, then try again."
 msgstr ""
 
 #: lib/common.sh
@@ -1762,7 +1785,7 @@ msgstr ""
 
 #: lib/common.sh
 msgid ""
-"The tested versions of %s don't install on this Python (%s); trying the newest."
+"PyPI has no build of %s for this Python (%s) and system; installing the newest %s that has one instead. The other tested versions stay."
 msgstr ""
 
 #: lib/common.sh
@@ -4736,13 +4759,16 @@ msgid "%s running (socket %s)"
 msgstr ""
 
 #: packs/core/ydotool/install.sh
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+msgid "Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s)."
 msgstr ""
 
 #: packs/core/ydotool/install.sh
 msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s); keeping the one you have."
+msgstr ""
+
+#: packs/core/ydotool/install.sh
+msgid "ydotool didn't start"
 msgstr ""
 
 #: packs/core/ydotool/status.sh packs/integrations/clipboard/status.sh packs/integrations/nordvpn/status.sh

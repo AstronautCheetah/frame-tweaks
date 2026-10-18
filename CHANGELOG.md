@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Security
+- **Python packages keep their tested versions:** a failed install of PyQt6, openvr or jeepney is
+  tried once more. If PyPI has no build of a tested version for your Python (after a SteamOS
+  update, say), only that one is replaced, by the newest that has a build, and the warning names
+  it; the others stay as tested. If PyPI can't be reached, a tested version is gone from PyPI, or
+  anything else goes wrong, the install stops and says so. Before, any failure (a dropped
+  connection, a full disk, a deleted release) dropped every version pin, with a warning that blamed
+  your Python.
+- **Arch Linux ARM packages (adb, ydotool) are checked more closely:** a package built for another
+  kind of processor is refused, even with a valid signature; a first install refuses an adb or
+  ydotool older than the version this release was tested with; and the downloads can't be
+  redirected to plain HTTP.
+- **A new ydotool is used only if it runs:** a build that couldn't load at all (made for another
+  processor) counted as working and replaced the ydotool you had, so Dictation and Arrow Pad
+  stopped typing. Now it must load and start, or the one you have stays, and the warning says why.
+
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
   Vulkan) draws straight to gamescope, so the snip came out black or didn't open. Then it now
