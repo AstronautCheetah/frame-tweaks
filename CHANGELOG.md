@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Screen snip works on Steam games:** a game run through Proton (and others drawing with
+  Vulkan) draws straight to gamescope, so the snip came out black or didn't open. Then it now
+  uses gamescope's own screenshot of what it shows.
+
 ## 0.6.19 (2026-10-17)
 
 ### Added

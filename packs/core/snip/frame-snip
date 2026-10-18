@@ -124,6 +124,50 @@ def capture_focused():
     return q                                   # (the X image is freed when this short-lived tool exits)
 
 
+def blank(img):
+    """True if a picture is (nearly) all black: what X gives for a window that draws straight to
+    gamescope (Proton and Vulkan games), which X never sees."""
+    small = img.scaled(32, 32).convertToFormat(QImage.Format.Format_RGB32)
+    return all(max(QColor(small.pixel(x, y)).getRgb()[:3]) < 12 for x in range(32) for y in range(32))
+
+
+def capture_gamescope():
+    """What gamescope shows, the focused app, games included, through its own screenshot
+    (gamescopectl screenshot: a PNG, written a moment later)."""
+    out = RUN / f"frame-snip-{os.getpid()}.png"
+    env = dict(os.environ, XDG_RUNTIME_DIR=str(RUN),
+               GAMESCOPE_WAYLAND_DISPLAY=os.environ.get("GAMESCOPE_WAYLAND_DISPLAY") or "gamescope-0")
+    try:
+        subprocess.run(["gamescopectl", "screenshot", str(out)], env=env, capture_output=True, timeout=5)
+        size, end = -1, time.monotonic() + 3
+        while time.monotonic() < end:              # (until it's there and stopped growing)
+            now = out.stat().st_size if out.exists() else -1
+            if now > 0 and now == size:
+                break
+            size = now
+            time.sleep(0.15)
+        img = QImage(str(out))
+    except (OSError, subprocess.SubprocessError):
+        img = QImage()
+    finally:
+        out.unlink(missing_ok=True)
+    if img.isNull():
+        raise RuntimeError(_("couldn't read the window's picture"))
+    return img.convertToFormat(QImage.Format.Format_RGB32)
+
+
+def capture():
+    """The focused window: from X, as it is (full size); a game, which X has no picture of (it
+    fails, or comes back black), from gamescope's own screenshot."""
+    try:
+        img = capture_focused()
+        if not blank(img):
+            return img
+    except RuntimeError:
+        pass
+    return capture_gamescope()
+
+
 # ---- actions ------------------------------------------------------------------------------
 def nested_wayland():
     """The desktop's Wayland socket (wl-copy talks to it from any session)."""
@@ -1914,7 +1958,7 @@ def main():
         return narrate_panel(sys.argv[2], sys.argv[3])
     app = QApplication(sys.argv[:1])
     try:
-        image = QImage(sys.argv[1]) if len(sys.argv) > 1 else capture_focused()
+        image = QImage(sys.argv[1]) if len(sys.argv) > 1 else capture()
     except RuntimeError as e:
         notify(_("Couldn't take a snip"), str(e))
         return 1
