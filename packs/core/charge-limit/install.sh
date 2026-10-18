@@ -15,12 +15,14 @@ password once, to add a udev rule (%s) that SteamOS updates keep." "$RULE")"
     if passwd -S "$USER" 2>/dev/null | grep -q " NP "; then
         die "$(t "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run.")"
     fi
-    sudo -v || die "$(t 'sudo failed.')"
-    if ! { printf '%s\n' "$rule" | sudo tee "$RULE" >/dev/null &&
-           printf '%s\n' "$RULE" | sudo tee "$KEEP" >/dev/null &&
-           sudo chown "$(id -u)" "$SWITCH"; }; then
-        die "$(t "Couldn't add the udev rule.")"
-    fi
+    # One sudo command for the rule, the list SteamOS updates keep and the switch, with -k: sudo
+    # asks for the password and doesn't remember it, so nothing else running in this terminal,
+    # meanwhile or after, can use it. (drop_sudo: in case.)
+    added=1
+    sudo -k sh -c 'printf "%s\n" "$1" > "$2" && printf "%s\n" "$2" > "$3" && chown "$4" "$5"' \
+        sh "$rule" "$RULE" "$KEEP" "$(id -u)" "$SWITCH" || added=
+    drop_sudo
+    [ -n "$added" ] || die "$(t "Couldn't add the udev rule.")"
 fi
 
 install -m755 "$TWEAK_DIR/charge-limit" "$BIN/"
