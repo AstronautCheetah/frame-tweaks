@@ -60,6 +60,11 @@
   only your home folder kept others out. It's now yours alone; an existing one changes at your next
   dictation, or when Dictation is reinstalled or updated. Dictation's log and recordings, Arrow
   Pad's input log and the notes under its VR panel are now yours alone too.
+- **Screen snip's narration panel reads only the snips Narrate hands it:** an open panel takes new
+  snips over a local socket, and it would read aloud any file it was pointed at, then delete the
+  folder that file was in. It now takes only the folders Narrate makes for a snip, never follows a
+  link in them, and refuses anything else. The same goes for the picture Copy hands to the
+  desktop's clipboard.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
