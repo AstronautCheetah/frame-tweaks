@@ -145,7 +145,10 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 
 - The snip window is a small PyQt program (it shares Arrow Pad's PyQt6 copy). It reads the
   focused window's picture straight from the Steam session's display, and opens on that display
-  so it shows up in VR.
+  so it shows up in VR. Steam games (Proton's, and others that draw with Vulkan) draw straight to
+  gamescope, so that display has no picture of them (it comes back black): then it takes
+  gamescope's own screenshot of what it shows instead (`gamescopectl screenshot`), at the size
+  gamescope draws it.
 - **Copy text** and **Narrate** read the text with
   [Tesseract](https://github.com/tesseract-ocr/tesseract), using its English data, on a
   picture scaled up 2× (small screen text reads better that way).
