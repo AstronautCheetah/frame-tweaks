@@ -338,7 +338,10 @@ printf %s "$code"; [ "$code" != 000 ] || exit 7'''
                                            PIP_CONS=self.CONS, PIP_NEEDS=" ".join(needs), CURL_SAYS=self.pypi,
                                            CURL_CALLS=self.curl_calls))
         calls = self.calls.read_text().splitlines() if self.calls.exists() else []
-        return r.returncode, r.stderr, [c.split(" ", 1)[0] for c in calls]
+        # (off the Frame, CI's x86_64 say, common.sh warns about the processor as it's sourced:
+        # not pip_pinned's to answer for, so left out)
+        said = "".join(l for l in r.stderr.splitlines(True) if "target the Steam Frame (aarch64)" not in l)
+        return r.returncode, said, [c.split(" ", 1)[0] for c in calls]
 
     def call(self, kind):
         return [c for c in self.calls.read_text().splitlines() if c.startswith(kind + " ")]
