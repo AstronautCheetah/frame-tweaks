@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **Battery charge limit: use at your own risk.** Its README and its 🧪 note in the window now
+  say so, and link a known SteamOS charger bug
+  ([SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879)) that stops some Frames
+  taking power from USB while plugged in. A Frame running the tweak hit it on 17 October 2026 and
+  no longer charges. If the battery drops while plugged in and the limit isn't holding it,
+  charge from a plain 5 V USB source before it runs out. This release changes nothing else:
+  its code is 0.6.19's.
+
 ## 0.6.19 (2026-10-17)
 
 ### Added
