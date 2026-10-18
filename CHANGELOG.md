@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.20 (2026-10-18)
 
 ### Changed
 - **Battery charge limit is withdrawn for new installs, and at your own risk if you have it.**
