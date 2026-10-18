@@ -7,13 +7,17 @@ UINPUT=${FRAME_TWEAKS_UINPUT:-/dev/uinput}   # overridable for dev/test-tweaks.s
 
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 alarm_fetch extra ydotool "$T"
-# Installed only if it runs here; otherwise a working ydotool from before is kept.
-if missing=$(runs_here "$T/usr/bin/ydotool") && missing=$(runs_here "$T/usr/bin/ydotoold"); then
+# Installed only if it runs here: both load (runs_here: what's missing, if not), and ydotool starts
+# where it was unpacked (--help prints its commands and stops before looking for a daemon, here
+# one whose socket isn't there; a time limit, for one that would wait anyway; ydotoold, the
+# daemon, isn't started). Otherwise a working ydotool from before is kept.
+if why=$(runs_here "$T/usr/bin/ydotool") && why=$(runs_here "$T/usr/bin/ydotoold") && why=$(t "ydotool didn't start") &&
+   YDOTOOL_SOCKET="$T/no-daemon" timeout 10 "$T/usr/bin/ydotool" --help >/dev/null 2>&1; then
     install -m755 "$T/usr/bin/ydotool" "$T/usr/bin/ydotoold" "$BIN/"
 elif [ -x "$BIN/ydotoold" ] && runs_here "$BIN/ydotoold" >/dev/null && runs_here "$BIN/ydotool" >/dev/null; then
-    warn "$(t "Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s" "$missing")"
+    warn "$(t "Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s); keeping the one you have." "$why")"
 else
-    die "$(t "Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s" "$missing")"
+    die "$(t "Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s)." "$why")"
 fi
 
 mkdir -p "$HOME/.config/systemd/user"

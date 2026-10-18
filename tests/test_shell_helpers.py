@@ -200,6 +200,244 @@ class SteamVRRestart(unittest.TestCase):
 
 
 
+@unittest.skipUnless(shutil.which("ldd") and shutil.which("true"), "needs ldd")
+class RunsHere(unittest.TestCase):
+    """runs_here: a program the system can load passes; one needing a library that isn't there,
+    or one ldd can't load at all (a build for another architecture, which ldd calls "not a
+    dynamic executable"), doesn't, saying why. (It took the second for one that runs: then an
+    Arch Linux ARM build for the wrong machine replaced a working ydotool.)"""
+
+    def runs_here(self, program):
+        r = subprocess.run(["bash", "-c", f'source {ROOT}/lib/common.sh 2>/dev/null; runs_here "{program}"'],
+                           capture_output=True, text=True, timeout=60,
+                           env=sandbox_env(self.home))
+        return r.returncode, r.stdout.strip()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.home = Path(self.tmp.name) / "home"
+        self.home.mkdir()
+        self.real = Path(shutil.which("true")).resolve().read_bytes()
+
+    def program(self, name, data):
+        f = Path(self.tmp.name) / name
+        f.write_bytes(data)
+        f.chmod(0o755)
+        return f
+
+    def test_one_that_loads(self):
+        self.assertEqual(self.runs_here(self.program("ok", self.real)), (0, ""))
+
+    def test_one_for_another_machine(self):
+        arm = bytearray(self.real)
+        arm[4] = 1                                    # (ELF class: 32-bit)
+        arm[18:20] = (40).to_bytes(2, "little")       # (machine: ARM, as armv7h builds are)
+        rc, said = self.runs_here(self.program("arm32", arm))
+        self.assertEqual(rc, 1)
+        self.assertIn("not a dynamic executable", said)
+
+    def test_one_needing_a_missing_library(self):
+        lib = next(n for n in (b"libc.so.6", b"libc.so") if n + b"\0" in self.real)
+        missing = self.real.replace(lib + b"\0", b"libq" + lib[4:] + b"\0", 1)
+        rc, said = self.runs_here(self.program("missing", missing))
+        self.assertEqual(rc, 1)
+        self.assertIn("libq" + lib[4:].decode() + " => not found", said)
+
+    def test_not_a_program_at_all(self):
+        self.assertEqual(self.runs_here(self.program("script", b"#!/bin/sh\nexit 0\n"))[0], 1)
+
+
+class PipPinned(unittest.TestCase):
+    """pip_pinned, with a stand-in pip (its messages are pip 26's): the tested versions, tried a
+    second time if that fails. Then only a tested version the package needs (pip's resolver says
+    what it needs) that PyPI has no build of for this Python (pip, asked for that version alone,
+    lists others or names the Python it needs) is replaced, by the newest that has one; the other
+    tested versions stay. Not if PyPI no longer has that version at all (deleted, as a hijacked
+    account could, to have its own newer one taken), nor if PyPI can't say. A lost connection,
+    the first time and the second, stops it, saying PyPI couldn't be reached; so does any other
+    failure. (Any failure dropped every pin, with a warning that blamed the Python version.)"""
+    # pip stand-in: logs "<kind> <arguments>" (pinned: -c, the tested versions; resolve: --report,
+    # writing a report of $PIP_NEEDS; check: --dry-run; fallback: -c another file, kept as
+    # $PIP_CALLS.cons; newest: no -c), then answers from $PIP_SAYS/<kind>.<n> (its nth call),
+    # <kind>.<its last argument> or <kind>: the exit code on the first line, what it prints on
+    # stderr after it. No file: exit 0.
+    PIP = r'''kind=newest prev=
+for a; do
+    [ "$prev" = -c ] && { kind=fallback; [ "$a" = "$PIP_CONS" ] && kind=pinned || cp "$a" "$PIP_CALLS.cons"; }
+    [ "$prev" = --report ] && printf '{"version": "1", "install": [%s]}' \
+        "$(printf '{"metadata": {"name": "%s"}}\n' $PIP_NEEDS | paste -sd, -)" > "$a"
+    prev=$a
+done
+case " $* " in *" --report "*) kind=resolve ;; *" --dry-run "*) kind=check ;; esac
+n=$(grep -c "^$kind " "$PIP_CALLS" 2>/dev/null)
+echo "$kind $*" >> "$PIP_CALLS"
+f="$PIP_SAYS/$kind.$((n + 1))"; [ -f "$f" ] || f="$PIP_SAYS/$kind.${*: -1}"; [ -f "$f" ] || f="$PIP_SAYS/$kind"
+[ -f "$f" ] || exit 0
+tail -n +2 "$f" >&2
+exit "$(head -1 "$f")"'''
+    # PyPI's JSON for a release, through curl: the HTTP code from $CURL_SAYS/<name>, else 200
+    # (000: no connection)
+    CURL = r'''echo "$*" >> "$CURL_CALLS"
+url=${*: -1}; name=${url#https://pypi.org/pypi/}; name=${name%%/*}
+code=$(cat "$CURL_SAYS/$name" 2>/dev/null || echo 200)
+printf %s "$code"; [ "$code" != 000 ] || exit 7'''
+    CONS = ROOT / "lib/python-constraints.txt"
+    PINS = dict(line.split("==") for line in CONS.read_text().splitlines() if "==" in line and line[0] != "#")
+    QT = ("PyQt6", "PyQt6-Qt6", "pyqt6-sip")       # (what PyQt6 needs, as a report spells them)
+    OFFLINE = ("WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after "
+               "connection broken by 'NewConnectionError(\"HTTPSConnection(host='pypi.org', port=443): Failed to "
+               "establish a new connection: [Errno 101] Network is unreachable\")': /simple/pyqt6/\n")
+    CONFLICT = ("ERROR: Cannot install PyQt6 because these package versions have conflicting dependencies.\n"
+                "ERROR: ResolutionImpossible: for help visit "
+                "https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts")
+    DISK_FULL = "ERROR: Could not install packages due to an OSError: [Errno 28] No space left on device"
+
+    @classmethod
+    def not_here(cls, name):
+        return (f"ERROR: Could not find a version that satisfies the requirement {name}=={cls.PINS[name]} (from "
+                f"versions: 13.14.0, 13.15.0)\nERROR: No matching distribution found for {name}=={cls.PINS[name]}")
+
+    @classmethod
+    def other_python(cls, name):
+        return (f"ERROR: Ignored the following versions that require a different python version: {cls.PINS[name]} "
+                f"Requires-Python >=3.16\nERROR: Could not find a version that satisfies the requirement "
+                f"{name}=={cls.PINS[name]} (from versions: none)\nERROR: No matching distribution found for "
+                f"{name}=={cls.PINS[name]}")
+
+    @classmethod
+    def gone(cls, name):
+        return (f"ERROR: Could not find a version that satisfies the requirement {name}=={cls.PINS[name]} (from "
+                f"versions: none)\nERROR: No matching distribution found for {name}=={cls.PINS[name]}")
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.d = Path(self.tmp.name)
+        self.venv, self.says, self.calls = self.d / "venv", self.d / "says", self.d / "calls"
+        self.pypi, self.curl_calls = self.d / "pypi", self.d / "curl-calls"
+        self.says.mkdir()
+        self.pypi.mkdir()
+        (self.d / "home").mkdir()
+        stub(self.venv / "bin", "pip", self.PIP)
+        stub(self.venv / "bin", "python", f'[ "$1" = -V ] && {{ echo "Python 3.15.0"; exit 0; }}\nexec "{sys.executable}" "$@"')
+        stub(self.d / "stubs", "curl", self.CURL)
+
+    def install(self, package="PyQt6", needs=QT, checks=(), pypi=(), **says):
+        """pip_pinned <package>, pip answering as says has it ({"pinned_2": (0, "")}: its second
+        pinned call) and, asked about one tested version alone, as checks has it ({"PyQt6_sip":
+        ...}); its resolver finding the package needs `needs`; PyPI's JSON answering as pypi has
+        it ({"pyqt6-sip": 404}). (exit code, what it printed on stderr, its pip calls' kinds)."""
+        for name, (rc, text) in [*says.items(), *((f"check_{p}=={self.PINS[p]}", a) for p, a in dict(checks).items())]:
+            (self.says / name.replace("_", ".", 1)).write_text(f"{rc}\n{text}\n")
+        for name, code in dict(pypi).items():
+            (self.pypi / name).write_text(f"{code}\n")
+        r = subprocess.run(["bash", "-c", f'source {ROOT}/lib/common.sh; pip_pinned "{self.venv}" {package}'],
+                           capture_output=True, text=True, timeout=60,
+                           env=sandbox_env(self.d / "home", self.d / "stubs", PIP_CALLS=self.calls, PIP_SAYS=self.says,
+                                           PIP_CONS=self.CONS, PIP_NEEDS=" ".join(needs), CURL_SAYS=self.pypi,
+                                           CURL_CALLS=self.curl_calls))
+        calls = self.calls.read_text().splitlines() if self.calls.exists() else []
+        return r.returncode, r.stderr, [c.split(" ", 1)[0] for c in calls]
+
+    def call(self, kind):
+        return [c for c in self.calls.read_text().splitlines() if c.startswith(kind + " ")]
+
+    def test_the_tested_versions(self):
+        rc, said, calls = self.install()
+        self.assertEqual((rc, calls), (0, ["pinned"]), said)
+        self.assertIn(f"-q -c {self.CONS} PyQt6", self.calls.read_text())
+        self.assertNotIn("warning", said)
+
+    def test_a_dropped_connection_is_tried_again(self):
+        rc, said, calls = self.install(pinned_1=(1, self.OFFLINE + self.CONFLICT), pinned_2=(0, ""))
+        self.assertEqual((rc, calls), (0, ["pinned", "pinned"]), said)
+
+    def test_no_connection_keeps_the_pins(self):
+        rc, said, calls = self.install(pinned=(1, self.OFFLINE + self.CONFLICT))
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(calls, ["pinned", "pinned"])
+        self.assertIn("Couldn't reach PyPI to install PyQt6: check the Internet connection, then try again.", said)
+
+    def test_no_build_of_a_tested_version_here_takes_the_newest_of_that_one(self):
+        rc, said, calls = self.install(pinned=(1, self.CONFLICT), checks={"PyQt6_sip": (1, self.not_here("PyQt6_sip"))})
+        self.assertEqual((rc, calls), (0, ["pinned", "pinned", "resolve", "check", "check", "check", "fallback"]), said)
+        self.assertIn("install -q --dry-run --ignore-installed --only-binary :all: --report ", self.call("resolve")[0])
+        self.assertEqual([c.rsplit(" ", 1)[1] for c in self.call("check")],          # (only what PyQt6 needs)
+                         [f"{p}=={self.PINS[p]}" for p in ("PyQt6", "PyQt6-Qt6", "PyQt6_sip")])
+        self.assertIn("install -q --dry-run --no-deps --only-binary :all: ", self.call("check")[0])
+        sip = f"PyQt6_sip=={self.PINS['PyQt6_sip']}"
+        self.assertIn(f"PyPI has no build of {sip} for this Python (Python 3.15.0) and system; installing the newest "
+                      "PyQt6_sip that has one instead. The other tested versions stay.", said)
+        self.assertRegex(self.call("fallback")[0], r"^fallback install -q -c \S+ PyQt6$")
+        kept = Path(f"{self.calls}.cons").read_text().splitlines()
+        self.assertNotIn(sip, kept)
+        self.assertEqual(kept, [line for line in self.CONS.read_text().splitlines() if line != sip])
+        [ask] = self.curl_calls.read_text().splitlines()                           # (it's still on PyPI)
+        self.assertTrue(ask.startswith("--proto =https --proto-redir =https "), ask)
+        self.assertTrue(ask.endswith(f" https://pypi.org/pypi/pyqt6-sip/{self.PINS['PyQt6_sip']}/json"), ask)
+
+    def test_one_needing_another_python_takes_the_newest_of_that_one(self):
+        rc, said, calls = self.install(pinned=(1, self.CONFLICT), checks={"PyQt6": (1, self.other_python("PyQt6"))})
+        self.assertEqual((rc, calls[-1]), (0, "fallback"), said)
+        self.assertIn(f"PyPI has no build of PyQt6=={self.PINS['PyQt6']} for this Python", said)
+        self.assertNotIn(f"PyQt6=={self.PINS['PyQt6']}", Path(f"{self.calls}.cons").read_text().splitlines())
+
+    def test_a_tested_version_deleted_from_pypi_stops_it(self):
+        """A hijacked account deletes the tested release and uploads a newer one: pip lists the
+        others, as for a missing build, but PyPI no longer has that release at all."""
+        rc, said, calls = self.install(pinned=(1, self.CONFLICT), checks={"PyQt6_sip": (1, self.not_here("PyQt6_sip"))},
+                                       pypi={"pyqt6-sip": 404})
+        self.assertNotEqual(rc, 0)
+        self.assertNotIn("fallback", calls)
+        self.assertIn(f"PyQt6_sip=={self.PINS['PyQt6_sip']}, the tested version, is no longer on PyPI, so PyQt6 isn't "
+                      "installed: a deleted release isn't replaced by another one. Please report this.", said)
+
+    def test_when_pypi_cant_say_whether_it_has_it(self):
+        for code in ("000", "503"):
+            with self.subTest(code=code):
+                self.calls.unlink(missing_ok=True)
+                rc, said, calls = self.install(pinned=(1, self.CONFLICT),
+                                               checks={"PyQt6_sip": (1, self.not_here("PyQt6_sip"))},
+                                               pypi={"pyqt6-sip": code})
+                self.assertNotEqual(rc, 0)
+                self.assertNotIn("fallback", calls)
+                self.assertIn("Couldn't reach PyPI to install PyQt6", said)
+
+    def test_a_tested_version_it_doesnt_need_changes_nothing(self):
+        """jeepney fails on a full disk, while the tested PyQt6_sip has no build here: jeepney
+        doesn't need it, so that's no reason to install another jeepney."""
+        rc, said, calls = self.install("jeepney", needs=("jeepney",), pinned=(1, self.DISK_FULL),
+                                       checks={"PyQt6_sip": (1, self.not_here("PyQt6_sip"))})
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(calls, ["pinned", "pinned", "resolve", "check"])
+        self.assertEqual(self.call("check")[0].rsplit(" ", 1)[1], f"jeepney=={self.PINS['jeepney']}")
+        self.assertIn("Couldn't install jeepney (see above).", said)
+
+    def test_any_other_failure_keeps_the_pins(self):
+        for case, answers, kinds in (
+                ("each version there", {}, ["resolve", "check", "check", "check"]),
+                ("that one gone altogether", {"checks": {"PyQt6": (1, self.gone("PyQt6"))}}, ["resolve", "check"]),
+                ("not even the newest installs", {"resolve": (1, self.gone("PyQt6"))}, ["resolve"])):
+            with self.subTest(case):
+                self.calls.unlink(missing_ok=True)
+                rc, said, calls = self.install(pinned=(1, self.DISK_FULL), **answers)
+                self.assertNotEqual(rc, 0)
+                self.assertEqual(calls, ["pinned", "pinned", *kinds])
+                self.assertIn("No space left on device", said)               # (pip's own words, shown)
+                self.assertIn("Couldn't install PyQt6 (see above).", said)
+
+    def test_no_connection_for_the_checks_either(self):
+        for answers in ({"resolve": (1, self.OFFLINE + self.gone("PyQt6"))},
+                        {"checks": {"PyQt6": (1, self.OFFLINE + self.gone("PyQt6"))}}):
+            with self.subTest(answers):
+                self.calls.unlink(missing_ok=True)
+                rc, said, calls = self.install(pinned=(1, self.CONFLICT), **answers)
+                self.assertNotEqual(rc, 0)
+                self.assertNotIn("fallback", calls)
+                self.assertIn("Couldn't reach PyPI", said)
+
+
 class DashboardPatchInstalled(unittest.TestCase):
     """install_dashboard_patch while SteamVR's patches service runs: "Active now." only once the
     service has injected the patch (it said so after its 10 checks either way); otherwise what the
