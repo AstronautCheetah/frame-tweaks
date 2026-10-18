@@ -3188,6 +3188,11 @@ msgid ""
 "password once, to add a udev rule (%s) that SteamOS updates keep."
 msgstr ""
 
+#: packs/core/charge-limit/needed.sh
+msgid ""
+"withdrawn for new installs while a SteamOS charger bug can leave a Frame unable to charge (SteamOS #2879)"
+msgstr ""
+
 #: packs/core/charge-limit/status.sh
 msgid "Battery %s%%; charging stops at %s%%"
 msgstr ""
