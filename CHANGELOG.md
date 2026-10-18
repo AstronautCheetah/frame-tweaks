@@ -17,6 +17,12 @@
 - **A new ydotool is used only if it runs:** a build that couldn't load at all (made for another
   processor) counted as working and replaced the ydotool you had, so Dictation and Arrow Pad
   stopped typing. Now it must load and start, or the one you have stays, and the warning says why.
+- **Claude Desktop never goes back to an older version by itself:** `claude-desktop-update`
+  installs only a version newer than yours, takes Claude Desktop's own entry in Anthropic's list,
+  and downloads over HTTPS only, redirects included; the window's update hint offers only what an
+  update would install. To go back, run `claude-desktop-update --allow-older`. It used to install
+  any version that differed from yours, older ones included, could take another package's entry,
+  and followed a redirect to plain HTTP.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with

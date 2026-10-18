@@ -1,8 +1,10 @@
 #!/bin/bash
 # Install or update Claude Desktop (official Linux build, arm64) without apt:
 # fetch the latest .deb from Anthropic's apt repo, verify its SHA256 and unpack
-# it into ~/.local/opt. Safe to re-run; does nothing when already current. Refuses while
-# Claude Desktop is open unless given --restart.
+# it into ~/.local/opt. Safe to re-run; does nothing when already current, and never installs a
+# version older than the one you have unless given --allow-older (an old copy of the list could
+# offer one). Refuses while Claude Desktop is open unless given --restart. --print-latest only
+# prints the version it would install (the installer window's update check), changing nothing.
 set -euo pipefail
 REPO=https://downloads.claude.ai/claude-desktop/apt/stable
 OPT="$HOME/.local/opt/claude-desktop"
@@ -10,12 +12,66 @@ OPT="$HOME/.local/opt/claude-desktop"
 # shellcheck source=/dev/null
 source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
     t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
-# (a time limit: a stalled connection hung the install's terminal for good)
-P=$(curl -fsSL --max-time 60 --retry 2 --retry-delay 3 "$REPO/dists/stable/main/binary-arm64/Packages")
-VER=$(echo "$P" | grep ^Version: | sort -V -k2 | tail -1 | cut -d' ' -f2)
-BLOCK=$(echo "$P" | awk -v v="$VER" '/^Package:/{b=""} {b=b $0 "\n"} /^$/ && b ~ "Version: " v "\n" {print b; exit} END{if (b ~ "Version: " v "\n") print b}')
-F=$(echo "$BLOCK" | grep ^Filename: | head -1 | cut -d' ' -f2)
-H=$(echo "$BLOCK" | grep ^SHA256: | head -1 | cut -d' ' -f2)
+restart='' older='' latest=''
+for a in "$@"; do case $a in --restart) restart=1 ;; --allow-older) older=1 ;; --print-latest) latest=1 ;; esac; done
+
+# deb_cmp A B: -1, 0 or 1 as Debian version A is older than, the same as or newer than B, in
+# dpkg's order: the epoch (before a colon), then the version, then the revision (after the last
+# hyphen); in each, runs of other characters (letters first, then signs; ~ before anything, even
+# the end) and numbers in turn, the numbers as numbers.
+deb_cmp() {
+    local a=$1 b=$2 ea=0 eb=0 ra='' rb='' r
+    if [[ $a == *:* ]]; then ea=${a%%:*} a=${a#*:}; fi
+    if [[ $b == *:* ]]; then eb=${b%%:*} b=${b#*:}; fi
+    if [[ $a == *-* ]]; then ra=${a##*-} a=${a%-*}; fi
+    if [[ $b == *-* ]]; then rb=${b##*-} b=${b%-*}; fi
+    for r in "$(deb_part "$ea" "$eb")" "$(deb_part "$a" "$b")" "$(deb_part "$ra" "$rb")"; do
+        [ "$r" = 0 ] || { echo "$r"; return; }
+    done
+    echo 0
+}
+deb_part() {          # (dpkg's verrevcmp)
+    local a=$1 b=$2 x y
+    while [ -n "$a$b" ]; do
+        while [[ $a =~ ^[^0-9] || $b =~ ^[^0-9] ]]; do
+            x=$(deb_order "${a:0:1}") y=$(deb_order "${b:0:1}")
+            [ "$x" -eq "$y" ] || { [ "$x" -gt "$y" ] && echo 1 || echo -1; return; }
+            a=${a:1} b=${b:1}
+        done
+        x=${a%%[^0-9]*} y=${b%%[^0-9]*}
+        a=${a#"$x"} b=${b#"$y"}
+        while [[ $x == 0* ]]; do x=${x#0}; done
+        while [[ $y == 0* ]]; do y=${y#0}; done
+        if [ ${#x} -ne ${#y} ]; then [ ${#x} -gt ${#y} ] && echo 1 || echo -1; return; fi
+        if [[ $x != "$y" ]]; then [[ $x > $y ]] && echo 1 || echo -1; return; fi
+    done
+    echo 0
+}
+deb_order() {
+    case $1 in
+        '') echo 0 ;; '~') echo -1 ;; [0-9]) echo 0 ;;
+        [A-Za-z]) printf '%d\n' "'$1" ;;
+        *) echo $(( $(printf '%d' "'$1") + 256 )) ;;
+    esac
+}
+
+# (a time limit: a stalled connection hung the install's terminal for good; HTTPS only, redirects
+# included: --proto)
+https=(--proto '=https' --proto-redir '=https')
+P=$(curl "${https[@]}" -fsSL --max-time 60 --retry 2 --retry-delay 3 "$REPO/dists/stable/main/binary-arm64/Packages")
+# Claude Desktop's entries (the list can hold other packages, and older versions): the newest.
+VER='' F='' H=''
+while IFS=$'\t' read -r v f h; do
+    if [ -z "$VER" ] || [ "$(deb_cmp "$v" "$VER")" = 1 ]; then VER=$v F=$f H=$h; fi
+done < <(awk '/^Package:/ { p = $2 } /^Version:/ { v = $2 } /^Filename:/ { f = $2 } /^SHA256:/ { h = $2 }
+              /^$/ { if (p == "claude-desktop" && v != "" && f != "" && h != "") print v "\t" f "\t" h; p = v = f = h = "" }
+              END { if (p == "claude-desktop" && v != "" && f != "" && h != "") print v "\t" f "\t" h }' <<<"$P")
+[ -n "$VER" ] || { echo "$(t "Anthropic's package list has no Claude Desktop for arm64")" >&2; exit 1; }
+# (the file's place comes from the list too: a plain path in the repository, nothing for curl to
+# read more into)
+[[ $F =~ ^[A-Za-z0-9._+~%-][A-Za-z0-9._+~%/-]*\.deb$ && $F != *..* ]] ||
+    { echo "$(t "Anthropic's package list names an unexpected file for Claude Desktop: %s" "$F")" >&2; exit 1; }
+[ -z "$latest" ] || { echo "$VER"; exit 0; }
 # A launcher, not a link to the program: every start (app menu, VR "+" menu, a claude:// link, a
 # terminal) uses the shared KDE wallet. Started without it, Claude can't encrypt (backend
 # basic_text), never keeps your sign-in, and can't read one saved by a wallet-backed start.
@@ -31,17 +87,27 @@ exec $outer "$HOME/.local/opt/claude-desktop/claude-desktop" "$@"
 LAUNCHER
 chmod 755 "$HOME/.local/bin/claude-desktop"
 CUR=$(cat "$OPT/.deb-version" 2>/dev/null || echo none)
-[ "$VER" = "$CUR" ] && { t 'Claude Desktop already at %s' "$VER"; echo; exit 0; }
+if [ "$CUR" != none ]; then
+    case $(deb_cmp "$VER" "$CUR") in
+        0) t 'Claude Desktop already at %s' "$CUR"; echo; exit 0 ;;
+        # (the list isn't signed, so an old copy of it could be served: going back takes asking)
+        -1) if [ -z "$older" ]; then
+                t "Claude Desktop %s is newer than the %s in Anthropic's list, so it stays.
+To install %s anyway, run: claude-desktop-update --allow-older" "$CUR" "$VER" "$VER"; echo
+                exit 0
+            fi ;;
+    esac
+fi
 
 # Never close a running Claude Desktop without being asked (you could lose an unsent message).
-if pgrep -f "^$OPT/claude-desktop" >/dev/null && [ "${1:-}" != --restart ]; then
+if pgrep -f "^$OPT/claude-desktop" >/dev/null && [ -z "$restart" ]; then
     t 'Claude Desktop %s is available, but Claude Desktop is open: quit it first,
 or run: claude-desktop-update --restart   (closes it, updates, and you reopen it)' "$VER"; echo
     exit 3
 fi
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 echo "Claude Desktop: $CUR -> $VER"
-curl -fL# --retry 3 --retry-all-errors --retry-delay 3 -o "$T/pkg.deb" "$REPO/$F"
+curl "${https[@]}" -gfL# --retry 3 --retry-all-errors --retry-delay 3 -o "$T/pkg.deb" "$REPO/$F"
 echo "$H  $T/pkg.deb" | sha256sum -c --quiet
 bsdtar -xf "$T/pkg.deb" -C "$T" data.tar.xz && mkdir "$T/root" && tar -xf "$T/data.tar.xz" -C "$T/root"
 pkill -f "^$OPT/" || true          # only reached when it isn't running, or with --restart

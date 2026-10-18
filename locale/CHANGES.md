@@ -28,3 +28,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/core/ydotool/install.sh:20`
   - was: "Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
   - now: "Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s)."
+- New in `packs/integrations/claude-desktop/claude-desktop-update:69`
+  - now: "Anthropic's package list has no Claude Desktop for arm64"
+- New in `packs/integrations/claude-desktop/claude-desktop-update:73`
+  - now: "Anthropic's package list names an unexpected file for Claude Desktop: %s"
+- New in `packs/integrations/claude-desktop/claude-desktop-update:95`
+  - now: "Claude Desktop %s is newer than the %s in Anthropic's list, so it stays.\nTo install %s anyway, run: claude-desktop-update --allow-older"
