@@ -8,6 +8,9 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-10-17
+- Changed in `gui/report_page.py:65`
+  - was: "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+  - now: "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs. Removed from it: your user name, home folder path and host name, the phone names Android Mirror remembers and adb's names for phones, IP, MAC and e-mail addresses, GitHub tokens, and other tokens and keys written as 64 hex digits or as 44 base64 characters ending in =. Anything else stays as it was. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 - New in `lib/common.sh:186`
   - now: "%s is built for '%s', not aarch64; not installing it"
 - New in `lib/common.sh:193`

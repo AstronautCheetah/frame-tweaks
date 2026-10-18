@@ -866,9 +866,15 @@ cmd_debug_info() {
     [[ -n $dir && $dir != "$HOME" ]] || dir="$HOME/Downloads"     # (it says $HOME when none is set)
     mkdir -p "$dir"
     local out; out="$dir/frame-tweaks-debug-$(date +%Y%m%d-%H%M%S).txt"
-    # Your phone's name too (Android Mirror's PHONE_NAME), escaped for sed -E ("Galaxy S24+ (Bob)").
-    local phone; phone=$(bash -c '. "$HOME/.config/frame-tweaks/phone.conf" 2>/dev/null; printf %s "${PHONE_NAME:-}"' |
-                         sed 's/[][\.*^$/&|(){}+?]/\\&/g')       # (read as phone does: it's shell-quoted)
+    # Your phones' names too: each one remembered (Android Mirror's PHONE_NAME, in its settings
+    # and where they were before 0.6), escaped for sed -E ("Galaxy S24+ (Bob)"). Only that line is
+    # read, as phone writes it (shell-quoted): the file from before 0.6 may be another program's.
+    local f phone phones=()
+    for f in "$HOME/.config/frame-tweaks/phone.conf" "$HOME/.config/phone.conf"; do
+        phone=$(grep -s '^[[:space:]]*PHONE_NAME=' "$f" | tail -1 |
+                bash -c '. /dev/stdin 2>/dev/null; printf %s "${PHONE_NAME:-}"' | sed 's/[][\.*^$/&|(){}+?]/\\&/g') || true
+        [[ -z $phone ]] || phones+=(-e "s/$phone/<phone>/g")
+    done
     # Your user name, everywhere as a word. The Frame's own, steamos, names nobody and is part of
     # SteamOS's names (steamos-manager, /usr/lib/steamos): it's replaced only where it names you
     # (in /home/NAME, NAME@host, user=NAME, "for NAME" and uid=1000(NAME)).
@@ -879,8 +885,13 @@ cmd_debug_info() {
                          -e "s/([Uu][Ss][Ee][Rr]([Nn][Aa][Mm][Ee])?|LOGNAME)=$u($w|\$)/\1=<user>\3/g"
                          -e "s/(\b[Ff]or( user)?|\b[Uu]ser) $u($w|\$)/\1 <user>\3/g" -e "s/([=,][0-9]+)\($u\)/\1(<user>)/g")
     fi
+    # (Tokens, keys and phone names are replaced first, right after the home folder: a rule after
+    # them could take a piece of one, a user name in it, and leave the rest.)
     {
-        echo "# Frame Tweaks debug info (user names, home path, host and phone names, IP, MAC and e-mail addresses removed)"
+        echo "# Frame Tweaks debug info. Removed: your user name, home folder path and host name; the phone names" \
+             "Android Mirror remembers, and adb's names for phones (adb-…); IP, MAC and e-mail addresses; GitHub" \
+             "tokens; and other tokens and keys written as 64 hex digits, or as 44 base64 characters ending in =." \
+             "Nothing else is."
         echo "frame-tweaks: $FT_BUILD (release $VERSION); channel: $(release_channel)"
         grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release | tr '\n' ' '; echo
         echo "steamvr: $(tr -d '\r' < /opt/steamvr/bin/version.txt 2>/dev/null || echo unknown); kernel: $(uname -r) $(uname -m)"
@@ -910,11 +921,16 @@ cmd_debug_info() {
         tail -20 "$LOGS/unstick.log" 2>/dev/null || true
         echo; echo "## the full window: setting it up and opening it, last 40"
         tail -40 "$WINDOW_LOG" 2>/dev/null || true
-    } | sed -E -e "s|$HOME|~|g" -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' "${user[@]}" \
+    } | sed -E -e "s|$HOME|~|g" \
+             -e 's/gh[opusr]_[[:alnum:]]{20,}|github_pat_[[:alnum:]_]{20,}/<token>/g' \
+             -e 's/(^|[^[:xdigit:]])[[:xdigit:]]{64}/\1<token>/g' -e 's#(^|[^[:alnum:]+/])[[:alnum:]+/]{43}=\B#\1<key>#g' \
+             "${phones[@]}" -e 's/\badb-[[:alnum:]]*[0-9][[:alnum:]]*-[[:alnum:]]{6}\b/<phone>/g' \
+             -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/<email>/g' "${user[@]}" \
              -e "s/(^|[[:space:]@/'\"(])$(hostname 2>/dev/null || echo nohost)([[:space:]:.,)'\"]|$)/\1<host>\2/g" \
              -e 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/<ip>/g' \
-             -e 's/\b([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}\b/<mac>/g' -e 's/\b([[:xdigit:]]{1,4}:){7}[[:xdigit:]]{1,4}\b|[[:xdigit:]]{0,4}(:[[:xdigit:]]{1,4})*::([[:xdigit:]]{1,4}:)*[[:xdigit:]]{0,4}/<ipv6>/g' \
-             ${phone:+-e "s/$phone/<phone>/g"} \
+             -e 's/\b(([[:xdigit:]]{2}:){5}|([[:xdigit:]]{2}-){5})[[:xdigit:]]{2}\b/<mac>/g' \
+             -e 's/\b([[:xdigit:]]{1,4}:){7}[[:xdigit:]]{1,4}\b|\b([[:xdigit:]]{1,4}:){1,6}(:[[:xdigit:]]{1,4}){1,6}\b/<ipv6>/g' \
+             -e 's/\b([[:xdigit:]]{1,4}:){1,7}:\B|\B:(:[[:xdigit:]]{1,4}){1,7}\b/<ipv6>/g' \
         > "$out"
     echo "Wrote $out"
     echo "$(t 'Read it before sharing; attach it to a bug report: %s' https://github.com/AstronautCheetah/frame-tweaks/issues)"

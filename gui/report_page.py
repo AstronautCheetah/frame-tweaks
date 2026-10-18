@@ -1,7 +1,7 @@
 """The installer window's 🐞 Report a problem page: it saves the diagnostics report
-(./install.sh debug-info: versions, status, recent logs; user names, paths and addresses
-removed), shows it right here (with a Copy button), and opens the bug form with the version
-filled in, to paste or attach it to. Nothing is sent anywhere by itself.
+(./install.sh debug-info: versions, status, recent logs; with the names, addresses, tokens and
+keys its first line lists removed), shows it right here (with a Copy button), and opens the bug
+form with the version filled in, to paste or attach it to. Nothing is sent anywhere by itself.
 It used to open the report in your text editor: in VR that started Kate, a Flatpak, as a VR
 window, and SteamOS's Holo portal crashes as a KDE Flatpak starts there (five times in a row on
 2026-10-17; KWalletManager did it too). Shown here, no other app starts."""
@@ -61,11 +61,15 @@ class ReportPage(QWidget):
         title.setObjectName("title")
         head.addWidget(title, 1)
         lay.addLayout(head)
+        # (what's removed: exactly what ./install.sh debug-info removes, as its first line lists)
         steps = QLabel(_("1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and "
-                         "recent logs, with user names, paths, host and phone names and addresses removed. Nothing in "
-                         "it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you "
-                         "sign in there), say what happened and what you expected, then paste the report into its "
-                         "Diagnostics report box (📋 Copy the report), or attach the saved file."))
+                         "recent logs. Removed from it: your user name, home folder path and host name, the phone "
+                         "names Android Mirror remembers and adb's names for phones, IP, MAC and e-mail addresses, "
+                         "GitHub tokens, and other tokens and keys written as 64 hex digits or as 44 base64 "
+                         "characters ending in =. Anything else stays as it was. Nothing in it is sent anywhere "
+                         "unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say "
+                         "what happened and what you expected, then paste the report into its Diagnostics report box "
+                         "(📋 Copy the report), or attach the saved file."))
         steps.setWordWrap(True)
         steps.setTextFormat(Qt.TextFormat.RichText)
         steps.setObjectName("desc")
