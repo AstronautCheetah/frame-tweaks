@@ -23,6 +23,11 @@
   update would install. To go back, run `claude-desktop-update --allow-older`. It used to install
   any version that differed from yours, older ones included, could take another package's entry,
   and followed a redirect to plain HTTP.
+- **The bug report removes more, and says exactly what:** it now also replaces GitHub tokens, other
+  tokens and keys (64 hex digits, or 44 base64 characters ending in =, such as a NordVPN token or a
+  WireGuard key), MAC addresses written with dashes, adb's names for phones, and every phone name
+  Android Mirror remembers. Its first line and the 🐞 Report a problem page list exactly what's
+  removed. C++ names such as `std::string` no longer come out as `st<ipv6>string`.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
