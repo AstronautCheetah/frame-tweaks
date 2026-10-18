@@ -23,6 +23,16 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Couldn't install %s (see above)."
 - New in `lib/common.sh:391`
   - now: "PyPI has no build of %s for this Python (%s) and system; installing the newest %s that has one instead. The other tested versions stay."
+- New in `packs/core/adb-scrcpy/phone:159`
+  - now: "More than one device on the Wi-Fi says it's %s: another device may be posing as your phone, or two phones have the same name."
+- New in `packs/core/adb-scrcpy/phone:161`
+  - now: "Choose the address your phone shows under Developer options → Wireless debugging → IP address & Port."
+- New in `packs/core/adb-scrcpy/phone:164`
+  - now: "More than one %s"
+- New in `packs/core/adb-scrcpy/phone:217`
+  - now: "Use this other %s"
+- New in `packs/core/adb-scrcpy/phone:222`
+  - now: "The %s on the Wi-Fi isn't the phone Android Mirror knows by that name: it's another phone with the same name, the same phone after a factory reset, or a device posing as it."
 - New in `packs/core/ydotool/install.sh:14`
   - now: "ydotool didn't start"
 - Changed in `packs/core/ydotool/install.sh:18`

@@ -2384,6 +2384,11 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid ""
+"Choose the address your phone shows under Developer options → Wireless debugging → IP address & Port."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
 "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
 msgstr ""
 
@@ -2427,6 +2432,15 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid "Looking for your phone on the Wi-Fi…"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "More than one %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"More than one device on the Wi-Fi says it's %s: another device may be posing as your phone, or two phones have the same name."
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone
@@ -2486,6 +2500,11 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid ""
+"The %s on the Wi-Fi isn't the phone Android Mirror knows by that name: it's another phone with the same name, the same phone after a factory reset, or a device posing as it."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid ""
 "The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
 msgstr ""
 
@@ -2511,6 +2530,10 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone
 msgid "Use %s instead"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "Use this other %s"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone

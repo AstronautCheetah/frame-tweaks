@@ -3,7 +3,8 @@
 # The port changes every time Wireless debugging is toggled, so it's looked up fresh each run.
 # The phone to use is remembered in ~/.config/frame-tweaks/phone.conf (PHONE_NAME="My phone"): taken by itself
 # when only one is advertising, chosen from a list when there are several (phone --pick: choose
-# again). When it isn't in sight you can wait for it or use another one.
+# again). When it isn't in sight you can wait for it or use another one. It's found again by its
+# adb identity (PHONE_ID), preferring the address it last connected at (PHONE_ADDRESS): find_phone.
 # Extra args are passed to scrcpy (e.g. phone --turn-screen-off).
 # Left on, it disconnects by itself after PHONE_TIMEOUT minutes (1 hour unless set; 0: never), so
 # a mirror forgotten overnight doesn't drain the phone's battery.
@@ -24,20 +25,56 @@ fi
 # takes a second or two; avahi-browse once went on waiting for an answer for a day, and this with it.)
 advertised() { timeout 10 avahi-browse -rtp _adb-tls-connect._tcp 2>/dev/null | grep '^=' | grep ';IPv4;'; }
 names_in() { sed -n 's/.*"name=\([^"]*\)".*/\1/p' | sort -u; }
-# find_phone: sets dev=address:port of the chosen phone (PHONE_NAME, the whole name: "Pixel 9"
-# isn't "Pixel 9 Pro"), or returns 1.
+# find_phone: sets dev (address:port) and id of the remembered phone; returns 1 if it isn't in
+# sight, 2 if more than one advertisement says it's that phone (matches: an "address:port id" line
+# each). It goes by the phone's adb identity, PHONE_ID: the name of its wireless debugging service
+# (adb-<serial>-<random>), which Android keeps (persist.adb.wifi.guid) when Wireless debugging is
+# turned off and on, the phone restarts, or it's paired again; only a factory reset makes a new
+# one. Until that's known (a phone just chosen, or remembered by an older version): by its whole
+# name ("Pixel 9" isn't "Pixel 9 Pro"), and the identity found is remembered once it has
+# connected (worked). Neither proves it's the phone: anything on the Wi-Fi can announce both, and
+# adb takes any device that answers (README: "Another device can pose as your phone"). So when
+# more than one says it's the phone, none is taken, unless one is at the address it last
+# connected at (PHONE_ADDRESS).
 find_phone() {
-    all=$(advertised)
-    c=$(echo "$all" | grep -F "\"name=${PHONE_NAME:-}\"" | head -1)
-    [ -n "$c" ] || return 1
-    dev="$(echo "$c" | cut -d';' -f8):$(echo "$c" | cut -d';' -f9)"
+    local pick line
+    # (an mDNS service whose name another device took first is renamed "ID (2)", escaped by avahi:
+    # that one counts too)
+    matches=$(advertised | ID=${PHONE_ID:-} NAME=${PHONE_NAME:-} awk -F';' '
+        function its(f, id) { return f == id || (index(f, id "\\032\\040") == 1 && substr(f, length(id) + 9) ~ /^[0-9]+\\041$/) }
+        (ENVIRON["ID"] != "" ? its($4, ENVIRON["ID"]) : index($0, "\"name=" ENVIRON["NAME"] "\"")) { print $8 ":" $9 " " $4 }' |
+        sort -u)
+    [ -n "$matches" ] || return 1
+    pick=$matches
+    if [ "$(grep -c . <<< "$matches")" -gt 1 ]; then
+        pick=
+        while read -r line; do [ "${line%% *}" = "${PHONE_ADDRESS:-}" ] && pick=$line; done <<< "$matches"
+        [ -n "$pick" ] || return 2
+    fi
+    dev=${pick%% *} id=${pick#* }
 }
-# remember NAME: the phone to use from now on (PHONE_NAME in phone.conf; other lines kept).
+# forget: no remembered phone (its name, identity and last address) in phone.conf; other lines kept.
+forget() { [ -f "$CONF" ] && sed -i -E '/^[[:space:]]*PHONE_(NAME|ID|ADDRESS)=/d' "$CONF"; }
+# remember NAME: the phone to use from now on (PHONE_NAME in phone.conf; other lines kept). Its
+# identity and address are found next (find_phone): it may not be the phone it was.
 remember() {
-    PHONE_NAME=$1
-    mkdir -p "${CONF%/*}" && touch "$CONF"
-    sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
-    printf 'PHONE_NAME=%q\n' "$PHONE_NAME" >> "$CONF"
+    forget
+    PHONE_NAME=$1 PHONE_ID='' PHONE_ADDRESS=''
+    mkdir -p "${CONF%/*}" && printf 'PHONE_NAME=%q\n' "$PHONE_NAME" >> "$CONF"
+}
+# keep KEY VALUE: KEY=VALUE in phone.conf (PHONE_ID, PHONE_ADDRESS), instead of what it said.
+keep() {
+    printf -v "$1" '%s' "$2"
+    sed -i "/^[[:space:]]*$1=/d" "$CONF" 2>/dev/null
+    mkdir -p "${CONF%/*}" && printf '%s=%q\n' "$1" "$2" >> "$CONF"
+}
+# worked: connected. The phone is known by its identity from now on (one just chosen, or
+# remembered by an older version, was found by its name: only once it has connected, so a device
+# that just announces the name isn't remembered as the phone), and the address it connected at is
+# the one to prefer next time, while the phone is there.
+worked() {
+    [ -n "${PHONE_ID:-}" ] || keep PHONE_ID "$id"
+    [ "${PHONE_ADDRESS:-}" = "$dev" ] || keep PHONE_ADDRESS "$dev"
 }
 # ask TITLE TEXT TAG LABEL...: a list to choose from (kdialog, on the display you're using);
 # prints the chosen tag; returns 1 if closed, 2 without kdialog.
@@ -113,18 +150,37 @@ pair_phone() {
 
 Check the code and try again (a new code appears each time the phone's pairing dialog opens)." "$out")"
 }
+# choose_twin: more than one device on the Wi-Fi says it's the phone (matches), and none is at the
+# address it last connected at. None is taken by itself: one may be posing as it. The phone shows
+# its own address (Wireless debugging: IP address & Port), so you choose that one; sets dev and id.
+choose_twin() {
+    local args=() line why
+    while read -r line; do args+=("${line%% *}" "${line%% *}"); done <<< "$matches"
+    why=$(t "More than one device on the Wi-Fi says it's %s: another device may be posing as your phone, or two phones have the same name." "$PHONE_NAME")
+    splash_end
+    dev=$(ask "$DLG" "$why $(t 'Choose the address your phone shows under Developer options → Wireless debugging → IP address & Port.')" "${args[@]}")
+    case $? in
+        0) ;;
+        2) fail "$(t 'More than one %s' "$PHONE_NAME")" "$why" ;;
+        *) exit 1 ;;                                        # closed: connect to neither
+    esac
+    id=''
+    while read -r line; do [ "${line%% *}" = "$dev" ] && id=${line#* }; done <<< "$matches"
+    [ -n "$id" ] || exit 1
+}
 # wait_for NAME: up to 3 minutes for it to show up (Wireless debugging turned on, back on the Wi-Fi).
 wait_for() {
     splash "$(t 'Waiting for %s: turn on Wireless debugging on it (Developer options), on the same Wi-Fi. Up to 3 minutes.' "$1")"
     for _ in $(seq 36); do
-        find_phone && return 0
+        find_phone
+        case $? in 0) return 0 ;; 2) choose_twin; return 0 ;; esac
         cancelled && exit 0
         sleep 5
     done
     fail "$(t "%s didn't appear" "$1")" "$(t "It didn't turn up on the Wi-Fi with Wireless debugging on. Turn that on in the phone's Developer options (main profile, same Wi-Fi as the Frame), then open Android Mirror again.")"
 }
 if [ "${1:-}" = --forget ]; then     # phone --forget: no remembered phone any more
-    [ -f "$CONF" ] && sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
+    forget
     t 'Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several.' "${PHONE_NAME:-$(t 'the remembered phone')}"; echo
     exit 0
 fi
@@ -148,16 +204,31 @@ if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
         remember "$chosen"
     fi
 fi
-if ! find_phone; then
-    # The chosen phone isn't in sight: wait for it, or use one that is.
+find_phone; r=$?
+[ $r -eq 2 ] && choose_twin
+if [ $r -eq 1 ]; then
+    # The chosen phone isn't in sight: wait for it, or use one that is. (One with its name but not
+    # its identity is another phone: one with the same name, the same phone after a factory
+    # reset, or a device posing as it.)
     mapfile -t list <<< "$names"
     # (no other phone in sight, or no kdialog: just wait)
-    args=(@wait "$(t 'Wait for %s' "$PHONE_NAME")"); for n in "${list[@]}"; do [ -n "$n" ] && args+=("$n" "$(t 'Use %s instead' "$n")"); done
-    if [ "$count" -eq 0 ]; then chosen=@wait; else splash_end; chosen=$(ask "$DLG" "$(t "%s isn't on the Wi-Fi with Wireless debugging on." "$PHONE_NAME")" "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
+    args=(@wait "$(t 'Wait for %s' "$PHONE_NAME")")
+    for n in "${list[@]}"; do
+        if [ "$n" = "$PHONE_NAME" ]; then args+=("$n" "$(t 'Use this other %s' "$n")")
+        elif [ -n "$n" ]; then args+=("$n" "$(t 'Use %s instead' "$n")"); fi
+    done
+    why=$(t "%s isn't on the Wi-Fi with Wireless debugging on." "$PHONE_NAME")
+    grep -qxF -- "$PHONE_NAME" <<< "$names" &&
+        why=$(t "The %s on the Wi-Fi isn't the phone Android Mirror knows by that name: it's another phone with the same name, the same phone after a factory reset, or a device posing as it." "$PHONE_NAME")
+    if [ "$count" -eq 0 ]; then chosen=@wait; else splash_end; chosen=$(ask "$DLG" "$why" "${args[@]}"); r=$?; [ $r -eq 2 ] && chosen=@wait; fi
     case "$chosen" in
         "") exit 1 ;;                                       # closed: do nothing
         @wait) wait_for "$PHONE_NAME" || exit 1 ;;
-        *) remember "$chosen"; find_phone || fail "$(t '%s not found' "$chosen")" "$(t 'It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again.')" ;;
+        *) remember "$chosen"; find_phone
+           case $? in
+               1) fail "$(t '%s not found' "$chosen")" "$(t 'It stopped showing up on the Wi-Fi. Check its Wireless debugging is still on, then try again.')" ;;
+               2) choose_twin ;;
+           esac ;;
     esac
 fi
 # With "Memory caps" installed, scrcpy runs inside its memory limit.
@@ -258,7 +329,7 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
         choice=$(ask "$DLG" "$why" pair "$(t 'Pair it again')" forget "$(t 'Forget %s' "${PHONE_NAME:-$(t 'this phone')}")" close "$(t 'Close')"); r=$?
         [ $r -eq 2 ] && fail "$(t "Couldn't connect to %s" "${PHONE_NAME:-$(t 'the phone')}")" "$why $(t "See Android Mirror's README for adb pair.")"
         if [ "$choice" = forget ]; then          # stop connecting to it by default (phone --forget)
-            [ -f "$CONF" ] && sed -i '/^[[:space:]]*PHONE_NAME=/d' "$CONF"
+            forget
             kdialog --title "$DLG" --msgbox "$(t 'Forgot %s. Next time, Android Mirror takes the phone in sight, or asks which if there are several.' "${PHONE_NAME:-$(t 'the phone')}")" 2>/dev/null
             exit 0
         fi
@@ -268,6 +339,7 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
         out=$(adb connect "$dev" 2>&1)
         grep -q "connected to" <<< "$out" || fail "$(t "Couldn't connect to %s" "${PHONE_NAME:-$(t 'the phone')}")" "$(t 'Paired, but connecting still failed. adb said: %s' "$out")"
     fi
+    grep -q "connected to" <<< "$out" && worked
     # In VR, shape the window like the phone (upright or sideways) and follow its rotation;
     # without it the Steam session makes the window 1920x1080, with black bars beside a portrait
     # phone. (It ends with scrcpy, so it's started again with each reconnect.)
@@ -342,7 +414,9 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
     splash "$(t 'The connection to %s was lost. Reconnecting…' "${PHONE_NAME:-$(t 'the phone')}")"
     found=
     for _ in $(seq 12); do                             # up to a minute
-        if find_phone && adb connect "$dev" >/dev/null && alive; then found=1; break; fi
+        find_phone; r=$?
+        [ $r -eq 2 ] && choose_twin
+        if [ $r -ne 1 ] && adb connect "$dev" >/dev/null && alive; then found=1; worked; break; fi
         cancelled && exit 0
         sleep 5
     done

@@ -178,6 +178,15 @@ offers to wait for it (up to 3 minutes, while you turn on Wireless debugging) or
 that is. To choose again, right-click Android Mirror in the app menu and pick **Choose phone…**,
 or run `phone --pick`.
 
+It remembers the phone by its name and, once it has connected to it, by its adb identity: the
+name its wireless debugging announces (`adb-`, its serial number and a random part), which stays
+the same when you turn Wireless debugging off and on, restart the phone or pair it again; only a
+factory reset gives it a new one. So a phone with the same name but another identity isn't taken
+for yours: Android Mirror says so, and asks before using it. If more than one device on the Wi-Fi
+claims to be your phone, it connects to none of them by itself: it asks you to choose the address
+your phone shows under *Developer options → Wireless debugging → IP address & Port*. While the
+phone stays at the address it last connected to, it goes there.
+
 Anything you add after `phone` goes to scrcpy, for example `phone --turn-screen-off` to keep
 the phone's own screen dark while you mirror it.
 
@@ -211,7 +220,8 @@ Change these with the **⚙ Settings** button on its row in Frame Tweaks, with t
 The defaults are enough for VR and keep the Wi-Fi link light; a heavier stream can fall
 behind the phone. Picture size, bit rate, frame rate and the clipboard apply the next time the
 mirror starts (or after *Restart stream* in VR); joystick speed applies at once. The chosen
-phone is saved in the same file (`PHONE_NAME`).
+phone is saved in the same file: its name (`PHONE_NAME`), its adb identity (`PHONE_ID`) and the
+address it last connected to (`PHONE_ADDRESS`).
 
 **Disconnecting by itself.** A mirror left on keeps the phone streaming its screen, which drains
 its battery (one left on all night emptied it). So once the mirror has been on for the time set
@@ -229,6 +239,13 @@ password copied on the phone reaches the Frame, and one you paste into the mirro
 phone's clipboard (and its keyboard's clipboard history, if it keeps one). Not shared: each keeps
 its own; Ctrl+V in the mirror pastes the phone's clipboard.
 
+It also means the phone can put anything into the Frame's clipboard, at any moment while the
+mirror is open, and nothing checks it: with Shared clipboard, into the desktop's and VR's
+clipboards too. A compromised phone, or a device posing as yours, could swap what you copied for
+something else (another link or account number, a command waiting to be pasted into a
+terminal). Look at what you paste after mirroring. To keep the phone out of the Frame's
+clipboard, set **Share the clipboard with the phone** to **Not shared** (`PHONE_CLIPBOARD=off`).
+
 ## How it works
 - **adb for the Frame:** Google only ships `adb` (Android's debugging tool) for x86 PCs. The
   installer takes the ARM build from Arch Linux ARM, signature-checked, plus the few libraries
@@ -239,7 +256,8 @@ its own; Ctrl+V in the mirror pastes the phone's clipboard.
   phone.
 - **scrcpy** (the program that shows and controls the phone) comes from Homebrew.
 - **Finding the phone:** wireless debugging picks a new port each time it's turned on. `phone`
-  looks the phone up on the local network (mDNS), connects, and starts scrcpy.
+  looks the phone up on the local network (mDNS) by its adb identity (see
+  [Which phone](#use)), connects, and starts scrcpy.
 - **Reconnecting:** `phone` checks every 5 seconds that the phone still answers. If the
   connection drops, it closes the frozen picture and reconnects (for up to a minute).
 - **Disconnecting by itself:** at the same checks, `phone` reads `PHONE_TIMEOUT` from its
@@ -258,6 +276,15 @@ its own; Ctrl+V in the mirror pastes the phone's clipboard.
   library, installed into Frame Tweaks' shared Python environment).
 
 ## Good to know
+- **Another device can pose as your phone.** Phones announce their wireless debugging on the
+  Wi-Fi with nothing to prove who they are, and adb's pairing works one way: it makes your phone
+  trust the Frame (only a paired computer can connect to it), not the Frame trust the phone. adb
+  connects to whatever device answers, without checking it's the phone you paired. So a device on
+  the same Wi-Fi can announce your phone's name and identity, and if Android Mirror connects to
+  it, that device gets what you type and paste into the mirror, and can show you a fake screen
+  to type a PIN or password into. Remembering the identity, and refusing when two claim it, make
+  that harder, not impossible. Mirror on a Wi-Fi you trust, and turn Wireless debugging off when
+  you're done.
 - **An always-on VPN on the phone:** the phone may show its VPN address, which the Frame can't
   reach. It still announces its real local address on the network, and that's what `phone`
   uses. If the phone isn't found at all, turn on the VPN's option to allow local network (LAN)

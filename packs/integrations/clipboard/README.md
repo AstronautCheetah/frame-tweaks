@@ -106,7 +106,12 @@ both.
 - Formats beyond text, files and pictures (a spreadsheet's cells, an app's own formats) stay
   where you copied them; the other session gets their text, if they have any.
 - Android Mirror can pass the clipboard on to the phone: see its setting **Share the clipboard
-  with the phone**.
+  with the phone**. It's shared both ways unless you change that: what the phone copies comes into
+  the Frame's clipboard while the mirror is open, and this tweak passes it on to the desktop and
+  VR like any copy, without checking it. So a compromised phone, or a device posing as yours,
+  could put anything into all of them (another link, a command waiting to be pasted into a
+  terminal). To keep the phone out, set that setting to **Not shared** (`PHONE_CLIPBOARD=off` in
+  `~/.config/frame-tweaks/phone.conf`).
 - The status line shows the build's version, and warns if it isn't running while desktop mode is
   (Restart starts it), if more than one copy is running, or if an older version's build lacks
   these changes (reinstall it to fix that). Without desktop mode, it says it starts with it.
