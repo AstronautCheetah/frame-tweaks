@@ -28,6 +28,19 @@
   WireGuard key), MAC addresses written with dashes, adb's names for phones, and every phone name
   Android Mirror remembers. Its first line and the 🐞 Report a problem page list exactly what's
   removed. C++ names such as `std::string` no longer come out as `st<ipv6>string`.
+- **Android Mirror knows your phone by its adb identity, not just its name:** any device on the
+  Wi-Fi can announce your phone's name, and Android Mirror connected to the first one with it. Once
+  it has connected to your phone, it now also remembers the phone's adb identity (which stays the
+  same when you turn Wireless debugging off and on, or pair the phone again) and the address it
+  last connected to. A phone with the same name but another identity isn't taken for yours: Android
+  Mirror says so and asks. If more than one device claims to be your phone, it connects to none by
+  itself and asks you to choose the address your phone shows (*Developer options → Wireless
+  debugging → IP address & Port*). Its README now says what this can't prevent: adb doesn't check
+  that the device is the phone you paired, so mirror on a Wi-Fi you trust.
+- **Android Mirror's clipboard works both ways:** its README and Shared clipboard's now say that
+  with the clipboard shared (the default), the phone can put anything into the Frame's clipboard,
+  and Shared clipboard passes it on to the desktop and VR, so a compromised phone could swap what
+  you copied for something else. **Share the clipboard with the phone → Not shared** turns it off.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with

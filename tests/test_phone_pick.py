@@ -1,10 +1,13 @@
 """adb-scrcpy/phone: which phone it connects to. Fake avahi-browse/kdialog/adb/scrcpy in a
 throwaway home: one phone is taken and remembered, several are chosen from a list, a remembered
-phone that's missing can be waited for or swapped; Restart stream after Reset to defaults. And
-the tweak's uninstall stopping adb's server in both sessions."""
+phone that's missing can be waited for or swapped; it's known by its adb identity, so a device
+announcing its name isn't taken for it, and two claiming it are told apart only by the address
+you choose; Restart stream after Reset to defaults. And the tweak's uninstall stopping adb's
+server in both sessions."""
 import sys
 import os
 import re
+import shutil
 import stat
 import subprocess
 import tempfile
@@ -17,13 +20,21 @@ from helpers import sandbox_env, stub  # noqa: E402
 PHONE = ROOT / "packs/core/adb-scrcpy" / "phone"
 
 
-def advert(name, ip, port):
-    return (f'=;wlan0;IPv4;adb-x;_adb-tls-connect._tcp;local;host.local;{ip};{port};'
+def advert(name, ip, port, ident=None):
+    """A phone's wireless debugging, as avahi-browse -rtp shows it. Its service's name (field 4) is
+    its adb identity, adb-<serial>-<random>: its own, unless given."""
+    ident = ident or "adb-" + re.sub(r"\W", "", name) + "-a1B2c3"
+    return (f'=;wlan0;IPv4;{ident};_adb-tls-connect._tcp;local;host.local;{ip};{port};'
             f'"name={name}" "api=37.0" "v=2.0"')
 
 
+REAL = ("Pixel 9", "10.0.0.5", 4000, "adb-SERIAL1-AbC123")
+IMPOSTOR = ("Pixel 9", "10.0.0.66", 5555, "adb-OTHER-XyZ789")       # (its name, not its identity)
+
+
 class PhonePick(unittest.TestCase):
-    def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False, extra=None, env=None):
+    def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False, extra=None, env=None,
+                  path=("/usr/bin", "/bin")):
         home = Path(self.tmp.name)
         stubs = home / ".local/bin"          # (first on phone's PATH, ahead of Homebrew's real scrcpy)
         stubs.mkdir(parents=True, exist_ok=True)
@@ -43,10 +54,11 @@ class PhonePick(unittest.TestCase):
             **(extra or {}),
         }
         for name, body in scripts.items():
-            stub(stubs, name, body)
+            if body is not None:                 # (None: no such command)
+                stub(stubs, name, body)
         (home / "run").mkdir(exist_ok=True)      # (its pid file and scrcpy's log: not a running mirror's)
-        env = sandbox_env(home, stubs, **{"CHOOSE": choose or "", "XDG_RUNTIME_DIR": home / "run",
-                                          "PHONE_NO_SPLASH": 1, **(env or {})})   # (the splash has a test of its own)
+        env = sandbox_env(home, stubs, path, **{"CHOOSE": choose or "", "XDG_RUNTIME_DIR": home / "run",
+                                                "PHONE_NO_SPLASH": 1, **(env or {})})   # (the splash has a test of its own)
         r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30,
                            stdin=subprocess.DEVNULL)
         f = home / ".config/frame-tweaks/phone.conf"
@@ -108,6 +120,9 @@ class PhonePick(unittest.TestCase):
         self.assertIn("adb pair 10.0.0.5:37001\n", log)            # the code isn't on its command line,
         self.assertIn("code 123456", log)                          # it's typed in
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        # (paired again, it keeps its identity: Android does too, so it's found by it next time)
+        conf = (Path(self.tmp.name) / ".config/frame-tweaks/phone.conf").read_text()
+        self.assertIn("PHONE_ID=adb-Pixel9-a1B2c3\n", conf)
 
     def test_a_phone_named_like_another_isnt_taken_for_it(self):
         """The remembered "Pixel 9" isn't "Pixel 9 Pro" (it was matched as part of the name)."""
@@ -118,6 +133,117 @@ class PhonePick(unittest.TestCase):
         code, log, _ = self.run_phone(phones[:1], conf='PHONE_NAME="Pixel 9"\n', choose="")
         self.assertIn("Use Pixel 9 Pro instead", log)              # not in sight: wait, or use the other
         self.assertNotIn("scrcpy", log)
+
+    def test_a_device_announcing_its_name_isnt_taken_for_it(self):
+        """Found by its name (remembered by an older version), the phone is known by its adb
+        identity from then on: another device announcing the same name, ahead of it in the list,
+        isn't connected to (the first one with the name was). The phone's new port (Wireless
+        debugging turned off and on) is followed."""
+        code, log, conf = self.run_phone([REAL], conf='PHONE_NAME="Pixel 9"\n')
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertIn("PHONE_ID=adb-SERIAL1-AbC123\n", conf)
+        self.assertIn("PHONE_ADDRESS=10.0.0.5:4000\n", conf)
+        code, log, conf = self.run_phone([IMPOSTOR, (*REAL[:2], 4100, REAL[3])])
+        self.assertEqual(code, 0, log)
+        self.assertIn("scrcpy -s 10.0.0.5:4100", log)
+        self.assertNotIn("10.0.0.66", log)
+        self.assertNotIn("--menu", log)
+        self.assertIn("PHONE_ADDRESS=10.0.0.5:4100\n", conf)
+
+    def test_its_name_with_another_identity_is_asked_about(self):
+        """The phone isn't in sight but something with its name is (another phone with that name,
+        the same one after a factory reset, a device posing as it): not taken by itself. Chosen,
+        it's the phone from now on."""
+        conf = 'PHONE_NAME="Pixel 9"\nPHONE_ID=adb-SERIAL1-AbC123\n'
+        code, log, _ = self.run_phone([IMPOSTOR], conf=conf, choose="")
+        self.assertNotEqual(code, 0)
+        self.assertIn("isn't the phone Android Mirror knows by that name", log)
+        self.assertIn("Use this other Pixel 9", log)
+        self.assertNotIn("adb connect", log)
+        self.assertNotIn("scrcpy", log)
+        code, log, conf = self.run_phone([IMPOSTOR], conf=conf, choose="Pixel 9")
+        self.assertIn("scrcpy -s 10.0.0.66:5555", log)
+        self.assertIn("PHONE_ID=adb-OTHER-XyZ789\n", conf)
+        self.assertEqual(conf.count("PHONE_ID"), 1)
+
+    def test_two_claiming_it_connect_to_neither_unless_chosen(self):
+        """Two advertisements with the phone's identity (one posing as it): neither is connected to
+        by itself. You choose the address the phone shows; while it's there, it's taken again
+        without asking."""
+        conf = 'PHONE_NAME="Pixel 9"\nPHONE_ID=adb-SERIAL1-AbC123\n'
+        twins = [(*IMPOSTOR[:3], REAL[3]), REAL]
+        code, log, _ = self.run_phone(twins, conf=conf, choose="")
+        self.assertNotEqual(code, 0)
+        self.assertIn("More than one device on the Wi-Fi says it's Pixel 9", log)
+        self.assertIn("10.0.0.5:4000 10.0.0.5:4000 10.0.0.66:5555 10.0.0.66:5555", log)   # (by address)
+        self.assertNotIn("adb connect", log)
+        self.assertNotIn("scrcpy", log)
+        code, log, conf = self.run_phone(twins, conf=conf, choose="10.0.0.5:4000")
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertNotIn("adb connect 10.0.0.66", log)
+        self.assertIn("PHONE_ADDRESS=10.0.0.5:4000\n", conf)
+        code, log, _ = self.run_phone(twins)
+        self.assertNotIn("--menu", log)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+
+    def test_two_claiming_it_without_kdialog_connect_to_neither(self):
+        """No kdialog to choose with: it stops and says why (a notification) rather than take
+        one. (On a PATH of only the commands it needs: this Frame's kdialog stays out of it.)"""
+        tools = Path(self.tmp.name) / "tools"
+        tools.mkdir()
+        for name in ("bash", "awk", "grep", "sed", "sort", "cut", "timeout", "cat", "id", "mkdir", "date", "seq",
+                     "rm", "mv", "tr", "head", "tail", "paste"):
+            (tools / name).symlink_to(shutil.which(name, path="/usr/bin:/bin"))
+        conf = 'PHONE_NAME="Pixel 9"\nPHONE_ID=adb-SERIAL1-AbC123\n'
+        code, log, _ = self.run_phone([(*IMPOSTOR[:3], REAL[3]), REAL], conf=conf, extra={"kdialog": None},
+                                      path=(str(tools),))
+        self.assertNotEqual(code, 0)
+        self.assertIn("notify -a Phone More than one Pixel 9 More than one device on the Wi-Fi says it's Pixel 9", log)
+        self.assertNotIn("kdialog", log)
+        self.assertNotIn("adb connect", log)
+        self.assertNotIn("scrcpy", log)
+
+    def test_its_identity_is_remembered_once_it_has_connected(self):
+        """Remembered by its name only (by an older version), and a device announcing that name is
+        alone on the Wi-Fi: its identity was remembered before connecting, so when it didn't connect
+        (it only announces the name), the phone itself was "not the phone Android Mirror knows"
+        from then on."""
+        refuses = {"adb": 'echo "adb $*" >> "$HOME/log"; [ "$1" = connect ] && echo "failed to connect to $2"; exit 0'}
+        code, log, conf = self.run_phone([IMPOSTOR], conf='PHONE_NAME="Pixel 9"\n', choose="close", extra=refuses)
+        self.assertNotEqual(code, 0)
+        self.assertIn("adb connect 10.0.0.66:5555", log)
+        self.assertNotIn("PHONE_ID", conf)
+        code, log, conf = self.run_phone([REAL])
+        self.assertEqual(code, 0, log)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertNotIn("isn't the phone", log)
+        self.assertIn("PHONE_ID=adb-SERIAL1-AbC123\n", conf)
+
+    def test_a_service_renamed_by_mdns_counts_as_claiming_it(self):
+        """mDNS renames a service whose name another device took first ("ID (2)", as avahi escapes
+        it): that's the phone's too, so two claim it; alone, it's the phone."""
+        renamed = REAL[3] + "\\032\\0402\\041"
+        conf = 'PHONE_NAME="Pixel 9"\nPHONE_ID=adb-SERIAL1-AbC123\n'
+        code, log, _ = self.run_phone([(*IMPOSTOR[:3], REAL[3]), (*REAL[:3], renamed)], conf=conf, choose="")
+        self.assertIn("More than one device", log)
+        self.assertNotIn("scrcpy", log)
+        code, log, conf = self.run_phone([(*REAL[:3], renamed)], conf=conf)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertIn("PHONE_ID=adb-SERIAL1-AbC123\n", conf)      # (its own name, not the renamed one)
+
+    def test_two_phones_with_one_name_are_told_apart_by_address(self):
+        """Remembered by name only, and two phones announce it: the one at the address you choose
+        is the phone, by its identity from then on."""
+        code, log, conf = self.run_phone([IMPOSTOR, REAL], conf='PHONE_NAME="Pixel 9"\n', choose="10.0.0.5:4000")
+        self.assertIn("More than one device on the Wi-Fi says it's Pixel 9", log)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertIn("PHONE_ID=adb-SERIAL1-AbC123\n", conf)
+
+    def test_forget_forgets_its_identity_and_address_too(self):
+        code, log, conf = self.run_phone([], conf='PHONE_NAME="Pixel 9"\nPHONE_ID=adb-SERIAL1-AbC123\n'
+                                                  'PHONE_ADDRESS=10.0.0.5:4000\nPHONE_MAX_FPS=90\n', args=["--forget"])
+        self.assertEqual(code, 0)
+        self.assertEqual(conf, "PHONE_MAX_FPS=90\n")
 
     def test_a_look_on_the_wifi_that_never_ends_is_cut_short(self):
         """avahi-browse can wait for an answer for ever (a mirror once waited a day): each look
