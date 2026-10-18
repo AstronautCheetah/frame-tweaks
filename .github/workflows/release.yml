@@ -86,7 +86,12 @@ jobs:
           PRE: ${{ inputs.prerelease }}
           GH_TOKEN: ${{ github.token }}
           SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+          BRANCH: ${{ github.ref_name }}
         run: |
+          # Released from main, or from a maintenance branch (release/X.Y: an older release's code
+          # with a fix of its own); the release commit goes back to the branch it was run on.
+          BRANCH=${BRANCH:-main}
+          case "$BRANCH" in main | release/*) ;; *) echo "release from main or a release/ branch, not $BRANCH"; exit 1 ;; esac
           git config user.name AstronautCheetah
           git config user.email 189046832+AstronautCheetah@users.noreply.github.com
           git commit -q -am "chore(release): $V"
@@ -97,10 +102,10 @@ jobs:
           printf '%s\n' "$SIGNING_KEY" > "$key"
           git -c gpg.format=ssh -c user.signingkey="$key" tag -s "v$V" -m "v$V"
           git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile=dev/release-signers verify-tag "v$V"
-          # (both or neither: a tag out while main refused the commit, say because it moved
-          # meanwhile, would be a release whose commit main never gets)
-          git push --atomic origin HEAD:main "v$V"
+          # (both or neither: a tag out while the branch refused the commit, say because it moved
+          # meanwhile, would be a release whose commit the branch never gets)
+          git push --atomic origin "HEAD:refs/heads/$BRANCH" "v$V"
           flags=(--draft --title "v$V" --notes-file notes.md)
           [ "$PRE" = true ] && flags+=(--prerelease)
           gh release create "v$V" "${flags[@]}"
-          gh workflow run ci.yml --ref main
+          gh workflow run ci.yml --ref "$BRANCH"
