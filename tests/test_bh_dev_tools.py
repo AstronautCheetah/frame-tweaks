@@ -200,6 +200,53 @@ class ReleasePush(Temp):
         self.assertEqual(self.git("ls-remote", "--tags", str(origin)), "")
         self.assertFalse((self.d / "gh.log").exists())                       # (no release drafted)
 
+    def release_branch(self, branch):
+        """The step run on a maintenance branch release/0.6 (0.6.1's code, a fix of its own) while
+        main has moved on, as the workflow runs it from BRANCH; the step's result and origin."""
+        self.env = {**os.environ, "HOME": str(self.d), "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+        key = self.d / "key"
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", "release", "-f", str(key)], check=True)
+        origin, work = self.d / "origin.git", self.d / "work"
+        self.git("init", "-q", "--bare", "-b", "main", str(origin))
+        self.git("init", "-q", "-b", "main", str(work))
+        pub = (self.d / "key.pub").read_text().split()
+        (work / "dev").mkdir()
+        (work / "dev/release-signers").write_text(f'release namespaces="git" {pub[0]} {pub[1]}\n')
+        (work / "VERSION").write_text("0.6.1\n")
+        self.git("add", "-A", cwd=work)
+        self.git("commit", "-qm", "0.6.1", cwd=work)
+        self.git("remote", "add", "origin", str(origin), cwd=work)
+        self.git("push", "-q", "origin", "main", "main:release/0.6", cwd=work)
+        (work / "README.md").write_text("main moved on\n")                  # (main, after 0.6.1)
+        self.git("add", "-A", cwd=work)
+        self.git("commit", "-qm", "on main", cwd=work)
+        self.git("push", "-q", "origin", "main", cwd=work)
+        self.git("checkout", "-q", "-b", "release/0.6", "origin/release/0.6", cwd=work)
+        (work / "VERSION").write_text("0.6.2\n")                            # (as the step before leaves it)
+        bin_ = stubs(self.d / "bin", gh='echo "gh $*" >> "$HOME/gh.log"')
+        r = subprocess.run(["bash", "-e", "-c", step_script("release.yml", "Commit, tag, push, draft release")], cwd=work,
+                           env={**self.env, "PATH": f"{bin_}:{os.environ['PATH']}", "V": "0.6.2", "PRE": "false",
+                                "GH_TOKEN": "x", "SIGNING_KEY": key.read_text(), "BRANCH": branch},
+                           capture_output=True, text=True, timeout=60)
+        return r, origin
+
+    def test_a_release_branch_gets_its_commit_and_tag(self):
+        r, origin = self.release_branch("release/0.6")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        heads = self.git("ls-remote", str(origin))
+        tag = self.git("rev-parse", "v0.6.2^{commit}", cwd=self.d / "work").strip()
+        self.assertIn(f"{tag}\trefs/heads/release/0.6", heads)
+        self.assertNotIn(f"{tag}\trefs/heads/main", heads)                  # (main isn't touched)
+        self.assertIn("refs/tags/v0.6.2", heads)
+        self.assertIn("gh workflow run ci.yml --ref release/0.6", (self.d / "gh.log").read_text())
+
+    def test_only_main_or_a_release_branch(self):
+        r, origin = self.release_branch("feature")
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertNotIn("refs/tags/", self.git("ls-remote", str(origin)))
+        self.assertFalse((self.d / "gh.log").exists())
+
 
 class Traffic(Temp):
     """The Traffic workflow's step, against a stand-in gh (GitHub's answers in files): the history

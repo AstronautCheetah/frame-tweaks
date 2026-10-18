@@ -18,7 +18,8 @@ sudo: >-
   once, to add a udev rule that lets you pause the battery's charging, and again to remove
   it
 experimental: >-
-  **Use at your own risk.** It pauses and resumes charging about every 10 minutes while it holds
+  **Withdrawn for new installs, and use at your own risk if you have it.** It pauses and resumes
+  charging about every 10 minutes while it holds
   the limit, through the Frame's charger driver (its charging pause switch), which Valve doesn't
   document. SteamOS has a known charger bug that stops some Frames taking power from USB while
   plugged in, so the battery runs down
@@ -85,6 +86,11 @@ Charging stops when the battery reaches the limit you choose (80% unless you cha
 > charger through the step where it fails. On 17 October 2026 a Frame running this tweak hit it
 > during a SteamVR session, ran flat while plugged in, and no longer charges or starts.
 >
+> **So it's withdrawn for new installs** until that bug is fixed: the Frame Tweaks window hides
+> it, and `./install.sh install` skips it. If you have it already, it stays installed and
+> listed, and updates keep it; to remove it, untick it or run
+> `./install.sh uninstall charge-limit`.
+>
 > If the battery level drops while the Frame is plugged in and the limit isn't holding it (its
 > status doesn't say "not charging"), charge from a plain 5 V USB source at once (a PC's USB
 > port, or a USB-A charger and cable) before the battery runs out: owners on that issue report
@@ -102,7 +108,8 @@ slowly: a lithium-ion battery ages faster the longer it sits full, and a Frame t
 plugged in (to a power bank while you play, say) sits full a lot.
 
 ## Install
-Tick it in the Frame Tweaks window, or:
+Withdrawn for new installs for now (see the warning above): the rest of this section is for
+when it's offered again. Tick it in the Frame Tweaks window, or:
 
 ```sh
 ./install.sh install charge-limit
@@ -191,7 +198,7 @@ to 78% limits. The measurements, the studies and when to test again are in
 
 - **Survives SteamOS updates:** Yes (SteamOS updates keep the udev rule)
 - **Changes:** `charge-limit` and `charge-limit-sleep` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts
-- **🧪 Experimental:** **Use at your own risk.** It pauses and resumes charging about every 10 minutes while it holds the limit, through the Frame's charger driver (its charging pause switch), which Valve doesn't document. SteamOS has a known charger bug that stops some Frames taking power from USB while plugged in, so the battery runs down ([SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879)); a Frame running this tweak hit it and no longer charges. SteamOS's charger service turns the pause off each time it starts; it's on again within 30 seconds. The status says if the switch is gone, or if the battery still charges while paused.
+- **🧪 Experimental:** **Withdrawn for new installs, and use at your own risk if you have it.** It pauses and resumes charging about every 10 minutes while it holds the limit, through the Frame's charger driver (its charging pause switch), which Valve doesn't document. SteamOS has a known charger bug that stops some Frames taking power from USB while plugged in, so the battery runs down ([SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879)); a Frame running this tweak hit it and no longer charges. SteamOS's charger service turns the pause off each time it starts; it's on again within 30 seconds. The status says if the switch is gone, or if the battery still charges while paused.
 - **Unusual access:** Pauses and resumes the battery's charging. Asks for your sudo password once to add the udev rule, and again to remove it
 - **Undo:** `./install.sh uninstall charge-limit` (asks for your sudo password to remove the udev rule); the battery charges normally again
 <!-- /generated:changes -->
