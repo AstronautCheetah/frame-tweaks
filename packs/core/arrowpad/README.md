@@ -215,8 +215,8 @@ arrowpad --quit          # close it (add --desktop or --vr to pick which)
   dashboard patch (`panel-keyboard`, for every Frame Tweaks panel) gives the keyboard straight back
   to the window it was open for: typing carries on there, and the keyboard stays where it was. Without the
   helper, what's typed after a press on the pad is lost; the pad never types it, and its log
-  (`/run/user/1000/arrowpad-input.log`) only counts it. Arrow Pad doesn't install the helper for
-  this: it opens the dashboard's DevTools port while SteamVR runs.
+  (`/run/user/1000/arrowpad-input.log`, readable only by you) only counts it. Arrow Pad doesn't
+  install the helper for this: it opens the dashboard's DevTools port while SteamVR runs.
 - **PyQt6** lives in a private venv (`~/.local/share/arrowpad/venv`), because SteamOS ships no
   Python GUI toolkit. The [NordVPN](../../integrations/nordvpn/) tray and Screen snip use the same one.
 

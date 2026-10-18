@@ -40,5 +40,8 @@ install_icon frame-tweaks-dictate
 install_desktop "$TWEAK_DIR/dictate.desktop"
 mkdir -p "$HOME/.config/frame-tweaks"
 [ -f "$HOME/.config/frame-tweaks/dictate.conf" ] || cp "$TWEAK_DIR/dictate.conf.example" "$HOME/.config/frame-tweaks/dictate.conf"
+# Your dictation history is readable by you alone (older versions left it readable by everyone).
+hist="$HOME/.local/share/dictation-history.txt"
+[ ! -f "$hist" ] || chmod 600 "$hist"
 
 say "$(t "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s" docs/controller-shortcuts.md)"
