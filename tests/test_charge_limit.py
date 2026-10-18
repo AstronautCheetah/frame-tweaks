@@ -308,16 +308,17 @@ class ChargeLimit(unittest.TestCase):
         script = self.home / "uninstall.sh"
         script.write_text(src)
         log = self.home / "sudo.log"
-        # sudo: removes files only in this home; chown fails on a file that isn't there, as it does
-        stub(self.stubs, "sudo", f'echo "sudo $*" >> {log}\ncase "$1" in -v) exit 0 ;;\n'
-                                 f'  rm) shift; for f in "$@"; do case "$f" in -f) ;; "{self.home}"/*) rm -f "$f" ;; *) exit 1 ;; esac; done ;;\n'
-                                 '  chown) [ -e "$3" ] || { echo "chown: cannot access $3" >&2; exit 1; } ;;\n  *) exit 1 ;; esac')
+        # sudo: its one command (sudo -k sh -c ...) runs as you, with files in this home only:
+        # chown fails, on a file that isn't there as it does (sudo -k alone: nothing to forget)
+        stub(self.stubs, "sudo", f'echo "sudo $*" >> {log}\n[ "$1" = -k ] || exit 1; shift; [ $# -gt 0 ] || exit 0\n'
+                                 f'for a; do case "$a" in /*) case "$a" in "{self.home}"/*) ;; *) exit 1 ;; esac ;; esac; done\n'
+                                 '[ "$1" = sh ] && exec "$@"; exit 1')
         stub(self.stubs, "systemctl", "exit 0")
         r = subprocess.run(["bash", str(script)], env={**self.env, "FRAME_TWEAKS_LIB": str(ROOT / "lib")},
                            capture_output=True, text=True, timeout=30)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertFalse(rule.exists() or keep.exists())
-        self.assertIn(f"chown root {self.home}/sys/gone/charging_pause", log.read_text())
+        self.assertIn(f"sh {rule} {keep} {self.home}/sys/gone/charging_pause\n", log.read_text())   # (handed back)
         self.assertIn(f"removed {rule}", r.stdout)
 
 

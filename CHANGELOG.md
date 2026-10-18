@@ -48,6 +48,13 @@
   file it reads or writes there is a link or not a plain file, or when the profile `installs.ini`
   names isn't a folder inside Firefox's own. It replaces the files it changes instead of writing
   into them.
+- **Your sudo password works only for the step you typed it for:** sudo remembers a password for a
+  few minutes, so after Battery charge limit's udev rule or Homebrew's installer, the next tweak in
+  the same install (a linked project's installer, another person's pack) could have used it without
+  asking. Battery charge limit now adds and removes its rule with one sudo command that doesn't
+  remember the password at all, and sudo forgets the password as soon as Homebrew's installer ends,
+  and before and after each tweak's script in an install, uninstall, reinstall or update, so each
+  one asks for its own.
 
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with

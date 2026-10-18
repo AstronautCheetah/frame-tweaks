@@ -1833,7 +1833,7 @@ msgstr ""
 msgid "restored KDE settings changed by %s"
 msgstr ""
 
-#: lib/common.sh packs/core/charge-limit/install.sh
+#: lib/common.sh
 msgid "sudo failed."
 msgstr ""
 

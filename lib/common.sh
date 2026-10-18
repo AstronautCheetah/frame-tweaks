@@ -78,6 +78,12 @@ ask() {
     fi
 }
 
+# drop_sudo: forget the sudo password just typed (sudo -k), right after the step it was asked for:
+# sudo would otherwise let anything run from the same terminal in the next minutes use it without
+# asking (what this tweak runs next, the next tweak in the same run, whatever it starts). Never
+# asks; nothing happens if sudo wasn't used.
+drop_sudo() { if command -v sudo >/dev/null; then sudo -k 2>/dev/null || true; fi; }
+
 # need_brew: make sure Homebrew is available, offering to install it if it isn't.
 need_brew() {
     if command -v brew >/dev/null || [ -x "$BREW" ]; then
@@ -91,12 +97,16 @@ Homebrew's installer asks for your sudo (admin) password once, to create that fo
         die "$(t "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run.")"
     fi
     ask "$(t 'Install Homebrew now?')" || die "$(t 'Homebrew is required for this tweak. Install it from https://brew.sh and re-run.')"
-    sudo -v || die "$(t 'sudo failed.')"
     # Homebrew's installer at a pinned commit, checked against homebrew/pin's hash before it runs.
-    local brew_installer; brew_installer=$(mktemp)
+    # (Downloaded first, so the password is asked for just before it runs, and forgotten as soon
+    # as it ends: drop_sudo.)
+    local brew_installer ok=1; brew_installer=$(mktemp)
     fetch_pinned homebrew "$brew_installer"
-    NONINTERACTIVE=1 /bin/bash "$brew_installer" || { rm -f "$brew_installer"; die "$(t "Homebrew's installer failed (see above).")"; }
+    sudo -v || { rm -f "$brew_installer"; die "$(t 'sudo failed.')"; }
+    NONINTERACTIVE=1 /bin/bash "$brew_installer" || ok=
+    drop_sudo
     rm -f "$brew_installer"
+    [ -n "$ok" ] || die "$(t "Homebrew's installer failed (see above).")"
     [ -x "$BREW" ] || die "$(t "Homebrew didn't end up in /home/linuxbrew.")"
     # shellcheck disable=SC2016
     grep -qs 'linuxbrew/bin/brew shellenv' "$HOME/.bashrc" ||

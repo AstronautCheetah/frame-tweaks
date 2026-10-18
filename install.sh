@@ -320,6 +320,9 @@ cmd_install() {
     [[ $1 == all ]] && set -- "${IDS[@]}"
     check_ids "$@"
     local id why failed=()
+    # Each tweak's script starts without a sudo password that sudo remembers (typed for the tweak
+    # before it, or before this run): it asks for its own (lib/common.sh drop_sudo).
+    drop_sudo
     for id in $(with_deps "$@"); do
         bold "── $id: ${TITLE[$id]}"
         if [[ ! -f $STATE/installed/$id && " ${WAS_INSTALLED[*]} " != *" $id "* ]] && why=$(not_needed "$id"); then
@@ -331,6 +334,7 @@ cmd_install() {
         stop_processes "$id"            # a reinstall must not leave the old copy running
         if ! tweak_script "$id" install 8>&-; then failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2
         else record_version "$id"; fi
+        drop_sudo
         echo
     done
     [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
@@ -365,11 +369,13 @@ cmd_uninstall() {
         done
     done
     local failed=()
+    drop_sudo                          # (as cmd_install: each script asks for its own)
     for id in "$@"; do
         bold "── $(t 'removing %s' "$id")"; stop_processes "$id"
         # (As with install: a failure is reported, and the version record stays with what's left.)
         if tweak_script "$id" uninstall 8>&-; then forget_version "$id"; uninstall_settings "$id" "$settings"
         else failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2; fi
+        drop_sudo
         echo
     done
     [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
@@ -547,9 +553,11 @@ cmd_reinstall_ids() {
     # (FRAME_TWEAKS_REINSTALL: an uninstall that keeps what other tweaks put in its care, e.g. the
     # dashboard patches of the tweaks that use the VR environment helper.)
     # (a linked project isn't removed first: its own installer, run again, updates it)
+    drop_sudo                          # (as cmd_install: each script asks for its own)
     for id in "$@"; do
         [[ -n ${LINKED[$id]:-} ]] && continue
-        bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-; forget_version "$id"; echo
+        bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-
+        drop_sudo; forget_version "$id"; echo
     done
     cmd_install "$@"
 }
@@ -827,6 +835,7 @@ stale_tweaks() {
 }
 run_migrations() {
     local id old
+    drop_sudo                          # (as cmd_install: each script asks for its own)
     for id in "$@"; do
         is_component "$id" || continue           # (unknown ids are refused right after)
         [[ -f ${DIR[$id]}/migrate.sh && -f $STATE/installed/$id ]] || continue
@@ -837,6 +846,7 @@ run_migrations() {
         tag_newer "$VERSION" "$old" || continue
         bold "── migrating $id from $old"
         bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $(t '%s migration failed' "$id")" >&2
+        drop_sudo
     done
 }
 cmd_hold() {
