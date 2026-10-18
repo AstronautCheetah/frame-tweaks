@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import signal
+import stat
 import subprocess
 import sys
 import tempfile
@@ -278,15 +279,70 @@ def breeze(name):
     return QIcon(str(hits[-1])) if hits else QIcon()
 
 
+def made_here(folder, prefix):
+    """folder, resolved, if it's one this program made to hand a snip to another of its processes
+    (tempfile.mkdtemp(prefix=prefix) in the temporary folder: snip-narrate-in-, snip-clip-) and is
+    yours; ValueError for any other folder. Only such a folder is read and then removed: the
+    narration panel takes snips over a socket any program of yours can write to, and a path from
+    it (or a command line) once had it read any file aloud and delete the folder it was in."""
+    f = Path(folder).resolve()
+    if (f.parent != Path(tempfile.gettempdir()).resolve() or not f.name.startswith(prefix) or not f.is_dir()
+            or f.stat().st_uid != os.getuid()):
+        raise ValueError(f"not a folder frame-snip made: {folder}")
+    return f
+
+
+def read_handed(folder, files):
+    """{name: its contents} for files ({name: "rb" or "r", as for open()}), each a plain file in
+    folder (from made_here), then the folder goes; ValueError for anything else, which is left
+    alone. The folder and its files are opened without following a link, and checked once open:
+    switched for a link after made_here looked, they'd have been read through (a file of yours
+    read aloud, or put on the clipboard), and a FIFO would have kept this waiting."""
+    def refuse():
+        return ValueError(f"not a folder frame-snip made: {folder}")
+    top = os.open(folder.parent, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        d = os.open(folder.name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=top)
+    except OSError:
+        raise refuse() from None
+    finally:
+        os.close(top)
+    out = {}
+    try:
+        if os.fstat(d).st_uid != os.getuid():
+            raise refuse()
+        for name, mode in files.items():
+            try:
+                fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=d)
+            except OSError:
+                raise refuse() from None
+            with open(fd, mode) as f:
+                if not stat.S_ISREG(os.fstat(fd).st_mode):
+                    raise refuse()
+                out[name] = f.read()
+    finally:
+        os.close(d)
+    shutil.rmtree(folder, ignore_errors=True)
+    return out
+
+
 def x_clipboard_owner(folder):
     """frame-snip --x-clipboard DIR: own the desktop's X clipboard (:2) and offer the files in DIR
     (clip.png, clip.bmp, clip.html) as image/png, image/bmp and text/html, until something else is
     copied. Some apps (OnlyOffice) don't take an image offered as PNG alone, which is all wl-copy
     can do; KWin passes the X clipboard on to Wayland apps too. No focus needed, unlike Wayland."""
-    folder = Path(folder)
+    try:
+        folder = made_here(folder, "snip-clip-")
+    except ValueError as e:
+        print(f"frame-snip: {e}", file=sys.stderr)
+        return 1
     files = {"image/png": "clip.png", "image/bmp": "clip.bmp", "text/html": "clip.html"}
-    data = {k: (folder / v).read_bytes() for k, v in files.items() if (folder / v).exists()}
-    shutil.rmtree(folder, ignore_errors=True)
+    try:
+        found = read_handed(folder, {v: "rb" for v in files.values() if (folder / v).exists()})
+    except (OSError, ValueError) as e:
+        print(f"frame-snip: {e}", file=sys.stderr)
+        return 1
+    data = {k: found[v] for k, v in files.items() if v in found}
     auth = next(iter(sorted(RUN.glob("nested_plasma/xauth_*"))), None)
     if auth:
         os.environ["XAUTHORITY"] = str(auth)
@@ -1890,11 +1946,24 @@ class Snip(QWidget):
         self.close()
 
 
+def handed_snip(image_path, text_path):
+    """The snip Narrate handed over (snip.png and text.txt, in a folder it made: made_here), as
+    (QImage, text), its folder removed; ValueError for anything else, which is left alone."""
+    d = made_here(Path(image_path).parent, "snip-narrate-in-")
+    if Path(image_path).resolve() != d / "snip.png" or Path(text_path).resolve() != d / "text.txt":
+        raise ValueError(f"not a snip Narrate handed over: {image_path}, {text_path}")
+    found = read_handed(d, {"snip.png": "rb", "text.txt": "r"})
+    return QImage.fromData(found["snip.png"]), found["text.txt"]
+
+
 def narrate_panel(image_path, text_path):
     """The narration panel process (frame-snip --narrate): its own SteamVR overlay."""
     app = QApplication(sys.argv[:1])
-    image, text = QImage(image_path), Path(text_path).read_text()
-    shutil.rmtree(Path(image_path).parent, ignore_errors=True)
+    try:
+        image, text = handed_snip(image_path, text_path)
+    except (OSError, ValueError) as e:
+        print(f"frame-snip: {e}", file=sys.stderr)
+        return 1
     w = NarrationWindow(image, text, load_speed(), panel=True)
     w.show()
     overlay = NarrationOverlay(w)
@@ -1912,12 +1981,11 @@ def narrate_panel(image_path, text_path):
                 return
             try:
                 req = json.loads(bytes(conn.readAll()).decode())
-                img, txt = QImage(req["image"]), Path(req["text"]).read_text()
-                shutil.rmtree(Path(req["image"]).parent, ignore_errors=True)
+                img, txt = handed_snip(req["image"], req["text"])     # (only what Narrate handed over)
                 w.speed = load_speed()      # the speed set under Narrate (saved there), as a new panel reads
                 w.show_speed()
                 w.load(img, txt)
-            except (OSError, ValueError, KeyError):
+            except (OSError, ValueError, KeyError, TypeError):
                 pass
             conn.disconnectFromServer()
         QTimer.singleShot(0, read)

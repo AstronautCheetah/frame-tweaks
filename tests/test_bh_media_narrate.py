@@ -472,7 +472,7 @@ class OpenPanel(unittest.TestCase):
 
         def snip(n):
             from PyQt6.QtGui import QImage
-            d = t / f"snip{n}"
+            d = t / f"snip-narrate-in-{n}"        # (as Narrate names them: the panel takes only those)
             d.mkdir()
             QImage(20, 20, QImage.Format.Format_RGB32).save(str(d / "snip.png"))
             (d / "text.txt").write_text(TWO)
