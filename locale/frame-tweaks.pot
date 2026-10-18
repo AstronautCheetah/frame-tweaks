@@ -4811,9 +4811,24 @@ msgid "from"
 msgstr ""
 
 #: packs/integrations/claude-desktop/claude-desktop-update
+msgid "Anthropic's package list has no Claude Desktop for arm64"
+msgstr ""
+
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Anthropic's package list names an unexpected file for Claude Desktop: %s"
+msgstr ""
+
+#: packs/integrations/claude-desktop/claude-desktop-update
 msgid ""
 "Claude Desktop %s is available, but Claude Desktop is open: quit it first,\n"
 "or run: claude-desktop-update --restart   (closes it, updates, and you reopen it)"
+msgstr ""
+
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Claude Desktop %s is newer than the %s in Anthropic's list, so it stays.\n"
+"To install %s anyway, run: claude-desktop-update --allow-older"
 msgstr ""
 
 #: packs/integrations/claude-desktop/claude-desktop-update

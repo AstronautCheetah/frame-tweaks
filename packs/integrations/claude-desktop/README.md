@@ -61,12 +61,18 @@ It does nothing if you're already up to date. If Claude is open, it stops and as
 Claude first, so you don't lose anything you were typing. To have it close Claude for you, run
 `claude-desktop-update --restart`, then open Claude again.
 
+It never replaces your Claude with an older version, which an old copy of Anthropic's list could
+offer. To install the version the list offers anyway, run `claude-desktop-update --allow-older`.
+
 ## How it works
 
-`claude-desktop-update` reads the list of packages in Anthropic's apt repository, downloads the
-newest arm64 `.deb`, checks it against the SHA256 the list gives, and unpacks it into
-`~/.local/opt/claude-desktop`. The list itself comes over HTTPS; its apt signature isn't
-checked. It also adds Claude's app-menu entry and icons.
+`claude-desktop-update` reads the list of packages in Anthropic's apt repository and takes the
+newest version of the `claude-desktop` package in it (versions compared the way apt compares
+them). If that's newer than yours, it downloads its arm64 `.deb`, checks it against the SHA256
+the list gives, and unpacks it into `~/.local/opt/claude-desktop`. The list and the package come
+over HTTPS only (a redirect to plain HTTP is refused), but the list's apt signature isn't checked,
+so the SHA256 only shows that the download arrived whole: whoever can serve that list can serve
+another file with it. It also adds Claude's app-menu entry and icons.
 
 Claude always starts through a small launcher, `~/.local/bin/claude-desktop`, which tells it to
 keep your sign-in in the KDE wallet. Without the wallet, Claude can't store it securely and asks
