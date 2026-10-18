@@ -66,6 +66,14 @@
   link in them, and refuses anything else. The same goes for the picture Copy hands to the
   desktop's clipboard.
 
+### Changed
+- **Battery charge limit: use at your own risk.** Its README and its 🧪 note in the window now
+  say so, and link a known SteamOS charger bug
+  ([SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879)) that stops some Frames
+  taking power from USB while plugged in. A Frame running the tweak hit it on 17 October 2026 and
+  no longer charges. If the battery drops while plugged in and the limit isn't holding it,
+  charge from a plain 5 V USB source before it runs out.
+
 ### Fixed
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
   Vulkan) draws straight to gamescope, so the snip came out black or didn't open. Then it now

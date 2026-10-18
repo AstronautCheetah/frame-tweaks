@@ -18,9 +18,14 @@ sudo: >-
   once, to add a udev rule that lets you pause the battery's charging, and again to remove
   it
 experimental: >-
-  Uses the Frame's charger driver directly (its charging pause switch). SteamOS's charger
-  service turns the pause off each time it starts; it's on again within 30 seconds. The status
-  says if the switch is gone, or if the battery still charges while paused.
+  **Use at your own risk.** It pauses and resumes charging about every 10 minutes while it holds
+  the limit, through the Frame's charger driver (its charging pause switch), which Valve doesn't
+  document. SteamOS has a known charger bug that stops some Frames taking power from USB while
+  plugged in, so the battery runs down
+  ([SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879)); a Frame running this
+  tweak hit it and no longer charges. SteamOS's charger service turns the pause off each time it
+  starts; it's on again within 30 seconds. The status says if the switch is gone, or if the
+  battery still charges while paused.
 icon: {theme: battery-080}
 processes: [~/.local/bin/charge-limit --run, ~/.local/bin/charge-limit-sleep]
 settings:
@@ -71,6 +76,20 @@ Charging stops when the battery reaches the limit you choose (80% unless you cha
 
 **Why on a Steam Frame:** A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame.
 <!-- /generated:intro -->
+
+> **Use at your own risk.** This tweak pauses and resumes charging about every 10 minutes while
+> it holds the limit, through a charger control Valve doesn't document. SteamOS has a known
+> charger bug, [SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879): on some
+> Frames the charger stops taking power from USB while plugged in, so the battery runs down
+> instead of charging. It happens on Frames without this tweak too, but each resume may put the
+> charger through the step where it fails. On 17 October 2026 a Frame running this tweak hit it
+> during a SteamVR session, ran flat while plugged in, and no longer charges or starts.
+>
+> If the battery level drops while the Frame is plugged in and the limit isn't holding it (its
+> status doesn't say "not charging"), charge from a plain 5 V USB source at once (a PC's USB
+> port, or a USB-A charger and cable) before the battery runs out: owners on that issue report
+> it still charges there. A Frame that runs flat with this bug may not charge again without a
+> repair.
 
 > **According to Valve Support:** For normal daily use, it's fine to leave the Frame connected
 > to power, including when the battery is at 100%. The battery manages this automatically and
@@ -172,7 +191,7 @@ to 78% limits. The measurements, the studies and when to test again are in
 
 - **Survives SteamOS updates:** Yes (SteamOS updates keep the udev rule)
 - **Changes:** `charge-limit` and `charge-limit-sleep` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts
-- **🧪 Experimental:** Uses the Frame's charger driver directly (its charging pause switch). SteamOS's charger service turns the pause off each time it starts; it's on again within 30 seconds. The status says if the switch is gone, or if the battery still charges while paused.
+- **🧪 Experimental:** **Use at your own risk.** It pauses and resumes charging about every 10 minutes while it holds the limit, through the Frame's charger driver (its charging pause switch), which Valve doesn't document. SteamOS has a known charger bug that stops some Frames taking power from USB while plugged in, so the battery runs down ([SteamOS #2879](https://github.com/ValveSoftware/SteamOS/issues/2879)); a Frame running this tweak hit it and no longer charges. SteamOS's charger service turns the pause off each time it starts; it's on again within 30 seconds. The status says if the switch is gone, or if the battery still charges while paused.
 - **Unusual access:** Pauses and resumes the battery's charging. Asks for your sudo password once to add the udev rule, and again to remove it
 - **Undo:** `./install.sh uninstall charge-limit` (asks for your sudo password to remove the udev rule); the battery charges normally again
 <!-- /generated:changes -->
