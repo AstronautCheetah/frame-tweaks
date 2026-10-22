@@ -77,6 +77,15 @@
   saved into `upstream/`, ready to commit. Now it stays a link, with a warning, and redirects away
   from GitHub are refused.
 
+## 0.6.21 (2026-10-22)
+
+### Security
+- **A new release signing key.** The old one was on a Steam Frame that went back to Valve for
+  repair, so it's being retired. This release is still signed with the old key, and teaches your
+  install the new one (`dev/release-signers`); from the next release on, releases are signed with
+  the new key only (SHA256:1/YuVhUNkdDJSId9uNalpS6L0thjsPcIdsq8h8yfSEM), and the old one is
+  dropped. Nothing else changes: Frame Tweaks' code is 0.6.19's.
+
 ## 0.6.20 (2026-10-18)
 
 ### Changed
