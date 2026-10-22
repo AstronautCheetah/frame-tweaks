@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.21 (2026-10-22)
 
 ### Security
 - **A new release signing key.** The old one was on a Steam Frame that went back to Valve for
