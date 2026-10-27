@@ -77,6 +77,32 @@
   saved into `upstream/`, ready to commit. Now it stays a link, with a warning, and redirects away
   from GitHub are refused.
 
+## 0.6.23 (2026-10-27)
+
+### Security
+- **Updating works again from every version, with one click.** 0.6.22 was signed with the new
+  release key only, which copies that hadn't updated to 0.6.21 yet don't know, so their update
+  refused it. While the old key is retired, each release is now signed with the old key (so those
+  copies accept it) and cosigned with the new one (`cosign-vX.Y.Z`), which is what your copy
+  checks from this release on. Your copy trusts only the new key (`dev/release-signers`) and
+  never goes back to trusting the old one; the old key's signature, still on releases for copies
+  that haven't caught up, doesn't count for it. Copies on 0.6.22 get here through a bridge tag
+  (`v0.6.23-bridge`), the only way their check accepts the old key's signature, for that one update.
+
+## 0.6.22 (2026-10-27)
+
+### Security
+- **The old release signing key is retired.** This release is signed with the new key only
+  (SHA256:1/YuVhUNkdDJSId9uNalpS6L0thjsPcIdsq8h8yfSEM), and the old one is dropped from
+  `dev/release-signers`, so your install stops trusting it. If you're on 0.6.20 or older and
+  `./install.sh update` says this release "isn't signed by Frame Tweaks' release key", your copy
+  doesn't know the new key yet: run `./install.sh update --to v0.6.21` (signed with the old key;
+  it teaches the new one), then `./install.sh update`.
+- **A key change no longer strands copies that skipped a release:** when the release signing key
+  changes, `./install.sh update` now checks the releases between yours and the newest, and learns
+  the new key from one signed by a key it already trusts. Before, a copy that skipped the release
+  introducing a new key refused every release after it.
+
 ## 0.6.21 (2026-10-22)
 
 ### Security
