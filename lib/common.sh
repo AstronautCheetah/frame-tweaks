@@ -523,12 +523,25 @@ release_signed() {
             -c gpg.x509.program=false verify-tag "refs/tags/$2" >/dev/null 2>&1
 }
 
-# verify_release DIR TAG: the checkout DIR's release TAG is signed by a key in dev/release-signers *as installed now*
-# (so a tampered release can't bring its own key), as handed on by the releases in between:
-# those newer than this copy's VERSION and older than TAG are walked oldest first, and one signed
-# by a key trusted so far hands on its own dev/release-signers. So a copy that skipped the
-# release introducing a new key still gets there, and a key a release in between dropped isn't
-# trusted for TAG. Checkouts from before signing have no such file and skip this.
+# release_trusted DIR TAG SIGNERS: TAG is signed by a key in SIGNERS, or its cosign-TAG is and
+# points at the same commit. While an old release key is being retired, releases are signed with
+# it (copies that know only that key accept nothing else) and cosigned with the new one: a copy
+# that has the new key takes the cosign, without trusting the old key again.
+release_trusted() {
+    release_signed "$1" "$2" "$3" && return 0
+    release_signed "$1" "cosign-$2" "$3" &&
+        [[ $(git -C "$1" rev-parse -q --verify "refs/tags/cosign-$2^{commit}") == \
+           $(git -C "$1" rev-parse -q --verify "refs/tags/$2^{commit}") ]]
+}
+
+# verify_release DIR TAG: the checkout DIR's release TAG is signed (or cosigned) by a key in
+# dev/release-signers *as installed now* (so a tampered release can't bring its own key), as
+# handed on by the releases in between: those newer than this copy's VERSION and older than TAG
+# are walked oldest first, and one trusted so far hands on its own dev/release-signers. So a copy
+# that skipped the release introducing a new key still gets there, and a key a release in between
+# dropped isn't trusted for TAG. vX.Y.Z-bridge tags are skipped: they list an old key again, for
+# copies from before cosigning (0.6.22), which have no other way to accept a release signed with it.
+# Checkouts from before signing have no such file and skip this.
 # FRAME_TWEAKS_ALLOW_UNSIGNED=1 overrides, for an emergency.
 verify_release() {
     [[ -f $1/dev/release-signers ]] || return 0
@@ -538,14 +551,14 @@ verify_release() {
     current=v$(cat "$1/VERSION" 2>/dev/null || true)
     while read -r t; do
         tag_newer "$t" "$current" && tag_newer "$2" "$t" || continue
-        release_signed "$1" "$t" "$signers" || continue
+        release_trusted "$1" "$t" "$signers" || continue
         git -C "$1" show "refs/tags/$t:dev/release-signers" > "$signers.next" 2>/dev/null || continue
         cmp -s "$signers.next" "$signers" ||
             echo "Release $t: signature verified; its release keys are trusted from here on."
         mv "$signers.next" "$signers"
-    done < <(git -C "$1" tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$' | rank_tags)
+    done < <(git -C "$1" tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$' | grep -v -- '-bridge$' | rank_tags)
     rm -f "$signers.next"
-    if release_signed "$1" "$2" "$signers"; then
+    if release_trusted "$1" "$2" "$signers"; then
         rm -f "$signers"; echo "Release $2: signature verified."; return 0
     fi
     rm -f "$signers"

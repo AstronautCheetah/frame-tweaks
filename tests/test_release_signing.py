@@ -126,6 +126,44 @@ class VerifyRelease(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("Release v1.0.3-rc.1: signature verified; its release keys are trusted", r.stdout)
 
+    def cosign(self, tag, key, commit=None):
+        name = f"cosign-{tag}"
+        self.git("-c", "gpg.format=ssh", "-c", f"user.signingkey={self.tmp / key}", "tag", "-s", name, "-m", name,
+                 *([commit] if commit else []))
+
+    def test_a_release_signed_with_the_old_key_is_taken_on_its_new_key_cosign(self):
+        """While the old key is retired: a copy that has only the new key takes the cosign, quietly."""
+        self.rotation()
+        self.release("v1.0.3", "release", "other")                  # (signed with the old key)
+        self.cosign("v1.0.3", "other")
+        self.git("-c", "advice.detachedHead=false", "checkout", "-q", "v1.0.2")
+        r = self.verify("v1.0.3")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(r.stdout, "Release v1.0.3: signature verified.\n")
+        self.assertEqual(r.stderr, "")
+
+    def test_a_cosign_counts_only_by_a_trusted_key_and_on_the_same_commit(self):
+        self.rotation()
+        self.release("v1.0.3", "release", "other")
+        self.cosign("v1.0.3", "release")                             # (by the old key: not trusted)
+        self.release("v1.0.4", "release", "other")
+        self.cosign("v1.0.4", "other", "v1.0.3^{commit}")            # (another commit)
+        self.git("-c", "advice.detachedHead=false", "checkout", "-q", "v1.0.2")
+        for t in ("v1.0.3", "v1.0.4"):
+            r = self.verify(t)
+            self.assertNotEqual(r.returncode, 0, t)
+            self.assertIn("wasn't installed", r.stderr)
+
+    def test_bridge_tags_dont_bring_the_old_key_back(self):
+        """vX-bridge lists the old key for copies from before cosigning; this code skips it."""
+        self.rotation()
+        self.release("v1.0.3-bridge", "other", "release", "other")
+        self.release("v1.0.3", "release", "other")                  # (no cosign)
+        self.git("-c", "advice.detachedHead=false", "checkout", "-q", "v1.0.2")
+        r = self.verify("v1.0.3")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertNotIn("trusted from here on", r.stdout)
+
     def test_a_dropped_key_isnt_trusted_after_the_release_that_dropped_it(self):
         self.rotation()
         self.release("v1.0.3", "release", "release")       # (the old key, after it was dropped)
