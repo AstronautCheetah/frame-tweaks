@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.23 (2026-10-27)
 
 ### Security
 - **Updating works again from every version, with one click.** 0.6.22 was signed with the new
