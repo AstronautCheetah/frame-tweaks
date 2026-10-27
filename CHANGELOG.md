@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Security
+- **The old release signing key is retired.** This release is signed with the new key only
+  (SHA256:1/YuVhUNkdDJSId9uNalpS6L0thjsPcIdsq8h8yfSEM), and the old one is dropped from
+  `dev/release-signers`, so your install stops trusting it. If you're on 0.6.20 or older and
+  `./install.sh update` says this release "isn't signed by Frame Tweaks' release key", your copy
+  doesn't know the new key yet: run `./install.sh update --to v0.6.21` (signed with the old key;
+  it teaches the new one), then `./install.sh update`.
 - **A key change no longer strands copies that skipped a release:** when the release signing key
   changes, `./install.sh update` now checks the releases between yours and the newest, and learns
   the new key from one signed by a key it already trusts. Before, a copy that skipped the release
