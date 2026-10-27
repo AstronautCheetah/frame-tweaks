@@ -535,7 +535,7 @@ verify_release() {
     local signers; signers=$(mktemp)
     cp "$1/dev/release-signers" "$signers"
     local current t
-    current=v$(cat "$1/VERSION" 2>/dev/null)
+    current=v$(cat "$1/VERSION" 2>/dev/null || true)
     while read -r t; do
         tag_newer "$t" "$current" && tag_newer "$2" "$t" || continue
         release_signed "$1" "$t" "$signers" || continue
