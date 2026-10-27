@@ -88,6 +88,10 @@
   never goes back to trusting the old one; the old key's signature, still on releases for copies
   that haven't caught up, doesn't count for it. Copies on 0.6.22 get here through a bridge tag
   (`v0.6.23-bridge`), the only way their check accepts the old key's signature, for that one update.
+- **The old key stops signing releases on 2026-12-11.** Releases from then on carry the new
+  key's signature only. Update before then (any version, one click) and nothing changes for you;
+  a copy still on 0.6.20 or older after that date refuses the update, and needs
+  `./install.sh update --to v0.6.23`, then `./install.sh update`, once.
 
 ## 0.6.22 (2026-10-27)
 
