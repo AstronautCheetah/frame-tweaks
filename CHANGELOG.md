@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Security
+- **A key change no longer strands copies that skipped a release:** when the release signing key
+  changes, `./install.sh update` now checks the releases between yours and the newest, and learns
+  the new key from one signed by a key it already trusts. Before, a copy that skipped the release
+  introducing a new key refused every release after it.
+
 ## 0.6.21 (2026-10-22)
 
 ### Security
