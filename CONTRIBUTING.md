@@ -376,7 +376,9 @@ Put the public key (`~/frame-tweaks-release-key.pub`) in `dev/release-signers` a
 (a password manager), not on the Frame. **Changing the key:** add the new public key to
 `dev/release-signers` and release with the old one first, so installed copies learn the new key
 before a release signed with it arrives; then switch the secret, and drop the old key from
-`dev/release-signers` in the first release signed with the new one. A copy that skipped the
+`dev/release-signers` in the first release signed with the new one. Leave weeks, not days,
+between the two: `./install.sh update` goes to the newest release, so a copy still trusting only
+the old key refuses every release once the newest is signed with the new key. A copy that skipped the
 release adding the new key learns it on the way (`verify_release` walks the releases in between),
 as long as its own `verify_release` already does that: copies from before 0.6.22 don't, and need
 `./install.sh update --to` the release that added the key first.

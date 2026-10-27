@@ -115,6 +115,17 @@ class VerifyRelease(unittest.TestCase):
         self.assertIn("Release v1.0.1: signature verified; its release keys are trusted", r.stdout)
         self.assertIn("Release v1.0.2: signature verified.", r.stdout)
 
+    def test_a_pre_release_signed_with_the_new_key_brings_a_new_key_only_copy_back_to_both(self):
+        """A bridge back to both keys: a copy trusting only the new key walks a pre-release signed
+        with it (listing both) to a release signed with the old key."""
+        self.rotation()
+        self.release("v1.0.3-rc.1", "other", "release", "other")
+        self.release("v1.0.3", "release", "release", "other")
+        self.git("-c", "advice.detachedHead=false", "checkout", "-q", "v1.0.2")
+        r = self.verify("v1.0.3")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Release v1.0.3-rc.1: signature verified; its release keys are trusted", r.stdout)
+
     def test_a_dropped_key_isnt_trusted_after_the_release_that_dropped_it(self):
         self.rotation()
         self.release("v1.0.3", "release", "release")       # (the old key, after it was dropped)

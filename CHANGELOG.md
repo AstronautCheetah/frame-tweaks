@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Security
+- **Updating works again from 0.6.20 and older, with one click.** 0.6.22 was signed with the new
+  release key only, which copies that hadn't updated to 0.6.21 yet don't know, so their update
+  refused it. Both keys are trusted again for a while: this release is signed with the old key,
+  so every copy accepts it, and the pre-release before it (0.6.23-rc.1, signed with the new key)
+  brings copies on 0.6.22 along. The old key will be retired later, once copies have had time to
+  learn the new one, with releases that keep the update path working.
+
 ## 0.6.22 (2026-10-27)
 
 ### Security
