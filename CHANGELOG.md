@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.22 (2026-10-27)
 
 ### Security
 - **The old release signing key is retired.** This release is signed with the new key only
