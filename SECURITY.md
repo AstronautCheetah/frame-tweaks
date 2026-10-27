@@ -129,6 +129,9 @@ doesn't review or sandbox other people's packs.
   signature against the release key your copy already has (`dev/release-signers`) and refuses an
   unsigned or wrongly signed one. Only an SSH signature by that key counts, on a tag that
   carries its own name, so an older signed release can't come back under a newer one's name.
+  When the release key changes, a release signed with the old key lists the new one first, and
+  an update that skipped it checks the releases in between, so it learns the new key from a
+  release signed by a key it already trusts, and stops trusting a key a later release dropped.
   The first install (`get.sh`) trusts GitHub's HTTPS; running `get.sh` again on an existing
   copy is an update (`./install.sh update`), with the same check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
   skips the check, for an emergency.
