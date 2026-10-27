@@ -132,6 +132,9 @@ doesn't review or sandbox other people's packs.
   When the release key changes, a release signed with the old key lists the new one first, and
   an update that skipped it checks the releases in between, so it learns the new key from a
   release signed by a key it already trusts, and stops trusting a key a later release dropped.
+  While the old key is retired, releases carry both signatures: the old key's, for copies that
+  haven't learned the new one, and the new key's (`cosign-vX.Y.Z`); a copy that has the new key
+  checks only that one, and never trusts the old key again.
   The first install (`get.sh`) trusts GitHub's HTTPS; running `get.sh` again on an existing
   copy is an update (`./install.sh update`), with the same check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
   skips the check, for an emergency.

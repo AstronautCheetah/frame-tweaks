@@ -374,11 +374,13 @@ gh secret set RELEASE_SIGNING_KEY < ~/frame-tweaks-release-key
 Put the public key (`~/frame-tweaks-release-key.pub`) in `dev/release-signers` as
 `releases namespaces="git" <type> <key>`, commit it, and keep the private key somewhere safe
 (a password manager), not on the Frame. **Changing the key:** add the new public key to
-`dev/release-signers` and release with the old one first, so installed copies learn the new key
-before a release signed with it arrives; then switch the secret, and drop the old key from
-`dev/release-signers` in the first release signed with the new one. Leave weeks, not days,
-between the two: `./install.sh update` goes to the newest release, so a copy still trusting only
-the old key refuses every release once the newest is signed with the new key. A copy that skipped the
-release adding the new key learns it on the way (`verify_release` walks the releases in between),
-as long as its own `verify_release` already does that: copies from before 0.6.22 don't, and need
-`./install.sh update --to` the release that added the key first.
+`dev/release-signers` and release with the old one, so installed copies learn the new key; then
+put the new private key in `RELEASE_SIGNING_KEY`, the old one in `RELEASE_BRIDGE_KEY`, and drop
+the old key from `dev/release-signers`. While `RELEASE_BRIDGE_KEY` is set, each release tag
+`vX.Y.Z` is signed with the old key (copies that know only it accept nothing else:
+`./install.sh update` goes to the newest release), `cosign-vX.Y.Z` is signed with the new key on
+the same commit (what `verify_release` takes from 0.6.23 on, without trusting the old key again),
+and `vX.Y.Z-bridge`, signed with the new key on a side commit listing both keys, carries copies on
+0.6.22 (whose `verify_release` walks the releases in between but has no cosign). Pre-releases are
+refused meanwhile. Keep it set for months, not days: deleting `RELEASE_BRIDGE_KEY` retires the
+old key for good, and a copy that still knows only the old key then refuses every release after.
