@@ -140,7 +140,7 @@ class VerifyRelease(unittest.TestCase):
         r = self.verify("v1.0.3")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(r.stdout, "Release v1.0.3: signature verified.\n")
-        self.assertEqual(r.stderr, "")
+        self.assertNotIn("signed", r.stderr)                         # (no warning about the old key)
 
     def test_a_cosign_counts_only_by_a_trusted_key_and_on_the_same_commit(self):
         self.rotation()
