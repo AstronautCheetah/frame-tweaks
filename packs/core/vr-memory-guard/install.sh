@@ -1,5 +1,5 @@
 #!/bin/bash
-# VR memory guard: desktop apps leave memory free for SteamVR, Firefox has a limit of its own, and
+# VR memory guard: Flatpak apps leave memory free for SteamVR, Firefox has a limit of its own, and
 # SteamVR is the last thing the kernel stops when memory runs out. Limits in
 # ~/.config/frame-tweaks/vr-memory-guard.conf; see README.md.
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
@@ -30,9 +30,9 @@ ff=$(size firefox_max); ff_swap=$(size firefox_swap_max)
 total=$(awk '/^MemTotal:/ {print int($2 / 1024)}' "$MEMINFO")
 [ -n "$total" ] && [ "$total" -gt 0 ] || die "$(t "Can't read how much memory this device has (%s)." "$MEMINFO")"
 apps=$(( total - reserve ))
-# (Less than 2 GB for every desktop app together would stop them constantly.)
-[ "$apps" -ge 2048 ] || die "$(t 'reserve_for_vr (%s) leaves less than 2 GB of the %s MB for desktop apps: make it smaller in %s.' "$(get reserve_for_vr)" "$total" "$CONF")"
-[ "$ff" -le "$apps" ] || warn "$(t 'firefox_max is more than all desktop apps together may use (%s MB): the apps limit applies first.' "$apps")"
+# (Less than 2 GB for every Flatpak app together would stop them constantly.)
+[ "$apps" -ge 2048 ] || die "$(t 'reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s.' "$(get reserve_for_vr)" "$total" "$CONF")"
+[ "$ff" -le "$apps" ] || warn "$(t 'firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first.' "$apps")"
 
 # dropin UNIT TEXT: our drop-in for UNIT (a real unit, or a prefix such as app-flatpak-X-.scope,
 # which systemd applies to every unit whose name starts with it).
@@ -59,7 +59,7 @@ sysctl_user set-property --runtime app.slice MemoryMax="${apps}M" MemorySwapMax=
 for scope in $(sysctl_user list-units --type=scope --state=running --plain --no-legend 'app-flatpak-org.mozilla.firefox-*.scope' 2>/dev/null | awk '{print $1}'); do
     sysctl_user set-property --runtime "$scope" MemoryMax="${ff}M" MemorySwapMax="${ff_swap}M" || true
 done
-say "$(t 'Desktop apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB.' "$apps" "$reserve" "$ff")"
+say "$(t 'Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB.' "$apps" "$reserve" "$ff")"
 if sysctl_user is-active --quiet steamvr.service; then
     say "$(t 'SteamVR is stopped last from its next start.')"
 fi

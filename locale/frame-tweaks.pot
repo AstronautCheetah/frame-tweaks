@@ -4520,12 +4520,12 @@ msgstr ""
 
 #: packs/core/vr-memory-guard/README.md
 msgid ""
-"Desktop apps together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
 msgstr ""
 
 #: packs/core/vr-memory-guard/README.md
 msgid ""
-"Keeps memory free for SteamVR, so a runaway app or browser is stopped instead of VR crashing"
+"Keeps memory free for SteamVR, so a runaway Flatpak app such as Firefox is stopped instead of VR crashing"
 msgstr ""
 
 #: packs/core/vr-memory-guard/README.md
@@ -4551,7 +4551,7 @@ msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
 msgid ""
-"Desktop apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+"Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
 msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
@@ -4560,16 +4560,16 @@ msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
 msgid ""
-"firefox_max is more than all desktop apps together may use (%s MB): the apps limit applies first."
+"firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
 msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
 msgid ""
-"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for desktop apps: make it smaller in %s."
+"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
 msgstr ""
 
 #: packs/core/vr-memory-guard/status.sh
-msgid "desktop apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
 msgstr ""
 
 #: packs/core/vr-memory-guard/status.sh

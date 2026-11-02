@@ -67,8 +67,9 @@
   desktop's clipboard.
 
 ### Added
-- **VR memory guard (new, System):** desktop apps together leave 5 GB for SteamVR, Steam and your
-  game, Firefox has a 5 GB limit of its own, and SteamVR is the last thing stopped when memory
+- **VR memory guard (new, System):** Flatpak apps (Firefox and others from Discover) together
+  leave 5 GB for SteamVR, Steam and your game (which aren't limited), Firefox has a 5 GB limit of
+  its own, and SteamVR is the last thing stopped when memory
   runs out. An app over its limit is stopped instead of stalling the headset. Signing in to
   Firefox installed every synced extension at once and took 10 GB on a Frame, and SteamVR's
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.

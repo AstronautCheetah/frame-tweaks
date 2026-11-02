@@ -116,9 +116,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-02
 - New in `packs/core/vr-memory-guard/README.md`
-  - now: "Desktop apps together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+  - now: "Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
 - New in `packs/core/vr-memory-guard/README.md`
-  - now: "Keeps memory free for SteamVR, so a runaway app or browser is stopped instead of VR crashing"
+  - now: "Keeps memory free for SteamVR, so a runaway Flatpak app such as Firefox is stopped instead of VR crashing"
 - New in `packs/core/vr-memory-guard/README.md`
   - now: "The Frame's 16 GB is shared by VR and every app you open. When one app takes it all (signing in to Firefox can install all your extensions at once and take 10 GB), the whole headset stalls and SteamVR's compositor can crash, dropping you out of VR."
 - New in `packs/core/vr-memory-guard/README.md`
@@ -128,19 +128,19 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/vr-memory-guard/install.sh:31`
   - now: "Can't read how much memory this device has (%s)."
 - New in `packs/core/vr-memory-guard/install.sh:34`
-  - now: "reserve_for_vr (%s) leaves less than 2 GB of the %s MB for desktop apps: make it smaller in %s."
+  - now: "reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
 - New in `packs/core/vr-memory-guard/install.sh:35`
-  - now: "firefox_max is more than all desktop apps together may use (%s MB): the apps limit applies first."
+  - now: "firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
 - New in `packs/core/vr-memory-guard/install.sh:58`
   - now: "Couldn't set the apps' limit now; it applies at your next login."
 - New in `packs/core/vr-memory-guard/install.sh:62`
-  - now: "Desktop apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+  - now: "Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
 - New in `packs/core/vr-memory-guard/install.sh:64`
   - now: "SteamVR is stopped last from its next start."
 - New in `packs/core/vr-memory-guard/status.sh:11`
   - now: "the apps' limit isn't in force yet: run the install again, or log out and back in"
 - New in `packs/core/vr-memory-guard/status.sh:14`
-  - now: "desktop apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+  - now: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
 - New in `packs/core/vr-memory-guard/status.sh:8`
   - now: "systemd doesn't hand the memory controller to your services here, so the limits can't apply"
 - New in `packs/core/vr-memory-guard/uninstall.sh:15`

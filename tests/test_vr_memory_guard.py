@@ -1,4 +1,4 @@
-"""VR memory guard (packs/core/vr-memory-guard): install gives desktop apps (app.slice) a limit of
+"""VR memory guard (packs/core/vr-memory-guard): install gives Flatpak apps (app.slice) a limit of
 the device's memory minus the reserve for VR, every Firefox scope its own, and SteamVR the lowest
 OOM score a user service may have; it sets the running slice and Firefox at once; it refuses a
 reserve that leaves too little and a size it can't read; uninstall lifts the limits and keeps the
@@ -94,7 +94,7 @@ class VrMemoryGuard(unittest.TestCase):
         (self.cg / "app.slice/memory.max").write_text(f"{10542 * 1048576}\n")
         (self.cg / "app.slice/memory.current").write_text(f"{1900 * 1048576}\n")
         r = self.run_script("status.sh")
-        self.assertIn("desktop apps 1900 of 10542 MB", r.stdout)
+        self.assertIn("Flatpak apps 1900 of 10542 MB", r.stdout)
         (self.cg / "cgroup.controllers").write_text("cpu pids\n")
         self.assertEqual(self.run_script("status.sh", ok=None).returncode, 2)
 
