@@ -113,3 +113,7 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "NordVPN access token:"
 - New in `packs/integrations/nordvpn/nordvpn-wg:275`
   - now: "Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
+
+## 2026-11-02
+- New in `packs/core/wallet/status.sh:19`
+  - now: "terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"

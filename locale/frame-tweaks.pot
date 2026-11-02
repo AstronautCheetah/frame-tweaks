@@ -4646,6 +4646,11 @@ msgstr ""
 
 #: packs/core/wallet/status.sh
 msgid ""
+"terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid ""
 "the wallet has no password: set one in KWalletManager (kdewallet → Change Password)"
 msgstr ""
 
