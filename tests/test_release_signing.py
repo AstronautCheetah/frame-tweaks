@@ -154,6 +154,20 @@ class VerifyRelease(unittest.TestCase):
             self.assertNotEqual(r.returncode, 0, t)
             self.assertIn("wasn't installed", r.stderr)
 
+    def test_after_the_bridge_ends_a_copy_on_the_old_key_still_gets_there(self):
+        """The bridge's end (docs/release-signing.md): releases signed with the new key only, no
+        cosign. A copy that trusts only the old key walks the announcing release, the switch and a
+        bridged release (by its cosign) to it; one on the bridged release goes straight there."""
+        self.rotation()                                              # (v1.0.0 old, v1.0.1 both, v1.0.2 new)
+        self.release("v1.0.3", "release", "other")                  # (bridged: old key, and a cosign)
+        self.cosign("v1.0.3", "other")
+        self.release("v1.0.4", "other", "other")                    # (after the end: new key only)
+        for start in ("v1.0.0", "v1.0.3"):
+            self.git("-c", "advice.detachedHead=false", "checkout", "-q", start)
+            r = self.verify("v1.0.4")
+            self.assertEqual(r.returncode, 0, start + r.stderr)
+            self.assertIn("Release v1.0.4: signature verified.", r.stdout)
+
     def test_bridge_tags_dont_bring_the_old_key_back(self):
         """vX-bridge lists the old key for copies from before cosigning; this code skips it."""
         self.rotation()
