@@ -462,7 +462,7 @@ def check_link(link, where):
     paths = [paths] if isinstance(paths, str) else paths
     if not (isinstance(paths, list) and paths and all(isinstance(x, str) and re.match(r"^(~/|/)\S", x) for x in paths)):
         errs.append(f"{where}: link.installed must be a path (or a list of them, any one will do) that "
-                    "exists once it's installed, e.g. ~/frametop")
+                    "exists once it's installed, e.g. ~/my-app/bin/my-app")
     elif any(re.search(r"[*?[]", x) for x in paths):
         errs.append(f"{where}: link.installed: a path, not a pattern (nothing is matched against it)")
     if "readme" in link and not (isinstance(link["readme"], str) and link["readme"].startswith("https://")):
