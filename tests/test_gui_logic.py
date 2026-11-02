@@ -696,7 +696,8 @@ class Links(unittest.TestCase):
 
 
 class PacksPage(unittest.TestCase):
-    """The Packs page lists a user's pack as not trusted; Trust… asks once more, then uses it."""
+    """The Packs page lists a user's pack as not trusted; Trust uses it at one press, and its
+    tooltip says what trusting means."""
     def test_trust_from_the_page(self):
         from PyQt6.QtWidgets import QApplication, QPushButton
         self.app = QApplication.instance() or QApplication([])     # (kept: a dropped one is gone)
@@ -711,9 +712,9 @@ class PacksPage(unittest.TestCase):
                 window = mock.Mock()
                 page = gui.Packs(window)
                 buttons = lambda: {b.text(): b for b in page.findChildren(QPushButton) if b.text() != "← Back"}
-                self.assertIn("Trust…", buttons())
-                buttons()["Trust…"].click()
-                buttons()["Yes: it runs as me"].click()
+                self.assertIn("Trust", buttons())
+                self.assertIn("run as you", buttons()["Trust"].toolTip())
+                buttons()["Trust"].click()
                 window.reload_tweaks.assert_called_once()
                 self.assertIn("hello-frame", [c["id"] for c in gui.sft.load(refresh=True)["components"]])
                 self.assertIn("Stop using", buttons())
@@ -761,7 +762,7 @@ class PacksPage(unittest.TestCase):
                 wait()
                 self.assertIn("Added Hello pack. It isn't used until you trust it", page.notice.text())
                 self.assertTrue((d / "packs/their-pack/pack.md").is_file())
-                self.assertIn("Trust…", buttons())
+                self.assertIn("Trust", buttons())
                 gui.sft.set_trusted(d / "packs/their-pack", True)             # (only a trusted pack updates)
                 window.pack_updates = {(d / "packs/their-pack").resolve()}     # (Check for updates found one)
                 page.build()
@@ -794,7 +795,7 @@ class PacksUnderTheWindow(unittest.TestCase):
         page = gui.Packs(mock.Mock())
         with mock.patch.object(gui.sft, "load", wraps=gui.sft.load) as load:
             page.toggle_inventory(gui.sft.THIRD_PARTY)
-            page.confirm(gui.sft.THIRD_PARTY)
+            page.ask_remove(gui.sft.THIRD_PARTY)          # (another click that builds the page again)
         self.assertTrue(load.called)
         self.assertFalse([c for c in load.call_args_list if c.kwargs.get("refresh")])
 

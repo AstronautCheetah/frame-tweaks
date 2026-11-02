@@ -121,6 +121,17 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Password set: the tweaks tagged sudo can install now."
 - New in `gui/frame-tweaks-gui.py:2126`
   - now: "No password yet: Set a password… again when you're ready."
+- Changed in `gui/packs_page.py:173`
+  - was: "Trust…"
+  - now: "Trust"
+- New in `gui/packs_page.py:174`
+  - now: "Use this pack: its tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. If its files change (an update), it waits until you trust it again."
+- Changed in `gui/packs_page.py:257`
+  - was: "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+  - now: "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust below."
+- Changed in `gui/packs_page.py:278`
+  - was: "It isn't used until you trust it again: read what changed first, then Trust… below."
+  - now: "It isn't used until you trust it again: read what changed first, then Trust below."
 - New in `gui/wallet_page.py:523`
   - now: "Terminal tools ({n})"
 - New in `gui/wallet_page.py:526`

@@ -26,7 +26,7 @@ uses most of what's described here.
   So a pack author publishes an update by pushing to the branch people added.
   Links start with `https://` (or `ssh://`, `git@host:`); a pack added at a tag stays at it.
 - **Trust:** a pack's tweaks run as you, with your files and passwords in reach, so a new pack
-  is listed but not used until you trust it: **🧩 Packs → Trust…**, or
+  is listed but not used until you trust it: **🧩 Packs → Trust** (one press; its tooltip says what it means), or
   `./install.sh mods trust "<pack name>"` (or its folder, if two packs share a name). Trust
   covers the pack's files as they are then (names, contents, links, which ones can run); if any
   change (an update, or something tampering with them), the pack waits until you trust it again.

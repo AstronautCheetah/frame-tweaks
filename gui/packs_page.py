@@ -114,7 +114,7 @@ class Packs(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.body)
         lay.addWidget(scroll, 1)
-        self.confirming = self.removing = None
+        self.removing = None
         if self.busy():                                 # (still adding or updating one, from a page left since)
             self.tell(self.window.pack_job[2], good=True)
         self.build()
@@ -169,13 +169,12 @@ class Packs(QWidget):
                     b = QPushButton(_("Stop using"))
                     b.setToolTip(_("Its tweaks leave the list; installed ones stay until you uninstall them"))
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.trust(d, False))
-                elif self.confirming == p["dir"]:
-                    b = QPushButton(_("Yes: it runs as me"))
-                    b.setToolTip(_("Trust this pack's current files"))
+                else:                                    # (one press: what it means is in its tooltip)
+                    b = QPushButton(_("Trust"))
+                    b.setToolTip(_("Use this pack: its tweaks join the list, and the ones you tick run as you, with "
+                                   "your files and passwords in reach. Trust only packs from people you trust. If "
+                                   "its files change (an update), it waits until you trust it again."))
                     b.clicked.connect(lambda _=False, d=p["dir"]: self.trust(d, True))
-                else:
-                    b = QPushButton(_("Trust…"))
-                    b.clicked.connect(lambda _=False, d=p["dir"]: self.confirm(d))
                 g.addWidget(b)
                 if origin:
                     b = QPushButton(_("Update"))
@@ -204,12 +203,8 @@ class Packs(QWidget):
             self.rows.addWidget(probs)
         self.rows.addStretch(1)
 
-    def confirm(self, d):
-        self.confirming, self.removing = d, None
-        self.build()
-
     def ask_remove(self, d):
-        self.confirming, self.removing = None, d
+        self.removing = d
         self.build()
 
     # ---- packs from a link (lib/sft.py add_pack, update_pack, remove_pack) ----
@@ -260,7 +255,7 @@ class Packs(QWidget):
         self.link.clear()
         p = next((x for x in sft.load()["packs"] if x["dir"] == d.resolve()), None)
         self.tell(_("Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they "
-                    "do first (its link, or Open packs folder), then Trust… below.").format(
+                    "do first (its link, or Open packs folder), then Trust below.").format(
                         name=sft.plain(p["name"]) if p else d.name), good=True)
         self.build()
 
@@ -280,7 +275,7 @@ class Packs(QWidget):
         else:
             self.tell(ngettext("{name}: updated, {n} file changed.", "{name}: updated, {n} files changed.",
                                len(got["files"])).format(name=name, n=len(got["files"])) + " "
-                      + _("It isn't used until you trust it again: read what changed first, then Trust… below.")
+                      + _("It isn't used until you trust it again: read what changed first, then Trust below.")
                       + "".join("\n• " + line for line in got["log"]))
         self.build()
 
@@ -347,7 +342,7 @@ class Packs(QWidget):
             QDesktopServices.openUrl(QUrl(url))
 
     def trust(self, d, on):
-        self.confirming = self.removing = None
+        self.removing = None
         sft.set_trusted(d, on)
         self.window.reload_tweaks()
         self.build()

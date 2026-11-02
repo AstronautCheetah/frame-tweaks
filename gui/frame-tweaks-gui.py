@@ -80,6 +80,8 @@ QLabel#desc { color: #9aa6b2; }
 QLabel[status="ok"] { color: #5cc77a; } QLabel[status="warn"] { color: #e0b33a; }
 QLabel[status="missing"], QLabel[status="checking"] { color: #6b7783; }
 QWidget#row { background: #161c23; border-radius: 10px; }
+QToolTip { font-size: 18px; padding: 8px 10px; color: #e8ecf0; background: #1f2731;
+           border: 1px solid #355b7a; border-radius: 6px; }
 QWidget#row:hover { background: #1c242d; }
 QWidget#row[hidden_row="true"] { background: #11161c; }
 QWidget#row[focused="true"] { background: #1f2a36; border: 2px solid #7fb2e5; }

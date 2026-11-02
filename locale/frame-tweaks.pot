@@ -700,7 +700,7 @@ msgstr ""
 
 #: gui/packs_page.py
 msgid ""
-"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust below."
 msgstr ""
 
 #: gui/packs_page.py
@@ -748,7 +748,7 @@ msgstr ""
 
 #: gui/packs_page.py
 msgid ""
-"It isn't used until you trust it again: read what changed first, then Trust… below."
+"It isn't used until you trust it again: read what changed first, then Trust below."
 msgstr ""
 
 #: gui/packs_page.py
@@ -809,15 +809,11 @@ msgid "That didn't work: {error}"
 msgstr ""
 
 #: gui/packs_page.py
-msgid "Trust this pack's current files"
+msgid "Trust"
 msgstr ""
 
 #: gui/packs_page.py
 msgid "Trusted: its tweaks are listed"
-msgstr ""
-
-#: gui/packs_page.py
-msgid "Trust…"
 msgstr ""
 
 #: gui/packs_page.py
@@ -829,11 +825,12 @@ msgid "Use"
 msgstr ""
 
 #: gui/packs_page.py
-msgid "Yes, delete it"
+msgid ""
+"Use this pack: its tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. If its files change (an update), it waits until you trust it again."
 msgstr ""
 
 #: gui/packs_page.py
-msgid "Yes: it runs as me"
+msgid "Yes, delete it"
 msgstr ""
 
 #: gui/packs_page.py lib/splash.py

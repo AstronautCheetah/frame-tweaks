@@ -90,6 +90,9 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Trusting a pack takes one press:** **Trust** on the Packs page, with a tooltip saying what it
+  means (its tweaks run as you; it waits again if its files change), instead of Trust… then "Yes:
+  it runs as me". **Every tooltip is larger,** with more padding: Qt's own were hard to read in VR.
 - **No password yet? The window says so, and sets one.** A new Frame's user has no password, so
   sudo can't work, and the tweaks that ask for it (Homebrew, Battery charge limit, and those that
   need Homebrew while it isn't installed) failed partway. Now the window shows a line above the
