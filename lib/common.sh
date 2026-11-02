@@ -8,17 +8,22 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=lib/i18n.sh
 source "$REPO_DIR/lib/i18n.sh"      # t 'Text %s' VALUE: in the user's language
-# The exact build, for people and logs: 0.5.0 at a release tag, 0.5.0+3.abc1234 three commits
-# after it, -dirty with local changes; the VERSION file without git. (VERSION itself stays the
-# release number that migrations and update checks compare.)
+# The exact build, for people and logs: 0.5.0 at its release tag, 0.5.0+3.abc1234 three commits
+# after it, 0.5.0+abc1234 when that tag isn't in this clone, -dirty with local changes; the
+# VERSION file alone without git. VERSION is the one source of the number (migrations and update
+# checks compare it): `git describe` named whichever tag it reached first, an older one when the
+# release tag sat on a branch not merged yet, and then disagreed with VERSION. (lib/sft.py
+# build_version says the same.)
 ft_version() {
-    local d
-    d=$(git -C "$REPO_DIR" describe --tags --match 'v[0-9]*' --dirty 2>/dev/null) ||
-        { cat "$REPO_DIR/VERSION" 2>/dev/null || echo dev; return; }
-    d=${d#v}
-    [[ $d =~ ^(.+)-([0-9]+)-g([0-9a-f]+)(-dirty)?$ ]] &&
-        d="${BASH_REMATCH[1]}+${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}"
-    echo "$d"
+    local v head n dirty=""
+    v=$(cat "$REPO_DIR/VERSION" 2>/dev/null) || v=dev
+    head=$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null) || { echo "$v"; return; }
+    [ -z "$(git -C "$REPO_DIR" status --porcelain --untracked-files=no 2>/dev/null)" ] || dirty=-dirty
+    if n=$(git -C "$REPO_DIR" rev-list --count "refs/tags/v$v..HEAD" 2>/dev/null); then
+        if [ "$n" = 0 ]; then echo "$v$dirty"; else echo "$v+$n.$head$dirty"; fi
+    else
+        echo "$v+$head$dirty"
+    fi
 }
 # The folder of the tweak whose script sourced this file (its own files), and tweak_dir <id> for
 # another tweak's: the installer passes the folders it found (FRAME_TWEAKS_DIRS, "id=folder"

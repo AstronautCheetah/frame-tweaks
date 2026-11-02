@@ -142,6 +142,9 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **The version shown is the release you have:** between releases a checkout could show an older
+  one (0.6.21+34 on 0.6.23), because the number came from whichever release tag git found first.
+  It now always starts with the release in `VERSION`, as updates use.
 - **Wallet apps says when the wallet has no password yet, instead of an Unlock that can't work.**
   SteamOS's stock wallet opens without a password, so the page's 🔓 Unlock… (and Password first
   on an app) asked for a password nobody could give. `wallet-unlock --info` now says whether the

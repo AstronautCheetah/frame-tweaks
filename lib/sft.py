@@ -50,20 +50,27 @@ REPO = Path(__file__).resolve().parent.parent
 
 
 def build_version():
-    """The exact build, as lib/common.sh ft_version says it: 0.5.0, 0.5.0+3.abc1234[-dirty]."""
+    """The exact build, as lib/common.sh ft_version says it (see there): 0.5.0, 0.5.0+3.abc1234,
+    0.5.0+abc1234 without the release tag, each -dirty with local changes; VERSION alone without git."""
     try:
-        d = subprocess.run(["git", "-C", str(REPO), "describe", "--tags", "--match", "v[0-9]*", "--dirty"],
-                           capture_output=True, text=True, timeout=5)
-    except (OSError, subprocess.TimeoutExpired):
-        d = None
-    if not d or d.returncode != 0:
+        v = (REPO / "VERSION").read_text().strip()
+    except OSError:
+        v = "dev"
+
+    def git(*args):
         try:
-            return (REPO / "VERSION").read_text().strip()
-        except OSError:
-            return "dev"
-    v = d.stdout.strip().removeprefix("v")
-    m = re.fullmatch(r"(.+)-(\d+)-g([0-9a-f]+)(-dirty)?", v)
-    return f"{m[1]}+{m[2]}.{m[3]}{m[4] or ''}" if m else v
+            r = subprocess.run(["git", "-C", str(REPO), *args], capture_output=True, text=True, timeout=5)
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        return r.stdout.strip() if r.returncode == 0 else None
+    head = git("rev-parse", "--short", "HEAD")
+    if head is None:
+        return v
+    dirty = "-dirty" if git("status", "--porcelain", "--untracked-files=no") else ""
+    n = git("rev-list", "--count", f"refs/tags/v{v}..HEAD")
+    if n is None:
+        return f"{v}+{head}{dirty}"
+    return f"{v}{dirty}" if n == "0" else f"{v}+{n}.{head}{dirty}"
 def current_release():
     """The release this checkout is (VERSION): 0.6.3, or a test release such as 0.6.4-rc.1."""
     try:
