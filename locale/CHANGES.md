@@ -124,28 +124,114 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/README.md`
   - now: "1.5 seconds"
 - New in `packs/core/dictation/README.md`
+  - now: "Alternative: D-pad up, left controller"
+- New in `packs/core/dictation/README.md`
+  - now: "Alternative: View, left controller"
+- New in `packs/core/dictation/README.md`
+  - now: "Always shown"
+- New in `packs/core/dictation/README.md`
   - now: "Applies within a second."
+- New in `packs/core/dictation/README.md`
+  - now: "Automatic: hidden while a controller button is set"
 - New in `packs/core/dictation/README.md`
   - now: "Controller button"
 - New in `packs/core/dictation/README.md`
+  - now: "Dictate (toggle) in the + menu"
+- New in `packs/core/dictation/README.md`
   - now: "Hold it for"
 - New in `packs/core/dictation/README.md`
-  - now: "In VR, hold this button on a controller to start dictating, and hold it again to stop. A short press does nothing here. The app in front still gets the press too, so if a game reacts to a long hold, pick the other button or turn it off."
+  - now: "In VR, hold this button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
 - New in `packs/core/dictation/README.md`
-  - now: "Menu, on the right controller (the default)"
+  - now: "Never shown"
 - New in `packs/core/dictation/README.md`
-  - now: "Y, on the right controller"
-- New in `packs/core/dictation/install.sh:72`
-  - now: "In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s)."
+  - now: "Not recommended: A, right controller (the laser's Home over windows)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: Aux, on the headset (the dashboard; a held mouse button on the desktop)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: B, right controller (the laser's Back over windows)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: D-pad down, left controller (the laser's Home)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: D-pad left, left controller (the laser's Back)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: D-pad right, left controller (the laser's middle click)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: X, right controller (the laser's middle click)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: left bumper (a laser click)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: left grip (picks up windows, switches the laser's hand)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: left stick click (the laser's right click)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: left trigger (a laser click; games use it)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: right bumper (a laser click)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: right grip (picks up windows, switches the laser's hand)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: right stick click (the laser's right click)"
+- New in `packs/core/dictation/README.md`
+  - now: "Not recommended: right trigger (a laser click; games use it)"
+- New in `packs/core/dictation/README.md`
+  - now: "Recommended: Menu, right controller (the default)"
+- New in `packs/core/dictation/README.md`
+  - now: "Recommended: Off"
+- New in `packs/core/dictation/README.md`
+  - now: "Recommended: Y, right controller"
+- New in `packs/core/dictation/button-names.sh:21`
+  - now: "Menu on the right controller"
+- New in `packs/core/dictation/button-names.sh:22`
+  - now: "Y on the right controller"
+- New in `packs/core/dictation/button-names.sh:23`
+  - now: "View on the left controller"
+- New in `packs/core/dictation/button-names.sh:24`
+  - now: "d-pad up on the left controller"
+- New in `packs/core/dictation/button-names.sh:25`
+  - now: "A on the right controller"
+- New in `packs/core/dictation/button-names.sh:26`
+  - now: "B on the right controller"
+- New in `packs/core/dictation/button-names.sh:27`
+  - now: "X on the right controller"
+- New in `packs/core/dictation/button-names.sh:28`
+  - now: "d-pad down on the left controller"
+- New in `packs/core/dictation/button-names.sh:29`
+  - now: "d-pad left on the left controller"
+- New in `packs/core/dictation/button-names.sh:30`
+  - now: "d-pad right on the left controller"
+- New in `packs/core/dictation/button-names.sh:31`
+  - now: "the left bumper"
+- New in `packs/core/dictation/button-names.sh:32`
+  - now: "the right bumper"
+- New in `packs/core/dictation/button-names.sh:33`
+  - now: "the left trigger"
+- New in `packs/core/dictation/button-names.sh:34`
+  - now: "the right trigger"
+- New in `packs/core/dictation/button-names.sh:35`
+  - now: "the left grip"
+- New in `packs/core/dictation/button-names.sh:36`
+  - now: "the right grip"
+- New in `packs/core/dictation/button-names.sh:37`
+  - now: "the left stick (pressed in)"
+- New in `packs/core/dictation/button-names.sh:38`
+  - now: "the right stick (pressed in)"
+- New in `packs/core/dictation/button-names.sh:39`
+  - now: "Aux on the headset"
 - New in `packs/core/dictation/install.sh:74`
   - now: "No SteamVR here, so no controller button for dictation; the shortcut works as before."
+- New in `packs/core/dictation/install.sh:75`
+  - now: "No controller button for dictation: choose one in ⚙ Settings (./install.sh settings dictation)."
 - Changed in `packs/core/dictation/install.sh:77`
   - was: "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
   - now: "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s"
+- New in `packs/core/dictation/install.sh:77`
+  - now: "In VR, hold %s to start or stop dictating (another button: ⚙ Settings)."
 - New in `packs/core/dictation/status.sh:11`
   - now: "the controller button isn't running (re-run ./install.sh dictation)"
-- New in `packs/core/dictation/status.sh:13`
-  - now: "dictate ready (%s, small model); hold %s on the right controller"
+- New in `packs/core/dictation/status.sh:12`
+  - now: "dictate ready (%s, small model); no controller button (⚙ Settings)"
+- New in `packs/core/dictation/status.sh:16`
+  - now: "dictate ready (%s, small model); hold %s to dictate"
 - New in `packs/core/vr-memory-guard/README.md`
   - now: "Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
 - New in `packs/core/vr-memory-guard/README.md`

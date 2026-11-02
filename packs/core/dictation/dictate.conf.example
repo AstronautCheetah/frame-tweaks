@@ -9,7 +9,11 @@
 #DICTATE_NOTYPE=1
 # Stop a recording you forgot after this many seconds:
 #DICTATE_MAX_SECONDS=300
-# The controller button that toggles dictation when you hold it, in VR: menu (on the right
-# controller; the default), y, or off. How long to hold it, in seconds:
+# The button that toggles dictation when you hold it, in VR: menu (on the right controller; the
+# default) or y are best; view and dpad_up work too; any other (README.md lists them) does
+# something else as well while held. Or off. How long to hold it, in seconds:
 #DICTATE_BUTTON=menu
 #DICTATE_BUTTON_HOLD=0.6
+# Dictate (toggle) in Steam's VR "+" menu and the desktop's menu: auto (hidden while a controller
+# button is set), yes, or no:
+#DICTATE_MENU=auto

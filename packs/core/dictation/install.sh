@@ -69,9 +69,20 @@ UNITFILE
     if sysctl_user is-active --quiet steamvr.service; then
         sysctl_user restart frame-tweaks-dictate-button.service || true
     fi
-    say "$(t 'In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s).' "$HOME/.config/frame-tweaks/dictate.conf")"
+    # shellcheck source=button-names.sh
+    source "$TWEAK_DIR/button-names.sh"
+    if [ "$(dictate_button)" = off ]; then
+        say "$(t 'No controller button for dictation: choose one in ⚙ Settings (./install.sh settings dictation).')"
+    else
+        say "$(t 'In VR, hold %s to start or stop dictating (another button: ⚙ Settings).' "$(button_name "$(dictate_button)")")"
+    fi
 else
     warn "$(t "No SteamVR here, so no controller button for dictation; the shortcut works as before.")"
 fi
+
+# Dictate (toggle) in the menus, as DICTATE_MENU says (by default hidden while a controller button
+# toggles dictation: dictate-menu).
+install -m755 "$TWEAK_DIR/dictate-menu" "$BIN/dictate-menu"
+"$BIN/dictate-menu" >/dev/null || true
 
 say "$(t "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s" docs/controller-shortcuts.md)"

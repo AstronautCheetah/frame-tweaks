@@ -1,0 +1,34 @@
+#!/bin/bash
+# dictate-menu: show or hide Dictate (toggle) in the app menus (Steam's VR "+" menu and the
+# desktop's), as dictate.conf's DICTATE_MENU says:
+#   auto (the default)  hidden while a controller button toggles dictation, shown otherwise
+#   yes / no            always shown / never shown
+# Run by Dictation's install, and by dictate-button when the settings change. It changes the
+# entry Frame Tweaks wrote and its own record of it (menu-built) alike, so a later install
+# doesn't take the change for one of yours (lib/menuedits.py).
+conf="$HOME/.config/frame-tweaks/dictate.conf"
+setting() { sed -n "s/^[[:space:]]*\(export[[:space:]]\{1,\}\)\{0,1\}$1=[\"']\{0,1\}\([a-z_]*\).*/\2/p" "$conf" 2>/dev/null | tail -1; }
+menu=$(setting DICTATE_MENU); button=$(setting DICTATE_BUTTON)
+show=1
+case ${menu:-auto} in
+    no) show= ;;
+    yes) ;;
+    *) [ "${button:-menu}" = off ] || [ ! -x "$HOME/.local/bin/dictate-button" ] || show= ;;
+esac
+apps="$HOME/.local/share/applications"
+hide=1; [ -z "$show" ] || hide=0
+for f in "$apps/dictate.desktop" "$HOME/.local/share/frame-tweaks/menu-built/dictate.desktop"; do
+    [ -f "$f" ] || continue
+    # (NoDisplay in the [Desktop Entry] group only; the entry's other lines kept as they are)
+    new=$(awk -v hide="$hide" '
+        /^\[/ { group = $0 }
+        group == "[Desktop Entry]" && /^NoDisplay=/ { next }
+        { print }
+        $0 == "[Desktop Entry]" && hide == 1 { print "NoDisplay=true" }' "$f")
+    if [ "$new" != "$(cat "$f")" ]; then
+        printf '%s\n' "$new" > "$f.tmp" && mv -f "$f.tmp" "$f"
+    fi
+done
+update-desktop-database "$apps" 2>/dev/null || true
+touch "$apps" 2>/dev/null || true
+echo "Dictate (toggle) in the menus: $([ -n "$show" ] && echo shown || echo hidden)"

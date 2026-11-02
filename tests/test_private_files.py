@@ -88,7 +88,7 @@ class Dictation(unittest.TestCase):
         self.history.write_text("2026-01-01 10:00:00\tSomething said before.\n")
         self.history.chmod(0o644)
         src = (DICTATION / "install.sh").read_text()
-        tail = src[src.index("# Your dictation history"):src.index('say "$(t "Done.')]   # (its last steps only)
+        tail = src[src.index("# Your dictation history"):src.index("# Hold Menu on the right controller")]   # (that step only)
         script = self.tmp / "install-tail.sh"
         script.write_text(f'source {ROOT / "lib/common.sh"}\n{tail}')
         r = subprocess.run(["bash", str(script)], env=sandbox_env(self.home), capture_output=True, text=True, timeout=60)

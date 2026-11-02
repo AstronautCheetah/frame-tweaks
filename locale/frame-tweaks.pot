@@ -2948,7 +2948,7 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/dictation/README.md packs/core/scroll-strips/README.md
+#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
@@ -3415,7 +3415,23 @@ msgid "1.5 seconds"
 msgstr ""
 
 #: packs/core/dictation/README.md
+msgid "Alternative: D-pad up, left controller"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Alternative: View, left controller"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Always shown"
+msgstr ""
+
+#: packs/core/dictation/README.md
 msgid "Applies within a second."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Automatic: hidden while a controller button is set"
 msgstr ""
 
 #: packs/core/dictation/README.md
@@ -3424,6 +3440,10 @@ msgstr ""
 
 #: packs/core/dictation/README.md
 msgid "Dictate"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Dictate (toggle) in the + menu"
 msgstr ""
 
 #: packs/core/dictation/README.md
@@ -3436,11 +3456,87 @@ msgstr ""
 
 #: packs/core/dictation/README.md
 msgid ""
-"In VR, hold this button on a controller to start dictating, and hold it again to stop. A short press does nothing here. The app in front still gets the press too, so if a game reacts to a long hold, pick the other button or turn it off."
+"In VR, hold this button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid "Menu, on the right controller (the default)"
+msgid "Never shown"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: A, right controller (the laser's Home over windows)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: Aux, on the headset (the dashboard; a held mouse button on the desktop)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: B, right controller (the laser's Back over windows)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: D-pad down, left controller (the laser's Home)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: D-pad left, left controller (the laser's Back)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: D-pad right, left controller (the laser's middle click)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: X, right controller (the laser's middle click)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: left bumper (a laser click)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: left grip (picks up windows, switches the laser's hand)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: left stick click (the laser's right click)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: left trigger (a laser click; games use it)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: right bumper (a laser click)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: right grip (picks up windows, switches the laser's hand)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: right stick click (the laser's right click)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Not recommended: right trigger (a laser click; games use it)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Recommended: Menu, right controller (the default)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Recommended: Off"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Recommended: Y, right controller"
 msgstr ""
 
 #: packs/core/dictation/README.md
@@ -3458,12 +3554,84 @@ msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
 msgstr ""
 
-#: packs/core/dictation/README.md
-msgid "Y, on the right controller"
-msgstr ""
-
 #: packs/core/dictation/README.md packs/core/snip/README.md packs/core/adb-scrcpy/README.md packs/core/homebrew/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/clipboard/README.md
 msgid "uses"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "A on the right controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "Aux on the headset"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "B on the right controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "Menu on the right controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "View on the left controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "X on the right controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "Y on the right controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "d-pad down on the left controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "d-pad left on the left controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "d-pad right on the left controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "d-pad up on the left controller"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the left bumper"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the left grip"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the left stick (pressed in)"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the left trigger"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the right bumper"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the right grip"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the right stick (pressed in)"
+msgstr ""
+
+#: packs/core/dictation/button-names.sh
+msgid "the right trigger"
 msgstr ""
 
 #: packs/core/dictation/check-system.sh
@@ -3529,7 +3697,7 @@ msgstr ""
 
 #: packs/core/dictation/install.sh
 msgid ""
-"In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s)."
+"In VR, hold %s to start or stop dictating (another button: ⚙ Settings)."
 msgstr ""
 
 #: packs/core/dictation/install.sh
@@ -3539,6 +3707,11 @@ msgstr ""
 #: packs/core/dictation/install.sh
 msgid ""
 "No SteamVR here, so no controller button for dictation; the shortcut works as before."
+msgstr ""
+
+#: packs/core/dictation/install.sh
+msgid ""
+"No controller button for dictation: choose one in ⚙ Settings (./install.sh settings dictation)."
 msgstr ""
 
 #: packs/core/dictation/install.sh
@@ -3562,7 +3735,11 @@ msgid "dictate ready (%s, small model)"
 msgstr ""
 
 #: packs/core/dictation/status.sh
-msgid "dictate ready (%s, small model); hold %s on the right controller"
+msgid "dictate ready (%s, small model); hold %s to dictate"
+msgstr ""
+
+#: packs/core/dictation/status.sh
+msgid "dictate ready (%s, small model); no controller button (⚙ Settings)"
 msgstr ""
 
 #: packs/core/dictation/status.sh

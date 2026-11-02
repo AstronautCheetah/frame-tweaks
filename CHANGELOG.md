@@ -67,6 +67,11 @@
   desktop's clipboard.
 
 ### Added
+- **Controller buttons in the installer window are back, in VR:** with the laser on the window,
+  B goes back, Y goes to the top of the list, A ticks or unticks the row you point at, and the
+  left d-pad moves a highlight through the rows. They're read from the controller's model while
+  the laser is on the window; the SteamVR Input version (off since 0.6.2) couldn't work on the
+  Frame, where SteamVR gives button presses only to the app in front.
 - **Dictation on a controller button, in VR:** hold **Menu** on the right controller (about half
   a second, until it ticks) to start dictating, and again to stop, whatever app is in front.
   `DICTATE_BUTTON` picks Y instead, or turns it off; `DICTATE_BUTTON_HOLD` sets how long to hold.
@@ -80,6 +85,11 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Dictation's controller button can be any button:** ⚙ Settings lists Menu, Y and Off as
+  recommended, View and d-pad up as alternatives, and every other button as not recommended but
+  available, each with what else it does while held (the laser's clicks, Home and Back over
+  windows, picking up windows, the dashboard), including the headset's Aux button. The system
+  buttons aren't offered: SteamVR keeps them.
 - **Apply changes asks first, with the list.** Before anything runs, the confirm page says what
   will be installed, by name (with the tweaks those need that aren't installed yet, and which
   ask for the sudo password), and what will be removed, with the settings note. **Apply** goes
@@ -122,6 +132,10 @@
   token. It used to say only "Run 'nordvpn-wg setup' first." and "NordVPN access token (input
   hidden):".
 ### For contributors
+- **`dev/button-test.py`:** a window, in VR on a Frame, showing which buttons Frame Tweaks sees
+  pressed (the controllers' through their model, the headset's Aux key through Linux), red once
+  a press is long, and what the window gets from SteamVR's laser mouse (CONTRIBUTING.md,
+  "Testing controller buttons on a Frame").
 - **`dev/update-check.sh`** checks updates on a Frame: snapshots of the install before and after
   an update, compared (version, signatures, each tweak's status, services, installed programs),
   and a release test that updates copies installed at the last releases, in throwaway homes, and

@@ -5,11 +5,14 @@ source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 [ -f "$HOME/.local/share/whisper/ggml-small-q8_0.bin" ] || grep -qs '^DICTATE_MODEL=' "$HOME/.config/frame-tweaks/dictate.conf" ||
     status_warn "$(t 'Whisper model missing (re-run ./install.sh dictation)')"
 engine=$([ -x "$HOME/.local/lib/whisper-frame/whisper-cli" ] && t "whisper-frame's engine" || echo "Homebrew whisper.cpp")
-button=$(sed -n 's/^[[:space:]]*DICTATE_BUTTON=["'"'"']\{0,1\}\([a-z]*\).*/\1/p' "$HOME/.config/frame-tweaks/dictate.conf" 2>/dev/null | tail -1)
-if [ -x "$BIN/dictate-button" ] && [ "${button:-menu}" != off ]; then
+# shellcheck source=button-names.sh
+source "$TWEAK_DIR/button-names.sh"
+button=$(dictate_button)
+if [ -x "$BIN/dictate-button" ]; then
+    [ "$button" != off ] || status_ok "$(t 'dictate ready (%s, small model); no controller button (⚙ Settings)' "$engine")"
     if sysctl_user is-active --quiet steamvr.service && ! sysctl_user is-active --quiet frame-tweaks-dictate-button.service; then
         status_warn "$(t "the controller button isn't running (re-run ./install.sh dictation)")"
     fi
-    status_ok "$(t 'dictate ready (%s, small model); hold %s on the right controller' "$engine" "$([ "${button:-menu}" = y ] && echo Y || echo Menu)")"
+    status_ok "$(t 'dictate ready (%s, small model); hold %s to dictate' "$engine" "$(button_name "$button")")"
 fi
 status_ok "$(t 'dictate ready (%s, small model)' "$engine")"

@@ -21,12 +21,13 @@ icon: {file: frame-tweaks-dictate.png}
 run: {label: Dictate}
 config: [~/.config/frame-tweaks/dictate.conf]
 changes: >-
-  `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, with SteamVR
+  `~/.local/bin/dictate` and `dictate-menu`, a **Dictate (toggle)** app-menu entry (hidden while
+  a controller button is set, unless you choose otherwise), with SteamVR
   `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`),
   `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history
   of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's
   `whisper-cpp` and `wl-clipboard`
-access: Microphone while recording; types through ydotool; reads the right controller's buttons while SteamVR runs
+access: Microphone while recording; types through ydotool; while SteamVR runs, watches the button you picked (a controller's, or the headset's Aux key through Linux)
 survives_updates: Yes (everything is in your home folder and Homebrew)
 undo: >-
   `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your
@@ -35,19 +36,45 @@ settings:
   file: ~/.config/frame-tweaks/dictate.conf
   format: shell
   about: >-
-    In VR, hold this button on a controller to start dictating, and hold it again to stop. A
-    short press does nothing here. The app in front still gets the press too, so if a game
-    reacts to a long hold, pick the other button or turn it off.
+    In VR, hold this button to start dictating, and hold it again to stop; a short press does
+    nothing here. The app in front still gets every press too, so the buttons are grouped by
+    what else they do: the recommended ones do nothing else on a long hold, the others do (the
+    laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold,
+    pick another.
   note: >-
     Applies within a second.
   options:
+    - key: DICTATE_MENU
+      title: "Dictate (toggle) in the + menu"
+      default: auto
+      choices:
+        - {label: "Automatic: hidden while a controller button is set", value: auto}
+        - {label: Always shown, value: "yes"}
+        - {label: Never shown, value: "no"}
     - key: DICTATE_BUTTON
       title: Controller button
       default: menu
       choices:
-        - {label: "Menu, on the right controller (the default)", value: menu}
-        - {label: "Y, on the right controller", value: "y"}
-        - {label: "Off", value: "off"}
+        - {label: "Recommended: Menu, right controller (the default)", value: menu}
+        - {label: "Recommended: Y, right controller", value: "y"}
+        - {label: "Recommended: Off", value: "off"}
+        - {label: "Alternative: View, left controller", value: view}
+        - {label: "Alternative: D-pad up, left controller", value: dpad_up}
+        - {label: "Not recommended: A, right controller (the laser's Home over windows)", value: a}
+        - {label: "Not recommended: B, right controller (the laser's Back over windows)", value: b}
+        - {label: "Not recommended: X, right controller (the laser's middle click)", value: x}
+        - {label: "Not recommended: D-pad down, left controller (the laser's Home)", value: dpad_down}
+        - {label: "Not recommended: D-pad left, left controller (the laser's Back)", value: dpad_left}
+        - {label: "Not recommended: D-pad right, left controller (the laser's middle click)", value: dpad_right}
+        - {label: "Not recommended: left bumper (a laser click)", value: bumper_left}
+        - {label: "Not recommended: right bumper (a laser click)", value: bumper_right}
+        - {label: "Not recommended: left trigger (a laser click; games use it)", value: trigger_left}
+        - {label: "Not recommended: right trigger (a laser click; games use it)", value: trigger_right}
+        - {label: "Not recommended: left grip (picks up windows, switches the laser's hand)", value: grip_left}
+        - {label: "Not recommended: right grip (picks up windows, switches the laser's hand)", value: grip_right}
+        - {label: "Not recommended: left stick click (the laser's right click)", value: stick_left}
+        - {label: "Not recommended: right stick click (the laser's right click)", value: stick_right}
+        - {label: "Not recommended: Aux, on the headset (the dashboard; a held mouse button on the desktop)", value: aux}
     - key: DICTATE_BUTTON_HOLD
       title: Hold it for
       default: "0.6"
@@ -118,8 +145,21 @@ to use it:
   for faster, less accurate text.
 - `DICTATE_NOTYPE=1`: only copy the text, don't type it.
 - `DICTATE_MAX_SECONDS`: stop a forgotten recording after this many seconds (default 300).
-- `DICTATE_BUTTON`: the controller button you hold to dictate: `menu` (right controller, the
-  default), `y`, or `off`.
+- `DICTATE_MENU`: whether **Dictate (toggle)** is in Steam's VR "+" menu and the desktop's app
+  menu: `auto` (the default: hidden while a controller button is set, shown when it's `off`),
+  `yes` or `no`.
+- `DICTATE_BUTTON`: the button you hold to dictate, or `off`. Every button reaches the app in
+  front too (Dictation can watch a button but not take it), so the choices are grouped by what
+  else that press does:
+
+  | | Buttons | Why |
+  |---|---|---|
+  | **Recommended** | `menu` (right; the default), `y` (right), `off` | Nothing else on the Frame uses a long hold of them: SteamVR's laser and the desktop leave them alone, and most games act on a short press. |
+  | **Alternatives** | `view` (left), `dpad_up` (left) | Also free from the laser and the desktop, but on the left hand, and games use them more. |
+  | **Not recommended** | `a`, `b`, `x`, `dpad_down`, `dpad_left`, `dpad_right`, `bumper_left`, `bumper_right`, `trigger_left`, `trigger_right`, `grip_left`, `grip_right`, `stick_left`, `stick_right`, `aux` | Each already does something while you hold it: the laser's clicks, Home and Back over windows, picking up windows, or (`aux`, the headset's button) the dashboard and, on the desktop, a held mouse button. |
+
+  The system buttons aren't offered: SteamVR keeps them for the dashboard, recentering and
+  screenshots.
 - `DICTATE_BUTTON_HOLD`: how long to hold it, in seconds (default 0.6). Changes to these two
   apply within a second, without reinstalling. They're also in **⚙ Settings** on Dictation's row
   in the Frame Tweaks window, and in `./install.sh settings dictation`.
@@ -172,8 +212,8 @@ to use it:
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
-- **Unusual access:** Microphone while recording; types through ydotool; reads the right controller's buttons while SteamVR runs
+- **Changes:** `~/.local/bin/dictate` and `dictate-menu`, a **Dictate (toggle)** app-menu entry (hidden while a controller button is set, unless you choose otherwise), with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
+- **Unusual access:** Microphone while recording; types through ydotool; while SteamVR runs, watches the button you picked (a controller's, or the headset's Aux key through Linux)
 - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
 <!-- /generated:changes -->
 

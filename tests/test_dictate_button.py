@@ -38,6 +38,47 @@ class Settings(unittest.TestCase):
         self.assertEqual(db.settings("DICTATE_BUTTON_HOLD=60"), ("menu", 3.0))
 
 
+class EveryButton(unittest.TestCase):
+    """Every DICTATE_BUTTON value the settings page offers is one dictate-button reads, and the
+    other way round; the system buttons aren't among them (SteamVR keeps them)."""
+
+    def test_settings_page_and_buttons_agree(self):
+        import manifest
+        meta, _ = manifest.front_matter((DICTATION / "README.md").read_text())
+        opt = next(o for o in meta["settings"]["options"] if o["key"] == "DICTATE_BUTTON")
+        offered = {c["value"] for c in opt["choices"]}
+        self.assertEqual(offered, set(db.BUTTONS) | {"off"})
+        for value in offered:
+            self.assertEqual(db.settings(f"DICTATE_BUTTON={value}")[0], None if value == "off" else value)
+        self.assertFalse([b for b in db.BUTTONS if "system" in db.BUTTONS[b][1]])
+        tiers = [c["label"].split(":")[0] for c in opt["choices"]]
+        self.assertEqual(tiers, sorted(tiers, key=["Recommended", "Alternative", "Not recommended"].index))
+
+
+class Aux(unittest.TestCase):
+    """The headset's Aux button, read from its input device without taking it: KEY_SELECT down
+    and up, other keys and auto-repeat ignored; None without the device."""
+
+    def events(self, *evs):
+        f = tempfile.NamedTemporaryFile(delete=False)
+        self.addCleanup(Path(f.name).unlink)
+        for kind, code, value in evs:
+            f.write(db.EVENT.pack(0, 0, kind, code, value))
+        f.close()
+        return f.name
+
+    def test_key_select_down_and_up(self):
+        r = db.AuxReader(self.events((1, 353, 1), (0, 0, 0), (1, 115, 1)))     # (Aux down, a sync, volume up)
+        self.assertIs(r.pressed(), True)
+        self.assertIs(r.pressed(), True)                                       # (still held: nothing new)
+        r2 = db.AuxReader(self.events((1, 353, 1), (1, 353, 2), (1, 353, 0)))  # (down, repeat, up)
+        self.assertIs(r2.pressed(), False)
+        self.assertIsNone(r2.device)                                           # (no controller to tick)
+
+    def test_none_without_the_device(self):
+        self.assertIsNone(db.AuxReader("/nonexistent/event99").pressed())
+
+
 class HoldToToggle(unittest.TestCase):
     def feed(self, samples, seconds=0.6):
         """samples: (time, down); the times it fired."""
@@ -106,6 +147,124 @@ class Reader(unittest.TestCase):
         vr.device = vr.k_unTrackedDeviceIndexInvalid
         self.assertIsNone(r.pressed())
         self.assertIsNone(r.device)
+
+
+class MenuEntry(unittest.TestCase):
+    """DICTATE_MENU: Dictate (toggle) hidden in the menus (NoDisplay) while a controller button
+    is set (auto, the default), or always shown or hidden; the entry and Frame Tweaks' record of
+    it change alike, only NoDisplay in [Desktop Entry]; the option sits above the button's."""
+
+    ENTRY = "[Desktop Entry]\nType=Application\nName=Dictate (toggle)\nNoDisplay=false\n\n[Desktop Action x]\nNoDisplay=keep\n"
+
+    def run_menu(self, conf, button_tool=True):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            entries = [home / ".local/share/applications/dictate.desktop",
+                       home / ".local/share/frame-tweaks/menu-built/dictate.desktop"]
+            for e in entries:
+                e.parent.mkdir(parents=True)
+                e.write_text(self.ENTRY)
+            (home / ".config/frame-tweaks").mkdir(parents=True)
+            (home / ".config/frame-tweaks/dictate.conf").write_text(conf)
+            if button_tool:
+                stub(home / ".local/bin", "dictate-button", "true")
+            env = sandbox_env(home)
+            for _ in range(2):                                   # (a second run changes nothing)
+                r = subprocess.run(["bash", str(DICTATION / "dictate-menu")], env=env, capture_output=True,
+                                   text=True, timeout=30)
+                self.assertEqual(r.returncode, 0, r.stderr)
+            texts = [e.read_text() for e in entries]
+            self.assertEqual(texts[0], texts[1])
+            self.assertIn("NoDisplay=keep", texts[0])             # (another group's line kept)
+            main = texts[0].split("\n\n")[0]
+            self.assertLessEqual(main.count("NoDisplay="), 1)
+            return "NoDisplay=true" in main
+
+    def test_auto_hides_while_a_button_is_set(self):
+        self.assertTrue(self.run_menu(""))                                     # (the defaults: Menu, auto)
+        self.assertFalse(self.run_menu("DICTATE_BUTTON=off\n"))
+        self.assertFalse(self.run_menu("", button_tool=False))                 # (no SteamVR, no button)
+
+    def test_always_or_never(self):
+        self.assertFalse(self.run_menu("DICTATE_MENU=yes\n"))
+        self.assertTrue(self.run_menu("DICTATE_MENU='no'\nDICTATE_BUTTON=off\n"))
+
+    def test_the_menu_option_comes_before_the_buttons(self):
+        import manifest
+        meta, _ = manifest.front_matter((DICTATION / "README.md").read_text())
+        keys = [o["key"] for o in meta["settings"]["options"]]
+        self.assertLess(keys.index("DICTATE_MENU"), keys.index("DICTATE_BUTTON"))
+
+
+class StatusLine(unittest.TestCase):
+    """Dictation's status line (the window's tip for it) names the button that's chosen, says so
+    when it's off, takes a value it doesn't know as Menu (as dictate-button does), and says
+    nothing of a button without SteamVR (no dictate-button)."""
+
+    def status(self, conf, button_tool=True):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            stub(home / ".local/bin", "dictate", "true")
+            if button_tool:
+                stub(home / ".local/bin", "dictate-button", "true")
+            (home / ".local/share/whisper").mkdir(parents=True)
+            (home / ".local/share/whisper/ggml-small-q8_0.bin").write_text("")
+            (home / ".config/frame-tweaks").mkdir(parents=True)
+            (home / ".config/frame-tweaks/dictate.conf").write_text(conf)
+            stubs = home / "stubs"
+            stub(stubs, "whisper-cli", "true")
+            stub(stubs, "systemctl", "exit 3")                       # (SteamVR not running)
+            r = subprocess.run(["bash", str(DICTATION / "status.sh")], env=sandbox_env(home, stubs),
+                               capture_output=True, text=True, timeout=30)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            return r.stdout.strip()
+
+    def test_names_the_chosen_button(self):
+        self.assertIn("hold Menu on the right controller to dictate", self.status(""))
+        self.assertIn("hold Y on the right controller to dictate", self.status("DICTATE_BUTTON=y\n"))
+        self.assertIn("hold d-pad up on the left controller to dictate", self.status("DICTATE_BUTTON=dpad_up\n"))
+        self.assertIn("hold Aux on the headset to dictate", self.status('DICTATE_BUTTON="aux"\n'))
+        self.assertIn("hold the left grip to dictate", self.status("DICTATE_BUTTON=grip_left\n"))
+        self.assertIn("hold Menu on the right controller", self.status("DICTATE_BUTTON=trigger\n"))   # (unknown: Menu)
+
+    def test_off_and_without_steamvr(self):
+        self.assertIn("no controller button", self.status("DICTATE_BUTTON=off\n"))
+        plain = self.status("DICTATE_BUTTON=y\n", button_tool=False)
+        self.assertNotIn("hold", plain)
+        self.assertNotIn("controller", plain)
+
+    def test_every_button_has_a_name(self):
+        names = (DICTATION / "button-names.sh").read_text()
+        for value in db.BUTTONS:
+            self.assertIn(f"\n        {value}) t '", names, value)
+
+
+class DpadDirection(unittest.TestCase):
+    """The d-pad is one part of the model, tilted about one axis per direction (measured on a
+    Frame): each axis is its direction, a diagonal (10°, between two) is none, and so is a part
+    barely tilted."""
+
+    @staticmethod
+    def turned(axis, degrees):
+        """A rest pose (identity) and the pose turned by degrees about axis, as m rows."""
+        x, y, z = axis
+        n = (x * x + y * y + z * z) ** 0.5
+        x, y, z = x / n, y / n, z / n
+        import math
+        c, s, t = math.cos(math.radians(degrees)), math.sin(math.radians(degrees)), 1 - math.cos(math.radians(degrees))
+        rot = [[t * x * x + c, t * x * y - s * z, t * x * z + s * y, 0],
+               [t * x * y + s * z, t * y * y + c, t * y * z - s * x, 0],
+               [t * x * z - s * y, t * y * z + s * x, t * z * z + c, 0]]
+        ident = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]
+        return types.SimpleNamespace(m=ident), types.SimpleNamespace(m=rot)
+
+    def test_each_direction_and_not_diagonals(self):
+        for name, axis in vrkit.DPAD_AXES.items():
+            self.assertEqual(vrkit.dpad_direction(*vrkit.rotation_axis(*self.turned(axis, 7))), name)
+        up, left = vrkit.DPAD_AXES["dpad_up"], vrkit.DPAD_AXES["dpad_left"]
+        diagonal = tuple(a + b for a, b in zip(up, left))
+        self.assertIsNone(vrkit.dpad_direction(*vrkit.rotation_axis(*self.turned(diagonal, 10))))
+        self.assertIsNone(vrkit.dpad_direction(*vrkit.rotation_axis(*self.turned(up, 1))))
 
 
 class InstallService(unittest.TestCase):

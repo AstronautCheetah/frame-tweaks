@@ -9,9 +9,19 @@ Frame, SteamVR hands button actions only to that app, so the button is read from
 the controller's model (lib/vrkit.py ButtonReader), which can watch it but not take it.
 
 Settings, in ~/.config/frame-tweaks/dictate.conf (read again when the file changes):
-  DICTATE_BUTTON=menu | y | off      (default menu)
-  DICTATE_BUTTON_HOLD=0.6            (seconds, 0.2 to 3)"""
+  DICTATE_BUTTON=menu                (recommended: menu, y; alternatives: view, dpad_up; not
+                                      recommended, as SteamVR's laser, the desktop or games use
+                                      them: a, b, x, dpad_down, dpad_left, dpad_right, bumper_left,
+                                      bumper_right, trigger_left, trigger_right, grip_left,
+                                      grip_right, stick_left, stick_right, aux; or off)
+  DICTATE_BUTTON_HOLD=0.6            (seconds, 0.2 to 3)
+  DICTATE_MENU=auto                  (Dictate (toggle) in the menus: auto, hidden while a button
+                                      is set; yes; no. Applied by dictate-menu when they change.)
+aux is the headset's Aux button, read from Linux (gpio-keys, KEY_SELECT) without taking it: it
+still opens the dashboard, and in desktop mode a held Aux is a held mouse button."""
+import glob
 import os
+import struct
 import subprocess
 import sys
 import time
@@ -21,7 +31,20 @@ sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".l
 
 CONF = Path(os.environ.get("FRAME_TWEAKS_DICTATE_CONF") or Path.home() / ".config/frame-tweaks/dictate.conf")
 DICTATE = Path.home() / ".local/bin/dictate"
-BUTTONS = {"menu": ("right", "button_menu"), "y": ("right", "button_y")}
+# DICTATE_BUTTON's values: the controller and the part of its model each one reads (aux: the
+# headset, through Linux). The settings page lists them by how well they suit (README.md).
+BUTTONS = {"menu": ("right", "button_menu"), "y": ("right", "button_y"),
+           "view": ("left", "button_view"), "dpad_up": ("left", "dpad_up"),
+           "a": ("right", "button_a"), "b": ("right", "button_b"), "x": ("right", "button_x"),
+           "dpad_down": ("left", "dpad_down"), "dpad_left": ("left", "dpad_left"),
+           "dpad_right": ("left", "dpad_right"),
+           "bumper_left": ("left", "bumper"), "bumper_right": ("right", "bumper"),
+           "trigger_left": ("left", "trigger"), "trigger_right": ("right", "trigger"),
+           "grip_left": ("left", "button_grip"), "grip_right": ("right", "button_grip"),
+           "stick_left": ("left", "thumbstick"), "stick_right": ("right", "thumbstick"),
+           "aux": ("headset", "aux")}
+KEY_SELECT, EV_KEY = 353, 1
+EVENT = struct.Struct("qqHHi")              # (struct input_event on 64-bit Linux)
 DEFAULT_BUTTON, DEFAULT_HOLD = "menu", 0.6
 POLL_S = 1 / 30
 
@@ -67,11 +90,68 @@ class Hold:
         return False
 
 
+class AuxReader:
+    """The headset's Aux button: KEY_SELECT on the gpio-keys input device, read without grabbing
+    it or changing its keymap, so SteamVR and the desktop still get it as before."""
+    device = None                           # (no controller: no haptic tick)
+
+    def __init__(self, path=None):
+        self.down, self.fd = False, None
+        path = path or os.environ.get("FRAME_TWEAKS_AUX_DEVICE") or self.find()
+        if path:
+            try:
+                self.fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+            except OSError:
+                self.fd = None
+
+    @staticmethod
+    def find():
+        for p in sorted(glob.glob("/sys/class/input/event*")):
+            try:
+                if Path(p, "device/name").read_text().strip() == "gpio-keys":
+                    return "/dev/input/" + os.path.basename(p)
+            except OSError:
+                continue
+        return None
+
+    def pressed(self):
+        """True or False; None without the device (or permission to read it)."""
+        if self.fd is None:
+            return None
+        while True:
+            try:
+                data = os.read(self.fd, EVENT.size * 32)
+            except BlockingIOError:
+                break
+            except OSError:
+                return None
+            if not data:
+                break
+            for i in range(0, len(data) - EVENT.size + 1, EVENT.size):
+                _, _, kind, code, value = EVENT.unpack_from(data, i)
+                if kind == EV_KEY and code == KEY_SELECT and value in (0, 1):
+                    self.down = value == 1
+        return self.down
+
+
+def reader_for(vr, vrkit, button):
+    hand, part = BUTTONS[button]
+    return AuxReader() if hand == "headset" else vrkit.ButtonReader(vr, hand, part)
+
+
 def read_settings():
     try:
         return settings(CONF.read_text())
     except OSError:
         return DEFAULT_BUTTON, DEFAULT_HOLD
+
+
+def apply_menu():
+    """Dictate (toggle) shown or hidden in the menus, as the settings now say (dictate-menu)."""
+    menu = DICTATE.parent / "dictate-menu"
+    if menu.exists():
+        subprocess.run([str(menu)], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, check=False)
 
 
 def toggle():
@@ -111,7 +191,8 @@ def main():
         if m != mtime:
             mtime = m
             button, seconds = read_settings()
-            reader = vrkit.ButtonReader(vr, *BUTTONS[button]) if button else None
+            apply_menu()
+            reader = reader_for(vr, vrkit, button) if button else None
             hold = Hold(seconds)
         if reader is None:                  # (off: just follow the settings and SteamVR)
             time.sleep(1)
