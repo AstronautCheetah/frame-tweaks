@@ -215,6 +215,8 @@ it's translated here, in « » (no article inside the quotes).
 | Firefox privacy | Confidentialité de Firefox | |
 | Mouse cursor fix | Correctif du curseur de la souris | |
 | Menu icons | Icônes des menus | |
+| VR memory guard | Protection de la mémoire VR | la Protection de la mémoire VR |
+| Performance Overlay, KnockThru (linked projects) | unchanged | |
 | Homebrew, ydotool (helper), NordVPN (WireGuard) | unchanged (helper: auxiliaire) | |
 | NordVPN Tray (menu entry) | NordVPN (zone de notification) | |
 | Lock Wallet (menu entry, README button) | Verrouiller le portefeuille | |

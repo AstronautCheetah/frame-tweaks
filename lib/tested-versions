@@ -5,7 +5,7 @@
 scrcpy=5.0.1
 android-tools=37.0.0.p1-1
 ydotool=1.0.4-3
-# What SteamOS provides (the Frame, build 20261007): an Arch Linux ARM build needing more is
+# What SteamOS provides (the Frame: 0.4.5 build 20261007, the same on 0.5.6 build 20261022): an Arch Linux ARM build needing more is
 # flagged before anyone installs it.
 steamos-glibc=2.39
 steamos-glibcxx=3.4.34

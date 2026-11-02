@@ -194,6 +194,7 @@ messages, status lines), so a title can be found in the list.
 | Mouse cursor fix / Menu icons | Herstel van de muisaanwijzer / Menupictogrammen |
 | a VR environment tweak (the category) | een aanpassing voor de VR-omgeving |
 | NordVPN Tray (menu) / App timers (notifications) | NordVPN-systeemvak / Apptimers |
+| VR memory guard / Performance Overlay / KnockThru | Geheugenbewaker voor VR / Performance Overlay / KnockThru (linked projects' names stay) |
 
 | Wallet apps page (🔑) | Dutch |
 |---|---|
