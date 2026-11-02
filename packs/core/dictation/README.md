@@ -117,6 +117,7 @@ settings:
   actions:
     - label: Apply
       script: engine.sh
+      keys: [DICTATE_ENGINE, DICTATE_KEEP_LOADED]
       about: Downloads Parakeet if it's chosen, and loads or stops the engine as chosen.
 test:
   offline: true

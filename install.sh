@@ -859,7 +859,11 @@ stop_processes() {
 # optional migrate.sh runs before its install.sh when that recorded version is older, with the
 # old version as $1 (e.g. to move a setting to a new place).
 record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; }
-forget_version() { rm -f "$STATE/installed/$1"; }
+forget_version() {
+    rm -f "$STATE/installed/$1"
+    # (and what its Apply last applied: lib/sft.py forget_applied)
+    [ ! -f "$STATE/settings-applied.json" ] || python3 lib/sft.py settings-applied --forget "$1" || true
+}
 held() { [[ -f "$STATE/held/$1" ]]; }
 # An update marks itself (UPDATE_MARK) from the moment it has moved the checkout until it has run the
 # tweaks' installers again: left behind, it was cut short (its terminal closed, Ctrl+C), and the

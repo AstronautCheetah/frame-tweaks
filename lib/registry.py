@@ -234,9 +234,12 @@ def check_settings(st, cid, where):
         if not (isinstance(a, dict) and isinstance(a.get("label"), str) and isinstance(a.get("script"), str)
                 and not Path(a["script"]).is_absolute() and ".." not in Path(a["script"]).parts
                 and isinstance(a.get("args", []), list) and all(isinstance(x, str) for x in a.get("args", []))
-                and isinstance(a.get("when", ""), str) and isinstance(a.get("about", ""), str)):
+                and isinstance(a.get("when", ""), str) and isinstance(a.get("about", ""), str)
+                and isinstance(a.get("keys", []), list)):
             errs.append(f"{where}: each settings action needs a label and a script in the tweak's folder "
-                        "(args, when, about optional)")
+                        "(args, when, about, keys optional)")
+        elif any(k not in {o.get("key") for o in opts if isinstance(o, dict)} for k in a.get("keys", [])):
+            errs.append(f"{where}: {a['label']}: keys: only this tweak's own options (what the action applies)")
     return errs
 
 

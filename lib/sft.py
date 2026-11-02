@@ -24,6 +24,9 @@ Command line (through ./install.sh):
   sft.py run-label ID                   the Run button's label (nothing if the tweak has none)
   sft.py settings ID                    current settings, and what each can be set to
   sft.py settings ID KEY=VALUE...       change them (VALUE: a listed value or its label)
+  sft.py settings-applied ID            note the settings its Apply applies as applied now (its script
+                                        runs it, from the install or the Apply button)
+  sft.py settings-applied --forget ID   drop that note (./install.sh, as it uninstalls ID)
   sft.py settings ID --reset            back to the defaults
 For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID, link ID FIELD,
 apps, uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
@@ -347,6 +350,42 @@ def _allowed(cid, key, value):
                for _, v in choices)
 
 
+# The settings an action applies (its keys:, such as Dictation's engine for its Apply), as they were the
+# last time its script ran: the window dims the action while nothing of them has changed since, as it
+# dims Apply changes. The script records them (sft.py settings-applied, lib/common.sh settings_applied),
+# so an install counts as well as the button. No record yet (installed before there was one): the
+# defaults, which an install applies.
+APPLIED = STATE / "settings-applied.json"
+
+
+def apply_keys(cid):
+    return [k for a in SETTINGS[cid]["actions"] for k in a.get("keys", [])]
+
+
+def applied(cid):
+    rec = ftconf.read_json(APPLIED).get(cid)
+    rec = rec if isinstance(rec, dict) else {}
+    base = defaults(cid)
+    return {k: rec.get(k, base[k]) for k in apply_keys(cid)}
+
+
+def unapplied(cid, keys=None):
+    """The keys (of keys, or all the ones its actions apply) chosen differently from what was applied."""
+    now, was = read_settings(cid), applied(cid)
+    return [k for k in (keys if keys is not None else apply_keys(cid)) if now[k] != was[k]]
+
+
+def record_applied(cid):
+    now = read_settings(cid)
+    ftconf.update_json(APPLIED, {cid: {k: now[k] for k in apply_keys(cid)}})
+
+
+def forget_applied(cid):
+    """Its record goes with the tweak (uninstalled: nothing of it is applied); the file with the last."""
+    if APPLIED.exists() and not ftconf.update_json(APPLIED, drop=[cid]):
+        APPLIED.unlink(missing_ok=True)
+
+
 def read_settings(cid):
     """Current values (defaults for anything unset or not allowed)."""
     s, out = SETTINGS[cid], defaults(cid)
@@ -481,6 +520,10 @@ def main(argv):
         set_category_hidden(names[name], cmd == "hide-group")
         print((_("Group {name} hidden in the installer window.") if cmd == "hide-group" else
                _("Group {name} shown in the installer window.")).format(name=repr(name)))
+    elif cmd == "settings-applied" and len(args) == 1 and args[0] in SETTINGS:
+        record_applied(args[0])
+    elif cmd == "settings-applied" and len(args) == 2 and args[0] == "--forget":
+        forget_applied(args[1])
     elif cmd == "mods":
         mods(args)
     elif cmd == "not-needed":                   # ID<TAB>why, for the tweaks this Frame doesn't need
@@ -574,6 +617,9 @@ def main(argv):
                     sys.exit(str(e))
             write_settings(cid, changes)
         print(show_settings(cid))
+        if unapplied(cid):          # (the window's Apply; an install applies them too)
+            print(_("Not applied yet: {keys}. To apply them: ./install.sh {id}").format(
+                keys=", ".join(unapplied(cid)), id=cid))
     else:
         sys.exit(__doc__)
 

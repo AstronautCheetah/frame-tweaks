@@ -1058,6 +1058,10 @@ msgid "📋 Copy the report"
 msgstr ""
 
 #: gui/settings_page.py
+msgid " or "
+msgstr ""
+
+#: gui/settings_page.py
 msgid "Another action is still running: try again once it's done."
 msgstr ""
 
@@ -1071,6 +1075,10 @@ msgstr ""
 
 #: gui/settings_page.py lib/splash.py packs/core/snip/frame-snip install.sh
 msgid "Done."
+msgstr ""
+
+#: gui/settings_page.py
+msgid "Nothing to apply: change %s first"
 msgstr ""
 
 #: gui/settings_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
@@ -2065,6 +2073,10 @@ msgstr ""
 
 #: lib/sft.py
 msgid "Needs: %s"
+msgstr ""
+
+#: lib/sft.py
+msgid "Not applied yet: {keys}. To apply them: ./install.sh {id}"
 msgstr ""
 
 #: lib/sft.py

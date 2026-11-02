@@ -674,6 +674,38 @@ class PageActions(unittest.TestCase):
                 self.assertEqual(alone.sections[0].actions[0][1].text(), "Apply")
 
 
+    def test_apply_is_dimmed_until_a_setting_it_applies_changes(self):
+        """As Apply changes on the main page: an Apply (an action with keys:) is dimmed while what
+        it applies is as it last applied it, with a tooltip saying what to change; choosing another
+        value brings it up; another setting doesn't."""
+        from PyQt6.QtWidgets import QApplication, QLabel, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            opts = [("ENGINE", "Engine", [("A", "a"), ("B", "b")], "a"), ("OTHER", "Other", [("X", "x"), ("Y", "y")], "x")]
+            spec = {"file": d / "x.conf", "format": "shell", "about": "", "note": "", "options": opts,
+                    "actions": [{"label": "Apply", "script": "a.sh", "dir": d, "about": "Applies it.", "keys": ["ENGINE"]}],
+                    "checkboxes": set(), "swatches": set(), "include": []}
+            with mock.patch.dict(gui.sft.SETTINGS, {"x-test": spec}), \
+                    mock.patch.object(gui.sft, "APPLIED", d / "applied.json"), mock.patch.dict(os.environ):
+                os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+                p = QWidget()
+                self.addCleanup(p.deleteLater)
+                section = gui.SettingsSection("x-test", QLabel(p))
+                apply_ = section.actions[0][1]
+                self.assertEqual(apply_.objectName(), "apply")
+                self.assertFalse(apply_.isEnabled())
+                self.assertEqual(apply_.toolTip(), "Nothing to apply: change Engine first")
+                section.choose("OTHER", "y")
+                self.assertFalse(apply_.isEnabled())
+                section.choose("ENGINE", "b")
+                self.assertTrue(apply_.isEnabled())
+                self.assertEqual(apply_.toolTip(), "Applies it.")
+                gui.sft.record_applied("x-test")            # (what its script does at the end)
+                section.show_actions()
+                self.assertFalse(apply_.isEnabled())
+
+
 class Links(unittest.TestCase):
     """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
     def test_with_copy(self):

@@ -79,6 +79,24 @@ class ReadWrite(unittest.TestCase):
         self.assertEqual(f.read_text(), 'PHONE_NAME="x"\n')
         self.assertEqual(f.read_text(), 'PHONE_NAME="x"\n')
 
+    def test_apply_counts_what_its_script_last_applied(self):
+        """Dictation's Apply applies its engine settings: nothing to apply until one is chosen
+        differently from what its script last applied (no record yet: the defaults, as installed);
+        recording them (its script does: sft.py settings-applied) leaves nothing to apply again.
+        Settings its Apply doesn't apply (the button) never count."""
+        sft.SETTINGS["dictation"]["file"] = Path(self.d.name) / "dictate.conf"
+        with mock.patch.object(sft, "APPLIED", Path(self.d.name) / "applied.json"):
+            self.assertEqual(sft.apply_keys("dictation"), ["DICTATE_ENGINE", "DICTATE_KEEP_LOADED"])
+            self.assertEqual(sft.unapplied("dictation"), [])
+            sft.write_settings("dictation", {"DICTATE_BUTTON": "y"})
+            self.assertEqual(sft.unapplied("dictation"), [])
+            sft.write_settings("dictation", {"DICTATE_ENGINE": "parakeet"})
+            self.assertEqual(sft.unapplied("dictation"), ["DICTATE_ENGINE"])
+            sft.record_applied("dictation")
+            self.assertEqual(sft.unapplied("dictation"), [])
+            sft.write_settings("dictation", {}, reset=True)            # (back to Whisper: to apply again)
+            self.assertEqual(sft.unapplied("dictation"), ["DICTATE_ENGINE"])
+
     def test_helper_and_module_write_alike(self):
         a = sft.SETTINGS["adb-scrcpy"]["file"]
         b = Path(self.d.name) / "other.conf"

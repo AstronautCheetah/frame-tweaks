@@ -64,6 +64,7 @@ exec env FRAME_TWEAKS_LIB="$FRAME_TWEAKS_LIB" bash "$TWEAK_DIR/install.sh"
 APPLY
 # What Narrate reads (frame-snip): the engine, and eSpeak NG's voice for this language.
 printf 'engine=%s\nespeak_voice=%s\nlanguage=%s\n' "${engine:-piper}" "$espeak_voice" "$lang" > "$D/narrate.conf"
+settings_applied          # (Narrate reads narrate.conf: the voice chosen is the one in use now)
 
 narrator=$([ "$engine" = espeak-ng ] && echo "eSpeak NG" || echo Piper)
 C="$HOME/.config/speech-dispatcher"

@@ -276,6 +276,16 @@ install_i18n() {
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }
 sha_ok() { [ -n "$1" ] && echo "$1  $2" | sha256sum -c --quiet - 2>/dev/null; }
+# settings_applied: the settings this tweak's Apply applies (its manifest's settings: actions: keys:)
+# are applied now, as chosen: its script says so at the end, from an install or the Apply button, and
+# the window dims Apply until one of them changes (lib/sft.py record_applied).
+settings_applied() {
+    python3 "$REPO_DIR/lib/sft.py" settings-applied "$(basename "$TWEAK_DIR")" >/dev/null 2>&1 || true
+}
+# settings_unapplied: its uninstall says nothing of it is applied any more (the record goes).
+settings_unapplied() {
+    python3 "$REPO_DIR/lib/sft.py" settings-applied --forget "$(basename "$TWEAK_DIR")" >/dev/null 2>&1 || true
+}
 # newest_tag: the newest release tag from the tag names on stdin. Stable (vX.Y.Z) only, unless
 # the channel is beta (FRAME_TWEAKS_CHANNEL=beta, or "beta" in ~/.config/frame-tweaks/channel),
 # which adds pre-releases (vX.Y.Z-rc1) ranked below their final version.

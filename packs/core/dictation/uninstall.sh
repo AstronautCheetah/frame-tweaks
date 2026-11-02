@@ -9,6 +9,7 @@ remove_files "$BIN/dictate" "$BIN/dictate-button" "$BIN/dictate-menu" "$BIN/dict
     "$HOME/.config/systemd/user/frame-tweaks-dictate-engine.service" \
     "$HOME/.local/share/whisper/ggml-silero-v6.2.0.bin" "$HOME/.local/share/frame-tweaks/parakeet"
 sysctl_user daemon-reload || true
+settings_unapplied
 if [ -x "$BIN/whisper-ptt" ]; then
     say "$(t 'Kept the Whisper model: whisper-frame uses it too.')"
 else

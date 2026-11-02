@@ -128,14 +128,25 @@ class SettingsSection(QWidget):
             self.actions.append((a, b))
         self.commands = {"\0".join(action_command(a)) for a in self.spec["actions"]}
         self.suffix = ""                             # (SettingsPage: which section's, when two share a label)
+        self.busy = False                            # (one of its actions running: all dimmed)
         self.show_actions()
 
     def show_actions(self):
+        """Each action's label and whether it shows; an Apply (an action with keys:) dimmed, as the
+        main page's Apply changes is, while none of the settings it applies has changed since it
+        last ran (lib/sft.py applied)."""
+        titles = {key: label for key, label, _choices, _default in self.spec["options"]}
         for a, b in self.actions:
             value = sft.raw_setting(self.cid, a["when"]) if a.get("when") else ""
             b.setText(re.sub(r"\{(\w+)\}", lambda m: sft.raw_setting(self.cid, m[1]), a["label"]) + self.suffix)
             # (setHidden, not setVisible: a button not yet in a shown window mustn't pop up on its own)
             b.setHidden(bool(a.get("when")) and not value)
+            keys = a.get("keys")
+            pending = sft.unapplied(self.cid, keys) if keys else True
+            b.setEnabled(not self.busy and bool(pending))
+            if keys:
+                b.setToolTip(a.get("about", "") if pending else
+                             _("Nothing to apply: change %s first") % _(" or ").join(titles[k] for k in keys))
 
     def act(self, a):
         """Run the action's script in the background (a download can take a while); its last line
@@ -163,15 +174,14 @@ class SettingsSection(QWidget):
         """Working… on this section's page until proc, its action, ends (started here, or from a
         page closed since); then how it went (action_said)."""
         self.notice.setText(_("Working… (a download can take a minute)"))
-        for _a, b in self.actions:
-            b.setEnabled(False)
+        self.busy = True
+        self.show_actions()
 
         def done(*_args):
             if sip.isdeleted(self):             # (its page was closed meanwhile)
                 return
             self.notice.setText(proc.property("said") or _("Done."))
-            for _a, b in self.actions:
-                b.setEnabled(True)
+            self.busy = False
             self.show_actions()
         proc.finished.connect(done)
 
@@ -189,6 +199,7 @@ class SettingsSection(QWidget):
             return
         sft.write_settings(self.cid, {key: value})
         self.notice.setText(_("Saved.") + " " + self.spec["note"])
+        self.show_actions()
 
     def reset(self):
         self.conf = sft.defaults(self.cid)
@@ -198,6 +209,7 @@ class SettingsSection(QWidget):
             return
         sft.write_settings(self.cid, {}, reset=True)
         self.notice.setText(_("Back to the defaults.") + " " + self.spec["note"])
+        self.show_actions()
 
 
 class SettingsPage(QWidget):

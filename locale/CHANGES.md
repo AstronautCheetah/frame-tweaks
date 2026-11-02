@@ -134,6 +134,10 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `gui/packs_page.py:278`
   - was: "It isn't used until you trust it again: read what changed first, then Trust… below."
   - now: "It isn't used until you trust it again: read what changed first, then Trust below."
+- New in `gui/settings_page.py:149`
+  - now: " or "
+- New in `gui/settings_page.py:149`
+  - now: "Nothing to apply: change %s first"
 - New in `gui/wallet_page.py:523`
   - now: "Terminal tools ({n})"
 - New in `gui/wallet_page.py:526`
@@ -154,6 +158,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Your user has no password yet, so sudo can't work."
 - New in `lib/common.sh:92`
   - now: "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
+- New in `lib/sft.py:1394`
+  - now: "Not applied yet: {keys}. To apply them: ./install.sh {id}"
 - New in `packs/core/dictation/README.md`
   - now: "0.4 seconds"
 - New in `packs/core/dictation/README.md`

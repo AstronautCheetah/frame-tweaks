@@ -32,6 +32,7 @@ elif [ -d "$P" ]; then
     say "$(t 'Dictation uses Whisper. Parakeet stays downloaded (~/.local/share/frame-tweaks/parakeet): uninstalling Dictation removes it.')"
 fi
 "$BIN/dictate" --apply
+settings_applied
 case $(setting DICTATE_KEEP_LOADED) in
     yes) say "$(t 'The engine stays loaded between dictations.')" ;;
 esac

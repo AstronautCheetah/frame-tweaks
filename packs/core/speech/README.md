@@ -57,6 +57,7 @@ settings:
   actions:
     - label: Apply
       script: install.sh
+      keys: [SPEECH_ENGINE, SPEECH_LANGUAGE]
       about: Downloads the chosen language's voice if needed and switches to it.
 changes: >-
   Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned);

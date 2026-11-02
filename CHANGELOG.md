@@ -120,6 +120,9 @@
 - **⚙ Settings: Apply is always in view.** A settings page's actions (Apply, Forget the phone,
   Charge to 100% once) sit at the top right beside its title, not after the last option, which
   on Dictation's page was several screens down in VR; what each does is its tooltip.
+  Apply is dimmed, as Apply changes is on the main page, until you choose something it applies
+  (Dictation's engine or keeping it loaded; Speech's engine or language); `./install.sh settings`
+  says what isn't applied yet.
 - **PyQt6 6.12** (from 6.11) for the installer window, Arrow Pad, Screen snip and the NordVPN tray,
   tried on a Frame. Full Keyboard 0.14.1 looked at, its Replace native keyboard tried beside Arrow
   Pad and Dictation.
