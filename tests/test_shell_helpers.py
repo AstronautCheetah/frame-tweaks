@@ -112,6 +112,12 @@ class Bashrc(unittest.TestCase):
 
     BREW = 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 
+    def test_a_symlinked_bashrc_stays_a_symlink(self):
+        """A .bashrc from a dotfiles repo: the change goes to the file it points at."""
+        script = (f"mkdir ~/dots; printf '%s\\n' '{self.LINE}' '{self.BREW}' > ~/dots/rc; ln -s ~/dots/rc ~/.bashrc; ensure_path; "
+                  "[ -L ~/.bashrc ] && echo link; cat ~/dots/rc; echo END")
+        self.assertEqual(sh(script), f"link\n{self.BREW}\n{self.LINE}\nEND")
+
     def test_our_line_moves_below_homebrews(self):
         """brew shellenv puts Homebrew's bin first: below our line, it shadowed the wallet's gh
         wrapper in ~/.local/bin with Homebrew's gh (token in plain text)."""
