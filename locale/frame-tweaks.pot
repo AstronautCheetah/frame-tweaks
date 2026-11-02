@@ -35,7 +35,15 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: gui/frame-tweaks-gui.py
+msgid "(asks for your sudo password: %s)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "(hidden)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "(needed by %s)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -53,6 +61,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Another action is still running: try again once it's done."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/speech/README.md
+msgid "Apply"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -131,6 +143,11 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Couldn't remove {tweaks} (not needed on this Frame): run ./install.sh tidy in a terminal to see why."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -232,6 +249,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Install the tweaks the last update didn't get to"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Install:"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -338,11 +359,16 @@ msgid "Reinstall: remove it and install it again in one step (settings kept)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Remove them"
+msgid "Remove:"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Remove: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Removed {tweaks}: not needed on this Frame ({why}). Some changes show after a reboot."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -434,10 +460,6 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "These installed tweaks were unticked and will be <b>removed</b>:"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1376,6 +1398,10 @@ msgstr ""
 msgid "🔓 Wallet open"
 msgstr ""
 
+#: install.sh
+msgid "%s could not be removed"
+msgstr ""
+
 #: install.sh packs/core/snip/install.sh
 msgid "%s failed"
 msgstr ""
@@ -1542,6 +1568,10 @@ msgstr ""
 
 #: install.sh
 msgid "Remove tweaks?"
+msgstr ""
+
+#: install.sh
+msgid "Removed %s: not needed on this Frame (%s)."
 msgstr ""
 
 #: install.sh
@@ -3880,10 +3910,6 @@ msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
 msgstr ""
 
-#: packs/core/snip/frame-snip packs/core/speech/README.md
-msgid "Apply"
-msgstr ""
-
 #: packs/core/snip/frame-snip
 msgid "Applying… (a new language downloads its voice, about 60 MB)"
 msgstr ""
@@ -5064,6 +5090,11 @@ msgid ""
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-tray
+msgid ""
+"'nordvpn-wg setup' is on your clipboard: open a terminal (Konsole), paste it and press Enter. It asks for a NordVPN access token, and says where to get one."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "Connect at startup ({location})"
 msgstr ""
 
@@ -5085,7 +5116,7 @@ msgid ""
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-tray
-msgid "No locations: run 'nordvpn-wg setup'"
+msgid "No locations yet: copy 'nordvpn-wg setup' for a terminal"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-tray packs/integrations/nordvpn/nordvpn-wg
@@ -5145,11 +5176,11 @@ msgid "No token given."
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
+msgid "NordVPN access token (input hidden): "
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "NordVPN access token (input hidden): "
+msgid "NordVPN access token:"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -5161,7 +5192,26 @@ msgid "NordVPN: connected via {connection}"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "Run 'nordvpn-wg setup' first."
+msgid "Run 'nordvpn-wg setup' first (in a terminal: Konsole)."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Run 'nordvpn-wg setup' first. It's on your clipboard: open a terminal (Konsole), paste it and press Enter."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Sign in to your Nord Account and make an access token: {url} (NordVPN → Manual setup → Generate new token; it's shown once, and a short-lived one is enough)."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "That address is on your clipboard: paste it into your browser."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
