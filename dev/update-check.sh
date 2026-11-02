@@ -58,7 +58,9 @@ snapshot() {
         git -C "$REPO" show "refs/tags/$t:dev/release-signers" > "$signers" 2>/dev/null
         for x in "$t" "cosign-$t"; do
             git -C "$REPO" rev-parse -q --verify "refs/tags/$x" >/dev/null || continue
-            if git -C "$REPO" -c gpg.ssh.allowedSignersFile="$signers" verify-tag "$x" >/dev/null 2>&1; then f=good
+            # (as lib/common.sh checks them: told it's SSH, not left to guess, and never gpg)
+            if git -C "$REPO" -c gpg.format=ssh -c gpg.program=false -c gpg.ssh.allowedSignersFile="$signers" \
+                verify-tag "$x" >/dev/null 2>&1; then f=good
             else f="not by the keys it lists (signed by the key before)"; fi
             echo "$x -> $(git -C "$REPO" rev-parse --short "refs/tags/$x^{commit}"): $f"
         done
@@ -120,8 +122,12 @@ release_test() {
         rc=$?
         head=$(git -C "$home/frame-tweaks" rev-parse --short HEAD)
         want=$(git -C "$home/frame-tweaks" rev-parse -q --short --verify "refs/tags/$newest^{commit}")
-        if [ -n "$want" ] && [ "$head" = "$want" ] && grep -q 'signature verified' <<<"$out"; then
-            echo "PASS $start -> $newest ($head)"; pass=$((pass + 1))
+        # Passing is moving to the release; the line verify_release (lib/common.sh) prints is
+        # checked apart, so a change to its wording reads as that, not as an update that failed.
+        if [ -n "$want" ] && [ "$head" = "$want" ]; then
+            if grep -q 'signature verified' <<<"$out"; then echo "PASS $start -> $newest ($head)"
+            else echo "PASS $start -> $newest ($head), but install.sh didn't say \"signature verified\": has its wording changed?"; fi
+            pass=$((pass + 1))
         else
             mkdir -p "$BASE"
             log=$BASE/release-test-$start-$(date +%Y%m%d-%H%M%S).log

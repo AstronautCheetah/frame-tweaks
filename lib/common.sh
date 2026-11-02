@@ -652,6 +652,7 @@ verify_release() {
     done < <(git -C "$1" tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$' | grep -v -- '-bridge$' | rank_tags)
     rm -f "$signers.next"
     if release_trusted "$1" "$2" "$signers"; then
+        # ("signature verified": dev/update-check.sh release-test looks for these words)
         rm -f "$signers"; echo "Release $2: signature verified."; return 0
     fi
     rm -f "$signers"
