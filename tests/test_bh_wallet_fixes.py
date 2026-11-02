@@ -995,6 +995,33 @@ class Scripts(Home):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("wallet unlocked", r.stdout)
 
+    def bashrc_status(self, *lines):
+        self.tool(self.stubs, "systemctl", "exit 0")
+        self.tool(self.bin, "wallet-unlock", "echo locked")
+        self.tool(self.bin, "wallet-launcher", "exit 0")
+        (self.home / ".bashrc").write_text("\n".join(lines) + "\n")
+        return self.run_script("status.sh")
+
+    BREW = 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+
+    def test_status_offers_a_reinstall_for_our_own_path_line_above_homebrews(self):
+        r = self.bashrc_status('export PATH="$HOME/.local/bin:$PATH"', self.BREW)
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("./install.sh install wallet", r.stdout)
+
+    def test_status_names_a_path_line_of_yours_above_homebrews(self):
+        """A reinstall only moves the line Frame Tweaks wrote, so it can't clear this one."""
+        mine = 'export PATH="$HOME/.local/bin:$HOME/bin:$PATH"'
+        r = self.bashrc_status(mine, self.BREW)
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn(mine, r.stdout)
+        self.assertIn("brew shellenv", r.stdout)
+        self.assertNotIn("./install.sh install wallet", r.stdout)
+
+    def test_status_is_quiet_with_local_bin_below_homebrews(self):
+        r = self.bashrc_status(self.BREW, 'export PATH="$HOME/.local/bin:$HOME/bin:$PATH"')
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
     def test_status_survives_a_failing_list(self):
         # (with pipefail and set -e, it stopped there: the wallet read as not installed)
         self.tool(self.stubs, "systemctl", "exit 0")
