@@ -153,6 +153,21 @@ class InstallState(unittest.TestCase):
         self.assertTrue((self.home / ".config/probe.conf").exists())       # (settings kept)
         self.assertEqual(self.sh("tidy").stdout, "")                      # (gone: nothing more)
 
+    def test_tidy_says_so_when_a_tweak_could_not_be_removed(self):
+        """The window reads tidy's exit status: a removal that failed mustn't look like one that
+        worked, and the tweak's record stays with what's left of it."""
+        (self.pack / "probe/README.md").write_text(README.replace("processes: []", "processes: []\nwhen_not_needed: uninstall"))
+        self.trust()
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\nexit 1\n")
+        (self.pack / "probe/uninstall.sh").write_text("#!/bin/bash\nexit 1\n")
+        self.trust()
+        r = self.sh("tidy")
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("probe could not be removed", r.stdout + r.stderr)
+        self.assertNotIn("Removed Probe", r.stdout)
+        self.assertTrue(self.record.exists())
+
     def test_tidy_leaves_a_tweak_that_doesnt_ask_for_it(self):
         r = self.sh("install", "probe")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

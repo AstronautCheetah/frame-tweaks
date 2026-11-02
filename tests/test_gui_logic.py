@@ -1586,6 +1586,24 @@ class TidyUnneeded(unittest.TestCase):
         self.assertEqual(out.getvalue(), "would run: ./install.sh tidy\n")
         self.assertTrue(w.tidied)
 
+    def test_says_how_it_went_and_checks_the_rows_again(self):
+        """When ./install.sh tidy ends: the notice (a failure too), and the rows checked again."""
+        for code, good, words in ((0, True, "Removed"), (1, None, "Couldn't remove")):
+            w = bare_window()
+            w.state["cursor"] = (0, "ok")
+            said, changed = [], []
+            w.say = lambda text, good=None: said.append((text, good))
+            w.changed = changed.append
+            with mock.patch.object(gui.sft, "not_needed", lambda rows=None, refresh=False: {"cursor": "SteamOS does it"}), \
+                    mock.patch.object(gui, "QProcess") as proc, mock.patch.dict(os.environ):
+                os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+                w.tidy_unneeded()
+            done = proc.return_value.finished.connect.call_args[0][0]
+            done(code, 0)                                           # (as QProcess.finished sends it)
+            self.assertIn(words, said[0][0])
+            self.assertEqual(said[0][1], good)
+            self.assertEqual(changed, [["cursor"]])
+
     def test_nothing_when_not_installed_or_still_needed(self):
         for not_needed, state in (({"cursor": "SteamOS does it"}, (1, "")), ({}, (0, "ok"))):
             w = bare_window()

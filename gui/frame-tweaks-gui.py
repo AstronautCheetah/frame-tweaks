@@ -1730,7 +1730,7 @@ class Window(QWidget):
         reasons = "; ".join(why[c["id"]] for c in gone)
         ids = [c["id"] for c in gone]
 
-        def done(code, *_):
+        def done(code, *_args):     # (not *_: that would hide _(), the translations)
             if code == 0:
                 self.say(_("Removed {tweaks}: not needed on this Frame ({why}). Some changes show after a "
                            "reboot.").format(tweaks=titles, why=reasons), good=True)
