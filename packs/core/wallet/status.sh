@@ -7,6 +7,10 @@ sysctl_user is-active --quiet app-timers || status_warn "$(t "%s not running: ap
 n=$({ "$BIN/wallet-launcher" --list 2>/dev/null || true; } | wc -l)
 state=$("$BIN/wallet-unlock" --status 2>/dev/null || echo unknown)
 grep -q oauth_token "$HOME/.config/gh/hosts.yml" 2>/dev/null && status_warn "$(t 'gh token stored in plain text (re-run %s)' "./install.sh install wallet")"
+# (brew shellenv below our PATH line puts Homebrew's gh ahead of the wallet's wrapper in terminals)
+if [ "$(grep -nF 'HOME/.local/bin' "$HOME/.bashrc" 2>/dev/null | tail -1 | cut -d: -f1)" -lt "$(grep -n 'brew shellenv' "$HOME/.bashrc" 2>/dev/null | tail -1 | cut -d: -f1)" ] 2>/dev/null; then
+    status_warn "$(t "terminals run Homebrew's gh, not the wallet's wrapper: its token would be plain text (re-run %s)" "./install.sh install wallet")"
+fi
 # (With Auto-lock off on the Wallet apps page, no timer is what was asked for.)
 autolock=$(sed -n 's/^WALLET_AUTOLOCK=//p' "$HOME/.config/frame-tweaks/wallet.conf" 2>/dev/null | tail -1 || true)
 if [ "$state" = unlocked ] && [ "$autolock" != 0 ] && ! sysctl_user is-active --quiet wallet-autolock.timer; then

@@ -111,6 +111,7 @@ Homebrew's installer asks for your sudo (admin) password once, to create that fo
     # shellcheck disable=SC2016
     grep -qs 'linuxbrew/bin/brew shellenv' "$HOME/.bashrc" ||
         append_line "$HOME/.bashrc" 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+    ensure_path                          # (~/.local/bin ahead of Homebrew's bin again: see there)
     eval "$("$BREW" shellenv)"
     say "$(t 'Homebrew installed.')"
 }
@@ -153,9 +154,18 @@ append_line() {
     printf '%s\n' "$2" >> "$1"
 }
 
-# Make sure ~/.local/bin is on PATH for terminals and the desktop session.
+# Make sure ~/.local/bin is on PATH for terminals and the desktop session, ahead of Homebrew's
+# bin: the wallet's gh wrapper lives in ~/.local/bin and the real gh in Homebrew, and `brew
+# shellenv` puts Homebrew's bin first. With its line below ours in ~/.bashrc, terminals ran
+# Homebrew's gh, which saved its token in plain text; ours goes last.
 ensure_path() {
-    grep -qs 'HOME/.local/bin' "$HOME/.bashrc" || append_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
+    local rc="$HOME/.bashrc" line='export PATH="$HOME/.local/bin:$PATH"'
+    if ! grep -qs 'HOME/.local/bin' "$rc"; then
+        append_line "$rc" "$line"
+    elif [ "$(grep -nxF "$line" "$rc" | tail -1 | cut -d: -f1)" -lt "$(grep -n 'brew shellenv' "$rc" | tail -1 | cut -d: -f1)" ] 2>/dev/null; then
+        grep -vxF "$line" "$rc" | write_file "$rc"       # (only our own line moves; one of yours stays)
+        append_line "$rc" "$line"
+    fi
     mkdir -p "$HOME/.config/environment.d"
     [ -f "$HOME/.config/environment.d/10-local-bin.conf" ] ||
         echo 'PATH=$HOME/.local/bin:$PATH' > "$HOME/.config/environment.d/10-local-bin.conf"

@@ -79,6 +79,13 @@
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
   Vulkan) draws straight to gamescope, so the snip came out black or didn't open. Then it now
   uses gamescope's own screenshot of what it shows.
+- **`gh auth login` in a terminal saves its token in the wallet again, not in plain text.** The
+  wallet tweak's `gh` wrapper (in `~/.local/bin`) is what makes gh use the wallet, but the
+  Homebrew tweak's `brew shellenv` line in `~/.bashrc` came after the `~/.local/bin` PATH line and
+  put Homebrew's bin first, so terminals ran Homebrew's gh directly. Installs now keep the
+  `~/.local/bin` line below Homebrew's (only the line Frame Tweaks wrote moves), and
+  `./install.sh status` warns while a terminal's gh isn't the wrapper. Re-run
+  `./install.sh install wallet` to fix the order and move a plain-text token into the wallet.
 
 ### For contributors
 - **`dev/fetch-upstream-readmes.py` fetches only over HTTPS from GitHub:** a picture in an upstream

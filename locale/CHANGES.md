@@ -7,6 +7,7 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 `dev/i18n.py export` hands translators what a changed text was, and its old translation, to
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
+<<<<<<< HEAD
 ## 2026-10-17
 - Changed in `gui/report_page.py:65`
   - was: "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
@@ -53,3 +54,28 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Anthropic's package list names an unexpected file for Claude Desktop: %s"
 - New in `packs/integrations/claude-desktop/claude-desktop-update:95`
   - now: "Claude Desktop %s is newer than the %s in Anthropic's list, so it stays.\nTo install %s anyway, run: claude-desktop-update --allow-older"
+=======
+## 2026-11-01
+- New in `gui/wallet_page.py:160`
+  - now: "⚠ The wallet has no password yet."
+- New in `gui/wallet_page.py:161`
+  - now: "It opens without one, so it protects nothing, and there's no password for Unlock or Password first to ask. Set one in KWalletManager: kdewallet → Change Password."
+- New in `gui/wallet_page.py:171`
+  - now: "It's closed now; apps open it without asking."
+- New in `gui/wallet_page.py:317`
+  - now: "🔑 Set password…"
+- New in `gui/wallet_page.py:318`
+  - now: "Opens KWalletManager: kdewallet → Change Password"
+- New in `gui/wallet_page.py:388`
+  - now: "🔓 Open"
+- New in `gui/wallet_page.py:389`
+  - now: "Opens the wallet; no password is set, so none is asked"
+- New in `gui/wallet_page.py:402`
+  - now: "Couldn't start KWalletManager; open it from the menu, then kdewallet → Change Password."
+- New in `packs/core/wallet/status.sh:12`
+  - now: "terminals run Homebrew's gh, not the wallet's wrapper: its token would be plain text (re-run %s)"
+- New in `packs/core/wallet/status.sh:17`
+  - now: "the wallet has no password: set one in KWalletManager (kdewallet → Change Password)"
+- New in `packs/core/wallet/wallet-unlock:354`
+  - now: "The wallet has no password yet, so it protects nothing. Set one in KWalletManager: kdewallet → Change Password."
+>>>>>>> 221f832 (fix(install): keep ~/.local/bin ahead of Homebrew's bin, so terminals run the wallet's gh)
