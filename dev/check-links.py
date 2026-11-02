@@ -44,8 +44,10 @@ def get(url):
 
 
 def links():
-    """(id, title, its manifest's link, the project's GitHub owner/name) for each linked tweak."""
-    for readme in sorted(ROOT.glob("packs/*/*/README.md")):
+    """(id, title, its manifest's link, the project's GitHub owner/name) for each linked tweak of
+    the official packs (a local pack in packs/, the Attic say, isn't published: not checked)."""
+    for readme in sorted(r for pack in ("core", "integrations", "third-party")
+                         for r in ROOT.glob(f"packs/{pack}/*/README.md")):
         meta, _body = manifest.front_matter(readme.read_text())
         link = meta.get("link")
         if not link:
