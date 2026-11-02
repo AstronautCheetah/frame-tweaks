@@ -147,15 +147,42 @@ class GripReader:
                 h["held"] = None
 
 
+# The left d-pad is one part in the model, which tilts one way per direction: the axis it turns
+# about (in its own frame, rest to pressed), measured on a Frame (7° for a direction, 10° on a
+# diagonal, which counts as neither).
+DPAD_AXES = {"dpad_up": (-1.0, 0.1, -0.2), "dpad_down": (1.0, -0.1, 0.2),
+             "dpad_left": (-0.1, 0.6, 0.8), "dpad_right": (0.1, -0.6, -0.8)}
+
+
+def rotation_axis(rest, cur):
+    """(angle in degrees, unit axis) of the turn from rest to cur, 3x4 HmdMatrix34_t-like."""
+    r = [[sum(cur.m[i][k] * rest.m[j][k] for k in range(3)) for j in range(3)] for i in range(3)]
+    angle = math.degrees(math.acos(max(-1.0, min(1.0, (r[0][0] + r[1][1] + r[2][2] - 1) / 2))))
+    ax = (r[2][1] - r[1][2], r[0][2] - r[2][0], r[1][0] - r[0][1])
+    n = math.sqrt(sum(x * x for x in ax)) or 1.0
+    return angle, tuple(x / n for x in ax)
+
+
+def dpad_direction(angle, axis):
+    """Which d-pad direction a tilt is, or None (not tilted, or a diagonal)."""
+    if angle < 3:
+        return None
+    best = max(DPAD_AXES, key=lambda d: sum(a * b for a, b in zip(axis, DPAD_AXES[d])))
+    return best if sum(a * b for a, b in zip(axis, DPAD_AXES[best])) > 0.85 else None
+
+
 class ButtonReader:
     """Whether one controller button is down, read from its part in the controller's model
-    (button_menu, button_y…). On the Frame, SteamVR gives button actions and legacy controller
+    (button_menu, button_y…; dpad_up and the like: the d-pad part, tilted that way). On the Frame, SteamVR gives button actions and legacy controller
     state only to the app with focus, so a background program never sees them; the model's part
     reports IsPressed whatever has focus (measured on a Frame: dashboard open or closed, in a
     game). It can't keep the press from the app with focus, which gets it too."""
 
     def __init__(self, vr, hand, component):
         self.vr, self.component = vr, component
+        self.direction = component if component in DPAD_AXES else None
+        if self.direction:
+            self.component = "dpad"
         self.sys, self.rm = vr.VRSystem(), vr.VRRenderModels()
         self.role = vr.TrackedControllerRole_LeftHand if hand == "left" else vr.TrackedControllerRole_RightHand
         self.path = vr.VRInput().getInputSourceHandle(f"/user/hand/{hand}")
@@ -175,7 +202,15 @@ class ButtonReader:
                 model, self.component, self.path, vr.RenderModel_ControllerMode_State_t())
         except Exception:
             return None
-        return bool(state.uProperties & vr.VRComponentProperty_IsPressed) if ok else None
+        if not ok:
+            return None
+        down = bool(state.uProperties & vr.VRComponentProperty_IsPressed)
+        if down and self.direction:
+            ok, rest = self.rm.getComponentState(model, self.component, vr.VRControllerState_t(),
+                                                 vr.RenderModel_ControllerMode_State_t())
+            down = ok and dpad_direction(*rotation_axis(rest.mTrackingToComponentRenderModel,
+                                                        state.mTrackingToComponentRenderModel)) == self.direction
+        return down
 
 
 def quat_of(rows):

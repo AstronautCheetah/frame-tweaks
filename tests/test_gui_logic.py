@@ -1479,30 +1479,82 @@ class ShowTweak(unittest.TestCase):
 
 
 
-class ControllerButtonsOff(unittest.TestCase):
-    """Controller buttons in VR are off until they work (docs/roadmap.md): no ⚙ option, and the
-    window doesn't claim the buttons; its haptic ticks still work."""
-    def test_no_option(self):
-        from PyQt6.QtWidgets import QApplication, QCheckBox
-        self.app = QApplication.instance() or QApplication([])
-        self.assertFalse(gui.CONTROLLER_BUTTONS)
-        texts = [b.text() for b in gui.Preferences(mock.Mock()).findChildren(QCheckBox)]
-        self.assertNotIn("Controller buttons in VR", texts)
-        self.assertNotIn("controller", gui.window_prefs())
+class ControllerButtons(unittest.TestCase):
+    """Controller buttons in VR (vrbuttons.py), read from the controller's model while the laser
+    is on the window: a button acts when it goes down with the laser there, never when the laser
+    is elsewhere, nor for one already held when the laser arrives; no SteamVR Input action
+    manifest (on the Frame it never reaches a program without focus); the D-pad's arrow key just
+    after a D-pad press is dropped; haptic ticks work whether or not the buttons do."""
 
-    def test_haptics_without_claiming_buttons(self):
-        fake = mock.MagicMock(k_unTrackedDeviceIndexInvalid=-1)
-        fake.VROverlay.return_value.getPrimaryDashboardDevice.return_value = 2
+    def setUp(self):
         sys.path.insert(0, str(gui.REPO / "gui"))
         import vrbuttons
-        with mock.patch.dict(sys.modules, {"openvr": fake}):
-            b = vrbuttons.VRButtons({})
+        self.vrbuttons = vrbuttons
+        self.fake = mock.MagicMock(k_unTrackedDeviceIndexInvalid=-1)
+        self.fake.VROverlay.return_value.getPrimaryDashboardDevice.return_value = 2
+        self.held = set()
+        held = self.held
+
+        class Reader:
+            def __init__(self, vr, hand, part):
+                self.part = part
+
+            def pressed(self):
+                return self.part in held
+
+        p = mock.patch.object(vrbuttons.vrkit, "ButtonReader", Reader)
+        p.start()
+        self.addCleanup(p.stop)
+        self.calls = []
+        self.handlers = {n: (lambda n=n: self.calls.append(n)) for n in ("back", "home", "toggle", "up", "down")}
+
+    def buttons(self, handlers):
+        with mock.patch.dict(sys.modules, {"openvr": self.fake}):
+            return self.vrbuttons.VRButtons(handlers)
+
+    def test_on_and_no_preferences_option(self):
+        from PyQt6.QtWidgets import QApplication, QCheckBox
+        self.app = QApplication.instance() or QApplication([])
+        self.assertTrue(gui.CONTROLLER_BUTTONS)
+        texts = [b.text() for b in gui.Preferences(mock.Mock()).findChildren(QCheckBox)]
+        self.assertNotIn("Controller buttons in VR", texts)
+
+    def test_a_press_acts_only_with_the_laser_on_the_window(self):
+        b = self.buttons(self.handlers)
+        self.assertTrue(b.ok)
+        self.fake.VRInput.return_value.setActionManifestPath.assert_not_called()
+        b.poll(True)                                        # (first look: nothing held)
+        self.held.add("button_b"); b.poll(True)
+        self.held.discard("button_b"); b.poll(True)
+        self.held.add("button_a"); b.poll(False)            # (laser elsewhere: someone else's press)
+        self.held.discard("button_a"); b.poll(False)
+        self.held.add("dpad_down"); b.poll(True)
+        self.assertEqual(self.calls, ["back", "down"])
+
+    def test_a_button_held_when_the_laser_arrives_does_nothing_until_pressed_again(self):
+        b = self.buttons(self.handlers)
+        self.held.add("button_y"); b.poll(False); b.poll(True); b.poll(True)
+        self.assertEqual(self.calls, [])
+        self.held.discard("button_y"); b.poll(True)
+        self.held.add("button_y"); b.poll(True)
+        self.assertEqual(self.calls, ["home"])
+
+    def test_the_arrow_key_after_a_dpad_press_is_dropped(self):
+        b = self.buttons(self.handlers)
+        b.poll(True)
+        self.assertFalse(b.recent_dpad())
+        self.held.add("dpad_up"); b.poll(True)
+        self.assertTrue(b.recent_dpad())
+        with mock.patch.object(self.vrbuttons.time, "monotonic", return_value=b.dpad_at + 1):
+            self.assertFalse(b.recent_dpad())
+
+    def test_haptics_without_the_buttons(self):
+        b = self.buttons({})
         self.assertTrue(b.started)
         self.assertFalse(b.ok)
-        fake.VRInput.assert_not_called()                             # (no action manifest, no action set)
-        b.poll(True)                                                 # (laser on the window: nothing claimed)
+        b.poll(True)
         b.haptic("press")
-        fake.VRSystem.return_value.triggerHapticPulse.assert_called_once_with(2, 0, 3999)
+        self.fake.VRSystem.return_value.triggerHapticPulse.assert_called_once_with(2, 0, 3999)
 
 
 def bare_window():

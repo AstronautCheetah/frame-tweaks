@@ -331,6 +331,16 @@ release-test` installs copies at the last four releases in throwaway homes and u
 local copy of the repository (`release-test PATH`), it tries a release before it's pushed.
 Snapshots are kept in `~/frame-update-checks` and on the microSD card (`dev/update-check.sh --help`).
 
+## Testing controller buttons on a Frame (maintainers)
+
+On the Frame, SteamVR hands controller button actions only to the app in front, so Frame Tweaks
+reads buttons from their parts in the controller's model instead (`lib/vrkit.py` `ButtonReader`).
+`dev/button-test.py` shows, in a window in VR, which buttons that sees pressed (d-pad directions
+and the headset's Aux key included), turns a held one red once it's a long press, and lists what
+the window itself gets from SteamVR's laser mouse. Run it over SSH with
+`DISPLAY=:0 ~/.local/share/arrowpad/venv/bin/python dev/button-test.py`; use it before giving a
+button a job, and after SteamOS or SteamVR updates.
+
 ## Releasing (maintainers)
 
 Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Release** workflow

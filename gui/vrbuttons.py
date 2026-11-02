@@ -1,69 +1,70 @@
-"""Steam Frame controller buttons for the installer window in VR: B = back, Y = home,
-A = tick/untick the row the laser points at; and haptic ticks for its buttons.
+"""Steam Frame controller buttons for the installer window in VR: B = back, Y = home (the list,
+scrolled to the top), A = tick/untick the row the laser points at, left D-pad up/down = move a
+highlight through the rows; and haptic ticks for its buttons.
 
 The window is a Steam floating window, which gets the laser as a mouse but never the
-controller's buttons. So, while the laser is over the window, this claims A, B and Y through
-SteamVR Input with an overlay-global action set priority (which receives input whatever has
-focus, and holds it from other apps), and releases them as soon as the laser leaves.
-SteamVR keys action manifests by program name, and Arrow Pad also runs under Python, so
-install.sh starts the window with a copy of the interpreter named `sft-python`: its own app
-key ("system.generated.sft-python"), its own bindings. (Registering a custom app key with
-IVRApplications doesn't work on the Frame.)
+controller's buttons, and on the Frame SteamVR hands button actions only to the app with focus
+(test actions bound for a background app, an overlay app, and an overlay app owning an overlay
+never became active). So the buttons are read from their parts in the controller's model
+(lib/vrkit.py ButtonReader), which report a press whatever has focus, and only while the laser
+is on the window: a press elsewhere is someone else's. They can't be taken from SteamVR's laser
+mouse, which gets them too; on the Frame it sends the window nothing for A, B and Y, and arrow
+keys for the D-pad (the window ignores those just after a D-pad press it handled: see
+recent_dpad).
 Optional: does nothing without SteamVR or the openvr module."""
-from pathlib import Path
+import time
 
 import vrkit  # (lib/: on the window's sys.path)
 
-VR_DIR = Path(__file__).resolve().parent / "vr"
+# Which part of the controller each action reads.
+BUTTONS = {"back": ("right", "button_b"), "home": ("right", "button_y"), "toggle": ("right", "button_a"),
+           "up": ("left", "dpad_up"), "down": ("left", "dpad_down")}
 
 
 class VRButtons:
     def __init__(self, handlers):
-        self.handlers = handlers            # {"back": fn, "home": fn, "toggle": fn}
-        self.ok, self.claimed = False, False
+        self.handlers = handlers            # {"back": fn, "home": fn, "toggle": fn, "up": fn, "down": fn}
+        self.ok = False                     # the buttons are read (SteamVR up, some handlers)
         self.started = False                # SteamVR is up: haptics work even if the buttons stop
+        self.claimed = False                # (nothing is claimed any more: kept for the window's timer)
+        self.down, self.dpad_at = {}, 0.0
         try:
             import openvr
             self.vr = openvr
             openvr.init(openvr.VRApplication_Overlay)
             self.started = True
-            if not handlers:                # haptics only: the buttons stay with whatever has focus
-                return
-            self.input = openvr.VRInput()
-            self.input.setActionManifestPath(str(VR_DIR / "actions.json"))
-            self.set = openvr.VRActiveActionSet_t()
-            self.set.ulActionSet = self.input.getActionSetHandle("/actions/sft")
-            self.set.nPriority = openvr.k_nActionSetOverlayGlobalPriorityMin
-            self.actions = {n: self.input.getActionHandle(f"/actions/sft/in/{n}") for n in handlers}
-            self.ok = True
+            self.readers = {n: vrkit.ButtonReader(openvr, *BUTTONS[n]) for n in handlers if n in BUTTONS}
+            self.ok = bool(self.readers)
         except Exception:
             self.ok = False
 
     def poll(self, hovered):
-        """Call ~30 times a second; hovered: the laser is over the window."""
+        """Call ~30 times a second; hovered: the laser is over the window. A button acts when it
+        goes down while the laser is on the window; one already held when the laser arrives
+        doesn't."""
         if not self.ok:
             return
         try:
-            if not hovered:
-                if self.claimed:            # hand the buttons back
-                    self.input.updateActionState([])
-                    self.claimed = False
-                return
-            self.input.updateActionState([self.set])
-            first = not self.claimed
-            self.claimed = True
-            for name, handle in self.actions.items():
-                d = self.input.getDigitalActionData(handle, self.vr.k_ulInvalidInputValueHandle)
-                if d.bActive and d.bChanged and d.bState and not first:
+            for name, reader in self.readers.items():
+                down = bool(reader.pressed())
+                was = self.down.get(name)
+                self.down[name] = down
+                if down and was is False and hovered:
+                    if name in ("up", "down"):
+                        self.dpad_at = time.monotonic()
                     self.handlers[name]()
         except Exception:
             self.ok = False
+
+    def recent_dpad(self, seconds=0.4):
+        """A D-pad press was handled just now (so the arrow key SteamVR also sends is ignored)."""
+        return self.ok and time.monotonic() - self.dpad_at < seconds
 
     def haptic(self, kind):
         """A tick (hover) or a firmer pulse (press) on the controller driving the laser, as on
         Arrow Pad and Full Keyboard. A direct pulse: SteamVR Input haptics need input focus,
         which the dashboard has."""
-        # (not tied to self.ok: an error claiming the buttons used to turn haptics off too, for good)
+        # (not tied to self.ok: an error reading the buttons used to turn haptics off too, for good)
         if not self.started:
             return
         try:
@@ -74,8 +75,6 @@ class VRButtons:
     def close(self):
         if self.started:
             try:
-                if self.ok:
-                    self.input.updateActionState([])
                 self.vr.shutdown()
             except Exception:
                 pass

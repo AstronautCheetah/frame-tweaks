@@ -667,9 +667,8 @@ class Row(QWidget):
 
 
 # Controller buttons in VR (B back, Y to the top, A ticks the row, the left D-pad through the
-# rows; vrbuttons.py): off until they work reliably (docs/roadmap.md). Off, the window never
-# claims the buttons; its haptic ticks still work.
-CONTROLLER_BUTTONS = False
+# rows; vrbuttons.py), read from the controller's model while the laser is on the window.
+CONTROLLER_BUTTONS = True
 
 # The list's last row, under every group: not a tweak (nothing to install), the ways to help
 # (docs/contribute.md). Built here, not in a pack, so install.sh, status and the README's
@@ -852,6 +851,9 @@ def action_said(proc):
     return last if ok else _("Didn't work: %s") % last
 
 
+LONG_CHOICE = 28        # (a settings choice with a longer label gets a row of its own)
+
+
 class SettingsSection(QWidget):
     """One tweak's settings (lib/sft.py SETTINGS: the same choices as ./install.sh settings and the
     gears in VR): its options, Reset, and its action buttons. notice: where it reports."""
@@ -880,10 +882,14 @@ class SettingsSection(QWidget):
             lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
             lay.addWidget(lab)
             grid = QGridLayout()                     # (wraps: a long list of choices fits the page)
-            per_row = 7 if all(len(t) <= 8 for t, _value in choices) else 4
+            longest = max((len(t) for t, _value in choices), default=0)
+            # (Long labels one per row: four of them side by side, each as wide as its text, made
+            # the page wider than the window and pushed buttons off its edge.)
+            per_row = 7 if longest <= 8 else 4 if longest <= LONG_CHOICE else 1
             swatches = key in self.spec["swatches"]
             if swatches:                             # circles of colour, as the gear's panel in VR
                 per_row = 12
+            row, group = 0, None
             for n, (text, value) in enumerate(choices):
                 b = QPushButton(text)
                 b.setCheckable(True)
@@ -904,9 +910,20 @@ class SettingsSection(QWidget):
                                     f" border: 2px solid rgba(255, 255, 255, 64); padding: 0; }}"
                                     f" QPushButton:checked {{ border: 4px solid white; }}")
                 b.clicked.connect(lambda _=False, k=key, v=value: self.choose(k, v))
-                grid.addWidget(b, n // per_row, n % per_row)
+                if per_row == 1:                     # (a gap where "Recommended: …" turns into "Not recommended: …")
+                    head = text.split(": ", 1)[0] if ": " in text else None
+                    if group is not None and head != group:
+                        grid.setRowMinimumHeight(row, 10)
+                        row += 1
+                    group = head
+                    b.setMinimumWidth(0)
+                    b.setStyleSheet(b.styleSheet() + " QPushButton { text-align: left; padding-left: 14px; }")
+                    grid.addWidget(b, row, 0)
+                    row += 1
+                else:
+                    grid.addWidget(b, n // per_row, n % per_row)
                 self.buttons[(key, text)] = (b, value)
-            grid.setColumnStretch(per_row, 1)
+            grid.setColumnStretch(per_row if per_row > 1 else 0, 1)
             lay.addLayout(grid)
         reset = QPushButton(_("Reset to defaults"))
         reset.clicked.connect(self.reset)
@@ -1109,8 +1126,8 @@ class Window(QWidget):
                 QApplication.instance().installEventFilter(self)    # haptics: see eventFilter
             if self.vr_buttons.ok:
                 self._laser = (None, 0.0)
-                # 30x a second while the laser is on the window (or A/B/Y are claimed); 4x a second
-                # otherwise, only to notice it arriving.
+                # 30x a second while the laser is on the window; 4x a second otherwise, only to
+                # notice it arriving (and which buttons are already held when it does).
                 self.vr_timer = QTimer(self, interval=33, timeout=self.poll_vr_buttons)
                 self.vr_timer.start()
         self.refresh()
@@ -2131,6 +2148,11 @@ class Window(QWidget):
         if t in (QEvent.Type.Enter, QEvent.Type.MouseButtonPress) and isinstance(obj, QAbstractButton) \
                 and obj.isEnabled() and obj.isVisible() and self.prefs["haptics"]:
             self.vr_buttons.haptic("hover" if t == QEvent.Type.Enter else "press")
+        # (SteamVR also sends the D-pad as an arrow key, which would scroll as well as move the
+        # highlight: dropped just after a D-pad press the window handled.)
+        if t == QEvent.Type.KeyPress and ev.key() in (Qt.Key.Key_Up, Qt.Key.Key_Down) \
+                and self.vr_buttons.recent_dpad():
+            return True
         return False
 
     # ---- controller buttons in VR (vrbuttons.py): B back, Y home, A tick ----------
