@@ -28,6 +28,203 @@ msgstr ""
 msgid "Updating %s (./install.sh update)"
 msgstr ""
 
+#: gui/apply_changes.py
+msgid "(asks for your sudo password: %s)"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "(needed by %s)"
+msgstr ""
+
+#: gui/apply_changes.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
+msgid "Apply"
+msgstr ""
+
+#: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
+msgid "Cancel"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"Choose a password for your user (sudo asks for it). Type it, press Enter, then type it again: nothing shows as you type."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Install:"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Install: %s"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "No password yet: Set a password… again when you're ready."
+msgstr ""
+
+#: gui/apply_changes.py install.sh
+msgid "Nothing to change."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Nothing to change: tick or untick a tweak first"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Password set: the tweaks tagged sudo can install now."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Remove:"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Remove: %s"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Set a password…"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Still checking status; try again in a moment."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Their settings and data are kept."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Their settings are removed too (⚙ Preferences); their data is kept."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
+msgstr ""
+
+#: gui/details_page.py
+msgid "(used instead of {other}'s)"
+msgstr ""
+
+#: gui/details_page.py
+msgid ""
+"<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
+msgstr ""
+
+#: gui/details_page.py
+msgid "About Frame Tweaks"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Asks for sudo"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Checking for a newer release…"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Couldn't check for a newer release; see {link}its releases{end}."
+msgstr ""
+
+#: gui/details_page.py
+msgid "Documentation"
+msgstr ""
+
+#: gui/details_page.py
+msgid "From"
+msgstr ""
+
+#: gui/details_page.py
+msgid ""
+"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
+msgstr ""
+
+#: gui/details_page.py
+msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Its README"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Made by"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Needs"
+msgstr ""
+
+#: gui/details_page.py
+msgid "No README."
+msgstr ""
+
+#: gui/details_page.py
+msgid "Not needed"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Pack"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Source"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Status"
+msgstr ""
+
+#: gui/details_page.py
+msgid "This Frame doesn't need it: %s"
+msgstr ""
+
+#: gui/details_page.py
+msgid "What it is"
+msgstr ""
+
+#: gui/details_page.py
+msgid "Why it's included"
+msgstr ""
+
+#: gui/details_page.py
+msgid "the pack {pack}, not part of Frame Tweaks"
+msgstr ""
+
+#: gui/details_page.py
+msgid "{file} on GitHub"
+msgstr ""
+
+#: gui/details_page.py
+msgid "{tweaks} (installed automatically)"
+msgstr ""
+
+#: gui/details_page.py
+msgid "{version} is still the latest release."
+msgstr ""
+
+#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "← Back"
+msgstr ""
+
+#: gui/details_page.py
+msgid "⚠ Known issue."
+msgstr ""
+
+#: gui/details_page.py
+msgid "🔗 Linked"
+msgstr ""
+
+#: gui/details_page.py
+msgid "🧪 Experimental"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py
 msgid "%d pack update"
 msgid_plural "%d pack updates"
@@ -35,44 +232,11 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: gui/frame-tweaks-gui.py
-msgid "(asks for your sudo password: %s)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "(hidden)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "(needed by %s)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "(used instead of {other}'s)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "About Frame Tweaks"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Another action is still running: try again once it's done."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
-msgid "Apply"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Asks for sudo"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py lib/sft.py
@@ -80,24 +244,7 @@ msgid "Asks for your sudo password: %s"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Back to the defaults."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py gui/prefs_page.py packs/core/snip/frame-snip
-msgid "Cancel"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Checking for a newer release…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Checking…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Choose a password for your user (sudo asks for it). Type it, press Enter, then type it again: nothing shows as you type."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -110,10 +257,6 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Close and reopen Frame Tweaks to use the new version."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
-msgid "Collapse"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -130,16 +273,8 @@ msgid ""
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Copy the link"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Couldn't check for a newer release; see {link}its releases{end}."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -168,25 +303,9 @@ msgstr ""
 msgid "Details: what it is, why it's included, who made it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "Didn't work: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Documentation"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py lib/splash.py packs/core/snip/frame-snip install.sh
-msgid "Done."
-msgstr ""
-
 #: gui/frame-tweaks-gui.py
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
-msgid "Expand"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py lib/sft.py
@@ -200,10 +319,6 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid ""
 "Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use it."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "From"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -237,14 +352,6 @@ msgid "Hide"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Hide category"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Hide the whole category from the list (doesn't remove anything)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Hide this tweak from the list (doesn't remove it)"
 msgstr ""
 
@@ -257,32 +364,7 @@ msgid "Install the tweaks the last update didn't get to"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Install:"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Install: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "It came to the front there. Close it there to open it here."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Its README"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Link copied"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -295,35 +377,7 @@ msgid "Look for a newer Frame Tweaks release"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Made by"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Needs"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "No README."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "No password yet: Set a password… again when you're ready."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Not needed"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Not needed on this Frame: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Nothing to change."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Nothing to change: tick or untick a tweak first"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -335,28 +389,12 @@ msgid "Open %s"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Pack"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Packs added from a link have a newer version where they came from: the Packs page says which"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Password set: the tweaks tagged sudo can install now."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Preferences: the language, and how this window behaves"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Press Enter to close, or press the X button floating below to close."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Press Enter to close…"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -372,24 +410,12 @@ msgid "Reinstall: remove it and install it again in one step (settings kept)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Remove:"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Remove: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Removed {tweaks}: not needed on this Frame ({why}). Some changes show after a reboot."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Reopen Frame Tweaks to use the new version"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
-msgid "Reset to defaults"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -405,14 +431,6 @@ msgid ""
 "Save a diagnostics report (user names and paths removed) and open the bug form"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py gui/prefs_page.py
-msgid "Saved."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Set a password…"
-msgstr ""
-
 #: gui/frame-tweaks-gui.py
 msgid "Settings"
 msgstr ""
@@ -426,23 +444,11 @@ msgid "Show hidden ({n})"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Show this category again"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Show this tweak in the list again"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Something went wrong in the installer window"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Source"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Status"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -454,37 +460,8 @@ msgid "SteamVR runs it until it restarts. Every open app closes."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "Still checking status; try again in a moment."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "The browser didn't answer: the link is on the clipboard."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid ""
 "The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Their settings and data are kept."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Their settings are removed too (⚙ Preferences); their data is kept."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "This Frame doesn't need it: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Tick every tweak in this category"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -504,15 +481,6 @@ msgstr ""
 msgid "Unhide"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py
-msgid "Unhide category"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Untick every tweak in this category (installed ones are removed when you apply the changes)"
-msgstr ""
-
 #: gui/frame-tweaks-gui.py gui/packs_page.py
 msgid "Update"
 msgstr ""
@@ -523,32 +491,7 @@ msgid ""
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "What it is"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "Where the tweaks come from; add other people's (docs/mods.md)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Why it's included"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "Working… (a download can take a minute)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "checking…"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "hidden"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -556,39 +499,7 @@ msgid "needs: %s"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "not available any more"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
-msgid "not installed"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "status check didn't finish (took over a minute)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py install.sh
-msgid "status check failed"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "status check failed (exit {code})"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py install.sh
-msgid "status check failed: %s"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "status check failed: {error}"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "the pack {pack}, not part of Frame Tweaks"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "{file} on GitHub"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -596,24 +507,7 @@ msgid "{label} (installs first if needed: tick it and Apply)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "{tweaks} (installed automatically)"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid ""
-"{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "{version} available"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "{version} is still the latest release."
-msgstr ""
-
-#: gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "← Back"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -622,10 +516,6 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "⚙ Settings"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "⚠ Known issue."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -661,15 +551,7 @@ msgid "🔑 Wallet apps"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
-msgid "🔗 Linked"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
 msgid "🧩 Packs"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "🧪 Experimental"
 msgstr ""
 
 #: gui/packs_page.py
@@ -987,6 +869,10 @@ msgid ""
 "Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
 msgstr ""
 
+#: gui/prefs_page.py gui/settings_page.py
+msgid "Saved."
+msgstr ""
+
 #: gui/prefs_page.py
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr ""
@@ -1107,6 +993,23 @@ msgstr ""
 msgid "{language}: {n} of {total} texts not yet confirmed."
 msgstr ""
 
+#: gui/readme_view.py
+msgid "Copy the link"
+msgstr ""
+
+#: gui/readme_view.py
+msgid "Link copied"
+msgstr ""
+
+#: gui/readme_view.py
+msgid ""
+"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
+msgstr ""
+
+#: gui/readme_view.py
+msgid "The browser didn't answer: the link is on the clipboard."
+msgstr ""
+
 #: gui/report_page.py
 msgid "(Trying out the window: no report saved.)"
 msgstr ""
@@ -1142,6 +1045,67 @@ msgstr ""
 
 #: gui/report_page.py
 msgid "📋 Copy the report"
+msgstr ""
+
+#: gui/settings_page.py
+msgid "Another action is still running: try again once it's done."
+msgstr ""
+
+#: gui/settings_page.py
+msgid "Back to the defaults."
+msgstr ""
+
+#: gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "Didn't work: %s"
+msgstr ""
+
+#: gui/settings_page.py lib/splash.py packs/core/snip/frame-snip install.sh
+msgid "Done."
+msgstr ""
+
+#: gui/settings_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Reset to defaults"
+msgstr ""
+
+#: gui/settings_page.py
+msgid "Working… (a download can take a minute)"
+msgstr ""
+
+#: gui/tweak_rows.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Collapse"
+msgstr ""
+
+#: gui/tweak_rows.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Expand"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid "Hide category"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid "Hide the whole category from the list (doesn't remove anything)"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid "Show this category again"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid "Tick every tweak in this category"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid "Unhide category"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid ""
+"Untick every tweak in this category (installed ones are removed when you apply the changes)"
+msgstr ""
+
+#: gui/tweak_rows.py
+msgid "hidden"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1449,6 +1413,42 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid "🔓 Wallet open"
+msgstr ""
+
+#: gui/window_logic.py install.sh
+msgid "Press Enter to close, or press the X button floating below to close."
+msgstr ""
+
+#: gui/window_logic.py install.sh
+msgid "Press Enter to close…"
+msgstr ""
+
+#: gui/window_logic.py
+msgid "checking…"
+msgstr ""
+
+#: gui/window_logic.py
+msgid "not available any more"
+msgstr ""
+
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+msgid "not installed"
+msgstr ""
+
+#: gui/window_logic.py
+msgid "status check didn't finish (took over a minute)"
+msgstr ""
+
+#: gui/window_logic.py install.sh
+msgid "status check failed"
+msgstr ""
+
+#: gui/window_logic.py
+msgid "status check failed (exit {code})"
+msgstr ""
+
+#: gui/window_logic.py install.sh
+msgid "status check failed: %s"
 msgstr ""
 
 #: install.sh

@@ -23,6 +23,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script  # noqa: E402
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
+# A function the window imports from one of its parts looks names up there: a patch reaches it
+# in that module, not through gui. (gui put gui/ on the path.)
+import readme_view  # noqa: E402  (after gui: it sets up the path and the language first)
+import window_logic  # noqa: E402  (after gui: it sets up the path and the language first)
 
 
 class Versions(unittest.TestCase):
@@ -57,9 +61,9 @@ class Versions(unittest.TestCase):
         fake = subprocess.CompletedProcess([], 0, stdout=out)
         with mock.patch.object(gui.subprocess, "run", return_value=fake), \
                 mock.patch.dict(os.environ, {"FRAME_TWEAKS_CHANNEL": "beta"}):
-            with mock.patch.object(gui, "current_release", return_value="1.2.0-rc.10"):
+            with mock.patch.object(window_logic, "current_release", return_value="1.2.0-rc.10"):
                 self.assertEqual(gui.self_update_check(), "")       # (not "1.2.0-rc.9 available")
-            with mock.patch.object(gui, "current_release", return_value="1.2.0-rc.9"):
+            with mock.patch.object(window_logic, "current_release", return_value="1.2.0-rc.9"):
                 self.assertEqual(gui.self_update_check(), "1.2.0-rc.10")
 
     def test_channel(self):
@@ -177,7 +181,7 @@ class Status(unittest.TestCase):
         self.assertIsNone(gui.update_check("no-such-tweak"))
         with tempfile.TemporaryDirectory() as d:
             moved = dict(gui.component("clipboard"), dir=Path(d) / "gone")
-            with mock.patch.object(gui, "component", return_value=moved):
+            with mock.patch.object(window_logic, "component", return_value=moved):
                 self.assertEqual(gui.status("clipboard"), (gui.UNAVAILABLE, "not available any more"))
                 self.assertIsNone(gui.update_check("clipboard"))
         self.assertIn(gui.UNAVAILABLE, gui.GONE)
@@ -216,7 +220,7 @@ class Status(unittest.TestCase):
 
     def test_update_check_parsing(self):
         with tempfile.TemporaryDirectory() as d, \
-                mock.patch.object(gui, "component", return_value={"dir": Path(d) / "x"}):
+                mock.patch.object(window_logic, "component", return_value={"dir": Path(d) / "x"}):
             (Path(d) / "x").mkdir()
             script = Path(d) / "x" / "update-check.sh"
             script.write_text("echo 1.0.0 1.1.0\n")
@@ -675,7 +679,7 @@ class Links(unittest.TestCase):
         gone = FileNotFoundError(2, "No such file or directory", "/x/applications/gone.desktop")
         for url, how in (("https://example.com/a", "launch"), ("file:///tmp/a.md", "open_path")):
             with mock.patch.object(gui.browser, how, side_effect=gone), mock.patch.object(gui.browser, "log") as log, \
-                    mock.patch.object(gui, "QDesktopServices") as desktop:
+                    mock.patch.object(readme_view, "QDesktopServices") as desktop:
                 gui.follow_link(url)
             desktop.openUrl.assert_called_once_with(gui.QUrl(url))
             self.assertIn("FileNotFoundError", log.call_args[0][0])
@@ -689,7 +693,7 @@ class Links(unittest.TestCase):
         view.resize(400, 200)
         view.show()
         self.app.processEvents()
-        with mock.patch.object(gui, "follow_link") as follow:
+        with mock.patch.object(readme_view, "follow_link") as follow:
             view.anchorClicked.emit(QUrl("#build-from-source"))
         follow.assert_not_called()                   # (not handed to the desktop as "#build-from-source")
         self.assertGreater(view.verticalScrollBar().value(), 0)
