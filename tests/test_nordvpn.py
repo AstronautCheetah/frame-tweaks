@@ -7,6 +7,7 @@ import copy
 import io
 import os
 import sys
+import socket
 import tempfile
 import types
 import unittest
@@ -364,6 +365,16 @@ class SetupHelp(unittest.TestCase):
             self.copied.append(text)
             return ok
         return copy
+
+    def test_klipper_is_tried_when_wl_copy_cant_start(self):
+        with socket.socket(socket.AF_UNIX) as sock:
+            sock.bind(os.path.join(self.tmp.name, "wayland-0"))
+            with mock.patch.object(self.wg, "RUN_DIR", Path(self.tmp.name)), \
+                    mock.patch.object(self.wg.shutil, "which", lambda name: f"/usr/bin/{name}"), \
+                    mock.patch.object(self.wg.subprocess, "Popen", side_effect=OSError("no wl-copy")), \
+                    mock.patch.object(self.wg.subprocess, "run", return_value=mock.Mock(returncode=0)) as run:
+                self.assertTrue(self.wg.copy_to_clipboard("text"))
+        self.assertIn("setClipboardContents", run.call_args.args[0])
 
     def test_needs_setup_first_with_the_command_copied(self):
         with mock.patch.object(self.wg, "copy_to_clipboard", self.copier(True)):
