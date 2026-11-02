@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""dictate-button: toggle Dictation by holding a controller button (Menu, on the right
+controller, unless dictate.conf says otherwise), in VR, whatever app has focus.
+
+Runs while SteamVR does (frame-tweaks-dictate-button.service: PartOf steamvr.service). Each hold
+of DICTATE_BUTTON_HOLD seconds or more runs `dictate` once, with a tick on that controller; a
+shorter press does nothing here. The press still reaches the app with focus as usual: on the
+Frame, SteamVR hands button actions only to that app, so the button is read from its part in
+the controller's model (lib/vrkit.py ButtonReader), which can watch it but not take it.
+
+Settings, in ~/.config/frame-tweaks/dictate.conf (read again when the file changes):
+  DICTATE_BUTTON=menu | y | off      (default menu)
+  DICTATE_BUTTON_HOLD=0.6            (seconds, 0.2 to 3)"""
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))
+
+CONF = Path(os.environ.get("FRAME_TWEAKS_DICTATE_CONF") or Path.home() / ".config/frame-tweaks/dictate.conf")
+DICTATE = Path.home() / ".local/bin/dictate"
+BUTTONS = {"menu": ("right", "button_menu"), "y": ("right", "button_y")}
+DEFAULT_BUTTON, DEFAULT_HOLD = "menu", 0.6
+POLL_S = 1 / 30
+
+
+def settings(text):
+    """(button or None for off, hold seconds) from dictate.conf's text: shell assignments, the
+    last one of each wins, comments and anything unknown ignored (the defaults stand)."""
+    button, hold = DEFAULT_BUTTON, DEFAULT_HOLD
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("export "):
+            line = line[7:].strip()
+        key, sep, value = line.partition("=")
+        if not sep or line.startswith("#"):
+            continue
+        value = value.split("#", 1)[0].strip().strip("\"'").strip().lower()
+        if key == "DICTATE_BUTTON":
+            button = value if value in BUTTONS or value == "off" else DEFAULT_BUTTON
+        elif key == "DICTATE_BUTTON_HOLD":
+            try:
+                hold = min(3.0, max(0.2, float(value)))
+            except ValueError:
+                hold = DEFAULT_HOLD
+    return (None if button == "off" else button), hold
+
+
+class Hold:
+    """A press held for `seconds`: feed() is True once per press, the moment it has been held
+    that long (so the chime comes while you still hold it, not on letting go)."""
+
+    def __init__(self, seconds):
+        self.seconds, self.since, self.fired = seconds, None, False
+
+    def feed(self, now, down):
+        if not down:                        # (released, or the controller gone: start over)
+            self.since, self.fired = None, False
+            return False
+        if self.since is None:
+            self.since = now
+        if not self.fired and now - self.since >= self.seconds:
+            self.fired = True
+            return True
+        return False
+
+
+def read_settings():
+    try:
+        return settings(CONF.read_text())
+    except OSError:
+        return DEFAULT_BUTTON, DEFAULT_HOLD
+
+
+def toggle():
+    """Run dictate on its own (it records or transcribes after we've moved on)."""
+    subprocess.Popen([str(DICTATE)], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+def connect(vr, tries=30):
+    """SteamVR as an overlay app; it may still be starting when the service does."""
+    for _ in range(tries):
+        try:
+            vr.init(vr.VRApplication_Overlay)
+            return True
+        except vr.OpenVRError:
+            time.sleep(2)
+    return False
+
+
+def main():
+    import openvr as vr
+    import vrkit
+    if not connect(vr):
+        sys.exit("dictate-button: SteamVR isn't running")
+    system, event = vr.VRSystem(), vr.VREvent_t()
+    mtime, reader, hold = None, None, None
+    while True:
+        while system.pollNextEvent(event):
+            if event.eventType == vr.VREvent_Quit:      # (SteamVR waits for its apps to go)
+                system.acknowledgeQuit_Exiting()
+                vr.shutdown()
+                return
+        try:
+            m = CONF.stat().st_mtime
+        except OSError:
+            m = 0
+        if m != mtime:
+            mtime = m
+            button, seconds = read_settings()
+            reader = vrkit.ButtonReader(vr, *BUTTONS[button]) if button else None
+            hold = Hold(seconds)
+        if reader is None:                  # (off: just follow the settings and SteamVR)
+            time.sleep(1)
+            continue
+        if hold.feed(time.monotonic(), reader.pressed()):
+            toggle()
+            vrkit.direct_pulse(vr, system, reader.device, vrkit.TICK["press"])
+        time.sleep(POLL_S)
+
+
+if __name__ == "__main__":
+    main()

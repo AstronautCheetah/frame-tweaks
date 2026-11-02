@@ -67,6 +67,11 @@
   desktop's clipboard.
 
 ### Added
+- **Dictation on a controller button, in VR:** hold **Menu** on the right controller (about half
+  a second, until it ticks) to start dictating, and again to stop, whatever app is in front.
+  `DICTATE_BUTTON` picks Y instead, or turns it off; `DICTATE_BUTTON_HOLD` sets how long to hold.
+  It runs while SteamVR does, and reads the button from the controller's model, because SteamVR
+  on the Frame gives button presses only to the app in front; the game still gets the press too.
 - **VR memory guard (new, System):** Flatpak apps (Firefox and others from Discover) together
   leave 5 GB for SteamVR, Steam and your game (which aren't limited), Firefox has a 5 GB limit of
   its own, and SteamVR is the last thing stopped when memory

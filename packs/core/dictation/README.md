@@ -21,11 +21,12 @@ icon: {file: frame-tweaks-dictate.png}
 run: {label: Dictate}
 config: [~/.config/frame-tweaks/dictate.conf]
 changes: >-
-  `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry,
+  `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, with SteamVR
+  `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`),
   `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history
   of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's
   `whisper-cpp` and `wl-clipboard`
-access: Microphone while recording; types through ydotool
+access: Microphone while recording; types through ydotool; reads the right controller's buttons while SteamVR runs
 survives_updates: Yes (everything is in your home folder and Homebrew)
 undo: >-
   `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your
@@ -55,15 +56,16 @@ there yet, the installer offers to set it up (it asks for your sudo password onc
 downloads the Whisper model (a pinned file, checked against its SHA256) and sets up
 [ydotool](../ydotool/), the helper it types through.
 
-Then give it a button: bind **Dictate (toggle)** to a key in *System Settings → Keyboard →
-Shortcuts*, and, if you like, that key to a controller button in Steam Input. Step by step:
-[Dictate and Lock Wallet on a controller button](../../../docs/controller-shortcuts.md). With
-[Arrow Pad](../arrowpad/) installed you already have one: **Tools**, then **🎤**.
+In VR it has a button already: **hold Menu on the right controller** (about half a second) to
+start dictating, and hold it again to stop. You can also bind **Dictate (toggle)** to a key in
+*System Settings → Keyboard → Shortcuts* ([step by step](../../../docs/controller-shortcuts.md)),
+and with [Arrow Pad](../arrowpad/) installed there's **Tools**, then **🎤**.
 
 ## Use
 
-1. Press your shortcut (or 🎤) once. A chime means it's recording. Speak.
-2. Press it again. A second chime, then after a few seconds the text is
+1. Hold **Menu** on the right controller until it ticks (or press your shortcut, or 🎤). A chime
+   means it's recording. Speak.
+2. Hold Menu again (or press the shortcut). A second chime, then after a few seconds the text is
    - typed into the window you're using,
    - copied to the clipboard,
    - added to `~/.local/share/dictation-history.txt`, with the date and time (only you can
@@ -91,6 +93,10 @@ to use it:
   for faster, less accurate text.
 - `DICTATE_NOTYPE=1`: only copy the text, don't type it.
 - `DICTATE_MAX_SECONDS`: stop a forgotten recording after this many seconds (default 300).
+- `DICTATE_BUTTON`: the controller button you hold to dictate: `menu` (right controller, the
+  default), `y`, or `off`.
+- `DICTATE_BUTTON_HOLD`: how long to hold it, in seconds (default 0.6). Changes to these two
+  apply within a second, without reinstalling.
 
 ## How it works
 
@@ -105,6 +111,13 @@ to use it:
   Shift or AltGr, or a dead key first (´ then e for é), as you'd type it. Text with a
   character your layout has no key for isn't typed at all: it's in the clipboard, and a
   notification says so.
+- **The controller button** is `dictate-button`, a small service that runs while SteamVR does
+  (`frame-tweaks-dictate-button.service`, started and stopped with `steamvr.service`). On the
+  Frame, SteamVR hands button presses only to the app in front, so it reads the button from its
+  part in the controller's 3D model, which shows it pressed whatever has focus (the way Arrow
+  Pad and Full Keyboard read the grips). It can watch the button but not take it: a long hold
+  of Menu still reaches the game or window too, as a long Menu press. Without SteamVR, install
+  leaves it out.
 - Whisper runs with `DISABLE_GAMESCOPE_WSI=1`, which keeps the Steam session's graphics layer
   out of its way.
 - If the GPU build of whisper.cpp from groffta's
@@ -124,6 +137,8 @@ to use it:
 - **Something went wrong?** The log is `/run/user/$UID/dictate/dictate.log`, and the last
   recording is kept as `/run/user/$UID/dictate/last.wav` so you can listen to it. Both go away
   when the headset restarts, and like the history, only you can read them.
+- **The game sees Menu too.** Most games open their menu on a short press; if one reacts to
+  the long hold, set `DICTATE_BUTTON=y` (or `off`) in your settings.
 - **Nothing typed, but the text was copied?** ydotool may need a restart: **▶ Restart** on the
   ydotool row in Frame Tweaks.
 
@@ -131,8 +146,8 @@ to use it:
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
-- **Unusual access:** Microphone while recording; types through ydotool
+- **Changes:** `~/.local/bin/dictate`, a **Dictate (toggle)** app-menu entry, with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model in `~/.local/share/whisper`, a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
+- **Unusual access:** Microphone while recording; types through ydotool; reads the right controller's buttons while SteamVR runs
 - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
 <!-- /generated:changes -->
 

@@ -44,4 +44,34 @@ mkdir -p "$HOME/.config/frame-tweaks"
 hist="$HOME/.local/share/dictation-history.txt"
 [ ! -f "$hist" ] || chmod 600 "$hist"
 
-say "$(t "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s" docs/controller-shortcuts.md)"
+# Hold Menu on the right controller to dictate, in VR (dictate-button, while SteamVR runs). It
+# needs the openvr bindings, on SteamVR's own library (VR_LIB): without SteamVR it's left out,
+# before anything is downloaded.
+UNIT="$HOME/.config/systemd/user/frame-tweaks-dictate-button.service"
+if [ -f "$VR_LIB" ] && ensure_tweaks_venv && ensure_openvr "$TWEAKS_VENV"; then
+    install_py_tool "$TWEAK_DIR/dictate-button"
+    write_file "$UNIT" <<UNITFILE
+[Unit]
+Description=Dictation on a controller button, while SteamVR runs (Frame Tweaks)
+After=steamvr.service
+PartOf=steamvr.service
+
+[Service]
+ExecStart=$BIN/dictate-button
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=steamvr.service
+UNITFILE
+    sysctl_user daemon-reload || true
+    sysctl_user enable frame-tweaks-dictate-button.service 2>/dev/null || true
+    if sysctl_user is-active --quiet steamvr.service; then
+        sysctl_user restart frame-tweaks-dictate-button.service || true
+    fi
+    say "$(t 'In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s).' "$HOME/.config/frame-tweaks/dictate.conf")"
+else
+    warn "$(t "No SteamVR here, so no controller button for dictation; the shortcut works as before.")"
+fi
+
+say "$(t "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s" docs/controller-shortcuts.md)"

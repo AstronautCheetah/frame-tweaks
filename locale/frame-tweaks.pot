@@ -3479,7 +3479,7 @@ msgid "Start/stop local Whisper speech-to-text"
 msgstr ""
 
 #: packs/core/dictation/install.sh
-msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+msgid "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s"
 msgstr ""
 
 #: packs/core/dictation/install.sh
@@ -3487,7 +3487,17 @@ msgid "Downloading Whisper model %s"
 msgstr ""
 
 #: packs/core/dictation/install.sh
+msgid ""
+"In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s)."
+msgstr ""
+
+#: packs/core/dictation/install.sh
 msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
+msgstr ""
+
+#: packs/core/dictation/install.sh
+msgid ""
+"No SteamVR here, so no controller button for dictation; the shortcut works as before."
 msgstr ""
 
 #: packs/core/dictation/install.sh
@@ -3511,7 +3521,15 @@ msgid "dictate ready (%s, small model)"
 msgstr ""
 
 #: packs/core/dictation/status.sh
+msgid "dictate ready (%s, small model); hold %s on the right controller"
+msgstr ""
+
+#: packs/core/dictation/status.sh
 msgid "no whisper-cli (re-run ./install.sh dictation)"
+msgstr ""
+
+#: packs/core/dictation/status.sh
+msgid "the controller button isn't running (re-run ./install.sh dictation)"
 msgstr ""
 
 #: packs/core/dictation/status.sh

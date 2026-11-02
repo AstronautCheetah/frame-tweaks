@@ -441,7 +441,7 @@ ensure_tweaks_venv() {
 
 # ensure_openvr <venv>: the openvr bindings in that venv, on SteamVR's own arm64 library (the
 # wheel only bundles an x86 one). Returns 1 (and changes nothing) without SteamVR's library.
-VR_LIB=/opt/steamvr/bin/linuxarm64/libopenvr_api.so
+VR_LIB=${FRAME_TWEAKS_VR_LIB:-/opt/steamvr/bin/linuxarm64/libopenvr_api.so}     # (another: for tests)
 ensure_openvr() {
     [ -f "$VR_LIB" ] || return 1
     "$1/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' ||

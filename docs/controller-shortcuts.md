@@ -1,5 +1,9 @@
 # Dictate and Lock Wallet on a controller button
 
+**Dictation has a controller button of its own in VR:** hold **Menu** on the right controller
+(`DICTATE_BUTTON` in `~/.config/frame-tweaks/dictate.conf` picks Y instead, or turns it off).
+What follows is for a keyboard shortcut, Lock Wallet, or a different button.
+
 Two steps: give each action a **keyboard shortcut** in the desktop, then have **Steam Input**
 press that shortcut when you press a controller button. Steam keeps controller layouts in its
 own settings, so this is done in Steam's UI, not by a script.

@@ -6,6 +6,8 @@ importing this needs no SteamVR.
 - Haptics: a direct pulse to the controller, which reaches it while the dashboard has input
   focus (SteamVR Input's vibration doesn't). TICK: Arrow Pad's and Full Keyboard's feel.
 - GripReader: grip squeezes, read the way Full Keyboard reads them.
+- ButtonReader: a button held down, from its part in the controller's model (Dictation's
+  controller button).
 - note_image: the picture of the note shown under a panel (why it only slides: Steam's keyboard
   open), drawn with Qt (imported only then).
 - DashboardGrab: SteamVR's own grab bar under a panel while Steam's keyboard is open (the VR
@@ -143,6 +145,37 @@ class GripReader:
         for h in self.hands:
             if h["armed"]:                      # (unarmed, it's released when it arms: not stale)
                 h["held"] = None
+
+
+class ButtonReader:
+    """Whether one controller button is down, read from its part in the controller's model
+    (button_menu, button_y…). On the Frame, SteamVR gives button actions and legacy controller
+    state only to the app with focus, so a background program never sees them; the model's part
+    reports IsPressed whatever has focus (measured on a Frame: dashboard open or closed, in a
+    game). It can't keep the press from the app with focus, which gets it too."""
+
+    def __init__(self, vr, hand, component):
+        self.vr, self.component = vr, component
+        self.sys, self.rm = vr.VRSystem(), vr.VRRenderModels()
+        self.role = vr.TrackedControllerRole_LeftHand if hand == "left" else vr.TrackedControllerRole_RightHand
+        self.path = vr.VRInput().getInputSourceHandle(f"/user/hand/{hand}")
+        self.device = None
+
+    def pressed(self):
+        """True or False; None without that controller, or without that part in its model."""
+        vr = self.vr
+        try:
+            d = self.sys.getTrackedDeviceIndexForControllerRole(self.role)
+            if d == vr.k_unTrackedDeviceIndexInvalid or not self.sys.isTrackedDeviceConnected(d):
+                self.device = None
+                return None
+            self.device = d
+            model = self.sys.getStringTrackedDeviceProperty(d, vr.Prop_RenderModelName_String)
+            ok, state = self.rm.getComponentStateForDevicePath(
+                model, self.component, self.path, vr.RenderModel_ControllerMode_State_t())
+        except Exception:
+            return None
+        return bool(state.uProperties & vr.VRComponentProperty_IsPressed) if ok else None
 
 
 def quat_of(rows):

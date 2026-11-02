@@ -115,6 +115,17 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 
 ## 2026-11-02
+- New in `packs/core/dictation/install.sh:72`
+  - now: "In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s)."
+- New in `packs/core/dictation/install.sh:74`
+  - now: "No SteamVR here, so no controller button for dictation; the shortcut works as before."
+- Changed in `packs/core/dictation/install.sh:77`
+  - was: "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+  - now: "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s"
+- New in `packs/core/dictation/status.sh:11`
+  - now: "the controller button isn't running (re-run ./install.sh dictation)"
+- New in `packs/core/dictation/status.sh:13`
+  - now: "dictate ready (%s, small model); hold %s on the right controller"
 - New in `packs/core/vr-memory-guard/README.md`
   - now: "Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
 - New in `packs/core/vr-memory-guard/README.md`

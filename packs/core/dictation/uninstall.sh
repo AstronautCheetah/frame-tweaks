@@ -2,7 +2,9 @@
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 remove_icon frame-tweaks-dictate
 remove_desktop dictate.desktop
-remove_files "$BIN/dictate"
+sysctl_user disable --now frame-tweaks-dictate-button.service 2>/dev/null || true
+remove_files "$BIN/dictate" "$BIN/dictate-button" "$HOME/.config/systemd/user/frame-tweaks-dictate-button.service"
+sysctl_user daemon-reload || true
 if [ -x "$BIN/whisper-ptt" ]; then
     say "$(t 'Kept the Whisper model: whisper-frame uses it too.')"
 else
