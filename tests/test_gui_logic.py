@@ -634,6 +634,42 @@ class PageActions(unittest.TestCase):
                 self.assertTrue(button.isEnabled())
                 self.assertFalse((d / "other").exists())
 
+    def test_actions_sit_in_the_header_and_say_whose_when_labels_clash(self):
+        """A long page's Apply mustn't be a scroll away: the actions go beside the title, outside
+        the scrolled options, with what they do as a tooltip. Two sections' "Apply" (a page that
+        includes another tweak's settings) each say whose."""
+        from PyQt6.QtWidgets import QApplication, QScrollArea, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+
+            def spec(include=()):
+                return {"file": d / "x.json", "format": "json", "about": "", "note": "", "options": [],
+                        "actions": [{"label": "Apply", "script": "a.sh", "dir": d, "about": "Downloads it."}],
+                        "checkboxes": set(), "swatches": set(), "include": list(include)}
+
+            class Window(QWidget):
+                def go_back(self):
+                    pass
+            window = Window()
+            self.addCleanup(window.deleteLater)
+            comps = [{"id": "x-one", "title": "One"}, {"id": "x-two", "title": "Two"}]
+            with mock.patch.dict(gui.sft.SETTINGS, {"x-one": spec(["x-two"]), "x-two": spec()}), \
+                    mock.patch("settings_page.components", lambda: comps):
+                page = gui.SettingsPage(window, "x-one")
+                page.setParent(window)
+                buttons = [b for s in page.sections for _a, b in s.actions]
+                self.assertEqual([b.text() for b in buttons], ["Apply (One)", "Apply (Two)"])
+                scroll = page.findChild(QScrollArea)
+                for b in buttons:
+                    self.assertFalse(scroll.isAncestorOf(b))
+                    self.assertTrue(page.isAncestorOf(b))
+                    self.assertEqual(b.toolTip(), "Downloads it.")
+                alone = gui.SettingsPage(window, "x-two")
+                alone.setParent(window)
+                self.assertEqual(alone.sections[0].actions[0][1].text(), "Apply")
+
+
 class Links(unittest.TestCase):
     """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
     def test_with_copy(self):

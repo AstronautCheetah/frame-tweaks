@@ -1,6 +1,8 @@
 """The installer window's ⚙ Settings page of a tweak (lib/sft.py SETTINGS: the same choices as
 ./install.sh settings and the gears in VR): its options, Reset, and its actions, which run in the
-background."""
+background. The actions (Apply, Forget the phone…) sit at the top right of the page, beside its
+title, where they show however far down a long list of options is scrolled (Dictation's runs to
+several screens in VR)."""
 import json
 import os
 import re
@@ -42,7 +44,8 @@ LONG_CHOICE = 28        # (a settings choice with a longer label gets a row of i
 
 class SettingsSection(QWidget):
     """One tweak's settings (lib/sft.py SETTINGS: the same choices as ./install.sh settings and the
-    gears in VR): its options, Reset, and its action buttons. notice: where it reports."""
+    gears in VR): its options and Reset; and its action buttons (self.actions: (action, button)),
+    which SettingsPage puts in its header. notice: where it reports."""
 
     def __init__(self, cid, notice):
         super().__init__()
@@ -103,7 +106,7 @@ class SettingsSection(QWidget):
                         row += 1
                     group = head
                     b.setMinimumWidth(0)
-                    b.setStyleSheet(b.styleSheet() + " QPushButton { text-align: left; padding-left: 14px; }")
+                    b.setStyleSheet(b.styleSheet() + " QPushButton { text-align: left; padding-left: 11px; }")   # (14 px from the edge: 3 are its border)
                     grid.addWidget(b, row, 0)
                     row += 1
                 else:
@@ -117,25 +120,22 @@ class SettingsSection(QWidget):
         self.actions = []
         for a in self.spec["actions"]:
             b = QPushButton()
+            if a["label"] == "Apply":                # (the main window's Apply look; Forget… and the like stay plain)
+                b.setObjectName("apply")
+            b.setToolTip(a.get("about", ""))         # (what it does: the laser's hover shows it in VR)
+            b.setAccessibleDescription(a.get("about", ""))
             b.clicked.connect(lambda _=False, a=a: self.act(a))
-            note = QLabel(a.get("about", ""))
-            note.setObjectName("desc")
-            note.setWordWrap(True)
-            row = QHBoxLayout()
-            row.addWidget(b)
-            row.addWidget(note, 1)
-            lay.addSpacing(10)
-            lay.addLayout(row)
-            self.actions.append((a, b, note))
+            self.actions.append((a, b))
         self.commands = {"\0".join(action_command(a)) for a in self.spec["actions"]}
+        self.suffix = ""                             # (SettingsPage: which section's, when two share a label)
         self.show_actions()
 
     def show_actions(self):
-        for a, b, note in self.actions:
+        for a, b in self.actions:
             value = sft.raw_setting(self.cid, a["when"]) if a.get("when") else ""
-            b.setText(re.sub(r"\{(\w+)\}", lambda m: sft.raw_setting(self.cid, m[1]), a["label"]))
-            b.setVisible(not a.get("when") or bool(value))
-            note.setVisible(b.isVisibleTo(self) or not a.get("when"))
+            b.setText(re.sub(r"\{(\w+)\}", lambda m: sft.raw_setting(self.cid, m[1]), a["label"]) + self.suffix)
+            # (setHidden, not setVisible: a button not yet in a shown window mustn't pop up on its own)
+            b.setHidden(bool(a.get("when")) and not value)
 
     def act(self, a):
         """Run the action's script in the background (a download can take a while); its last line
@@ -163,14 +163,14 @@ class SettingsSection(QWidget):
         """Working… on this section's page until proc, its action, ends (started here, or from a
         page closed since); then how it went (action_said)."""
         self.notice.setText(_("Working… (a download can take a minute)"))
-        for _a, b, _note in self.actions:
+        for _a, b in self.actions:
             b.setEnabled(False)
 
         def done(*_args):
             if sip.isdeleted(self):             # (its page was closed meanwhile)
                 return
             self.notice.setText(proc.property("said") or _("Done."))
-            for _a, b, _note in self.actions:
+            for _a, b in self.actions:
                 b.setEnabled(True)
             self.show_actions()
         proc.finished.connect(done)
@@ -235,6 +235,15 @@ class SettingsPage(QWidget):
             self.sections.append(SettingsSection(other, self.notice))
             col.addWidget(self.sections[-1])
         col.addStretch(1)
+        # The actions, at the top right: two sections' with the same label ("Apply") say whose.
+        labels = [a["label"] for section in self.sections for a, _b in section.actions]
+        for section in self.sections:
+            if any(labels.count(a["label"]) > 1 for a, _b in section.actions):
+                title = next((c["title"] for c in components() if c["id"] == section.cid), section.cid)
+                section.suffix = f" ({title})"
+                section.show_actions()
+            for _a, b in section.actions:
+                head.addWidget(b)
         running = running_action(window)         # (one of its actions, started from this page closed since)
         for section in self.sections:
             if running is not None and running.property("command") in section.commands:
