@@ -5,9 +5,10 @@ Survives SteamOS updates: nothing is installed into /usr; the connections live i
 /etc/NetworkManager/system-connections, which updates keep. Switch them from the
 NordVPN tray icon (nordvpn-tray), or from here.
 
-  nordvpn-wg setup                    one-time: asks for your NordVPN access token
-                                      (Nord Account → NordVPN → Access token), fetches
-                                      your WireGuard key, creates the connections
+  nordvpn-wg setup                    one-time: asks for your NordVPN access token (Nord
+                                      Account → NordVPN → Manual setup → Generate new token;
+                                      it says so, with that page's address on your clipboard),
+                                      fetches your WireGuard key, creates the connections
   nordvpn-wg list                     configured locations and their current servers
   nordvpn-wg add CC [CC...]           add locations by country code (e.g. DE JP)
   nordvpn-wg remove CC [CC...]        remove locations
@@ -213,19 +214,66 @@ def create(code, country, key):
         connection=f"{con_name(country):28}", host=host, city=city, load=load))
 
 
+# Where a NordVPN access token is made (Nord Account → NordVPN → Manual setup → Generate new token).
+TOKEN_URL = "https://my.nordaccount.com/dashboard/nordvpn/manual-configuration/"
+RUN_DIR = Path(f"/run/user/{os.getuid()}")
+
+
+def copy_to_clipboard(text):
+    """Put text on the desktop's clipboard, so it can be pasted into a terminal or the browser:
+    wl-copy (on PATH, or Homebrew's) on the desktop's Wayland socket, else Klipper over D-Bus.
+    False when neither can (no desktop running: in VR, say)."""
+    sock = next((s for s in [RUN_DIR / "nested_plasma/wayland-0", *RUN_DIR.glob("*/wayland-0"), RUN_DIR / "wayland-0"]
+                 if s.is_socket()), None)
+    wl_copy = shutil.which("wl-copy") or next((p for p in ["/home/linuxbrew/.linuxbrew/bin/wl-copy"] if os.path.exists(p)), None)
+    try:
+        if sock and wl_copy:        # (wl-copy stays behind to serve the clipboard: not waited for)
+            p = subprocess.Popen([wl_copy], stdin=subprocess.PIPE, env=dict(os.environ, WAYLAND_DISPLAY=str(sock)),
+                                 start_new_session=True, stderr=subprocess.DEVNULL)
+            p.communicate(text.encode(), timeout=5)
+            if p.returncode == 0:
+                return True
+        qdbus = shutil.which("qdbus6") or shutil.which("qdbus")
+        if qdbus:
+            return subprocess.run([qdbus, "org.kde.klipper", "/klipper", "setClipboardContents", text],
+                                  capture_output=True, timeout=5).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return False
+
+
+def setup_hint():
+    """What to do before anything else: run nordvpn-wg setup, with the command on the clipboard
+    when the desktop's can be reached (the tray's menu says the same)."""
+    if copy_to_clipboard("nordvpn-wg setup"):
+        return _("Run 'nordvpn-wg setup' first. It's on your clipboard: open a terminal (Konsole), paste it "
+                 "and press Enter.")
+    return _("Run 'nordvpn-wg setup' first (in a terminal: Konsole).")
+
+
 def need_key():
     if not KEY.exists():
-        raise SystemExit(_("Run 'nordvpn-wg setup' first."))
+        raise SystemExit(setup_hint())
     return KEY.read_text().strip()
 
 
 def ask_token():
+    """The access token, typed hidden (a terminal) or in a dialog (started without one). First,
+    where to get it, with that page's address on the clipboard: it asked for a token without a
+    word on where one comes from."""
+    where = _("Sign in to your Nord Account and make an access token: {url} (NordVPN → Manual setup → "
+              "Generate new token; it's shown once, and a short-lived one is enough).").format(url=TOKEN_URL)
+    if copy_to_clipboard(TOKEN_URL):
+        where += " " + _("That address is on your clipboard: paste it into your browser.")
     if os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY"):
         if shutil.which("kdialog") and not sys.stdin.isatty():
             r = subprocess.run(["kdialog", "--title", "NordVPN", "--password",
-                                _("NordVPN access token (Nord Account → NordVPN → Access token):")],
+                                where + "\n\n" + _("NordVPN access token:")],
                                capture_output=True, text=True)
             return r.stdout.strip() if r.returncode == 0 else ""
+    print(where, file=sys.stderr)
+    print(_("Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."),
+          file=sys.stderr)
     return getpass.getpass(_("NordVPN access token (input hidden): ")).strip()
 
 

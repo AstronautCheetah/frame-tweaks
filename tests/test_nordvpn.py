@@ -334,6 +334,91 @@ class TrayItem(unittest.TestCase):
         t.build_menu()
         self.assertFalse([a for a in t.menu.actions() if a.text().startswith("Connect at startup")])
 
+    def test_no_locations_offers_the_setup_command(self):
+        """Before 'nordvpn-wg setup' has run, the menu's item puts that command on the clipboard and
+        says what to do with it (the tray can't take the token: it's typed hidden, in a terminal)."""
+        t = self.tray.Tray.__new__(self.tray.Tray)
+        t.app, t.menu, t.profiles, t._codes, t.tray, t.off = mock.Mock(), self.QMenu(), [], {}, mock.Mock(), None
+        t.active = t.startup = t.last = None
+        t.build_menu()
+        item = next(a for a in t.menu.actions() if "nordvpn-wg setup" in a.text())
+        self.assertTrue(item.isEnabled())
+        item.trigger()
+        t.app.clipboard().setText.assert_called_once_with("nordvpn-wg setup")
+        self.assertIn("paste it", t.tray.showMessage.call_args.args[1])
+
+
+class SetupHelp(unittest.TestCase):
+    """nordvpn-wg before its setup, and the setup's token prompt: 'run nordvpn-wg setup first' comes
+    with the command on the clipboard, and the prompt says where a token is made, with that page's
+    address on the clipboard, when the desktop's clipboard can be reached; plainly when not."""
+    def setUp(self):
+        self.wg = load_script(PACK / "nordvpn-wg")
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.wg.KEY = Path(self.tmp.name) / "private_key"
+        self.copied = []
+
+    def copier(self, ok):
+        def copy(text):
+            self.copied.append(text)
+            return ok
+        return copy
+
+    def test_needs_setup_first_with_the_command_copied(self):
+        with mock.patch.object(self.wg, "copy_to_clipboard", self.copier(True)):
+            with self.assertRaises(SystemExit) as e:
+                self.wg.need_key()
+        self.assertIn("It's on your clipboard", str(e.exception))
+        self.assertEqual(self.copied, ["nordvpn-wg setup"])
+
+    def test_needs_setup_first_without_a_clipboard(self):
+        with mock.patch.object(self.wg, "copy_to_clipboard", self.copier(False)):
+            with self.assertRaises(SystemExit) as e:
+                self.wg.need_key()
+        self.assertEqual(str(e.exception), "Run 'nordvpn-wg setup' first (in a terminal: Konsole).")
+
+    def test_the_token_prompt_says_where_with_the_address_copied(self):
+        err = io.StringIO()
+        with mock.patch.object(self.wg, "copy_to_clipboard", self.copier(True)), \
+                mock.patch.object(self.wg.getpass, "getpass", return_value=" tok \n"), \
+                mock.patch.dict(os.environ, {"WAYLAND_DISPLAY": "", "DISPLAY": ""}), \
+                mock.patch("sys.stderr", err):
+            self.assertEqual(self.wg.ask_token(), "tok")
+        self.assertIn(self.wg.TOKEN_URL, err.getvalue())
+        self.assertIn("Manual setup", err.getvalue())
+        self.assertIn("on your clipboard", err.getvalue())
+        self.assertEqual(self.copied, [self.wg.TOKEN_URL])
+
+    def test_without_a_clipboard_the_address_is_still_said(self):
+        err = io.StringIO()
+        with mock.patch.object(self.wg, "copy_to_clipboard", self.copier(False)), \
+                mock.patch.object(self.wg.getpass, "getpass", return_value="tok"), \
+                mock.patch.dict(os.environ, {"WAYLAND_DISPLAY": "", "DISPLAY": ""}), \
+                mock.patch("sys.stderr", err):
+            self.wg.ask_token()
+        self.assertIn(self.wg.TOKEN_URL, err.getvalue())
+        self.assertNotIn("clipboard", err.getvalue())
+
+    def test_the_dialog_says_where_too(self):
+        shown = []
+        with mock.patch.object(self.wg, "copy_to_clipboard", self.copier(True)), \
+                mock.patch.object(self.wg.shutil, "which", lambda n: "/usr/bin/kdialog"), \
+                mock.patch.object(self.wg.sys.stdin, "isatty", lambda: False), \
+                mock.patch.dict(os.environ, {"WAYLAND_DISPLAY": "wayland-0"}), \
+                mock.patch.object(self.wg.subprocess, "run",
+                                  lambda cmd, **k: shown.append(cmd) or types.SimpleNamespace(returncode=0, stdout="tok\n")):
+            self.assertEqual(self.wg.ask_token(), "tok")
+        self.assertEqual(shown[0][:4], ["kdialog", "--title", "NordVPN", "--password"])
+        self.assertIn(self.wg.TOKEN_URL, shown[0][4])
+
+    def test_copying_without_a_desktop_is_false(self):
+        """No desktop Wayland socket and no qdbus: nothing to copy to, and nothing breaks."""
+        self.wg.RUN_DIR = Path(self.tmp.name) / "run"
+        with mock.patch.object(self.wg.shutil, "which", lambda n: None), \
+                mock.patch.object(self.wg.os.path, "exists", lambda p: False):
+            self.assertFalse(self.wg.copy_to_clipboard("x"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -151,6 +151,14 @@ class Tray:
         self.update_state()
         self.build_menu()
 
+    def copy_setup(self):
+        """'nordvpn-wg setup' on the clipboard, and what to do with it: the setup types the access
+        token hidden, in a terminal, which a tray menu can't offer."""
+        self.app.clipboard().setText("nordvpn-wg setup")
+        self.tray.showMessage("NordVPN", _("'nordvpn-wg setup' is on your clipboard: open a terminal (Konsole), paste it "
+                                           "and press Enter. It asks for a NordVPN access token, and says where to get one."),
+                              self.off, 10000)
+
     def update_state(self):
         self.profiles, self.active, self.startup, self.last = nm_connections()
         busy = self.proc and self.proc.state() != QProcess.ProcessState.NotRunning
@@ -172,8 +180,8 @@ class Tray:
             a.triggered.connect(lambda _=False, c=code: self.run("up", c))
             group.addAction(a)
             self.menu.addAction(a)
-        if not profiles:
-            self.menu.addAction(_("No locations: run 'nordvpn-wg setup'")).setEnabled(False)
+        if not profiles:            # (nothing set up yet: the way in, since the tray can't take the token)
+            self.menu.addAction(_("No locations yet: copy 'nordvpn-wg setup' for a terminal")).triggered.connect(self.copy_setup)
         self.menu.addSeparator()
         dis = self.menu.addAction(_("Disconnect"))
         dis.setEnabled(bool(self.active))
