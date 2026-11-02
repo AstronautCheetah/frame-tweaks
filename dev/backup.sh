@@ -32,6 +32,8 @@ snapshot() {
     mountpoint -q "$(dirname "$dest")" || mountpoint -q "$(dirname "$(dirname "$dest")")" ||
         { echo "dev/backup.sh: $dest isn't on a mounted drive; no snapshot" >&2; return 0; }
     mkdir -p "$dest"
+    # (a run cut short: never used again, and not a snapshot)
+    find "$dest" -mindepth 1 -maxdepth 1 -type d -name '20*.part' -exec rm -rf {} +
     stamp=$(date +%Y-%m-%d_%H%M%S)
     new="$dest/$stamp"
     [ -d "$dest/latest/" ] && link=(--link-dest="$dest/latest/")
@@ -42,8 +44,8 @@ snapshot() {
     mv "$new.part" "$new"
     ln -sfn "$stamp" "$dest/latest"
     # (the oldest beyond KEEP go; latest is a link, not counted)
-    find "$dest" -mindepth 1 -maxdepth 1 -type d -name '20*' | sort | head -n -"$KEEP" | while read -r old; do rm -rf "$old"; done
-    echo "snapshot: $new ($(du -sh --apparent-size "$new" | cut -f1); $(find "$dest" -mindepth 1 -maxdepth 1 -type d -name '20*' | wc -l) kept)"
+    find "$dest" -mindepth 1 -maxdepth 1 -type d -name '20*' ! -name '*.part' | sort | head -n -"$KEEP" | while read -r old; do rm -rf "$old"; done
+    echo "snapshot: $new ($(du -sh --apparent-size "$new" | cut -f1); $(find "$dest" -mindepth 1 -maxdepth 1 -type d -name '20*' ! -name '*.part' | wc -l) kept)"
 }
 
 user_systemctl() {
