@@ -16,6 +16,10 @@ registry). Nothing else is read, so this starts fast and never touches a manifes
   installer.py needed-by ID...    ID<TAB>OTHER for each tweak OTHER, not among the IDs, that
                                   depends on ID (the IDs in order, then the tweaks in order; one
                                   line per mention), for ./install.sh uninstall to check installed
+  installer.py status-server       status-of for many results, one per request line, while
+                                  ./install.sh runs: EXIT RECORD STDERR_FILE STDOUT (base64, or
+                                  -), answered with STATUS LINE (status-of's exit code, 10-12,
+                                  and its line in base64, or -); one Python start for the run
   installer.py status-of EXIT RECORD STDERR_FILE
                                   a status.sh's result, its stdout on stdin: prints the line
                                   ./install.sh shows (stdout as it was, or "warning  status check
@@ -129,6 +133,8 @@ def main(argv, stdin=sys.stdin, stdout=sys.stdout):
     cmd, ids = argv[0], argv[1:]
     if cmd == "status-of" and len(ids) == 3:
         return status_main(*ids, stdin=stdin, stdout=stdout)
+    if cmd == "status-server" and not ids:
+        return status_server(stdin, stdout)
     graph = parse_graph(stdin.read())
     if cmd == "with-deps":
         lines = with_deps(graph, ids)
@@ -169,6 +175,26 @@ def status_main(returncode, record, err_file, stdin, stdout):
             stdout.write(line + "\n")
     # (not 0 to 2: a Python failure is 1, with its traceback, and must not pass for "not installed")
     return 10 + code
+
+
+
+def status_server(stdin, stdout):
+    """status-server: status-of, a request per line, until stdin ends. The texts travel as base64,
+    so a status line can hold any byte, a newline included, without breaking the framing."""
+    import base64
+    import io
+    for request in stdin:
+        try:
+            rc, record, err_file, out = request.split()
+            body = io.BytesIO(b"" if out == "-" else base64.b64decode(out))
+            answer = io.StringIO()
+            code = status_main(rc, record, err_file, body, answer)
+            line = answer.getvalue().removesuffix("\n").encode("utf-8", "surrogateescape")
+            reply = f"{code} {base64.b64encode(line).decode() if line else '-'}"
+        except (ValueError, OSError):
+            reply = "1 -"           # (not 10-12: the caller runs status-of itself for this one)
+        print(reply, file=stdout, flush=True)
+    return 0
 
 
 if __name__ == "__main__":

@@ -211,10 +211,27 @@ is_component() { [[ -n ${TITLE[$1]:-} ]]; }
 # tweak_script ID NAME [ARGS]: run the tweak's NAME.sh; for a linked project (manifest link:, no
 # scripts of its own), lib/link.sh does the same from the link's fields.
 tweak_script() {
+    # (without the status server's pipes: a program a script leaves running would keep it alive)
+    if [[ -n $STATUS_IN ]]; then tweak_script_run "$@" {STATUS_IN}>&- {STATUS_OUT}<&-; else tweak_script_run "$@"; fi
+}
+tweak_script_run() {
     local id=$1 name=$2; shift 2
     if [[ -f ${DIR[$id]}/$name.sh ]]; then bash "${DIR[$id]}/$name.sh" "$@"
     elif [[ -n ${LINKED[$id]:-} ]]; then bash "$REPO_DIR/lib/link.sh" "$name" "$id" "$@"
     else return 127; fi
+}
+
+# One python3 that reads every status result of this run (lib/installer.py status-server), as a
+# coprocess of the main shell: started once per tweak, Python's start made ./install.sh status a
+# second slower on a Frame. Without it (it didn't start, or a $(…) subshell can't start one for
+# later calls), status_of starts Python for each result instead, as it always did.
+STATUS_IN="" STATUS_OUT=""
+start_status_server() {
+    [[ -n $STATUS_IN ]] && return 0
+    (( BASH_SUBSHELL == 0 )) || return 1
+    # (fd 8, the lock, closed: the server must not hold it after this script is done)
+    coproc STATUS_PY { exec 8>&- python3 lib/installer.py status-server; } 2>/dev/null || return 1
+    STATUS_OUT=${STATUS_PY[0]} STATUS_IN=${STATUS_PY[1]}
 }
 
 # status <id>: prints the component's one-line status; returns 0 ok, 1 missing (or uninstalled,
@@ -227,7 +244,19 @@ status_of() {
     err=$(mktemp) || err=/dev/null
     out=$(tweak_script "$1" status 2>"$err"); rc=$?
     [[ -f $STATE/installed/$1 ]] && rec=1 || rec=0
-    line=$(printf '%s' "$out" | python3 lib/installer.py status-of "$rc" "$rec" "$err"); st=$?
+    st=""
+    if [[ -n $STATUS_IN ]]; then
+        local b64 reply
+        b64=$(printf '%s' "$out" | base64 -w0); [[ -n $b64 ]] || b64=-
+        # (in a subshell: a server that died would kill this script with SIGPIPE, not just the write)
+        if (printf '%s %s %s %s\n' "$rc" "$rec" "$err" "$b64" >&"$STATUS_IN") 2>/dev/null &&
+           read -r st reply <&"$STATUS_OUT"; then
+            if [[ $reply == - ]]; then line=""; else line=$(base64 -d <<<"$reply"); fi
+        else
+            st=""
+        fi
+    fi
+    [[ $st == 1[012] ]] || { line=$(printf '%s' "$out" | python3 lib/installer.py status-of "$rc" "$rec" "$err"); st=$?; }
     [[ $err == /dev/null ]] || rm -f "$err"
     case $st in
         10|11|12) rc=$((st - 10)) ;;
@@ -1013,6 +1042,11 @@ cmd_check_system() {
     return $bad
 }
 
+# (the commands that read many statuses: one Python for them all, see start_status_server)
+case ${1:-} in
+    ""|status|check|update|_reinstall|reinstall|install|tidy|uninstall|remove|uninstall-self|forget-settings)
+        start_status_server || true ;;
+esac
 case ${1:-} in
     "")          if [[ ! -t 0 || -n ${FRAME_TWEAKS_GUI:-} ]] && command -v kdialog >/dev/null && [[ -n ${WAYLAND_DISPLAY:-${DISPLAY:-}} ]]; then cmd_gui
                  else usage; echo; cmd_status; fi ;;

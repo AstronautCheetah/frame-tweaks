@@ -295,5 +295,31 @@ class CommandLine(unittest.TestCase):
         self.assertEqual(r.returncode, 1)               # (its usage: not 3, which ./install.sh reads as an id)
 
 
+
+class StatusServer(unittest.TestCase):
+    """installer.py status-server: what ./install.sh status_of asks while a command runs, one line
+    each, answered as status-of would; texts as base64, so any byte gets through."""
+    def test_answers_as_status_of_one_line_each(self):
+        import base64
+        with tempfile.TemporaryDirectory() as d:
+            err = Path(d, "err")
+            err.write_bytes(b"\x1b[31mcurl: (6) no host\x1b[0m\n")
+            requests = [("0", "0", "/nonexistent", b"ok       fine"),
+                        ("1", "1", str(err), b""),                          # (failed: a record, no word)
+                        ("2", "0", "/nonexistent", "warning  caf\u00e9\nsecond".encode() + b"\xff"),
+                        ("bad request",)]
+            lines = "".join(" ".join(r[:3] + ((base64.b64encode(r[3]).decode() or "-") if r[3] else "-",)) + "\n"
+                            if len(r) == 4 else r[0] + "\n" for r in requests)
+            p = subprocess.run([sys.executable, str(ROOT / "lib/installer.py"), "status-server"], input=lines,
+                               capture_output=True, text=True, timeout=30)
+        replies = [line.split(" ", 1) for line in p.stdout.splitlines()]
+        self.assertEqual(len(replies), 4, p.stdout + p.stderr)
+        got = [(int(code), b"" if b64 == "-" else base64.b64decode(b64)) for code, b64 in replies]
+        self.assertEqual(got[0], (10, b"ok       fine"))
+        self.assertEqual(got[1], (12, b"warning  status check failed: curl: (6) no host"))
+        self.assertEqual(got[2], (12, "warning  caf\u00e9\nsecond".encode() + b"\xff"))
+        self.assertEqual(got[3], (1, b""))                                  # (install.sh asks status-of then)
+
+
 if __name__ == "__main__":
     unittest.main()
