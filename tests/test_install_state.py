@@ -168,6 +168,20 @@ class InstallState(unittest.TestCase):
         self.assertNotIn("Removed Probe", r.stdout)
         self.assertTrue(self.record.exists())
 
+    def test_tidy_goes_by_what_is_installed_not_by_the_record(self):
+        """The window counts a tweak as installed by its status: without a version record it was
+        skipped here, and the window said Removed for a tweak still there."""
+        (self.pack / "probe/README.md").write_text(README.replace("processes: []", "processes: []\nwhen_not_needed: uninstall"))
+        self.trust()
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\nexit 1\n")
+        self.trust()
+        self.record.unlink()
+        r = self.sh("tidy")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Removed Probe", r.stdout)
+        self.assertEqual(self.log(), ["install", "uninstall"])
+
     def test_tidy_leaves_a_tweak_that_doesnt_ask_for_it(self):
         r = self.sh("install", "probe")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

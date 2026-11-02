@@ -389,11 +389,14 @@ cmd_uninstall() {
 # frame-tweaks-tidy.service at each login. One line per tweak removed; nothing when there's
 # nothing to do (their settings are kept: nobody asked to remove them).
 cmd_tidy() {
-    local id why failed=0
+    local id why failed=0 installed
     for id in "${IDS[@]}"; do
-        [[ -n ${AUTO_REMOVE[$id]} && -f $STATE/installed/$id ]] || continue
+        [[ -n ${AUTO_REMOVE[$id]} ]] || continue
+        # (by its status, as the window goes: it says Removed once this ends, so none may be skipped)
+        is_installed "$id"; installed=$?
+        [[ $installed -eq 0 || -f $STATE/installed/$id ]] || continue
         why=$(not_needed "$id") || continue
-        if is_installed "$id"; then
+        if [[ $installed -eq 0 ]]; then
             cmd_uninstall --keep-settings "$id" || { echo "!! $(t '%s could not be removed' "$id")" >&2; failed=1; continue; }
         else
             forget_version "$id"            # (removed by hand already: its record goes too)
