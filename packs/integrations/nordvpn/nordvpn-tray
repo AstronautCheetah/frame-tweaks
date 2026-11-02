@@ -88,6 +88,9 @@ def nm_connections():
     return sorted(profiles), active, min(startup, default=None), last
 
 
+SETUP_CMD = "nordvpn-wg setup"      # (a command, not text to translate: locale/MARKING.md)
+
+
 class Tray:
     def __init__(self, app):
         self.app = app
@@ -154,7 +157,7 @@ class Tray:
     def copy_setup(self):
         """'nordvpn-wg setup' on the clipboard, and what to do with it: the setup types the access
         token hidden, in a terminal, which a tray menu can't offer."""
-        self.app.clipboard().setText("nordvpn-wg setup")
+        self.app.clipboard().setText(SETUP_CMD)
         self.tray.showMessage("NordVPN", _("'nordvpn-wg setup' is on your clipboard: open a terminal (Konsole), paste it "
                                            "and press Enter. It asks for a NordVPN access token, and says where to get one."),
                               self.off, 10000)
