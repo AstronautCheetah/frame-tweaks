@@ -64,6 +64,10 @@ msgid "I understand the risk: apply"
 msgstr ""
 
 #: gui/apply_changes.py
+msgid "Install again, with the files that changed since they were installed:"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Install:"
 msgstr ""
 
@@ -84,7 +88,16 @@ msgid "Nothing to change: tick or untick a tweak first"
 msgstr ""
 
 #: gui/apply_changes.py
+msgid ""
+"Nothing to reinstall: no installed tweak's files changed since it was installed."
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Password set: the tweaks tagged sudo can install now."
+msgstr ""
+
+#: gui/apply_changes.py gui/frame-tweaks-gui.py
+msgid "Reinstall"
 msgstr ""
 
 #: gui/apply_changes.py
@@ -104,6 +117,11 @@ msgid "Still checking status; try again in a moment."
 msgstr ""
 
 #: gui/apply_changes.py
+msgid ""
+"Their files changed since they were installed (Frame Tweaks updated, or a pack edited), and the installed copies are still the old ones. Installs them again: %s"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Their settings and data are kept."
 msgstr ""
 
@@ -119,6 +137,10 @@ msgstr ""
 #: gui/apply_changes.py
 msgid ""
 "{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "↻ Reinstall updated ({n})"
 msgstr ""
 
 #: gui/apply_changes.py
@@ -388,6 +410,16 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid ""
+"Its files changed since it was installed (Frame Tweaks updated, or its pack edited), and the installed copy is still the old one. Reinstall installs it again with them."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Its files changed since it was installed: reinstall to use them (remove it and install it again in one step, settings kept)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
 "Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
 msgstr ""
 
@@ -524,6 +556,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "status check failed: {error}"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py install.sh
+msgid "updated"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1589,6 +1625,10 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid "Installing again, with their changed files: %s"
+msgstr ""
+
+#: install.sh
 msgid "Kept backups of files tweaks changed: %s"
 msgstr ""
 
@@ -1627,6 +1667,11 @@ msgstr ""
 #: install.sh
 msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
+msgstr ""
+
+#: install.sh
+msgid ""
+"No installed tweak has files that changed since it was installed: nothing to install again."
 msgstr ""
 
 #: install.sh
@@ -1839,6 +1884,11 @@ msgstr ""
 
 #: install.sh
 msgid "update: unknown option %s (--to vX.Y.Z | --to stable | --reinstall)"
+msgstr ""
+
+#: install.sh
+msgid ""
+"↻ updated: the files of %s changed since they were installed, and the installed copies are still the old ones. To install them again: %s"
 msgstr ""
 
 #: lib/browser.py

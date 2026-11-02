@@ -1754,6 +1754,52 @@ class ApplyConfirm(unittest.TestCase):
         self.assertNotIn("needed by", w.confirm_text.text())
 
 
+class ReinstallUpdated(unittest.TestCase):
+    """Tweaks whose files changed since they were installed (sft.files_changed): ↻ updated on
+    their rows, and ↻ Reinstall updated, which names them on the confirm page first, as Apply
+    changes does, then runs ./install.sh reinstall-changed for them."""
+    def test_found_in_the_background_then_named_and_reinstalled(self):
+        w = bare_window()
+        a, b = (c["id"] for c in w.rows[:2])
+        w.state[a] = (0, "ok")                                 # (b: not installed, so not offered)
+        cw = collecting_window(state=w.state, files_job=finished({a, b}))
+        cw.collect()
+        self.assertEqual(cw.files_changed, {a, b})
+        self.assertIsNone(cw.files_job)
+        w.files_changed = cw.files_changed
+        self.assertEqual(w.updated_ids(), [a])
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.reinstall_changed()
+            self.assertIs(w.stack.currentWidget(), w.confirm_page)
+            self.assertIn(gui.html.escape(gui.component(a)["title"]), w.confirm_text.text())
+            self.assertNotIn("• " + gui.html.escape(gui.component(b)["title"]), w.confirm_text.text())
+            self.assertEqual(w.confirm_yes.text(), "Reinstall")
+            self.assertEqual(out.getvalue(), "")                    # (asks first)
+            w.confirm_yes.click()
+        self.assertEqual(out.getvalue(), f"would run: ./install.sh reinstall-changed {a}\n")
+
+    def test_the_button_shows_only_when_theres_one_and_goes_once_reinstalled(self):
+        from PyQt6.QtWidgets import QPushButton
+        w = bare_window()
+        a = w.rows[0]["id"]
+        w.changed_button, w.files_changed = QPushButton(), {a}
+        w.update_reinstall_changed()
+        self.assertTrue(w.changed_button.isHidden())           # (a isn't installed)
+        w.state[a] = (0, "ok")
+        w.update_reinstall_changed()
+        self.assertFalse(w.changed_button.isHidden())
+        self.assertEqual(w.changed_button.text(), "↻ Reinstall updated (1)")
+        w.updates, w.refresh = {}, mock.Mock()
+        w.changed([a])                                         # (its terminal closed)
+        self.assertEqual(w.files_changed, set())
+        w.update_reinstall_changed()
+        self.assertTrue(w.changed_button.isHidden())
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            w.reinstall_changed()
+        self.assertEqual(out.getvalue(), "")
+        w.say.assert_called_once()
+
+
 class ChangesTextSudo(unittest.TestCase):
     def test_a_dependency_says_it_asks_for_sudo_too(self):
         w = bare_window()

@@ -177,7 +177,10 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
   tray…). Tweaks with settings have a **⚙ Settings** button instead, or a **⚙** beside their ▶
   (Screen snip, Android Mirror); the wallet's row has **🔑 Wallet apps**, and a tweak with nothing
   to open has **Help**, its details page.
-- **↻** removes a tweak and installs it again in one step, keeping its settings.
+- **↻** removes a tweak and installs it again in one step, keeping its settings. When a tweak's
+  files changed since it was installed (in a copy you update with `git pull`, or a pack you
+  edit), its row says "↻ updated · Reinstall" and its ↻ is lit; **↻ Reinstall updated (N)**, at
+  the bottom, installs all of them again.
 - Categories fold, and rows or whole categories can be hidden (hiding never removes anything).
 - "↑ … available · Update" appears when a newer Frame Tweaks release, or a newer version of an
   app a tweak installs, is out.
@@ -206,6 +209,7 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh uninstall --remove-settings arrowpad   remove one and its settings (--keep-settings: keep them)
 ./install.sh forget-settings    delete the settings uninstalled tweaks left behind (--list: only show them)
 ./install.sh reinstall arrowpad remove and install again in one step (the ↻ button)
+./install.sh reinstall-changed  install again the tweaks whose files changed since (status: ↻ updated)
 ./install.sh status             health check, changes nothing
 ./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
 ./install.sh debug-info         a redacted report for bug reports
@@ -292,6 +296,11 @@ own: a tweak only changes when you update.
 - **Go to a specific release** (for example, to go back): `./install.sh update --to vX.Y.Z`
   (0.6.1 or later: older releases aren't signed, so they're refused).
 - **Keep one tweak as it is** during updates: `./install.sh hold ID` (`unhold` to undo).
+- **Changed files without an update** (a copy on a branch you `git pull`, or a pack you edit):
+  the installed tweaks keep their old copies until their installers run again. Status marks each
+  one "↻ updated", and `./install.sh reinstall-changed` (in the window, **↻ Reinstall updated**)
+  installs those again, as an update would. Tweaks installed before Frame Tweaks recorded this
+  aren't marked until their next install.
 
 **If updates stop.** What's installed keeps working. If another project deletes or changes a
 file a tweak downloads, the installer falls back to Frame Tweaks' own copy, checked against the

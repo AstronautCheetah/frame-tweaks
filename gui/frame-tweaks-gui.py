@@ -113,6 +113,7 @@ QPushButton#info:disabled { color: #3a434d; }
 QWidget#timer { background: transparent; }
 QPushButton#again { padding: 0px 7px 3px 7px; font-size: 24px; font-weight: 600; }
 QPushButton#again:disabled { color: #3a434d; }
+QPushButton#again[updated="true"] { color: #7fb2e5; }
 QPushButton#run { background: #2f6b46; font-weight: 600; min-width: 92px; }
 QPushButton#run:hover { background: #3c8a5a; }
 QPushButton#run:disabled { background: #161c23; color: #3a434d; }
@@ -161,6 +162,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     """The installer window. Apply changes (apply_changes.py) and the controller in VR
     (vr_controls.py) are parts of it in modules of their own: mixins, before QWidget so their
     eventFilter is the one Qt calls."""
+    # (class defaults too: the tests build windows without __init__, and on such a Qt object a missing
+    # attribute raises RuntimeError rather than AttributeError, so getattr's default wouldn't help)
+    files_job, files_changed = None, frozenset()
     pack_job = None         # a pack being added or updated from a link, (future, done, saying): finish_pack_job
 
     def __init__(self):
@@ -186,6 +190,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.check_known_issues()
         self.details = None
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
+        # Tweaks whose files changed since they were installed (sft.files_changed), and its job:
+        # ↻ updated on their rows, and ↻ Reinstall updated (apply_changes.py) for all of them.
+        self.files_changed, self.files_job = set(), None
         self.prefs = window_prefs()
         try:                                         # (what's kept under a tweak's former id: formerly:)
             sft.apply_formerly()
@@ -278,6 +285,10 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.update_button = QPushButton()
         self.update_button.clicked.connect(self.update_clicked)
         bottom.addWidget(self.update_button)
+        self.changed_button = QPushButton()
+        self.changed_button.clicked.connect(self.reinstall_changed)
+        bottom.addWidget(self.changed_button)
+        self.update_reinstall_changed()
         self.set_update_state(self.update_state, self.update_newest)
         about = QPushButton(_("📖 README"))
         about.setToolTip(_("What Frame Tweaks is, how to install, update and remove it, common issues"))
@@ -388,6 +399,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             fut.cancel()
         self.state = {}
         self.futures = {c["id"]: self.pool.submit(status, c["id"]) for c in self.rows}
+        if self.files_job is not None:      # (the last round's, if it hasn't run yet)
+            self.files_job.cancel()
+        self.files_job = self.pool.submit(sft.files_changed, self.rows)
         self.collecting()
         self.rebuild()
 
@@ -500,8 +514,19 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             self.tidy_unneeded()
         if shown:
             self.fit_list()                              # (a status can make its row wider)
+        if self.files_job is not None and self.files_job.done():
+            job, self.files_job = self.files_job, None
+            try:
+                self.files_changed = set() if job.cancelled() else job.result()
+            except Exception:                            # (an unreadable folder, say: nothing marked, rows as before)
+                self.files_changed = set()
+            for cid in self.status_labels:
+                self.show_status(cid)
+                self.update_again(cid)
+            self.update_apply()
         busy = (self.futures or self.latest_futures or self.update_futures or self.self_update is not None
-                or self.pack_check is not None or self.pack_job is not None)
+                or self.pack_check is not None or self.pack_job is not None
+                or self.files_job is not None)
         self.collect_every(100 if busy else 1000)
 
     # ---- layout -----------------------------------------------------------------
@@ -605,7 +630,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             st.setProperty("status", kind)
             st.setWordWrap(True)
             st.setTextFormat(Qt.TextFormat.RichText)
-            st.linkActivated.connect(lambda _, c=cid: self.run_update(c))
+            # (two links: u, a newer upstream version, Update; r, files changed since installed, Reinstall)
+            st.linkActivated.connect(lambda href, c=cid: self.run_reinstall(c) if href == "r" else self.run_update(c))
             self.status_labels[cid] = st
             self.show_status(cid)
             run = QPushButton()
@@ -720,7 +746,14 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             cur, new = self.updates[cid]
             text += ("<br><span style='color:#7fb2e5'>↑ " + _("{version} available").format(version=html.escape(new))
                      + " · <a style='color:#7fb2e5' href='u'>" + _("Update") + "</a></span>")
+        updated = self.files_updated(cid)
+        if updated:
+            text += ("<br><span style='color:#7fb2e5'>↻ " + html.escape(_("updated")) + " · <a style='color:#7fb2e5' "
+                     "href='r'>" + html.escape(_("Reinstall")) + "</a></span>")
         label.setText(text)
+        label.setToolTip(_("Its files changed since it was installed (Frame Tweaks updated, or its pack edited), and "
+                           "the installed copy is still the old one. Reinstall installs it again with them.")
+                         if updated else "")
 
     def run_update(self, cid, to=None):
         """Reinstall one tweak (fetches its latest upstream version), or update this repo (cid None;
@@ -823,6 +856,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         for them before is in now (or went with them), and every row is checked again."""
         for cid in ids:
             self.updates.pop(cid, None)
+            self.files_changed = self.files_changed - {cid}     # (installed again, or gone: refresh looks again)
         self.refresh()
 
     def tidy_unneeded(self):
@@ -866,8 +900,15 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         state = self.state.get(cid)
         installed = state is not None and state[0] not in GONE
         button.setEnabled(installed)
-        button.setToolTip(_("Reinstall: remove it and install it again in one step (settings kept)")
+        updated = self.files_updated(cid)
+        button.setToolTip(_("Its files changed since it was installed: reinstall to use them (remove it and install "
+                            "it again in one step, settings kept)") if updated else
+                          _("Reinstall: remove it and install it again in one step (settings kept)")
                           if installed else _("Reinstall (available once it's installed)"))
+        if button.property("updated") != ("true" if updated else "false"):
+            button.setProperty("updated", "true" if updated else "false")
+            button.style().unpolish(button)
+            button.style().polish(button)
 
     def update_run(self, cid):
         """Run/Open/... for installed tweaks with something to launch, Help otherwise."""

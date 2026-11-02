@@ -241,6 +241,22 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
   instead (`lib/common.sh` `ft_version`, `lib/sft.py` `build_version`): `0.5.0` at a release
   tag, `0.5.0+3.abc1234` three commits later, `-dirty` with local changes. Only `v*` tags count
   (the `mirror` release has a tag of its own).
+- **Files changed since installed.** A checkout that moves without an update (`git pull` on a
+  branch, a pack edited) leaves the installed copies as they were. So each successful install
+  also writes `$STATE/fingerprints/<id>`: a SHA-256 of the tweak's folder (`lib/installer.py`
+  `fingerprint`: paths and contents; of `README.md` only its front matter, the manifest; not
+  `__pycache__`, `*.pyc`, `*.swp`, `*~`), taken after the installer ran, so an installer that
+  writes into its own folder isn't flagged for good. It's not in `installed/<id>`, which every
+  reader compares whole with `VERSION`. `lib/` isn't fingerprinted: every tweak uses it, and a
+  change there is what `update` (every installer again) is for. `./install.sh status` and the
+  window mark an installed tweak whose folder now differs "↻ updated" (the exit code stays the
+  status's); `./install.sh reinstall-changed [ID...]` (the window's **↻ Reinstall updated**, after
+  its confirm page) runs their migrations and installers as an update's second stage does. Held
+  and linked tweaks are never marked, as an update leaves them too. A tweak without a
+  fingerprint, installed before they were recorded, counts as unchanged until its next install:
+  flagged instead, every old install would say so until reinstalled by hand; recorded by
+  `status`, a checkout pulled since would pass for what was installed (and `status` changes
+  nothing).
 - **Releases** are made by the Release workflow
   ([`release.yml`](../.github/workflows/release.yml)). It turns CHANGELOG.md's
   `## Unreleased` section into the release notes, bumps `VERSION` and the AppStream metadata,
@@ -254,7 +270,7 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
 | Where | What |
 |---|---|
 | `~/frame-tweaks/` | The checkout (`get.sh`'s default; `FRAME_TWEAKS_DIR` changes it). The menu entry points here. |
-| `~/.local/state/frame-tweaks/` | `install.lock`; `logs/` (every changing run, the last 5 kept, used by `debug-info`); `installed/<id>` (version records); `held/<id>`; `backups/<tweak>/` (originals of changed user files and KDE keys); `alarm/<package>` (last installed Arch Linux ARM version, for the downgrade check); `vr-debugger.prev` (the dashboard setting to restore). |
+| `~/.local/state/frame-tweaks/` | `install.lock`; `logs/` (every changing run, the last 5 kept, used by `debug-info`); `installed/<id>` (version records); `fingerprints/<id>` (what the tweak's folder held when it was last installed); `held/<id>`; `backups/<tweak>/` (originals of changed user files and KDE keys); `alarm/<package>` (last installed Arch Linux ARM version, for the downgrade check); `vr-debugger.prev` (the dashboard setting to restore). |
 | `~/.config/frame-tweaks/` | `channel`; `installer/` (hidden and shown rows, folded and hidden groups, `trusted-packs`); tweak settings (`*.conf`, `*.json`), written only through the keys and values the manifest lists. |
 | `~/.local/share/frame-tweaks/` | `packs/` (user packs); `venv/` (shared Python venv for small D-Bus tools); `vr-dashboard/` (the patcher and installed patches); `launcher-originals/` (menu entries before wallet-launcher wrapped them) and `launcher-built/` (the wrappers as it wrote them); `menu-built/` (Frame Tweaks' own menu entries as written). What an entry in the menu says differently from its copy is your edit, kept when Frame Tweaks writes it again (lib/menuedits.py); some tweaks' data. |
 | `~/.local/share/arrowpad/venv` | The PyQt6 venv shared by the installer window, Arrow Pad and the NordVPN tray. |

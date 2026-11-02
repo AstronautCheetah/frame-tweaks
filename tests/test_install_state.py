@@ -10,8 +10,9 @@ kept, a reinstall keeping a tweak the Frame doesn't need, a status check that fa
 for "not installed", an update forgetting the record of a tweak that's gone and failing when a
 tweak does, Frame Tweaks' own commands with no tweak loaded or run by a relative path, the
 app-menu entry whole, and debug-info's report without names and addresses (but SteamOS's own
-names kept). systemctl is a stand-in: sysctl_user would reach the real user session's systemd,
-whatever HOME is."""
+names kept), and a tweak whose files changed since it was installed marked and reinstalled
+(reinstall-changed). systemctl is a stand-in: sysctl_user would reach the real user session's
+systemd, whatever HOME is."""
 import sys
 import fcntl
 import os
@@ -152,6 +153,64 @@ class InstallState(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.record.read_text(), VERSION + "\n")
         self.assertEqual(self.log(), ["install"])
+
+    def change_the_probe(self):
+        """Its files change after it was installed (a git pull, an edit to the pack)."""
+        (self.pack / "probe/install.sh").write_text('#!/bin/bash\n' + SCRIPTS["install.sh"] + '  # fixed\n')
+        self.trust()
+
+    def test_files_changed_since_installed_show_and_reinstall(self):
+        """The install records its folder's fingerprint; once the files change, status marks it
+        ↻ updated and says how to install it again, and reinstall-changed does (as an update does:
+        its installer runs over what's there), after which it's as installed again."""
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.state / "fingerprints/probe").is_file())
+        r = self.sh("status", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertNotIn("↻", r.stdout)
+        self.change_the_probe()
+        r = self.sh("status", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)                # (the status's own code)
+        self.assertRegex(r.stdout, r"✔\x1b\[0m probe +installed +\x1b\[36m↻ updated")
+        self.assertIn("./install.sh reinstall-changed", r.stdout)
+        r = self.sh("reinstall-changed")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["install", "install"])                  # (not removed first)
+        self.assertNotIn("↻", self.sh("status", "probe").stdout)
+        r = self.sh("reinstall-changed")                                      # (nothing left to do)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("nothing to install again", r.stdout)
+        self.assertEqual(self.log(), ["install", "install"])
+
+    def test_an_install_from_before_fingerprints_isnt_changed(self):
+        """An install record without a fingerprint (installed by an older Frame Tweaks): unknown
+        counts as unchanged, rather than every old install flagged until reinstalled by hand. Its
+        next install records one."""
+        self.installed_at(VERSION)
+        self.change_the_probe()
+        r = self.sh("status", "probe")
+        self.assertNotIn("↻", r.stdout)
+        r = self.sh("reinstall-changed")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), [])
+        self.assertFalse((self.state / "fingerprints/probe").exists())     # (status changed nothing)
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.assertTrue((self.state / "fingerprints/probe").is_file())
+
+    def test_files_changed_leave_held_and_uninstalled_tweaks_alone(self):
+        """A held tweak is kept as it is: not marked, not reinstalled. An uninstall forgets the
+        fingerprint with the record."""
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.change_the_probe()
+        self.assertEqual(self.sh("hold", "probe").returncode, 0)
+        self.assertNotIn("↻", self.sh("status", "probe").stdout)
+        self.assertEqual(self.sh("reinstall-changed", "probe").returncode, 0)
+        self.assertEqual(self.log(), ["install"])
+        self.assertEqual(self.sh("unhold", "probe").returncode, 0)
+        self.assertIn("↻", self.sh("status", "probe").stdout)
+        self.assertEqual(self.sh("uninstall", "probe").returncode, 0)
+        self.assertFalse((self.state / "fingerprints/probe").exists())
 
     def test_tidy_removes_an_installed_tweak_this_frame_no_longer_needs(self):
         """when_not_needed: uninstall, and needed.sh says SteamOS does it now (after an update, or a

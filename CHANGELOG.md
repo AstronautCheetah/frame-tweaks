@@ -70,6 +70,14 @@
   desktop's clipboard.
 
 ### Added
+- **Tweaks whose files changed since you installed them say so:** after the checkout changes
+  (a `git pull`, a pack you edit), an installed tweak keeps running its old copy until its
+  installer runs again. Its row now says **↻ updated** (with a Reinstall link, and its ↻ button
+  lit), and **↻ Reinstall updated (N)** installs all of them again in one go, after naming them
+  first; in a terminal, `./install.sh status` marks them and `./install.sh reinstall-changed`
+  installs them again. Each install records a fingerprint of the tweak's folder (its scripts and
+  its manifest, not its README's text) for this. Tweaks installed before this have none, so they
+  aren't flagged until their next install (any update gives them one); held tweaks are left alone.
 - **✔ Works on my Frame:** a button that shows a short report of which tweaks work on your
   SteamOS and SteamVR versions (each tweak's mark only, not its status text), then opens GitHub's
   "Works on my Frame" form with it filled in. Nothing is sent unless you submit the form, and the

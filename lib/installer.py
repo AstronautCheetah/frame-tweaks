@@ -26,6 +26,15 @@ registry). Nothing else is read, so this starts fast and never touches a manifes
                                   failed: ..."), exits 10, 11 or 12 for status 0, 1 or 2. RECORD
                                   is 1 if the tweak has a version record, else 0.
 
+What a tweak's files were when it was installed (docs/DESIGN.md, "Files changed since installed"):
+
+  installer.py fingerprint DIR    the fingerprint of the tweak folder DIR, as ./install.sh records
+                                  it in $STATE/fingerprints/<id> when its installer succeeds
+  installer.py files-changed FINGERPRINTS
+                                  of the tweaks on stdin (ID<TAB>DIR, one per line), those whose
+                                  folder's fingerprint isn't the one recorded in FINGERPRINTS/<id>,
+                                  one per line; a tweak without a record isn't named
+
 The files ./install.sh writes for itself are rendered here, so a path is quoted in one place;
 ./install.sh writes them (write_file) and runs systemctl:
 
@@ -35,6 +44,7 @@ The files ./install.sh writes for itself are rendered here, so a path is quoted 
                                   frame-tweaks-menus.service, running I18N_PY menus
   installer.py desktop-entry REPO the menu entry template on stdin with @REPO@ as REPO
 """
+import os
 import re
 import sys
 
@@ -134,6 +144,75 @@ def status_of(returncode, stdout, stderr, record):
     if code == 2 and returncode != 2:
         return "warning  " + text, 2
     return stdout.rstrip("\n"), {RESTART: 2, UNLOAD: 1}.get(code, code)
+
+
+# --- files changed since installed ------------------------------------------------------------
+# A tweak's own folder only, not lib/: every tweak uses lib/common.sh, so a change there would
+# flag every installed tweak at once, which is what ./install.sh update is for (it runs every
+# installer again). Content, not dates: a restored backup or a fresh clone dates every file anew.
+# What .gitignore leaves out is left out here too (__pycache__ and *.pyc, which Python writes next
+# to a tweak's modules as they run; editors' *.swp and *~).
+FINGERPRINT_SKIP = re.compile(r"\.pyc$|\.swp$|~$")
+
+
+def readme_manifest(data):
+    """A README's front matter (its manifest), the part of it the installer reads: the rest is
+    text, partly written by dev/gen-docs.py, and a reworded paragraph is no reason to reinstall.
+    No front matter: all of it (nothing to tell apart)."""
+    if not data.startswith(b"---\n"):
+        return data
+    end = data.find(b"\n---\n", 3)
+    return data if end < 0 else data[:end + 5]
+
+
+def fingerprint(folder):
+    """A SHA-256 of the files in folder (their paths relative to it, and contents; a symbolic
+    link's target, not what it points to, which may be anywhere), in sorted order, so it's the
+    same on every machine with the same files. Cheap: a tweak's folder is a few dozen kilobytes."""
+    import hashlib      # (here: ./install.sh starts this module for every status result, too)
+    h = hashlib.sha256()
+    for root, dirs, files in os.walk(folder):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for name in sorted(files):
+            if FINGERPRINT_SKIP.search(name):
+                continue
+            path = os.path.join(root, name)
+            rel = os.path.relpath(path, folder)
+            if os.path.islink(path):
+                data = b"-> " + os.fsencode(os.readlink(path))
+            else:
+                with open(path, "rb") as f:
+                    data = f.read()
+                if rel == "README.md":
+                    data = readme_manifest(data)
+            h.update(os.fsencode(rel) + b"\0" + str(len(data)).encode() + b"\0" + data)
+    return h.hexdigest()
+
+
+def files_changed(records, tweaks):
+    """The ids of tweaks ((id, folder) pairs) whose folder's fingerprint isn't the one recorded in
+    records/<id>. One without a record isn't named: unknown counts as "as installed" until its next
+    install records one (an update installs every tweak again, so after the next one every tweak
+    has one). Installs from before fingerprints were recorded have none: counted as changed, every
+    one of them would say so until reinstalled by hand; recorded by a status run, a checkout pulled
+    since the install would pass for what was installed (and status changes nothing). A folder that
+    can't be read counts as changed: its files aren't what they were."""
+    out = []
+    for cid, folder in tweaks:
+        try:
+            with open(os.path.join(records, cid)) as f:
+                recorded = f.read().strip()
+        except (OSError, UnicodeDecodeError):
+            continue
+        if not recorded:
+            continue
+        try:
+            now = fingerprint(folder) if os.path.isdir(folder) else None
+        except OSError:
+            now = None
+        if now != recorded:
+            out.append(cid)
+    return out
 
 
 # --- files ./install.sh writes ---------------------------------------------------------------
@@ -274,6 +353,16 @@ def main(argv, stdin=sys.stdin, stdout=sys.stdout):
         return status_main(*ids, stdin=stdin, stdout=stdout)
     if cmd == "status-server" and not ids:
         return status_server(stdin, stdout)
+    if cmd == "fingerprint" and len(ids) == 1:
+        if not os.path.isdir(ids[0]):
+            return 1            # (no folder, no fingerprint: ./install.sh records none)
+        print(fingerprint(ids[0]), file=stdout)
+        return 0
+    if cmd == "files-changed" and len(ids) == 1:
+        pairs = [line.split("\t", 1) for line in stdin.read().splitlines() if "\t" in line]
+        for cid in files_changed(ids[0], pairs):
+            print(cid, file=stdout)
+        return 0
     graph = parse_graph(stdin.read())
     if cmd == "with-deps":
         lines = with_deps(graph, ids)

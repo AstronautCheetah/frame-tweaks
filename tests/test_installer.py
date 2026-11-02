@@ -464,3 +464,81 @@ class GeneratedFiles(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FilesChanged(unittest.TestCase):
+    """A tweak's fingerprint (lib/installer.py fingerprint, files_changed): what ./install.sh records
+    when its installer succeeds, so status can say its files changed since. Its scripts and the
+    README's manifest count; the README's text, Python's caches and editors' leftovers don't; a
+    tweak with no record isn't named (installs from before records were kept)."""
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.dir = Path(self.tmp.name) / "probe"
+        (self.dir / "bin").mkdir(parents=True)
+        (self.dir / "README.md").write_text("---\ntitle: Probe\nprocesses: []\n---\n# Probe\n\nWhat it does.\n")
+        (self.dir / "install.sh").write_text("echo install\n")
+        (self.dir / "bin/tool").write_text("echo tool\n")
+        self.records = Path(self.tmp.name) / "fingerprints"
+        self.records.mkdir()
+        (self.records / "probe").write_text(installer.fingerprint(str(self.dir)) + "\n")
+
+    def changed(self):
+        return installer.files_changed(str(self.records), [("probe", str(self.dir))])
+
+    def test_as_installed_is_unchanged(self):
+        self.assertEqual(self.changed(), [])
+
+    def test_a_script_changed(self):
+        (self.dir / "bin/tool").write_text("echo tool, fixed\n")
+        self.assertEqual(self.changed(), ["probe"])
+
+    def test_a_file_added_removed_or_renamed(self):
+        (self.dir / "uninstall.sh").write_text("echo uninstall\n")
+        self.assertEqual(self.changed(), ["probe"])
+        (self.dir / "uninstall.sh").unlink()
+        self.assertEqual(self.changed(), [])
+        (self.dir / "bin/tool").rename(self.dir / "bin/tool2")     # (same contents, another name)
+        self.assertEqual(self.changed(), ["probe"])
+
+    def test_the_manifest_counts_the_readmes_text_doesnt(self):
+        readme = self.dir / "README.md"
+        readme.write_text(readme.read_text().replace("What it does.", "What it does, reworded."))
+        self.assertEqual(self.changed(), [])
+        readme.write_text(readme.read_text().replace("processes: []", "processes: [probe-daemon]"))
+        self.assertEqual(self.changed(), ["probe"])
+
+    def test_caches_and_editor_files_dont_count(self):
+        (self.dir / "__pycache__").mkdir()
+        (self.dir / "__pycache__/tool.cpython-313.pyc").write_bytes(b"\0")
+        (self.dir / "bin/old.pyc").write_bytes(b"\0")
+        (self.dir / "install.sh~").write_text("old\n")
+        (self.dir / ".install.sh.swp").write_text("swap\n")
+        self.assertEqual(self.changed(), [])
+
+    def test_no_record_isnt_changed_a_folder_gone_is(self):
+        (self.records / "probe").unlink()
+        self.assertEqual(self.changed(), [])                        # (unknown: as installed)
+        (self.records / "probe").write_text("\n")
+        self.assertEqual(self.changed(), [])
+        (self.records / "probe").write_text(installer.fingerprint(str(self.dir)) + "\n")
+        shutil.rmtree(self.dir)
+        self.assertEqual(self.changed(), ["probe"])
+
+    def test_the_same_files_elsewhere_have_the_same_fingerprint(self):
+        """(another checkout, a restored backup: dates differ, the files don't)"""
+        other = Path(self.tmp.name) / "elsewhere/probe"
+        shutil.copytree(self.dir, other)
+        os.utime(other / "install.sh", (0, 0))
+        self.assertEqual(installer.fingerprint(str(other)), installer.fingerprint(str(self.dir)))
+
+    def test_command_line(self):
+        out = io.StringIO()
+        self.assertEqual(installer.main(["fingerprint", str(self.dir)], stdout=out), 0)
+        self.assertEqual(out.getvalue(), installer.fingerprint(str(self.dir)) + "\n")
+        self.assertEqual(installer.main(["fingerprint", str(self.dir / "none")], stdout=io.StringIO()), 1)
+        (self.dir / "install.sh").write_text("echo install, fixed\n")
+        out = io.StringIO()
+        stdin = io.StringIO(f"probe\t{self.dir}\nother\t{self.dir}\n")       # (other: no record)
+        self.assertEqual(installer.main(["files-changed", str(self.records)], stdin=stdin, stdout=out), 0)
+        self.assertEqual(out.getvalue(), "probe\n")

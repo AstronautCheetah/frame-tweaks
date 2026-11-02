@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidg
 
 import sft  # (lib/ is on the path)
 from i18n import _  # (translations: locale/README.md)
-from window_logic import GONE, close_prompt, in_terminal
+from window_logic import GONE, REPO, close_prompt, in_terminal
 
 
 class ApplyChanges:
@@ -56,6 +56,58 @@ class ApplyChanges:
         button.setToolTip((_("Install: %s") % ", ".join(add) if add else "") + ("; " if add and remove else "")
                           + (_("Remove: %s") % ", ".join(remove) if remove else "")
                           or _("Nothing to change: tick or untick a tweak first"))
+        self.update_reinstall_changed()
+
+    # ---- files changed since installed: ↻ Reinstall updated ------------------------------------
+    def files_updated(self, cid):
+        """cid's files changed since it was installed (sft.files_changed), and it's installed."""
+        state = self.state.get(cid)
+        return cid in self.files_changed and state is not None and state[0] not in GONE
+
+    def updated_ids(self):
+        """The installed tweaks whose files changed since they were installed, in the list's order."""
+        return [c["id"] for c in self.rows if self.files_updated(c["id"])]
+
+    def update_reinstall_changed(self):
+        """↻ Reinstall updated (N), shown only while there's a tweak to reinstall."""
+        button = getattr(self, "changed_button", None)
+        if button is None:
+            return
+        ids = self.updated_ids()
+        button.setVisible(bool(ids))
+        button.setText(_("↻ Reinstall updated ({n})").format(n=len(ids)))
+        button.setToolTip(_("Their files changed since they were installed (Frame Tweaks updated, or a pack edited), "
+                            "and the installed copies are still the old ones. Installs them again: %s")
+                          % ", ".join(ids) if ids else "")
+
+    def reinstall_changed(self):
+        """↻ Reinstall updated: the confirm page names them first, as Apply changes does."""
+        ids = self.updated_ids()
+        if not ids:
+            self.say(_("Nothing to reinstall: no installed tweak's files changed since it was installed."))
+            return
+        comps = {c["id"]: c for c in self.rows}
+        dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
+        lines = []
+        for cid in ids:
+            note = sft.sudo_note(comps[cid])
+            lines.append(html.escape(comps[cid]["title"])
+                         + (" " + dim % html.escape(_("(asks for your sudo password: %s)") % note) if note else ""))
+        text = ("<b>" + _("Install again, with the files that changed since they were installed:") + "</b><br>"
+                + "<br>".join("• " + line for line in lines) + "<br>" + dim % _("Their settings and data are kept."))
+        self.confirm(text, _("Reinstall"), lambda: self.run_reinstall_changed(ids))
+
+    def run_reinstall_changed(self, ids):
+        """./install.sh reinstall-changed in a terminal, for the tweaks the confirm page named (a tweak
+        whose files are as installed again by then is left out there)."""
+        cmd = "./install.sh reinstall-changed " + " ".join(shlex.quote(cid) for cid in ids)
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
+            print("would run:", cmd)
+            return
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
+        self.proc = QProcess(self)            # don't block the window while Konsole runs
+        self.proc.finished.connect(lambda *_: self.changed(ids))
+        in_terminal(self.proc, full)
 
     def apply(self):
         if self.futures:

@@ -162,12 +162,12 @@ STATE = Path.home() / ".local/state/frame-tweaks"           # (install.sh's $STA
 
 def apply_formerly():
     """What's kept under a tweak's former id (formerly: in its manifest) moves to its id, once:
-    its install record, held, unloaded and backups entries, and hidden or shown rows; and an
-    official pack turned off under a former folder name is recorded under its own. ./install.sh
-    and the window run this as they start. Returns what moved."""
+    its install record and fingerprint, held, unloaded and backups entries, and hidden or shown
+    rows; and an official pack turned off under a former folder name is recorded under its own.
+    ./install.sh and the window run this as they start. Returns what moved."""
     moved = []
     for old, new in registry.load(refresh=True).get("renamed", {}).items():
-        for sub in ("installed", "held", "unloaded", "backups"):
+        for sub in ("installed", "fingerprints", "held", "unloaded", "backups"):
             src, dst = STATE / sub / old, STATE / sub / new
             if (src.exists() or src.is_symlink()) and not (dst.exists() or dst.is_symlink()):
                 src.rename(dst)
@@ -217,6 +217,20 @@ def not_needed(rows=None, refresh=False):
 
 def installed_record(cid):
     return (STATE / "installed" / cid).exists()
+
+
+def files_changed(rows=None):
+    """The ids of tweaks whose files changed since they were installed, as ./install.sh
+    files_changed finds them (lib/installer.py files_changed: a tweak without a fingerprint isn't
+    one): not linked, not held. Whether each is still installed is its status's to say."""
+    records = STATE / "fingerprints"
+    if not records.is_dir():
+        return set()
+    held = STATE / "held"
+    pairs = [(c["id"], str(c["dir"])) for c in rows or registry.components()
+             if c.get("dir") and not c.get("link") and not (held / c["id"]).exists()
+             and (records / c["id"]).is_file()]
+    return set(installer.files_changed(str(records), pairs))
 
 
 def unfinished_update():

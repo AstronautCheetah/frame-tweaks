@@ -13,6 +13,9 @@
 #                                    --keep-tweaks; other projects' apps such as Claude Desktop stay
 #                                    unless --remove-apps); this folder too, unless it holds work of yours
 #   ./install.sh reinstall ID...     remove and install again (settings kept; a clean copy)
+#   ./install.sh reinstall-changed [ID...]
+#                                    install again the tweaks whose files changed since they were
+#                                    installed (pulled, or edited): status marks them ↻ updated
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
 #   ./install.sh update [--to vX.Y.Z | --to stable] [--reinstall]
 #                                    move to the newest (or given) release, re-run what's installed
@@ -49,7 +52,7 @@ cd "$(dirname "$(readlink -f "$0")")" || exit 1
 # terminal: it marks the one it runs the command in (FRAME_TWEAKS_SPLASH_TTY). ⚙ Preferences
 # (~/.config/frame-tweaks/splash) or FRAME_TWEAKS_SPLASH: off turns it off, still keeps it still.
 case ${1:-} in
-    install|uninstall|remove|reinstall|update|uninstall-self)
+    install|uninstall|remove|reinstall|reinstall-changed|update|uninstall-self)
         # (the terminal is read from /proc: in $(tty <&1), fd 1 is the pipe that collects the answer)
         if [[ -t 1 && ${FRAME_TWEAKS_SPLASH:-$(cat "$HOME/.config/frame-tweaks/splash" 2>/dev/null)} != off &&
               ${FRAME_TWEAKS_SPLASH_TTY:-} != "$(readlink "/proc/$$/fd/1")" ]] &&
@@ -311,18 +314,27 @@ cmd_list() {
 }
 
 cmd_status() {
-    local ids=("$@") id rc line worst=0
+    local ids=("$@") id rc line worst=0 changed updated=() mark
     [[ ${#ids[@]} -eq 0 ]] && ids=("${IDS[@]}")
     check_ids "${ids[@]}"
+    # (files changed since installed: an installed tweak's line ends in ↻ updated; the exit code
+    # stays its status's, which scripts read as before)
+    changed=" $(files_changed "${ids[@]}" | tr '\n' ' ') "
     for id in "${ids[@]}"; do
         line=$(status_of "$id"); rc=$?
+        mark=
+        if [[ $rc -ne 1 && $changed == *" $id "* ]]; then
+            mark="  "$'\033[36m'"↻ $(t 'updated')"$'\033[0m'; updated+=("$id")
+        fi
         case $rc in
-            0) printf '  \033[32m✔\033[0m %-15s %s\n' "$id" "${line#ok       }" ;;
+            0) printf '  \033[32m✔\033[0m %-15s %s%s\n' "$id" "${line#ok       }" "$mark" ;;
             1) [[ $line == "restart  "* ]] && line=${line#restart  } || line=$(t 'not installed')
                printf '  \033[2m·\033[0m %-15s \033[2m%s\033[0m\n' "$id" "$line" ;;
-            *) line=${line#warning  }; printf '  \033[33m!\033[0m %-15s %s\n' "$id" "${line#restart  }"; worst=2 ;;
+            *) line=${line#warning  }; printf '  \033[33m!\033[0m %-15s %s%s\n' "$id" "${line#restart  }" "$mark"; worst=2 ;;
         esac
     done
+    [[ ${#updated[@]} -eq 0 ]] ||
+        say "$(t "↻ updated: the files of %s changed since they were installed, and the installed copies are still the old ones. To install them again: %s" "${updated[*]}" "./install.sh reinstall-changed")"
     return $worst
 }
 
@@ -636,6 +648,27 @@ cmd_reinstall_ids() {
     cmd_install "$@"
 }
 
+# reinstall-changed [ID...]: install again the installed tweaks (of the IDs given, else all) whose
+# files changed since they were installed (files_changed). As an update reinstalls (cmd_reinstall):
+# migrations, then each installer run over what's there; not removed first, as ↻ (reinstall) does.
+cmd_reinstall_changed() {
+    local ids=("$@") id found cand=() changed=()
+    [[ ${#ids[@]} -eq 0 ]] && ids=("${IDS[@]}")
+    check_ids "${ids[@]}"
+    # (read whole first: status scripts get this script's stdin, as they always did, not the list)
+    found=$(files_changed "${ids[@]}")
+    [[ -z $found ]] || mapfile -t cand <<<"$found"
+    for id in "${cand[@]}"; do is_installed "$id" && changed+=("$id"); done
+    if [[ ${#changed[@]} -eq 0 ]]; then
+        t 'No installed tweak has files that changed since it was installed: nothing to install again.'; echo
+        return 0
+    fi
+    bold "$(t 'Installing again, with their changed files: %s' "${changed[*]}")"
+    WAS_INSTALLED=("${changed[@]}")
+    run_migrations "${changed[@]}"
+    cmd_install "${changed[@]}"
+}
+
 cmd_update() {
     local want="" again=""
     while [[ $# -gt 0 ]]; do
@@ -883,13 +916,43 @@ stop_processes() {
 # installed/<id> records the Frame Tweaks version that last installed a tweak. A tweak's
 # optional migrate.sh runs before its install.sh when that recorded version is older, with the
 # old version as $1 (e.g. to move a setting to a new place).
-record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; }
+record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; record_files "$1"; }
 forget_version() {
-    rm -f "$STATE/installed/$1"
+    rm -f "$STATE/installed/$1" "$STATE/fingerprints/$1"
     # (and what its Apply last applied: lib/sft.py forget_applied)
     [ ! -f "$STATE/settings-applied.json" ] || python3 lib/sft.py settings-applied --forget "$1" || true
 }
 held() { [[ -f "$STATE/held/$1" ]]; }
+
+# ---- files changed since installed ----------------------------------------------------------
+# fingerprints/<id>: what the tweak's folder held when its installer last succeeded (lib/installer.py
+# fingerprint). After a git pull, or an edit to a pack, the installed copies are still the old
+# ones until each installer runs again: status marks such a tweak "↻ updated", and
+# reinstall-changed (the window's ↻ Reinstall updated) runs them. Not in installed/<id>: that file
+# holds the version alone, and every reader of it (migrations, stale_tweaks, the window) compares
+# it whole. Taken after the install, so a tweak whose installer writes into its own folder isn't
+# flagged for good. A linked project has no files of its own (it updates its own way, as during an
+# update): none is recorded.
+record_files() {
+    local f="$STATE/fingerprints/$1"
+    mkdir -p "${f%/*}"
+    if [[ -z ${LINKED[$1]:-} ]] && python3 lib/installer.py fingerprint "${DIR[$1]}" > "$f.new" 2>/dev/null; then
+        mv -f "$f.new" "$f"
+    else
+        rm -f "$f.new" "$f"         # (none: counted as unchanged, lib/installer.py files_changed)
+    fi
+}
+# files_changed ID...: those of them whose files changed since they were installed, one per line.
+# Not held ones: held means "keep it as it is" (./install.sh reinstall ID still reinstalls one).
+# Nor those without a record (installed before records were kept: lib/installer.py files_changed
+# says why). One Python for them all, and none when nothing has a record.
+files_changed() {
+    [[ -d $STATE/fingerprints ]] || return 0
+    local id
+    for id in "$@"; do
+        [[ -f $STATE/fingerprints/$id && -z ${LINKED[$id]:-} ]] && ! held "$id" && printf '%s\t%s\n' "$id" "${DIR[$id]}"
+    done | python3 lib/installer.py files-changed "$STATE/fingerprints"
+}
 # An update marks itself (UPDATE_MARK) from the moment it has moved the checkout until it has run the
 # tweaks' installers again: left behind, it was cut short (its terminal closed, Ctrl+C), and the
 # tweaks it didn't get to are run by the next update (the window: ⬇ Finish the update). Only then:
@@ -1040,7 +1103,7 @@ cmd_check_system() {
 
 # (the commands that read many statuses: one Python for them all, see start_status_server)
 case ${1:-} in
-    ""|status|check|update|_reinstall|reinstall|install|tidy|uninstall|remove|uninstall-self|forget-settings)
+    ""|status|check|update|_reinstall|reinstall|reinstall-changed|install|tidy|uninstall|remove|uninstall-self|forget-settings)
         start_status_server || true ;;
 esac
 case ${1:-} in
@@ -1051,6 +1114,7 @@ case ${1:-} in
     install)     shift; take_lock; start_log install "$@"; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; run_migrations "$@"; cmd_install "$@" ;;
     uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;
     reinstall)   shift; take_lock; start_log reinstall "$@"; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
+    reinstall-changed) shift; take_lock; start_log reinstall-changed "$@"; cmd_reinstall_changed "$@" ;;
     status|check) shift; cmd_status "$@" ;;
     tidy)        take_lock; start_log tidy; cmd_tidy ;;
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
