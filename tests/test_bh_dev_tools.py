@@ -3,7 +3,8 @@ throwaway copies, with stand-ins for the network, gh and git (nothing leaves the
 the Release workflow's version after a pre-release, its empty-notes check, its notes (a
 pre-release leaves CHANGELOG.md's section to the release) and its push (no tag without the
 commit); the Traffic workflow keeping the saved history and its draft release; dev/check-docs.py
-and HTML pictures; dev/gen-docs.py and an upstream README a tweak no longer names; dev/i18n.py
+and HTML pictures, a tweak missing from the README's overview and a link to a table that isn't
+there; dev/gen-docs.py and an upstream README a tweak no longer names, and docs/tweaks.md; dev/i18n.py
 keeping removed texts' translations; dev/check-pins.sh comparing a Hugging Face file at main;
 dev/check-upstream.sh reporting a check-pins.sh that stopped; dev/test-tweaks.sh catching writes
 into the checkout and old-dated files left in /tmp."""
@@ -340,6 +341,24 @@ class CheckDocs(Temp):
         self.assertEqual(r.returncode, 1, r.stdout)
         self.assertEqual(r.stdout.strip(), "README.md: broken link docs/gone.png")
 
+    def test_a_tweak_missing_from_the_overview_and_a_wrong_table_link_are_reported(self):
+        (self.d / "dev").mkdir()
+        shutil.copy(ROOT / "dev/check-docs.py", self.d / "dev")
+        for pack in ("integrations", "third-party"):
+            (self.d / "packs" / pack).mkdir(parents=True)
+        for tweak in ("foo", "bar"):
+            (self.d / "packs/core" / tweak).mkdir(parents=True)
+            (self.d / "packs/core" / tweak / "README.md").write_text("# T\n")
+        (self.d / "docs").mkdir()
+        (self.d / "docs/tweaks.md").write_text("# Tweaks\n\n## Privacy & security\n\n| | Tweak |\n|---|---|\n"
+                                               "| 🔐 | [**Foo**](../packs/core/foo/) |\n| 🔐 | [**Bar**](../packs/core/bar/) |\n")
+        (self.d / "README.md").write_text("<!-- generated:overview (x) -->\n- **[Privacy & security](docs/tweaks.md#privacy--security):** "
+                                          "[Foo](packs/core/foo/)\n<!-- /generated:overview -->\n\n[gone](docs/tweaks.md#privacy)\n")
+        r = subprocess.run([sys.executable, str(self.d / "dev/check-docs.py")], capture_output=True, text=True, timeout=60)
+        self.assertEqual(r.returncode, 1, r.stdout)
+        self.assertEqual(r.stdout.strip().splitlines(), ["README.md: no entry for 'bar'",
+                                                         "README.md: no heading for docs/tweaks.md#privacy"])
+
 
 class GenDocs(Temp):
     def test_an_upstream_readme_no_longer_named_goes(self):
@@ -359,6 +378,18 @@ class GenDocs(Temp):
         self.assertNotIn("generated:upstream", after)
         self.assertTrue(after.endswith("\n") and not after.endswith("\n\n"))
         self.assertEqual(subprocess.run(gen + ["--check"], capture_output=True, timeout=120).returncode, 0)
+
+    def test_the_tables_page_is_generated_and_checked(self):
+        repo = copy_repo(self.d / "repo")
+        page = repo / "docs/tweaks.md"
+        good = page.read_text()
+        page.write_text(good.replace("](../packs/", "](../packs/stale-", 1))
+        gen = [sys.executable, str(repo / "dev/gen-docs.py")]
+        r = subprocess.run(gen + ["--check"], capture_output=True, text=True, timeout=120)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("docs/tweaks.md", r.stderr)
+        subprocess.run(gen, check=True, capture_output=True, timeout=120)
+        self.assertEqual(page.read_text(), good)
 
 
 i18ntool = load_script(ROOT / "dev/i18n.py", "i18ntool")

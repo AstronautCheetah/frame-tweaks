@@ -61,7 +61,7 @@ jobs:
         run: |
           sudo apt-get install -y appstream desktop-file-utils >/dev/null
           dev/check.sh metadata
-      - name: Docs consistency (README rows, links, generated tables)
+      - name: Docs consistency (tweak rows, links, generated tables)
         run: dev/check.sh docs
       - name: Install, status and uninstall in a throwaway home
         run: |

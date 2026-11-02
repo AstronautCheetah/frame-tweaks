@@ -1,16 +1,34 @@
 #!/usr/bin/env python3
-"""Docs consistency: every tweak in the official packs has a row in README.md, README links only
-to tweaks that exist, and relative links in all Markdown files point at real files."""
+"""Docs consistency: every tweak in the official packs has a row in docs/tweaks.md and a link in
+README.md's overview, both name only tweaks that exist, relative links in all Markdown files point
+at real files, and links to a table in docs/tweaks.md (#convenience) at one of its headings."""
 import re
 import sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
 ids = [d.name for pack in ("core", "integrations", "third-party") for d in (root / "packs" / pack).iterdir() if (d / "README.md").is_file()]
-readme = (root / "README.md").read_text()
-rows = set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(packs/(?:core|integrations|third-party)/([a-z0-9-]+)/\)", readme, re.M))
-problems = [f"README.md: no row for '{i}'" for i in ids if i not in rows]
-problems += [f"README.md: row for unknown tweak '{r}'" for r in rows - set(ids)]
+
+
+def read(path):
+    return (root / path).read_text() if (root / path).is_file() else ""
+
+
+def anchor(heading):
+    """The anchor GitHub gives a heading (as dev/gen-docs.py makes the overview's links)."""
+    return re.sub(r"[^\w\- ]", "", heading.lower()).replace(" ", "-")
+
+
+TWEAK = r"(?:\.\./)?packs/(?:core|integrations|third-party)/([a-z0-9-]+)/\)"
+tables = read("docs/tweaks.md")
+overview = re.search(r"<!-- generated:overview .*?<!-- /generated:overview -->", read("README.md"), re.S)
+found = {"docs/tweaks.md": set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(" + TWEAK, tables, re.M)),
+         "README.md": set(re.findall(r"\]\(" + TWEAK, overview[0] if overview else ""))}
+problems = []
+for page, named in found.items():
+    problems += [f"{page}: no entry for '{i}'" for i in ids if i not in named]
+    problems += [f"{page}: unknown tweak '{r}'" for r in named - set(ids)]
+headings = {anchor(h) for h in re.findall(r"^#+ (.*)", tables, re.M)}
 for md in root.rglob("*.md"):
     parts = md.relative_to(root).parts
     if {".git", "tmp", "references"} & set(parts):
@@ -24,5 +42,8 @@ for md in root.rglob("*.md"):
     for target in links:
         if not (md.parent / target).exists():
             problems.append(f"{md.relative_to(root)}: broken link {target}")
+    for target, frag in re.findall(r"\]\((?!https?:)([^)#\s]*tweaks\.md)#([^)\s]+)\)", text):
+        if (md.parent / target).resolve() == (root / "docs/tweaks.md").resolve() and frag not in headings:
+            problems.append(f"{md.relative_to(root)}: no heading for {target}#{frag}")
 print("\n".join(problems) or "docs ok")
 sys.exit(1 if problems else 0)

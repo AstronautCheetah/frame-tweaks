@@ -123,8 +123,9 @@ sharing). A check whose tool isn't installed is skipped, with a note saying how 
   Arch's `vercmp` (a Frame has it). `dev/check.sh` finds a Python with PyQt6 (`PYTHON=…`,
   `.venv`, then `python3`).
 - `metadata`: the AppStream metadata and the desktop entry validate.
-- `docs`: every tweak has a README row and relative links resolve (`dev/check-docs.py`), and the
-  generated README and SECURITY sections match the manifests (`dev/gen-docs.py --check`).
+- `docs`: every tweak has a row in docs/tweaks.md and a link in the README's overview, and
+  relative links resolve (`dev/check-docs.py`), and the generated README, docs/tweaks.md and
+  SECURITY sections match the manifests (`dev/gen-docs.py --check`).
 - `tweaks`: install → status → uninstall of each offline-testable tweak in a throwaway home
   (`dev/test-tweaks.sh`), without network where user namespaces allow it.
 
@@ -201,10 +202,11 @@ about it. To add one:
    copy, and [docs/mods.md](docs/mods.md) explains every field and helper.
 2. Add its id to `order:` in that pack's `pack.md`, where it belongs in the list (tweaks it
    doesn't list come after, alphabetically).
-3. Run `dev/gen-docs.py` (the README tables, SECURITY.md's rows, and the intro and "What it
-   changes" section of the tweak's README come from its manifest) and `dev/i18n.py extract` (its
-   title, summary, what and why are translated). For a 3rd Party tweak with `upstream_readme:`,
-   `dev/fetch-upstream-readmes.py ID` first. Then `dev/check.sh`.
+3. Run `dev/gen-docs.py` (the tables in docs/tweaks.md, the README's overview, SECURITY.md's
+   rows, and the intro and "What it changes" section of the tweak's README come from its
+   manifest) and `dev/i18n.py extract` (its title, summary, what and why are translated). For a
+   3rd Party tweak with `upstream_readme:`, `dev/fetch-upstream-readmes.py ID` first. Then
+   `dev/check.sh`.
 4. A tweak with a window: a screenshot under its intro, and in the README's **Screenshots**
    (a folded `<details>` section). The Core tweaks' windows are drawn off-screen with sample
    content by `dev/screenshots.py` (into `docs/images/`; run it with a Python that has PyQt6,

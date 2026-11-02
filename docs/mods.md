@@ -81,7 +81,7 @@ emoji: 👋
 category: Examples
 tier: extras
 summary: One line for the list
-what: What you get, for its details page and the README tables.
+what: What you get, for its details page and the tables in docs/tweaks.md.
 why: Why it's useful on the Frame.
 author: Your name
 changes: What it installs or changes, and where
@@ -98,13 +98,13 @@ undo: "`./install.sh uninstall hello-frame`"
 | Key | What it's for |
 |---|---|
 | `title` | Its name in the list. |
-| `emoji` | Its emoji in the README tables. |
+| `emoji` | Its emoji in docs/tweaks.md and the README's overview. |
 | `category` | Its group in the list: an existing one (Accessibility, Convenience, VR environment, System, Hardware, Privacy & security, Developer) or a new one. |
-| `tier` | `core` (a fix for the Frame), `extras` (an app setup) or `helper` (something other tweaks need; the README tables mark it "helper"). It describes the tweak and doesn't change how it installs. |
+| `tier` | `core` (a fix for the Frame), `extras` (an app setup) or `helper` (something other tweaks need; docs/tweaks.md marks it "helper"). It describes the tweak and doesn't change how it installs. |
 | `summary` | One line, shown in the list and in `./install.sh list`. |
 | `what`, `why` | Its details page. |
 | `author` | Who made it ("Made by"). |
-| `changes`, `access`, `survives_updates`, `undo` | What it changes on the system, any unusual access it has, whether it survives SteamOS updates, and how to undo it (the official README tables and SECURITY.md are made from these). |
+| `changes`, `access`, `survives_updates`, `undo` | What it changes on the system, any unusual access it has, whether it survives SteamOS updates, and how to undo it (docs/tweaks.md's tables and SECURITY.md are made from these). |
 
 **Optional:**
 
@@ -120,7 +120,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `processes` | `["^~/.local/bin/my-daemon"]` | Programs it keeps running: a list of `pgrep -f` patterns, one line each, `~` for your home folder. They're stopped before it's uninstalled or reinstalled, then `stopped.sh` runs if it has one. Anchor them (`^…`) and make them specific: whatever matches is stopped, the installer itself included if its own command line matches. |
 | `config` | `[~/.config/my-tweak.json]` | Where it keeps its settings: files or folders under `~/.config/`, `~/.var/app/` or `~/.local/state/frame-tweaks/` (its `settings.file` counts without being listed). An uninstall keeps them and says so, or removes them when ⚙ Preferences → Uninstalling, or `--remove-settings`, says to. Data such as a history or keys belongs elsewhere, and stays. |
 | `app` | `Hello Viewer` | The name of another project's app it installs (Claude Desktop, say). Uninstalling Frame Tweaks leaves such tweaks, and what they depend on, installed unless asked to remove them, so the app and your work in it stay. |
-| `sudo` | `once, to add a udev rule that lets you pause charging` | When and why installing it asks for the sudo password; the window tags its row **sudo** and says so on its page, and the README tables mark it *(sudo)*. `homebrew`: only while Homebrew isn't installed (a tweak that calls `need_brew`). While your user has no password, such a tweak isn't run: sudo couldn't work, and the installer and the window say how to set one. |
+| `sudo` | `once, to add a udev rule that lets you pause charging` | When and why installing it asks for the sudo password; the window tags its row **sudo** and says so on its page, and docs/tweaks.md and the README's overview mark it *(sudo)*. `homebrew`: only while Homebrew isn't installed (a tweak that calls `need_brew`). While your user has no password, such a tweak isn't run: sudo couldn't work, and the installer and the window say how to set one. |
 | `formerly` | `[old-name]` | The tweak's earlier ids, after a rename (its folder's name). What Frame Tweaks keeps under one (its install record, held, hidden) moves to the new id once, `depends:` on one still finds it, and `./install.sh` says what it's called now. Moving a tweak to another pack needs nothing: ids are the same in every pack. |
 | `settings` | (below) | A settings page in the installer window, and `./install.sh settings ID`. |
 | `known_issue` | `{version, short, long, latest}` | A problem with an upstream version: `short` on its row, `long` on its details page, and a check whether `latest` (a GitHub releases API URL) has something newer than `version`. |

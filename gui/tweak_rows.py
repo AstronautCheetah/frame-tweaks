@@ -114,8 +114,8 @@ class Row(QWidget):
 
 
 # The list's last row, under every group: not a tweak (nothing to install), the ways to help
-# (docs/contribute.md). Built here, not in a pack, so install.sh, status and the README's
-# tables never see it.
+# (docs/contribute.md). Built here, not in a pack, so install.sh, status and the tables
+# of tweaks (docs/tweaks.md) never see it.
 CONTRIBUTE = {"id": "_contribute", "icon": "system-users"}
 
 

@@ -64,7 +64,7 @@ packs, this lived in separate files (`components.tsv`, `meta`, `processes`, `# l
 the CHANGELOG records their removal. One file per tweak means a tweak folder is
 self-contained, and can be copied into a pack or out of one.
 
-[`dev/gen-docs.py`](../dev/gen-docs.py) builds the README tables, SECURITY.md's "What each
+[`dev/gen-docs.py`](../dev/gen-docs.py) builds docs/tweaks.md's tables, the README's overview, SECURITY.md's "What each
 tweak changes" rows and each tweak README's intro and "What it changes" section (and a 3rd Party
 tweak's copy of its upstream README) from the manifests, between
 `<!-- generated:NAME -->` markers. CI runs it with `--check`, so the docs can't fall behind
@@ -398,8 +398,8 @@ at the lowest priority, and on one core while the headset is worn, [`dev/run-tes
   Frame and are skipped on CI's Ubuntu), the dashboard patcher, `lib/browser.py`
   and parts of individual tweaks.
 - AppStream metadata and desktop entry validation.
-- Docs: [`dev/check-docs.py`](../dev/check-docs.py) (every tweak has a README row, relative
-  links resolve) and `dev/gen-docs.py --check`.
+- Docs: [`dev/check-docs.py`](../dev/check-docs.py) (every tweak has a row in docs/tweaks.md
+  and a link in the README's overview, relative links resolve) and `dev/gen-docs.py --check`.
 - [`dev/test-tweaks.sh`](../dev/test-tweaks.sh): install, status and uninstall for each tweak
   whose manifest says `test: {offline: true}`, plus the example pack, each in a throwaway home.
   It uses stand-ins for systemctl, flatpak, brew, kdialog, gpgv and others, and a fake `curl`

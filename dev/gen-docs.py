@@ -2,7 +2,8 @@
 """Generate the docs that list tweaks, from the official packs (packs/core,
 packs/integrations, then packs/third-party: each tweak's README.md front matter, in their pack.md's order):
 
-  README.md       a table of tweaks per category, in the installer window's order
+  docs/tweaks.md  a table of tweaks per category, in the installer window's order
+  README.md       a line per category: its tweaks' names, each linking to the tweak's README
   SECURITY.md     the "What each tweak changes on your system" rows
   <tweak>/README  its opening (what it is, why on a Steam Frame), a "What it changes" section
                   (survives updates, what it changes, unusual access, how to undo), and
@@ -35,27 +36,48 @@ def tweaks():
     return out
 
 
-def link(m):
-    """[**NordVPN**](packs/integrations/nordvpn/) (WireGuard): bold name, plain parenthetical."""
+def link(m, up=""):
+    """[**NordVPN**](packs/integrations/nordvpn/) (WireGuard): bold name, plain parenthetical.
+    up: the way from the page's folder to the repo's root ("../" for docs/)."""
     n = re.match(r"(.*?)( \(.*\))?$", m["name"])
-    return f"[**{n[1]}**]({m['dir']}/){n[2] or ''}"
+    return f"[**{n[1]}**]({up}{m['dir']}/){n[2] or ''}"
 
 
-def readme_tables(rows):
-    """One table per category, in pack.md's order (as the installer window lists them)."""
+def marks(m):
+    """The marks after a tweak's name that the README's "What's included" explains."""
+    return (f"{' 🧪' if m.get('experimental') else ''}{' 🔗' if m.get('linked') else ''}"
+            f"{' *(helper)*' if m['group'] == 'helper' and 'helper' not in m['name'].lower() else ''}"
+            f"{' *(sudo)*' if m.get('sudo') else ''}")
+
+
+def by_category(rows):
+    """[(category, its tweaks)], in pack.md's order (as the installer window lists them)."""
     order = sft.read_pack(sft.CORE)[0]["categories"]
     cats = order + sorted({m["category"] for _, m in rows} - set(order))
+    return [(cat, mine) for cat in cats if (mine := [(i, m) for i, m in rows if m["category"] == cat])]
+
+
+def anchor(heading):
+    """The anchor GitHub gives a heading: "Privacy & security" -> "privacy--security"."""
+    return re.sub(r"[^\w\- ]", "", heading.lower()).replace(" ", "-")
+
+
+def tweak_tables(rows):
+    """docs/tweaks.md: one table per category."""
     out = []
-    for cat in cats:
-        mine = [(i, m) for i, m in rows if m["category"] == cat]
-        if not mine:
-            continue
-        out += [f"### {cat}", "", "| | Tweak | What you get | Why on a Steam Frame |", "|---|---|---|---|"]
-        out += [f"| {m['emoji']} | {link(m)}{' 🧪' if m.get('experimental') else ''}{' 🔗' if m.get('linked') else ''}"
-                f"{' *(helper)*' if m['group'] == 'helper' and 'helper' not in m['name'].lower() else ''}"
-                f"{' *(sudo)*' if m.get('sudo') else ''} | {m['what']} | {m['why']} |" for i, m in mine]
+    for cat, mine in by_category(rows):
+        out += [f"## {cat}", "", "| | Tweak | What you get | Why on a Steam Frame |", "|---|---|---|---|"]
+        out += [f"| {m['emoji']} | {link(m, '../')}{marks(m)} | {m['what']} | {m['why']} |" for i, m in mine]
         out.append("")
     return "\n".join(out).rstrip()
+
+
+def readme_overview(rows):
+    """README.md: one line per category (linking to its table in docs/tweaks.md) with its
+    tweaks' names, each linking to the tweak's README."""
+    return "\n".join(f"- **[{cat}](docs/tweaks.md#{anchor(cat)}):** "
+                     + ", ".join(f"{m['emoji']} [{m['name']}]({m['dir']}/){marks(m)}" for i, m in mine)
+                     for cat, mine in by_category(rows))
 
 
 def security_rows(rows):
@@ -129,7 +151,8 @@ def put(text, name, body, path):
 def main():
     check = "--check" in sys.argv
     rows = tweaks()
-    targets = {ROOT / "README.md": [("tweaks", readme_tables(rows))],
+    targets = {ROOT / "README.md": [("overview", readme_overview(rows))],
+               ROOT / "docs/tweaks.md": [("tweaks", tweak_tables(rows))],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
         targets[ROOT / m["dir"] / "README.md"] = [("intro", intro(m)), ("changes", changes(m)),
