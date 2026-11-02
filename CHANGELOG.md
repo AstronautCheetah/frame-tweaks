@@ -180,6 +180,14 @@
   token. It used to say only "Run 'nordvpn-wg setup' first." and "NordVPN access token (input
   hidden):".
 ### For contributors
+- **New docs:** [docs/how-it-works.md](docs/how-it-works.md), the code on one page;
+  [docs/release-signing.md](docs/release-signing.md), how updates check releases and how the
+  release key changes, with the current change's end date; a quick start at the top of
+  CONTRIBUTING.md; the status protocol as a table in docs/mods.md; and what release signing
+  protects against, and what it doesn't, in SECURITY.md.
+- **The installer window is split into modules** (`gui/`), and dependency order moved from
+  bash to `lib/installer.py`, the first step of moving the installer's logic to Python
+  ([DESIGN.md](docs/DESIGN.md#moving-the-installer-to-python)).
 - **`dev/container-check.sh`** runs `dev/check.sh` in a container with CI's environment
   (`dev/Containerfile`, Podman or Docker), so every check runs on a Mac, Windows or any Linux.
 - **`dev/button-test.py`:** a window, in VR on a Frame, showing which buttons Frame Tweaks sees

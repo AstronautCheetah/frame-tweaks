@@ -50,7 +50,7 @@ The design follows from what the Frame is:
 | [`lib/sft.py`](../lib/sft.py) | Loads the packs and their tweaks, and holds everything the installer window and `install.sh` share: the tweak list (`registry`), hidden rows and groups, the Run label, and tweak settings. Both front ends call it, so they can't drift apart. |
 | [`lib/installer.py`](../lib/installer.py) | `install.sh`'s pure logic: dependency order, the order uninstalls go in, ID checks, which installed tweaks need one being removed. It is given the tweak list on stdin and reads nothing else. |
 | [`lib/manifest.py`](../lib/manifest.py) | Reads (and writes) the YAML front matter of manifests, with no dependencies. |
-| [`gui/`](../gui/) | The installer window (PyQt6): the list, details pages, Packs and Wallet apps pages. |
+| [`gui/`](../gui/) | The installer window (PyQt6). `frame-tweaks-gui.py` is the window and its list; beside it, `window_logic.py` (status codes and checks, no Qt), `tweak_rows.py`, `readme_view.py`, `details_page.py`, `settings_page.py`, `apply_changes.py`, `vr_controls.py`, `packs_page.py`, `wallet_page.py` and `report_page.py`. |
 | [`packs/core/<id>/`](../packs/core/) | One folder per tweak: `README.md` (its manifest, then its documentation), `install.sh`, `uninstall.sh`, `status.sh` and optional scripts. `pack.md` sets the order and categories. |
 | [`dev/`](../dev/) | Maintainer tools: docs generation and checks, pin checks and bumps, the mirror, the test harness, git hooks. |
 | [`tests/`](../tests/) | Unit tests (`dev/run-tests.py` runs them several at a time; one file: `python3 -m unittest tests/test_x.py`). |

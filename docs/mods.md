@@ -231,6 +231,25 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   (`set -e`) shows "status check failed" for a tweak Frame Tweaks installed, which stays
   installed (updates reinstall it, its settings are kept). So add `|| true` where a command may
   fail, and say what's missing with `status_missing`.
+
+  **The status protocol.** `status.sh` prints one line, `WORD  TEXT`, and exits; the helpers in
+  `lib/common.sh` write both. `./install.sh` (`status_of`) and the installer window
+  (`gui/window_logic.py`, `status`) read the line and the exit code together:
+
+  | Helper | First word | Exit | Means | Counts as installed |
+  |---|---|---|---|---|
+  | `status_ok TEXT` | `ok` | 0 | Installed and working | Yes |
+  | `status_warn TEXT` | `warning` | 2 | Installed, needs attention (the row says TEXT) | Yes |
+  | `status_restart TEXT` | `restart` | 2 | Installed; SteamVR loads it at its next start (the row offers ⟳ Restart SteamVR) | Yes |
+  | `status_missing TEXT` | `missing` | 1 | Not installed | No |
+  | `status_unload TEXT` | `restart` | 1 | Removed, but SteamVR still runs it until it restarts (the row offers ⟳ Restart SteamVR) | No |
+  | (anything else) | any | 1 | "status check failed" if Frame Tweaks installed it (a version record exists), else not installed | Yes if recorded |
+  | (anything else) | any | over 2 | "status check failed" | Yes |
+
+  Only the first word and the exit code carry meaning; TEXT is for people and may be translated.
+  A tweak whose removal waits on something other than SteamVR (desktop mode's session, a
+  reboot) says so with `status_missing` and a TEXT that names it: the Mouse cursor fix's
+  `status.sh` is an example.
 - `run.sh` (with `run:`): what the Run button does. Launch apps through their menu entry
   (`gtk-launch <id>`), so wallet gates apply.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one

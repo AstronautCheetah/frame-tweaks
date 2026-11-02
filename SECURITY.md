@@ -142,4 +142,28 @@ doesn't review or sandbox other people's packs.
   copy is an update (`./install.sh update`), with the same check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
   skips the check, for an emergency.
 
+## What release signing protects against
+
+Updates install only release tags signed by a key the copy already trusts
+([docs/release-signing.md](docs/release-signing.md) has the details and the current key change).
+
+**Protects against:**
+- Someone who can push to the repository but doesn't have the release key: a tag they make,
+  or one they move, is refused.
+- A changed copy on the way: a mirror, a proxy or a network that alters what's downloaded.
+- An old signed release presented under a newer name: the signature covers the tag's name.
+- A release that adds its own key: a copy trusts only keys it already has, and learns a new
+  one only from a release signed by a key it trusts.
+
+**Doesn't protect against:**
+- **The first install.** `get.sh` comes from the `main` branch over HTTPS and trusts GitHub for
+  that download. To check it yourself instead: `git clone` the repository, `git -c
+  gpg.format=ssh -c gpg.ssh.allowedSignersFile=dev/release-signers verify-tag vX.Y.Z` (the newest
+  release), check that tag out, then run `./install.sh gui`.
+- **Someone with the maintainer's GitHub account.** The signing key is a repository secret that
+  only the Release workflow uses. Whoever can run that workflow, which runs only from `main` or
+  a `release/` branch, can publish a signed release, so signing is as safe as that account.
+- **What the tweaks download.** Each tweak's downloads are checked separately (pinned hashes and
+  HTTPS; see the list above).
+
 Found a problem? See [Reporting a problem](#reporting-a-problem) at the top.

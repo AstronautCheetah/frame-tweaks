@@ -11,6 +11,18 @@ welcome, and much of the work doesn't need a Frame.
 - **A fix or a new tweak:** read on. For a big change, open an issue first (**Tweak idea**), so
   we can agree on the approach before you put the time in.
 
+**Quick start** (no Frame needed):
+
+```sh
+git clone https://github.com/AstronautCheetah/frame-tweaks && cd frame-tweaks
+dev/install-hooks.sh                    # commit message checks
+dev/check.sh                            # on Linux; anywhere else: dev/container-check.sh
+dev/test-tweaks.sh cursor               # one tweak: install, status, uninstall, in a throwaway home
+```
+
+Then read [docs/how-it-works.md](docs/how-it-works.md) (one page), make your change, run the
+checks again, and open a pull request ("Sending a change", below).
+
 ## What needs a Frame, and what doesn't
 
 Frame Tweaks is shell and Python, plus a little JavaScript for the VR dashboard patches. Most of
@@ -393,7 +405,8 @@ releasing:
 Texts marked as needing review don't hold a release up. "Release with texts not translated yet"
 overrides it, for an urgent fix: they show in English.
 
-**Release tags are signed** with an SSH key: the workflow signs with the private key in the
+**Release tags are signed** with an SSH key ([docs/release-signing.md](docs/release-signing.md)
+explains the check and the current key change): the workflow signs with the private key in the
 repository secret `RELEASE_SIGNING_KEY`, and `./install.sh update` refuses a release whose tag
 isn't signed by a key listed in `dev/release-signers` *as already installed* (`verify_release`
 in `lib/common.sh`). Setting it up, once:
