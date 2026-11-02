@@ -219,6 +219,10 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/README.md`
   - now: "Not recommended: right trigger (a laser click; games use it)"
 - New in `packs/core/dictation/README.md`
+  - now: "Off (the default): Whisper hears the whole recording"
+- New in `packs/core/dictation/README.md`
+  - now: "On: Whisper hears only the speech, so pauses and room noise don't become words"
+- New in `packs/core/dictation/README.md`
   - now: "Parakeet: 25 European languages, fastest when kept loaded (press Apply)"
 - New in `packs/core/dictation/README.md`
   - now: "Put the text in by"
@@ -232,6 +236,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "The engine turns your speech into text, on the Frame. In VR, hold the controller button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
 - New in `packs/core/dictation/README.md`
   - now: "Typing it (the default); pasting what your keyboard layout can't type"
+- New in `packs/core/dictation/README.md`
+  - now: "Voice activity detection"
 - New in `packs/core/dictation/README.md`
   - now: "Whisper (the default): 99 languages, uses your word list"
 - New in `packs/core/dictation/README.md`

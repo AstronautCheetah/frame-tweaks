@@ -10,7 +10,7 @@
 #   dictate --serve    the loaded engine itself (frame-tweaks-dictate-engine.service runs it)
 #
 # Settings in ~/.config/frame-tweaks/dictate.conf: DICTATE_ENGINE (whisper, parakeet), DICTATE_KEEP_LOADED
-# (no, yes), DICTATE_TYPING (type, paste), DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
+# (no, yes), DICTATE_VAD (no, yes), DICTATE_TYPING (type, paste), DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
 # DICTATE_BEAM (1, or 5 for whisper.cpp's beam search), DICTATE_NOTYPE=1 (copy only),
 # DICTATE_MAX_SECONDS (auto-stop, default 300).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
@@ -47,10 +47,11 @@ MAX_SECONDS="${DICTATE_MAX_SECONDS:-300}"
 # (5), with the same text in our trials. DICTATE_BEAM=5 brings the beam search back.
 BEAM="${DICTATE_BEAM:-1}"
 [[ $BEAM =~ ^[1-8]$ ]] || BEAM=1
-# Silero voice activity detection (whisper.cpp --vad): Whisper only hears the stretches with speech,
-# so a pause or a noisy room doesn't turn into invented text ("you", "Thanks for watching"). Optional:
-# without the file (its download failed), Whisper hears everything, as before.
+# Silero voice activity detection (whisper.cpp --vad, DICTATE_VAD=yes; off by default): Whisper only
+# hears the stretches with speech, so a pause or a noisy room doesn't turn into invented text ("you",
+# "Thanks for watching"). Without the file (its download failed), Whisper hears everything, as when off.
 VAD_MODEL="$HOME/.local/share/whisper/ggml-silero-v6.2.0.bin"
+VAD="${DICTATE_VAD:-no}"
 # Parakeet TDT 0.6B v3 (int8, onnx-asr on the CPU): downloaded only when chosen in ⚙ Settings (Apply).
 PARAKEET="$HOME/.local/bin/dictate-parakeet"
 PARAKEET_MODEL="$HOME/.local/share/frame-tweaks/parakeet/model"
@@ -143,7 +144,7 @@ engine() {
 signature() {
     if [ "$(engine)" = parakeet ]; then echo parakeet; else echo "whisper $MODEL $(vad_on && echo vad)"; fi
 }
-vad_on() { [ -f "$VAD_MODEL" ]; }
+vad_on() { [ "$VAD" = yes ] && [ -f "$VAD_MODEL" ]; }
 # A GPU build (whisper-frame's) needs the Adreno's Vulkan driver named, and no implicit layers
 # (SteamVR's and the Steam overlay's break it); Homebrew's CPU build ignores them.
 whisper_env() {

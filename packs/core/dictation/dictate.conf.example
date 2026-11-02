@@ -10,6 +10,8 @@
 #DICTATE_PROMPT="SteamOS, Steam Frame, SteamVR, KDE Plasma."
 # Language spoken (the shared model is multilingual), e.g. de, fr, es; "auto" to detect:
 #DICTATE_LANG=en
+# Silero voice activity detection, so Whisper hears only the speech: no (the default) or yes:
+#DICTATE_VAD=no
 # Whisper's beam size: 1 (the default, fastest) or 5 (whisper.cpp's own default, slower):
 #DICTATE_BEAM=1
 # A different whisper.cpp model:

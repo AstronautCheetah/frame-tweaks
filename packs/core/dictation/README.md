@@ -25,7 +25,7 @@ changes: >-
   a controller button is set, unless you choose otherwise), with SteamVR
   `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`),
   `~/.config/frame-tweaks/dictate.conf`, the Whisper model and Silero's voice activity
-  detection in `~/.local/share/whisper` (and, if you choose Parakeet, its model and runtime in
+  detection model (used only if you turn it on) in `~/.local/share/whisper` (and, if you choose Parakeet, its model and runtime in
   `~/.local/share/frame-tweaks/parakeet`), the engine's user service
   (`frame-tweaks-dictate-engine.service`, running only if you keep it loaded), a history
   of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's
@@ -63,6 +63,12 @@ settings:
       choices:
         - {label: "No (the default): loaded for each dictation, no memory used in between", value: "no"}
         - {label: "Yes: text sooner; memory in use all the time (Whisper 600 MB, Parakeet 1.3 GB)", value: "yes"}
+    - key: DICTATE_VAD
+      title: Voice activity detection
+      default: "no"
+      choices:
+        - {label: "Off (the default): Whisper hears the whole recording", value: "no"}
+        - {label: "On: Whisper hears only the speech, so pauses and room noise don't become words", value: "yes"}
     - key: DICTATE_TYPING
       title: Put the text in by
       default: type
@@ -172,6 +178,9 @@ to use it:
 - `DICTATE_KEEP_LOADED`: `no` (the default) or `yes`: the engine stays loaded between
   dictations, so the text comes sooner, but its memory stays in use (Whisper about 600 MB,
   Parakeet about 1.3 GB, out of the 16 GB VR shares).
+- `DICTATE_VAD`: `no` (the default) or `yes`: Silero's voice activity detection hands Whisper
+  only the stretches with speech, so pauses and room noise don't turn into invented words (four
+  seconds of noise gave "you" without it, nothing with it). Parakeet doesn't use it.
 - `DICTATE_TYPING`: `type` (the default) types the text, and pastes it when your keyboard
   layout has no key for one of its characters; `paste` always pastes it.
 - `DICTATE_PROMPT`: words Whisper should spell your way, such as names or jargon.
@@ -226,7 +235,8 @@ Parakeet is the one to keep loaded; started for each dictation, Whisper is faste
   (`frame-tweaks-dictate-engine.service`, the first thing stopped if memory runs out).
 - Whisper runs on the Frame's six fast cores, decoding greedily, and works through only as
   much of its 30-second window as the recording needs: a 3-second clip takes about 0.6 s
-  instead of 1.6. Silero's voice activity detection hands it only the stretches with speech.
+  instead of 1.6. With `DICTATE_VAD=yes`, Silero's voice activity detection hands it only the
+  stretches with speech.
 - Typing goes through [ydotool](../ydotool/), because KDE's Wayland desktop doesn't let ordinary
   programs send keys to other apps. Copying uses `wl-copy`, which the script points at the
   desktop's Wayland socket itself (shortcuts and launchers don't always say where it is).
@@ -258,10 +268,9 @@ Parakeet is the one to keep loaded; started for each dictation, Whisper is faste
   If a recording stops early by itself (the microphone gone, say), your next press, or the
   auto-stop, still transcribes what it caught.
 - **No phantom text.** Whisper tends to invent phrases for silence ("Thanks for watching",
-  "Subs by …"). A recording whose loudest moment stays under −40 dB counts as "no speech";
-  voice activity detection keeps pauses and room noise from Whisper (four seconds of noise
-  gave "you" without it, nothing with it); and those stock phrases are dropped when they're the
-  whole result.
+  "Subs by …"). A recording whose loudest moment stays under −40 dB counts as "no speech", and
+  those stock phrases are dropped when they're the whole result. Voice activity detection
+  (`DICTATE_VAD=yes`, off by default) also keeps pauses and room noise from Whisper.
 - **Something went wrong?** The log is `/run/user/$UID/dictate/dictate.log`, and the last
   recording is kept as `/run/user/$UID/dictate/last.wav` so you can listen to it. Both go away
   when the headset restarts, and like the history, only you can read them.
@@ -276,7 +285,7 @@ Parakeet is the one to keep loaded; started for each dictation, Whisper is faste
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `~/.local/bin/dictate` and `dictate-menu`, a **Dictate (toggle)** app-menu entry (hidden while a controller button is set, unless you choose otherwise), with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model and Silero's voice activity detection in `~/.local/share/whisper` (and, if you choose Parakeet, its model and runtime in `~/.local/share/frame-tweaks/parakeet`), the engine's user service (`frame-tweaks-dictate-engine.service`, running only if you keep it loaded), a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
+- **Changes:** `~/.local/bin/dictate` and `dictate-menu`, a **Dictate (toggle)** app-menu entry (hidden while a controller button is set, unless you choose otherwise), with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model and Silero's voice activity detection model (used only if you turn it on) in `~/.local/share/whisper` (and, if you choose Parakeet, its model and runtime in `~/.local/share/frame-tweaks/parakeet`), the engine's user service (`frame-tweaks-dictate-engine.service`, running only if you keep it loaded), a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
 - **Unusual access:** Microphone while recording; types through ydotool; while SteamVR runs, watches the button you picked (a controller's, or the headset's Aux key through Linux); an engine kept loaded listens on 127.0.0.1 (this machine only)
 - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
 <!-- /generated:changes -->
