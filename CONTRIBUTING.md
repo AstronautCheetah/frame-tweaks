@@ -313,6 +313,13 @@ makes a separate checkout under `tmp/` (a git worktree of `origin/main`), and
 `dev/safe-push.sh` publishes its commits onto `main`, replaying them if `main` moved meanwhile.
 `dev/agent-worktree.sh remove <name>` cleans up.
 
+## Backing up a checkout (maintainers)
+
+`dev/backup.sh --timer` keeps hourly snapshots of this folder on an SD card or other drive mounted
+under `/run/media` (`dev/backup.sh --help`): `.git` with commits not pushed, local packs and
+whatever else git ignores included, build files and caches left out. Each snapshot is hardlinked
+against the one before, so only changed files take space; the newest 48 are kept.
+
 ## Releasing (maintainers)
 
 Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Release** workflow
