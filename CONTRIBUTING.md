@@ -103,8 +103,10 @@ sharing). A check whose tool isn't installed is skipped, with a note saying how 
   source, and that programs in `~/.local/bin` are replaced with `write_file` (`lib/common.sh`),
   never written into.
 - `python`: every Python file compiles, the tweaks' modules too.
-- `lint`: Ruff finds what Python only finds when the line runs: a name that doesn't exist, an
-  import or variable never used (`ruff.toml`: those rules only, not style).
+- `lint`: Ruff finds what Python only finds when the line runs, such as a name that doesn't exist
+  or an import never used, and likely bugs (Bugbear: a computed default argument, a closure over
+  a loop variable, an exception's cause lost). `ruff.toml` says which rules: mistakes only, not
+  style.
 - `i18n`: the translation template is current (`dev/i18n.py extract` updates it).
 - `commits`: your commits' messages ("Commit style", below).
 - `manifests`: every manifest is valid and names its scripts (`python3 lib/sft.py mods check

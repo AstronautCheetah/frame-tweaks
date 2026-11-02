@@ -436,7 +436,7 @@ def update(po, pot_text):
     old = {(c, m): b for c, m, _, b in kept + entries_of(text) if not b.lstrip().startswith("#~")}
     header = next((b for c, m, _, b in entries_of(text) if m == ""), None)
     out, used = [], set()
-    for ctx, msgid, plural, block in entries_of(pot_text):
+    for ctx, msgid, _plural, block in entries_of(pot_text):
         if msgid == "":
             out.append(header or block)
             continue

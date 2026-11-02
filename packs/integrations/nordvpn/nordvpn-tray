@@ -199,7 +199,7 @@ class Tray:
             self.menu.addSeparator()
             auto = QAction(_("Connect at startup ({location})").format(location=start[8:]), self.menu,
                            checkable=True, checked=bool(self.startup))
-            auto.triggered.connect(lambda on, c=self.code_for(start): self.run("autoconnect", c if on else "off", note=True))
+            auto.triggered.connect(lambda on, c=self.code_for(start): self.run("autoconnect", c if on else "off", note=True))  # noqa: B008  (on purpose: the location as the menu was built)
             self.menu.addAction(auto)
         self.menu.addSeparator()
         self.menu.addAction(_("Quit tray icon")).triggered.connect(self.app.quit)

@@ -32,7 +32,7 @@ class LinkUpdateCheck(unittest.TestCase):
         curl.chmod(0o755)
         self.env = dict(os.environ, HOME=str(self.home), PATH=f"{bin_}:{os.environ['PATH']}", ASKED=str(self.asked))
 
-    def check(self, tid, headers=moved_to("v1.4.0")):
+    def check(self, tid, headers=moved_to("v1.4.0")):  # noqa: B008  (a constant, made once: the usual reply)
         r = subprocess.run(["bash", str(ROOT / "lib/link.sh"), "update-check", tid], capture_output=True, text=True,
                            env=dict(self.env, HEADERS=headers or ""))
         return r.stdout

@@ -319,7 +319,7 @@ def cmd_setup():
     try:
         creds = get("users/services/credentials", auth=token)
     except urllib.error.HTTPError as e:
-        raise SystemExit(_("NordVPN rejected the token (HTTP {code}).").format(code=e.code))
+        raise SystemExit(_("NordVPN rejected the token (HTTP {code}).").format(code=e.code)) from None
     del token
     CONF.mkdir(parents=True, exist_ok=True)
     os.chmod(CONF, 0o700)

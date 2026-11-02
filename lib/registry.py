@@ -134,7 +134,7 @@ def pack_hash(d):
             try:
                 with open(p, "rb") as f:
                     fh = hashlib.sha256()
-                    for chunk in iter(lambda: f.read(1 << 20), b""):
+                    for chunk in iter(lambda f=f: f.read(1 << 20), b""):
                         fh.update(chunk)
                 h.update(b"F" + rel + b"\0" + (b"x" if os.access(p, os.X_OK) else b"-") + fh.digest())
             except OSError:

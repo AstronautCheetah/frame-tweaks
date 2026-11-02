@@ -609,7 +609,7 @@ class OverlayHost:
         elif self.grips:
             self.grips.pause()                  # (a grip squeezed elsewhere doesn't grab the pad)
         self.gripping = {d for d, held, _ in grips if held}
-        for d, held, pressed in grips:
+        for d, _held, pressed in grips:
             # Squeeze while that controller's laser is on the pad: grab it (keys included).
             if pressed and d in self.hovered_devices and self.drag is None and not self.pad.pinned:
                 self.start_drag(d, grip=True, at=self.laser_at.get(d))

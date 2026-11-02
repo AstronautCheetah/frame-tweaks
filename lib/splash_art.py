@@ -240,7 +240,7 @@ class Picture:
             tx = self.x0 + self.S + self.gap
             ty = comp_y + (self.h - self.th) // 2 - top_px
             sh = 1 if self.k > 1 else 0
-            for (x, y, shade, li) in self.title_px:
+            for (x, y, _shade, li) in self.title_px:
                 f = 1.0 if letters is None else letters[li]
                 if f <= 0:
                     continue

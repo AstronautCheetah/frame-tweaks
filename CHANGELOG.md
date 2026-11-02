@@ -195,6 +195,8 @@
   token. It used to say only "Run 'nordvpn-wg setup' first." and "NordVPN access token (input
   hidden):".
 ### For contributors
+- **The lint check also looks for likely bugs** (Ruff's Bugbear and Pylint error rules), not
+  style; what it found in the code is fixed or marked on purpose.
 - **[docs/compatibility.md](docs/compatibility.md)** shows each tweak's status on the SteamOS and
   SteamVR builds it was checked on, generated from records that `dev/update-check.sh record`
   adds on a Frame.

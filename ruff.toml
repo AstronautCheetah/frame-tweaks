@@ -3,5 +3,16 @@
 # errors (E9), including syntax newer than SteamOS's Python runs.
 target-version = "py312"
 
+# Bugbear (B) and Pylint's errors (PLE) too: likely bugs, such as a mutable or computed default
+# argument, a closure over a loop variable, an exception's cause lost. Not style, so they don't
+# turn a contributor's diff into reformatting.
 [lint]
-select = ["F", "E9"]
+select = ["F", "E9", "B", "PLE"]
+# B905 (zip without strict=): the code zips lists of the same length by construction, and
+# strict= would only add noise.
+ignore = ["B905"]
+
+[lint.per-file-ignores]
+# B023 (a closure over a loop variable): tests build stand-ins inside a loop and use them in the
+# same pass, which is what the rule can't tell from the bug it looks for.
+"tests/*" = ["B023"]
