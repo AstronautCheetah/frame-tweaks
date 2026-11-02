@@ -67,8 +67,34 @@ def get(path, params=None, auth=None):
         return json.load(r)
 
 
+class NmcliError(subprocess.SubprocessError):
+    """nmcli failed: what it was asked (args) and what it said (its last line)."""
+    def __init__(self, args, said):
+        super().__init__(said)
+        self.args_, self.said = args, said
+
+
 def nmcli(*args, check=True):
-    return subprocess.run(["nmcli", *args], capture_output=True, text=True, check=check).stdout
+    r = subprocess.run(["nmcli", *args], capture_output=True, text=True)
+    if check and r.returncode != 0:
+        lines = [line.strip() for line in (r.stderr or r.stdout).splitlines() if line.strip()]
+        raise NmcliError(args, lines[-1] if lines else _("nmcli ended with code {code}").format(code=r.returncode))
+    return r.stdout
+
+
+def nmcli_failed(e):
+    """What to say when nmcli failed (the tray shows it in a notification): what didn't happen,
+    what NetworkManager said, and for a refusal, why and what to do. (It used to be a Python
+    traceback, with NetworkManager's own words cut off.)"""
+    what = {"up": _("Couldn't connect {name}."), "down": _("Couldn't disconnect {name}."),
+            "delete": _("Couldn't remove {name}.")}.get(e.args_[1] if len(e.args_) > 1 else "",
+                                                       _("NetworkManager couldn't do it."))
+    name = e.args_[-1] if len(e.args_) > 2 else "NordVPN"
+    msg = what.format(name=name) + " " + _("NetworkManager said: {said}").format(said=e.said)
+    if "not authorized" in e.said.lower():
+        msg += " " + _("It lets only your desktop session control the network: open NordVPN Tray from the "
+                       "desktop's menu (not from SSH or another login), or run nordvpn-wg in Konsole.")
+    return msg
 
 
 def countries():
@@ -429,4 +455,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except NmcliError as e:
+        sys.exit(nmcli_failed(e))

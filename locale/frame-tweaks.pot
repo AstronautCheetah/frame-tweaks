@@ -5509,11 +5509,36 @@ msgid "(missing: run refresh)"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't connect {name}."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't disconnect {name}."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't remove {name}."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"It lets only your desktop session control the network: open NordVPN Tray from the desktop's menu (not from SSH or another login), or run nordvpn-wg in Konsole."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager couldn't do it."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the change: {reply}"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the connection: {reply}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager said: {said}"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -5578,6 +5603,10 @@ msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "disconnected {connection}"
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "nmcli ended with code {code}"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg

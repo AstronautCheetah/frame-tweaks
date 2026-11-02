@@ -288,5 +288,19 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Verify your email address if it asks, then copy the token it shows you."
 - New in `packs/integrations/nordvpn/nordvpn-wg:284`
   - now: "Paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
+- New in `packs/integrations/nordvpn/nordvpn-wg:81`
+  - now: "nmcli ended with code {code}"
+- New in `packs/integrations/nordvpn/nordvpn-wg:89`
+  - now: "Couldn't connect {name}."
+- New in `packs/integrations/nordvpn/nordvpn-wg:89`
+  - now: "Couldn't disconnect {name}."
+- New in `packs/integrations/nordvpn/nordvpn-wg:90`
+  - now: "Couldn't remove {name}."
+- New in `packs/integrations/nordvpn/nordvpn-wg:91`
+  - now: "NetworkManager couldn't do it."
+- New in `packs/integrations/nordvpn/nordvpn-wg:93`
+  - now: "NetworkManager said: {said}"
+- New in `packs/integrations/nordvpn/nordvpn-wg:95`
+  - now: "It lets only your desktop session control the network: open NordVPN Tray from the desktop's menu (not from SSH or another login), or run nordvpn-wg in Konsole."
 - New in `packs/third-party/cursor/status.sh:12`
   - now: "removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"

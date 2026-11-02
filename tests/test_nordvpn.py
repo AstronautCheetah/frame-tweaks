@@ -6,6 +6,7 @@ real connections are never touched. Then the tray's menu item: its location, tic
 import copy
 import io
 import os
+import subprocess
 import sys
 import socket
 import tempfile
@@ -16,7 +17,7 @@ from pathlib import Path
 from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import ROOT, load_script  # noqa: E402
+from helpers import ROOT, load_script, sandbox_env, stub  # noqa: E402
 
 PACK = ROOT / "packs/integrations/nordvpn"
 SETTINGS = "/org/freedesktop/NetworkManager/Settings"
@@ -347,6 +348,28 @@ class TrayItem(unittest.TestCase):
         item.trigger()
         t.app.clipboard().setText.assert_called_once_with("nordvpn-wg setup")
         self.assertIn("paste it", t.tray.showMessage.call_args.args[1])
+
+
+class NmcliFailure(unittest.TestCase):
+    """NetworkManager refusing (here: not authorized, as for a tray started from an SSH login) is
+    said in one readable line, its own words included, with what to do; not a Python traceback,
+    which the tray's notification used to show with NetworkManager's words cut off."""
+
+    def test_a_refused_connection_says_why_and_what_to_do(self):
+        with tempfile.TemporaryDirectory() as d:
+            stub(Path(d, "stubs"), "nmcli", """case "$*" in
+  "-t -f NAME,TYPE connection show") echo "NordVPN United States:wireguard" ;;
+  "-g connection.interface-name connection show NordVPN United States") echo nordvpn-us ;;
+  "-t -f NAME,DEVICE connection show --active") echo "Home:wlan0" ;;
+  "connection up NordVPN United States") echo "Error: Connection activation failed: Not authorized to control networking." >&2; exit 4 ;;
+esac""")
+            r = subprocess.run([sys.executable, str(PACK / "nordvpn-wg"), "up", "us"], capture_output=True, text=True, timeout=30,
+                               env=sandbox_env(Path(d), Path(d, "stubs")))
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertNotIn("Traceback", r.stderr)
+        self.assertIn("Couldn't connect NordVPN United States. NetworkManager said: Error: Connection activation "
+                      "failed: Not authorized to control networking.", r.stderr)
+        self.assertIn("open NordVPN Tray from the desktop's menu", r.stderr)
 
 
 class SetupHelp(unittest.TestCase):
