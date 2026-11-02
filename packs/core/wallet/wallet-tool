@@ -11,7 +11,8 @@ gh wrapper the Wallet install adds is the same thing, for gh.
   wallet-tool --remove claude   back to Homebrew's own command
   wallet-tool --list            protected commands, one a line
   wallet-tool --candidates      Homebrew commands that could be: from the formulae you installed
-                                (brew leaves) and the casks, as "command<TAB>formula or cask"
+                                (brew leaves) and the casks, not those Frame Tweaks' tweaks
+                                install and run, as "command<TAB>formula or cask"
 """
 import os
 import re
@@ -31,6 +32,10 @@ BREW = Path(os.environ.get("FRAME_TWEAKS_BREW") or "/home/linuxbrew/.linuxbrew/b
 PREFIX = BREW.parent.parent
 MARK = "# wallet-tool:"                  # (on the wrappers this writes: only those are removed)
 LINE = re.compile(r'^exec "\$HOME/\.local/bin/with-keyring" (/\S+) "\$@"$', re.M)
+# The formulae Frame Tweaks' own tweaks install (written by the Wallet install): their commands
+# aren't offered, since those tweaks run them and they mustn't wait for the wallet.
+FOR_TWEAKS = Path(os.environ.get("FRAME_TWEAKS_BREW_FOR_TWEAKS")
+                  or Path.home() / ".local/share/frame-tweaks/brew-for-tweaks")
 # The installer's own wrapper (gh: it also moves gh's token into the wallet), and Homebrew itself.
 MANAGED = {"gh": _("set up by the Wallet tweak's install"), "brew": None}
 
@@ -72,13 +77,26 @@ def leaves():
     return {line.split("/")[-1] for line in r.stdout.split()}
 
 
+def same(name):
+    """A formula's name as Homebrew's folders and its install line may each spell it (whisper.cpp
+    is installed as whisper-cpp)."""
+    return name.lower().replace(".", "-")
+
+
+def for_tweaks():
+    try:
+        return {same(n) for n in FOR_TWEAKS.read_text().split()}
+    except OSError:
+        return set()
+
+
 def candidates():
-    mine, done, kept = leaves(), protected(), []
+    mine, done, kept, theirs = leaves(), protected(), [], for_tweaks()
     for f in sorted((PREFIX / "bin").iterdir()) if (PREFIX / "bin").is_dir() else []:
         if f.name in done or f.name in MANAGED or f.name.startswith("."):
             continue
         o = owner(f.name)
-        if o and (o[0] == "Caskroom" or o[1] in mine) and os.access(f, os.X_OK):
+        if o and (o[0] == "Caskroom" or o[1] in mine) and same(o[1]) not in theirs and os.access(f, os.X_OK):
             kept.append((f.name, o[1]))
     return kept
 

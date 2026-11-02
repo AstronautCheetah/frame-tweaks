@@ -9,6 +9,12 @@ ensure_tweaks_venv
 install_py_tool "$TWEAK_DIR/wallet-unlock"
 install -m755 "$TWEAK_DIR/with-keyring" "$BIN/"
 install -m755 "$TWEAK_DIR/wallet-tool" "$BIN/"      # (terminal tools from Homebrew behind the wallet)
+# The Homebrew formulae Frame Tweaks' own tweaks install (whisper-cpp for Dictation, say): wallet-tool
+# doesn't offer their commands, which those tweaks run and which mustn't wait for the wallet.
+mkdir -p "$HOME/.local/share/frame-tweaks"
+grep -ohE 'brew (re)?install [^;&|)"`]*' "$REPO_DIR"/packs/*/*/install.sh "$REPO_DIR/lib/common.sh" 2>/dev/null |
+    sed -E 's/brew (re)?install//' | tr ' ' '\n' | grep -E '^[a-z0-9]' | sort -u |
+    write_file "$HOME/.local/share/frame-tweaks/brew-for-tweaks"
 
 # Closing the wallet (KWalletManager, idle timeout) only closes kwalletd6's view; ksecretd
 # stays unlocked. This service turns every close into a real lock.

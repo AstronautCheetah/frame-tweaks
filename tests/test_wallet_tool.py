@@ -1,6 +1,7 @@
 """wallet-tool (packs/core/wallet): terminal tools from Homebrew behind the shared KDE wallet. It
 offers the commands of the formulae you installed (brew leaves) and of casks, not those of
-dependencies, Homebrew itself or gh (the Wallet install's own wrapper); protecting writes a
+dependencies, Homebrew itself, gh (the Wallet install's own wrapper) or the formulae Frame
+Tweaks' tweaks install and run; protecting writes a
 wrapper in ~/.local/bin that runs the real command through with-keyring; --list and --remove
 follow; a program of yours there is never overwritten or removed. A fake Homebrew prefix stands
 in for /home/linuxbrew/.linuxbrew."""
@@ -25,14 +26,18 @@ class WalletTool(unittest.TestCase):
         self.home, prefix = t / "home", t / "linuxbrew"
         self.prefix = prefix
         for owner, cmd in (("Caskroom/claude-code@latest/2.1", "claude"), ("Cellar/ripgrep/14.1/bin", "rg"),
-                           ("Cellar/pcre2/10.4/bin", "pcre2grep"), ("Cellar/gh/2.80/bin", "gh")):
+                           ("Cellar/pcre2/10.4/bin", "pcre2grep"), ("Cellar/gh/2.80/bin", "gh"),
+                           ("Cellar/whisper.cpp/1.8/bin", "whisper-cli")):
             stub(prefix / owner, cmd, f'echo "real {cmd} $*"')
             (prefix / "bin").mkdir(parents=True, exist_ok=True)
             (prefix / "bin" / cmd).symlink_to(prefix / owner / cmd)
-        stub(prefix / "bin", "brew", 'case "$1" in leaves) printf "ripgrep\\ngh\\n" ;; esac')
+        stub(prefix / "bin", "brew", 'case "$1" in leaves) printf "ripgrep\\ngh\\nwhisper.cpp\\n" ;; esac')
+        # (what Frame Tweaks' tweaks install, as the Wallet install writes it: whisper-cpp for Dictation)
+        (t / "brew-for-tweaks").write_text("tesseract\nwhisper-cpp\nwl-clipboard\n")
         # (with-keyring: just runs the command, saying it did)
         stub(self.home / ".local/bin", "with-keyring", 'echo "with-keyring"; exec "$@"')
-        self.env = sandbox_env(self.home, FRAME_TWEAKS_BREW=prefix / "bin/brew")
+        self.env = sandbox_env(self.home, FRAME_TWEAKS_BREW=prefix / "bin/brew",
+                               FRAME_TWEAKS_BREW_FOR_TWEAKS=t / "brew-for-tweaks")
 
     def tool(self, *args, ok=True):
         r = subprocess.run([sys.executable, str(TOOL), *args], env=self.env, capture_output=True, text=True, timeout=30)
@@ -43,7 +48,8 @@ class WalletTool(unittest.TestCase):
     def listed(self, arg):
         return dict(line.split("\t", 1) for line in self.tool(arg).stdout.splitlines())
 
-    def test_offers_what_you_installed_not_dependencies_brew_or_gh(self):
+    def test_offers_what_you_installed_not_dependencies_brew_gh_or_what_tweaks_run(self):
+        # (whisper.cpp is a leaf, but Dictation runs whisper-cli: it mustn't wait for the wallet)
         self.assertEqual(self.listed("--candidates"), {"claude": "claude-code@latest", "rg": "ripgrep"})
 
     def test_protect_runs_it_through_with_keyring_then_remove(self):

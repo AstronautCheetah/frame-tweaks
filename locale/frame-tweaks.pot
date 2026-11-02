@@ -1220,6 +1220,12 @@ msgid "Headset off"
 msgstr ""
 
 #: gui/wallet_page.py
+msgid "Homebrew's {src}: its command {cmds}"
+msgid_plural "Homebrew's {src}: its commands {cmds}"
+msgstr[0] ""
+msgstr[1] ""
+
+#: gui/wallet_page.py
 msgid ""
 "It opens without one, so it protects nothing, and there's no password for Unlock or Password first to ask. Set one in KWalletManager: kdewallet → Change Password."
 msgstr ""
@@ -1362,10 +1368,6 @@ msgstr ""
 #: gui/wallet_page.py
 msgid ""
 "asks for the wallet password first while it's locked, and keeps its sign-in in the wallet if it can · runs {real}"
-msgstr ""
-
-#: gui/wallet_page.py
-msgid "command from Homebrew's {src}"
 msgstr ""
 
 #: gui/wallet_page.py

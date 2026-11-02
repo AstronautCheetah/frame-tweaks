@@ -132,8 +132,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `gui/wallet_page.py:537`
   - now: "Add a terminal tool ({n} from Homebrew)"
   - plural: "Add a terminal tool ({n} from Homebrew)"
-- New in `gui/wallet_page.py:545`
-  - now: "command from Homebrew's {src}"
+- New in `gui/wallet_page.py:548`
+  - now: "Homebrew's {src}: its command {cmds}"
+  - plural: "Homebrew's {src}: its commands {cmds}"
 - New in `install.sh:344`
   - now: "%s needs your sudo password, and your user has none yet."
 - New in `lib/common.sh:102`

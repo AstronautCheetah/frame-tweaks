@@ -534,30 +534,43 @@ class WalletApps(QWidget):
                 remove.clicked.connect(lambda _checked=False, c=cmd: self.run_tool(["--remove", c], c))
                 buttons = [remove]
             self.rows.addWidget(self.row(tool, note, buttons))
+        # (one row a package: a formula can bring many commands, tesseract's training tools say)
+        packages = {}
+        for cmd, src in candidates:
+            packages.setdefault(src, []).append(cmd)
         self.rows.addWidget(self.heading(ngettext("Add a terminal tool ({n} from Homebrew)",
                                                   "Add a terminal tool ({n} from Homebrew)",
-                                                  len(candidates)).format(n=len(candidates))))
-        for cmd, src in candidates:
+                                                  len(packages)).format(n=len(packages))))
+        for src, cmds in sorted(packages.items()):
             add = QPushButton(_("Protect"))
             add.setObjectName("run")
-            add.clicked.connect(lambda _checked=False, c=cmd: self.run_tool([c], c))
-            self.rows.addWidget(self.row({"name": cmd, "icon": "utilities-terminal"},
-                                         _("command from Homebrew's {src}").format(src=html.escape(src)), [add]))
+            add.clicked.connect(lambda _checked=False, c=cmds: self.run_tool(c, None))
+            note = ngettext("Homebrew's {src}: its command {cmds}", "Homebrew's {src}: its commands {cmds}",
+                            len(cmds)).format(src=html.escape(src), cmds=", ".join(html.escape(c) for c in cmds))
+            self.rows.addWidget(self.row({"name": src, "icon": "utilities-terminal"}, note, [add]))
 
     def run_tool(self, args, cmd):
-        """wallet-tool protect/remove; then the lists are read again (wallet-tool, not brew: quick)."""
+        """wallet-tool: ["--remove", cmd], or the commands of one package to protect (cmd None),
+        one call each; then the protected list is read again (wallet-tool, not brew: quick)."""
+        calls = [args] if args[0] == "--remove" else [[c] for c in args]
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
-            print("would run: wallet-tool", " ".join(args))
+            for a in calls:
+                print("would run: wallet-tool", " ".join(a))
             return
-        r = subprocess.run([str(WALLET_TOOL)] + args, capture_output=True, text=True)
-        self.notice.setText(html.escape((r.stdout if r.returncode == 0 else _("Didn't work: %s") % (r.stderr or r.stdout)).strip(),
-                                        quote=False))
-        if r.returncode == 0 and self.tools is not None:
+        said, ok = [], True
+        for a in calls:
+            r = subprocess.run([str(WALLET_TOOL)] + a, capture_output=True, text=True)
+            ok = ok and r.returncode == 0
+            said.append((r.stdout if r.returncode == 0 else _("Didn't work: %s") % (r.stderr or r.stdout)).strip())
+        self.notice.setText(html.escape(" ".join(said), quote=False))
+        if self.tools is not None:
             _old, candidates = self.tools
             listed = subprocess.run([str(WALLET_TOOL), "--list"], capture_output=True, text=True).stdout
             protected = [tuple(line.split("\t", 1)) for line in listed.splitlines() if "\t" in line]
-            candidates = ([t for t in candidates if t[0] != cmd] if args[0] != "--remove"
-                          else sorted(candidates + [(cmd, "Homebrew")]))
+            done = {p[0] for p in protected}
+            if args[0] == "--remove" and ok:
+                candidates = sorted(candidates + [(cmd, "Homebrew")])
+            candidates = [t for t in candidates if t[0] not in done]
             self.tools = (protected, candidates)
         QTimer.singleShot(0, self.fill)
 
