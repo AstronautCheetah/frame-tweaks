@@ -84,6 +84,12 @@ msgstr "Ik begrijp het risico: toepassen"
 
 # needs review
 #: gui/apply_changes.py
+msgid "Install again, with the files that changed since they were installed:"
+msgstr ""
+"Opnieuw installeren, met de bestanden die veranderd zijn sinds de installatie:"
+
+# needs review
+#: gui/apply_changes.py
 msgid "Install:"
 msgstr "Installeren:"
 
@@ -110,9 +116,21 @@ msgstr "Niets te wijzigen: vink eerst een aanpassing aan of uit"
 
 # needs review
 #: gui/apply_changes.py
+msgid ""
+"Nothing to reinstall: no installed tweak's files changed since it was installed."
+msgstr ""
+"Niets opnieuw te installeren: van geen enkele geïnstalleerde aanpassing zijn de bestanden veranderd sinds de installatie."
+
+# needs review
+#: gui/apply_changes.py
 msgid "Password set: the tweaks tagged sudo can install now."
 msgstr ""
 "Wachtwoord ingesteld: de aanpassingen met de tag sudo kunnen nu geïnstalleerd worden."
+
+# needs review
+#: gui/apply_changes.py gui/frame-tweaks-gui.py
+msgid "Reinstall"
+msgstr "Opnieuw installeren"
 
 # needs review
 #: gui/apply_changes.py
@@ -133,6 +151,13 @@ msgstr "Wachtwoord instellen…"
 #: gui/apply_changes.py
 msgid "Still checking status; try again in a moment."
 msgstr "De status wordt nog gecontroleerd; probeer het zo meteen opnieuw."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Their files changed since they were installed (Frame Tweaks updated, or a pack edited), and the installed copies are still the old ones. Installs them again: %s"
+msgstr ""
+"Hun bestanden zijn veranderd sinds de installatie (Frame Tweaks bijgewerkt, of een pakket gewijzigd), en de geïnstalleerde kopieën zijn nog de oude. Installeert ze opnieuw: %s"
 
 # needs review
 #: gui/apply_changes.py
@@ -158,6 +183,11 @@ msgid ""
 "{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
 msgstr ""
 "{tweaks} hebben je sudo-wachtwoord nodig, en je gebruiker heeft er nog geen. Stel er een in en kies dan opnieuw Wijzigingen toepassen."
+
+# needs review
+#: gui/apply_changes.py
+msgid "↻ Reinstall updated ({n})"
+msgstr "↻ Bijgewerkte opnieuw installeren ({n})"
 
 # needs review
 #: gui/apply_changes.py
@@ -298,7 +328,7 @@ msgid "{version} is still the latest release."
 msgstr "{version} is nog altijd de nieuwste versie."
 
 # needs review
-#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py gui/works_page.py packs/core/snip/frame-snip
 msgid "← Back"
 msgstr "← Terug"
 
@@ -507,6 +537,20 @@ msgstr "Het is daar naar voren gekomen. Sluit het daar om het hier te openen."
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid ""
+"Its files changed since it was installed (Frame Tweaks updated, or its pack edited), and the installed copy is still the old one. Reinstall installs it again with them."
+msgstr ""
+"De bestanden zijn veranderd sinds de installatie (Frame Tweaks bijgewerkt, of het pakket gewijzigd), en de geïnstalleerde kopie is nog de oude. Opnieuw installeren installeert ze opnieuw met de nieuwe bestanden."
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Its files changed since it was installed: reinstall to use them (remove it and install it again in one step, settings kept)"
+msgstr ""
+"De bestanden zijn veranderd sinds de installatie: installeer opnieuw om ze te gebruiken (verwijderen en opnieuw installeren in één stap, instellingen blijven behouden)"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
 "Linked: installed and uninstalled with the project's own commands, which Frame Tweaks runs but doesn't check"
 msgstr ""
 "Gekoppeld: geïnstalleerd en verwijderd met de eigen opdrachten van het project, die Frame Tweaks uitvoert maar niet controleert"
@@ -570,6 +614,13 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "Reopen Frame Tweaks to use the new version"
 msgstr "Frame Tweaks opnieuw openen om de nieuwe versie te gebruiken"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Report which tweaks work on your SteamOS and SteamVR versions (on GitHub, when you choose to)"
+msgstr ""
+"Melden welke aanpassingen werken op jouw versies van SteamOS en SteamVR (op GitHub, als je dat wilt)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -683,6 +734,11 @@ msgid "status check failed: {error}"
 msgstr "statuscontrole mislukt: {error}"
 
 # needs review
+#: gui/frame-tweaks-gui.py install.sh
+msgid "updated"
+msgstr "bijgewerkt"
+
+# needs review
 #: gui/frame-tweaks-gui.py
 msgid "{label} (installs first if needed: tick it and Apply)"
 msgstr ""
@@ -707,6 +763,11 @@ msgstr "⚙ Instellingen"
 #: gui/frame-tweaks-gui.py
 msgid "✔ Frame Tweaks is up to date ({version})."
 msgstr "✔ Frame Tweaks is bijgewerkt ({version})."
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "✔ Works on my Frame"
+msgstr "✔ Werkt op mijn Frame"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1376,12 +1437,12 @@ msgid "🐞 Open the bug form"
 msgstr "🐞 Het bugformulier openen"
 
 # needs review
-#: gui/report_page.py
+#: gui/report_page.py gui/works_page.py
 msgid "📋 Copied"
 msgstr "📋 Gekopieerd"
 
 # needs review
-#: gui/report_page.py
+#: gui/report_page.py gui/works_page.py
 msgid "📋 Copy the report"
 msgstr "📋 Het rapport kopiëren"
 
@@ -1904,6 +1965,23 @@ msgid "status check failed (exit {code})"
 msgstr "statuscontrole mislukt (afsluitcode {code})"
 
 # needs review
+#: gui/works_page.py
+msgid "Open the form on GitHub"
+msgstr "Formulier op GitHub openen"
+
+# needs review
+#: gui/works_page.py
+msgid ""
+"Tell others which tweaks work on your SteamOS and SteamVR versions. Below is everything the report says: the versions, and each tweak as a mark only (✔ works, ! needs attention, ⟳ waits for a SteamVR restart, · not installed), not its status text.<br><b>Open the form on GitHub</b> opens it in your browser with this filled in. Nothing is sent unless you submit it there (you sign in on GitHub, and the report is public). Frame Tweaks sends nothing by itself and doesn't remember this."
+msgstr ""
+"Laat anderen weten welke aanpassingen werken op jouw versies van SteamOS en SteamVR. Hieronder staat alles wat het rapport bevat: de versies, en elke aanpassing alleen als teken (✔ werkt, ! vraagt aandacht, ⟳ wacht op een herstart van SteamVR, · niet geïnstalleerd), niet de statustekst.<br><b>Formulier op GitHub openen</b> opent het in je browser, met dit al ingevuld. Er wordt niets verstuurd tenzij je het daar indient (je meldt je aan bij GitHub, en het rapport is openbaar). Frame Tweaks verstuurt zelf niets en onthoudt dit niet."
+
+# needs review
+#: gui/works_page.py
+msgid "Works on my Frame"
+msgstr "Werkt op mijn Frame"
+
+# needs review
 #: install.sh
 msgid "%s could not be removed"
 msgstr "%s kon niet verwijderd worden"
@@ -2029,6 +2107,11 @@ msgstr ""
 
 # needs review
 #: install.sh
+msgid "Installing again, with their changed files: %s"
+msgstr "Opnieuw installeren, met hun veranderde bestanden: %s"
+
+# needs review
+#: install.sh
 msgid "Kept backups of files tweaks changed: %s"
 msgstr "Reservekopieën behouden van bestanden die aanpassingen wijzigden: %s"
 
@@ -2081,6 +2164,13 @@ msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 "Gekoppeld, dus ze worden op hun eigen manier bijgewerkt (in hun rij voert ↻ hun installatieprogramma opnieuw uit): %s"
+
+# needs review
+#: install.sh
+msgid ""
+"No installed tweak has files that changed since it was installed: nothing to install again."
+msgstr ""
+"Van geen enkele geïnstalleerde aanpassing zijn de bestanden veranderd sinds de installatie: niets opnieuw te installeren."
 
 # needs review
 #: install.sh
@@ -2358,6 +2448,13 @@ msgstr ""
 #: install.sh
 msgid "update: unknown option %s (--to vX.Y.Z | --to stable | --reinstall)"
 msgstr "update: onbekende optie %s (--to vX.Y.Z | --to stable | --reinstall)"
+
+# needs review
+#: install.sh
+msgid ""
+"↻ updated: the files of %s changed since they were installed, and the installed copies are still the old ones. To install them again: %s"
+msgstr ""
+"↻ bijgewerkt: de bestanden van %s zijn veranderd sinds de installatie, en de geïnstalleerde kopieën zijn nog de oude. Om ze opnieuw te installeren: %s"
 
 # needs review
 #: lib/browser.py
@@ -4938,6 +5035,11 @@ msgstr "Gekopieerd naar klembord"
 
 # needs review
 #: packs/core/dictation/dictate
+msgid "Dictation is busy"
+msgstr "Dicteren is bezig"
+
+# needs review
+#: packs/core/dictation/dictate
 msgid "Listening… (run again to stop)"
 msgstr "Luisteren… (nogmaals starten om te stoppen)"
 
@@ -5425,7 +5527,7 @@ msgid "System"
 msgstr "Systeem"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/cuff/README.md
 msgid "VR environment"
 msgstr "VR-omgeving"
 
@@ -6858,6 +6960,99 @@ msgstr ""
 "De KDE-portefeuille nu vergrendelen (Signal, Firefox, Android-spiegel en gh vragen dan het wachtwoord)"
 
 # needs review
+#: packs/core/wallet/wallet-token
+msgid "the wallet is locked"
+msgstr "de portefeuille is vergrendeld"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid "wallet-token: can't reach the wallet ({error})"
+msgstr "wallet-token: kan de portefeuille niet bereiken ({error})"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid "wallet-token: can't run {path}: {error}"
+msgstr "wallet-token: kan {path} niet starten: {error}"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid ""
+"wallet-token: couldn't read the wallet ({error}): {cmd} signs in its own way"
+msgstr ""
+"wallet-token: kon de portefeuille niet lezen ({error}): {cmd} meldt zich op de eigen manier aan"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid ""
+"wallet-token: that isn't a token (one line, no spaces): nothing stored"
+msgstr ""
+"wallet-token: dat is geen token (één regel, geen spaties): niets opgeslagen"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid "wallet-token: {error}"
+msgstr "wallet-token: {error}"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid ""
+"{cmd}: no token in the wallet yet, so it keeps its sign-in in its own plain-text file. To keep it in the wallet instead: wallet-tool --store-token {cmd}   (said once)"
+msgstr ""
+"{cmd}: nog geen token in de portefeuille, dus het bewaart de eigen aanmelding in een onversleuteld bestand. Om ze in de portefeuille te bewaren: wallet-tool --store-token {cmd}   (eenmalige melding)"
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid "{cmd}: token removed from the wallet."
+msgstr "{cmd}: token uit de portefeuille verwijderd."
+
+# needs review
+#: packs/core/wallet/wallet-token
+msgid "{cmd}: token stored in the wallet."
+msgstr "{cmd}: token in de portefeuille opgeslagen."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"It also holds: {keys} (MCP servers' sign-ins, say); with it moved aside, {cmd} asks for those again."
+msgstr ""
+"Het bevat ook: {keys} (bv. aanmeldingen voor MCP-servers); als het opzij is gezet, vraagt {cmd} die opnieuw."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "Left where it is. To remove it yourself: rm {path}"
+msgstr "Laten staan. Om het zelf te verwijderen: rm {path}"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+msgstr ""
+"Verplaatsen naar {path}? Er wordt niets gewist en je wordt nergens afgemeld: zet het terug om dit ongedaan te maken. [y/N] "
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "Moved. Once {cmd} works with the wallet's token, delete it: rm {path}"
+msgstr ""
+"Verplaatst. Zodra {cmd} werkt met het token uit de portefeuille, wis je het: rm {path}"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "Nothing stored."
+msgstr "Niets opgeslagen."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "Paste the token (it isn't shown), then Enter: "
+msgstr "Plak het token (het wordt niet getoond) en druk op Enter: "
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+msgstr ""
+"{cmd} {sub} nu starten om een token te maken? Er opent een browser om je aan te melden, daarna wordt het token getoond om te kopiëren. [Y/n] "
+
+# needs review
 #: packs/core/wallet/wallet-tool
 msgid "a program of yours"
 msgstr "een programma van jezelf"
@@ -6870,8 +7065,27 @@ msgstr ""
 
 # needs review
 #: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd} now signs in with the wallet's token. If the token is still on screen, clear this terminal's scrollback (clear, or Konsole's Clear Scrollback and Reset)."
+msgstr ""
+"{cmd} meldt zich nu aan met het token uit de portefeuille. Staat het token nog op het scherm, wis dan de scrollgeschiedenis van deze terminal (clear, of Clear Scrollback and Reset in Konsole)."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd}: a token in the wallet, if you stored one, stays there while the wallet is locked: wallet-tool --forget-token {cmd} removes it."
+msgstr ""
+"{cmd}: een token in de portefeuille, als je er een opgeslagen hebt, blijft daar terwijl de portefeuille vergrendeld is: wallet-tool --forget-token {cmd} verwijdert het."
+
+# needs review
+#: packs/core/wallet/wallet-tool
 msgid "{cmd}: back to Homebrew's own command."
 msgstr "{cmd}: terug naar de eigen opdracht van Homebrew."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: no token to keep for it (only for: {commands})"
+msgstr "{cmd}: geen token om ervoor te bewaren (alleen voor: {commands})"
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -6909,6 +7123,13 @@ msgstr ""
 #: packs/core/wallet/wallet-tool
 msgid "{path} is a program of yours: left as it is"
 msgstr "{path} is een programma van jezelf: blijft zoals het is"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{path} still holds {cmd}'s own sign-in in plain text. With the token in the wallet, {cmd} doesn't need it."
+msgstr ""
+"{path} bevat nog de eigen aanmelding van {cmd}, onversleuteld. Met het token in de portefeuille heeft {cmd} die niet nodig."
 
 # needs review
 #: packs/core/wallet/wallet-unlock
@@ -7141,7 +7362,7 @@ msgstr ""
 "Claude voor desktop, de officiële Linux-app van Anthropic (arm64), geïnstalleerd in je persoonlijke map en bijgewerkt met één opdracht."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cuff/README.md packs/third-party/cursor/README.md
 msgid "from"
 msgstr "van"
 
@@ -7771,6 +7992,31 @@ msgid ""
 "The kwallet6 setting stays: Signal's database key now lives in the wallet, and switching back would lock you out."
 msgstr ""
 "De instelling kwallet6 blijft: de databasesleutel van Signal staat nu in de portefeuille, en terugschakelen zou je buitensluiten."
+
+# needs review
+#: packs/third-party/cuff/README.md
+msgid "A wrist panel in VR with the time, batteries, quick actions and tabs"
+msgstr ""
+"Een polspaneel in VR met de tijd, batterijen, snelle acties en tabbladen"
+
+# needs review
+#: packs/third-party/cuff/README.md
+msgid "Cuff"
+msgstr "Cuff"
+
+# needs review
+#: packs/third-party/cuff/README.md
+msgid ""
+"Look at the back of your wrist in VR and a panel is there: the time, the headset's, the controllers' and Bluetooth headphones' batteries, six quick actions (dictation, mic mute, passthrough, recenter, the SteamVR keyboard, a screenshot), and tabs for what's playing, audio, a timer and performance. Touch it with the sphere in front of your other controller."
+msgstr ""
+"Kijk in VR naar de rug van je pols en daar is een paneel: de tijd, de batterijen van de headset, de controllers en een Bluetooth-koptelefoon, zes snelle acties (dicteren, microfoon dempen, Kamerweergave, Opnieuw centreren, het SteamVR-toetsenbord, een screenshot), en tabbladen voor wat er speelt, audio, een timer en prestaties. Raak het aan met het bolletje voor je andere controller."
+
+# needs review
+#: packs/third-party/cuff/README.md
+msgid ""
+"The Frame has no glanceable status in VR: the time and batteries are behind the dashboard. Linked: [Cuff](https://github.com/Brobert-in-aus/cuff) installs itself on the Frame, the way its README describes, at the commit Frame Tweaks tried it at."
+msgstr ""
+"De Frame heeft in VR geen status die je in één oogopslag ziet: de tijd en de batterijen zitten achter het dashboard. Gekoppeld: [Cuff](https://github.com/Brobert-in-aus/cuff) installeert zichzelf op de Frame, zoals de README het beschrijft, op de commit waarmee Frame Tweaks het getest heeft."
 
 # needs review
 #: packs/third-party/cursor/README.md
