@@ -113,6 +113,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `depends` | `[ydotool]` | Tweaks installed first (from any pack in use). If one is missing, this one isn't offered. |
 | `source` | `{relation: from, url: https://…}` | The project it's linked to in the list, and how: `from`, `uses` (the default), or a few words of your own such as `styled after`. |
 | `hidden_by_default` | `true` | Hidden in the list until you choose to show it. |
+| `when_not_needed` | `uninstall` | With a `needed.sh` (below): once this Frame doesn't need the tweak any more (a SteamOS update does the thing itself, say), it's removed by itself: by the window as it opens, with a note, and by a login-time service (`./install.sh tidy`); its settings are kept. Its `uninstall.sh` must then run without asking (no sudo). Without this, an installed tweak stays, and its status should ask you to remove it. |
 | `experimental` | text | Marks it 🧪 and says what relies on another program's internals and what happens when they change. |
 | `icon` | `{file: icon.png}` · `{theme: face-smile}` · `{flatpak: org.app.Id}` | Its icon in the list: a picture in its folder, a Breeze icon name, or an installed Flatpak's icon (these can be combined; tried in the order flatpak, file, theme). |
 | `run` | `{label: Open}` | The Run button's label. A tweak with a `run.sh` gets the button anyway, labelled Run. |
@@ -242,8 +243,9 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   beta and stable branches number differently. A tweak that isn't needed isn't offered: the
   window hides it (**Show hidden** lists it, saying why, with its box disabled), and
   `./install.sh install` skips it. If it's installed already, it stays in the list, updates and
-  ↻ Reinstall install it again, and its `status.sh` should say it can be removed (the Mouse
-  cursor fix does).
+  ↻ Reinstall install it again, and its `status.sh` should say it can be removed, or, with
+  `when_not_needed: uninstall` in its manifest, it's removed by itself (`./install.sh tidy`; the
+  Mouse cursor fix).
 - `update-check.sh`: prints `<installed> <latest>` versions; the window offers an update when
   the second is newer. (A link needs none: its `version:`, below.)
 - `migrate.sh <old-version>`: runs before `install.sh` when the Frame Tweaks version that last
