@@ -79,7 +79,11 @@ files, its manifest, and the helpers its scripts can use.
 ## Checks
 
 `dev/check.sh` runs the checks CI runs, on any Linux PC; `dev/check.sh docs tests` runs just
-those. A check whose tool isn't installed is skipped, with a note saying how to get it. The
+those. Not on Linux, or without the tools: `dev/container-check.sh` (same arguments) runs them in
+a container with CI's environment (`dev/Containerfile`), with Podman or Docker. It builds the
+image the first time. On a Mac or Windows, the checkout must be in a folder the container VM
+shares (Podman's machine shares your home folder; Docker Desktop: Settings → Resources → File
+sharing). A check whose tool isn't installed is skipped, with a note saying how to get it. The
 `tweaks` check is left out when nothing it installs changed since `origin/main` (CI, and
 `dev/check.sh tweaks`, run it anyway). The checks:
 
