@@ -1,0 +1,30 @@
+#!/bin/bash
+# frame-tweaks-share-whisper: Dictation's Whisper model and Full Keyboard's on-device one are the
+# same file (ggml-small-q8_0.bin, the same Hugging Face revision and SHA-256), kept in two folders.
+# Whichever is there gives the other a hard link: one copy on disk (264 MB saved), and each program
+# can still delete its own name for it without taking the file from the other. Only the pinned
+# file is linked (its SHA-256, from Dictation's pin), only into a program that's installed, and
+# never over a file already there. Dictation's install runs it, and the Full Keyboard tweak's
+# (lib/link.sh puts this folder on a linked install's PATH).
+set -u
+repo=$(cd "$(dirname "$0")/../.." && pwd)
+sha=${FRAME_TWEAKS_MODEL_SHA256:-$(sed -n 's/^sha256=//p' "$repo/packs/core/dictation/pin")}
+ours="$HOME/.local/share/whisper/ggml-small-q8_0.bin"
+fk="$HOME/.local/share/framekeyboard"
+theirs="$fk/models/ggml-small-q8_0.bin"
+
+# share FROM TO: TO becomes a hard link to FROM, if FROM is the pinned file and TO isn't there.
+share() {
+    [ -f "$1" ] && [ ! -e "$2" ] && [ -n "$sha" ] || return 0
+    [ "$(sha256sum "$1" | cut -d' ' -f1)" = "$sha" ] || return 0
+    # (Full Keyboard keeps its models in a folder only you can read: made as it makes it)
+    # shellcheck disable=SC2174   # (on purpose: 700 for that last folder only, the others exist)
+    mkdir -p -m 700 "$(dirname "$2")" && ln "$1" "$2" 2>/dev/null &&
+        echo "Whisper model shared, one copy on disk: $2 is $1"
+    return 0
+}
+# (into Full Keyboard's folder only once it's installed; into ours once Dictation, or whisper-frame,
+# which uses the same file, has made the folder)
+[ -d "$fk" ] && share "$ours" "$theirs"
+[ -d "${ours%/*}" ] && share "$theirs" "$ours"
+exit 0

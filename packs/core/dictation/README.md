@@ -25,7 +25,8 @@ changes: >-
   a controller button is set, unless you choose otherwise), with SteamVR
   `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`),
   `~/.config/frame-tweaks/dictate.conf`, the Whisper model and Silero's voice activity
-  detection model in `~/.local/share/whisper` (and, if you choose Parakeet, its model and runtime in
+  detection model in `~/.local/share/whisper` (the Whisper model shared with Full Keyboard's
+  on-device dictation as a hard link, when that's installed: one copy on disk) (and, if you choose Parakeet, its model and runtime in
   `~/.local/share/frame-tweaks/parakeet`), the engine's user service
   (`frame-tweaks-dictate-engine.service`, running only if you keep it loaded), a history
   of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's
@@ -288,7 +289,7 @@ Parakeet is the one to keep loaded; started for each dictation, Whisper is faste
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder and Homebrew)
-- **Changes:** `~/.local/bin/dictate` and `dictate-menu`, a **Dictate (toggle)** app-menu entry (hidden while a controller button is set, unless you choose otherwise), with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model and Silero's voice activity detection model in `~/.local/share/whisper` (and, if you choose Parakeet, its model and runtime in `~/.local/share/frame-tweaks/parakeet`), the engine's user service (`frame-tweaks-dictate-engine.service`, running only if you keep it loaded), a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
+- **Changes:** `~/.local/bin/dictate` and `dictate-menu`, a **Dictate (toggle)** app-menu entry (hidden while a controller button is set, unless you choose otherwise), with SteamVR `~/.local/bin/dictate-button` and its user service (`frame-tweaks-dictate-button.service`), `~/.config/frame-tweaks/dictate.conf`, the Whisper model and Silero's voice activity detection model in `~/.local/share/whisper` (the Whisper model shared with Full Keyboard's on-device dictation as a hard link, when that's installed: one copy on disk) (and, if you choose Parakeet, its model and runtime in `~/.local/share/frame-tweaks/parakeet`), the engine's user service (`frame-tweaks-dictate-engine.service`, running only if you keep it loaded), a history of what you dictated (`~/.local/share/dictation-history.txt`, plain text); Homebrew's `whisper-cpp` and `wl-clipboard`
 - **Unusual access:** Microphone while recording; types through ydotool; while SteamVR runs, watches the button you picked (a controller's, or the headset's Aux key through Linux); an engine kept loaded listens on 127.0.0.1 (this machine only)
 - **Undo:** `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
 <!-- /generated:changes -->

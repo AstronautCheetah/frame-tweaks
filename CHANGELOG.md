@@ -126,6 +126,10 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Dictation and Full Keyboard share their Whisper model.** Full Keyboard's on-device dictation
+  uses the same file as Dictation (`ggml-small-q8_0.bin`, the same revision and SHA-256), so
+  whichever has it gives the other a hard link: one copy on disk, 264 MB saved, and nothing
+  downloaded twice. Uninstalling either keeps the other's.
 - **Tweaks that drive the Frame's hardware say so before you install them.** A manifest with
   `hardware:` must also be experimental and say, in `fail_safe:`, what the tweak does by itself
   when something goes wrong. The Apply page shows both, and its button reads "I understand the

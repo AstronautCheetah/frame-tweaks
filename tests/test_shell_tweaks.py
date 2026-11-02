@@ -209,6 +209,59 @@ class CursorNotNeeded(Home):
         self.assertEqual((r.returncode, r.stdout.strip()), (1, "missing  cursor fix not installed"))
 
 
+
+class ShareWhisperModel(Home):
+    """Dictation's Whisper model and Full Keyboard's on-device one are the same file: whichever is
+    there is hard-linked into the other's place (one copy on disk), only the pinned file, only into
+    an installed program, never over a file already there."""
+    SCRIPT = ROOT / "lib/link-path/frame-tweaks-share-whisper"
+    DATA = b"pretend model"
+
+    def run_it(self, sha=None):
+        env = {**sandbox_env(self.home, self.stubs),
+               "FRAME_TWEAKS_MODEL_SHA256": sha or hashlib.sha256(self.DATA).hexdigest()}
+        r = subprocess.run(["bash", str(self.SCRIPT)], env=env, capture_output=True, text=True, timeout=30)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        return r.stdout
+
+    def paths(self):
+        return (self.home / ".local/share/whisper/ggml-small-q8_0.bin",
+                self.home / ".local/share/framekeyboard/models/ggml-small-q8_0.bin")
+
+    def test_ours_shared_with_full_keyboard_once_installed(self):
+        ours, theirs = self.paths()
+        ours.parent.mkdir(parents=True)
+        ours.write_bytes(self.DATA)
+        self.run_it()
+        self.assertFalse(theirs.exists())                             # (Full Keyboard not installed)
+        (self.home / ".local/share/framekeyboard").mkdir(parents=True)
+        self.assertIn("one copy on disk", self.run_it())
+        self.assertEqual(theirs.stat().st_ino, ours.stat().st_ino)    # (the same file, not a copy)
+        self.assertEqual(theirs.parent.stat().st_mode & 0o777, 0o700)
+        ours.unlink()                                                 # (Dictation uninstalled: theirs stays)
+        self.assertEqual(theirs.read_bytes(), self.DATA)
+
+    def test_theirs_shared_with_dictation_and_only_the_pinned_file(self):
+        ours, theirs = self.paths()
+        theirs.parent.mkdir(parents=True)
+        theirs.write_bytes(self.DATA)
+        self.run_it()
+        self.assertFalse(ours.exists())                               # (Dictation's folder not there yet)
+        ours.parent.mkdir(parents=True)
+        self.run_it(sha="0" * 64)
+        self.assertFalse(ours.exists())                               # (not the pinned file: left alone)
+        self.run_it()
+        self.assertEqual(ours.stat().st_ino, theirs.stat().st_ino)
+
+    def test_never_over_a_file_already_there(self):
+        ours, theirs = self.paths()
+        for p, data in ((ours, self.DATA), (theirs, b"its own")):
+            p.parent.mkdir(parents=True)
+            p.write_bytes(data)
+        self.assertEqual(self.run_it(), "")
+        self.assertEqual(theirs.read_bytes(), b"its own")
+
+
 class ClipboardStatus(Home):
     """clipboard-sync starts with desktop mode: not running without it is as it should be; not
     running with it is a warning (Restart starts it). (pgrep is a stand-in.)"""

@@ -24,7 +24,7 @@ processes: [/framekeyboard( |$)]
 config: [~/.config/framekeyboard]
 app: Full Keyboard
 link:
-  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/TaiKeid/steam-frame-full-keyboard/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'framekeyboard-.*-aarch64\.tar\.gz' SHA256SUMS) && v=${f#framekeyboard-} && v=${v%-aarch64.tar.gz} && if [ -e ~/.local/share/framekeyboard/releases/$v ]; then echo "Full Keyboard $v, its newest release, is already installed"; else curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && bash "${f%.tar.gz}/install.sh"; fi
+  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/TaiKeid/steam-frame-full-keyboard/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'framekeyboard-.*-aarch64\.tar\.gz' SHA256SUMS) && v=${f#framekeyboard-} && v=${v%-aarch64.tar.gz} && if [ -e ~/.local/share/framekeyboard/releases/$v ]; then echo "Full Keyboard $v, its newest release, is already installed"; else curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && bash "${f%.tar.gz}/install.sh"; fi && frame-tweaks-share-whisper
   uninstall: rm -f ~/.local/bin/framekeyboard ~/.local/share/applications/framekeyboard.desktop && rm -rf ~/.local/share/framekeyboard
   installed: ~/.local/share/framekeyboard/current
   version: basename "$(readlink ~/.local/share/framekeyboard/current)"
@@ -32,7 +32,10 @@ link:
   readme: https://github.com/TaiKeid/steam-frame-full-keyboard#readme
 changes: >-
   Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in
-  `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry
+  `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry. With
+  Frame Tweaks' Dictation installed, its on-device dictation model is the same file as
+  Dictation's: a hard link to it in `~/.local/share/framekeyboard/models`, so it's on disk once
+  and isn't downloaded again
 access: A SteamVR overlay; types into the app you're using
 survives_updates: Yes (everything is in your home folder)
 undo: >-
@@ -82,7 +85,7 @@ Not sure which keyboard to use? See the [keyboard guide](../../core/arrowpad/REA
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry
+- **Changes:** Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry. With Frame Tweaks' Dictation installed, its on-device dictation model is the same file as Dictation's: a hard link to it in `~/.local/share/framekeyboard/models`, so it's on disk once and isn't downloaded again
 - **Unusual access:** A SteamVR overlay; types into the app you're using
 - **Undo:** Uncheck it, or `./install.sh uninstall full-keyboard`: Full Keyboard's own removal steps (keeps its settings in `~/.config/framekeyboard`)
 <!-- /generated:changes -->

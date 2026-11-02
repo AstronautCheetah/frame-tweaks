@@ -21,10 +21,14 @@ fi
 # Model: the same file whisper-frame uses, so installing both never keeps two copies.
 MODELS="$HOME/.local/share/whisper"; MODEL=ggml-small-q8_0.bin
 mkdir -p "$MODELS"
+# Full Keyboard's on-device dictation uses the same file: a copy it has is shared, not downloaded
+# again, and one this has is shared with it (lib/link-path/frame-tweaks-share-whisper).
+"$REPO_DIR/lib/link-path/frame-tweaks-share-whisper"
 if [ ! -f "$MODELS/$MODEL" ]; then
     say "$(t 'Downloading Whisper model %s' "$MODEL")"
     fetch_pinned dictation "$MODELS/$MODEL.part"     # pinned revision and SHA256 (dictation/pin)
     mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
+    "$REPO_DIR/lib/link-path/frame-tweaks-share-whisper"
 fi
 # Silero voice activity detection (dictate: Whisper hears only the speech). Optional: if it can't be
 # downloaded, Dictation works as before, without it.
