@@ -59,7 +59,7 @@ Description=Frame Tweaks checkout: snapshot to $dest (dev/backup.sh)
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash $repo/dev/backup.sh $dest
+ExecStart=/bin/bash "$repo/dev/backup.sh" "$dest"
 Nice=19
 IOSchedulingClass=idle
 UNIT

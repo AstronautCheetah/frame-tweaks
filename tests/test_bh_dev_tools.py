@@ -603,5 +603,24 @@ true""")
         self.assertIn(f"reached 127.0.0.1:{port}", r.stdout)
 
 
+
+class BackupTimer(unittest.TestCase):
+    def test_a_drive_with_a_space_in_its_name_stays_one_argument(self):
+        """A card's label can hold a space: the timer's service must still pass one DEST, or each
+        hourly run looks at the wrong folder and quietly makes no snapshot."""
+        with tempfile.TemporaryDirectory() as td:
+            home, stubs = Path(td) / "home", Path(td) / "bin"
+            home.mkdir()
+            stubs.mkdir()
+            stub(stubs, "systemctl", "exit 0\n")
+            stub(stubs, "mountpoint", "exit 1\n")            # (no snapshot: only the units matter)
+            dest = "/run/media/me/My Card/frame-tweaks-backup"
+            r = subprocess.run(["bash", str(ROOT / "dev/backup.sh"), "--timer", dest], capture_output=True, text=True,
+                               env={**os.environ, "HOME": str(home), "PATH": f"{stubs}:{os.environ['PATH']}"}, timeout=30)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            unit = (home / ".config/systemd/user/frame-tweaks-backup.service").read_text()
+            self.assertIn(f'dev/backup.sh" "{dest}"', unit)
+
+
 if __name__ == "__main__":
     unittest.main()
