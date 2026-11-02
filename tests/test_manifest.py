@@ -346,6 +346,23 @@ class Packs(unittest.TestCase):
         (self.user / "mypack" / "pack.md").write_bytes(b"---\nname: Caf\xe9\n---\n")   # (not UTF-8)
         self.assertTrue(any("pack.md" in p for p in sft.load(refresh=True)["problems"]))
 
+    def test_hardware_needs_experimental_and_a_fail_safe(self):
+        """A tweak that drives hardware (docs/DESIGN.md, "Hardware") must be experimental and say
+        what it does when something goes wrong; with both, the fields reach the window."""
+        for extra, problem in (("hardware: a fan\n", "must be experimental too"),
+                               ("hardware: a fan\nexperimental: drives it\n", "needs fail_safe")):
+            d = self.tweak("mypack", "hello", extra=extra)
+            sft.set_trusted(d.parent, True)
+            data = sft.load(refresh=True)
+            self.assertNotIn("hello", self.ids())
+            self.assertTrue(any(problem in p for p in data["problems"]), data["problems"])
+            shutil.rmtree(d)
+        d = self.tweak("mypack", "hello", extra="hardware: a fan\nexperimental: drives it\nfail_safe: stops\n")
+        sft.set_trusted(d.parent, True)
+        c = self.ids()["hello"]
+        self.assertEqual((c["hardware"], c["fail_safe"]), ("a fan", "stops"))
+        self.assertEqual(self.ids()["arrowpad"]["hardware"], "")
+
     def test_sudo_says_when_and_why(self):
         """sudo: text for the window's tag and page (and ./install.sh list), or homebrew: only while
         Homebrew isn't installed."""

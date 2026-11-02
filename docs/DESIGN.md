@@ -375,6 +375,21 @@ Other tweaks that rely on internals use `check-system.sh` the same way (for exam
 - **Sandboxed services.** Frame Tweaks' own user services use systemd sandboxing where it
   doesn't break them (see SECURITY.md).
 
+## Hardware
+
+A tweak that drives the Frame's hardware directly (a charger switch, a fan, a display setting
+through an undocumented driver) can cost someone a device, which no other tweak can. Battery
+charge limit drove the charger's pause switch, and a Frame running it stopped charging (a SteamOS
+charger bug was the cause, and the tweak may have made it more likely). The rules:
+
+- The manifest says what it drives (`hardware:`) and what it does by itself when something goes
+  wrong (`fail_safe:`), including what it doesn't catch. Both are required, and so is
+  `experimental` (lib/registry.py refuses the manifest otherwise; [mods.md](mods.md)).
+- The window's Apply page shows both, and its button reads "I understand the risk: apply".
+- It stays experimental until it has been tried on at least two Frames (test records in
+  [compatibility.md](compatibility.md)) and its fail-safe has been seen to work.
+- Prefer reading hardware state over writing it, and write as rarely as the job allows.
+
 ## Testing and CI
 
 [`ci.yml`](../.github/workflows/ci.yml) runs on every push to `main` and on pull requests, in two

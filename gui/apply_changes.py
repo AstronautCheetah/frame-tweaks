@@ -72,7 +72,10 @@ class ApplyChanges:
                            "Apply changes again.").format(tweaks=", ".join(blocked))
                          + "<br><br>" + self.changes_text(add, remove), _("Set a password…"), self.set_password)
             return
-        self.confirm(self.changes_text(add, remove), _("Apply"), lambda: self.run_changes(add, remove))
+        # (a tweak that drives hardware: the yes button says what it agrees to, not just Apply)
+        hw = any(c.get("hardware") for c in self.rows if c["id"] in add)
+        self.confirm(self.changes_text(add, remove), _("I understand the risk: apply") if hw else _("Apply"),
+                     lambda: self.run_changes(add, remove))
 
     def needs_password(self, add):
         """The titles of the tweaks in add, and those they need, that would ask for the sudo
@@ -136,9 +139,16 @@ class ApplyChanges:
         def sudo(cid):
             note = sft.sudo_note(comps[cid]) if cid in comps else ""
             return " " + dim % html.escape(_("(asks for your sudo password: %s)") % note) if note else ""
+        def hardware(cid):
+            c = comps.get(cid, {})
+            if not c.get("hardware"):
+                return ""
+            return ("<br>&nbsp;&nbsp;<span style='color:#e0b33a'>" + html.escape(
+                _("⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}").format(
+                    hardware=c["hardware"], fail_safe=c["fail_safe"])) + "</span>")
         parts = []
         if add:
-            lines = [title(cid) + sudo(cid) for cid in add]
+            lines = [title(cid) + sudo(cid) + hardware(cid) for cid in add]
             # (./install.sh installs what they depend on first, from any pack in use)
             installed = {cid for cid, st in self.state.items() if st[0] not in GONE}
             needed, queue = {}, list(add)

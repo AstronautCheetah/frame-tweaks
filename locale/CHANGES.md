@@ -111,6 +111,10 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 ## 2026-11-02
 - New in `get.sh:160`
   - now: "Release %s isn't signed by Frame Tweaks' release key, so it wasn't installed."
+- New in `gui/apply_changes.py:147`
+  - now: "⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}"
+- New in `gui/apply_changes.py:77`
+  - now: "I understand the risk: apply"
 - New in `gui/frame-tweaks-gui.py:2070`
   - now: "{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
 - New in `gui/frame-tweaks-gui.py:2099`

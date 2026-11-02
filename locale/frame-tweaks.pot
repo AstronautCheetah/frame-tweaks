@@ -60,6 +60,10 @@ msgid ""
 msgstr ""
 
 #: gui/apply_changes.py
+msgid "I understand the risk: apply"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Install:"
 msgstr ""
 
@@ -115,6 +119,11 @@ msgstr ""
 #: gui/apply_changes.py
 msgid ""
 "{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}"
 msgstr ""
 
 #: gui/details_page.py

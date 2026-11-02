@@ -39,7 +39,11 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
-            "app", "link", "sudo", "formerly", "when_not_needed")
+            "app", "link", "sudo", "formerly", "when_not_needed", "hardware", "fail_safe")
+# hardware: what part of the Frame's hardware the tweak drives (a charger switch, a fan, a
+# display setting). Such a tweak must also be experimental and say, in fail_safe, what it does
+# by itself when things go wrong: a tweak that drove the charger's pause switch was on a Frame
+# that stopped charging, and these can cost someone a device (docs/DESIGN.md, "Hardware").
 # app: the name of the other project's app the tweak installs (Claude Desktop, Full Keyboard, …).
 # Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
@@ -304,6 +308,15 @@ def read_tweak(d):
         errs.append(f"{where}: wallet_apps must be a list of app ids")
     if not isinstance(data.get("experimental") or "", str):
         errs.append(f"{where}: experimental must be text (what relies on another program's internals)")
+    for k in ("hardware", "fail_safe"):
+        if not isinstance(data.get(k) or "", str):
+            errs.append(f"{where}: {k} must be text")
+    if data.get("hardware"):
+        if not data.get("experimental"):
+            errs.append(f"{where}: a tweak with hardware: must be experimental too (and say why it's safe to try)")
+        if not data.get("fail_safe"):
+            errs.append(f"{where}: a tweak with hardware: needs fail_safe: what it does by itself when "
+                        "something goes wrong (stops, puts the hardware back as it was)")
     for k in ("source", "run", "known_issue", "test"):
         if not isinstance(data.get(k) or {}, dict):
             errs.append(f"{where}: {k} must be a mapping, like {{key: value}}")
@@ -324,7 +337,8 @@ def read_tweak(d):
         what=data["what"], why=data["why"], author=data["author"],
         source=f"{src.get('relation', 'uses')}|{src['url']}" if src.get("url") else "",
         flags={"hidden-by-default"} if data.get("hidden_by_default") else set(),
-        experimental=data.get("experimental") or "", icon=icon, sudo=(data.get("sudo") or "").strip(), formerly=formerly,
+        experimental=data.get("experimental") or "", hardware=data.get("hardware") or "",
+        fail_safe=data.get("fail_safe") or "", icon=icon, sudo=(data.get("sudo") or "").strip(), formerly=formerly,
         run_label=run.get("label", "Run") if (d / "run.sh").is_file() or (link or {}).get("run") else None,
         link=link_paths(link, github_repo(src.get("url"), link.get("readme"))) if link else None,
         processes=procs, settings=data.get("settings"),

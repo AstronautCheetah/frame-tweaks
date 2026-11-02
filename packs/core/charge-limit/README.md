@@ -27,6 +27,13 @@ experimental: >-
   tweak hit it and no longer charges. SteamOS's charger service turns the pause off each time it
   starts; it's on again within 30 seconds. The status says if the switch is gone, or if the
   battery still charges while paused.
+hardware: >-
+  the battery charger's charging pause switch (pm8550b-charger, charging_pause), which Valve
+  doesn't document
+fail_safe: >-
+  Its status says when the switch is gone or the battery still charges while paused. Uninstalling
+  turns the pause off. It doesn't yet notice on its own that the Frame stopped taking power from
+  USB, which is how a Frame running it was lost.
 icon: {theme: battery-080}
 processes: [~/.local/bin/charge-limit --run, ~/.local/bin/charge-limit-sleep]
 settings:

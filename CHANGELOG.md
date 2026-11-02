@@ -117,6 +117,10 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Tweaks that drive the Frame's hardware say so before you install them.** A manifest with
+  `hardware:` must also be experimental and say, in `fail_safe:`, what the tweak does by itself
+  when something goes wrong. The Apply page shows both, and its button reads "I understand the
+  risk: apply". Battery charge limit is the first such tweak.
 - **⚙ Settings: Apply is always in view.** A settings page's actions (Apply, Forget the phone,
   Charge to 100% once) sit at the top right beside its title, not after the last option, which
   on Dictation's page was several screens down in VR; what each does is its tooltip.

@@ -1660,8 +1660,10 @@ class NoPassword(unittest.TestCase):
 
     def test_with_a_password_apply_as_usual(self):
         w = bare_window()
-        w.wanted = {self.sudo_tweak(w)["id"]: True}
-        with mock.patch.object(gui.sft, "has_password", return_value=True):
+        t = self.sudo_tweak(w)
+        w.wanted = {t["id"]: True}
+        # (as a tweak that doesn't drive hardware: that one's button reads differently, tested apart)
+        with mock.patch.object(gui.sft, "has_password", return_value=True), mock.patch.dict(t, {"hardware": ""}):
             w.apply()
         self.assertEqual(w.confirm_yes.text(), "Apply")
         free = next(c for c in w.rows if not c["deps"] and not gui.sft.sudo_note(c))
@@ -1764,6 +1766,24 @@ class ChangesTextSudo(unittest.TestCase):
         self.assertIn("needed by", line)
         self.assertIn("asks for your sudo password: to add a rule", line)
 
+
+    def test_a_hardware_tweak_shows_its_risk_and_the_button_says_so(self):
+        """docs/DESIGN.md, "Hardware": the Apply page names what it drives and its fail-safe, and
+        the yes button says the risk is understood."""
+        w = bare_window()
+        c = next(r for r in w.rows if not r["deps"])
+        self.addCleanup(c.update, {"hardware": c.get("hardware", ""), "fail_safe": c.get("fail_safe", "")})
+        c["hardware"], c["fail_safe"] = "a fan", "turns it off"
+        text = w.changes_text([c["id"]], [])
+        self.assertIn("Drives the Frame&#x27;s hardware: a fan. If something goes wrong: turns it off", text)
+        w.state[c["id"]] = (1, "")
+        w.wanted = {c["id"]: True}
+        w.needs_password = lambda add: []
+        w.apply()
+        self.assertEqual(w.confirm_yes.text(), "I understand the risk: apply")
+        c["hardware"] = ""
+        w.apply()
+        self.assertEqual(w.confirm_yes.text(), "Apply")
 
 class TidyUnneeded(unittest.TestCase):
     """An installed tweak this Frame doesn't need any more, whose manifest says to remove it then
