@@ -205,6 +205,8 @@ to use it:
   when the headset restarts, and like the history, only you can read them.
 - **The game sees Menu too.** Most games open their menu on a short press; if one reacts to
   the long hold, set `DICTATE_BUTTON=y` (or `off`) in your settings.
+- **Full Keyboard has a dictation of its own** (its mic key, from 0.11): both can be installed;
+  use one at a time.
 - **Nothing typed, but the text was copied?** ydotool may need a restart: **▶ Restart** on the
   ydotool row in Frame Tweaks.
 

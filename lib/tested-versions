@@ -12,5 +12,5 @@ steamos-glibcxx=3.4.34
 # The linked projects' releases last looked at (dev/check-links.py flags a newer one daily): its
 # notes read, the link and the tweak's page checked.
 link-recline=v1.4.0
-link-full-keyboard=0.6.0
+link-full-keyboard=0.14.1
 link-frametop=v0.2.2

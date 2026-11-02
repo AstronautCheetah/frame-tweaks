@@ -90,6 +90,9 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **PyQt6 6.12** (from 6.11) for the installer window, Arrow Pad, Screen snip and the NordVPN tray,
+  tried on a Frame. Full Keyboard 0.14.1 looked at, its Replace native keyboard tried beside Arrow
+  Pad and Dictation.
 - **Trusting a pack takes one press:** **Trust** on the Packs page, with a tooltip saying what it
   means (its tweaks run as you; it waits again if its files change), instead of Trust… then "Yes:
   it runs as me". **Every tooltip is larger,** with more padding: Qt's own were hard to read in VR.
