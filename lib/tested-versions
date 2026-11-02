@@ -3,14 +3,14 @@
 # upstream moves past them; scrcpy's major version is also enforced by adb-scrcpy/phone-touch
 # (SCRCPY_TESTED); for the others, installs keep a working copy if a new build won't run here.
 scrcpy=5.0.1
-android-tools=37.0.0-5
-ydotool=1.0.4-2
+android-tools=37.0.0.p1-1
+ydotool=1.0.4-3
 # What SteamOS provides (the Frame, build 20261007): an Arch Linux ARM build needing more is
 # flagged before anyone installs it.
 steamos-glibc=2.39
 steamos-glibcxx=3.4.34
 # The linked projects' releases last looked at (dev/check-links.py flags a newer one daily): its
 # notes read, the link and the tweak's page checked.
-link-recline=v1.3.0
+link-recline=v1.4.0
 link-full-keyboard=0.6.0
 link-frametop=v0.2.2

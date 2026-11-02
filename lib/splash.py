@@ -1180,7 +1180,7 @@ def demo_child():
     w("\n")
     pad, snip = _("Arrow Pad"), _("Screen snip + Narrate")
     for tid, title, lines in (
-            ("ydotool", "ydotool", [_("Fetching {name} (Arch Linux ARM, signature checked)").format(name="ydotool 1.0.4-2"),
+            ("ydotool", "ydotool", [_("Fetching {name} (Arch Linux ARM, signature checked)").format(name="ydotool 1.0.4-3"),
                                     _("Installed {programs} in {folder}").format(programs="ydotool, ydotoold",
                                                                                  folder="~/.local/bin")]),
             ("arrowpad", pad, [_("Setting up {name}'s Python packages").format(name=pad),
