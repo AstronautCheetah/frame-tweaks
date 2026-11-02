@@ -396,9 +396,14 @@ class SetupHelp(unittest.TestCase):
                 mock.patch.dict(os.environ, {"WAYLAND_DISPLAY": "", "DISPLAY": ""}), \
                 mock.patch("sys.stderr", err):
             self.assertEqual(self.wg.ask_token(), "tok")
-        self.assertIn(self.wg.TOKEN_URL, err.getvalue())
-        self.assertIn("Manual setup", err.getvalue())
-        self.assertIn("on your clipboard", err.getvalue())
+        said = err.getvalue()
+        self.assertIn(self.wg.TOKEN_URL, said)
+        self.assertIn("on your clipboard", said)
+        # (the page's own words, in the order you meet them: its heading, section and button)
+        for words in ("Manual setup page", "under Access token", "press Get Access token", "Verify your email"):
+            self.assertIn(words, said)
+        self.assertLess(said.index("1. Open"), said.index("2. On the Manual setup page"))
+        self.assertNotIn("Generate new token", said)
         self.assertEqual(self.copied, [self.wg.TOKEN_URL])
 
     def test_without_a_clipboard_the_address_is_still_said(self):

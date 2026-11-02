@@ -5541,6 +5541,24 @@ msgid "NordVPN: connected via {connection}"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "On the Manual setup page, under Access token, press Get Access token."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Open {url} in your browser (it's on your clipboard: paste it into the address bar), and sign in to your Nord Account."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Open {url} in your browser, and sign in to your Nord Account."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
+msgstr ""
+
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "Run 'nordvpn-wg setup' first (in a terminal: Konsole)."
 msgstr ""
 
@@ -5550,17 +5568,12 @@ msgid ""
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid ""
-"Sign in to your Nord Account and make an access token: {url} (NordVPN → Manual setup → Generate new token; it's shown once, and a short-lived one is enough)."
-msgstr ""
-
-#: packs/integrations/nordvpn/nordvpn-wg
-msgid "That address is on your clipboard: paste it into your browser."
+msgid "To log in, NordVPN needs an access token from your Nord Account:"
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid ""
-"Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
+"Verify your email address if it asks, then copy the token it shows you."
 msgstr ""
 
 #: packs/integrations/nordvpn/nordvpn-wg

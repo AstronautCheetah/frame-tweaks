@@ -104,15 +104,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/integrations/nordvpn/nordvpn-wg:251`
   - was: "Run 'nordvpn-wg setup' first."
   - now: "Run 'nordvpn-wg setup' first (in a terminal: Konsole)."
-- New in `packs/integrations/nordvpn/nordvpn-wg:264`
-  - now: "Sign in to your Nord Account and make an access token: {url} (NordVPN → Manual setup → Generate new token; it's shown once, and a short-lived one is enough)."
-- New in `packs/integrations/nordvpn/nordvpn-wg:267`
-  - now: "That address is on your clipboard: paste it into your browser."
 - Changed in `packs/integrations/nordvpn/nordvpn-wg:271`
   - was: "NordVPN access token (Nord Account → NordVPN → Access token):"
   - now: "NordVPN access token:"
-- New in `packs/integrations/nordvpn/nordvpn-wg:275`
-  - now: "Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 
 ## 2026-11-02
 - New in `gui/frame-tweaks-gui.py:2070`
@@ -282,5 +276,17 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Kept your limits in %s."
 - New in `packs/core/wallet/status.sh:19`
   - now: "terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
+- New in `packs/integrations/nordvpn/nordvpn-wg:268`
+  - now: "Open {url} in your browser (it's on your clipboard: paste it into the address bar), and sign in to your Nord Account."
+- New in `packs/integrations/nordvpn/nordvpn-wg:270`
+  - now: "Open {url} in your browser, and sign in to your Nord Account."
+- New in `packs/integrations/nordvpn/nordvpn-wg:272`
+  - now: "To log in, NordVPN needs an access token from your Nord Account:"
+- New in `packs/integrations/nordvpn/nordvpn-wg:274`
+  - now: "On the Manual setup page, under Access token, press Get Access token."
+- New in `packs/integrations/nordvpn/nordvpn-wg:275`
+  - now: "Verify your email address if it asks, then copy the token it shows you."
+- New in `packs/integrations/nordvpn/nordvpn-wg:284`
+  - now: "Paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 - New in `packs/third-party/cursor/status.sh:12`
   - now: "removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"

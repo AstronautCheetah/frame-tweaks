@@ -54,12 +54,15 @@ nordvpn-wg setup
 (Until it's run, the tray's menu offers to copy that command for a terminal, and any other
 `nordvpn-wg` command says to run it first, with the command on your clipboard.)
 
-It asks for a NordVPN **access token** in a hidden prompt, and first says where to get one, with
-that page's address on your clipboard for your browser: sign in to your Nord Account, open
-**NordVPN** → **Manual setup** and **Generate new token**
-(<https://my.nordaccount.com/dashboard/nordvpn/manual-configuration/>). It's shown only once,
-and a short-lived one is enough. Paste it into the prompt: nothing shows while you paste (in
-Konsole, Ctrl+Shift+V), then press Enter. Don't put it in a file or on a command line:
+It asks for a NordVPN **access token** in a hidden prompt, and first says where to get one, step
+by step, with that page's address on your clipboard for your browser:
+
+1. Open <https://my.nordaccount.com/dashboard/nordvpn/manual-configuration/> and sign in to your
+   Nord Account.
+2. On the **Manual setup** page, under **Access token**, press **Get Access token**.
+3. Verify your email address if it asks, then copy the token it shows you.
+4. Paste it into the prompt: nothing shows while you paste (in Konsole, Ctrl+Shift+V), then press
+   Enter. Don't put it in a file or on a command line:
 `nordvpn-wg` uses it once to fetch your WireGuard key and doesn't save it. Your NordVPN username
 and password ("service credentials") aren't used.
 
