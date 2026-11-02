@@ -66,6 +66,13 @@
   link in them, and refuses anything else. The same goes for the picture Copy hands to the
   desktop's clipboard.
 
+### Added
+- **VR memory guard (new, System):** desktop apps together leave 5 GB for SteamVR, Steam and your
+  game, Firefox has a 5 GB limit of its own, and SteamVR is the last thing stopped when memory
+  runs out. An app over its limit is stopped instead of stalling the headset. Signing in to
+  Firefox installed every synced extension at once and took 10 GB on a Frame, and SteamVR's
+  compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
+
 ### Changed
 - **Apply changes asks first, with the list.** Before anything runs, the confirm page says what
   will be installed, by name (with the tweaks those need that aren't installed yet, and which

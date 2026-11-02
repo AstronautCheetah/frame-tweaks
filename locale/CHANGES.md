@@ -115,6 +115,36 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 
 ## 2026-11-02
+- New in `packs/core/vr-memory-guard/README.md`
+  - now: "Desktop apps together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+- New in `packs/core/vr-memory-guard/README.md`
+  - now: "Keeps memory free for SteamVR, so a runaway app or browser is stopped instead of VR crashing"
+- New in `packs/core/vr-memory-guard/README.md`
+  - now: "The Frame's 16 GB is shared by VR and every app you open. When one app takes it all (signing in to Firefox can install all your extensions at once and take 10 GB), the whole headset stalls and SteamVR's compositor can crash, dropping you out of VR."
+- New in `packs/core/vr-memory-guard/README.md`
+  - now: "VR memory guard"
+- New in `packs/core/vr-memory-guard/install.sh:25`
+  - now: "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
+- New in `packs/core/vr-memory-guard/install.sh:31`
+  - now: "Can't read how much memory this device has (%s)."
+- New in `packs/core/vr-memory-guard/install.sh:34`
+  - now: "reserve_for_vr (%s) leaves less than 2 GB of the %s MB for desktop apps: make it smaller in %s."
+- New in `packs/core/vr-memory-guard/install.sh:35`
+  - now: "firefox_max is more than all desktop apps together may use (%s MB): the apps limit applies first."
+- New in `packs/core/vr-memory-guard/install.sh:58`
+  - now: "Couldn't set the apps' limit now; it applies at your next login."
+- New in `packs/core/vr-memory-guard/install.sh:62`
+  - now: "Desktop apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+- New in `packs/core/vr-memory-guard/install.sh:64`
+  - now: "SteamVR is stopped last from its next start."
+- New in `packs/core/vr-memory-guard/status.sh:11`
+  - now: "the apps' limit isn't in force yet: run the install again, or log out and back in"
+- New in `packs/core/vr-memory-guard/status.sh:14`
+  - now: "desktop apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+- New in `packs/core/vr-memory-guard/status.sh:8`
+  - now: "systemd doesn't hand the memory controller to your services here, so the limits can't apply"
+- New in `packs/core/vr-memory-guard/uninstall.sh:15`
+  - now: "Kept your limits in %s."
 - New in `packs/core/wallet/status.sh:19`
   - now: "terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
 - New in `packs/third-party/cursor/status.sh:12`

@@ -537,7 +537,7 @@ msgstr ""
 msgid "not available any more"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/third-party/menu-icons/status.sh
+#: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
 
@@ -3727,7 +3727,7 @@ msgstr ""
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr ""
 
@@ -4516,6 +4516,74 @@ msgstr ""
 
 #: packs/core/vr-dashboard/status.sh
 msgid "waiting for a SteamVR restart (reboot once)"
+msgstr ""
+
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"Desktop apps together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+msgstr ""
+
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"Keeps memory free for SteamVR, so a runaway app or browser is stopped instead of VR crashing"
+msgstr ""
+
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"The Frame's 16 GB is shared by VR and every app you open. When one app takes it all (signing in to Firefox can install all your extensions at once and take 10 GB), the whole headset stalls and SteamVR's compositor can crash, dropping you out of VR."
+msgstr ""
+
+#: packs/core/vr-memory-guard/README.md
+msgid "VR memory guard"
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid "Can't read how much memory this device has (%s)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid "Couldn't set the apps' limit now; it applies at your next login."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"Desktop apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid "SteamVR is stopped last from its next start."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"firefox_max is more than all desktop apps together may use (%s MB): the apps limit applies first."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for desktop apps: make it smaller in %s."
+msgstr ""
+
+#: packs/core/vr-memory-guard/status.sh
+msgid "desktop apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+msgstr ""
+
+#: packs/core/vr-memory-guard/status.sh
+msgid ""
+"systemd doesn't hand the memory controller to your services here, so the limits can't apply"
+msgstr ""
+
+#: packs/core/vr-memory-guard/status.sh
+msgid ""
+"the apps' limit isn't in force yet: run the install again, or log out and back in"
+msgstr ""
+
+#: packs/core/vr-memory-guard/uninstall.sh
+msgid "Kept your limits in %s."
 msgstr ""
 
 #: packs/core/wallet/README.md

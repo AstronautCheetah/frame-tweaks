@@ -21,6 +21,7 @@ order:
   - ydotool
   - speech
   - charge-limit
+  - vr-memory-guard
 ---
 Frame Tweaks' own fixes and app setups for the Steam Frame, and the helpers many of them need:
 other projects' tools, installed with the tweaks that use them and credited to their makers.

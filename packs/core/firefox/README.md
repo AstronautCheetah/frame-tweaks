@@ -82,6 +82,9 @@ nothing. Each file it changes is replaced by a new one (readable only by you), n
   other RFP users, so don't. Canvas and WebGL show as "randomized": no stable value.
 - **If a site breaks,** use a separate Firefox profile without RFP for that site, rather than
   adding per-site exceptions, which themselves make you easier to identify.
+- **Signing in to Firefox** can install all your synced extensions at once, which has taken
+  10 GB on a Frame and crashed SteamVR. [VR memory guard](../vr-memory-guard/) gives Firefox a
+  memory limit of its own and keeps memory free for VR.
 - To blend in with a large crowd, Tor Browser remains stronger than any single-browser setting.
   An ad blocker such as uBlock Origin (from addons.mozilla.org) also blocks many fingerprinting
   scripts.
