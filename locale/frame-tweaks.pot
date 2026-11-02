@@ -3617,12 +3617,11 @@ msgid "Not recommended: right trigger (a laser click; games use it)"
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid "Off (the default): Whisper hears the whole recording"
+msgid "Off: Whisper hears the whole recording"
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid ""
-"On: Whisper hears only the speech, so pauses and room noise don't become words"
+msgid "On (the default): Whisper hears only the speech in your recording"
 msgstr ""
 
 #: packs/core/dictation/README.md

@@ -221,9 +221,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/README.md`
   - now: "Not recommended: right trigger (a laser click; games use it)"
 - New in `packs/core/dictation/README.md`
-  - now: "Off (the default): Whisper hears the whole recording"
+  - now: "Off: Whisper hears the whole recording"
 - New in `packs/core/dictation/README.md`
-  - now: "On: Whisper hears only the speech, so pauses and room noise don't become words"
+  - now: "On (the default): Whisper hears only the speech in your recording"
 - New in `packs/core/dictation/README.md`
   - now: "Parakeet: 25 European languages, fastest when kept loaded (press Apply)"
 - New in `packs/core/dictation/README.md`

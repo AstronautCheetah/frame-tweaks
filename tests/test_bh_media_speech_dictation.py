@@ -6,7 +6,7 @@ Narrate, and an earlier speech-dispatcher setup is undone. A recording that ende
 transcribed (by the next press, or the auto-stop), not "auto-stopped" into a new one. Installing
 removes the models older versions downloaded, unless the settings use one. Every setting the
 README lists is in the example settings file. Whisper decodes greedily, on a context sized to the
-clip, with voice activity detection when it's turned on (off by default); quiet speech is raised first; an
+clip, with voice activity detection (unless turned off) when its model is there; quiet speech is raised first; an
 engine kept loaded answers instead, and the one chosen but not downloaded (Parakeet) says so and
 leaves the dictation to Whisper. Text the layout can't type, or all text with DICTATE_TYPING=paste,
 is pasted (selection and clipboard, then Shift+Insert)."""
@@ -357,9 +357,9 @@ class DictateEngine(Home):
         vad = self.home / ".local/share/whisper/ggml-silero-v6.2.0.bin"
         vad.parent.mkdir(parents=True)
         vad.write_text("model")
-        self.assertNotIn("--vad", self.whisper_args(self.dictate("Hello.")))      # (off by default)
+        self.assertNotIn("--vad", self.whisper_args(self.dictate("Hello.", conf="DICTATE_VAD=no\n")))
         self.log.write_text("")
-        args = self.whisper_args(self.dictate("Hello.", conf="DICTATE_BEAM=5\nDICTATE_VAD=yes\n"))
+        args = self.whisper_args(self.dictate("Hello.", conf="DICTATE_BEAM=5\n"))     # (on by default)
         self.assertEqual(args[args.index("-bs"):args.index("-bs") + 4], ["-bs", "5", "-bo", "5"])
         self.assertEqual(args[args.index("--vad"):args.index("--vad") + 3], ["--vad", "-vm", str(vad)])
 

@@ -81,8 +81,9 @@
 - **Dictation: keep the engine loaded** (⚙ Settings, off by default): text sooner, for memory in
   use all the time (Whisper about 600 MB, Parakeet about 1.3 GB). The engine is the first thing
   stopped if memory runs out.
-- **Dictation: voice activity detection** (⚙ Settings, off by default): Silero's keeps pauses
-  and room noise from Whisper, so they don't turn into invented words. Quiet speech is now
+- **Dictation: voice activity detection** (on; ⚙ Settings turns it off): Silero's keeps pauses
+  and room noise in a recording from Whisper, so they don't turn into invented words. It reads
+  only the recording: the mic is still open only while you dictate. Quiet speech is now
   raised to a normal level first, and recording goes on a quarter of a second after you stop, so
   the last word isn't cut off.
 - **Dictation pastes what it can't type:** text with a character your keyboard layout has no

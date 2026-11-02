@@ -47,11 +47,12 @@ MAX_SECONDS="${DICTATE_MAX_SECONDS:-300}"
 # (5), with the same text in our trials. DICTATE_BEAM=5 brings the beam search back.
 BEAM="${DICTATE_BEAM:-1}"
 [[ $BEAM =~ ^[1-8]$ ]] || BEAM=1
-# Silero voice activity detection (whisper.cpp --vad, DICTATE_VAD=yes; off by default): Whisper only
+# Silero voice activity detection (whisper.cpp --vad; on unless DICTATE_VAD=no): Whisper only
 # hears the stretches with speech, so a pause or a noisy room doesn't turn into invented text ("you",
-# "Thanks for watching"). Without the file (its download failed), Whisper hears everything, as when off.
+# "Thanks for watching"). It reads only the recording: the mic is open only while you dictate. Without
+# the file (its download failed), Whisper hears everything, as when it's off.
 VAD_MODEL="$HOME/.local/share/whisper/ggml-silero-v6.2.0.bin"
-VAD="${DICTATE_VAD:-no}"
+VAD="${DICTATE_VAD:-yes}"
 # Parakeet TDT 0.6B v3 (int8, onnx-asr on the CPU): downloaded only when chosen in ⚙ Settings (Apply).
 PARAKEET="$HOME/.local/bin/dictate-parakeet"
 PARAKEET_MODEL="$HOME/.local/share/frame-tweaks/parakeet/model"
