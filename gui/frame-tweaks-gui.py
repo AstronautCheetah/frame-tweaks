@@ -53,6 +53,7 @@ from wallet_page import WalletApps  # noqa: E402  (Wallet apps page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences page)
 from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
+from works_page import WorksPage  # noqa: E402  (✔ Works on my Frame page)
 from window_logic import (GONE, KNOWN_ISSUES, RESTART, UNLOAD, close_prompt, in_terminal,  # noqa: E402
                           latest_release, self_update_check, status, status_text, update_check)
 from readme_view import follow_link, link_label, with_copy  # noqa: E402  (READMEs and links)
@@ -286,6 +287,10 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         diag.setToolTip(_("Save a diagnostics report (user names and paths removed) and open the bug form"))
         diag.clicked.connect(self.show_report)
         bottom.addWidget(diag)
+        works = QPushButton(_("✔ Works on my Frame"))
+        works.setToolTip(_("Report which tweaks work on your SteamOS and SteamVR versions (on GitHub, when you choose to)"))
+        works.clicked.connect(self.show_works)
+        bottom.addWidget(works)
         apply_ = QPushButton(_("Apply changes"))
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
@@ -1017,6 +1022,12 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     def show_report(self):
         self.close_details()
         self.details = ReportPage(self, follow_link, self.pool, REPO)
+        self.stack.addWidget(self.details)
+        self.stack.setCurrentWidget(self.details)
+
+    def show_works(self):
+        self.close_details()
+        self.details = WorksPage(self, follow_link)
         self.stack.addWidget(self.details)
         self.stack.setCurrentWidget(self.details)
 

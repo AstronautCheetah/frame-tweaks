@@ -70,6 +70,10 @@
   desktop's clipboard.
 
 ### Added
+- **✔ Works on my Frame:** a button that shows a short report of which tweaks work on your
+  SteamOS and SteamVR versions (each tweak's mark only, not its status text), then opens GitHub's
+  "Works on my Frame" form with it filled in. Nothing is sent unless you submit the form, and the
+  window remembers nothing.
 - **Dictation is faster:** Whisper now runs on the Frame's six fast cores, decodes greedily and
   works through only as much of its window as the recording needs: a 3-second clip is text in
   about 0.6 s instead of 1.6, a 10-second one in 1.2 s instead of 3. `DICTATE_BEAM=5` brings the

@@ -1827,6 +1827,59 @@ class TidyUnneeded(unittest.TestCase):
             self.assertEqual(out.getvalue(), "")
 
 
+
+class WorksOnMyFrame(unittest.TestCase):
+    """✔ Works on my Frame: the report shows in full first, holds each tweak's mark but never its
+    status text (which can be personal), and only a click opens GitHub's form with it; nothing is
+    sent or remembered by the window (no telemetry)."""
+    OS = 'NAME="SteamOS"\nVERSION_ID=0.5.6\nBUILD_ID=20261022.6153909\n'
+    VR = "Tue Nov 01 2026 12:00:00.000 - vrserver 2.18.2 startup with PID=1\n"
+
+    def test_versions_read_from_the_frame(self):
+        import works_page
+        v = works_page.frame_versions(self.OS, self.VR, "beta")
+        self.assertEqual(v, {"steamos": "0.5.6", "build": "20261022.6153909", "steamvr": "2.18.2", "channel": "beta"})
+        self.assertEqual(works_page.frame_versions("", "", "")["steamos"], "")
+
+    def test_marks_only_and_nothing_opened_until_asked(self):
+        import types
+        import urllib.parse
+        import works_page
+        from PyQt6.QtWidgets import QApplication
+        app = QApplication.instance() or QApplication([])      # (kept: a dropped one is gone)
+        state = {"wallet": (0, "wallet locked"), "nordvpn": (0, "connected via United States"),
+                 "cursor": (1, "not installed"), "curvature": (gui.RESTART, "restart SteamVR"),
+                 "snip": (2, "narrate voice missing"), "dictation": None}
+        opened = []
+        here = works_page.frame_versions(self.OS, self.VR, "beta")
+        with mock.patch.object(works_page, "frame_versions", lambda: here), \
+                mock.patch.object(works_page.sft, "build_version", lambda: "0.6.23+5.abc1234"):
+            page = works_page.WorksPage(types.SimpleNamespace(go_back=lambda: None, state=state), opened.append)
+        app.processEvents()
+        self.assertEqual(opened, [])                             # (nothing until the button)
+        self.assertIn("SteamOS 0.5.6 (build 20261022.6153909, beta)", page.text)
+        for line in ("✔ wallet", "✔ nordvpn", "· cursor", "⟳ curvature", "! snip", "? dictation"):
+            self.assertIn(line, page.text)
+        self.assertNotIn("United States", page.text)
+        form = next(b for b in page.findChildren(type(page.copy)) if b.text() == "Open the form on GitHub")
+        form.click()
+        self.assertEqual(len(opened), 1)
+        url = opened[0]
+        self.assertTrue(url.startswith(works_page.WORKS_FORM + "&"))
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        self.assertEqual(query["template"], ["test_report.yml"])
+        self.assertIn("✔ wallet", query["status"][0])
+        self.assertNotIn("United States", url + urllib.parse.unquote(url))
+        page.copy.click()
+        self.assertEqual(QApplication.clipboard().text(), page.text)
+
+    def test_a_long_list_still_opens_the_form(self):
+        import works_page
+        url = works_page.works_form_url("Frame Tweaks 1", "\n".join(f"✔ tweak-{i:04d}" for i in range(2000)))
+        self.assertLessEqual(len(url), works_page.MAX_URL)
+        self.assertIn("versions=", url)
+
+
 if __name__ == "__main__":
     unittest.main()
 
