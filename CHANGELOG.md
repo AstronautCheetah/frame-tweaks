@@ -100,7 +100,9 @@
   off when you knock. It needs CEF Remote Debugging on; its page says what that allows.
 - **Cuff** (3rd Party, linked, experimental): Brobert-in-aus' Cuff, a wrist panel in VR with the
   time, batteries, quick actions and tabs. Installed at the commit Frame Tweaks tried it at, with
-  its own installer; it downloads its own speech model (about 650 MB).
+  its own installer; it downloads its own speech model (about 650 MB). With Frame Tweaks'
+  Dictation installed first, Cuff's dictation button uses it (`dictate --ptt`): one engine,
+  language and history, and Cuff's own model isn't loaded.
 - **Wallet apps protects terminal tools from Homebrew too**, such as Claude Code's `claude`: the
   page lists the commands of the formulae you installed and of casks, and **Protect** makes one ask
   for the wallet password first while the wallet is locked, with the wallet as its keyring (where

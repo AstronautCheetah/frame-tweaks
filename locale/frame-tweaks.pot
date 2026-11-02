@@ -3818,6 +3818,10 @@ msgid "Copied to clipboard"
 msgstr ""
 
 #: packs/core/dictation/dictate
+msgid "Dictation is busy"
+msgstr ""
+
+#: packs/core/dictation/dictate
 msgid "Listening… (run again to stop)"
 msgstr ""
 

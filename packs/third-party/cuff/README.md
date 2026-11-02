@@ -24,6 +24,10 @@ experimental: >-
 icon: {theme: chronometer}
 link:
   install: >-
+    if [ -x ~/.local/bin/dictate ] && ! grep -qs '^\[dictation\]' ~/.config/cuff/config.toml; then
+    mkdir -p ~/.config/cuff && printf '%s\n' '' '# Frame Tweaks Dictation instead of a model of its own (written by Frame Tweaks)'
+    '[dictation]' 'command = ["~/.local/bin/dictate", "--ptt"]' 'env = { DICTATE_STATUS = "stdout" }' 'local = false'
+    >> ~/.config/cuff/config.toml || exit; fi;
     d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT &&
     curl -fsSL https://github.com/Brobert-in-aus/cuff/archive/bea0789859d3d6ae3d1972dc91189544e7f831b9.tar.gz | tar -C "$d" -xzf - &&
     sh "$d"/cuff-bea0789859d3d6ae3d1972dc91189544e7f831b9/install.sh --here &&
@@ -58,8 +62,11 @@ Frame Tweaks runs [Cuff](https://github.com/Brobert-in-aus/cuff)'s own installer
 it was tried at (bea0789, 2026-10-25).
 
 ## Before trying it
-- **Two dictations.** Cuff's first quick action dictates with its own model; Frame Tweaks'
-  Dictation (hold Menu) still works too. Try one at a time.
+- **One dictation.** With Frame Tweaks' Dictation installed first, Cuff's dictation button uses
+  it: the same engine (Whisper or Parakeet), language, history and typing, and Cuff's own speech
+  model isn't loaded. Installing Cuff adds a `[dictation]` section to `~/.config/cuff/config.toml`
+  saying so, unless that file already has one. Delete the section to go back to Cuff's own model.
+  Cuff's installer still downloads its model (about 650 MB): it doesn't offer to skip it yet.
 - **Its PC half** (Cuff for PC, Windows) is optional: without it, Cuff dictates on the headset and
   the Performance tab's PC fields say so.
 - **It runs all the time** once installed (a user service at login, restarted if it stops), not

@@ -293,6 +293,39 @@ class DictateTyping(Home):
     def keys(self, log):
         return [line for line in log if line.startswith("ydotool")]
 
+    def test_push_to_talk_for_another_program(self):
+        """dictate --ptt, as Cuff's [dictation] command runs it: records until SIGUSR1, then
+        transcribes and types; with DICTATE_STATUS=stdout, JSON lines say how it goes, and the
+        program shows them, so no notifications of our own."""
+        import json
+        import signal
+        self.dictate("warm up")                       # (the stand-ins and folders, as a toggle has them)
+        self.log.write_text("")
+        script = self.tmp / "dictate"
+        self.stub(self.home / ".local/bin", "whisper-cli", "printf '%s\\n' 'Hello from Cuff.'")
+        env = {**sandbox_env(self.home), "DICTATE_STATUS": "stdout"}
+        p = subprocess.Popen(["bash", str(script), "--ptt"], env=env, stdout=subprocess.PIPE, text=True)
+        self.assertEqual(json.loads(p.stdout.readline()), {"phase": "listening", "text": ""})
+        p.send_signal(signal.SIGUSR1)
+        rest = [json.loads(line) for line in p.stdout]
+        self.assertEqual(p.wait(timeout=60), 0)
+        self.assertEqual([m["phase"] for m in rest], ["transcribing", "done"])
+        self.assertEqual(rest[-1]["text"], "Hello from Cuff. ")
+        log = self.log.read_text().splitlines()
+        self.assertIn("ydotool type --key-delay 2 -- Hello from Cuff. ", log)
+        self.assertFalse([line for line in log if line.startswith("notify")])
+
+    def test_push_to_talk_says_busy_while_dictation_records(self):
+        self.dictate("warm up")
+        script, env = self.tmp / "dictate", sandbox_env(self.home)
+        subprocess.run(["bash", str(script)], env=env, capture_output=True, text=True, timeout=60)   # (its own button)
+        r = subprocess.run(["bash", str(script), "--ptt"], env={**env, "DICTATE_STATUS": "stdout"},
+                           capture_output=True, text=True, timeout=60)
+        self.assertEqual(r.returncode, 1)
+        self.assertEqual(r.stdout.strip(), '{"phase": "error", "text": "Dictation is busy"}')
+        time.sleep(0.8)
+        subprocess.run(["bash", str(script)], env=env, capture_output=True, text=True, timeout=60)   # (stopped again)
+
     def test_us_keyboard_types_as_before(self):
         log = self.dictate("Hello, world.")
         self.assertIn("ydotool type --key-delay 2 -- Hello, world. ", log)

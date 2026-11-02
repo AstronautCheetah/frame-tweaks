@@ -18,6 +18,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Works on my Frame"
 - New in `gui/works_page.py:99`
   - now: "Tell others which tweaks work on your SteamOS and SteamVR versions. Below is everything the report says: the versions, and each tweak as a mark only (✔ works, ! needs attention, ⟳ waits for a SteamVR restart, · not installed), not its status text.<br><b>Open the form on GitHub</b> opens it in your browser with this filled in. Nothing is sent unless you submit it there (you sign in on GitHub, and the report is public). Frame Tweaks sends nothing by itself and doesn't remember this."
+- New in `packs/core/dictation/dictate:281`
+  - now: "Dictation is busy"
 - New in `packs/third-party/cuff/README.md`
   - now: "A wrist panel in VR with the time, batteries, quick actions and tabs"
 - New in `packs/third-party/cuff/README.md`

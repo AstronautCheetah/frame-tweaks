@@ -8,6 +8,11 @@
 #   dictate --apply    keep the engine loaded, or stop it, as DICTATE_KEEP_LOADED says (dictate-button
 #                      runs it when the settings change)
 #   dictate --serve    the loaded engine itself (frame-tweaks-dictate-engine.service runs it)
+#   dictate --ptt      push to talk for another program (Cuff's [dictation] command): records until
+#                      it gets SIGUSR1, then transcribes and types as a toggle does; with
+#                      DICTATE_STATUS=stdout, says how it goes as {"phase", "text"} JSON lines
+#                      (listening, transcribing, done, idle, error), and shows no notifications
+#                      of its own (the program shows them)
 #
 # Settings in ~/.config/frame-tweaks/dictate.conf: DICTATE_ENGINE (whisper, parakeet), DICTATE_KEEP_LOADED
 # (no, yes), DICTATE_VAD (no, yes), DICTATE_TYPING (type, paste), DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
@@ -83,7 +88,13 @@ LAST="$STATE/last-toggle"   # time of the last toggle, to ignore double taps
 TIMER="$STATE/autostop.pid" # pid of the recording's auto-stop timer, ended with the recording
 SERVING="$STATE/engine.serving"   # what the loaded engine was started with (signature)
 
-notify() { notify-send -a Dictation -t 1500 "$@" 2>/dev/null; }
+# (with DICTATE_STATUS=stdout, the program that started us shows what's happening: no second popup)
+notify() { [ "${DICTATE_STATUS:-}" = stdout ] || notify-send -a Dictation -t 1500 "$@" 2>/dev/null; }
+# status_out PHASE [TEXT]: one JSON line on stdout, for a program that asked (DICTATE_STATUS=stdout)
+status_out() {
+    [ "${DICTATE_STATUS:-}" = stdout ] || return 0
+    python3 -c 'import json, sys; print(json.dumps({"phase": sys.argv[1], "text": sys.argv[2]}), flush=True)' "$1" "${2:-}"
+}
 cue() { pw-play "$SOUNDS/$1.oga" 9>&- 2>/dev/null & }   # 9>&-: never hold the toggle lock
 log() { echo "$(date +%T) $*" >> "$LOG"; }
 alive() { [ -f "$1" ] && kill -0 "$(cat "$1")" 2>/dev/null; }
@@ -215,6 +226,7 @@ run_engine() {
 transcribe() {   # transcribe <wav>: runs after the lock is released
     local wav=$1 text
     echo $$ > "$BUSY"
+    status_out transcribing
     cue device-removed
     notify "$(t 'Transcribing…')"
     local secs; secs=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$wav")
@@ -225,7 +237,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     peak=$(ffmpeg -nostats -i "$wav" -af volumedetect -f null - 2>&1 | sed -n 's/.*max_volume: \(-*[0-9.]*\) dB/\1/p')
     if [ -n "$peak" ] && awk -v p="$peak" 'BEGIN{exit !(p < -40)}'; then
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
-        notify "$(t 'No speech detected')"; return
+        notify "$(t 'No speech detected')"; status_out idle; return
     fi
     # Quiet speech (a soft voice, the microphone far away) is raised to a peak of -3 dB first: the
     # engines punctuate it better (Whisper left out the commas of a sentence spoken at -37 dB).
@@ -247,7 +259,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     fi
     mv -f "$wav" "$STATE/last.wav"
     rm -f "$BUSY"
-    if [ -z "$text" ]; then log "no speech"; notify "$(t 'No speech detected')"; return; fi
+    if [ -z "$text" ]; then log "no speech"; notify "$(t 'No speech detected')"; status_out idle; return; fi
     # Trailing space after a finished sentence, so the next dictation flows on.
     [[ "$text" =~ [.?!]$ ]] && text="$text "
     [ ! -f "$HISTORY" ] || chmod 600 "$HISTORY"          # (an older one was readable by everyone)
@@ -255,16 +267,35 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     log "text: $text"
     printf '%s' "$text" | setsid wl-copy 2>>"$LOG" || log "wl-copy failed (WAYLAND_DISPLAY=$WAYLAND_DISPLAY)"
     if [ -z "${DICTATE_NOTYPE:-}" ]; then
-        type_text "$text" || return 0          # (it said so)
+        type_text "$text" || { status_out "done" "$text"; return 0; }          # (it said so)
     fi
     notify "$(t 'Copied to clipboard')" "$text"
+    status_out "done" "$text"
 }
+
+# Push to talk (--ptt): the toggle's start, then its stop when SIGUSR1 comes, in this process, so
+# the program that started it reads the JSON lines both print. Started only when nothing is
+# recorded or transcribed: a press of Dictation's own button meanwhile would otherwise be stopped
+# as if it were ours.
+if [ "${1:-}" = --ptt ]; then
+    [ "$("$0" --status)" = idle ] || { status_out error "$(t 'Dictation is busy')"; exit 1; }
+    stop=""; trap 'stop=1' USR1
+    DICTATE_PTT=1 "$0" || exit
+    rec=$(cat "$PID" 2>/dev/null)
+    while [ -z "$stop" ] && [ -n "$rec" ] && [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; do sleep 0.1; done
+    if [ -n "$stop" ] && [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then DICTATE_PTT=1 exec "$0"; fi
+    # (stopped some other way, Dictation's own button or the auto-stop, which transcribed it)
+    while alive "$BUSY"; do sleep 0.2; done
+    status_out idle
+    exit 0
+fi
 
 # Decide start/stop under a lock, so two quick presses can't both start (or both stop).
 exec 9>"$STATE/lock"
 flock 9
 now=$(date +%s%N)
-if [ -f "$LAST" ] && [ $(( (now - $(cat "$LAST")) / 1000000 )) -lt 700 ]; then
+# (not for --ptt: its stop is a signal sent once, not a second press of a button that bounces)
+if [ -z "${DICTATE_PTT:-}" ] && [ -f "$LAST" ] && [ $(( (now - $(cat "$LAST")) / 1000000 )) -lt 700 ]; then
     log "ignored double tap"; exit 0
 fi
 echo "$now" > "$LAST"
@@ -287,6 +318,7 @@ if [ -f "$PID" ]; then
 elif alive "$BUSY"; then
     log "ignored: still transcribing"
     notify "$(t 'Still transcribing…')" "$(t 'Wait for the text before dictating again.')"
+    status_out error "$(t 'Still transcribing…')"
 else
     wav="$STATE/rec-$(date +%s%N).wav"   # own file per recording: never clobbers one being transcribed
     apply_engine 9>&-                 # (loads it while you speak, if it's to be kept loaded and isn't yet)
@@ -306,4 +338,5 @@ else
     echo $! > "$TIMER"
     sleep 0.15; cue device-added
     notify "🎙 $(t 'Listening… (run again to stop)')"
+    status_out listening
 fi
