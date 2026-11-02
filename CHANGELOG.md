@@ -117,6 +117,9 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **⚙ Settings: Apply is always in view.** A settings page's actions (Apply, Forget the phone,
+  Charge to 100% once) sit at the top right beside its title, not after the last option, which
+  on Dictation's page was several screens down in VR; what each does is its tooltip.
 - **PyQt6 6.12** (from 6.11) for the installer window, Arrow Pad, Screen snip and the NordVPN tray,
   tried on a Frame. Full Keyboard 0.14.1 looked at, its Replace native keyboard tried beside Arrow
   Pad and Dictation.
@@ -146,6 +149,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Buttons' rounded corners** no longer look notched at the bottom.
 - **The version shown is the release you have:** between releases a checkout could show an older
   one (0.6.21+34 on 0.6.23), because the number came from whichever release tag git found first.
   It now always starts with the release in `VERSION`, as updates use.
