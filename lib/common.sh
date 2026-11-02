@@ -159,7 +159,9 @@ append_line() {
 # shellenv` puts Homebrew's bin first. With its line below ours in ~/.bashrc, terminals ran
 # Homebrew's gh, which saved its token in plain text; ours goes last.
 ensure_path() {
-    local rc="$HOME/.bashrc" line='export PATH="$HOME/.local/bin:$PATH"'
+    # (the file itself: write_file on a link from a dotfiles repo would replace the link)
+    local rc line='export PATH="$HOME/.local/bin:$PATH"'
+    rc=$(readlink -f "$HOME/.bashrc" 2>/dev/null) && [ -n "$rc" ] || rc=$HOME/.bashrc
     if ! grep -qs 'HOME/.local/bin' "$rc"; then
         append_line "$rc" "$line"
     elif [ "$(grep -nxF "$line" "$rc" | tail -1 | cut -d: -f1)" -lt "$(grep -n 'brew shellenv' "$rc" | tail -1 | cut -d: -f1)" ] 2>/dev/null; then
