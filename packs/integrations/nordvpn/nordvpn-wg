@@ -226,19 +226,22 @@ def copy_to_clipboard(text):
     sock = next((s for s in [RUN_DIR / "nested_plasma/wayland-0", *RUN_DIR.glob("*/wayland-0"), RUN_DIR / "wayland-0"]
                  if s.is_socket()), None)
     wl_copy = shutil.which("wl-copy") or next((p for p in ["/home/linuxbrew/.linuxbrew/bin/wl-copy"] if os.path.exists(p)), None)
-    try:
-        if sock and wl_copy:        # (wl-copy stays behind to serve the clipboard: not waited for)
+    if sock and wl_copy:            # (wl-copy stays behind to serve the clipboard: not waited for)
+        try:
             p = subprocess.Popen([wl_copy], stdin=subprocess.PIPE, env=dict(os.environ, WAYLAND_DISPLAY=str(sock)),
                                  start_new_session=True, stderr=subprocess.DEVNULL)
             p.communicate(text.encode(), timeout=5)
             if p.returncode == 0:
                 return True
-        qdbus = shutil.which("qdbus6") or shutil.which("qdbus")
-        if qdbus:
+        except (OSError, subprocess.SubprocessError):
+            pass                    # (Klipper may still do it)
+    qdbus = shutil.which("qdbus6") or shutil.which("qdbus")
+    if qdbus:
+        try:
             return subprocess.run([qdbus, "org.kde.klipper", "/klipper", "setClipboardContents", text],
                                   capture_output=True, timeout=5).returncode == 0
-    except (OSError, subprocess.SubprocessError):
-        pass
+        except (OSError, subprocess.SubprocessError):
+            pass
     return False
 
 
