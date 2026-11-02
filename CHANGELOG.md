@@ -160,6 +160,10 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **A Frame Tweaks folder with a space (or a `%`) in its path works:** the login service that
+  removes tweaks the Frame no longer needs, and the app-menu entry that opens the window, now
+  quote the folder's path. Before, the path was split at the space, so the service ran nothing
+  and the menu entry didn't open Frame Tweaks. The next install rewrites them.
 - **Buttons' rounded corners** no longer look notched at the bottom.
 - **The version shown is the release you have:** between releases a checkout could show an older
   one (0.6.21+34 on 0.6.23), because the number came from whichever release tag git found first.

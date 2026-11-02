@@ -463,11 +463,26 @@ exit codes, so the window, the tests and users' habits don't notice.
    on a Frame), so `./install.sh status` over every tweak takes about a third longer. The tests
    check it against both copies it replaced, on generated results. Running the scripts
    themselves from Python waits for stage 4.
-3. **Then: plans.** What `install`, `uninstall`, `tidy` and `update` will do, worked out before
-   anything runs: the order, which tweaks are held, not needed, already installed, or need a
-   sudo password the user doesn't have. Python returns the plan; bash carries it out line by
-   line. Generated files (systemd units, desktop entries) move with it, written by Python so
-   paths are quoted in one place.
+3. **Half done: generated files; plans to come.** The files `install.sh` writes for itself
+   (`frame-tweaks-tidy.service`, `frame-tweaks-menus.path` and `.service`, and the window's menu
+   entry from `share/applications/`) are rendered by `lib/installer.py unit` and
+   `desktop-entry`, which quote a path in one place: for systemd (`systemd.syntax`, `%` as `%%`,
+   `$` as `$$`) or for a desktop entry's `Exec=` (its spec's quoting, `%%`, then the value's
+   escapes; `lib/needs.py exec_args` reads it back the same way). A plain path gives the text
+   bash wrote, byte for byte, so units already installed aren't rewritten; `install.sh` still
+   writes the files (`write_file`) and runs `systemctl` (`sysctl_user`). "Already set up" is the
+   rendered text equal to the file, not a grep for the path. `tests/test_installer.py` checks
+   plain paths against the old printf and sed, and random paths against a reference reader of
+   each format; `tests/test_install_state.py` installs from a checkout named
+   `frame tweaks 100%`. Helpers in `lib/common.sh` that tweak scripts call (`install_desktop`,
+   say) keep their own files: they stay bash.
+   **Plans** are left: what `install`, `uninstall`, `tidy` and `update` will do, worked out
+   before anything runs. `cmd_install`'s decisions can't all be made up front as it stands: each
+   one is taken just before that tweak runs, after the ones before it installed, and some depend
+   on them (`asks_sudo_now` asks whether Homebrew is installed *now*, so a tweak after the
+   `homebrew` one no longer needs the sudo password; a `needed.sh` may look at what an earlier
+   tweak installed). A plan computed first changes that, so it waits for a decision on whether
+   those checks may run up front, or for a plan that's re-asked after each tweak.
 4. **Last: orchestration.** The lock, the logs, `update`'s two stages and the sudo handling, once
    stages 1 to 3 have left `install.sh` a thin loop. Each piece moves only with a test that
    shows the old and new behaviour match; the lock's fd 8 must still be closed for every tweak

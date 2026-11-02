@@ -25,6 +25,15 @@ registry). Nothing else is read, so this starts fast and never touches a manifes
                                   ./install.sh shows (stdout as it was, or "warning  status check
                                   failed: ..."), exits 10, 11 or 12 for status 0, 1 or 2. RECORD
                                   is 1 if the tweak has a version record, else 0.
+
+The files ./install.sh writes for itself are rendered here, so a path is quoted in one place;
+./install.sh writes them (write_file) and runs systemctl:
+
+  installer.py unit tidy REPO     frame-tweaks-tidy.service, running REPO/install.sh tidy
+  installer.py unit menus-path    frame-tweaks-menus.path
+  installer.py unit menus-service I18N_PY
+                                  frame-tweaks-menus.service, running I18N_PY menus
+  installer.py desktop-entry REPO the menu entry template on stdin with @REPO@ as REPO
 """
 import re
 import sys
@@ -127,10 +136,140 @@ def status_of(returncode, stdout, stderr, record):
     return stdout.rstrip("\n"), {RESTART: 2, UNLOAD: 1}.get(code, code)
 
 
+# --- files ./install.sh writes ---------------------------------------------------------------
+# A word systemd's command lines take as it is: anything else is quoted (systemd.syntax). A path
+# with a space, written bare, split into two arguments, and the service ran a script that isn't
+# there. Plain paths stay bare, so units written before this read the same and aren't rewritten.
+SYSTEMD_BARE = re.compile(r"[^\s\"'\\;\x00-\x1f\x7f]+")
+# (A desktop entry's Exec: the characters its spec reserves, which make an argument quoted.)
+DESKTOP_RESERVED = re.compile(r"[\s\"'\\><~|&;$*?#()`]")
+
+
+def systemd_word(arg):
+    """arg as one word of an ExecStart= line. % starts a specifier (%h: the home folder) and $ a
+    variable, in quotes too, so both are doubled; inside the quotes, backslash and " are escaped
+    and control characters written as C escapes, which systemd reads back."""
+    arg = arg.replace("%", "%%").replace("$", "$$")
+    if SYSTEMD_BARE.fullmatch(arg):
+        return arg
+    special = {"\\": "\\\\", '"': '\\"', "\n": "\\n", "\t": "\\t", "\r": "\\r"}
+    return '"' + "".join(special.get(c) or (f"\\x{ord(c):02x}" if ord(c) < 32 or ord(c) == 127 else c)
+                         for c in arg) + '"'
+
+
+def desktop_word(arg):
+    """arg as one argument of a desktop entry's Exec= (Desktop Entry Specification, "The Exec
+    key"): quoted when it has a reserved character, with " ` $ \\ escaped inside; % doubled (a
+    field code otherwise: %h isn't the home folder there). Then the value's own escapes
+    (backslash, newline, tab), which a reader undoes first: lib/needs.py window_command does."""
+    if DESKTOP_RESERVED.search(arg):
+        arg = '"' + re.sub(r'(["`$\\])', r"\\\1", arg) + '"'
+    return desktop_string(arg.replace("%", "%%"))
+
+
+def desktop_string(text):
+    """text as a desktop entry's value (its string escapes)."""
+    return text.replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")
+
+
+TIDY_UNIT = """\
+[Unit]
+Description=Frame Tweaks: remove the tweaks this Frame no longer needs
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash {script} tidy
+
+[Install]
+WantedBy=default.target
+"""
+MENUS_PATH = """\
+[Unit]
+Description=Frame Tweaks: menu entries in the keyboard's language
+
+[Path]
+PathChanged=%h/.local/share/Steam/config/config.vdf
+PathChanged=%h/.steam/registry.vdf
+PathChanged=%h/.config/frame-tweaks/language
+
+[Install]
+WantedBy=default.target
+"""
+# (Steam saves config.vdf several times in a few seconds: started that often, the service hit
+# systemd's start limit, and the path unit then gave up for good, with menus left in the old
+# language. No limit, and a second's wait, so one run takes a burst of saves.)
+MENUS_SERVICE = """\
+[Unit]
+Description=Frame Tweaks: menu entries in the keyboard's language
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/sleep 1
+ExecStart=/usr/bin/python3 {script} menus
+# (It rewrites only Frame Tweaks' menu entries: the rest of the system is out of its reach.)
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=-%h/.local/share/applications -%h/.local/share/frame-tweaks/launcher-originals
+PrivateTmp=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
+"""
+
+
+def unit(name, *args):
+    """A unit's text, or None for a name or arguments it doesn't take. ./install.sh compares it
+    with the file there: the same text is a unit already set up (its daemon-reload and enable
+    skipped), so a change here rewrites every installed unit once."""
+    if name == "tidy" and len(args) == 1:
+        return TIDY_UNIT.format(script=systemd_word(args[0] + "/install.sh"))
+    if name == "menus-path" and not args:
+        return MENUS_PATH
+    if name == "menus-service" and len(args) == 1:
+        return MENUS_SERVICE.format(script=systemd_word(args[0]))
+    return None
+
+
+def desktop_entry(template, repo):
+    """The menu entry template with @REPO@ as repo: in Exec=, the argument it's part of quoted as
+    a whole (a space, or an & which sed read as "the match", broke the command); elsewhere as a
+    plain value."""
+    out = []
+    for line in template.split("\n"):
+        key, eq, value = line.partition("=")
+        if "@REPO@" in value and key == "Exec":
+            value = " ".join(desktop_word(w.replace("@REPO@", repo)) if "@REPO@" in w else w for w in value.split(" "))
+        else:
+            value = value.replace("@REPO@", desktop_string(repo))
+        out.append(key + eq + value)
+    return "\n".join(out)
+
+
+def write_out(text, stdout):
+    """text out as the bytes it came from: a path that isn't UTF-8 (surrogateescape, as Python
+    reads its arguments) is written as it is, as sed wrote it, rather than failing the file."""
+    if hasattr(stdout, "buffer"):
+        stdout.flush()
+        stdout.buffer.write(text.encode("utf-8", "surrogateescape"))
+        stdout.buffer.flush()
+    else:
+        stdout.write(text)
+    return 0
+
+
 def main(argv, stdin=sys.stdin, stdout=sys.stdout):
     if not argv:
         sys.exit(__doc__)
     cmd, ids = argv[0], argv[1:]
+    if cmd == "unit" and ids and (text := unit(*ids)) is not None:
+        return write_out(text, stdout)
+    if cmd == "desktop-entry" and len(ids) == 1:
+        return write_out(desktop_entry(stdin.read(), ids[0]), stdout)
     if cmd == "status-of" and len(ids) == 3:
         return status_main(*ids, stdin=stdin, stdout=stdout)
     if cmd == "status-server" and not ids:

@@ -27,7 +27,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(ROOT / "lib"))
 from helpers import kde_saves, sandbox_env, stub  # noqa: E402
+from needs import exec_args  # noqa: E402
+from test_installer import exec_start  # noqa: E402
 VERSION = (ROOT / "VERSION").read_text().strip()
 
 README = """\
@@ -1002,6 +1005,53 @@ class UpdateWithoutGit(unittest.TestCase):
         r = self.sh("update")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("Nothing installed yet.", r.stdout)
+
+
+class CheckoutPathWithSpace(unittest.TestCase):
+    """Frame Tweaks in a folder whose path has a space and a %: the units and menu entry
+    ./install.sh writes run that checkout. Written bare, the tidy service's ExecStart split the
+    path in two (and % began a specifier), so it ran nothing at login; "already set up" was a
+    grep for the bare path, which found that broken unit. (A copy of this repo there;
+    InstallState's home and probe pack.)"""
+    stub, trust, only_the_probe, sh, tearDown, log = (
+        InstallState.stub, InstallState.trust, InstallState.only_the_probe, InstallState.sh, InstallState.tearDown,
+        InstallState.log)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.copy = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.copy.cleanup)
+        cls.root = Path(cls.copy.name) / "frame tweaks 100%"
+        shutil.copytree(ROOT, cls.root, ignore=shutil.ignore_patterns(".git", "tmp", "references", "__pycache__"))
+
+    def setUp(self):
+        InstallState.setUp(self)
+        self.stub("systemctl", 'echo "$*" >> "$HOME/systemctl.log"; case " $* " in *" is-active "*) exit 3 ;; esac')
+
+    def systemctl(self):
+        p = self.home / "systemctl.log"
+        return p.read_text().splitlines() if p.exists() else []
+
+    def test_the_tidy_service_runs_this_checkout_and_is_set_up_once(self):
+        (self.pack / "probe/README.md").write_text(README.replace("processes: []", "processes: []\nwhen_not_needed: uninstall"))
+        self.trust()
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        unit = (self.home / ".config/systemd/user/frame-tweaks-tidy.service").read_text()
+        self.assertEqual(exec_start(unit), ["/bin/bash", f"{self.root}/install.sh", "tidy"], unit)
+        enabled = [c for c in self.systemctl() if "frame-tweaks-tidy" in c]
+        self.assertEqual(enabled, ["--user enable frame-tweaks-tidy.service"])
+        r = self.sh("install", "probe")                                  # (set up already: left alone)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual([c for c in self.systemctl() if "frame-tweaks-tidy" in c], enabled)
+        self.assertEqual((self.home / ".config/systemd/user/frame-tweaks-tidy.service").read_text(), unit)
+
+    def test_the_menu_entry_runs_this_checkout(self):
+        r = self.sh("menu")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        entry = (self.home / ".local/share/applications/io.github.AstronautCheetah.FrameTweaks.desktop").read_text()
+        cmd = next(line for line in entry.splitlines() if line.startswith("Exec="))[len("Exec="):]
+        self.assertEqual(exec_args(cmd), ["env", "FRAME_TWEAKS_GUI=1", f"{self.root}/install.sh", "gui"], entry)
 
 
 if __name__ == "__main__":

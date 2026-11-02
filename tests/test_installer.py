@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
 import installer  # noqa: E402
+import needs  # noqa: E402
 
 # install.sh before lib/installer.py: with_deps as it was, and cmd_uninstall's check with
 # is_installed answering "no" while noting each tweak it was asked about.
@@ -319,6 +320,146 @@ class StatusServer(unittest.TestCase):
         self.assertEqual(got[1], (12, b"warning  status check failed: curl: (6) no host"))
         self.assertEqual(got[2], (12, "warning  caf\u00e9\nsecond".encode() + b"\xff"))
         self.assertEqual(got[3], (1, b""))                                  # (install.sh asks status-of then)
+
+
+def systemd_split(line):
+    """An ExecStart= value as systemd reads it (systemd.syntax, "Quoting"; systemd.service,
+    "Command lines"), for checking what lib/installer.py writes without a systemd: words split at
+    whitespace, "double" or 'single' quoted, C escapes in and out of quotes, then %% as % and $$
+    as $. A specifier or variable that's left (%h, $HOME) is an error here: none may come from a
+    path."""
+    escapes = {"a": "\a", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t", "v": "\v", "s": " ",
+               "\\": "\\", '"': '"', "'": "'"}
+    words, word, quote, i = [], None, None, 0
+    while i < len(line):
+        c = line[i]
+        if c == "\\":
+            nxt = line[i + 1:i + 2]
+            if nxt == "x":
+                word, i = (word or "") + chr(int(line[i + 2:i + 4], 16)), i + 4
+                continue
+            if nxt not in escapes:
+                raise ValueError(f"bad escape in {line!r}")
+            word, i = (word or "") + escapes[nxt], i + 2
+            continue
+        if quote:
+            if c == quote:
+                quote = None
+            else:
+                word += c
+        elif c in "\"'":
+            quote, word = c, word or ""
+        elif c in " \t\n":
+            if word is not None:
+                words.append(word)
+            word = None
+        else:
+            word = (word or "") + c
+        i += 1
+    if quote:
+        raise ValueError(f"quote left open in {line!r}")
+    if word is not None:
+        words.append(word)
+    out = []
+    for w in words:
+        parts = re.findall(r"%%|\$\$|[%$]|[^%$]+", w)
+        if "%" in parts or "$" in parts:
+            raise ValueError(f"a specifier or variable left in {w!r}")
+        out.append("".join(p[0] if p in ("%%", "$$") else p for p in parts))
+    return out
+
+
+def exec_start(text):
+    return systemd_split(next(line for line in text.splitlines() if line.startswith("ExecStart="))[len("ExecStart="):])
+
+
+def random_path(rng):
+    """A checkout path with what a folder name can hold: spaces, quotes, %, $, backslashes, ;,
+    &, non-ASCII, a tab or a newline now and then."""
+    chars = "ab-_.~ \"'%$\\;&|*?#()`<>=:@+,é漢"
+    names = ["".join(rng.choice(chars + "\t\n" * (rng.random() < 0.05)) for _ in range(rng.randint(1, 8)))
+             for _ in range(rng.randint(1, 4))]
+    return "/" + "/".join(n.replace("/", "_") for n in names)
+
+
+# The units and menu entry install.sh wrote with printf and sed before lib/installer.py did: for a
+# path with nothing to quote, the text must be the same, or every installed unit is rewritten
+# (and its systemctl daemon-reload and enable run) at the next install.
+OLD_FILES = r"""
+tidy() {
+    printf '[Unit]\nDescription=Frame Tweaks: remove the tweaks this Frame no longer needs\n\n[Service]\nType=oneshot\nExecStart=/bin/bash %s/install.sh tidy\n\n[Install]\nWantedBy=default.target\n' "$1"
+}
+menus_path() {
+    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
+        "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "PathChanged=%h/.steam/registry.vdf" \
+        "PathChanged=%h/.config/frame-tweaks/language" "" \
+        "[Install]" "WantedBy=default.target"
+}
+menus_service() {
+    local py=$1
+    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" \
+        "StartLimitIntervalSec=0" "" \
+        "[Service]" "Type=oneshot" "ExecStartPre=/usr/bin/sleep 1" "ExecStart=/usr/bin/python3 $py menus" \
+        "# (It rewrites only Frame Tweaks' menu entries: the rest of the system is out of its reach.)" \
+        "NoNewPrivileges=yes" "ProtectSystem=strict" "ProtectHome=read-only" \
+        "ReadWritePaths=-%h/.local/share/applications -%h/.local/share/frame-tweaks/launcher-originals" \
+        "PrivateTmp=yes" "PrivateNetwork=yes" "RestrictAddressFamilies=AF_UNIX" "LockPersonality=yes" \
+        "RestrictRealtime=yes" "RestrictNamespaces=yes" "SystemCallArchitectures=native"
+}
+desktop() { sed "s|@REPO@|$1|g" "$2"; }
+"""
+DESKTOP_TEMPLATE = ROOT / "share/applications/io.github.AstronautCheetah.FrameTweaks.desktop"
+
+
+def old_file(*args):
+    return subprocess.run(["bash", "-c", OLD_FILES + '"$@"', "old", *args], capture_output=True, text=True,
+                          check=True, timeout=30).stdout
+
+
+class GeneratedFiles(unittest.TestCase):
+    """The units and menu entry ./install.sh writes for itself, rendered by lib/installer.py."""
+    PLAIN = ["/home/deck/frame-tweaks", "/home/deck/.local/share/frame-tweaks/i18n/i18n.py", "/run/media/x/a-b_c.d"]
+
+    def test_plain_paths_give_the_files_as_they_were(self):
+        for path in self.PLAIN:
+            self.assertEqual(installer.unit("tidy", path), old_file("tidy", path))
+            self.assertEqual(installer.unit("menus-service", path), old_file("menus_service", path))
+            self.assertEqual(installer.desktop_entry(DESKTOP_TEMPLATE.read_text(), path),
+                             old_file("desktop", path, str(DESKTOP_TEMPLATE)))
+        self.assertEqual(installer.unit("menus-path"), old_file("menus_path"))
+
+    def test_any_path_reads_back_as_itself(self):
+        """systemd reads ExecStart's path back whole (a space split it, a % began a specifier), and
+        a desktop entry's Exec too, as lib/needs.py reads it; random paths, fixed seed."""
+        rng = random.Random(3)
+        for _ in range(2000):
+            path = random_path(rng)
+            with self.subTest(path=path):
+                self.assertEqual(exec_start(installer.unit("tidy", path)), ["/bin/bash", path + "/install.sh", "tidy"])
+                self.assertEqual(exec_start(installer.unit("menus-service", path)), ["/usr/bin/python3", path, "menus"])
+                entry = installer.desktop_entry(DESKTOP_TEMPLATE.read_text(), path)
+                lines = entry.split("\n")
+                self.assertEqual(len(lines), len(DESKTOP_TEMPLATE.read_text().split("\n")))  # (no line broken)
+                cmd = next(line for line in lines if line.startswith("Exec="))[len("Exec="):]
+                self.assertEqual(needs.exec_args(cmd), ["env", "FRAME_TWEAKS_GUI=1", path + "/install.sh", "gui"])
+
+    def test_examples(self):
+        self.assertEqual(installer.systemd_word("/x/frame tweaks 100%"), '"/x/frame tweaks 100%%"')
+        self.assertEqual(installer.systemd_word('/x/a"b\\c$d'), '"/x/a\\"b\\\\c$$d"')
+        self.assertEqual(installer.systemd_word("/x/50%"), "/x/50%%")       # (bare: % alone needs no quotes)
+        self.assertEqual(installer.desktop_word("/x/frame tweaks 100%"), '"/x/frame tweaks 100%%"')
+        self.assertEqual(installer.desktop_word("/x/a$b"), '"/x/a\\\\$b"')  # (\$ in quotes, then \\ for the \)
+
+    def test_through_python(self):
+        def run(*argv, stdin=""):
+            r = subprocess.run([sys.executable, str(ROOT / "lib/installer.py"), *argv], input=stdin,
+                               capture_output=True, text=True, timeout=30)
+            return r.returncode, r.stdout
+        self.assertEqual(run("unit", "tidy", "/x/a b"), (0, installer.unit("tidy", "/x/a b")))
+        self.assertEqual(run("desktop-entry", "/x/a b", stdin="Exec=@REPO@/install.sh gui\n"),
+                         (0, 'Exec="/x/a b/install.sh" gui\n'))
+        self.assertEqual(run("unit", "nope")[0], 1)
+        self.assertEqual(run("unit", "tidy")[0], 1)                         # (no path: its usage, no unit)
 
 
 if __name__ == "__main__":

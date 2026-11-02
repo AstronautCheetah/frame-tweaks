@@ -134,9 +134,11 @@ ensure_menu_entry() {
     # (Written whole, in English if translating it fails: written straight from lib/i18n.py, a
     # failure there left the menu entry empty. With what you've changed in it since it was last
     # written, as lib/common.sh install_desktop does.)
-    local entry mine
-    entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop" | python3 lib/i18n.py desktop) && [[ -n $entry ]] ||
-        entry=$(sed "s|@REPO@|$PWD|g" "share/applications/$id.desktop")
+    # (@REPO@ filled in by lib/installer.py, which quotes the command's path as the desktop entry
+    # spec says: bare, a space in it split the command, and a % began a field code.)
+    local entry mine raw
+    raw=$(python3 lib/installer.py desktop-entry "$PWD" < "share/applications/$id.desktop") || raw=
+    [[ -z $raw ]] || { entry=$(printf '%s\n' "$raw" | python3 lib/i18n.py desktop) && [[ -n $entry ]] || entry=$raw; }
     if [[ -n $entry ]]; then
         if [[ -f $LAUNCHER_ORIGINALS/$id.desktop && -x $BIN/wallet-launcher ]]; then
             # (protected on the Wallet apps page: the new original goes under it, and the wrapper is
@@ -166,22 +168,13 @@ ensure_menu_language() {
     local u="$HOME/.config/systemd/user" py="$HOME/.local/share/frame-tweaks/i18n/i18n.py" changed=
     install_i18n
     mkdir -p "$u"
-    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
-        "[Path]" "PathChanged=%h/.local/share/Steam/config/config.vdf" "PathChanged=%h/.steam/registry.vdf" \
-        "PathChanged=%h/.config/frame-tweaks/language" "" \
-        "[Install]" "WantedBy=default.target" > "$u/$MENU_UNIT.path.new"
-    # (Steam saves config.vdf several times in a few seconds: started that often, the service hit
-    # systemd's start limit, and the path unit then gave up for good, with menus left in the old
-    # language. No limit, and a second's wait, so one run takes a burst of saves.)
-    printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" \
-        "StartLimitIntervalSec=0" "" \
-        "[Service]" "Type=oneshot" "ExecStartPre=/usr/bin/sleep 1" "ExecStart=/usr/bin/python3 $py menus" \
-        "# (It rewrites only Frame Tweaks' menu entries: the rest of the system is out of its reach.)" \
-        "NoNewPrivileges=yes" "ProtectSystem=strict" "ProtectHome=read-only" \
-        "ReadWritePaths=-%h/.local/share/applications -%h/.local/share/frame-tweaks/launcher-originals" \
-        "PrivateTmp=yes" "PrivateNetwork=yes" "RestrictAddressFamilies=AF_UNIX" "LockPersonality=yes" \
-        "RestrictRealtime=yes" "RestrictNamespaces=yes" "SystemCallArchitectures=native" > "$u/$MENU_UNIT.service.new"
+    # (the texts in lib/installer.py unit, which quotes the script's path for systemd; none: the
+    # units as they are)
+    python3 lib/installer.py unit menus-path > "$u/$MENU_UNIT.path.new" &&
+        python3 lib/installer.py unit menus-service "$py" > "$u/$MENU_UNIT.service.new" ||
+        rm -f "$u/$MENU_UNIT.path.new" "$u/$MENU_UNIT.service.new"
     for f in "$u/$MENU_UNIT.path" "$u/$MENU_UNIT.service"; do
+        [[ -f $f.new ]] || continue
         if cmp -s "$f.new" "$f"; then rm -f "$f.new"; else mv "$f.new" "$f"; changed=1; fi
     done
     if [[ -n $changed ]]; then
@@ -444,10 +437,13 @@ cmd_tidy() {
 # The user service that runs tidy at each login, set up with the first tweak installed that asks
 # for it (enabled, not started: a login is the moment); uninstall-self removes it.
 TIDY_UNIT="$HOME/.config/systemd/user/frame-tweaks-tidy.service"
+# Set up means the file holds the whole text lib/installer.py renders, the checkout's path quoted
+# for systemd: a unit that merely mentions the path may have it bare, which can't run it.
 ensure_tidy_service() {
-    [[ -f $TIDY_UNIT ]] && grep -qF -- "$REPO_DIR/install.sh tidy" "$TIDY_UNIT" && return 0
-    printf '[Unit]\nDescription=Frame Tweaks: remove the tweaks this Frame no longer needs\n\n[Service]\nType=oneshot\nExecStart=/bin/bash %s/install.sh tidy\n\n[Install]\nWantedBy=default.target\n' "$REPO_DIR" |
-        write_file "$TIDY_UNIT"
+    local text
+    text=$(python3 lib/installer.py unit tidy "$REPO_DIR") || return 0
+    printf '%s\n' "$text" | cmp -s - "$TIDY_UNIT" && return 0
+    printf '%s\n' "$text" | write_file "$TIDY_UNIT"
     sysctl_user daemon-reload >/dev/null 2>&1 || true
     sysctl_user enable frame-tweaks-tidy.service >/dev/null 2>&1 || true
 }
