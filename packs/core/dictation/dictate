@@ -5,9 +5,14 @@
 #
 #   dictate            toggle
 #   dictate --status   print idle / recording / transcribing
+#   dictate --apply    keep the engine loaded, or stop it, as DICTATE_KEEP_LOADED says (dictate-button
+#                      runs it when the settings change)
+#   dictate --serve    the loaded engine itself (frame-tweaks-dictate-engine.service runs it)
 #
-# Settings in ~/.config/frame-tweaks/dictate.conf: DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
-# DICTATE_NOTYPE=1 (copy only), DICTATE_MAX_SECONDS (auto-stop, default 300).
+# Settings in ~/.config/frame-tweaks/dictate.conf: DICTATE_ENGINE (whisper, parakeet), DICTATE_KEEP_LOADED
+# (no, yes), DICTATE_TYPING (type, paste), DICTATE_MODEL, DICTATE_LANG (default en), DICTATE_PROMPT,
+# DICTATE_BEAM (1, or 5 for whisper.cpp's beam search), DICTATE_NOTYPE=1 (copy only),
+# DICTATE_MAX_SECONDS (auto-stop, default 300).
 export PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 # Translations (lib/i18n.sh; the copy install_i18n puts here), else English
 # shellcheck source=/dev/null
@@ -38,6 +43,27 @@ WHISPER="$HOME/.local/lib/whisper-frame/whisper-cli"
 # Vocabulary hint so Whisper spells these words correctly.
 PROMPT="${DICTATE_PROMPT:-SteamOS, Steam Frame, SteamVR, KDE Plasma.}"
 MAX_SECONDS="${DICTATE_MAX_SECONDS:-300}"
+# Greedy decoding (1): on the Frame's CPU about 1.5 times as fast as whisper.cpp's default beam search
+# (5), with the same text in our trials. DICTATE_BEAM=5 brings the beam search back.
+BEAM="${DICTATE_BEAM:-1}"
+[[ $BEAM =~ ^[1-8]$ ]] || BEAM=1
+# Silero voice activity detection (whisper.cpp --vad): Whisper only hears the stretches with speech,
+# so a pause or a noisy room doesn't turn into invented text ("you", "Thanks for watching"). Optional:
+# without the file (its download failed), Whisper hears everything, as before.
+VAD_MODEL="$HOME/.local/share/whisper/ggml-silero-v6.2.0.bin"
+# Parakeet TDT 0.6B v3 (int8, onnx-asr on the CPU): downloaded only when chosen in ⚙ Settings (Apply).
+PARAKEET="$HOME/.local/bin/dictate-parakeet"
+PARAKEET_MODEL="$HOME/.local/share/frame-tweaks/parakeet/model"
+ENGINE="${DICTATE_ENGINE:-whisper}"
+KEEP="${DICTATE_KEEP_LOADED:-no}"
+TYPING="${DICTATE_TYPING:-type}"
+# The engine kept loaded (DICTATE_KEEP_LOADED=yes) answers here, on this machine only.
+UNIT=frame-tweaks-dictate-engine.service
+URL=http://127.0.0.1:47815
+# The Frame's six fast cores (0 and 1 are its slow ones): Whisper on all eight waits for the slow two.
+# (FAST: the taskset that puts a program there; nothing on a machine without those cores.)
+CORES=2-7 THREADS=6 FAST=()
+taskset -c "$CORES" true 2>/dev/null && FAST=(taskset -c "$CORES")
 # Fixed path: launcher, shortcut and terminal see different XDG_RUNTIME_DIRs.
 STATE=$RUN/dictate
 HISTORY="$HOME/.local/share/dictation-history.txt"
@@ -53,6 +79,7 @@ CUR="$STATE/rec.current"    # path of the file being recorded
 BUSY="$STATE/busy.pid"      # pid of a running transcription
 LAST="$STATE/last-toggle"   # time of the last toggle, to ignore double taps
 TIMER="$STATE/autostop.pid" # pid of the recording's auto-stop timer, ended with the recording
+SERVING="$STATE/engine.serving"   # what the loaded engine was started with (signature)
 
 notify() { notify-send -a Dictation -t 1500 "$@" 2>/dev/null; }
 cue() { pw-play "$SOUNDS/$1.oga" 9>&- 2>/dev/null & }   # 9>&-: never hold the toggle lock
@@ -68,8 +95,8 @@ alive() { [ -f "$1" ] && kill -0 "$(cat "$1")" 2>/dev/null; }
 # only the ones down; Alt and Super around F24, so that's no tap opening a menu).
 type_text() {
     local out rc=0 keys mods xkb="${FRAME_TWEAKS_PYLIB:-$HOME/.local/share/frame-tweaks/i18n}/xkb.py"
-    out=$(python3 "$xkb" ydotool "$1" 2>>"$LOG") || rc=$?
-    if [ $rc = 0 ] || [ $rc = 3 ]; then
+    if [ "$TYPING" = paste ]; then rc=4; else out=$(python3 "$xkb" ydotool "$1" 2>>"$LOG") || rc=$?; fi
+    if [ $rc != 1 ]; then
         read -ra mods <<<"$(python3 "$xkb" let-go 2>>"$LOG")"
         if [ ${#mods[@]} -gt 0 ]; then
             log "letting go of modifiers: ${mods[*]}"
@@ -81,14 +108,25 @@ type_text() {
         0) read -ra keys <<<"$out"         # (CODE:1 / CODE:0, a key down / up, with Shift or AltGr around)
            # 11 ms between key events: about ydotool type's pace (20 ms held, 2 between keys)
            ydotool key --key-delay 11 "${keys[@]}" 2>>"$LOG" || log "typing failed (is ydotoold running?)" ;;
-        2) log "not typed: this keyboard layout has no key for $out"
-           notify "$(t 'Not typed: copied to the clipboard')" \
-               "$(t 'Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V).' "$out")"
-           return 1 ;;
-        *) log "not typed: this keyboard layout couldn't be read"
-           notify "$(t 'Not typed: copied to the clipboard')" "$(t 'Paste the text instead (Ctrl+V).')"
-           return 1 ;;
+        2|4) [ $rc = 2 ] && log "pasting: this keyboard layout has no key for $out"
+           paste_text "$1" ;;
+        *) log "pasting: this keyboard layout couldn't be read"
+           paste_text "$1" ;;
     esac
+}
+
+# paste_text TEXT: when typing can't (a character your layout has no key for, é on a US keyboard, or
+# DICTATE_TYPING=paste): the text goes into the primary selection as well as the clipboard, then
+# Shift+Insert, which pastes in terminals as well as other apps (Konsole pastes the selection with it,
+# GTK, Qt and Firefox the clipboard: both hold the text). Only the two keys go through ydotool, by
+# their key codes, so no layout is involved. Fails (1) when nothing was pasted.
+paste_text() {
+    printf '%s' "$1" | setsid wl-copy --primary 2>>"$LOG" || { log "wl-copy --primary failed"; }
+    sleep 0.1                                  # (the app sees the new selection before the keys)
+    if ydotool key --key-delay 11 42:1 110:1 110:0 42:0 2>>"$LOG"; then return 0; fi
+    log "pasting failed (is ydotoold running?)"
+    notify "$(t 'Not typed: copied to the clipboard')" "$(t 'Paste the text instead (Ctrl+V).')"
+    return 1
 }
 
 if [ "${1:-}" = --status ]; then
@@ -96,12 +134,89 @@ if [ "${1:-}" = --status ]; then
     exit 0
 fi
 
+# engine: the one to use, parakeet only once it's downloaded (⚙ Settings, Apply); else whisper.
+engine() {
+    if [ "$ENGINE" = parakeet ] && [ -x "$PARAKEET" ] && [ -f "$PARAKEET_MODEL/.version" ]; then echo parakeet
+    else echo whisper; fi
+}
+# signature: what a loaded engine has to have been started with to be the one wanted now.
+signature() {
+    if [ "$(engine)" = parakeet ]; then echo parakeet; else echo "whisper $MODEL $(vad_on && echo vad)"; fi
+}
+vad_on() { [ -f "$VAD_MODEL" ]; }
+# A GPU build (whisper-frame's) needs the Adreno's Vulkan driver named, and no implicit layers
+# (SteamVR's and the Steam overlay's break it); Homebrew's CPU build ignores them.
+whisper_env() {
+    export DISABLE_GAMESCOPE_WSI=1 VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json \
+        VK_LOADER_LAYERS_DISABLE='~implicit~' GGML_VK_PREFER_HOST_MEMORY=1
+}
+whisper_server() {
+    local s; s="$(dirname "$WHISPER")/whisper-server"
+    [ -x "$s" ] || s=$(command -v whisper-server) || return 1
+    echo "$s"
+}
+
+if [ "${1:-}" = --serve ]; then
+    signature > "$SERVING"
+    if [ "$(engine)" = parakeet ]; then exec "${FAST[@]}" "$PARAKEET" --serve "${URL##*:}"; fi
+    server=$(whisper_server) || { log "no whisper-server: can't keep Whisper loaded"; exit 1; }
+    args=(-m "$MODEL" -t "$THREADS" --host 127.0.0.1 --port "${URL##*:}")
+    vad_on && args+=(--vad -vm "$VAD_MODEL")
+    whisper_env
+    exec "${FAST[@]}" "$server" "${args[@]}"
+fi
+
+# apply_engine: the engine loaded and waiting (DICTATE_KEEP_LOADED=yes), restarted if it's not the one
+# the settings now want; or stopped (no, the default), so its memory goes back to VR.
+apply_engine() {
+    if [ "$KEEP" = yes ]; then
+        if ! systemctl --user is-active --quiet "$UNIT"; then systemctl --user start "$UNIT" 2>>"$LOG"
+        elif [ "$(cat "$SERVING" 2>/dev/null)" != "$(signature)" ]; then systemctl --user restart "$UNIT" 2>>"$LOG"
+        fi
+    elif systemctl --user is-active --quiet "$UNIT"; then
+        systemctl --user stop "$UNIT" 2>>"$LOG"
+    fi
+    return 0                          # (no engine kept loaded is no failure of the dictation)
+}
+if [ "${1:-}" = --apply ]; then apply_engine; exit 0; fi
+
+# audio_ctx SECONDS: how much of Whisper's 30-second window to work through, sized to the clip (50 a
+# second, and a margin): a 3-second clip is then transcribed in about 0.6 s instead of 1.6 on the Frame.
+# 0 (all of it) for a long one, where Whisper reads 30-second windows and a short context would cut them.
+audio_ctx() {
+    awk -v d="$1" 'BEGIN { if (d <= 0 || d >= 28) { print 0; exit }
+        n = int(d * 50) + 128; n = int((n + 63) / 64) * 64; print (n < 256 ? 256 : n) }'
+}
+
+# run_engine WAV SECONDS: what was said, on stdout. The loaded engine if it's up and the one wanted;
+# else the engine started for this one recording.
+run_engine() {
+    local wav=$1 ac; ac=$(audio_ctx "$2")
+    if [ "$KEEP" = yes ] && [ "$(cat "$SERVING" 2>/dev/null)" = "$(signature)" ] &&
+        curl -fsS --max-time 120 "$URL/inference" -F "file=@$wav" -F response_format=text \
+            -F "language=$LANGUAGE" -F "prompt=$PROMPT" -F "beam_size=$BEAM" -F "best_of=$BEAM" \
+            -F "audio_ctx=$ac" -F suppress_non_speech=true -F no_timestamps=true 2>>"$LOG"; then
+        log "transcribed by the loaded engine"; return 0
+    fi
+    if [ "$(engine)" = parakeet ]; then
+        "${FAST[@]}" "$PARAKEET" "$wav" 2>>"$LOG"; return
+    fi
+    # With "Memory caps" installed, Whisper runs inside its memory limit.
+    local cap=() args=(-m "$MODEL" -f "$wav" -t "$THREADS" -nt -np -l "$LANGUAGE" --prompt "$PROMPT"
+                      -bs "$BEAM" -bo "$BEAM" -sns)
+    [ "$ac" -gt 0 ] && args+=(-ac "$ac")
+    vad_on && args+=(--vad -vm "$VAD_MODEL")
+    [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" whisper --)
+    ( whisper_env; exec "${FAST[@]}" "${cap[@]}" "$WHISPER" "${args[@]}" ) 2>>"$LOG"
+}
+
 transcribe() {   # transcribe <wav>: runs after the lock is released
     local wav=$1 text
     echo $$ > "$BUSY"
     cue device-removed
     notify "$(t 'Transcribing…')"
-    log "stop: $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$wav")s of audio"
+    local secs; secs=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$wav")
+    log "stop: ${secs}s of audio"
     # Whisper invents text for silence ("Thanks for watching", "Subs by …"), so check
     # loudness first: a recording whose peak stays under -40 dB has no speech.
     local peak
@@ -110,10 +225,19 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
         notify "$(t 'No speech detected')"; return
     fi
-    # With "Memory caps" installed, Whisper runs inside its memory limit.
-    local cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" whisper --)
-    text=$(DISABLE_GAMESCOPE_WSI=1 "${cap[@]}" "$WHISPER" -m "$MODEL" -f "$wav" -t 5 -nt -np -l "$LANGUAGE" \
-            --prompt "$PROMPT" 2>>"$LOG" \
+    # Quiet speech (a soft voice, the microphone far away) is raised to a peak of -3 dB first: the
+    # engines punctuate it better (Whisper left out the commas of a sentence spoken at -37 dB).
+    if [ -n "$peak" ] && awk -v p="$peak" 'BEGIN{exit !(p < -20)}'; then
+        local gain; gain=$(awk -v p="$peak" 'BEGIN{printf "%.1f", -3 - p}')
+        if ffmpeg -loglevel error -y -i "$wav" -af "volume=${gain}dB" "$wav.loud.wav" 2>>"$LOG" && [ -s "$wav.loud.wav" ]; then
+            mv -f "$wav.loud.wav" "$wav"; log "quiet (peak ${peak} dB): raised ${gain} dB"
+        fi
+    fi
+    if [ "$ENGINE" = parakeet ] && [ "$(engine)" != parakeet ]; then
+        log "Parakeet chosen but not downloaded: Whisper instead"
+        notify "$(t "Parakeet isn't downloaded")" "$(t "Using Whisper. To download Parakeet, press Apply in Dictation's ⚙ Settings.")"
+    fi
+    text=$(run_engine "$wav" "$secs" \
         | tr '\n' ' ' | sed -E 's/\[[A-Z_ ]+\]//g; s/\([a-z ]+\)//g; s/^ +//; s/ +$//; s/  +/ /g')
     # Drop Whisper's well-known phantom phrases when they are the whole result.
     if grep -qiE '^(subs? (by|from) .*|subtitles by .*|thanks? (you )?for watching[.!]?|thank you[.!]?|you|bye[.!]?|\.+)$' <<<"$text"; then
@@ -147,7 +271,8 @@ if [ -f "$PID" ]; then
     # Stop, and transcribe. (A recording whose pw-record ended by itself, the microphone gone say,
     # counts as one still running: what it caught is transcribed, not left behind for a new one.)
     wav=$(cat "$CUR")
-    if alive "$PID"; then kill -INT "$(cat "$PID")"; else log "the recording had ended by itself"; fi
+    # A quarter of a second more first: a stop pressed on the last word would cut it off.
+    if alive "$PID"; then sleep 0.25; kill -INT "$(cat "$PID")"; else log "the recording had ended by itself"; fi
     rm -f "$PID"
     # Its auto-stop timer goes too (it slept on for MAX_SECONDS; only if it's still a dictate).
     t=$(cat "$TIMER" 2>/dev/null) && grep -qs dictate "/proc/$t/cmdline" && kill "$t" 2>/dev/null
@@ -156,11 +281,13 @@ if [ -f "$PID" ]; then
     flock -u 9; exec 9>&-
     sleep 0.3
     transcribe "$wav"
+    apply_engine                      # (the settings may have changed since: load or free it now)
 elif alive "$BUSY"; then
     log "ignored: still transcribing"
     notify "$(t 'Still transcribing…')" "$(t 'Wait for the text before dictating again.')"
 else
     wav="$STATE/rec-$(date +%s%N).wav"   # own file per recording: never clobbers one being transcribed
+    apply_engine 9>&-                 # (loads it while you speak, if it's to be kept loaded and isn't yet)
     pw-record --rate 16000 --channels 1 --format s16 "$wav" 9>&- 2>/dev/null &   # 9>&-: don't inherit the lock
     rec=$!
     echo "$rec" > "$PID"; echo "$wav" > "$CUR"

@@ -26,6 +26,13 @@ if [ ! -f "$MODELS/$MODEL" ]; then
     fetch_pinned dictation "$MODELS/$MODEL.part"     # pinned revision and SHA256 (dictation/pin)
     mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
 fi
+# Silero voice activity detection (dictate: Whisper hears only the speech). Optional: if it can't be
+# downloaded, Dictation works as before, without it.
+VAD=$(basename "$(sed -n 's/^url=//p' "$TWEAK_DIR/vad.pin")")
+if [ ! -f "$MODELS/$VAD" ]; then
+    if ( fetch_pinned dictation "$MODELS/$VAD.part" vad.pin ); then mv "$MODELS/$VAD.part" "$MODELS/$VAD"
+    else rm -f "$MODELS/$VAD.part"; warn "$(t 'No voice activity detection (its download failed): Whisper hears the whole recording.')"; fi
+fi
 # Models older versions downloaded; the shared one replaces them, unless a DICTATE_MODEL line in
 # use names one. (Not one commented out: the example's, copied into every dictate.conf, names one.)
 for old in ggml-small.en-q5_1.bin ggml-base.en-q5_1.bin; do
@@ -79,6 +86,21 @@ UNITFILE
 else
     warn "$(t "No SteamVR here, so no controller button for dictation; the shortcut works as before.")"
 fi
+
+# The engine kept loaded between dictations, when ⚙ Settings say so (DICTATE_KEEP_LOADED=yes):
+# dictate --serve, on the fast cores; the first thing stopped when memory runs out, so VR wins.
+write_file "$HOME/.config/systemd/user/frame-tweaks-dictate-engine.service" <<UNITFILE
+[Unit]
+Description=Dictation's engine, kept loaded (Frame Tweaks)
+
+[Service]
+ExecStart=$BIN/dictate --serve
+OOMScoreAdjust=900
+Restart=on-failure
+RestartSec=5
+UNITFILE
+sysctl_user daemon-reload || true
+"$TWEAK_DIR/engine.sh" || warn "$(t "Dictation's engine setting couldn't be applied; it uses Whisper")"
 
 # Dictate (toggle) in the menus, as DICTATE_MENU says (by default hidden while a controller button
 # toggles dictation: dictate-menu).

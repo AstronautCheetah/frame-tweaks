@@ -7,3 +7,9 @@ PyQt6-Qt6==6.12.0
 PyQt6_sip==13.13.0
 openvr==2.12.1401
 jeepney==0.9.0
+onnx-asr==0.12.0
+onnxruntime==1.31.1
+numpy==2.5.4
+flatbuffers==25.12.19
+packaging==26.3
+protobuf==7.36.2

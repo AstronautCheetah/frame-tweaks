@@ -165,9 +165,11 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/README.md`
   - now: "Alternative: View, left controller"
 - New in `packs/core/dictation/README.md`
+  - now: "Always pasting it"
+- New in `packs/core/dictation/README.md`
   - now: "Always shown"
 - New in `packs/core/dictation/README.md`
-  - now: "Applies within a second."
+  - now: "Applies within a second (in VR; otherwise at your next dictation). Choosing Parakeet: press Apply to download it (about 800 MB)."
 - New in `packs/core/dictation/README.md`
   - now: "Automatic: hidden while a controller button is set"
 - New in `packs/core/dictation/README.md`
@@ -175,11 +177,17 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/README.md`
   - now: "Dictate (toggle) in the + menu"
 - New in `packs/core/dictation/README.md`
+  - now: "Downloads Parakeet if it's chosen, and loads or stops the engine as chosen."
+- New in `packs/core/dictation/README.md`
+  - now: "Engine"
+- New in `packs/core/dictation/README.md`
   - now: "Hold it for"
 - New in `packs/core/dictation/README.md`
-  - now: "In VR, hold this button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
+  - now: "Keep the engine loaded"
 - New in `packs/core/dictation/README.md`
   - now: "Never shown"
+- New in `packs/core/dictation/README.md`
+  - now: "No (the default): loaded for each dictation, no memory used in between"
 - New in `packs/core/dictation/README.md`
   - now: "Not recommended: A, right controller (the laser's Home over windows)"
 - New in `packs/core/dictation/README.md`
@@ -211,11 +219,23 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/README.md`
   - now: "Not recommended: right trigger (a laser click; games use it)"
 - New in `packs/core/dictation/README.md`
+  - now: "Parakeet: 25 European languages, fastest when kept loaded (press Apply)"
+- New in `packs/core/dictation/README.md`
+  - now: "Put the text in by"
+- New in `packs/core/dictation/README.md`
   - now: "Recommended: Menu, right controller (the default)"
 - New in `packs/core/dictation/README.md`
   - now: "Recommended: Off"
 - New in `packs/core/dictation/README.md`
   - now: "Recommended: Y, right controller"
+- New in `packs/core/dictation/README.md`
+  - now: "The engine turns your speech into text, on the Frame. In VR, hold the controller button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
+- New in `packs/core/dictation/README.md`
+  - now: "Typing it (the default); pasting what your keyboard layout can't type"
+- New in `packs/core/dictation/README.md`
+  - now: "Whisper (the default): 99 languages, uses your word list"
+- New in `packs/core/dictation/README.md`
+  - now: "Yes: text sooner; memory in use all the time (Whisper 600 MB, Parakeet 1.3 GB)"
 - New in `packs/core/dictation/button-names.sh:21`
   - now: "Menu on the right controller"
 - New in `packs/core/dictation/button-names.sh:22`
@@ -254,6 +274,28 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "the right stick (pressed in)"
 - New in `packs/core/dictation/button-names.sh:39`
   - now: "Aux on the headset"
+- New in `packs/core/dictation/dictate:238`
+  - now: "Parakeet isn't downloaded"
+- New in `packs/core/dictation/dictate:238`
+  - now: "Using Whisper. To download Parakeet, press Apply in Dictation's ⚙ Settings."
+- New in `packs/core/dictation/engine.sh:10`
+  - now: "Setting up onnx-asr, the runtime Parakeet runs on"
+- New in `packs/core/dictation/engine.sh:11`
+  - now: "About 150 MB, in ~/.local/share/frame-tweaks/parakeet."
+- New in `packs/core/dictation/engine.sh:13`
+  - now: "Parakeet's runtime couldn't be installed; Dictation goes on with Whisper"
+- New in `packs/core/dictation/engine.sh:24`
+  - now: "Downloading Parakeet (about 650 MB)"
+- New in `packs/core/dictation/engine.sh:30`
+  - now: "Dictation uses Parakeet."
+- New in `packs/core/dictation/engine.sh:32`
+  - now: "Dictation uses Whisper. Parakeet stays downloaded (~/.local/share/frame-tweaks/parakeet): uninstalling Dictation removes it."
+- New in `packs/core/dictation/engine.sh:36`
+  - now: "The engine stays loaded between dictations."
+- New in `packs/core/dictation/install.sh:103`
+  - now: "Dictation's engine setting couldn't be applied; it uses Whisper"
+- New in `packs/core/dictation/install.sh:34`
+  - now: "No voice activity detection (its download failed): Whisper hears the whole recording."
 - New in `packs/core/dictation/install.sh:74`
   - now: "No SteamVR here, so no controller button for dictation; the shortcut works as before."
 - New in `packs/core/dictation/install.sh:75`
@@ -264,11 +306,19 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/core/dictation/install.sh:77`
   - now: "In VR, hold %s to start or stop dictating (another button: ⚙ Settings)."
 - New in `packs/core/dictation/status.sh:11`
+  - now: "Parakeet chosen but not downloaded: Apply in ⚙ Settings (Whisper until then)"
+- New in `packs/core/dictation/status.sh:11`
   - now: "the controller button isn't running (re-run ./install.sh dictation)"
-- New in `packs/core/dictation/status.sh:12`
-  - now: "dictate ready (%s, small model); no controller button (⚙ Settings)"
-- New in `packs/core/dictation/status.sh:16`
-  - now: "dictate ready (%s, small model); hold %s to dictate"
+- New in `packs/core/dictation/status.sh:17`
+  - now: "dictate ready (%s); no controller button (⚙ Settings)"
+- New in `packs/core/dictation/status.sh:21`
+  - now: "dictate ready (%s); hold %s to dictate"
+- Changed in `packs/core/dictation/status.sh:23`
+  - was: "dictate ready (%s, small model)"
+  - now: "dictate ready (%s)"
+- Changed in `packs/core/dictation/status.sh:7`
+  - was: "whisper-frame's engine"
+  - now: "whisper-frame's engine, small model"
 - New in `packs/core/vr-memory-guard/README.md`
   - now: "Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
 - New in `packs/core/vr-memory-guard/README.md`

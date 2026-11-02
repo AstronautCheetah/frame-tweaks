@@ -5,7 +5,11 @@ speech-dispatcher. Without speech-dispatcher (SteamOS 0.5.6 removed it) Speech s
 Narrate, and an earlier speech-dispatcher setup is undone. A recording that ended by itself is
 transcribed (by the next press, or the auto-stop), not "auto-stopped" into a new one. Installing
 removes the models older versions downloaded, unless the settings use one. Every setting the
-README lists is in the example settings file."""
+README lists is in the example settings file. Whisper decodes greedily, on a context sized to the
+clip, with voice activity detection when its model is there; quiet speech is raised first; an
+engine kept loaded answers instead, and the one chosen but not downloaded (Parakeet) says so and
+leaves the dictation to Whisper. Text the layout can't type, or all text with DICTATE_TYPING=paste,
+is pasted (selection and clipboard, then Shift+Insert)."""
 import sys
 import os
 import re
@@ -141,7 +145,8 @@ class DictateAutoStop(Home):
                            ("pw-play", "exit 0"), ("notify-send", f'echo "notify $*" >> {self.log}'),
                            ("ffprobe", "echo 2.0"), ("ffmpeg", 'echo "[volumedetect] max_volume: -12.0 dB" >&2'),
                            ("whisper-cli", f'echo "whisper $*" >> {self.log}; echo "Hello from the recording."'),
-                           ("wl-copy", f'echo "copy $(cat)" >> {self.log}'), ("ydotool", f'echo "ydotool $*" >> {self.log}')):
+                           ("wl-copy", f'echo "copy $(cat)" >> {self.log}'), ("ydotool", f'echo "ydotool $*" >> {self.log}'),
+                           ("systemctl", "exit 3")):     # (no engine kept loaded: inactive)
             self.stub(bin_, name, body)
         (self.home / ".config/frame-tweaks").mkdir(parents=True)
         (self.home / ".config/frame-tweaks/dictate.conf").write_text(f"DICTATE_MAX_SECONDS={max_seconds}\n")
@@ -246,7 +251,7 @@ class DictateTyping(Home):
     a notification says. One dictation each: started, then stopped and transcribed (stand-ins
     record, transcribe and type)."""
 
-    def dictate(self, text, kxkbrc=None):
+    def dictate(self, text, kxkbrc=None, conf="", peak="-12.0", stubs=()):
         run = self.tmp / "run"
         src = (DICTATION / "dictate").read_text()
         script = self.tmp / "dictate"
@@ -256,9 +261,16 @@ class DictateTyping(Home):
         self.stub(bin_, "pw-record", "exec sleep 30 >/dev/null 2>&1")      # (until stopped; not holding output open)
         self.stub(bin_, "pw-play", "exit 0")
         self.stub(bin_, "ffprobe", "echo 1.5")
-        self.stub(bin_, "ffmpeg", 'echo "[Parsed_volumedetect_0] max_volume: -12.0 dB" >&2')
-        self.stub(bin_, "whisper-cli", f"printf '%s\\n' {shlex.quote(text)}")
-        self.stub(bin_, "wl-copy", f'echo "copied $(cat)" >> {self.log}')
+        # (ffmpeg: the loudness it measures; a volume filter's output file, said in the log)
+        self.stub(bin_, "ffmpeg", f'echo "[Parsed_volumedetect_0] max_volume: {peak} dB" >&2\n'
+                                  f'case "$*" in *volume=*) echo "ffmpeg $*" >> {self.log}; for f; do :; done; echo RIFF > "$f";; esac')
+        self.stub(bin_, "whisper-cli", f"echo \"whisper $*\" >> {self.log}; printf '%s\\n' {shlex.quote(text)}")
+        self.stub(bin_, "wl-copy", f'echo "copied$([ "$1" = --primary ] && echo -n " primary") $(cat)" >> {self.log}')
+        self.stub(bin_, "systemctl", f'echo "systemctl $*" >> {self.log}; exit 3')      # (nothing kept loaded)
+        for name, body in stubs:
+            self.stub(bin_, name, body)
+        (self.home / ".config/frame-tweaks").mkdir(parents=True, exist_ok=True)
+        (self.home / ".config/frame-tweaks/dictate.conf").write_text(conf)
         self.stub(bin_, "ydotool", f'echo "ydotool $*" >> {self.log}')
         self.stub(bin_, "notify-send", f'echo "notify $*" >> {self.log}')
         if kxkbrc:
@@ -273,7 +285,11 @@ class DictateTyping(Home):
             if "notify" in self.log.read_text().split("copied", 1)[-1]:
                 break
             time.sleep(0.1)
-        return [line for line in self.log.read_text().splitlines() if line.split()[0] in ("ydotool", "notify", "copied")]
+        return [line for line in self.log.read_text().splitlines()
+                if line.split()[0] in ("ydotool", "notify", "copied", "whisper", "curl", "ffmpeg")]
+
+    def keys(self, log):
+        return [line for line in log if line.startswith("ydotool")]
 
     def test_us_keyboard_types_as_before(self):
         log = self.dictate("Hello, world.")
@@ -287,7 +303,7 @@ class DictateTyping(Home):
         shortcuts (Ctrl+W closes the tab, Ctrl+Q quits): they go up before the typing. (Which are
         down can't be read here: all of them; a release of a key that's up goes nowhere.)"""
         log = self.dictate("Hello.")
-        self.assertEqual([line for line in log if line.startswith("ydotool")],
+        self.assertEqual(self.keys(log),
                          ["ydotool key --key-delay 11 42:0 54:0 29:0 194:1 56:0 100:0 125:0 126:0 194:0",
                           "ydotool type --key-delay 2 -- Hello. "])
 
@@ -300,12 +316,125 @@ class DictateTyping(Home):
         self.assertTrue(log[-1].startswith("notify -a Dictation -t 1500 Copied to clipboard"))
 
     @unittest.skipUnless(xkb_compiles(), "needs libxkbcommon and XKB's layouts")
-    def test_a_character_the_layout_cant_type(self):
+    def test_a_character_the_layout_cant_type_is_pasted(self):
+        """Not typed at all (part of it would be wrong), but pasted: in the selection as well as the
+        clipboard, then Shift+Insert, by key codes (no layout involved), modifiers let go first."""
         log = self.dictate("Hola 漢字", "[Layout]\nLayoutList=latam\n")
         self.assertIn("copied Hola 漢字", log)
-        self.assertFalse([line for line in log if line.startswith("ydotool")])        # nothing typed at all
-        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Not typed: copied to the clipboard "
-                                  "Your keyboard layout has no key for 漢字. Paste the text instead (Ctrl+V).")
+        self.assertIn("copied primary Hola 漢字", log)
+        self.assertEqual(self.keys(log)[-1], "ydotool key --key-delay 11 42:1 110:1 110:0 42:0")
+        self.assertFalse([line for line in log if line.startswith("ydotool type")])
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Hola 漢字")
+
+    def test_paste_always(self):
+        log = self.dictate("Hello.", conf="DICTATE_TYPING=paste\n")
+        self.assertIn("copied primary Hello. ", log)
+        self.assertEqual(self.keys(log)[-1], "ydotool key --key-delay 11 42:1 110:1 110:0 42:0")
+        self.assertFalse([line for line in log if line.startswith("ydotool type")])
+
+
+class DictateEngine(Home):
+    """Which engine runs, and how (one dictation each, as DictateTyping's)."""
+    dictate = DictateTyping.dictate
+    keys = DictateTyping.keys
+
+    def whisper_args(self, log):
+        calls = [line for line in log if line.startswith("whisper ")]
+        self.assertEqual(len(calls), 1, log)
+        return calls[0].split()
+
+    def test_whisper_greedy_on_a_context_sized_to_the_clip(self):
+        """A 1.5-second clip: 75 frames and a margin, rounded up to 64, at least 256."""
+        args = self.whisper_args(self.dictate("Hello."))
+        for flags in (["-bs", "1", "-bo", "1"], ["-ac", "256"], ["-t", "6"], ["-sns"]):
+            i = args.index(flags[0])
+            self.assertEqual(args[i:i + len(flags)], flags)
+        self.assertNotIn("--vad", args)                    # (no Silero model downloaded)
+
+    def test_beam_search_and_voice_activity_detection(self):
+        vad = self.home / ".local/share/whisper/ggml-silero-v6.2.0.bin"
+        vad.parent.mkdir(parents=True)
+        vad.write_text("model")
+        args = self.whisper_args(self.dictate("Hello.", conf="DICTATE_BEAM=5\n"))
+        self.assertEqual(args[args.index("-bs"):args.index("-bs") + 4], ["-bs", "5", "-bo", "5"])
+        self.assertEqual(args[args.index("--vad"):args.index("--vad") + 3], ["--vad", "-vm", str(vad)])
+
+    def test_quiet_speech_is_raised_loud_speech_is_not(self):
+        log = self.dictate("Hello.", peak="-31.0")
+        self.assertTrue(any("-af volume=28.0dB" in line for line in log), log)
+        self.log.write_text("")
+        log = self.dictate("Hello.", peak="-12.0")
+        self.assertFalse([line for line in log if line.startswith("ffmpeg")])
+
+    def test_the_engine_kept_loaded_answers(self):
+        """DICTATE_KEEP_LOADED=yes, the loaded engine up and the one wanted: it gets the recording
+        (with Whisper's settings as form fields), and no whisper-cli starts."""
+        run = self.tmp / "run/dictate"
+        run.mkdir(parents=True)
+        model = self.home / ".local/share/whisper/ggml-small-q8_0.bin"
+        (run / "engine.serving").write_text(f"whisper {model} \n")
+        log = self.dictate("unused", conf="DICTATE_KEEP_LOADED=yes\n", stubs=(
+            ("curl", f'echo "curl $*" >> {self.log}; echo "Loaded text."'),
+            ("systemctl", f'echo "systemctl $*" >> {self.log}; exit 0')))
+        self.assertFalse([line for line in log if line.startswith("whisper ")], log)
+        post = [line for line in log if line.startswith("curl")]
+        self.assertEqual(len(post), 1, log)
+        for field in ("http://127.0.0.1:47815/inference", "beam_size=1", "audio_ctx=256", "language=en"):
+            self.assertIn(field, post[0])
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Loaded text. ")
+
+    def test_a_loaded_engine_that_fails_leaves_it_to_whisper(self):
+        run = self.tmp / "run/dictate"
+        run.mkdir(parents=True)
+        (run / "engine.serving").write_text(f"whisper {self.home}/.local/share/whisper/ggml-small-q8_0.bin \n")
+        log = self.dictate("Hello.", conf="DICTATE_KEEP_LOADED=yes\n", stubs=(
+            ("curl", f'echo "curl $*" >> {self.log}; exit 7'),
+            ("systemctl", "exit 0")))
+        self.assertEqual(len([line for line in log if line.startswith("whisper ")]), 1, log)
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Hello. ")
+
+    def test_not_kept_loaded_a_running_engine_is_stopped(self):
+        self.dictate("Hello.", stubs=(("systemctl", f'echo "systemctl $*" >> {self.log}; exit 0'),))
+        self.assertIn("systemctl --user stop frame-tweaks-dictate-engine.service", self.log.read_text())
+
+    def test_kept_loaded_it_is_started(self):
+        self.dictate("Hello.", conf="DICTATE_KEEP_LOADED=yes\n")
+        self.assertIn("systemctl --user start frame-tweaks-dictate-engine.service", self.log.read_text())
+
+    def test_parakeet_chosen_but_not_downloaded(self):
+        log = self.dictate("Hello.", conf="DICTATE_ENGINE=parakeet\n")
+        self.assertEqual(len([line for line in log if line.startswith("whisper ")]), 1, log)
+        self.assertIn("notify -a Dictation -t 1500 Parakeet isn't downloaded Using Whisper. To download Parakeet, "
+                      "press Apply in Dictation's ⚙ Settings.", log)
+
+    def test_parakeet_when_downloaded(self):
+        model = self.home / ".local/share/frame-tweaks/parakeet/model"
+        model.mkdir(parents=True)
+        (model / ".version").write_text("8f23f0c0\n")
+        log = self.dictate("unused", conf="DICTATE_ENGINE=parakeet\n", stubs=(
+            ("dictate-parakeet", f'echo "parakeet $*" >> {self.log}; echo "Bonjour."'),))
+        self.assertFalse([line for line in log if line.startswith("whisper ")], log)
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Bonjour. ")
+
+
+class DictateParakeetForm(unittest.TestCase):
+    """dictate-parakeet --serve reads the recording from a form as curl -F sends it (whisper-server's
+    request), without onnx-asr."""
+
+    def test_the_file_part_of_a_multipart_form(self):
+        import importlib.machinery
+        import importlib.util
+        loader = importlib.machinery.SourceFileLoader("dictate_parakeet", str(DICTATION / "dictate-parakeet"))
+        mod = importlib.util.module_from_spec(importlib.util.spec_from_loader(loader.name, loader))
+        loader.exec_module(mod)
+        wav = b"RIFF\x00\x01binary\r\n--not-the-boundary\r\n\xff"
+        body = (b"--XyZ\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\nen\r\n"
+                b"--XyZ\r\nContent-Disposition: form-data; name=\"file\"; filename=\"r.wav\"\r\n"
+                b"Content-Type: application/octet-stream\r\n\r\n" + wav + b"\r\n--XyZ--\r\n")
+        self.assertEqual(mod.form_file("multipart/form-data; boundary=XyZ", body), wav)
+        self.assertIsNone(mod.form_file("multipart/form-data; boundary=XyZ",
+                                        b"--XyZ\r\nContent-Disposition: form-data; name=\"x\"\r\n\r\n1\r\n--XyZ--\r\n"))
+        self.assertIsNone(mod.form_file("text/plain", b"hello"))
 
 
 class DictateSettings(unittest.TestCase):

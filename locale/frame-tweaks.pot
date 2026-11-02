@@ -63,7 +63,7 @@ msgstr ""
 msgid "Another action is still running: try again once it's done."
 msgstr ""
 
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/speech/README.md
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
 msgid "Apply"
 msgstr ""
 
@@ -3489,11 +3489,16 @@ msgid "Alternative: View, left controller"
 msgstr ""
 
 #: packs/core/dictation/README.md
+msgid "Always pasting it"
+msgstr ""
+
+#: packs/core/dictation/README.md
 msgid "Always shown"
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid "Applies within a second."
+msgid ""
+"Applies within a second (in VR; otherwise at your next dictation). Choosing Parakeet: press Apply to download it (about 800 MB)."
 msgstr ""
 
 #: packs/core/dictation/README.md
@@ -3517,16 +3522,29 @@ msgid "Dictation"
 msgstr ""
 
 #: packs/core/dictation/README.md
+msgid ""
+"Downloads Parakeet if it's chosen, and loads or stops the engine as chosen."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Engine"
+msgstr ""
+
+#: packs/core/dictation/README.md
 msgid "Hold it for"
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid ""
-"In VR, hold this button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
+msgid "Keep the engine loaded"
 msgstr ""
 
 #: packs/core/dictation/README.md
 msgid "Never shown"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"No (the default): loaded for each dictation, no memory used in between"
 msgstr ""
 
 #: packs/core/dictation/README.md
@@ -3594,6 +3612,15 @@ msgid "Not recommended: right trigger (a laser click; games use it)"
 msgstr ""
 
 #: packs/core/dictation/README.md
+msgid ""
+"Parakeet: 25 European languages, fastest when kept loaded (press Apply)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Put the text in by"
+msgstr ""
+
+#: packs/core/dictation/README.md
 msgid "Recommended: Menu, right controller (the default)"
 msgstr ""
 
@@ -3617,7 +3644,25 @@ msgstr ""
 
 #: packs/core/dictation/README.md
 msgid ""
+"The engine turns your speech into text, on the Frame. In VR, hold the controller button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Typing it (the default); pasting what your keyboard layout can't type"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Whisper (the default): 99 languages, uses your word list"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"Yes: text sooner; memory in use all the time (Whisper 600 MB, Parakeet 1.3 GB)"
 msgstr ""
 
 #: packs/core/dictation/README.md packs/core/snip/README.md packs/core/adb-scrcpy/README.md packs/core/homebrew/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/clipboard/README.md
@@ -3725,6 +3770,10 @@ msgid "Not typed: copied to the clipboard"
 msgstr ""
 
 #: packs/core/dictation/dictate
+msgid "Parakeet isn't downloaded"
+msgstr ""
+
+#: packs/core/dictation/dictate
 msgid "Paste the text instead (Ctrl+V)."
 msgstr ""
 
@@ -3737,12 +3786,12 @@ msgid "Transcribing…"
 msgstr ""
 
 #: packs/core/dictation/dictate
-msgid "Wait for the text before dictating again."
+msgid ""
+"Using Whisper. To download Parakeet, press Apply in Dictation's ⚙ Settings."
 msgstr ""
 
 #: packs/core/dictation/dictate
-msgid ""
-"Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
+msgid "Wait for the text before dictating again."
 msgstr ""
 
 #: packs/core/dictation/dictate.desktop
@@ -3751,6 +3800,40 @@ msgstr ""
 
 #: packs/core/dictation/dictate.desktop
 msgid "Start/stop local Whisper speech-to-text"
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid "About 150 MB, in ~/.local/share/frame-tweaks/parakeet."
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid "Dictation uses Parakeet."
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid ""
+"Dictation uses Whisper. Parakeet stays downloaded (~/.local/share/frame-tweaks/parakeet): uninstalling Dictation removes it."
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid "Downloading Parakeet (about 650 MB)"
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid ""
+"Parakeet's runtime couldn't be installed; Dictation goes on with Whisper"
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid "Setting up onnx-asr, the runtime Parakeet runs on"
+msgstr ""
+
+#: packs/core/dictation/engine.sh
+msgid "The engine stays loaded between dictations."
+msgstr ""
+
+#: packs/core/dictation/install.sh
+msgid "Dictation's engine setting couldn't be applied; it uses Whisper"
 msgstr ""
 
 #: packs/core/dictation/install.sh
@@ -3781,11 +3864,21 @@ msgid ""
 msgstr ""
 
 #: packs/core/dictation/install.sh
+msgid ""
+"No voice activity detection (its download failed): Whisper hears the whole recording."
+msgstr ""
+
+#: packs/core/dictation/install.sh
 msgid "Removed old model %s (replaced by the shared %s)"
 msgstr ""
 
 #: packs/core/dictation/install.sh
 msgid "Using whisper-frame's whisper-cli (no second copy)"
+msgstr ""
+
+#: packs/core/dictation/status.sh
+msgid ""
+"Parakeet chosen but not downloaded: Apply in ⚙ Settings (Whisper until then)"
 msgstr ""
 
 #: packs/core/dictation/status.sh
@@ -3797,15 +3890,15 @@ msgid "dictate not installed"
 msgstr ""
 
 #: packs/core/dictation/status.sh
-msgid "dictate ready (%s, small model)"
+msgid "dictate ready (%s)"
 msgstr ""
 
 #: packs/core/dictation/status.sh
-msgid "dictate ready (%s, small model); hold %s to dictate"
+msgid "dictate ready (%s); hold %s to dictate"
 msgstr ""
 
 #: packs/core/dictation/status.sh
-msgid "dictate ready (%s, small model); no controller button (⚙ Settings)"
+msgid "dictate ready (%s); no controller button (⚙ Settings)"
 msgstr ""
 
 #: packs/core/dictation/status.sh
@@ -3817,7 +3910,7 @@ msgid "the controller button isn't running (re-run ./install.sh dictation)"
 msgstr ""
 
 #: packs/core/dictation/status.sh
-msgid "whisper-frame's engine"
+msgid "whisper-frame's engine, small model"
 msgstr ""
 
 #: packs/core/dictation/uninstall.sh

@@ -1,8 +1,17 @@
 # Copy to ~/.config/frame-tweaks/dictate.conf to customise dictation.
+# The engine: whisper (the default) or parakeet (25 European languages; download it with Apply in
+# Dictation's ⚙ Settings, or ./install.sh dictation):
+#DICTATE_ENGINE=whisper
+# Keep the engine loaded between dictations (text sooner, memory used all the time): no or yes:
+#DICTATE_KEEP_LOADED=no
+# Put the text in by typing it (pasting what your keyboard layout can't type), or always paste:
+#DICTATE_TYPING=type
 # Words Whisper should spell your way (names, jargon):
 #DICTATE_PROMPT="SteamOS, Steam Frame, SteamVR, KDE Plasma."
 # Language spoken (the shared model is multilingual), e.g. de, fr, es; "auto" to detect:
 #DICTATE_LANG=en
+# Whisper's beam size: 1 (the default, fastest) or 5 (whisper.cpp's own default, slower):
+#DICTATE_BEAM=1
 # A different whisper.cpp model:
 #DICTATE_MODEL="$HOME/.local/share/whisper/ggml-base.en-q5_1.bin"
 # Only copy to the clipboard, don't type into the focused window:

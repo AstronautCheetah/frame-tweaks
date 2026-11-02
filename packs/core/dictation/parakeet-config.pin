@@ -1,0 +1,7 @@
+# Parakeet TDT 0.6B v3 (NVIDIA, CC-BY-4.0; ONNX export by istupakov), its settings for onnx-asr: this file from this exact
+# Hugging Face revision, checked against this SHA256. Downloaded only when Parakeet is chosen.
+version=8f23f0c0
+url=https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx/resolve/8f23f0c03c8761650bdb5b40aaf3e40d2c15f1ce/config.json
+sha256=666903c76b9798caf2c210afd4f6cd60b08a8dbf9800ec8d7a3bc0d2148ac466
+latest=https://huggingface.co/api/models/istupakov/parakeet-tdt-0.6b-v3-onnx/revision/main
+nomirror=a part of the model the encoder pin has no copy of either

@@ -1,0 +1,7 @@
+# Parakeet TDT 0.6B v3 (NVIDIA, CC-BY-4.0; ONNX export by istupakov), its vocabulary: this file from this exact
+# Hugging Face revision, checked against this SHA256. Downloaded only when Parakeet is chosen.
+version=8f23f0c0
+url=https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx/resolve/8f23f0c03c8761650bdb5b40aaf3e40d2c15f1ce/vocab.txt
+sha256=d58544679ea4bc6ac563d1f545eb7d474bd6cfa467f0a6e2c1dc1c7d37e3c35d
+latest=https://huggingface.co/api/models/istupakov/parakeet-tdt-0.6b-v3-onnx/revision/main
+nomirror=a part of the model the encoder pin has no copy of either

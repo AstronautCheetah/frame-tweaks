@@ -147,11 +147,12 @@ def read_settings():
 
 
 def apply_menu():
-    """Dictate (toggle) shown or hidden in the menus, as the settings now say (dictate-menu)."""
-    menu = DICTATE.parent / "dictate-menu"
-    if menu.exists():
-        subprocess.run([str(menu)], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL, check=False)
+    """Dictate (toggle) shown or hidden in the menus (dictate-menu), and the engine kept loaded or
+    stopped (dictate --apply), as the settings now say."""
+    for cmd in ([str(DICTATE.parent / "dictate-menu")], [str(DICTATE), "--apply"]):
+        if Path(cmd[0]).exists():
+            subprocess.run(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, check=False)
 
 
 def toggle():

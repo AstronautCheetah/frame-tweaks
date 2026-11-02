@@ -67,6 +67,24 @@
   desktop's clipboard.
 
 ### Added
+- **Dictation is faster:** Whisper now runs on the Frame's six fast cores, decodes greedily and
+  works through only as much of its window as the recording needs: a 3-second clip is text in
+  about 0.6 s instead of 1.6, a 10-second one in 1.2 s instead of 3. `DICTATE_BEAM=5` brings the
+  beam search back.
+- **Dictation: Parakeet engine** (⚙ Settings → Engine, then Apply): NVIDIA's Parakeet TDT 0.6B
+  v3 on the CPU, 25 European languages told apart by themselves, about 0.4 s for a 10-second
+  sentence when kept loaded. About 800 MB to download, checksum-pinned; Whisper stays the
+  default.
+- **Dictation: keep the engine loaded** (⚙ Settings, off by default): text sooner, for memory in
+  use all the time (Whisper about 600 MB, Parakeet about 1.3 GB). The engine is the first thing
+  stopped if memory runs out.
+- **Dictation hears pauses as silence:** Silero voice activity detection keeps pauses and room
+  noise from Whisper, so they don't turn into invented words; quiet speech is raised to a normal
+  level first; and recording goes on a quarter of a second after you stop, so the last word
+  isn't cut off.
+- **Dictation pastes what it can't type:** text with a character your keyboard layout has no
+  key for (é on a US keyboard, 漢字 on any) is pasted (Shift+Insert, which terminals take too)
+  instead of only copied; `DICTATE_TYPING=paste` always pastes.
 - **Performance Overlay** (3rd Party, linked): sasaken1102r's frame-perf-overlay, a panel in VR
   with the frame rate, CPU and GPU load, temperatures, memory and battery. Installed from its
   newest GitHub release, checked against its `SHA256SUMS`, with its own installer.
