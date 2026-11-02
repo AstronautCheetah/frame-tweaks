@@ -20,6 +20,14 @@ if [ ! -f "$CONF" ] && [ -f "$HOME/.config/phone.conf" ]; then
 fi
 # shellcheck source=/dev/null
 [ -f "$CONF" ] && . "$CONF"
+# plog TEXT: a line in a log of what it saw, chose and was told (never the pairing code), for when
+# something goes wrong: readable by you alone, in the runtime folder (gone at the next restart),
+# trimmed to its last 200 lines once it passes 400.
+PLOG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/phone.log"
+plog() { (umask 077; printf '%s %s\n' "$(date +%T)" "$*" >> "$PLOG") 2>/dev/null || true; }
+if [ "$(wc -l < "$PLOG" 2>/dev/null || echo 0)" -gt 400 ]; then
+    tail -n 200 "$PLOG" > "$PLOG.tmp" 2>/dev/null && mv -f "$PLOG.tmp" "$PLOG"
+fi
 
 # advertised: the phones on the Wi-Fi with Wireless debugging on, one mDNS line each. (A look
 # takes a second or two; avahi-browse once went on waiting for an answer for a day, and this with it.)
@@ -54,11 +62,12 @@ find_phone() {
     dev=${pick%% *} id=${pick#* }
 }
 # forget: no remembered phone (its name, identity and last address) in phone.conf; other lines kept.
-forget() { [ -f "$CONF" ] && sed -i -E '/^[[:space:]]*PHONE_(NAME|ID|ADDRESS)=/d' "$CONF"; }
+forget() { plog "forgetting the remembered phone"; [ -f "$CONF" ] && sed -i -E '/^[[:space:]]*PHONE_(NAME|ID|ADDRESS)=/d' "$CONF"; }
 # remember NAME: the phone to use from now on (PHONE_NAME in phone.conf; other lines kept). Its
 # identity and address are found next (find_phone): it may not be the phone it was.
 remember() {
     forget
+    plog "remembering \"$1\""
     PHONE_NAME=$1 PHONE_ID='' PHONE_ADDRESS=''
     mkdir -p "${CONF%/*}" && printf 'PHONE_NAME=%q\n' "$PHONE_NAME" >> "$CONF"
 }
@@ -73,6 +82,7 @@ keep() {
 # that just announces the name isn't remembered as the phone), and the address it connected at is
 # the one to prefer next time, while the phone is there.
 worked() {
+    plog "connected to $dev ($id): remembered as the phone"
     [ -n "${PHONE_ID:-}" ] || keep PHONE_ID "$id"
     [ "${PHONE_ADDRESS:-}" = "$dev" ] || keep PHONE_ADDRESS "$dev"
 }
@@ -123,6 +133,7 @@ splash_leftovers() {
 cancelled() { [ ${#SPLASH[@]} -eq 2 ] && [ "$(qdbus6 "${SPLASH[@]}" wasCancelled 2>/dev/null)" = true ]; }
 # fail TITLE TEXT: say why it stopped (a dialog, and a notification), then stop.
 fail() {
+    plog "stopped: $1: ${2%%$'\n'*}"
     splash_end
     notify-send -a Phone "$1" "$2"
     command -v kdialog >/dev/null && kdialog --title "$(t 'Android Mirror: %s' "$1")" --error "$2" 2>/dev/null
@@ -142,10 +153,12 @@ pair_phone() {
         sleep 2
     done
     splash_end
+    if [ -n "$where" ]; then plog "pairing: the phone offers it at $where"; else plog "pairing: no offer from $ip"; fi
     [ -n "$where" ] || fail "$(t "The phone didn't offer pairing")" "$(t 'Nothing showed a pairing code within two minutes. On the phone: Developer options → Wireless debugging → Pair device with pairing code, then open Android Mirror again.')"
     code=$(kdialog --title "$(t 'Android Mirror: pair with %s' "${PHONE_NAME:-$(t 'the phone')}")" --inputbox "$(t 'The six-digit pairing code the phone shows:')" 2>/dev/null) || exit 0
     # (the code on adb's input, which asks for it: not on its command line, which any program can read)
     out=$(printf '%s\n' "$code" | adb pair "$where" 2>&1); out=${out#Enter pairing code: }
+    plog "adb pair $where: $out"
     grep -qi "successfully paired" <<< "$out" || fail "$(t "Pairing didn't work")" "$(t "adb said: %s
 
 Check the code and try again (a new code appears each time the phone's pairing dialog opens)." "$out")"
@@ -188,6 +201,7 @@ pick=; [ "${1:-}" = --pick ] && { pick=1; shift; }       # phone --pick: choose 
 splash "$(t 'Looking for your phone on the Wi-Fi…')"
 names=$(advertised | names_in)
 count=$(printf '%s\n' "$names" | grep -c .)
+plog "started${pick:+ to choose a phone}: remembered \"${PHONE_NAME:-}\"${PHONE_ID:+ (identity known)}; advertising: $(printf '%s' "$names" | paste -sd'|' - | sed 's/|/, /g')"
 if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
     # No phone chosen yet (or choosing again): one in sight is taken (and remembered); several, you choose.
     if [ "$count" -eq 0 ]; then
@@ -205,6 +219,9 @@ if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
     fi
 fi
 find_phone; r=$?
+if [ $r -eq 0 ]; then plog "looked for it: at $dev ($id)"
+elif [ $r -eq 1 ]; then plog "looked for it: not in sight"
+else plog "looked for it: more than one claims it"; fi
 [ $r -eq 2 ] && choose_twin
 if [ $r -eq 1 ]; then
     # The chosen phone isn't in sight: wait for it, or use one that is. (One with its name but not
@@ -320,13 +337,26 @@ while :; do
     fi
     splash "$(t 'Connecting to %s…' "${PHONE_NAME:-$(t 'the phone')}")"
     out=$(adb connect "$dev" 2>&1)
+    plog "adb connect $dev: $out"
     if [ -n "$first" ] && ! grep -q "connected to" <<< "$out"; then
         # Often: the phone forgot the Frame (or never knew it). Offer to pair again, then retry.
+        # Another phone in sight may be the one meant (the remembered one was taken because it was
+        # the only one advertising then): it's offered too, and taken without opening it again.
         splash_end
         why=$(t "Couldn't connect to %s. adb said: %s
 
 If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_NAME:-$(t 'the phone')}" "$out")
-        choice=$(ask "$DLG" "$why" pair "$(t 'Pair it again')" forget "$(t 'Forget %s' "${PHONE_NAME:-$(t 'this phone')}")" close "$(t 'Close')"); r=$?
+        others=()
+        while read -r n; do
+            [ -n "$n" ] && [ "$n" != "${PHONE_NAME:-}" ] && others+=("use:$n" "$(t 'Use %s instead' "$n")")
+        done <<< "$names"
+        choice=$(ask "$DLG" "$why" pair "$(t 'Pair it again')" "${others[@]}" forget "$(t 'Forget %s' "${PHONE_NAME:-$(t 'this phone')}")" close "$(t 'Close')"); r=$?
+        plog "after the failed connection: ${choice:-closed}"
+        if [ "${choice#use:}" != "$choice" ]; then     # another phone: start again with it
+            remember "${choice#use:}"
+            splash_end
+            exec "$0"
+        fi
         [ $r -eq 2 ] && fail "$(t "Couldn't connect to %s" "${PHONE_NAME:-$(t 'the phone')}")" "$why $(t "See Android Mirror's README for adb pair.")"
         if [ "$choice" = forget ]; then          # stop connecting to it by default (phone --forget)
             forget

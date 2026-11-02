@@ -277,6 +277,36 @@ class PhonePick(unittest.TestCase):
         close = lines.index(f"qdbus6 org.kde.kdialog-{n} /ProgressDialog close")
         self.assertLess(close, lines.index("mirror closed"))         # gone while the mirror runs
 
+    def test_failed_connection_offers_another_phone_in_sight(self):
+        """The remembered phone refuses (taken once because it was the only one advertising) and
+        another is in sight: the dialog offers it, and choosing it starts again with that one,
+        without opening Android Mirror again."""
+        a, b = ("Phone A", "10.0.0.7", 4100), ("Phone B", "10.0.0.5", 4000)
+        code, log, conf = self.run_phone([a, b], conf='PHONE_NAME="Phone A"\n', choose="use:Phone B", extra={
+            "adb": 'echo "adb $*" >> "$HOME/log"; case "$1 $2" in "connect 10.0.0.5:4000") echo "connected to $2";; '
+                   'connect*) echo "failed to connect to $2";; esac; exit 0'})
+        self.assertEqual(code, 0, log)
+        self.assertIn("use:Phone B Use Phone B instead", log)
+        self.assertNotIn("use:Phone A", log)                       # (not the one that refused)
+        self.assertIn("PHONE_NAME=Phone\\ B\n", conf)                 # (remembered, as printf %q writes it)
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+
+    def test_its_steps_are_logged_but_never_the_pairing_code(self):
+        pairing = "=;wlan0;IPv4;adb-x;_adb-tls-pairing._tcp;local;host.local;10.0.0.5;37001;"
+        self.run_phone([("Phone B", "10.0.0.5", 4000)], conf='PHONE_NAME="Phone B"\n', choose="pair", extra={
+            "avahi-browse": f'''case "$*" in *pairing*) echo '{pairing}';; *) printf '%s\\n' '{advert("Phone B", "10.0.0.5", 4000)}';; esac''',
+            "kdialog": 'case "$*" in *--inputbox*) echo 482913;; *) echo "$CHOOSE";; esac',
+            "adb": 'case "$1" in connect) [ -f "$HOME/paired" ] && echo "connected to $2" || echo "failed to connect to $2";; '
+                   'pair) read -r c; touch "$HOME/paired"; echo "Successfully paired to $2";; esac; exit 0'})
+        plog = Path(self.tmp.name) / "run/phone.log"
+        text = plog.read_text()
+        self.assertEqual(stat.S_IMODE(plog.stat().st_mode), 0o600)
+        for step in ('remembered "Phone B"', "adb connect 10.0.0.5:4000: failed to connect", "after the failed connection: pair",
+                     "pairing: the phone offers it at 10.0.0.5:37001", "adb pair 10.0.0.5:37001: Successfully paired",
+                     "connected to 10.0.0.5:4000 (adb-PhoneB-a1B2c3): remembered as the phone"):
+            self.assertIn(step, text)
+        self.assertNotIn("482913", text)
+
     def test_failed_connection_can_forget_the_phone(self):
         code, log, conf = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n',
                                          choose="forget", extra={

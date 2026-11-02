@@ -161,7 +161,10 @@ once).
 Later, if Android Mirror can't connect because the phone forgot the Frame (or it's a new phone),
 it offers **Pair it again**: open *Pair device with pairing code* on the phone, and enter the
 six-digit code when asked. No terminal needed. Or **Forget** the phone, so Android Mirror stops
-choosing it by default.
+choosing it by default. If another phone is in sight, it's offered too (**Use … instead**):
+Android Mirror takes the only phone advertising the first time, which may not be the one you
+meant, and this switches to yours and goes on to pairing it, without opening Android Mirror
+again. A new Frame (or a reset one) has a new key, so every phone needs pairing with it once.
 
 ## Use
 1. On the phone, turn on *Wireless debugging*.
@@ -294,6 +297,9 @@ clipboard, set **Share the clipboard with the phone** to **Not shared** (`PHONE_
   says so.
 - If you install a VR environment tweak after this one, reinstall Android Mirror to add its VR
   extras.
+- **Something went wrong?** `/run/user/$UID/phone.log` says what Android Mirror saw on the
+  Wi-Fi, which phone it chose, and what adb answered (never the pairing code). Only you can read
+  it, and it goes away when the headset restarts.
 - **Removing the tweak** keeps your pairing keys (`~/.android`), scrcpy (`brew uninstall
   scrcpy` removes it) and your settings.
 

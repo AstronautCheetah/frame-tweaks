@@ -85,6 +85,11 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Android Mirror offers the other phone in sight** when the remembered one won't connect
+  (**Use … instead**), and goes on to pairing it. The first time, Android Mirror takes the only
+  phone advertising, which may be another of yours: switching used to take Forget and opening
+  it again. It also keeps a log of what it saw, chose and was told, without the pairing code
+  (`/run/user/$UID/phone.log`, yours alone, gone at the next restart).
 - **Dictation's controller button can be any button:** ⚙ Settings lists Menu, Y and Off as
   recommended, View and d-pad up as alternatives, and every other button as not recommended but
   available, each with what else it does while held (the laser's clicks, Home and Back over
