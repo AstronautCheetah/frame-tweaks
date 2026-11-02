@@ -1505,6 +1505,97 @@ class ControllerButtonsOff(unittest.TestCase):
         fake.VRSystem.return_value.triggerHapticPulse.assert_called_once_with(2, 0, 3999)
 
 
+def bare_window():
+    """A window without its widgets: the list's state, what's ticked, and the confirm page."""
+    from PyQt6.QtWidgets import QApplication, QPushButton, QStackedWidget
+    bare_window.app = QApplication.instance() or QApplication([])
+    w = gui.Window.__new__(gui.Window)
+    w.rows = gui.components()
+    w.state = {c["id"]: (1, "") for c in w.rows}
+    w.wanted, w.futures, w.tidied = {}, {}, False
+    w.stack = QStackedWidget()
+    w.stack.addWidget(QPushButton())                     # (the list)
+    w.confirm_page, w.confirm_text, w.confirm_yes = w.make_confirm_page()
+    w.stack.addWidget(w.confirm_page)
+    w.say = mock.Mock()
+    return w
+
+
+class ApplyConfirm(unittest.TestCase):
+    """Apply changes says first what it will install (with what those need, and which ask for
+    sudo) and remove, by name, and does it on Apply; Cancel is the confirm page's."""
+    def test_lists_installs_and_removals_then_applies(self):
+        w = bare_window()
+        ids = {c["id"] for c in w.rows}
+        dep = next(c for c in w.rows if c["deps"] and set(c["deps"]) <= ids)
+        gone = next(c for c in w.rows if c["id"] not in (dep["id"], *dep["deps"]))
+        w.state[gone["id"]] = (0, "ok")
+        w.wanted = {dep["id"]: True, gone["id"]: False}
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.apply()
+            self.assertIs(w.stack.currentWidget(), w.confirm_page)
+            text = w.confirm_text.text()
+            self.assertIn("Install:", text)
+            self.assertIn(dep["title"], text)
+            for d in dep["deps"]:
+                self.assertIn(gui.component(d)["title"], text)      # (installed first, as it needs them)
+            self.assertIn("needed by " + dep["title"], text)
+            self.assertIn("Remove:", text)
+            self.assertIn(gone["title"], text)
+            self.assertEqual(w.confirm_yes.text(), "Apply")
+            self.assertEqual(out.getvalue(), "")                    # (asks first)
+            w.confirm_yes.click()
+        self.assertEqual(out.getvalue(), f"would remove: {gone['id']}\nwould install: {dep['id']}\n")
+        self.assertEqual(w.stack.currentIndex(), 0)
+
+    def test_installs_alone_are_confirmed_too(self):
+        w = bare_window()
+        one = next(c for c in w.rows if not c["deps"])
+        w.wanted = {one["id"]: True}
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.apply()
+            self.assertIs(w.stack.currentWidget(), w.confirm_page)
+            self.assertIn(one["title"], w.confirm_text.text())
+            self.assertNotIn("Remove:", w.confirm_text.text())
+            w.confirm_yes.click()
+        self.assertEqual(out.getvalue(), f"would remove: none\nwould install: {one['id']}\n")
+
+    def test_a_dependency_already_installed_isnt_listed(self):
+        w = bare_window()
+        ids = {c["id"] for c in w.rows}
+        dep = next(c for c in w.rows if c["deps"] and set(c["deps"]) <= ids)
+        for d in dep["deps"]:
+            w.state[d] = (0, "ok")
+        w.wanted = {dep["id"]: True}
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()):
+            w.apply()
+        self.assertNotIn("needed by", w.confirm_text.text())
+
+
+class TidyUnneeded(unittest.TestCase):
+    """An installed tweak this Frame doesn't need any more, whose manifest says to remove it then
+    (the Mouse cursor fix after a SteamOS update): the window runs ./install.sh tidy, once."""
+    def test_removed_once_when_installed_and_not_needed(self):
+        w = bare_window()
+        self.assertEqual(gui.component("cursor")["when_not_needed"], "uninstall")
+        w.state["cursor"] = (0, "ok")
+        with mock.patch.object(gui.sft, "not_needed", lambda rows=None, refresh=False: {"cursor": "SteamOS does it"}), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.tidy_unneeded()
+            w.tidy_unneeded()                                       # (once per window)
+        self.assertEqual(out.getvalue(), "would run: ./install.sh tidy\n")
+        self.assertTrue(w.tidied)
+
+    def test_nothing_when_not_installed_or_still_needed(self):
+        for not_needed, state in (({"cursor": "SteamOS does it"}, (1, "")), ({}, (0, "ok"))):
+            w = bare_window()
+            w.state["cursor"] = state
+            with mock.patch.object(gui.sft, "not_needed", lambda rows=None, refresh=False, n=not_needed: n), \
+                    mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+                w.tidy_unneeded()
+            self.assertEqual(out.getvalue(), "")
+
+
 if __name__ == "__main__":
     unittest.main()
 
