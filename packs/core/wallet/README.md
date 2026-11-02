@@ -25,7 +25,8 @@ run: {label: Unlock}
 wallet_apps: [org.kde.kwalletmanager]
 config: [~/.config/frame-tweaks/wallet.conf, ~/.config/frame-tweaks/app-timers.conf]
 changes: >-
-  `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh`
+  `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `wallet-tool`, `app-timers`, `with-keyring`, wrappers
+  for the Homebrew commands you protect, and a `gh`
   wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet**
   menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps'
   menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries
@@ -131,6 +132,24 @@ Close-after timers are saved in `~/.config/frame-tweaks/app-timers.conf`
 (`app-id = minutes [headset]`, 0 for never), the auto-lock time in
 `~/.config/frame-tweaks/wallet.conf`.
 
+### Terminal tools from Homebrew
+The Wallet apps page also lists the commands of what you installed with Homebrew (the formulae you
+asked for, and casks such as Claude Code's `claude`). **Protect** puts one behind the wallet: it
+asks for the wallet password first while the wallet is locked, and the command finds the wallet
+as its keyring, so a tool that can keep its sign-in in a keyring keeps it there instead of in a
+plain-text file. **Remove** puts Homebrew's own command back. From a terminal:
+
+```sh
+wallet-tool --candidates     # what could be protected
+wallet-tool claude           # protect claude
+wallet-tool --list           # protected commands
+wallet-tool --remove claude  # back to Homebrew's
+```
+
+It's a small wrapper of the same name in `~/.local/bin` (which terminals search before Homebrew's
+bin): open a new terminal after protecting or removing one. A program of your own there is never
+overwritten.
+
 **Terminal tools:** `with-keyring CMD` runs a command with the shared wallet as its keyring,
 unlocking it first if needed. If the GitHub CLI (`gh`) is installed, the installer adds a `gh`
 wrapper in `~/.local/bin` that does this, moves an existing plain-text `gh` token into the
@@ -235,7 +254,7 @@ locks at the auto-lock time, with **Lock now**, or after the idle time with nobo
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `app-timers`, `with-keyring` and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries as written in `launcher-built`); points git's credential helper for github.com, if you have one, at that `gh`
+- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `wallet-tool`, `app-timers`, `with-keyring`, wrappers for the Homebrew commands you protect, and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries as written in `launcher-built`); points git's credential helper for github.com, if you have one, at that `gh`
 - **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
 - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the original menu entries and the KDE settings it changed)
 <!-- /generated:changes -->

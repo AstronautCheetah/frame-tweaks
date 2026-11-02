@@ -26,6 +26,7 @@ import ftconf  # noqa: E402  (settings files; lib/ is on the path)
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
 APP_TIMERS = Path.home() / ".local/bin/app-timers"
+WALLET_TOOL = Path.home() / ".local/bin/wallet-tool"
 WALLET_UNLOCK = Path.home() / ".local/bin/wallet-unlock"
 TIMER_STEPS = [0, 5, 10, 15, 30, 60, 120, 240]          # minutes; 0 = never close
 LAUNCHERS = Path.home() / ".local/share/applications"
@@ -258,6 +259,20 @@ def wallet_candidates(protected_ids):
                 seen[f.stem] = {"id": f.stem, "name": i18n.entry_name(e, f.stem), "icon": e.get("Icon", ""),
                                 "kind": kind_here, "exec": e.get("Exec", "")}
     return sorted((a for a in seen.values() if a), key=lambda a: a["name"].lower())
+
+
+def terminal_tools():
+    """(protected, candidates) from wallet-tool: [(command, the real command)], [(command, its
+    formula or cask)]. Empty without wallet-tool (an older Wallet install) or Homebrew."""
+    def ask(arg):
+        try:
+            r = subprocess.run([str(WALLET_TOOL), arg], capture_output=True, text=True, timeout=90)
+        except (OSError, subprocess.SubprocessError):
+            return []
+        return [tuple(line.split("\t", 1)) for line in r.stdout.splitlines() if "\t" in line]
+    if not WALLET_TOOL.exists():
+        return [], []
+    return ask("--list"), ask("--candidates")
 
 
 def app_icon(name):
@@ -494,7 +509,57 @@ class WalletApps(QWidget):
                 (["--electron"] if el else []) + [a["id"]],
                 _("{app}: protected. Reopen it if it's running.").format(app=a["name"])))
             self.rows.addWidget(self.row(a, note, [add]))
+        self.fill_tools()
         self.rows.addStretch(1)
+
+    def fill_tools(self):
+        """Terminal tools from Homebrew (wallet-tool): the protected ones, and the commands that
+        could be. Homebrew is asked once per page (brew leaves takes a moment), then kept."""
+        if getattr(self, "tools", None) is None:
+            self.tools = terminal_tools()
+        protected, candidates = self.tools
+        if not protected and not candidates:
+            return
+        self.rows.addWidget(self.heading(_("Terminal tools ({n})").format(n=len(protected))))
+        for cmd, real in protected:
+            tool = {"name": cmd, "icon": "utilities-terminal"}
+            note = _("asks for the wallet password first while it's locked, and keeps its sign-in in the wallet "
+                     "if it can · runs {real}").format(real=html.escape(real))
+            if cmd == "gh":
+                note += "<br><span style='color:#6b7783'>" + _("Set up by this tweak's install.") + "</span>"
+                buttons = []
+            else:
+                remove = QPushButton(_("Remove"))
+                remove.setToolTip(_("Back to Homebrew's own command"))
+                remove.clicked.connect(lambda _checked=False, c=cmd: self.run_tool(["--remove", c], c))
+                buttons = [remove]
+            self.rows.addWidget(self.row(tool, note, buttons))
+        self.rows.addWidget(self.heading(ngettext("Add a terminal tool ({n} from Homebrew)",
+                                                  "Add a terminal tool ({n} from Homebrew)",
+                                                  len(candidates)).format(n=len(candidates))))
+        for cmd, src in candidates:
+            add = QPushButton(_("Protect"))
+            add.setObjectName("run")
+            add.clicked.connect(lambda _checked=False, c=cmd: self.run_tool([c], c))
+            self.rows.addWidget(self.row({"name": cmd, "icon": "utilities-terminal"},
+                                         _("command from Homebrew's {src}").format(src=html.escape(src)), [add]))
+
+    def run_tool(self, args, cmd):
+        """wallet-tool protect/remove; then the lists are read again (wallet-tool, not brew: quick)."""
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: wallet-tool", " ".join(args))
+            return
+        r = subprocess.run([str(WALLET_TOOL)] + args, capture_output=True, text=True)
+        self.notice.setText(html.escape((r.stdout if r.returncode == 0 else _("Didn't work: %s") % (r.stderr or r.stdout)).strip(),
+                                        quote=False))
+        if r.returncode == 0 and self.tools is not None:
+            _old, candidates = self.tools
+            listed = subprocess.run([str(WALLET_TOOL), "--list"], capture_output=True, text=True).stdout
+            protected = [tuple(line.split("\t", 1)) for line in listed.splitlines() if "\t" in line]
+            candidates = ([t for t in candidates if t[0] != cmd] if args[0] != "--remove"
+                          else sorted(candidates + [(cmd, "Homebrew")]))
+            self.tools = (protected, candidates)
+        QTimer.singleShot(0, self.fill)
 
     @staticmethod
     def heading(text):

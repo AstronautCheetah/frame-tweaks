@@ -8,6 +8,7 @@ install -m755 "$TWEAK_DIR/frame-outer-bus" "$TWEAK_DIR/wallet-launcher" "$TWEAK_
 ensure_tweaks_venv
 install_py_tool "$TWEAK_DIR/wallet-unlock"
 install -m755 "$TWEAK_DIR/with-keyring" "$BIN/"
+install -m755 "$TWEAK_DIR/wallet-tool" "$BIN/"      # (terminal tools from Homebrew behind the wallet)
 
 # Closing the wallet (KWalletManager, idle timeout) only closes kwalletd6's view; ksecretd
 # stays unlocked. This service turns every close into a real lock.

@@ -121,6 +121,19 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Password set: the tweaks tagged sudo can install now."
 - New in `gui/frame-tweaks-gui.py:2126`
   - now: "No password yet: Set a password… again when you're ready."
+- New in `gui/wallet_page.py:523`
+  - now: "Terminal tools ({n})"
+- New in `gui/wallet_page.py:526`
+  - now: "asks for the wallet password first while it's locked, and keeps its sign-in in the wallet if it can · runs {real}"
+- New in `gui/wallet_page.py:529`
+  - now: "Set up by this tweak's install."
+- New in `gui/wallet_page.py:533`
+  - now: "Back to Homebrew's own command"
+- New in `gui/wallet_page.py:537`
+  - now: "Add a terminal tool ({n} from Homebrew)"
+  - plural: "Add a terminal tool ({n} from Homebrew)"
+- New in `gui/wallet_page.py:545`
+  - now: "command from Homebrew's {src}"
 - New in `install.sh:344`
   - now: "%s needs your sudo password, and your user has none yet."
 - New in `lib/common.sh:102`
@@ -276,6 +289,26 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Kept your limits in %s."
 - New in `packs/core/wallet/status.sh:19`
   - now: "terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
+- New in `packs/core/wallet/wallet-tool:104`
+  - now: "{cmd}: protected. Open a new terminal (or run hash -r) for it to take effect."
+- New in `packs/core/wallet/wallet-tool:112`
+  - now: "{cmd}: not protected"
+- New in `packs/core/wallet/wallet-tool:114`
+  - now: "{cmd}: not protected by wallet-tool ({why})"
+- New in `packs/core/wallet/wallet-tool:115`
+  - now: "a program of yours"
+- New in `packs/core/wallet/wallet-tool:117`
+  - now: "{cmd}: back to Homebrew's own command."
+- New in `packs/core/wallet/wallet-tool:35`
+  - now: "set up by the Wallet tweak's install"
+- New in `packs/core/wallet/wallet-tool:88`
+  - now: "{cmd}: not this way ({why})"
+- New in `packs/core/wallet/wallet-tool:90`
+  - now: "{cmd}: not a command name"
+- New in `packs/core/wallet/wallet-tool:93`
+  - now: "{cmd}: not in Homebrew ({path})"
+- New in `packs/core/wallet/wallet-tool:96`
+  - now: "{path} is a program of yours: left as it is"
 - New in `packs/integrations/nordvpn/nordvpn-wg:268`
   - now: "Open {url} in your browser (it's on your clipboard: paste it into the address bar), and sign in to your Nord Account."
 - New in `packs/integrations/nordvpn/nordvpn-wg:270`

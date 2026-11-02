@@ -67,6 +67,11 @@
   desktop's clipboard.
 
 ### Added
+- **Wallet apps protects terminal tools from Homebrew too**, such as Claude Code's `claude`: the
+  page lists the commands of the formulae you installed and of casks, and **Protect** makes one ask
+  for the wallet password first while the wallet is locked, with the wallet as its keyring (where
+  a tool that can keeps its sign-in instead of a plain-text file). `wallet-tool` does the same
+  from a terminal; **Remove** puts Homebrew's command back.
 - **Controller buttons in the installer window are back, in VR:** with the laser on the window,
   B goes back, Y goes to the top of the list, A ticks or unticks the row you point at, and the
   left d-pad moves a highlight through the rows. They're read from the controller's model while

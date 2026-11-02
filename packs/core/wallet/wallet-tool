@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""wallet-tool: put a terminal tool from Homebrew behind the shared KDE wallet.
+
+Protecting a command writes a wrapper of the same name in ~/.local/bin (which terminals search
+before Homebrew's bin): it runs the real command through with-keyring, so it asks for the wallet
+password first while the wallet is locked, and the command finds the wallet as its keyring
+(Secret Service), where tools that use one keep their sign-in instead of a plain-text file. The
+gh wrapper the Wallet install adds is the same thing, for gh.
+
+  wallet-tool claude            protect (the command's name, as you type it)
+  wallet-tool --remove claude   back to Homebrew's own command
+  wallet-tool --list            protected commands, one a line
+  wallet-tool --candidates      Homebrew commands that could be: from the formulae you installed
+                                (brew leaves) and the casks, as "command<TAB>formula or cask"
+"""
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+BIN = Path.home() / ".local/bin"
+BREW = Path(os.environ.get("FRAME_TWEAKS_BREW") or "/home/linuxbrew/.linuxbrew/bin/brew")
+PREFIX = BREW.parent.parent
+MARK = "# wallet-tool:"                  # (on the wrappers this writes: only those are removed)
+LINE = re.compile(r'^exec "\$HOME/\.local/bin/with-keyring" (/\S+) "\$@"$', re.M)
+# The installer's own wrapper (gh: it also moves gh's token into the wallet), and Homebrew itself.
+MANAGED = {"gh": _("set up by the Wallet tweak's install"), "brew": None}
+
+
+def wrapper_target(path):
+    """The real command a wrapper of ours (or the installer's gh one) runs, else None."""
+    try:
+        m = LINE.search(path.read_text(errors="replace"))
+    except OSError:
+        return None
+    return m.group(1) if m else None
+
+
+def protected():
+    """{command: real command} for the wrappers in ~/.local/bin."""
+    out = {}
+    for f in sorted(BIN.iterdir()) if BIN.is_dir() else []:
+        if f.is_file() and not f.is_symlink() and (target := wrapper_target(f)):
+            out[f.name] = target
+    return out
+
+
+def owner(cmd):
+    """The formula or cask a command of Homebrew's bin comes from, or None."""
+    try:
+        real = (PREFIX / "bin" / cmd).resolve()
+    except OSError:
+        return None
+    m = re.search(r"/(Cellar|Caskroom)/([^/]+)/", str(real))
+    return (m.group(1), m.group(2)) if m else None
+
+
+def leaves():
+    """The formulae you installed yourself (not ones installed as another's dependency)."""
+    try:
+        r = subprocess.run([str(BREW), "leaves"], capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    return {line.split("/")[-1] for line in r.stdout.split()}
+
+
+def candidates():
+    mine, done, kept = leaves(), protected(), []
+    for f in sorted((PREFIX / "bin").iterdir()) if (PREFIX / "bin").is_dir() else []:
+        if f.name in done or f.name in MANAGED or f.name.startswith("."):
+            continue
+        o = owner(f.name)
+        if o and (o[0] == "Caskroom" or o[1] in mine) and os.access(f, os.X_OK):
+            kept.append((f.name, o[1]))
+    return kept
+
+
+def protect(cmd):
+    if cmd in MANAGED:
+        sys.exit(_("{cmd}: not this way ({why})").format(cmd=cmd, why=MANAGED[cmd] or "Homebrew"))
+    if not re.fullmatch(r"[A-Za-z0-9._+-]+", cmd):
+        sys.exit(_("{cmd}: not a command name").format(cmd=cmd))
+    real = PREFIX / "bin" / cmd
+    if not (real.exists() and os.access(real, os.X_OK)):
+        sys.exit(_("{cmd}: not in Homebrew ({path})").format(cmd=cmd, path=real))
+    wrapper = BIN / cmd
+    if wrapper.exists() and wrapper_target(wrapper) is None:
+        sys.exit(_("{path} is a program of yours: left as it is").format(path=wrapper))
+    BIN.mkdir(parents=True, exist_ok=True)
+    tmp = wrapper.with_name(f".{cmd}.wallet-tool")
+    tmp.write_text(f'#!/bin/sh\n{MARK} {cmd} with the shared KDE wallet: its password first while it is locked, '
+                   f'and it is the keyring (with-keyring). wallet-tool --remove {cmd} undoes it.\n'
+                   f'exec "$HOME/.local/bin/with-keyring" {real} "$@"\n')
+    tmp.chmod(0o755)
+    os.replace(tmp, wrapper)
+    print(_("{cmd}: protected. Open a new terminal (or run hash -r) for it to take effect.").format(cmd=cmd))
+
+
+def remove(cmd):
+    wrapper = BIN / cmd
+    try:
+        ours = MARK in wrapper.read_text(errors="replace")
+    except OSError:
+        sys.exit(_("{cmd}: not protected").format(cmd=cmd))
+    if not ours:
+        sys.exit(_("{cmd}: not protected by wallet-tool ({why})").format(
+            cmd=cmd, why=MANAGED.get(cmd) or _("a program of yours")))
+    wrapper.unlink()
+    print(_("{cmd}: back to Homebrew's own command.").format(cmd=cmd))
+
+
+def main(a):
+    if a == ["--list"]:
+        for cmd, real in protected().items():
+            print(f"{cmd}\t{real}")
+    elif a == ["--candidates"]:
+        for cmd, src in candidates():
+            print(f"{cmd}\t{src}")
+    elif len(a) == 2 and a[0] == "--remove":
+        remove(a[1])
+    elif len(a) == 1 and not a[0].startswith("-"):
+        protect(a[0])
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

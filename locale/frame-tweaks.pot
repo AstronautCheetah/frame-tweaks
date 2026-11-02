@@ -1157,6 +1157,12 @@ msgid ""
 msgstr ""
 
 #: gui/wallet_page.py
+msgid "Add a terminal tool ({n} from Homebrew)"
+msgid_plural "Add a terminal tool ({n} from Homebrew)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: gui/wallet_page.py
 msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] ""
@@ -1182,6 +1188,10 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid "Auto-lock"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Back to Homebrew's own command"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1302,6 +1312,10 @@ msgid ""
 msgstr ""
 
 #: gui/wallet_page.py
+msgid "Set up by this tweak's install."
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Shorter"
 msgstr ""
 
@@ -1311,6 +1325,10 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid "System app"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Terminal tools ({n})"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1339,6 +1357,15 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid "asks for the wallet password first"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid ""
+"asks for the wallet password first while it's locked, and keeps its sign-in in the wallet if it can · runs {real}"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "command from Homebrew's {src}"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -5097,6 +5124,47 @@ msgstr ""
 #: packs/core/wallet/wallet-lock.desktop
 msgid ""
 "Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "a program of yours"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "set up by the Wallet tweak's install"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: back to Homebrew's own command."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not a command name"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not in Homebrew ({path})"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not protected"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not protected by wallet-tool ({why})"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not this way ({why})"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd}: protected. Open a new terminal (or run hash -r) for it to take effect."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{path} is a program of yours: left as it is"
 msgstr ""
 
 #: packs/core/wallet/wallet-unlock
