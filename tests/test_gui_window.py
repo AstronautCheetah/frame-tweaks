@@ -16,6 +16,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script  # noqa: E402  (English, throwaway language files: test_00_english.py)
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
+# The packs' names live in lib/registry.py and lib/userpacks.py (gui.sft.NAME reads them there):
+# patched there, a patch reaches the window and sft's own code alike.
+import registry  # noqa: E402  (after gui: lib/ is on the path through sft)
+import userpacks  # noqa: E402  (after gui: lib/ is on the path through sft)
 from PyQt6.QtTest import QTest  # noqa: E402
 from PyQt6.QtWidgets import QApplication, QPushButton  # noqa: E402
 
@@ -31,14 +35,15 @@ class WindowTest(unittest.TestCase):
                   mock.patch.object(gui, "update_check", lambda cid: None),
                   mock.patch.object(gui, "latest_release", lambda url: None),
                   mock.patch.object(gui, "self_update_check", lambda: ""),
-                  mock.patch.object(gui.sft, "packs_with_updates", lambda: []),
+                  mock.patch.object(userpacks, "packs_with_updates", lambda: []),
                   mock.patch.object(gui.sft, "apply_formerly", lambda: []),
                   mock.patch.object(gui.sft, "build_version", lambda: "0.0.0"),     # (no git describe)
                   mock.patch.object(gui.sft, "not_needed", lambda rows=None, refresh=False: {}),   # (no needed.sh)
-                  mock.patch.multiple(gui.sft, USER_PACKS=d / "packs", CONF=d, TRUSTED=d / "trusted",
-                                      OFF_PACKS=d / "off-packs", HIDDEN=d / "hidden", SHOWN=d / "shown",
-                                      HIDDEN_CATS=d / "hidden-categories", STATE=d / "state",
-                                      INSTALLED=d / "state/installed"),
+                  mock.patch.multiple(registry, USER_PACKS=d / "packs", CONF=d, TRUSTED=d / "trusted",
+                                      OFF_PACKS=d / "off-packs"),
+                  mock.patch.object(userpacks, "INSTALLED", d / "state/installed"),
+                  mock.patch.multiple(gui.sft, HIDDEN=d / "hidden", SHOWN=d / "shown",
+                                      HIDDEN_CATS=d / "hidden-categories", STATE=d / "state"),
                   mock.patch.multiple(gui, HIDDEN_CATS=d / "hidden-categories", COLLAPSED=d / "collapsed"),
                   mock.patch.object(sys, "excepthook", lambda kind, value, tb: self.errors.append(value)),
                   mock.patch.object(gui.Window, "say"),      # (its message's timer would outlive the window)
@@ -98,7 +103,7 @@ class PacksChangeUnderIt(WindowTest):
         w = self.window()
         self.assertIn("recline", self.ids(w))
         gui.sft.set_official(gui.sft.THIRD_PARTY, False)                # (./install.sh mods off third-party)
-        with mock.patch.object(gui.sft, "packs_with_updates", lambda: (gui.sft.load(refresh=True), [])[1]):
+        with mock.patch.object(userpacks, "packs_with_updates", lambda: (gui.sft.load(refresh=True), [])[1]):
             w.update_clicked()                                          # ⟳ Check for updates
             self.settle(w)
         self.assertNotIn("recline", self.ids(w))
@@ -115,7 +120,7 @@ class PacksChangeUnderIt(WindowTest):
             gui.sft.load(refresh=True)
             return {"files": ["hello-frame/README.md"], "log": ["a change"]}
         origin = lambda folder: "https://example.org/mine.git" if Path(folder) == mine else None   # (added from a link)
-        with mock.patch.multiple(gui.sft, pack_origin=origin, update_pack=update_pack):
+        with mock.patch.multiple(userpacks, pack_origin=origin, update_pack=update_pack):
             w = self.window()
             w.pack_updates = {mine}                     # (Check for updates found it newer)
             w.show_pack_updates()

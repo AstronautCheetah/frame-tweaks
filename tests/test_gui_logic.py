@@ -27,6 +27,10 @@ gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 # in that module, not through gui. (gui put gui/ on the path.)
 import readme_view  # noqa: E402  (after gui: it sets up the path and the language first)
 import window_logic  # noqa: E402  (after gui: it sets up the path and the language first)
+# The packs' names live in lib/registry.py and lib/userpacks.py (gui.sft.NAME reads them there):
+# patched there, a patch reaches the window and sft's own code alike.
+import registry  # noqa: E402  (after gui: lib/ is on the path through sft)
+import userpacks  # noqa: E402  (after gui: lib/ is on the path through sft)
 
 
 class Versions(unittest.TestCase):
@@ -400,7 +404,7 @@ class Reload(unittest.TestCase):
         w.pool, w.latest, w.latest_futures, w.refresh, w.collecting = mock.Mock(), {}, {}, mock.Mock(), mock.Mock()
         issue = {"version": "1.0", "short": "s", "long": "l", "latest": "https://api.github.com/repos/o/r/releases/latest"}
         rows = gui.components() + [dict(gui.component("clipboard"), id="x-issue", known_issue=issue, settings=None)]
-        with mock.patch.object(gui, "components", return_value=rows), mock.patch.object(gui.sft, "load"), \
+        with mock.patch.object(gui, "components", return_value=rows), mock.patch.object(registry, "load"), \
                 mock.patch.object(gui.sft, "settings_specs", return_value={}), mock.patch.object(gui.sft, "SETTINGS", {}), \
                 mock.patch.dict(gui.SETTINGS_PAGES), mock.patch.object(gui, "KNOWN_ISSUES", {}):
             w.reload_tweaks()
@@ -420,7 +424,7 @@ class Reload(unittest.TestCase):
             w = gui.Window.__new__(gui.Window)
             w.show_hidden, w.build_ui, w.refresh, w.update_newest = mock.Mock(), mock.Mock(), mock.Mock(), None
             with mock.patch.dict(os.environ, {"FRAME_TWEAKS_LANG_RESOLVED": "es_419"}), \
-                    mock.patch.object(gui, "components", return_value=[row]), mock.patch.object(gui.sft, "load"), \
+                    mock.patch.object(gui, "components", return_value=[row]), mock.patch.object(registry, "load"), \
                     mock.patch.object(gui.sft, "settings_specs", return_value={}), mock.patch.object(gui.sft, "SETTINGS", {}), \
                     mock.patch.object(gui, "KNOWN_ISSUES", {}):
                 w.retranslate()
@@ -746,8 +750,8 @@ class PacksPage(unittest.TestCase):
             (d / "packs").mkdir()
             import shutil
             shutil.copytree(ROOT / "examples/hello-pack", d / "packs" / "mine")
-            with mock.patch.object(gui.sft, "USER_PACKS", d / "packs"), \
-                    mock.patch.object(gui.sft, "TRUSTED", d / "trusted"), mock.patch.object(gui.sft, "CONF", d), \
+            with mock.patch.object(registry, "USER_PACKS", d / "packs"), \
+                    mock.patch.object(registry, "TRUSTED", d / "trusted"), mock.patch.object(registry, "CONF", d), \
                     mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
                 window = mock.Mock()
                 page = gui.Packs(window)
@@ -775,9 +779,9 @@ class PacksPage(unittest.TestCase):
             shutil.copytree(ROOT / "examples/hello-pack", src)
             for args in (["init", "-q"], ["add", "-A"], ["commit", "-qm", "pack"]):
                 subprocess.run(["git", "-C", str(src), *args], check=True, capture_output=True)
-            with mock.patch.object(gui.sft, "USER_PACKS", d / "packs"), mock.patch.object(gui.sft, "CONF", d), \
-                    mock.patch.object(gui.sft, "TRUSTED", d / "trusted"), \
-                    mock.patch.object(gui.sft, "INSTALLED", d / "installed"):
+            with mock.patch.object(registry, "USER_PACKS", d / "packs"), mock.patch.object(registry, "CONF", d), \
+                    mock.patch.object(registry, "TRUSTED", d / "trusted"), \
+                    mock.patch.object(userpacks, "INSTALLED", d / "installed"):
                 window = mock.Mock()
                 page = gui.Packs(window)
                 window.details = page
@@ -833,7 +837,7 @@ class PacksUnderTheWindow(unittest.TestCase):
         from PyQt6.QtWidgets import QApplication
         self.app = QApplication.instance() or QApplication([])
         page = gui.Packs(mock.Mock())
-        with mock.patch.object(gui.sft, "load", wraps=gui.sft.load) as load:
+        with mock.patch.object(registry, "load", wraps=registry.load) as load:
             page.toggle_inventory(gui.sft.THIRD_PARTY)
             page.ask_remove(gui.sft.THIRD_PARTY)          # (another click that builds the page again)
         self.assertTrue(load.called)
@@ -856,8 +860,8 @@ class PacksUnderTheWindow(unittest.TestCase):
                 gui.sft.load(refresh=True)
                 return {"files": ["hello-frame/README.md"], "log": ["a change"]}
             origin = lambda folder: "https://example.org/mine.git" if Path(folder) == mine else None   # (added from a link)
-            with mock.patch.multiple(gui.sft, USER_PACKS=d / "packs", CONF=d, TRUSTED=d / "trusted",
-                                     pack_origin=origin, update_pack=update_pack), \
+            with mock.patch.multiple(registry, USER_PACKS=d / "packs", CONF=d, TRUSTED=d / "trusted"), \
+                    mock.patch.multiple(userpacks, pack_origin=origin, update_pack=update_pack), \
                     mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
                 gui.sft.set_trusted(mine, True)
                 window = mock.Mock(details=None, pack_job=None, pack_updates={mine})
@@ -1004,7 +1008,7 @@ class PackInventory(unittest.TestCase):
         from PyQt6.QtWidgets import QApplication, QLabel
         import packs_page
         self.app = QApplication.instance() or QApplication([])
-        with tempfile.TemporaryDirectory() as d, mock.patch.object(gui.sft, "INSTALLED", Path(d)):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(userpacks, "INSTALLED", Path(d)):
             (Path(d) / "recline").write_text("0.6.4\n")                     # (an install record)
             window = mock.Mock()
             page = gui.Packs(window)
@@ -1058,8 +1062,8 @@ class LinkedProject(unittest.TestCase):
             readme = readme.replace("\n---\n", "\nlink:\n  install: echo installing\n  installed: ~/linked-project\n"
                                     "  readme: https://example.org/linked#readme\n---\n", 1)
             (t / "README.md").write_text(readme)
-            with mock.patch.object(gui.sft, "USER_PACKS", d / "packs"), mock.patch.object(gui.sft, "CONF", d), \
-                    mock.patch.object(gui.sft, "TRUSTED", d / "trusted"), mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
+            with mock.patch.object(registry, "USER_PACKS", d / "packs"), mock.patch.object(registry, "CONF", d), \
+                    mock.patch.object(registry, "TRUSTED", d / "trusted"), mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
                 gui.sft.set_trusted(d / "packs/mine", True)
                 comp = next(c for c in gui.sft.load(refresh=True)["components"] if c["id"] == "linked")
                 page = gui.Details(mock.Mock(), comp, (1, "not installed"))

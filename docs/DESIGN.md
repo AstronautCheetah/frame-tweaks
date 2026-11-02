@@ -47,7 +47,10 @@ The design follows from what the Frame is:
 |---|---|
 | [`install.sh`](../install.sh) | The commands: install, uninstall, reinstall, status, update, hold, check-system, debug-info, list, and so on. It decides what runs in which order, and takes the lock and the log. |
 | [`lib/common.sh`](../lib/common.sh) | Helpers that tweak scripts source: messages, `fetch_pinned`, `alarm_fetch`, `pip_pinned`, backups, `status_ok`/`status_missing`/`status_warn`, dashboard-patch helpers. [mods.md](mods.md) lists what a pack can rely on. |
-| [`lib/sft.py`](../lib/sft.py) | Loads the packs and their tweaks, and holds everything the installer window and `install.sh` share: the tweak list (`registry`), hidden rows and groups, the Run label, and tweak settings. Both front ends call it, so they can't drift apart. |
+| [`lib/sft.py`](../lib/sft.py) | Everything the installer window and `install.sh` share, so they can't drift apart: its command line (`registry`, `mods`, `deps`, …), hidden rows and groups, what this Frame doesn't need, the Run label, and tweak settings. Both front ends import or run it; `sft.NAME` also reaches the two modules below. |
+| [`lib/registry.py`](../lib/registry.py) | The packs and their tweaks: where packs are, which are in use (official, turned off, trusted), each manifest checked and read, and the tweak list `load()` makes of them. |
+| [`lib/userpacks.py`](../lib/userpacks.py) | Packs added from a link (add, update, remove, checking for newer versions) and the `mods` command. |
+| [`lib/splash.py`](../lib/splash.py) | The animated splash `install.sh` runs its long commands under in a terminal: it runs the command in a terminal of its own and hands it the keys. Beside it, `splash_art.py` (the picture, as character cells) and `splash_stage.py` (the split screen: the picture above, the command's output below, and the transcript printed again at the end). |
 | [`lib/installer.py`](../lib/installer.py) | `install.sh`'s pure logic: dependency order, the order uninstalls go in, ID checks, which installed tweaks need one being removed, and what a `status.sh` result means (the window's too). It is given the tweak list, or a status result, and reads no manifest. |
 | [`lib/manifest.py`](../lib/manifest.py) | Reads (and writes) the YAML front matter of manifests, with no dependencies. |
 | [`gui/`](../gui/) | The installer window (PyQt6). `frame-tweaks-gui.py` is the window and its list; beside it, `window_logic.py` (status codes and checks, no Qt), `tweak_rows.py`, `readme_view.py`, `details_page.py`, `settings_page.py`, `apply_changes.py`, `vr_controls.py`, `packs_page.py`, `wallet_page.py` and `report_page.py`. |
@@ -87,7 +90,7 @@ reader, to PyYAML and to a person:
 ## Packs and trust
 
 Every tweak comes from a pack: a folder of tweak folders with an optional `pack.md`.
-`lib/sft.py` `pack_dirs` looks in three places, in this order: the official packs
+`lib/registry.py` `pack_dirs` looks in three places, in this order: the official packs
 (`packs/core/`, `packs/integrations/`, then `packs/third-party/`; other folders in `packs/` are local packs that
 need trusting), the folders in `~/.local/share/frame-tweaks/packs/`, and the folders
 listed in `FRAME_TWEAKS_PACKS`.
@@ -106,7 +109,7 @@ listed in `FRAME_TWEAKS_PACKS`.
   it is left out with a problem message, unless its manifest says `replaces: true`. Then it
   takes the earlier tweak's place in the list, and the window says which one it replaced.
 - **`api`.** `pack.md` can say which version of the pack format it uses. A pack with a newer
-  `api` than this Frame Tweaks knows (`API` in `lib/sft.py`) is skipped with a message, rather
+  `api` than this Frame Tweaks knows (`API` in `lib/registry.py`) is skipped with a message, rather
   than misread. Unknown manifest keys are warnings and are ignored, so packs can use optional
   fields that a newer version adds.
 - **Problems don't stop the others.** A tweak with a bad manifest or a missing script is left

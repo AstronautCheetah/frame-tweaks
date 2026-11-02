@@ -16,7 +16,9 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
 import manifest  # noqa: E402
+import registry  # noqa: E402
 import sft  # noqa: E402
+import userpacks  # noqa: E402
 
 try:
     import yaml
@@ -132,11 +134,13 @@ class Packs(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         t = Path(self.tmp.name)
         self.user = t / "packs"
-        # (every file under CONF: HIDDEN and the rest were made from the real one as sft loaded)
-        for name, value in (("USER_PACKS", self.user), ("TRUSTED", t / "trusted"), ("OFF_PACKS", t / "off"), ("CONF", t),
-                            ("HIDDEN", t / "hidden"), ("SHOWN", t / "shown"), ("COLLAPSED", t / "collapsed"),
-                            ("HIDDEN_CATS", t / "hidden-categories")):
-            p = mock.patch.object(sft, name, value)
+        # (every file under CONF: HIDDEN and the rest were made from the real one as sft loaded;
+        # each patched in the module whose code reads it: the packs' in lib/registry.py)
+        for module, name, value in ((registry, "USER_PACKS", self.user), (registry, "TRUSTED", t / "trusted"),
+                                    (registry, "OFF_PACKS", t / "off"), (registry, "CONF", t),
+                                    (sft, "HIDDEN", t / "hidden"), (sft, "SHOWN", t / "shown"),
+                                    (sft, "COLLAPSED", t / "collapsed"), (sft, "HIDDEN_CATS", t / "hidden-categories")):
+            p = mock.patch.object(module, name, value)
             p.start()
             self.addCleanup(p.stop)
         p = mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""})
@@ -193,7 +197,7 @@ class Packs(unittest.TestCase):
             (packs / name).mkdir(parents=True)
         dirs = [packs / "core", packs / "integrations", packs / "third-party"]
         (packs / "core/pack.md").write_text("---\nname: Core\nformerly: [original]\n---\n")
-        with mock.patch.object(sft, "CORE", dirs[0]), mock.patch.object(sft, "OFFICIAL_PACKS", dirs):
+        with mock.patch.object(registry, "CORE", dirs[0]), mock.patch.object(registry, "OFFICIAL_PACKS", dirs):
             self.assertEqual([d.name for d in sft.pack_dirs()][:4], ["core", "integrations", "third-party", "mine"])
             (packs / "original/pack.md").write_text("---\nname: Mine too\n---\n")
             self.assertIn("original", [d.name for d in sft.pack_dirs()])
@@ -422,12 +426,12 @@ class Packs(unittest.TestCase):
         run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "x")
         run("remote", "add", "origin", "https://example.invalid/their-pack.git")
         run("config", "remote.origin.uploadpack", f"touch {mark}; git-upload-pack")
-        with mock.patch.object(sft, "pack_has_update", wraps=sft.pack_has_update) as check:
+        with mock.patch.object(userpacks, "pack_has_update", wraps=userpacks.pack_has_update) as check:
             self.assertEqual(sft.packs_with_updates(), [])
             check.assert_not_called()
         self.assertFalse(mark.exists())
         sft.set_trusted(d.parent, True)
-        with mock.patch.object(sft, "pack_has_update", return_value=True) as check:
+        with mock.patch.object(userpacks, "pack_has_update", return_value=True) as check:
             self.assertEqual([p["name"] for p in sft.packs_with_updates()], ["their-pack"])
 
     def git_pack(self, name, **config):

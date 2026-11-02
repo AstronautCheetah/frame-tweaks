@@ -207,7 +207,7 @@ class Packs(QWidget):
         self.removing = d
         self.build()
 
-    # ---- packs from a link (lib/sft.py add_pack, update_pack, remove_pack) ----
+    # ---- packs from a link (lib/userpacks.py add_pack, update_pack, remove_pack) ----
     def tell(self, text, good=False):
         self.notice.setText(text)
         self.notice.setStyleSheet(f"color: {'#5cc77a' if good else '#e0b33a'}")

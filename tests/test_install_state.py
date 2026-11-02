@@ -692,13 +692,14 @@ class InstallState(unittest.TestCase):
         checkout was new, the tweaks not reinstalled. (lib/sft.py unfinished_update, as
         stale_tweaks; held and linked tweaks aren't reinstalled by an update.)"""
         import sft
+        import userpacks
         records = self.state / "installed"
         records.mkdir(parents=True, exist_ok=True)
         for tid, version in (("ydotool", "0.0.1"), ("tools", VERSION), ("speech", "0.0.1"), ("recline", "0.0.1")):
             (records / tid).write_text(version + "\n")
         (self.state / "held").mkdir(parents=True, exist_ok=True)
         (self.state / "held/speech").touch()
-        with mock.patch.multiple(sft, INSTALLED=records, STATE=self.state):
+        with mock.patch.object(userpacks, "INSTALLED", records), mock.patch.object(sft, "STATE", self.state):
             # Without the update's mark, older records alone aren't one cut short: a checkout moved
             # some other way (git pull, a developer's work) said so, and Finish the update ran every
             # tweak's installer again.

@@ -570,7 +570,7 @@ msgid_plural "%d tweaks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "(instead of {other}'s)"
 msgstr ""
 
@@ -729,7 +729,7 @@ msgstr ""
 msgid "installed"
 msgstr ""
 
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "none"
 msgstr ""
 
@@ -737,11 +737,11 @@ msgstr ""
 msgid "tweak pack provided by {author}"
 msgstr ""
 
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "{name} is up to date."
 msgstr ""
 
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] ""
@@ -2035,14 +2035,6 @@ msgid "(default)"
 msgstr ""
 
 #: lib/sft.py
-msgid "Added the pack {name} in {folder}."
-msgstr ""
-
-#: lib/sft.py
-msgid "By {author}."
-msgstr ""
-
-#: lib/sft.py
 msgid "By: %s"
 msgstr ""
 
@@ -2068,42 +2060,11 @@ msgid "Hidden in the installer window: %s"
 msgstr ""
 
 #: lib/sft.py
-msgid ""
-"It isn't used until you trust it again. Read what changed first, then: {command}"
-msgstr ""
-
-#: lib/sft.py
-msgid ""
-"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
-msgstr ""
-
-#: lib/sft.py
-msgid ""
-"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
-msgstr ""
-
-#: lib/sft.py
 msgid "More: %s"
 msgstr ""
 
 #: lib/sft.py
 msgid "Needs: %s"
-msgstr ""
-
-#: lib/sft.py
-msgid "No packs added from a link."
-msgstr ""
-
-#: lib/sft.py
-msgid "Only packs in {folder} can be removed here."
-msgstr ""
-
-#: lib/sft.py
-msgid "Problems:"
-msgstr ""
-
-#: lib/sft.py
-msgid "Removed the pack {name} ({folder})."
 msgstr ""
 
 #: lib/sft.py
@@ -2123,41 +2084,7 @@ msgid "Source: %s"
 msgstr ""
 
 #: lib/sft.py
-msgid ""
-"That isn't a link to a pack: give the address of its git repository, starting with https://"
-msgstr ""
-
-#: lib/sft.py
-msgid ""
-"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
-msgstr ""
-
-#: lib/sft.py
-msgid "Tweaks: %s"
-msgstr ""
-
-#: lib/sft.py
-msgid "Uninstall its tweaks first: {ids} ({command})."
-msgstr ""
-
-#: lib/sft.py
 msgid "Why: %s"
-msgstr ""
-
-#: lib/sft.py
-msgid "You have a pack in {folder} already: update it, or remove it first."
-msgstr ""
-
-#: lib/sft.py
-msgid "a newer version is out: {command}"
-msgstr ""
-
-#: lib/sft.py
-msgid "changed since you trusted it: not used until you trust it again"
-msgstr ""
-
-#: lib/sft.py
-msgid "couldn't check (no connection?)"
 msgstr ""
 
 #: lib/sft.py
@@ -2165,68 +2092,8 @@ msgid "expected KEY=VALUE, got %s"
 msgstr ""
 
 #: lib/sft.py
-msgid "git isn't installed"
-msgstr ""
-
-#: lib/sft.py
-msgid "git took too long (no connection?)"
-msgstr ""
-
-#: lib/sft.py
-msgid "git {command} failed"
-msgstr ""
-
-#: lib/sft.py
-msgid "in use; its tweaks are listed"
-msgstr ""
-
-#: lib/sft.py
-msgid "more than one pack is called {name}: give its folder ({folders})"
-msgstr ""
-
-#: lib/sft.py
-msgid "no longer used (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-
-#: lib/sft.py
-msgid "no pack {name}; see {command}"
-msgstr ""
-
-#: lib/sft.py
-msgid "not checked: not trusted ({command})"
-msgstr ""
-
-#: lib/sft.py
-msgid "not trusted: not used ({command})"
-msgstr ""
-
-#: lib/sft.py
-msgid "official: in use"
-msgstr ""
-
-#: lib/sft.py
-msgid "official: turned off ({command})"
-msgstr ""
-
-#: lib/sft.py
 msgid ""
 "once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
-msgstr ""
-
-#: lib/sft.py
-msgid "problem: %s"
-msgstr ""
-
-#: lib/sft.py
-msgid "trusted: in use"
-msgstr ""
-
-#: lib/sft.py
-msgid "trusted; its tweaks are listed now"
-msgstr ""
-
-#: lib/sft.py
-msgid "turned off (installed tweaks of it stay until you uninstall them)"
 msgstr ""
 
 #: lib/sft.py
@@ -2242,10 +2109,6 @@ msgid "unknown group {name}; groups: {groups}"
 msgstr ""
 
 #: lib/sft.py
-msgid "up to date"
-msgstr ""
-
-#: lib/sft.py
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr ""
 
@@ -2257,47 +2120,12 @@ msgstr ""
 msgid "{key}: {text} isn't one of: {choices}"
 msgstr ""
 
-#: lib/sft.py
-msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
-msgstr ""
-
-#: lib/sft.py
-msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
-msgstr ""
-
-#: lib/sft.py
-msgid ""
-"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
-msgstr ""
-
-#: lib/sft.py
-msgid ""
-"{pack} was added at a fixed version: to follow another one, remove it and add it again."
-msgstr ""
-
-#: lib/sft.py
-msgid "{pack} wasn't added from a link: change its folder yourself."
-msgstr ""
-
-#: lib/sft.py
-msgid ""
-"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
-msgstr ""
-
-#: lib/sft.py
-msgid "{ref} isn't a branch or tag name"
-msgstr ""
-
 #: lib/splash.py
 msgid "Added {name} to the app menu"
 msgstr ""
 
 #: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
 msgid "Arrow Pad"
-msgstr ""
-
-#: lib/splash.py packs/core/arrowpad/arrowpad.py
-msgid "Done"
 msgstr ""
 
 #: lib/splash.py
@@ -2316,10 +2144,6 @@ msgstr ""
 msgid "Narrate's voice: {voice}"
 msgstr ""
 
-#: lib/splash.py
-msgid "Press any key to skip"
-msgstr ""
-
 #: lib/splash.py packs/core/snip/frame-snip packs/core/snip/frame-snip.desktop packs/core/snip/README.md
 msgid "Screen snip + Narrate"
 msgstr ""
@@ -2332,11 +2156,7 @@ msgstr ""
 msgid "Setting up {name}'s Python packages"
 msgstr ""
 
-#: lib/splash.py
-msgid "Stopped with an error (exit status {code})"
-msgstr ""
-
-#: lib/splash.py
+#: lib/splash.py lib/splash_stage.py
 msgid "Working…"
 msgstr ""
 
@@ -2346,6 +2166,186 @@ msgstr ""
 
 #: lib/splash.py
 msgid "{name} is ready: {keys} shows it"
+msgstr ""
+
+#: lib/splash_stage.py packs/core/arrowpad/arrowpad.py
+msgid "Done"
+msgstr ""
+
+#: lib/splash_stage.py
+msgid "Press any key to skip"
+msgstr ""
+
+#: lib/splash_stage.py
+msgid "Stopped with an error (exit status {code})"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "Added the pack {name} in {folder}."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "By {author}."
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"It isn't used until you trust it again. Read what changed first, then: {command}"
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "No packs added from a link."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "Only packs in {folder} can be removed here."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "Problems:"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "Removed the pack {name} ({folder})."
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"That isn't a link to a pack: give the address of its git repository, starting with https://"
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "Tweaks: %s"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "Uninstall its tweaks first: {ids} ({command})."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "You have a pack in {folder} already: update it, or remove it first."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "a newer version is out: {command}"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "changed since you trusted it: not used until you trust it again"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "couldn't check (no connection?)"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "git isn't installed"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "git took too long (no connection?)"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "git {command} failed"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "in use; its tweaks are listed"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "more than one pack is called {name}: give its folder ({folders})"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "no longer used (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "no pack {name}; see {command}"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "not checked: not trusted ({command})"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "not trusted: not used ({command})"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "official: in use"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "official: turned off ({command})"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "problem: %s"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "trusted: in use"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "trusted; its tweaks are listed now"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "turned off (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "up to date"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
+msgstr ""
+
+#: lib/userpacks.py
+msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"{pack} was added at a fixed version: to follow another one, remove it and add it again."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr ""
+
+#: lib/userpacks.py
+msgid ""
+"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
+msgstr ""
+
+#: lib/userpacks.py
+msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
