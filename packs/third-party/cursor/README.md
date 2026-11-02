@@ -21,6 +21,7 @@ access: –
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall cursor`, then reboot"
 test: {offline: true}
+when_not_needed: uninstall
 ---
 # Mouse cursor fix
 
@@ -65,7 +66,9 @@ draws X's default). How that was found:
 [docs/research/mouse-cursor.md](../../../docs/research/mouse-cursor.md).
 
 So on those versions Frame Tweaks doesn't offer it (it's hidden in the list, saying why), and if
-it's installed, its status asks you to uninstall it. Older SteamOS versions still get it.
+it's installed, from before an update or a switch to the beta, it's removed by itself: by the
+Frame Tweaks window as it opens (with a note), or at the next login (`./install.sh tidy`). The
+second pointer then goes with the reboot after. Older SteamOS versions still get it.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
