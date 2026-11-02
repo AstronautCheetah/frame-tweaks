@@ -621,6 +621,19 @@ class BackupTimer(unittest.TestCase):
             unit = (home / ".config/systemd/user/frame-tweaks-backup.service").read_text()
             self.assertIn(f'dev/backup.sh" "{dest}"', unit)
 
+    def test_a_stale_part_folder_goes_at_the_next_run(self):
+        """A snapshot cut short leaves DATE.part, which was never used again and counted as a kept
+        snapshot, pushing a whole one out."""
+        with tempfile.TemporaryDirectory() as td:
+            stubs, dest = Path(td) / "bin", Path(td) / "drive/backup"
+            stub(stubs, "mountpoint", "exit 0\n")
+            (dest / "2026-01-01_000000.part/old").mkdir(parents=True)
+            r = subprocess.run(["bash", str(ROOT / "dev/backup.sh"), str(dest)], capture_output=True, text=True,
+                               env={**os.environ, "PATH": f"{stubs}:{os.environ['PATH']}"}, timeout=120)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual([p.name for p in dest.glob("*.part")], [])
+            self.assertIn("; 1 kept)", r.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
