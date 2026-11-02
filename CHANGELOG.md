@@ -116,6 +116,13 @@
   for the wallet password first while the wallet is locked, with the wallet as its keyring (where
   a tool that can keeps its sign-in instead of a plain-text file). `wallet-tool` does the same
   from a terminal; **Remove** puts Homebrew's command back.
+- **Claude Code's sign-in in the wallet:** on Linux, `claude` keeps its sign-in in
+  `~/.claude/.credentials.json` (plain text) even with the wallet as its keyring, so protecting it
+  only asked for the password. `wallet-tool --store-token claude` now keeps a long-lived token
+  from `claude setup-token` in the wallet (pasted, not shown; it offers to run `setup-token`), and
+  the protected `claude` hands it over in `CLAUDE_CODE_OAUTH_TOKEN`, to that `claude` only. Then
+  it offers to move the plain-text file aside (nothing is deleted or signed out).
+  `wallet-tool --forget-token claude` and **Remove** take the token out of the wallet again.
 - **Controller buttons in the installer window are back, in VR:** with the laser on the window,
   B goes back, Y goes to the top of the list, A ticks or unticks the row you point at, and the
   left d-pad moves a highlight through the rows. They're read from the controller's model while

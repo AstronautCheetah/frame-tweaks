@@ -43,6 +43,6 @@ if [ -x "$BIN/wallet-tool" ] && [ -z "${FRAME_TWEAKS_REINSTALL:-}" ]; then
         if [ -f "$w" ] && grep -q '^# wallet-tool:' "$w" 2>/dev/null; then "$BIN/wallet-tool" --remove "$(basename "$w")" || true; fi
     done
 fi
-remove_files "$HOME/.config/systemd/user/wallet-lock-sync.service" "$HOME/.config/systemd/user/app-timers.service" "$BIN/app-timers" "$BIN/with-keyring" "$BIN/wallet-unlock" "$BIN/wallet-gate" "$BIN/wallet-launcher" "$BIN/wallet-tool" "$BIN/frame-outer-bus" "$HOME/.local/share/frame-tweaks/brew-for-tweaks"
+remove_files "$HOME/.config/systemd/user/wallet-lock-sync.service" "$HOME/.config/systemd/user/app-timers.service" "$BIN/app-timers" "$BIN/with-keyring" "$BIN/wallet-unlock" "$BIN/wallet-token" "$BIN/wallet-gate" "$BIN/wallet-launcher" "$BIN/wallet-tool" "$BIN/frame-outer-bus" "$HOME/.local/share/frame-tweaks/brew-for-tweaks"
 say "$(t 'Kept KWalletManager (%s) and the wallet itself. gh tokens stay in the wallet.' "flatpak uninstall org.kde.kwalletmanager")"
 warn "$(t 'Signal still needs the wallet: keep its kwallet6 setting (see %s).' signal/README.md)"

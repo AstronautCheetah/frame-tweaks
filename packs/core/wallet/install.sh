@@ -7,6 +7,7 @@ install -m755 "$TWEAK_DIR/frame-outer-bus" "$TWEAK_DIR/wallet-launcher" "$TWEAK_
     "$TWEAK_DIR/app-timers" "$BIN/"
 ensure_tweaks_venv
 install_py_tool "$TWEAK_DIR/wallet-unlock"
+install_py_tool "$TWEAK_DIR/wallet-token"    # (tokens in the wallet, for wallet-tool's claude wrapper)
 install -m755 "$TWEAK_DIR/with-keyring" "$BIN/"
 install -m755 "$TWEAK_DIR/wallet-tool" "$BIN/"      # (terminal tools from Homebrew behind the wallet)
 # The Homebrew formulae Frame Tweaks' own tweaks install (whisper-cpp for Dictation, say): wallet-tool

@@ -7,13 +7,25 @@ password first while the wallet is locked, and the command finds the wallet as i
 (Secret Service), where tools that use one keep their sign-in instead of a plain-text file. The
 gh wrapper the Wallet install adds is the same thing, for gh.
 
+Claude Code is one that doesn't: on Linux it keeps its sign-in in ~/.claude/.credentials.json
+whatever the keyring. Its wrapper also hands it a long-lived token kept in the wallet
+(wallet-token), once you store one; then it signs in with that.
+
   wallet-tool claude            protect (the command's name, as you type it)
-  wallet-tool --remove claude   back to Homebrew's own command
+  wallet-tool --remove claude   back to Homebrew's own command (and its token out of the wallet)
+  wallet-tool --store-token claude
+                                a token for claude into the wallet: claude setup-token makes one
+                                (it offers to run it), you paste it (not shown); then it offers to
+                                move claude's plain-text sign-in file aside
+  wallet-tool --forget-token claude
+                                the token out of the wallet
   wallet-tool --list            protected commands, one a line
   wallet-tool --candidates      Homebrew commands that could be: from the formulae you installed
                                 (brew leaves) and the casks, not those Frame Tweaks' tweaks
                                 install and run, as "command<TAB>formula or cask"
 """
+import getpass
+import json
 import os
 import re
 import subprocess
@@ -31,13 +43,19 @@ BIN = Path.home() / ".local/bin"
 BREW = Path(os.environ.get("FRAME_TWEAKS_BREW") or "/home/linuxbrew/.linuxbrew/bin/brew")
 PREFIX = BREW.parent.parent
 MARK = "# wallet-tool:"                  # (on the wrappers this writes: only those are removed)
-LINE = re.compile(r'^exec "\$HOME/\.local/bin/with-keyring" (/\S+) "\$@"$', re.M)
+# (with "$HOME/.local/bin/wallet-token" run CMD before the real command for the TOKENS ones)
+LINE = re.compile(r'^exec "\$HOME/\.local/bin/with-keyring" (?:"\$HOME/\.local/bin/wallet-token" run \S+ )?'
+                  r'(/\S+) "\$@"$', re.M)
 # The formulae Frame Tweaks' own tweaks install (written by the Wallet install): their commands
 # aren't offered, since those tweaks run them and they mustn't wait for the wallet.
 FOR_TWEAKS = Path(os.environ.get("FRAME_TWEAKS_BREW_FOR_TWEAKS")
                   or Path.home() / ".local/share/frame-tweaks/brew-for-tweaks")
 # The installer's own wrapper (gh: it also moves gh's token into the wallet), and Homebrew itself.
 MANAGED = {"gh": _("set up by the Wallet tweak's install"), "brew": None}
+# Commands that keep their sign-in in a plain-text file even with the wallet as their keyring, but
+# take a token in their environment: the subcommand that makes one (wallet-token's ENV names the
+# variable).
+TOKENS = {"claude": "setup-token"}
 
 
 def wrapper_target(path):
@@ -114,9 +132,10 @@ def protect(cmd):
         sys.exit(_("{path} is a program of yours: left as it is").format(path=wrapper))
     BIN.mkdir(parents=True, exist_ok=True)
     tmp = wrapper.with_name(f".{cmd}.wallet-tool")
+    token = f'"$HOME/.local/bin/wallet-token" run {cmd} ' if cmd in TOKENS else ""
     tmp.write_text(f'#!/bin/sh\n{MARK} {cmd} with the shared KDE wallet: its password first while it is locked, '
                    f'and it is the keyring (with-keyring). wallet-tool --remove {cmd} undoes it.\n'
-                   f'exec "$HOME/.local/bin/with-keyring" {real} "$@"\n')
+                   f'exec "$HOME/.local/bin/with-keyring" {token}{real} "$@"\n')
     tmp.chmod(0o755)
     os.replace(tmp, wrapper)
     print(_("{cmd}: protected. Open a new terminal (or run hash -r) for it to take effect.").format(cmd=cmd))
@@ -133,6 +152,99 @@ def remove(cmd):
             cmd=cmd, why=MANAGED.get(cmd) or _("a program of yours")))
     wrapper.unlink()
     print(_("{cmd}: back to Homebrew's own command.").format(cmd=cmd))
+    if cmd in TOKENS:
+        forget_token(cmd, unlock=False)
+
+
+def yes(question, default):
+    try:
+        answer = input(question).strip().lower()
+    except EOFError:
+        return default
+    return default if not answer else answer[0] == "y"
+
+
+def wallet_state():
+    try:
+        return subprocess.run([str(BIN / "wallet-unlock"), "--status"], capture_output=True, text=True,
+                              timeout=30).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+
+
+def wallet_token(*args, **kw):
+    """wallet-token, with the wallet unlocked (with-keyring: its dialog while it's locked)."""
+    return subprocess.run([str(BIN / "with-keyring"), str(BIN / "wallet-token"), *args], **kw).returncode
+
+
+def needs_token_command(cmd):
+    if cmd not in TOKENS:
+        sys.exit(_("{cmd}: no token to keep for it (only for: {commands})").format(cmd=cmd, commands=", ".join(TOKENS)))
+
+
+def store_token(cmd):
+    needs_token_command(cmd)
+    real = PREFIX / "bin" / cmd
+    protect(cmd)            # (again: a wrapper from before tokens didn't hand one over)
+    if sys.stdin.isatty():
+        if yes(_("Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token "
+                 "to copy. [Y/n] ").format(cmd=cmd, sub=TOKENS[cmd]), True):
+            # (The real command: it shows the token on this terminal, and saves it nowhere.)
+            subprocess.run([str(real), TOKENS[cmd]])
+        token = getpass.getpass(_("Paste the token (it isn't shown), then Enter: "))
+    else:
+        token = sys.stdin.readline()
+    if not token.strip():
+        sys.exit(_("Nothing stored."))
+    # (On stdin, never on a command line, which every process can read.)
+    if wallet_token("store", cmd, input=token.strip() + "\n", text=True):
+        sys.exit(1)
+    print(_("{cmd} now signs in with the wallet's token. If the token is still on screen, clear this "
+            "terminal's scrollback (clear, or Konsole's Clear Scrollback and Reset).").format(cmd=cmd))
+    offer_move(cmd)
+
+
+def credentials_file(cmd):
+    """Where the command keeps its own sign-in in plain text."""
+    if cmd == "claude":
+        return Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / ".credentials.json"
+    return None
+
+
+def offer_move(cmd):
+    f = credentials_file(cmd)
+    if not (f and f.is_file()):
+        return
+    print(_("{path} still holds {cmd}'s own sign-in in plain text. With the token in the wallet, {cmd} "
+            "doesn't need it.").format(path=f, cmd=cmd))
+    try:            # (only which sign-ins it holds, never what they say)
+        others = sorted(set(json.loads(f.read_text())) - {"claudeAiOauth"})
+    except (OSError, ValueError, TypeError):
+        others = []
+    if others:
+        print(_("It also holds: {keys} (MCP servers' sign-ins, say); with it moved aside, {cmd} asks for those "
+                "again.").format(keys=", ".join(others), cmd=cmd))
+    aside = f.with_name(f.name + ".before-wallet")
+    if (sys.stdin.isatty() and not aside.exists()
+            and yes(_("Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] ").format(
+                path=aside), False)):
+        os.replace(f, aside)
+        print(_("Moved. Once {cmd} works with the wallet's token, delete it: rm {path}").format(cmd=cmd, path=aside))
+    else:
+        # (Not /logout or claude auth logout: they sign that login out at Anthropic too.)
+        print(_("Left where it is. To remove it yourself: rm {path}").format(path=f))
+
+
+def forget_token(cmd, unlock=True):
+    needs_token_command(cmd)
+    if not (BIN / "wallet-token").exists():
+        return
+    if not unlock and wallet_state() != "unlocked":     # (no password dialog for a Remove)
+        print(_("{cmd}: a token in the wallet, if you stored one, stays there while the wallet is locked: "
+                "wallet-tool --forget-token {cmd} removes it.").format(cmd=cmd))
+        return
+    if wallet_token("forget", cmd):
+        sys.exit(1)
 
 
 def main(a):
@@ -144,6 +256,10 @@ def main(a):
             print(f"{cmd}\t{src}")
     elif len(a) == 2 and a[0] == "--remove":
         remove(a[1])
+    elif len(a) == 2 and a[0] == "--store-token":
+        store_token(a[1])
+    elif len(a) == 2 and a[0] == "--forget-token":
+        forget_token(a[1])
     elif len(a) == 1 and not a[0].startswith("-"):
         protect(a[0])
     else:

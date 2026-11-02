@@ -25,7 +25,7 @@ run: {label: Unlock}
 wallet_apps: [org.kde.kwalletmanager]
 config: [~/.config/frame-tweaks/wallet.conf, ~/.config/frame-tweaks/app-timers.conf]
 changes: >-
-  `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `wallet-tool`, `app-timers`, `with-keyring`, wrappers
+  `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `wallet-tool`, `wallet-token`, `app-timers`, `with-keyring`, wrappers
   for the Homebrew commands you protect, and a `gh`
   wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet**
   menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps'
@@ -35,7 +35,8 @@ changes: >-
 access: >-
   Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its
   dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app
-  timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
+  timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet; keeps a
+  Claude Code token there if you store one (`wallet-tool --store-token claude`)
 survives_updates: Yes (everything is in your home folder)
 undo: >-
   `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the
@@ -137,7 +138,8 @@ The Wallet apps page also lists the commands of what you installed with Homebrew
 asked for, and casks such as Claude Code's `claude`). **Protect** puts one behind the wallet: it
 asks for the wallet password first while the wallet is locked, and the command finds the wallet
 as its keyring, so a tool that can keep its sign-in in a keyring keeps it there instead of in a
-plain-text file. **Remove** puts Homebrew's own command back. From a terminal:
+plain-text file (Claude Code can't: [see below](#claude-code-its-sign-in-in-the-wallet)).
+**Remove** puts Homebrew's own command back. From a terminal:
 
 ```sh
 wallet-tool --candidates     # what could be protected
@@ -149,6 +151,43 @@ wallet-tool --remove claude  # back to Homebrew's
 It's a small wrapper of the same name in `~/.local/bin` (which terminals search before Homebrew's
 bin): open a new terminal after protecting or removing one. A program of your own there is never
 overwritten.
+
+#### Claude Code: its sign-in in the wallet
+On Linux, Claude Code keeps its sign-in in `~/.claude/.credentials.json` (plain text, mode 600)
+whatever the keyring, so protecting `claude` alone only asks for the password. But it also takes
+a long-lived token (a year) from the `CLAUDE_CODE_OAUTH_TOKEN` variable, made by
+`claude setup-token` ([Claude Code: authentication](https://code.claude.com/docs/en/authentication#generate-a-long-lived-token)).
+The protected `claude` hands it one kept in the wallet:
+
+```sh
+wallet-tool --store-token claude    # protect claude, store a token (asks to run claude setup-token)
+wallet-tool --forget-token claude   # the token out of the wallet
+```
+
+- `--store-token` offers to run `claude setup-token` (a browser sign-in, then the token on
+  screen), and asks you to paste it: it isn't shown, and goes to the wallet through a pipe, never
+  a command line or a file. Clear the terminal afterwards (`clear`). From a script, the token is
+  read from standard input.
+- Then it offers to move `~/.claude/.credentials.json` aside to `.credentials.json.before-wallet`:
+  nothing is deleted or signed out, and moving it back undoes it. Delete it once `claude` works
+  (`/status` in claude shows how it signed in). It says first if the file also holds other
+  sign-ins (MCP servers'), which `claude` then asks for again.
+- `claude` (the wrapper) runs `wallet-token run claude …`: it reads the token from the wallet and
+  puts it in the environment of the real `claude`, and nothing else. Until you store one, it runs
+  `claude` as before and says once how to store one. A `CLAUDE_CODE_OAUTH_TOKEN` you set yourself
+  stands. If the wallet can't be read, `claude` still starts, signing in its own way.
+- **Remove** (or `wallet-tool --remove claude`) also takes the token out of the wallet, if the
+  wallet is unlocked (a Remove asks for no password); otherwise it says how. Taking it out of the
+  wallet doesn't revoke it.
+- What changes for Claude Code: the token can only make model requests, so Remote Control and
+  claude.ai connectors need its usual sign-in (your own MCP servers still work); `/login` in a
+  session signs it in the usual way again, and writes `.credentials.json` again. Claude Desktop
+  and editors that start their own `claude` don't use the wrapper.
+- While it runs, the token is in `claude`'s environment, and so in that of the commands, hooks
+  and MCP servers it starts, as the plain-text file is open to them now. Set
+  `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` (Claude Code's `env` setting) to keep it from them (its
+  commands then can't see or signal your other processes either). Other users can't read it
+  (`/proc/<pid>/environ` is yours only).
 
 **Terminal tools:** `with-keyring CMD` runs a command with the shared wallet as its keyring,
 unlocking it first if needed. If the GitHub CLI (`gh`) is installed, the installer adds a `gh`
@@ -254,8 +293,8 @@ locks at the auto-lock time, with **Lock now**, or after the idle time with nobo
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `wallet-tool`, `app-timers`, `with-keyring`, wrappers for the Homebrew commands you protect, and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries as written in `launcher-built`); points git's credential helper for github.com, if you have one, at that `gh`
-- **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet
+- **Changes:** `wallet-unlock`, `wallet-launcher`, `wallet-gate`, `wallet-tool`, `wallet-token`, `app-timers`, `with-keyring`, wrappers for the Homebrew commands you protect, and a `gh` wrapper in `~/.local/bin`; user services `wallet-lock-sync` and `app-timers`; a **Lock Wallet** menu entry; `kwalletrc` idle-close setting; KWalletManager (Flathub); rewrites chosen apps' menu entries (originals kept in `~/.local/share/frame-tweaks/launcher-originals`, the entries as written in `launcher-built`); points git's credential helper for github.com, if you have one, at that `gh`
+- **Unusual access:** Talks to KDE Wallet over D-Bus; **closes KDE's own wallet password prompts** (replaced by its dialog); reads keyboard and mouse activity and the headset's proximity sensor (for app timers); quits apps you set a timer for; moves the GitHub CLI token into the wallet; keeps a Claude Code token there if you store one (`wallet-tool --store-token claude`)
 - **Undo:** `./install.sh uninstall wallet` (keeps the wallet itself and KWalletManager; restores the original menu entries and the KDE settings it changed)
 <!-- /generated:changes -->
 

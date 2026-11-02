@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""wallet-token: a terminal tool's sign-in token kept in the shared KDE wallet, and handed to the
+tool in its environment when it runs. For tools that keep their sign-in in a plain-text file even
+when the wallet is their keyring: Claude Code on Linux always writes ~/.claude/.credentials.json,
+but takes a long-lived token (claude setup-token) from CLAUDE_CODE_OAUTH_TOKEN instead.
+wallet-tool runs this through with-keyring, so the wallet is unlocked and on the bus this uses.
+
+  wallet-token run claude REAL [ARGS...]   run REAL with claude's token from the wallet in its
+                                           environment; without one stored, as it is, saying
+                                           once how to store one
+  wallet-token store claude                the token, one line on stdin, into the wallet
+  wallet-token forget claude               the token out of the wallet
+  wallet-token status claude               stored / none (exit 0 / 1)
+
+The token never appears on a command line, in a file or in this program's output: only in the
+environment of the command it runs (which other users can't read: /proc/PID/environ is the
+owner's).
+"""
+import os
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+# The commands whose token this keeps, and the variable each reads it from (wallet-tool's TOKENS
+# names the same commands, with the subcommand that makes one).
+ENV = {"claude": "CLAUDE_CODE_OAUTH_TOKEN"}
+OUTER_BUS = f"unix:path=/run/user/{os.getuid()}/bus"       # (where the wallet is: with-keyring)
+SECRETS = "org.freedesktop.secrets"
+SERVICE = "/org/freedesktop/secrets"
+COLLECTION = "/org/freedesktop/secrets/collection/kdewallet"   # (wallet-unlock's one wallet)
+# Said once (per command) when there's no token to hand over, not at every start.
+HINTED = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "frame-tweaks"
+
+
+class WalletError(Exception):
+    pass
+
+
+def attributes(cmd):
+    """How the token is found again (and seen in KWalletManager, under Secret Service)."""
+    return {"application": "frame-tweaks", "frame-tweaks-token": cmd}
+
+
+class Wallet:
+    """The Secret Service on the outer bus. Its "plain" session: the token crosses the session
+    bus unencrypted, as gh's and every libsecret tool's secrets may; only this user's own
+    processes can listen there."""
+
+    def __init__(self):
+        from jeepney import DBusAddress, MessageType, new_method_call
+        from jeepney.io.blocking import open_dbus_connection
+        self._address, self._call, self._error = DBusAddress, new_method_call, MessageType.error
+        self.conn = open_dbus_connection(OUTER_BUS)
+        self.session = self.call(SERVICE, "Service", "OpenSession", "sv", ("plain", ("s", "")))[1]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.conn.close()
+
+    def call(self, path, interface, method, signature=None, body=()):
+        address = self._address(path, bus_name=SECRETS, interface="org.freedesktop.Secret." + interface)
+        reply = self.conn.send_and_get_reply(self._call(address, method, signature, body))
+        if reply.header.message_type == self._error:
+            raise WalletError(f"{method}: {reply.body[0] if reply.body else reply.header.fields.get(4, 'D-Bus error')}")
+        return reply.body
+
+    def items(self, cmd):
+        # (Both lists: ksecretd's "locked" can stay true after an unlock, see wallet-unlock's
+        # is_locked; GetSecrets says whether it really is.)
+        unlocked, locked = self.call(SERVICE, "Service", "SearchItems", "a{ss}", (attributes(cmd),))
+        return list(unlocked) + list(locked)
+
+    def get(self, cmd):
+        items = self.items(cmd)
+        if not items:
+            return None
+        secrets = self.call(SERVICE, "Service", "GetSecrets", "aoo", (items[:1], self.session))[0]
+        for _session, _params, value, _type in secrets.values():
+            return bytes(value).decode()
+        raise WalletError(_("the wallet is locked"))
+
+    def store(self, cmd, token):
+        props = {"org.freedesktop.Secret.Item.Label": ("s", f"{cmd}: sign-in token (wallet-tool)"),
+                 "org.freedesktop.Secret.Item.Attributes": ("a{ss}", attributes(cmd))}
+        _item, prompt = self.call(COLLECTION, "Collection", "CreateItem", "a{sv}(oayays)b",
+                                  (props, (self.session, b"", token.encode(), "text/plain"), True))
+        if prompt != "/":       # (ksecretd's own prompt, floating in VR: with-keyring unlocks first)
+            raise WalletError(_("the wallet is locked"))
+
+    def forget(self, cmd):
+        n = 0
+        for item in self.items(cmd):
+            if self.call(item, "Item", "Delete")[0] != "/":
+                raise WalletError(_("the wallet is locked"))
+            n += 1
+        return n
+
+
+def hint_once(cmd):
+    mark = HINTED / f"wallet-token-hint.{cmd}"
+    if mark.exists():
+        return
+    print(_("{cmd}: no token in the wallet yet, so it keeps its sign-in in its own plain-text file. To keep "
+            "it in the wallet instead: wallet-tool --store-token {cmd}   (said once)").format(cmd=cmd), file=sys.stderr)
+    try:
+        HINTED.mkdir(parents=True, exist_ok=True)
+        mark.touch()
+    except OSError:
+        pass
+
+
+def unhint(cmd):
+    (HINTED / f"wallet-token-hint.{cmd}").unlink(missing_ok=True)
+
+
+def run(cmd, argv):
+    env, name = dict(os.environ), ENV[cmd]
+    if not env.get(name):           # (one you set yourself stands)
+        try:
+            with Wallet() as w:
+                token = w.get(cmd)
+        except Exception as e:       # (whatever went wrong, the command still runs: as it would without)
+            print(_("wallet-token: couldn't read the wallet ({error}): {cmd} signs in its own way").format(
+                error=e, cmd=cmd), file=sys.stderr)
+        else:
+            if token:
+                env[name] = token
+            else:
+                hint_once(cmd)
+    try:
+        os.execve(argv[0], argv, env)
+    except OSError as e:
+        sys.exit(_("wallet-token: can't run {path}: {error}").format(path=argv[0], error=e.strerror))
+
+
+def read_token():
+    """One line on stdin: printable ASCII without spaces, as tokens are (not what a wrong paste
+    of a whole terminal line would be)."""
+    token = sys.stdin.readline().strip()
+    if not re.fullmatch(r"[\x21-\x7e]{20,4096}", token):
+        sys.exit(_("wallet-token: that isn't a token (one line, no spaces): nothing stored"))
+    return token
+
+
+def main(a):
+    if len(a) < 2 or a[1] not in ENV:
+        sys.exit(__doc__)
+    what, cmd = a[0], a[1]
+    if what == "run" and len(a) >= 3:
+        run(cmd, a[2:])
+    try:
+        if what == "store" and len(a) == 2:
+            token = read_token()
+            with Wallet() as w:
+                w.store(cmd, token)
+            unhint(cmd)
+            print(_("{cmd}: token stored in the wallet.").format(cmd=cmd))
+        elif what == "forget" and len(a) == 2:
+            with Wallet() as w:
+                n = w.forget(cmd)
+            unhint(cmd)
+            if n:
+                print(_("{cmd}: token removed from the wallet.").format(cmd=cmd))
+        elif what == "status" and len(a) == 2:
+            with Wallet() as w:
+                stored = bool(w.items(cmd))
+            print("stored" if stored else "none")
+            sys.exit(0 if stored else 1)
+        else:
+            sys.exit(__doc__)
+    except WalletError as e:
+        sys.exit(_("wallet-token: {error}").format(error=e))
+    except OSError as e:          # (no session bus, no Secret Service on it)
+        sys.exit(_("wallet-token: can't reach the wallet ({error})").format(error=e))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

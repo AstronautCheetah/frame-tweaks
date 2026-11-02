@@ -5332,6 +5332,76 @@ msgid ""
 "Lock the KDE wallet now (Signal, Firefox, Android Mirror and gh then need the password)"
 msgstr ""
 
+#: packs/core/wallet/wallet-token
+msgid "the wallet is locked"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid "wallet-token: can't reach the wallet ({error})"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid "wallet-token: can't run {path}: {error}"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid ""
+"wallet-token: couldn't read the wallet ({error}): {cmd} signs in its own way"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid ""
+"wallet-token: that isn't a token (one line, no spaces): nothing stored"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid "wallet-token: {error}"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid ""
+"{cmd}: no token in the wallet yet, so it keeps its sign-in in its own plain-text file. To keep it in the wallet instead: wallet-tool --store-token {cmd}   (said once)"
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid "{cmd}: token removed from the wallet."
+msgstr ""
+
+#: packs/core/wallet/wallet-token
+msgid "{cmd}: token stored in the wallet."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid ""
+"It also holds: {keys} (MCP servers' sign-ins, say); with it moved aside, {cmd} asks for those again."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "Left where it is. To remove it yourself: rm {path}"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid ""
+"Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "Moved. Once {cmd} works with the wallet's token, delete it: rm {path}"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "Nothing stored."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "Paste the token (it isn't shown), then Enter: "
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid ""
+"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+msgstr ""
+
 #: packs/core/wallet/wallet-tool
 msgid "a program of yours"
 msgstr ""
@@ -5341,7 +5411,21 @@ msgid "set up by the Wallet tweak's install"
 msgstr ""
 
 #: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd} now signs in with the wallet's token. If the token is still on screen, clear this terminal's scrollback (clear, or Konsole's Clear Scrollback and Reset)."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd}: a token in the wallet, if you stored one, stays there while the wallet is locked: wallet-tool --forget-token {cmd} removes it."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
 msgid "{cmd}: back to Homebrew's own command."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: no token to keep for it (only for: {commands})"
 msgstr ""
 
 #: packs/core/wallet/wallet-tool
@@ -5371,6 +5455,11 @@ msgstr ""
 
 #: packs/core/wallet/wallet-tool
 msgid "{path} is a program of yours: left as it is"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{path} still holds {cmd}'s own sign-in in plain text. With the token in the wallet, {cmd} doesn't need it."
 msgstr ""
 
 #: packs/core/wallet/wallet-unlock
