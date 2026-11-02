@@ -635,5 +635,36 @@ class BackupTimer(unittest.TestCase):
             self.assertIn("; 1 kept)", r.stdout)
 
 
+
+class UpdateCheck(unittest.TestCase):
+    """dev/update-check.sh compare: what changed between two snapshots, ignoring when each was taken."""
+    def snap(self, root, name, version, status):
+        d = Path(root) / "snapshots" / name
+        d.mkdir(parents=True)
+        (d / "system.txt").write_text(f"2026-11-0{name[-1]}T10:00:00+00:00\nSteamOS 0.5.6 build 1\n")
+        (d / "git.txt").write_text(f"version: {version}\n")
+        (d / "status.txt").write_text(status)
+        for f in ("signatures.txt", "installed.txt", "units.txt", "bin.sha256"):
+            (d / f).write_text("same\n")
+
+    def test_compare_shows_only_what_changed(self):
+        with tempfile.TemporaryDirectory() as td:
+            self.snap(td, "20261101-before-1", "0.6.22", "  ✔ wallet ok\n")
+            self.snap(td, "20261102-after-2", "0.6.23", "  ✔ wallet ok\n")
+            r = subprocess.run(["bash", str(ROOT / "dev/update-check.sh"), "compare", "before", "after"],
+                               capture_output=True, text=True, env={**os.environ, "FRAME_TWEAKS_CHECKS": td}, timeout=30)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("== git.txt\n< version: 0.6.22\n> version: 0.6.23", r.stdout)
+        for unchanged in ("system.txt", "status.txt", "units.txt"):
+            self.assertNotIn(f"== {unchanged}", r.stdout)
+
+    def test_compare_says_when_a_snapshot_is_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            r = subprocess.run(["bash", str(ROOT / "dev/update-check.sh"), "compare", "x", "y"],
+                               capture_output=True, text=True, env={**os.environ, "FRAME_TWEAKS_CHECKS": td}, timeout=30)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("no such snapshot", r.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

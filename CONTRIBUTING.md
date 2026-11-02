@@ -320,6 +320,17 @@ under `/run/media` (`dev/backup.sh --help`): `.git` with commits not pushed, loc
 whatever else git ignores included, build files and caches left out. Each snapshot is hardlinked
 against the one before, so only changed files take space; the newest 48 are kept.
 
+## Checking updates on a Frame (maintainers)
+
+`dev/update-check.sh` checks that updates keep working, on a Frame. Before an update of the
+Frame's own install, `dev/update-check.sh snapshot before`; after it, `snapshot after` and
+`compare before after`: the version, release signatures, each tweak's status, user services and
+the programs in `~/.local/bin`, side by side. After each release, `dev/update-check.sh
+release-test` installs copies at the last four releases in throwaway homes and updates them as
+`./install.sh update` does: each must verify the new release's signature and move to it. Given a
+local copy of the repository (`release-test PATH`), it tries a release before it's pushed.
+Snapshots are kept in `~/frame-update-checks` and on the microSD card (`dev/update-check.sh --help`).
+
 ## Releasing (maintainers)
 
 Add changes under `## Unreleased` in CHANGELOG.md as you go, then run the **Release** workflow

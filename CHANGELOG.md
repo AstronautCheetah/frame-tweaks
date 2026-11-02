@@ -109,6 +109,10 @@
   token. It used to say only "Run 'nordvpn-wg setup' first." and "NordVPN access token (input
   hidden):".
 ### For contributors
+- **`dev/update-check.sh`** checks updates on a Frame: snapshots of the install before and after
+  an update, compared (version, signatures, each tweak's status, services, installed programs),
+  and a release test that updates copies installed at the last releases, in throwaway homes, and
+  checks each verifies the new release's signature and moves to it.
 - **`dev/fetch-upstream-readmes.py` fetches only over HTTPS from GitHub:** a picture in an upstream
   README at a `file:` address (a file of yours, such as gh's token) or on another host was read and
   saved into `upstream/`, ready to commit. Now it stays a link, with a warning, and redirects away
