@@ -213,8 +213,9 @@ class DictateAutoStop(Home):
 class DictationInstall(Home):
     def install(self, conf):
         """dictation/install.sh in a throwaway home with dictate.conf saying conf, the shared model
-        there and two that older versions downloaded; stand-ins for Homebrew, systemctl and the
-        ydotool helper's installer. The models left afterwards."""
+        there and two that older versions downloaded; stand-ins for Homebrew, systemctl, curl (no
+        download: the optional voice activity model then isn't there, as offline) and the ydotool
+        helper's installer. The models left afterwards."""
         self.home = Path(tempfile.mkdtemp(dir=self.tmp))
         models = self.home / ".local/share/whisper"
         models.mkdir(parents=True)
@@ -225,6 +226,7 @@ class DictationInstall(Home):
         stubs, ydotool = self.tmp / "stubs", self.tmp / "ydotool"
         for name in ("brew", "systemctl"):
             self.stub(stubs, name, f'echo "{name} $*" >> {self.log}')
+        self.stub(stubs, "curl", f'echo "curl $*" >> {self.log}; exit 22')     # (nothing reaches the Internet)
         self.stub(ydotool, "install.sh", f'echo "ydotool install" >> {self.log}')
         env = sandbox_env(self.home, stubs, BREW_BIN=stubs / "brew", FRAME_TWEAKS_DIRS=f"ydotool={ydotool}")
         r = subprocess.run(["bash", str(DICTATION / "install.sh")], env=env, capture_output=True, text=True, timeout=60)
