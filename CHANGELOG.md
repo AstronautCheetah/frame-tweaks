@@ -190,6 +190,9 @@
   ([DESIGN.md](docs/DESIGN.md#moving-the-installer-to-python)).
 - **`dev/container-check.sh`** runs `dev/check.sh` in a container with CI's environment
   (`dev/Containerfile`, Podman or Docker), so every check runs on a Mac, Windows or any Linux.
+- **`steam-frame.yml`:** what Frame Tweaks is, in frame-commons' manifest format, with a test record
+  (headset SteamOS, build, SteamVR, channel, result) for each release tried on a Frame, added by
+  `dev/record-tested.sh`; the catalog's compatibility table is built from them.
 - **`dev/button-test.py`:** a window, in VR on a Frame, showing which buttons Frame Tweaks sees
   pressed (the controllers' through their model, the headset's Aux key through Linux), red once
   a press is long, and what the window gets from SteamVR's laser mouse (CONTRIBUTING.md,

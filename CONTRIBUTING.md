@@ -382,6 +382,14 @@ test release until the next stable one is out, which ranks above its test releas
 at once (the window offers it; `./install.sh update --to stable`). An update never moves to an
 older release unasked.
 
+**Record what a release was tested on.** After trying a release on a Frame, add a test record to
+[steam-frame.yml](steam-frame.yml): `dev/record-tested.sh HOST works "0.7.0: install, Dictation"`
+(HOST: the Frame as ssh reaches it, or `.` on the Frame itself; `partial` or `broken` when that's
+what happened). It reads the headset's SteamOS version and build, SteamVR's version and the update
+channel from the Frame. frame-commons' catalog builds its compatibility table
+([COMPAT.md](https://github.com/frame-commons/catalog/blob/main/COMPAT.md)) from these records.
+Add records; never change old ones.
+
 **How many people use it** (Frame Tweaks itself never reports anything): GitHub counts clones
 (each install is one; updates may count too) and page views, but keeps only 14 days. The **Traffic**
 workflow saves them daily into `traffic.csv` on the draft release "traffic" (maintainers only),
