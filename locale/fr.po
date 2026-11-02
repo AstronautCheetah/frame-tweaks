@@ -22,6 +22,13 @@ msgstr "Installation de %s dans %s"
 
 # needs review
 #: get.sh
+msgid ""
+"Release %s isn't signed by Frame Tweaks' release key, so it wasn't installed."
+msgstr ""
+"La version %s n'est pas signée par la clé de publication de Frame Tweaks, elle n'a donc pas été installée."
+
+# needs review
+#: get.sh
 msgid "Release channel: %s"
 msgstr "Canal des versions : %s"
 
@@ -37,6 +44,280 @@ msgid "Updating %s (./install.sh update)"
 msgstr "Mise à jour de %s (./install.sh update)"
 
 # needs review
+#: get.sh lib/common.sh
+msgid ""
+"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
+msgstr ""
+"la version %s n'est pas signée avec la clé de publication de Frame Tweaks ; poursuite malgré tout (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
+
+# needs review
+#: gui/apply_changes.py
+msgid "(asks for your sudo password: %s)"
+msgstr "(demande votre mot de passe sudo : %s)"
+
+# needs review
+#: gui/apply_changes.py
+msgid "(needed by %s)"
+msgstr "(nécessaire pour %s)"
+
+# needs review
+#: gui/apply_changes.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
+msgid "Apply"
+msgstr "Appliquer"
+
+# needs review
+#: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
+msgid "Cancel"
+msgstr "Annuler"
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Choose a password for your user (sudo asks for it). Type it, press Enter, then type it again: nothing shows as you type."
+msgstr ""
+"Choisissez un mot de passe pour votre utilisateur (sudo le demande). Tapez-le, appuyez sur Entrée, puis tapez-le de nouveau : rien ne s'affiche pendant la saisie."
+
+# needs review
+#: gui/apply_changes.py
+msgid "I understand the risk: apply"
+msgstr "Je comprends le risque : appliquer"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Install:"
+msgstr "Installer :"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Install: %s"
+msgstr "Installer : %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid "No password yet: Set a password… again when you're ready."
+msgstr ""
+"Pas encore de mot de passe : appuyez de nouveau sur « Définir un mot de passe… » quand vous serez prêt."
+
+# needs review
+#: gui/apply_changes.py install.sh
+msgid "Nothing to change."
+msgstr "Rien à modifier."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Nothing to change: tick or untick a tweak first"
+msgstr "Rien à modifier : cochez ou décochez d'abord un ajustement"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Password set: the tweaks tagged sudo can install now."
+msgstr ""
+"Mot de passe défini : les ajustements marqués sudo peuvent maintenant s'installer."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Remove:"
+msgstr "Retirer :"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Remove: %s"
+msgstr "Retirer : %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Set a password…"
+msgstr "Définir un mot de passe…"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Still checking status; try again in a moment."
+msgstr "Vérification de l'état en cours ; réessayez dans un instant."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Their settings and data are kept."
+msgstr "Leurs paramètres et données sont conservés."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Their settings are removed too (⚙ Preferences); their data is kept."
+msgstr ""
+"Leurs paramètres sont aussi supprimés (⚙ Préférences) ; leurs données sont conservées."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
+msgstr ""
+"Votre utilisateur n'a pas encore de mot de passe, donc les ajustements qui demandent le mot de passe sudo (marqués sudo) ne peuvent pas s'installer. Définissez-en un d'abord : vous le taperez quand ils le demanderont."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
+msgstr ""
+"{tweaks} : nécessite votre mot de passe sudo, et votre utilisateur n'en a pas encore. Définissez-en un, puis appuyez de nouveau sur « Appliquer les modifications »."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}"
+msgstr ""
+"⚠ Pilote le matériel du Frame : {hardware}. En cas de problème : {fail_safe}"
+
+# needs review
+#: gui/details_page.py
+msgid "(used instead of {other}'s)"
+msgstr "(utilisé à la place de celui de {other})"
+
+# needs review
+#: gui/details_page.py
+msgid ""
+"<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
+msgstr ""
+"<b>La version {version} est disponible</b>, le problème est peut-être résolu : consultez {link}ses notes de version{end}, puis réinstallez pour mettre à jour."
+
+# needs review
+#: gui/details_page.py
+msgid "About Frame Tweaks"
+msgstr "À propos de Frame Tweaks"
+
+# needs review
+#: gui/details_page.py
+msgid "Asks for sudo"
+msgstr "Demande sudo"
+
+# needs review
+#: gui/details_page.py
+msgid "Checking for a newer release…"
+msgstr "Recherche d'une version plus récente…"
+
+# needs review
+#: gui/details_page.py
+msgid "Couldn't check for a newer release; see {link}its releases{end}."
+msgstr ""
+"Impossible de rechercher une version plus récente ; consultez {link}ses versions{end}."
+
+# needs review
+#: gui/details_page.py
+msgid "Documentation"
+msgstr "Documentation"
+
+# needs review
+#: gui/details_page.py
+msgid "From"
+msgstr "Provenance"
+
+# needs review
+#: gui/details_page.py
+msgid ""
+"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
+msgstr ""
+"Installé, mis à jour et désinstallé avec les commandes propres au projet, telles que son README les donne ; Frame Tweaks les exécute, mais ne fixe pas les versions de ce qu'elles installent, et ne le vérifie ni ne le modifie."
+
+# needs review
+#: gui/details_page.py
+msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
+msgstr ""
+"Son installation demande votre mot de passe sudo (administrateur) dans son terminal : %s"
+
+# needs review
+#: gui/details_page.py
+msgid "Its README"
+msgstr "Son README"
+
+# needs review
+#: gui/details_page.py
+msgid "Made by"
+msgstr "Créé par"
+
+# needs review
+#: gui/details_page.py
+msgid "Needs"
+msgstr "Nécessite"
+
+# needs review
+#: gui/details_page.py
+msgid "No README."
+msgstr "Pas de README."
+
+# needs review
+#: gui/details_page.py
+msgid "Not needed"
+msgstr "Non nécessaire"
+
+# needs review
+#: gui/details_page.py
+msgid "Pack"
+msgstr "Pack"
+
+# needs review
+#: gui/details_page.py
+msgid "Source"
+msgstr "Source"
+
+# needs review
+#: gui/details_page.py
+msgid "Status"
+msgstr "État"
+
+# needs review
+#: gui/details_page.py
+msgid "This Frame doesn't need it: %s"
+msgstr "Ce Frame n'en a pas besoin : %s"
+
+# needs review
+#: gui/details_page.py
+msgid "What it is"
+msgstr "Ce que c'est"
+
+# needs review
+#: gui/details_page.py
+msgid "Why it's included"
+msgstr "Pourquoi il est inclus"
+
+# needs review
+#: gui/details_page.py
+msgid "the pack {pack}, not part of Frame Tweaks"
+msgstr "le pack {pack}, qui ne fait pas partie de Frame Tweaks"
+
+# needs review
+#: gui/details_page.py
+msgid "{file} on GitHub"
+msgstr "{file} sur GitHub"
+
+# needs review
+#: gui/details_page.py
+msgid "{tweaks} (installed automatically)"
+msgstr "{tweaks} (installation automatique)"
+
+# needs review
+#: gui/details_page.py
+msgid "{version} is still the latest release."
+msgstr "{version} est toujours la dernière version."
+
+# needs review
+#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "← Back"
+msgstr "← Retour"
+
+# needs review
+#: gui/details_page.py
+msgid "⚠ Known issue."
+msgstr "⚠ Problème connu."
+
+# needs review
+#: gui/details_page.py
+msgid "🔗 Linked"
+msgstr "🔗 Lié"
+
+# needs review
+#: gui/details_page.py
+msgid "🧪 Experimental"
+msgstr "🧪 Expérimental"
+
+# needs review
 #: gui/frame-tweaks-gui.py
 msgid "%d pack update"
 msgid_plural "%d pack updates"
@@ -50,56 +331,13 @@ msgstr "(masqué)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "(used instead of {other}'s)"
-msgstr "(utilisé à la place de celui de {other})"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
-msgstr ""
-"<b>La version {version} est disponible</b>, le problème est peut-être résolu : consultez {link}ses notes de version{end}, puis réinstallez pour mettre à jour."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "About Frame Tweaks"
-msgstr "À propos de Frame Tweaks"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Another action is still running: try again once it's done."
-msgstr ""
-"Une autre action est encore en cours : réessayez quand elle sera terminée."
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Appliquer les modifications"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Asks for sudo"
-msgstr "Demande sudo"
 
 # needs review
 #: gui/frame-tweaks-gui.py lib/sft.py
 msgid "Asks for your sudo password: %s"
 msgstr "Demande votre mot de passe sudo : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Back to the defaults."
-msgstr "Valeurs par défaut rétablies."
-
-# needs review
-#: gui/frame-tweaks-gui.py gui/prefs_page.py packs/core/snip/frame-snip
-msgid "Cancel"
-msgstr "Annuler"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Checking for a newer release…"
-msgstr "Recherche d'une version plus récente…"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -123,11 +361,6 @@ msgid "Close and reopen Frame Tweaks to use the new version."
 msgstr "Fermez et rouvrez Frame Tweaks pour utiliser la nouvelle version."
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
-msgid "Collapse"
-msgstr "Réduire"
-
-# needs review
 #: gui/frame-tweaks-gui.py
 msgid "Copied"
 msgstr "Copié"
@@ -146,21 +379,10 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Copy the link"
-msgstr "Copier le lien"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
 "Copier ces détails, puis enregistrer un rapport de diagnostic et ouvrir le formulaire de signalement"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Couldn't check for a newer release; see {link}its releases{end}."
-msgstr ""
-"Impossible de rechercher une version plus récente ; consultez {link}ses versions{end}."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -173,6 +395,13 @@ msgstr ""
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 "Impossible d'ouvrir un terminal : exécutez ./install.sh uninstall-self dans {folder}"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Couldn't remove {tweaks} (not needed on this Frame): run ./install.sh tidy in a terminal to see why."
+msgstr ""
+"Impossible de retirer {tweaks} (inutile sur ce Frame) : exécutez ./install.sh tidy dans un terminal pour savoir pourquoi."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -193,31 +422,11 @@ msgid "Details: what it is, why it's included, who made it"
 msgstr "Détails : ce que c'est, pourquoi il est inclus, qui l'a créé"
 
 # needs review
-#: gui/frame-tweaks-gui.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "Didn't work: %s"
-msgstr "Échec : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Documentation"
-msgstr "Documentation"
-
-# needs review
-#: gui/frame-tweaks-gui.py lib/splash.py packs/core/snip/frame-snip install.sh
-msgid "Done."
-msgstr "Terminé."
-
-# needs review
 #: gui/frame-tweaks-gui.py
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
 msgstr ""
 "Toutes les applications ouvertes se ferment, y compris le mode bureau et cette fenêtre : enregistrez d'abord votre travail. SteamVR redémarre ensuite de lui-même."
-
-# needs review
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
-msgid "Expand"
-msgstr "Développer"
 
 # needs review
 #: gui/frame-tweaks-gui.py lib/sft.py
@@ -235,11 +444,6 @@ msgid ""
 "Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use it."
 msgstr ""
 "Frame Tweaks a été mis à jour vers {version} depuis l'ouverture de cette fenêtre : appuyez sur « ↻ Redémarrer » pour l'utiliser."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "From"
-msgstr "Provenance"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -282,16 +486,6 @@ msgstr "Masquer"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Hide category"
-msgstr "Masquer la catégorie"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Hide the whole category from the list (doesn't remove anything)"
-msgstr "Masquer toute la catégorie de la liste (ne retire rien)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Hide this tweak from the list (doesn't remove it)"
 msgstr "Masquer cet ajustement de la liste (ne le retire pas)"
 
@@ -307,37 +501,9 @@ msgstr "Installer les ajustements laissés de côté par la dernière mise à jo
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Install: %s"
-msgstr "Installer : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
-msgstr ""
-"Installé, mis à jour et désinstallé avec les commandes propres au projet, telles que son README les donne ; Frame Tweaks les exécute, mais ne fixe pas les versions de ce qu'elles installent, et ne le vérifie ni ne le modifie."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
-msgstr ""
-"Son installation demande votre mot de passe sudo (administrateur) dans son terminal : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "It came to the front there. Close it there to open it here."
 msgstr ""
 "Il est passé au premier plan là-bas. Fermez-le là-bas pour l'ouvrir ici."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Its README"
-msgstr "Son README"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Link copied"
-msgstr "Lien copié"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -353,38 +519,8 @@ msgstr "Rechercher une version plus récente de Frame Tweaks"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Made by"
-msgstr "Créé par"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Needs"
-msgstr "Nécessite"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "No README."
-msgstr "Pas de README."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Not needed"
-msgstr "Non nécessaire"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Not needed on this Frame: %s"
 msgstr "Non nécessaire sur ce Frame : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Nothing to change."
-msgstr "Rien à modifier."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Nothing to change: tick or untick a tweak first"
-msgstr "Rien à modifier : cochez ou décochez d'abord un ajustement"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -398,11 +534,6 @@ msgstr "Ouvrir %s"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Pack"
-msgstr "Pack"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Packs added from a link have a newer version where they came from: the Packs page says which"
 msgstr ""
@@ -412,17 +543,6 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "Preferences: the language, and how this window behaves"
 msgstr "Préférences : la langue, et le comportement de cette fenêtre"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Press Enter to close, or press the X button floating below to close."
-msgstr ""
-"Appuyez sur Entrée pour fermer, ou sur le bouton X qui flotte en dessous."
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Press Enter to close…"
-msgstr "Appuyez sur Entrée pour fermer…"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -442,23 +562,15 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Remove them"
-msgstr "Les retirer"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Remove: %s"
-msgstr "Retirer : %s"
+msgid ""
+"Removed {tweaks}: not needed on this Frame ({why}). Some changes show after a reboot."
+msgstr ""
+"Retiré : {tweaks}, inutile sur ce Frame ({why}). Certaines modifications n'apparaissent qu'après un redémarrage."
 
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "Reopen Frame Tweaks to use the new version"
 msgstr "Rouvrir Frame Tweaks pour utiliser la nouvelle version"
-
-# needs review
-#: gui/frame-tweaks-gui.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
-msgid "Reset to defaults"
-msgstr "Rétablir les valeurs par défaut"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -478,11 +590,6 @@ msgstr ""
 "Enregistrer un rapport de diagnostic (sans noms d'utilisateur ni chemins) et ouvrir le formulaire de signalement"
 
 # needs review
-#: gui/frame-tweaks-gui.py gui/prefs_page.py
-msgid "Saved."
-msgstr "Enregistré."
-
-# needs review
 #: gui/frame-tweaks-gui.py
 msgid "Settings"
 msgstr "Paramètres"
@@ -499,11 +606,6 @@ msgstr "Afficher les masqués ({n})"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Show this category again"
-msgstr "Réafficher cette catégorie"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Show this tweak in the list again"
 msgstr "Réafficher cet ajustement dans la liste"
 
@@ -511,16 +613,6 @@ msgstr "Réafficher cet ajustement dans la liste"
 #: gui/frame-tweaks-gui.py
 msgid "Something went wrong in the installer window"
 msgstr "Un problème est survenu dans la fenêtre de Frame Tweaks"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Source"
-msgstr "Source"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Status"
-msgstr "État"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -536,53 +628,10 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Still checking status; try again in a moment."
-msgstr "Vérification de l'état en cours ; réessayez dans un instant."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
-msgstr ""
-"Le navigateur n'a pas répondu, le lien est donc dans le presse-papiers : collez-le dans le navigateur."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "The browser didn't answer: the link is on the clipboard."
-msgstr "Le navigateur n'a pas répondu : le lien est dans le presse-papiers."
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid ""
 "The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
 msgstr ""
 "La dernière mise à jour n'est pas allée au bout : {tweaks} n'ont pas été réinstallés. « ⬇ Terminer la mise à jour » s'en charge."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Their settings and data are kept."
-msgstr "Leurs paramètres et données sont conservés."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Their settings are removed too (⚙ Preferences); their data is kept."
-msgstr ""
-"Leurs paramètres sont aussi supprimés (⚙ Préférences) ; leurs données sont conservées."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "These installed tweaks were unticked and will be <b>removed</b>:"
-msgstr "Ces ajustements installés ont été décochés et seront <b>retirés</b> :"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "This Frame doesn't need it: %s"
-msgstr "Ce Frame n'en a pas besoin : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Tick every tweak in this category"
-msgstr "Cocher tous les ajustements de cette catégorie"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -607,18 +656,6 @@ msgid "Unhide"
 msgstr "Réafficher"
 
 # needs review
-#: gui/frame-tweaks-gui.py
-msgid "Unhide category"
-msgstr "Réafficher la catégorie"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Untick every tweak in this category (installed ones are removed when you apply the changes)"
-msgstr ""
-"Décocher tous les ajustements de cette catégorie (ceux qui sont installés sont retirés quand vous appliquez les modifications)"
-
-# needs review
 #: gui/frame-tweaks-gui.py gui/packs_page.py
 msgid "Update"
 msgstr "Mettre à jour"
@@ -632,34 +669,9 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "What it is"
-msgstr "Ce que c'est"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Where the tweaks come from; add other people's (docs/mods.md)"
 msgstr ""
 "D'où viennent les ajustements ; ajouter ceux d'autres personnes (docs/mods.md)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Why it's included"
-msgstr "Pourquoi il est inclus"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Working… (a download can take a minute)"
-msgstr "En cours… (un téléchargement peut prendre une minute)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "checking…"
-msgstr "vérification…"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "hidden"
-msgstr "masquée"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -668,48 +680,8 @@ msgstr "nécessite : %s"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "not available any more"
-msgstr "plus disponible"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/third-party/menu-icons/status.sh
-msgid "not installed"
-msgstr "non installé"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "status check didn't finish (took over a minute)"
-msgstr "la vérification de l'état n'a pas abouti (plus d'une minute)"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "status check failed"
-msgstr "échec de la vérification de l'état"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "status check failed (exit {code})"
-msgstr "échec de la vérification de l'état (code de sortie {code})"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "status check failed: %s"
-msgstr "échec de la vérification de l'état : %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "status check failed: {error}"
 msgstr "échec de la vérification de l'état : {error}"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "the pack {pack}, not part of Frame Tweaks"
-msgstr "le pack {pack}, qui ne fait pas partie de Frame Tweaks"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "{file} on GitHub"
-msgstr "{file} sur GitHub"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -718,23 +690,8 @@ msgstr "{label} (s'installe d'abord si besoin : cochez-le et appliquez)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "{tweaks} (installed automatically)"
-msgstr "{tweaks} (installation automatique)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "{version} available"
 msgstr "{version} disponible"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "{version} is still the latest release."
-msgstr "{version} est toujours la dernière version."
-
-# needs review
-#: gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "← Back"
-msgstr "← Retour"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -745,11 +702,6 @@ msgstr "↻ Redémarrer"
 #: gui/frame-tweaks-gui.py
 msgid "⚙ Settings"
 msgstr "⚙ Paramètres"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "⚠ Known issue."
-msgstr "⚠ Problème connu."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -793,18 +745,8 @@ msgstr "🔑 Applications du portefeuille"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "🔗 Linked"
-msgstr "🔗 Lié"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "🧩 Packs"
 msgstr "🧩 Packs"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "🧪 Experimental"
-msgstr "🧪 Expérimental"
 
 # needs review
 #: gui/packs_page.py
@@ -814,7 +756,7 @@ msgstr[0] "%d ajustement"
 msgstr[1] "%d ajustements"
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "(instead of {other}'s)"
 msgstr "(à la place de celui de {other})"
 
@@ -842,9 +784,9 @@ msgstr "Ajouter un pack depuis un lien :"
 # needs review
 #: gui/packs_page.py
 msgid ""
-"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust below."
 msgstr ""
-"Pack {name} ajouté. Il n'est pas utilisé tant que vous ne l'approuvez pas : ses ajustements s'exécuteraient avec vos droits. Lisez d'abord ce qu'ils font (son lien, ou « Ouvrir le dossier des packs »), puis appuyez sur « Approuver… » ci-dessous."
+"Pack {name} ajouté. Il n'est pas utilisé tant que vous ne l'approuvez pas : ses ajustements s'exécuteraient avec vos droits. Lisez d'abord ce qu'ils font (son lien, ou « Ouvrir le dossier des packs »), puis appuyez sur « Approuver » ci-dessous."
 
 # needs review
 #: gui/packs_page.py
@@ -908,9 +850,9 @@ msgstr ""
 # needs review
 #: gui/packs_page.py
 msgid ""
-"It isn't used until you trust it again: read what changed first, then Trust… below."
+"It isn't used until you trust it again: read what changed first, then Trust below."
 msgstr ""
-"Il n'est pas utilisé tant que vous ne l'approuvez pas de nouveau : lisez d'abord ce qui a changé, puis appuyez sur « Approuver… » ci-dessous."
+"Il n'est pas utilisé tant que vous ne l'approuvez pas de nouveau : lisez d'abord ce qui a changé, puis appuyez sur « Approuver » ci-dessous."
 
 # needs review
 #: gui/packs_page.py
@@ -986,18 +928,13 @@ msgstr "Cela n'a pas fonctionné : {error}"
 
 # needs review
 #: gui/packs_page.py
-msgid "Trust this pack's current files"
-msgstr "Approuver les fichiers actuels de ce pack"
+msgid "Trust"
+msgstr "Approuver"
 
 # needs review
 #: gui/packs_page.py
 msgid "Trusted: its tweaks are listed"
 msgstr "Approuvé : ses ajustements sont listés"
-
-# needs review
-#: gui/packs_page.py
-msgid "Trust…"
-msgstr "Approuver…"
 
 # needs review
 #: gui/packs_page.py
@@ -1011,13 +948,15 @@ msgstr "Utiliser"
 
 # needs review
 #: gui/packs_page.py
-msgid "Yes, delete it"
-msgstr "Oui, le supprimer"
+msgid ""
+"Use this pack: its tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. If its files change (an update), it waits until you trust it again."
+msgstr ""
+"Utiliser ce pack : ses ajustements rejoignent la liste, et ceux que vous cochez s'exécutent avec vos droits, avec accès à vos fichiers et mots de passe. N'approuvez que les packs de personnes en qui vous avez confiance. Si ses fichiers changent (une mise à jour), il attend que vous l'approuviez de nouveau."
 
 # needs review
 #: gui/packs_page.py
-msgid "Yes: it runs as me"
-msgstr "Oui : il s'exécute avec mes droits"
+msgid "Yes, delete it"
+msgstr "Oui, le supprimer"
 
 # needs review
 #: gui/packs_page.py lib/splash.py
@@ -1025,7 +964,7 @@ msgid "installed"
 msgstr "installé"
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "none"
 msgstr "aucun"
 
@@ -1035,12 +974,12 @@ msgid "tweak pack provided by {author}"
 msgstr "pack d'ajustements fourni par {author}"
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "{name} is up to date."
 msgstr "{name} est à jour."
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] "{name} : mis à jour, {n} fichier modifié."
@@ -1220,6 +1159,11 @@ msgstr ""
 "Supprimer les paramètres vous déconnecte aussi de Claude pour ordinateur et supprime la clé de NordVPN (reconfigurer NordVPN demande alors un nouveau jeton d'accès)."
 
 # needs review
+#: gui/prefs_page.py gui/settings_page.py
+msgid "Saved."
+msgstr "Enregistré."
+
+# needs review
 #: gui/prefs_page.py
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr ""
@@ -1378,6 +1322,28 @@ msgid "{language}: {n} of {total} texts not yet confirmed."
 msgstr "{language} : {n} textes sur {total} pas encore confirmés."
 
 # needs review
+#: gui/readme_view.py
+msgid "Copy the link"
+msgstr "Copier le lien"
+
+# needs review
+#: gui/readme_view.py
+msgid "Link copied"
+msgstr "Lien copié"
+
+# needs review
+#: gui/readme_view.py
+msgid ""
+"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
+msgstr ""
+"Le navigateur n'a pas répondu, le lien est donc dans le presse-papiers : collez-le dans le navigateur."
+
+# needs review
+#: gui/readme_view.py
+msgid "The browser didn't answer: the link is on the clipboard."
+msgstr "Le navigateur n'a pas répondu : le lien est dans le presse-papiers."
+
+# needs review
 #: gui/report_page.py
 msgid "(Trying out the window: no report saved.)"
 msgstr "(Essai de la fenêtre : aucun rapport enregistré.)"
@@ -1385,9 +1351,9 @@ msgstr "(Essai de la fenêtre : aucun rapport enregistré.)"
 # needs review
 #: gui/report_page.py
 msgid ""
-"1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+"1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs. Removed from it: your user name, home folder path and host name, the phone names Android Mirror remembers and adb's names for phones, IP, MAC and e-mail addresses, GitHub tokens, and other tokens and keys written as 64 hex digits or as 44 base64 characters ending in =. Anything else stays as it was. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
-"1. Lisez le rapport ci-dessous : les versions de Frame Tweaks et de SteamOS, l'état de chaque ajustement et les journaux récents, sans noms d'utilisateur, chemins, noms d'hôte et de téléphone ni adresses. Rien n'en est envoyé nulle part, sauf si vous l'ajoutez au formulaire.<br>2. Ouvrez le formulaire de signalement (sur GitHub, où vous vous connectez), décrivez ce qui s'est passé et ce que vous attendiez, puis collez le rapport dans sa case « Diagnostics report » (« 📋 Copier le rapport »), ou joignez le fichier enregistré."
+"1. Lisez le rapport ci-dessous : les versions de Frame Tweaks et de SteamOS, l'état de chaque ajustement et les journaux récents. En ont été retirés : votre nom d'utilisateur, le chemin de votre dossier personnel et le nom d'hôte, les noms de téléphone que le Miroir Android mémorise et ceux qu'adb donne aux téléphones, les adresses IP, MAC et e-mail, les jetons GitHub, et les autres jetons et clés écrits sous forme de 64 chiffres hexadécimaux ou de 44 caractères base64 terminés par =. Tout le reste est inchangé. Rien n'en est envoyé nulle part, sauf si vous l'ajoutez au formulaire.<br>2. Ouvrez le formulaire de signalement (sur GitHub, où vous vous connectez), décrivez ce qui s'est passé et ce que vous attendiez, puis collez le rapport dans sa case « Diagnostics report » (« 📋 Copier le rapport »), ou joignez le fichier enregistré."
 
 # needs review
 #: gui/report_page.py
@@ -1425,6 +1391,94 @@ msgid "📋 Copy the report"
 msgstr "📋 Copier le rapport"
 
 # needs review
+#: gui/settings_page.py
+msgid " or "
+msgstr " ou "
+
+# needs review
+#: gui/settings_page.py
+msgid "Another action is still running: try again once it's done."
+msgstr ""
+"Une autre action est encore en cours : réessayez quand elle sera terminée."
+
+# needs review
+#: gui/settings_page.py
+msgid "Back to the defaults."
+msgstr "Valeurs par défaut rétablies."
+
+# needs review
+#: gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "Didn't work: %s"
+msgstr "Échec : %s"
+
+# needs review
+#: gui/settings_page.py lib/splash.py packs/core/snip/frame-snip install.sh
+msgid "Done."
+msgstr "Terminé."
+
+# needs review
+#: gui/settings_page.py
+msgid "Nothing to apply: change %s first"
+msgstr "Rien à appliquer : modifiez d'abord %s"
+
+# needs review
+#: gui/settings_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Reset to defaults"
+msgstr "Rétablir les valeurs par défaut"
+
+# needs review
+#: gui/settings_page.py
+msgid "Working… (a download can take a minute)"
+msgstr "En cours… (un téléchargement peut prendre une minute)"
+
+# needs review
+#: gui/tweak_rows.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Collapse"
+msgstr "Réduire"
+
+# needs review
+#: gui/tweak_rows.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Expand"
+msgstr "Développer"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Hide category"
+msgstr "Masquer la catégorie"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Hide the whole category from the list (doesn't remove anything)"
+msgstr "Masquer toute la catégorie de la liste (ne retire rien)"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Show this category again"
+msgstr "Réafficher cette catégorie"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Tick every tweak in this category"
+msgstr "Cocher tous les ajustements de cette catégorie"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Unhide category"
+msgstr "Réafficher la catégorie"
+
+# needs review
+#: gui/tweak_rows.py
+msgid ""
+"Untick every tweak in this category (installed ones are removed when you apply the changes)"
+msgstr ""
+"Décocher tous les ajustements de cette catégorie (ceux qui sont installés sont retirés quand vous appliquez les modifications)"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "hidden"
+msgstr "masquée"
+
+# needs review
 #: gui/wallet_page.py
 msgid "(default 4 h)"
 msgstr "(4 h par défaut)"
@@ -1435,6 +1489,13 @@ msgid ""
 "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker to pick up, and it gets passed around to family and friends. But the apps you use in it can still hold sensitive things, like messages, notes and signed-in accounts. Here you can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the whole headset: the wallet is unlocked once when you need it, and locks again by itself."
 msgstr ""
 "<b>Pourquoi l'utiliser ?</b> Beaucoup de gens ne mettent pas de mot de passe sur leur Steam Frame : il est ainsi plus vite prêt à l'emploi, et on se le prête en famille et entre amis. Mais les applications que vous y utilisez peuvent contenir des choses sensibles, comme des messages, des notes et des comptes connectés. Ici, vous pouvez protéger ces applications par <b>un seul mot de passe, celui de votre portefeuille KDE</b>, sans verrouiller tout le casque : le portefeuille est déverrouillé une fois quand vous en avez besoin, et se reverrouille tout seul."
+
+# needs review
+#: gui/wallet_page.py
+msgid "Add a terminal tool ({n} from Homebrew)"
+msgid_plural "Add a terminal tool ({n} from Homebrew)"
+msgstr[0] "Ajouter un outil de terminal ({n} dans Homebrew)"
+msgstr[1] "Ajouter un outil de terminal ({n} dans Homebrew)"
 
 # needs review
 #: gui/wallet_page.py
@@ -1474,8 +1535,20 @@ msgstr "Verrouillage automatique"
 
 # needs review
 #: gui/wallet_page.py
+msgid "Back to Homebrew's own command"
+msgstr "Revenir à la commande de Homebrew"
+
+# needs review
+#: gui/wallet_page.py
 msgid "Close after"
 msgstr "Fermer après"
+
+# needs review
+#: gui/wallet_page.py
+msgid ""
+"Couldn't start KWalletManager; open it from the menu, then kdewallet → Change Password."
+msgstr ""
+"Impossible de lancer KWalletManager ; ouvrez-le depuis le menu, puis kdewallet → Modifier le mot de passe."
 
 # needs review
 #: gui/wallet_page.py
@@ -1499,9 +1572,28 @@ msgstr "Casque retiré"
 
 # needs review
 #: gui/wallet_page.py
+msgid "Homebrew's {src}: its command {cmds}"
+msgid_plural "Homebrew's {src}: its commands {cmds}"
+msgstr[0] "{src} de Homebrew : sa commande {cmds}"
+msgstr[1] "{src} de Homebrew : ses commandes {cmds}"
+
+# needs review
+#: gui/wallet_page.py
+msgid ""
+"It opens without one, so it protects nothing, and there's no password for Unlock or Password first to ask. Set one in KWalletManager: kdewallet → Change Password."
+msgstr ""
+"Il s'ouvre sans mot de passe, donc il ne protège rien, et « Déverrouiller » ou « Mot de passe d'abord » n'ont aucun mot de passe à demander. Définissez-en un dans KWalletManager : kdewallet → Modifier le mot de passe."
+
+# needs review
+#: gui/wallet_page.py
 msgid "It stays unlocked until you lock it (auto-lock is off)."
 msgstr ""
 "Il reste déverrouillé jusqu'à ce que vous le verrouilliez (verrouillage automatique désactivé)."
+
+# needs review
+#: gui/wallet_page.py
+msgid "It's closed now; apps open it without asking."
+msgstr "Il est fermé ; les applications l'ouvrent sans rien demander."
 
 # needs review
 #: gui/wallet_page.py
@@ -1554,6 +1646,17 @@ msgstr "L'ouvrir comme avant (son lanceur d'origine)"
 
 # needs review
 #: gui/wallet_page.py
+msgid "Opens KWalletManager: kdewallet → Change Password"
+msgstr "Ouvrir KWalletManager : kdewallet → Modifier le mot de passe"
+
+# needs review
+#: gui/wallet_page.py
+msgid "Opens the wallet; no password is set, so none is asked"
+msgstr ""
+"Ouvrir le portefeuille ; aucun mot de passe n'est défini, donc aucun n'est demandé"
+
+# needs review
+#: gui/wallet_page.py
 msgid "Password first"
 msgstr "Mot de passe d'abord"
 
@@ -1599,6 +1702,11 @@ msgstr ""
 
 # needs review
 #: gui/wallet_page.py
+msgid "Set up by this tweak's install."
+msgstr "Configuré par l'installation de cet ajustement."
+
+# needs review
+#: gui/wallet_page.py
 msgid "Shorter"
 msgstr "Plus court"
 
@@ -1612,6 +1720,11 @@ msgstr ""
 #: gui/wallet_page.py
 msgid "System app"
 msgstr "Application système"
+
+# needs review
+#: gui/wallet_page.py
+msgid "Terminal tools ({n})"
+msgstr "Outils de terminal ({n})"
 
 # needs review
 #: gui/wallet_page.py
@@ -1649,6 +1762,13 @@ msgstr "se ferme aussi quand le casque est retiré"
 #: gui/wallet_page.py
 msgid "asks for the wallet password first"
 msgstr "demande d'abord le mot de passe du portefeuille"
+
+# needs review
+#: gui/wallet_page.py
+msgid ""
+"asks for the wallet password first while it's locked, and keeps its sign-in in the wallet if it can · runs {real}"
+msgstr ""
+"demande d'abord le mot de passe du portefeuille s'il est verrouillé, et garde sa connexion dans le portefeuille si possible · exécute {real}"
 
 # needs review
 #: gui/wallet_page.py
@@ -1723,6 +1843,16 @@ msgstr "⏱ Prolonger le délai"
 
 # needs review
 #: gui/wallet_page.py
+msgid "⚠ The wallet has no password yet."
+msgstr "⚠ Le portefeuille n'a pas encore de mot de passe."
+
+# needs review
+#: gui/wallet_page.py
+msgid "🔑 Set password…"
+msgstr "🔑 Définir le mot de passe…"
+
+# needs review
+#: gui/wallet_page.py
 msgid "🔒 Lock now"
 msgstr "🔒 Verrouiller"
 
@@ -1733,6 +1863,11 @@ msgstr "🔒 Portefeuille verrouillé."
 
 # needs review
 #: gui/wallet_page.py
+msgid "🔓 Open"
+msgstr "🔓 Ouvrir"
+
+# needs review
+#: gui/wallet_page.py
 msgid "🔓 Unlock…"
 msgstr "🔓 Déverrouiller…"
 
@@ -1740,6 +1875,47 @@ msgstr "🔓 Déverrouiller…"
 #: gui/wallet_page.py
 msgid "🔓 Wallet open"
 msgstr "🔓 Portefeuille ouvert"
+
+# needs review
+#: gui/window_logic.py install.sh
+msgid "Press Enter to close, or press the X button floating below to close."
+msgstr ""
+"Appuyez sur Entrée pour fermer, ou sur le bouton X qui flotte en dessous."
+
+# needs review
+#: gui/window_logic.py install.sh
+msgid "Press Enter to close…"
+msgstr "Appuyez sur Entrée pour fermer…"
+
+# needs review
+#: gui/window_logic.py
+msgid "checking…"
+msgstr "vérification…"
+
+# needs review
+#: gui/window_logic.py
+msgid "not available any more"
+msgstr "plus disponible"
+
+# needs review
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+msgid "not installed"
+msgstr "non installé"
+
+# needs review
+#: gui/window_logic.py
+msgid "status check didn't finish (took over a minute)"
+msgstr "la vérification de l'état n'a pas abouti (plus d'une minute)"
+
+# needs review
+#: gui/window_logic.py
+msgid "status check failed (exit {code})"
+msgstr "échec de la vérification de l'état (code de sortie {code})"
+
+# needs review
+#: install.sh
+msgid "%s could not be removed"
+msgstr "Impossible de retirer %s"
 
 # needs review
 #: install.sh packs/core/snip/install.sh
@@ -1765,6 +1941,12 @@ msgstr "%s s'appelle désormais %s"
 #: install.sh
 msgid "%s migration failed"
 msgstr "échec de la migration de %s"
+
+# needs review
+#: install.sh
+msgid "%s needs your sudo password, and your user has none yet."
+msgstr ""
+"%s nécessite votre mot de passe sudo, et votre utilisateur n'en a pas encore."
 
 # needs review
 #: install.sh
@@ -1960,6 +2142,11 @@ msgstr "Lisez-le avant de le partager ; joignez-le à un rapport de bug : %s"
 #: install.sh
 msgid "Remove tweaks?"
 msgstr "Retirer des ajustements ?"
+
+# needs review
+#: install.sh
+msgid "Removed %s: not needed on this Frame (%s)."
+msgstr "Retiré : %s, inutile sur ce Frame (%s)."
 
 # needs review
 #: install.sh
@@ -2225,6 +2412,25 @@ msgstr "mode bureau"
 # needs review
 #: lib/common.sh
 msgid ""
+"%s %s is older than the %s this release was tested with; not installing it"
+msgstr ""
+"%s %s est plus ancien que la version %s avec laquelle cette version de Frame Tweaks a été testée ; pas d'installation"
+
+# needs review
+#: lib/common.sh
+msgid "%s is built for '%s', not aarch64; not installing it"
+msgstr "%s est compilé pour '%s', pas pour aarch64 ; pas d'installation"
+
+# needs review
+#: lib/common.sh
+msgid ""
+"%s, the tested version, is no longer on PyPI, so %s isn't installed: a deleted release isn't replaced by another one. Please report this."
+msgstr ""
+"%s, la version testée, n'est plus sur PyPI, donc %s n'est pas installé : une version supprimée n'est pas remplacée par une autre. Signalez-le."
+
+# needs review
+#: lib/common.sh
+msgid ""
 "About 280 MB to download, shared by the installer window and the tweaks that use it."
 msgstr ""
 "Environ 280 Mo à télécharger, partagés par la fenêtre de Frame Tweaks et les ajustements qui l'utilisent."
@@ -2245,6 +2451,18 @@ msgstr "Actif au prochain démarrage de SteamVR."
 #: lib/common.sh
 msgid "Active now."
 msgstr "Actif dès maintenant."
+
+# needs review
+#: lib/common.sh
+msgid "Couldn't install %s (see above)."
+msgstr "Impossible d'installer %s (voir ci-dessus)."
+
+# needs review
+#: lib/common.sh
+msgid ""
+"Couldn't reach PyPI to install %s: check the Internet connection, then try again."
+msgstr ""
+"Impossible de joindre PyPI pour installer %s : vérifiez la connexion Internet, puis réessayez."
 
 # needs review
 #: lib/common.sh
@@ -2291,9 +2509,16 @@ msgstr "Pas encore actif : %s"
 # needs review
 #: lib/common.sh
 msgid ""
-"The tested versions of %s don't install on this Python (%s); trying the newest."
+"PyPI has no build of %s for this Python (%s) and system; installing the newest %s that has one instead. The other tested versions stay."
 msgstr ""
-"Les versions testées de %s ne s'installent pas sur ce Python (%s) ; essai des plus récentes."
+"PyPI n'a pas de version compilée de %s pour ce Python (%s) et ce système ; installation à la place de la plus récente version %s qui en a une. Les autres versions testées restent."
+
+# needs review
+#: lib/common.sh
+msgid ""
+"Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
+msgstr ""
+"Définissez-en un : ouvrez un terminal (Konsole), tapez passwd et appuyez sur Entrée, puis choisissez un mot de passe (rien ne s'affiche pendant la saisie). Ou utilisez « Définir un mot de passe… » dans la fenêtre de Frame Tweaks."
 
 # needs review
 #: lib/common.sh
@@ -2318,11 +2543,10 @@ msgstr ""
 "L'installateur de Homebrew demande une fois votre mot de passe sudo (administrateur), pour créer ce dossier."
 
 # needs review
-#: lib/common.sh packs/core/charge-limit/install.sh
-msgid ""
-"Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
+#: lib/common.sh
+msgid "Your user has no password yet, so sudo can't work."
 msgstr ""
-"Votre utilisateur n'a pas de mot de passe, donc sudo ne peut pas fonctionner. Définissez-en un avec 'passwd', puis relancez."
+"Votre utilisateur n'a pas encore de mot de passe, donc sudo ne peut pas fonctionner."
 
 # needs review
 #: lib/common.sh
@@ -2333,13 +2557,6 @@ msgstr "installé (actif pendant que SteamVR tourne)"
 #: lib/common.sh
 msgid "not responding"
 msgstr "ne répond pas"
-
-# needs review
-#: lib/common.sh
-msgid ""
-"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
-msgstr ""
-"la version %s n'est pas signée avec la clé de publication de Frame Tweaks ; poursuite malgré tout (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 
 # needs review
 #: lib/common.sh
@@ -2357,7 +2574,7 @@ msgid "restored KDE settings changed by %s"
 msgstr "paramètres KDE modifiés par %s restaurés"
 
 # needs review
-#: lib/common.sh packs/core/charge-limit/install.sh
+#: lib/common.sh
 msgid "sudo failed."
 msgstr "échec de sudo."
 
@@ -2371,6 +2588,16 @@ msgstr "le service de modification du tableau de bord n'a pas répondu"
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 "en attente d'un redémarrage de SteamVR (redémarrez SteamVR ou le Frame une fois)"
+
+# needs review
+#: lib/installer.py
+msgid "status check failed"
+msgstr "échec de la vérification de l'état"
+
+# needs review
+#: lib/installer.py
+msgid "status check failed: %s"
+msgstr "échec de la vérification de l'état : %s"
 
 # needs review
 #: lib/link.sh
@@ -2450,16 +2677,6 @@ msgstr "(par défaut)"
 
 # needs review
 #: lib/sft.py
-msgid "Added the pack {name} in {folder}."
-msgstr "Pack {name} ajouté dans {folder}."
-
-# needs review
-#: lib/sft.py
-msgid "By {author}."
-msgstr "Par {author}."
-
-# needs review
-#: lib/sft.py
 msgid "By: %s"
 msgstr "Auteur : %s"
 
@@ -2492,27 +2709,6 @@ msgstr "Masqué dans la fenêtre de Frame Tweaks : %s"
 
 # needs review
 #: lib/sft.py
-msgid ""
-"It isn't used until you trust it again. Read what changed first, then: {command}"
-msgstr ""
-"Il n'est pas utilisé tant que vous ne l'approuvez pas de nouveau. Lisez d'abord ce qui a changé, puis : {command}"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
-msgstr ""
-"Il n'est pas utilisé tant que vous ne l'approuvez pas : ses ajustements s'exécuteraient avec vos droits. Lisez d'abord ce qu'ils font (le README.md de chacun dans ce dossier), puis : {command}"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
-msgstr ""
-"Ses ajustements {ids} sont encore installés : approuvez-le de nouveau pour les désinstaller ({command}), puis retirez-le."
-
-# needs review
-#: lib/sft.py
 msgid "More: %s"
 msgstr "En savoir plus : %s"
 
@@ -2523,23 +2719,8 @@ msgstr "Nécessite : %s"
 
 # needs review
 #: lib/sft.py
-msgid "No packs added from a link."
-msgstr "Aucun pack ajouté depuis un lien."
-
-# needs review
-#: lib/sft.py
-msgid "Only packs in {folder} can be removed here."
-msgstr "Seuls les packs de {folder} peuvent être retirés ici."
-
-# needs review
-#: lib/sft.py
-msgid "Problems:"
-msgstr "Problèmes :"
-
-# needs review
-#: lib/sft.py
-msgid "Removed the pack {name} ({folder})."
-msgstr "Pack {name} retiré ({folder})."
+msgid "Not applied yet: {keys}. To apply them: ./install.sh {id}"
+msgstr "Pas encore appliqué : {keys}. Pour les appliquer : ./install.sh {id}"
 
 # needs review
 #: lib/sft.py
@@ -2563,54 +2744,8 @@ msgstr "Source : %s"
 
 # needs review
 #: lib/sft.py
-msgid ""
-"That isn't a link to a pack: give the address of its git repository, starting with https://"
-msgstr ""
-"Ce n'est pas un lien vers un pack : indiquez l'adresse de son dépôt git, commençant par https://"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
-msgstr ""
-"Aucun pack à la racine de {link} : ni pack.md, ni dossiers d'ajustements (docs/mods.md)."
-
-# needs review
-#: lib/sft.py
-msgid "Tweaks: %s"
-msgstr "Ajustements : %s"
-
-# needs review
-#: lib/sft.py
-msgid "Uninstall its tweaks first: {ids} ({command})."
-msgstr "Désinstallez d'abord ses ajustements : {ids} ({command})."
-
-# needs review
-#: lib/sft.py
 msgid "Why: %s"
 msgstr "Pourquoi : %s"
-
-# needs review
-#: lib/sft.py
-msgid "You have a pack in {folder} already: update it, or remove it first."
-msgstr ""
-"Vous avez déjà un pack dans {folder} : mettez-le à jour, ou retirez-le d'abord."
-
-# needs review
-#: lib/sft.py
-msgid "a newer version is out: {command}"
-msgstr "une version plus récente est disponible : {command}"
-
-# needs review
-#: lib/sft.py
-msgid "changed since you trusted it: not used until you trust it again"
-msgstr ""
-"modifié depuis votre approbation : non utilisé tant que vous ne l'approuvez pas de nouveau"
-
-# needs review
-#: lib/sft.py
-msgid "couldn't check (no connection?)"
-msgstr "vérification impossible (pas de connexion ?)"
 
 # needs review
 #: lib/sft.py
@@ -2619,87 +2754,10 @@ msgstr "KEY=VALUE attendu, reçu %s"
 
 # needs review
 #: lib/sft.py
-msgid "git isn't installed"
-msgstr "git n'est pas installé"
-
-# needs review
-#: lib/sft.py
-msgid "git took too long (no connection?)"
-msgstr "git a mis trop de temps (pas de connexion ?)"
-
-# needs review
-#: lib/sft.py
-msgid "git {command} failed"
-msgstr "échec de git {command}"
-
-# needs review
-#: lib/sft.py
-msgid "in use; its tweaks are listed"
-msgstr "utilisé ; ses ajustements sont listés"
-
-# needs review
-#: lib/sft.py
-msgid "more than one pack is called {name}: give its folder ({folders})"
-msgstr "plusieurs packs s'appellent {name} : indiquez son dossier ({folders})"
-
-# needs review
-#: lib/sft.py
-msgid "no longer used (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-"n'est plus utilisé (ses ajustements installés restent jusqu'à ce que vous les désinstalliez)"
-
-# needs review
-#: lib/sft.py
-msgid "no pack {name}; see {command}"
-msgstr "aucun pack {name} ; voir {command}"
-
-# needs review
-#: lib/sft.py
-msgid "not checked: not trusted ({command})"
-msgstr "non vérifié : non approuvé ({command})"
-
-# needs review
-#: lib/sft.py
-msgid "not trusted: not used ({command})"
-msgstr "non approuvé : non utilisé ({command})"
-
-# needs review
-#: lib/sft.py
-msgid "official: in use"
-msgstr "officiel : utilisé"
-
-# needs review
-#: lib/sft.py
-msgid "official: turned off ({command})"
-msgstr "officiel : désactivé ({command})"
-
-# needs review
-#: lib/sft.py
 msgid ""
 "once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
 msgstr ""
 "une fois, si Homebrew n'est pas encore installé : son installateur le demande, pour créer /home/linuxbrew"
-
-# needs review
-#: lib/sft.py
-msgid "problem: %s"
-msgstr "problème : %s"
-
-# needs review
-#: lib/sft.py
-msgid "trusted: in use"
-msgstr "approuvé : utilisé"
-
-# needs review
-#: lib/sft.py
-msgid "trusted; its tweaks are listed now"
-msgstr "approuvé ; ses ajustements sont maintenant listés"
-
-# needs review
-#: lib/sft.py
-msgid "turned off (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-"désactivé (ses ajustements installés restent jusqu'à ce que vous les désinstalliez)"
 
 # needs review
 #: lib/sft.py
@@ -2718,11 +2776,6 @@ msgstr "groupe inconnu {name} ; groupes : {groups}"
 
 # needs review
 #: lib/sft.py
-msgid "up to date"
-msgstr "à jour"
-
-# needs review
-#: lib/sft.py
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr "{id} n'a pas de paramètre {key} ; ses paramètres : {keys}"
 
@@ -2737,49 +2790,6 @@ msgid "{key}: {text} isn't one of: {choices}"
 msgstr "{key} : {text} ne fait pas partie des choix : {choices}"
 
 # needs review
-#: lib/sft.py
-msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
-msgstr ""
-"{pack} est fourni avec Frame Tweaks et n'a donc pas besoin d'être approuvé : {command}"
-
-# needs review
-#: lib/sft.py
-msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
-msgstr "{pack} ne fait pas partie des packs de Frame Tweaks : {command}"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
-msgstr ""
-"{pack} n'est pas approuvé : approuvez-le d'abord ({command}), ou retirez-le et ajoutez-le à nouveau."
-
-# needs review
-#: lib/sft.py
-msgid ""
-"{pack} was added at a fixed version: to follow another one, remove it and add it again."
-msgstr ""
-"{pack} a été ajouté à une version fixée : pour en suivre une autre, retirez-le et ajoutez-le à nouveau."
-
-# needs review
-#: lib/sft.py
-msgid "{pack} wasn't added from a link: change its folder yourself."
-msgstr ""
-"{pack} n'a pas été ajouté depuis un lien : modifiez son dossier vous-même."
-
-# needs review
-#: lib/sft.py
-msgid ""
-"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
-msgstr ""
-"Les paramètres git de {pack} (.git/config) ne sont pas ceux créés lors de son ajout, et git les appliquerait : retirez le pack et ajoutez-le à nouveau."
-
-# needs review
-#: lib/sft.py
-msgid "{ref} isn't a branch or tag name"
-msgstr "{ref} n'est pas un nom de branche ou d'étiquette"
-
-# needs review
 #: lib/splash.py
 msgid "Added {name} to the app menu"
 msgstr "{name} ajouté au menu des applications"
@@ -2788,11 +2798,6 @@ msgstr "{name} ajouté au menu des applications"
 #: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr "Pavé fléché"
-
-# needs review
-#: lib/splash.py packs/core/arrowpad/arrowpad.py
-msgid "Done"
-msgstr "Terminé"
 
 # needs review
 #: lib/splash.py
@@ -2815,11 +2820,6 @@ msgid "Narrate's voice: {voice}"
 msgstr "Voix de lecture : {voice}"
 
 # needs review
-#: lib/splash.py
-msgid "Press any key to skip"
-msgstr "Appuyez sur une touche pour passer"
-
-# needs review
 #: lib/splash.py packs/core/snip/frame-snip packs/core/snip/frame-snip.desktop packs/core/snip/README.md
 msgid "Screen snip + Narrate"
 msgstr "Capture d'écran + Lecture"
@@ -2835,12 +2835,7 @@ msgid "Setting up {name}'s Python packages"
 msgstr "Préparation des paquets Python de {name}"
 
 # needs review
-#: lib/splash.py
-msgid "Stopped with an error (exit status {code})"
-msgstr "Arrêté avec une erreur (code de sortie {code})"
-
-# needs review
-#: lib/splash.py
+#: lib/splash.py lib/splash_stage.py
 msgid "Working…"
 msgstr "En cours…"
 
@@ -2853,6 +2848,243 @@ msgstr "en cours d'exécution"
 #: lib/splash.py
 msgid "{name} is ready: {keys} shows it"
 msgstr "{name} est prêt : {keys} l'affiche"
+
+# needs review
+#: lib/splash_stage.py packs/core/arrowpad/arrowpad.py
+msgid "Done"
+msgstr "Terminé"
+
+# needs review
+#: lib/splash_stage.py
+msgid "Press any key to skip"
+msgstr "Appuyez sur une touche pour passer"
+
+# needs review
+#: lib/splash_stage.py
+msgid "Stopped with an error (exit status {code})"
+msgstr "Arrêté avec une erreur (code de sortie {code})"
+
+# needs review
+#: lib/userpacks.py
+msgid "Added the pack {name} in {folder}."
+msgstr "Pack {name} ajouté dans {folder}."
+
+# needs review
+#: lib/userpacks.py
+msgid "By {author}."
+msgstr "Par {author}."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"It isn't used until you trust it again. Read what changed first, then: {command}"
+msgstr ""
+"Il n'est pas utilisé tant que vous ne l'approuvez pas de nouveau. Lisez d'abord ce qui a changé, puis : {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
+msgstr ""
+"Il n'est pas utilisé tant que vous ne l'approuvez pas : ses ajustements s'exécuteraient avec vos droits. Lisez d'abord ce qu'ils font (le README.md de chacun dans ce dossier), puis : {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
+msgstr ""
+"Ses ajustements {ids} sont encore installés : approuvez-le de nouveau pour les désinstaller ({command}), puis retirez-le."
+
+# needs review
+#: lib/userpacks.py
+msgid "No packs added from a link."
+msgstr "Aucun pack ajouté depuis un lien."
+
+# needs review
+#: lib/userpacks.py
+msgid "Only packs in {folder} can be removed here."
+msgstr "Seuls les packs de {folder} peuvent être retirés ici."
+
+# needs review
+#: lib/userpacks.py
+msgid "Problems:"
+msgstr "Problèmes :"
+
+# needs review
+#: lib/userpacks.py
+msgid "Removed the pack {name} ({folder})."
+msgstr "Pack {name} retiré ({folder})."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"That isn't a link to a pack: give the address of its git repository, starting with https://"
+msgstr ""
+"Ce n'est pas un lien vers un pack : indiquez l'adresse de son dépôt git, commençant par https://"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+msgstr ""
+"Aucun pack à la racine de {link} : ni pack.md, ni dossiers d'ajustements (docs/mods.md)."
+
+# needs review
+#: lib/userpacks.py
+msgid "Tweaks: %s"
+msgstr "Ajustements : %s"
+
+# needs review
+#: lib/userpacks.py
+msgid "Uninstall its tweaks first: {ids} ({command})."
+msgstr "Désinstallez d'abord ses ajustements : {ids} ({command})."
+
+# needs review
+#: lib/userpacks.py
+msgid "You have a pack in {folder} already: update it, or remove it first."
+msgstr ""
+"Vous avez déjà un pack dans {folder} : mettez-le à jour, ou retirez-le d'abord."
+
+# needs review
+#: lib/userpacks.py
+msgid "a newer version is out: {command}"
+msgstr "une version plus récente est disponible : {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "changed since you trusted it: not used until you trust it again"
+msgstr ""
+"modifié depuis votre approbation : non utilisé tant que vous ne l'approuvez pas de nouveau"
+
+# needs review
+#: lib/userpacks.py
+msgid "couldn't check (no connection?)"
+msgstr "vérification impossible (pas de connexion ?)"
+
+# needs review
+#: lib/userpacks.py
+msgid "git isn't installed"
+msgstr "git n'est pas installé"
+
+# needs review
+#: lib/userpacks.py
+msgid "git took too long (no connection?)"
+msgstr "git a mis trop de temps (pas de connexion ?)"
+
+# needs review
+#: lib/userpacks.py
+msgid "git {command} failed"
+msgstr "échec de git {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "in use; its tweaks are listed"
+msgstr "utilisé ; ses ajustements sont listés"
+
+# needs review
+#: lib/userpacks.py
+msgid "more than one pack is called {name}: give its folder ({folders})"
+msgstr "plusieurs packs s'appellent {name} : indiquez son dossier ({folders})"
+
+# needs review
+#: lib/userpacks.py
+msgid "no longer used (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+"n'est plus utilisé (ses ajustements installés restent jusqu'à ce que vous les désinstalliez)"
+
+# needs review
+#: lib/userpacks.py
+msgid "no pack {name}; see {command}"
+msgstr "aucun pack {name} ; voir {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "not checked: not trusted ({command})"
+msgstr "non vérifié : non approuvé ({command})"
+
+# needs review
+#: lib/userpacks.py
+msgid "not trusted: not used ({command})"
+msgstr "non approuvé : non utilisé ({command})"
+
+# needs review
+#: lib/userpacks.py
+msgid "official: in use"
+msgstr "officiel : utilisé"
+
+# needs review
+#: lib/userpacks.py
+msgid "official: turned off ({command})"
+msgstr "officiel : désactivé ({command})"
+
+# needs review
+#: lib/userpacks.py
+msgid "problem: %s"
+msgstr "problème : %s"
+
+# needs review
+#: lib/userpacks.py
+msgid "trusted: in use"
+msgstr "approuvé : utilisé"
+
+# needs review
+#: lib/userpacks.py
+msgid "trusted; its tweaks are listed now"
+msgstr "approuvé ; ses ajustements sont maintenant listés"
+
+# needs review
+#: lib/userpacks.py
+msgid "turned off (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+"désactivé (ses ajustements installés restent jusqu'à ce que vous les désinstalliez)"
+
+# needs review
+#: lib/userpacks.py
+msgid "up to date"
+msgstr "à jour"
+
+# needs review
+#: lib/userpacks.py
+msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
+msgstr ""
+"{pack} est fourni avec Frame Tweaks et n'a donc pas besoin d'être approuvé : {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
+msgstr "{pack} ne fait pas partie des packs de Frame Tweaks : {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
+msgstr ""
+"{pack} n'est pas approuvé : approuvez-le d'abord ({command}), ou retirez-le et ajoutez-le à nouveau."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"{pack} was added at a fixed version: to follow another one, remove it and add it again."
+msgstr ""
+"{pack} a été ajouté à une version fixée : pour en suivre une autre, retirez-le et ajoutez-le à nouveau."
+
+# needs review
+#: lib/userpacks.py
+msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr ""
+"{pack} n'a pas été ajouté depuis un lien : modifiez son dossier vous-même."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
+msgstr ""
+"Les paramètres git de {pack} (.git/config) ne sont pas ceux créés lors de son ajout, et git les appliquerait : retirez le pack et ajoutez-le à nouveau."
+
+# needs review
+#: lib/userpacks.py
+msgid "{ref} isn't a branch or tag name"
+msgstr "{ref} n'est pas un nom de branche ou d'étiquette"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
@@ -3078,6 +3310,13 @@ msgstr "Miroir Android : vous l'utilisez encore ?"
 # needs review
 #: packs/core/adb-scrcpy/phone
 msgid ""
+"Choose the address your phone shows under Developer options → Wireless debugging → IP address & Port."
+msgstr ""
+"Choisissez l'adresse que votre téléphone affiche sous Options pour les développeurs → Débogage sans fil → Adresse IP et port."
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid ""
 "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
 msgstr ""
 "Désormais, connexion à %s. Pour en choisir un autre : « Choisir le téléphone… » dans le Miroir Android (ou phone --pick)."
@@ -3138,6 +3377,18 @@ msgstr "Rester connecté"
 #: packs/core/adb-scrcpy/phone
 msgid "Looking for your phone on the Wi-Fi…"
 msgstr "Recherche de votre téléphone sur le Wi-Fi…"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid "More than one %s"
+msgstr "Plusieurs %s"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"More than one device on the Wi-Fi says it's %s: another device may be posing as your phone, or two phones have the same name."
+msgstr ""
+"Plusieurs appareils sur le Wi-Fi disent être %s : un autre appareil se fait peut-être passer pour votre téléphone, ou deux téléphones ont le même nom."
 
 # needs review
 #: packs/core/adb-scrcpy/phone
@@ -3213,6 +3464,13 @@ msgstr "Démarrage du miroir…"
 # needs review
 #: packs/core/adb-scrcpy/phone
 msgid ""
+"The %s on the Wi-Fi isn't the phone Android Mirror knows by that name: it's another phone with the same name, the same phone after a factory reset, or a device posing as it."
+msgstr ""
+"Le %s sur le Wi-Fi n'est pas le téléphone que le Miroir Android connaît sous ce nom : c'est un autre téléphone du même nom, le même téléphone après une réinitialisation d'usine, ou un appareil qui se fait passer pour lui."
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid ""
 "The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
 msgstr ""
 "La connexion à %s a été perdue et n'est pas revenue en une minute. Le « Débogage sans fil » est-il toujours activé, sur le même Wi-Fi ? Rouvrez le Miroir Android quand c'est le cas."
@@ -3246,6 +3504,11 @@ msgstr "Code d'association à six chiffres affiché par le téléphone :"
 #: packs/core/adb-scrcpy/phone
 msgid "Use %s instead"
 msgstr "Utiliser %s à la place"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid "Use this other %s"
+msgstr "Utiliser cet autre %s"
 
 # needs review
 #: packs/core/adb-scrcpy/phone
@@ -4152,6 +4415,13 @@ msgstr ""
 "(administrateur) est demandé une fois, pour ajouter une règle udev (%s) que les mises à jour de SteamOS conservent."
 
 # needs review
+#: packs/core/charge-limit/install.sh
+msgid ""
+"Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
+msgstr ""
+"Votre utilisateur n'a pas de mot de passe, donc sudo ne peut pas fonctionner. Définissez-en un avec 'passwd', puis relancez."
+
+# needs review
 #: packs/core/charge-limit/needed.sh
 msgid ""
 "withdrawn for new installs while a SteamOS charger bug can leave a Frame unable to charge (SteamOS #2879)"
@@ -4289,13 +4559,234 @@ msgstr "fenêtres flottantes courbes dès le départ"
 
 # needs review
 #: packs/core/dictation/README.md
+msgid "0.4 seconds"
+msgstr "0,4 seconde"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "0.6 seconds (the default)"
+msgstr "0,6 seconde (par défaut)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "1 second"
+msgstr "1 seconde"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "1.5 seconds"
+msgstr "1,5 seconde"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Alternative: D-pad up, left controller"
+msgstr "Autre choix : croix directionnelle haut, contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Alternative: View, left controller"
+msgstr "Autre choix : Vue, contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Always pasting it"
+msgstr "En le collant toujours"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Always shown"
+msgstr "Toujours affiché"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Applies within a second (in VR; otherwise at your next dictation). Choosing Parakeet: press Apply to download it (about 800 MB)."
+msgstr ""
+"S'applique en une seconde (en VR ; sinon à votre prochaine dictée). Pour Parakeet : appuyez sur « Appliquer » pour le télécharger (environ 800 Mo)."
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Automatic: hidden while a controller button is set"
+msgstr "Automatique : masqué si un bouton de contrôleur est défini"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Controller button"
+msgstr "Bouton du contrôleur"
+
+# needs review
+#: packs/core/dictation/README.md
 msgid "Dictate"
 msgstr "Dicter"
 
 # needs review
 #: packs/core/dictation/README.md
+msgid "Dictate (toggle) in the + menu"
+msgstr "Dicter (marche/arrêt) dans le menu +"
+
+# needs review
+#: packs/core/dictation/README.md
 msgid "Dictation"
 msgstr "Dictée"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Downloads Parakeet if it's chosen, and loads or stops the engine as chosen."
+msgstr ""
+"Télécharger Parakeet s'il est choisi, et charger ou arrêter le moteur selon le choix."
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Engine"
+msgstr "Moteur"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Hold it for"
+msgstr "Maintenir pendant"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Keep the engine loaded"
+msgstr "Garder le moteur chargé"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Never shown"
+msgstr "Jamais affiché"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"No (the default): loaded for each dictation, no memory used in between"
+msgstr ""
+"Non (par défaut) : chargé à chaque dictée, aucune mémoire utilisée entre deux"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: A, right controller (the laser's Home over windows)"
+msgstr "Déconseillé : A, contrôleur droit (Accueil du laser sur les fenêtres)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: Aux, on the headset (the dashboard; a held mouse button on the desktop)"
+msgstr ""
+"Déconseillé : Aux, sur le casque (le tableau de bord ; un bouton de souris maintenu sur le bureau)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: B, right controller (the laser's Back over windows)"
+msgstr "Déconseillé : B, contrôleur droit (Retour du laser sur les fenêtres)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: D-pad down, left controller (the laser's Home)"
+msgstr ""
+"Déconseillé : croix directionnelle bas, contrôleur gauche (Accueil du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: D-pad left, left controller (the laser's Back)"
+msgstr ""
+"Déconseillé : croix directionnelle gauche, contrôleur gauche (Retour du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: D-pad right, left controller (the laser's middle click)"
+msgstr ""
+"Déconseillé : croix directionnelle droite, contrôleur gauche (clic central du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: X, right controller (the laser's middle click)"
+msgstr "Déconseillé : X, contrôleur droit (clic central du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: left bumper (a laser click)"
+msgstr "Déconseillé : bouton supérieur gauche (un clic du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: left grip (picks up windows, switches the laser's hand)"
+msgstr ""
+"Déconseillé : poignée gauche (saisit les fenêtres, change la main du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: left stick click (the laser's right click)"
+msgstr "Déconseillé : clic du stick gauche (clic droit du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: left trigger (a laser click; games use it)"
+msgstr ""
+"Déconseillé : gâchette gauche (un clic du laser ; les jeux l'utilisent)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: right bumper (a laser click)"
+msgstr "Déconseillé : bouton supérieur droit (un clic du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: right grip (picks up windows, switches the laser's hand)"
+msgstr ""
+"Déconseillé : poignée droite (saisit les fenêtres, change la main du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: right stick click (the laser's right click)"
+msgstr "Déconseillé : clic du stick droit (clic droit du laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: right trigger (a laser click; games use it)"
+msgstr ""
+"Déconseillé : gâchette droite (un clic du laser ; les jeux l'utilisent)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Off: Whisper hears the whole recording"
+msgstr "Désactivée : Whisper entend tout l'enregistrement"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "On (the default): Whisper hears only the speech in your recording"
+msgstr ""
+"Activée (par défaut) : Whisper n'entend que la parole de votre enregistrement"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Parakeet: 25 European languages, fastest when kept loaded (press Apply)"
+msgstr ""
+"Parakeet : 25 langues européennes, le plus rapide s'il reste chargé (appuyez sur « Appliquer »)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Put the text in by"
+msgstr "Insérer le texte en"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Recommended: Menu, right controller (the default)"
+msgstr "Recommandé : Menu, contrôleur droit (par défaut)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Recommended: Off"
+msgstr "Recommandé : désactivé"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Recommended: Y, right controller"
+msgstr "Recommandé : Y, contrôleur droit"
 
 # needs review
 #: packs/core/dictation/README.md
@@ -4314,14 +4805,139 @@ msgstr ""
 # needs review
 #: packs/core/dictation/README.md
 msgid ""
+"The engine turns your speech into text, on the Frame. In VR, hold the controller button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
+msgstr ""
+"Le moteur transforme votre parole en texte, sur le Frame. En VR, maintenez le bouton du contrôleur pour commencer à dicter, et maintenez-le de nouveau pour arrêter ; un appui court ne fait rien ici. L'application au premier plan reçoit aussi chaque appui, donc les boutons sont classés selon ce qu'ils font d'autre : les recommandés ne font rien d'autre sur un appui long, les autres si (les clics du laser, Accueil et Retour sur les fenêtres, le tableau de bord). Si un jeu réagit quand vous maintenez le bouton, choisissez-en un autre."
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Typing it (the default); pasting what your keyboard layout can't type"
+msgstr ""
+"Le tapant (par défaut) ; en collant ce que votre disposition de clavier ne peut pas taper"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
 msgstr ""
 "Taper au laser des contrôleurs sur un clavier VR est lent. Le Frame peut transcrire la parole localement : vous pouvez donc parler à la place, et votre voix ne quitte jamais le casque."
 
 # needs review
+#: packs/core/dictation/README.md
+msgid "Voice activity detection"
+msgstr "Détection de la voix"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Whisper (the default): 99 languages, uses your word list"
+msgstr "Whisper (par défaut) : 99 langues, utilise votre liste de mots"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Yes: text sooner; memory in use all the time (Whisper 600 MB, Parakeet 1.3 GB)"
+msgstr ""
+"Oui : texte plus rapide ; mémoire utilisée en permanence (Whisper 600 Mo, Parakeet 1,3 Go)"
+
+# needs review
 #: packs/core/dictation/README.md packs/core/snip/README.md packs/core/adb-scrcpy/README.md packs/core/homebrew/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/clipboard/README.md
 msgid "uses"
 msgstr "utilise"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "A on the right controller"
+msgstr "A sur le contrôleur droit"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "Aux on the headset"
+msgstr "Aux sur le casque"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "B on the right controller"
+msgstr "B sur le contrôleur droit"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "Menu on the right controller"
+msgstr "Menu sur le contrôleur droit"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "View on the left controller"
+msgstr "Vue sur le contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "X on the right controller"
+msgstr "X sur le contrôleur droit"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "Y on the right controller"
+msgstr "Y sur le contrôleur droit"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad down on the left controller"
+msgstr "croix directionnelle bas sur le contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad left on the left controller"
+msgstr "croix directionnelle gauche sur le contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad right on the left controller"
+msgstr "croix directionnelle droite sur le contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad up on the left controller"
+msgstr "croix directionnelle haut sur le contrôleur gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left bumper"
+msgstr "le bouton supérieur gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left grip"
+msgstr "la poignée gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left stick (pressed in)"
+msgstr "le stick gauche (enfoncé)"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left trigger"
+msgstr "la gâchette gauche"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right bumper"
+msgstr "le bouton supérieur droit"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right grip"
+msgstr "la poignée droite"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right stick (pressed in)"
+msgstr "le stick droit (enfoncé)"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right trigger"
+msgstr "la gâchette droite"
 
 # needs review
 #: packs/core/dictation/check-system.sh
@@ -4355,6 +4971,11 @@ msgstr "Non tapé : copié dans le presse-papiers"
 
 # needs review
 #: packs/core/dictation/dictate
+msgid "Parakeet isn't downloaded"
+msgstr "Parakeet n'est pas téléchargé"
+
+# needs review
+#: packs/core/dictation/dictate
 msgid "Paste the text instead (Ctrl+V)."
 msgstr "Collez plutôt le texte (Ctrl+V)."
 
@@ -4370,15 +4991,15 @@ msgstr "Transcription…"
 
 # needs review
 #: packs/core/dictation/dictate
-msgid "Wait for the text before dictating again."
-msgstr "Attendez le texte avant de dicter à nouveau."
+msgid ""
+"Using Whisper. To download Parakeet, press Apply in Dictation's ⚙ Settings."
+msgstr ""
+"Whisper utilisé. Pour télécharger Parakeet, appuyez sur « Appliquer » dans « ⚙ Paramètres » de la Dictée."
 
 # needs review
 #: packs/core/dictation/dictate
-msgid ""
-"Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
-msgstr ""
-"Votre disposition de clavier n'a pas de touche pour %s. Collez plutôt le texte (Ctrl+V)."
+msgid "Wait for the text before dictating again."
+msgstr "Attendez le texte avant de dicter à nouveau."
 
 # needs review
 #: packs/core/dictation/dictate.desktop
@@ -4391,10 +5012,55 @@ msgid "Start/stop local Whisper speech-to-text"
 msgstr "Démarrer/arrêter la reconnaissance vocale Whisper locale"
 
 # needs review
-#: packs/core/dictation/install.sh
-msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+#: packs/core/dictation/engine.sh
+msgid "About 150 MB, in ~/.local/share/frame-tweaks/parakeet."
+msgstr "Environ 150 Mo, dans ~/.local/share/frame-tweaks/parakeet."
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "Dictation uses Parakeet."
+msgstr "La Dictée utilise Parakeet."
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid ""
+"Dictation uses Whisper. Parakeet stays downloaded (~/.local/share/frame-tweaks/parakeet): uninstalling Dictation removes it."
 msgstr ""
-"Terminé. Attribuez « Dicter (marche/arrêt) » à une touche (et à un bouton de contrôleur) : %s"
+"La Dictée utilise Whisper. Parakeet reste téléchargé (~/.local/share/frame-tweaks/parakeet) : désinstaller la Dictée le supprime."
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "Downloading Parakeet (about 650 MB)"
+msgstr "Téléchargement de Parakeet (environ 650 Mo)"
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid ""
+"Parakeet's runtime couldn't be installed; Dictation goes on with Whisper"
+msgstr ""
+"Impossible d'installer l'environnement d'exécution de Parakeet ; la Dictée continue avec Whisper"
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "Setting up onnx-asr, the runtime Parakeet runs on"
+msgstr "Installation d'onnx-asr, l'environnement d'exécution de Parakeet"
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "The engine stays loaded between dictations."
+msgstr "Le moteur reste chargé entre les dictées."
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid "Dictation's engine setting couldn't be applied; it uses Whisper"
+msgstr ""
+"Impossible d'appliquer le paramètre de moteur de la Dictée ; elle utilise Whisper"
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s"
+msgstr ""
+"Terminé. Attribuez aussi « Dicter (marche/arrêt) » à une touche, si vous voulez : %s"
 
 # needs review
 #: packs/core/dictation/install.sh
@@ -4403,8 +5069,36 @@ msgstr "Téléchargement du modèle Whisper %s"
 
 # needs review
 #: packs/core/dictation/install.sh
+msgid ""
+"In VR, hold %s to start or stop dictating (another button: ⚙ Settings)."
+msgstr ""
+"En VR, maintenez %s pour commencer ou arrêter la dictée (autre bouton : « ⚙ Paramètres »)."
+
+# needs review
+#: packs/core/dictation/install.sh
 msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
 msgstr "Installation de whisper.cpp et wl-clipboard (Homebrew)"
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid ""
+"No SteamVR here, so no controller button for dictation; the shortcut works as before."
+msgstr ""
+"Pas de SteamVR ici, donc pas de bouton de contrôleur pour la dictée ; le raccourci fonctionne comme avant."
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid ""
+"No controller button for dictation: choose one in ⚙ Settings (./install.sh settings dictation)."
+msgstr ""
+"Aucun bouton de contrôleur pour la dictée : choisissez-en un dans « ⚙ Paramètres » (./install.sh settings dictation)."
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid ""
+"No voice activity detection (its download failed): Whisper hears the whole recording."
+msgstr ""
+"Pas de détection de la voix (son téléchargement a échoué) : Whisper entend tout l'enregistrement."
 
 # needs review
 #: packs/core/dictation/install.sh
@@ -4418,6 +5112,13 @@ msgstr "Utilisation du whisper-cli de whisper-frame (pas de seconde copie)"
 
 # needs review
 #: packs/core/dictation/status.sh
+msgid ""
+"Parakeet chosen but not downloaded: Apply in ⚙ Settings (Whisper until then)"
+msgstr ""
+"Parakeet choisi mais non téléchargé : « Appliquer » dans « ⚙ Paramètres » (Whisper d'ici là)"
+
+# needs review
+#: packs/core/dictation/status.sh
 msgid "Whisper model missing (re-run ./install.sh dictation)"
 msgstr "Modèle Whisper manquant (relancez ./install.sh dictation)"
 
@@ -4428,8 +5129,18 @@ msgstr "dictate non installé"
 
 # needs review
 #: packs/core/dictation/status.sh
-msgid "dictate ready (%s, small model)"
-msgstr "dictate prêt (%s, petit modèle)"
+msgid "dictate ready (%s)"
+msgstr "dictate prêt (%s)"
+
+# needs review
+#: packs/core/dictation/status.sh
+msgid "dictate ready (%s); hold %s to dictate"
+msgstr "dictate prêt (%s) ; maintenez %s pour dicter"
+
+# needs review
+#: packs/core/dictation/status.sh
+msgid "dictate ready (%s); no controller button (⚙ Settings)"
+msgstr "dictate prêt (%s) ; aucun bouton de contrôleur (« ⚙ Paramètres »)"
 
 # needs review
 #: packs/core/dictation/status.sh
@@ -4438,8 +5149,14 @@ msgstr "pas de whisper-cli (relancez ./install.sh dictation)"
 
 # needs review
 #: packs/core/dictation/status.sh
-msgid "whisper-frame's engine"
-msgstr "moteur de whisper-frame"
+msgid "the controller button isn't running (re-run ./install.sh dictation)"
+msgstr ""
+"le bouton du contrôleur n'est pas en cours d'exécution (relancez ./install.sh dictation)"
+
+# needs review
+#: packs/core/dictation/status.sh
+msgid "whisper-frame's engine, small model"
+msgstr "moteur de whisper-frame, petit modèle"
 
 # needs review
 #: packs/core/dictation/uninstall.sh
@@ -4488,8 +5205,20 @@ msgstr ""
 
 # needs review
 #: packs/core/firefox/install.sh
+msgid ""
+"%s is a link, or not a plain file. Firefox's sandbox can write there, so Frame Tweaks leaves the profile alone: remove it, then run this again."
+msgstr ""
+"%s est un lien, ou n'est pas un fichier ordinaire. Le bac à sable de Firefox peut y écrire, donc Frame Tweaks ne touche pas au profil : supprimez-le, puis relancez ceci."
+
+# needs review
+#: packs/core/firefox/install.sh
 msgid "Anti-fingerprinting settings written to %s"
 msgstr "Paramètres contre l'empreinte numérique écrits dans %s"
+
+# needs review
+#: packs/core/firefox/install.sh
+msgid "Couldn't write %s"
+msgstr "Impossible d'écrire %s"
 
 # needs review
 #: packs/core/firefox/install.sh
@@ -4502,6 +5231,13 @@ msgstr ""
 #: packs/core/firefox/install.sh
 msgid "Firefox is running: restart it to apply."
 msgstr "Firefox est ouvert : redémarrez-le pour appliquer."
+
+# needs review
+#: packs/core/firefox/install.sh
+msgid ""
+"Firefox's profile %s isn't a folder inside Firefox's own, so Frame Tweaks leaves it alone."
+msgstr ""
+"Le profil Firefox %s n'est pas un dossier à l'intérieur de celui de Firefox, donc Frame Tweaks n'y touche pas."
 
 # needs review
 #: packs/core/firefox/install.sh
@@ -4702,12 +5438,12 @@ msgid "Privacy & security"
 msgstr "Confidentialité et sécurité"
 
 # needs review
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr "Système"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
 msgid "VR environment"
 msgstr "Environnement VR"
 
@@ -4939,11 +5675,6 @@ msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
 msgstr ""
 "La vitesse s'applique à la prochaine lecture (ou tout de suite, avec les − / + du panneau)."
-
-# needs review
-#: packs/core/snip/frame-snip packs/core/speech/README.md
-msgid "Apply"
-msgstr "Appliquer"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -5738,6 +6469,100 @@ msgid "waiting for a SteamVR restart (reboot once)"
 msgstr "en attente d'un redémarrage de SteamVR (redémarrez le Frame une fois)"
 
 # needs review
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+msgstr ""
+"Les applications Flatpak (Firefox et les autres de Discover) laissent toujours ensemble 5 Go à SteamVR, Steam et votre jeu ; Firefox a sa propre limite de 5 Go ; et si la mémoire vient quand même à manquer, SteamVR est arrêté en dernier."
+
+# needs review
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"Keeps memory free for SteamVR, so a runaway Flatpak app such as Firefox is stopped instead of VR crashing"
+msgstr ""
+"Garde de la mémoire libre pour SteamVR, pour qu'une application Flatpak incontrôlée comme Firefox soit arrêtée au lieu de faire planter la VR"
+
+# needs review
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"The Frame's 16 GB is shared by VR and every app you open. When one app takes it all (signing in to Firefox can install all your extensions at once and take 10 GB), the whole headset stalls and SteamVR's compositor can crash, dropping you out of VR."
+msgstr ""
+"Les 16 Go du Frame sont partagés entre la VR et chaque application ouverte. Quand une application prend tout (se connecter à Firefox peut installer toutes vos extensions d'un coup et prendre 10 Go), tout le casque se fige et le compositeur de SteamVR peut planter, ce qui vous fait sortir de la VR."
+
+# needs review
+#: packs/core/vr-memory-guard/README.md
+msgid "VR memory guard"
+msgstr "Protection de la mémoire VR"
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
+msgstr ""
+"%s dans %s doit être une taille comme 5G ou 512M (valeur actuelle : \"%s\")."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "Can't read how much memory this device has (%s)."
+msgstr "Impossible de lire la quantité de mémoire de cet appareil (%s)."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "Couldn't set the apps' limit now; it applies at your next login."
+msgstr ""
+"Impossible de définir la limite des applications maintenant ; elle s'appliquera à votre prochaine connexion."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+msgstr ""
+"Applications Flatpak ensemble : jusqu'à %s Mo (%s Mo réservés à la VR) ; Firefox : jusqu'à %s Mo."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "SteamVR is stopped last from its next start."
+msgstr "SteamVR est arrêté en dernier à partir de son prochain démarrage."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
+msgstr ""
+"firefox_max dépasse ce que toutes les applications Flatpak ensemble peuvent utiliser (%s Mo) : la limite des applications s'applique d'abord."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
+msgstr ""
+"reserve_for_vr (%s) laisse moins de 2 Go des %s Mo aux applications Flatpak : réduisez-la dans %s."
+
+# needs review
+#: packs/core/vr-memory-guard/status.sh
+msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+msgstr ""
+"Applications Flatpak %s sur %s Mo ; Firefox jusqu'à %s ; SteamVR arrêté en dernier"
+
+# needs review
+#: packs/core/vr-memory-guard/status.sh
+msgid ""
+"systemd doesn't hand the memory controller to your services here, so the limits can't apply"
+msgstr ""
+"systemd ne confie pas ici le contrôleur de mémoire à vos services, donc les limites ne peuvent pas s'appliquer"
+
+# needs review
+#: packs/core/vr-memory-guard/status.sh
+msgid ""
+"the apps' limit isn't in force yet: run the install again, or log out and back in"
+msgstr ""
+"la limite des applications n'est pas encore active : relancez l'installation, ou déconnectez-vous et reconnectez-vous"
+
+# needs review
+#: packs/core/vr-memory-guard/uninstall.sh
+msgid "Kept your limits in %s."
+msgstr "Vos limites ont été conservées dans %s."
+
+# needs review
 #: packs/core/wallet/README.md
 msgid ""
 "Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins."
@@ -5900,6 +6725,27 @@ msgstr ""
 
 # needs review
 #: packs/core/wallet/status.sh
+msgid ""
+"terminals run Homebrew's gh, not the wallet's wrapper: its token would be plain text (re-run %s)"
+msgstr ""
+"les terminaux exécutent le gh de Homebrew, pas l'enveloppe du portefeuille : son jeton serait en clair (relancez %s)"
+
+# needs review
+#: packs/core/wallet/status.sh
+msgid ""
+"terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
+msgstr ""
+"les terminaux exécutent le gh de Homebrew, pas l'enveloppe du portefeuille : déplacez cette ligne de ~/.bashrc sous sa ligne brew shellenv : %s"
+
+# needs review
+#: packs/core/wallet/status.sh
+msgid ""
+"the wallet has no password: set one in KWalletManager (kdewallet → Change Password)"
+msgstr ""
+"le portefeuille n'a pas de mot de passe : définissez-en un dans KWalletManager (kdewallet → Modifier le mot de passe)"
+
+# needs review
+#: packs/core/wallet/status.sh
 msgid "wallet %s; %s app launcher(s) routed/gated"
 msgstr "portefeuille %s ; %s lanceur(s) d'application redirigé(s)/protégé(s)"
 
@@ -6035,6 +6881,59 @@ msgstr ""
 "Verrouiller maintenant le portefeuille KDE (Signal, Firefox, le Miroir Android et gh demanderont alors le mot de passe)"
 
 # needs review
+#: packs/core/wallet/wallet-tool
+msgid "a program of yours"
+msgstr "un de vos programmes"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "set up by the Wallet tweak's install"
+msgstr ""
+"configuré par l'installation de l'ajustement « Portefeuille KDE partagé »"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: back to Homebrew's own command."
+msgstr "{cmd} : retour à la commande de Homebrew."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not a command name"
+msgstr "{cmd} : n'est pas un nom de commande"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not in Homebrew ({path})"
+msgstr "{cmd} : absent de Homebrew ({path})"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not protected"
+msgstr "{cmd} : non protégé"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not protected by wallet-tool ({why})"
+msgstr "{cmd} : non protégé par wallet-tool ({why})"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not this way ({why})"
+msgstr "{cmd} : pas de cette façon ({why})"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd}: protected. Open a new terminal (or run hash -r) for it to take effect."
+msgstr ""
+"{cmd} : protégé. Ouvrez un nouveau terminal (ou exécutez hash -r) pour que ce soit pris en compte."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{path} is a program of yours: left as it is"
+msgstr "{path} est un de vos programmes : laissé tel quel"
+
+# needs review
 #: packs/core/wallet/wallet-unlock
 msgid ""
 "A KDE Wallet password prompt is already open (look in VR, around the dashboard). While it is open the wallet ignores this dialog.\n"
@@ -6049,6 +6948,13 @@ msgstr ""
 #: packs/core/wallet/wallet-unlock
 msgid "Password for the KDE wallet:"
 msgstr "Mot de passe du portefeuille KDE :"
+
+# needs review
+#: packs/core/wallet/wallet-unlock
+msgid ""
+"The wallet has no password yet, so it protects nothing. Set one in KWalletManager: kdewallet → Change Password."
+msgstr ""
+"Le portefeuille n'a pas encore de mot de passe, donc il ne protège rien. Définissez-en un dans KWalletManager : kdewallet → Modifier le mot de passe."
 
 # needs review
 #: packs/core/wallet/wallet-unlock
@@ -6198,17 +7104,21 @@ msgstr "%s en cours d'exécution (socket %s)"
 
 # needs review
 #: packs/core/ydotool/install.sh
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+msgid "Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s)."
 msgstr ""
-"Le ydotool actuel d'Arch Linux ARM ne fonctionne pas sur ce SteamOS. Manquant : %s"
+"Le ydotool actuel d'Arch Linux ARM ne fonctionne pas sur ce SteamOS (%s)."
 
 # needs review
 #: packs/core/ydotool/install.sh
 msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s); keeping the one you have."
 msgstr ""
-"Le ydotool actuel d'Arch Linux ARM ne fonctionne pas sur ce SteamOS ; celui que vous avez est conservé. Manquant : %s"
+"Le ydotool actuel d'Arch Linux ARM ne fonctionne pas sur ce SteamOS (%s) ; celui que vous avez est conservé."
+
+# needs review
+#: packs/core/ydotool/install.sh
+msgid "ydotool didn't start"
+msgstr "ydotool n'a pas démarré"
 
 # needs review
 #: packs/core/ydotool/status.sh packs/integrations/clipboard/status.sh packs/integrations/nordvpn/status.sh
@@ -6257,9 +7167,22 @@ msgstr ""
 "Claude pour ordinateur, l'application Linux officielle d'Anthropic (arm64), installée dans votre dossier personnel et mise à jour d'une seule commande."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
 msgid "from"
 msgstr "de"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid "Anthropic's package list has no Claude Desktop for arm64"
+msgstr ""
+"La liste de paquets d'Anthropic n'a pas de Claude pour ordinateur pour arm64"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Anthropic's package list names an unexpected file for Claude Desktop: %s"
+msgstr ""
+"La liste de paquets d'Anthropic indique un fichier inattendu pour Claude pour ordinateur : %s"
 
 # needs review
 #: packs/integrations/claude-desktop/claude-desktop-update
@@ -6269,6 +7192,15 @@ msgid ""
 msgstr ""
 "Claude pour ordinateur %s est disponible, mais l'application est ouverte : quittez-la d'abord,\n"
 "ou exécutez : claude-desktop-update --restart   (la ferme et la met à jour ; vous la rouvrez ensuite)"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Claude Desktop %s is newer than the %s in Anthropic's list, so it stays.\n"
+"To install %s anyway, run: claude-desktop-update --allow-older"
+msgstr ""
+"Claude pour ordinateur %s est plus récent que la version %s de la liste d'Anthropic, il est donc conservé.\n"
+"Pour installer %s quand même, exécutez : claude-desktop-update --allow-older"
 
 # needs review
 #: packs/integrations/claude-desktop/claude-desktop-update
@@ -6461,6 +7393,13 @@ msgstr ""
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-tray
+msgid ""
+"'nordvpn-wg setup' is on your clipboard: open a terminal (Konsole), paste it and press Enter. It asks for a NordVPN access token, and says where to get one."
+msgstr ""
+"'nordvpn-wg setup' est dans votre presse-papiers : ouvrez un terminal (Konsole), collez-le et appuyez sur Entrée. Il demande un jeton d'accès NordVPN, et indique où en obtenir un."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "Connect at startup ({location})"
 msgstr "Se connecter au démarrage ({location})"
 
@@ -6488,8 +7427,9 @@ msgstr ""
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-tray
-msgid "No locations: run 'nordvpn-wg setup'"
-msgstr "Aucun emplacement : exécutez 'nordvpn-wg setup'"
+msgid "No locations yet: copy 'nordvpn-wg setup' for a terminal"
+msgstr ""
+"Aucun emplacement pour l'instant : copier 'nordvpn-wg setup' pour un terminal"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-tray packs/integrations/nordvpn/nordvpn-wg
@@ -6544,6 +7484,33 @@ msgstr "(manquant : exécutez refresh)"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't connect {name}."
+msgstr "Impossible de connecter {name}."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't disconnect {name}."
+msgstr "Impossible de déconnecter {name}."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't remove {name}."
+msgstr "Impossible de retirer {name}."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"It lets only your desktop session control the network: open NordVPN Tray from the desktop's menu (not from SSH or another login), or run nordvpn-wg in Konsole."
+msgstr ""
+"Il ne laisse que votre session de bureau contrôler le réseau : ouvrez « NordVPN (zone de notification) » depuis le menu du bureau (pas depuis SSH ni une autre session), ou exécutez nordvpn-wg dans Konsole."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager couldn't do it."
+msgstr "NetworkManager n'a pas pu le faire."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the change: {reply}"
 msgstr "NetworkManager a refusé la modification : {reply}"
 
@@ -6551,6 +7518,11 @@ msgstr "NetworkManager a refusé la modification : {reply}"
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the connection: {reply}"
 msgstr "NetworkManager a refusé la connexion : {reply}"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager said: {said}"
+msgstr "Réponse de NetworkManager : {said}"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -6564,13 +7536,13 @@ msgstr "Aucun jeton fourni."
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
-msgstr "Jeton d'accès NordVPN (Nord Account → NordVPN → Access token) :"
+msgid "NordVPN access token (input hidden): "
+msgstr "Jeton d'accès NordVPN (saisie masquée) : "
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "NordVPN access token (input hidden): "
-msgstr "Jeton d'accès NordVPN (saisie masquée) : "
+msgid "NordVPN access token:"
+msgstr "Jeton d'accès NordVPN :"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -6584,13 +7556,64 @@ msgstr "NordVPN : connecté via {connection}"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "Run 'nordvpn-wg setup' first."
-msgstr "Exécutez d'abord 'nordvpn-wg setup'."
+msgid "On the Manual setup page, under Access token, press Get Access token."
+msgstr ""
+"Sur la page « Manual setup », sous « Access token », appuyez sur « Get Access token »."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Open {url} in your browser (it's on your clipboard: paste it into the address bar), and sign in to your Nord Account."
+msgstr ""
+"Ouvrez {url} dans votre navigateur (l'adresse est dans votre presse-papiers : collez-la dans la barre d'adresse), et connectez-vous à votre Nord Account."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Open {url} in your browser, and sign in to your Nord Account."
+msgstr ""
+"Ouvrez {url} dans votre navigateur, et connectez-vous à votre Nord Account."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
+msgstr ""
+"Collez le jeton ici. Rien ne s'affiche pendant le collage (dans Konsole : Ctrl+Maj+V) ; appuyez ensuite sur Entrée."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Run 'nordvpn-wg setup' first (in a terminal: Konsole)."
+msgstr "Exécutez d'abord 'nordvpn-wg setup' (dans un terminal : Konsole)."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Run 'nordvpn-wg setup' first. It's on your clipboard: open a terminal (Konsole), paste it and press Enter."
+msgstr ""
+"Exécutez d'abord 'nordvpn-wg setup'. La commande est dans votre presse-papiers : ouvrez un terminal (Konsole), collez-la et appuyez sur Entrée."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "To log in, NordVPN needs an access token from your Nord Account:"
+msgstr ""
+"Pour se connecter, NordVPN a besoin d'un jeton d'accès de votre Nord Account :"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Verify your email address if it asks, then copy the token it shows you."
+msgstr ""
+"Vérifiez votre adresse e-mail si on vous le demande, puis copiez le jeton affiché."
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "disconnected {connection}"
 msgstr "déconnecté : {connection}"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "nmcli ended with code {code}"
+msgstr "nmcli s'est terminé avec le code {code}"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -6845,6 +7868,13 @@ msgstr ""
 
 # needs review
 #: packs/third-party/cursor/status.sh
+msgid ""
+"removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"
+msgstr ""
+"retiré ; le mode bureau garde son pointeur logiciel (un second X noir) jusqu'à son redémarrage, ou jusqu'au prochain redémarrage du Frame"
+
+# needs review
+#: packs/third-party/cursor/status.sh
 msgid "software cursor active"
 msgstr "curseur logiciel actif"
 
@@ -6878,6 +7908,31 @@ msgid ""
 "TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
 msgstr ""
 "Le clavier VR complet de TaiKeid, affiché avec le tableau de bord de SteamVR, installé depuis sa dernière version"
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid ""
+"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+msgstr ""
+"Pour vérifier la pièce, il faut trouver le bouton « Vue de la pièce » dans le tableau de bord, ou une association de touches du contrôleur. Un toc fonctionne avec un contrôleur en main ou posé. Lié : il s'installe depuis sa dernière version avec son propre installateur, comme le décrit son README."
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid "Knock twice on your headset or a table to turn passthrough on or off"
+msgstr ""
+"Tapez deux fois sur votre casque ou une table pour activer ou désactiver la vue de la pièce"
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid "KnockThru"
+msgstr "KnockThru"
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid ""
+"VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+"KnockThru de VioletTides : tapez les contrôleurs l'un contre l'autre, un contrôleur sur une table (ou votre jambe), ou sur le casque, et la vue de la pièce s'active ou se désactive. Un double toc l'active ou la désactive, un triple toc peut changer son style ; vous choisissez et calibrez vos tocs dans son onglet du tableau de bord de SteamVR. Il démarre avec SteamVR."
 
 # needs review
 #: packs/third-party/menu-icons/README.md
@@ -6948,6 +8003,32 @@ msgid ""
 "Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse cursor's and the menu icons', Frame Tweaks applies itself."
 msgstr ""
 "Des projets et correctifs d'autres personnes pour le Steam Frame, crédités à leurs auteurs. La plupart sont liés (🔗) : Frame Tweaks exécute leur propre installateur, tel que leur README l'indique, dans votre dossier personnel, et ils se mettent à jour à leur manière (↻ sur leur ligne). Les correctifs trouvés par d'autres, comme celui du curseur de la souris ou celui des icônes des menus, Frame Tweaks les applique lui-même."
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid "Performance Overlay"
+msgstr "Performance Overlay"
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+msgstr ""
+"Le Frame n'affiche pas ses propres températures, fréquences ou mémoire pendant que vous jouez, donc un ralentissement ou un casque chaud est difficile à expliquer. Lié : il s'installe depuis sa dernière version avec son propre installateur, comme le décrit son README."
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"sasaken1102r's frame-perf-overlay: a small panel in VR with the frame rate and frame times, CPU and GPU load and clocks, temperatures, memory, battery and Wi-Fi. You choose what it shows and where, in its Perf tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+"frame-perf-overlay de sasaken1102r : un petit panneau en VR avec la fréquence d'images et les temps d'image, la charge et les fréquences du CPU et du GPU, les températures, la mémoire, la batterie et le Wi-Fi. Vous choisissez ce qu'il affiche et où, dans son onglet Perf du tableau de bord de SteamVR. Il démarre avec SteamVR."
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
+msgstr ""
+"Panneau de performances de sasaken1102r en VR : fréquence d'images, charge du CPU et du GPU, températures, mémoire et batterie, sur votre poignet ou dans le tableau de bord"
 
 # needs review
 #: packs/third-party/recline/README.md
@@ -7046,3 +8127,90 @@ msgstr "Installateur d'ajustements"
 #~ "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
 #~ msgstr ""
 #~ "La partie commune des ajustements de la catégorie Environnement VR (Fenêtres flottantes courbes, Retour à la fenêtre précédente, Saisir en faisant flotter, Bandes de défilement) : elle insère leurs petites modifications dans le tableau de bord de SteamVR pendant que SteamVR fonctionne. Le Miroir Android s'en sert aussi lorsqu'elle est installée. S'installe automatiquement."
+
+#~ # needs review
+#~ msgid "Remove them"
+#~ msgstr "Les retirer"
+
+#~ # needs review
+#~ msgid "These installed tweaks were unticked and will be <b>removed</b>:"
+#~ msgstr "Ces ajustements installés ont été décochés et seront <b>retirés</b> :"
+
+#~ # needs review
+#~ msgid ""
+#~ "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+#~ msgstr ""
+#~ "Pack {name} ajouté. Il n'est pas utilisé tant que vous ne l'approuvez pas : ses ajustements s'exécuteraient avec vos droits. Lisez d'abord ce qu'ils font (son lien, ou « Ouvrir le dossier des packs »), puis appuyez sur « Approuver… » ci-dessous."
+
+#~ # needs review
+#~ msgid ""
+#~ "It isn't used until you trust it again: read what changed first, then Trust… below."
+#~ msgstr ""
+#~ "Il n'est pas utilisé tant que vous ne l'approuvez pas de nouveau : lisez d'abord ce qui a changé, puis appuyez sur « Approuver… » ci-dessous."
+
+#~ # needs review
+#~ msgid "Trust this pack's current files"
+#~ msgstr "Approuver les fichiers actuels de ce pack"
+
+#~ # needs review
+#~ msgid "Trust…"
+#~ msgstr "Approuver…"
+
+#~ # needs review
+#~ msgid "Yes: it runs as me"
+#~ msgstr "Oui : il s'exécute avec mes droits"
+
+#~ # needs review
+#~ msgid ""
+#~ "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+#~ msgstr ""
+#~ "1. Lisez le rapport ci-dessous : les versions de Frame Tweaks et de SteamOS, l'état de chaque ajustement et les journaux récents, sans noms d'utilisateur, chemins, noms d'hôte et de téléphone ni adresses. Rien n'en est envoyé nulle part, sauf si vous l'ajoutez au formulaire.<br>2. Ouvrez le formulaire de signalement (sur GitHub, où vous vous connectez), décrivez ce qui s'est passé et ce que vous attendiez, puis collez le rapport dans sa case « Diagnostics report » (« 📋 Copier le rapport »), ou joignez le fichier enregistré."
+
+#~ # needs review
+#~ msgid ""
+#~ "The tested versions of %s don't install on this Python (%s); trying the newest."
+#~ msgstr ""
+#~ "Les versions testées de %s ne s'installent pas sur ce Python (%s) ; essai des plus récentes."
+
+#~ # needs review
+#~ msgid ""
+#~ "Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
+#~ msgstr ""
+#~ "Votre disposition de clavier n'a pas de touche pour %s. Collez plutôt le texte (Ctrl+V)."
+
+#~ # needs review
+#~ msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+#~ msgstr ""
+#~ "Terminé. Attribuez « Dicter (marche/arrêt) » à une touche (et à un bouton de contrôleur) : %s"
+
+#~ # needs review
+#~ msgid "dictate ready (%s, small model)"
+#~ msgstr "dictate prêt (%s, petit modèle)"
+
+#~ # needs review
+#~ msgid "whisper-frame's engine"
+#~ msgstr "moteur de whisper-frame"
+
+#~ # needs review
+#~ msgid ""
+#~ "Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+#~ msgstr ""
+#~ "Le ydotool actuel d'Arch Linux ARM ne fonctionne pas sur ce SteamOS. Manquant : %s"
+
+#~ # needs review
+#~ msgid ""
+#~ "Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+#~ msgstr ""
+#~ "Le ydotool actuel d'Arch Linux ARM ne fonctionne pas sur ce SteamOS ; celui que vous avez est conservé. Manquant : %s"
+
+#~ # needs review
+#~ msgid "No locations: run 'nordvpn-wg setup'"
+#~ msgstr "Aucun emplacement : exécutez 'nordvpn-wg setup'"
+
+#~ # needs review
+#~ msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
+#~ msgstr "Jeton d'accès NordVPN (Nord Account → NordVPN → Access token) :"
+
+#~ # needs review
+#~ msgid "Run 'nordvpn-wg setup' first."
+#~ msgstr "Exécutez d'abord 'nordvpn-wg setup'."

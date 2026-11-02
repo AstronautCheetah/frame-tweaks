@@ -22,6 +22,13 @@ msgstr "%s installeren in %s"
 
 # needs review
 #: get.sh
+msgid ""
+"Release %s isn't signed by Frame Tweaks' release key, so it wasn't installed."
+msgstr ""
+"Versie %s is niet ondertekend met de sleutel van Frame Tweaks, dus is ze niet geïnstalleerd."
+
+# needs review
+#: get.sh
 msgid "Release channel: %s"
 msgstr "Versiekanaal: %s"
 
@@ -37,6 +44,280 @@ msgid "Updating %s (./install.sh update)"
 msgstr "%s bijwerken (./install.sh update)"
 
 # needs review
+#: get.sh lib/common.sh
+msgid ""
+"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
+msgstr ""
+"versie %s is niet ondertekend met de sleutel van Frame Tweaks; er wordt toch doorgegaan (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
+
+# needs review
+#: gui/apply_changes.py
+msgid "(asks for your sudo password: %s)"
+msgstr "(vraagt om je sudo-wachtwoord: %s)"
+
+# needs review
+#: gui/apply_changes.py
+msgid "(needed by %s)"
+msgstr "(nodig voor %s)"
+
+# needs review
+#: gui/apply_changes.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
+msgid "Apply"
+msgstr "Toepassen"
+
+# needs review
+#: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
+msgid "Cancel"
+msgstr "Annuleren"
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Choose a password for your user (sudo asks for it). Type it, press Enter, then type it again: nothing shows as you type."
+msgstr ""
+"Kies een wachtwoord voor je gebruiker (sudo vraagt erom). Typ het, druk op Enter en typ het dan opnieuw: er verschijnt niets terwijl je typt."
+
+# needs review
+#: gui/apply_changes.py
+msgid "I understand the risk: apply"
+msgstr "Ik begrijp het risico: toepassen"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Install:"
+msgstr "Installeren:"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Install: %s"
+msgstr "Installeren: %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid "No password yet: Set a password… again when you're ready."
+msgstr ""
+"Nog geen wachtwoord: kies opnieuw Wachtwoord instellen… als je klaar bent."
+
+# needs review
+#: gui/apply_changes.py install.sh
+msgid "Nothing to change."
+msgstr "Niets te wijzigen."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Nothing to change: tick or untick a tweak first"
+msgstr "Niets te wijzigen: vink eerst een aanpassing aan of uit"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Password set: the tweaks tagged sudo can install now."
+msgstr ""
+"Wachtwoord ingesteld: de aanpassingen met de tag sudo kunnen nu geïnstalleerd worden."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Remove:"
+msgstr "Verwijderen:"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Remove: %s"
+msgstr "Verwijderen: %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Set a password…"
+msgstr "Wachtwoord instellen…"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Still checking status; try again in a moment."
+msgstr "De status wordt nog gecontroleerd; probeer het zo meteen opnieuw."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Their settings and data are kept."
+msgstr "Hun instellingen en gegevens blijven behouden."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Their settings are removed too (⚙ Preferences); their data is kept."
+msgstr ""
+"Hun instellingen worden ook gewist (⚙ Voorkeuren); hun gegevens blijven behouden."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
+msgstr ""
+"Je gebruiker heeft nog geen wachtwoord, dus aanpassingen die om het sudo-wachtwoord vragen (tag sudo), kunnen niet geïnstalleerd worden. Stel er eerst een in: je typt het als ze erom vragen."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
+msgstr ""
+"{tweaks} hebben je sudo-wachtwoord nodig, en je gebruiker heeft er nog geen. Stel er een in en kies dan opnieuw Wijzigingen toepassen."
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}"
+msgstr ""
+"⚠ Stuurt de hardware van de Frame aan: {hardware}. Als er iets misgaat: {fail_safe}"
+
+# needs review
+#: gui/details_page.py
+msgid "(used instead of {other}'s)"
+msgstr "(gebruikt in plaats van die van {other})"
+
+# needs review
+#: gui/details_page.py
+msgid ""
+"<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
+msgstr ""
+"<b>Versie {version} is nu beschikbaar</b>, dus dit is misschien opgelost: zie {link}de opmerkingen bij die versie{end} en installeer daarna opnieuw om bij te werken."
+
+# needs review
+#: gui/details_page.py
+msgid "About Frame Tweaks"
+msgstr "Over Frame Tweaks"
+
+# needs review
+#: gui/details_page.py
+msgid "Asks for sudo"
+msgstr "Vraagt om sudo"
+
+# needs review
+#: gui/details_page.py
+msgid "Checking for a newer release…"
+msgstr "Zoeken naar een nieuwere versie…"
+
+# needs review
+#: gui/details_page.py
+msgid "Couldn't check for a newer release; see {link}its releases{end}."
+msgstr ""
+"Kon niet naar een nieuwere versie zoeken; zie {link}de lijst met versies{end}."
+
+# needs review
+#: gui/details_page.py
+msgid "Documentation"
+msgstr "Documentatie"
+
+# needs review
+#: gui/details_page.py
+msgid "From"
+msgstr "Van"
+
+# needs review
+#: gui/details_page.py
+msgid ""
+"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
+msgstr ""
+"Geïnstalleerd, bijgewerkt en verwijderd met de eigen opdrachten van het project, zoals de README ze vermeldt; Frame Tweaks voert ze uit, maar zet niet vast, controleert niet en wijzigt niet wat ze installeren."
+
+# needs review
+#: gui/details_page.py
+msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
+msgstr ""
+"Bij de installatie vraagt de terminal om je sudo-wachtwoord (beheerder): %s"
+
+# needs review
+#: gui/details_page.py
+msgid "Its README"
+msgstr "README van het project"
+
+# needs review
+#: gui/details_page.py
+msgid "Made by"
+msgstr "Gemaakt door"
+
+# needs review
+#: gui/details_page.py
+msgid "Needs"
+msgstr "Vereist"
+
+# needs review
+#: gui/details_page.py
+msgid "No README."
+msgstr "Geen README."
+
+# needs review
+#: gui/details_page.py
+msgid "Not needed"
+msgstr "Niet nodig"
+
+# needs review
+#: gui/details_page.py
+msgid "Pack"
+msgstr "Pakket"
+
+# needs review
+#: gui/details_page.py
+msgid "Source"
+msgstr "Bron"
+
+# needs review
+#: gui/details_page.py
+msgid "Status"
+msgstr "Status"
+
+# needs review
+#: gui/details_page.py
+msgid "This Frame doesn't need it: %s"
+msgstr "Deze Frame heeft het niet nodig: %s"
+
+# needs review
+#: gui/details_page.py
+msgid "What it is"
+msgstr "Wat het is"
+
+# needs review
+#: gui/details_page.py
+msgid "Why it's included"
+msgstr "Waarom het erbij zit"
+
+# needs review
+#: gui/details_page.py
+msgid "the pack {pack}, not part of Frame Tweaks"
+msgstr "het pakket {pack}, geen deel van Frame Tweaks"
+
+# needs review
+#: gui/details_page.py
+msgid "{file} on GitHub"
+msgstr "{file} op GitHub"
+
+# needs review
+#: gui/details_page.py
+msgid "{tweaks} (installed automatically)"
+msgstr "{tweaks} (automatisch geïnstalleerd)"
+
+# needs review
+#: gui/details_page.py
+msgid "{version} is still the latest release."
+msgstr "{version} is nog altijd de nieuwste versie."
+
+# needs review
+#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "← Back"
+msgstr "← Terug"
+
+# needs review
+#: gui/details_page.py
+msgid "⚠ Known issue."
+msgstr "⚠ Bekend probleem."
+
+# needs review
+#: gui/details_page.py
+msgid "🔗 Linked"
+msgstr "🔗 Gekoppeld"
+
+# needs review
+#: gui/details_page.py
+msgid "🧪 Experimental"
+msgstr "🧪 Experimenteel"
+
+# needs review
 #: gui/frame-tweaks-gui.py
 msgid "%d pack update"
 msgid_plural "%d pack updates"
@@ -50,55 +331,13 @@ msgstr "(verborgen)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "(used instead of {other}'s)"
-msgstr "(gebruikt in plaats van die van {other})"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"<b>Version {version} is now available</b>, so this may be resolved: see {link}its release notes{end}, then reinstall to update."
-msgstr ""
-"<b>Versie {version} is nu beschikbaar</b>, dus dit is misschien opgelost: zie {link}de opmerkingen bij die versie{end} en installeer daarna opnieuw om bij te werken."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "About Frame Tweaks"
-msgstr "Over Frame Tweaks"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Another action is still running: try again once it's done."
-msgstr "Er loopt nog een andere actie: probeer het opnieuw als die klaar is."
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Wijzigingen toepassen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Asks for sudo"
-msgstr "Vraagt om sudo"
 
 # needs review
 #: gui/frame-tweaks-gui.py lib/sft.py
 msgid "Asks for your sudo password: %s"
 msgstr "Vraagt om je sudo-wachtwoord: %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Back to the defaults."
-msgstr "Terug naar de standaardwaarden."
-
-# needs review
-#: gui/frame-tweaks-gui.py gui/prefs_page.py packs/core/snip/frame-snip
-msgid "Cancel"
-msgstr "Annuleren"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Checking for a newer release…"
-msgstr "Zoeken naar een nieuwere versie…"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -123,11 +362,6 @@ msgstr ""
 "Sluit Frame Tweaks en open het opnieuw om de nieuwe versie te gebruiken."
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
-msgid "Collapse"
-msgstr "Inklappen"
-
-# needs review
 #: gui/frame-tweaks-gui.py
 msgid "Copied"
 msgstr "Gekopieerd"
@@ -146,21 +380,10 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Copy the link"
-msgstr "Link kopiëren"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Copy these details, then save a diagnostics report and open the bug form"
 msgstr ""
 "Deze details kopiëren, dan een diagnoserapport opslaan en het bugformulier openen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Couldn't check for a newer release; see {link}its releases{end}."
-msgstr ""
-"Kon niet naar een nieuwere versie zoeken; zie {link}de lijst met versies{end}."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -172,6 +395,13 @@ msgstr "Kon niet naar updates zoeken (geen verbinding met GitHub?)."
 msgid "Couldn't open a terminal: run ./install.sh uninstall-self in {folder}"
 msgstr ""
 "Kon geen terminal openen: voer ./install.sh uninstall-self uit in {folder}"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Couldn't remove {tweaks} (not needed on this Frame): run ./install.sh tidy in a terminal to see why."
+msgstr ""
+"Kon {tweaks} niet verwijderen (niet nodig op deze Frame): voer ./install.sh tidy uit in een terminal om te zien waarom."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -192,31 +422,11 @@ msgid "Details: what it is, why it's included, who made it"
 msgstr "Details: wat het is, waarom het erbij zit, wie het gemaakt heeft"
 
 # needs review
-#: gui/frame-tweaks-gui.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "Didn't work: %s"
-msgstr "Lukte niet: %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Documentation"
-msgstr "Documentatie"
-
-# needs review
-#: gui/frame-tweaks-gui.py lib/splash.py packs/core/snip/frame-snip install.sh
-msgid "Done."
-msgstr "Klaar."
-
-# needs review
 #: gui/frame-tweaks-gui.py
 msgid ""
 "Every open app closes, desktop mode and this window too: save your work first. SteamVR then starts again by itself."
 msgstr ""
 "Alle open apps worden gesloten, ook de bureaubladmodus en dit venster: sla eerst je werk op. Daarna start SteamVR vanzelf opnieuw."
-
-# needs review
-#: gui/frame-tweaks-gui.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
-msgid "Expand"
-msgstr "Uitklappen"
 
 # needs review
 #: gui/frame-tweaks-gui.py lib/sft.py
@@ -234,11 +444,6 @@ msgid ""
 "Frame Tweaks was updated to {version} since this window opened: ↻ Restart to use it."
 msgstr ""
 "Frame Tweaks is bijgewerkt naar {version} sinds dit venster openging: ↻ Herstarten om die versie te gebruiken."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "From"
-msgstr "Van"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -281,16 +486,6 @@ msgstr "Verbergen"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Hide category"
-msgstr "Categorie verbergen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Hide the whole category from the list (doesn't remove anything)"
-msgstr "De hele categorie uit de lijst verbergen (verwijdert niets)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Hide this tweak from the list (doesn't remove it)"
 msgstr "Deze aanpassing uit de lijst verbergen (verwijdert ze niet)"
 
@@ -306,36 +501,8 @@ msgstr "De aanpassingen installeren waar de laatste update niet aan toe kwam"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Install: %s"
-msgstr "Installeren: %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Installed, updated and uninstalled with the project's own commands, as its README gives them; Frame Tweaks runs them, but doesn't pin, check or change what they install."
-msgstr ""
-"Geïnstalleerd, bijgewerkt en verwijderd met de eigen opdrachten van het project, zoals de README ze vermeldt; Frame Tweaks voert ze uit, maar zet niet vast, controleert niet en wijzigt niet wat ze installeren."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Installing it asks for your sudo (admin) password in its terminal: %s"
-msgstr ""
-"Bij de installatie vraagt de terminal om je sudo-wachtwoord (beheerder): %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "It came to the front there. Close it there to open it here."
 msgstr "Het is daar naar voren gekomen. Sluit het daar om het hier te openen."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Its README"
-msgstr "README van het project"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Link copied"
-msgstr "Link gekopieerd"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -351,38 +518,8 @@ msgstr "Naar een nieuwere versie van Frame Tweaks zoeken"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Made by"
-msgstr "Gemaakt door"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Needs"
-msgstr "Vereist"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "No README."
-msgstr "Geen README."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Not needed"
-msgstr "Niet nodig"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Not needed on this Frame: %s"
 msgstr "Niet nodig op deze Frame: %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Nothing to change."
-msgstr "Niets te wijzigen."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Nothing to change: tick or untick a tweak first"
-msgstr "Niets te wijzigen: vink eerst een aanpassing aan of uit"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -396,11 +533,6 @@ msgstr "%s openen"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Pack"
-msgstr "Pakket"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid ""
 "Packs added from a link have a newer version where they came from: the Packs page says which"
 msgstr ""
@@ -410,16 +542,6 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "Preferences: the language, and how this window behaves"
 msgstr "Voorkeuren: de taal en hoe dit venster zich gedraagt"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Press Enter to close, or press the X button floating below to close."
-msgstr "Druk op Enter om te sluiten, of druk op de zwevende X-knop hieronder."
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "Press Enter to close…"
-msgstr "Druk op Enter om te sluiten…"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -439,23 +561,15 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Remove them"
-msgstr "Verwijderen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Remove: %s"
-msgstr "Verwijderen: %s"
+msgid ""
+"Removed {tweaks}: not needed on this Frame ({why}). Some changes show after a reboot."
+msgstr ""
+"{tweaks} verwijderd: niet nodig op deze Frame ({why}). Sommige wijzigingen zie je pas na opnieuw opstarten."
 
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "Reopen Frame Tweaks to use the new version"
 msgstr "Frame Tweaks opnieuw openen om de nieuwe versie te gebruiken"
-
-# needs review
-#: gui/frame-tweaks-gui.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
-msgid "Reset to defaults"
-msgstr "Standaardwaarden herstellen"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -475,11 +589,6 @@ msgstr ""
 "Een diagnoserapport opslaan (zonder gebruikersnamen en paden) en het bugformulier openen"
 
 # needs review
-#: gui/frame-tweaks-gui.py gui/prefs_page.py
-msgid "Saved."
-msgstr "Opgeslagen."
-
-# needs review
 #: gui/frame-tweaks-gui.py
 msgid "Settings"
 msgstr "Instellingen"
@@ -496,11 +605,6 @@ msgstr "Verborgen tonen ({n})"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Show this category again"
-msgstr "Deze categorie weer tonen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Show this tweak in the list again"
 msgstr "Deze aanpassing weer in de lijst tonen"
 
@@ -508,16 +612,6 @@ msgstr "Deze aanpassing weer in de lijst tonen"
 #: gui/frame-tweaks-gui.py
 msgid "Something went wrong in the installer window"
 msgstr "Er ging iets mis in het installatievenster"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Source"
-msgstr "Bron"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Status"
-msgstr "Status"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -533,54 +627,10 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "Still checking status; try again in a moment."
-msgstr "De status wordt nog gecontroleerd; probeer het zo meteen opnieuw."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
-msgstr ""
-"De browser reageerde niet, dus de link staat op het klembord: plak hem in de browser."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "The browser didn't answer: the link is on the clipboard."
-msgstr "De browser reageerde niet: de link staat op het klembord."
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid ""
 "The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
 msgstr ""
 "De laatste update is niet afgerond: {tweaks} werden niet opnieuw geïnstalleerd. ⬇ Update afronden doet dat alsnog."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Their settings and data are kept."
-msgstr "Hun instellingen en gegevens blijven behouden."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Their settings are removed too (⚙ Preferences); their data is kept."
-msgstr ""
-"Hun instellingen worden ook gewist (⚙ Voorkeuren); hun gegevens blijven behouden."
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "These installed tweaks were unticked and will be <b>removed</b>:"
-msgstr ""
-"Deze geïnstalleerde aanpassingen zijn uitgevinkt en worden <b>verwijderd</b>:"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "This Frame doesn't need it: %s"
-msgstr "Deze Frame heeft het niet nodig: %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Tick every tweak in this category"
-msgstr "Alle aanpassingen in deze categorie aanvinken"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -605,18 +655,6 @@ msgid "Unhide"
 msgstr "Weer tonen"
 
 # needs review
-#: gui/frame-tweaks-gui.py
-msgid "Unhide category"
-msgstr "Categorie weer tonen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid ""
-"Untick every tweak in this category (installed ones are removed when you apply the changes)"
-msgstr ""
-"Alle aanpassingen in deze categorie uitvinken (geïnstalleerde worden verwijderd als je de wijzigingen toepast)"
-
-# needs review
 #: gui/frame-tweaks-gui.py gui/packs_page.py
 msgid "Update"
 msgstr "Bijwerken"
@@ -630,34 +668,9 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "What it is"
-msgstr "Wat het is"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "Where the tweaks come from; add other people's (docs/mods.md)"
 msgstr ""
 "Waar de aanpassingen vandaan komen; die van anderen toevoegen (docs/mods.md)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Why it's included"
-msgstr "Waarom het erbij zit"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "Working… (a download can take a minute)"
-msgstr "Bezig… (een download kan een minuut duren)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "checking…"
-msgstr "controleren…"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "hidden"
-msgstr "verborgen"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -666,48 +679,8 @@ msgstr "vereist: %s"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "not available any more"
-msgstr "niet meer beschikbaar"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/third-party/menu-icons/status.sh
-msgid "not installed"
-msgstr "niet geïnstalleerd"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "status check didn't finish (took over a minute)"
-msgstr "statuscontrole niet afgerond (duurde langer dan een minuut)"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "status check failed"
-msgstr "statuscontrole mislukt"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "status check failed (exit {code})"
-msgstr "statuscontrole mislukt (afsluitcode {code})"
-
-# needs review
-#: gui/frame-tweaks-gui.py install.sh
-msgid "status check failed: %s"
-msgstr "statuscontrole mislukt: %s"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "status check failed: {error}"
 msgstr "statuscontrole mislukt: {error}"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "the pack {pack}, not part of Frame Tweaks"
-msgstr "het pakket {pack}, geen deel van Frame Tweaks"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "{file} on GitHub"
-msgstr "{file} op GitHub"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -717,23 +690,8 @@ msgstr ""
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "{tweaks} (installed automatically)"
-msgstr "{tweaks} (automatisch geïnstalleerd)"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "{version} available"
 msgstr "{version} beschikbaar"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "{version} is still the latest release."
-msgstr "{version} is nog altijd de nieuwste versie."
-
-# needs review
-#: gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "← Back"
-msgstr "← Terug"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -744,11 +702,6 @@ msgstr "↻ Herstarten"
 #: gui/frame-tweaks-gui.py
 msgid "⚙ Settings"
 msgstr "⚙ Instellingen"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "⚠ Known issue."
-msgstr "⚠ Bekend probleem."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -792,18 +745,8 @@ msgstr "🔑 Portefeuille-apps"
 
 # needs review
 #: gui/frame-tweaks-gui.py
-msgid "🔗 Linked"
-msgstr "🔗 Gekoppeld"
-
-# needs review
-#: gui/frame-tweaks-gui.py
 msgid "🧩 Packs"
 msgstr "🧩 Pakketten"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "🧪 Experimental"
-msgstr "🧪 Experimenteel"
 
 # needs review
 #: gui/packs_page.py
@@ -813,7 +756,7 @@ msgstr[0] "%d aanpassing"
 msgstr[1] "%d aanpassingen"
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "(instead of {other}'s)"
 msgstr "(in plaats van die van {other})"
 
@@ -841,9 +784,9 @@ msgstr "Een pakket toevoegen via een link:"
 # needs review
 #: gui/packs_page.py
 msgid ""
-"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+"Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust below."
 msgstr ""
-"{name} toegevoegd. Het wordt pas gebruikt als je het vertrouwt: de aanpassingen ervan zouden met jouw rechten draaien. Lees eerst wat ze doen (via de link of Pakkettenmap openen) en kies dan hieronder Vertrouwen…"
+"{name} toegevoegd. Het wordt pas gebruikt als je het vertrouwt: de aanpassingen ervan zouden met jouw rechten draaien. Lees eerst wat ze doen (via de link of Pakkettenmap openen) en kies dan hieronder Vertrouwen."
 
 # needs review
 #: gui/packs_page.py
@@ -907,9 +850,9 @@ msgstr ""
 # needs review
 #: gui/packs_page.py
 msgid ""
-"It isn't used until you trust it again: read what changed first, then Trust… below."
+"It isn't used until you trust it again: read what changed first, then Trust below."
 msgstr ""
-"Het wordt pas gebruikt als je het opnieuw vertrouwt: lees eerst wat er veranderd is en kies dan hieronder Vertrouwen…"
+"Het wordt pas gebruikt als je het opnieuw vertrouwt: lees eerst wat er veranderd is en kies dan hieronder Vertrouwen."
 
 # needs review
 #: gui/packs_page.py
@@ -985,18 +928,13 @@ msgstr "Dat lukte niet: {error}"
 
 # needs review
 #: gui/packs_page.py
-msgid "Trust this pack's current files"
-msgstr "De huidige bestanden van dit pakket vertrouwen"
+msgid "Trust"
+msgstr "Vertrouwen"
 
 # needs review
 #: gui/packs_page.py
 msgid "Trusted: its tweaks are listed"
 msgstr "Vertrouwd: de aanpassingen ervan staan in de lijst"
-
-# needs review
-#: gui/packs_page.py
-msgid "Trust…"
-msgstr "Vertrouwen…"
 
 # needs review
 #: gui/packs_page.py
@@ -1010,13 +948,15 @@ msgstr "Gebruiken"
 
 # needs review
 #: gui/packs_page.py
-msgid "Yes, delete it"
-msgstr "Ja, wissen"
+msgid ""
+"Use this pack: its tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. If its files change (an update), it waits until you trust it again."
+msgstr ""
+"Dit pakket gebruiken: de aanpassingen ervan komen in de lijst, en die je aanvinkt, draaien met jouw rechten, met je bestanden en wachtwoorden binnen bereik. Vertrouw alleen pakketten van mensen die je vertrouwt. Veranderen de bestanden ervan (een update), dan wacht het tot je het opnieuw vertrouwt."
 
 # needs review
 #: gui/packs_page.py
-msgid "Yes: it runs as me"
-msgstr "Ja, met mijn rechten"
+msgid "Yes, delete it"
+msgstr "Ja, wissen"
 
 # needs review
 #: gui/packs_page.py lib/splash.py
@@ -1024,7 +964,7 @@ msgid "installed"
 msgstr "geïnstalleerd"
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "none"
 msgstr "geen"
 
@@ -1034,12 +974,12 @@ msgid "tweak pack provided by {author}"
 msgstr "pakket met aanpassingen van {author}"
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "{name} is up to date."
 msgstr "{name} is al bijgewerkt."
 
 # needs review
-#: gui/packs_page.py lib/sft.py
+#: gui/packs_page.py lib/userpacks.py
 msgid "{name}: updated, {n} file changed."
 msgid_plural "{name}: updated, {n} files changed."
 msgstr[0] "{name}: bijgewerkt, {n} bestand gewijzigd."
@@ -1216,6 +1156,11 @@ msgstr ""
 "Instellingen wissen meldt je ook af bij Claude voor desktop en wist de sleutel van NordVPN (NordVPN opnieuw instellen vereist dan een nieuw toegangstoken)."
 
 # needs review
+#: gui/prefs_page.py gui/settings_page.py
+msgid "Saved."
+msgstr "Opgeslagen."
+
+# needs review
 #: gui/prefs_page.py
 msgid "Saved. ⟳ Check for updates finds test releases too."
 msgstr "Opgeslagen. ⟳ Naar updates zoeken vindt nu ook testversies."
@@ -1372,6 +1317,28 @@ msgid "{language}: {n} of {total} texts not yet confirmed."
 msgstr "{language}: {n} van de {total} teksten nog niet bevestigd."
 
 # needs review
+#: gui/readme_view.py
+msgid "Copy the link"
+msgstr "Link kopiëren"
+
+# needs review
+#: gui/readme_view.py
+msgid "Link copied"
+msgstr "Link gekopieerd"
+
+# needs review
+#: gui/readme_view.py
+msgid ""
+"The browser didn't answer, so the link is on the clipboard: paste it into the browser."
+msgstr ""
+"De browser reageerde niet, dus de link staat op het klembord: plak hem in de browser."
+
+# needs review
+#: gui/readme_view.py
+msgid "The browser didn't answer: the link is on the clipboard."
+msgstr "De browser reageerde niet: de link staat op het klembord."
+
+# needs review
 #: gui/report_page.py
 msgid "(Trying out the window: no report saved.)"
 msgstr "(Het venster wordt uitgeprobeerd: geen rapport opgeslagen.)"
@@ -1379,9 +1346,9 @@ msgstr "(Het venster wordt uitgeprobeerd: geen rapport opgeslagen.)"
 # needs review
 #: gui/report_page.py
 msgid ""
-"1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+"1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs. Removed from it: your user name, home folder path and host name, the phone names Android Mirror remembers and adb's names for phones, IP, MAC and e-mail addresses, GitHub tokens, and other tokens and keys written as 64 hex digits or as 44 base64 characters ending in =. Anything else stays as it was. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
 msgstr ""
-"1. Lees het rapport hieronder: de versies van Frame Tweaks en SteamOS, de status van elke aanpassing en recente logs, zonder gebruikersnamen, paden, host- en telefoonnamen en adressen. Er wordt niets van verstuurd, tenzij je het aan het formulier toevoegt.<br>2. Open het bugformulier (op GitHub; je meldt je daar aan), vertel wat er gebeurde en wat je verwachtte, en plak het rapport in het vak Diagnostics report (📋 Het rapport kopiëren), of voeg het opgeslagen bestand toe."
+"1. Lees het rapport hieronder: de versies van Frame Tweaks en SteamOS, de status van elke aanpassing en recente logs. Eruit verwijderd: je gebruikersnaam, het pad van je persoonlijke map en je hostnaam, de telefoonnamen die Android-spiegel onthoudt en de namen die adb aan telefoons geeft, IP-, MAC- en e-mailadressen, GitHub-tokens, en andere tokens en sleutels geschreven als 64 hexadecimale cijfers of als 44 base64-tekens die eindigen op =. Al de rest blijft zoals het was. Er wordt niets van verstuurd, tenzij je het aan het formulier toevoegt.<br>2. Open het bugformulier (op GitHub; je meldt je daar aan), vertel wat er gebeurde en wat je verwachtte, en plak het rapport in het vak Diagnostics report (📋 Het rapport kopiëren), of voeg het opgeslagen bestand toe."
 
 # needs review
 #: gui/report_page.py
@@ -1419,6 +1386,93 @@ msgid "📋 Copy the report"
 msgstr "📋 Het rapport kopiëren"
 
 # needs review
+#: gui/settings_page.py
+msgid " or "
+msgstr " of "
+
+# needs review
+#: gui/settings_page.py
+msgid "Another action is still running: try again once it's done."
+msgstr "Er loopt nog een andere actie: probeer het opnieuw als die klaar is."
+
+# needs review
+#: gui/settings_page.py
+msgid "Back to the defaults."
+msgstr "Terug naar de standaardwaarden."
+
+# needs review
+#: gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "Didn't work: %s"
+msgstr "Lukte niet: %s"
+
+# needs review
+#: gui/settings_page.py lib/splash.py packs/core/snip/frame-snip install.sh
+msgid "Done."
+msgstr "Klaar."
+
+# needs review
+#: gui/settings_page.py
+msgid "Nothing to apply: change %s first"
+msgstr "Niets toe te passen: wijzig eerst %s"
+
+# needs review
+#: gui/settings_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Reset to defaults"
+msgstr "Standaardwaarden herstellen"
+
+# needs review
+#: gui/settings_page.py
+msgid "Working… (a download can take a minute)"
+msgstr "Bezig… (een download kan een minuut duren)"
+
+# needs review
+#: gui/tweak_rows.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Collapse"
+msgstr "Inklappen"
+
+# needs review
+#: gui/tweak_rows.py packs/core/arrowpad/arrowpad.py packs/core/snip/frame-snip
+msgid "Expand"
+msgstr "Uitklappen"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Hide category"
+msgstr "Categorie verbergen"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Hide the whole category from the list (doesn't remove anything)"
+msgstr "De hele categorie uit de lijst verbergen (verwijdert niets)"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Show this category again"
+msgstr "Deze categorie weer tonen"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Tick every tweak in this category"
+msgstr "Alle aanpassingen in deze categorie aanvinken"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "Unhide category"
+msgstr "Categorie weer tonen"
+
+# needs review
+#: gui/tweak_rows.py
+msgid ""
+"Untick every tweak in this category (installed ones are removed when you apply the changes)"
+msgstr ""
+"Alle aanpassingen in deze categorie uitvinken (geïnstalleerde worden verwijderd als je de wijzigingen toepast)"
+
+# needs review
+#: gui/tweak_rows.py
+msgid "hidden"
+msgstr "verborgen"
+
+# needs review
 #: gui/wallet_page.py
 msgid "(default 4 h)"
 msgstr "(standaard 4 u)"
@@ -1429,6 +1483,13 @@ msgid ""
 "<b>Why use this?</b> Many people don't put a password on their Steam Frame: it's quicker to pick up, and it gets passed around to family and friends. But the apps you use in it can still hold sensitive things, like messages, notes and signed-in accounts. Here you can keep those apps behind <b>one password, your KDE wallet's</b>, without locking the whole headset: the wallet is unlocked once when you need it, and locks again by itself."
 msgstr ""
 "<b>Waarom dit gebruiken?</b> Veel mensen zetten geen wachtwoord op hun Steam Frame: zo kun je hem sneller opzetten, en hij gaat van hand tot hand bij familie en vrienden. Maar de apps die je erop gebruikt, kunnen toch gevoelige dingen bevatten, zoals berichten, notities en accounts waarop je bent aangemeld. Hier kun je die apps achter <b>één wachtwoord, dat van je KDE-portefeuille</b>, houden zonder de hele headset te vergrendelen: de portefeuille wordt één keer ontgrendeld als je hem nodig hebt, en vergrendelt daarna vanzelf weer."
+
+# needs review
+#: gui/wallet_page.py
+msgid "Add a terminal tool ({n} from Homebrew)"
+msgid_plural "Add a terminal tool ({n} from Homebrew)"
+msgstr[0] "Een terminaltool toevoegen ({n} van Homebrew)"
+msgstr[1] "Een terminaltool toevoegen ({n} van Homebrew)"
 
 # needs review
 #: gui/wallet_page.py
@@ -1468,8 +1529,20 @@ msgstr "Automatisch vergrendelen"
 
 # needs review
 #: gui/wallet_page.py
+msgid "Back to Homebrew's own command"
+msgstr "Terug naar de eigen opdracht van Homebrew"
+
+# needs review
+#: gui/wallet_page.py
 msgid "Close after"
 msgstr "Sluiten na"
+
+# needs review
+#: gui/wallet_page.py
+msgid ""
+"Couldn't start KWalletManager; open it from the menu, then kdewallet → Change Password."
+msgstr ""
+"Kon KWalletManager niet starten; open het via het menu en kies dan kdewallet → Wachtwoord wijzigen."
 
 # needs review
 #: gui/wallet_page.py
@@ -1493,9 +1566,28 @@ msgstr "Headset af"
 
 # needs review
 #: gui/wallet_page.py
+msgid "Homebrew's {src}: its command {cmds}"
+msgid_plural "Homebrew's {src}: its commands {cmds}"
+msgstr[0] "{src} van Homebrew: de opdracht {cmds}"
+msgstr[1] "{src} van Homebrew: de opdrachten {cmds}"
+
+# needs review
+#: gui/wallet_page.py
+msgid ""
+"It opens without one, so it protects nothing, and there's no password for Unlock or Password first to ask. Set one in KWalletManager: kdewallet → Change Password."
+msgstr ""
+"Hij opent zonder wachtwoord, dus beschermt hij niets, en er is geen wachtwoord waar Ontgrendelen of Eerst wachtwoord om kan vragen. Stel er een in via KWalletManager: kdewallet → Wachtwoord wijzigen."
+
+# needs review
+#: gui/wallet_page.py
 msgid "It stays unlocked until you lock it (auto-lock is off)."
 msgstr ""
 "Hij blijft ontgrendeld tot je hem vergrendelt (automatisch vergrendelen staat uit)."
+
+# needs review
+#: gui/wallet_page.py
+msgid "It's closed now; apps open it without asking."
+msgstr "Hij is nu gesloten; apps openen hem zonder te vragen."
 
 # needs review
 #: gui/wallet_page.py
@@ -1548,6 +1640,17 @@ msgstr "De app weer openen zoals vroeger (met de oorspronkelijke starter)"
 
 # needs review
 #: gui/wallet_page.py
+msgid "Opens KWalletManager: kdewallet → Change Password"
+msgstr "Opent KWalletManager: kdewallet → Wachtwoord wijzigen"
+
+# needs review
+#: gui/wallet_page.py
+msgid "Opens the wallet; no password is set, so none is asked"
+msgstr ""
+"Opent de portefeuille; er is geen wachtwoord ingesteld, dus er wordt er geen gevraagd"
+
+# needs review
+#: gui/wallet_page.py
 msgid "Password first"
 msgstr "Eerst wachtwoord"
 
@@ -1592,6 +1695,11 @@ msgstr ""
 
 # needs review
 #: gui/wallet_page.py
+msgid "Set up by this tweak's install."
+msgstr "Ingesteld door de installatie van deze aanpassing."
+
+# needs review
+#: gui/wallet_page.py
 msgid "Shorter"
 msgstr "Korter"
 
@@ -1605,6 +1713,11 @@ msgstr ""
 #: gui/wallet_page.py
 msgid "System app"
 msgstr "Systeemapp"
+
+# needs review
+#: gui/wallet_page.py
+msgid "Terminal tools ({n})"
+msgstr "Terminaltools ({n})"
 
 # needs review
 #: gui/wallet_page.py
@@ -1642,6 +1755,13 @@ msgstr "sluit ook als de headset wordt afgezet"
 #: gui/wallet_page.py
 msgid "asks for the wallet password first"
 msgstr "vraagt eerst om het wachtwoord van de portefeuille"
+
+# needs review
+#: gui/wallet_page.py
+msgid ""
+"asks for the wallet password first while it's locked, and keeps its sign-in in the wallet if it can · runs {real}"
+msgstr ""
+"vraagt eerst het wachtwoord van de portefeuille zolang die vergrendeld is, en bewaart de aanmelding in de portefeuille als dat kan · voert {real} uit"
 
 # needs review
 #: gui/wallet_page.py
@@ -1715,6 +1835,16 @@ msgstr "⏱ Timer verlengen"
 
 # needs review
 #: gui/wallet_page.py
+msgid "⚠ The wallet has no password yet."
+msgstr "⚠ De portefeuille heeft nog geen wachtwoord."
+
+# needs review
+#: gui/wallet_page.py
+msgid "🔑 Set password…"
+msgstr "🔑 Wachtwoord instellen…"
+
+# needs review
+#: gui/wallet_page.py
 msgid "🔒 Lock now"
 msgstr "🔒 Nu vergrendelen"
 
@@ -1725,6 +1855,11 @@ msgstr "🔒 Portefeuille vergrendeld."
 
 # needs review
 #: gui/wallet_page.py
+msgid "🔓 Open"
+msgstr "🔓 Openen"
+
+# needs review
+#: gui/wallet_page.py
 msgid "🔓 Unlock…"
 msgstr "🔓 Ontgrendelen…"
 
@@ -1732,6 +1867,46 @@ msgstr "🔓 Ontgrendelen…"
 #: gui/wallet_page.py
 msgid "🔓 Wallet open"
 msgstr "🔓 Portefeuille open"
+
+# needs review
+#: gui/window_logic.py install.sh
+msgid "Press Enter to close, or press the X button floating below to close."
+msgstr "Druk op Enter om te sluiten, of druk op de zwevende X-knop hieronder."
+
+# needs review
+#: gui/window_logic.py install.sh
+msgid "Press Enter to close…"
+msgstr "Druk op Enter om te sluiten…"
+
+# needs review
+#: gui/window_logic.py
+msgid "checking…"
+msgstr "controleren…"
+
+# needs review
+#: gui/window_logic.py
+msgid "not available any more"
+msgstr "niet meer beschikbaar"
+
+# needs review
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+msgid "not installed"
+msgstr "niet geïnstalleerd"
+
+# needs review
+#: gui/window_logic.py
+msgid "status check didn't finish (took over a minute)"
+msgstr "statuscontrole niet afgerond (duurde langer dan een minuut)"
+
+# needs review
+#: gui/window_logic.py
+msgid "status check failed (exit {code})"
+msgstr "statuscontrole mislukt (afsluitcode {code})"
+
+# needs review
+#: install.sh
+msgid "%s could not be removed"
+msgstr "%s kon niet verwijderd worden"
 
 # needs review
 #: install.sh packs/core/snip/install.sh
@@ -1757,6 +1932,11 @@ msgstr "%s heet nu %s"
 #: install.sh
 msgid "%s migration failed"
 msgstr "migratie van %s mislukt"
+
+# needs review
+#: install.sh
+msgid "%s needs your sudo password, and your user has none yet."
+msgstr "%s heeft je sudo-wachtwoord nodig, en je gebruiker heeft er nog geen."
 
 # needs review
 #: install.sh
@@ -1952,6 +2132,11 @@ msgstr "Lees het eerst voor je het deelt; voeg het bij een bugrapport: %s"
 #: install.sh
 msgid "Remove tweaks?"
 msgstr "Aanpassingen verwijderen?"
+
+# needs review
+#: install.sh
+msgid "Removed %s: not needed on this Frame (%s)."
+msgstr "%s verwijderd: niet nodig op deze Frame (%s)."
 
 # needs review
 #: install.sh
@@ -2216,6 +2401,25 @@ msgstr "bureaubladmodus"
 # needs review
 #: lib/common.sh
 msgid ""
+"%s %s is older than the %s this release was tested with; not installing it"
+msgstr ""
+"%s %s is ouder dan de %s waarmee deze versie getest is; wordt niet geïnstalleerd"
+
+# needs review
+#: lib/common.sh
+msgid "%s is built for '%s', not aarch64; not installing it"
+msgstr "%s is gebouwd voor '%s', niet voor aarch64; wordt niet geïnstalleerd"
+
+# needs review
+#: lib/common.sh
+msgid ""
+"%s, the tested version, is no longer on PyPI, so %s isn't installed: a deleted release isn't replaced by another one. Please report this."
+msgstr ""
+"%s, de geteste versie, staat niet meer op PyPI, dus is %s niet geïnstalleerd: een gewiste versie wordt niet door een andere vervangen. Meld dit."
+
+# needs review
+#: lib/common.sh
+msgid ""
 "About 280 MB to download, shared by the installer window and the tweaks that use it."
 msgstr ""
 "Ongeveer 280 MB om te downloaden, gedeeld door het installatievenster en de aanpassingen die het gebruiken."
@@ -2236,6 +2440,18 @@ msgstr "Actief vanaf de volgende start van SteamVR."
 #: lib/common.sh
 msgid "Active now."
 msgstr "Nu actief."
+
+# needs review
+#: lib/common.sh
+msgid "Couldn't install %s (see above)."
+msgstr "Kon %s niet installeren (zie hierboven)."
+
+# needs review
+#: lib/common.sh
+msgid ""
+"Couldn't reach PyPI to install %s: check the Internet connection, then try again."
+msgstr ""
+"Kon PyPI niet bereiken om %s te installeren: controleer de internetverbinding en probeer het opnieuw."
 
 # needs review
 #: lib/common.sh
@@ -2282,9 +2498,16 @@ msgstr "Nog niet actief: %s"
 # needs review
 #: lib/common.sh
 msgid ""
-"The tested versions of %s don't install on this Python (%s); trying the newest."
+"PyPI has no build of %s for this Python (%s) and system; installing the newest %s that has one instead. The other tested versions stay."
 msgstr ""
-"De geteste versies van %s installeren niet op deze Python (%s); de nieuwste worden geprobeerd."
+"PyPI heeft geen build van %s voor deze Python (%s) en dit systeem; in plaats daarvan wordt de nieuwste %s geïnstalleerd die er wel een heeft. De andere geteste versies blijven."
+
+# needs review
+#: lib/common.sh
+msgid ""
+"Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
+msgstr ""
+"Stel er een in: open een terminal (Konsole), typ passwd en druk op Enter, en kies dan een wachtwoord (er verschijnt niets terwijl je het typt). Of gebruik Wachtwoord instellen… in het Frame Tweaks-venster."
 
 # needs review
 #: lib/common.sh
@@ -2309,11 +2532,9 @@ msgstr ""
 "Het installatieprogramma van Homebrew vraagt één keer om je sudo-wachtwoord (beheerder), om die map aan te maken."
 
 # needs review
-#: lib/common.sh packs/core/charge-limit/install.sh
-msgid ""
-"Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
-msgstr ""
-"Je gebruiker heeft geen wachtwoord, dus sudo kan niet werken. Stel er een in met 'passwd' en voer dit opnieuw uit."
+#: lib/common.sh
+msgid "Your user has no password yet, so sudo can't work."
+msgstr "Je gebruiker heeft nog geen wachtwoord, dus sudo kan niet werken."
 
 # needs review
 #: lib/common.sh
@@ -2324,13 +2545,6 @@ msgstr "geïnstalleerd (actief zolang SteamVR draait)"
 #: lib/common.sh
 msgid "not responding"
 msgstr "reageert niet"
-
-# needs review
-#: lib/common.sh
-msgid ""
-"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
-msgstr ""
-"versie %s is niet ondertekend met de sleutel van Frame Tweaks; er wordt toch doorgegaan (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 
 # needs review
 #: lib/common.sh
@@ -2348,7 +2562,7 @@ msgid "restored KDE settings changed by %s"
 msgstr "KDE-instellingen hersteld die %s had gewijzigd"
 
 # needs review
-#: lib/common.sh packs/core/charge-limit/install.sh
+#: lib/common.sh
 msgid "sudo failed."
 msgstr "sudo mislukt."
 
@@ -2362,6 +2576,16 @@ msgstr "de patchdienst van het dashboard antwoordde niet"
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 "wacht op een herstart van SteamVR (herstart SteamVR of start één keer opnieuw op)"
+
+# needs review
+#: lib/installer.py
+msgid "status check failed"
+msgstr "statuscontrole mislukt"
+
+# needs review
+#: lib/installer.py
+msgid "status check failed: %s"
+msgstr "statuscontrole mislukt: %s"
 
 # needs review
 #: lib/link.sh
@@ -2442,16 +2666,6 @@ msgstr "(standaard)"
 
 # needs review
 #: lib/sft.py
-msgid "Added the pack {name} in {folder}."
-msgstr "Pakket {name} toegevoegd in {folder}."
-
-# needs review
-#: lib/sft.py
-msgid "By {author}."
-msgstr "Door {author}."
-
-# needs review
-#: lib/sft.py
 msgid "By: %s"
 msgstr "Door: %s"
 
@@ -2484,27 +2698,6 @@ msgstr "Verborgen in het installatievenster: %s"
 
 # needs review
 #: lib/sft.py
-msgid ""
-"It isn't used until you trust it again. Read what changed first, then: {command}"
-msgstr ""
-"Het wordt pas gebruikt als je het opnieuw vertrouwt. Lees eerst wat er veranderd is, dan: {command}"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
-msgstr ""
-"Het wordt pas gebruikt als je het vertrouwt: de aanpassingen ervan zouden met jouw rechten draaien. Lees eerst wat ze doen (de README.md van elk ervan in die map), dan: {command}"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
-msgstr ""
-"De aanpassingen {ids} ervan zijn nog geïnstalleerd: vertrouw het pakket opnieuw om ze te verwijderen ({command}) en wis het daarna."
-
-# needs review
-#: lib/sft.py
 msgid "More: %s"
 msgstr "Meer: %s"
 
@@ -2515,23 +2708,8 @@ msgstr "Vereist: %s"
 
 # needs review
 #: lib/sft.py
-msgid "No packs added from a link."
-msgstr "Geen pakketten toegevoegd via een link."
-
-# needs review
-#: lib/sft.py
-msgid "Only packs in {folder} can be removed here."
-msgstr "Alleen pakketten in {folder} kunnen hier gewist worden."
-
-# needs review
-#: lib/sft.py
-msgid "Problems:"
-msgstr "Problemen:"
-
-# needs review
-#: lib/sft.py
-msgid "Removed the pack {name} ({folder})."
-msgstr "Pakket {name} gewist ({folder})."
+msgid "Not applied yet: {keys}. To apply them: ./install.sh {id}"
+msgstr "Nog niet toegepast: {keys}. Om ze toe te passen: ./install.sh {id}"
 
 # needs review
 #: lib/sft.py
@@ -2555,53 +2733,8 @@ msgstr "Bron: %s"
 
 # needs review
 #: lib/sft.py
-msgid ""
-"That isn't a link to a pack: give the address of its git repository, starting with https://"
-msgstr ""
-"Dat is geen link naar een pakket: geef het adres van de git-repository, beginnend met https://"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
-msgstr ""
-"Er staat geen pakket in de hoofdmap van {link}: geen pack.md en geen mappen met aanpassingen (docs/mods.md)."
-
-# needs review
-#: lib/sft.py
-msgid "Tweaks: %s"
-msgstr "Aanpassingen: %s"
-
-# needs review
-#: lib/sft.py
-msgid "Uninstall its tweaks first: {ids} ({command})."
-msgstr "Verwijder eerst de aanpassingen ervan: {ids} ({command})."
-
-# needs review
-#: lib/sft.py
 msgid "Why: %s"
 msgstr "Waarom: %s"
-
-# needs review
-#: lib/sft.py
-msgid "You have a pack in {folder} already: update it, or remove it first."
-msgstr "Je hebt al een pakket in {folder}: werk het bij, of wis het eerst."
-
-# needs review
-#: lib/sft.py
-msgid "a newer version is out: {command}"
-msgstr "er is een nieuwere versie: {command}"
-
-# needs review
-#: lib/sft.py
-msgid "changed since you trusted it: not used until you trust it again"
-msgstr ""
-"gewijzigd sinds je het vertrouwde: niet in gebruik tot je het opnieuw vertrouwt"
-
-# needs review
-#: lib/sft.py
-msgid "couldn't check (no connection?)"
-msgstr "kon niet controleren (geen verbinding?)"
 
 # needs review
 #: lib/sft.py
@@ -2610,87 +2743,10 @@ msgstr "KEY=VALUE verwacht, maar %s gekregen"
 
 # needs review
 #: lib/sft.py
-msgid "git isn't installed"
-msgstr "git is niet geïnstalleerd"
-
-# needs review
-#: lib/sft.py
-msgid "git took too long (no connection?)"
-msgstr "git duurde te lang (geen verbinding?)"
-
-# needs review
-#: lib/sft.py
-msgid "git {command} failed"
-msgstr "git {command} is mislukt"
-
-# needs review
-#: lib/sft.py
-msgid "in use; its tweaks are listed"
-msgstr "in gebruik; de aanpassingen ervan staan in de lijst"
-
-# needs review
-#: lib/sft.py
-msgid "more than one pack is called {name}: give its folder ({folders})"
-msgstr "meer dan één pakket heet {name}: geef de map op ({folders})"
-
-# needs review
-#: lib/sft.py
-msgid "no longer used (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-"niet meer in gebruik (geïnstalleerde aanpassingen ervan blijven tot je ze verwijdert)"
-
-# needs review
-#: lib/sft.py
-msgid "no pack {name}; see {command}"
-msgstr "geen pakket {name}; zie {command}"
-
-# needs review
-#: lib/sft.py
-msgid "not checked: not trusted ({command})"
-msgstr "niet gecontroleerd: niet vertrouwd ({command})"
-
-# needs review
-#: lib/sft.py
-msgid "not trusted: not used ({command})"
-msgstr "niet vertrouwd: niet in gebruik ({command})"
-
-# needs review
-#: lib/sft.py
-msgid "official: in use"
-msgstr "officieel: in gebruik"
-
-# needs review
-#: lib/sft.py
-msgid "official: turned off ({command})"
-msgstr "officieel: uitgeschakeld ({command})"
-
-# needs review
-#: lib/sft.py
 msgid ""
 "once, if Homebrew isn't installed yet: its installer asks, to create /home/linuxbrew"
 msgstr ""
 "één keer, als Homebrew nog niet geïnstalleerd is: het installatieprogramma van Homebrew vraagt het om /home/linuxbrew aan te maken"
-
-# needs review
-#: lib/sft.py
-msgid "problem: %s"
-msgstr "probleem: %s"
-
-# needs review
-#: lib/sft.py
-msgid "trusted: in use"
-msgstr "vertrouwd: in gebruik"
-
-# needs review
-#: lib/sft.py
-msgid "trusted; its tweaks are listed now"
-msgstr "vertrouwd; de aanpassingen ervan staan nu in de lijst"
-
-# needs review
-#: lib/sft.py
-msgid "turned off (installed tweaks of it stay until you uninstall them)"
-msgstr ""
-"uitgeschakeld (geïnstalleerde aanpassingen ervan blijven tot je ze verwijdert)"
 
 # needs review
 #: lib/sft.py
@@ -2709,11 +2765,6 @@ msgstr "onbekende groep {name}; groepen: {groups}"
 
 # needs review
 #: lib/sft.py
-msgid "up to date"
-msgstr "bijgewerkt"
-
-# needs review
-#: lib/sft.py
 msgid "{id} has no setting {key}; it has: {keys}"
 msgstr "{id} heeft geen instelling {key}; wel: {keys}"
 
@@ -2728,48 +2779,6 @@ msgid "{key}: {text} isn't one of: {choices}"
 msgstr "{key}: {text} is niet een van: {choices}"
 
 # needs review
-#: lib/sft.py
-msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
-msgstr ""
-"{pack} hoort bij Frame Tweaks en hoeft dus niet vertrouwd te worden: {command}"
-
-# needs review
-#: lib/sft.py
-msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
-msgstr "{pack} is geen eigen pakket van Frame Tweaks: {command}"
-
-# needs review
-#: lib/sft.py
-msgid ""
-"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
-msgstr ""
-"{pack} is niet vertrouwd: vertrouw het eerst ({command}), of wis het en voeg het opnieuw toe."
-
-# needs review
-#: lib/sft.py
-msgid ""
-"{pack} was added at a fixed version: to follow another one, remove it and add it again."
-msgstr ""
-"{pack} is op een vaste versie toegevoegd: om een andere te volgen, wis je het en voeg je het opnieuw toe."
-
-# needs review
-#: lib/sft.py
-msgid "{pack} wasn't added from a link: change its folder yourself."
-msgstr "{pack} is niet via een link toegevoegd: werk de map zelf bij."
-
-# needs review
-#: lib/sft.py
-msgid ""
-"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
-msgstr ""
-"De git-instellingen van {pack} (.git/config) zijn niet meer zoals ze bij het toevoegen waren, en git zou ze volgen: wis het pakket en voeg het opnieuw toe."
-
-# needs review
-#: lib/sft.py
-msgid "{ref} isn't a branch or tag name"
-msgstr "{ref} is geen branch- of tagnaam"
-
-# needs review
 #: lib/splash.py
 msgid "Added {name} to the app menu"
 msgstr "{name} toegevoegd aan het appmenu"
@@ -2778,11 +2787,6 @@ msgstr "{name} toegevoegd aan het appmenu"
 #: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr "Pijltjesblok"
-
-# needs review
-#: lib/splash.py packs/core/arrowpad/arrowpad.py
-msgid "Done"
-msgstr "Klaar"
 
 # needs review
 #: lib/splash.py
@@ -2805,11 +2809,6 @@ msgid "Narrate's voice: {voice}"
 msgstr "Stem van Voorlezen: {voice}"
 
 # needs review
-#: lib/splash.py
-msgid "Press any key to skip"
-msgstr "Druk op een toets om over te slaan"
-
-# needs review
 #: lib/splash.py packs/core/snip/frame-snip packs/core/snip/frame-snip.desktop packs/core/snip/README.md
 msgid "Screen snip + Narrate"
 msgstr "Schermknipsel + Voorlezen"
@@ -2825,12 +2824,7 @@ msgid "Setting up {name}'s Python packages"
 msgstr "De Python-pakketten van {name} instellen"
 
 # needs review
-#: lib/splash.py
-msgid "Stopped with an error (exit status {code})"
-msgstr "Gestopt met een fout (afsluitstatus {code})"
-
-# needs review
-#: lib/splash.py
+#: lib/splash.py lib/splash_stage.py
 msgid "Working…"
 msgstr "Bezig…"
 
@@ -2843,6 +2837,241 @@ msgstr "actief"
 #: lib/splash.py
 msgid "{name} is ready: {keys} shows it"
 msgstr "{name} is klaar: {keys} toont het"
+
+# needs review
+#: lib/splash_stage.py packs/core/arrowpad/arrowpad.py
+msgid "Done"
+msgstr "Klaar"
+
+# needs review
+#: lib/splash_stage.py
+msgid "Press any key to skip"
+msgstr "Druk op een toets om over te slaan"
+
+# needs review
+#: lib/splash_stage.py
+msgid "Stopped with an error (exit status {code})"
+msgstr "Gestopt met een fout (afsluitstatus {code})"
+
+# needs review
+#: lib/userpacks.py
+msgid "Added the pack {name} in {folder}."
+msgstr "Pakket {name} toegevoegd in {folder}."
+
+# needs review
+#: lib/userpacks.py
+msgid "By {author}."
+msgstr "Door {author}."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"It isn't used until you trust it again. Read what changed first, then: {command}"
+msgstr ""
+"Het wordt pas gebruikt als je het opnieuw vertrouwt. Lees eerst wat er veranderd is, dan: {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"It isn't used until you trust it: its tweaks would run as you. Read what they do first (each one's README.md in that folder), then: {command}"
+msgstr ""
+"Het wordt pas gebruikt als je het vertrouwt: de aanpassingen ervan zouden met jouw rechten draaien. Lees eerst wat ze doen (de README.md van elk ervan in die map), dan: {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
+msgstr ""
+"De aanpassingen {ids} ervan zijn nog geïnstalleerd: vertrouw het pakket opnieuw om ze te verwijderen ({command}) en wis het daarna."
+
+# needs review
+#: lib/userpacks.py
+msgid "No packs added from a link."
+msgstr "Geen pakketten toegevoegd via een link."
+
+# needs review
+#: lib/userpacks.py
+msgid "Only packs in {folder} can be removed here."
+msgstr "Alleen pakketten in {folder} kunnen hier gewist worden."
+
+# needs review
+#: lib/userpacks.py
+msgid "Problems:"
+msgstr "Problemen:"
+
+# needs review
+#: lib/userpacks.py
+msgid "Removed the pack {name} ({folder})."
+msgstr "Pakket {name} gewist ({folder})."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"That isn't a link to a pack: give the address of its git repository, starting with https://"
+msgstr ""
+"Dat is geen link naar een pakket: geef het adres van de git-repository, beginnend met https://"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"There's no pack at the top of {link}: no pack.md, and no tweak folders (docs/mods.md)."
+msgstr ""
+"Er staat geen pakket in de hoofdmap van {link}: geen pack.md en geen mappen met aanpassingen (docs/mods.md)."
+
+# needs review
+#: lib/userpacks.py
+msgid "Tweaks: %s"
+msgstr "Aanpassingen: %s"
+
+# needs review
+#: lib/userpacks.py
+msgid "Uninstall its tweaks first: {ids} ({command})."
+msgstr "Verwijder eerst de aanpassingen ervan: {ids} ({command})."
+
+# needs review
+#: lib/userpacks.py
+msgid "You have a pack in {folder} already: update it, or remove it first."
+msgstr "Je hebt al een pakket in {folder}: werk het bij, of wis het eerst."
+
+# needs review
+#: lib/userpacks.py
+msgid "a newer version is out: {command}"
+msgstr "er is een nieuwere versie: {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "changed since you trusted it: not used until you trust it again"
+msgstr ""
+"gewijzigd sinds je het vertrouwde: niet in gebruik tot je het opnieuw vertrouwt"
+
+# needs review
+#: lib/userpacks.py
+msgid "couldn't check (no connection?)"
+msgstr "kon niet controleren (geen verbinding?)"
+
+# needs review
+#: lib/userpacks.py
+msgid "git isn't installed"
+msgstr "git is niet geïnstalleerd"
+
+# needs review
+#: lib/userpacks.py
+msgid "git took too long (no connection?)"
+msgstr "git duurde te lang (geen verbinding?)"
+
+# needs review
+#: lib/userpacks.py
+msgid "git {command} failed"
+msgstr "git {command} is mislukt"
+
+# needs review
+#: lib/userpacks.py
+msgid "in use; its tweaks are listed"
+msgstr "in gebruik; de aanpassingen ervan staan in de lijst"
+
+# needs review
+#: lib/userpacks.py
+msgid "more than one pack is called {name}: give its folder ({folders})"
+msgstr "meer dan één pakket heet {name}: geef de map op ({folders})"
+
+# needs review
+#: lib/userpacks.py
+msgid "no longer used (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+"niet meer in gebruik (geïnstalleerde aanpassingen ervan blijven tot je ze verwijdert)"
+
+# needs review
+#: lib/userpacks.py
+msgid "no pack {name}; see {command}"
+msgstr "geen pakket {name}; zie {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "not checked: not trusted ({command})"
+msgstr "niet gecontroleerd: niet vertrouwd ({command})"
+
+# needs review
+#: lib/userpacks.py
+msgid "not trusted: not used ({command})"
+msgstr "niet vertrouwd: niet in gebruik ({command})"
+
+# needs review
+#: lib/userpacks.py
+msgid "official: in use"
+msgstr "officieel: in gebruik"
+
+# needs review
+#: lib/userpacks.py
+msgid "official: turned off ({command})"
+msgstr "officieel: uitgeschakeld ({command})"
+
+# needs review
+#: lib/userpacks.py
+msgid "problem: %s"
+msgstr "probleem: %s"
+
+# needs review
+#: lib/userpacks.py
+msgid "trusted: in use"
+msgstr "vertrouwd: in gebruik"
+
+# needs review
+#: lib/userpacks.py
+msgid "trusted; its tweaks are listed now"
+msgstr "vertrouwd; de aanpassingen ervan staan nu in de lijst"
+
+# needs review
+#: lib/userpacks.py
+msgid "turned off (installed tweaks of it stay until you uninstall them)"
+msgstr ""
+"uitgeschakeld (geïnstalleerde aanpassingen ervan blijven tot je ze verwijdert)"
+
+# needs review
+#: lib/userpacks.py
+msgid "up to date"
+msgstr "bijgewerkt"
+
+# needs review
+#: lib/userpacks.py
+msgid "{pack} comes with Frame Tweaks, so it needs no trust: {command}"
+msgstr ""
+"{pack} hoort bij Frame Tweaks en hoeft dus niet vertrouwd te worden: {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid "{pack} isn't one of Frame Tweaks' own packs: {command}"
+msgstr "{pack} is geen eigen pakket van Frame Tweaks: {command}"
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"{pack} isn't trusted: trust it first ({command}), or remove it and add it again."
+msgstr ""
+"{pack} is niet vertrouwd: vertrouw het eerst ({command}), of wis het en voeg het opnieuw toe."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"{pack} was added at a fixed version: to follow another one, remove it and add it again."
+msgstr ""
+"{pack} is op een vaste versie toegevoegd: om een andere te volgen, wis je het en voeg je het opnieuw toe."
+
+# needs review
+#: lib/userpacks.py
+msgid "{pack} wasn't added from a link: change its folder yourself."
+msgstr "{pack} is niet via een link toegevoegd: werk de map zelf bij."
+
+# needs review
+#: lib/userpacks.py
+msgid ""
+"{pack}'s git settings (.git/config) aren't the ones adding it made, and git would act on them: remove the pack and add it again."
+msgstr ""
+"De git-instellingen van {pack} (.git/config) zijn niet meer zoals ze bij het toevoegen waren, en git zou ze volgen: wis het pakket en voeg het opnieuw toe."
+
+# needs review
+#: lib/userpacks.py
+msgid "{ref} isn't a branch or tag name"
+msgstr "{ref} is geen branch- of tagnaam"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
@@ -3067,6 +3296,13 @@ msgstr "Android-spiegel: nog in gebruik?"
 # needs review
 #: packs/core/adb-scrcpy/phone
 msgid ""
+"Choose the address your phone shows under Developer options → Wireless debugging → IP address & Port."
+msgstr ""
+"Kies het adres dat je telefoon toont onder Ontwikkelaarsopties → Draadloze foutopsporing → IP-adres en poort."
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid ""
 "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)."
 msgstr ""
 "Maakt voortaan verbinding met %s. Een andere kiezen: \"Telefoon kiezen…\" in Android-spiegel (of phone --pick)."
@@ -3127,6 +3363,18 @@ msgstr "Aan laten"
 #: packs/core/adb-scrcpy/phone
 msgid "Looking for your phone on the Wi-Fi…"
 msgstr "Je telefoon zoeken op de wifi…"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid "More than one %s"
+msgstr "Meer dan één %s"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid ""
+"More than one device on the Wi-Fi says it's %s: another device may be posing as your phone, or two phones have the same name."
+msgstr ""
+"Meer dan één apparaat op de wifi zegt %s te zijn: een ander apparaat doet zich misschien voor als je telefoon, of twee telefoons hebben dezelfde naam."
 
 # needs review
 #: packs/core/adb-scrcpy/phone
@@ -3202,6 +3450,13 @@ msgstr "Spiegel starten…"
 # needs review
 #: packs/core/adb-scrcpy/phone
 msgid ""
+"The %s on the Wi-Fi isn't the phone Android Mirror knows by that name: it's another phone with the same name, the same phone after a factory reset, or a device posing as it."
+msgstr ""
+"De %s op de wifi is niet de telefoon die Android-spiegel onder die naam kent: het is een andere telefoon met dezelfde naam, dezelfde telefoon na een fabrieksreset, of een apparaat dat zich ervoor uitgeeft."
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid ""
 "The connection to %s was lost and it didn't come back within a minute. Is Wireless debugging still on, on the same Wi-Fi? Open Android Mirror again when it is."
 msgstr ""
 "De verbinding met %s is verbroken en kwam binnen een minuut niet terug. Staat Draadloze foutopsporing nog aan, op dezelfde wifi? Open Android-spiegel opnieuw zodra dat zo is."
@@ -3235,6 +3490,11 @@ msgstr "De koppelingscode van zes cijfers die de telefoon toont:"
 #: packs/core/adb-scrcpy/phone
 msgid "Use %s instead"
 msgstr "Liever %s gebruiken"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid "Use this other %s"
+msgstr "Deze andere %s gebruiken"
 
 # needs review
 #: packs/core/adb-scrcpy/phone
@@ -4139,6 +4399,13 @@ msgstr ""
 "(beheerder), om een udev-regel (%s) toe te voegen die SteamOS-updates behouden."
 
 # needs review
+#: packs/core/charge-limit/install.sh
+msgid ""
+"Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
+msgstr ""
+"Je gebruiker heeft geen wachtwoord, dus sudo kan niet werken. Stel er een in met 'passwd' en voer dit opnieuw uit."
+
+# needs review
 #: packs/core/charge-limit/needed.sh
 msgid ""
 "withdrawn for new installs while a SteamOS charger bug can leave a Frame unable to charge (SteamOS #2879)"
@@ -4274,13 +4541,235 @@ msgstr "zwevende vensters starten gebogen"
 
 # needs review
 #: packs/core/dictation/README.md
+msgid "0.4 seconds"
+msgstr "0,4 seconden"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "0.6 seconds (the default)"
+msgstr "0,6 seconden (standaard)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "1 second"
+msgstr "1 seconde"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "1.5 seconds"
+msgstr "1,5 seconden"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Alternative: D-pad up, left controller"
+msgstr "Alternatief: vierpuntsdruktoets omhoog, linkercontroller"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Alternative: View, left controller"
+msgstr "Alternatief: View, linkercontroller"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Always pasting it"
+msgstr "Altijd plakken"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Always shown"
+msgstr "Altijd getoond"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Applies within a second (in VR; otherwise at your next dictation). Choosing Parakeet: press Apply to download it (about 800 MB)."
+msgstr ""
+"Geldt binnen een seconde (in VR; anders bij het volgende dicteren). Kies je Parakeet: druk op Toepassen om het te downloaden (ongeveer 800 MB)."
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Automatic: hidden while a controller button is set"
+msgstr "Automatisch: verborgen zolang er een controllerknop ingesteld is"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Controller button"
+msgstr "Controllerknop"
+
+# needs review
+#: packs/core/dictation/README.md
 msgid "Dictate"
 msgstr "Dicteren"
 
 # needs review
 #: packs/core/dictation/README.md
+msgid "Dictate (toggle) in the + menu"
+msgstr "Dicteren (aan/uit) in het menu +"
+
+# needs review
+#: packs/core/dictation/README.md
 msgid "Dictation"
 msgstr "Dicteren"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Downloads Parakeet if it's chosen, and loads or stops the engine as chosen."
+msgstr ""
+"Downloadt Parakeet als het gekozen is, en laadt of stopt de engine zoals gekozen."
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Engine"
+msgstr "Engine"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Hold it for"
+msgstr "Ingedrukt houden gedurende"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Keep the engine loaded"
+msgstr "De engine geladen houden"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Never shown"
+msgstr "Nooit getoond"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"No (the default): loaded for each dictation, no memory used in between"
+msgstr ""
+"Nee (standaard): geladen voor elk dictaat, tussendoor geen geheugen in gebruik"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: A, right controller (the laser's Home over windows)"
+msgstr ""
+"Niet aanbevolen: A, rechtercontroller (Home van de laser boven vensters)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: Aux, on the headset (the dashboard; a held mouse button on the desktop)"
+msgstr ""
+"Niet aanbevolen: Aux, op de headset (het dashboard; een ingedrukte muisknop op het bureaublad)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: B, right controller (the laser's Back over windows)"
+msgstr ""
+"Niet aanbevolen: B, rechtercontroller (Terug van de laser boven vensters)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: D-pad down, left controller (the laser's Home)"
+msgstr ""
+"Niet aanbevolen: vierpuntsdruktoets omlaag, linkercontroller (Home van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: D-pad left, left controller (the laser's Back)"
+msgstr ""
+"Niet aanbevolen: vierpuntsdruktoets links, linkercontroller (Terug van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: D-pad right, left controller (the laser's middle click)"
+msgstr ""
+"Niet aanbevolen: vierpuntsdruktoets rechts, linkercontroller (middelklik van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: X, right controller (the laser's middle click)"
+msgstr "Niet aanbevolen: X, rechtercontroller (middelklik van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: left bumper (a laser click)"
+msgstr "Niet aanbevolen: linkerbumper (een laserklik)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: left grip (picks up windows, switches the laser's hand)"
+msgstr ""
+"Niet aanbevolen: linkergreep (pakt vensters op, wisselt de hand van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: left stick click (the laser's right click)"
+msgstr ""
+"Niet aanbevolen: linker analoge stick indrukken (rechtsklik van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: left trigger (a laser click; games use it)"
+msgstr "Niet aanbevolen: linkertrekker (een laserklik; games gebruiken hem)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: right bumper (a laser click)"
+msgstr "Niet aanbevolen: rechterbumper (een laserklik)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Not recommended: right grip (picks up windows, switches the laser's hand)"
+msgstr ""
+"Niet aanbevolen: rechtergreep (pakt vensters op, wisselt de hand van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: right stick click (the laser's right click)"
+msgstr ""
+"Niet aanbevolen: rechter analoge stick indrukken (rechtsklik van de laser)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Not recommended: right trigger (a laser click; games use it)"
+msgstr "Niet aanbevolen: rechtertrekker (een laserklik; games gebruiken hem)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Off: Whisper hears the whole recording"
+msgstr "Uit: Whisper hoort de hele opname"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "On (the default): Whisper hears only the speech in your recording"
+msgstr "Aan (standaard): Whisper hoort alleen de spraak in je opname"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Parakeet: 25 European languages, fastest when kept loaded (press Apply)"
+msgstr ""
+"Parakeet: 25 Europese talen, het snelst als het geladen blijft (druk op Toepassen)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Put the text in by"
+msgstr "Tekst invoeren door"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Recommended: Menu, right controller (the default)"
+msgstr "Aanbevolen: Menu, rechtercontroller (standaard)"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Recommended: Off"
+msgstr "Aanbevolen: Uit"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Recommended: Y, right controller"
+msgstr "Aanbevolen: Y, rechtercontroller"
 
 # needs review
 #: packs/core/dictation/README.md
@@ -4299,14 +4788,138 @@ msgstr ""
 # needs review
 #: packs/core/dictation/README.md
 msgid ""
+"The engine turns your speech into text, on the Frame. In VR, hold the controller button to start dictating, and hold it again to stop; a short press does nothing here. The app in front still gets every press too, so the buttons are grouped by what else they do: the recommended ones do nothing else on a long hold, the others do (the laser's clicks, Home and Back over windows, the dashboard). If a game reacts to your hold, pick another."
+msgstr ""
+"De engine zet je spraak om in tekst, op de Frame. Houd in VR de controllerknop ingedrukt om te beginnen met dicteren, en houd hem opnieuw ingedrukt om te stoppen; kort drukken doet hier niets. De app vooraan krijgt ook elke druk, dus zijn de knoppen gegroepeerd naar wat ze nog meer doen: de aanbevolen knoppen doen niets anders als je ze lang ingedrukt houdt, de andere wel (de klikken van de laser, Home en Terug boven vensters, het dashboard). Reageert een game als je de knop ingedrukt houdt, kies dan een andere."
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Typing it (the default); pasting what your keyboard layout can't type"
+msgstr "Typen (standaard); plakken wat je toetsenbordindeling niet kan typen"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
 msgstr ""
 "Typen met controllerlasers op een VR-toetsenbord gaat traag. De Frame kan spraak lokaal omzetten in tekst, dus je kunt gewoon praten, en je stem verlaat de headset nooit."
 
 # needs review
+#: packs/core/dictation/README.md
+msgid "Voice activity detection"
+msgstr "Detectie van spraakactiviteit"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid "Whisper (the default): 99 languages, uses your word list"
+msgstr "Whisper (standaard): 99 talen, gebruikt je woordenlijst"
+
+# needs review
+#: packs/core/dictation/README.md
+msgid ""
+"Yes: text sooner; memory in use all the time (Whisper 600 MB, Parakeet 1.3 GB)"
+msgstr ""
+"Ja: sneller tekst; altijd geheugen in gebruik (Whisper 600 MB, Parakeet 1,3 GB)"
+
+# needs review
 #: packs/core/dictation/README.md packs/core/snip/README.md packs/core/adb-scrcpy/README.md packs/core/homebrew/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/clipboard/README.md
 msgid "uses"
 msgstr "gebruikt"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "A on the right controller"
+msgstr "A op de rechtercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "Aux on the headset"
+msgstr "Aux op de headset"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "B on the right controller"
+msgstr "B op de rechtercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "Menu on the right controller"
+msgstr "Menu op de rechtercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "View on the left controller"
+msgstr "View op de linkercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "X on the right controller"
+msgstr "X op de rechtercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "Y on the right controller"
+msgstr "Y op de rechtercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad down on the left controller"
+msgstr "vierpuntsdruktoets omlaag op de linkercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad left on the left controller"
+msgstr "vierpuntsdruktoets links op de linkercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad right on the left controller"
+msgstr "vierpuntsdruktoets rechts op de linkercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "d-pad up on the left controller"
+msgstr "vierpuntsdruktoets omhoog op de linkercontroller"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left bumper"
+msgstr "de linkerbumper"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left grip"
+msgstr "de linkergreep"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left stick (pressed in)"
+msgstr "de linker analoge stick (ingedrukt)"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the left trigger"
+msgstr "de linkertrekker"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right bumper"
+msgstr "de rechterbumper"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right grip"
+msgstr "de rechtergreep"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right stick (pressed in)"
+msgstr "de rechter analoge stick (ingedrukt)"
+
+# needs review
+#: packs/core/dictation/button-names.sh
+msgid "the right trigger"
+msgstr "de rechtertrekker"
 
 # needs review
 #: packs/core/dictation/check-system.sh
@@ -4340,6 +4953,11 @@ msgstr "Niet getypt: gekopieerd naar het klembord"
 
 # needs review
 #: packs/core/dictation/dictate
+msgid "Parakeet isn't downloaded"
+msgstr "Parakeet is niet gedownload"
+
+# needs review
+#: packs/core/dictation/dictate
 msgid "Paste the text instead (Ctrl+V)."
 msgstr "Plak de tekst in plaats daarvan (Ctrl+V)."
 
@@ -4355,15 +4973,15 @@ msgstr "Transcriberen…"
 
 # needs review
 #: packs/core/dictation/dictate
-msgid "Wait for the text before dictating again."
-msgstr "Wacht op de tekst voor je opnieuw dicteert."
+msgid ""
+"Using Whisper. To download Parakeet, press Apply in Dictation's ⚙ Settings."
+msgstr ""
+"Whisper wordt gebruikt. Om Parakeet te downloaden: druk op Toepassen in ⚙ Instellingen van Dicteren."
 
 # needs review
 #: packs/core/dictation/dictate
-msgid ""
-"Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
-msgstr ""
-"Je toetsenbordindeling heeft geen toets voor %s. Plak de tekst in plaats daarvan (Ctrl+V)."
+msgid "Wait for the text before dictating again."
+msgstr "Wacht op de tekst voor je opnieuw dicteert."
 
 # needs review
 #: packs/core/dictation/dictate.desktop
@@ -4376,10 +4994,55 @@ msgid "Start/stop local Whisper speech-to-text"
 msgstr "Spraak naar tekst met Whisper (lokaal) starten/stoppen"
 
 # needs review
-#: packs/core/dictation/install.sh
-msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+#: packs/core/dictation/engine.sh
+msgid "About 150 MB, in ~/.local/share/frame-tweaks/parakeet."
+msgstr "Ongeveer 150 MB, in ~/.local/share/frame-tweaks/parakeet."
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "Dictation uses Parakeet."
+msgstr "Dicteren gebruikt Parakeet."
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid ""
+"Dictation uses Whisper. Parakeet stays downloaded (~/.local/share/frame-tweaks/parakeet): uninstalling Dictation removes it."
 msgstr ""
-"Klaar. Wijs 'Dicteren (aan/uit)' toe aan een toets (en een controllerknop): %s"
+"Dicteren gebruikt Whisper. Parakeet blijft gedownload (~/.local/share/frame-tweaks/parakeet): Dicteren verwijderen wist het."
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "Downloading Parakeet (about 650 MB)"
+msgstr "Parakeet downloaden (ongeveer 650 MB)"
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid ""
+"Parakeet's runtime couldn't be installed; Dictation goes on with Whisper"
+msgstr ""
+"De runtime van Parakeet kon niet geïnstalleerd worden; Dicteren gaat verder met Whisper"
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "Setting up onnx-asr, the runtime Parakeet runs on"
+msgstr "onnx-asr instellen, de runtime waarop Parakeet draait"
+
+# needs review
+#: packs/core/dictation/engine.sh
+msgid "The engine stays loaded between dictations."
+msgstr "De engine blijft geladen tussen dictaten."
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid "Dictation's engine setting couldn't be applied; it uses Whisper"
+msgstr ""
+"De engine-instelling van Dicteren kon niet toegepast worden; Whisper wordt gebruikt"
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid "Done. Bind 'Dictate (toggle)' to a key too, if you like: %s"
+msgstr ""
+"Klaar. Wijs 'Dicteren (aan/uit)' ook toe aan een toets, als je wilt: %s"
 
 # needs review
 #: packs/core/dictation/install.sh
@@ -4388,8 +5051,36 @@ msgstr "Whisper-model %s downloaden"
 
 # needs review
 #: packs/core/dictation/install.sh
+msgid ""
+"In VR, hold %s to start or stop dictating (another button: ⚙ Settings)."
+msgstr ""
+"Houd in VR %s ingedrukt om het dicteren te starten of te stoppen (andere knop: ⚙ Instellingen)."
+
+# needs review
+#: packs/core/dictation/install.sh
 msgid "Installing whisper.cpp and wl-clipboard (Homebrew)"
 msgstr "whisper.cpp en wl-clipboard installeren (Homebrew)"
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid ""
+"No SteamVR here, so no controller button for dictation; the shortcut works as before."
+msgstr ""
+"Geen SteamVR hier, dus geen controllerknop voor dicteren; de sneltoets werkt zoals voorheen."
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid ""
+"No controller button for dictation: choose one in ⚙ Settings (./install.sh settings dictation)."
+msgstr ""
+"Geen controllerknop voor dicteren: kies er een in ⚙ Instellingen (./install.sh settings dictation)."
+
+# needs review
+#: packs/core/dictation/install.sh
+msgid ""
+"No voice activity detection (its download failed): Whisper hears the whole recording."
+msgstr ""
+"Geen detectie van spraakactiviteit (de download is mislukt): Whisper hoort de hele opname."
 
 # needs review
 #: packs/core/dictation/install.sh
@@ -4403,6 +5094,13 @@ msgstr "De whisper-cli van whisper-frame wordt gebruikt (geen tweede kopie)"
 
 # needs review
 #: packs/core/dictation/status.sh
+msgid ""
+"Parakeet chosen but not downloaded: Apply in ⚙ Settings (Whisper until then)"
+msgstr ""
+"Parakeet gekozen maar niet gedownload: Toepassen in ⚙ Instellingen (tot dan Whisper)"
+
+# needs review
+#: packs/core/dictation/status.sh
 msgid "Whisper model missing (re-run ./install.sh dictation)"
 msgstr "Whisper-model ontbreekt (voer ./install.sh dictation opnieuw uit)"
 
@@ -4413,8 +5111,18 @@ msgstr "dictate niet geïnstalleerd"
 
 # needs review
 #: packs/core/dictation/status.sh
-msgid "dictate ready (%s, small model)"
-msgstr "dictate klaar (%s, klein model)"
+msgid "dictate ready (%s)"
+msgstr "dictate klaar (%s)"
+
+# needs review
+#: packs/core/dictation/status.sh
+msgid "dictate ready (%s); hold %s to dictate"
+msgstr "dictate klaar (%s); houd %s ingedrukt om te dicteren"
+
+# needs review
+#: packs/core/dictation/status.sh
+msgid "dictate ready (%s); no controller button (⚙ Settings)"
+msgstr "dictate klaar (%s); geen controllerknop (⚙ Instellingen)"
 
 # needs review
 #: packs/core/dictation/status.sh
@@ -4423,8 +5131,14 @@ msgstr "geen whisper-cli (voer ./install.sh dictation opnieuw uit)"
 
 # needs review
 #: packs/core/dictation/status.sh
-msgid "whisper-frame's engine"
-msgstr "engine van whisper-frame"
+msgid "the controller button isn't running (re-run ./install.sh dictation)"
+msgstr ""
+"de controllerknop draait niet (voer ./install.sh dictation opnieuw uit)"
+
+# needs review
+#: packs/core/dictation/status.sh
+msgid "whisper-frame's engine, small model"
+msgstr "engine van whisper-frame, klein model"
 
 # needs review
 #: packs/core/dictation/uninstall.sh
@@ -4473,8 +5187,20 @@ msgstr ""
 
 # needs review
 #: packs/core/firefox/install.sh
+msgid ""
+"%s is a link, or not a plain file. Firefox's sandbox can write there, so Frame Tweaks leaves the profile alone: remove it, then run this again."
+msgstr ""
+"%s is een link of geen gewoon bestand. De sandbox van Firefox kan daar schrijven, dus laat Frame Tweaks het profiel met rust: wis het en voer dit daarna opnieuw uit."
+
+# needs review
+#: packs/core/firefox/install.sh
 msgid "Anti-fingerprinting settings written to %s"
 msgstr "Instellingen tegen fingerprinting geschreven naar %s"
+
+# needs review
+#: packs/core/firefox/install.sh
+msgid "Couldn't write %s"
+msgstr "Kon %s niet schrijven"
 
 # needs review
 #: packs/core/firefox/install.sh
@@ -4487,6 +5213,13 @@ msgstr ""
 #: packs/core/firefox/install.sh
 msgid "Firefox is running: restart it to apply."
 msgstr "Firefox is actief: herstart het om toe te passen."
+
+# needs review
+#: packs/core/firefox/install.sh
+msgid ""
+"Firefox's profile %s isn't a folder inside Firefox's own, so Frame Tweaks leaves it alone."
+msgstr ""
+"Het Firefox-profiel %s is geen map binnen die van Firefox zelf, dus laat Frame Tweaks het met rust."
 
 # needs review
 #: packs/core/firefox/install.sh
@@ -4687,12 +5420,12 @@ msgid "Privacy & security"
 msgstr "Privacy en beveiliging"
 
 # needs review
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr "Systeem"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
 msgid "VR environment"
 msgstr "VR-omgeving"
 
@@ -4922,11 +5655,6 @@ msgid ""
 "The speed applies to the next Narrate (or at once, from the panel's − / +)."
 msgstr ""
 "De snelheid geldt vanaf de volgende keer Voorlezen (of meteen, met − / + op het paneel)."
-
-# needs review
-#: packs/core/snip/frame-snip packs/core/speech/README.md
-msgid "Apply"
-msgstr "Toepassen"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -5721,6 +6449,99 @@ msgid "waiting for a SteamVR restart (reboot once)"
 msgstr "wacht op een herstart van SteamVR (één keer opnieuw opstarten)"
 
 # needs review
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+msgstr ""
+"Flatpak-apps (Firefox en andere uit Discover) laten samen altijd 5 GB over voor SteamVR, Steam en je game; Firefox krijgt een eigen limiet van 5 GB; en als het geheugen toch opraakt, wordt SteamVR als laatste gestopt."
+
+# needs review
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"Keeps memory free for SteamVR, so a runaway Flatpak app such as Firefox is stopped instead of VR crashing"
+msgstr ""
+"Houdt geheugen vrij voor SteamVR, zodat een op hol geslagen Flatpak-app zoals Firefox gestopt wordt in plaats van dat VR crasht"
+
+# needs review
+#: packs/core/vr-memory-guard/README.md
+msgid ""
+"The Frame's 16 GB is shared by VR and every app you open. When one app takes it all (signing in to Firefox can install all your extensions at once and take 10 GB), the whole headset stalls and SteamVR's compositor can crash, dropping you out of VR."
+msgstr ""
+"De 16 GB van de Frame wordt gedeeld door VR en elke app die je opent. Als één app alles inneemt (aanmelden bij Firefox kan al je extensies tegelijk installeren en 10 GB innemen), loopt de hele headset vast en kan de compositor van SteamVR crashen, waardoor je uit VR valt."
+
+# needs review
+#: packs/core/vr-memory-guard/README.md
+msgid "VR memory guard"
+msgstr "Geheugenbewaker voor VR"
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
+msgstr "%s in %s moet een grootte zijn zoals 5G of 512M (het is \"%s\")."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "Can't read how much memory this device has (%s)."
+msgstr "Kan niet lezen hoeveel geheugen dit apparaat heeft (%s)."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "Couldn't set the apps' limit now; it applies at your next login."
+msgstr ""
+"Kon de limiet voor de apps nu niet instellen; ze geldt vanaf je volgende aanmelding."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+msgstr ""
+"Flatpak-apps samen: tot %s MB (%s MB gereserveerd voor VR); Firefox: tot %s MB."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid "SteamVR is stopped last from its next start."
+msgstr "SteamVR wordt als laatste gestopt vanaf de volgende start."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
+msgstr ""
+"firefox_max is meer dan alle Flatpak-apps samen mogen gebruiken (%s MB): de limiet voor de apps geldt eerst."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
+"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
+msgstr ""
+"reserve_for_vr (%s) laat minder dan 2 GB van de %s MB over voor Flatpak-apps: maak het kleiner in %s."
+
+# needs review
+#: packs/core/vr-memory-guard/status.sh
+msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+msgstr ""
+"Flatpak-apps %s van %s MB; Firefox tot %s; SteamVR als laatste gestopt"
+
+# needs review
+#: packs/core/vr-memory-guard/status.sh
+msgid ""
+"systemd doesn't hand the memory controller to your services here, so the limits can't apply"
+msgstr ""
+"systemd geeft de geheugencontroller hier niet aan je services, dus de limieten kunnen niet gelden"
+
+# needs review
+#: packs/core/vr-memory-guard/status.sh
+msgid ""
+"the apps' limit isn't in force yet: run the install again, or log out and back in"
+msgstr ""
+"de limiet voor de apps geldt nog niet: voer de installatie opnieuw uit, of meld je af en weer aan"
+
+# needs review
+#: packs/core/vr-memory-guard/uninstall.sh
+msgid "Kept your limits in %s."
+msgstr "Je limieten in %s zijn behouden."
+
+# needs review
 #: packs/core/wallet/README.md
 msgid ""
 "Frames are often left without a password or shared with family, yet some apps hold private things. This protects just those apps, without locking the whole headset. It also fixes the Frame's two sessions (VR and desktop) each having their own wallet, which lose each other's logins."
@@ -5883,6 +6704,27 @@ msgstr ""
 
 # needs review
 #: packs/core/wallet/status.sh
+msgid ""
+"terminals run Homebrew's gh, not the wallet's wrapper: its token would be plain text (re-run %s)"
+msgstr ""
+"terminals starten de gh van Homebrew, niet de wrapper van de portefeuille: het token zou onversleuteld zijn (voer %s opnieuw uit)"
+
+# needs review
+#: packs/core/wallet/status.sh
+msgid ""
+"terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
+msgstr ""
+"terminals starten de gh van Homebrew, niet de wrapper van de portefeuille: zet deze regel van ~/.bashrc onder de brew shellenv-regel: %s"
+
+# needs review
+#: packs/core/wallet/status.sh
+msgid ""
+"the wallet has no password: set one in KWalletManager (kdewallet → Change Password)"
+msgstr ""
+"de portefeuille heeft geen wachtwoord: stel er een in via KWalletManager (kdewallet → Wachtwoord wijzigen)"
+
+# needs review
+#: packs/core/wallet/status.sh
 msgid "wallet %s; %s app launcher(s) routed/gated"
 msgstr "portefeuille %s; %s appstarter(s) omgeleid/beveiligd"
 
@@ -6016,6 +6858,59 @@ msgstr ""
 "De KDE-portefeuille nu vergrendelen (Signal, Firefox, Android-spiegel en gh vragen dan het wachtwoord)"
 
 # needs review
+#: packs/core/wallet/wallet-tool
+msgid "a program of yours"
+msgstr "een programma van jezelf"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "set up by the Wallet tweak's install"
+msgstr ""
+"ingesteld door de installatie van de aanpassing Gedeelde KDE-portefeuille"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: back to Homebrew's own command."
+msgstr "{cmd}: terug naar de eigen opdracht van Homebrew."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not a command name"
+msgstr "{cmd}: geen opdrachtnaam"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not in Homebrew ({path})"
+msgstr "{cmd}: niet in Homebrew ({path})"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not protected"
+msgstr "{cmd}: niet beveiligd"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not protected by wallet-tool ({why})"
+msgstr "{cmd}: niet beveiligd door wallet-tool ({why})"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{cmd}: not this way ({why})"
+msgstr "{cmd}: niet op deze manier ({why})"
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid ""
+"{cmd}: protected. Open a new terminal (or run hash -r) for it to take effect."
+msgstr ""
+"{cmd}: beveiligd. Open een nieuwe terminal (of voer hash -r uit) om het te laten werken."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "{path} is a program of yours: left as it is"
+msgstr "{path} is een programma van jezelf: blijft zoals het is"
+
+# needs review
 #: packs/core/wallet/wallet-unlock
 msgid ""
 "A KDE Wallet password prompt is already open (look in VR, around the dashboard). While it is open the wallet ignores this dialog.\n"
@@ -6030,6 +6925,13 @@ msgstr ""
 #: packs/core/wallet/wallet-unlock
 msgid "Password for the KDE wallet:"
 msgstr "Wachtwoord voor de KDE-portefeuille:"
+
+# needs review
+#: packs/core/wallet/wallet-unlock
+msgid ""
+"The wallet has no password yet, so it protects nothing. Set one in KWalletManager: kdewallet → Change Password."
+msgstr ""
+"De portefeuille heeft nog geen wachtwoord, dus beschermt hij niets. Stel er een in via KWalletManager: kdewallet → Wachtwoord wijzigen."
 
 # needs review
 #: packs/core/wallet/wallet-unlock
@@ -6176,17 +7078,21 @@ msgstr "%s actief (socket %s)"
 
 # needs review
 #: packs/core/ydotool/install.sh
-msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+msgid "Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s)."
 msgstr ""
-"De huidige ydotool van Arch Linux ARM draait niet op deze SteamOS. Ontbreekt: %s"
+"De huidige ydotool van Arch Linux ARM draait niet op deze SteamOS (%s)."
 
 # needs review
 #: packs/core/ydotool/install.sh
 msgid ""
-"Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+"Arch Linux ARM's current ydotool doesn't run on this SteamOS (%s); keeping the one you have."
 msgstr ""
-"De huidige ydotool van Arch Linux ARM draait niet op deze SteamOS; de versie die je hebt, blijft. Ontbreekt: %s"
+"De huidige ydotool van Arch Linux ARM draait niet op deze SteamOS (%s); de versie die je hebt, blijft."
+
+# needs review
+#: packs/core/ydotool/install.sh
+msgid "ydotool didn't start"
+msgstr "ydotool is niet gestart"
 
 # needs review
 #: packs/core/ydotool/status.sh packs/integrations/clipboard/status.sh packs/integrations/nordvpn/status.sh
@@ -6235,9 +7141,22 @@ msgstr ""
 "Claude voor desktop, de officiële Linux-app van Anthropic (arm64), geïnstalleerd in je persoonlijke map en bijgewerkt met één opdracht."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
 msgid "from"
 msgstr "van"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid "Anthropic's package list has no Claude Desktop for arm64"
+msgstr ""
+"De pakketlijst van Anthropic heeft geen Claude voor desktop voor arm64"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Anthropic's package list names an unexpected file for Claude Desktop: %s"
+msgstr ""
+"De pakketlijst van Anthropic noemt een onverwacht bestand voor Claude voor desktop: %s"
 
 # needs review
 #: packs/integrations/claude-desktop/claude-desktop-update
@@ -6247,6 +7166,15 @@ msgid ""
 msgstr ""
 "Claude voor desktop %s is beschikbaar, maar Claude voor desktop is open: sluit het eerst af,\n"
 "of voer uit: claude-desktop-update --restart   (sluit het, werkt het bij, en jij opent het opnieuw)"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Claude Desktop %s is newer than the %s in Anthropic's list, so it stays.\n"
+"To install %s anyway, run: claude-desktop-update --allow-older"
+msgstr ""
+"Claude voor desktop %s is nieuwer dan de %s in de lijst van Anthropic, dus blijft hij staan.\n"
+"Om %s toch te installeren, voer uit: claude-desktop-update --allow-older"
 
 # needs review
 #: packs/integrations/claude-desktop/claude-desktop-update
@@ -6438,6 +7366,13 @@ msgstr ""
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-tray
+msgid ""
+"'nordvpn-wg setup' is on your clipboard: open a terminal (Konsole), paste it and press Enter. It asks for a NordVPN access token, and says where to get one."
+msgstr ""
+"'nordvpn-wg setup' staat op je klembord: open een terminal (Konsole), plak het en druk op Enter. Het vraagt om een NordVPN-toegangstoken en zegt waar je er een krijgt."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-tray
 msgid "Connect at startup ({location})"
 msgstr "Verbinden bij opstarten ({location})"
 
@@ -6465,8 +7400,8 @@ msgstr ""
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-tray
-msgid "No locations: run 'nordvpn-wg setup'"
-msgstr "Geen locaties: voer 'nordvpn-wg setup' uit"
+msgid "No locations yet: copy 'nordvpn-wg setup' for a terminal"
+msgstr "Nog geen locaties: 'nordvpn-wg setup' kopiëren voor een terminal"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-tray packs/integrations/nordvpn/nordvpn-wg
@@ -6520,6 +7455,33 @@ msgstr "(ontbreekt: voer refresh uit)"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't connect {name}."
+msgstr "Kon {name} niet verbinden."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't disconnect {name}."
+msgstr "Kon de verbinding met {name} niet verbreken."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Couldn't remove {name}."
+msgstr "Kon {name} niet verwijderen."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"It lets only your desktop session control the network: open NordVPN Tray from the desktop's menu (not from SSH or another login), or run nordvpn-wg in Konsole."
+msgstr ""
+"Alleen je bureaubladsessie mag het netwerk beheren: open NordVPN-systeemvak via het menu van het bureaublad (niet via SSH of een andere aanmelding), of voer nordvpn-wg uit in Konsole."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager couldn't do it."
+msgstr "NetworkManager kon het niet doen."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the change: {reply}"
 msgstr "NetworkManager weigerde de wijziging: {reply}"
 
@@ -6527,6 +7489,11 @@ msgstr "NetworkManager weigerde de wijziging: {reply}"
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "NetworkManager refused the connection: {reply}"
 msgstr "NetworkManager weigerde de verbinding: {reply}"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "NetworkManager said: {said}"
+msgstr "NetworkManager zei: {said}"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -6540,13 +7507,13 @@ msgstr "Geen token opgegeven."
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
-msgstr "NordVPN-toegangstoken (Nord Account → NordVPN → Access token):"
+msgid "NordVPN access token (input hidden): "
+msgstr "NordVPN-toegangstoken (invoer verborgen): "
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "NordVPN access token (input hidden): "
-msgstr "NordVPN-toegangstoken (invoer verborgen): "
+msgid "NordVPN access token:"
+msgstr "NordVPN-toegangstoken:"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -6560,13 +7527,63 @@ msgstr "NordVPN: verbonden via {connection}"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
-msgid "Run 'nordvpn-wg setup' first."
-msgstr "Voer eerst 'nordvpn-wg setup' uit."
+msgid "On the Manual setup page, under Access token, press Get Access token."
+msgstr ""
+"Druk op de pagina Manual setup, onder Access token, op Get Access token."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Open {url} in your browser (it's on your clipboard: paste it into the address bar), and sign in to your Nord Account."
+msgstr ""
+"Open {url} in je browser (het staat op je klembord: plak het in de adresbalk), en meld je aan bij je Nord Account."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Open {url} in your browser, and sign in to your Nord Account."
+msgstr "Open {url} in je browser, en meld je aan bij je Nord Account."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
+msgstr ""
+"Plak het token hier. Er verschijnt niets terwijl je plakt (in Konsole: Ctrl+Shift+V); druk daarna op Enter."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "Run 'nordvpn-wg setup' first (in a terminal: Konsole)."
+msgstr "Voer eerst 'nordvpn-wg setup' uit (in een terminal: Konsole)."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Run 'nordvpn-wg setup' first. It's on your clipboard: open a terminal (Konsole), paste it and press Enter."
+msgstr ""
+"Voer eerst 'nordvpn-wg setup' uit. Het staat op je klembord: open een terminal (Konsole), plak het en druk op Enter."
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "To log in, NordVPN needs an access token from your Nord Account:"
+msgstr ""
+"Om aan te melden heeft NordVPN een toegangstoken van je Nord Account nodig:"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid ""
+"Verify your email address if it asks, then copy the token it shows you."
+msgstr ""
+"Bevestig je e-mailadres als erom gevraagd wordt, en kopieer dan het token dat getoond wordt."
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
 msgid "disconnected {connection}"
 msgstr "verbinding {connection} verbroken"
+
+# needs review
+#: packs/integrations/nordvpn/nordvpn-wg
+msgid "nmcli ended with code {code}"
+msgstr "nmcli stopte met afsluitcode {code}"
 
 # needs review
 #: packs/integrations/nordvpn/nordvpn-wg
@@ -6819,6 +7836,13 @@ msgstr ""
 
 # needs review
 #: packs/third-party/cursor/status.sh
+msgid ""
+"removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"
+msgstr ""
+"verwijderd; de bureaubladmodus houdt zijn softwareaanwijzer (een tweede, zwarte X) tot hij herstart, of tot de volgende keer opnieuw opstarten"
+
+# needs review
+#: packs/third-party/cursor/status.sh
 msgid "software cursor active"
 msgstr "softwarecursor actief"
 
@@ -6852,6 +7876,31 @@ msgid ""
 "TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
 msgstr ""
 "Volwaardig VR-toetsenbord van TaiKeid, zichtbaar met het SteamVR-dashboard, geïnstalleerd vanuit de nieuwste versie"
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid ""
+"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+msgstr ""
+"De kamer controleren betekent de knop Kamerweergave in het dashboard zoeken, of een controllerbinding. Een klop werkt met een controller in je hand of neergelegd. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid "Knock twice on your headset or a table to turn passthrough on or off"
+msgstr ""
+"Klop twee keer op je headset of een tafel om Kamerweergave aan of uit te zetten"
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid "KnockThru"
+msgstr "KnockThru"
+
+# needs review
+#: packs/third-party/knockthru/README.md
+msgid ""
+"VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+"KnockThru van VioletTides: klop de controllers tegen elkaar, één controller op een tafel (of je been) of op de headset, en Kamerweergave gaat aan of uit. Een dubbele klop schakelt het om, een drievoudige klop kan de stijl wisselen; je kiest en kalibreert je kloppen in het eigen tabblad in het SteamVR-dashboard. Het start mee met SteamVR."
 
 # needs review
 #: packs/third-party/menu-icons/README.md
@@ -6922,6 +7971,32 @@ msgid ""
 "Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse cursor's and the menu icons', Frame Tweaks applies itself."
 msgstr ""
 "Projecten en oplossingen van anderen voor de Steam Frame, op naam van hun makers. De meeste zijn gekoppeld (🔗): Frame Tweaks voert hun eigen installatieprogramma uit zoals hun README het aangeeft, in je persoonlijke map, en ze werken zichzelf op hun eigen manier bij (↻ in hun rij). Oplossingen die anderen vonden, zoals die voor de muisaanwijzer en de menupictogrammen, past Frame Tweaks zelf toe."
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid "Performance Overlay"
+msgstr "Performance Overlay"
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+msgstr ""
+"De Frame toont zijn eigen temperaturen, kloksnelheden of geheugen niet terwijl je speelt, dus een vertraging of een warme headset is moeilijk te verklaren. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"sasaken1102r's frame-perf-overlay: a small panel in VR with the frame rate and frame times, CPU and GPU load and clocks, temperatures, memory, battery and Wi-Fi. You choose what it shows and where, in its Perf tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+"frame-perf-overlay van sasaken1102r: een klein paneel in VR met de framesnelheid en frametijden, CPU- en GPU-belasting en kloksnelheden, temperaturen, geheugen, batterij en wifi. Je kiest wat het toont en waar, in het eigen tabblad Perf in het SteamVR-dashboard. Het start mee met SteamVR."
+
+# needs review
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
+msgstr ""
+"Prestatiepaneel van sasaken1102r in VR: framesnelheid, CPU- en GPU-belasting, temperaturen, geheugen en batterij, op je pols of in het dashboard"
 
 # needs review
 #: packs/third-party/recline/README.md
@@ -7018,3 +8093,91 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "The shared part of the VR environment tweaks (Curved world windows, Back to the previous window, Pick up when floating, Scroll strips): it puts their small patches into SteamVR's dashboard while SteamVR runs. Android Mirror uses it too when it's there. Installed automatically."
 #~ msgstr ""
 #~ "Het gedeelde deel van de aanpassingen voor de VR-omgeving (Gebogen zwevende vensters, Terug naar het vorige venster, Oppakken bij zweven, Scrolstroken): het zet hun kleine patches in het SteamVR-dashboard terwijl SteamVR draait. Android-spiegel gebruikt het ook als het er is. Wordt automatisch geïnstalleerd."
+
+#~ # needs review
+#~ msgid "Remove them"
+#~ msgstr "Verwijderen"
+
+#~ # needs review
+#~ msgid "These installed tweaks were unticked and will be <b>removed</b>:"
+#~ msgstr ""
+#~ "Deze geïnstalleerde aanpassingen zijn uitgevinkt en worden <b>verwijderd</b>:"
+
+#~ # needs review
+#~ msgid ""
+#~ "Added {name}. It isn't used until you trust it: its tweaks would run as you. Read what they do first (its link, or Open packs folder), then Trust… below."
+#~ msgstr ""
+#~ "{name} toegevoegd. Het wordt pas gebruikt als je het vertrouwt: de aanpassingen ervan zouden met jouw rechten draaien. Lees eerst wat ze doen (via de link of Pakkettenmap openen) en kies dan hieronder Vertrouwen…"
+
+#~ # needs review
+#~ msgid ""
+#~ "It isn't used until you trust it again: read what changed first, then Trust… below."
+#~ msgstr ""
+#~ "Het wordt pas gebruikt als je het opnieuw vertrouwt: lees eerst wat er veranderd is en kies dan hieronder Vertrouwen…"
+
+#~ # needs review
+#~ msgid "Trust this pack's current files"
+#~ msgstr "De huidige bestanden van dit pakket vertrouwen"
+
+#~ # needs review
+#~ msgid "Trust…"
+#~ msgstr "Vertrouwen…"
+
+#~ # needs review
+#~ msgid "Yes: it runs as me"
+#~ msgstr "Ja, met mijn rechten"
+
+#~ # needs review
+#~ msgid ""
+#~ "1. Read the report below: Frame Tweaks' and SteamOS's versions, each tweak's status and recent logs, with user names, paths, host and phone names and addresses removed. Nothing in it is sent anywhere unless you add it to the form.<br>2. Open the bug form (on GitHub; you sign in there), say what happened and what you expected, then paste the report into its Diagnostics report box (📋 Copy the report), or attach the saved file."
+#~ msgstr ""
+#~ "1. Lees het rapport hieronder: de versies van Frame Tweaks en SteamOS, de status van elke aanpassing en recente logs, zonder gebruikersnamen, paden, host- en telefoonnamen en adressen. Er wordt niets van verstuurd, tenzij je het aan het formulier toevoegt.<br>2. Open het bugformulier (op GitHub; je meldt je daar aan), vertel wat er gebeurde en wat je verwachtte, en plak het rapport in het vak Diagnostics report (📋 Het rapport kopiëren), of voeg het opgeslagen bestand toe."
+
+#~ # needs review
+#~ msgid ""
+#~ "The tested versions of %s don't install on this Python (%s); trying the newest."
+#~ msgstr ""
+#~ "De geteste versies van %s installeren niet op deze Python (%s); de nieuwste worden geprobeerd."
+
+#~ # needs review
+#~ msgid ""
+#~ "Your keyboard layout has no key for %s. Paste the text instead (Ctrl+V)."
+#~ msgstr ""
+#~ "Je toetsenbordindeling heeft geen toets voor %s. Plak de tekst in plaats daarvan (Ctrl+V)."
+
+#~ # needs review
+#~ msgid "Done. Bind 'Dictate (toggle)' to a key (and a controller button): %s"
+#~ msgstr ""
+#~ "Klaar. Wijs 'Dicteren (aan/uit)' toe aan een toets (en een controllerknop): %s"
+
+#~ # needs review
+#~ msgid "dictate ready (%s, small model)"
+#~ msgstr "dictate klaar (%s, klein model)"
+
+#~ # needs review
+#~ msgid "whisper-frame's engine"
+#~ msgstr "engine van whisper-frame"
+
+#~ # needs review
+#~ msgid ""
+#~ "Arch Linux ARM's current ydotool doesn't run on this SteamOS. Missing: %s"
+#~ msgstr ""
+#~ "De huidige ydotool van Arch Linux ARM draait niet op deze SteamOS. Ontbreekt: %s"
+
+#~ # needs review
+#~ msgid ""
+#~ "Arch Linux ARM's current ydotool doesn't run on this SteamOS; keeping the one you have. Missing: %s"
+#~ msgstr ""
+#~ "De huidige ydotool van Arch Linux ARM draait niet op deze SteamOS; de versie die je hebt, blijft. Ontbreekt: %s"
+
+#~ # needs review
+#~ msgid "No locations: run 'nordvpn-wg setup'"
+#~ msgstr "Geen locaties: voer 'nordvpn-wg setup' uit"
+
+#~ # needs review
+#~ msgid "NordVPN access token (Nord Account → NordVPN → Access token):"
+#~ msgstr "NordVPN-toegangstoken (Nord Account → NordVPN → Access token):"
+
+#~ # needs review
+#~ msgid "Run 'nordvpn-wg setup' first."
+#~ msgstr "Voer eerst 'nordvpn-wg setup' uit."
