@@ -1572,6 +1572,19 @@ class ApplyConfirm(unittest.TestCase):
         self.assertNotIn("needed by", w.confirm_text.text())
 
 
+class ChangesTextSudo(unittest.TestCase):
+    def test_a_dependency_says_it_asks_for_sudo_too(self):
+        w = bare_window()
+        ids = {c["id"] for c in w.rows}
+        tweak = next(c for c in w.rows if c["deps"] and set(c["deps"]) <= ids)
+        dep = tweak["deps"][0]
+        with mock.patch.object(gui.sft, "sudo_note", lambda c: "to add a rule" if c["id"] == dep else ""):
+            text = w.changes_text([tweak["id"]], [])
+        line = next(part for part in text.split("<br>") if gui.html.escape(gui.component(dep)["title"]) in part)
+        self.assertIn("needed by", line)
+        self.assertIn("asks for your sudo password: to add a rule", line)
+
+
 class TidyUnneeded(unittest.TestCase):
     """An installed tweak this Frame doesn't need any more, whose manifest says to remove it then
     (the Mouse cursor fix after a SteamOS update): the window runs ./install.sh tidy, once."""
