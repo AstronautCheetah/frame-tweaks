@@ -80,8 +80,8 @@ QLabel#title { font-size: 20px; font-weight: 600; }
 QWidget#cathead QPushButton#cattoggle { background: transparent; border: none; text-align: left;
                   font-size: 13px; font-weight: 700; color: #7fb2e5; letter-spacing: 1px; padding: 10px 4px 2px 4px; }
 QWidget#cathead QPushButton#cattoggle:hover { color: #a9cdf0; }
-QWidget#cathead QPushButton#cathide { padding: 3px 10px; font-size: 12px; margin-top: 8px; }
-QWidget#cathead QPushButton#cattick { padding: 3px; margin-top: 8px; }
+QWidget#cathead QPushButton#cathide { padding: 0px 7px 3px 7px; font-size: 12px; margin-top: 8px; }
+QWidget#cathead QPushButton#cattick { padding: 0px 0px 3px 0px; margin-top: 8px; }
 QLabel#category { font-size: 13px; font-weight: 700; color: #7fb2e5; letter-spacing: 1px;
                   padding: 10px 4px 2px 4px; }
 QLabel#name { font-size: 15px; font-weight: 600; }
@@ -96,7 +96,10 @@ QWidget#row[hidden_row="true"] { background: #11161c; }
 QWidget#row[focused="true"] { background: #1f2a36; border: 2px solid #7fb2e5; }
 QWidget#row QLabel, QWidget#row QCheckBox, QWidget#row QWidget#spacer { background: transparent; }
 QPushButton { background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 #2c333b, stop:0.5 #232a32, stop:1 #1c232a);
-              border: none; border-bottom: 3px solid #0c1015; border-radius: 8px; padding: 6px 14px; }
+              border: 3px solid transparent; border-bottom-color: #0c1015; border-radius: 8px; padding: 3px 11px 6px 11px; }
+/* (The dark edge is the bottom of a border as wide on every side, the others see-through: a 3 px bottom
+   border with none on the sides, which this was, gave notched corners where they met the rounding.
+   Paddings are 3 px less than the space wanted on every side but the bottom, for that border.) */
 QPushButton:hover { background: #3d4855; }
 QPushButton:checked { background: #355b7a; }
 QPushButton#apply { background: #355b7a; font-weight: 600; }
@@ -104,10 +107,10 @@ QPushButton#apply:disabled { background: #161c23; color: #3a434d; }
 QPushButton#danger { background: #7a2e2e; font-weight: 600; }
 QPushButton#danger:hover { background: #963838; }
 QWidget#ask { background: #141b23; border: 1px solid #2a3542; border-radius: 8px; }
-QPushButton#info { padding: 6px 10px; }
+QPushButton#info { padding: 3px 7px 6px 7px; }
 QPushButton#info:disabled { color: #3a434d; }
 QWidget#timer { background: transparent; }
-QPushButton#again { padding: 0px 10px 3px 10px; font-size: 24px; font-weight: 600; }
+QPushButton#again { padding: 0px 7px 3px 7px; font-size: 24px; font-weight: 600; }
 QPushButton#again:disabled { color: #3a434d; }
 QPushButton#run { background: #2f6b46; font-weight: 600; min-width: 92px; }
 QPushButton#run:hover { background: #3c8a5a; }
