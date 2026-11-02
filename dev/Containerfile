@@ -4,9 +4,10 @@
 FROM docker.io/library/ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive PIP_BREAK_SYSTEM_PACKAGES=1 PIP_ROOT_USER_ACTION=ignore
 # (shellcheck, appstream, desktop-file-utils, libarchive-tools: the checks' tools; the libraries
-# and xvfb: PyQt6 headless; git, rsync, file, xz, binutils, xdg-user-dirs: what tests call)
+# and xvfb: PyQt6 headless; git, ssh-keygen (release signing), rsync, file, xz, binutils,
+# xdg-user-dirs: what tests call; without ssh-keygen the signing tests skip themselves)
 RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
-      git ca-certificates python3 python3-pip python3-venv shellcheck rsync procps file \
+      git ca-certificates openssh-client python3 python3-pip python3-venv shellcheck rsync procps file \
       appstream desktop-file-utils libarchive-tools xz-utils xdg-user-dirs binutils \
       libegl1 libgl1 libxkbcommon0 libfontconfig1 xvfb libxtst6 libdbus-1-3 \
     && rm -rf /var/lib/apt/lists/*
