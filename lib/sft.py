@@ -115,7 +115,7 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
-            "app", "link", "sudo", "formerly")
+            "app", "link", "sudo", "formerly", "when_not_needed")
 # app: the name of the other project's app the tweak installs (Claude Desktop, Full Keyboard, …).
 # Uninstalling Frame Tweaks leaves those tweaks, and so their apps, unless asked to remove them.
 # config: where a tweak keeps its settings (files or folders; its settings.file counts too). An
@@ -390,6 +390,8 @@ def read_tweak(d):
     for k in ("hidden_by_default", "replaces"):
         if k in data and not isinstance(data[k], bool):
             errs.append(f"{where}: {k} must be true or false")
+    if "when_not_needed" in data and data["when_not_needed"] != "uninstall":
+        errs.append(f"{where}: when_not_needed takes uninstall (remove the tweak once this Frame doesn't need it)")
     if "upstream_readme" in data and not (isinstance(data["upstream_readme"], str)
                                           and UPSTREAM_README.match(data["upstream_readme"])):
         errs.append(f"{where}: upstream_readme must be a raw.githubusercontent.com URL of a .md file")
@@ -439,6 +441,7 @@ def read_tweak(d):
         config=list(dict.fromkeys(conf + ([data["settings"]["file"]] if data.get("settings") else []))),
         known_issue=data.get("known_issue"), wallet_apps=apps,
         upstream_readme=data.get("upstream_readme", ""),
+        when_not_needed=data.get("when_not_needed") or "",     # ("uninstall": ./install.sh tidy removes it then)
         test=data.get("test") or {}, replaces=data.get("replaces", False),
         changes=data["changes"], access=data["access"], survives_updates=data["survives_updates"],
         undo=data["undo"]), warn
@@ -1259,7 +1262,8 @@ def main(argv):
         for c in components():                  # (a line break in a summary would start a row of its own)
             print("\x1f".join(re.sub(r"[\n\r\x1f]", " ", f) for f in [c["id"], c["title"], " ".join(c["deps"]),
                                                                   c["desc"], str(c["dir"]), "1" if c["experimental"] else "",
-                                                                  "1" if c["link"] else "", "1" if sudo_note(c) else ""]))
+                                                                  "1" if c["link"] else "", "1" if sudo_note(c) else "",
+                                                                  "1" if c["when_not_needed"] == "uninstall" else ""]))
     elif cmd == "dir" and len(args) == 1:
         c = component(args[0])
         sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])

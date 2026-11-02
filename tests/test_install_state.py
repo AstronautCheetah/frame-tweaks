@@ -131,6 +131,38 @@ class InstallState(unittest.TestCase):
         self.assertEqual(self.record.read_text(), VERSION + "\n")
         self.assertEqual(self.log(), ["install"])
 
+    def test_tidy_removes_an_installed_tweak_this_frame_no_longer_needs(self):
+        """when_not_needed: uninstall, and needed.sh says SteamOS does it now (after an update, or a
+        switch to the beta): tidy removes it, says so, and keeps its settings; its login-time service
+        is set up with the install. With nothing to do it says nothing."""
+        (self.pack / "probe/README.md").write_text(README.replace("processes: []", "processes: []\nwhen_not_needed: uninstall"))
+        self.trust()
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        unit = self.home / ".config/systemd/user/frame-tweaks-tidy.service"
+        self.assertIn("install.sh tidy", unit.read_text())
+        self.assertEqual(self.sh("tidy").stdout, "")                      # (needed: stays)
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\nexit 1\n")
+        self.trust()
+        (self.home / ".config/probe.conf").write_text("mine\n")
+        r = self.sh("tidy")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Removed Probe: not needed on this Frame (SteamOS does it now).", r.stdout)
+        self.assertEqual(self.log(), ["install", "uninstall"])
+        self.assertFalse(self.record.exists())
+        self.assertTrue((self.home / ".config/probe.conf").exists())       # (settings kept)
+        self.assertEqual(self.sh("tidy").stdout, "")                      # (gone: nothing more)
+
+    def test_tidy_leaves_a_tweak_that_doesnt_ask_for_it(self):
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.home / ".config/systemd/user/frame-tweaks-tidy.service").exists())
+        (self.pack / "probe/needed.sh").write_text("#!/bin/bash\necho 'SteamOS does it now'\nexit 1\n")
+        self.trust()
+        self.assertEqual(self.sh("tidy").stdout, "")
+        self.assertEqual(self.log(), ["install"])
+        self.assertTrue(self.record.exists())
+
     def test_a_tweak_this_frame_doesnt_need_isnt_installed(self):
         """needed.sh exit 1: SteamOS does it itself, say. install skips it (all too) and list says
         why; installed already, it's still reinstalled (an update), and needed.sh exit 0 installs."""

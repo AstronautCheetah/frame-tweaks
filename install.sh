@@ -24,6 +24,7 @@
 #   ./install.sh debug-info          write a redacted report for bug reports
 #   ./install.sh report              the same, and the bug form's address to attach it to
 #   ./install.sh check-system        are the SteamOS/SteamVR parts the tweaks rely on still there?
+#   ./install.sh tidy                remove installed tweaks this Frame no longer needs (the window as it opens, and each login, do this)
 #   ./install.sh list                components and what they do
 #   ./install.sh info ID             one component's details (as in the installer window)
 #   ./install.sh run ID              its Run / Open button (e.g. open Arrow Pad)
@@ -103,17 +104,17 @@ start_log() {
 
 # The tweaks, from the packs (lib/sft.py registry: the official packs and the user's trusted
 # packs, each tweak described by its README.md front matter; see docs/mods.md).
-declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED SUDO
+declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED SUDO AUTO_REMOVE
 IDS=()
-while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo; do
+while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo autoremove; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
-    LINKED[$id]=$linked; SUDO[$id]=$sudo
+    LINKED[$id]=$linked; SUDO[$id]=$sudo; AUTO_REMOVE[$id]=$autoremove       # (when_not_needed: uninstall)
 done < <(python3 lib/sft.py registry)
 # (Frame Tweaks' own commands work without: every pack off or not trusted. mods too: "mods on
 # core" is the way back.)
 # (gui too: with every pack turned off on the Packs page, the window, opened from the menu, said
 # nothing and stayed shut; it's where they're turned on again)
-[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window)$ ]] ||
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window|tidy)$ ]] ||
     { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
@@ -333,7 +334,7 @@ cmd_install() {
         fi
         stop_processes "$id"            # a reinstall must not leave the old copy running
         if ! tweak_script "$id" install 8>&-; then failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2
-        else record_version "$id"; fi
+        else record_version "$id"; [[ -z ${AUTO_REMOVE[$id]} ]] || ensure_tidy_service; fi
         drop_sudo
         echo
     done
@@ -379,6 +380,43 @@ cmd_uninstall() {
         echo
     done
     [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
+}
+
+# tidy: remove the installed tweaks this Frame doesn't need any more, where their manifest says
+# so (when_not_needed: uninstall; docs/mods.md): a SteamOS update does the thing itself, say. The
+# Mouse cursor fix, from gamescope 3.16.30 (SteamOS 0.5.6), gave a second pointer until it was
+# removed by hand, and switching to the beta brought that. The window runs this as it opens, and
+# frame-tweaks-tidy.service at each login. One line per tweak removed; nothing when there's
+# nothing to do (their settings are kept: nobody asked to remove them).
+cmd_tidy() {
+    local id why
+    for id in "${IDS[@]}"; do
+        [[ -n ${AUTO_REMOVE[$id]} && -f $STATE/installed/$id ]] || continue
+        why=$(not_needed "$id") || continue
+        if is_installed "$id"; then
+            cmd_uninstall --keep-settings "$id" || { echo "!! $(t '%s could not be removed' "$id")" >&2; continue; }
+        else
+            forget_version "$id"            # (removed by hand already: its record goes too)
+        fi
+        echo "$(t 'Removed %s: not needed on this Frame (%s).' "${TITLE[$id]}" "$why")"
+    done
+}
+
+# The user service that runs tidy at each login, set up with the first tweak installed that asks
+# for it (enabled, not started: a login is the moment); uninstall-self removes it.
+TIDY_UNIT="$HOME/.config/systemd/user/frame-tweaks-tidy.service"
+ensure_tidy_service() {
+    [[ -f $TIDY_UNIT ]] && grep -qF -- "$REPO_DIR/install.sh tidy" "$TIDY_UNIT" && return 0
+    printf '[Unit]\nDescription=Frame Tweaks: remove the tweaks this Frame no longer needs\n\n[Service]\nType=oneshot\nExecStart=/bin/bash %s/install.sh tidy\n\n[Install]\nWantedBy=default.target\n' "$REPO_DIR" |
+        write_file "$TIDY_UNIT"
+    sysctl_user daemon-reload >/dev/null 2>&1 || true
+    sysctl_user enable frame-tweaks-tidy.service >/dev/null 2>&1 || true
+}
+remove_tidy_service() {
+    [[ -f $TIDY_UNIT ]] || return 0
+    sysctl_user disable frame-tweaks-tidy.service >/dev/null 2>&1 || true
+    remove_files "$TIDY_UNIT"
+    sysctl_user daemon-reload >/dev/null 2>&1 || true
 }
 
 # uninstall_settings ID keep|remove: what's left of the tweak's settings (its manifest's config:
@@ -482,6 +520,7 @@ cmd_uninstall_self() {
         say "$(t 'Kept for the tweaks still installed (%s): ~/.local/share/frame-tweaks, ~/.local/state/frame-tweaks and their settings.' "$(echo $installed)")"
     else
         remove_menu_entry
+        remove_tidy_service
         rm -f "$QT_VENV/bin/sft-python"; remove_qt_venv
         if [[ -d $HOME/.local/share/frame-tweaks ]]; then
             find "$HOME/.local/share/frame-tweaks" -mindepth 1 -maxdepth 1 ! -name packs -exec rm -rf {} +
@@ -969,6 +1008,7 @@ case ${1:-} in
     uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;
     reinstall)   shift; take_lock; start_log reinstall "$@"; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
     status|check) shift; cmd_status "$@" ;;
+    tidy)        take_lock; start_log tidy; cmd_tidy ;;
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
     _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;
     _setup-window) cmd_setup_window ;;
