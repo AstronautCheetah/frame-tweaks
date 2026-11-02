@@ -110,6 +110,29 @@ class Bashrc(unittest.TestCase):
         self.assertEqual(self.bashrc(": > ~/.bashrc"), f"{self.LINE}\nEND")
         self.assertEqual(self.bashrc("rm -f ~/.bashrc"), f"{self.LINE}\nEND")
 
+    BREW = 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+
+    def test_our_line_moves_below_homebrews(self):
+        """brew shellenv puts Homebrew's bin first: below our line, it shadowed the wallet's gh
+        wrapper in ~/.local/bin with Homebrew's gh (token in plain text)."""
+        self.assertEqual(self.bashrc(f"printf '%s\\n' 'PS1=x' '{self.LINE}' '{self.BREW}' > ~/.bashrc"),
+                         f"PS1=x\n{self.BREW}\n{self.LINE}\nEND")
+
+    def test_already_below_homebrews_stays(self):
+        self.assertEqual(self.bashrc(f"printf '%s\\n' '{self.BREW}' '{self.LINE}' 'PS1=x' > ~/.bashrc"),
+                         f"{self.BREW}\n{self.LINE}\nPS1=x\nEND")
+
+    def test_your_own_path_line_is_left_where_it_is(self):
+        yours = 'export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"'
+        self.assertEqual(self.bashrc(f"printf '%s\\n' '{yours}' '{self.BREW}' > ~/.bashrc"),
+                         f"{yours}\n{self.BREW}\nEND")
+
+    def test_need_brew_puts_ours_below_the_line_it_adds(self):
+        """need_brew's shellenv line (after installing Homebrew) goes after ours: ours moves."""
+        script = (f"printf '%s\\n' '{self.LINE}' > ~/.bashrc; "
+                  "append_line ~/.bashrc '" + self.BREW + "'; ensure_path; cat ~/.bashrc; echo END")
+        self.assertEqual(sh(script), f"{self.BREW}\n{self.LINE}\nEND")
+
 
 
 class DesktopEntry(unittest.TestCase):

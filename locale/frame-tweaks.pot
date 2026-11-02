@@ -4615,6 +4615,11 @@ msgstr ""
 
 #: packs/core/wallet/status.sh
 msgid ""
+"terminals run Homebrew's gh, not the wallet's wrapper: its token would be plain text (re-run %s)"
+msgstr ""
+
+#: packs/core/wallet/status.sh
+msgid ""
 "the wallet has no password: set one in KWalletManager (kdewallet → Change Password)"
 msgstr ""
 
