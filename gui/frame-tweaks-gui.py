@@ -1071,6 +1071,7 @@ class Window(QWidget):
         self.futures = {}
         self.latest = {}              # id -> newest upstream tag (known-issue rows), None if unknown
         self.latest_futures = {}
+        self.tidied = False           # tidy_unneeded ran (once the first round of statuses is in)
         self.check_known_issues()
         self.details = None
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
@@ -1375,6 +1376,12 @@ class Window(QWidget):
                         box.setChecked(self.state[cid][0] not in GONE)
                         box.blockSignals(False)
                 self.update_apply()
+        try:
+            tidy = shown and not self.futures and not self.tidied
+        except (AttributeError, RuntimeError):            # (a test's bare window)
+            tidy = False
+        if tidy:
+            self.tidy_unneeded()
         if shown:
             self.fit_list()                              # (a status can make its row wider)
         busy = (self.futures or self.latest_futures or self.update_futures or self.self_update is not None
@@ -1702,6 +1709,39 @@ class Window(QWidget):
             self.updates.pop(cid, None)
         self.refresh()
 
+    def tidy_unneeded(self):
+        """Installed tweaks this Frame doesn't need any more whose manifest says to remove them then
+        (when_not_needed: uninstall; the Mouse cursor fix after a SteamOS update, or a switch to the
+        beta, gave a second pointer until it was removed by hand): ./install.sh tidy removes them
+        in the background, a notice says so, and the rows are checked again. Once per window; a
+        login-time service does the same for people who don't open it."""
+        if self.tidied:
+            return
+        self.tidied = True
+        why = sft.not_needed(self.rows)
+        gone = [c for c in self.rows if c.get("when_not_needed") == "uninstall" and c["id"] in why
+                and self.state.get(c["id"]) is not None and self.state[c["id"]][0] not in GONE]
+        if not gone:
+            return
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):       # for tests: say what would run, change nothing
+            print("would run: ./install.sh tidy")
+            return
+        titles = ", ".join(c["title"] for c in gone)
+        reasons = "; ".join(why[c["id"]] for c in gone)
+        ids = [c["id"] for c in gone]
+
+        def done(code, *_):
+            if code == 0:
+                self.say(_("Removed {tweaks}: not needed on this Frame ({why}). Some changes show after a "
+                           "reboot.").format(tweaks=titles, why=reasons), good=True)
+            else:
+                self.say(_("Couldn't remove {tweaks} (not needed on this Frame): run ./install.sh tidy in a "
+                           "terminal to see why.").format(tweaks=titles))
+            self.changed(ids)
+        self.tidy_proc = QProcess(self)
+        self.tidy_proc.finished.connect(done)
+        self.tidy_proc.start(str(REPO / "install.sh"), ["tidy"])
+
     def update_again(self, cid):
         """The ↻ Reinstall button: only for installed tweaks."""
         button = self.again_buttons.get(cid)
@@ -2007,15 +2047,36 @@ class Window(QWidget):
         if not add and not remove:
             self.say(_("Nothing to change."))
             return
+        self.confirm(self.changes_text(add, remove), _("Apply"), lambda: self.run_changes(add, remove))
+
+    def changes_text(self, add, remove):
+        """What Apply changes will do, for the confirm page, by name: the tweaks installed (with the
+        ones they need that aren't installed yet, and which ask for the sudo password) and removed."""
+        comps = {c["id"]: c for c in self.rows}
+        dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
+        title = lambda cid: html.escape(comps[cid]["title"] if cid in comps else cid)   # noqa: E731
+        parts = []
+        if add:
+            lines = []
+            for cid in add:
+                note = sft.sudo_note(comps[cid]) if cid in comps else ""
+                lines.append(title(cid) + (" " + dim % html.escape(_("(asks for your sudo password: %s)") % note) if note else ""))
+            # (./install.sh installs what they depend on first, from any pack in use)
+            installed = {cid for cid, st in self.state.items() if st[0] not in GONE}
+            needed, queue = {}, list(add)
+            while queue:
+                for d in comps.get(queue.pop(0), {}).get("deps", []):
+                    if d in comps and d not in add and d not in installed and d not in needed:
+                        needed[d] = next(c["id"] for c in comps.values() if d in c["deps"] and (c["id"] in add or c["id"] in needed))
+                        queue.append(d)
+            for d, by in needed.items():
+                lines.append(title(d) + " " + dim % html.escape(_("(needed by %s)") % comps[by]["title"]))
+            parts.append("<b>" + _("Install:") + "</b><br>" + "<br>".join("• " + line for line in lines))
         if remove:
-            self.confirm(
-                _("These installed tweaks were unticked and will be <b>removed</b>:") + "<br><br>"
-                + html.escape(", ".join(remove)) + "<br><br><span style='font-size:14px;color:#9aa6b2'>"
-                + (_("Their settings are removed too (⚙ Preferences); their data is kept.")
-                   if sft.uninstall_settings() == "remove" else _("Their settings and data are kept.")) + "</span>",
-                _("Remove them"), lambda: self.run_changes(add, remove))
-            return
-        self.run_changes(add, remove)
+            parts.append("<b>" + _("Remove:") + "</b><br>" + "<br>".join("• " + title(cid) for cid in remove)
+                         + "<br>" + dim % (_("Their settings are removed too (⚙ Preferences); their data is kept.")
+                                           if sft.uninstall_settings() == "remove" else _("Their settings and data are kept.")))
+        return "<br><br>".join(parts)
 
     def confirm(self, text, yes_label, on_yes):
         """Ask on the confirm page (text: rich text): Cancel goes back to the list, the yes button
