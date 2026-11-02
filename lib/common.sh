@@ -108,7 +108,7 @@ Homebrew's installer asks for your sudo (admin) password once, to create that fo
     rm -f "$brew_installer"
     [ -n "$ok" ] || die "$(t "Homebrew's installer failed (see above).")"
     [ -x "$BREW" ] || die "$(t "Homebrew didn't end up in /home/linuxbrew.")"
-    # shellcheck disable=SC2016
+    # shellcheck disable=SC2016   # (single quotes on purpose: .bashrc expands it when it runs, not now)
     grep -qs 'linuxbrew/bin/brew shellenv' "$HOME/.bashrc" ||
         append_line "$HOME/.bashrc" 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
     ensure_path                          # (~/.local/bin ahead of Homebrew's bin again: see there)
@@ -519,7 +519,7 @@ restore_kconfig() {
 CLEAR_MODIFIERS="42:1 42:0 54:1 54:0 29:1 29:0 56:1 194:1 194:0 56:0 125:1 194:1 194:0 125:0"
 clear_stuck_modifiers() {
     [ -x "$BIN/ydotool" ] || return 0
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086   # (split on purpose: one ydotool argument per key event)
     YDOTOOL_SOCKET="/run/user/$(id -u)/.ydotool_socket" "$BIN/ydotool" key $CLEAR_MODIFIERS 2>/dev/null || true
 }
 

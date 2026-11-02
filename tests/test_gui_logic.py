@@ -1623,7 +1623,7 @@ class ReportProblem(unittest.TestCase):
             page.resize(900, 600)
             page.show()
             app.processEvents()
-            where = lambda: (page.copy.geometry(), page.view.geometry())     # noqa: E731
+            where = lambda: (page.copy.geometry(), page.view.geometry())     # noqa: E731  (a one-line helper for this test only)
             before = where()
             self.assertEqual(page.view.placeholderText(), "Saving the diagnostics report…")   # (in the report's box)
             page.collect()
