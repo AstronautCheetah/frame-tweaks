@@ -116,6 +116,25 @@ class InstallState(unittest.TestCase):
         return subprocess.run([str(root / "install.sh"), *args], env={**self.env, **extra}, stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=120)
 
+    def test_without_a_password_a_sudo_tweak_is_refused_with_how_to_set_one(self):
+        """sudo can't work for a user without a password: the tweak that would ask isn't run (it
+        would fail partway), and the installer says how to set one; with a password, it installs."""
+        readme = self.pack / "probe/README.md"
+        readme.write_text(README.replace("undo: ./install.sh uninstall probe\n",
+                                         "undo: ./install.sh uninstall probe\nsudo: once, to test\n"))
+        self.trust()
+        self.stub("passwd", 'echo "$2 NP 2026-11-02 0 99999 7 -1"')
+        r = self.sh("install", "probe")
+        self.assertNotEqual(r.returncode, 0)
+        said = r.stdout + r.stderr                                         # (the installer logs both as one)
+        self.assertIn("Probe needs your sudo password, and your user has none yet", said)
+        self.assertIn("type passwd", said)
+        self.assertEqual(self.log(), [])                                   # (its script never ran)
+        self.stub("passwd", 'echo "$2 P 2026-11-02 0 99999 7 -1"')
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.log(), ["install"])
+
     def log(self):
         p = self.home / "probe.log"
         return p.read_text().split("\n")[:-1] if p.exists() else []

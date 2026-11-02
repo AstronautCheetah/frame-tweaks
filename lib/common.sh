@@ -85,6 +85,12 @@ ask() {
 drop_sudo() { if command -v sudo >/dev/null; then sudo -k 2>/dev/null || true; fi; }
 
 # need_brew: make sure Homebrew is available, offering to install it if it isn't.
+# user_has_password: whether your user has a password, which sudo needs. A new Frame's user has
+# none (set one with passwd). False only when passwd says so (NP); when it can't tell, true, and
+# sudo says for itself.
+user_has_password() { ! passwd -S "$USER" 2>/dev/null | grep -q '^[^ ]* NP '; }
+no_password_how() { t "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."; }
+
 need_brew() {
     if command -v brew >/dev/null || [ -x "$BREW" ]; then
         eval "$("${BREW_BIN:-$(command -v brew || echo "$BREW")}" shellenv)"
@@ -93,9 +99,7 @@ need_brew() {
     printf '\n%s\n' "$(t "This tweak needs Homebrew, a package manager that installs into /home/linuxbrew.
 That folder is outside SteamOS's system partition, so updates don't remove it.
 Homebrew's installer asks for your sudo (admin) password once, to create that folder.")"
-    if passwd -S "$USER" 2>/dev/null | grep -q " NP "; then
-        die "$(t "Your user has no password, so sudo can't work. Set one with 'passwd', then re-run.")"
-    fi
+    user_has_password || die "$(t "Your user has no password yet, so sudo can't work.") $(no_password_how)"
     ask "$(t 'Install Homebrew now?')" || die "$(t 'Homebrew is required for this tweak. Install it from https://brew.sh and re-run.')"
     # Homebrew's installer at a pinned commit, checked against homebrew/pin's hash before it runs.
     # (Downloaded first, so the password is asked for just before it runs, and forgotten as soon

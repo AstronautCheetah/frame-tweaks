@@ -315,6 +315,13 @@ cmd_status() {
 # again whatever their needed.sh says (docs/mods.md). (A reinstall removes the record that
 # says so first.)
 WAS_INSTALLED=()
+# asks_sudo_now ID: installing it would ask for the sudo password now (its manifest's sudo:, and
+# for "homebrew", only while Homebrew isn't installed: lib/sft.py sudo_note).
+asks_sudo_now() {
+    [[ -n ${SUDO[$1]} ]] || return 1
+    [[ ${SUDO[$1]} != homebrew ]] && return 0
+    ! command -v brew >/dev/null && [[ ! -x $BREW ]]
+}
 cmd_install() {
     [[ $# -eq 0 ]] && { echo "$(t 'install what? (./install.sh list)')" >&2; exit 1; }
     ensure_menu_entry
@@ -331,6 +338,11 @@ cmd_install() {
         fi
         if held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]]; then
             echo "held: left as it is (./install.sh unhold $id)"; echo; continue
+        fi
+        # (without a password sudo can't work: say how to set one rather than fail partway)
+        if asks_sudo_now "$id" && ! user_has_password; then
+            echo "$(t "%s needs your sudo password, and your user has none yet." "${TITLE[$id]}") $(no_password_how)" >&2
+            failed+=("$id"); echo; continue
         fi
         stop_processes "$id"            # a reinstall must not leave the old copy running
         if ! tweak_script "$id" install 8>&-; then failed+=("$id"); echo "!! $(t '%s failed' "$id")" >&2

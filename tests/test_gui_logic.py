@@ -969,7 +969,10 @@ class PackInventory(unittest.TestCase):
             page = gui.Packs(window)
 
             def third_party():
-                return next(r for r in page.findChildren(packs_page.PackRow) if r.dir.name == "third-party")
+                # (not a row build() hid on its way out: it stays a child until it's deleted, and
+                # since Qt 6.12 findChildren can return it before the row that replaced it)
+                return next(r for r in page.findChildren(packs_page.PackRow)
+                            if r.dir.name == "third-party" and not r.isHidden())
 
             def text():
                 return " ".join(w.text() for w in third_party().findChildren(QLabel))
@@ -1557,6 +1560,49 @@ class ControllerButtons(unittest.TestCase):
         self.fake.VRSystem.return_value.triggerHapticPulse.assert_called_once_with(2, 0, 3999)
 
 
+class NoPassword(unittest.TestCase):
+    """A user without a password (a new Frame's) can't install what asks for the sudo password:
+    Apply says which tweaks, and its button sets a password instead; with one, Apply as usual.
+    sft.has_password goes by passwd -S (NP: none), and says yes when it can't tell."""
+
+    def sudo_tweak(self, w):
+        return next(c for c in w.rows if c.get("sudo") and c["sudo"] != "homebrew")
+
+    def test_apply_offers_to_set_a_password_first(self):
+        w = bare_window()
+        t = self.sudo_tweak(w)
+        w.wanted = {t["id"]: True}
+        with mock.patch.object(gui.sft, "has_password", return_value=False), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            w.apply()
+            self.assertIn(t["title"] + " need your sudo password, and your user has none yet", w.confirm_text.text())
+            self.assertEqual(w.confirm_yes.text(), "Set a password…")
+            w.confirm_yes.click()
+        self.assertEqual(out.getvalue(), "would run: passwd\n")         # (not the install)
+
+    def test_with_a_password_apply_as_usual(self):
+        w = bare_window()
+        w.wanted = {self.sudo_tweak(w)["id"]: True}
+        with mock.patch.object(gui.sft, "has_password", return_value=True):
+            w.apply()
+        self.assertEqual(w.confirm_yes.text(), "Apply")
+        free = next(c for c in w.rows if not c["deps"] and not gui.sft.sudo_note(c))
+        with mock.patch.object(gui.sft, "has_password", return_value=False):
+            self.assertEqual(w.needs_password([free["id"]]), [])           # (nothing that asks: nothing in the way)
+
+    def test_has_password_reads_passwd(self):
+        with tempfile.TemporaryDirectory() as d:
+            for status, want in (("u NP 2026-11-02 0 99999 7 -1", False), ("u P 2026-11-02 0 99999 7 -1", True),
+                                 ("u L 2026-11-02 0 99999 7 -1", True)):
+                Path(d, "passwd").write_text(f"#!/bin/sh\necho '{status}'\n")
+                Path(d, "passwd").chmod(0o755)
+                with mock.patch.dict(os.environ, {"PATH": d}):
+                    self.assertIs(gui.sft.has_password("u"), want, status)
+            with mock.patch.dict(os.environ, {"PATH": str(Path(d, "none"))}):
+                self.assertIs(gui.sft.has_password("u"), True)              # (no passwd: can't tell)
+
+
 def bare_window():
     """A window without its widgets: the list's state, what's ticked, and the confirm page."""
     from PyQt6.QtWidgets import QApplication, QPushButton, QStackedWidget
@@ -1576,6 +1622,11 @@ def bare_window():
 class ApplyConfirm(unittest.TestCase):
     """Apply changes says first what it will install (with what those need, and which ask for
     sudo) and remove, by name, and does it on Apply; Cancel is the confirm page's."""
+    def setUp(self):
+        p = mock.patch.object(gui.sft, "has_password", return_value=True)   # (whatever this machine's user has)
+        p.start()
+        self.addCleanup(p.stop)
+
     def test_lists_installs_and_removals_then_applies(self):
         w = bare_window()
         ids = {c["id"] for c in w.rows}

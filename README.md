@@ -78,8 +78,10 @@ similar). It never unlocks SteamOS's read-only system (no `steamos-readonly disa
 SteamOS updates don't undo it. The few exceptions, each only when you tick the tweak that
 needs it:
 
-- **Homebrew** asks for your sudo password once, to create `/home/linuxbrew` (if you never set
-  a password for your user, set one first with `passwd` in Konsole).
+- **Homebrew** asks for your sudo password once, to create `/home/linuxbrew`. A new Frame's user
+  has no password: until you set one, the window says so above the list, with **Set a
+  password…** (it runs `passwd` in Konsole), and Apply changes offers it instead of starting an
+  install that would fail. `./install.sh` says how too.
 - **Battery charge limit** asks for it once too, to add a udev rule
   (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`) that lets you pause the battery's
   charging, and again to remove it. Nothing else asks for sudo.

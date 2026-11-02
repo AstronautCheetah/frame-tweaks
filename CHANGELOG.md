@@ -85,6 +85,12 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **No password yet? The window says so, and sets one.** A new Frame's user has no password, so
+  sudo can't work, and the tweaks that ask for it (Homebrew, Battery charge limit, and those that
+  need Homebrew while it isn't installed) failed partway. Now the window shows a line above the
+  list with **Set a password…** (`passwd` in Konsole, then it looks again), Apply changes names
+  those tweaks and offers the same button instead, and `./install.sh` doesn't start them, saying
+  how to set one. Only Homebrew's install checked before.
 - **Android Mirror offers the other phone in sight** when the remembered one won't connect
   (**Use … instead**), and goes on to pairing it. The first time, Android Mirror takes the only
   phone advertising, which may be another of yours: switching used to take Forget and opening

@@ -96,6 +96,11 @@ msgid "Checking…"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"Choose a password for your user (sudo asks for it). Type it, press Enter, then type it again: nothing shows as you type."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 
@@ -302,6 +307,10 @@ msgid "No README."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "No password yet: Set a password… again when you're ready."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Not needed"
 msgstr ""
 
@@ -332,6 +341,10 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid ""
 "Packs added from a link have a newer version where they came from: the Packs page says which"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Password set: the tweaks tagged sudo can install now."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -394,6 +407,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py gui/prefs_page.py
 msgid "Saved."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Set a password…"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -522,6 +539,11 @@ msgid "Working… (a download can take a minute)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "checking…"
 msgstr ""
 
@@ -575,6 +597,11 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "{tweaks} (installed automatically)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1423,6 +1450,10 @@ msgid "%s migration failed"
 msgstr ""
 
 #: install.sh
+msgid "%s needs your sudo password, and your user has none yet."
+msgstr ""
+
+#: install.sh
 msgid "%s what? (./install.sh list)"
 msgstr ""
 
@@ -1853,6 +1884,11 @@ msgid ""
 msgstr ""
 
 #: lib/common.sh
+msgid ""
+"Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
+msgstr ""
+
+#: lib/common.sh
 msgid "These tweaks target the Steam Frame (aarch64); you're on %s."
 msgstr ""
 
@@ -1867,9 +1903,8 @@ msgid ""
 "Homebrew's installer asks for your sudo (admin) password once, to create that folder."
 msgstr ""
 
-#: lib/common.sh packs/core/charge-limit/install.sh
-msgid ""
-"Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
+#: lib/common.sh
+msgid "Your user has no password yet, so sudo can't work."
 msgstr ""
 
 #: lib/common.sh
@@ -3296,6 +3331,11 @@ msgstr ""
 msgid ""
 "The charger's pause switch belongs to root. To make it yours, this asks for your sudo (admin)\n"
 "password once, to add a udev rule (%s) that SteamOS updates keep."
+msgstr ""
+
+#: packs/core/charge-limit/install.sh
+msgid ""
+"Your user has no password, so sudo can't work. Set one with 'passwd', then re-run."
 msgstr ""
 
 #: packs/core/charge-limit/needed.sh

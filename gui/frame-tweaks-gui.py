@@ -1206,6 +1206,7 @@ class Window(QWidget):
         lay = QVBoxLayout(page)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addLayout(top)
+        lay.addWidget(self.make_password_bar())
         lay.addWidget(scroll, 1)
         lay.addLayout(bottom)
         self.row_widgets, self.focus_index = [], -1
@@ -2064,7 +2065,65 @@ class Window(QWidget):
         if not add and not remove:
             self.say(_("Nothing to change."))
             return
+        blocked = self.needs_password(add)
+        if blocked:                  # (sudo can't work yet: set a password first, then Apply again)
+            self.confirm(_("{tweaks} need your sudo password, and your user has none yet. Set one, then "
+                           "Apply changes again.").format(tweaks=", ".join(blocked))
+                         + "<br><br>" + self.changes_text(add, remove), _("Set a password…"), self.set_password)
+            return
         self.confirm(self.changes_text(add, remove), _("Apply"), lambda: self.run_changes(add, remove))
+
+    def needs_password(self, add):
+        """The titles of the tweaks in add, and those they need, that would ask for the sudo
+        password now, if your user has no password (empty when it has one, or none would ask)."""
+        if sft.has_password():
+            return []
+        comps = {c["id"]: c for c in self.rows}
+        installed = {cid for cid, st in self.state.items() if st[0] not in GONE}
+        ids, queue = [], list(add)
+        while queue:
+            cid = queue.pop(0)
+            if cid in comps and cid not in ids:
+                ids.append(cid)
+                queue += [d for d in comps[cid].get("deps", []) if d not in installed]
+        return [comps[cid]["title"] for cid in ids if sft.sudo_note(comps[cid])]
+
+    def make_password_bar(self):
+        """While your user has no password (a new Frame's), a line saying the tweaks that ask for
+        the sudo password can't install yet, with a button that sets one."""
+        bar = QWidget()
+        bar.setObjectName("passwordbar")
+        bar.setStyleSheet("QWidget#passwordbar { background: #3a3020; border-radius: 6px; }")
+        row = QHBoxLayout(bar)
+        row.setContentsMargins(12, 8, 12, 8)
+        text = QLabel("🔑 " + _("Your user has no password yet, so tweaks that ask for the sudo password (tagged "
+                               "sudo) can't install. Set one first: you'll type it when they ask."))
+        text.setWordWrap(True)
+        row.addWidget(text, 1)
+        b = QPushButton(_("Set a password…"))
+        b.clicked.connect(self.set_password)
+        row.addWidget(b)
+        self.password_bar = bar
+        bar.setVisible(not sft.has_password())
+        return bar
+
+    def set_password(self):
+        """passwd in a terminal, with a word on what it asks; the bar goes once it's set."""
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
+            print("would run: passwd")
+            return
+        intro = _("Choose a password for your user (sudo asks for it). Type it, press Enter, then type "
+                  "it again: nothing shows as you type.")
+        cmd = f"echo {shlex.quote(intro)}; echo; passwd; echo; read -rp {close_prompt()}"
+        self.password_proc = QProcess(self)
+        self.password_proc.finished.connect(lambda *_: self.password_checked())
+        in_terminal(self.password_proc, cmd)
+
+    def password_checked(self):
+        has = sft.has_password()
+        self.password_bar.setVisible(not has)
+        self.say(_("Password set: the tweaks tagged sudo can install now.") if has
+                 else _("No password yet: Set a password… again when you're ready."))
 
     def changes_text(self, add, remove):
         """What Apply changes will do, for the confirm page, by name: the tweaks installed (with the

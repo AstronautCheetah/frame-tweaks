@@ -31,6 +31,7 @@ test-keeps ID.
 """
 import hashlib
 import json
+import getpass
 import os
 import re
 import shutil
@@ -830,6 +831,17 @@ def parse_value(cid, key, text):
 
 
 # ---- command line -------------------------------------------------------------------------------
+def has_password(user=None):
+    """Whether your user has a password, which sudo needs (a new Frame's user has none: passwd
+    sets one). False only when passwd says so (NP); True when it can't tell: sudo says for itself."""
+    try:
+        out = subprocess.run(["passwd", "-S", user or os.environ.get("USER") or getpass.getuser()],
+                             capture_output=True, text=True, timeout=5).stdout.split()
+    except (OSError, subprocess.SubprocessError):
+        return True
+    return not (len(out) > 1 and out[1] == "NP")
+
+
 def sudo_note(c):
     """When and why installing tweak c asks for the sudo password; "" when it won't (a Homebrew
     one, with Homebrew installed)."""

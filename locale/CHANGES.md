@@ -115,6 +115,24 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 
 ## 2026-11-02
+- New in `gui/frame-tweaks-gui.py:2070`
+  - now: "{tweaks} need your sudo password, and your user has none yet. Set one, then Apply changes again."
+- New in `gui/frame-tweaks-gui.py:2099`
+  - now: "Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
+- New in `gui/frame-tweaks-gui.py:2103`
+  - now: "Set a password…"
+- New in `gui/frame-tweaks-gui.py:2115`
+  - now: "Choose a password for your user (sudo asks for it). Type it, press Enter, then type it again: nothing shows as you type."
+- New in `gui/frame-tweaks-gui.py:2125`
+  - now: "Password set: the tweaks tagged sudo can install now."
+- New in `gui/frame-tweaks-gui.py:2126`
+  - now: "No password yet: Set a password… again when you're ready."
+- New in `install.sh:344`
+  - now: "%s needs your sudo password, and your user has none yet."
+- New in `lib/common.sh:102`
+  - now: "Your user has no password yet, so sudo can't work."
+- New in `lib/common.sh:92`
+  - now: "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
 - New in `packs/core/dictation/README.md`
   - now: "0.4 seconds"
 - New in `packs/core/dictation/README.md`
