@@ -48,7 +48,7 @@ The design follows from what the Frame is:
 | [`install.sh`](../install.sh) | The commands: install, uninstall, reinstall, status, update, hold, check-system, debug-info, list, and so on. It decides what runs in which order, and takes the lock and the log. |
 | [`lib/common.sh`](../lib/common.sh) | Helpers that tweak scripts source: messages, `fetch_pinned`, `alarm_fetch`, `pip_pinned`, backups, `status_ok`/`status_missing`/`status_warn`, dashboard-patch helpers. [mods.md](mods.md) lists what a pack can rely on. |
 | [`lib/sft.py`](../lib/sft.py) | Loads the packs and their tweaks, and holds everything the installer window and `install.sh` share: the tweak list (`registry`), hidden rows and groups, the Run label, and tweak settings. Both front ends call it, so they can't drift apart. |
-| [`lib/installer.py`](../lib/installer.py) | `install.sh`'s pure logic: dependency order, the order uninstalls go in, ID checks, which installed tweaks need one being removed. It is given the tweak list on stdin and reads nothing else. |
+| [`lib/installer.py`](../lib/installer.py) | `install.sh`'s pure logic: dependency order, the order uninstalls go in, ID checks, which installed tweaks need one being removed, and what a `status.sh` result means (the window's too). It is given the tweak list, or a status result, and reads no manifest. |
 | [`lib/manifest.py`](../lib/manifest.py) | Reads (and writes) the YAML front matter of manifests, with no dependencies. |
 | [`gui/`](../gui/) | The installer window (PyQt6). `frame-tweaks-gui.py` is the window and its list; beside it, `window_logic.py` (status codes and checks, no Qt), `tweak_rows.py`, `readme_view.py`, `details_page.py`, `settings_page.py`, `apply_changes.py`, `vr_controls.py`, `packs_page.py`, `wallet_page.py` and `report_page.py`. |
 | [`packs/core/<id>/`](../packs/core/) | One folder per tweak: `README.md` (its manifest, then its documentation), `install.sh`, `uninstall.sh`, `status.sh` and optional scripts. `pack.md` sets the order and categories. |
@@ -435,12 +435,16 @@ exit codes, so the window, the tests and users' habits don't notice.
    uninstall check stays in bash, because it runs `status.sh`. `lib/sft.py deps` uses the same
    function. [`tests/test_installer.py`](../tests/test_installer.py) checks it against the bash
    it replaced, on random graphs.
-2. **Next: deciding what a status means.** `status_of`'s rule (a `status.sh` that stops without
-   saying `missing` or `restart` isn't "not installed" for a tweak with a version record; an
-   exit code over 2 is "status check failed") is pure once the script has run, and the window
-   has its own copy. Bash keeps running `status.sh`, as now; one Python function takes the exit
-   code, the first word, the last line of stderr and the record, and both front ends use it.
-   Running the scripts themselves from Python waits for stage 4.
+2. **Done: deciding what a status means.** `read_status` in `lib/installer.py` takes what
+   `status.sh` did (its exit code, its stdout's first word and text, the last line of its
+   stderr) and whether the tweak has a version record, and says what it means: a `status.sh`
+   that stops without saying `missing` or `restart` isn't "not installed" for a tweak with a
+   record, and an exit code over 2 is "status check failed". The window calls it directly;
+   `install.sh status_of` runs `status.sh` in bash, as before, then asks
+   `lib/installer.py status-of`: one more `python3` start per tweak, some 20 ms on a PC (more
+   on a Frame), so `./install.sh status` over every tweak takes about a third longer. The tests
+   check it against both copies it replaced, on generated results. Running the scripts
+   themselves from Python waits for stage 4.
 3. **Then: plans.** What `install`, `uninstall`, `tidy` and `update` will do, worked out before
    anything runs: the order, which tweaks are held, not needed, already installed, or need a
    sudo password the user doesn't have. Python returns the plan; bash carries it out line by

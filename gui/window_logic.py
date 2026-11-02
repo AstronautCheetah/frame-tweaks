@@ -11,6 +11,7 @@ import urllib.request
 from pathlib import Path
 
 import sft  # (lib/ is on the path)
+from installer import RESTART, UNLOAD, read_status
 from sft import component, current_release, release_channel
 from i18n import _  # (translations: locale/README.md)
 
@@ -20,19 +21,16 @@ REPO = Path(__file__).resolve().parent.parent
 # binding the name to a new dict would leave that page with the old issues.
 KNOWN_ISSUES = {}
 
-RESTART = 3      # a status code of the window's own: installed, but SteamVR loads it only as it starts
-UNLOAD = 4       # and: uninstalled, but SteamVR runs what it loaded until it restarts
-UNAVAILABLE = 256    # and: its pack or folder went since the list was read (no program exits with 256)
+# Status codes beyond status.sh's 0, 1 and 2: RESTART and UNLOAD (lib/installer.py read_status), and
+UNAVAILABLE = 256    # its pack or folder went since the list was read (no program exits with 256)
 GONE = (1, UNLOAD, UNAVAILABLE)   # the codes of a tweak that isn't installed
 
 
 def status(cid):
-    """(code, text): 0 ok, 1 not installed, 2 needs attention; a status.sh line "restart …" is
-    RESTART (exit 2: installed) or UNLOAD (exit 1: uninstalled), waiting for a SteamVR restart.
-    A status.sh that stops without saying "missing" or "restart" (a command in it failed) didn't
-    find the tweak missing: installed by Frame Tweaks (its record), or with an exit code that
-    isn't 0, 1 or 2, it's 2, "status check failed" (./install.sh status_of has the same rule).
-    UNAVAILABLE: its pack or folder went since the window read the list."""
+    """(code, text): what its status.sh says, as lib/installer.py read_status reads it (0 ok, 1 not
+    installed, 2 needs attention, RESTART or UNLOAD waiting for a SteamVR restart; the same rule
+    as ./install.sh status_of). UNAVAILABLE: its pack or folder went since the window read the
+    list."""
     c = component(cid)
     if c is None or sft.script(c, "status") is None:     # (its pack or folder went since the list was read)
         return UNAVAILABLE, _("not available any more")
@@ -41,15 +39,7 @@ def status(cid):
         r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         return 2, _("status check didn't finish (took over a minute)")
-    out = r.stdout.strip()
-    text = out.split(None, 1)[-1] if out else ""
-    word = out.split(None, 1)[:1]
-    if word == ["restart"] and r.returncode in (1, 2):
-        return {2: RESTART, 1: UNLOAD}[r.returncode], text
-    if r.returncode not in (0, 1, 2) or (r.returncode == 1 and word != ["missing"] and sft.installed_record(cid)):
-        said = [line for line in re.sub(r"\x1b\[[0-9;]*m", "", r.stderr or "").splitlines() if line.strip()]
-        return 2, (_("status check failed: %s") % said[-1].strip() if said else _("status check failed"))
-    return r.returncode, text
+    return read_status(r.returncode, r.stdout, r.stderr, sft.installed_record(cid))
 
 
 def update_check(cid):

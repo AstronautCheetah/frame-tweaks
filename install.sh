@@ -218,25 +218,24 @@ tweak_script() {
 }
 
 # status <id>: prints the component's one-line status; returns 0 ok, 1 missing (or uninstalled,
-# waiting for a SteamVR restart), 2 warning (or installed, waiting for one).
-# A status.sh that stops without saying "missing" or "restart" (a command in it failed: set -e)
-# didn't find the tweak missing. Installed by Frame Tweaks (its version record), or with an exit
-# code other than 0, 1 or 2, it's "status check failed" (2): as "not installed", updates skipped
-# it and forget-settings deleted its settings. Without a record, exit 1 is still not installed
-# (a pack's status.sh may say so in words of its own). (The window's status() has the same rule.)
+# waiting for a SteamVR restart), 2 warning (or installed, waiting for one). What the result means
+# (a check that failed is "status check failed", 2) is lib/installer.py read_status's, the window's
+# rule too. Bash runs status.sh itself, as before (its environment and stdin as they were); the
+# Python run after it only reads the result.
 status_of() {
-    local out rc err word why
+    local out rc err rec line st
     err=$(mktemp) || err=/dev/null
     out=$(tweak_script "$1" status 2>"$err"); rc=$?
-    word=${out#"${out%%[![:space:]]*}"}; word=${word%%[[:space:]]*}       # (its first word)
-    if [[ $rc -gt 2 || ($rc -eq 1 && $word != missing && $word != restart && -f $STATE/installed/$1) ]]; then
-        why=$(sed -e 's/\x1b\[[0-9;]*m//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$err" | grep . | tail -1)   # (what it said last)
-        if [[ -n $why ]]; then out="warning  $(t 'status check failed: %s' "$why")"
-        else out="warning  $(t 'status check failed')"; fi
-        rc=2
-    fi
+    [[ -f $STATE/installed/$1 ]] && rec=1 || rec=0
+    line=$(printf '%s' "$out" | python3 lib/installer.py status-of "$rc" "$rec" "$err"); st=$?
     [[ $err == /dev/null ]] || rm -f "$err"
-    [[ -z $out ]] || printf '%s\n' "$out"
+    case $st in
+        10|11|12) rc=$((st - 10)) ;;
+        # (Python failed, its traceback said: 2, installed, with the line as it was; 1 would have
+        # updates skip the tweak and forget-settings delete its settings)
+        *) line=$out; rc=2 ;;
+    esac
+    [[ -z $line ]] || printf '%s\n' "$line"
     return $rc
 }
 is_installed() { status_of "$1" >/dev/null; [[ $? -ne 1 ]]; }     # (status 0 or 2)

@@ -2,12 +2,18 @@
 tests: the bash it replaced (with_deps, and cmd_uninstall's "needed by" loops), kept here as the
 reference, gives the same answers on random graphs, cycles included; and properties that hold
 whatever the graph: every dependency before what needs it (no cycle), nothing twice, unknown ids
-reported, never a crash. Then the command line ./install.sh uses, exit codes included."""
+reported, never a crash. Then the command line ./install.sh uses, exit codes included.
+What a status result means (read_status, status_of): the same as install.sh's status_of and the
+window's status() before them, on generated results."""
 import io
+import os
 import random
+import re
+import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -106,6 +112,116 @@ class SameAsTheBashItReplaced(unittest.TestCase):
             # (the old loop asked about every pair, the new list has them all, in the same order)
             self.assertEqual([other for _i, other in installer.needed_by(graph, asked)],
                              [line.split()[1] for line in needed_out.splitlines()], msg)
+
+
+# install.sh's status_of before lib/installer.py read_status, given what status.sh did: RC, its
+# stdout as bash had it ($(...), trailing newlines gone), a file with its stderr, and 1 for a
+# version record. t as lib/i18n.sh has it with no translation.
+OLD_STATUS_BASH = r'''
+t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
+old_status() {
+    local rc=$1 out=$2 err=$3 word why
+    word=${out#"${out%%[![:space:]]*}"}; word=${word%%[[:space:]]*}
+    if [[ $rc -gt 2 || ($rc -eq 1 && $word != missing && $word != restart && $4 == 1) ]]; then
+        why=$(sed -e 's/\x1b\[[0-9;]*m//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$err" | grep . | tail -1)
+        if [[ -n $why ]]; then out="warning  $(t 'status check failed: %s' "$why")"
+        else out="warning  $(t 'status check failed')"; fi
+        rc=2
+    fi
+    [[ -z $out ]] || printf '%s\n' "$out"
+    return $rc
+}
+'''
+
+
+def old_window_status(returncode, stdout, stderr, record):
+    """gui/window_logic.py status() before lib/installer.py read_status, once status.sh had run."""
+    out = stdout.strip()
+    text = out.split(None, 1)[-1] if out else ""
+    word = out.split(None, 1)[:1]
+    if word == ["restart"] and returncode in (1, 2):
+        return {2: installer.RESTART, 1: installer.UNLOAD}[returncode], text
+    if returncode not in (0, 1, 2) or (returncode == 1 and word != ["missing"] and record):
+        said = [line for line in re.sub(r"\x1b\[[0-9;]*m", "", stderr or "").splitlines() if line.strip()]
+        return 2, ("status check failed: %s" % said[-1].strip() if said else "status check failed")
+    return returncode, text
+
+
+def random_result(rng, odd_breaks=True):
+    """(exit code, stdout, stderr, record) as a status.sh might leave them, odd ones included;
+    odd_breaks: stderr lines with \\r or \\v in them, which splitlines breaks at and bash didn't."""
+    word = rng.choice(["ok", "missing", "warning", "restart", "other", "", "okay", "Missing"])
+    text = rng.choice(["", "Fine", "Load it   now", "50% done", "a\tb", "über %s"])
+    lead = rng.choice(["", "", " ", "\n", " \t"])
+    tail = rng.choice(["", "\n", "\n\n", "  \n", "\nsecond line\n"])
+    stdout = (lead + word + (rng.choice(["  ", " ", "\t"]) + text if text else "") + tail) if word or text else rng.choice(["", "\n"])
+    lines = ["", "cat: x: No such file", "\x1b[1;33mwarning:\x1b[0m x", "  spaced  ", "\t", "%s and %d",
+             "\x1b[31m\x1b[0m", "phone: command not found"]
+    if odd_breaks:
+        lines += ["50%\r100%\rdone", "trailing\r", "line\x0bwith a vertical tab"]
+    stderr = "\n".join(rng.choice(lines) for _ in range(rng.randint(0, 4))) + rng.choice(["", "\n", "\n\n"])
+    rc = rng.choice([0, 1, 2, 3, 4, 5, 1, 1, 2, 127, 255])
+    return rc, stdout, stderr, rng.random() < 0.5
+
+
+class StatusSameAsBefore(unittest.TestCase):
+    def test_same_as_install_sh_status_of(self):
+        bash = shutil.which("bash")
+        if not bash or subprocess.run([bash, "-c", "((BASH_VERSINFO[0] >= 4))"]).returncode:
+            self.skipTest("needs bash 4")
+        rng = random.Random(20261103)
+        cases = [random_result(rng) for _ in range(600)]
+        with tempfile.TemporaryDirectory() as d:
+            script = [OLD_STATUS_BASH]
+            for k, (rc, stdout, stderr, record) in enumerate(cases):
+                err = Path(d) / f"err{k}"
+                err.write_text(stderr)
+                script.append(f"out=$(printf '%s' {shlex.quote(stdout)}); old_status {rc} \"$out\" {err} {int(record)}; "
+                              "echo \"#rc $?\"\n")
+            # (bytes: text=True would turn status.sh's \\r into \\n)
+            r = subprocess.run([bash, "-c", "".join(script)], capture_output=True, timeout=120,
+                               env={**os.environ, "LC_ALL": "C.UTF-8"})
+        self.assertEqual(r.returncode, 0, r.stderr)
+        blocks = re.split(r"#rc (\d+)\n", r.stdout.decode())
+        self.assertEqual(len(blocks), 2 * len(cases) + 1)
+        for k, (rc, stdout, stderr, record) in enumerate(cases):
+            want = (blocks[2 * k], int(blocks[2 * k + 1]))
+            line, code = installer.status_of(rc, stdout.rstrip("\n"), stderr, record)
+            self.assertEqual((line + "\n" if line else "", code), want, (rc, stdout, stderr, record))
+
+    def test_same_as_the_window_had_it(self):
+        """The window's rule split stderr into lines at \\r and \\v too (splitlines); install.sh's
+        at \\n only, which read_status keeps: the one difference, left out here."""
+        rng = random.Random(1103)
+        for _ in range(2000):
+            rc, stdout, stderr, record = random_result(rng, odd_breaks=False)
+            if rng.random() < 0.1:
+                rc = rng.choice([-9, -15, 126])          # (killed by a signal: Python's negative codes)
+            self.assertEqual(installer.read_status(rc, stdout, stderr, record),
+                             old_window_status(rc, stdout, stderr, record), (rc, stdout, stderr, record))
+
+    def test_the_command_line(self):
+        """As ./install.sh status_of runs it: stdout on stdin, stderr in a file, 10 + the status;
+        bytes that aren't UTF-8 pass through."""
+        rng = random.Random(311)
+        cases = [(rc, out.rstrip("\n").encode(), err.encode(), rec) for rc, out, err, rec in
+                 (random_result(rng) for _ in range(25))]
+        cases += [(1, b"", b"cat: x: No such file\n", True), (1, b"restart  Unload it", b"", True),
+                  (3, b"ok  fine", b"bad \xff\n", False), (0, b"ok  \xfe", b"", False)]
+        with tempfile.TemporaryDirectory() as d:
+            err_file = Path(d) / "err"
+            for rc, out, err, record in cases:
+                err_file.write_bytes(err)
+                r = subprocess.run([sys.executable, str(ROOT / "lib/installer.py"), "status-of", str(rc),
+                                    str(int(record)), str(err_file)], input=out, capture_output=True, timeout=30)
+                line, code = installer.status_of(rc, out.decode("utf-8", "surrogateescape"),
+                                                 err.decode("utf-8", "surrogateescape"), record)
+                want = (line + "\n").encode("utf-8", "surrogateescape") if line else b""
+                self.assertEqual((r.returncode, r.stdout), (10 + code, want), (rc, out, err, record, r.stderr))
+            r = subprocess.run([sys.executable, str(ROOT / "lib/installer.py"), "status-of", "1", "1",
+                                str(Path(d) / "gone")], input=b"", capture_output=True, timeout=30)
+            # (no stderr file, as when mktemp failed: nothing said)
+            self.assertEqual((r.returncode, r.stdout), (12, b"warning  status check failed\n"))
 
 
 class Properties(unittest.TestCase):

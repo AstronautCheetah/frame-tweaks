@@ -1449,16 +1449,8 @@ msgstr ""
 msgid "status check didn't finish (took over a minute)"
 msgstr ""
 
-#: gui/window_logic.py install.sh
-msgid "status check failed"
-msgstr ""
-
 #: gui/window_logic.py
 msgid "status check failed (exit {code})"
-msgstr ""
-
-#: gui/window_logic.py install.sh
-msgid "status check failed: %s"
 msgstr ""
 
 #: install.sh
@@ -1973,6 +1965,14 @@ msgstr ""
 
 #: lib/common.sh
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
+msgstr ""
+
+#: lib/installer.py
+msgid "status check failed"
+msgstr ""
+
+#: lib/installer.py
+msgid "status check failed: %s"
 msgstr ""
 
 #: lib/link.sh

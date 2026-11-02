@@ -234,7 +234,8 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
 
   **The status protocol.** `status.sh` prints one line, `WORD  TEXT`, and exits; the helpers in
   `lib/common.sh` write both. `./install.sh` (`status_of`) and the installer window
-  (`gui/window_logic.py`, `status`) read the line and the exit code together:
+  (`gui/window_logic.py`, `status`) read the line and the exit code together, by one rule
+  (`lib/installer.py`, `read_status`):
 
   | Helper | First word | Exit | Means | Counts as installed |
   |---|---|---|---|---|
