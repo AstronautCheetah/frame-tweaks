@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
 try:
     import i18n
-    from i18n import _, N_, NP_, ngettext, pgettext  # noqa: F401
+    from i18n import _, N_, NP_, ngettext, pgettext  # noqa: F401  (the names the English fallback below defines; not all used)
 except ImportError:                       # (not installed by Frame Tweaks: English)
     i18n = None
 

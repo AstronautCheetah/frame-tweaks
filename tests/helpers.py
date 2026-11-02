@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # A test file run alone starts as the whole suite does: in English, with throwaway settings files
 # (test_00_english.py, which runs first), and the shared modules in lib/ importable, as the
 # programs loaded here find them beside i18n.py when installed.
-import test_00_english  # noqa: E402,F401
+import test_00_english  # noqa: E402,F401  (imported for its side effects, after the comment above)
 if str(ROOT / "lib") not in sys.path:
     sys.path.insert(0, str(ROOT / "lib"))
 

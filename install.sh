@@ -437,7 +437,7 @@ uninstall_settings() {
 # Preferences button does the same.)
 cmd_forget_settings() {
     local id p n=0
-    # shellcheck disable=SC2046
+    # shellcheck disable=SC2046   # (split on purpose: an optional --delete and tweak ids, no spaces)
     while IFS=$'\t' read -r id p; do
         n=$((n + 1))
         if [[ ${1:-} == --list ]]; then echo "$id	$p"; else say "$(t 'removed %s' "$p") ($id)"; fi
@@ -829,11 +829,11 @@ stop_processes() {
         pat=${pat//\~/$HOME}
         pids=$(pgrep -f -- "$pat" | grep -vx "$$" || true)
         [[ -n $pids ]] || continue
-        # shellcheck disable=SC2086
+        # shellcheck disable=SC2086   # (split on purpose: pgrep's pids, one per line)
         kill $pids 2>/dev/null || true
         for _ in 1 2 3 4 5 6; do pgrep -f -- "$pat" >/dev/null || break; sleep 0.5; done
         pids=$(pgrep -f -- "$pat" || true)
-        # shellcheck disable=SC2086
+        # shellcheck disable=SC2086   # (split on purpose: pgrep's pids, one per line)
         [[ -z $pids ]] || kill -9 $pids 2>/dev/null || true      # didn't stop within 3 s
         n=$((n + 1))
     done < <(python3 lib/sft.py processes "$id")

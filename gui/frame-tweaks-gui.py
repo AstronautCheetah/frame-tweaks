@@ -2054,7 +2054,7 @@ class Window(QWidget):
         ones they need that aren't installed yet, and which ask for the sudo password) and removed."""
         comps = {c["id"]: c for c in self.rows}
         dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
-        title = lambda cid: html.escape(comps[cid]["title"] if cid in comps else cid)   # noqa: E731
+        title = lambda cid: html.escape(comps[cid]["title"] if cid in comps else cid)   # noqa: E731  (a one-line helper for this method only)
         parts = []
         if add:
             lines = []
