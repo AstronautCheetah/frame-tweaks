@@ -67,6 +67,15 @@
   desktop's clipboard.
 
 ### Fixed
+- **Wallet apps says when the wallet has no password yet, instead of an Unlock that can't work.**
+  SteamOS's stock wallet opens without a password, so the page's 🔓 Unlock… (and Password first
+  on an app) asked for a password nobody could give. `wallet-unlock --info` now says whether the
+  wallet has one: found out while the wallet is locked, by trying it without a password the way
+  kwalletd6 itself does first, then locking it again, and kept for that wallet file (Change
+  Password rewrites it, so the next lock looks again). Without one, the page warns that the wallet
+  protects nothing, Unlock becomes Open (no dialog), and 🔑 Set password… opens KWalletManager;
+  `wallet-unlock` itself opens the wallet without asking and says to set a password;
+  `./install.sh status` warns too.
 - **Screen snip works on Steam games:** a game run through Proton (and others drawing with
   Vulkan) draws straight to gamescope, so the snip came out black or didn't open. Then it now
   uses gamescope's own screenshot of what it shows.

@@ -1140,6 +1140,11 @@ msgid "Close after"
 msgstr ""
 
 #: gui/wallet_page.py
+msgid ""
+"Couldn't start KWalletManager; open it from the menu, then kdewallet → Change Password."
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Electron app: will be told to use the wallet"
 msgstr ""
 
@@ -1156,7 +1161,16 @@ msgid "Headset off"
 msgstr ""
 
 #: gui/wallet_page.py
+msgid ""
+"It opens without one, so it protects nothing, and there's no password for Unlock or Password first to ask. Set one in KWalletManager: kdewallet → Change Password."
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "It stays unlocked until you lock it (auto-lock is off)."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "It's closed now; apps open it without asking."
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1194,6 +1208,14 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid "Open it the way it opened before (its original launcher)"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Opens KWalletManager: kdewallet → Change Password"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Opens the wallet; no password is set, so none is asked"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1327,11 +1349,23 @@ msgid "⏱ Extend timer"
 msgstr ""
 
 #: gui/wallet_page.py
+msgid "⚠ The wallet has no password yet."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "🔑 Set password…"
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "🔒 Lock now"
 msgstr ""
 
 #: gui/wallet_page.py
 msgid "🔒 Wallet locked."
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "🔓 Open"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -4580,6 +4614,11 @@ msgid "%s not running: closing the wallet would not lock it (re-run %s)"
 msgstr ""
 
 #: packs/core/wallet/status.sh
+msgid ""
+"the wallet has no password: set one in KWalletManager (kdewallet → Change Password)"
+msgstr ""
+
+#: packs/core/wallet/status.sh
 msgid "wallet %s; %s app launcher(s) routed/gated"
 msgstr ""
 
@@ -4689,6 +4728,11 @@ msgstr ""
 
 #: packs/core/wallet/wallet-unlock
 msgid "Password for the KDE wallet:"
+msgstr ""
+
+#: packs/core/wallet/wallet-unlock
+msgid ""
+"The wallet has no password yet, so it protects nothing. Set one in KWalletManager: kdewallet → Change Password."
 msgstr ""
 
 #: packs/core/wallet/wallet-unlock
