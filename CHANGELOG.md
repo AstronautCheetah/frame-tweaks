@@ -224,7 +224,9 @@
   (`dev/Containerfile`, Podman or Docker), so every check runs on a Mac, Windows or any Linux.
 - **`steam-frame.yml`:** what Frame Tweaks is, in frame-commons' manifest format, with a test record
   (headset SteamOS, build, SteamVR, channel, result) for each release tried on a Frame, added by
-  `dev/record-tested.sh`; the catalog's compatibility table is built from them.
+  `dev/record-tested.sh`; the catalog's compatibility table is built from them, and so is README.md's
+  **Tested on** table, which now lists every SteamOS build each release was tested on, not only the
+  last. `dev/steam_frame_yml.py` checks the file with the catalog's own checker.
 - **`dev/button-test.py`:** a window, in VR on a Frame, showing which buttons Frame Tweaks sees
   pressed (the controllers' through their model, the headset's Aux key through Linux), red once
   a press is long, and what the window gets from SteamVR's laser mouse (CONTRIBUTING.md,

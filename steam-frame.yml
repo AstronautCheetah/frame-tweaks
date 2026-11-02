@@ -1,11 +1,16 @@
 # What Frame Tweaks is for the Steam Frame, for programs that read it: frame-commons' catalog and
 # its compatibility table (COMPAT.md), or any installer or list. Format: steam-frame.yml version 0
 # (https://github.com/frame-commons/catalog/blob/main/spec/steam-frame-yml.md).
-# tested: one line per test on a Frame, added by dev/record-tested.sh (Releasing, in
-# CONTRIBUTING.md). Add lines; never change old ones.
+# tested: one line per test on a Frame, oldest first, added by dev/record-tested.sh (Releasing, in
+# CONTRIBUTING.md); README.md's "Tested on" table is made from them (dev/gen-docs.py). Add lines;
+# never change old ones. The first three were written afterwards from the changelog and README
+# of their releases. Checked by dev/steam_frame_yml.py.
 manifest: 0
-provides: [tooling, input, voice, desktop, overlay, compat-fix]
+provides: [tooling, input, voice, desktop, overlay, compat-fix, streaming, passthrough]
 runs_on: headset
 install: "curl -fsSL https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/get.sh | bash"
 tested:
-  - { steamos: "0.5.6", build: "20261022.6153909", steamvr: "2.18.2", channel: beta, date: 2026-11-02, result: works, notes: "main after 0.6.23 (24ee830): Dictation, Performance Overlay, KnockThru, Arrow Pad" }
+  - { steamos: "0.4.5", build: "20261006.6173745", steamvr: "2.18.2", date: "2026-10-07", result: works, notes: "0.1.0 to 0.4.0" }
+  - { steamos: "0.4.5", build: "20261007.6125817", steamvr: "2.18.2", date: "2026-10-14", result: works, notes: "0.5.0 to 0.6.23" }
+  - { steamos: "0.5.6", channel: beta, date: "2026-10-16", result: works, notes: "0.6.9 to 0.6.23 (build not recorded): 0.6.9 made Mouse cursor fix and Speech engine work on it" }
+  - { steamos: "0.5.6", build: "20261022.6153909", steamvr: "2.18.2", channel: beta, date: "2026-11-02", result: works, notes: "main after 0.6.23 (24ee830): Dictation, Performance Overlay, KnockThru, Arrow Pad" }

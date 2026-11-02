@@ -15,8 +15,8 @@ from helpers import ROOT  # noqa: E402
 
 SCRIPT = ROOT / "dev/record-tested.sh"
 RECORD = re.compile(r'^  - \{ steamos: "[0-9][^"]*"(, build: "[^"]+")?(, steamvr: "[0-9][^"]*")?'
-                    r'(, channel: (stable|beta|preview))?, date: \d{4}-\d{2}-\d{2}, '
-                    r'result: (works|partial|broken)(, notes: "[^"\n]{1,120}")? \}$')
+                    r'(, channel: (stable|beta|preview))?, date: "\d{4}-\d{2}-\d{2}", '
+                    r'result: (works|partial|broken)(, notes: "[^"\n]{1,200}")? \}$')
 
 
 class RecordTested(unittest.TestCase):
@@ -37,17 +37,36 @@ class RecordTested(unittest.TestCase):
         self.assertIn('steamvr: "2.18.2"', line)
 
     def test_bad_result_or_notes_are_refused(self):
-        for args in (("fine", "x"), ("works", 'a "quoted" word'), ("works", "two\nlines"), ("works", "x" * 121)):
+        for args in (("fine", "x"), ("works", 'a "quoted" word'), ("works", "two\nlines"), ("works", "x" * 201)):
             r = self.run_it(*args)
             self.assertEqual(r.returncode, 2, (args, r.stdout, r.stderr))
 
     def test_the_records_in_steam_frame_yml(self):
+        """Each record as dev/record-tested.sh writes it, and the whole file fine by the catalog's
+        own checker (dev/fccatalog_manifest.py, when PyYAML is there) and Frame Tweaks' reader."""
         text = (ROOT / "steam-frame.yml").read_text()
-        self.assertRegex(text, r"(?m)^manifest: 0$")
-        self.assertRegex(text, r"(?m)^provides: \[[a-z, -]+\]$")
         records = text.split("\ntested:\n", 1)[1].splitlines()
         for line in records:
             self.assertRegex(line, RECORD)
+        sys.path.insert(0, str(ROOT / "dev"))
+        import steam_frame_yml
+        found, _ran = steam_frame_yml.problems()
+        self.assertEqual(found, [])
+        self.assertEqual(len(steam_frame_yml.records()), len(records))
+
+    def test_the_catalog_checker_refuses_what_it_should(self):
+        """Its copy here still refuses an unquoted version and an unknown term (if it didn't, the
+        file's check would mean nothing)."""
+        try:
+            import yaml  # noqa: F401
+        except ImportError:
+            self.skipTest("needs PyYAML")
+        sys.path.insert(0, str(ROOT / "dev"))
+        import fccatalog_manifest as catalog
+        with self.assertRaises(catalog.ManifestError) as e:
+            catalog.parse("provides: [tooling, sorcery]\ntested:\n  - { steamos: 0.5, date: 2026-11-02, result: works }\n")
+        self.assertTrue(any("sorcery" in p for p in e.exception.problems))
+        self.assertTrue(any("quote" in p for p in e.exception.problems))
 
 
 if __name__ == "__main__":

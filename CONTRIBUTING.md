@@ -396,7 +396,9 @@ older release unasked.
 what happened). It reads the headset's SteamOS version and build, SteamVR's version and the update
 channel from the Frame. frame-commons' catalog builds its compatibility table
 ([COMPAT.md](https://github.com/frame-commons/catalog/blob/main/COMPAT.md)) from these records.
-Add records; never change old ones.
+It adds the record to README.md's **Tested on** table too, which keeps every build each release
+was tested on. Add records; never change old ones. `dev/steam_frame_yml.py` checks the file with the
+catalog's own checker (copied into `dev/fccatalog_manifest.py`).
 
 **How many people use it** (Frame Tweaks itself never reports anything): GitHub counts clones
 (each install is one; updates may count too) and page views, but keeps only 14 days. The **Traffic**

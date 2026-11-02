@@ -16,7 +16,7 @@ print=
 host=$1 result=$2 notes=$3
 case $result in works|partial|broken) ;; *) echo "RESULT: works, partial or broken" >&2; exit 2 ;; esac
 # (the spec's notes are one short line, quoted: no quote or newline that would break it)
-[[ $notes != *[\"$'\n']* ]] && [ ${#notes} -le 120 ] || { echo "NOTES: one line, at most 120 characters, no \"" >&2; exit 2; }
+[[ $notes != *[\"$'\n']* ]] && [ ${#notes} -le 200 ] || { echo "NOTES: one line, at most 200 characters, no \"" >&2; exit 2; }
 read_frame() {
     # SteamOS's own version (the headset's 0.x line) and build; SteamVR's version as vrserver logs it
     # when it starts (its version.txt is a build number); the channel steamos-select-branch is on.
@@ -34,5 +34,7 @@ rec="  - { steamos: \"$steamos\""
 [ -z "$build" ] || rec+=", build: \"$build\""
 [ -z "$steamvr" ] || rec+=", steamvr: \"$steamvr\""
 [ -z "$channel" ] || rec+=", channel: $channel"
-rec+=", date: $(date -u +%F), result: $result, notes: \"$notes\" }"
-if [ -n "$print" ]; then echo "$rec"; else echo "$rec" >> steam-frame.yml; echo "added: $rec"; fi
+rec+=", date: \"$(date -u +%F)\", result: $result, notes: \"$notes\" }"   # (date quoted: lib/manifest.py reads it)
+if [ -n "$print" ]; then echo "$rec"; exit 0; fi
+echo "$rec" >> steam-frame.yml && echo "added: $rec"
+python3 dev/steam_frame_yml.py && python3 dev/gen-docs.py     # (README.md's Tested on table is made from them)

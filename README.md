@@ -40,7 +40,7 @@ Not affiliated with or endorsed by Valve. Steam and Steam Frame are trademarks o
 
 You need:
 
-- A **Valve Steam Frame** in **desktop mode** (tested on SteamOS 0.4.x). The Steam Deck and
+- A **Valve Steam Frame** in **desktop mode** (tested on SteamOS 0.4.5 and 0.5.6: [Tested on](#tested-on)). The Steam Deck and
   other SteamOS devices aren't supported: Frame Tweaks installs programs built for the Frame's
   ARM processor, and the VR tweaks need the Frame's SteamVR.
 - A network connection, and `git` (SteamOS has it).
@@ -101,7 +101,8 @@ tweaks) rely on that tool's checks. Details: [SECURITY.md](SECURITY.md#what-each
 window goes online only to look for newer releases: Frame Tweaks' own (it asks GitHub; turn this
 off in its ⚙ preferences) and, for a tweak that installs an app with its own releases, that
 app's (Claude Desktop asks Anthropic's download server). Installs and updates download what the
-tweaks need. **🐞 Report a problem** saves its report on the Frame and opens GitHub's bug form;
+tweaks need. Linked projects check for their own updates as they're made to: Performance Overlay
+and KnockThru ask GitHub once a day (each can turn that off; their pages say how). **🐞 Report a problem** saves its report on the Frame and opens GitHub's bug form;
 nothing is sent unless you attach it. The apps the tweaks install (Signal, NordVPN, Claude…) go
 online as they normally do.
 
@@ -467,9 +468,20 @@ Help is welcome, and much of it doesn't need a Frame:
 
 ## Tested on
 
-Last checked on SteamOS 0.5.6 (build 20261022.6153909, beta) with SteamVR 2.18.2, on one Steam
-Frame; [docs/compatibility.md](docs/compatibility.md) has each tweak's status on each build
-checked. SteamOS and SteamVR updates can break tweaks that rely on their internals (the 🧪
+Every SteamOS and SteamVR build Frame Tweaks was tested on, with the releases tested there, on one
+Steam Frame (from the test records in [steam-frame.yml](steam-frame.yml)); each tweak's status
+on each build checked is in [docs/compatibility.md](docs/compatibility.md).
+
+<!-- generated:tested (dev/gen-docs.py, from steam-frame.yml) -->
+| Tested | SteamOS | Build | SteamVR | Channel | Result | Frame Tweaks, and notes |
+|---|---|---|---|---|---|---|
+| 2026-11-02 | 0.5.6 | 20261022.6153909 | 2.18.2 | beta | works | main after 0.6.23 (24ee830): Dictation, Performance Overlay, KnockThru, Arrow Pad |
+| 2026-10-16 | 0.5.6 | – | – | beta | works | 0.6.9 to 0.6.23 (build not recorded): 0.6.9 made Mouse cursor fix and Speech engine work on it |
+| 2026-10-14 | 0.4.5 | 20261007.6125817 | 2.18.2 | – | works | 0.5.0 to 0.6.23 |
+| 2026-10-07 | 0.4.5 | 20261006.6173745 | 2.18.2 | – | works | 0.1.0 to 0.4.0 |
+<!-- /generated:tested -->
+
+SteamOS and SteamVR updates can break tweaks that rely on their internals (the 🧪
 experimental tweaks check for this and switch themselves off). Reports from other versions are
 welcome: the [Works on my Frame](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=test_report.yml)
 issue form asks for what's needed.

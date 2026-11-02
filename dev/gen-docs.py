@@ -125,8 +125,21 @@ def upstream(i, m):
             f"is Frame Tweaks'.*\n\n" + copy.read_text().strip())
 
 
+def tested_on():
+    """README.md's "Tested on" table: every test record in steam-frame.yml, newest first (each
+    release's, not only the last: dev/record-tested.sh adds them)."""
+    sys.path.insert(0, str(ROOT / "dev"))
+    from steam_frame_yml import records
+    rows = ["| Tested | SteamOS | Build | SteamVR | Channel | Result | Frame Tweaks, and notes |",
+            "|---|---|---|---|---|---|---|"]
+    for r in reversed(records()):
+        rows.append("| " + " | ".join(str(r.get(k) or "–") for k in ("date", "steamos", "build", "steamvr", "channel",
+                                                                       "result", "notes")) + " |")
+    return "\n".join(rows)
+
+
 def put(text, name, body, path):
-    source = "upstream.md" if name == "upstream" else "each tweak's README front matter"
+    source = {"upstream": "upstream.md", "tested": "steam-frame.yml"}.get(name, "each tweak's README front matter")
     begin, end = f"<!-- generated:{name} (dev/gen-docs.py, from {source}) -->", f"<!-- /generated:{name} -->"
     block = f"{begin}\n{body}\n{end}"
     pat = re.compile(re.escape(begin.split(" (")[0]) + r".*?" + re.escape(end), re.S)
@@ -151,7 +164,7 @@ def put(text, name, body, path):
 def main():
     check = "--check" in sys.argv
     rows = tweaks()
-    targets = {ROOT / "README.md": [("overview", readme_overview(rows))],
+    targets = {ROOT / "README.md": [("overview", readme_overview(rows)), ("tested", tested_on())],
                ROOT / "docs/tweaks.md": [("tweaks", tweak_tables(rows))],
                ROOT / "SECURITY.md": [("security", security_rows(rows))]}
     for i, m in rows:
