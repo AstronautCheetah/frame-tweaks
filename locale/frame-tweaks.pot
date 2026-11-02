@@ -17,6 +17,11 @@ msgid "Installing %s into %s"
 msgstr ""
 
 #: get.sh
+msgid ""
+"Release %s isn't signed by Frame Tweaks' release key, so it wasn't installed."
+msgstr ""
+
+#: get.sh
 msgid "Release channel: %s"
 msgstr ""
 
@@ -26,6 +31,11 @@ msgstr ""
 
 #: get.sh
 msgid "Updating %s (./install.sh update)"
+msgstr ""
+
+#: get.sh lib/common.sh
+msgid ""
+"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 
 #: gui/apply_changes.py
@@ -1939,11 +1949,6 @@ msgstr ""
 
 #: lib/common.sh
 msgid "not responding"
-msgstr ""
-
-#: lib/common.sh
-msgid ""
-"release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)"
 msgstr ""
 
 #: lib/common.sh

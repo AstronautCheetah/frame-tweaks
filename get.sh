@@ -5,6 +5,12 @@
 # Test releases too (testers): ... | FRAME_TWEAKS_CHANNEL=beta bash (kept for later updates).
 set -euo pipefail
 
+# The release key a new install trusts: the same as dev/release-signers (tests/test_bh_shell_get.py
+# keeps the two the same). The release installed is checked against it before anything in it runs,
+# as ./install.sh update checks every release after (lib/common.sh verify_release), so only this
+# file is taken on trust. FRAME_TWEAKS_SIGNERS=FILE trusts the keys in FILE instead (a fork's own).
+RELEASE_SIGNERS='releases namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOdKDHhVzmD7oWLyfHgVX7x8qbVjCAbwlIMKDOLDbzVC'
+
 # Its few words come before Frame Tweaks (and its translations) are here, so they carry their own
 # translations: dev/i18n.py update writes them below from locale/*.po. The language is picked as
 # Frame Tweaks picks it (lib/i18n.py), without the keyboard: FRAME_TWEAKS_LANGUAGE, the one chosen
@@ -21,18 +27,21 @@ texts() {
         [$'es_419|Release channel: %s']=$'Canal de versiones: %s'
         [$'es_419|Some tweaks didn\'t update (see above); the window shows which.']=$'Algunos ajustes no se actualizaron (ver arriba); la ventana muestra cuáles.'
         [$'es_419|Updating %s (./install.sh update)']=$'Actualizando %s (./install.sh update)'
+        [$'es_419|release %s isn\'t signed by Frame Tweaks\' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)']=$'la versión %s no está firmada con la clave de versiones de Frame Tweaks; se continúa (FRAME_TWEAKS_ALLOW_UNSIGNED=1)'
         [$'fr|Couldn\'t find a release of %s']=$'Impossible de trouver une version de %s'
         [$'fr|FRAME_TWEAKS_CHANNEL: stable or beta']=$'FRAME_TWEAKS_CHANNEL : stable ou beta'
         [$'fr|Installing %s into %s']=$'Installation de %s dans %s'
         [$'fr|Release channel: %s']=$'Canal des versions : %s'
         [$'fr|Some tweaks didn\'t update (see above); the window shows which.']=$'Certains ajustements n\'ont pas été mis à jour (voir ci-dessus) ; la fenêtre indique lesquels.'
         [$'fr|Updating %s (./install.sh update)']=$'Mise à jour de %s (./install.sh update)'
+        [$'fr|release %s isn\'t signed by Frame Tweaks\' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)']=$'la version %s n\'est pas signée avec la clé de publication de Frame Tweaks ; poursuite malgré tout (FRAME_TWEAKS_ALLOW_UNSIGNED=1)'
         [$'nl_BE|Couldn\'t find a release of %s']=$'Geen versie van %s gevonden'
         [$'nl_BE|FRAME_TWEAKS_CHANNEL: stable or beta']=$'FRAME_TWEAKS_CHANNEL: stable of beta'
         [$'nl_BE|Installing %s into %s']=$'%s installeren in %s'
         [$'nl_BE|Release channel: %s']=$'Versiekanaal: %s'
         [$'nl_BE|Some tweaks didn\'t update (see above); the window shows which.']=$'Sommige aanpassingen zijn niet bijgewerkt (zie hierboven); het venster toont welke.'
         [$'nl_BE|Updating %s (./install.sh update)']=$'%s bijwerken (./install.sh update)'
+        [$'nl_BE|release %s isn\'t signed by Frame Tweaks\' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)']=$'versie %s is niet ondertekend met de sleutel van Frame Tweaks; er wordt toch doorgegaan (FRAME_TWEAKS_ALLOW_UNSIGNED=1)'
     )
     # END translations
 }
@@ -72,6 +81,31 @@ installed_texts() {    # Frame Tweaks is here: its own translations, as its scri
     # shellcheck source=/dev/null
     [ -f "$1/lib/i18n.sh" ] && source "$1/lib/i18n.sh"
     return 0
+}
+
+# signed TAG: TAG names itself and carries a good SSH signature by a key in $SIGNERS (as
+# lib/common.sh release_signed checks it: never GPG, and an old release can't pass under a newer name).
+signed() {
+    [ "$(git -C "$DIR" for-each-ref --format='%(tag)' "refs/tags/$1" 2>/dev/null)" = "$1" ] &&
+        git -C "$DIR" -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$SIGNERS" -c gpg.program=false \
+            -c gpg.x509.program=false verify-tag "refs/tags/$1" >/dev/null 2>&1
+}
+# verified TAG: TAG is signed by a trusted key, or its cosign-TAG is and points at the same commit
+# (while an old release key is retired, docs/release-signing.md: the release itself carries the
+# old key's signature, which a new install doesn't trust).
+verified() {
+    local ok=1
+    SIGNERS=$(mktemp)
+    if [ -n "${FRAME_TWEAKS_SIGNERS:-}" ]; then cat "$FRAME_TWEAKS_SIGNERS" > "$SIGNERS"; else printf '%s\n' "$RELEASE_SIGNERS" > "$SIGNERS"; fi
+    if signed "$1"; then
+        ok=0
+    elif git -C "$DIR" fetch --quiet --depth 1 origin "refs/tags/cosign-$1:refs/tags/cosign-$1" 2>/dev/null &&
+         signed "cosign-$1" &&
+         [ "$(git -C "$DIR" rev-parse "refs/tags/cosign-$1^{commit}")" = "$(git -C "$DIR" rev-parse "refs/tags/$1^{commit}")" ]; then
+        ok=0
+    fi
+    rm -f "$SIGNERS"
+    return $ok
 }
 
 # All in one function, called on the last line: a download cut short runs nothing.
@@ -117,6 +151,16 @@ main() {
         [ -n "$TAG" ] || { echo "$(t "Couldn't find a release of %s" "$REPO")" >&2; exit 1; }
         echo "$(t 'Installing %s into %s' "$TAG" "$DIR")"
         git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" "$REPO" "$DIR"
+        # (nothing in it has run yet: a release that fails the check is removed again)
+        if ! verified "$TAG"; then
+            if [ "${FRAME_TWEAKS_ALLOW_UNSIGNED:-}" = 1 ]; then
+                echo "warning: $(t "release %s isn't signed by Frame Tweaks' release key; continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)" "$TAG")" >&2
+            else
+                rm -rf "$DIR"
+                echo "$(t "Release %s isn't signed by Frame Tweaks' release key, so it wasn't installed." "$TAG")" >&2
+                exit 1
+            fi
+        fi
     fi
 
     "$DIR/install.sh" menu

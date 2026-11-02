@@ -8,7 +8,8 @@ the maintainer's steps, see [CONTRIBUTING.md](../CONTRIBUTING.md#releasing-maint
 ## The check
 
 Every release is a git tag, `vX.Y.Z`, signed with an SSH key. `dev/release-signers` lists the
-public keys a copy trusts. An update (`verify_release` in `lib/common.sh`) moves to a release
+public keys a copy trusts, and `get.sh` carries the same list for a new install (a test keeps
+the two the same, so a key change updates both). An update (`verify_release` in `lib/common.sh`) moves to a release
 only if its tag carries a good signature by a key in the list **as the copy already has it**. A
 release can't bring its own key.
 

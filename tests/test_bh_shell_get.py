@@ -2,8 +2,10 @@
 pre-releases ranked below their release; given, or kept from before), says so when there is no
 release, runs install.sh by its full path (FRAME_TWEAKS_DIR relative too), and on an existing
 checkout runs ./install.sh update (signature check and all), stopping, without opening the old
-version, when that fails. Against a stand-in repository whose install.sh only logs how it was run
-(and fails "update" when FAIL_UPDATE is set)."""
+version, when that fails. A new install checks the release's signature first (its cosign while an
+old key is retired) and removes a release that fails. Against a stand-in repository whose
+install.sh only logs how it was run (and fails "update" when FAIL_UPDATE is set), signed with
+throwaway keys."""
 import shutil
 import subprocess
 import tempfile
@@ -13,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
-@unittest.skipUnless(shutil.which("git"), "needs git")
+@unittest.skipUnless(shutil.which("git") and shutil.which("ssh-keygen"), "needs git and ssh-keygen")
 class GetSh(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -30,28 +32,71 @@ class GetSh(unittest.TestCase):
                                              '[ "${1:-}" = update ] && [ -n "${FAIL_UPDATE:-}" ] && exit "$FAIL_UPDATE"; exit 0\n')
         (self.src / "install.sh").chmod(0o755)
         self.dest = self.tmp / "frame-tweaks"
+        for k in ("release", "other"):
+            subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", k, "-f", str(self.tmp / k)], check=True)
+        self.signers = self.tmp / "signers"
+        pub = (self.tmp / "release.pub").read_text().split()
+        self.signers.write_text(f'releases namespaces="git" {pub[0]} {pub[1]}\n')
 
     def git(self, where, *args):
         return subprocess.run(["git", "-C", str(where), *args], env=self.env, check=True,
                               capture_output=True, text=True).stdout.strip()
 
-    def release(self, *tags):
+    def release(self, *tags, key="release"):
         for tag in tags:
             (self.src / "VERSION").write_text(tag + "\n")
             self.git(self.src, "add", "-A")
             self.git(self.src, "commit", "-qm", tag)
-            self.git(self.src, "tag", "-a", tag, "-m", tag)
+            self.sign(tag, key)
+
+    def sign(self, tag, key, commit="HEAD"):
+        if key:
+            self.git(self.src, "-c", "gpg.format=ssh", "-c", f"user.signingkey={self.tmp / key}", "tag", "-s", tag, "-m", tag, commit)
+        else:
+            self.git(self.src, "tag", "-a", tag, "-m", tag, commit)
 
     def get(self, **extra):
         return subprocess.run(["bash", str(ROOT / "get.sh")], capture_output=True, text=True, timeout=60,
                               env={**self.env, "FRAME_TWEAKS_REPO": f"file://{self.src}",
-                                   "FRAME_TWEAKS_DIR": str(self.dest), **extra})
+                                   "FRAME_TWEAKS_DIR": str(self.dest), "FRAME_TWEAKS_SIGNERS": str(self.signers), **extra})
 
     def ran(self):
         return self.log.read_text().splitlines() if self.log.exists() else []
 
     def at(self):
         return (self.dest / "VERSION").read_text().strip()
+
+    def test_a_release_not_signed_by_a_trusted_key_isnt_installed(self):
+        """Unsigned, or signed by another key: refused before anything in it runs, and removed."""
+        for tag, key in (("v0.10.0", None), ("v0.11.0", "other")):
+            self.release(tag, key=key)
+            r = self.get()
+            self.assertEqual(r.returncode, 1, r.stdout)
+            self.assertIn("isn't signed by Frame Tweaks' release key, so it wasn't installed", r.stderr)
+            self.assertFalse(self.dest.exists())
+            self.assertEqual(self.ran(), [])
+        r = self.get(FRAME_TWEAKS_ALLOW_UNSIGNED="1")                  # (the emergency override)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("continuing (FRAME_TWEAKS_ALLOW_UNSIGNED=1)", r.stderr)
+
+    def test_a_release_on_a_retiring_key_is_taken_by_its_cosign(self):
+        """While an old key is retired (docs/release-signing.md) vX is signed with the old key and
+        cosign-vX with the new one on the same commit; a cosign on another commit doesn't count."""
+        self.release("v0.10.0", key="other")
+        self.sign("cosign-v0.10.0", "release")
+        r = self.get()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.at(), "v0.10.0")
+        shutil.rmtree(self.dest)
+        self.release("v0.11.0", key="other")
+        self.sign("cosign-v0.11.0", "release", "v0.10.0^{commit}")
+        self.assertEqual(self.get().returncode, 1)
+        self.assertFalse(self.dest.exists())
+
+    def test_the_key_it_trusts_is_the_release_key(self):
+        text = (ROOT / "get.sh").read_text()
+        line = next(l for l in text.splitlines() if l.startswith("RELEASE_SIGNERS="))
+        self.assertEqual(line.split("=", 1)[1].strip("'"), (ROOT / "dev/release-signers").read_text().strip())
 
     def test_installs_the_newest_stable_release(self):
         self.release("v0.9.0", "v0.10.0", "v0.11.0-rc.1")
@@ -95,7 +140,8 @@ class GetSh(unittest.TestCase):
         relative one with a folder in it, it couldn't find itself)."""
         self.release("v0.10.0")
         r = subprocess.run(["bash", str(ROOT / "get.sh")], cwd=self.tmp, capture_output=True, text=True, timeout=60,
-                           env={**self.env, "FRAME_TWEAKS_REPO": f"file://{self.src}", "FRAME_TWEAKS_DIR": "frame-tweaks"})
+                           env={**self.env, "FRAME_TWEAKS_REPO": f"file://{self.src}", "FRAME_TWEAKS_DIR": "frame-tweaks",
+                                "FRAME_TWEAKS_SIGNERS": str(self.signers)})
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(self.at(), "v0.10.0")
         self.assertEqual(self.ran(), ["install.sh menu", "install.sh "])

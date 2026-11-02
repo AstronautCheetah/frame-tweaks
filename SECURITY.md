@@ -138,8 +138,9 @@ doesn't review or sandbox other people's packs.
   While the old key is retired, releases carry both signatures: the old key's, for copies that
   haven't learned the new one, and the new key's (`cosign-vX.Y.Z`); a copy that has the new key
   checks only that one, and never trusts the old key again.
-  The first install (`get.sh`) trusts GitHub's HTTPS; running `get.sh` again on an existing
-  copy is an update (`./install.sh update`), with the same check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
+  The first install (`get.sh`) checks the release it installs against the key it carries;
+  running `get.sh` again on an existing copy is an update (`./install.sh update`), with the same
+  check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
   skips the check, for an emergency.
 
 ## What release signing protects against
@@ -156,10 +157,12 @@ Updates install only release tags signed by a key the copy already trusts
   one only from a release signed by a key it trusts.
 
 **Doesn't protect against:**
-- **The first install.** `get.sh` comes from the `main` branch over HTTPS and trusts GitHub for
-  that download. To check it yourself instead: `git clone` the repository, `git -c
-  gpg.format=ssh -c gpg.ssh.allowedSignersFile=dev/release-signers verify-tag vX.Y.Z` (the newest
-  release), check that tag out, then run `./install.sh gui`.
+- **`get.sh` itself, on the first install.** It comes from the `main` branch over HTTPS, and
+  GitHub is trusted for that one small file. It carries the release key and checks the release
+  it installs before running anything in it, so the rest is checked. To check everything
+  yourself instead: `git clone` the repository, `git -c gpg.format=ssh -c
+  gpg.ssh.allowedSignersFile=dev/release-signers verify-tag vX.Y.Z` (the newest release; during
+  a key change, `cosign-vX.Y.Z`), check that tag out, then run `./install.sh gui`.
 - **Someone with the maintainer's GitHub account.** The signing key is a repository secret that
   only the Release workflow uses. Whoever can run that workflow, which runs only from `main` or
   a `release/` branch, can publish a signed release, so signing is as safe as that account.

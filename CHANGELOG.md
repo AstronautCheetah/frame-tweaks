@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Security
+- **A new install checks the release's signature too:** `get.sh` carries the release key and
+  checks the release it downloads before running anything in it, as updates already did; a
+  release that fails is removed again. Only `get.sh` itself is now taken on trust.
 - **Python packages keep their tested versions:** a failed install of PyQt6, openvr or jeepney is
   tried once more. If PyPI has no build of a tested version for your Python (after a SteamOS
   update, say), only that one is replaced, by the newest that has a build, and the warning names
