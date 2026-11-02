@@ -31,6 +31,31 @@ survives_updates: Yes (everything is in your home folder and Homebrew)
 undo: >-
   `./install.sh uninstall dictation` (keeps `~/.config/frame-tweaks/dictate.conf`, your
   dictation history and Homebrew's `whisper-cpp` and `wl-clipboard`)
+settings:
+  file: ~/.config/frame-tweaks/dictate.conf
+  format: shell
+  about: >-
+    In VR, hold this button on a controller to start dictating, and hold it again to stop. A
+    short press does nothing here. The app in front still gets the press too, so if a game
+    reacts to a long hold, pick the other button or turn it off.
+  note: >-
+    Applies within a second.
+  options:
+    - key: DICTATE_BUTTON
+      title: Controller button
+      default: menu
+      choices:
+        - {label: "Menu, on the right controller (the default)", value: menu}
+        - {label: "Y, on the right controller", value: "y"}
+        - {label: "Off", value: "off"}
+    - key: DICTATE_BUTTON_HOLD
+      title: Hold it for
+      default: "0.6"
+      choices:
+        - {label: "0.4 seconds", value: "0.4"}
+        - {label: "0.6 seconds (the default)", value: "0.6"}
+        - {label: "1 second", value: "1"}
+        - {label: "1.5 seconds", value: "1.5"}
 test:
   offline: true
   keeps: [".config/frame-tweaks/dictate.conf"]
@@ -96,7 +121,8 @@ to use it:
 - `DICTATE_BUTTON`: the controller button you hold to dictate: `menu` (right controller, the
   default), `y`, or `off`.
 - `DICTATE_BUTTON_HOLD`: how long to hold it, in seconds (default 0.6). Changes to these two
-  apply within a second, without reinstalling.
+  apply within a second, without reinstalling. They're also in **⚙ Settings** on Dictation's row
+  in the Frame Tweaks window, and in `./install.sh settings dictation`.
 
 ## How it works
 

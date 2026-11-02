@@ -2948,7 +2948,7 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/dictation/README.md packs/core/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
@@ -3399,11 +3399,48 @@ msgid "world windows start curved"
 msgstr ""
 
 #: packs/core/dictation/README.md
+msgid "0.4 seconds"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "0.6 seconds (the default)"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "1 second"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "1.5 seconds"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Applies within a second."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Controller button"
+msgstr ""
+
+#: packs/core/dictation/README.md
 msgid "Dictate"
 msgstr ""
 
 #: packs/core/dictation/README.md
 msgid "Dictation"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Hold it for"
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid ""
+"In VR, hold this button on a controller to start dictating, and hold it again to stop. A short press does nothing here. The app in front still gets the press too, so if a game reacts to a long hold, pick the other button or turn it off."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Menu, on the right controller (the default)"
 msgstr ""
 
 #: packs/core/dictation/README.md
@@ -3419,6 +3456,10 @@ msgstr ""
 #: packs/core/dictation/README.md
 msgid ""
 "Typing with controller lasers on a VR keyboard is slow. The Frame can transcribe speech locally, so you can talk instead, and your voice never leaves the headset."
+msgstr ""
+
+#: packs/core/dictation/README.md
+msgid "Y, on the right controller"
 msgstr ""
 
 #: packs/core/dictation/README.md packs/core/snip/README.md packs/core/adb-scrcpy/README.md packs/core/homebrew/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/integrations/clipboard/README.md

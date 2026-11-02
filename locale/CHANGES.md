@@ -115,6 +115,26 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Then paste the token here. Nothing shows while you paste (in Konsole: Ctrl+Shift+V); press Enter after."
 
 ## 2026-11-02
+- New in `packs/core/dictation/README.md`
+  - now: "0.4 seconds"
+- New in `packs/core/dictation/README.md`
+  - now: "0.6 seconds (the default)"
+- New in `packs/core/dictation/README.md`
+  - now: "1 second"
+- New in `packs/core/dictation/README.md`
+  - now: "1.5 seconds"
+- New in `packs/core/dictation/README.md`
+  - now: "Applies within a second."
+- New in `packs/core/dictation/README.md`
+  - now: "Controller button"
+- New in `packs/core/dictation/README.md`
+  - now: "Hold it for"
+- New in `packs/core/dictation/README.md`
+  - now: "In VR, hold this button on a controller to start dictating, and hold it again to stop. A short press does nothing here. The app in front still gets the press too, so if a game reacts to a long hold, pick the other button or turn it off."
+- New in `packs/core/dictation/README.md`
+  - now: "Menu, on the right controller (the default)"
+- New in `packs/core/dictation/README.md`
+  - now: "Y, on the right controller"
 - New in `packs/core/dictation/install.sh:72`
   - now: "In VR, hold Menu on the right controller to start or stop dictating (DICTATE_BUTTON in %s)."
 - New in `packs/core/dictation/install.sh:74`

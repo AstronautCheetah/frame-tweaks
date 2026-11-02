@@ -167,5 +167,26 @@ class InstallService(unittest.TestCase):
         self.assertIn("systemctl --user disable --now frame-tweaks-dictate-button.service", self.log.read_text())
 
 
+class SettingsPage(unittest.TestCase):
+    """What Dictation's ⚙ Settings writes (./install.sh settings, the window's page) is what
+    dictate-button reads, and the example settings stay commented out around it."""
+
+    def test_the_settings_page_writes_what_dictate_button_reads(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            conf = home / ".config/frame-tweaks/dictate.conf"
+            conf.parent.mkdir(parents=True)
+            conf.write_text((DICTATION / "dictate.conf.example").read_text())
+            env = sandbox_env(home, path=("/usr/bin", "/bin", str(Path(sys.executable).parent)))
+            for args, want in ((["DICTATE_BUTTON=y", "DICTATE_BUTTON_HOLD=1"], ("y", 1.0)),
+                               (["DICTATE_BUTTON=off"], (None, 1.0)),
+                               (["--reset"], ("menu", 0.6))):
+                r = subprocess.run(["bash", str(ROOT / "install.sh"), "settings", "dictation", *args],
+                                   env=env, capture_output=True, text=True, timeout=60, cwd=ROOT)
+                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+                self.assertEqual(db.settings(conf.read_text()), want, args)
+            self.assertIn("#DICTATE_PROMPT=", conf.read_text())                 # (kept)
+
+
 if __name__ == "__main__":
     unittest.main()
