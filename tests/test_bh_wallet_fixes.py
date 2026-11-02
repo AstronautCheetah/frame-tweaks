@@ -69,8 +69,8 @@ def wallet_unlock(home):
     with mock.patch.dict(sys.modules, jeepney_stand_ins()), \
             mock.patch.dict(os.environ, {"FRAME_TWEAKS_PYLIB": str(ROOT / "lib")}):
         wu = load("wallet-unlock", home)
-    wu.SESSION, wu.ASKING, wu.CANCELLED, wu.SCHEDULING = (
-        home / name for name in ("wallet-session.json", "asking.lock", "cancelled", "autolock.lock"))
+    wu.SESSION, wu.ASKING, wu.CANCELLED, wu.SCHEDULING, wu.PASSWORD = (
+        home / name for name in ("wallet-session.json", "asking.lock", "cancelled", "autolock.lock", "password.json"))
     return wu
 
 
@@ -644,8 +644,88 @@ class FromTheBugHunt(Home):
         wu.SALT.write_bytes(b"0" * 56)
         locked = [True]
         with mock.patch.multiple(wu, ensure_ksecretd=lambda conn: None, ksecretd_open=lambda conn: False,
-                                 is_locked=lambda conn: locked[0], ask_password=lambda retry: locked.__setitem__(0, False)):
+                                 is_locked=lambda conn: locked[0], ask_password=lambda retry: locked.__setitem__(0, False),
+                                 open_without_password=lambda conn: False):      # (a wallet with a password)
             self.assertTrue(wu.unlock(None))         # (cancelled, but the unlock before it landed)
+
+
+class NoPassword(Home):
+    """SteamOS's stock wallet opens without a password. Asking for one then can't work (the Wallet
+    apps page's Unlock never did), so wallet-unlock tries without first, and --info says whether
+    the wallet has a password, found out while it's locked and kept for that wallet file."""
+    def wallet(self, stock):
+        """wallet-unlock with a wallet file and salt, and a stand-in ksecretd: pamOpen opens the
+        wallet when it's the stock one (any key: ours is the empty password's)."""
+        wu = wallet_unlock(self.home)
+        wu.SALT, wu.KWL = self.home / "kdewallet.salt", self.home / "kdewallet.kwl"
+        wu.SALT.write_bytes(b"0" * 56)
+        wu.KWL.write_bytes(b"KWALLET")
+        state = {"open": False, "pam": 0, "locked_again": 0, "told": []}
+        conn = types.SimpleNamespace(send=lambda msg: (state.__setitem__("pam", state["pam"] + 1),
+                                                       stock and state.__setitem__("open", True)))
+
+        def lock(conn):
+            state["open"] = False
+            state["locked_again"] += 1
+        patches = mock.patch.multiple(wu, ensure_ksecretd=lambda conn: None, ksecretd_open=lambda conn: state["open"],
+                                      lock=lock, notify=lambda text: state["told"].append(text),
+                                      ask_password=lambda retry: self.fail("asked for a password"))
+        patches.start()
+        self.addCleanup(patches.stop)
+        sleep = mock.patch.object(wu.time, "sleep", lambda s: None)      # (the poll for pamOpen's result)
+        sleep.start()
+        self.addCleanup(sleep.stop)
+        return wu, conn, state
+
+    def test_the_stock_wallet_is_found_out_while_locked_and_locked_again(self):
+        wu, conn, state = self.wallet(stock=True)
+        self.assertIs(wu.password_set(conn), False)
+        self.assertEqual((state["pam"], state["open"], state["locked_again"]), (1, False, 1))
+        self.assertIs(wu.password_set(conn), False)              # (kept: not tried again for this file)
+        self.assertEqual(state["pam"], 1)
+        wu.KWL.write_bytes(b"KWALLET with a new password")      # (Change Password rewrites the file)
+        self.assertIs(wu.password_set(conn), False)              # (the stand-in still opens: tried again)
+        self.assertEqual(state["pam"], 2)
+
+    def test_a_wallet_with_a_password_keeps_it(self):
+        wu, conn, state = self.wallet(stock=False)
+        self.assertIs(wu.password_set(conn), True)
+        self.assertEqual((state["pam"], state["locked_again"]), (1, 0))
+        self.assertIs(wu.password_set(conn), True)
+        self.assertEqual(state["pam"], 1)
+
+    def test_an_open_wallet_isnt_tried(self):
+        wu, conn, state = self.wallet(stock=True)
+        state["open"] = True
+        self.assertIsNone(wu.password_set(conn))                # (nothing known yet; pamOpen would be ignored)
+        self.assertEqual(state["pam"], 0)
+        state["open"] = False
+        wu.password_set(conn)                                   # (locked: found out)
+        state["open"] = True
+        self.assertIs(wu.password_set(conn), False)             # (open again: the answer kept)
+        self.assertEqual(state["pam"], 1)
+
+    def test_no_wallet_file_is_unknown(self):
+        wu, conn, state = self.wallet(stock=True)
+        wu.KWL.unlink()
+        self.assertIsNone(wu.password_set(conn))
+        self.assertEqual(state["pam"], 0)
+
+    def test_unlock_opens_the_stock_wallet_without_a_dialog(self):
+        wu, conn, state = self.wallet(stock=True)
+        self.assertTrue(wu.unlock(conn))
+        self.assertEqual((state["pam"], state["open"]), (1, True))
+        self.assertIn("no password", state["told"][0])
+        self.assertIs(wu.password_set(conn, probe=False), False)
+
+    def test_unlock_asks_once_it_knows_there_is_a_password(self):
+        wu, conn, state = self.wallet(stock=False)
+        asked = []
+        with mock.patch.object(wu, "ask_password", lambda retry: asked.append(retry) or None):
+            self.assertFalse(wu.unlock(conn))                   # (tried without first, then asked: cancelled)
+            self.assertEqual((state["pam"], asked), (1, [False]))
+            self.assertFalse(wu.unlock(conn))                   # (known now: straight to the dialog)
+            self.assertEqual((state["pam"], asked), (1, [False, False]))
 
 
 class FrontEndHandle(Home):

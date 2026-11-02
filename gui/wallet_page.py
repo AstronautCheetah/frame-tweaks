@@ -34,6 +34,7 @@ FLATPAK_APPS = [Path.home() / ".local/share/flatpak/exports/share/applications",
 FLATPAK_ROOTS = [Path.home() / ".local/share/flatpak/app", Path("/var/lib/flatpak/app")]
 SYSTEM_APPS = [Path("/usr/local/share/applications"), Path("/usr/share/applications")]
 WALLET_MARK = "X-FrameTweaks-Wallet=true"
+KWALLETMANAGER = "org.kde.kwalletmanager"        # (its menu entry: the Flatpak the wallet tweak installs)
 # Menu entries that aren't apps with secrets: Steam game shortcuts, SteamVR's link handler, the
 # wallet's own Lock entry.
 NOT_WALLET_APP = re.compile(r"steam://|/vrurlhandler\b|wallet-unlock")
@@ -66,6 +67,15 @@ def desktop_entry(path):
             k, v = line.split("=", 1)
             keys.setdefault(k.strip(), v.strip())
     return keys
+
+
+def kwalletmanager_entry():
+    """KWalletManager's menu entry (the one wallet-launcher wrote, else the Flatpak's), or None."""
+    for d in [LAUNCHERS, *FLATPAK_APPS, *SYSTEM_APPS]:
+        f = d / f"{KWALLETMANAGER}.desktop"
+        if f.exists():
+            return f
+    return None
 
 
 def protected_apps():
@@ -145,14 +155,25 @@ def set_lock_hours(hours):
     ftconf.set_shell(LOCK_CONF, {"WALLET_LOCK_HOURS": f"{hours:g}"})
 
 
+def no_password_text():
+    """The warning atop Wallet apps for SteamOS's stock wallet, which has no password yet."""
+    return ("<b style='color:#e0b33a'>" + _("⚠ The wallet has no password yet.") + "</b> "
+            + _("It opens without one, so it protects nothing, and there's no password for Unlock or "
+                "Password first to ask. Set one in KWalletManager: kdewallet → Change Password."))
+
+
 def wallet_state_text(info, now):
     """The status line atop Wallet apps, from wallet-unlock --info."""
     if info is None:
         return "<span style='color:#9aa6b2'>" + _("Wallet state unknown (is the Wallet tweak installed?)") + "</span>"
     if info["state"] == "locked":
+        if info.get("password") is False:
+            return no_password_text() + " " + _("It's closed now; apps open it without asking.")
         return ("<b style='color:#5cc77a'>" + _("🔒 Wallet locked.") + "</b> "
                 + _("Protected apps ask for the password before they open."))
     bold = "<b style='color:#e0b33a'>" + _("🔓 Wallet open") + "</b>"
+    if info.get("password") is False:
+        bold = no_password_text() + " " + bold
     if info.get("unlocked_at"):
         text = _("{wallet_open} for {time}.").format(wallet_open=bold, time=span_text(now - info["unlocked_at"]))
     else:
@@ -291,6 +312,13 @@ class WalletApps(QWidget):
         self.wallet_toggle = QPushButton()
         self.wallet_toggle.clicked.connect(self.toggle_wallet)
         status_row.addWidget(self.wallet_toggle)
+        # (Shown while the wallet has no password: SteamOS's stock wallet. KWalletManager is where
+        # one is set; the wallet tweak installs it.)
+        self.set_password = QPushButton(_("🔑 Set password…"))
+        self.set_password.setToolTip(_("Opens KWalletManager: kdewallet → Change Password"))
+        self.set_password.clicked.connect(self.open_kwalletmanager)
+        self.set_password.setVisible(False)
+        status_row.addWidget(self.set_password)
         lay.addLayout(status_row)
         # How long an unlock lasts (wallet.conf; wallet-unlock reads it). Buttons, not a drop-down:
         # a pop-up list opens as a window of its own in VR.
@@ -347,16 +375,31 @@ class WalletApps(QWidget):
         except (OSError, ValueError, subprocess.TimeoutExpired):
             info = None
         self.wallet_locked = None if info is None else info["state"] == "locked"
+        self.no_password = info is not None and info.get("password") is False
         self.wallet_state.setText(wallet_state_text(info, time.time()))
         self.wallet_toggle.setVisible(info is not None)
+        self.set_password.setVisible(self.no_password and kwalletmanager_entry() is not None)
         on = autolock_on() if info is None else info.get("autolock", True)
         self.autolock.setChecked(on)
         self.extend.setVisible(info is not None and not self.wallet_locked and on)
         self.extend.setToolTip(_("Start the {time} countdown to the auto-lock again, from now").format(
             time=timer_text(lock_hours() * 60)))
-        self.wallet_toggle.setText(_("🔓 Unlock…") if self.wallet_locked else _("🔒 Lock now"))
-        self.wallet_toggle.setToolTip(_("Asks for the wallet password") if self.wallet_locked else
-                                      _("Lock the wallet now: protected apps need the password again"))
+        if self.wallet_locked and self.no_password:
+            self.wallet_toggle.setText(_("🔓 Open"))
+            self.wallet_toggle.setToolTip(_("Opens the wallet; no password is set, so none is asked"))
+        else:
+            self.wallet_toggle.setText(_("🔓 Unlock…") if self.wallet_locked else _("🔒 Lock now"))
+            self.wallet_toggle.setToolTip(_("Asks for the wallet password") if self.wallet_locked else
+                                          _("Lock the wallet now: protected apps need the password again"))
+
+    def open_kwalletmanager(self):
+        """Start KWalletManager from its menu entry (the one wallet-launcher wrote, so it uses the
+        shared wallet), for Change Password."""
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: gtk-launch", KWALLETMANAGER)
+            return
+        if not QProcess.startDetached("gtk-launch", [KWALLETMANAGER])[0]:
+            self.wallet_state.setText(_("Couldn't start KWalletManager; open it from the menu, then kdewallet → Change Password."))
 
     def wallet_unlock(self, args, then):
         """wallet-unlock with args, in the background; then() when it's done, if this page is still
@@ -406,7 +449,8 @@ class WalletApps(QWidget):
         if self.wallet_locked:
             # The password dialog opens on this display; the window stays usable meanwhile.
             self.wallet_unlock([], self.show_wallet_state)
-            self.wallet_state.setText(_("Waiting for the wallet password (look for the dialog)…"))
+            if not self.no_password:
+                self.wallet_state.setText(_("Waiting for the wallet password (look for the dialog)…"))
         else:
             self.wallet_unlock(["--lock"], self.show_wallet_state)   # (not waited for: the window stays usable)
 

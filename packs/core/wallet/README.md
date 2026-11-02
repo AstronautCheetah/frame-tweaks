@@ -65,7 +65,9 @@ password. SteamOS has no other wallet window or settings page.
 
 **Then set a wallet password.** SteamOS gives every Frame the same stock wallet, and it opens
 **without a password**. Until you set one, what apps "store in the wallet" is only hidden, not
-protected. Open KWalletManager → *kdewallet* → *Change Password*.
+protected, and there's no password for an unlock to ask. The Wallet apps page says so while
+that's the case (**🔑 Set password…** there opens KWalletManager), and so does `./install.sh
+status`. Open KWalletManager → *kdewallet* → *Change Password*.
 
 These apps are set up for you, if installed: KWalletManager, Signal and Claude Desktop. They
 use the shared wallet and ask for its password first.

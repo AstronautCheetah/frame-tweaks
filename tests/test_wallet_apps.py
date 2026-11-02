@@ -139,6 +139,13 @@ class Timers(unittest.TestCase):
         self.assertIn("4 h unused", t)
         self.assertIn("No automatic lock", wp.wallet_state_text({"state": "unlocked"}, now))
         self.assertIn("unknown", wp.wallet_state_text(None, now))
+        # SteamOS's stock wallet, without a password: the warning, locked or open
+        self.assertIn("no password", wp.wallet_state_text({"state": "locked", "password": False}, now))
+        self.assertNotIn("Wallet locked", wp.wallet_state_text({"state": "locked", "password": False}, now))
+        t = wp.wallet_state_text({"state": "unlocked", "password": False, "unlocked_at": now - 60}, now)
+        self.assertIn("no password", t)
+        self.assertIn("Wallet open", t)
+        self.assertNotIn("no password", wp.wallet_state_text({"state": "locked", "password": None}, now))
 
     def test_settings_files(self):
         t = Path(tempfile.mkdtemp())
@@ -228,6 +235,49 @@ class LockHours(unittest.TestCase):
             wp.WalletApps.step_hours(mock.Mock(), +1)         # the + beside the auto-lock time
         self.assertFalse((d / "wallet.conf").exists())
         self.assertIn("would save: WALLET_LOCK_HOURS=6", out.getvalue())
+
+
+class NoPassword(unittest.TestCase):
+    """--info saying the wallet has no password (SteamOS's stock wallet): the page warns, Unlock
+    becomes Open (no dialog to wait for) and a Set password button starts KWalletManager."""
+    def test_the_page_says_so_and_offers_kwalletmanager(self):
+        from PyQt6.QtWidgets import QApplication, QWidget
+        app = QApplication.instance() or QApplication([])   # noqa: F841  (kept alive for the page)
+        t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
+        unlock = t / "wallet-unlock"
+        unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked", "password": false}\'; exit; }\n')
+        unlock.chmod(0o755)
+        (t / "apps").mkdir()
+        (t / "apps/org.kde.kwalletmanager.desktop").write_text("[Desktop Entry]\nName=KWalletManager\nExec=true\n")
+
+        class Window(QWidget):
+            def go_back(self):
+                pass
+        with mock.patch.multiple(wp, WALLET_UNLOCK=unlock, APP_TIMERS=t / "none", LAUNCHERS=t / "apps",
+                                 FLATPAK_APPS=[], SYSTEM_APPS=[], FLATPAK_ROOTS=[], LOCK_CONF=t / "wallet.conf"), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}):
+            page = wp.WalletApps(Window())
+            self.assertIn("no password", page.wallet_state.text())
+            self.assertFalse(page.set_password.isHidden())
+            self.assertIn("Open", page.wallet_toggle.text())
+            self.assertNotIn("…", page.wallet_toggle.text())
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                page.open_kwalletmanager()
+                page.toggle_wallet()
+            self.assertIn("would run: gtk-launch org.kde.kwalletmanager", out.getvalue())
+            self.assertIn("would run: wallet-unlock", out.getvalue())
+            self.assertNotIn("Waiting for the wallet password", page.wallet_state.text())
+            # with a password, or unknown: no button
+            unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked", "password": true}\'; exit; }\n')
+            page.show_wallet_state()
+            self.assertTrue(page.set_password.isHidden())
+            self.assertIn("Unlock", page.wallet_toggle.text())
+            (t / "apps/org.kde.kwalletmanager.desktop").unlink()      # (no KWalletManager: no button to start it)
+            unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked", "password": false}\'; exit; }\n')
+            page.show_wallet_state()
+            self.assertTrue(page.set_password.isHidden())
+            self.assertIn("no password", page.wallet_state.text())
 
 
 class Background(unittest.TestCase):

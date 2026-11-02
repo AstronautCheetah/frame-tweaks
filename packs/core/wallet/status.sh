@@ -12,6 +12,9 @@ autolock=$(sed -n 's/^WALLET_AUTOLOCK=//p' "$HOME/.config/frame-tweaks/wallet.co
 if [ "$state" = unlocked ] && [ "$autolock" != 0 ] && ! sysctl_user is-active --quiet wallet-autolock.timer; then
     status_warn "$(t 'wallet unlocked with no auto-lock scheduled (run: %s)' "wallet-unlock --schedule-lock")"
 fi
+# (--info tries the wallet without a password while it's locked, once per wallet file: SteamOS's
+# stock wallet has none, so until one is set nothing in it is protected.)
+"$BIN/wallet-unlock" --info 2>/dev/null | grep -q '"password": false' && status_warn "$(t 'the wallet has no password: set one in KWalletManager (kdewallet → Change Password)')"
 case $state in
     locked) status_ok "$(t 'wallet locked; %s app launcher(s) routed/gated' "$n")" ;;
     unlocked) status_ok "$(t 'wallet unlocked; %s app launcher(s) routed/gated' "$n")" ;;

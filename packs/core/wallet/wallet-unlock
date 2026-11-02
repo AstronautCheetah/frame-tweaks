@@ -10,7 +10,8 @@ pops up as a floating VR window on the Steam session's display.
   wallet-unlock --schedule-lock     start the auto-lock countdown again (Extend timer)
   wallet-unlock --autolock on|off   whether it locks itself at all (timer and idle close)
   wallet-unlock --status   print locked / unlocked
-  wallet-unlock --info     JSON: state, when it was unlocked, when it locks (installer window)
+  wallet-unlock --info     JSON: state, when it was unlocked, when it locks, whether it has a
+                           password (installer window)
   wallet-unlock --watch    run by wallet-lock-sync.service:
                            - when the wallet is closed (KWalletManager's Close, idle timeout),
                              really lock it (kwalletd6's close leaves ksecretd unlocked);
@@ -64,6 +65,10 @@ KSECRETD = DBusAddress("/ksecretd", bus_name="org.kde.ksecretd", interface="org.
 KWALLETD = DBusAddress("/modules/kwalletd6", bus_name="org.kde.kwalletd6", interface="org.kde.KWallet")
 # When the wallet was unlocked and when the auto-lock fires (cleared by locking, and by a reboot).
 SESSION = Path(f"/run/user/{os.getuid()}/wallet-session.json")
+# Whether the wallet has a password (SteamOS's stock wallet has none), as last tried, for the
+# wallet file as it was then (password_set).
+PASSWORD = Path(f"/run/user/{os.getuid()}/wallet-password.json")
+KWL = SALT.with_suffix(".kwl")
 
 
 def bus():
@@ -265,6 +270,63 @@ def prompt_pending():
     return bool(ksecretd_prompts())
 
 
+def wallet_file_id():
+    """The wallet file as it is now (Change Password rewrites it; so does every save), or None
+    without one."""
+    try:
+        st = KWL.stat()
+    except OSError:
+        return None
+    return f"{st.st_mtime_ns}:{st.st_size}"
+
+
+def open_without_password(conn):
+    """Try the locked wallet with no password, as kwalletd6 itself does first: True when that
+    opened it (SteamOS's stock wallet). Nothing is shown, by this or by ksecretd."""
+    try:
+        salt = SALT.read_bytes()
+    except OSError:
+        return False
+    conn.send(new_method_call(KSECRETD, "pamOpen", "sayi",
+                              (WALLET, hashlib.pbkdf2_hmac("sha512", b"", salt, 50000, 56), 0)))
+    for _poll in range(20):          # (no reply to wait for: poll, a second at most)
+        time.sleep(0.05)
+        if ksecretd_open(conn):
+            return True
+    return False
+
+
+def remember_password(is_set):
+    """Keep what the last try found, for the wallet file as it is now (until a reboot)."""
+    try:
+        PASSWORD.write_text(json.dumps({"kwl": wallet_file_id(), "set": is_set}))
+    except OSError:
+        pass
+
+
+def password_set(conn, probe=True):
+    """Whether the wallet needs a password: False for SteamOS's stock wallet, which opens without
+    one, so it protects nothing and a dialog asking for its password can't be answered (the
+    Wallet apps page says so instead); None when there's no wallet, or no way to tell yet. Found
+    out by trying, while the wallet is locked (an open one ignores pamOpen), and locking it again;
+    the answer is kept for the wallet file as it was, so a new one (Change Password rewrites it)
+    is tried at the next lock. probe=False only reads what's kept."""
+    file_id = wallet_file_id()
+    if file_id is None:
+        return None
+    try:
+        known = json.loads(PASSWORD.read_text())
+    except (OSError, ValueError):
+        known = {}
+    if known.get("kwl") == file_id or not probe or not is_locked(conn):
+        return known.get("set")      # (open: the last answer, if any; an app saving rewrites the file too)
+    opened = open_without_password(conn)
+    if opened:
+        lock(conn)
+    remember_password(not opened)
+    return not opened
+
+
 def ask_password(retry):
     text = (_("Wrong password (is Caps Lock on?). Try again:") if retry
             else _("Password for the KDE wallet:"))
@@ -284,6 +346,15 @@ def unlock(conn):
                         _("There's no KDE wallet here to unlock with a password yet (kdewallet, made at "
                           "login). KWalletManager can make one.")])
         return False
+    if password_set(conn, probe=False) is not True:
+        # SteamOS's stock wallet opens without a password: there's none to ask for (the dialog
+        # could only be answered with an empty one, which nobody guesses).
+        if open_without_password(conn):
+            remember_password(False)
+            notify(_("The wallet has no password yet, so it protects nothing. "
+                     "Set one in KWalletManager: kdewallet → Change Password."))
+            return True
+        remember_password(True)
     for attempt in range(3):
         pw = ask_password(attempt > 0)
         if pw is None:
@@ -646,7 +717,8 @@ def main():
                 s["locks"] = timer_lock_time()
             print(json.dumps({"state": "locked" if locked else "unlocked", "unlocked_at": s.get("unlocked"),
                               "locks_at": s.get("locks"), "idle_close_minutes": idle_close_minutes(),
-                              "lock_hours": float(lock_hours()), "autolock": autolock_on()}))
+                              "lock_hours": float(lock_hours()), "autolock": autolock_on(),
+                              "password": password_set(conn)}))
         elif arg == "--lock":
             lock(conn)
             if not is_locked(conn):
