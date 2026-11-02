@@ -2055,12 +2055,13 @@ class Window(QWidget):
         comps = {c["id"]: c for c in self.rows}
         dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
         title = lambda cid: html.escape(comps[cid]["title"] if cid in comps else cid)   # noqa: E731  (a one-line helper for this method only)
+
+        def sudo(cid):
+            note = sft.sudo_note(comps[cid]) if cid in comps else ""
+            return " " + dim % html.escape(_("(asks for your sudo password: %s)") % note) if note else ""
         parts = []
         if add:
-            lines = []
-            for cid in add:
-                note = sft.sudo_note(comps[cid]) if cid in comps else ""
-                lines.append(title(cid) + (" " + dim % html.escape(_("(asks for your sudo password: %s)") % note) if note else ""))
+            lines = [title(cid) + sudo(cid) for cid in add]
             # (./install.sh installs what they depend on first, from any pack in use)
             installed = {cid for cid, st in self.state.items() if st[0] not in GONE}
             needed, queue = {}, list(add)
@@ -2070,7 +2071,7 @@ class Window(QWidget):
                         needed[d] = next(c["id"] for c in comps.values() if d in c["deps"] and (c["id"] in add or c["id"] in needed))
                         queue.append(d)
             for d, by in needed.items():
-                lines.append(title(d) + " " + dim % html.escape(_("(needed by %s)") % comps[by]["title"]))
+                lines.append(title(d) + " " + dim % html.escape(_("(needed by %s)") % comps[by]["title"]) + sudo(d))
             parts.append("<b>" + _("Install:") + "</b><br>" + "<br>".join("• " + line for line in lines))
         if remove:
             parts.append("<b>" + _("Remove:") + "</b><br>" + "<br>".join("• " + title(cid) for cid in remove)
