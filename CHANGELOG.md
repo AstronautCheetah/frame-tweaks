@@ -66,6 +66,13 @@
   link in them, and refuses anything else. The same goes for the picture Copy hands to the
   desktop's clipboard.
 
+### Changed
+- **Apply changes asks first, with the list.** Before anything runs, the confirm page says what
+  will be installed, by name (with the tweaks those need that aren't installed yet, and which
+  ask for the sudo password), and what will be removed, with the settings note. **Apply** goes
+  ahead, **Cancel** goes back to the list with everything still ticked as it was. It used to ask
+  only when something was being removed, and listed ids.
+
 ### Fixed
 - **Wallet apps says when the wallet has no password yet, instead of an Unlock that can't work.**
   SteamOS's stock wallet opens without a password, so the page's 🔓 Unlock… (and Password first
@@ -87,11 +94,29 @@
   `./install.sh status` warns while a terminal's gh isn't the wrapper. Re-run
   `./install.sh install wallet` to fix the order and move a plain-text token into the wallet.
 
+- **The Mouse cursor fix goes by itself once SteamOS shows the pointer.** From gamescope 3.16.30
+  (SteamOS 0.5.6 and the beta) the fix adds a second pointer, a black X, and switching to the beta
+  with it installed left you with that until you removed it by hand (its status said to). Now an
+  installed tweak this Frame doesn't need any more is removed by itself when its manifest asks for
+  that (`when_not_needed: uninstall`, docs/mods.md): by the Frame Tweaks window as it opens, with
+  a notice, and at each login by a user service (`./install.sh tidy`), which installs and updates
+  set up. Its settings are kept. The pointer is one again after the reboot that follows.
+- **NordVPN says how to get logged in.** Before `nordvpn-wg setup` has run, the tray's menu item
+  copies that command for a terminal and says what to do with it, and any other `nordvpn-wg`
+  command says to run it first with the command on your clipboard. The setup's token prompt now
+  says where an access token is made (Nord Account → NordVPN → Manual setup → Generate new token),
+  puts that page's address on your clipboard for the browser, and says how to paste the hidden
+  token. It used to say only "Run 'nordvpn-wg setup' first." and "NordVPN access token (input
+  hidden):".
 ### For contributors
 - **`dev/fetch-upstream-readmes.py` fetches only over HTTPS from GitHub:** a picture in an upstream
   README at a `file:` address (a file of yours, such as gh's token) or on another host was read and
   saved into `upstream/`, ready to commit. Now it stays a link, with a warning, and redirects away
   from GitHub are refused.
+- **`dev/backup.sh`** keeps snapshots of a checkout on another drive (an SD card): everything in the
+  folder, `.git` and what git ignores included, but not what can be made again (`__pycache__`,
+  `.venv`, `.cache`, `tmp`); each snapshot hardlinked against the one before, the newest 48 kept;
+  `--timer` makes one every hour.
 
 ## 0.6.23 (2026-10-27)
 
