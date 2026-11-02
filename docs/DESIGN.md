@@ -48,6 +48,7 @@ The design follows from what the Frame is:
 | [`install.sh`](../install.sh) | The commands: install, uninstall, reinstall, status, update, hold, check-system, debug-info, list, and so on. It decides what runs in which order, and takes the lock and the log. |
 | [`lib/common.sh`](../lib/common.sh) | Helpers that tweak scripts source: messages, `fetch_pinned`, `alarm_fetch`, `pip_pinned`, backups, `status_ok`/`status_missing`/`status_warn`, dashboard-patch helpers. [mods.md](mods.md) lists what a pack can rely on. |
 | [`lib/sft.py`](../lib/sft.py) | Loads the packs and their tweaks, and holds everything the installer window and `install.sh` share: the tweak list (`registry`), hidden rows and groups, the Run label, and tweak settings. Both front ends call it, so they can't drift apart. |
+| [`lib/installer.py`](../lib/installer.py) | `install.sh`'s pure logic: dependency order, the order uninstalls go in, ID checks, which installed tweaks need one being removed. It is given the tweak list on stdin and reads nothing else. |
 | [`lib/manifest.py`](../lib/manifest.py) | Reads (and writes) the YAML front matter of manifests, with no dependencies. |
 | [`gui/`](../gui/) | The installer window (PyQt6): the list, details pages, Packs and Wallet apps pages. |
 | [`packs/core/<id>/`](../packs/core/) | One folder per tweak: `README.md` (its manifest, then its documentation), `install.sh`, `uninstall.sh`, `status.sh` and optional scripts. `pack.md` sets the order and categories. |
@@ -418,6 +419,43 @@ What isn't tested automatically:
 - Only official and example tweaks run in CI; user packs are checked only by `mods check`.
 - Everything has been tested on one Frame and one SteamOS and SteamVR build (README,
   *Tested on*).
+
+## Moving the installer to Python
+
+`install.sh` and `lib/common.sh` began as bash and grew to some 1,700 lines. Several bugs came
+from bash itself rather than from the logic: a function that always returned success, a
+variable named like a nearby array (ShellCheck SC2178), unquoted paths in generated systemd
+units. The installer is moving to Python in stages, each one with the same output, texts and
+exit codes, so the window, the tests and users' habits don't notice.
+
+1. **Done: pure logic.** [`lib/installer.py`](../lib/installer.py) computes dependency order
+   (`with_deps`, `_deps`), the order `uninstall all` and `uninstall-self` remove in, the first
+   unknown ID (`check_ids`), and the tweaks that depend on one being removed. `install.sh` passes
+   it the tweak list it already read and acts on the answer; the "is it installed?" half of the
+   uninstall check stays in bash, because it runs `status.sh`. `lib/sft.py deps` uses the same
+   function. [`tests/test_installer.py`](../tests/test_installer.py) checks it against the bash
+   it replaced, on random graphs.
+2. **Next: deciding what a status means.** `status_of`'s rule (a `status.sh` that stops without
+   saying `missing` or `restart` isn't "not installed" for a tweak with a version record; an
+   exit code over 2 is "status check failed") is pure once the script has run, and the window
+   has its own copy. Bash keeps running `status.sh`, as now; one Python function takes the exit
+   code, the first word, the last line of stderr and the record, and both front ends use it.
+   Running the scripts themselves from Python waits for stage 4.
+3. **Then: plans.** What `install`, `uninstall`, `tidy` and `update` will do, worked out before
+   anything runs: the order, which tweaks are held, not needed, already installed, or need a
+   sudo password the user doesn't have. Python returns the plan; bash carries it out line by
+   line. Generated files (systemd units, desktop entries) move with it, written by Python so
+   paths are quoted in one place.
+4. **Last: orchestration.** The lock, the logs, `update`'s two stages and the sudo handling, once
+   stages 1 to 3 have left `install.sh` a thin loop. Each piece moves only with a test that
+   shows the old and new behaviour match; the lock's fd 8 must still be closed for every tweak
+   script and for `git`.
+
+**Staying in bash for good:** each tweak's `install.sh`, `uninstall.sh`, `status.sh` and
+optional scripts, and the helpers in `lib/common.sh` they source (helpers only `install.sh`
+uses move with stage 4). Packs are written against that
+interface ([mods.md](mods.md)), and a tweak is mostly shell commands anyway. `get.sh`, the
+bootstrap, stays shell too: it runs before anything else is on the machine.
 
 ## Known limitations
 

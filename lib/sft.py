@@ -43,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manifest  # noqa: E402
 import ftconf  # noqa: E402
 import i18n  # noqa: E402
+import installer  # noqa: E402
 from i18n import _, ngettext  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
@@ -1308,17 +1309,11 @@ def main(argv):
             set_uninstall_settings(args[0])
         print(uninstall_settings())
     elif cmd == "deps" and len(args) == 1:      # what ID needs, transitively, dependencies first
-        byid, out, seen = {c["id"]: c for c in components()}, [], set()
-        if args[0] not in byid:
+        graph = {c["id"]: c["deps"] for c in components()}
+        if args[0] not in graph:
             sys.exit(_("unknown component: %s") % args[0])
-        def visit(i):                           # (as install.sh's with_deps: a cycle stops where it began)
-            seen.add(i)
-            for d in byid[i]["deps"]:
-                if d not in seen:
-                    visit(d)
-                    out.append(d)
-        visit(args[0])
-        print(" ".join(out))
+        # (the same order ./install.sh installs in; it always ends with the ID itself)
+        print(" ".join(installer.with_deps(graph, args)[:-1]))
     elif cmd == "test-list":                    # dev/test-tweaks.sh's default set
         import shutil
         print(" ".join(c["id"] for c in components() if c["test"].get("offline")

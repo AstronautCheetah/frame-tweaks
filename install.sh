@@ -246,31 +246,25 @@ installed_ids() {           # every tweak that is installed (or half: status 0 o
     return 0
 }
 
-# with_deps <id>...: the ids plus their dependencies, dependencies first, no duplicates
-with_deps() {
-    local -A seen=(); local out=()
-    visit() {
-        local id=$1 d
-        [[ -n ${seen[$id]:-} ]] && return
-        seen[$id]=1
-        for d in ${DEPS[$id]}; do visit "$d"; done
-        out+=("$id")
-    }
+# Dependency order and ID checks are lib/installer.py's, from the tweaks as read above
+# (deps_graph). Its callers stop when it fails (exit 1, its traceback said): with nothing to go by,
+# an install would do nothing and say Done, and an uninstall would skip its "needed by" check.
+deps_graph() {
     local id
-    for id in "$@"; do visit "$id"; done
-    [[ ${#out[@]} -eq 0 ]] || printf '%s\n' "${out[@]}"      # (none: no empty line, which isn't an id)
+    for id in "${IDS[@]}"; do printf '%s\t%s\n' "$id" "${DEPS[$id]}"; done
 }
+installer_py() { deps_graph | python3 lib/installer.py "$@"; }
+# with_deps <id>...: the ids plus their dependencies, dependencies first, no duplicates
+with_deps() { installer_py with-deps "$@"; }
 
 check_ids() {
-    local id
-    for id in "$@"; do
-        is_component "$id" && continue
-        local now
-        if now=$(python3 lib/sft.py renamed "$id" 2>/dev/null); then
-            echo "$(t '%s is now called %s' "$id" "$now")" >&2; exit 1
-        fi
-        echo "unknown component: $id (see ./install.sh list; a pack that isn't trusted: ./install.sh mods)" >&2; exit 1
-    done
+    local id now
+    id=$(installer_py first-unknown "$@")
+    case $? in 0) return 0 ;; 3) ;; *) exit 1 ;; esac
+    if now=$(python3 lib/sft.py renamed "$id" 2>/dev/null); then
+        echo "$(t '%s is now called %s' "$id" "$now")" >&2; exit 1
+    fi
+    echo "unknown component: $id (see ./install.sh list; a pack that isn't trusted: ./install.sh mods)" >&2; exit 1
 }
 
 # not_needed ID: its optional needed.sh says this Frame doesn't need it (SteamOS does it itself,
@@ -327,11 +321,12 @@ cmd_install() {
     ensure_menu_entry
     [[ $1 == all ]] && set -- "${IDS[@]}"
     check_ids "$@"
-    local id why failed=()
+    local id why failed=() order
+    order=$(with_deps "$@") || exit 1
     # Each tweak's script starts without a sudo password that sudo remembers (typed for the tweak
     # before it, or before this run): it asks for its own (lib/common.sh drop_sudo).
     drop_sudo
-    for id in $(with_deps "$@"); do
+    for id in $order; do
         bold "── $id: ${TITLE[$id]}"
         if [[ ! -f $STATE/installed/$id && " ${WAS_INSTALLED[*]} " != *" $id "* ]] && why=$(not_needed "$id"); then
             echo "$(t 'Not needed on this Frame, so not installed: %s' "$why")"; echo; continue
@@ -360,26 +355,26 @@ cmd_uninstall() {
     case ${1:-} in --keep-settings) settings=keep; shift ;; --remove-settings) settings=remove; shift ;; esac
     [[ $# -eq 0 ]] && { echo "$(t 'uninstall what?')" >&2; exit 1; }
     if [[ $1 == all ]]; then           # everything installed, each tweak before what it depends on
-        local i all=() order
-        mapfile -t order < <(with_deps "${IDS[@]}")
-        for (( i=${#order[@]}-1; i>=0; i-- )); do
-            status_of "${order[i]}" >/dev/null; [[ $? -ne 1 ]] && all+=("${order[i]}")
+        local id all=() order
+        order=$(installer_py removal-order) || exit 1
+        for id in $order; do
+            status_of "$id" >/dev/null; [[ $? -ne 1 ]] && all+=("$id")
         done
         [[ ${#all[@]} -eq 0 ]] && { t 'Nothing installed.'; echo; return; }
         set -- "${all[@]}"
     fi
     check_ids "$@"
-    local id other d
-    for id in "$@"; do
-        # Refuse to remove something an installed component depends on (installed: status 0, or 2
-        # with a warning).
-        for other in "${IDS[@]}"; do
-            for d in ${DEPS[$other]}; do
-                if [[ $d == "$id" && " $* " != *" $other "* ]] && is_installed "$other"; then
-                    echo "$(t '%s is needed by %s: uninstall %s too, or keep %s' "$id" "$other" "$other" "$id")" >&2; exit 1
-                fi
-            done
-        done
+    local id other pair found pairs=()
+    # Refuse to remove something an installed component depends on (installed: status 0, or 2
+    # with a warning). (The pairs are read whole first: status scripts get this script's stdin,
+    # as they always did, not the list.)
+    found=$(installer_py needed-by "$@") || exit 1
+    [[ -z $found ]] || mapfile -t pairs <<<"$found"
+    for pair in "${pairs[@]}"; do
+        IFS=$'\t' read -r id other <<<"$pair"
+        if is_installed "$other"; then
+            echo "$(t '%s is needed by %s: uninstall %s too, or keep %s' "$id" "$other" "$other" "$id")" >&2; exit 1
+        fi
     done
     local failed=()
     drop_sudo                          # (as cmd_install: each script asks for its own)
@@ -494,11 +489,11 @@ cmd_uninstall_self() {
         if [[ $apps == keep ]]; then
             while IFS=$'\t' read -r id p; do [[ -n $id ]] && named[$id]=$p; done < <(python3 lib/sft.py apps)
             # (each app's tweak, and what it needs: removing that would be refused, or break it)
-            for id in $(with_deps "${!named[@]}"); do keep[$id]=1; done
+            order=$(with_deps "${!named[@]}") || exit 1
+            for id in $order; do keep[$id]=1; done
         fi
-        mapfile -t order < <(with_deps "${IDS[@]}")
-        for (( p=${#order[@]}-1; p>=0; p-- )); do        # (dependents first)
-            id=${order[p]}
+        order=$(installer_py removal-order) || exit 1       # (dependents first)
+        for id in $order; do
             status_of "$id" >/dev/null; [[ $? -ne 1 ]] || continue
             if [[ -n ${keep[$id]:-} ]]; then [[ -n ${named[$id]:-} ]] && left+=("${named[$id]}"); else drop+=("$id"); fi
         done
@@ -1033,7 +1028,8 @@ case ${1:-} in
     debug-info)  cmd_debug_info ;;
     report)      cmd_report ;;
     check-system) cmd_check_system ;;
-    _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; with_deps "$@" | tr "\n" " "; echo ;;
+    _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; deps=$(with_deps "$@") || exit 1
+                 [[ -z $deps ]] || printf '%s\n' "$deps" | tr "\n" " "; echo ;;
     list)        cmd_list ;;
     # The installer window's other buttons, through the same code (lib/sft.py) or tools it uses.
     info|hide|unhide|hide-group|unhide-group|settings|mods) python3 lib/sft.py "$@" ;;
