@@ -8,6 +8,7 @@ order:
   - recline
   - perf-overlay
   - knockthru
+  - cuff
   - cursor
   - menu-icons
 ---
