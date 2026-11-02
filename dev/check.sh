@@ -126,7 +126,7 @@ check_metadata() {      # the AppStream metadata and the desktop entry
     rm -rf "$tmp"; return $rc
 }
 
-check_docs() { python3 dev/check-docs.py && python3 dev/gen-docs.py --check; }
+check_docs() { python3 dev/check-docs.py && python3 dev/gen-docs.py --check && python3 dev/gen-compat.py --check; }
 
 # tweak_free FILE: a changed file the tweak check doesn't depend on (it installs from packs/, lib/,
 # examples/, icons/, share/ and install.sh).

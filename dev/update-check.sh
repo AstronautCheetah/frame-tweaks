@@ -15,6 +15,12 @@
 #                                           newest release's signature and move to it. ORIGIN
 #                                           (GitHub unless given) is where they update from: a
 #                                           local copy tries a release before it's pushed
+#   dev/update-check.sh record HOST         add each installed tweak's status on the Frame HOST (as
+#                                           ssh reaches it; "." on the Frame itself), with its
+#                                           SteamOS and SteamVR builds, to docs/compat/records.tsv
+#                                           in this checkout, and write docs/compatibility.md
+#                                           (it only reads the Frame and writes these files; it
+#                                           sends nothing anywhere; read them before committing)
 #   dev/update-check.sh list                the snapshots so far
 # Snapshots go to $FRAME_TWEAKS_CHECKS (~/frame-update-checks unless set)/snapshots, and are
 # copied to the microSD card when one is mounted, so they outlast the headset.
@@ -142,11 +148,45 @@ release_test() {
     [ "$fail" -eq 0 ]
 }
 
+# On the Frame: its builds, Frame Tweaks' version, and ./install.sh status (FRAME_TWEAKS_DIR, or
+# ~/frame-tweaks). (Sent over ssh as text, as dev/record-tested.sh does: nothing to install there.)
+frame_facts() {
+    grep -E '^(VERSION_ID|BUILD_ID)=' /etc/os-release
+    echo "STEAMVR=$(grep -m1 -oE 'vrserver [0-9][0-9.]* startup' "$HOME/.local/share/Steam/logs/vrserver.txt" 2>/dev/null | cut -d' ' -f2)"
+    echo "CHANNEL=$(steamos-select-branch -c 2>/dev/null || true)"
+    cd "${FRAME_TWEAKS_DIR:-$HOME/frame-tweaks}" || exit 1
+    echo "RELEASE=$(./install.sh version 2>/dev/null | tail -1)"
+    # (marks as alternatives, not a [list]: over ssh the locale is often C, where a list of
+    # multibyte characters matches their single bytes instead)
+    ./install.sh status 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' | sed -nE 's/^ *(✔|!|⟳|·|✘) ([a-z0-9-]+) +(.*)$/STATUS=\1\t\2\t\3/p'
+}
+
+record() {
+    local host=${1:?"record needs the Frame, as ssh reaches it (. on the Frame itself)"} facts n=0
+    # shellcheck disable=SC2029   # (on purpose: frame_facts' definition is sent, to run there)
+    if [ "$host" = . ]; then facts=$(frame_facts); else facts=$(ssh "$host" "$(declare -f frame_facts); frame_facts"); fi
+    get() { sed -n "s/^$1=//p" <<<"$facts" | tr -d '"' | head -1; }
+    [ -n "$(get VERSION_ID)" ] || { echo "couldn't read the Frame's SteamOS version" >&2; return 1; }
+    local row
+    row="$(date -u +%F)\t$(get VERSION_ID)\t$(get BUILD_ID)\t$(get STEAMVR)\t$(get CHANNEL)\t$(get RELEASE)"
+    # (the status text only where something needs looking at: a working tweak's text can say
+    # personal things, a VPN's location say, and the records are public once committed)
+    while IFS= read -r line; do
+        case $line in "✔"$'\t'*|"·"$'\t'*) line=${line%$'\t'*}$'\t' ;; esac
+        printf '%b\t%s\n' "$row" "${line//$'\r'/}" >> "$REPO/docs/compat/records.tsv"
+        n=$((n + 1))
+    done < <(sed -n 's/^STATUS=//p' <<<"$facts")
+    [ "$n" -gt 0 ] || { echo "no tweak statuses read" >&2; return 1; }
+    python3 "$REPO/dev/gen-compat.py"
+    echo "recorded $n tweak(s) on SteamOS $(get VERSION_ID) ($(get BUILD_ID)), SteamVR $(get STEAMVR); docs/compatibility.md updated"
+}
+
 case ${1:-} in
     snapshot) shift; mkdir -p "$SNAPS"; snapshot "$@" ;;
     compare) shift; compare "$@" ;;
     release-test) shift; release_test "$@" ;;
+    record) shift; record "$@" ;;
     list) ls -1 "$SNAPS" 2>/dev/null ;;
-    -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//' ;;
-    *) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2 ;;
+    -h|--help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2 ;;
 esac

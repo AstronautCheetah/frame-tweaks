@@ -348,6 +348,10 @@ release-test` installs copies at the last four releases in throwaway homes and u
 `./install.sh update` does: each must verify the new release's signature and move to it. Given a
 local copy of the repository (`release-test PATH`), it tries a release before it's pushed.
 Snapshots are kept in `~/frame-update-checks` and on the microSD card (`dev/update-check.sh --help`).
+`dev/update-check.sh record FRAME` (run on the workstation, the Frame as ssh reaches it) adds
+each installed tweak's status on that Frame's SteamOS and SteamVR builds to
+`docs/compat/records.tsv` and regenerates [docs/compatibility.md](docs/compatibility.md); commit
+both. Do it after each release, and after a SteamOS or SteamVR update.
 
 ## Testing controller buttons on a Frame (maintainers)
 

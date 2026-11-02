@@ -697,5 +697,26 @@ class UpdateCheck(unittest.TestCase):
         self.assertIn("no such snapshot", r.stderr)
 
 
+
+class Compatibility(unittest.TestCase):
+    """dev/gen-compat.py: the newest builds as columns, each tweak's newest record per build, and
+    notes for what isn't simply working or not installed."""
+    def test_newest_builds_first_and_notes(self):
+        gen = load_script(ROOT / "dev/gen-compat.py", "gen_compat")
+        rows = [dict(zip(gen.FIELDS, r)) for r in (
+            ("2026-10-20", "0.5.5", "b1", "2.17", "stable", "0.6.20", "✔", "wallet", "ok"),
+            ("2026-11-01", "0.5.6", "b2", "2.18", "beta", "0.6.23", "!", "wallet", "no password"),
+            ("2026-11-02", "0.5.6", "b2", "2.18", "beta", "0.6.23", "✔", "wallet", "fixed"),
+            ("2026-11-02", "0.5.6", "b2", "2.18", "beta", "0.6.23", "⟳", "curvature", "restart SteamVR"),
+            ("2026-11-02", "0.5.6", "b2", "2.18", "beta", "0.6.23", "·", "cursor", "not installed"))]
+        text = gen.render(rows)
+        header = next(line for line in text.splitlines() if line.startswith("| Tweak"))
+        self.assertLess(header.index("b2"), header.index("b1"))            # (newest first)
+        self.assertIn("| `wallet` | ✔ | ✔ |", text)                         # (the newest record per build)
+        self.assertIn("- **curvature** on SteamOS 0.5.6 (b2): restart SteamVR", text)
+        self.assertNotIn("**cursor**", text)
+        self.assertIn("No records yet.", gen.render([]))
+
+
 if __name__ == "__main__":
     unittest.main()

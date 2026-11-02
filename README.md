@@ -467,8 +467,9 @@ Help is welcome, and much of it doesn't need a Frame:
 
 ## Tested on
 
-SteamOS 0.4.5 (build 20261007.6125817), SteamVR build 1791331621, kernel 6.18, one Steam
-Frame. SteamOS and SteamVR updates can break tweaks that rely on their internals (the 🧪
+Last checked on SteamOS 0.5.6 (build 20261022.6153909, beta) with SteamVR 2.18.2, on one Steam
+Frame; [docs/compatibility.md](docs/compatibility.md) has each tweak's status on each build
+checked. SteamOS and SteamVR updates can break tweaks that rely on their internals (the 🧪
 experimental tweaks check for this and switch themselves off). Reports from other versions are
 welcome: the [Works on my Frame](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=test_report.yml)
 issue form asks for what's needed.
