@@ -4029,11 +4029,11 @@ msgstr ""
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr ""
 
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
 msgid "VR environment"
 msgstr ""
 
@@ -5339,7 +5339,7 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
 msgid "from"
 msgstr ""
 
@@ -5898,6 +5898,24 @@ msgid ""
 "TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
 msgstr ""
 
+#: packs/third-party/knockthru/README.md
+msgid ""
+"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+msgstr ""
+
+#: packs/third-party/knockthru/README.md
+msgid "Knock twice on your headset or a table to turn passthrough on or off"
+msgstr ""
+
+#: packs/third-party/knockthru/README.md
+msgid "KnockThru"
+msgstr ""
+
+#: packs/third-party/knockthru/README.md
+msgid ""
+"VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+
 #: packs/third-party/menu-icons/README.md
 msgid ""
 "Icons for Konsole, System Settings and other apps that show blank in Steam's VR \"+\" menu"
@@ -5949,6 +5967,25 @@ msgstr ""
 #: packs/third-party/pack.md
 msgid ""
 "Other people's projects and fixes for the Steam Frame, credited to their authors. Most are linked (🔗): Frame Tweaks runs their own installer, as their README gives it, into your home folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse cursor's and the menu icons', Frame Tweaks applies itself."
+msgstr ""
+
+#: packs/third-party/perf-overlay/README.md
+msgid "Performance Overlay"
+msgstr ""
+
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+msgstr ""
+
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"sasaken1102r's frame-perf-overlay: a small panel in VR with the frame rate and frame times, CPU and GPU load and clocks, temperatures, memory, battery and Wi-Fi. You choose what it shows and where, in its Perf tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+
+#: packs/third-party/perf-overlay/README.md
+msgid ""
+"sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
 msgstr ""
 
 #: packs/third-party/recline/README.md

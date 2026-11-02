@@ -1,0 +1,102 @@
+---
+title: KnockThru
+emoji: ✊
+category: VR environment
+tier: extras
+summary: Knock twice on your headset or a table to turn passthrough on or off
+what: >-
+  VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the
+  headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you
+  pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR.
+why: >-
+  Checking the room means finding the Room View button in the dashboard, or a controller
+  binding. A knock works with a controller in your hand or set down. Linked: it installs from
+  its newest release with its own installer, the way its README describes.
+author: VioletTides (KnockThru)
+source:
+  relation: from
+  url: https://github.com/VioletTides/KnockThru
+experimental: >-
+  KnockThru presses Room View through Steam's own dashboard, over CEF Remote Debugging, which you
+  turn on in the Developer settings: a Steam update that moves the button stops it until
+  KnockThru catches up (three buzzes after a knock, and its tab says why). While CEF Remote
+  Debugging is on, programs on the headset can control Steam's interface; turn it off when you
+  stop using KnockThru.
+icon: {theme: view-visible}
+processes: [/KnockThru/knockthru( |$)]
+config: [~/.config/knockthru]
+link:
+  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && curl -fsSL https://github.com/VioletTides/KnockThru/releases/latest/download/install.sh -o "$d/install.sh" && sh "$d/install.sh"
+  uninstall: ~/KnockThru/knockthru --uninstall && rm -rf ~/KnockThru
+  installed: ~/KnockThru/knockthru
+  version: python3 -c 'import json, os; print(json.load(open(os.path.expanduser("~/.config/knockthru/state.json")))["knockthru_version"])'
+  readme: https://github.com/VioletTides/KnockThru#readme
+changes: >-
+  Whatever KnockThru's own installer sets up (its README lists it): the program in
+  `~/KnockThru`, registered with SteamVR to start with it, and a Non-Steam entry in your Steam
+  library
+access: >-
+  Reads controller and headset motion from SteamVR; presses Room View through Steam's interface
+  (CEF Remote Debugging, which you turn on); asks GitHub once a day for a newer release
+survives_updates: Yes (everything is in your home folder); a Steam update can move the button it presses
+undo: >-
+  Uncheck it, or `./install.sh uninstall knockthru`: KnockThru's own `--uninstall`, then its
+  folder is deleted (keeps its settings and calibration in `~/.config/knockthru`). Remove its
+  Non-Steam library entry and turn CEF Remote Debugging off yourself.
+---
+# KnockThru
+
+<!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
+VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR.
+
+**Why on a Steam Frame:** Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes.
+<!-- /generated:intro -->
+
+A **link**: Frame Tweaks runs KnockThru's own steps, as its
+[README](https://github.com/VioletTides/KnockThru#readme) gives them, in the terminal it opens
+for installs, and doesn't pin or change what they install.
+
+**Before you install:** turn on **Developer Mode**, then **CEF Remote Debugging** in the
+Developer settings. KnockThru needs it to press Room View for you. Leaving it on lets programs
+on the headset control Steam's interface, not just KnockThru: turn it off again if you remove
+KnockThru.
+
+- **Install** (tick it): downloads the installer from KnockThru's newest GitHub release and runs
+  it. The installer downloads the release, checks its SHA-256, unpacks it to `~/KnockThru`,
+  adds it to your Steam library under Non-Steam, and starts it. If SteamVR doesn't answer,
+  launch **KnockThru** once from **Library → Non-Steam** in Gaming mode.
+- **Update:** its row says when a newer release is out, and ↻ installs it the same way. Its own
+  **Check for updates** in its Settings works too. Frame Tweaks' own updates leave it alone.
+- **Uninstall** (untick it): runs `~/KnockThru/knockthru --uninstall`, which stops it and
+  removes it from SteamVR, then deletes `~/KnockThru`. Your settings and calibration in
+  `~/.config/knockthru` stay; `~/KnockThru/knockthru --uninstall --purge` before unticking
+  removes them too. The Non-Steam entry in your library stays: remove it there.
+
+## Use
+
+The first time you open its **KnockThru** tab in the SteamVR dashboard, a short tour helps you
+pick your knocks, calibrate them and try them. The **KnockThru On** switch at the top pauses
+knocking. Its [README](https://github.com/VioletTides/KnockThru#readme) covers the knocks, the
+settings and the troubleshooting.
+
+- **Three buzzes after a knock:** it heard you but couldn't change passthrough. Usually CEF
+  Remote Debugging is off, or a Steam update moved the Room View button; its tab says which.
+
+<!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
+## What it changes
+
+- **Survives SteamOS updates:** Yes (everything is in your home folder); a Steam update can move the button it presses
+- **Changes:** Whatever KnockThru's own installer sets up (its README lists it): the program in `~/KnockThru`, registered with SteamVR to start with it, and a Non-Steam entry in your Steam library
+- **🧪 Experimental:** KnockThru presses Room View through Steam's own dashboard, over CEF Remote Debugging, which you turn on in the Developer settings: a Steam update that moves the button stops it until KnockThru catches up (three buzzes after a knock, and its tab says why). While CEF Remote Debugging is on, programs on the headset can control Steam's interface; turn it off when you stop using KnockThru.
+- **Unusual access:** Reads controller and headset motion from SteamVR; presses Room View through Steam's interface (CEF Remote Debugging, which you turn on); asks GitHub once a day for a newer release
+- **Undo:** Uncheck it, or `./install.sh uninstall knockthru`: KnockThru's own `--uninstall`, then its folder is deleted (keeps its settings and calibration in `~/.config/knockthru`). Remove its Non-Steam library entry and turn CEF Remote Debugging off yourself.
+<!-- /generated:changes -->
+
+## Credits
+
+KnockThru is by [VioletTides](https://github.com/VioletTides/KnockThru) (MIT); its controller and
+headset drawings come from Valve's Steam Frame CAD files (CC BY-NC-SA 4.0). Frame Tweaks only
+runs its install steps. See also [CREDITS.md](../../../CREDITS.md).
+
+---
+Check: `./install.sh status knockthru` · Remove: `./install.sh uninstall knockthru`

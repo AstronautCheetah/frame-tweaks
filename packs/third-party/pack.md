@@ -6,6 +6,8 @@ categories: [Accessibility, Convenience, VR environment, System, Hardware, Priva
 order:
   - full-keyboard
   - recline
+  - perf-overlay
+  - knockthru
   - cursor
   - menu-icons
 ---

@@ -67,6 +67,11 @@
   desktop's clipboard.
 
 ### Added
+- **Performance Overlay** (3rd Party, linked): sasaken1102r's frame-perf-overlay, a panel in VR
+  with the frame rate, CPU and GPU load, temperatures, memory and battery. Installed from its
+  newest GitHub release, checked against its `SHA256SUMS`, with its own installer.
+- **KnockThru** (3rd Party, linked, experimental): VioletTides' KnockThru turns passthrough on or
+  off when you knock. It needs CEF Remote Debugging on; its page says what that allows.
 - **Wallet apps protects terminal tools from Homebrew too**, such as Claude Code's `claude`: the
   page lists the commands of the formulae you installed and of casks, and **Protect** makes one ask
   for the wallet password first while the wallet is locked, with the wallet as its keyring (where

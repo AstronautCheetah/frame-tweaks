@@ -13,3 +13,5 @@ steamos-glibcxx=3.4.34
 # notes read, the link and the tweak's page checked.
 link-recline=v1.4.0
 link-full-keyboard=0.14.1
+link-perf-overlay=v0.3.2
+link-knockthru=v1.2.0

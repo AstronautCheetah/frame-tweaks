@@ -349,3 +349,19 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "It lets only your desktop session control the network: open NordVPN Tray from the desktop's menu (not from SSH or another login), or run nordvpn-wg in Konsole."
 - New in `packs/third-party/cursor/status.sh:12`
   - now: "removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"
+- New in `packs/third-party/knockthru/README.md`
+  - now: "Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+- New in `packs/third-party/knockthru/README.md`
+  - now: "Knock twice on your headset or a table to turn passthrough on or off"
+- New in `packs/third-party/knockthru/README.md`
+  - now: "KnockThru"
+- New in `packs/third-party/knockthru/README.md`
+  - now: "VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
+- New in `packs/third-party/perf-overlay/README.md`
+  - now: "Performance Overlay"
+- New in `packs/third-party/perf-overlay/README.md`
+  - now: "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+- New in `packs/third-party/perf-overlay/README.md`
+  - now: "sasaken1102r's frame-perf-overlay: a small panel in VR with the frame rate and frame times, CPU and GPU load and clocks, temperatures, memory, battery and Wi-Fi. You choose what it shows and where, in its Perf tab in the SteamVR dashboard. It starts with SteamVR."
+- New in `packs/third-party/perf-overlay/README.md`
+  - now: "sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
