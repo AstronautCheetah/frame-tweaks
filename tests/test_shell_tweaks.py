@@ -194,6 +194,20 @@ class CursorNotNeeded(Home):
         r = self.run_script("cursor/status.sh")
         self.assertEqual((r.returncode, r.stdout.strip()), (0, "ok       installed (active in desktop mode after a reboot)"))
 
+    def test_removed_but_still_in_the_running_desktop_session(self):
+        """Removed (./install.sh tidy, say) while desktop mode runs: its session keeps the software
+        pointer until desktop mode restarts, which the status says instead of a plain "not installed"."""
+        self.gamescope("3.16.30-1")
+        session = subprocess.Popen(["sleep", "60"], env={"KWIN_FORCE_SW_CURSOR": "1"})
+        self.addCleanup(session.kill)
+        self.stub("pgrep", f'[ "${{*: -1}}" = plasmashell ] && echo {session.pid}')
+        r = self.run_script("cursor/status.sh")
+        self.assertEqual(r.returncode, 1, r.stdout)
+        self.assertIn("until it restarts, or the next reboot", r.stdout)
+        self.stub("pgrep", "exit 1")                       # (rebooted, or no desktop mode running)
+        r = self.run_script("cursor/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (1, "missing  cursor fix not installed"))
+
 
 class ClipboardStatus(Home):
     """clipboard-sync starts with desktop mode: not running without it is as it should be; not

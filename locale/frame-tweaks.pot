@@ -5414,6 +5414,11 @@ msgid ""
 msgstr ""
 
 #: packs/third-party/cursor/status.sh
+msgid ""
+"removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"
+msgstr ""
+
+#: packs/third-party/cursor/status.sh
 msgid "software cursor active"
 msgstr ""
 

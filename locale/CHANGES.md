@@ -117,3 +117,5 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 ## 2026-11-02
 - New in `packs/core/wallet/status.sh:19`
   - now: "terminals run Homebrew's gh, not the wallet's wrapper: move this line of ~/.bashrc below its brew shellenv line: %s"
+- New in `packs/third-party/cursor/status.sh:12`
+  - now: "removed; desktop mode keeps its software pointer (a second, black X) until it restarts, or the next reboot"
