@@ -1175,6 +1175,10 @@ msgid "Done."
 msgstr ""
 
 #: gui/settings_page.py
+msgid "Not used with the {setting} you chose."
+msgstr ""
+
+#: gui/settings_page.py
 msgid "Nothing to apply: change %s first"
 msgstr ""
 
@@ -4026,11 +4030,11 @@ msgid ""
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid "Voice activity detection"
+msgid "Whisper (the default): 99 languages, uses your word list"
 msgstr ""
 
 #: packs/core/dictation/README.md
-msgid "Whisper (the default): 99 languages, uses your word list"
+msgid "Whisper voice activity detection"
 msgstr ""
 
 #: packs/core/dictation/README.md

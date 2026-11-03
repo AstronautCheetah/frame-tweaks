@@ -57,8 +57,15 @@ class SettingsSection(QWidget):
         about.setWordWrap(True)
         lay.addWidget(about)
         self.conf = sft.read_settings(cid)
-        self.buttons, self.checks = {}, {}
+        self.buttons, self.checks, self.dims = {}, {}, {}
+        titles = {key: label for key, label, _choices, _default in self.spec["options"]}
         for key, label, choices, _default in self.spec["options"]:
+            only = self.spec.get("only_with", {}).get(key)
+            if only:
+                # (dimmed, still choosable: it's kept for when the other setting comes back)
+                note = QLabel(_("Not used with the {setting} you chose.").format(setting=titles.get(only[0], only[0])))
+                note.setObjectName("desc")
+                self.dims[key] = (only, [], note)
             if key in self.spec["checkboxes"]:          # on / off: one tick box
                 box = QCheckBox(label)
                 box.setStyleSheet("font-weight: 600; margin-top: 14px;")
@@ -66,10 +73,16 @@ class SettingsSection(QWidget):
                 box.clicked.connect(lambda on, k=key, c=choices: self.choose(k, c[0][1] if on else c[1][1]))
                 lay.addWidget(box)
                 self.checks[key] = (box, choices[0][1])
+                if only:
+                    self.dims[key][1].append(box)
+                    lay.addWidget(self.dims[key][2])
                 continue
             lab = QLabel(label)
             lab.setStyleSheet("font-weight: 600; margin-top: 14px;")
             lay.addWidget(lab)
+            if only:
+                lay.addWidget(self.dims[key][2])
+                self.dims[key][1].append(lab)
             grid = QGridLayout()                     # (wraps: a long list of choices fits the page)
             longest = max((len(t) for t, _value in choices), default=0)
             # (Long labels one per row: four of them side by side, each as wide as its text, made
@@ -112,6 +125,8 @@ class SettingsSection(QWidget):
                 else:
                     grid.addWidget(b, n // per_row, n % per_row)
                 self.buttons[(key, text)] = (b, value)
+                if only:
+                    self.dims[key][1].append(b)
             grid.setColumnStretch(per_row if per_row > 1 else 0, 1)
             lay.addLayout(grid)
         reset = QPushButton(_("Reset to defaults"))
@@ -132,6 +147,7 @@ class SettingsSection(QWidget):
         # (SettingsPage: the row's status is checked again after a change: it named the old button)
         self.on_change = lambda: None
         self.show_actions()
+        self.show_choices()
 
     def show_actions(self):
         """Each action's label and whether it shows; an Apply (an action with keys:) dimmed, as the
@@ -193,6 +209,11 @@ class SettingsSection(QWidget):
             b.setChecked(self.conf.get(key) == value)
         for key, (box, on) in self.checks.items():
             box.setChecked(self.conf.get(key) == on)
+        for (other, value), widgets, note in self.dims.values():
+            used = str(self.conf.get(other)) == str(value)
+            for w in widgets:
+                w.setEnabled(used)
+            note.setHidden(used)
 
     def choose(self, key, value):
         self.conf[key] = value

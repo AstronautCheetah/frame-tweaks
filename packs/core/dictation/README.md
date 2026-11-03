@@ -65,8 +65,9 @@ settings:
         - {label: "No (the default): loaded for each dictation, no memory used in between", value: "no"}
         - {label: "Yes: text sooner; memory in use all the time (Whisper 600 MB, Parakeet 1.3 GB)", value: "yes"}
     - key: DICTATE_VAD
-      title: Voice activity detection
+      title: Whisper voice activity detection
       default: "yes"
+      only_with: {DICTATE_ENGINE: whisper}
       choices:
         - {label: "On (the default): Whisper hears only the speech in your recording", value: "yes"}
         - {label: "Off: Whisper hears the whole recording", value: "no"}
@@ -276,8 +277,8 @@ Parakeet is the one to keep loaded; started for each dictation, Whisper is faste
   those stock phrases are dropped when they're the whole result. Voice activity detection also
   keeps pauses and room noise from Whisper.
 - **Something went wrong?** The log is `/run/user/$UID/dictate/dictate.log`, and the last
-  recording is kept as `/run/user/$UID/dictate/last.wav` so you can listen to it. Both go away
-  when the headset restarts, and like the history, only you can read them.
+  recording is kept as `/run/user/$UID/dictate/last.wav` so you can listen to it; the last one
+  the engine heard nothing in, also as `last-no-text.wav`. They go away when the headset restarts, and like the history, only you can read them.
 - **The game sees Menu too.** Most games open their menu on a short press; if one reacts to
   the long hold, set `DICTATE_BUTTON=y` (or `off`) in your settings.
 - **Full Keyboard has a dictation of its own** (its mic key, from 0.11): both can be installed;

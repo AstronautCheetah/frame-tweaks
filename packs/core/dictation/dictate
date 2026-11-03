@@ -257,6 +257,7 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     # loudness first: a recording whose peak stays under -40 dB has no speech.
     local peak
     peak=$(ffmpeg -nostats -i "$wav" -af volumedetect -f null - 2>&1 | sed -n 's/.*max_volume: \(-*[0-9.]*\) dB/\1/p')
+    log "peak ${peak:-?} dB"
     if [ -n "$peak" ] && awk -v p="$peak" 'BEGIN{exit !(p < -40)}'; then
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
         # (-90 dB and below: not a quiet room, nothing at all came in; muted, or the wrong microphone)
@@ -286,9 +287,12 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     if grep -qiE '^(subs? (by|from) .*|subtitles by .*|thanks? (you )?for watching[.!]?|thank you[.!]?|you|bye[.!]?|\.+)$' <<<"$text"; then
         log "dropped likely hallucination: $text"; text=""
     fi
+    # (one the engine heard nothing in, though it was loud enough, is kept apart from last.wav, which
+    # the next dictation replaces: to find out why, play it, or run the engine on it again)
+    if [ -z "$text" ]; then cp -f "$wav" "$STATE/last-no-text.wav"; fi
     mv -f "$wav" "$STATE/last.wav"
     rm -f "$BUSY"
-    if [ -z "$text" ]; then log "no speech"; notify "$(t 'No speech detected')"; status_out idle; return; fi
+    if [ -z "$text" ]; then log "no speech ($(engine) heard nothing; kept in last-no-text.wav)"; notify "$(t 'No speech detected')"; status_out idle; return; fi
     # Trailing space after a finished sentence, so the next dictation flows on.
     [[ "$text" =~ [.?!]$ ]] && text="$text "
     [ ! -f "$HISTORY" ] || chmod 600 "$HISTORY"          # (an older one was readable by everyone)

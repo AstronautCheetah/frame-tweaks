@@ -236,6 +236,13 @@ def check_settings(st, cid, where):
                 vals.append(c["value"])
         if o.get("default") not in vals:
             errs.append(f"{where}: {o['key']}: the default must be one of the choices' values")
+    values = {o["key"]: [c.get("value") for c in o["choices"] if isinstance(c, dict)] for o in opts
+              if isinstance(o, dict) and isinstance(o.get("key"), str) and isinstance(o.get("choices"), list)}
+    for o in opts:
+        w = o.get("only_with") if isinstance(o, dict) else None
+        if w is not None and not (isinstance(w, dict) and len(w) == 1 and next(iter(w)) in values
+                                  and next(iter(w)) != o.get("key") and next(iter(w.values())) in values[next(iter(w))]):
+            errs.append(f"{where}: {o.get('key')}: only_with names one other option and one of its values")
     for o in opts:
         if isinstance(o, dict) and o.get("checkbox") and not (isinstance(o.get("choices"), list) and len(o["choices"]) == 2):
             errs.append(f"{where}: {o.get('key')}: a checkbox option needs exactly two choices (on, then off)")

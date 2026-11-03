@@ -8,6 +8,8 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-03
+- New in `gui/settings_page.py:66`
+  - now: "Not used with the {setting} you chose."
 - New in `gui/wallet_page.py:575`
   - now: "Show all Homebrew commands ({n} more formula)"
   - plural: "Show all Homebrew commands ({n} more formulae)"
@@ -21,3 +23,6 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
 - New in `gui/wallet_page.py:606`
   - now: "Protect selected"
+- Changed in `packs/core/dictation/README.md`
+  - was: "Voice activity detection"
+  - now: "Whisper voice activity detection"

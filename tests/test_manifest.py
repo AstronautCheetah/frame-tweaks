@@ -418,6 +418,19 @@ class Packs(unittest.TestCase):
             self.assertTrue(any(says in p for p in sft.load()["problems"]), (says, sft.load()["problems"]))
             sft.settings_specs()                                                  # (and no crash)
 
+    def test_only_with_names_another_option_and_one_of_its_values(self):
+        opts = ("settings:\n  file: ~/.config/x.conf\n  format: shell\n  options:\n"
+                "    - {key: E, title: E, default: a, choices: [{label: A, value: a}, {label: B, value: b}]}\n")
+        bad = "    - {key: V, title: V, default: d, only_with: {%s}, choices: [{label: D, value: d}]}\n"
+        for w in ("E: c", "X: a", "V: d", "E: a, V: d"):
+            d = self.tweak("mypack", "hello", extra=opts + bad % w)
+            sft.set_trusted(d.parent, True)
+            self.assertNotIn("hello", self.ids(), w)
+            self.assertTrue(any("only_with names one other option" in p for p in sft.load()["problems"]), w)
+        d = self.tweak("mypack", "hello", extra=opts + bad % "E: b")
+        sft.set_trusted(d.parent, True)
+        self.assertIn("hello", self.ids())
+
     def test_mods_check_sees_a_pack_with_its_own_readme(self):
         """A shared pack often has a README.md at its top and no pack.md (optional): it's still a
         pack, its tweaks checked, as load() treats it; only a folder with no tweak folders in it is

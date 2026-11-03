@@ -749,6 +749,37 @@ class PageActions(unittest.TestCase):
         w.run_reinstall.assert_called_once_with("snip")
 
 
+class OnlyWith(unittest.TestCase):
+    """An option with only_with (Dictation's Whisper voice activity detection) is dimmed, with its
+    note, while the other setting has another value (Parakeet), and comes back with it."""
+    def test_dimmed_while_the_other_setting_differs(self):
+        from PyQt6.QtWidgets import QApplication, QLabel, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "x.json").write_text('{"engine": "parakeet"}')
+            spec = {"file": d / "x.json", "format": "json", "about": "", "note": "",
+                    "options": [("engine", "Engine", [("Whisper", "whisper"), ("Parakeet", "parakeet")], "whisper"),
+                                ("vad", "Whisper voice activity detection", [("On", "yes"), ("Off", "no")], "yes")],
+                    "actions": [], "checkboxes": set(), "swatches": set(), "include": [],
+                    "only_with": {"vad": ("engine", "whisper")}}
+            with mock.patch.dict(gui.sft.SETTINGS, {"x-test": spec}), \
+                    mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                section = gui.SettingsSection("x-test", QLabel())
+                on = next(b for b in section.findChildren(QPushButton) if b.text() == "On")
+                note = next(n for n in section.findChildren(QLabel) if n.text().startswith("Not used with"))
+                self.assertFalse(on.isEnabled())
+                self.assertFalse(note.isHidden())
+                self.assertIn("Engine", note.text())
+                next(b for b in section.findChildren(QPushButton) if b.text() == "Whisper").click()
+                self.assertTrue(on.isEnabled())
+                self.assertTrue(note.isHidden())
+
+    def test_dictation_vad_is_whisper_only(self):
+        self.assertEqual(gui.sft.SETTINGS["dictation"]["only_with"], {"DICTATE_VAD": ("DICTATE_ENGINE", "whisper")})
+
+
 class Links(unittest.TestCase):
     """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
     def test_with_copy(self):

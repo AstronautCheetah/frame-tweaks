@@ -142,6 +142,8 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Dictation's voice activity detection says it's Whisper's:** its setting is now *Whisper voice activity detection*, dimmed with a note while Parakeet is the engine (Parakeet doesn't use it). Settings pages can do this for any option (`only_with`, docs/mods.md).
+- **Dictation keeps a recording the engine heard nothing in** (`last-no-text.wav`, beside `last.wav`), and logs each recording's peak, to find out why.
 - **Homebrew shows its own logo** on its row and its page.
 - **Tooltips stay twice as long** in the Frame Tweaks window, Arrow Pad, Screen snip and the NordVPN tray: in VR, reading them takes longer.
 - **Screen snip's Save says where:** a tooltip on Save shows the file's path for a few seconds before the snip closes (in VR the notification may not show).

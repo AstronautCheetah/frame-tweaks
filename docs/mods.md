@@ -164,7 +164,10 @@ settings:
 
 Only the listed keys are written (a `shell` file's values quoted where they must be, so it can
 be `source`d); anything else in the file is kept. Your program reads the file itself. An option
-with `swatches: true` shows its choices as colour circles (their values are colours).
+with `swatches: true` shows its choices as colour circles (their values are colours). One with
+`only_with: {OTHER_KEY: value}` is dimmed, with a note that it isn't used, while another option
+of the same tweak has a different value (Dictation's Whisper voice activity detection, say,
+with Parakeet as its engine); it's still saved.
 
 ### The YAML
 
