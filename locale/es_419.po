@@ -63,6 +63,11 @@ msgstr "(lo necesita %s)"
 msgid "Apply"
 msgstr "Aplicar"
 
+# needs review
+#: gui/apply_changes.py gui/frame-tweaks-gui.py lib/sft.py
+msgid "Asks for your sudo password: %s"
+msgstr "Pide tu contraseña de sudo: %s"
+
 #: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
 msgid "Cancel"
 msgstr "Cancelar"
@@ -93,6 +98,16 @@ msgstr "Instalar:"
 #: gui/apply_changes.py
 msgid "Install: %s"
 msgstr "Instalar: %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Its files changed since it was installed: the new ones are used."
+msgstr "Sus archivos cambiaron desde que se instaló: se usan los nuevos."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Its settings and data are kept."
+msgstr "Su configuración y sus datos se conservan."
 
 # needs review
 #: gui/apply_changes.py
@@ -128,12 +143,30 @@ msgstr "Reinstalar"
 
 # needs review
 #: gui/apply_changes.py
+msgid "Reinstall {title}?"
+msgstr "¿Reinstalar {title}?"
+
+# needs review
+#: gui/apply_changes.py
 msgid "Remove:"
 msgstr "Quitar:"
 
 #: gui/apply_changes.py
 msgid "Remove: %s"
 msgstr "Quitar: %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Removes it and installs it again in one step, stopping its running programs first."
+msgstr ""
+"Lo quita y lo vuelve a instalar en un solo paso, deteniendo antes sus programas en ejecución."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Runs its own uninstaller, then its own installer again."
+msgstr ""
+"Ejecuta su propio desinstalador y luego otra vez su propio instalador."
 
 # needs review
 #: gui/apply_changes.py
@@ -337,11 +370,6 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Aplicar cambios"
-
-# needs review
-#: gui/frame-tweaks-gui.py lib/sft.py
-msgid "Asks for your sudo password: %s"
-msgstr "Pide tu contraseña de sudo: %s"
 
 # needs review
 #: gui/frame-tweaks-gui.py

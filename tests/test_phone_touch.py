@@ -29,6 +29,19 @@ class Touch(unittest.TestCase):
         self.assertEqual(len(p.sock.sendall.call_args[0][0]), 32)
         self.assertEqual(sent(p), (2, 0, -2, 540, 600, 1080, 2400, 0xFFFF, 0, 0))
 
+    def test_a_press_wakes_the_phone_first(self):
+        """A phone asleep ignores touches: each press sends Android's WAKEUP key (down, up) first;
+        a move or a lift doesn't."""
+        p = phone()
+        p.touch(pt.DOWN, 0.5, 0.25, sideways=False)
+        msgs = [c[0][0] for c in p.sock.sendall.call_args_list]
+        self.assertEqual([struct.unpack(">BBIII", m) for m in msgs[:2]], [(0, 0, 224, 0, 0), (0, 1, 224, 0, 0)])
+        self.assertEqual(struct.unpack(">BBqiiHHHII", msgs[2])[:2], (2, pt.DOWN))
+        p.sock.reset_mock()
+        p.touch(pt.MOVE, 0.5, 0.3, sideways=False)
+        p.touch(pt.UP, 0.5, 0.3, sideways=False)
+        self.assertEqual(len(p.sock.sendall.call_args_list), 2)
+
     def test_sideways_swaps_the_screen(self):
         p = phone()
         p.touch(pt.MOVE, 1.0, 1.0, sideways=True)

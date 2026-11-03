@@ -50,6 +50,10 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
+#: gui/apply_changes.py gui/frame-tweaks-gui.py lib/sft.py
+msgid "Asks for your sudo password: %s"
+msgstr ""
+
 #: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
 msgid "Cancel"
 msgstr ""
@@ -73,6 +77,14 @@ msgstr ""
 
 #: gui/apply_changes.py
 msgid "Install: %s"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Its files changed since it was installed: the new ones are used."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Its settings and data are kept."
 msgstr ""
 
 #: gui/apply_changes.py
@@ -101,11 +113,24 @@ msgid "Reinstall"
 msgstr ""
 
 #: gui/apply_changes.py
+msgid "Reinstall {title}?"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Remove:"
 msgstr ""
 
 #: gui/apply_changes.py
 msgid "Remove: %s"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"Removes it and installs it again in one step, stopping its running programs first."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "Runs its own uninstaller, then its own installer again."
 msgstr ""
 
 #: gui/apply_changes.py
@@ -283,10 +308,6 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Apply changes"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py lib/sft.py
-msgid "Asks for your sudo password: %s"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py

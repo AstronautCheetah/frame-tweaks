@@ -55,6 +55,7 @@ JAR = "/data/local/tmp/sft-phone-touch.jar"     # scrcpy deletes its own copy on
 PIDFILE = Path(f"/run/user/{os.getuid()}/sft-phone-touch.pid")
 DOWN, UP, MOVE = 0, 1, 2
 FINGER = -2                                     # scrcpy's "generic finger" pointer id
+KEYCODE_WAKEUP = 224                            # (Android's AKEYCODE_WAKEUP)
 # scrcpy versions (major) whose control protocol this was tested with: the touch and scroll
 # messages below and the server's options. scrcpy has changed them between major versions
 # before, and a mismatch would make taps go nowhere without an error, so with any other version
@@ -192,8 +193,18 @@ class Phone:
         return round(min(1, max(0, u)) * (w - 1)), round(min(1, max(0, v)) * (h - 1)), w, h
 
     def touch(self, action, u, v, sideways):
+        if action == DOWN:
+            self.wake()
         self.send(lambda: struct.pack(">BBqiiHHHII", 2, action, FINGER, *self.point(u, v, sideways),
                                       0 if action == UP else 0xFFFF, 0, 0), retry=action != MOVE)
+
+    def wake(self):
+        """Android's WAKEUP key, down and up (scrcpy's 14-byte key message): a phone gone to sleep
+        ignores touches, so a press on the mirror did nothing until its power button was pressed.
+        WAKEUP only turns the screen on (POWER would turn an awake one off), so it goes before every
+        press; a locked phone shows its lock screen, as with the power button."""
+        for key_action in (0, 1):                       # (AKEY_EVENT_ACTION_DOWN, _UP)
+            self.send(lambda a=key_action: struct.pack(">BBIII", 0, a, KEYCODE_WAKEUP, 0, 0), retry=True)
 
     def scroll(self, u, v, sideways, dx, dy):
         """A mouse wheel at u, v: dx, dy in notches, + = right / down (as a page's wheel event)."""

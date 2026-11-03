@@ -97,6 +97,25 @@ class ApplyChanges:
                 + "<br>".join("• " + line for line in lines) + "<br>" + dim % _("Their settings and data are kept."))
         self.confirm(text, _("Reinstall"), lambda: self.run_reinstall_changed(ids))
 
+    def ask_reinstall(self, cid):
+        """↻ on a row (and its Reinstall link): the confirm page says what reinstalling does first, as
+        Apply changes does, then run_reinstall."""
+        comp = next((c for c in self.rows if c["id"] == cid), None)
+        title = comp["title"] if comp else cid
+        dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
+        lines = [_("Removes it and installs it again in one step, stopping its running programs first.")]
+        if comp is not None and comp.get("link"):
+            lines = [_("Runs its own uninstaller, then its own installer again.")]
+        if comp is not None and self.files_updated(cid):
+            lines.append(_("Its files changed since it was installed: the new ones are used."))
+        note = sft.sudo_note(comp) if comp is not None else ""
+        if note:
+            lines.append(_("Asks for your sudo password: %s") % note)
+        text = ("<b>" + html.escape(_("Reinstall {title}?").format(title=title)) + "</b><br>"
+                + "<br>".join("• " + html.escape(line) for line in lines) + "<br>"
+                + dim % html.escape(_("Its settings and data are kept.")))
+        self.confirm(text, _("Reinstall"), lambda: self.run_reinstall(cid))
+
     def run_reinstall_changed(self, ids):
         """./install.sh reinstall-changed in a terminal, for the tweaks the confirm page named (a tweak
         whose files are as installed again by then is left out there)."""

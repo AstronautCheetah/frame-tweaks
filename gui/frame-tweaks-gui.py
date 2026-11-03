@@ -645,7 +645,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             details.clicked.connect(lambda _=False, c=comp: self.show_details(c))
             again = QPushButton("↻")
             again.setObjectName("again")
-            again.clicked.connect(lambda _=False, c=cid: self.run_reinstall(c))
+            again.clicked.connect(lambda _=False, c=cid: self.ask_reinstall(c))
             self.again_buttons[cid] = again
             self.update_again(cid)
             hide = QPushButton(_("Unhide") if is_hidden else _("Hide"))
@@ -777,7 +777,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         """A link on a tweak's status: r Reinstall, u Update, and for a link with a tested version
         n (its newest, not yet tested) or t (the tested one: up to it, or back to it)."""
         if href == "r":
-            self.run_reinstall(cid)
+            self.ask_reinstall(cid)
         else:
             self.run_update(cid, to={"n": "newest", "t": "tested"}.get(href))
 

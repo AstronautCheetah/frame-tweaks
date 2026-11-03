@@ -141,6 +141,7 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **↻ Reinstall asks first,** on the confirm page Apply changes uses: what reinstalling does, whether its files changed, and whether it asks for the sudo password.
 - **VR memory guard also limits Frame Tweaks' own heavy helpers:** Dictation (Whisper, or an
   engine kept loaded) up to 2.5 GB and Android Mirror's scrcpy up to 1 GB (`dictation_max`,
   `mirror_max`). Opened from Steam's "+" menu, Android Mirror ran inside Steam's own service,
@@ -202,6 +203,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Android Mirror wakes a sleeping phone:** a press on the mirror did nothing while the phone's screen was off (Android ignores touches then); each press now sends Android's wake-up key first.
 - **Dictation says when the microphone is muted:** muted (by Steam's mute in the VR menu, or
   another app's), it recorded silence and said only "No speech detected". It now says the
   microphone is muted, before recording, and a recording with no sound at all says so too: aloud,

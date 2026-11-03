@@ -706,6 +706,24 @@ class PageActions(unittest.TestCase):
                 self.assertFalse(apply_.isEnabled())
 
 
+    def test_reinstall_asks_first(self):
+        """↻ on a row goes to the confirm page, saying what reinstalling does, as Apply changes does;
+        only its yes button reinstalls."""
+        w = collecting_window()
+        w.rows = [{"id": "snip", "title": "Screen snip + Narrate"}]
+        w.confirm, w.run_reinstall, w.files_changed = mock.Mock(), mock.Mock(), {"snip"}
+        w.state = {"snip": (0, "ready")}
+        with mock.patch.object(gui.sft, "sudo_note", return_value=""):
+            w.ask_reinstall("snip")
+        text, label, on_yes = w.confirm.call_args[0]
+        self.assertIn("Reinstall Screen snip + Narrate?", text)
+        self.assertIn("Its files changed since it was installed", text)
+        self.assertEqual(label, "Reinstall")
+        w.run_reinstall.assert_not_called()
+        on_yes()
+        w.run_reinstall.assert_called_once_with("snip")
+
+
 class Links(unittest.TestCase):
     """Each web or file link gets a 📋 that copies it; the details page's README links are absolute."""
     def test_with_copy(self):
@@ -1160,12 +1178,12 @@ class LinkVersions(unittest.TestCase):
         w.updates = {"recline": {"tested": "v1.4.0", "newest": "1.5.0", "to_tested": None}}
         w.show_status("recline")
         self.assertIn("A newer release than the one Frame Tweaks tested", label.toolTip())
-        w.run_update, w.run_reinstall = mock.Mock(), mock.Mock()
+        w.run_update, w.ask_reinstall = mock.Mock(), mock.Mock()
         for href, to in (("n", "newest"), ("t", "tested"), ("u", None)):
             w.status_link("recline", href)
             w.run_update.assert_called_with("recline", to=to)
-        w.status_link("recline", "r")
-        w.run_reinstall.assert_called_once_with("recline")
+        w.status_link("recline", "r")                   # (Reinstall: the confirm page first)
+        w.ask_reinstall.assert_called_once_with("recline")
         out = io.StringIO()
         with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(out):
             gui.Window.run_update(mock.Mock(), "recline", to="newest")

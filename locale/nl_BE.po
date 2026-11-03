@@ -66,6 +66,11 @@ msgid "Apply"
 msgstr "Toepassen"
 
 # needs review
+#: gui/apply_changes.py gui/frame-tweaks-gui.py lib/sft.py
+msgid "Asks for your sudo password: %s"
+msgstr "Vraagt om je sudo-wachtwoord: %s"
+
+# needs review
 #: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
 msgid "Cancel"
 msgstr "Annuleren"
@@ -97,6 +102,17 @@ msgstr "Installeren:"
 #: gui/apply_changes.py
 msgid "Install: %s"
 msgstr "Installeren: %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid "Its files changed since it was installed: the new ones are used."
+msgstr ""
+"De bestanden zijn veranderd sinds de installatie: de nieuwe worden gebruikt."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Its settings and data are kept."
+msgstr "De instellingen en gegevens blijven behouden."
 
 # needs review
 #: gui/apply_changes.py
@@ -134,6 +150,11 @@ msgstr "Opnieuw installeren"
 
 # needs review
 #: gui/apply_changes.py
+msgid "Reinstall {title}?"
+msgstr "{title} opnieuw installeren?"
+
+# needs review
+#: gui/apply_changes.py
 msgid "Remove:"
 msgstr "Verwijderen:"
 
@@ -141,6 +162,19 @@ msgstr "Verwijderen:"
 #: gui/apply_changes.py
 msgid "Remove: %s"
 msgstr "Verwijderen: %s"
+
+# needs review
+#: gui/apply_changes.py
+msgid ""
+"Removes it and installs it again in one step, stopping its running programs first."
+msgstr ""
+"Verwijdert het en installeert het opnieuw in één stap; de programma's die draaien worden eerst gestopt."
+
+# needs review
+#: gui/apply_changes.py
+msgid "Runs its own uninstaller, then its own installer again."
+msgstr ""
+"Voert eerst het eigen verwijderprogramma uit en daarna opnieuw het eigen installatieprogramma."
 
 # needs review
 #: gui/apply_changes.py
@@ -370,11 +404,6 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Wijzigingen toepassen"
-
-# needs review
-#: gui/frame-tweaks-gui.py lib/sft.py
-msgid "Asks for your sudo password: %s"
-msgstr "Vraagt om je sudo-wachtwoord: %s"
 
 # needs review
 #: gui/frame-tweaks-gui.py
