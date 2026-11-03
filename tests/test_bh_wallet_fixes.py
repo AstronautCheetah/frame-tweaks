@@ -693,6 +693,12 @@ class NoPassword(Home):
         self.assertEqual((state["pam"], state["locked_again"]), (1, 0))
         self.assertIs(wu.password_set(conn), True)
         self.assertEqual(state["pam"], 1)
+        # Every save into the wallet rewrites its file: trying again after each was one more
+        # empty-password attempt, and kwalletd warned of "repeated failed attempts".
+        for n in range(3):
+            wu.KWL.write_bytes(b"KWALLET saved " + bytes([48 + n]))
+            self.assertIs(wu.password_set(conn), True)
+        self.assertEqual(state["pam"], 1)
 
     def test_an_open_wallet_isnt_tried(self):
         wu, conn, state = self.wallet(stock=True)

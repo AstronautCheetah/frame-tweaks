@@ -308,9 +308,13 @@ def password_set(conn, probe=True):
     """Whether the wallet needs a password: False for SteamOS's stock wallet, which opens without
     one, so it protects nothing and a dialog asking for its password can't be answered (the
     Wallet apps page says so instead); None when there's no wallet, or no way to tell yet. Found
-    out by trying, while the wallet is locked (an open one ignores pamOpen), and locking it again;
-    the answer is kept for the wallet file as it was, so a new one (Change Password rewrites it)
-    is tried at the next lock. probe=False only reads what's kept."""
+    out by trying, while the wallet is locked (an open one ignores pamOpen), and locking it again.
+    "No password" is kept for the wallet file as it was, so a changed one (Change Password rewrites
+    it) is tried again at the next lock. "A password" is kept whatever the file does: every save
+    into the wallet rewrites the file too, and trying again after each one was an empty-password
+    attempt each time, which kwalletd counted until it warned of "repeated failed attempts to gain
+    access to a wallet". (Taking a password off, rare, is then noticed after a restart: the answer
+    lives in /run.) probe=False only reads what's kept."""
     file_id = wallet_file_id()
     if file_id is None:
         return None
@@ -318,7 +322,7 @@ def password_set(conn, probe=True):
         known = json.loads(PASSWORD.read_text())
     except (OSError, ValueError):
         known = {}
-    if known.get("kwl") == file_id or not probe or not is_locked(conn):
+    if known.get("kwl") == file_id or known.get("set") is True or not probe or not is_locked(conn):
         return known.get("set")      # (open: the last answer, if any; an app saving rewrites the file too)
     opened = open_without_password(conn)
     if opened:
