@@ -228,7 +228,6 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh wallet-apps        apps using the wallet (add, --remove, --gate…; --help)
 ./install.sh timers             close-after timers (--set APP MINUTES, --headset…; --help)
 ./install.sh menu               put the Frame Tweaks app-menu entry back (--remove takes it out)
-./install.sh bindings status    SteamVR controller bindings tweaks changed (experimental; docs/mods.md)
 ./install.sh uninstall-self     uninstall Frame Tweaks itself (see Uninstalling, below)
 ./install.sh --version          which Frame Tweaks this is
 ```
