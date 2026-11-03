@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 (2026-11-03)
 
 ### Security
 - **A new install checks the release's signature too:** `get.sh` carries the release key and
