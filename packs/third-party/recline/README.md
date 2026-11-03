@@ -21,7 +21,7 @@ experimental: >-
   Recline-VR checks those internals each time SteamVR starts and turns the affected part off if
   they changed (the driver doesn't load, or the room view looks tilted while reclined; its panel
   and `reclinectl status` say so) until Recline-VR catches up.
-icon: {theme: go-down-skip}
+icon: {file: recline.png}
 link:
   install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR fetch --tags origin; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR && touch ~/Recline-VR/.git/frame-tweaks-cloned; fi && if [ -n "$FT_LINK_VERSION" ]; then git -C ~/Recline-VR -c advice.detachedHead=false checkout -q "refs/tags/$FT_LINK_VERSION"; else git -C ~/Recline-VR checkout -q main && git -C ~/Recline-VR pull --ff-only; fi && ~/Recline-VR/install.sh
   uninstall: >-
@@ -111,7 +111,8 @@ they're not copied here.)
 ## Credits
 [Recline-VR](https://github.com/new-waifu/Recline-VR) is by new-waifu (MIT), with parts of the
 OpenVR SDK (BSD-3-Clause, Valve) and DejaVu Sans Mono glyphs; its `LICENSE` and
-`THIRD_PARTY.md` are installed with it. We also looked at
+`THIRD_PARTY.md` are installed with it. This tweak's icon, `recline.png`, is Recline-VR's own
+(`packaging/resources/icon.png`, MIT), unchanged. We also looked at
 [RobcPeng/steam-frame-recline](https://github.com/RobcPeng/steam-frame-recline), a similar
 project. See also [CREDITS.md](../../../CREDITS.md).
 

@@ -143,6 +143,7 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Recline shows Recline-VR's own icon** in the list, instead of a stock arrow.
 - **✔ Works on my Frame moved** from the window's bottom row to the "Help make Frame Tweaks better" row, under **Get involved**: reporting what works is a way to help.
 - **Dictation's voice activity detection says it's Whisper's:** its setting is now *Whisper voice activity detection*, dimmed with a note while Parakeet is the engine (Parakeet doesn't use it). Settings pages can do this for any option (`only_with`, docs/mods.md).
 - **Dictation keeps a recording the engine heard nothing in** (`last-no-text.wav`, beside `last.wav`), and logs each recording's peak, to find out why.
