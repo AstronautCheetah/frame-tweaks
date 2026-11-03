@@ -236,6 +236,12 @@ run_engine() {
     if [ "$(engine)" = parakeet ]; then
         "${FAST[@]}" "$PARAKEET" "$wav" 2>>"$LOG"; return
     fi
+    run_whisper "$wav" "$ac"
+}
+
+# run_whisper WAV AUDIO_CTX: Whisper, started for this one recording.
+run_whisper() {
+    local wav=$1 ac=$2
     # With "Memory caps" installed, Whisper runs inside its memory limit.
     local cap=() args=(-m "$MODEL" -f "$wav" -t "$THREADS" -nt -np -l "$LANGUAGE" --prompt "$PROMPT"
                       -bs "$BEAM" -bo "$BEAM" -sns)
@@ -283,6 +289,14 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     fi
     text=$(run_engine "$wav" "$secs" \
         | tr '\n' ' ' | sed -E 's/\[[A-Z_ ]+\]//g; s/\([a-z ]+\)//g; s/^ +//; s/ +$//; s/  +/ /g')
+    # Parakeet (int8) sometimes hears nothing in a recording loud enough to have speech (one of 3.5
+    # s, "dictation test, the first one failed": nothing; its first 1.2 s alone: the words), where
+    # Whisper hears it all: Whisper, whose model is always here, tries that one.
+    if [ -z "$text" ] && [ "$(engine)" = parakeet ]; then
+        log "Parakeet heard nothing: Whisper tries it"; cp -f "$wav" "$STATE/last-no-text.wav"
+        text=$(run_whisper "$wav" "$(audio_ctx "$secs")" \
+            | tr '\n' ' ' | sed -E 's/\[[A-Z_ ]+\]//g; s/\([a-z ]+\)//g; s/^ +//; s/ +$//; s/  +/ /g')
+    fi
     # Drop Whisper's well-known phantom phrases when they are the whole result.
     if grep -qiE '^(subs? (by|from) .*|subtitles by .*|thanks? (you )?for watching[.!]?|thank you[.!]?|you|bye[.!]?|\.+)$' <<<"$text"; then
         log "dropped likely hallucination: $text"; text=""

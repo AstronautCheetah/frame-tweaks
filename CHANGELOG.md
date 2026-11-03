@@ -210,6 +210,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Parakeet no longer drops a whole dictation:** its int8 model sometimes heard nothing in a recording with clear speech (3.5 seconds of "dictation test, the first one failed": nothing; Whisper heard all of it). When Parakeet hears nothing in a recording loud enough to hold speech, Whisper tries it.
 - **Performance Overlay starts with SteamVR, as meant, and has a Show button.** Its installer
   enables a user service that starts the panel with SteamVR, but `systemctl --user enable` fails
   quietly in the desktop-mode terminal Frame Tweaks runs installers in (no user bus there), so the

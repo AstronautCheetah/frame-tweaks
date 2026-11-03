@@ -494,6 +494,20 @@ class DictateEngine(Home):
         self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Bonjour. ")
 
 
+    def test_whisper_tries_what_parakeet_heard_nothing_in(self):
+        """Parakeet (int8) heard nothing in a loud 3.5 s recording Whisper heard all of: Whisper
+        tries it."""
+        model = self.home / ".local/share/frame-tweaks/parakeet/model"
+        model.mkdir(parents=True)
+        (model / ".version").write_text("8f23f0c0\n")
+        log = self.dictate("Dictation test.", conf="DICTATE_ENGINE=parakeet\n", stubs=(
+            ("dictate-parakeet", f'echo "parakeet $*" >> {self.log}; echo'),))
+        self.assertIn("parakeet ", self.log.read_text())                 # (asked first)
+        self.assertTrue([line for line in log if line.startswith("whisper ")], log)
+        self.assertIn("Parakeet heard nothing: Whisper tries it", (self.tmp / "run/dictate/dictate.log").read_text())
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Dictation test. ")
+
+
 class DictateParakeetForm(unittest.TestCase):
     """dictate-parakeet --serve reads the recording from a form as curl -F sends it (whisper-server's
     request), without onnx-asr."""

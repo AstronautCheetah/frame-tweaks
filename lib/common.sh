@@ -279,7 +279,8 @@ install_i18n() {
     find "$d/locale" -name '*.po' -delete
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }
-sha_ok() { [ -n "$1" ] && echo "$1  $2" | sha256sum -c --quiet - 2>/dev/null; }
+# (a file not there yet is no match, quietly: sha256sum said "FAILED open or read" for each, on stdout)
+sha_ok() { [ -n "$1" ] && [ -f "$2" ] && echo "$1  $2" | sha256sum -c --quiet - >/dev/null 2>&1; }
 # settings_applied: the settings this tweak's Apply applies (its manifest's settings: actions: keys:)
 # are applied now, as chosen: its script says so at the end, from an install or the Apply button, and
 # the window dims Apply until one of them changes (lib/sft.py record_applied).
