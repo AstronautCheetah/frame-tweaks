@@ -186,6 +186,8 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **The Packs page keeps its place:** Trust (or any button there) on one of many packs left the
+  list scrolled to an end; it now stays where you were.
 - **Android Mirror's Restart stream always restarts:** the gear's request is now left as a file
   as well as signalled, so a signal bash didn't act on no longer loses it; and a restart during the
   first mirror's start-up check is no longer reported as "The mirror didn't start".

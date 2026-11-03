@@ -5,7 +5,8 @@ import html
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
-from PyQt6.QtCore import Qt, QUrl
+from PyQt6 import sip
+from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtGui import QCursor, QDesktopServices
 from PyQt6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
                              QVBoxLayout, QWidget)
@@ -109,17 +110,34 @@ class Packs(QWidget):
         self.body = QWidget()
         self.rows = QVBoxLayout(self.body)
         self.rows.setSpacing(8)
-        scroll = QScrollArea()
+        self.scroll = scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self.body)
         lay.addWidget(scroll, 1)
+        self.keep_scroll = None                          # (where build() puts the view back: restore_scroll)
+        self.building = False                            # (a build in this turn of the event loop already)
+        scroll.verticalScrollBar().rangeChanged.connect(self.restore_scroll)
+        # (until you scroll yourself: the wheel, the bar, the keys; then that's where you are)
+        scroll.verticalScrollBar().actionTriggered.connect(lambda _action: setattr(self, "keep_scroll", None))
         self.removing = None
         if self.busy():                                 # (still adding or updating one, from a page left since)
             self.tell(self.window.pack_job[2], good=True)
         self.build()
 
     def build(self):
+        # Every button here rebuilds the list, and the rows going and coming back moved the view
+        # (Trust on one of many packs left you at the bottom): it's put back where it was as soon
+        # as the new rows are laid out far enough down to show it, and again at each relayout
+        # after (the old rows' going emptied the list for a moment, back to the top), until you
+        # scroll yourself (restore_scroll).
+        # (Where you are now, unless a build ran in this same turn: the view is mid-rebuild then.)
+        bar = self.scroll.verticalScrollBar()
+        if not self.building:
+            self.keep_scroll, self.building = bar.value(), True
+            QTimer.singleShot(0, lambda: sip.isdeleted(self) or setattr(self, "building", False))
+        if self.body.focusWidget() is not None:       # (a focused button deleted: Qt then focuses, and
+            self.scroll.setFocus()                   # scrolls to, whatever comes next)
         while self.rows.count():
             w = self.rows.takeAt(0).widget()
             if w:
@@ -202,6 +220,12 @@ class Packs(QWidget):
             probs.setStyleSheet("color: #e0b33a")
             self.rows.addWidget(probs)
         self.rows.addStretch(1)
+        self.restore_scroll(bar.minimum(), bar.maximum())
+
+    def restore_scroll(self, _low, high):
+        """The view back where it was before build(), whenever the list reaches that far."""
+        if self.keep_scroll is not None and high >= self.keep_scroll:
+            self.scroll.verticalScrollBar().setValue(self.keep_scroll)
 
     def ask_remove(self, d):
         self.removing = d

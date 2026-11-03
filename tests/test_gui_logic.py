@@ -796,6 +796,37 @@ class PacksPage(unittest.TestCase):
                 self.assertIn("Stop using", buttons())
         gui.sft.load(refresh=True)
 
+    def test_trust_keeps_the_scroll_position(self):
+        """Trust on one of many packs rebuilt the list and left the view at the bottom: it stays
+        where it was."""
+        import shutil
+        from PyQt6.QtWidgets import QApplication, QPushButton, QScrollArea
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "packs").mkdir()
+            for n in range(12):
+                shutil.copytree(ROOT / "examples/hello-pack", d / "packs" / f"mine-{n:02d}")
+            with mock.patch.object(registry, "USER_PACKS", d / "packs"), \
+                    mock.patch.object(registry, "TRUSTED", d / "trusted"), mock.patch.object(registry, "CONF", d), \
+                    mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
+                page = gui.Packs(mock.Mock())
+                page.resize(700, 400)
+                page.show()
+                self.addCleanup(page.close)
+                self.app.processEvents()
+                bar = page.findChild(QScrollArea).verticalScrollBar()
+                self.assertGreater(bar.maximum(), 0)
+                bar.setValue(bar.maximum() // 2)
+                middle = bar.value()
+                trust = [b for b in page.findChildren(QPushButton) if b.text() == "Trust" and b.isVisible()]
+                visible = [b for b in trust if b.visibleRegion().boundingRect().height() > 0]
+                (visible or trust)[0].click()
+                for _ in range(5):
+                    self.app.processEvents()
+                self.assertEqual(bar.value(), middle)
+        gui.sft.load(refresh=True)
+
     def test_add_update_and_remove_from_a_link(self):
         """A pack's link: Add brings it in, not trusted; one Check for updates found newer says so, and
         Update gets it; Remove… asks once more."""
