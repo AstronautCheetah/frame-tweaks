@@ -1051,6 +1051,30 @@ class LinkedProject(unittest.TestCase):
         self.sh("install", "linked")                                    # (installing again forgets it)
         self.assertFalse((self.home / ".local/state/frame-tweaks/unloaded/linked").exists())
 
+    def test_reinstalling_the_version_steamvr_has_loaded_asks_for_no_restart(self):
+        """↻ over the version SteamVR has loaded already (Passthrough PiP's reinstall said to restart
+        SteamVR, which wasn't needed): no restart. A fresh install, or another version, still asks."""
+        (self.pack / "linked/README.md").write_text(LINKED.replace(
+            "  readme: https://example.org/linked", "  restart: steamvr\n  version: cat ~/linked-project/VERSION\n"
+            "  readme: https://github.com/example/linked").replace(
+            "mkdir -p ~/linked-project", "mkdir -p ~/linked-project; echo ${NEXT:-1.0} > ~/linked-project/VERSION"))
+        self.trust()
+        self.stub("pgrep", '[ "$*" = "-xo vrserver" ] && echo 4242 || exit 1')
+        self.stub("ps", "echo 60")                                           # SteamVR: started a minute ago
+        r = self.sh("install", "linked")                                     # (fresh, while SteamVR runs)
+        self.assertIn("Done.", r.stdout, r.stderr)                           # (exit 2: it waits for a restart)
+        r = self.sh("status", "linked")
+        self.assertIn("installed; restart SteamVR to load it", r.stdout, r.stderr)
+        for f in (self.home / "linked-project", self.home / ".local/state/frame-tweaks/installed/linked"):
+            os.utime(f, (time.time() - 3600,) * 2)                          # (installed an hour ago: loaded since)
+        self.assertIn("installed by its own installer", self.sh("status", "linked").stdout)
+        self.sh("reinstall", "linked")                                       # (the same version again)
+        out = self.sh("status", "linked").stdout
+        self.assertNotIn("restart SteamVR", out)
+        self.assertIn("installed by its own installer", out)
+        self.sh("reinstall", "linked", NEXT="2.0")                           # (another version: not loaded)
+        self.assertIn("installed; restart SteamVR to load it", self.sh("status", "linked").stdout)
+
     def test_an_install_whose_file_keeps_an_old_date_still_asks_for_a_restart(self):
         """An installer that copies with cp -p keeps a file's date from the project (Recline-VR's
         uninstall.sh): older than SteamVR, it read as loaded already. The install is Frame Tweaks'

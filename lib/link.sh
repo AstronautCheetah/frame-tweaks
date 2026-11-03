@@ -20,6 +20,10 @@ UNLOADED="$HOME/.local/state/frame-tweaks/unloaded/$id"
 # Which version Frame Tweaks installed: "tested <version>" or "newest" (lib/sft.py link_choice).
 # ./install.sh forget_version removes it with the install record.
 CHOICE="$HOME/.local/state/frame-tweaks/link-version/$id"
+# restart: steamvr: the version an install put back over the same version SteamVR had loaded
+# already (a ↻ reinstall, say): no restart is needed for that one, though the install record it
+# rewrote is newer than SteamVR. Gone with any other install, and with the uninstall.
+LOADED="$HOME/.local/state/frame-tweaks/loaded/$id"
 
 # same_version A B: the same release (a leading v either way), or for a commit, one abbreviating
 # the other (lib/tested-versions has it whole, a version: command prints it short).
@@ -60,6 +64,20 @@ how_installed() {
     fi
 }
 
+# restart_pending: restart: steamvr and installed after SteamVR started (its install record, or a
+# newer change to an installed path), unless what was installed is the version SteamVR had loaded
+# already (LOADED). True only while SteamVR runs.
+restart_pending() {
+    local path
+    if [ -f "$LOADED" ] && same_version "$(head -1 "$LOADED")" "$(installed_version)"; then return 1; fi
+    vr_started_before "$HOME/.local/state/frame-tweaks/installed/$id" && return 0
+    while IFS= read -r path; do
+        path=${path/#\~/$HOME}
+        [ -e "$path" ] && vr_started_before "$path" && return 0
+    done < <(field installed)
+    return 1
+}
+
 case $action in
     install)
         cmd=$(field install) tested=$(field tested) choice=""
@@ -77,9 +95,18 @@ case $action in
             say "$(t "Installing %s %s, the version Frame Tweaks tested, with its own installer (from the project):" "$name" "$(shown "$tested")")"
         fi
         echo "  $cmd"
+        # (loaded: SteamVR has this version loaded already, or loads it when it starts: installed,
+        # nothing waiting for a restart, and the same version installed after)
+        loaded=""
+        if [ "$(field restart)" = steamvr ] && [ ! -e "$UNLOADED" ] && ! restart_pending; then
+            loaded=$(installed_version)
+        fi
         # (exported to its command alone: the version to install, empty for the newest)
         FT_LINK_VERSION=$version PATH=$LINK_PATH bash -c "$cmd" || exit
-        rm -f "$UNLOADED"
+        rm -f "$UNLOADED" "$LOADED"
+        if [ -n "$loaded" ] && same_version "$loaded" "$(installed_version)"; then
+            mkdir -p "${LOADED%/*}" && echo "$loaded" > "$LOADED"
+        fi
         if [ -n "$tested" ]; then
             mkdir -p "${CHOICE%/*}"
             if [ "$choice" = newest ]; then echo newest; else echo "tested $tested"; fi > "$CHOICE"
@@ -92,6 +119,7 @@ case $action in
         say "$(t "Uninstalling %s with its own uninstaller:" "$name")"
         echo "  $cmd"
         PATH=$LINK_PATH bash -c "$cmd" || exit
+        rm -f "$LOADED"
         if [ "$(field restart)" = steamvr ]; then
             mkdir -p "${UNLOADED%/*}" && touch "$UNLOADED"
             say "$(t 'Restart SteamVR to unload it: ⟳ Restart SteamVR on its row in the Frame Tweaks window, or reboot.')"
@@ -102,13 +130,13 @@ case $action in
         # installer window offers to restart it either way). The install: Frame Tweaks' record of
         # it, rewritten by every install and ↻, or a newer change to the path. (Not the path's
         # date alone: an installer that copies with cp -p keeps the date the file had in the
-        # project, often older than SteamVR.)
+        # project, often older than SteamVR.) Not after an install of the version SteamVR had
+        # loaded already (restart_pending, LOADED).
         restart=$(field restart)
         while IFS= read -r path; do
             path=${path/#\~/$HOME}
             [ -e "$path" ] || continue
-            [ "$restart" = steamvr ] &&
-                { vr_started_before "$HOME/.local/state/frame-tweaks/installed/$id" || vr_started_before "$path"; } &&
+            [ "$restart" = steamvr ] && restart_pending &&
                 status_restart "$(t 'installed; restart SteamVR to load it')"
             status_ok "$(how_installed "$(field tested)")"
         done < <(field installed)
