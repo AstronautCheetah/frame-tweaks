@@ -22,6 +22,20 @@ TICK = {"hover": 1000, "press": 3999}        # µs: a light tick on hover, a fir
 NOTE_PX, NOTE_PAD_PX, NOTE_FONT_PX = 900, 28, 34     # a note's picture: width, margin, text size
 
 
+def server_running(proc="/proc"):
+    """SteamVR's vrserver is running. An overlay app's init starts SteamVR when it isn't, and a
+    SteamVR started that way, by a service before SteamOS's VR session is up, has no X server:
+    its web helper can't start, so the headset shows only a blue void with no dashboard. So an
+    app that starts on its own waits for this first; SteamOS's steamvr.service starts SteamVR."""
+    for comm in Path(proc).glob("[0-9]*/comm"):
+        try:
+            if comm.read_text().strip() == "vrserver":
+                return True
+        except OSError:
+            continue
+    return False
+
+
 def rigid_mul(a, b):
     """a * b for two rigid 3x4 transforms."""
     return [[sum(a[r][k] * b[k][c] for k in range(3)) + (a[r][3] if c == 3 else 0.0)

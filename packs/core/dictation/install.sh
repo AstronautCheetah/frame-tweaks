@@ -66,6 +66,10 @@ if [ -f "$VR_LIB" ] && ensure_tweaks_venv && ensure_openvr "$TWEAKS_VENV"; then
 Description=Dictation on a controller button, while SteamVR runs (Frame Tweaks)
 After=steamvr.service
 PartOf=steamvr.service
+# Only once steamvr.service has started: when SteamOS's VR session fails to come up at boot,
+# steamvr.service's start fails and this one isn't started either (a Wants alone would start it,
+# and its init would start SteamVR without the session: a blue void in the headset).
+Requires=steamvr.service
 # A crash loop gives up: 10 starts within 5 minutes and it stays stopped, rather than restart
 # for ever; running steadily, old starts age out. (systemd's own limit, 5 in 10 s, would never
 # trip with the growing waits below.)

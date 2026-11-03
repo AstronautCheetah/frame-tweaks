@@ -260,6 +260,11 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **A blue void in the headset after a boot.** When SteamOS's VR session was slow to come up,
+  Dictation's controller button service could start SteamVR itself, without the session: SteamVR
+  then ran with no X server for its web helper, so the headset showed only a blue screen, with no
+  dashboard. The service now starts only once SteamOS's SteamVR has, and waits for SteamVR's server
+  rather than starting it.
 - **Screen snip in Theater mode.** With a game, or anything started from Steam, running, the snip
   seemed to do nothing: gamescope keeps its focus on that app and shows only its windows, so the
   selection window never appeared and got no laser. The snip window now marks itself as the

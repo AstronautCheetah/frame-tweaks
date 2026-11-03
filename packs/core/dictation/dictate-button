@@ -161,14 +161,21 @@ def toggle():
                      stderr=subprocess.DEVNULL, start_new_session=True)
 
 
-def connect(vr, tries=30):
-    """SteamVR as an overlay app; it may still be starting when the service does."""
+def connect(vr, tries=30, running=None):
+    """SteamVR as an overlay app, once its server runs; it may still be starting when the service
+    does. Never before: the init would start SteamVR itself, without SteamOS's VR session
+    (vrkit.server_running: the headset then shows a blue void)."""
+    if running is None:
+        import vrkit
+        running = vrkit.server_running
     for _ in range(tries):
-        try:
-            vr.init(vr.VRApplication_Overlay)
-            return True
-        except vr.OpenVRError:
-            time.sleep(2)
+        if running():
+            try:
+                vr.init(vr.VRApplication_Overlay)
+                return True
+            except vr.OpenVRError:
+                pass
+        time.sleep(2)
     return False
 
 

@@ -11,6 +11,7 @@ import sys
 import tempfile
 import types
 import unittest
+import unittest.mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -267,6 +268,38 @@ class DpadDirection(unittest.TestCase):
         self.assertIsNone(vrkit.dpad_direction(*vrkit.rotation_axis(*self.turned(up, 1))))
 
 
+class Connect(unittest.TestCase):
+    """It never starts SteamVR itself: an overlay app's init does when vrserver isn't running, and
+    a service starting it before SteamOS's VR session left the headset a blue void. It inits only
+    once vrserver runs, and gives up (False) when it never does."""
+
+    def vr(self):
+        calls = []
+        return calls, types.SimpleNamespace(VRApplication_Overlay=2, OpenVRError=RuntimeError,
+                                            init=lambda kind: calls.append(kind))
+
+    def test_waits_for_vrserver_and_never_inits_before(self):
+        calls, vr = self.vr()
+        up = iter([False, False, True])
+        with unittest.mock.patch.object(db.time, "sleep"):
+            self.assertTrue(db.connect(vr, tries=5, running=lambda: next(up)))
+        self.assertEqual(calls, [2])
+        calls, vr = self.vr()
+        with unittest.mock.patch.object(db.time, "sleep"):
+            self.assertFalse(db.connect(vr, tries=3, running=lambda: False))
+        self.assertEqual(calls, [])
+
+    def test_server_running_reads_proc(self):
+        with tempfile.TemporaryDirectory() as d:
+            for pid, comm in (("1", "systemd"), ("42", "vrcompositor"), ("self", "vrserver")):
+                (Path(d) / pid).mkdir()
+                (Path(d) / pid / "comm").write_text(comm + "\n")
+            self.assertFalse(vrkit.server_running(d))
+            (Path(d) / "77").mkdir()
+            (Path(d) / "77/comm").write_text("vrserver\n")
+            self.assertTrue(vrkit.server_running(d))
+
+
 class InstallService(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
@@ -313,7 +346,7 @@ class InstallService(unittest.TestCase):
         ovr = self.with_steamvr()
         self.run_script("install.sh")
         unit = self.unit.read_text()
-        for line in ("PartOf=steamvr.service", "After=steamvr.service", "WantedBy=steamvr.service",
+        for line in ("PartOf=steamvr.service", "After=steamvr.service", "Requires=steamvr.service", "WantedBy=steamvr.service",
                      f"ExecStart={self.home}/.local/bin/dictate-button"):
             self.assertIn(line, unit)
         tool = (self.home / ".local/bin/dictate-button").read_text()
