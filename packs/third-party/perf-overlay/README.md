@@ -18,7 +18,7 @@ author: sasaken1102r (frame-perf-overlay)
 source:
   relation: from
   url: https://github.com/sasaken1102r/frame-perf-overlay
-icon: {theme: utilities-system-monitor}
+icon: {file: frame-perf-overlay.png}
 processes: [/frame-perf-overlay( |$)]
 config: [~/.config/frame-perf-overlay]
 link:
@@ -88,7 +88,8 @@ setting.
 ## Credits
 
 frame-perf-overlay is by [sasaken1102r](https://github.com/sasaken1102r/frame-perf-overlay)
-(MIT). Frame Tweaks only runs its install steps. See also [CREDITS.md](../../../CREDITS.md).
+(MIT). Frame Tweaks only runs its install steps. This tweak's icon, `frame-perf-overlay.png`, is
+its own launcher icon (`contrib/icons/frame-perf-overlay-256.png`, MIT), unchanged. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status perf-overlay` · Remove: `./install.sh uninstall perf-overlay`

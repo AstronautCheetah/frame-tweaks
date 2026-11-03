@@ -22,7 +22,7 @@ experimental: >-
   KnockThru catches up (three buzzes after a knock, and its tab says why). While CEF Remote
   Debugging is on, programs on the headset can control Steam's interface; turn it off when you
   stop using KnockThru.
-icon: {theme: view-visible}
+icon: {file: knockthru-logo.svg}
 processes: [/KnockThru/knockthru( |$)]
 config: [~/.config/knockthru]
 link:
@@ -101,7 +101,9 @@ settings and the troubleshooting.
 
 KnockThru is by [VioletTides](https://github.com/VioletTides/KnockThru) (MIT); its controller and
 headset drawings come from Valve's Steam Frame CAD files (CC BY-NC-SA 4.0). Frame Tweaks only
-runs its install steps. See also [CREDITS.md](../../../CREDITS.md).
+runs its install steps. This tweak's icon, `knockthru-logo.svg`, is KnockThru's own logo
+(`images/logo.svg`), unchanged; traced from the same CAD files, it's CC BY-NC-SA 4.0 too, not
+MIT like the rest of Frame Tweaks. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status knockthru` · Remove: `./install.sh uninstall knockthru`

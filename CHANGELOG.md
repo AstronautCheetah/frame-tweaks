@@ -141,6 +141,7 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **KnockThru and Performance Overlay show their own logos** on their rows, instead of a generic icon.
 - **↻ Reinstall asks first,** on the confirm page Apply changes uses: what reinstalling does, whether its files changed, and whether it asks for the sudo password.
 - **VR memory guard also limits Frame Tweaks' own heavy helpers:** Dictation (Whisper, or an
   engine kept loaded) up to 2.5 GB and Android Mirror's scrcpy up to 1 GB (`dictation_max`,

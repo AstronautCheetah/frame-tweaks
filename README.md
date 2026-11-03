@@ -478,7 +478,8 @@ Help is welcome, and much of it doesn't need a Frame:
   security problems privately, through a
   [security advisory](https://github.com/AstronautCheetah/frame-tweaks/security/advisories/new).
 - [MIT](LICENSE), except the icons made from KDE Breeze and Noto Color Emoji (their own
-  licences; [icons/README.md](icons/README.md)). Changes: [CHANGELOG.md](CHANGELOG.md).
+  licences; [icons/README.md](icons/README.md)) and KnockThru's logo, its tweak's icon
+  (CC BY-NC-SA 4.0; [CREDITS.md](CREDITS.md)). Changes: [CHANGELOG.md](CHANGELOG.md).
 
 ## Tested on
 
