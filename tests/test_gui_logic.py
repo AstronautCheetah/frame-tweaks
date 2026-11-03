@@ -376,13 +376,17 @@ class Collect(unittest.TestCase):
         self.assertEqual(w.updates, {"arrowpad": ("1", "2")})
         w.refresh.assert_called_once()
         w.changed, w.wanted = mock.Mock(), {"arrowpad": True}
-        with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.object(gui, "in_terminal"), \
+        with mock.patch.object(gui, "QProcess") as qprocess, mock.patch.object(gui, "in_terminal") as term, \
                 mock.patch.dict(os.environ):
             os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
             w.run_reinstall("full-keyboard")
+            # (through lib/detached.sh: closing the terminal doesn't cut it short)
+            self.assertIn("&& bash lib/detached.sh ./install.sh reinstall full-keyboard;", term.call_args[0][1])
             qprocess.return_value.finished.connect.call_args[0][0]()        # (its terminal closed)
             w.changed.assert_called_with(["full-keyboard"])
             w.run_changes(["arrowpad"], ["snip"])
+            self.assertIn("&& bash lib/detached.sh bash -c './install.sh uninstall snip && ./install.sh install arrowpad';",
+                          term.call_args[0][1])
             qprocess.return_value.finished.connect.call_args[0][0]()
             w.changed.assert_called_with(["arrowpad", "snip"])
         self.assertEqual(w.wanted, {})

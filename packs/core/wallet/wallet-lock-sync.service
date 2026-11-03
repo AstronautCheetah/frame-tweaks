@@ -1,10 +1,19 @@
 [Unit]
 Description=Lock the KDE wallet (ksecretd) whenever kwalletd6 closes it
+# A crash loop gives up: 10 starts within 5 minutes and it stays stopped, rather than restart
+# for ever; running steadily, old starts age out. (systemd's own limit, 5 in 10 s, would never
+# trip with the growing waits below.)
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 ExecStart=%h/.local/bin/wallet-unlock --watch
+# On a crash only (not a clean exit, nor a stop by Frame Tweaks): again after 1 s, the wait
+# doubling with each restart up to 32 s (systemd 254+; the Frame has 257).
 Restart=on-failure
-RestartSec=5
+RestartSec=1
+RestartSteps=5
+RestartMaxDelaySec=32
 # Sandboxing (lighter than ydotoold's: it shows the unlock dialog and talks to both desktops'
 # D-Bus and X servers, so the home folder, /run/user and /tmp stay writable).
 NoNewPrivileges=yes

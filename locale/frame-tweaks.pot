@@ -343,6 +343,11 @@ msgid ""
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"An install or update is still running (one started before this window opened goes on by itself): check again once it's done. Its output: {folder}"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr ""
 
@@ -2309,6 +2314,11 @@ msgstr ""
 
 #: lib/common.sh
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
+msgstr ""
+
+#: lib/detached.sh
+msgid ""
+"Closing this terminal does not stop it: it goes on as %s (its output: %s)."
 msgstr ""
 
 #: lib/i18n.py

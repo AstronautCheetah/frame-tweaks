@@ -66,11 +66,20 @@ if [ -f "$VR_LIB" ] && ensure_tweaks_venv && ensure_openvr "$TWEAKS_VENV"; then
 Description=Dictation on a controller button, while SteamVR runs (Frame Tweaks)
 After=steamvr.service
 PartOf=steamvr.service
+# A crash loop gives up: 10 starts within 5 minutes and it stays stopped, rather than restart
+# for ever; running steadily, old starts age out. (systemd's own limit, 5 in 10 s, would never
+# trip with the growing waits below.)
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 ExecStart=$BIN/dictate-button
+# On a crash only (not a clean exit, nor a stop by Frame Tweaks): again after 1 s, the wait
+# doubling with each restart up to 32 s (systemd 254+; the Frame has 257).
 Restart=on-failure
-RestartSec=5
+RestartSec=1
+RestartSteps=5
+RestartMaxDelaySec=32
 
 [Install]
 WantedBy=steamvr.service
@@ -96,12 +105,21 @@ fi
 write_file "$HOME/.config/systemd/user/frame-tweaks-dictate-engine.service" <<UNITFILE
 [Unit]
 Description=Dictation's engine, kept loaded (Frame Tweaks)
+# A crash loop gives up: 10 starts within 5 minutes and it stays stopped, rather than restart
+# for ever; running steadily, old starts age out. (systemd's own limit, 5 in 10 s, would never
+# trip with the growing waits below.)
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 ExecStart=$BIN/dictate --serve
 OOMScoreAdjust=900
+# On a crash only (not a clean exit, nor a stop by Frame Tweaks): again after 1 s, the wait
+# doubling with each restart up to 32 s (systemd 254+; the Frame has 257).
 Restart=on-failure
-RestartSec=5
+RestartSec=1
+RestartSteps=5
+RestartMaxDelaySec=32
 UNITFILE
 sysctl_user daemon-reload || true
 "$TWEAK_DIR/engine.sh" || warn "$(t "Dictation's engine setting couldn't be applied; it uses Whisper")"

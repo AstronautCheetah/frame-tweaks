@@ -54,8 +54,8 @@ from packs_page import Packs  # noqa: E402  (Packs page)
 from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences page)
 from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
 from works_page import WorksPage  # noqa: E402  (✔ Works on my Frame page)
-from window_logic import (GONE, KNOWN_ISSUES, RESTART, UNLOAD, close_prompt, in_terminal,  # noqa: E402
-                          latest_release, run_label, self_update_check, status, status_text, update_check)
+from window_logic import (GONE, KNOWN_ISSUES, RESTART, UNLOAD, close_prompt, detached, in_terminal,  # noqa: E402
+                          install_running, latest_release, run_label, self_update_check, status, status_text, update_check)
 from readme_view import follow_link, link_label, with_copy  # noqa: E402  (READMEs and links)
 from tweak_rows import BREEZE, CONTRIBUTE, CategoryHeader, ContributeRow, Row, row_icon  # noqa: E402  (the list's rows)
 from details_page import Details, ReadmePage  # noqa: E402  (a tweak's page, a README's)
@@ -868,7 +868,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         # (0 updated, 3 updated but a tweak didn't install again; else it didn't update: no "reopen")
         after = "" if cid else ("; rc=$?; if [ $rc -eq 0 ] || [ $rc -eq 3 ]; then echo; echo "
                                 + shlex.quote(_("Close and reopen Frame Tweaks to use the new version.")) + "; fi")
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}{after}; echo; read -rp {close_prompt()}"
+        full = f"cd {shlex.quote(str(REPO))} && {detached(cmd)}{after}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: (self.updates.pop(cid, None), self.refresh(),
                                                cid is None and self.after_self_update()))
@@ -948,7 +948,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
+        full = f"cd {shlex.quote(str(REPO))} && {detached(cmd)}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)
         self.proc.finished.connect(lambda *_: self.changed([cid]))
         in_terminal(self.proc, full)
@@ -970,6 +970,12 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         if self.tidied:
             return
         self.tidied = True
+        # (An install going on, one a closed window started say: it holds the lock tidy needs.)
+        if install_running():
+            self.say(_("An install or update is still running (one started before this window opened goes on "
+                       "by itself): check again once it's done. Its output: {folder}").format(
+                         folder="~/.local/state/frame-tweaks/logs"))
+            return
         why = sft.not_needed(self.rows)
         gone = [c for c in self.rows if c.get("when_not_needed") == "uninstall" and c["id"] in why
                 and self.state.get(c["id"]) is not None and self.state[c["id"]][0] not in GONE]
@@ -1272,8 +1278,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             steps.append("./install.sh uninstall " + " ".join(remove))
         if add:
             steps.append("./install.sh install " + " ".join(add))
-        # (one splash for both: ./install.sh run under lib/splash.py doesn't start another)
-        cmd = (f"cd {shlex.quote(str(REPO))} && python3 lib/splash.py -- bash -c {shlex.quote(' && '.join(steps))}"
+        # (one splash for both, drawn by lib/detached.sh: ./install.sh run under it doesn't start another)
+        cmd = (f"cd {shlex.quote(str(REPO))} && {detached('bash -c ' + shlex.quote(' && '.join(steps)))}"
                f"; echo; read -rp {close_prompt()}")
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.changed(add + remove)))

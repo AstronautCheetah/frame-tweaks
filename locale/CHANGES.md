@@ -28,6 +28,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Search the tweaks"
 - New in `gui/frame-tweaks-gui.py:283`
   - now: "Search: name, description, category"
+- New in `gui/frame-tweaks-gui.py:975`
+  - now: "An install or update is still running (one started before this window opened goes on by itself): check again once it's done. Its output: {folder}"
 - New in `gui/prefs_page.py:235`
   - now: "Translating without a copy of the repository: Save the template, translate it (Poedit, Lokalize or a text editor) and keep it in this folder as <language>.po, de.po or pt_BR.po say: {folder}. Frame Tweaks reads it at once. Each of its texts takes the place of the shipped one, and a language only it has appears above, marked (local). A text that would lose a placeholder, a tag or a space is left out and listed here."
 - New in `gui/prefs_page.py:245`
@@ -88,6 +90,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "still broken after installing it again: %s"
 - New in `install.sh:796`
   - now: "Still broken: %s"
+- New in `lib/detached.sh:36`
+  - now: "Closing this terminal does not stop it: it goes on as %s (its output: %s)."
 - New in `lib/i18n.py:152`
   - now: "placeholders/tags {want} became {got}"
 - New in `lib/i18n.py:154`

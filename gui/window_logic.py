@@ -157,6 +157,48 @@ def in_terminal(proc, script):
     proc.start("bash", ["-c", 'konsole --separate -e bash -c "$1" >/dev/null 2>&1 & wait', "konsole", script])
 
 
+def detached(cmd):
+    """cmd (an ./install.sh command, as shell words) as the window runs it in a terminal: through
+    lib/detached.sh, so closing the terminal or this window doesn't cut an install or update short
+    (and its splash drawn there)."""
+    return "bash lib/detached.sh " + cmd
+
+
+LOCK = Path.home() / ".local/state/frame-tweaks/install.lock"
+
+
+def install_running(lock=LOCK, proc="/proc"):
+    """Whether an install, update or removal holds ./install.sh's lock (take_lock) now: one a closed
+    window started, going on by itself (lib/detached.sh), or one in a terminal. Read from the
+    kernel's list of locks: taking the lock to try it, even for a moment, could make an install
+    starting just then find it held, and stop."""
+    try:
+        ino = os.stat(lock).st_ino
+        with open(f"{proc}/locks") as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return False
+    for line in lines:
+        fields = line.split()
+        if "FLOCK" not in fields or "->" in fields:        # ("->": waiting for it, not holding it)
+            continue
+        i = fields.index("FLOCK")
+        if len(fields) < i + 5 or not fields[i + 4].endswith(f":{ino}"):
+            continue
+        # (the same inode number on another file system: is this process's file the lock?)
+        try:
+            fds = os.listdir(f"{proc}/{fields[i + 3]}/fd")
+        except OSError:
+            continue
+        for fd in fds:
+            try:
+                if os.readlink(f"{proc}/{fields[i + 3]}/fd/{fd}") == str(lock):
+                    return True
+            except OSError:
+                pass
+    return False
+
+
 def self_update_check():
     """Newest vX.Y.Z tag of this repo on GitHub, if newer than VERSION (needs git access); "" if
     there's none newer, None when it couldn't look (offline, say)."""

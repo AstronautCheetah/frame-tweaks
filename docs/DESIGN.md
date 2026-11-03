@@ -181,10 +181,31 @@ uninstall. Then a tweak can keep what other tweaks left in its care; for example
 
 ### Optional scripts
 
-- **`stopped.sh`** runs after the programs listed under `processes:` in the manifest were
-  stopped. Those patterns are `pgrep -f` patterns; they are sent a kill, given 3 seconds, then
+- **`stopped.sh`** runs after the tweak's running programs were stopped: first its
+  `run_unit` units (`ft-<id>-<name>`, below), then the programs listed under `processes:` in the
+  manifest. Those patterns are `pgrep -f` patterns; they are sent a kill, given 3 seconds, then
   killed with `-9`. Arrow Pad's `stopped.sh` releases modifier keys that a stopped pad can no
   longer release itself.
+
+### Long-running programs as user units
+
+- **`run_unit <id> <name> [--memory 800M] -- COMMAND...`** (lib/common.sh) starts a tweak's
+  program as a transient user service, `ft-<id>-<name>`, in `app-ft.slice` (inside `app.slice`,
+  under VR memory guard's limit), with `MemoryMax`, `TasksMax`, `NoNewPrivileges` and
+  `KillMode=control-group`: stopping it stops whatever it started too. The caller's session
+  (display, runtime folder, D-Bus, language) is passed on, since a unit otherwise gets the Steam
+  session's. Not for a program that needs sudo, nor one that needs the whole desktop session's
+  environment (KDE autostart programs started with `ksmserver`'s, Plasma itself). Arrow Pad's Run
+  button uses it; `processes:` stays the fallback for copies started from a menu.
+- **Services a tweak installs** that stay up restart on a crash after 1 s, the wait doubling up to
+  32 s (`RestartSteps=`, systemd 254+), and give up after 10 starts in 5 minutes
+  (`tests/test_units.py` checks each one). systemd counts the growing wait from the last start
+  by hand or by its trigger, not from the last stable run; the start limit is what ages out.
+- **Installs from the window** run through `lib/detached.sh`: a transient service
+  (`ft-install-<pid>`) on a pty that `systemd-run --pty` relays to the terminal, so prompts and
+  sudo work, and closing the terminal or the window leaves it running (it ignores the hangup; its
+  log and the install lock go on). A window opened meanwhile says an install is running
+  (`window_logic.install_running`, from `/proc/locks`, without touching the lock).
 - **`migrate.sh OLD-VERSION`** runs before `install.sh` when the version recorded in
   `installed/<id>` is older than the current `VERSION` (going back to an older release runs
   none). A failed migration is reported and the

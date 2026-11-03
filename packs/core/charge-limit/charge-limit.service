@@ -1,10 +1,19 @@
 [Unit]
 Description=Hold the battery at its charge limit (charge-limit, Frame Tweaks)
+# A crash loop gives up: 10 starts within 5 minutes and it stays stopped, rather than restart
+# for ever; running steadily, old starts age out. (systemd's own limit, 5 in 10 s, would never
+# trip with the growing waits below.)
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 ExecStart=%h/.local/bin/charge-limit --run
+# On a crash only (not a clean exit, nor a stop by Frame Tweaks): again after 1 s, the wait
+# doubling with each restart up to 32 s (systemd 254+; the Frame has 257).
 Restart=on-failure
-RestartSec=30
+RestartSec=1
+RestartSteps=5
+RestartMaxDelaySec=32
 # Reads the battery and its settings; writes only the charger's pause switch (/sys, which the
 # tweak's udev rule makes yours) and its notes in the runtime folder. Stopping it lets the
 # battery charge again.

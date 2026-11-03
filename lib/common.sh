@@ -66,6 +66,96 @@ sysctl_user() {
     DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus" \
     systemctl --user "$@"
 }
+# systemd-run --user through the same bus as sysctl_user (desktop mode's XDG_RUNTIME_DIR,
+# /run/user/<uid>/nested_plasma, has no systemd in it). Give the program its environment with
+# --setenv (session_env_args): what this prefix sets is systemd-run's own, not the program's.
+systemd_run_user() {
+    XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR_USER" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus" \
+    systemd-run --user "$@"
+}
+# units_usable: systemd-run is there and the user's service manager answers (not in a container
+# or a sandbox without one, as in the tests and dev/fresh-install.sh).
+units_usable() { command -v systemd-run >/dev/null && sysctl_user show-environment >/dev/null 2>&1; }
+
+# The caller's session, for a program run as a unit: a unit gets the user manager's environment,
+# which is the Steam session's (DISPLAY=:0, /run/user/<uid>), not desktop mode's (its own
+# XDG_RUNTIME_DIR with its Wayland socket, DISPLAY=:2, XAUTHORITY, and its own D-Bus for
+# notifications and the tray). Each is passed as the caller has it; the display variables the
+# caller doesn't have are unset in the unit too, so a program started from VR doesn't find
+# DISPLAY=:0 and one from desktop mode doesn't pick up the Steam session's leftovers.
+FT_SESSION_ENV=(WAYLAND_DISPLAY DISPLAY XAUTHORITY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS
+                XDG_SESSION_TYPE XDG_CURRENT_DESKTOP XDG_DATA_DIRS XDG_CONFIG_DIRS PATH TERM COLORTERM
+                LANG LANGUAGE LC_ALL LC_CTYPE LC_MESSAGES LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY
+                FRAME_TWEAKS_LANGUAGE FRAME_TWEAKS_LANG_RESOLVED FRAME_TWEAKS_LIB)
+FT_SESSION_UNSET=(WAYLAND_DISPLAY DISPLAY XAUTHORITY)
+# session_env_args: those as systemd-run options, in the array SESSION_ENV_ARGS.
+session_env_args() {
+    local v
+    SESSION_ENV_ARGS=()
+    for v in "${FT_SESSION_ENV[@]}"; do
+        if [ -n "${!v+x}" ]; then SESSION_ENV_ARGS+=("--setenv=$v=${!v}")
+        elif [[ " ${FT_SESSION_UNSET[*]} " == *" $v "* ]]; then SESSION_ENV_ARGS+=(-p "UnsetEnvironment=$v"); fi
+    done
+}
+
+# run_unit TWEAK NAME [--memory SIZE] [--tasks N] -- COMMAND...: start a tweak's long-running
+# program as a transient user service, ft-TWEAK-NAME (NAME: letters and digits, no "-", so
+# stop_units can tell ft-vr-x, tweak vr, from ft-vr-dashboard-x). Its own cgroup gives it a memory
+# limit (MemoryMax, 800M unless --memory; MemorySwapMax so it can't grow on in swap instead),
+# TasksMax, no way to gain privileges (no sudo or setuid helper from inside it: don't use this for
+# a program that needs one), and stopping the unit stops whatever it started too (an orphan used
+# to keep running after setsid -f, and only processes: patterns found it). In app-ft.slice,
+# inside app.slice, where VR memory guard's limit for apps applies (as app-ftmirror.slice).
+# Its output goes to the journal (journalctl --user -u ft-TWEAK-NAME).
+# Returns 3, starting nothing, when that unit is running already: the caller decides (hand the
+# program a "toggle", say). Without a usable systemd (units_usable), the program is started as
+# before: setsid -f, in the background.
+run_unit() {
+    local tweak=${1:-} name=${2:-} mem=800M tasks=128 unit
+    shift 2 || die "run_unit TWEAK NAME [--memory SIZE] [--tasks N] -- COMMAND..."
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --memory) mem=$2; shift 2 ;;
+            --tasks) tasks=$2; shift 2 ;;
+            --) shift; break ;;
+            *) die "run_unit: unknown option $1" ;;
+        esac
+    done
+    [ $# -gt 0 ] || die "run_unit: no command"
+    [[ $tweak =~ ^[a-z0-9][a-z0-9-]*$ && $name =~ ^[a-z0-9]+$ ]] || die "run_unit: bad name ft-$tweak-$name"
+    unit="ft-$tweak-$name"
+    if ! units_usable; then
+        (cd "$HOME" && setsid -f "$@" >/dev/null 2>&1 </dev/null)
+        return 0
+    fi
+    sysctl_user is-active --quiet "$unit.service" && return 3
+    # (one that failed and was not collected yet would make systemd-run refuse the name)
+    sysctl_user reset-failed "$unit.service" >/dev/null 2>&1 || true
+    session_env_args
+    # IgnoreSIGPIPE=no: as when started from a shell (a service ignores SIGPIPE by default, and a
+    # program writing to a closed pipe then gets errors it never expected instead of ending).
+    systemd_run_user --quiet --collect --unit="$unit" --slice=app-ft.slice \
+        --working-directory="$HOME" \
+        -p MemoryMax="$mem" -p MemorySwapMax=256M -p TasksMax="$tasks" \
+        -p NoNewPrivileges=yes -p KillMode=control-group -p IgnoreSIGPIPE=no \
+        "${SESSION_ENV_ARGS[@]}" -- "$@"
+}
+
+# stop_units TWEAK: stop the tweak's run_unit programs (ft-TWEAK-NAME); true if there were any.
+stop_units() {
+    local tweak=$1 u found=()
+    units_usable || return 1
+    # (grep: a failed unit's line starts with a "●")
+    while read -r u; do
+        # (ft-TWEAK-NAME exactly: NAME has no "-", so tweak vr's glob leaves vr-dashboard's units)
+        [[ ${u%-*} == "ft-$tweak" ]] && found+=("$u")
+    done < <(sysctl_user list-units --all --plain --no-legend --type=service "ft-$tweak-*" 2>/dev/null |
+             grep -o 'ft-[a-z0-9-]*\.service')
+    [ ${#found[@]} -gt 0 ] || return 1
+    sysctl_user stop "${found[@]}" 2>/dev/null || true
+    return 0
+}
 
 BREW=/home/linuxbrew/.linuxbrew/bin/brew
 # brew_cmd NAME: the path of a command on PATH or in Homebrew (which a status check's PATH may

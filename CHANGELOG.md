@@ -95,6 +95,14 @@
   file, how many of its texts are used and each one left out, with why. It also has buttons to open
   the folder and to save the template there to start from. `./install.sh translation-check FILE.po`
   prints the same checks. Uninstalling Frame Tweaks keeps the folder, even when it removes the settings.
+- **Updates and reinstalls started from the window finish even if you close its terminal:** they
+  run as a user service on a terminal relayed to the one the window opens, so questions and the
+  sudo password work as before; closed, the install goes on (its log in
+  `~/.local/state/frame-tweaks/logs`), and a window opened meanwhile says it's still running.
+  Without a usable systemd they run as before.
+- **Arrow Pad's Run button starts the pad as a user unit of its own** (`ft-arrowpad-desktop` or
+  `ft-arrowpad-vr`) with a memory limit, so an uninstall stops it whole. Tweaks can do the same
+  with `run_unit` (docs/DESIGN.md).
 - **Android Mirror: hardware-key buttons** by the mirror, in VR: Back, App switcher, Volume up, Volume down, Power and Notifications (opens the phone's notification panel; again, closes it), each turned on in ⚙ Settings or the gear's panel (all off by default); the gear's panel shows them as one compact row each: a grab handle, the name and a switch. Drag a row by its handle to change the buttons' order (kept in `phone.conf`). The buttons go below the mirror, above it, or in a column left or right of it ("Buttons: Below, Above, Left, Right", one row in the gear's panel; also in ⚙ Settings), beyond a scroll strip on that side.
 - **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice in the mirror now says why while one is in front. Two ways to unlock it blind: **Type PIN**, a keypad that types on the phone as a keyboard would (digits, ⌫, ↵, and Wake / show PIN; one dot per digit, nothing logged), and **Where the digits are**, a reference PIN pad over the picture with arrows to nudge it onto the phone's own, for screens that don't take typed keys (taps go through it). Both go within about a second of the phone unlocking. The phone's fingerprint or face prompt gets a notice of its own (use its sensor, or Use PIN on the phone and type the PIN here), and a fingerprint shows where the phone's under-screen sensor is.
 - **Tweaks whose files changed since you installed them say so:** after the checkout changes
@@ -169,6 +177,10 @@
 ### Changed
 - **Recline shows Recline-VR's own icon** in the list, instead of a stock arrow.
 - **✔ Works on my Frame moved** from the window's bottom row to the "Help make Frame Tweaks better" row, under **Get involved**: reporting what works is a way to help.
+- **Frame Tweaks' background services restart with growing waits:** after a crash, 1 s, then 2,
+  4, up to 32 s, and after 10 starts in 5 minutes they stay stopped rather than restart for ever
+  (ydotoold, the charge limit, the wallet's two, the VR dashboard helper, Dictation's two). A
+  clean exit or a stop by Frame Tweaks doesn't count.
 - **Dictation's voice activity detection says it's Whisper's:** its setting is now *Whisper voice activity detection*, dimmed with a note while Parakeet is the engine (Parakeet doesn't use it). Settings pages can do this for any option (`only_with`, docs/mods.md).
 - **Dictation keeps a recording the engine heard nothing in** (`last-no-text.wav`, beside `last.wav`), and logs each recording's peak, to find out why.
 - **Homebrew shows its own logo** on its row and its page.

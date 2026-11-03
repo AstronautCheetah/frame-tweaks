@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidg
 
 import sft  # (lib/ is on the path)
 from i18n import _  # (translations: locale/README.md)
-from window_logic import GONE, REPO, close_prompt, in_terminal
+from window_logic import GONE, REPO, close_prompt, detached, in_terminal
 
 
 class ApplyChanges:
@@ -160,7 +160,7 @@ class ApplyChanges:
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
             print("would run:", cmd)
             return
-        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
+        full = f"cd {shlex.quote(str(REPO))} && {detached(cmd)}; echo; read -rp {close_prompt()}"
         self.proc = QProcess(self)            # don't block the window while Konsole runs
         self.proc.finished.connect(lambda *_: self.changed(ids))
         in_terminal(self.proc, full)

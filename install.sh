@@ -1074,8 +1074,12 @@ usage() { sed -n '2,/^#   \.\/install\.sh ID\.\.\./s/^# \{0,1\}//p' "$REPO_DIR/i
 # A tweak's manifest lists the programs it runs (processes: pgrep -f patterns, ~ = $HOME).
 # They're stopped before the tweak is uninstalled or reinstalled, so an old copy can't keep
 # running; then its optional stopped.sh runs (e.g. Arrow Pad releasing keys it held down).
+# Programs a tweak started with run_unit (lib/common.sh) go first, unit and all, with whatever
+# they started; the patterns stay for those started otherwise (a menu entry, KDE's autostart, a
+# tweak not moved to run_unit yet).
 stop_processes() {
     local id=$1 pat pids n=0
+    stop_units "$id" && n=1
     while IFS= read -r pat; do
         [[ -z $pat ]] && continue
         pat=${pat//\~/$HOME}
