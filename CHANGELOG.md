@@ -141,6 +141,8 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Yes/no questions in a terminal take your language's yes:** `[s/N]` in Spanish, `[o/N]` in
+  French, `[j/N]` in Flemish, and the letter shown counts as yes; `y` still does in every language.
 - **Dictation and Full Keyboard share their Whisper model.** Full Keyboard's on-device dictation
   uses the same file as Dictation (`ggml-small-q8_0.bin`, the same revision and SHA-256), so
   whichever has it gives the other a hard link: one copy on disk, 264 MB saved, and nothing

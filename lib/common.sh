@@ -72,10 +72,14 @@ BREW=/home/linuxbrew/.linuxbrew/bin/brew
 # not have); fails without it.
 brew_cmd() { command -v "$1" 2>/dev/null || { [ -x "${BREW%/brew}/$1" ] && echo "${BREW%/brew}/$1"; }; }
 
-# ask <question>: yes/no in the terminal, or a dialog when there's no terminal.
+# ask <question>: yes/no in the terminal, or a dialog when there's no terminal. [y/N] is in the
+# reader's language, its first letter that language's yes ([s/N], [o/N], [j/N]): an answer starting
+# with it counts as yes, and so does y in every language (wallet-tool's yes() does the same).
 ask() {
     if [ -t 0 ]; then
-        local a; read -rp "$1 [y/N] " a; [[ $a == [yY]* ]]
+        local a keys mine; keys=$(t '[y/N]'); mine=${keys:1:1}
+        read -rp "$1 $keys " a
+        [[ ${a,,} == y* || ( -n $mine && ${a,,} == "${mine,,}"* ) ]]
     elif command -v kdialog >/dev/null && [ -n "${WAYLAND_DISPLAY:-${DISPLAY:-}}" ]; then
         kdialog --title "Frame Tweaks" --yesno "$1"
     else

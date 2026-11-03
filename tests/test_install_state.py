@@ -1043,7 +1043,9 @@ class UpdateWithoutGit(unittest.TestCase):
     def test_uninstalling_frame_tweaks_keeps_a_copy_without_git(self):
         """With no git, changes of yours in it can't be told from Frame Tweaks' own: it was
         deleted, edits included (only your own packs in packs/ kept it)."""
-        shutil.rmtree(self.root / "packs/attic", ignore_errors=True)      # (a maintainer's own: kept it already)
+        for pack in (self.root / "packs").iterdir():      # (a maintainer's own packs: they keep it already)
+            if pack.is_dir() and pack.name not in ("core", "integrations", "third-party"):
+                shutil.rmtree(pack)
         (self.root / "my-notes.txt").write_text("mine\n")
         r = self.sh("uninstall-self", "--keep-settings", FRAME_TWEAKS_KEEP_CHECKOUT="")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

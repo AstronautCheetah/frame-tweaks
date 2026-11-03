@@ -304,5 +304,35 @@ class WalletToken(unittest.TestCase):
         self.assertEqual(self.wallet.opened, 0)
 
 
+class YesInYourLanguage(unittest.TestCase):
+    """wallet-tool's yes/no questions: [y/N] in the reader's language, whose first letter is that
+    language's yes ([s/N] in Spanish): it counts as yes, and so does y; Enter is the default."""
+
+    def answer(self, typed, default, keys):
+        import builtins
+        import importlib.machinery
+        import importlib.util
+        from unittest import mock
+        loader = importlib.machinery.SourceFileLoader("wallet_tool", str(TOOL))
+        mod = importlib.util.module_from_spec(importlib.util.spec_from_loader(loader.name, loader))
+        loader.exec_module(mod)
+        asked = []
+        with mock.patch.object(mod, "_", lambda text: keys.get(text, text)), \
+                mock.patch.object(builtins, "input", lambda q: asked.append(q) or typed):
+            return mod.yes("Move it?", default), asked[0]
+
+    def test_spanish_letters_and_y(self):
+        es = {"[y/N]": "[s/N]", "[Y/n]": "[S/n]"}
+        self.assertEqual(self.answer("sí", False, es), (True, "Move it? [s/N] "))
+        self.assertEqual(self.answer("y", False, es)[0], True)
+        self.assertEqual(self.answer("n", True, es), (False, "Move it? [S/n] "))
+        self.assertEqual(self.answer("", True, es)[0], True)
+        self.assertEqual(self.answer("", False, es)[0], False)
+
+    def test_english(self):
+        self.assertEqual(self.answer("yes", False, {}), (True, "Move it? [y/N] "))
+        self.assertEqual(self.answer("s", False, {})[0], False)
+
+
 if __name__ == "__main__":
     unittest.main()

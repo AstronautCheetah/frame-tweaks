@@ -7025,9 +7025,9 @@ msgstr "Laten staan. Om het zelf te verwijderen: rm {path}"
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+"Move it to {path}? Nothing is deleted or signed out: move it back to undo."
 msgstr ""
-"Verplaatsen naar {path}? Er wordt niets gewist en je wordt nergens afgemeld: zet het terug om dit ongedaan te maken. [y/N] "
+"Verplaatsen naar {path}? Er wordt niets gewist en je wordt nergens afgemeld: zet het terug om dit ongedaan te maken."
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -7048,9 +7048,19 @@ msgstr "Plak het token (het wordt niet getoond) en druk op Enter: "
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy."
 msgstr ""
-"{cmd} {sub} nu starten om een token te maken? Er opent een browser om je aan te melden, daarna wordt het token getoond om te kopiëren. [Y/n] "
+"{cmd} {sub} nu starten om een token te maken? Er opent een browser om je aan te melden, daarna wordt het token getoond om te kopiëren."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "[Y/n]"
+msgstr "[J/n]"
+
+# needs review
+#: packs/core/wallet/wallet-tool lib/common.sh
+msgid "[y/N]"
+msgstr "[j/N]"
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -8427,3 +8437,15 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ # needs review
 #~ msgid "Run 'nordvpn-wg setup' first."
 #~ msgstr "Voer eerst 'nordvpn-wg setup' uit."
+
+#~ # needs review
+#~ msgid ""
+#~ "Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+#~ msgstr ""
+#~ "Verplaatsen naar {path}? Er wordt niets gewist en je wordt nergens afgemeld: zet het terug om dit ongedaan te maken. [y/N] "
+
+#~ # needs review
+#~ msgid ""
+#~ "Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+#~ msgstr ""
+#~ "{cmd} {sub} nu starten om een token te maken? Er opent een browser om je aan te melden, daarna wordt het token getoond om te kopiëren. [Y/n] "

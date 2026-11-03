@@ -5382,7 +5382,7 @@ msgstr ""
 
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+"Move it to {path}? Nothing is deleted or signed out: move it back to undo."
 msgstr ""
 
 #: packs/core/wallet/wallet-tool
@@ -5399,7 +5399,15 @@ msgstr ""
 
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy."
+msgstr ""
+
+#: packs/core/wallet/wallet-tool
+msgid "[Y/n]"
+msgstr ""
+
+#: packs/core/wallet/wallet-tool lib/common.sh
+msgid "[y/N]"
 msgstr ""
 
 #: packs/core/wallet/wallet-tool

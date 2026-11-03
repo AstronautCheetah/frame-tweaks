@@ -7047,9 +7047,9 @@ msgstr "Laissé à sa place. Pour le supprimer vous-même : rm {path}"
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+"Move it to {path}? Nothing is deleted or signed out: move it back to undo."
 msgstr ""
-"Le déplacer vers {path} ? Rien n'est supprimé ni déconnecté : remettez-le à sa place pour annuler. [y/N] "
+"Le déplacer vers {path} ? Rien n'est supprimé ni déconnecté : remettez-le à sa place pour annuler."
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -7070,9 +7070,19 @@ msgstr "Collez le jeton (il ne s'affiche pas), puis appuyez sur Entrée : "
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy."
 msgstr ""
-"Exécuter {cmd} {sub} maintenant pour créer un jeton ? Un navigateur s'ouvre pour vous connecter, puis affiche le jeton à copier. [Y/n] "
+"Exécuter {cmd} {sub} maintenant pour créer un jeton ? Un navigateur s'ouvre pour vous connecter, puis affiche le jeton à copier."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "[Y/n]"
+msgstr "[O/n]"
+
+# needs review
+#: packs/core/wallet/wallet-tool lib/common.sh
+msgid "[y/N]"
+msgstr "[o/N]"
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -8460,3 +8470,15 @@ msgstr "Installateur d'ajustements"
 #~ # needs review
 #~ msgid "Run 'nordvpn-wg setup' first."
 #~ msgstr "Exécutez d'abord 'nordvpn-wg setup'."
+
+#~ # needs review
+#~ msgid ""
+#~ "Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+#~ msgstr ""
+#~ "Le déplacer vers {path} ? Rien n'est supprimé ni déconnecté : remettez-le à sa place pour annuler. [y/N] "
+
+#~ # needs review
+#~ msgid ""
+#~ "Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+#~ msgstr ""
+#~ "Exécuter {cmd} {sub} maintenant pour créer un jeton ? Un navigateur s'ouvre pour vous connecter, puis affiche le jeton à copier. [Y/n] "

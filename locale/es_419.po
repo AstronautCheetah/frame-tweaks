@@ -6190,9 +6190,9 @@ msgstr "Se dejó donde está. Para borrarlo tú mismo: rm {path}"
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+"Move it to {path}? Nothing is deleted or signed out: move it back to undo."
 msgstr ""
-"¿Moverlo a {path}? No se borra nada ni se cierra ninguna sesión: vuelve a moverlo para deshacerlo. [y/N] "
+"¿Moverlo a {path}? No se borra nada ni se cierra ninguna sesión: vuelve a moverlo para deshacerlo."
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -6213,9 +6213,19 @@ msgstr "Pega el token (no se muestra) y presiona Enter: "
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
-"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+"Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy."
 msgstr ""
-"¿Ejecutar {cmd} {sub} ahora para crear un token? Abre un navegador para iniciar sesión y luego muestra el token para copiarlo. [Y/n] "
+"¿Ejecutar {cmd} {sub} ahora para crear un token? Abre un navegador para iniciar sesión y luego muestra el token para copiarlo."
+
+# needs review
+#: packs/core/wallet/wallet-tool
+msgid "[Y/n]"
+msgstr "[S/n]"
+
+# needs review
+#: packs/core/wallet/wallet-tool lib/common.sh
+msgid "[y/N]"
+msgstr "[s/N]"
 
 # needs review
 #: packs/core/wallet/wallet-tool
@@ -8059,3 +8069,15 @@ msgstr "Instalador de ajustes"
 
 #~ msgid "Run 'nordvpn-wg setup' first."
 #~ msgstr "Primero ejecuta 'nordvpn-wg setup'."
+
+#~ # needs review
+#~ msgid ""
+#~ "Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] "
+#~ msgstr ""
+#~ "¿Moverlo a {path}? No se borra nada ni se cierra ninguna sesión: vuelve a moverlo para deshacerlo. [y/N] "
+
+#~ # needs review
+#~ msgid ""
+#~ "Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
+#~ msgstr ""
+#~ "¿Ejecutar {cmd} {sub} ahora para crear un token? Abre un navegador para iniciar sesión y luego muestra el token para copiarlo. [Y/n] "

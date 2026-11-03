@@ -157,11 +157,17 @@ def remove(cmd):
 
 
 def yes(question, default):
+    """A yes/no question in the terminal: question, then [y/N] (or [Y/n] when the default is yes) in
+    the reader's language, whose first letter is that language's yes ([s/N] in Spanish, [o/N] in
+    French, [j/N] in Flemish): an answer starting with it counts as yes, and so does y in every
+    language. Enter alone: the default."""
+    keys = _("[Y/n]") if default else _("[y/N]")
+    mine = keys[1:2].lower() or "y"
     try:
-        answer = input(question).strip().lower()
+        answer = input(f"{question} {keys} ").strip().lower()
     except EOFError:
         return default
-    return default if not answer else answer[0] == "y"
+    return default if not answer else answer[0] in ("y", mine)
 
 
 def wallet_state():
@@ -188,7 +194,7 @@ def store_token(cmd):
     protect(cmd)            # (again: a wrapper from before tokens didn't hand one over)
     if sys.stdin.isatty():
         if yes(_("Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token "
-                 "to copy. [Y/n] ").format(cmd=cmd, sub=TOKENS[cmd]), True):
+                 "to copy.").format(cmd=cmd, sub=TOKENS[cmd]), True):
             # (The real command: it shows the token on this terminal, and saves it nowhere.)
             subprocess.run([str(real), TOKENS[cmd]])
         token = getpass.getpass(_("Paste the token (it isn't shown), then Enter: "))
@@ -226,7 +232,7 @@ def offer_move(cmd):
                 "again.").format(keys=", ".join(others), cmd=cmd))
     aside = f.with_name(f.name + ".before-wallet")
     if (sys.stdin.isatty() and not aside.exists()
-            and yes(_("Move it to {path}? Nothing is deleted or signed out: move it back to undo. [y/N] ").format(
+            and yes(_("Move it to {path}? Nothing is deleted or signed out: move it back to undo.").format(
                 path=aside), False)):
         os.replace(f, aside)
         print(_("Moved. Once {cmd} works with the wallet's token, delete it: rm {path}").format(cmd=cmd, path=aside))

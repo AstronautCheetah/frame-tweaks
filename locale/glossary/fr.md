@@ -215,6 +215,7 @@ it's translated here, in « » (no article inside the quotes).
 | Firefox privacy | Confidentialité de Firefox | |
 | Mouse cursor fix | Correctif du curseur de la souris | |
 | Menu icons | Icônes des menus | |
+| [y/N], [Y/n] (yes/no questions in a terminal) | [o/N], [O/n] | the first letter is what the reader types for yes; the scripts accept it, and y too |
 | VR memory guard | Protection de la mémoire VR | la Protection de la mémoire VR |
 | Performance Overlay, KnockThru (linked projects) | unchanged | |
 | Homebrew, ydotool (helper), NordVPN (WireGuard) | unchanged (helper: auxiliaire) | |
