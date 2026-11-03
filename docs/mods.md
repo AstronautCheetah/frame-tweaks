@@ -368,6 +368,10 @@ run: {label: Open}                                 # the Run button's label, wit
     if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi &&
     curl -fsSLO "$u/SHA256SUMS" && ...
   ```
+- **A script of your own beside a link** (`status.sh`, `run.sh`) runs instead of the link's for
+  that step, when the project needs one check or one repair the link can't express. From such a
+  `status.sh`, `bash "$REPO_DIR/lib/link.sh" status ID` gives the link's own line to pass on
+  (the Performance Overlay's adds whether the panel's service is enabled; its `run.sh` enables it).
 - The other fields are as for any tweak; `changes`, `access` and `undo` describe what the
   project's installer does. Name the app in `app:` if it should stay installed when Frame Tweaks
   itself is uninstalled.

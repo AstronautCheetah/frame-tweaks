@@ -19,10 +19,11 @@ source:
   relation: from
   url: https://github.com/sasaken1102r/frame-perf-overlay
 icon: {file: frame-perf-overlay.png}
+run: {label: Show}
 processes: [/frame-perf-overlay( |$)]
 config: [~/.config/frame-perf-overlay]
 link:
-  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/sasaken1102r/frame-perf-overlay/releases && if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'frame-perf-overlay-[0-9.]*\.tar\.gz' SHA256SUMS | head -1) && curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && cd frame-perf-overlay && ./install.sh
+  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/sasaken1102r/frame-perf-overlay/releases && if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'frame-perf-overlay-[0-9.]*\.tar\.gz' SHA256SUMS | head -1) && curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && cd frame-perf-overlay && ./install.sh && (XDG_RUNTIME_DIR=/run/user/$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus systemctl --user enable frame-perf-overlay.service 2>/dev/null || true)
   uninstall: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/sasaken1102r/frame-perf-overlay/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'frame-perf-overlay-[0-9.]*\.tar\.gz' SHA256SUMS | head -1) && curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && cd frame-perf-overlay && ./install.sh --uninstall
   installed: ~/.local/bin/frame-perf-overlay
   version: ~/.local/bin/frame-perf-overlay --version | awk '{print $2}'
@@ -53,7 +54,10 @@ it opens for installs, and doesn't change what they install.
   `lib/tested-versions`) and its `SHA256SUMS` from GitHub, checks
   the one against the other (`sha256sum -c`), unpacks it and runs its `install.sh`. Its README
   also offers a one-line installer from the author's own website; Frame Tweaks uses the GitHub
-  release instead, so what runs is what the checksum covers.
+  release instead, so what runs is what the checksum covers. One step is added after it: enabling
+  the panel's user service with the Steam session's bus, the one thing its installer can't do from
+  the desktop-mode terminal Frame Tweaks runs it in (there `systemctl --user` fails quietly, and
+  the panel sat installed and never started).
 - **Update:** when sasaken1102r publishes a release newer than the one Frame Tweaks tested, its row
   offers it as *not yet tested by Frame Tweaks* (↑ *version* available · **Update**); once
   it's installed, **↩ Back to the tested version** installs the tested one again. Frame
@@ -66,7 +70,10 @@ it opens for installs, and doesn't change what they install.
 
 ## Use
 
-With SteamVR running the panel shows on its own. Its **Perf** tab in the SteamVR
+With SteamVR running the panel shows on its own. **Show** on its row in the Frame Tweaks window
+shows or hides it, starts it if it isn't running, and, if an install left its service disabled,
+enables it so it starts with SteamVR again (`./install.sh run perf-overlay` does the same; the
+status says when that's needed). Its **Perf** tab in the SteamVR
 dashboard chooses what it shows, where (wrist, view or a fixed spot) and its profiles, and turns
 it off until the next SteamVR start. Its
 [README](https://github.com/sasaken1102r/frame-perf-overlay#usage) explains every value and

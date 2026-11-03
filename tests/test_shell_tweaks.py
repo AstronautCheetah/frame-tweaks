@@ -164,6 +164,114 @@ class NordVPNStatus(Home):
         self.assertEqual(r.stdout.strip(), "ok       2 location(s); disconnected; connects at startup: United States")
 
 
+class PerfOverlay(Home):
+    """Performance Overlay (a link with scripts of its own): its status adds whether the panel's
+    user service is enabled, which its installer's `systemctl --user enable` can't do from a
+    desktop-mode terminal; Show (run.sh) enables it, starts it while SteamVR runs, and shows or
+    hides a running panel. systemctl, notify-send and gtk-launch are stand-ins writing a log."""
+    def setUp(self):
+        super().setUp()
+        self.log = self.home / "calls.log"
+        self.stub("systemctl", 'echo "$*" >> "$HOME/calls.log"\n'
+                  'case " $* " in\n'
+                  '  *" is-enabled "*) cat "$HOME/enabled" 2>/dev/null || echo disabled; [ "$(cat "$HOME/enabled" 2>/dev/null)" = enabled ] ;;\n'
+                  '  *" is-active "*steamvr.service*) [ -f "$HOME/vr" ] ;;\n'
+                  '  *" is-active "*) [ -f "$HOME/failed" ] && echo failed; [ -f "$HOME/running" ] ;;\n'
+                  '  *" show "*ExecMainStatus*) cat "$HOME/exitcode" 2>/dev/null ;;\n'
+                  '  *" enable "*) echo enabled > "$HOME/enabled" ;;\n'
+                  '  *" start "*) touch "$HOME/running" ;;\n'
+                  'esac')
+        for tool in ("notify-send", "gtk-launch"):
+            self.stub(tool, f'echo "{tool} $*" >> "$HOME/calls.log"')
+        self.stub("pgrep", "exit 1")
+
+    def installed(self, service=True, enabled=False):
+        prog = self.home / ".local/bin/frame-perf-overlay"
+        prog.parent.mkdir(parents=True, exist_ok=True)
+        prog.write_text('#!/bin/bash\n[ "$1" = --version ] && echo "frame-perf-overlay 0.3.2"\n')
+        prog.chmod(0o755)
+        if service:
+            unit = self.home / ".config/systemd/user/frame-perf-overlay.service"
+            unit.parent.mkdir(parents=True, exist_ok=True)
+            unit.write_text("[Unit]\nDescription=x\n")
+        if enabled:
+            (self.home / "enabled").write_text("enabled\n")
+
+    def calls(self):
+        return self.log.read_text().splitlines() if self.log.exists() else []
+
+    def test_status_warns_while_the_service_is_disabled(self):
+        self.installed()
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("not set to start with SteamVR", r.stdout)
+        self.assertIn("./install.sh run perf-overlay", r.stdout)
+
+    def test_status_is_the_links_once_enabled(self):
+        self.installed(enabled=True)
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(r.stdout.strip(), "ok       installed by its own installer: the version Frame Tweaks tested (v0.3.2)")
+
+    def test_status_while_steamvr_runs_without_it(self):
+        """Closed from its dashboard (exit 3, filed as failed by systemd) isn't a failure; another
+        exit status is; not started yet (enabled after SteamVR started) is said plainly."""
+        self.installed(enabled=True)
+        (self.home / "vr").touch()
+        (self.home / "failed").touch()
+        (self.home / "exitcode").write_text("3\n")
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("closed from its dashboard until the next SteamVR start", r.stdout)
+        (self.home / "exitcode").write_text("1\n")
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("its service failed (exit status 1)", r.stdout)
+        self.assertIn("journalctl --user -u frame-perf-overlay.service", r.stdout)
+        (self.home / "failed").unlink()
+        (self.home / "exitcode").unlink()
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (0, "ok       installed; starts with the next SteamVR start (Show on its row starts it now)"))
+
+    def test_status_not_installed(self):
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (1, "missing  not installed"))
+
+    def test_show_enables_the_service_and_waits_for_steamvr(self):
+        self.installed()
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("enable frame-perf-overlay.service", "\n".join(self.calls()))
+        self.assertIn("SteamVR is not running", r.stdout)
+        self.assertIn("From now on it starts with SteamVR", r.stdout)
+        self.assertNotIn("start frame-perf-overlay.service", "\n".join(self.calls()))
+
+    def test_show_starts_the_service_while_steamvr_runs(self):
+        self.installed(enabled=True)
+        (self.home / "vr").touch()
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("--user start frame-perf-overlay.service", "\n".join(self.calls()))
+        self.assertIn("Started", r.stdout)
+        self.assertNotIn("From now on", r.stdout)               # (was enabled: nothing to fix)
+        self.assertFalse([c for c in self.calls() if c.startswith("gtk-launch")])
+
+    def test_show_toggles_a_running_panel(self):
+        self.installed(enabled=True)
+        (self.home / "vr").touch()
+        (self.home / "running").touch()
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("gtk-launch frame-perf-overlay", self.calls())
+        self.assertIn("Shown or hidden", r.stdout)
+        self.assertNotIn("--user start frame-perf-overlay.service", "\n".join(self.calls()))
+
+    def test_show_without_the_program_says_to_install(self):
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("Not installed", r.stdout)
+
+
 class CursorNotNeeded(Home):
     """Mouse cursor fix: not needed from gamescope 3.16.30 (SteamVR draws desktop mode's pointer
     itself); installed there, its status asks to uninstall it. (pacman is a stand-in.)"""

@@ -26,3 +26,27 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/core/dictation/README.md`
   - was: "Voice activity detection"
   - now: "Whisper voice activity detection"
+- New in `packs/third-party/perf-overlay/README.md`
+  - now: "Show"
+- New in `packs/third-party/perf-overlay/run.sh:12`
+  - now: "Not installed: tick Performance Overlay and Apply changes first."
+- New in `packs/third-party/perf-overlay/run.sh:16`
+  - now: "From now on it starts with SteamVR, as its installer meant to set up."
+- New in `packs/third-party/perf-overlay/run.sh:18`
+  - now: "It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
+- New in `packs/third-party/perf-overlay/run.sh:23`
+  - now: "SteamVR is not running: the panel shows once it is."
+- New in `packs/third-party/perf-overlay/run.sh:27`
+  - now: "Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings."
+- New in `packs/third-party/perf-overlay/run.sh:31`
+  - now: "Shown or hidden in VR (it was running)."
+- New in `packs/third-party/perf-overlay/run.sh:35`
+  - now: "Could not start %s: see %s"
+- New in `packs/third-party/perf-overlay/status.sh:13`
+  - now: "installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Show on its row sets it, or %s"
+- New in `packs/third-party/perf-overlay/status.sh:19`
+  - now: "installed; closed from its dashboard until the next SteamVR start (Show on its row starts it again)"
+- New in `packs/third-party/perf-overlay/status.sh:21`
+  - now: "installed, but its service failed (exit status %s): Show on its row starts it again; its log: %s"
+- New in `packs/third-party/perf-overlay/status.sh:24`
+  - now: "installed; starts with the next SteamVR start (Show on its row starts it now)"

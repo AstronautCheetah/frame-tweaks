@@ -6560,7 +6560,7 @@ msgid ""
 msgstr ""
 
 #: packs/third-party/perf-overlay/README.md
-msgid "Performance Overlay"
+msgid "Show"
 msgstr ""
 
 #: packs/third-party/perf-overlay/README.md
@@ -6576,6 +6576,60 @@ msgstr ""
 #: packs/third-party/perf-overlay/README.md
 msgid ""
 "sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Could not start %s: see %s"
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "From now on it starts with SteamVR, as its installer meant to set up."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid ""
+"It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Not installed: tick Performance Overlay and Apply changes first."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh packs/third-party/perf-overlay/README.md
+msgid "Performance Overlay"
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Shown or hidden in VR (it was running)."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid ""
+"Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "SteamVR is not running: the panel shows once it is."
+msgstr ""
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed, but its service failed (exit status %s): Show on its row starts it again; its log: %s"
+msgstr ""
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Show on its row sets it, or %s"
+msgstr ""
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed; closed from its dashboard until the next SteamVR start (Show on its row starts it again)"
+msgstr ""
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed; starts with the next SteamVR start (Show on its row starts it now)"
 msgstr ""
 
 #: packs/third-party/recline/README.md

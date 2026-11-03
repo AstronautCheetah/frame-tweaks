@@ -210,6 +210,15 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Performance Overlay starts with SteamVR, as meant, and has a Show button.** Its installer
+  enables a user service that starts the panel with SteamVR, but `systemctl --user enable` fails
+  quietly in the desktop-mode terminal Frame Tweaks runs installers in (no user bus there), so the
+  panel sat installed and never started, with nothing in the window to start it. The install now
+  enables the service with the Steam session's bus after the project's installer; the status warns
+  when the service is disabled; and **Show** on its row enables it if needed, starts it when
+  SteamVR runs, and shows or hides the panel when it's running (`./install.sh run perf-overlay`).
+  While SteamVR runs without the panel, the status says why: closed from its dashboard until the
+  next SteamVR start (systemd files that exit as failed; it isn't), not started yet, or failed.
 - **Charge limit lifts its pause when stopped, every time:** stopped in the instant between pausing charging and noting that the pause was its own, it took the pause for someone else's and left charging paused.
 - **No more "repeated failed attempts to gain access to a wallet":** to tell whether the wallet has a password, Frame Tweaks tried it once with none; every save into the wallet made it try again, and kwalletd counted each try as a failed attempt. A wallet known to have a password isn't tried again.
 - **Dictation's start sound plays at once with Bluetooth headphones:** SteamOS stops their audio while an app records (SteamOS issue #2896), so the sound waited until the recording stopped; it now plays before the microphone opens.
