@@ -382,6 +382,36 @@ def dashboard():
     return mod
 
 
+# An app can hide its screen from anything that records or mirrors it (Android's FLAG_SECURE: banking
+# apps, password managers, some players): scrcpy then shows black, and nothing says why. Android's
+# window list marks such a window SECURE; while the focused one is, the layer says so over the mirror.
+WINDOW_BLOCK = re.compile(r"^\s*Window #\d+ (Window\{[0-9a-f]+ [^}]*\}):", re.M)
+
+
+def focused_is_secure(dumpsys):
+    """Whether the focused window in `dumpsys window windows` output has FLAG_SECURE (fl=… SECURE)."""
+    m = re.search(r"mCurrentFocus=(Window\{[0-9a-f]+ [^}]*\})", dumpsys)
+    if not m:
+        return False
+    blocks = list(WINDOW_BLOCK.finditer(dumpsys))
+    for i, b in enumerate(blocks):
+        if b.group(1) == m.group(1):
+            end = blocks[i + 1].start() if i + 1 < len(blocks) else len(dumpsys)
+            return re.search(r"\bfl=[^\n]*\bSECURE\b", dumpsys[b.start():end]) is not None
+    return False
+
+
+def watch_secure(dev, state, every=3.0):
+    """state["secure"]: the phone's focused window hides itself from the mirror (checked every few s)."""
+    while scrcpy_running():
+        try:
+            r = adb(dev, "shell", "dumpsys", "window", "windows")
+            state["secure"] = r.returncode == 0 and focused_is_secure(r.stdout)
+        except OSError:
+            state["secure"] = False
+        time.sleep(every)
+
+
 def publish(ws, state):
     """Hand the page the settings as they are in the file (and the joystick speed to the sticks)."""
     conf = read_conf()
@@ -411,7 +441,8 @@ def serve(phone, sd, state):
                         break
                     n += 1
                     ws.send({"id": n, "method": "Runtime.evaluate",
-                             "params": {"expression": "window.__sftPhoneTouchAlive = Date.now()"}})
+                             "params": {"expression": "window.__sftPhoneTouchAlive = Date.now(); "
+                                        f"window.__sftPhoneSecure = {'true' if state.get('secure') else 'false'}"}})
                     beat = now
                 # Wait for a message without a timeout cutting one in half.
                 if not ws.rest and not select.select([ws.s], [], [], 0.5)[0]:
@@ -479,6 +510,7 @@ def main():
             log("phone:", e)                      # tried again at the first touch
         state = {}                                # where the laser is on the mirror (from the layer)
         threading.Thread(target=scroll_with_sticks, args=(phone, state), daemon=True).start()
+        threading.Thread(target=watch_secure, args=(phone.dev, state), daemon=True).start()
         serve(phone, dashboard(), state)
     finally:
         phone.close()

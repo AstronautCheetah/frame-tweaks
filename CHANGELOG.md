@@ -70,6 +70,7 @@
   desktop's clipboard.
 
 ### Added
+- **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice above the mirror now says why while one is in front.
 - **Tweaks whose files changed since you installed them say so:** after the checkout changes
   (a `git pull`, a pack you edit), an installed tweak keeps running its old copy until its
   installer runs again. Its row now says **↻ updated** (with a Reinstall link, and its ↻ button

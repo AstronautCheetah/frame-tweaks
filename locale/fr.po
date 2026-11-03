@@ -3947,6 +3947,13 @@ msgid "Slow"
 msgstr "Lent"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid ""
+"The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone."
+msgstr ""
+"L'application de votre téléphone masque cet écran à la recopie (un réglage de confidentialité) : il ne s'affiche que sur le téléphone."
+
+# needs review
 #: packs/core/adb-scrcpy/status.sh
 msgid "adb %s, scrcpy%s, phone launcher"
 msgstr "adb %s, scrcpy%s, lanceur phone"

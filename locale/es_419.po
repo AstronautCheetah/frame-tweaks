@@ -3478,6 +3478,13 @@ msgstr "Compartido"
 msgid "Slow"
 msgstr "Lento"
 
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid ""
+"The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone."
+msgstr ""
+"La app de tu teléfono oculta esta pantalla a la duplicación (una opción de privacidad): solo se ve en el teléfono."
+
 #: packs/core/adb-scrcpy/status.sh
 msgid "adb %s, scrcpy%s, phone launcher"
 msgstr "adb %s, scrcpy%s, lanzador de phone"

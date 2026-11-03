@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 19;
+  const NAME = 'phone-touch', VERSION = 20;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -134,7 +134,7 @@
   };
 
   // ---- the gear and its settings panel ----
-  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.34;       // sizes, metres
+  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.34, NOTICE_M = 0.3;   // sizes, metres
   // [title, key, [[label, value]...], needs a stream restart]: the real settings (scrcpy's
   // --max-size, --video-bit-rate, --max-fps); frame rates are the Steam Frame's refresh rates.
   const OPTIONS = [
@@ -319,6 +319,22 @@
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
              T('Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once.')))));
   };
+  // An app on the phone hiding its screen (Android's FLAG_SECURE: banking apps, password managers):
+  // the mirror shows black. phone-touch sees the focused window marked SECURE and sets
+  // window.__sftPhoneSecure; this says why, just above the window.
+  const secureNotice = (f, k, H) => {
+    const top = typeof f.activePage?.GetPanelAnchorID === 'function' && f.activePage.GetPanelAnchorID(TOP_CENTER);
+    if (!top) return null;
+    const h = hueOf();
+    return el(XFORM, { key: `${f.frameID}-sft-secure`, parent_id: top,
+                       translation: { y: GAP_M * k + 0.03 * k, z: LIFT_M * k } },
+      el(PANEL, { key: `${f.frameID}-sft-secure-p`, width: NOTICE_M * k, interactive: false, only_visible_with_laser: false,
+        debug_name: 'SftPhoneSecure', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        el('div', { style: { width: '480px', boxSizing: 'border-box', padding: '12px 16px', borderRadius: '14px',
+                             background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.6)`,
+                             color: '#e8ecf0', fontSize: '20px', textAlign: 'center', zoom: 0.62 } },
+           '🔒 ' + T('The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone.'))));
+  };
   const buildExtras = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
@@ -326,7 +342,8 @@
     if (!H || !Hw || !id) return [];
     const k = H / Hw, c = pictureSize(page);
     const beside = f.docking?.dockLocation === DASH && c && c.w < c.h;      // upright, docked
-    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null];
+    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null,
+            window.__sftPhoneSecure ? secureNotice(f, k, H) : null];
   };
 
   const sizes = (f) => {
@@ -337,7 +354,7 @@
   };
   const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f), f.activePage?.mainPanelSGID ?? null]), () => buildLayer(f));
   const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
-                                               settingsOpen.has(f.frameID), pending, hueOf(),
+                                               settingsOpen.has(f.frameID), pending, hueOf(), !!window.__sftPhoneSecure,
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
   // Drawn as the last child of the dashboard app, in the page's bottom-right corner (L.mount; the

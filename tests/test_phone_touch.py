@@ -99,6 +99,42 @@ class PhoneNotAnswering(unittest.TestCase):
         self.assertEqual(sent(p), (2, 0, -2, 540, 600, 1080, 2400, 0xFFFF, 0, 0))
 
 
+DUMPSYS = """WINDOW MANAGER WINDOWS (dumpsys window windows)
+  Window #0 Window{a1b2c3 u0 com.android.systemui/StatusBar}:
+    mDisplayId=0 rootTaskId=1 mSession=Session{1 2:3}
+    mAttrs={(0,0)(fillxfill) ty=STATUS_BAR fmt=TRANSLUCENT
+      fl=NOT_FOCUSABLE SPLIT_TOUCH HARDWARE_ACCELERATED}
+  Window #1 Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}:
+    mDisplayId=0 rootTaskId=12
+    mAttrs={(0,0)(fillxfill) ty=BASE_APPLICATION wanim=0x1030465
+      fl=LAYOUT_IN_SCREEN LAYOUT_INSET_DECOR SECURE SPLIT_TOUCH HARDWARE_ACCELERATED}
+  Window #2 Window{778899 u0 com.example.notes/com.example.notes.Edit}:
+    mAttrs={(0,0)(fillxfill) ty=BASE_APPLICATION
+      fl=LAYOUT_IN_SCREEN SPLIT_TOUCH}
+
+  mCurrentFocus=Window{FOCUS u0 X}
+"""
+
+
+class SecureScreen(unittest.TestCase):
+    """An app hiding its screen from mirroring (FLAG_SECURE) shows black: phone-touch tells it from
+    Android's window list, by the focused window's flags."""
+
+    def test_the_focused_windows_flags_decide(self):
+        bank = DUMPSYS.replace("Window{FOCUS u0 X}", "Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}")
+        notes = DUMPSYS.replace("Window{FOCUS u0 X}", "Window{778899 u0 com.example.notes/com.example.notes.Edit}")
+        self.assertTrue(pt.focused_is_secure(bank))
+        self.assertFalse(pt.focused_is_secure(notes))            # (SECURE on another window doesn't count)
+        self.assertFalse(pt.focused_is_secure(DUMPSYS.replace("mCurrentFocus=Window{FOCUS u0 X}", "mCurrentFocus=null")))
+        self.assertFalse(pt.focused_is_secure(""))
+
+    def test_the_layer_shows_a_notice_while_it_is_hidden(self):
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        self.assertIn("window.__sftPhoneSecure ? secureNotice(", js)
+        src = (ROOT / "packs/core/adb-scrcpy" / "phone-touch").read_text()
+        self.assertIn("window.__sftPhoneSecure = ", src)
+
+
 class Replaced(unittest.TestCase):
     def test_the_one_replaced_cleans_up(self):
         """A reconnect's phone-touch stops the one before (SIGTERM): that one removes its tunnel
