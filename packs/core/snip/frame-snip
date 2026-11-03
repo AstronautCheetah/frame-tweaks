@@ -94,13 +94,84 @@ class Attrs(ctypes.Structure):
                 ("rest", ctypes.c_char * 256)]
 
 
-def capture_focused():
-    """The focused window of the Steam session (gamescope's GAMESCOPE_FOCUSED_WINDOW) as a QImage."""
+def x11():
+    """libX11 through ctypes, for the Steam session's display (gamescope's Xwayland, :0)."""
     x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
     x.XOpenDisplay.restype = ctypes.c_void_p
     x.XGetImage.restype = ctypes.c_void_p
     x.XInternAtom.restype = ctypes.c_ulong
     x.XDefaultRootWindow.restype = ctypes.c_ulong
+    return x
+
+
+def root_cardinal(x, d, name):
+    """The first value of a CARDINAL property on the root window, or None: absent, or empty."""
+    root = ctypes.c_ulong(x.XDefaultRootWindow(d))
+    atom = x.XInternAtom(d, name, 1)
+    rtype, fmt, n, after = ctypes.c_ulong(), ctypes.c_int(), ctypes.c_ulong(), ctypes.c_ulong()
+    prop = ctypes.c_void_p()
+    if not atom or x.XGetWindowProperty(d, root, ctypes.c_ulong(atom), 0, 1, 0, ctypes.c_ulong(6),   # XA_CARDINAL
+                                        ctypes.byref(rtype), ctypes.byref(fmt), ctypes.byref(n),
+                                        ctypes.byref(after), ctypes.byref(prop)) != 0 or not n.value or not prop.value:
+        return None
+    value = ctypes.cast(prop, ctypes.POINTER(ctypes.c_ulong))[0]
+    x.XFree(prop)
+    return value
+
+
+def focused_app():
+    """The Steam app gamescope keeps its focus on (GAMESCOPE_FOCUSED_APP): set while something
+    started from Steam runs, a game or anything from the "+" menu, Theater mode included; None
+    otherwise (the desktop, a plain window), or when the display can't be asked."""
+    try:
+        x = x11()
+        d = ctypes.c_void_p(x.XOpenDisplay(os.environ.get("DISPLAY", ":0").encode()))
+        if not d.value:
+            return None
+        try:
+            return root_cardinal(x, d, b"GAMESCOPE_FOCUSED_APP") or None
+        finally:
+            x.XCloseDisplay(d)
+    except (OSError, AttributeError):
+        return None
+
+
+def join_app(win, appid):
+    """Mark the snip window as the focused app's (STEAM_GAME = its id). With its focus on an app,
+    gamescope shows and hands input to that app's windows only, so a plain window of ours never
+    appeared in Theater mode: no selection, no laser, and the snip seemed to do nothing. Done
+    before the window is mapped, so gamescope's first look at it counts it as the app's; when
+    the snip closes, the focus goes back to the app's own window."""
+    x = x11()
+    d = ctypes.c_void_p(x.XOpenDisplay(os.environ.get("DISPLAY", ":0").encode()))
+    if not d.value:
+        raise OSError("no display")
+    try:
+        atom = x.XInternAtom(d, b"STEAM_GAME", 0)
+        value = ctypes.c_ulong(int(appid))
+        x.XChangeProperty(d, ctypes.c_ulong(int(win)), ctypes.c_ulong(atom), ctypes.c_ulong(6), 32, 0,   # XA_CARDINAL, replace
+                          ctypes.byref(value), 1)
+        x.XFlush(d)
+    finally:
+        x.XCloseDisplay(d)
+
+
+def tag_for_theater(window):
+    """The snip window as the focused app's, when there is one (join_app); SFT_SNIP_NO_APP_TAG=1
+    leaves it a plain window (to see what gamescope does then). The app id used, or None."""
+    appid = focused_app()
+    if not appid or os.environ.get("SFT_SNIP_NO_APP_TAG"):
+        return None
+    try:
+        join_app(int(window.winId()), appid)
+    except (OSError, AttributeError, ValueError):
+        return None
+    return appid
+
+
+def capture_focused():
+    """The focused window of the Steam session (gamescope's GAMESCOPE_FOCUSED_WINDOW) as a QImage."""
+    x = x11()
     d = ctypes.c_void_p(x.XOpenDisplay(b":0"))
     if not d.value:
         raise RuntimeError(_("can't open the Steam session's display"))
@@ -2096,6 +2167,7 @@ def main():
         notify(_("Couldn't take a snip"), _("empty picture"))
         return 1
     w = Snip(image)
+    tag_for_theater(w)               # (an app in Theater mode: shown over it, with the laser)
     w.showFullScreen()
     w.activateWindow()
     return app.exec()

@@ -212,6 +212,10 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Screen snip in Theater mode.** With a game, or anything started from Steam, running, the snip
+  seemed to do nothing: gamescope keeps its focus on that app and shows only its windows, so the
+  selection window never appeared and got no laser. The snip window now marks itself as the
+  focused app's (`STEAM_GAME`) before it opens, and the focus returns to the app when it closes.
 - **Unstick says when only a SteamVR restart can help.** A modifier that stays "held" after a key's
   release went to another VR window lives in SteamVR's compositor, which counts presses per key;
   no key event from a keyboard, Arrow Pad or a virtual device can bring that count back, so

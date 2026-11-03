@@ -149,6 +149,11 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
   gamescope, so that display has no picture of them (it comes back black): then it takes
   gamescope's own screenshot of what it shows instead (`gamescopectl screenshot`), at the size
   gamescope draws it.
+- **In Theater mode**, with a game or anything started from Steam running, gamescope keeps its
+  focus on that app: it shows and hands input to that app's windows only, so a plain window of
+  the snip's never appeared there. The snip window therefore marks itself as the focused app's
+  (`STEAM_GAME` = its id, read from `GAMESCOPE_FOCUSED_APP`) before it opens, and the focus
+  returns to the app when it closes. `SFT_SNIP_NO_APP_TAG=1` turns that off.
 - **Copy text** and **Narrate** read the text with
   [Tesseract](https://github.com/tesseract-ocr/tesseract), using its English data, on a
   picture scaled up 2× (small screen text reads better that way).
