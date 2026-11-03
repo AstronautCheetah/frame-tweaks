@@ -26,9 +26,11 @@ case " $* " in
     *" list-units "*) printf '%b' "${LIST:-}" ;;
 esac
 exit 0'''
-# systemd-run: its arguments, one per line, and the runtime folder it was given itself.
+# systemd-run: its arguments, one per line, and the runtime folder it was given itself; with
+# RUN_EXEC, it also runs the command after "--", as the unit would.
 SYSTEMD_RUN = r'''printf '%s\n' "$@" > "$HOME/run-args"
 echo "$XDG_RUNTIME_DIR" > "$HOME/run-runtime"
+if [ -n "${RUN_EXEC:-}" ]; then while [ $# -gt 0 ] && [ "$1" != -- ]; do shift; done; shift; "$@"; fi
 exit "${RUN_STATUS:-0}"'''
 
 
@@ -162,7 +164,7 @@ class Detached(Sandbox):
 
     def detached(self, *cmd, **extra):
         return subprocess.run(["bash", str(ROOT / "lib/detached.sh"), *cmd], capture_output=True, text=True,
-                              env=self.env(FRAME_TWEAKS_SPLASH="off", **extra), timeout=30)
+                              env=self.env(FRAME_TWEAKS_SPLASH="off", FRAME_TWEAKS_NO_TMUX="1", **extra), timeout=30)
 
     def test_as_a_service(self):
         r = self.detached("./install.sh", "update", "--to", "v1.2.3", FRAME_TWEAKS_DRY_RUN="1", DISPLAY=":2")
@@ -193,6 +195,61 @@ class Detached(Sandbox):
         r = self.detached("bash", "-c", "echo plain; exit 4", NO_SYSTEMD="1")
         self.assertEqual((r.returncode, r.stdout.strip()), (4, "plain"))
         self.assertIsNone(self.run_args())
+
+
+# tmux: new-session runs its command at once (as the session would), attach-session prints ATTACHED,
+# has-session answers HAS (1: gone); every call is logged.
+TMUX = r'''echo "tmux $*" >> "$HOME/calls"
+case " $* " in
+    *" new-session "*) for a; do last=$a; [ "$a" = ";" ] && break; cmd=$a; done; bash -c "$cmd" ;;
+    *" attach-session "*) echo ATTACHED ;;
+    *" has-session "*) exit "${HAS:-1}" ;;
+esac
+exit 0'''
+
+
+class DetachedTmux(Sandbox):
+    """With tmux (SteamOS has it): the install runs in a tmux session the service owns, and the
+    terminal attaches; closing it detaches, and ./install.sh attach brings it back."""
+    def setUp(self):
+        super().setUp()
+        stub(self.stubs, "tmux", TMUX)
+
+    def detached(self, *cmd, **extra):
+        return subprocess.run(["bash", str(ROOT / "lib/detached.sh"), *cmd], capture_output=True, text=True,
+                              env=self.env(FRAME_TWEAKS_SPLASH="off", **extra), timeout=30)
+
+    def test_runs_in_tmux_and_passes_its_exit_status_on(self):
+        r = self.detached("bash", "-c", "exit 3", RUN_EXEC="1")
+        self.assertEqual(r.returncode, 3, r.stdout + r.stderr)
+        args = self.run_args()
+        self.assertIn("Type=forking", args)
+        i = args.index("--")
+        self.assertEqual(args[i + 1:i + 3], ["tmux", "-L"])
+        self.assertRegex(args[i + 3], r"^ft-install-\d+$")
+        self.assertIn("status", args)                                 # (its status bar off)
+        self.assertTrue(any("attach-session" in c for c in self.calls()))
+
+    def test_detached_it_goes_on_and_says_so(self):
+        r = self.detached("bash", "-c", "exit 0", HAS="0")             # (the session still there)
+        self.assertEqual(r.returncode, 0)
+        self.assertIn("./install.sh attach", r.stdout)
+
+    def test_attach_finds_the_running_one(self):
+        socks = Path(self.tmp.name) / "tmux-sockets"
+        sockdir = socks / f"tmux-{os.getuid()}"
+        sockdir.mkdir(parents=True)
+        import socket
+        s1 = socket.socket(socket.AF_UNIX)
+        s1.bind(str(sockdir / "ft-install-42"))
+        self.addCleanup(s1.close)
+        r = subprocess.run([str(ROOT / "install.sh"), "attach"], capture_output=True, text=True, timeout=30,
+                           env=self.env(TMUX_TMPDIR=str(socks), HAS="0"))
+        self.assertIn("ATTACHED", r.stdout, r.stderr)
+        self.assertIn("tmux -L ft-install-42 attach-session -t ft-install-42", self.calls())
+        r = subprocess.run([str(ROOT / "install.sh"), "attach"], capture_output=True, text=True, timeout=30,
+                           env=self.env(TMUX_TMPDIR=str(socks), HAS="1"))
+        self.assertIn("No install is running", r.stdout)
 
 
 class WindowSide(unittest.TestCase):

@@ -348,6 +348,11 @@ msgid ""
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"An install, update or removal is still running on its own (its terminal was closed): open it again, to see it or answer it"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr ""
 
@@ -664,6 +669,10 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "▶ Show the running install"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1863,6 +1872,10 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid "No install is running. The output of past ones: %s"
+msgstr ""
+
+#: install.sh
 msgid ""
 "No installed tweak has files that changed since it was installed: nothing to install again."
 msgstr ""
@@ -2319,6 +2332,15 @@ msgstr ""
 #: lib/detached.sh
 msgid ""
 "Closing this terminal does not stop it: it goes on as %s (its output: %s)."
+msgstr ""
+
+#: lib/detached.sh
+msgid ""
+"Closing this terminal does not stop it: it goes on, and \"./install.sh attach\" (or Show it in the window) brings it back."
+msgstr ""
+
+#: lib/detached.sh
+msgid "Still running on its own: ./install.sh attach brings it back."
 msgstr ""
 
 #: lib/i18n.py

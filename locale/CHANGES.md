@@ -28,6 +28,10 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Search the tweaks"
 - New in `gui/frame-tweaks-gui.py:283`
   - now: "Search: name, description, category"
+- New in `gui/frame-tweaks-gui.py:332`
+  - now: "▶ Show the running install"
+- New in `gui/frame-tweaks-gui.py:333`
+  - now: "An install, update or removal is still running on its own (its terminal was closed): open it again, to see it or answer it"
 - New in `gui/frame-tweaks-gui.py:975`
   - now: "An install or update is still running (one started before this window opened goes on by itself): check again once it's done. Its output: {folder}"
 - New in `gui/prefs_page.py:235`
@@ -62,6 +66,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Protect selected"
 - New in `install.sh:1338`
   - now: "translation-check FILE.po"
+- New in `install.sh:1343`
+  - now: "No install is running. The output of past ones: %s"
 - New in `install.sh:373`
   - now: "Nothing was installed."
 - New in `install.sh:647`
@@ -92,6 +98,10 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Still broken: %s"
 - New in `lib/detached.sh:36`
   - now: "Closing this terminal does not stop it: it goes on as %s (its output: %s)."
+- New in `lib/detached.sh:39`
+  - now: "Closing this terminal does not stop it: it goes on, and \"./install.sh attach\" (or Show it in the window) brings it back."
+- New in `lib/detached.sh:58`
+  - now: "Still running on its own: ./install.sh attach brings it back."
 - New in `lib/i18n.py:152`
   - now: "placeholders/tags {want} became {got}"
 - New in `lib/i18n.py:154`

@@ -48,6 +48,7 @@
 #   ./install.sh wallet-apps [ARGS]  apps that use the wallet (wallet-launcher; --help for its options)
 #   ./install.sh timers [ARGS]       close-after timers for apps (app-timers; --help for its options)
 #   ./install.sh menu [--remove]     (re)create the "Frame Tweaks" app-menu entry (or remove it)
+#   ./install.sh attach              back to an install the window started whose terminal was closed
 #   ./install.sh bindings show|patch|restore|status [ARGS]   SteamVR controller bindings changed
 #                                    by tweaks (experimental; lib/vrbindings.py, docs/mods.md)
 #   ./install.sh translation-check FILE.po   check a translation of your own as Frame Tweaks reads
@@ -129,7 +130,7 @@ done < <(python3 lib/sft.py registry)
 # core" is the way back.)
 # (gui too: with every pack turned off on the Packs page, the window, opened from the menu, said
 # nothing and stayed shut; it's where they're turned on again)
-[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window|tidy|translation-check)$ ]] ||
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window|tidy|translation-check|attach)$ ]] ||
     { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
@@ -1334,6 +1335,13 @@ case ${1:-} in
     wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
     bindings)    shift; exec python3 lib/vrbindings.py "$@" ;;
+    attach)      shift
+                 # (lib/detached.sh: the newest install the window started, still running in tmux)
+                 sess=$(for sock in "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"/ft-install-*; do
+                            [ -S "$sock" ] && tmux -L "${sock##*/}" has-session -t "${sock##*/}" 2>/dev/null && echo "${sock##*/}"
+                        done | sort -t- -k3 -n | tail -1)
+                 [ -n "$sess" ] || { echo "$(t 'No install is running. The output of past ones: %s' "$HOME/.local/state/frame-tweaks/logs")"; exit 0; }
+                 exec tmux -L "$sess" attach-session -t "$sess" ;;
     forget-settings) shift; take_lock; start_log forget-settings "$@"; cmd_forget_settings "$@" ;;
     uninstall-self) shift; take_lock; start_log uninstall-self "$@"; lifecycle uninstall uninstall-self; cmd_uninstall_self "$@" ;;
     menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "$(t "Removed 'Frame Tweaks' from the app menu.")"

@@ -13,6 +13,13 @@
 # meanwhile that it's still running. (A question asked after that gets no answer: no, as without
 # a terminal; a sudo prompt fails that one tweak.)
 #
+# With tmux (part of SteamOS), better: the command runs in a tmux session of its own (socket and
+# session ft-install-PID) whose server is that service, and this terminal only attaches to it.
+# Closing the terminal detaches; the install goes on with its pty, so a question or sudo's prompt
+# waits for an answer, and `./install.sh attach` (the window's "Show it") brings it back, prompt
+# and all. Its exit status goes through a file ($RUN_DIR/ft-install-PID.rc): tmux's attach
+# doesn't hand it back.
+#
 # The splash (lib/splash.py) is drawn here, around the relay: inside, it would pass the hangup on
 # to the command (it does, on purpose, in a terminal). Without a usable systemd (units_usable),
 # the command runs as it did before, in this terminal. FRAME_TWEAKS_DRY_RUN: print the command.
@@ -23,7 +30,39 @@ source lib/common.sh
 set +e     # (common.sh turns on -e for tweak scripts)
 [ $# -gt 0 ] || die "lib/detached.sh COMMAND..."
 
-if units_usable; then
+if units_usable && command -v tmux >/dev/null && [ -z "${FRAME_TWEAKS_NO_TMUX:-}" ]; then
+    unit="ft-install-$$"
+    rcfile="$XDG_RUNTIME_DIR_USER/$unit.rc"
+    rm -f "$rcfile"
+    session_env_args
+    inner=$(printf '%q ' "$@")
+    note=$(t 'Closing this terminal does not stop it: it goes on, and "./install.sh attach" (or Show it in the window) brings it back.')
+    # (Type=forking: tmux new-session -d starts its server and returns; the server is the unit.
+    # remain-on-exit off: the session ends with the command, and so does the unit.)
+    start=(env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR_USER" DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus"
+           systemd-run --user --quiet --collect --unit="$unit" -p Type=forking --working-directory="$REPO_DIR"
+           --setenv=FRAME_TWEAKS_SPLASH=off "${SESSION_ENV_ARGS[@]}"
+           -- tmux -L "$unit" new-session -d -s "$unit" -x 200 -y 50
+           "printf '%s\n\n' $(printf '%q' "$note"); $inner; echo \$? > $(printf '%q' "$rcfile")"
+           \; set-option -t "$unit" status off)      # (no status bar: it read as part of the output)
+    if [ -n "${FRAME_TWEAKS_DRY_RUN:-}" ]; then
+        printf 'would run:'; printf ' %q' "${start[@]}"; echo
+        exit 0
+    fi
+    "${start[@]}" || exit 1
+    attach=(tmux -L "$unit" attach-session -t "$unit")
+    if command -v python3 >/dev/null; then python3 lib/splash.py -- "${attach[@]}"; else "${attach[@]}"; fi
+    # (the terminal closed meanwhile: nothing runs this; the install goes on. Detached by hand
+    # (tmux's Ctrl+B D): it goes on too, and this says so.)
+    if tmux -L "$unit" has-session -t "$unit" 2>/dev/null; then
+        echo "$(t 'Still running on its own: ./install.sh attach brings it back.')"
+        exit 0
+    fi
+    for _ in 1 2 3 4 5 6 7 8 9 10; do [ -s "$rcfile" ] && break; sleep 0.2; done
+    rc=$(cat "$rcfile" 2>/dev/null || echo 1)
+    rm -f "$rcfile"
+    exit "$rc"
+elif units_usable; then
     unit="ft-install-$$"
     session_env_args
     # (env, not systemd_run_user: splash.py runs a program, not a shell function)

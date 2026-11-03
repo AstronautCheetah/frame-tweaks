@@ -70,6 +70,7 @@
   desktop's clipboard.
 
 ### Added
+- **An install whose terminal was closed can be brought back:** installs, updates and removals the window starts run in a tmux session (part of SteamOS) owned by their own service. Closing the terminal only detaches: a question or sudo's password prompt waits, and **▶ Show the running install** in the window (or `./install.sh attach`) opens it again.
 - **Search the tweaks:** a 🔍 button left of ⚙ in the window's top row opens a search field; the list shows only the tweaks whose name, description, category or pack has every word typed (categories unfolded). Esc, or the button again, brings back the whole list.
 - **Tweaks that can't go together, or need a newer Frame Tweaks, say so before installing:** a
   tweak's manifest can name the tweaks it conflicts with (`conflicts:`), the things only one tweak

@@ -17,6 +17,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from PyQt6 import sip
 from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, pyqtSignal
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QIcon
@@ -326,6 +327,18 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.update_button = QPushButton()
         self.update_button.clicked.connect(self.update_clicked)
         bottom.addWidget(self.update_button)
+        # An install whose terminal was closed goes on (lib/detached.sh, in tmux): Show it brings it
+        # back in a terminal, its questions and sudo prompt included. Shown only while one runs.
+        self.show_install_button = QPushButton(_("▶ Show the running install"))
+        self.show_install_button.setToolTip(_("An install, update or removal is still running on its own (its "
+                                              "terminal was closed): open it again, to see it or answer it"))
+        self.show_install_button.clicked.connect(self.show_install)
+        self.show_install_button.setHidden(True)
+        bottom.addWidget(self.show_install_button)
+        if not getattr(self, "install_timer", None):
+            self.install_timer = QTimer(self, interval=3000, timeout=self.check_install_running)
+            self.install_timer.start()
+        self.check_install_running()
         self.changed_button = QPushButton()
         self.changed_button.clicked.connect(self.reinstall_changed)
         bottom.addWidget(self.changed_button)
@@ -960,6 +973,27 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             self.updates.pop(cid, None)
             self.files_changed = self.files_changed - {cid}     # (installed again, or gone: refresh looks again)
         self.refresh()
+
+    def check_install_running(self):
+        button = getattr(self, "show_install_button", None)
+        if button is None or sip.isdeleted(button):
+            return
+        running = install_running()
+        # (this window's own terminal shows its install already: the button is for one it lost)
+        button.setHidden(not running or self.terminal_open())
+
+    def terminal_open(self):
+        proc = getattr(self, "proc", None)
+        return proc is not None and not sip.isdeleted(proc) and proc.state() != QProcess.ProcessState.NotRunning
+
+    def show_install(self):
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print("would run: ./install.sh attach")
+            return
+        self.proc = QProcess(self)
+        self.proc.finished.connect(lambda *_: self.check_install_running())
+        in_terminal(self.proc, f"cd {shlex.quote(str(REPO))} && ./install.sh attach; echo; read -rp {close_prompt()}")
+        self.check_install_running()
 
     def tidy_unneeded(self):
         """Installed tweaks this Frame doesn't need any more whose manifest says to remove them then
