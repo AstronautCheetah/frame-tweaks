@@ -83,6 +83,10 @@ it off until the next SteamVR start. Its
 [README](https://github.com/sasaken1102r/frame-perf-overlay#usage) explains every value and
 setting.
 
+- **On your wrist, it goes with the controller.** Attached to the left or right wrist (its Perf
+  tab), the panel is drawn only while that controller is tracked: with the controller off or
+  asleep it vanishes, though the panel is running and set to visible, and Show changes nothing.
+  Wake the controller, or set the attachment to *View* in the Perf tab.
 - **It looks for updates on GitHub** at start and then at most once a day, and installs one only
   when you confirm. To turn the check off, set `"update_check": false` in
   `~/.config/frame-perf-overlay/config.json`.
