@@ -327,6 +327,13 @@ msgstr[1] "%d actualizaciones de paquetes"
 msgid "(hidden)"
 msgstr "(oculto)"
 
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"A newer release than the one Frame Tweaks tested on a Frame: it may work differently, or not yet on the Frame, and this tweak's page may not match it. Once it's installed, its row offers to go back to the tested version."
+msgstr ""
+"Una versión más reciente que la que Frame Tweaks probó en un Frame: puede funcionar de otra manera, o todavía no funcionar en el Frame, y la página de este ajuste puede no coincidir con ella. Una vez instalada, su fila ofrece volver a la versión probada."
+
 #: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Aplicar cambios"
@@ -335,6 +342,11 @@ msgstr "Aplicar cambios"
 #: gui/frame-tweaks-gui.py lib/sft.py
 msgid "Asks for your sudo password: %s"
 msgstr "Pide tu contraseña de sudo: %s"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Back to the tested version {version}"
+msgstr "Volver a la versión probada {version}"
 
 #: gui/frame-tweaks-gui.py
 msgid "Checking…"
@@ -475,6 +487,13 @@ msgstr "Instálala: tus ajustes se actualizan con ella"
 #: gui/frame-tweaks-gui.py
 msgid "Install the tweaks the last update didn't get to"
 msgstr "Instalar los ajustes a los que no llegó la última actualización"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Installs the version Frame Tweaks tested again, with the project's own installer (its settings stay)."
+msgstr ""
+"Vuelve a instalar la versión que probó Frame Tweaks, con el propio instalador del proyecto (su configuración se mantiene)."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -671,6 +690,16 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "{version} available"
 msgstr "{version} disponible"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "{version} available (not yet tested by Frame Tweaks)"
+msgstr "{version} disponible (aún no probada por Frame Tweaks)"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "{version} available (tested by Frame Tweaks)"
+msgstr "{version} disponible (probada por Frame Tweaks)"
 
 #: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
@@ -1765,6 +1794,13 @@ msgstr "No se pudo quitar %s"
 msgid "%s failed"
 msgstr "%s falló"
 
+# needs review
+#: install.sh
+msgid ""
+"%s has no tested version: it installs its newest (./install.sh install %s)"
+msgstr ""
+"%s no tiene versión probada: se instala la más reciente (./install.sh install %s)"
+
 #: install.sh lib/link.sh
 msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
@@ -1777,6 +1813,11 @@ msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 #: install.sh
 msgid "%s is now called %s"
 msgstr "%s ahora se llama %s"
+
+# needs review
+#: install.sh
+msgid "%s isn't linked: it installs what Frame Tweaks has"
+msgstr "%s no está vinculado: se instala lo que tiene Frame Tweaks"
 
 #: install.sh
 msgid "%s migration failed"
@@ -1866,8 +1907,23 @@ msgstr ""
 
 # needs review
 #: install.sh
+msgid "Installed: %s"
+msgstr "Instalada: %s"
+
+# needs review
+#: install.sh
 msgid "Installing again, with their changed files: %s"
 msgstr "Instalando de nuevo, con sus archivos cambiados: %s"
+
+# needs review
+#: install.sh
+msgid "Its newest: %s"
+msgstr "Su versión más reciente: %s"
+
+# needs review
+#: install.sh
+msgid "Its newest: couldn't look it up"
+msgstr "Su versión más reciente: no se pudo consultar"
 
 #: install.sh
 msgid "Kept backups of files tweaks changed: %s"
@@ -1914,6 +1970,13 @@ msgstr ""
 # needs review
 #: install.sh
 msgid ""
+"Linked, at the version Frame Tweaks tested, which this release moves to a newer one: %s"
+msgstr ""
+"Vinculados, en la versión que probó Frame Tweaks, que esta versión de Frame Tweaks cambia por una más nueva: %s"
+
+# needs review
+#: install.sh
+msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 "Vinculados, así que se actualizan a su manera (en su fila, ↻ vuelve a ejecutar su instalador): %s"
@@ -1931,6 +1994,11 @@ msgid ""
 "No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go."
 msgstr ""
 "Ya no forman parte de Frame Tweaks, así que no se desinstalan desde aquí: %s (el README de cada uno decía cómo se instaló). Sus registros se borran."
+
+# needs review
+#: install.sh
+msgid "No tested version: it installs its newest."
+msgstr "Sin versión probada: se instala la más reciente."
 
 #: install.sh
 msgid "No tweaks found (python3 lib/sft.py mods says why)"
@@ -2016,6 +2084,11 @@ msgid ""
 msgstr ""
 "La ventana completa no se abrió (qué pasó: %s); se usa la lista simple."
 
+# needs review
+#: install.sh
+msgid "The version Frame Tweaks tested: %s"
+msgstr "La versión que probó Frame Tweaks: %s"
+
 #: install.sh
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
@@ -2035,6 +2108,11 @@ msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 "Marca lo que quieras instalar. Desmarcar un ajuste instalado lo quita."
+
+# needs review
+#: install.sh
+msgid "To install one: %s"
+msgstr "Para instalar una: %s"
 
 #: install.sh
 msgid "Uninstalling every tweak"
@@ -2123,6 +2201,11 @@ msgid ""
 "it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own"
 msgstr ""
 "no es una copia de git, así que no se pueden distinguir tus cambios de los de Frame Tweaks"
+
+# needs review
+#: install.sh
+msgid "link-version ID [tested|newest]"
+msgstr "link-version ID [tested|newest]"
 
 #: install.sh
 msgid "no release %s"
@@ -2375,8 +2458,20 @@ msgstr "la revisión del estado falló: %s"
 
 # needs review
 #: lib/link.sh
+msgid "%s has no tested version here: it installs its newest"
+msgstr "%s no tiene versión probada aquí: se instala la más reciente"
+
+# needs review
+#: lib/link.sh
 msgid "%s has no uninstall command here: see its README"
 msgstr "%s no tiene aquí un comando para desinstalarlo: consulta su README"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"Installing %s %s, the version Frame Tweaks tested, with its own installer (from the project):"
+msgstr ""
+"Instalando %s %s, la versión que probó Frame Tweaks, con su propio instalador (del proyecto):"
 
 # needs review
 #: lib/link.sh
@@ -2384,6 +2479,13 @@ msgid ""
 "Installing %s with its own installer (from the project, not checked by Frame Tweaks):"
 msgstr ""
 "Instalando %s con su propio instalador (del proyecto, sin comprobar por Frame Tweaks):"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"Installing the newest %s, not yet tested by Frame Tweaks, with its own installer (from the project):"
+msgstr ""
+"Instalando la versión más reciente de %s, aún no probada por Frame Tweaks, con su propio instalador (del proyecto):"
 
 # needs review
 #: lib/link.sh
@@ -2401,6 +2503,26 @@ msgstr "Desinstalando %s con su propio desinstalador:"
 #: lib/link.sh
 msgid "installed by its own installer (it updates its own way)"
 msgstr "instalado por su propio instalador (se actualiza a su manera)"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"installed by its own installer: %s, not the version Frame Tweaks tested (%s)"
+msgstr ""
+"instalado por su propio instalador: %s, no la versión que probó Frame Tweaks (%s)"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"installed by its own installer: its newest version, not yet tested by Frame Tweaks"
+msgstr ""
+"instalado por su propio instalador: su versión más reciente, aún no probada por Frame Tweaks"
+
+# needs review
+#: lib/link.sh
+msgid "installed by its own installer: the version Frame Tweaks tested (%s)"
+msgstr ""
+"instalado por su propio instalador: la versión que probó Frame Tweaks (%s)"
 
 # needs review
 #: lib/link.sh
@@ -7160,9 +7282,9 @@ msgstr "Teclado completo (RV)"
 # needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
+"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
-"El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
+"El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Vinculado: se instala desde la versión que probó Frame Tweaks con su propio instalador, como lo describe su README."
 
 # needs review
 #: packs/third-party/full-keyboard/README.md
@@ -7174,16 +7296,16 @@ msgstr ""
 # needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
+"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from the release Frame Tweaks tested"
 msgstr ""
-"El teclado de RV de tamaño completo de TaiKeid, que aparece con el menú principal de SteamVR, instalado desde su versión más reciente"
+"El teclado de RV de tamaño completo de TaiKeid, que aparece con el menú principal de SteamVR, instalado desde la versión que probó Frame Tweaks"
 
 # needs review
 #: packs/third-party/knockthru/README.md
 msgid ""
-"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
-"Revisar la habitación implica buscar el botón Vista de habitación en el menú principal, o una asignación del control. Un golpe funciona con un control en la mano o apoyado. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
+"Revisar la habitación implica buscar el botón Vista de habitación en el menú principal, o una asignación del control. Un golpe funciona con un control en la mano o apoyado. Vinculado: se instala desde la versión que probó Frame Tweaks con su propio instalador, como lo describe su README."
 
 # needs review
 #: packs/third-party/knockthru/README.md
@@ -7270,9 +7392,9 @@ msgstr "Performance Overlay"
 # needs review
 #: packs/third-party/perf-overlay/README.md
 msgid ""
-"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
-"El Frame no muestra sus propias temperaturas, frecuencias ni memoria mientras juegas, así que una ralentización o un visor caliente es difícil de explicar. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
+"El Frame no muestra sus propias temperaturas, frecuencias ni memoria mientras juegas, así que una ralentización o un visor caliente es difícil de explicar. Vinculado: se instala desde la versión que probó Frame Tweaks con su propio instalador, como lo describe su README."
 
 # needs review
 #: packs/third-party/perf-overlay/README.md
@@ -8081,3 +8203,27 @@ msgstr "Instalador de ajustes"
 #~ "Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
 #~ msgstr ""
 #~ "¿Ejecutar {cmd} {sub} ahora para crear un token? Abre un navegador para iniciar sesión y luego muestra el token para copiarlo. [Y/n] "
+
+#~ # needs review
+#~ msgid ""
+#~ "Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
+#~ msgstr ""
+#~ "El teclado de RV de Steam no tiene teclas que el escritorio necesita, como las flechas arriba/abajo, Ctrl y las teclas F. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
+
+#~ # needs review
+#~ msgid ""
+#~ "TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
+#~ msgstr ""
+#~ "El teclado de RV de tamaño completo de TaiKeid, que aparece con el menú principal de SteamVR, instalado desde su versión más reciente"
+
+#~ # needs review
+#~ msgid ""
+#~ "Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+#~ msgstr ""
+#~ "Revisar la habitación implica buscar el botón Vista de habitación en el menú principal, o una asignación del control. Un golpe funciona con un control en la mano o apoyado. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
+
+#~ # needs review
+#~ msgid ""
+#~ "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+#~ msgstr ""
+#~ "El Frame no muestra sus propias temperaturas, frecuencias ni memoria mientras juegas, así que una ralentización o un visor caliente es difícil de explicar. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."

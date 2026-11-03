@@ -361,6 +361,13 @@ msgstr "(verborgen)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
+msgid ""
+"A newer release than the one Frame Tweaks tested on a Frame: it may work differently, or not yet on the Frame, and this tweak's page may not match it. Once it's installed, its row offers to go back to the tested version."
+msgstr ""
+"Een nieuwere versie dan die Frame Tweaks op een Frame getest heeft: ze kan anders werken, of nog niet op de Frame, en de pagina van deze aanpassing klopt er misschien niet mee. Zodra ze geïnstalleerd is, biedt de rij ervan aan om terug te gaan naar de geteste versie."
+
+# needs review
+#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr "Wijzigingen toepassen"
 
@@ -368,6 +375,11 @@ msgstr "Wijzigingen toepassen"
 #: gui/frame-tweaks-gui.py lib/sft.py
 msgid "Asks for your sudo password: %s"
 msgstr "Vraagt om je sudo-wachtwoord: %s"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "Back to the tested version {version}"
+msgstr "Terug naar de geteste versie {version}"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -528,6 +540,13 @@ msgstr "Deze versie installeren: je aanpassingen worden tegelijk bijgewerkt"
 #: gui/frame-tweaks-gui.py
 msgid "Install the tweaks the last update didn't get to"
 msgstr "De aanpassingen installeren waar de laatste update niet aan toe kwam"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Installs the version Frame Tweaks tested again, with the project's own installer (its settings stay)."
+msgstr ""
+"Installeert opnieuw de versie die Frame Tweaks getest heeft, met het eigen installatieprogramma van het project (de instellingen ervan blijven)."
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -748,6 +767,16 @@ msgstr ""
 #: gui/frame-tweaks-gui.py
 msgid "{version} available"
 msgstr "{version} beschikbaar"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "{version} available (not yet tested by Frame Tweaks)"
+msgstr "{version} beschikbaar (nog niet getest door Frame Tweaks)"
+
+# needs review
+#: gui/frame-tweaks-gui.py
+msgid "{version} available (tested by Frame Tweaks)"
+msgstr "{version} beschikbaar (getest door Frame Tweaks)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1992,6 +2021,13 @@ msgid "%s failed"
 msgstr "%s mislukt"
 
 # needs review
+#: install.sh
+msgid ""
+"%s has no tested version: it installs its newest (./install.sh install %s)"
+msgstr ""
+"%s heeft geen geteste versie: de nieuwste wordt geïnstalleerd (./install.sh install %s)"
+
+# needs review
 #: install.sh lib/link.sh
 msgid "%s has nothing to run"
 msgstr "%s heeft niets om te starten"
@@ -2005,6 +2041,11 @@ msgstr "%s is nodig voor %s: verwijder %s ook, of behoud %s"
 #: install.sh
 msgid "%s is now called %s"
 msgstr "%s heet nu %s"
+
+# needs review
+#: install.sh
+msgid "%s isn't linked: it installs what Frame Tweaks has"
+msgstr "%s is niet gekoppeld: wat Frame Tweaks heeft, wordt geïnstalleerd"
 
 # needs review
 #: install.sh
@@ -2107,8 +2148,23 @@ msgstr ""
 
 # needs review
 #: install.sh
+msgid "Installed: %s"
+msgstr "Geïnstalleerd: %s"
+
+# needs review
+#: install.sh
 msgid "Installing again, with their changed files: %s"
 msgstr "Opnieuw installeren, met hun veranderde bestanden: %s"
+
+# needs review
+#: install.sh
+msgid "Its newest: %s"
+msgstr "De nieuwste: %s"
+
+# needs review
+#: install.sh
+msgid "Its newest: couldn't look it up"
+msgstr "De nieuwste: kon niet opgezocht worden"
 
 # needs review
 #: install.sh
@@ -2161,6 +2217,13 @@ msgstr ""
 # needs review
 #: install.sh
 msgid ""
+"Linked, at the version Frame Tweaks tested, which this release moves to a newer one: %s"
+msgstr ""
+"Gekoppeld, op de versie die Frame Tweaks getest heeft; deze versie van Frame Tweaks maakt daar een nieuwere van: %s"
+
+# needs review
+#: install.sh
+msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 "Gekoppeld, dus ze worden op hun eigen manier bijgewerkt (in hun rij voert ↻ hun installatieprogramma opnieuw uit): %s"
@@ -2178,6 +2241,11 @@ msgid ""
 "No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go."
 msgstr ""
 "Geen deel meer van Frame Tweaks, dus niet van hieruit verwijderd: %s (de README van elk ervan vertelde hoe het werd ingesteld). Hun installatiegegevens worden gewist."
+
+# needs review
+#: install.sh
+msgid "No tested version: it installs its newest."
+msgstr "Geen geteste versie: de nieuwste wordt geïnstalleerd."
 
 # needs review
 #: install.sh
@@ -2276,6 +2344,11 @@ msgstr ""
 
 # needs review
 #: install.sh
+msgid "The version Frame Tweaks tested: %s"
+msgstr "De versie die Frame Tweaks getest heeft: %s"
+
+# needs review
+#: install.sh
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
@@ -2296,6 +2369,11 @@ msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
 msgstr ""
 "Vink aan wat je geïnstalleerd wilt hebben. Een geïnstalleerde aanpassing uitvinken verwijdert ze."
+
+# needs review
+#: install.sh
+msgid "To install one: %s"
+msgstr "Om er een te installeren: %s"
 
 # needs review
 #: install.sh
@@ -2396,6 +2474,11 @@ msgid ""
 "it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own"
 msgstr ""
 "het is geen git-checkout, dus je eigen wijzigingen erin zijn niet te onderscheiden van die van Frame Tweaks"
+
+# needs review
+#: install.sh
+msgid "link-version ID [tested|newest]"
+msgstr "link-version ID [tested|newest]"
 
 # needs review
 #: install.sh
@@ -2686,8 +2769,20 @@ msgstr "statuscontrole mislukt: %s"
 
 # needs review
 #: lib/link.sh
+msgid "%s has no tested version here: it installs its newest"
+msgstr "%s heeft hier geen geteste versie: de nieuwste wordt geïnstalleerd"
+
+# needs review
+#: lib/link.sh
 msgid "%s has no uninstall command here: see its README"
 msgstr "%s heeft hier geen verwijderopdracht: zie de README ervan"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"Installing %s %s, the version Frame Tweaks tested, with its own installer (from the project):"
+msgstr ""
+"%s %s installeren, de versie die Frame Tweaks getest heeft, met het eigen installatieprogramma (van het project):"
 
 # needs review
 #: lib/link.sh
@@ -2695,6 +2790,13 @@ msgid ""
 "Installing %s with its own installer (from the project, not checked by Frame Tweaks):"
 msgstr ""
 "%s installeren met het eigen installatieprogramma (van het project, niet gecontroleerd door Frame Tweaks):"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"Installing the newest %s, not yet tested by Frame Tweaks, with its own installer (from the project):"
+msgstr ""
+"De nieuwste %s installeren, nog niet getest door Frame Tweaks, met het eigen installatieprogramma (van het project):"
 
 # needs review
 #: lib/link.sh
@@ -2713,6 +2815,26 @@ msgstr "%s verwijderen met het eigen verwijderprogramma:"
 msgid "installed by its own installer (it updates its own way)"
 msgstr ""
 "geïnstalleerd door het eigen installatieprogramma (wordt op een eigen manier bijgewerkt)"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"installed by its own installer: %s, not the version Frame Tweaks tested (%s)"
+msgstr ""
+"geïnstalleerd door het eigen installatieprogramma: %s, niet de versie die Frame Tweaks getest heeft (%s)"
+
+# needs review
+#: lib/link.sh
+msgid ""
+"installed by its own installer: its newest version, not yet tested by Frame Tweaks"
+msgstr ""
+"geïnstalleerd door het eigen installatieprogramma: de nieuwste versie, nog niet getest door Frame Tweaks"
+
+# needs review
+#: lib/link.sh
+msgid "installed by its own installer: the version Frame Tweaks tested (%s)"
+msgstr ""
+"geïnstalleerd door het eigen installatieprogramma: de versie die Frame Tweaks getest heeft (%s)"
 
 # needs review
 #: lib/link.sh
@@ -8115,9 +8237,9 @@ msgstr "Volledig toetsenbord (VR)"
 # needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
+"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
-"Het eigen VR-toetsenbord van Steam mist toetsen die het bureaublad nodig heeft, zoals pijltjes omhoog/omlaag, Ctrl en F-toetsen. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+"Het eigen VR-toetsenbord van Steam mist toetsen die het bureaublad nodig heeft, zoals pijltjes omhoog/omlaag, Ctrl en F-toetsen. Gekoppeld: het wordt geïnstalleerd vanuit de versie die Frame Tweaks getest heeft, met het eigen installatieprogramma, zoals de README het beschrijft."
 
 # needs review
 #: packs/third-party/full-keyboard/README.md
@@ -8129,16 +8251,16 @@ msgstr ""
 # needs review
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
+"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from the release Frame Tweaks tested"
 msgstr ""
-"Volwaardig VR-toetsenbord van TaiKeid, zichtbaar met het SteamVR-dashboard, geïnstalleerd vanuit de nieuwste versie"
+"Volwaardig VR-toetsenbord van TaiKeid, zichtbaar met het SteamVR-dashboard, geïnstalleerd vanuit de versie die Frame Tweaks getest heeft"
 
 # needs review
 #: packs/third-party/knockthru/README.md
 msgid ""
-"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
-"De kamer controleren betekent de knop Kamerweergave in het dashboard zoeken, of een controllerbinding. Een klop werkt met een controller in je hand of neergelegd. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+"De kamer controleren betekent de knop Kamerweergave in het dashboard zoeken, of een controllerbinding. Een klop werkt met een controller in je hand of neergelegd. Gekoppeld: het wordt geïnstalleerd vanuit de versie die Frame Tweaks getest heeft, met het eigen installatieprogramma, zoals de README het beschrijft."
 
 # needs review
 #: packs/third-party/knockthru/README.md
@@ -8236,9 +8358,9 @@ msgstr "Performance Overlay"
 # needs review
 #: packs/third-party/perf-overlay/README.md
 msgid ""
-"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
-"De Frame toont zijn eigen temperaturen, kloksnelheden of geheugen niet terwijl je speelt, dus een vertraging of een warme headset is moeilijk te verklaren. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+"De Frame toont zijn eigen temperaturen, kloksnelheden of geheugen niet terwijl je speelt, dus een vertraging of een warme headset is moeilijk te verklaren. Gekoppeld: het wordt geïnstalleerd vanuit de versie die Frame Tweaks getest heeft, met het eigen installatieprogramma, zoals de README het beschrijft."
 
 # needs review
 #: packs/third-party/perf-overlay/README.md
@@ -8449,3 +8571,27 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "Run {cmd} {sub} now to make a token? It opens a browser to sign in, then shows the token to copy. [Y/n] "
 #~ msgstr ""
 #~ "{cmd} {sub} nu starten om een token te maken? Er opent een browser om je aan te melden, daarna wordt het token getoond om te kopiëren. [Y/n] "
+
+#~ # needs review
+#~ msgid ""
+#~ "Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
+#~ msgstr ""
+#~ "Het eigen VR-toetsenbord van Steam mist toetsen die het bureaublad nodig heeft, zoals pijltjes omhoog/omlaag, Ctrl en F-toetsen. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+
+#~ # needs review
+#~ msgid ""
+#~ "TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
+#~ msgstr ""
+#~ "Volwaardig VR-toetsenbord van TaiKeid, zichtbaar met het SteamVR-dashboard, geïnstalleerd vanuit de nieuwste versie"
+
+#~ # needs review
+#~ msgid ""
+#~ "Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+#~ msgstr ""
+#~ "De kamer controleren betekent de knop Kamerweergave in het dashboard zoeken, of een controllerbinding. Een klop werkt met een controller in je hand of neergelegd. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+
+#~ # needs review
+#~ msgid ""
+#~ "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+#~ msgstr ""
+#~ "De Frame toont zijn eigen temperaturen, kloksnelheden of geheugen niet terwijl je speelt, dus een vertraging of een warme headset is moeilijk te verklaren. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
