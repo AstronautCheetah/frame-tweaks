@@ -51,6 +51,7 @@ pass_language()
 # The window's parts (gui/), imported once the tweaks are read in the window's language: some
 # read their text as they load.
 from wallet_page import WalletApps  # noqa: E402  (Wallet apps page)
+from memory_page import MemoryLimits  # noqa: E402  (VR memory guard's Memory limits page)
 from packs_page import Packs  # noqa: E402  (Packs page)
 from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences page)
 from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
@@ -155,8 +156,12 @@ QRadioButton::indicator:checked {{ image: url({_BOX}/radio-checked.svg); }}
 CONTROLLER_BUTTONS = True
 
 # A row whose button opens a page of its own instead of settings (SETTINGS_PAGES) or Run (label,
-# page): the wallet's apps.
-PAGES = {"wallet": (N_("🔑 Wallet apps"), WalletApps)}         # (label: translated where it's shown)
+# page, the button's tooltip): the wallet's apps, VR memory guard's limits. The button is dimmed
+# until the tweak is installed: the page runs the programs its install puts in ~/.local/bin.
+PAGES = {"wallet": (N_("🔑 Wallet apps"), WalletApps,         # (label and tooltip: translated where they're shown)
+                    N_("Choose which apps open with the shared KDE wallet; lock or unlock it")),
+         "vr-memory-guard": (N_("📊 Memory limits"), MemoryLimits,
+                             N_("Set how much memory each Flatpak app may use, and how much is kept free for VR"))}
 
 
 def matches(comp, query):
@@ -1086,8 +1091,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             button.style().unpolish(button)
             button.style().polish(button)
             button.setEnabled(installed)
-            button.setToolTip(_("Choose which apps open with the shared KDE wallet; lock or unlock it")
-                              if installed else _("Tick it and Apply first"))
+            button.setToolTip(_(PAGES[cid][2]) if installed else _("Tick it and Apply first"))
             return
         if cid in SETTINGS_PAGES and not label:          # (with something to run: a ⚙ beside it)
             button.setText(_("⚙ Settings"))

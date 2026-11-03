@@ -46,7 +46,7 @@ msgstr ""
 msgid "(needed by %s)"
 msgstr ""
 
-#: gui/apply_changes.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
+#: gui/apply_changes.py gui/memory_page.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
 msgid "Apply"
 msgstr ""
 
@@ -311,7 +311,7 @@ msgstr ""
 msgid "{version} is still the latest release."
 msgstr ""
 
-#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py gui/works_page.py packs/core/snip/frame-snip
+#: gui/details_page.py gui/frame-tweaks-gui.py gui/memory_page.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py gui/works_page.py packs/core/snip/frame-snip
 msgid "← Back"
 msgstr ""
 
@@ -577,6 +577,11 @@ msgid "Search: name, description, category"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"Set how much memory each Flatpak app may use, and how much is kept free for VR"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Settings"
 msgstr ""
 
@@ -708,6 +713,10 @@ msgid "🐞 Report a problem"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "📊 Memory limits"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "📖 README"
 msgstr ""
 
@@ -717,6 +726,98 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "🧩 Packs"
+msgstr ""
+
+#: gui/memory_page.py
+msgid ""
+"A limit of its own; unticked, it's shared: only the limit all Flatpak apps share applies to it"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Above this, the app is stopped (and it may use some swap on top)"
+msgstr ""
+
+#: gui/memory_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "Didn't work: %s"
+msgstr ""
+
+#: gui/memory_page.py
+msgid ""
+"Flatpak apps (Firefox, and the apps you install from Discover) share the memory that isn't <b>kept free for VR</b>: past it, the app that asks for more is stopped, and SteamVR, Steam and your game keep running. An app can also have a <b>limit of its own</b>, so it's stopped before it takes the others' share; <b>shared</b> means only the apps' common limit applies to it. Games and the desktop itself aren't limited."
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Flatpak apps ({n})"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Flatpak apps together: up to {pool} of {total}."
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Keep less for VR: more for the apps"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Keep more for VR: less for the apps"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Kept free for VR"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Less memory for this app"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Memory Flatpak apps leave free for SteamVR, Steam and your game"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Memory limits"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "More memory for this app"
+msgstr ""
+
+#: gui/memory_page.py
+msgid ""
+"More than all Flatpak apps together may use: their common limit applies first."
+msgstr ""
+
+#: gui/memory_page.py
+msgid "No Flatpak apps are installed."
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Nothing to apply"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Nothing to apply: change a limit first"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Own limit"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Save these limits and put them in force, for the apps open now too"
+msgstr ""
+
+#: gui/memory_page.py
+msgid ""
+"This page needs vr-memory-guard-tool, which VR memory guard installs since this version: reinstall it (↻) first."
+msgstr ""
+
+#: gui/memory_page.py
+msgid "shared"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "{n} GB"
 msgstr ""
 
 #: gui/packs_page.py
@@ -1253,10 +1354,6 @@ msgstr ""
 
 #: gui/settings_page.py
 msgid "Back to the defaults."
-msgstr ""
-
-#: gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "Didn't work: %s"
 msgstr ""
 
 #: gui/settings_page.py lib/splash.py packs/core/snip/frame-snip install.sh
@@ -5572,7 +5669,7 @@ msgstr ""
 
 #: packs/core/vr-memory-guard/README.md
 msgid ""
-"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own, and any other app can have one too (its Memory limits page); and when memory runs out anyway, SteamVR is the last thing stopped."
 msgstr ""
 
 #: packs/core/vr-memory-guard/README.md
@@ -5590,43 +5687,17 @@ msgid "VR memory guard"
 msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
-msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
-msgstr ""
-
-#: packs/core/vr-memory-guard/install.sh
-msgid "Can't read how much memory this device has (%s)."
-msgstr ""
-
-#: packs/core/vr-memory-guard/install.sh
-msgid "Couldn't set the apps' limit now; it applies at your next login."
-msgstr ""
-
-#: packs/core/vr-memory-guard/install.sh
 msgid ""
 "Dictation: up to %s MB; Android Mirror: up to %s MB (from its next start)."
-msgstr ""
-
-#: packs/core/vr-memory-guard/install.sh
-msgid ""
-"Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
 msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
 msgid "SteamVR is given priority from its next start."
 msgstr ""
 
-#: packs/core/vr-memory-guard/install.sh
-msgid ""
-"firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
-msgstr ""
-
-#: packs/core/vr-memory-guard/install.sh
-msgid ""
-"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
-msgstr ""
-
 #: packs/core/vr-memory-guard/status.sh
-msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR given priority"
+msgid ""
+"Flatpak apps %s of %s MB (apps with a limit of their own: %s); SteamVR given priority"
 msgstr ""
 
 #: packs/core/vr-memory-guard/status.sh
@@ -5640,7 +5711,121 @@ msgid ""
 msgstr ""
 
 #: packs/core/vr-memory-guard/uninstall.sh
-msgid "Kept your limits in %s."
+msgid "Kept your limits in %s and %s."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool packs/core/vr-memory-guard/install.sh
+msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Can't read how much memory this device has (%s)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Couldn't set the apps' limit now; it applies at your next login."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Flatpak apps together: up to %s MB (%s MB kept for VR)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"Keeping {size} for VR leaves less than 2 GB of the {total} MB for Flatpak apps: choose {most}M or less."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "No Flatpak app has a limit of its own."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Run vr-memory-guard-tool apply to put it in force."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "VR memory guard isn't set up here (no {file}): install it first."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "With a limit of their own: {apps}."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "firefox_max in {file} should be 256M at least."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"line {n}: after the app ID, a size (such as 5G) and optionally its swap, or “shared”"
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "line {n}: {app} is already on an earlier line"
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"line {n}: “{app}” isn't a Flatpak app ID (such as org.mozilla.firefox)"
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "line {n}: “{size}” isn't a limit such as 512M or 5G (256M at least)"
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "line {n}: “{size}” isn't a swap size such as 0, 512M or 1G"
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"{app}: its limit ({size}) is more than all Flatpak apps together may use ({pool} MB): the apps' limit applies first."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{app}: no limit of its own, only the one all Flatpak apps share."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{app}: up to {size}, and {swap} of swap."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{file} has lines that can't be read:"
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"{size} is more than all Flatpak apps together may use ({pool} MB): choose {pool}M or less, or keep less memory for VR."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{size} kept for VR: Flatpak apps together up to {pool} MB."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“shared” takes no swap size: the apps' own applies."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{app}” isn't a Flatpak app ID (such as org.mozilla.firefox)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{size}” isn't a limit such as 512M or 5G (256M at least)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{size}” isn't a size such as 4G or 4608M (1G at least)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{size}” isn't a swap size such as 0, 512M or 1G."
 msgstr ""
 
 #: packs/core/wallet/README.md

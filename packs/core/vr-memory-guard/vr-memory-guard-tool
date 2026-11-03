@@ -1,0 +1,449 @@
+#!/usr/bin/env python3
+"""vr-memory-guard-tool: the Flatpak apps' memory limits (VR memory guard).
+
+Every Flatpak app shares one limit, the apps' pool: the Frame's memory minus reserve_for_vr (in
+~/.config/frame-tweaks/vr-memory-guard.conf). An app can also have a limit of its own, kept in
+~/.config/frame-tweaks/vr-memory-guard-apps.conf, one app a line:
+
+  org.mozilla.firefox 5G 1G     a limit of its own, then (optional) its swap on top (1G if left out)
+  org.signal.Signal shared      none of its own: only the apps' pool applies
+
+  vr-memory-guard-tool list                  installed Flatpak apps: id<TAB>limit or shared<TAB>swap
+  vr-memory-guard-tool info                  the same, the apps in the file that aren't installed,
+                                             and the memory figures, as JSON (the installer
+                                             window's Memory limits page reads it)
+  vr-memory-guard-tool set APP SIZE [SWAP]   a limit of its own (sizes such as 512M or 5G)
+  vr-memory-guard-tool set APP shared        none of its own
+  vr-memory-guard-tool reserve SIZE          the memory Flatpak apps leave free for VR
+  vr-memory-guard-tool check                 whether the settings can be applied (nothing changes)
+  vr-memory-guard-tool apply                 put them in force: drop-ins, and the apps open now
+
+set and reserve only save: apply puts them in force.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, os.environ.get("FRAME_TWEAKS_PYLIB") or str(Path.home() / ".local/share/frame-tweaks/i18n"))   # (lib/common.sh install_i18n)
+try:
+    from i18n import _
+except ImportError:                       # (not installed by Frame Tweaks: English)
+    def _(text):
+        return text
+
+CONF = Path.home() / ".config/frame-tweaks/vr-memory-guard.conf"
+APPS_FILE = Path.home() / ".config/frame-tweaks/vr-memory-guard-apps.conf"
+UNITS = Path.home() / ".config/systemd/user"
+DROPIN = "frame-tweaks-vr-memory-guard.conf"          # (install.sh and uninstall.sh use the same name)
+MEMINFO = Path(os.environ.get("FRAME_TWEAKS_MEMINFO") or "/proc/meminfo")
+FIREFOX = "org.mozilla.firefox"
+# Firefox's limit before there was a file of apps: signing in to it can install every synced
+# extension at once, which took 10 GB on a Frame.
+DEFAULTS = {FIREFOX: (5120, 1024)}
+DEFAULT_SWAP = 1024
+MIN_POOL = 2048           # (less than 2 GB for every Flatpak app together would stop them constantly)
+MIN_RESERVE = 1024
+MIN_LIMIT = 256           # (below it, most apps are stopped as they open)
+MAX_SIZE = 1024 * 1024    # (1 TB: past it a number is a typo, and systemd would refuse it anyway)
+# Flatpak's own rule for an app ID: two parts or more, each a letter or _ then letters, digits or
+# _, and a - only in the last. Anything else would put characters a unit name can't have into the
+# drop-ins' folder names.
+APP_ID = re.compile(r"(?:[A-Za-z_][A-Za-z0-9_]*\.)+[A-Za-z_][A-Za-z0-9_-]*")
+SCOPE = re.compile(r"app-flatpak-(.+)-[0-9]+\.scope")      # (each Flatpak app's scope: its id, then a number)
+HEADER = """\
+# VR memory guard (Frame Tweaks): Flatpak apps with a memory limit of their own.
+# One app a line: its Flatpak app ID, then either
+#   a limit (whole numbers in M or G) and, optionally, how much swap it may use on top (1G if left
+#   out): above them the app is stopped, before it takes the memory VR needs;
+#   or "shared": no limit of its own, only the one all Flatpak apps share (the Frame's memory minus
+#   reserve_for_vr, in vr-memory-guard.conf).
+# An app not listed here is "shared". Change it with the installer window's Memory limits page or
+# vr-memory-guard-tool (set, then apply). Rewritten by both: comments of your own aren't kept.
+"""
+
+
+class Bad(Exception):
+    """A setting that can't be used: what to tell the reader."""
+
+
+def valid_app(app):
+    return len(app) <= 255 and APP_ID.fullmatch(app) is not None
+
+
+def mib(text, zero=False):
+    """A size written as 5G or 512M (whole numbers; also 0 where zero) in MiB, else None. As
+    install.sh's mib reads it, so a size means the same in both."""
+    m = re.fullmatch(r"([1-9][0-9]{0,6})([MmGg])", text)
+    if m:
+        v = int(m[1]) * (1024 if m[2] in "Gg" else 1)
+        return v if v <= MAX_SIZE else None
+    return 0 if zero and text == "0" else None
+
+
+def size_text(v):
+    """MiB as the files write it: 5G, 2560M, 0."""
+    return f"{v // 1024}G" if v and v % 1024 == 0 else f"{v}M" if v else "0"
+
+
+def write(path, text):
+    """path's new content, all at once (a link from a dotfiles repo is written through)."""
+    path = Path(os.path.realpath(path))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.new")
+    tmp.write_text(text)
+    os.replace(tmp, path)
+
+
+# ---- vr-memory-guard.conf --------------------------------------------------------------------
+
+def conf_lines():
+    try:
+        return CONF.read_text().splitlines()
+    except FileNotFoundError:
+        raise Bad(_("VR memory guard isn't set up here (no {file}): install it first.").format(file=CONF)) from None
+    except (OSError, UnicodeDecodeError) as e:
+        raise Bad(f"{CONF}: {e}") from None
+
+
+def get(lines, key):
+    """A setting's value as install.sh's get reads it: its last KEY= line, spaces taken out."""
+    vals = ["".join(line[len(key) + 1:].split()) for line in lines if line.startswith(key + "=")]
+    return vals[-1] if vals else None
+
+
+def size(lines, key):
+    v = get(lines, key) or ""
+    n = mib(v, zero=True)
+    if n is None:
+        raise Bad(_('%s in %s should be a size such as 5G or 512M (it is "%s").') % (key, CONF, v))
+    return n
+
+
+def total_mib():
+    try:
+        for line in MEMINFO.read_text().splitlines():
+            if line.startswith("MemTotal:"):
+                v = int(line.split()[1]) // 1024
+                if v > 0:
+                    return v
+    except (OSError, ValueError, IndexError):
+        pass
+    raise Bad(_("Can't read how much memory this device has (%s).") % MEMINFO)
+
+
+def figures(lines):
+    """{total, reserve, apps_swap, pool} in MiB, checked as install.sh always has."""
+    reserve, apps_swap = size(lines, "reserve_for_vr"), size(lines, "apps_swap_max")
+    total = total_mib()
+    if total - reserve < MIN_POOL:
+        raise Bad(_('reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s.')
+                  % (get(lines, "reserve_for_vr"), total, CONF))
+    return {"total": total, "reserve": reserve, "apps_swap": apps_swap, "pool": total - reserve}
+
+
+# ---- vr-memory-guard-apps.conf ---------------------------------------------------------------
+
+def parse_apps(text):
+    """({app: (limit, swap) in MiB, or None for shared}, [what's wrong, a line each]). A line it
+    can't read is reported, never raised, and so is an app named twice."""
+    apps, errors = {}, []
+    for n, raw in enumerate(text.splitlines(), 1):
+        words = raw.split("#", 1)[0].split()
+        if not words:
+            continue
+        app, rest = words[0], words[1:]
+        if not valid_app(app):
+            errors.append(_("line {n}: “{app}” isn't a Flatpak app ID (such as org.mozilla.firefox)").format(n=n, app=app))
+        elif app in apps:
+            errors.append(_("line {n}: {app} is already on an earlier line").format(n=n, app=app))
+        elif rest == ["shared"]:
+            apps[app] = None
+        elif len(rest) not in (1, 2):
+            errors.append(_("line {n}: after the app ID, a size (such as 5G) and optionally its swap, or “shared”")
+                          .format(n=n))
+        else:
+            limit = mib(rest[0])
+            swap = mib(rest[1], zero=True) if len(rest) == 2 else DEFAULT_SWAP
+            if limit is None or limit < MIN_LIMIT:
+                errors.append(_("line {n}: “{size}” isn't a limit such as 512M or 5G (256M at least)").format(n=n, size=rest[0]))
+            elif swap is None:
+                errors.append(_("line {n}: “{size}” isn't a swap size such as 0, 512M or 1G").format(n=n, size=rest[1]))
+            else:
+                apps[app] = (limit, swap)
+    return apps, errors
+
+
+def format_apps(apps):
+    """The file's text for these apps (parse_apps reads back the same)."""
+    body = "".join(f"{app} shared\n" if v is None else f"{app} {size_text(v[0])} {size_text(v[1])}\n"
+                   for app, v in sorted(apps.items()))
+    return HEADER + body
+
+
+OLD_KEYS = ("firefox_max", "firefox_swap_max")
+
+
+def load_apps(lines):
+    """(apps as parse_apps gives them, whether vr-memory-guard.conf still has Firefox's old keys).
+
+    Firefox's limit was firefox_max and firefox_swap_max in vr-memory-guard.conf until each app
+    could have its own. Where either is still there (a limits file from before, or one restored
+    from a backup) it is Firefox's line, taking the place of what this file says; save() then moves
+    it here and comments the old keys out, so they're read once. Without that, an existing user's
+    Firefox limit would fall back to the default, and a later firefox_max= edit would be ignored
+    without a word. With no file yet, Firefox has its old default (DEFAULTS)."""
+    try:
+        apps, errors = parse_apps(APPS_FILE.read_text())
+    except FileNotFoundError:
+        apps, errors = dict(DEFAULTS), []
+    except (OSError, UnicodeDecodeError) as e:
+        raise Bad(f"{APPS_FILE}: {e}") from None
+    if errors:
+        raise Bad(_("{file} has lines that can't be read:").format(file=APPS_FILE) + "\n  " + "\n  ".join(errors))
+    old = {k: get(lines, k) for k in OLD_KEYS}
+    if any(v is not None for v in old.values()):
+        limit, swap = apps.get(FIREFOX) or DEFAULTS[FIREFOX]
+        if old["firefox_max"] is not None:
+            limit = size(lines, "firefox_max")
+            if limit < MIN_LIMIT:
+                raise Bad(_("firefox_max in {file} should be 256M at least.").format(file=CONF))
+        if old["firefox_swap_max"] is not None:
+            swap = size(lines, "firefox_swap_max")
+        apps[FIREFOX] = (limit, swap)
+    return apps, any(v is not None for v in old.values())
+
+
+def save(lines, apps, moved):
+    write(APPS_FILE, format_apps(apps))
+    if moved:
+        write(CONF, "".join(f"# {line}   (moved to {APPS_FILE.name}: Firefox's line there)\n"
+                            if line.startswith(tuple(k + "=" for k in OLD_KEYS)) else line + "\n" for line in lines))
+
+
+def over_pool(apps, pool):
+    """A warning for each app whose own limit is more than the pool (the pool applies first)."""
+    return [_("{app}: its limit ({size}) is more than all Flatpak apps together may use ({pool} MB): the apps' "
+              "limit applies first.").format(app=app, size=size_text(v[0]), pool=pool)
+            for app, v in sorted(apps.items()) if v and v[0] > pool]
+
+
+# ---- systemd and Flatpak ---------------------------------------------------------------------
+
+def systemctl(*args):
+    """systemctl --user through the user's own bus, as lib/common.sh sysctl_user (desktop mode's
+    XDG_RUNTIME_DIR, nested_plasma, has no systemd in it). None if it couldn't run."""
+    run = os.environ.get("XDG_RUNTIME_DIR_USER") or f"/run/user/{os.getuid()}"
+    env = dict(os.environ, XDG_RUNTIME_DIR=run, DBUS_SESSION_BUS_ADDRESS=f"unix:path={run}/bus")
+    try:
+        return subprocess.run(["systemctl", "--user", *args], env=env, capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def installed():
+    """The Flatpak apps installed (yours and the system's), sorted."""
+    try:
+        r = subprocess.run(["flatpak", "list", "--app", "--columns=application"], capture_output=True, text=True,
+                           timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    return sorted({line.strip() for line in r.stdout.splitlines() if valid_app(line.strip())})
+
+
+def scope_prefix(app):
+    # (systemd applies a drop-in for app-flatpak-ID-.scope to every unit whose name starts with
+    # that up to a dash: every scope of the app, each named with a number after its id. An app
+    # whose id is another's plus a dash, org.foo-bar beside org.foo, gets org.foo's too unless it
+    # has one of its own: only the last part of an id may have a dash, so that's rare.)
+    return f"app-flatpak-{app}-.scope"
+
+
+def our_scope_dropins():
+    """{app: its drop-in file} for the apps with a limit written by an earlier apply (or install)."""
+    out = {}
+    for f in UNITS.glob(f"app-flatpak-*-.scope.d/{DROPIN}"):
+        app = f.parent.name[len("app-flatpak-"):-len("-.scope.d")]
+        if valid_app(app):
+            out[app] = f
+    return out
+
+
+def dropin(unit, text):
+    d = UNITS / f"{unit}.d"
+    d.mkdir(parents=True, exist_ok=True)
+    write(d / DROPIN, text + "\n")
+
+
+def running_scopes():
+    """[(scope, app)] for the Flatpak apps open now."""
+    r = systemctl("list-units", "--type=scope", "--state=running", "--plain", "--no-legend", "app-flatpak-*.scope")
+    out = []
+    for line in (r.stdout if r else "").splitlines():
+        m = SCOPE.fullmatch((line.split() or [""])[0])
+        if m:
+            out.append((m[0], m[1]))
+    return out
+
+
+# ---- the commands ----------------------------------------------------------------------------
+
+def listing():
+    """[{id, limit, swap, installed}] (limit and swap None for shared): the installed apps, then
+    the file's that aren't."""
+    apps, _moved = load_apps(conf_lines())
+    have = installed()
+    rows = []
+    for app in have + sorted(set(apps) - set(have)):
+        v = apps.get(app)
+        rows.append({"id": app, "limit": v[0] if v else None, "swap": v[1] if v else None, "installed": app in have})
+    return rows
+
+
+def show_list():
+    for row in listing():
+        if row["installed"]:
+            print(f"{row['id']}\t{size_text(row['limit']) if row['limit'] else 'shared'}\t"
+                  f"{size_text(row['swap']) if row['limit'] else '-'}")
+
+
+def show_info():
+    lines = conf_lines()
+    info = figures(lines)
+    info.update(min_reserve=MIN_RESERVE, max_reserve=info["total"] - MIN_POOL, min_limit=MIN_LIMIT,
+                default_swap=DEFAULT_SWAP, apps=listing())
+    print(json.dumps(info))
+
+
+def check():
+    lines = conf_lines()
+    f = figures(lines)
+    apps, _moved = load_apps(lines)
+    for w in over_pool(apps, f["pool"]):
+        print(w, file=sys.stderr)
+
+
+def set_app(app, value, swap=None):
+    if not valid_app(app):
+        raise Bad(_("“{app}” isn't a Flatpak app ID (such as org.mozilla.firefox).").format(app=app))
+    lines = conf_lines()
+    f = figures(lines)
+    apps, moved = load_apps(lines)
+    if value == "shared":
+        if swap is not None:
+            raise Bad(_("“shared” takes no swap size: the apps' own applies."))
+        apps[app] = None
+        said = _("{app}: no limit of its own, only the one all Flatpak apps share.").format(app=app)
+    else:
+        limit = mib(value)
+        if limit is None or limit < MIN_LIMIT:
+            raise Bad(_("“{size}” isn't a limit such as 512M or 5G (256M at least).").format(size=value))
+        if limit > f["pool"]:
+            raise Bad(_("{size} is more than all Flatpak apps together may use ({pool} MB): choose {pool}M or less, "
+                        "or keep less memory for VR.").format(size=value, pool=f["pool"]))
+        if swap is None:
+            s = (apps.get(app) or (0, DEFAULT_SWAP))[1]
+        else:
+            s = mib(swap, zero=True)
+            if s is None:
+                raise Bad(_("“{size}” isn't a swap size such as 0, 512M or 1G.").format(size=swap))
+        apps[app] = (limit, s)
+        said = _("{app}: up to {size}, and {swap} of swap.").format(app=app, size=size_text(limit), swap=size_text(s))
+    save(lines, apps, moved)
+    print(said + " " + _("Run vr-memory-guard-tool apply to put it in force."))
+
+
+def set_reserve(value):
+    lines = conf_lines()
+    r = mib(value)
+    if r is None or r < MIN_RESERVE:
+        raise Bad(_("“{size}” isn't a size such as 4G or 4608M (1G at least).").format(size=value))
+    total = total_mib()
+    if total - r < MIN_POOL:
+        raise Bad(_("Keeping {size} for VR leaves less than 2 GB of the {total} MB for Flatpak apps: choose {most}M "
+                    "or less.").format(size=value, total=total, most=total - MIN_POOL))
+    try:                                 # (only for the warnings below: a broken apps file is apply's to report)
+        apps, _moved = load_apps(lines)
+    except Bad:
+        apps = {}
+    out, done = [], False
+    for line in lines:                   # (where it was; a second reserve_for_vr= line would win in install.sh)
+        if line.startswith("reserve_for_vr="):
+            if not done:
+                out.append(f"reserve_for_vr={size_text(r)}")
+                done = True
+            continue
+        out.append(line)
+    if not done:
+        out.append(f"reserve_for_vr={size_text(r)}")
+    write(CONF, "".join(line + "\n" for line in out))
+    for w in over_pool(apps, total - r):
+        print(w, file=sys.stderr)
+    print(_("{size} kept for VR: Flatpak apps together up to {pool} MB.").format(size=size_text(r), pool=total - r)
+          + " " + _("Run vr-memory-guard-tool apply to put it in force."))
+
+
+def apply():
+    """Write the apps' pool (app.slice) and each app's own limit as drop-ins, remove those of apps
+    now shared, and set the apps open now too: a drop-in only counts from a unit's next start."""
+    lines = conf_lines()
+    f = figures(lines)
+    apps, moved = load_apps(lines)
+    for w in over_pool(apps, f["pool"]):
+        print(w, file=sys.stderr)
+    save(lines, apps, moved)
+    # MemoryMax without MemoryHigh: an app over its limit is stopped at once. With MemoryHigh the
+    # kernel throttles it instead, which on the Frame left a runaway app crawling for minutes rather
+    # than stopped. MemorySwapMax: without it the app goes on growing in swap.
+    dropin("app.slice", f"[Slice]\nMemoryMax={f['pool']}M\nMemorySwapMax={f['apps_swap']}M")
+    limited = {app: v for app, v in apps.items() if v}
+    gone = set()
+    for app, file in our_scope_dropins().items():
+        if app not in limited:
+            file.unlink()
+            try:
+                file.parent.rmdir()
+            except OSError:              # (a drop-in of yours beside it)
+                pass
+            gone.add(app)
+    for app, (limit, swap) in limited.items():
+        dropin(scope_prefix(app), f"[Scope]\nMemoryMax={limit}M\nMemorySwapMax={swap}M")
+    systemctl("daemon-reload")
+    # (A running slice doesn't take a new drop-in on daemon-reload: set it until the next login.)
+    r = systemctl("set-property", "--runtime", "app.slice", f"MemoryMax={f['pool']}M", f"MemorySwapMax={f['apps_swap']}M")
+    if r is None or r.returncode:
+        print(_("Couldn't set the apps' limit now; it applies at your next login."), file=sys.stderr)
+    for scope, app in running_scopes():
+        if app in limited:
+            systemctl("set-property", "--runtime", scope, f"MemoryMax={limited[app][0]}M", f"MemorySwapMax={limited[app][1]}M")
+        elif app in gone:                # (its limit set on the running scope stays until it stops)
+            systemctl("set-property", "--runtime", scope, "MemoryMax=infinity", "MemorySwapMax=infinity")
+    print(_("Flatpak apps together: up to %s MB (%s MB kept for VR).") % (f["pool"], f["reserve"]))
+    print(_("With a limit of their own: {apps}.").format(apps=", ".join(f"{a} {size_text(v[0])}" for a, v in sorted(limited.items())))
+          if limited else _("No Flatpak app has a limit of its own."))
+
+
+def main(a):
+    try:
+        if a == ["list"]:
+            show_list()
+        elif a == ["info"]:
+            show_info()
+        elif a == ["check"]:
+            check()
+        elif a == ["apply"]:
+            apply()
+        elif len(a) in (3, 4) and a[0] == "set":
+            set_app(*a[1:])
+        elif len(a) == 2 and a[0] == "reserve":
+            set_reserve(a[1])
+        else:
+            sys.exit(__doc__)
+    except Bad as e:
+        sys.exit(str(e))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

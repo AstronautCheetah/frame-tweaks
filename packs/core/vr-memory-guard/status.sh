@@ -10,5 +10,6 @@ limit=$(cat "$CG/app.slice/memory.max" 2>/dev/null)
 [ -n "$limit" ] && [ "$limit" != max ] ||
     status_warn "$(t "the apps' limit isn't in force yet: run the install again, or log out and back in")"
 used=$(cat "$CG/app.slice/memory.current" 2>/dev/null || echo 0)
-ff=$(sed -n 's/^MemoryMax=//p' "$UNITS/app-flatpak-org.mozilla.firefox-.scope.d/$DROPIN" 2>/dev/null)
-status_ok "$(t 'Flatpak apps %s of %s MB; Firefox up to %s; SteamVR given priority' "$(( used / 1048576 ))" "$(( limit / 1048576 ))" "$ff")"
+own=0
+for f in "$UNITS"/app-flatpak-*-.scope.d/"$DROPIN"; do [ -f "$f" ] && own=$((own + 1)); done
+status_ok "$(t 'Flatpak apps %s of %s MB (apps with a limit of their own: %s); SteamVR given priority' "$(( used / 1048576 ))" "$(( limit / 1048576 ))" "$own")"

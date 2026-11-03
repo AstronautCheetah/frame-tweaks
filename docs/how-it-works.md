@@ -32,7 +32,7 @@ flowchart LR
 5. **The window.** `gui/frame-tweaks-gui.py` (PyQt6) shows the tweaks as a checklist with each
    one's status, and runs `install.sh` for what you change. Its pages live in their own modules
    beside it (`details_page.py`, `settings_page.py`, `packs_page.py`, `wallet_page.py`,
-   `apply_changes.py`); logic without Qt is in `window_logic.py`.
+   `memory_page.py`, `apply_changes.py`); logic without Qt is in `window_logic.py`.
 6. **Updates.** A user's copy is a git checkout of a release tag. `./install.sh update` moves it
    to the newest signed release tag ([release-signing.md](release-signing.md)), then runs the
    installed tweaks' installers again.

@@ -70,6 +70,14 @@
   desktop's clipboard.
 
 ### Added
+- **VR memory guard: a memory limit for any Flatpak app:** **📊 Memory limits** on VR memory
+  guard's row opens a page listing every Flatpak app you have installed. Each can have a limit of
+  its own, set with − and + in half GBs, or be left shared, with only the limit all Flatpak apps
+  share; the memory kept free for VR is set there too. **Apply** (top right) saves the limits and
+  puts them in force, for the apps open now too. `vr-memory-guard-tool` does the same in a terminal
+  (`list`, `set`, `reserve`, `apply`), and the limits are kept in
+  `~/.config/frame-tweaks/vr-memory-guard-apps.conf`, one app a line. Firefox keeps its 5 GB, or
+  the `firefox_max` you set, which the next install moves into that file.
 - **Passthrough PiP** (VR environment): Sippbox's frame-passthrough-pip, the passthrough camera as a
   small picture-in-picture panel over any game, pinned to your view or placed in the room, as a
   linked tweak with a tested release (0.9.1). Tried on a Frame: the camera came up at about 9% of
