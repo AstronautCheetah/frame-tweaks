@@ -408,6 +408,16 @@ def dashboard():
 WINDOW_BLOCK = re.compile(r"^\s*Window #\d+ (Window\{[0-9a-f]+ [^}]*\}):", re.M)
 
 
+def hidden_kind(dumpsys):
+    """What the phone's hidden screen is: "biometric" for its fingerprint or face prompt (system UI's
+    BiometricPrompt window: it wants the sensor, not a PIN; its "Use PIN" button leads to the PIN
+    screen), "screen" for any other hidden window (the PIN screen, a banking app), "" for none."""
+    if not focused_is_secure(dumpsys):
+        return ""
+    focused = re.findall(r"mCurrentFocus=(Window\{[0-9a-f]+ [^}]*\})", dumpsys)
+    return "biometric" if any("BiometricPrompt" in w for w in focused) else "screen"
+
+
 def focused_is_secure(dumpsys):
     """Whether a focused window in `dumpsys window windows` output (followed by the focus lines, which
     only the full `dumpsys window` has) has FLAG_SECURE (fl=… SECURE). Each display has a focus line,
@@ -433,9 +443,9 @@ def watch_secure(dev, state, every=3.0, hidden_every=1.0):
         try:
             # (one call: the windows and their flags, then the focus lines, only in the full dump)
             r = adb(dev, "shell", "dumpsys window windows; dumpsys window | grep mCurrentFocus")
-            state["secure"] = r.returncode == 0 and focused_is_secure(r.stdout)
+            state["secure"] = hidden_kind(r.stdout) if r.returncode == 0 else ""
         except OSError:
-            state["secure"] = False
+            state["secure"] = ""
         time.sleep(hidden_every if state.get("secure") else every)
 
 
@@ -463,16 +473,16 @@ def serve(phone, sd, state):
             publish(ws, state)
             while True:
                 now = time.monotonic()
-                if bool(state.get("secure")) != told:     # (a change: at once, not at the next beat)
+                if (state.get("secure") or "") != told:   # (a change: at once, not at the next beat)
                     beat = 0.0
-                    told = bool(state.get("secure"))
+                    told = state.get("secure") or ""
                 if now - beat > 2:
                     if not scrcpy_running():
                         break
                     n += 1
                     ws.send({"id": n, "method": "Runtime.evaluate",
                              "params": {"expression": "window.__sftPhoneTouchAlive = Date.now(); "
-                                        f"window.__sftPhoneSecure = {'true' if state.get('secure') else 'false'}"}})
+                                        f"window.__sftPhoneSecure = {json.dumps(state.get('secure') or '')}"}})
                     beat = now
                 # Wait for a message without a timeout cutting one in half.
                 if not ws.rest and not select.select([ws.s], [], [], 0.5)[0]:

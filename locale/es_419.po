@@ -3505,6 +3505,13 @@ msgstr "Escribe tu PIN en el teléfono"
 msgid "Wake / show PIN"
 msgstr "Activar / mostrar PIN"
 
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid ""
+"Your phone asks for your fingerprint or face: use its sensor. Or press Use PIN on the phone and type your PIN here."
+msgstr ""
+"Tu teléfono pide tu huella o tu rostro: usa su sensor. O toca Usar PIN en el teléfono y escribe tu PIN aquí."
+
 #: packs/core/adb-scrcpy/status.sh
 msgid "adb %s, scrcpy%s, phone launcher"
 msgstr "adb %s, scrcpy%s, lanzador de phone"

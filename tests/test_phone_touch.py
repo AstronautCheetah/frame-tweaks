@@ -135,6 +135,19 @@ class SecureScreen(unittest.TestCase):
                               "  mCurrentFocus=null\n  mCurrentFocus=Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}\n")
         self.assertTrue(pt.focused_is_secure(two))
 
+    def test_a_fingerprint_or_face_prompt_is_told_apart(self):
+        """The phone's biometric prompt wants the sensor, not a PIN: its own notice (a Pixel's
+        BiometricPrompt window, focused on its second display)."""
+        bio = DUMPSYS.replace("Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}", "Window{2304332 u0 BiometricPrompt}") \
+                     .replace("  mCurrentFocus=Window{FOCUS u0 X}\n",
+                              "  mCurrentFocus=null\n  mCurrentFocus=Window{2304332 u0 BiometricPrompt}\n")
+        self.assertEqual(pt.hidden_kind(bio), "biometric")
+        bank = DUMPSYS.replace("Window{FOCUS u0 X}", "Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}")
+        self.assertEqual(pt.hidden_kind(bank), "screen")
+        self.assertEqual(pt.hidden_kind(DUMPSYS), "")
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        self.assertIn("window.__sftPhoneSecure === 'biometric'", js)
+
     def test_checked_every_second_while_hidden(self):
         """The notice and keypads stayed up several seconds after unlocking: while the screen is
         hidden it's checked every second (3 s otherwise)."""

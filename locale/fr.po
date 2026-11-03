@@ -3974,6 +3974,13 @@ msgid "Wake / show PIN"
 msgstr "Réveiller / afficher le PIN"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid ""
+"Your phone asks for your fingerprint or face: use its sensor. Or press Use PIN on the phone and type your PIN here."
+msgstr ""
+"Votre téléphone demande votre empreinte ou votre visage : utilisez son capteur. Ou appuyez sur Utiliser le code sur le téléphone et tapez votre code ici."
+
+# needs review
 #: packs/core/adb-scrcpy/status.sh
 msgid "adb %s, scrcpy%s, phone launcher"
 msgstr "adb %s, scrcpy%s, lanceur phone"

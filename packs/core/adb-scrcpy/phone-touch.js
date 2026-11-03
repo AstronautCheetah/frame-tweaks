@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 22;
+  const NAME = 'phone-touch', VERSION = 23;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -137,7 +137,8 @@
   // ---- a screen the phone hides from the mirror ----
   // An app can hide its screen from mirroring (Android's FLAG_SECURE: the PIN or fingerprint
   // prompt, banking apps, password managers): the mirror shows black. phone-touch sees the focused
-  // window marked SECURE and sets window.__sftPhoneSecure; a notice in the picture says why, with
+  // window marked SECURE and sets window.__sftPhoneSecure ("screen", or "biometric" for the phone's
+  // fingerprint or face prompt, which wants the sensor rather than a PIN); a notice in the picture says why, with
   // two ways to unlock it blind:
   //  - Type PIN: a keypad of ours that types on the phone (Android's digit keys, Delete, Enter, as
   //    a keyboard plugged into the phone would; phone-touch's UNLOCK_KEYS), whatever its layout.
@@ -200,7 +201,9 @@
           boxSizing: 'border-box', padding: '6px 8px', borderRadius: '8px', background: 'rgba(22, 27, 34, 0.92)',
           border: `1px solid hsla(${h}, 60%, 68%, 0.6)`, color: '#e8ecf0', fontSize: '10px', lineHeight: 1.35,
           display: 'flex', alignItems: 'center', gap: '6px', pointerEvents: 'none' } },
-        el('div', { style: { flex: '1' } }, '🔒 ' + T('The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone.')),
+        el('div', { style: { flex: '1' } }, window.__sftPhoneSecure === 'biometric'
+          ? '👆 ' + T('Your phone asks for your fingerprint or face: use its sensor. Or press Use PIN on the phone and type your PIN here.')
+          : '🔒 ' + T('The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone.')),
         iconButton(h, unlock.on, KEYPAD_SVG, false, T('Type your PIN on the phone'),
                    () => { unlock.on = !unlock.on; unlock.count = 0; }),
         iconButton(h, keypad.on, OUTLINE_SVG, true, T('Show where a lock screen has its digits'),
@@ -439,7 +442,7 @@
             f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
   };
   const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f), f.activePage?.mainPanelSGID ?? null,
-                                              !!window.__sftPhoneSecure, keypad, unlock, window.__sftI18n?.lang ?? null, hueOf()]),
+                                              window.__sftPhoneSecure || '', keypad, unlock, window.__sftI18n?.lang ?? null, hueOf()]),
                               () => buildLayer(f));
   const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
                                                settingsOpen.has(f.frameID), pending, hueOf(),
