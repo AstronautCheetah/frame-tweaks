@@ -17,6 +17,7 @@ Marks: ✔ works; ! needs attention; ⟳ works after a SteamVR restart; · not i
 | `firefox` | ✔ |
 | `float-grab` | ✔ |
 | `float-return` | ✔ |
+| `frame-passthrough-pip` | ! |
 | `full-keyboard` | ✔ |
 | `homebrew` | ✔ |
 | `knockthru` | ✔ |
@@ -33,3 +34,7 @@ Marks: ✔ works; ! needs attention; ⟳ works after a SteamVR restart; · not i
 | `vr-memory-guard` | ✔ |
 | `wallet` | ✔ |
 | `ydotool` | ✔ |
+
+## Notes
+
+- **frame-passthrough-pip** on SteamOS 0.5.6 (20261022.6153909): installed; restart SteamVR to load it

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### For contributors
+- **`dev/update-check.sh record` records only the official packs' tweaks:** a local pack on trial
+  on the Frame (a field guide pick, the Attic) isn't published, and the records are.
+
 ## 0.7.0 (2026-11-03)
 
 ### Security
