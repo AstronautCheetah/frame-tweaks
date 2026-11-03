@@ -34,7 +34,7 @@ IMPOSTOR = ("Pixel 9", "10.0.0.66", 5555, "adb-OTHER-XyZ789")       # (its name,
 
 class PhonePick(unittest.TestCase):
     def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False, extra=None, env=None,
-                  path=("/usr/bin", "/bin")):
+                  path=("/usr/bin", "/bin"), timeout=30):
         home = Path(self.tmp.name)
         stubs = home / ".local/bin"          # (first on phone's PATH, ahead of Homebrew's real scrcpy)
         stubs.mkdir(parents=True, exist_ok=True)
@@ -59,7 +59,7 @@ class PhonePick(unittest.TestCase):
         (home / "run").mkdir(exist_ok=True)      # (its pid file and scrcpy's log: not a running mirror's)
         env = sandbox_env(home, stubs, path, **{"CHOOSE": choose or "", "XDG_RUNTIME_DIR": home / "run",
                                                 "PHONE_NO_SPLASH": 1, **(env or {})})   # (the splash has a test of its own)
-        r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=30,
+        r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=timeout,
                            stdin=subprocess.DEVNULL)
         f = home / ".config/frame-tweaks/phone.conf"
         conf_text = f.read_text() if f.exists() else ""
@@ -250,8 +250,9 @@ class PhonePick(unittest.TestCase):
         has a time limit, and what it found by then counts."""
         code, log, _ = self.run_phone([], conf='PHONE_NAME="Pixel 9"\n', extra={
             "avahi-browse": f"printf '%s\\n' '{advert('Pixel 9', '10.0.0.5', 4000)}'; exec /usr/bin/sleep 60",
-            # (records the limit asked for, then keeps 1 s of it)
-            "timeout": 'echo "timeout $1 $2" >> "$HOME/log"; shift; exec /usr/bin/timeout 1 "$@"'})
+            # (records the limit asked for, then keeps 3 s of it: time enough, on a busy test machine,
+            # for the stand-in to print its phone before it's cut short)
+            "timeout": 'echo "timeout $1 $2" >> "$HOME/log"; shift; exec /usr/bin/timeout 3 "$@"'})
         self.assertIn("timeout 10 avahi-browse", log)
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
 
@@ -263,9 +264,16 @@ class PhonePick(unittest.TestCase):
             "kdialog": 'echo "kdialog $*" >> "$HOME/log"; case "$*" in *--progressbar*) n=$(( $(cat "$HOME/n" 2>/dev/null || echo 0) + 1 )); '
                        'echo $n > "$HOME/n"; echo "org.kde.kdialog-$n /ProgressDialog";; esac',
             "qdbus6": 'echo "qdbus6 $*" >> "$HOME/log"',
-            # the first mirror loses the phone (it stops answering until reconnected); the second runs a moment
-            "scrcpy": 'if [ ! -f "$HOME/dropped" ]; then /usr/bin/sleep 0.3; touch "$HOME/dropped"; exit 1; fi; '
-                      'echo "mirror up" >> "$HOME/log"; /usr/bin/sleep 1.5; echo "mirror closed" >> "$HOME/log"',
+            # the first mirror loses the phone (it stops answering until reconnected) once it's being
+            # watched (adb shell: past the start-up check, which takes a mirror gone by then for one
+            # that didn't start); the second closes once its splash is closed, or after 10 s (the
+            # splash left open: the bug). Waiting on these, not fixed times: a busy test machine
+            # once took longer than them.
+            "scrcpy": 'if [ ! -f "$HOME/dropped" ]; then for _ in $(seq 200); do grep -q " shell " "$HOME/log" && break; '
+                      '/usr/bin/sleep 0.05; done; touch "$HOME/dropped"; exit 1; fi; '
+                      'echo "mirror up" >> "$HOME/log"; for _ in $(seq 200); do '
+                      'grep -qx "qdbus6 org.kde.kdialog-$(cat "$HOME/n") /ProgressDialog close" "$HOME/log" && break; '
+                      '/usr/bin/sleep 0.05; done; echo "mirror closed" >> "$HOME/log"',
             "adb": 'echo "adb $*" >> "$HOME/log"; case "$1 $3" in "connect "*) [ -f "$HOME/dropped" ] && touch "$HOME/back"; echo "connected to $2";; '
                    '*shell*) [ ! -f "$HOME/dropped" ] || [ -f "$HOME/back" ];; esac'})
         self.assertEqual(code, 0)
@@ -376,17 +384,53 @@ class PhonePick(unittest.TestCase):
         conf = ('PHONE_NAME="Pixel 9"\nPHONE_MAX_SIZE=1920\nPHONE_BIT_RATE=8M\nPHONE_MAX_FPS=90\n'
                 'PHONE_STICK_SPEED=25\nPHONE_CLIPBOARD=off\n')
         code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf=conf, extra={
-            # the first mirror: Reset to defaults, then Restart stream (phone-touch's SIGUSR1), and
+            # the first mirror: Reset to defaults, then Restart stream (as phone-touch asks: its
+            # request file, then SIGUSR1), and
             # it runs until it's stopped; the restarted one closes
             "scrcpy": 'echo "scrcpy $*" >> "$HOME/log"; [ -f "$HOME/reset" ] && exit 0; touch "$HOME/reset"; '
                       '/usr/bin/sleep 0.5; printf \'PHONE_NAME="Pixel 9"\\n\' > "$HOME/.config/frame-tweaks/phone.conf"; '
-                      'kill -USR1 "$(cat "$XDG_RUNTIME_DIR/sft-phone.pid")"; exec /usr/bin/sleep 10',
+                      'touch "$XDG_RUNTIME_DIR/sft-phone.restart"; kill -USR1 "$(cat "$XDG_RUNTIME_DIR/sft-phone.pid")"; exec /usr/bin/sleep 10',
             "sleep": "exec /usr/bin/sleep 0.05"})
         self.assertEqual(code, 0, log)
         runs = [l for l in log.splitlines() if l.startswith("scrcpy ")]
         self.assertEqual(len(runs), 2, log)
         self.assertIn("--video-bit-rate=8M --max-size=1920 --max-fps=90 --no-clipboard-autosync", runs[0])
         self.assertIn("--video-bit-rate=2M --max-size=1024 --max-fps=60 --window-title", runs[1])
+
+    def test_restart_whose_signal_is_lost_still_restarts(self):
+        """bash 5.2 can lose the trap of Restart stream's SIGUSR1 (run while it parses a $(...), it
+        fails to parse), and the restart did nothing. The request file alone restarts it here (no
+        signal at all), at the next check."""
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n', extra={
+            # (once it's watched: adb shell. Restarted, the mirror closes.)
+            "scrcpy": 'echo "scrcpy $*" >> "$HOME/log"; [ -f "$HOME/reset" ] && exit 0; touch "$HOME/reset"; '
+                      'for _ in $(seq 200); do grep -q " shell " "$HOME/log" && break; /usr/bin/sleep 0.05; done; '
+                      'printf \'PHONE_NAME="Pixel 9"\\n\' > "$HOME/.config/frame-tweaks/phone.conf"; '
+                      'touch "$XDG_RUNTIME_DIR/sft-phone.restart"; exec /usr/bin/sleep 20',
+            "sleep": "exec /usr/bin/sleep 0.05"})
+        self.assertEqual(code, 0, log)
+        runs = [l for l in log.splitlines() if l.startswith("scrcpy ")]
+        self.assertEqual(len(runs), 2, log)
+        self.assertIn("--max-fps=60", runs[1])
+        self.assertFalse((Path(self.tmp.name) / "run/sft-phone.restart").exists())   # (done: not again)
+
+    def test_restart_during_the_start_up_check_restarts(self):
+        """Restart stream while the first mirror was still being checked (its first 3 s): its trap
+        stopped scrcpy, taken then for a mirror that didn't start ("The mirror didn't start", and
+        no mirror). The check's sleeps wait here until the restart has been asked for."""
+        conf = 'PHONE_NAME="Pixel 9"\nPHONE_MAX_FPS=90\n'
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf=conf, extra={
+            "scrcpy": 'echo "scrcpy $*" >> "$HOME/log"; [ -f "$HOME/reset" ] && exit 0; touch "$HOME/reset"; '
+                      'printf \'PHONE_NAME="Pixel 9"\\n\' > "$HOME/.config/frame-tweaks/phone.conf"; '
+                      'touch "$XDG_RUNTIME_DIR/sft-phone.restart"; kill -USR1 "$(cat "$XDG_RUNTIME_DIR/sft-phone.pid")"; touch "$HOME/sent"; '
+                      'exec /usr/bin/sleep 10',
+            "sleep": 'for _ in $(seq 200); do [ -f "$HOME/reset" ] && [ ! -f "$HOME/sent" ] || break; /usr/bin/sleep 0.05; done; '
+                     'exec /usr/bin/sleep 0.05'})
+        self.assertEqual(code, 0, log)
+        self.assertNotIn("didn't start", log)
+        runs = [l for l in log.splitlines() if l.startswith("scrcpy ")]
+        self.assertEqual(len(runs), 2, log)
+        self.assertIn("--max-fps=60", runs[1])
 
     def test_steamvr_update_that_turns_its_patch_off_gets_a_plain_window(self):
         """vr-dashboard switched the layer's patch off: the narrow window had no layer to take the
@@ -403,41 +447,81 @@ class PhonePick(unittest.TestCase):
 
 class AutoDisconnect(unittest.TestCase):
     """A mirror left on drained the phone's battery overnight: after PHONE_TIMEOUT minutes it asks
-    (a minute) whether to keep it on, and with no answer closes the mirror and disconnects. Minutes
-    are seconds here (PHONE_MINUTE); the mirror runs until it's stopped."""
+    (a minute) whether to keep it on, and with no answer closes the mirror and disconnects. The
+    mirror runs until it's stopped.
+
+    Its time is a stand-in clock (date +%s reads $HOME/clock, in ms), moved on only by phone's own
+    sleeps: real minutes, decided by its own steps, so a busy test machine slows the test but can't
+    change what it sees. (On real seconds, shortened, a stand-in dialog once had a tenth of a
+    second to answer, and a mirror's step meant for before the question came after it.) A step a
+    stand-in takes at a set time waits for it at $HOME/hold: the clock stops there until the
+    stand-in has done it and removed the file."""
     setUp, run_phone = PhonePick.setUp, PhonePick.run_phone
     PHONES = [("Pixel 9", "10.0.0.5", 4000)]
-    MIRROR = 'echo "scrcpy $*" >> "$HOME/log"; exec /usr/bin/sleep 20'
+    START = 1_700_000_000_000                    # (the clock's start, ms)
+    MIRROR = 'echo "scrcpy $*" >> "$HOME/log"; exec /usr/bin/sleep 120'
     # kdialog --yesno: logged with the time; answers from $HOME/answers (one per ask: yes, no; none
     # left: never answers)
     ASK = ('echo "kdialog $(date +%s.%N) $*" >> "$HOME/log"; a=$(head -1 "$HOME/answers" 2>/dev/null); '
-           'sed -i 1d "$HOME/answers" 2>/dev/null; case "$a" in yes) exit 0;; no) exit 1;; esac; exec /usr/bin/sleep 20')
+           'sed -i 1d "$HOME/answers" 2>/dev/null; case "$a" in yes) exit 0;; no) exit 1;; esac; exec /usr/bin/sleep 120')
+    # sleep N: moves the clock on N s (up to the hold, if any); held, it waits a moment instead.
+    # (mv: a reader never sees the file half written)
+    SLEEP = ('read -r c < "$HOME/clock"; h=$(cat "$HOME/hold" 2>/dev/null); '
+             '[ -n "$h" ] && [ "$c" -ge "$h" ] && exec /usr/bin/sleep 0.02; '
+             'case $1 in *.*) i=${1%%.*} f=${1#*.}000;; *) i=$1 f=000;; esac; '
+             'n=$((c + 10#${i:-0} * 1000 + 10#${f:0:3})); [ -n "$h" ] && [ "$n" -gt "$h" ] && n=$h; '
+             'echo "$n" > "$HOME/clock.new" && mv "$HOME/clock.new" "$HOME/clock"')
+    DATE = ('read -r c < "$HOME/clock"; case "$1" in +%s) echo $((c / 1000));; '
+            '+%s.%N) printf "%d.%03d000000\\n" $((c / 1000)) $((c % 1000));; *) exec /usr/bin/date "$@";; esac')
+    # (in a mirror stand-in: wait, at most 30 s, for the clock to reach the hold)
+    AT_HOLD = ('for _ in $(seq 1500); do [ "$(cat "$HOME/clock")" -ge "$(cat "$HOME/hold")" ] && break; '
+               '/usr/bin/sleep 0.02; done; ')
 
-    def run_auto(self, conf, answers="", mirror=None, minute=1):
-        (Path(self.tmp.name) / "answers").write_text(answers)
-        return self.run_phone(self.PHONES, conf='PHONE_NAME="Pixel 9"\n' + conf, env={"PHONE_MINUTE": minute}, extra={
-            "scrcpy": mirror or self.MIRROR, "kdialog": self.ASK, "sleep": "exec /usr/bin/sleep 0.05",
-            "notify-send": 'echo "notify $*" >> "$HOME/log"'})
+    def run_auto(self, conf, answers="", mirror=None, hold=None, adb=None):
+        """phone with the stand-in clock, PHONE_MINUTE unset (a minute is 60 s); hold: the clock
+        stops at that many seconds in until the mirror stand-in removes $HOME/hold."""
+        home = Path(self.tmp.name)
+        (home / "answers").write_text(answers)
+        (home / "clock").write_text(f"{self.START}\n")
+        if hold is not None:
+            (home / "hold").write_text(f"{self.START + hold * 1000}\n")
+        extra = {"scrcpy": mirror or self.MIRROR, "kdialog": self.ASK, "sleep": self.SLEEP, "date": self.DATE,
+                 "notify-send": 'echo "notify $*" >> "$HOME/log"'}
+        if adb:
+            extra["adb"] = adb
+        # (a minute to answer is 120 of its steps: seconds of real time, more on a busy machine)
+        return self.run_phone(self.PHONES, conf='PHONE_NAME="Pixel 9"\n' + conf, extra=extra, timeout=120)
+
+    def times(self, log, start):
+        """The stand-in clock's times of the lines starting with START, and of the questions."""
+        lines = log.splitlines()
+        return (float(next(l.split()[1] for l in lines if l.startswith(start))),
+                float(next(l.split()[1] for l in lines if "--yesno" in l)))
 
     def test_no_answer_disconnects(self):
         code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n")
         self.assertEqual(code, 0, log)
         self.assertEqual(log.count("--yesno"), 1, log)
         self.assertIn("Keep it on", log)
+        self.assertIn("Pixel 9 has been mirrored for 1 min.", log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
         self.assertIn("adb kill-server", log)                        # (no other device on adb: nothing left on)
-        self.assertIn("notify -a Phone Android Mirror disconnected Pixel 9 was mirrored for 1 min", log)
+        # (the minute it was on, then the minute to answer)
+        self.assertIn("notify -a Phone Android Mirror disconnected Pixel 9 was mirrored for 2 min", log)
         self.assertNotIn("--title Android Mirror --", log)           # (the mirror window's own title)
 
     def test_keep_it_on_asks_again_after_the_same_time(self):
         code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", answers="yes\n")
         self.assertEqual(log.count("--yesno"), 2, log)
+        asked = [float(l.split()[1]) for l in log.splitlines() if "--yesno" in l]
+        self.assertGreaterEqual(asked[1] - asked[0], 59.0, log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
 
     def test_disconnect_answer_goes_at_once(self):
         code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", answers="no\n")
         self.assertEqual(log.count("--yesno"), 1, log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
+        self.assertIn("was mirrored for 1 min", log.split("adb disconnect")[1])   # (not after the minute to answer)
 
     def test_adbs_server_stays_for_another_device(self):
         code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n")
@@ -445,26 +529,24 @@ class AutoDisconnect(unittest.TestCase):
         adb = ('echo "adb $*" >> "$HOME/log"; [ "$1" = connect ] && echo "connected to $2"; '
                '[ "$1" = devices ] && printf "List of devices attached\\nemulator-5554\\tdevice\\n"; exit 0')
         (Path(self.tmp.name) / "log").write_text("")
-        code, log, _ = self.run_phone(self.PHONES, conf='PHONE_NAME="Pixel 9"\nPHONE_TIMEOUT=1\n', env={"PHONE_MINUTE": 1},
-                                      extra={"scrcpy": self.MIRROR, "kdialog": self.ASK, "adb": adb,
-                                             "sleep": "exec /usr/bin/sleep 0.05", "notify-send": 'echo "notify $*" >> "$HOME/log"'})
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", adb=adb)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
         self.assertNotIn("adb kill-server", log)
 
     def test_restart_stream_counts_again(self):
         """Restart stream (the gear) starts the time again: asked a full period after it."""
         mirror = ('echo "scrcpy $*" >> "$HOME/log"; if [ ! -f "$HOME/restarted" ]; then touch "$HOME/restarted"; '
-                  '/usr/bin/sleep 2; echo "restart $(date +%s.%N)" >> "$HOME/log"; kill -USR1 $PPID; fi; '
-                  'exec /usr/bin/sleep 20')
-        # (4 s "minutes", counted in whole seconds: asked 3-4 s after the restart, ~1.5 s without it)
-        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", minute=4, mirror=mirror)
-        restarted = float(next(l.split()[1] for l in log.splitlines() if l.startswith("restart ")))
-        asked = float(next(l.split()[1] for l in log.splitlines() if "--yesno" in l))
+                  + self.AT_HOLD + 'echo "restart $(date +%s.%N)" >> "$HOME/log"; rm -f "$HOME/hold"; touch "$XDG_RUNTIME_DIR/sft-phone.restart"; kill -USR1 $PPID; fi; '
+                  'exec /usr/bin/sleep 120')
+        # (restarted half a minute in: asked a minute after that; without counting again, half a minute after)
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", mirror=mirror, hold=30)
+        restarted, asked = self.times(log, "restart ")
         self.assertEqual(log.count("scrcpy -s"), 2, log)
-        self.assertGreaterEqual(asked - restarted, 3.0, log)
+        self.assertGreaterEqual(asked - restarted, 59.0, log)
 
     def test_never(self):
-        """PHONE_TIMEOUT=0: the mirror stays until it's closed."""
+        """PHONE_TIMEOUT=0: the mirror stays until it's closed (2.5 s here: many minutes on the
+        stand-in clock)."""
         code, log, _ = self.run_auto("PHONE_TIMEOUT=0\n", mirror='echo "scrcpy $*" >> "$HOME/log"; /usr/bin/sleep 2.5')
         self.assertEqual(code, 0, log)
         self.assertNotIn("--yesno", log)
@@ -474,21 +556,22 @@ class AutoDisconnect(unittest.TestCase):
         """Changed while the mirror is open (the gear, the settings page): it applies to that mirror,
         counted from the change (1 minute set after 2.5 minutes open doesn't disconnect at once)."""
         conf = Path(self.tmp.name) / ".config/frame-tweaks/phone.conf"
-        code, log, _ = self.run_auto("PHONE_TIMEOUT=0\n", minute=2, mirror=(
-            'echo "scrcpy $*" >> "$HOME/log"; /usr/bin/sleep 2.5; '
-            f'echo PHONE_TIMEOUT=1 >> "{conf}"; echo "changed $(date +%s.%N)" >> "$HOME/log"; exec /usr/bin/sleep 20'))
-        changed = float(next(l.split()[1] for l in log.splitlines() if l.startswith("changed ")))
-        asked = float(next(l.split()[1] for l in log.splitlines() if "--yesno" in l))
-        self.assertGreaterEqual(asked - changed, 1.0, log)
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=0\n", hold=150, mirror=(
+            'echo "scrcpy $*" >> "$HOME/log"; ' + self.AT_HOLD +
+            f'echo "changed $(date +%s.%N)" >> "$HOME/log"; echo PHONE_TIMEOUT=1 >> "{conf}"; rm -f "$HOME/hold"; '
+            'exec /usr/bin/sleep 120'))
+        changed, asked = self.times(log, "changed ")
+        self.assertGreaterEqual(asked - changed, 59.0, log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
 
     def test_reset_to_defaults_is_back_to_an_hour(self):
         """Reset to defaults takes PHONE_TIMEOUT out of the file: an hour again, not the value the
-        mirror started with."""
+        mirror started with (reset half a minute in; the mirror closes after 5 minutes)."""
         conf = Path(self.tmp.name) / ".config/frame-tweaks/phone.conf"
-        code, log, _ = self.run_auto("PHONE_TIMEOUT=2\n", mirror=(
-            'echo "scrcpy $*" >> "$HOME/log"; /usr/bin/sleep 0.5; '
-            f'printf \'PHONE_NAME="Pixel 9"\\n\' > "{conf}"; /usr/bin/sleep 3.5'))
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=2\n", hold=30, mirror=(
+            'echo "scrcpy $*" >> "$HOME/log"; ' + self.AT_HOLD +
+            f'printf \'PHONE_NAME="Pixel 9"\\n\' > "{conf}"; rm -f "$HOME/hold"; '
+            f'for _ in $(seq 1500); do [ "$(cat "$HOME/clock")" -ge {self.START + 300_000} ] && break; /usr/bin/sleep 0.02; done'))
         self.assertEqual(code, 0, log)
         self.assertNotIn("--yesno", log)
         self.assertNotIn("adb disconnect", log)

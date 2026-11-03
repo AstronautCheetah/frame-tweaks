@@ -215,6 +215,20 @@ class Defaults(unittest.TestCase):
             self.assertEqual(conf.read_text(), 'PHONE_NAME="x"\n')
 
 
+class RestartStream(unittest.TestCase):
+    def test_leaves_the_request_then_signals(self):
+        """The request file first (phone looks for it: bash can lose the signal's trap), then
+        SIGUSR1 to hurry it."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            request = Path(d) / "sft-phone.restart"
+            seen = []
+            with mock.patch.object(pt, "PHONE_RESTART", request), mock.patch.object(pt, "running", return_value=4321), \
+                    mock.patch.object(pt.os, "kill", side_effect=lambda pid, sig: seen.append((pid, sig, request.exists()))):
+                pt.restart_stream()
+            self.assertEqual(seen, [(4321, 10, True)])
+
+
 class UntestedScrcpy(unittest.TestCase):
     """With a scrcpy major version it wasn't tested with, phone-touch stays off (once-only notice)."""
     def setUp(self):

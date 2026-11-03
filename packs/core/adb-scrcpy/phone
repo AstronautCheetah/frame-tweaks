@@ -312,8 +312,8 @@ close_all() {
 # e.g. after switching profile): the picture just freezes. Check the phone answers every 5 s;
 # after 3 misses, close the frozen mirror and reconnect at the phone's current address.
 alive() { timeout 4 adb -s "$dev" shell true >/dev/null 2>&1; }
-# The mirror's gear panel (in VR) changes the settings above and asks for a restart (SIGUSR1):
-# scrcpy starts again, reading ~/.config/frame-tweaks/phone.conf afresh. (In the session's
+# The mirror's gear panel (in VR) changes the settings above and asks for a restart (a file,
+# then SIGUSR1): scrcpy starts again, reading ~/.config/frame-tweaks/phone.conf afresh. (In the session's
 # runtime folder, like adb's socket. The tests give it their own: their runs once removed the
 # pid file of a mirror that was running.)
 RUN=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
@@ -322,11 +322,17 @@ echo $$ > "$PIDFILE"
 trap 'splash_end; [ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
 restart=
 trap 'restart=1; kill "$pid" 2>/dev/null' USR1
+# The request itself is a file phone-touch leaves before the signal, looked for at each check: bash
+# 5.2 can lose the trap (run while it's parsing a $(...), it fails with "unexpected EOF while
+# looking for matching `)'"), and Restart stream then did nothing. The signal only hurries it.
+RESTART="$RUN/sft-phone.restart"
+rm -f "$RESTART"
 SCRCPY_LOG="$RUN/phone-scrcpy.log"                         # what scrcpy said, for a failure message
 first=1
 opened=$(date +%s) since=$(date +%s) limit=$(timeout_minutes) timed_out=
 while :; do
     if [ -n "$restart" ]; then
+        rm -f "$RESTART"
         restart='' since=$(date +%s)            # (Restart stream: the time counts again from now)
         # (a setting no longer in the file, after the gear's Reset to defaults say, is back to its
         # default: reading the file again can't unset what it doesn't say)
@@ -398,7 +404,10 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
     pid=$! misses=0
     # The splash stays until the mirror has been up a moment (after a reconnect or a restart too).
     for _ in 1 2 3 4 5 6; do sleep 0.5; kill -0 "$pid" 2>/dev/null || break; done
-    if [ -n "$first" ]; then
+    # (Not when a Restart stream came meanwhile: its trap stopped this scrcpy, which then looked
+    # like a mirror that didn't start. The restarted one gets this check instead.)
+    [ -e "$RESTART" ] && restart=1
+    if [ -n "$first" ] && [ -z "$restart" ]; then
         if ! kill -0 "$pid" 2>/dev/null && wait "$pid"; then exit 0; fi       # closed straight away
         if ! kill -0 "$pid" 2>/dev/null; then
             fail "$(t "The mirror didn't start")" "$(t 'scrcpy stopped straight away. It said:
@@ -412,6 +421,7 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
     splash_end
     while kill -0 "$pid" 2>/dev/null; do
         sleep 5 & wait $!                      # (a restart request interrupts the wait)
+        [ -e "$RESTART" ] && restart=1
         [ -n "$restart" ] && break
         m=$(timeout_minutes) now=$(date +%s)
         [ "$m" != "$limit" ] && limit=$m since=$now               # (changed: counts from now)

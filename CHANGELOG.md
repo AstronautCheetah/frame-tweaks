@@ -186,6 +186,9 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Android Mirror's Restart stream always restarts:** the gear's request is now left as a file
+  as well as signalled, so a signal bash didn't act on no longer loses it; and a restart during the
+  first mirror's start-up check is no longer reported as "The mirror didn't start".
 - **A Frame Tweaks folder with a space (or a `%`) in its path works:** the login service that
   removes tweaks the Frame no longer needs, and the app-menu entry that opens the window, now
   quote the folder's path. Before, the path was split at the space, so the service ran nothing

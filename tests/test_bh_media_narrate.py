@@ -204,8 +204,10 @@ class Narration(unittest.TestCase):
                                   'if [ "$1" = -f ]; then printf \'[{"index": 7, "properties": {"media.name": "%s"}}]\' '
                                   '"$(/bin/cat ' + f"{self.tmp}/now" + ')"; fi')
         self.slow_player()
-        stub_at(stubs / "pw-play", f'echo "play ${{@: -1}} $$" >> {self.log}; echo "volume $2" >> {self.log}.volume; '
-                                   f'echo -n "${{@: -1}}" > {self.tmp}/now; exec /bin/sleep 60')
+        # (the "play" line last: the test waits for it, then reads the volume line and pactl reads
+        # "now". Written after it, a busy machine once had them missing when looked at.)
+        stub_at(stubs / "pw-play", f'echo "volume $2" >> {self.log}.volume; echo -n "${{@: -1}}" > {self.tmp}/now; '
+                                   f'echo "play ${{@: -1}} $$" >> {self.log}; exec /bin/sleep 60')
         with mock.patch.object(fs, "PACTL", str(stubs / "pactl")):
             w = self.window(THREE)
             self.assertEqual(w.volume, 1.0)
@@ -346,8 +348,10 @@ class Narration(unittest.TestCase):
                 w, overlay, ov = self.panel()
                 getattr(ov, call).side_effect = gone
                 err = io.StringIO()
+                # (until it closes, up to 20 s: 3 s was once too short on a busy test machine, and the
+                # error then went to the real stderr, after the stand-in was gone)
                 with mock.patch.object(sys, "stderr", err):
-                    self.wait(lambda: not w.isVisible(), 3)
+                    self.assertTrue(self.wait(lambda: not w.isVisible(), 20), err.getvalue())
                 self.assertEqual(self.escaped, [])
                 self.assertFalse(w.isVisible())
                 self.assertTrue(w.narrator.stopped)
