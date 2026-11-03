@@ -271,6 +271,8 @@ fetch_mirror() {
 # (and the Python modules the programs share: lib/ftconf.py, settings files and logs; lib/vrkit.py,
 # SteamVR poses, grips and haptics; lib/needs.py, "this needs a tweak that isn't installed";
 # lib/xkb.py, keys on the desktop's keyboard layout)
+# (a drop-in translation, ~/.config/frame-tweaks/locale, isn't copied: lib/i18n.py reads it
+# from there in every program, so one saved there counts at once, without an install)
 SHARED_LIB=(i18n.py i18n.sh ftconf.py vrkit.py needs.py xkb.py menuedits.py tooltips.py)
 install_i18n() {
     local d="$HOME/.local/share/frame-tweaks/i18n"

@@ -15,6 +15,8 @@ _ANNOUNCED, _PREFERRED = tempfile.TemporaryDirectory(), tempfile.TemporaryDirect
 os.environ["FRAME_TWEAKS_ANNOUNCE_FILE"] = os.path.join(_ANNOUNCED.name, "language")
 os.environ["FRAME_TWEAKS_PREFERENCE_FILE"] = os.path.join(_PREFERRED.name, "language")   # (⚙ Preferences)
 os.environ["FRAME_TWEAKS_UNINSTALL_FILE"] = os.path.join(_PREFERRED.name, "uninstall-settings")
+# (nor a translation of this machine's own, ~/.config/frame-tweaks/locale: a folder that isn't there)
+os.environ["FRAME_TWEAKS_LOCAL_LOCALE"] = os.path.join(_PREFERRED.name, "locale")
 
 
 class English(unittest.TestCase):

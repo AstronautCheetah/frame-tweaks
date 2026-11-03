@@ -28,6 +28,21 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Search the tweaks"
 - New in `gui/frame-tweaks-gui.py:283`
   - now: "Search: name, description, category"
+- New in `gui/prefs_page.py:235`
+  - now: "Translating without a copy of the repository: Save the template, translate it (Poedit, Lokalize or a text editor) and keep it in this folder as <language>.po, de.po or pt_BR.po say: {folder}. Frame Tweaks reads it at once. Each of its texts takes the place of the shipped one, and a language only it has appears above, marked (local). A text that would lose a placeholder, a tag or a space is left out and listed here."
+- New in `gui/prefs_page.py:245`
+  - now: "Local translation: {file} ({n} text; {m} left out)"
+  - plural: "Local translation: {file} ({n} texts; {m} left out)"
+- New in `gui/prefs_page.py:250`
+  - now: "Left out (the shipped translation or the English shows instead):"
+- New in `gui/prefs_page.py:257`
+  - now: "Open the folder"
+- New in `gui/prefs_page.py:257`
+  - now: "Save the template"
+- New in `gui/prefs_page.py:286`
+  - now: "Couldn't save the template: {error}"
+- New in `gui/prefs_page.py:288`
+  - now: "Saved {path}"
 - New in `gui/settings_page.py:66`
   - now: "Not used with the {setting} you chose."
 - New in `gui/wallet_page.py:575`
@@ -43,8 +58,12 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
 - New in `gui/wallet_page.py:606`
   - now: "Protect selected"
+- New in `install.sh:1338`
+  - now: "translation-check FILE.po"
 - New in `install.sh:373`
   - now: "Nothing was installed."
+- New in `install.sh:647`
+  - now: "Kept your own translations: %s"
 - New in `install.sh:666`
   - now: "The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
 - New in `install.sh:745`
@@ -69,6 +88,29 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "still broken after installing it again: %s"
 - New in `install.sh:796`
   - now: "Still broken: %s"
+- New in `lib/i18n.py:152`
+  - now: "placeholders/tags {want} became {got}"
+- New in `lib/i18n.py:154`
+  - now: "spacing at the start differs"
+- New in `lib/i18n.py:156`
+  - now: "spacing at the end differs"
+- New in `lib/i18n.py:178`
+  - now: "not a .po file gettext could read: {error}"
+- New in `lib/i18n.py:188`
+  - now: "plural forms given for a text without a plural"
+- New in `lib/i18n.py:192`
+  - now: "the file's Plural-Forms line can't be read"
+- New in `lib/i18n.py:194`
+  - now: "{got} plural forms, but the file's Plural-Forms says {want}"
+- New in `lib/i18n.py:606`
+  - now: "couldn't be read: {error}"
+- New in `lib/i18n.py:607`
+  - now: "{file}: {n} text passes the checks"
+  - plural: "{file}: {n} texts pass the checks"
+- New in `lib/i18n.py:610`
+  - now: "Left out: {n} (the shipped translation or the English shows instead)"
+- New in `lib/i18n.py:662`
+  - now: "{language} (local)"
 - New in `lib/registry.py:606`
   - now: "needs Frame Tweaks {want} (this is {have}): update first"
 - New in `lib/registry.py:616`

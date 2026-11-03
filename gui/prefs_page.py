@@ -3,18 +3,23 @@ whether uninstalling a tweak removes its settings, and how this window behaves. 
 choices are kept in ~/.config/frame-tweaks/installer/window.json; the language in
 ~/.config/frame-tweaks/language; whether updates take test releases in ~/.config/frame-tweaks/channel;
 the uninstall choice in ~/.config/frame-tweaks/uninstall-settings; the look of installs in a
-terminal in ~/.config/frame-tweaks/splash (lib/splash.py)."""
+terminal in ~/.config/frame-tweaks/splash (lib/splash.py); a translation of your own in
+~/.config/frame-tweaks/locale (lib/i18n.py LOCAL)."""
 
 import html
 import os
 import shlex
+import shutil
+import subprocess
 
 from PyQt6.QtCore import QProcess, Qt, QTimer
 from PyQt6.QtWidgets import (QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QRadioButton,
                              QScrollArea, QVBoxLayout, QWidget)
 
 import i18n  # (lib/ is on the path)
+import browser
 import ftconf
+import link_tip
 from i18n import _, N_, ngettext
 import sft
 import splash
@@ -88,6 +93,7 @@ class Preferences(QWidget):
         grid.addStretch(1)
         rows.addLayout(grid)
         rows.addWidget(self.translations_note(names))
+        self.local_translation(rows)
 
         rows.addWidget(self.heading(_("This window")))
         prefs = window_prefs()
@@ -221,6 +227,65 @@ class Preferences(QWidget):
         label.setOpenExternalLinks(False)
         label.linkActivated.connect(lambda link, lang=lang: self.translation_link(link, lang, names))
         return label
+
+    def local_translation(self, rows):
+        """A translation of your own (lib/i18n.py LOCAL): where to put it, the one in use now (how
+        many of its texts are used, and each one left out, with why), its folder, and the template
+        to start from, so translating needs no copy of the repository."""
+        rows.addWidget(self.note(_("Translating without a copy of the repository: Save the template, translate "
+                                   "it (Poedit, Lokalize or a text editor) and keep it in this folder as "
+                                   "<language>.po, de.po or pt_BR.po say: {folder}. Frame Tweaks reads it at "
+                                   "once. Each of its texts takes the place of the shipped one, and a language "
+                                   "only it has appears above, marked (local). A text that would lose a "
+                                   "placeholder, a tag or a space is left out and listed here.").format(
+                                       folder=i18n.LOCAL)))
+        cat = i18n.CATALOGUE
+        self.local_status = None
+        if cat.local_file:
+            text = ngettext("Local translation: {file} ({n} text; {m} left out)",
+                            "Local translation: {file} ({n} texts; {m} left out)", cat.local_count).format(
+                file=cat.local_file, n=cat.local_count, m=len(cat.left_out))
+            lines = i18n.left_out_lines(cat.left_out)
+            if lines:
+                text += "\n" + _("Left out (the shipped translation or the English shows instead):") + "\n" + \
+                    "\n".join("• " + line for line in lines)
+            self.local_status = self.note(text)
+            self.local_status.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            rows.addWidget(self.local_status)
+        grid = QHBoxLayout()
+        grid.setSpacing(6)
+        for label, act in ((_("Open the folder"), self.open_local_folder), (_("Save the template"), self.save_template)):
+            b = QPushButton(label)
+            b.clicked.connect(lambda _on=False, a=act: a())
+            grid.addWidget(b)
+        grid.addStretch(1)
+        rows.addLayout(grid)
+
+    def open_local_folder(self):
+        i18n.LOCAL.mkdir(parents=True, exist_ok=True)
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
+            print(f"would open: {i18n.LOCAL}")
+            return
+        # The default file manager as desktop mode sets it, where it's running (lib/browser.py):
+        # xdg-open from the VR session would pick Kate.
+        note = browser.open_path(str(i18n.LOCAL))
+        if note:
+            link_tip.show(note)
+        else:
+            subprocess.Popen(["xdg-open", str(i18n.LOCAL)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def save_template(self):
+        """This checkout's frame-tweaks.pot into the drop-in folder: every text of this version,
+        which a volunteer saves as <language>.po once translated. (Not as a .po itself: an
+        untranslated file named like a language would be listed as one.)"""
+        target = i18n.LOCAL / "frame-tweaks.pot"
+        try:
+            i18n.LOCAL.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(i18n.LOCALE / "frame-tweaks.pot", target)
+        except OSError as e:
+            self.window.say(_("Couldn't save the template: {error}").format(error=e))
+            return
+        self.window.say(_("Saved {path}").format(path=target), good=True)
 
     def translation_link(self, link, lang, names):
         if link == "contribute":

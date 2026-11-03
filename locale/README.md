@@ -74,6 +74,40 @@ keyboard themselves). Scripts and other programs use the language they found whe
 `FRAME_TWEAKS_KEYBOARD=0` turns the keyboard check off, and Steam's language with it. Anything not
 translated shows in English.
 
+## Translating without a checkout
+
+You don't need a copy of the repository, or git, to translate Frame Tweaks or to fix a few texts
+of a language you use:
+
+1. In the installer window's **⚙ Preferences**, under Language, press **Save the template**. It
+   saves this version's `frame-tweaks.pot` in `~/.config/frame-tweaks/locale/`. **Open the folder**
+   opens that folder.
+2. Translate it in Poedit, Lokalize or a text editor, and save it in that folder as
+   `<language>.po`: `de.po`, `pt_BR.po`, or `fr.po` to correct some French texts. Set its
+   `Plural-Forms` line for your language (the GNU gettext manual lists them; without one, Frame
+   Tweaks counts 2 forms, singular and plural).
+3. Frame Tweaks reads it at once, in every program (the window within a few seconds; Arrow Pad and
+   the other programs when they start). Each text in your file takes the place of the shipped
+   translation, and the rest stay as shipped. A language only your file has appears in Preferences
+   marked **(local)**, so a screenshot of it isn't taken for an official translation.
+
+Each text in your file is checked as it's read, with the checks `dev/i18n.py import` makes: the
+placeholders (`%s`, `%d`, `{name}`), HTML tags and newlines must all stay, the spaces at either end
+must match the English, and a plural text needs as many forms as your `Plural-Forms` line says. A
+text that fails is left out (the shipped translation or the English shows instead). Preferences
+names your file, how many of its texts are used, and each one left out, with why. In a terminal:
+
+```sh
+./install.sh translation-check ~/.config/frame-tweaks/locale/de.po
+```
+
+Why `~/.config/frame-tweaks/locale`: it's yours, next to your other Frame Tweaks settings. An
+update or a reinstall doesn't touch it, unlike the checkout and the programs' shared copy in
+`~/.local/share/frame-tweaks/i18n`, which each install replaces. Uninstalling Frame Tweaks keeps it
+even when it removes the settings. Once your file is done, offer it through
+[Translate Frame Tweaks](https://github.com/AstronautCheetah/frame-tweaks/issues/new?template=translation_volunteer.yml)
+so it can ship to everyone.
+
 ## Keeping up
 
 Changes are made in English only; the translations catch up in one pass just before a release

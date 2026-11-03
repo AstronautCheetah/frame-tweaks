@@ -910,6 +910,10 @@ msgid "Couldn't delete: {paths}"
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Couldn't save the template: {error}"
+msgstr ""
+
+#: gui/prefs_page.py
 msgid "Delete settings left by uninstalled tweaks…"
 msgstr ""
 
@@ -988,6 +992,16 @@ msgid "Leave every tweak installed"
 msgstr ""
 
 #: gui/prefs_page.py
+msgid "Left out (the shipped translation or the English shows instead):"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Local translation: {file} ({n} text; {m} left out)"
+msgid_plural "Local translation: {file} ({n} texts; {m} left out)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: gui/prefs_page.py
 msgid "Look for a new Frame Tweaks release when this window opens"
 msgstr ""
 
@@ -997,6 +1011,10 @@ msgstr ""
 
 #: gui/prefs_page.py
 msgid "Off: only when you press ⟳ Check for updates."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Open the folder"
 msgstr ""
 
 #: gui/prefs_page.py
@@ -1018,6 +1036,14 @@ msgstr ""
 #: gui/prefs_page.py
 msgid ""
 "Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Save the template"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid "Saved {path}"
 msgstr ""
 
 #: gui/prefs_page.py gui/settings_page.py
@@ -1077,6 +1103,11 @@ msgstr ""
 
 #: gui/prefs_page.py
 msgid "Translate it yourself"
+msgstr ""
+
+#: gui/prefs_page.py
+msgid ""
+"Translating without a copy of the repository: Save the template, translate it (Poedit, Lokalize or a text editor) and keep it in this folder as <language>.po, de.po or pt_BR.po say: {folder}. Frame Tweaks reads it at once. Each of its texts takes the place of the shipped one, and a language only it has appears above, marked (local). A text that would lose a placeholder, a tag or a space is left out and listed here."
 msgstr ""
 
 #: gui/prefs_page.py
@@ -1808,6 +1839,10 @@ msgid "Kept your own packs: %s"
 msgstr ""
 
 #: install.sh
+msgid "Kept your own translations: %s"
+msgstr ""
+
+#: install.sh
 msgid ""
 "Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
 msgstr ""
@@ -2090,6 +2125,10 @@ msgid "stopped %s's running programs"
 msgstr ""
 
 #: install.sh
+msgid "translation-check FILE.po"
+msgstr ""
+
+#: install.sh
 msgid "uninstall what?"
 msgstr ""
 
@@ -2270,6 +2309,52 @@ msgstr ""
 
 #: lib/common.sh
 msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
+msgstr ""
+
+#: lib/i18n.py
+msgid "Left out: {n} (the shipped translation or the English shows instead)"
+msgstr ""
+
+#: lib/i18n.py
+msgid "couldn't be read: {error}"
+msgstr ""
+
+#: lib/i18n.py
+msgid "not a .po file gettext could read: {error}"
+msgstr ""
+
+#: lib/i18n.py
+msgid "placeholders/tags {want} became {got}"
+msgstr ""
+
+#: lib/i18n.py
+msgid "plural forms given for a text without a plural"
+msgstr ""
+
+#: lib/i18n.py
+msgid "spacing at the end differs"
+msgstr ""
+
+#: lib/i18n.py
+msgid "spacing at the start differs"
+msgstr ""
+
+#: lib/i18n.py
+msgid "the file's Plural-Forms line can't be read"
+msgstr ""
+
+#: lib/i18n.py
+msgid "{file}: {n} text passes the checks"
+msgid_plural "{file}: {n} texts pass the checks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: lib/i18n.py
+msgid "{got} plural forms, but the file's Plural-Forms says {want}"
+msgstr ""
+
+#: lib/i18n.py
+msgid "{language} (local)"
 msgstr ""
 
 #: lib/installer.py

@@ -20,6 +20,8 @@ import i18n  # noqa: E402
 
 # (this machine's Steam language isn't in the tests: SteamLanguage below gives each its own)
 i18n.STEAM_REGISTRY = Path("/nonexistent/.steam/registry.vdf")
+# (nor a translation of this machine's own: DropIn below gives each test its own folder)
+i18n.LOCAL = Path("/nonexistent/.config/frame-tweaks/locale")
 
 PO = textwrap.dedent('''\
     msgid ""
@@ -338,6 +340,165 @@ class Shell(unittest.TestCase):
         env["FRAME_TWEAKS_LANG_RESOLVED"] = "en"                # (a script started by one that found none)
         out = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True).stdout
         self.assertEqual(out.splitlines()[0], "Fetching a 'b'")
+
+
+class DropIn(unittest.TestCase):
+    """A translation of your own in ~/.config/frame-tweaks/locale (i18n.LOCAL): per text it wins
+    over the shipped one, each entry is checked as dev/i18n.py import checks a translator's (a bad
+    one is left out, with why), and a language only it has can be chosen."""
+    SHIPPED = ('msgid ""\nmsgstr ""\n"Plural-Forms: nplurals=2; plural=(n > 1);\\n"\n\n'
+               'msgid "Refresh"\nmsgstr "Actualiser"\n\nmsgid "Open"\nmsgstr "Ouvrir"\n\n'
+               'msgid "Saved {path}"\nmsgstr "Enregistré : {path}"\n')
+
+    def setUp(self):
+        self.d = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.d, True)
+        self.shipped, self.local = self.d / "locale", self.d / "mine"
+        self.shipped.mkdir()
+        self.local.mkdir()
+        (self.shipped / "fr.po").write_text(self.SHIPPED, encoding="utf-8")
+
+    def test_the_local_text_wins_per_text(self):
+        (self.local / "fr.po").write_text('msgid "Refresh"\nmsgstr "Rafraîchir"\n', encoding="utf-8")
+        cat = i18n.Catalogue(["fr"], self.shipped, self.local)
+        self.assertEqual(cat.gettext("Refresh"), "Rafraîchir")            # (yours)
+        self.assertEqual(cat.gettext("Open"), "Ouvrir")                   # (the shipped one: yours hasn't it)
+        self.assertEqual((cat.language, cat.file, cat.local_file), ("fr", self.shipped / "fr.po", self.local / "fr.po"))
+        self.assertEqual((cat.local_count, cat.left_out), (1, []))
+        self.assertIsNone(i18n.Catalogue(["fr"], self.shipped).local_file)  # (another folder: none unless given)
+
+    def test_bad_entries_are_left_out_with_why(self):
+        (self.local / "fr.po").write_text(textwrap.dedent('''\
+            msgid ""
+            msgstr ""
+            "Plural-Forms: nplurals=2; plural=(n > 1);\\n"
+
+            msgid "Saved {path}"
+            msgstr "Enregistré"
+
+            msgid "Open"
+            msgstr " Ouvrir"
+
+            msgid "Line one\\nline two"
+            msgstr "Ligne un, ligne deux"
+
+            msgid "<b>Bold</b>"
+            msgstr "Gras"
+
+            msgid "%d tweak"
+            msgid_plural "%d tweaks"
+            msgstr[0] "%d réglage"
+            msgstr[1] "%d réglages"
+            msgstr[2] "%d réglages ?"
+
+            msgid "Refresh"
+            msgstr[0] "Rafraîchir"
+            msgstr[1] "Rafraîchir"
+
+            #, fuzzy
+            msgid "Close"
+            msgstr "Fermer"
+
+            msgid "Fetching %s"
+            msgstr "Téléchargement de %s"
+            '''), encoding="utf-8")
+        cat = i18n.Catalogue(["fr"], self.shipped, self.local)
+        why = {msgid: i18n.why(reasons) for _ctx, msgid, reasons in cat.left_out}
+        self.assertEqual(why, {
+            "Saved {path}": "placeholders/tags ['{path}'] became []",
+            "Open": "spacing at the start differs",
+            "Line one\nline two": "placeholders/tags ['\\n'] became []",
+            "<b>Bold</b>": "placeholders/tags ['</b>', '<b>'] became []",
+            "%d tweak": "3 plural forms, but the file's Plural-Forms says 2",
+            "Refresh": "plural forms given for a text without a plural"})
+        self.assertEqual(cat.gettext("Saved {path}"), "Enregistré : {path}")     # (the shipped one shows)
+        self.assertEqual(cat.gettext("Open"), "Ouvrir")
+        self.assertEqual(cat.gettext("<b>Bold</b>"), "<b>Bold</b>")              # (or the English)
+        self.assertEqual(cat.gettext("Close"), "Close")                          # (fuzzy: skipped, not left out)
+        self.assertEqual(cat.gettext("Fetching %s"), "Téléchargement de %s")
+        self.assertEqual(cat.local_count, 1)
+        report, ok = i18n.check_file(self.local / "fr.po")
+        self.assertFalse(ok)
+        self.assertIn("1 text passes the checks", report)
+        self.assertIn("Left out: 6", report)
+        self.assertIn("\u201cSaved {path}\u201d: placeholders/tags ['{path}'] became []", report)
+        # the same checks as dev/i18n.py import (one set of rules, in lib/i18n.py)
+        tool = load_script(ROOT / "dev/i18n.py", "i18n_tool")
+        self.assertIs(tool.problems, i18n.problems)
+
+    def test_a_file_that_isnt_a_po_file(self):
+        (self.local / "fr.po").write_text('msgid "Refresh"\nmsgstr "Rafra\\xq"\n', encoding="utf-8")
+        cat = i18n.Catalogue(["fr"], self.shipped, self.local)
+        self.assertEqual(cat.gettext("Refresh"), "Actualiser")
+        self.assertEqual(len(cat.left_out), 1)
+        self.assertIn("not a .po file", i18n.why(cat.left_out[0][2]))
+
+    def test_plural_forms_follow_the_local_file(self):
+        """Russian's first form is for 1 and 21: it may carry the plural's {n} (either English will do)."""
+        (self.local / "ru.po").write_text(PO.replace('"Language: ru\\n"\n', "") + textwrap.dedent('''
+            msgid "One file"
+            msgid_plural "{n} files"
+            msgstr[0] "{n} файл"
+            msgstr[1] "{n} файла"
+            msgstr[2] "{n} файлов"
+            '''), encoding="utf-8")
+        cat = i18n.Catalogue(["ru"], self.shipped, self.local)
+        self.assertEqual(cat.left_out, [])
+        self.assertEqual(cat.file, self.local / "ru.po")                         # (a language only it has)
+        self.assertEqual([cat.ngettext("%d tweak", "%d tweaks", n) % n for n in (1, 3, 5)], ["1 твик", "3 твика", "5 твиков"])
+        self.assertEqual(cat.ngettext("One file", "{n} files", 21).format(n=21), "21 файл")
+
+    def test_a_language_only_you_have_can_be_chosen(self):
+        (self.local / "de.po").write_text('msgid "Refresh"\nmsgstr "Aktualisieren"\n', encoding="utf-8")
+        (self.local / "fr.po").write_text('msgid "Refresh"\nmsgstr "Rafraîchir"\n', encoding="utf-8")
+        (self.local / "notes.po").write_text("", encoding="utf-8")              # (not named like a language)
+        (self.local / "frame-tweaks.pot").write_text("", encoding="utf-8")      # (the template saved there)
+        self.assertEqual(i18n.pick(["de_AT", "de"], self.shipped, self.local), self.local / "de.po")
+        self.assertEqual(i18n.pick(["fr"], self.shipped, self.local), self.shipped / "fr.po")
+        self.assertIsNone(i18n.pick(["de"], self.shipped))
+        self.assertEqual(i18n.Catalogue(["de"], self.shipped, self.local).gettext("Refresh"), "Aktualisieren")
+        with mock.patch.object(i18n, "LOCALE", self.shipped), mock.patch.object(i18n, "LOCAL", self.local):
+            self.assertEqual(i18n.available(), [("en", "English"), ("de", "Deutsch (local)"), ("fr", "Français (local)")])
+            (self.local / "fr.po").unlink()
+            self.assertEqual(i18n.available(), [("en", "English"), ("de", "Deutsch (local)"), ("fr", "Français")])
+
+    def test_a_file_saved_since_counts_as_a_change(self):
+        env = {"FRAME_TWEAKS_LANGUAGE": "fr", "FRAME_TWEAKS_KEYBOARD": "0"}
+        with mock.patch.object(i18n, "LOCALE", self.shipped), mock.patch.object(i18n, "LOCAL", self.local), \
+                mock.patch.dict(os.environ, env, clear=True), mock.patch.object(i18n, "CATALOGUE", i18n.CATALOGUE):
+            i18n.CATALOGUE = i18n.Catalogue()
+            self.assertFalse(i18n.refresh())
+            (self.local / "fr.po").write_text('msgid "Refresh"\nmsgstr "Rafraîchir"\n', encoding="utf-8")
+            self.assertTrue(i18n.refresh())
+            self.assertEqual(i18n._("Refresh"), "Rafraîchir")
+            self.assertFalse(i18n.refresh())
+
+    def test_the_shell_t_sees_it(self):
+        """Installed programs read the folder themselves (install_i18n doesn't copy it)."""
+        (self.d / "lib").mkdir()
+        for f in ("i18n.py", "i18n.sh"):
+            (self.d / "lib" / f).write_text((ROOT / "lib" / f).read_text())
+        shutil.copytree(self.shipped, self.d / "lib/locale")
+        (self.local / "fr.po").write_text('msgid "Open"\nmsgstr "Ouvre"\n\nmsgid "Saved {path}"\nmsgstr "Oups"\n',
+                                          encoding="utf-8")
+        script = f'source {self.d}/lib/i18n.sh; t Open; echo; t Refresh; echo; t "Saved {{path}}"; echo'
+        env = {"PATH": os.environ["PATH"], "HOME": str(self.d), "FRAME_TWEAKS_LANGUAGE": "fr",
+               "FRAME_TWEAKS_KEYBOARD": "0", "FRAME_TWEAKS_LOCAL_LOCALE": str(self.local)}
+        out = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True).stdout
+        self.assertEqual(out.splitlines(), ["Ouvre", "Actualiser", "Enregistré : {path}"])
+        # and where it lives by default: ~/.config/frame-tweaks/locale
+        (self.d / ".config/frame-tweaks").mkdir(parents=True)
+        self.local.rename(self.d / ".config/frame-tweaks/locale")
+        del env["FRAME_TWEAKS_LOCAL_LOCALE"]
+        out = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True).stdout
+        self.assertEqual(out.splitlines()[0], "Ouvre")
+
+    def test_translation_check_on_the_command_line(self):
+        (self.local / "fr.po").write_text('msgid "Open"\nmsgstr "Ouvre "\n', encoding="utf-8")
+        r = subprocess.run([sys.executable, str(ROOT / "lib/i18n.py"), "check", str(self.local / "fr.po")],
+                           capture_output=True, text=True, env={**os.environ, "FRAME_TWEAKS_LANGUAGE": "en"})
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("\u201cOpen\u201d: spacing at the end differs", r.stdout)
 
 
 class MenusAndDashboard(unittest.TestCase):

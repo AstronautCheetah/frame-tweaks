@@ -5,7 +5,8 @@
 # Write the text in single quotes, or in double quotes without $: dev/i18n.py collects it from
 # there, and the values go in as arguments. A text given no values is printed as it is.
 # lib/common.sh sources this; installed programs source their copy, from
-# ~/.local/share/frame-tweaks/i18n (install_i18n).
+# ~/.local/share/frame-tweaks/i18n (install_i18n). A drop-in translation in
+# ~/.config/frame-tweaks/locale counts here too: i18n.py bash reads it with the shipped one.
 declare -gA FT_TR=()
 if [ "${FRAME_TWEAKS_LANG_RESOLVED:-}" != en ]; then
     # (one python3 run per script; "en": a script started by one that found no translation)

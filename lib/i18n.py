@@ -10,6 +10,9 @@ language (chosen at the Frame's first setup or in Steam's settings; English says
 LANG (SteamOS sets it to en_US.UTF-8 whatever language was chosen). A language without its own
 file uses one for the same language elsewhere (es, es_MX → es_419.po; nl → nl_BE.po).
 
+A <language>.po of your own in ~/.config/frame-tweaks/locale (LOCAL) is read too, each entry
+checked as dev/i18n.py import checks a translator's; per text, it wins over the shipped one.
+
 Shell scripts: lib/i18n.sh (t 'Text with %s' ARGS), which reads `python3 i18n.py bash`.
 Installed programs use a copy in ~/.local/share/frame-tweaks/i18n (lib/common.sh install_i18n).
 
@@ -34,17 +37,17 @@ def unquote(s):
     return ast.literal_eval(s)
 
 
-def parse_po(text):
-    """{(context, msgid): [msgstr, ...]} from a .po file's text: msgstr is a one-item list, or one
-    per plural form (msgstr[n]). Fuzzy and untranslated entries are left out."""
-    out, entry, field, fuzzy = {}, {}, None, False
+def po_entries(text):
+    """[(context, msgid, msgid_plural, [msgstr, ...], fuzzy)] of a .po file's text, the header
+    (msgid "") and untranslated entries included: msgstr is a one-item list, or one per plural
+    form (msgstr[n]). A line that isn't a .po string raises ValueError or SyntaxError."""
+    out, entry, field, fuzzy = [], {}, None, False
 
     def flush():
         nonlocal entry, fuzzy
-        if "msgid" in entry and entry["msgid"] and not fuzzy:
+        if "msgid" in entry:
             strs = [entry[k] for k in sorted(k for k in entry if k.startswith("msgstr"))]
-            if any(strs):
-                out[(entry.get("msgctxt"), entry["msgid"])] = strs
+            out.append((entry.get("msgctxt"), entry["msgid"], entry.get("msgid_plural"), strs, fuzzy))
         entry, fuzzy = {}, False
 
     for line in text.splitlines():
@@ -73,6 +76,19 @@ def parse_po(text):
     return out
 
 
+def parse_po(text):
+    """{(context, msgid): [msgstr, ...]} from a .po file's text: msgstr is a one-item list, or one
+    per plural form (msgstr[n]). Fuzzy and untranslated entries are left out."""
+    return {(ctx, msgid): strs for ctx, msgid, _plural, strs, fuzzy in po_entries(text)
+            if msgid and not fuzzy and any(strs)}
+
+
+def header_of(text):
+    """A .po file's header (the msgstr of msgid ""), as one text."""
+    m = re.search(r'msgid ""\s*msgstr ((?:".*"\s*)+)', text)
+    return "".join(unquote(s) for s in re.findall(r'".*"', m[1])) if m else ""
+
+
 def plural_index(n, header):
     """The plural form for n, from the catalogue's Plural-Forms header (gettext's own parser)."""
     m = re.search(r"plural\s*=\s*([^;]+)", header or "")
@@ -80,6 +96,115 @@ def plural_index(n, header):
         return gettext.c2py(m[1])(n) if m else (0 if n == 1 else 1)
     except (ValueError, TypeError):
         return 0 if n == 1 else 1
+
+
+def nplurals(header):
+    """How many plural forms the Plural-Forms header says (gettext's default without one: 2)."""
+    m = re.search(r"nplurals\s*=\s*(\d+)", header or "")
+    return int(m[1]) if m else 2
+
+
+def plural_rule_ok(header):
+    """Whether the header's plural= rule is one gettext can read (none at all is fine: n != 1)."""
+    m = re.search(r"plural\s*=\s*([^;]+)", header or "")
+    try:
+        return not m or callable(gettext.c2py(m[1]))
+    except (ValueError, TypeError):
+        return False
+
+
+def N_(text):
+    """Marks text for dev/i18n.py without translating it yet: for a constant made at import
+    time, translated with _() where it's shown (the language can change while a program runs)."""
+    return text
+
+
+def NP_(context, text):
+    """N_ with a context (pgettext's): the same text can be translated apart (a key legend)."""
+    return text
+
+
+# ---- what a translation must keep of its English ------------------------------------------------
+# dev/i18n.py import checks a translator's answers with these, and a drop-in translation (below)
+# is checked the same way as it's read: one set of rules, so a file that passes one passes both.
+PLACEHOLDER = re.compile(r"\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
+# A text printf or Python's % formats has a conversion (%s, %d, %(name)s) or a %% in its English;
+# in other text (a tweak's manifest, say) a % is just a percent sign: "starts again 1% below".
+FORMAT_TEXT = re.compile(r"%(?:\([^)]+\))?[-+#0]*\d*(?:\.\d+)?[sdifxXr]|%%")
+# Its conversions as printf reads them, space flag included: "100 % de" in a format text is one.
+CONVERSION = re.compile(r"%(?:\([^)]+\))?[-+ #0']*\d*(?:\.\d+)?[sdifxXr%]")
+
+
+def placeholders(english, text):
+    found = PLACEHOLDER.findall(text)
+    if FORMAT_TEXT.search(english):
+        found += CONVERSION.findall(text)
+    return sorted(found)
+
+
+def problem_list(msgid, msgstr):
+    """What a translation loses of its English, as [(English reason, its values)]: placeholders,
+    HTML tags, newlines, and the spaces at either end. (Kept apart so each reader puts the reason
+    in its own language: why() for the window, problems() in English for dev/i18n.py.)"""
+    out = []
+    want, got = placeholders(msgid, msgid), placeholders(msgid, msgstr)
+    if want != got:
+        out.append((N_("placeholders/tags {want} became {got}"), {"want": want, "got": got}))
+    if msgid[:len(msgid) - len(msgid.lstrip())] != msgstr[:len(msgstr) - len(msgstr.lstrip())]:
+        out.append((N_("spacing at the start differs"), {}))
+    if msgid[len(msgid.rstrip()):] != msgstr[len(msgstr.rstrip()):]:
+        out.append((N_("spacing at the end differs"), {}))
+    return out
+
+
+def problems(msgid, msgstr):
+    """problem_list's reasons, in English."""
+    return [reason.format(**values) for reason, values in problem_list(msgid, msgstr)]
+
+
+def why(reasons):
+    """problem_list's (or check_po's) reasons in the language spoken now, one text."""
+    return "; ".join(_(reason).format(**values) for reason, values in reasons)
+
+
+def check_po(text):
+    """A drop-in translation read with dev/i18n.py import's checks, per entry: ({(context, msgid):
+    [msgstr, ...]} that passed, the header, [(context, msgid, reasons)] left out). An entry left out
+    shows the shipped translation or the English instead: one bad entry costs one text, not the
+    file. Fuzzy and untranslated entries are skipped, as in a shipped file."""
+    try:
+        entries = po_entries(text)
+    except (ValueError, SyntaxError) as e:            # (a line that isn't a .po string: nothing in it is safe)
+        return {}, "", [(None, "", [(N_("not a .po file gettext could read: {error}"), {"error": e})])]
+    header = header_of(text)
+    forms, rule_ok = nplurals(header), plural_rule_ok(header)
+    kept, left = {}, []
+    for ctx, msgid, plural, strs, fuzzy in entries:
+        if not msgid or fuzzy or not any(strs):
+            continue
+        reasons = []
+        if plural is None:
+            if len(strs) != 1:
+                reasons.append((N_("plural forms given for a text without a plural"), {}))
+            else:
+                reasons += problem_list(msgid, strs[0])
+        elif not rule_ok:
+            reasons.append((N_("the file's Plural-Forms line can't be read"), {}))
+        elif len(strs) != forms:
+            reasons.append((N_("{got} plural forms, but the file's Plural-Forms says {want}"),
+                            {"got": len(strs), "want": forms}))
+        else:
+            for i, form in enumerate(strs):
+                # (a form is used for several numbers: Russian's first is for 1 and 21, so it may
+                # carry the plural's {n}; either English will do, and an empty form shows English)
+                against_plural, against_one = problem_list(plural, form), problem_list(msgid, form)
+                if form and against_plural and (i > 0 or against_one):
+                    reasons += [r for r in (against_one if i == 0 else against_plural) if r not in reasons]
+        if reasons:
+            left.append((ctx, msgid, reasons))
+        else:
+            kept[(ctx, msgid)] = strs
+    return kept, header, left
 
 
 # ---- the active keyboard's language ------------------------------------------------------------
@@ -356,30 +481,85 @@ def wanted_languages():
     return seen
 
 
-def pick(languages, folder):
+# ---- drop-in translations --------------------------------------------------------------------
+# A <language>.po of your own in LOCAL is read with the shipped one: per text, yours wins, and a
+# language with only your file can be chosen in ⚙ Preferences, labelled "(local)". It's in your
+# settings, not the checkout or the shared copy (~/.local/share/frame-tweaks/i18n, which
+# install_i18n empties and fills again at every install), so an update or a reinstall keeps it,
+# and every program finds it there itself, installed copy or not. (uninstall-self keeps it even
+# when it removes the settings: it's your work, like your own packs.) Each entry is checked as
+# dev/i18n.py import checks a translator's (check_po); one that fails is left out and named in
+# Preferences and by ./install.sh translation-check.
+LOCAL = Path(os.environ.get("FRAME_TWEAKS_LOCAL_LOCALE") or Path.home() / ".config/frame-tweaks/locale")
+LANGUAGE_CODE = re.compile(r"[a-z]{2,3}(_([A-Z]{2}|[0-9]{3}))?(@[a-z]+)?")
+
+
+def local_languages(local=None):
+    """The languages with a drop-in file ({"de", "pt_BR"}): files named like a language only (a
+    saved frame-tweaks.pot, or notes.po, isn't one)."""
+    try:
+        return {f.stem for f in Path(local or LOCAL).glob("*.po") if LANGUAGE_CODE.fullmatch(f.stem) and f.is_file()}
+    except OSError:
+        return set()
+
+
+def pick(languages, folder, local=None):
     """The .po file for the first of languages that has one: its own (es_MX.po), else the
-    language's own (es.po), else one for it elsewhere (es_419.po)."""
+    language's own (es.po), else one for it elsewhere (es_419.po). The shipped folder's file if
+    there's one, else the drop-in folder's (local)."""
+    mine = local_languages(local) if local else set()
+
+    def found(code):
+        if (folder / f"{code}.po").is_file():
+            return folder / f"{code}.po"
+        return local / f"{code}.po" if code in mine else None
     for lang in languages:
-        if (folder / f"{lang}.po").is_file():
-            return folder / f"{lang}.po"
+        if found(lang):
+            return found(lang)
         base = lang.split("_")[0]
-        near = ([folder / f"{base}.po"] if (folder / f"{base}.po").is_file() else []) + sorted(folder.glob(f"{base}_*.po"))
-        if near:
-            return near[0]
+        near = sorted({f.stem for f in folder.glob(f"{base}_*.po")} | {c for c in mine if c.startswith(base + "_")})
+        for code in [base, *near]:
+            if found(code):
+                return found(code)
     return None
 
 
+def stamp(path):
+    try:
+        return path.stat().st_mtime_ns
+    except (OSError, AttributeError):
+        return None
+
+
 class Catalogue:
-    def __init__(self, languages=None, folder=LOCALE):
+    """One language's texts: the shipped file's, with a drop-in file's over them (folder: the
+    shipped files; local: the drop-in folder, LOCAL for the real catalogue and none for another
+    folder unless given)."""
+    def __init__(self, languages=None, folder=None, local=None):
         self.messages, self.header, self.language, self.file = {}, "", None, None
-        self.folder = folder
-        f = pick(wanted_languages() if languages is None else languages, folder)
-        if f:
-            text = f.read_text(encoding="utf-8")
+        folder = folder or LOCALE                         # (looked up now: refresh() compares with LOCALE as it is)
+        self.folder, self.local = folder, local if local is not None else (LOCAL if folder == LOCALE else None)
+        # the drop-in file in use, its texts used, those left out [(context, msgid, reasons)]
+        self.local_file, self.local_count, self.left_out = None, 0, []
+        self.local_header, self.local_keys, self.local_stamp = "", set(), None
+        f = pick(wanted_languages() if languages is None else languages, folder, self.local)
+        if not f:
+            return
+        self.language, self.file = f.stem, f
+        if (folder / f.name).is_file():
+            text = (folder / f.name).read_text(encoding="utf-8")
             self.messages = parse_po(text)
-            m = re.search(r'msgid ""\s*msgstr ((?:".*"\s*)+)', text)
-            self.header = "".join(unquote(s) for s in re.findall(r'".*"', m[1])) if m else ""
-            self.language, self.file = f.stem, f
+            self.header = header_of(text)
+        mine = self.local / f.name if self.local else None
+        if mine and mine.is_file():
+            self.local_file, self.local_stamp = mine, stamp(mine)
+            try:
+                kept, self.local_header, self.left_out = check_po(mine.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError) as e:
+                kept, self.left_out = {}, [(None, "", [(N_("couldn't be read: {error}"), {"error": e})])]
+            self.messages.update(kept)                    # (per text, the drop-in's wins)
+            self.local_keys, self.local_count = set(kept), len(kept)
+            self.header = self.header or self.local_header
 
     def gettext(self, text, context=None):
         strs = self.messages.get((context, text))
@@ -388,7 +568,8 @@ class Catalogue:
     def ngettext(self, singular, plural, n, context=None):
         strs = self.messages.get((context, singular))
         if strs:
-            i = plural_index(n, self.header)
+            # (a drop-in entry's forms follow its own file's Plural-Forms, checked against them)
+            i = plural_index(n, self.local_header if (context, singular) in self.local_keys else self.header)
             if i < len(strs) and strs[i]:
                 return strs[i]
         return singular if n == 1 else plural
@@ -399,29 +580,41 @@ CATALOGUE = Catalogue()
 
 def refresh():
     """Look again at which language to use (the keyboard may have changed; no more than once
-    every CHECK_EVERY seconds): True when it changed, and _() now gives the new one."""
+    every CHECK_EVERY seconds): True when it changed, and _() now gives the new one. A drop-in
+    file saved since counts as a change."""
     global CATALOGUE
-    f = pick(wanted_languages(), LOCALE)
-    if f == CATALOGUE.file:
+    f = pick(wanted_languages(), LOCALE, LOCAL)
+    mine = LOCAL / f.name if f else None
+    if f == CATALOGUE.file and stamp(mine) == CATALOGUE.local_stamp:
         return False
     CATALOGUE = Catalogue()
     return True
 
 
+def left_out_lines(left):
+    """check_po's left-out entries, one line each: the text (with its context) and why."""
+    return [(f"[{ctx}] " if ctx else "") + (f"\u201c{msgid}\u201d: " if msgid else "") + why(reasons)
+            for ctx, msgid, reasons in left]
+
+
+def check_file(path):
+    """./install.sh translation-check FILE: check_po's verdict on a drop-in file, as text; and
+    whether everything in it passed."""
+    try:
+        kept, _header, left = check_po(Path(path).read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError) as e:
+        kept, left = {}, [(None, "", [(N_("couldn't be read: {error}"), {"error": e})])]
+    lines = [ngettext("{file}: {n} text passes the checks", "{file}: {n} texts pass the checks", len(kept)).format(
+        file=path, n=len(kept))]
+    if left:
+        lines.append(_("Left out: {n} (the shipped translation or the English shows instead)").format(n=len(left)))
+        lines += ["  " + line for line in left_out_lines(left)]
+    return "\n".join(lines), not left
+
+
 def _(text):
     """text in the user's language (English if there's no translation)."""
     return CATALOGUE.gettext(text)
-
-
-def N_(text):
-    """Marks text for dev/i18n.py without translating it yet: for a constant made at import
-    time, translated with _() where it's shown (the language can change while a program runs)."""
-    return text
-
-
-def NP_(context, text):
-    """N_ with a context (pgettext's): the same text can be translated apart (a key legend)."""
-    return text
 
 
 def ngettext(singular, plural, n):
@@ -460,8 +653,13 @@ def unconfirmed(language=None, folder=None):
 
 
 def available():
-    """[(code, name)]: English and every translation there's a file for."""
-    return [("en", NAMES["en"])] + [(f.stem, NAMES.get(f.stem, f.stem)) for f in sorted(LOCALE.glob("*.po"))]
+    """[(code, name)]: English and every translation there's a file for, shipped or drop-in; a
+    language with a drop-in file is labelled "(local)", so a screenshot of it isn't taken for an
+    official translation."""
+    mine = local_languages()
+    codes = sorted({f.stem for f in LOCALE.glob("*.po")} | mine)
+    return [("en", NAMES["en"])] + [
+        (c, _("{language} (local)").format(language=NAMES.get(c, c)) if c in mine else NAMES.get(c, c)) for c in codes]
 
 
 def bash():
@@ -528,10 +726,12 @@ def translations_of(english, folder=None):
     folder = Path(folder or LOCALE)
     if folder not in _every_translation:
         found = {}
-        for po in sorted(folder.glob("*.po")):
+        # (a drop-in file's labels are ours too: one put in the menus, then left, stayed)
+        mine = [LOCAL / f"{c}.po" for c in sorted(local_languages())] if folder == LOCALE else []
+        for po in [*sorted(folder.glob("*.po")), *mine]:
             try:
                 messages = parse_po(po.read_text(encoding="utf-8"))
-            except (OSError, UnicodeDecodeError):
+            except (OSError, UnicodeDecodeError, ValueError, SyntaxError):
                 continue
             for (ctx, msgid), strs in messages.items():
                 if ctx is None and strs and strs[0]:
@@ -607,5 +807,9 @@ if __name__ == "__main__":
             print(f"{f.name}: {CATALOGUE.language or 'en'}")
     elif sys.argv[1:] == ["language"]:
         print(CATALOGUE.language or "en")
+    elif len(sys.argv) == 3 and sys.argv[1] == "check":
+        report, ok = check_file(sys.argv[2])
+        print(report)
+        sys.exit(0 if ok else 1)
     else:
-        sys.exit("i18n.py bash | language | desktop (a .desktop file in, translated out) | menus")
+        sys.exit("i18n.py bash | language | desktop (a .desktop file in, translated out) | menus | check FILE.po")

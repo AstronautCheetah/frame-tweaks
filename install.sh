@@ -50,6 +50,8 @@
 #   ./install.sh menu [--remove]     (re)create the "Frame Tweaks" app-menu entry (or remove it)
 #   ./install.sh bindings show|patch|restore|status [ARGS]   SteamVR controller bindings changed
 #                                    by tweaks (experimental; lib/vrbindings.py, docs/mods.md)
+#   ./install.sh translation-check FILE.po   check a translation of your own as Frame Tweaks reads
+#                                    it from ~/.config/frame-tweaks/locale (locale/README.md)
 #   ./install.sh ID...               same as "install ID..."
 #
 # Everything installs into your home directory; nothing touches SteamOS's read-only system
@@ -127,7 +129,7 @@ done < <(python3 lib/sft.py registry)
 # core" is the way back.)
 # (gui too: with every pack turned off on the Packs page, the window, opened from the menu, said
 # nothing and stayed shut; it's where they're turned on again)
-[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window|tidy)$ ]] ||
+[[ ${#IDS[@]} -gt 0 || ${1:-} =~ ^(uninstall-self|forget-settings|menu|channel|mods|update|_reinstall|help|-h|--help|version|--version|debug-info|report|gui|_setup-window|tidy|translation-check)$ ]] ||
     { echo "$(t 'No tweaks found (python3 lib/sft.py mods says why)')" >&2; exit 1; }
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
@@ -637,7 +639,13 @@ cmd_uninstall_self() {
             rmdir "$STATE" 2>/dev/null && say "$(t 'removed %s' "$STATE")"
             [[ -e $STATE/sft-dashboard-restore ]] && say "$(t "SteamVR's own setting goes back when SteamVR stops; then this goes too: %s" "$STATE")"
         fi
-        [[ $settings == remove ]] && remove_files "$HOME/.config/frame-tweaks"
+        if [[ $settings == remove && -d $HOME/.config/frame-tweaks ]]; then
+            # (a translation of your own, lib/i18n.py LOCAL, is your work, not a setting: kept, as
+            # your own packs are)
+            find "$HOME/.config/frame-tweaks" -mindepth 1 -maxdepth 1 ! -name locale -exec rm -rf {} +
+            rmdir "$HOME/.config/frame-tweaks" 2>/dev/null && say "$(t 'removed %s' "$HOME/.config/frame-tweaks")"
+            [[ -d $HOME/.config/frame-tweaks/locale ]] && say "$(t 'Kept your own translations: %s' "$HOME/.config/frame-tweaks/locale")"
+        fi
     fi
     [[ $settings == keep ]] && [[ -d $HOME/.config/frame-tweaks ]] && say "$(t 'Kept the settings: %s' "$HOME/.config/frame-tweaks")"
     if [[ -n $again ]]; then                    # (to run this again, as it says)
@@ -1326,6 +1334,9 @@ case ${1:-} in
     uninstall-self) shift; take_lock; start_log uninstall-self "$@"; lifecycle uninstall uninstall-self; cmd_uninstall_self "$@" ;;
     menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "$(t "Removed 'Frame Tweaks' from the app menu.")"
                  else ensure_menu_entry; echo "$(t "Added 'Frame Tweaks' to the app menu.")"; fi ;;
+    # (the checks lib/i18n.py makes as it reads a drop-in translation: what it would leave out)
+    translation-check) shift; [[ $# -eq 1 ]] || { echo "$(t 'translation-check FILE.po')" >&2; exit 1; }
+                 python3 lib/i18n.py check "$1" ;;
     -h|--help|help) usage ;;
     --version|version) echo "$FT_BUILD" ;;
     *)           take_lock; start_log install "$@"; [[ $1 == all ]] && set -- "${IDS[@]}"; run_migrations "$@"; cmd_install "$@" ;;

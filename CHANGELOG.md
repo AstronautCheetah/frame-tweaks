@@ -86,6 +86,15 @@
   anything runs. Frame Tweaks now notes the SteamOS build it saw, and once the build changes and an
   installed tweak isn't working, the window shows **SteamOS was updated (A → B)** with a
   **🛠 Repair** button that runs it in a terminal.
+- **A translation of your own, without a copy of the repository:** save a `<language>.po` file
+  in `~/.config/frame-tweaks/locale` and every Frame Tweaks program reads it with the shipped
+  translation. Each of its texts takes the place of the shipped one, and a language only it has
+  can be chosen in ⚙ Preferences, marked "(local)". Each text is checked as it's read; one that
+  would lose a placeholder, a tag, a newline or a space, or has the wrong number of plural forms,
+  is left out, and the English or the shipped translation shows instead. ⚙ Preferences names the
+  file, how many of its texts are used and each one left out, with why. It also has buttons to open
+  the folder and to save the template there to start from. `./install.sh translation-check FILE.po`
+  prints the same checks. Uninstalling Frame Tweaks keeps the folder, even when it removes the settings.
 - **Android Mirror: hardware-key buttons** by the mirror, in VR: Back, App switcher, Volume up, Volume down, Power and Notifications (opens the phone's notification panel; again, closes it), each turned on in ⚙ Settings or the gear's panel (all off by default); the gear's panel shows them as one compact row each: a grab handle, the name and a switch. Drag a row by its handle to change the buttons' order (kept in `phone.conf`). The buttons go below the mirror, above it, or in a column left or right of it ("Buttons: Below, Above, Left, Right", one row in the gear's panel; also in ⚙ Settings), beyond a scroll strip on that side.
 - **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice in the mirror now says why while one is in front. Two ways to unlock it blind: **Type PIN**, a keypad that types on the phone as a keyboard would (digits, ⌫, ↵, and Wake / show PIN; one dot per digit, nothing logged), and **Where the digits are**, a reference PIN pad over the picture with arrows to nudge it onto the phone's own, for screens that don't take typed keys (taps go through it). Both go within about a second of the phone unlocking. The phone's fingerprint or face prompt gets a notice of its own (use its sensor, or Use PIN on the phone and type the PIN here), and a fingerprint shows where the phone's under-screen sensor is.
 - **Tweaks whose files changed since you installed them say so:** after the checkout changes

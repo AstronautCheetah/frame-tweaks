@@ -457,32 +457,9 @@ def update(po, pot_text):
     write_get_sh()
 
 
-PLACEHOLDER = re.compile(r"\{[A-Za-z_0-9]*\}|</?[a-zA-Z][^>]*>|\\n|\n")
-# A text printf or Python's % formats has a conversion (%s, %d, %(name)s) or a %% in its English;
-# in other text (a tweak's manifest, say) a % is just a percent sign: "starts again 1% below".
-FORMAT_TEXT = re.compile(r"%(?:\([^)]+\))?[-+#0]*\d*(?:\.\d+)?[sdifxXr]|%%")
-# Its conversions as printf reads them, space flag included: "100 % de" in a format text is one.
-CONVERSION = re.compile(r"%(?:\([^)]+\))?[-+ #0']*\d*(?:\.\d+)?[sdifxXr%]")
-
-
-def placeholders(english, text):
-    found = PLACEHOLDER.findall(text)
-    if FORMAT_TEXT.search(english):
-        found += CONVERSION.findall(text)
-    return sorted(found)
-
-
-def problems(msgid, msgstr):
-    """What a translation loses of its English: placeholders, HTML tags, newlines, and the
-    spaces at either end."""
-    out = []
-    want, got = placeholders(msgid, msgid), placeholders(msgid, msgstr)
-    if want != got:
-        out.append(f"placeholders/tags {want} became {got}")
-    for side, f in (("start", lambda x: x[:len(x) - len(x.lstrip())]), ("end", lambda x: x[len(x.rstrip()):])):
-        if f(msgid) != f(msgstr):
-            out.append(f"spacing at the {side} differs")
-    return out
+# (the checks live in lib/i18n.py: a drop-in translation is read with the same ones; the tests
+# and import_ below call them as this module's)
+problems = i18n.problems
 
 
 def needs_review(text):

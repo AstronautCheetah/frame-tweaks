@@ -17,7 +17,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 _ANNOUNCED, _PREFERRED = tempfile.TemporaryDirectory(), tempfile.TemporaryDirectory()   # (removed at the end)
 for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
              "FRAME_TWEAKS_ANNOUNCE_FILE": os.path.join(_ANNOUNCED.name, "language"),
-             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(_PREFERRED.name, "language")}.items():
+             "FRAME_TWEAKS_PREFERENCE_FILE": os.path.join(_PREFERRED.name, "language"),
+             "FRAME_TWEAKS_LOCAL_LOCALE": os.path.join(_PREFERRED.name, "locale")}.items():
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1433,6 +1434,52 @@ class PreferencesPage(unittest.TestCase):
         note.linkActivated.emit("volunteer")
         self.assertIn("template=translation_volunteer.yml", opened[1])
         self.assertIn("language=Fran%C3%A7ais", opened[1])
+
+    def test_a_translation_of_your_own(self):
+        """Under Language: where to put a translation of your own; the one in use, how many of its
+        texts are used and each one left out with why; its folder; and Save the template, this
+        checkout's frame-tweaks.pot, to start from without a copy of the repository. A language
+        with such a file is marked (local) in the list."""
+        from PyQt6.QtWidgets import QApplication, QLabel, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            local = Path(d) / "locale"
+            local.mkdir()
+            (local / "fr.po").write_text('msgid "Refresh"\nmsgstr "Rafraîchir"\n\n'
+                                         'msgid "Saved {path}"\nmsgstr "Enregistré"\n', encoding="utf-8")
+            (local / "de.po").write_text('msgid "Refresh"\nmsgstr "Aktualisieren"\n', encoding="utf-8")
+            fr = gui.i18n.Catalogue(["fr"], gui.i18n.LOCALE, local)
+            window = mock.Mock()
+            with mock.patch.object(gui.i18n, "LOCAL", local), mock.patch.object(gui.i18n, "CATALOGUE", fr), \
+                    mock.patch.object(gui.i18n, "unconfirmed", lambda: None):
+                page = gui.Preferences(window)
+                buttons = {b.text(): b for b in page.findChildren(QPushButton)}
+                self.assertIn("Deutsch (local)", buttons)
+                self.assertIn("Français (local)", buttons)
+                self.assertNotIn("Français", buttons)
+                status = page.local_status.text()
+                self.assertTrue(status.startswith(f"Local translation: {local / 'fr.po'} (1 text; 1 left out)"), status)
+                self.assertIn("\u201cSaved {path}\u201d: placeholders/tags ['{path}'] became []", status)
+                self.assertTrue(any(str(local) in lb.text() and "Save the template" in lb.text()
+                                    for lb in page.findChildren(QLabel)))      # (the help: where, and how)
+                buttons["Save the template"].click()
+                saved = local / "frame-tweaks.pot"
+                self.assertEqual(saved.read_text(), (ROOT / "locale/frame-tweaks.pot").read_text())
+                window.say.assert_called_with(f"Saved {saved}", good=True)
+                self.assertNotIn("frame-tweaks", dict(gui.i18n.available()))   # (the template isn't a language)
+                env = {k: v for k, v in os.environ.items() if k != "FRAME_TWEAKS_DRY_RUN"}
+                with mock.patch.object(sys.modules["prefs_page"].browser, "open_path", return_value=None) as opened, \
+                        mock.patch.object(sys.modules["prefs_page"].subprocess, "Popen") as popen, \
+                        mock.patch.dict(os.environ, env, clear=True):
+                    buttons["Open the folder"].click()
+                opened.assert_called_once_with(str(local))
+                self.assertEqual(popen.call_args.args[0], ["xdg-open", str(local)])
+            # English, no file of your own: no status line, the help and buttons still there
+            with mock.patch.object(gui.i18n, "LOCAL", Path(d) / "none"), \
+                    mock.patch.object(gui.i18n, "CATALOGUE", gui.i18n.Catalogue([], gui.i18n.LOCALE, Path(d) / "none")):
+                page = gui.Preferences(mock.Mock())
+                self.assertIsNone(page.local_status)
+                self.assertIn("Save the template", [b.text() for b in page.findChildren(QPushButton)])
 
     def test_explanations_are_plain_text(self):
         """(they were escaped as HTML and shown as plain text: "they&#x27;re")"""
