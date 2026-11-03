@@ -304,6 +304,11 @@
 - **`run-label.sh`**, an optional script beside `run.sh`: prints the Run button's label for the
   tweak's state now; the window runs it with each status check (docs/mods.md). The Performance
   Overlay's reads Show or Hide.
+- **`lib/vrbindings.py`** (experimental): a tweak can change a SteamVR controller binding (drop
+  or change one input, such as the system button's long press) and put it back on uninstall,
+  through SteamVR's binding editor's local API. Each tweak's patch has a name; patches of the same
+  binding stack, and one is put back only while SteamVR still uses Frame Tweaks' copy unchanged.
+  `./install.sh bindings show|patch|restore|status`; the edit file's format is in docs/mods.md.
 
 ### For contributors
 - **The lint check also looks for likely bugs** (Ruff's Bugbear and Pylint error rules), not

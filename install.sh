@@ -45,6 +45,8 @@
 #   ./install.sh wallet-apps [ARGS]  apps that use the wallet (wallet-launcher; --help for its options)
 #   ./install.sh timers [ARGS]       close-after timers for apps (app-timers; --help for its options)
 #   ./install.sh menu [--remove]     (re)create the "Frame Tweaks" app-menu entry (or remove it)
+#   ./install.sh bindings show|patch|restore|status [ARGS]   SteamVR controller bindings changed
+#                                    by tweaks (experimental; lib/vrbindings.py, docs/mods.md)
 #   ./install.sh ID...               same as "install ID..."
 #
 # Everything installs into your home directory; nothing touches SteamOS's read-only system
@@ -1201,6 +1203,7 @@ case ${1:-} in
                  esac ;;
     wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
+    bindings)    shift; exec python3 lib/vrbindings.py "$@" ;;
     forget-settings) shift; take_lock; start_log forget-settings "$@"; cmd_forget_settings "$@" ;;
     uninstall-self) shift; take_lock; start_log uninstall-self "$@"; cmd_uninstall_self "$@" ;;
     menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "$(t "Removed 'Frame Tweaks' from the app menu.")"
