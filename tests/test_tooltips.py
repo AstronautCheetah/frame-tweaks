@@ -44,5 +44,20 @@ class LongerTooltips(unittest.TestCase):
         self.assertEqual(self.ask(b), 5000)
 
 
+@unittest.skipIf(QApplication is None, "needs PyQt6")
+class Sooner(unittest.TestCase):
+    def setUp(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        self.app = QApplication.instance() or QApplication([])
+        import tooltips
+        self.tooltips = tooltips
+        self.addCleanup(self.app.removeEventFilter, tooltips.longer_tooltips(self.app))
+
+    def test_they_come_sooner_than_qts_700_ms(self):
+        from PyQt6.QtWidgets import QStyle
+        self.assertEqual(self.app.style().styleHint(QStyle.StyleHint.SH_ToolTip_WakeUpDelay), self.tooltips.WAKE_MS)
+        self.assertLess(self.tooltips.WAKE_MS, 700)
+
+
 if __name__ == "__main__":
     unittest.main()
