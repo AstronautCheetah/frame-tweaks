@@ -5995,6 +5995,11 @@ msgstr "Kon het knipsel niet opslaan"
 
 # needs review
 #: packs/core/snip/frame-snip
+msgid "Couldn't save to {path}"
+msgstr "Kon niet opslaan in {path}"
+
+# needs review
+#: packs/core/snip/frame-snip
 msgid "Couldn't take a snip"
 msgstr "Kon geen knipsel maken"
 
@@ -6138,6 +6143,11 @@ msgstr "Hervatten"
 #: packs/core/snip/frame-snip
 msgid "Save"
 msgstr "Opslaan"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Saved to {path}"
+msgstr "Opgeslagen in {path}"
 
 # needs review
 #: packs/core/snip/frame-snip

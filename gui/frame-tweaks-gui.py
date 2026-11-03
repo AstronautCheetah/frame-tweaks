@@ -1396,8 +1396,18 @@ def watch_for_hangs(log_dir):
     threading.Thread(target=watch, daemon=True, name="hang-watch").start()
 
 
+def _longer_tooltips(app):
+    """Tooltips twice as long as Qt's own (lib/tooltips.py; installed beside i18n.py)."""
+    try:
+        from tooltips import longer_tooltips
+    except ImportError:              # (an older copy of Frame Tweaks' shared files: Qt's own)
+        return
+    longer_tooltips(app)
+
+
 def main():
     app = QApplication(sys.argv)
+    _longer_tooltips(app)
     app.setApplicationName("frame-tweaks")
     app.setDesktopFileName("io.github.AstronautCheetah.FrameTweaks")
     # --show ID: open on that tweak's page (lib/needs.py: a feature that needs it, not installed).

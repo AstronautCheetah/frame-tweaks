@@ -232,6 +232,15 @@ def desktop_session_env():
     return None
 
 
+def _longer_tooltips(app):
+    """Tooltips twice as long as Qt's own (lib/tooltips.py; installed beside i18n.py)."""
+    try:
+        from tooltips import longer_tooltips
+    except ImportError:              # (an older copy of Frame Tweaks' shared files: Qt's own)
+        return
+    longer_tooltips(app)
+
+
 def main():
     # The icon lives in desktop mode's system tray. Started from VR (the Frame Tweaks window, the
     # "+" menu), it would run in the Steam session, which has no tray: no icon, and it would hold
@@ -253,6 +262,7 @@ def main():
         sys.exit(0)
     main.lock = lock                     # held until the process exits
     app = QApplication(sys.argv)
+    _longer_tooltips(app)
     app.setApplicationName("nordvpn-tray")
     app.setQuitOnLastWindowClosed(False)
     if not QSystemTrayIcon.isSystemTrayAvailable():

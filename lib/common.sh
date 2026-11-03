@@ -275,7 +275,7 @@ install_i18n() {
     local d="$HOME/.local/share/frame-tweaks/i18n"
     mkdir -p "$d/locale"
     install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$REPO_DIR/lib/needs.py" "$REPO_DIR/lib/xkb.py" \
-        "$REPO_DIR/lib/menuedits.py" "$d/"
+        "$REPO_DIR/lib/menuedits.py" "$REPO_DIR/lib/tooltips.py" "$d/"
     find "$d/locale" -name '*.po' -delete
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
 }

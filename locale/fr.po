@@ -6016,6 +6016,11 @@ msgstr "Impossible d'enregistrer la capture"
 
 # needs review
 #: packs/core/snip/frame-snip
+msgid "Couldn't save to {path}"
+msgstr "Impossible d'enregistrer dans {path}"
+
+# needs review
+#: packs/core/snip/frame-snip
 msgid "Couldn't take a snip"
 msgstr "Impossible de faire une capture"
 
@@ -6158,6 +6163,11 @@ msgstr "Reprendre"
 #: packs/core/snip/frame-snip
 msgid "Save"
 msgstr "Enregistrer"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Saved to {path}"
+msgstr "Enregistré dans {path}"
 
 # needs review
 #: packs/core/snip/frame-snip

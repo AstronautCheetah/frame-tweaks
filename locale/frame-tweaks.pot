@@ -4597,6 +4597,10 @@ msgid "Couldn't save the snip"
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Couldn't save to {path}"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Couldn't take a snip"
 msgstr ""
 
@@ -4708,6 +4712,10 @@ msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "Save"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Saved to {path}"
 msgstr ""
 
 #: packs/core/snip/frame-snip

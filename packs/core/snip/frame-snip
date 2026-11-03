@@ -59,7 +59,7 @@ from PyQt6.QtNetwork import QLocalServer, QLocalSocket                          
 from PyQt6.QtCore import QRectF, QSize                                            # noqa: E402
 from PyQt6.QtGui import QColor, QIcon, QImage, QMouseEvent, QPainter, QPen, QPixmap  # noqa: E402
 from PyQt6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel, QPushButton,  # noqa: E402
-                             QVBoxLayout, QWidget)
+                             QToolTip, QVBoxLayout, QWidget)
 
 HOME = Path.home()
 RUN = Path(f"/run/user/{os.getuid()}")
@@ -1727,6 +1727,8 @@ class Snip(QWidget):
                           (_("Narrate"), self.narrate), (_("Cancel"), self.close)):
             b = QPushButton(label)
             b.clicked.connect(fn)
+            if fn == self.save:
+                self.save_button = b
             if fn != self.narrate:
                 lay.addWidget(b, 0, Qt.AlignmentFlag.AlignTop)
                 continue
@@ -1881,12 +1883,24 @@ class Snip(QWidget):
         notify(_("Snip copied") if ok else _("Couldn't copy the snip"), "" if ok else _("the desktop isn't available"))
         self.close()
 
+    SAVED_TIP_MS = 6000
+
     def save(self):
+        """Save, then say where, in a tooltip on Save for a few seconds before closing: in VR the
+        notification may not show, and the path is what you need next."""
         SAVE_DIR.mkdir(parents=True, exist_ok=True)
         path = SAVE_DIR / time.strftime("Snip_%Y-%m-%d_%H-%M-%S.png")
         ok = self.snipped().save(str(path))
         notify(_("Snip saved") if ok else _("Couldn't save the snip"), str(path))
-        self.close()
+        b = getattr(self, "save_button", None)
+        if b is None or not b.isVisible():
+            self.close()
+            return
+        for other in self.bar.findChildren(QPushButton):
+            other.setEnabled(False)
+        tip = (_("Saved to {path}") if ok else _("Couldn't save to {path}")).format(path=path)
+        QToolTip.showText(b.mapToGlobal(b.rect().bottomLeft()), tip, b, b.rect(), self.SAVED_TIP_MS)
+        QTimer.singleShot(self.SAVED_TIP_MS, self.close)
 
     def copy_text(self):
         text = ocr(self.snipped())
@@ -1956,9 +1970,19 @@ def handed_snip(image_path, text_path):
     return QImage.fromData(found["snip.png"]), found["text.txt"]
 
 
+def _longer_tooltips(app):
+    """Tooltips twice as long as Qt's own (lib/tooltips.py; installed beside i18n.py)."""
+    try:
+        from tooltips import longer_tooltips
+    except ImportError:              # (an older copy of Frame Tweaks' shared files: Qt's own)
+        return
+    longer_tooltips(app)
+
+
 def narrate_panel(image_path, text_path):
     """The narration panel process (frame-snip --narrate): its own SteamVR overlay."""
     app = QApplication(sys.argv[:1])
+    _longer_tooltips(app)
     try:
         image, text = handed_snip(image_path, text_path)
     except (OSError, ValueError) as e:
@@ -2025,6 +2049,7 @@ def main():
     if NARRATE:
         return narrate_panel(sys.argv[2], sys.argv[3])
     app = QApplication(sys.argv[:1])
+    _longer_tooltips(app)
     try:
         image = QImage(sys.argv[1]) if len(sys.argv) > 1 else capture()
     except RuntimeError as e:

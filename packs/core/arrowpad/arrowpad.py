@@ -1621,6 +1621,15 @@ def signal_running(command):
     return True
 
 
+def _longer_tooltips(app):
+    """Tooltips twice as long as Qt's own (lib/tooltips.py; installed beside i18n.py)."""
+    try:
+        from tooltips import longer_tooltips
+    except ImportError:              # (an older copy of Frame Tweaks' shared files: Qt's own)
+        return
+    longer_tooltips(app)
+
+
 def main():
     # A crash in native code (ctypes, Qt, OpenVR) kills the pad without a Python traceback; keep
     # one in a file so a bug report can say where it happened.
@@ -1646,6 +1655,7 @@ def main():
     if signal_running("quit" if args.quit else "fold" if args.fold else "toggle") or args.quit or args.fold:
         return
     app = QApplication(sys.argv)
+    _longer_tooltips(app)
     app.setApplicationName("arrowpad")
     # Taskbar/window icon instead of the generic X11 logo; the desktop file name lets
     # KWin match the window to its menu entry.

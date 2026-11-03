@@ -142,6 +142,8 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Tooltips stay twice as long** in the Frame Tweaks window, Arrow Pad, Screen snip and the NordVPN tray: in VR, reading them takes longer.
+- **Screen snip's Save says where:** a tooltip on Save shows the file's path for a few seconds before the snip closes (in VR the notification may not show).
 - **KnockThru and Performance Overlay show their own logos** on their rows, instead of a generic icon.
 - **↻ Reinstall asks first,** on the confirm page Apply changes uses: what reinstalling does, whether its files changed, and whether it asks for the sudo password.
 - **VR memory guard also limits Frame Tweaks' own heavy helpers:** Dictation (Whisper, or an

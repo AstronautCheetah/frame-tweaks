@@ -5319,6 +5319,11 @@ msgstr "No se pudo copiar el texto"
 msgid "Couldn't save the snip"
 msgstr "No se pudo guardar el recorte"
 
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't save to {path}"
+msgstr "No se pudo guardar en {path}"
+
 #: packs/core/snip/frame-snip
 msgid "Couldn't take a snip"
 msgstr "No se pudo hacer un recorte"
@@ -5437,6 +5442,11 @@ msgstr "Reanudar"
 #: packs/core/snip/frame-snip
 msgid "Save"
 msgstr "Guardar"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Saved to {path}"
+msgstr "Guardado en {path}"
 
 #: packs/core/snip/frame-snip
 msgid "Screen snip"
