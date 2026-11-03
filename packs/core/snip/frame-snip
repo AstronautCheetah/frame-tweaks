@@ -453,6 +453,24 @@ def tesseract_missing():
                 question=_("Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"))
 
 
+NO_TEXT_SNIP = RUN / "snip-no-text.png"
+
+
+def looks_black(img):
+    """Nearly all black (a window the screenshot can't see, a game drawn straight to the
+    headset, say): every sampled pixel darker than 16 of 255."""
+    w, h = img.width(), img.height()
+    if not w or not h:
+        return True
+    return all(QColor(img.pixel(min(w - 1, x * w // 24), min(h - 1, y * h // 24))).value() < 16
+               for x in range(24) for y in range(24))
+
+
+def no_text_reason(snip):
+    return (_("The snip is black: this window can't be captured, so there's no text to read.") if looks_black(snip)
+            else _("No text found in the snip."))
+
+
 def ocr(img):
     """Text in the image (Tesseract), or None if Tesseract isn't installed."""
     if not Path(TESSERACT).exists():
@@ -1729,6 +1747,8 @@ class Snip(QWidget):
             b.clicked.connect(fn)
             if fn == self.save:
                 self.save_button = b
+            if fn == self.copy_text:
+                self.copy_text_button = b
             if fn != self.narrate:
                 lay.addWidget(b, 0, Qt.AlignmentFlag.AlignTop)
                 continue
@@ -1902,12 +1922,27 @@ class Snip(QWidget):
         QToolTip.showText(b.mapToGlobal(b.rect().bottomLeft()), tip, b, b.rect(), self.SAVED_TIP_MS)
         QTimer.singleShot(self.SAVED_TIP_MS, self.close)
 
+    def no_text(self, snip, button):
+        """Nothing to read in the snip (Copy text): said on the button, for a few seconds before
+        closing, as Save does (in VR the notification may not show), and why when the snip is
+        black. The snip is kept, to look at."""
+        snip.save(str(NO_TEXT_SNIP))
+        tip = no_text_reason(snip) + "\n" + _("Kept as {path}").format(path=NO_TEXT_SNIP)
+        notify(_("No text found in the snip"), tip)
+        if button is None or not button.isVisible():
+            return self.close()
+        for other in self.bar.findChildren(QPushButton):
+            other.setEnabled(False)
+        QToolTip.showText(button.mapToGlobal(button.rect().bottomLeft()), tip, button, button.rect(), self.SAVED_TIP_MS)
+        QTimer.singleShot(self.SAVED_TIP_MS, self.close)
+
     def copy_text(self):
-        text = ocr(self.snipped())
+        snip = self.snipped()
+        text = ocr(snip)
         if text is None:
             tesseract_missing()
         elif not text:
-            notify(_("No text found in the snip"))
+            return self.no_text(snip, getattr(self, "copy_text_button", None))
         else:
             ok = to_clipboard(text.encode(), "text/plain;charset=utf-8")
             notify(_("Text copied") if ok else _("Couldn't copy the text"), text)
@@ -1926,12 +1961,14 @@ class Snip(QWidget):
     def narrate(self):
         snip = self.snipped()
         text = ocr(snip)
-        if not text:
-            if text == "":
-                notify(_("No text found in the snip"), "")
-            else:
-                tesseract_missing()
+        if text is None:
+            tesseract_missing()
             return self.close()
+        if not text:
+            # Nothing to read: the panel opens anyway, with the snip, and reads why (black, or no
+            # text found), so something shows and is heard in VR; the snip is kept to look at.
+            snip.save(str(NO_TEXT_SNIP))
+            text = no_text_reason(snip)
         if not PIPER.exists() or not VOICE.exists():
             needs.offer("speech", _("Narrate needs the Speech engine"),
                         _("Narrate reads the snip aloud with the Speech engine (Piper, on the Frame itself), "

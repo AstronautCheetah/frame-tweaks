@@ -4769,6 +4769,10 @@ msgid "Image copied to the clipboard."
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Kept as {path}"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Narrate"
 msgstr ""
 
@@ -4795,6 +4799,10 @@ msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "No text found in the snip"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "No text found in the snip."
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -4935,6 +4943,11 @@ msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "The clipboard has no text."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid ""
+"The snip is black: this window can't be captured, so there's no text to read."
 msgstr ""
 
 #: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js

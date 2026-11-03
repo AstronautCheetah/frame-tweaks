@@ -216,6 +216,7 @@
   Unstick's "pressed and let go" was false comfort. When no keyboard holds a key, it now says the
   stuck state is inside SteamVR and that ⟳ Restart SteamVR (or `steamvr restart`) clears it.
   Why, and what was tried: docs/research/stuck-modifiers.md.
+- **Narrate with nothing to read still opens its panel:** a snip with no text (a game's picture, say) closed with only a notification, unseen in VR, so Narrate seemed to do nothing. The panel now opens with the snip and reads why: no text found, or the snip is black (a window the screenshot can't capture). **Copy text** says the same on its button. The snip is kept as `/run/user/$UID/snip-no-text.png`.
 - **`reinstall-changed` updates the shared files too:** the translations, tooltips and other shared modules Arrow Pad, Screen snip and the NordVPN tray load are copied again when the checkout's differ; no tweak's folder holds them, so no change to them was noticed.
 - **Parakeet no longer drops a whole dictation:** its int8 model sometimes heard nothing in a recording with clear speech (3.5 seconds of "dictation test, the first one failed": nothing; Whisper heard all of it). When Parakeet hears nothing in a recording loud enough to hold speech, Whisper tries it.
 - **Performance Overlay starts with SteamVR, as meant, and has a Show button.** Its installer

@@ -450,6 +450,58 @@ def __getattr__(name):
 '''
 
 
+class NoText(unittest.TestCase):
+    """Nothing to read in a snip (a Proton game's: Narrate seemed to do nothing, its notification
+    unseen in VR): said on the button for a few seconds, black snips said to be black, the snip kept."""
+    def test_black_or_not(self):
+        from PyQt6.QtGui import QColor, QImage
+        img = QImage(200, 100, QImage.Format.Format_RGB32)
+        img.fill(QColor(3, 3, 3))
+        self.assertTrue(fs.looks_black(img))
+        img.setPixelColor(100, 50, QColor(255, 255, 255))     # (one spot the samples miss: still black)
+        img.fill(QColor(40, 40, 40))
+        self.assertFalse(fs.looks_black(img))
+
+    def test_said_on_the_button_and_kept(self):
+        from PyQt6.QtGui import QColor, QImage
+        img = QImage(120, 60, QImage.Format.Format_RGB32)
+        img.fill(QColor(0, 0, 0))
+        shown, closed = [], []
+
+        class Fake:
+            SAVED_TIP_MS = 10
+            bar = mock.Mock(findChildren=lambda *_: [])
+            close = lambda self: closed.append(True)
+        button = mock.Mock(isVisible=lambda: True)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(fs, "NO_TEXT_SNIP", Path(d) / "kept.png"), \
+                mock.patch.object(fs, "notify"), \
+                mock.patch.object(fs.QToolTip, "showText", lambda *a: shown.append(a[1])), \
+                mock.patch.object(fs.QTimer, "singleShot", lambda _ms, fn: fn()):
+            fs.Snip.no_text(Fake(), img, button)
+            self.assertTrue((Path(d) / "kept.png").exists())
+        self.assertIn("black", shown[0])
+        self.assertEqual(closed, [True])
+
+    def test_narrate_still_opens_the_panel_and_reads_why(self):
+        from PyQt6.QtGui import QColor, QImage
+        img = QImage(120, 60, QImage.Format.Format_RGB32)
+        img.fill(QColor(0, 0, 0))
+        opened = []
+
+        class Fake:
+            speed = 1.0
+            snipped = lambda self: img
+            close = lambda self: None
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(fs, "NO_TEXT_SNIP", Path(d) / "kept.png"), \
+                mock.patch.object(fs, "ocr", lambda _img: ""), mock.patch.object(fs, "vr_panel_available", lambda: False), \
+                mock.patch.object(fs, "PIPER", Path(d)), mock.patch.object(fs, "VOICE", Path(d)), \
+                mock.patch.object(fs, "NarrationWindow", lambda image, text, speed: opened.append(text) or mock.Mock()):
+            fs.Snip.narrate(Fake())
+            self.assertTrue((Path(d) / "kept.png").exists())
+        self.assertEqual(len(opened), 1)
+        self.assertIn("black", opened[0])
+
+
 class OpenPanel(unittest.TestCase):
     def test_a_new_snip_is_read_at_the_speed_set_under_narrate(self):
         """The panel is open; a snip is narrated after its speed was set to 1.5× under Narrate (the

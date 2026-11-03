@@ -30,6 +30,12 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/core/dictation/README.md`
   - was: "Voice activity detection"
   - now: "Whisper voice activity detection"
+- New in `packs/core/snip/frame-snip:1930`
+  - now: "Kept as {path}"
+- New in `packs/core/snip/frame-snip:470`
+  - now: "The snip is black: this window can't be captured, so there's no text to read."
+- New in `packs/core/snip/frame-snip:471`
+  - now: "No text found in the snip."
 - New in `packs/third-party/perf-overlay/README.md`
   - now: "Show"
 - New in `packs/third-party/perf-overlay/run.sh:12`
