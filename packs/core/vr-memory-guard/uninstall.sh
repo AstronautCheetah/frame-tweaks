@@ -2,7 +2,8 @@
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 UNITS="$HOME/.config/systemd/user"
 DROPIN=frame-tweaks-vr-memory-guard.conf
-for unit in app.slice app-flatpak-org.mozilla.firefox-.scope steamvr.service; do
+for unit in app.slice app-flatpak-org.mozilla.firefox-.scope steamvr.service frame-tweaks-dictate-engine.service \
+        frame-tweaks-dictate-button.service app-ftmirror.slice; do
     remove_files "$UNITS/$unit.d/$DROPIN"
     rmdir "$UNITS/$unit.d" 2>/dev/null || true
 done

@@ -6763,6 +6763,13 @@ msgstr ""
 # needs review
 #: packs/core/vr-memory-guard/install.sh
 msgid ""
+"Dictation: up to %s MB; Android Mirror: up to %s MB (from its next start)."
+msgstr ""
+"Dictée : jusqu'à %s Mo ; Miroir Android : jusqu'à %s Mo (à son prochain démarrage)."
+
+# needs review
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
 "Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
 msgstr ""
 "Applications Flatpak ensemble : jusqu'à %s Mo (%s Mo réservés à la VR) ; Firefox : jusqu'à %s Mo."

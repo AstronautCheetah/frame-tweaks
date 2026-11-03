@@ -61,6 +61,21 @@ class VrMemoryGuard(unittest.TestCase):
         self.assertIn("MemorySwapMax=0M", self.dropin("app.slice"))
         self.assertIn("MemoryMax=3500M", self.dropin("app-flatpak-org.mozilla.firefox-.scope"))
 
+    def test_frame_tweaks_own_helpers_get_limits_of_their_own(self):
+        """Dictation's services and Android Mirror's slice (scrcpy ran in steam.service from Steam's
+        + menu, unlimited); a limits file from before these settings gets the defaults."""
+        self.run_script("install.sh")
+        for unit in ("frame-tweaks-dictate-engine.service", "frame-tweaks-dictate-button.service"):
+            self.assertIn("MemoryMax=2500M", self.dropin(unit))
+        self.assertIn("MemoryMax=1024M", self.dropin("app-ftmirror.slice"))
+        self.conf.write_text("reserve_for_vr=5G\napps_swap_max=2G\nfirefox_max=5G\nfirefox_swap_max=1G\n"
+                             "dictation_max=3G\nmirror_max=768M\n")
+        self.run_script("install.sh")
+        self.assertIn("MemoryMax=3072M", self.dropin("frame-tweaks-dictate-engine.service"))
+        self.assertIn("MemoryMax=768M", self.dropin("app-ftmirror.slice"))
+        self.run_script("uninstall.sh")
+        self.assertFalse((self.units / "app-ftmirror.slice.d").exists())
+
     def test_running_slice_and_firefox_are_set_at_once(self):
         self.run_script("install.sh")
         log = self.calls.read_text()

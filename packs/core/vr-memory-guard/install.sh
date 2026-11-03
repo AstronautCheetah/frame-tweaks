@@ -25,8 +25,11 @@ size() {     # size NAME: the setting in MiB, or stop and say which line is wron
         die "$(t '%s in %s should be a size such as 5G or 512M (it is "%s").' "$1" "$CONF" "$(get "$1")")"
     echo "$v"
 }
+# size_or NAME DEFAULT: as size, but a limits file from before the setting existed gets the default
+size_or() { if [ -z "$(get "$1")" ]; then mib "$2"; else size "$1"; fi; }
 reserve=$(size reserve_for_vr); apps_swap=$(size apps_swap_max)
 ff=$(size firefox_max); ff_swap=$(size firefox_swap_max)
+dict=$(size_or dictation_max 2500M); mirror=$(size_or mirror_max 1G)
 total=$(awk '/^MemTotal:/ {print int($2 / 1024)}' "$MEMINFO")
 [ -n "$total" ] && [ "$total" -gt 0 ] || die "$(t "Can't read how much memory this device has (%s)." "$MEMINFO")"
 apps=$(( total - reserve ))
@@ -46,6 +49,19 @@ MemorySwapMax=${apps_swap}M"
 dropin app-flatpak-org.mozilla.firefox-.scope "[Scope]
 MemoryMax=${ff}M
 MemorySwapMax=${ff_swap}M"
+# Frame Tweaks' own heavy helpers, outside Flatpak: Dictation's services (its button's runs Whisper
+# for each dictation; its engine kept loaded) and Android Mirror's scrcpy, which phone runs in a
+# scope of this slice (app-ftmirror.slice, inside app.slice: also within the apps' limit). Opened
+# from Steam's + menu it ran in steam.service, which nothing limits, and a drop-in there would
+# limit Steam itself.
+for unit in frame-tweaks-dictate-engine.service frame-tweaks-dictate-button.service; do
+    dropin "$unit" "[Service]
+MemoryMax=${dict}M
+MemorySwapMax=512M"
+done
+dropin app-ftmirror.slice "[Slice]
+MemoryMax=${mirror}M
+MemorySwapMax=256M"
 # (100 is the lowest a user's own service may set, the user manager's own value; apps run at 200,
 # so when memory runs out anyway the kernel stops an app before SteamVR.)
 dropin steamvr.service "[Service]
@@ -59,7 +75,12 @@ sysctl_user set-property --runtime app.slice MemoryMax="${apps}M" MemorySwapMax=
 for scope in $(sysctl_user list-units --type=scope --state=running --plain --no-legend 'app-flatpak-org.mozilla.firefox-*.scope' 2>/dev/null | awk '{print $1}'); do
     sysctl_user set-property --runtime "$scope" MemoryMax="${ff}M" MemorySwapMax="${ff_swap}M" || true
 done
+for unit in frame-tweaks-dictate-engine.service frame-tweaks-dictate-button.service; do
+    ! sysctl_user is-active --quiet "$unit" ||
+        sysctl_user set-property --runtime "$unit" MemoryMax="${dict}M" MemorySwapMax=512M || true
+done
 say "$(t 'Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB.' "$apps" "$reserve" "$ff")"
+say "$(t 'Dictation: up to %s MB; Android Mirror: up to %s MB (from its next start).' "$dict" "$mirror")"
 if sysctl_user is-active --quiet steamvr.service; then
     say "$(t 'SteamVR is stopped last from its next start.')"
 fi

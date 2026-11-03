@@ -18,7 +18,7 @@ author: Frame Tweaks
 icon: {theme: security-high}
 changes: >-
   `~/.config/frame-tweaks/vr-memory-guard.conf`, and systemd drop-ins for your Flatpak apps,
-  Firefox and SteamVR in `~/.config/systemd/user/`
+  Firefox, SteamVR, Dictation's services and Android Mirror's slice in `~/.config/systemd/user/`
 access: Sets memory limits on your own systemd services (no root)
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall vr-memory-guard` (keeps your limits file)"
@@ -81,6 +81,11 @@ After editing (for example `nano ~/.config/frame-tweaks/vr-memory-guard.conf`), 
 - There's no `MemoryHigh`. With it, the kernel slows an app down instead of stopping it, and in
   tests on a Frame a runaway app went on crawling for minutes. `MemorySwapMax` stops it growing
   into swap instead.
+- Frame Tweaks' own heavy helpers, which aren't Flatpak apps, get limits of their own:
+  Dictation's services (Whisper for each dictation, or the engine kept loaded) up to
+  `dictation_max` (2500M), and Android Mirror's scrcpy up to `mirror_max` (1G). Android Mirror
+  runs scrcpy in a slice of its own inside the apps' (`app-ftmirror.slice`): opened from Steam's
+  "+" menu it otherwise ran inside Steam's service, which nothing limits.
 - SteamVR's service gets `OOMScoreAdjust=100`. Apps run at 200, and 100 is the lowest a user's
   own service may set.
 - No root: your own systemd user manager applies all of it.
@@ -98,7 +103,7 @@ After editing (for example `nano ~/.config/frame-tweaks/vr-memory-guard.conf`), 
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `~/.config/frame-tweaks/vr-memory-guard.conf`, and systemd drop-ins for your Flatpak apps, Firefox and SteamVR in `~/.config/systemd/user/`
+- **Changes:** `~/.config/frame-tweaks/vr-memory-guard.conf`, and systemd drop-ins for your Flatpak apps, Firefox, SteamVR, Dictation's services and Android Mirror's slice in `~/.config/systemd/user/`
 - **Unusual access:** Sets memory limits on your own systemd services (no root)
 - **Undo:** `./install.sh uninstall vr-memory-guard` (keeps your limits file)
 <!-- /generated:changes -->

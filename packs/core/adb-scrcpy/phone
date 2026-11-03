@@ -248,8 +248,15 @@ if [ $r -eq 1 ]; then
            esac ;;
     esac
 fi
-# With "Memory caps" installed, scrcpy runs inside its memory limit.
-cap=(); [ -x "$HOME/.local/bin/capped" ] && cap=("$HOME/.local/bin/capped" scrcpy --)
+# scrcpy runs in a scope of its own slice, app-ftmirror.slice, inside app.slice: VR memory guard limits
+# it there (opened from Steam's + menu it otherwise ran in steam.service, which nothing limits).
+# systemd-run --scope runs it in this process, so $pid is scrcpy's, as the restart and stop need.
+# With "Memory caps" installed, that limit instead; with neither, the scope is just a scope.
+cap=()
+if [ -x "$HOME/.local/bin/capped" ]; then cap=("$HOME/.local/bin/capped" scrcpy --)
+elif command -v systemd-run >/dev/null && systemctl --user show-environment >/dev/null 2>&1; then
+    cap=(systemd-run --user --scope --quiet --collect --slice=app-ftmirror.slice --)
+fi
 MAX=1920                                   # the window: fits the Steam session's 1920x1080 screen
 # The stream: no larger than VR shows it (the upright window is 1080 tall). scrcpy already shows
 # only the newest picture, so a delay is pictures still on their way: the wireless connection

@@ -141,6 +141,10 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **VR memory guard also limits Frame Tweaks' own heavy helpers:** Dictation (Whisper, or an
+  engine kept loaded) up to 2.5 GB and Android Mirror's scrcpy up to 1 GB (`dictation_max`,
+  `mirror_max`). Opened from Steam's "+" menu, Android Mirror ran inside Steam's own service,
+  which nothing limited; it now runs in a scope of its own.
 - **Linked projects install the version Frame Tweaks tested:** ticking one (Recline, Full
   Keyboard, Performance Overlay, KnockThru, Cuff) installs the release Frame Tweaks tested, and
   its row says so. They used to install whatever was newest (Cuff: one fixed commit).

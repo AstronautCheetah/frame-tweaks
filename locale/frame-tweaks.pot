@@ -5170,6 +5170,11 @@ msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
 msgid ""
+"Dictation: up to %s MB; Android Mirror: up to %s MB (from its next start)."
+msgstr ""
+
+#: packs/core/vr-memory-guard/install.sh
+msgid ""
 "Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
 msgstr ""
 
