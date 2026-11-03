@@ -422,7 +422,7 @@ msgstr ""
 "Kiezen welke apps met de gedeelde KDE-portefeuille openen; hem vergrendelen of ontgrendelen"
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js
 msgid "Close"
 msgstr "Sluiten"
 
@@ -3895,6 +3895,11 @@ msgid "Medium"
 msgstr "Gemiddeld"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Move the keypad"
+msgstr "Het toetsenblok verplaatsen"
+
+# needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
 msgstr "Niet gedeeld"
@@ -3927,6 +3932,11 @@ msgid "Shared"
 msgstr "Gedeeld"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Show where a lock screen has its digits"
+msgstr "Tonen waar een vergrendelscherm zijn cijfers heeft"
+
+# needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Slow"
 msgstr "Langzaam"
@@ -3937,6 +3947,16 @@ msgid ""
 "The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone."
 msgstr ""
 "De app op je telefoon verbergt dit scherm voor spiegelen (een privacy-instelling): het is alleen op de telefoon te zien."
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Type your PIN on the phone"
+msgstr "Je pincode op de telefoon typen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Wake / show PIN"
+msgstr "Wekken / pincode tonen"
 
 # needs review
 #: packs/core/adb-scrcpy/status.sh

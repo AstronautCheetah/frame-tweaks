@@ -56,6 +56,10 @@ PIDFILE = Path(f"/run/user/{os.getuid()}/sft-phone-touch.pid")
 DOWN, UP, MOVE = 0, 1, 2
 FINGER = -2                                     # scrcpy's "generic finger" pointer id
 KEYCODE_WAKEUP = 224                            # (Android's AKEYCODE_WAKEUP)
+# The unlock keypad's keys (the layer's {"a": "key", "k": …}): Android's digit keys, Delete and Enter,
+# which a lock screen's PIN entry takes as from a keyboard plugged into the phone. Only these: a
+# key the layer names that isn't here is refused. (Which key was pressed is never logged.)
+UNLOCK_KEYS = {**{str(d): 7 + d for d in range(10)}, "del": 67, "enter": 66}
 # scrcpy versions (major) whose control protocol this was tested with: the touch and scroll
 # messages below and the server's options. scrcpy has changed them between major versions
 # before, and a mismatch would make taps go nowhere without an error, so with any other version
@@ -197,6 +201,22 @@ class Phone:
             self.wake()
         self.send(lambda: struct.pack(">BBqiiHHHII", 2, action, FINGER, *self.point(u, v, sideways),
                                       0 if action == UP else 0xFFFF, 0, 0), retry=action != MOVE)
+
+    def key(self, code):
+        """One key, down and up, as a keyboard on the phone would press it."""
+        for key_action in (0, 1):
+            self.send(lambda a=key_action: struct.pack(">BBIII", 0, a, code, 0, 0), retry=True)
+
+    def show_pin(self):
+        """The unlock keypad's Wake / show PIN: the screen on, then a swipe up from near the bottom,
+        which brings up the PIN entry on a lock screen that wants it first (a Pixel's)."""
+        self.wake()
+        time.sleep(0.3)
+        self.touch(DOWN, 0.5, 0.88, False)
+        for i in range(1, 9):
+            time.sleep(0.02)
+            self.touch(MOVE, 0.5, 0.88 - 0.06 * i, False)
+        self.touch(UP, 0.5, 0.4, False)
 
     def wake(self):
         """Android's WAKEUP key, down and up (scrcpy's 14-byte key message): a phone gone to sleep
@@ -468,6 +488,14 @@ def serve(phone, sd, state):
                             continue
                         if req["a"] == "leave":
                             state["hover"] = None
+                            continue
+                        if req["a"] == "key":             # (the unlock keypad: never logged, what it typed)
+                            code = UNLOCK_KEYS.get(str(req.get("k")))
+                            if code is not None:
+                                phone.key(code)
+                            continue
+                        if req["a"] == "show-pin":
+                            threading.Thread(target=phone.show_pin, daemon=True).start()
                             continue
                         at = (float(req["u"]), float(req["v"]), float(req["w"]) > float(req["h"]))
                         if req["a"] == "scroll":          # (from the scroll strips: not where the laser is)

@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 20;
+  const NAME = 'phone-touch', VERSION = 22;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -111,12 +111,13 @@
     // A curved window: bend the layer around the same origin, so it stays on the picture.
     const curveId = f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : undefined;
     const pxW = 240, pxH = Math.round(pxW * c.h / c.w);         // small page element, same shape
+    const over = hidden(pxW, pxH);
     return el(XFORM, { key: `${f.frameID}-sft-touch`, parent_id: id, translation: { y: -H / 2, z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-touch-p`, width: W, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftPhoneTouch', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false },
         focus_target_sgid: page.mainPanelSGID,
         ...(curveId ? { curvature_origin_id: curveId } : {}) },
-        el('div', { style: { width: `${pxW}px`, height: `${pxH}px`, background: 'rgba(0, 0, 0, 0)' },
+        el('div', { style: { width: `${pxW}px`, height: `${pxH}px`, background: 'rgba(0, 0, 0, 0)', position: 'relative' },
           onWheel: (ev) => onWheel(ev, c),
           onMouseMove: (ev) => onHover(ev, c),
           onMouseLeave: onLeave,
@@ -130,11 +131,113 @@
             window.addEventListener('mousemove', onMove, true);
             window.addEventListener('mouseup', onUp, true);
             window.addEventListener('pointerup', onUp, true);
-          } })));
+          } }, ...over)));
+  };
+
+  // ---- a screen the phone hides from the mirror ----
+  // An app can hide its screen from mirroring (Android's FLAG_SECURE: the PIN or fingerprint
+  // prompt, banking apps, password managers): the mirror shows black. phone-touch sees the focused
+  // window marked SECURE and sets window.__sftPhoneSecure; a notice in the picture says why, with
+  // two ways to unlock it blind:
+  //  - Type PIN: a keypad of ours that types on the phone (Android's digit keys, Delete, Enter, as
+  //    a keyboard plugged into the phone would; phone-touch's UNLOCK_KEYS), whatever its layout.
+  //    It shows one dot per digit, never the digits; nothing of it is logged or kept.
+  //  - Where the digits are: a reference PIN pad over the picture, where a lock screen usually has
+  //    them, for a screen that doesn't take typed keys: taps go through it to the phone (its
+  //    digits take no clicks), and arrows around it nudge it onto the phone's own layout.
+  // Both stay for the session (window.__sftPhoneUnlock, __sftPhoneKeypad); the typing pad goes by
+  // itself once the screen isn't hidden any more (unlocked).
+  const keypad = (window.__sftPhoneKeypad ??= { on: false, dx: 0, dy: 0 });
+  const unlock = (window.__sftPhoneUnlock ??= { on: false, count: 0, wasSecure: false });
+  const NUDGE = 0.01;                                // of the picture, per arrow press
+  const KEYPAD_SVG = 'M5 3h3v3H5zM10.5 3h3v3h-3zM16 3h3v3h-3zM5 8.5h3v3H5zM10.5 8.5h3v3h-3zM16 8.5h3v3h-3z' +
+    'M5 14h3v3H5zM10.5 14h3v3h-3zM16 14h3v3h-3zM10.5 19.5h3v3h-3z';
+  // A control in the picture: a click acts here and never reaches the phone as a touch.
+  const own = (fn) => ({ onMouseDown: (ev) => { ev.stopPropagation(); ev.preventDefault(); buzz('Snap'); },
+                         onMouseUp: (ev) => ev.stopPropagation(),
+                         onClick: (ev) => { ev.stopPropagation(); fn(); redraw(); },
+                         onMouseEnter: () => buzz('Enter') });
+  const OUTLINE_SVG = 'M4 2h4v4H4zM10 2h4v4h-4zM16 2h4v4h-4zM4 8h4v4H4zM10 8h4v4h-4zM16 8h4v4h-4zM4 14h4v4H4zM10 14h4v4h-4z' +
+    'M16 14h4v4h-4zM10 20h4v3h-4z';
+  const iconButton = (h, on, svg, outline, tip, fn) =>
+    el('div', { ...own(fn), title: tip,
+                style: { pointerEvents: 'auto', flex: '0 0 auto', width: '26px', height: '26px', borderRadius: '6px',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.1)',
+                         border: `1px solid hsla(${h}, 60%, 70%, 0.8)` } },
+      el('svg', { width: 18, height: 18, viewBox: '0 0 24 24' },
+        el('path', outline ? { d: svg, fill: 'none', stroke: `hsl(${h}, 65%, 85%)`, strokeWidth: 1.4 }
+                           : { d: svg, fill: `hsl(${h}, 65%, 85%)` })));
+  const typingPad = (pxW, pxH, h) => {
+    const w = pxW * 0.72, x = (pxW - w) / 2, y = pxH * 0.22;
+    const press = (k) => { call({ a: 'key', k }); unlock.count = k === 'del' ? Math.max(0, unlock.count - 1)
+                                                               : k === 'enter' ? 0 : unlock.count + 1; };
+    const key = (label, k) => el('div', { key: `k${label}`, ...own(() => press(k)), style: {
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        height: '30px', margin: '3px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, color: '#fff',
+        background: 'rgba(255, 255, 255, 0.12)', border: `1px solid hsla(${h}, 60%, 70%, 0.5)` } }, label);
+    const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => key(d, d));
+    return el('div', { key: 'typing', style: { position: 'absolute', left: `${x}px`, top: `${y}px`, width: `${w}px`,
+        boxSizing: 'border-box', padding: '8px', borderRadius: '12px', background: 'rgba(22, 27, 34, 0.95)',
+        border: `1px solid hsla(${h}, 60%, 68%, 0.7)` } },
+      el('div', { style: { display: 'flex', alignItems: 'center', marginBottom: '4px' } },
+        el('div', { style: { flex: '1', textAlign: 'center', color: '#e8ecf0', fontSize: '16px', letterSpacing: '4px',
+                             minHeight: '20px' } }, '●'.repeat(Math.min(unlock.count, 16))),
+        el('div', { ...own(() => { unlock.on = false; unlock.count = 0; }), title: T('Close'),
+                    style: { fontSize: '14px', color: '#9aa6b2', padding: '0 4px' } }, '✕')),
+      el('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' } },
+        ...digits, key('⌫', 'del'), key('0', '0'), key('↵', 'enter')),
+      el('div', { ...own(() => call({ a: 'show-pin' })), style: { marginTop: '4px', textAlign: 'center',
+          padding: '6px', borderRadius: '8px', fontSize: '11px', color: '#e8ecf0', background: 'rgba(255, 255, 255, 0.08)',
+          border: `1px solid hsla(${h}, 60%, 70%, 0.35)` } }, T('Wake / show PIN')));
+  };
+  const hidden = (pxW, pxH) => {
+    const out = [], h = hueOf(), secure = !!window.__sftPhoneSecure;
+    if (unlock.wasSecure && !secure) { unlock.on = false; unlock.count = 0; }      // (unlocked: done)
+    unlock.wasSecure = secure;
+    if (secure) {
+      out.push(el('div', { key: 'secure', style: { position: 'absolute', left: '5%', top: '4%', width: '90%',
+          boxSizing: 'border-box', padding: '6px 8px', borderRadius: '8px', background: 'rgba(22, 27, 34, 0.92)',
+          border: `1px solid hsla(${h}, 60%, 68%, 0.6)`, color: '#e8ecf0', fontSize: '10px', lineHeight: 1.35,
+          display: 'flex', alignItems: 'center', gap: '6px', pointerEvents: 'none' } },
+        el('div', { style: { flex: '1' } }, '🔒 ' + T('The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone.')),
+        iconButton(h, unlock.on, KEYPAD_SVG, false, T('Type your PIN on the phone'),
+                   () => { unlock.on = !unlock.on; unlock.count = 0; }),
+        iconButton(h, keypad.on, OUTLINE_SVG, true, T('Show where a lock screen has its digits'),
+                   () => { keypad.on = !keypad.on; })));
+    }
+    if (unlock.on) out.push(typingPad(pxW, pxH, h));
+    if (!keypad.on) return out;
+    // Where a phone's lock-screen PIN pad usually is: the lower half, most of the width (a Pixel's).
+    const gw = pxW * 0.66, gh = pxH * 0.36;
+    const cx = pxW * (0.5 + keypad.dx), cy = pxH * (0.66 + keypad.dy);
+    const left = cx - gw / 2, top = cy - gh / 2;
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '↵'];
+    out.push(el('div', { key: 'pad', style: { position: 'absolute', left: `${left}px`, top: `${top}px`,
+        width: `${gw}px`, height: `${gh}px`, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateRows: 'repeat(4, 1fr)', pointerEvents: 'none' } },
+      ...keys.map((d) => el('div', { key: d, style: { display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: d.match(/\d/) ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.45)', fontSize: '15px', fontWeight: 600,
+          border: `1px solid hsla(${h}, 60%, 70%, 0.35)`, borderRadius: '50%', margin: '3px',
+          background: 'rgba(255, 255, 255, 0.04)' } }, d))));
+    // The arrows, around it: each moves it a step that way.
+    const A = 16, gap = 3;
+    const arrows = [['↖', -1, -1], ['↑', 0, -1], ['↗', 1, -1], ['←', -1, 0], ['→', 1, 0], ['↙', -1, 1], ['↓', 0, 1], ['↘', 1, 1]];
+    for (const [label, ax, ay] of arrows) {
+      const x = ax < 0 ? left - A - gap : ax > 0 ? left + gw + gap : cx - A / 2;
+      const y = ay < 0 ? top - A - gap : ay > 0 ? top + gh + gap : cy - A / 2;
+      out.push(el('div', { key: `n${label}`, ...own(() => { keypad.dx += ax * NUDGE; keypad.dy += ay * NUDGE; }),
+        title: T('Move the keypad'),
+        style: { position: 'absolute', left: `${x}px`, top: `${y}px`, width: `${A}px`, height: `${A}px`,
+                 borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px',
+                 color: '#e8ecf0', background: `hsla(${h}, 30%, 25%, 0.85)`, border: `1px solid hsla(${h}, 60%, 70%, 0.6)` } },
+        label));
+    }
+    return out;
   };
 
   // ---- the gear and its settings panel ----
-  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.34, NOTICE_M = 0.3;   // sizes, metres
+  const GEAR_M = 0.045, GAP_M = 0.015, SETTINGS_M = 0.34;       // sizes, metres
   // [title, key, [[label, value]...], needs a stream restart]: the real settings (scrcpy's
   // --max-size, --video-bit-rate, --max-fps); frame rates are the Steam Frame's refresh rates.
   const OPTIONS = [
@@ -319,22 +422,6 @@
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
              T('Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once.')))));
   };
-  // An app on the phone hiding its screen (Android's FLAG_SECURE: banking apps, password managers):
-  // the mirror shows black. phone-touch sees the focused window marked SECURE and sets
-  // window.__sftPhoneSecure; this says why, just above the window.
-  const secureNotice = (f, k, H) => {
-    const top = typeof f.activePage?.GetPanelAnchorID === 'function' && f.activePage.GetPanelAnchorID(TOP_CENTER);
-    if (!top) return null;
-    const h = hueOf();
-    return el(XFORM, { key: `${f.frameID}-sft-secure`, parent_id: top,
-                       translation: { y: GAP_M * k + 0.03 * k, z: LIFT_M * k } },
-      el(PANEL, { key: `${f.frameID}-sft-secure-p`, width: NOTICE_M * k, interactive: false, only_visible_with_laser: false,
-        debug_name: 'SftPhoneSecure', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
-        el('div', { style: { width: '480px', boxSizing: 'border-box', padding: '12px 16px', borderRadius: '14px',
-                             background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.6)`,
-                             color: '#e8ecf0', fontSize: '20px', textAlign: 'center', zoom: 0.62 } },
-           '🔒 ' + T('The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone.'))));
-  };
   const buildExtras = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
@@ -342,8 +429,7 @@
     if (!H || !Hw || !id) return [];
     const k = H / Hw, c = pictureSize(page);
     const beside = f.docking?.dockLocation === DASH && c && c.w < c.h;      // upright, docked
-    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null,
-            window.__sftPhoneSecure ? secureNotice(f, k, H) : null];
+    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null];
   };
 
   const sizes = (f) => {
@@ -352,9 +438,11 @@
             f.curvature?.shouldCurve ? f.curvature.curvatureTransformOriginID : null,
             f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
   };
-  const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f), f.activePage?.mainPanelSGID ?? null]), () => buildLayer(f));
+  const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f), f.activePage?.mainPanelSGID ?? null,
+                                              !!window.__sftPhoneSecure, keypad, unlock, window.__sftI18n?.lang ?? null, hueOf()]),
+                              () => buildLayer(f));
   const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
-                                               settingsOpen.has(f.frameID), pending, hueOf(), !!window.__sftPhoneSecure,
+                                               settingsOpen.has(f.frameID), pending, hueOf(),
                                                window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
 
   // Drawn as the last child of the dashboard app, in the page's bottom-right corner (L.mount; the

@@ -1,5 +1,6 @@
 """adb-scrcpy/phone-touch: laser positions on the mirror become scrcpy touch messages."""
 import sys
+import re
 import struct
 import unittest
 from pathlib import Path
@@ -136,9 +137,57 @@ class SecureScreen(unittest.TestCase):
 
     def test_the_layer_shows_a_notice_while_it_is_hidden(self):
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
-        self.assertIn("window.__sftPhoneSecure ? secureNotice(", js)
+        layer = js.split("const buildLayer", 1)[1].split("// ---- the gear", 1)[0]
+        self.assertIn("window.__sftPhoneSecure", layer)              # (the notice: in the picture)
+        self.assertIn("...over", layer)
+        # The keypad's digits take no clicks (taps reach the phone through them); its controls
+        # (the keypad button, the nudge arrows) never reach the phone as touches.
+        pad = layer.split("key: 'pad'", 1)[1].split("// The arrows", 1)[0]
+        self.assertIn("pointerEvents: 'none'", pad)
+        self.assertIn("ev.stopPropagation(); ev.preventDefault()", layer)
+        self.assertEqual(layer.count("['↖', -1, -1]"), 1)
+        self.assertEqual(len(re.findall(r"\['[↖↑↗←→↙↓↘]', -?[01], -?[01]\]", layer)), 8)
         src = (ROOT / "packs/core/adb-scrcpy" / "phone-touch").read_text()
         self.assertIn("window.__sftPhoneSecure = ", src)
+
+
+class UnlockKeypad(unittest.TestCase):
+    """The unlock keypad types on the phone as a keyboard would: digits, Delete, Enter only; its
+    digits are never logged or counted where a trail could show them."""
+
+    def test_keys_are_androids_and_only_these(self):
+        self.assertEqual(pt.UNLOCK_KEYS["0"], 7)
+        self.assertEqual(pt.UNLOCK_KEYS["9"], 16)
+        self.assertEqual((pt.UNLOCK_KEYS["del"], pt.UNLOCK_KEYS["enter"]), (67, 66))
+        self.assertEqual(set(pt.UNLOCK_KEYS), {*"0123456789", "del", "enter"})
+
+    def test_a_key_is_pressed_and_let_go(self):
+        p = phone()
+        p.key(pt.UNLOCK_KEYS["5"])
+        msgs = [struct.unpack(">BBIII", c[0][0]) for c in p.sock.sendall.call_args_list]
+        self.assertEqual(msgs, [(0, 0, 12, 0, 0), (0, 1, 12, 0, 0)])
+
+    def test_show_pin_wakes_then_swipes_up(self):
+        p = phone()
+        with mock.patch.object(pt.time, "sleep"):
+            p.show_pin()
+        msgs = [c[0][0] for c in p.sock.sendall.call_args_list]
+        self.assertEqual(struct.unpack(">BBIII", msgs[0])[2], pt.KEYCODE_WAKEUP)
+        touches = [struct.unpack(">BBqiiHHHII", m) for m in msgs if len(m) == 32]
+        downs = [t for t in touches if t[1] == pt.DOWN]
+        self.assertEqual(len(downs), 1)
+        self.assertGreater(downs[0][4], touches[-1][4])               # (from low on the screen, up)
+        self.assertEqual(touches[-1][1], pt.UP)
+
+    def test_the_layer_never_records_a_digit(self):
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        pad = js.split("const typingPad", 1)[1].split("const hidden", 1)[0]
+        self.assertIn("call({ a: 'key', k })", pad)
+        self.assertNotIn("mark(", pad)
+        self.assertNotIn("stats", pad)
+        src = (ROOT / "packs/core/adb-scrcpy" / "phone-touch").read_text()
+        handler = src.split('if req["a"] == "key":', 1)[1].split("continue", 1)[0]
+        self.assertNotIn("log(", handler)
 
 
 class Replaced(unittest.TestCase):

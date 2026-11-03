@@ -322,7 +322,7 @@ msgstr ""
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js
 msgid "Close"
 msgstr ""
 
@@ -2986,6 +2986,10 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Move the keypad"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
 msgstr ""
@@ -3011,6 +3015,10 @@ msgstr ""
 msgid "Shared"
 msgstr ""
 
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Show where a lock screen has its digits"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Slow"
 msgstr ""
@@ -3018,6 +3026,14 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid ""
 "The app on your phone hides this screen from mirroring (a privacy setting): it shows only on the phone."
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Type your PIN on the phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Wake / show PIN"
 msgstr ""
 
 #: packs/core/adb-scrcpy/status.sh
