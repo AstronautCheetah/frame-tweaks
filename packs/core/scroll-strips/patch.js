@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 26;
+  const NAME = 'scroll-strips', VERSION = 27;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -132,31 +132,22 @@
     if (at < 0.25) d.axis === 'y' ? send(d.target, 0, 0, 1) : send(d.target, -PAGE, 0);
     else if (at > 0.75) d.axis === 'y' ? send(d.target, 0, 0, -1) : send(d.target, PAGE, 0);
   };
-  const dot = (el, axis, at, color, size, sx = 1) => {        // a marker on the strip (plain DOM)
+  const dot = (el, axis, at, color, size) => {               // a marker on the strip (plain DOM)
     const m = document.createElement('div');
-    // (sx: the strip's squeeze along its length, so the marker is round in VR)
-    Object.assign(m.style, { position: 'absolute', width: `${size * (axis === 'y' ? 1 : sx)}px`,
-      height: `${size * (axis === 'y' ? sx : 1)}px`, borderRadius: '50%',
+    Object.assign(m.style, { position: 'absolute', width: `${size}px`, height: `${size}px`, borderRadius: '50%',
       background: color, pointerEvents: 'none', transform: 'translate(-50%, -50%)',
       [axis === 'y' ? 'top' : 'left']: `${at}px`, [axis === 'y' ? 'left' : 'top']: '50%' });
     el.appendChild(m);
     return m;
   };
   const strip = (key, axis, length, thick, target, curveId) => {   // sizes in the anchor's units
-    // Each panel's picture is a piece of the dashboard's one shared page, from our corner of it
-    // (920 px wide; lib.js area()). A strip longer than 600 px there runs out of that corner, over
-    // the dashboard's own pieces: drawn 64 px thick at its true shape (up to 2400 px long), the grab
-    // bars under windows stopped working and bits of the strips showed on other panels, the
-    // controllers' too. So 600 px long at most, squeezed along its length when the strip is longer
-    // than that (sx); 48 px thick, for sharp edges (at 16 px its border, stretched some 30 times in
-    // VR, came out fuzzy). The rounded ends and markers are drawn squeezed by sx too, so they're
-    // round in VR; the drag maths uses fractions of the strip, not pixels.
-    const px = 48, S = px / 16, natural = px * length / thick, lenPx = Math.min(600, Math.round(natural));
-    const sx = lenPx / natural, r = `${px / 2}px`, rs = `${(px / 2) * sx}px`, b = `${S}px`, bs = `${Math.max(1, S * sx)}px`;
+    // Small page elements: each panel's picture is a piece of the dashboard's one shared page, and
+    // at 64 px (a strip up to 2400 px long) they overlapped the dashboard's own pieces there, so the
+    // grab bars stopped working and other panels showed bits of the strips.
+    const px = 16, lenPx = Math.min(600, Math.round(px * length / thick));
     const style = { width: `${axis === 'y' ? px : lenPx}px`, height: `${axis === 'y' ? lenPx : px}px`,
-      background: colors().idle, position: 'relative', boxSizing: 'border-box',
-      borderRadius: axis === 'y' ? `${r} / ${rs}` : `${rs} / ${r}`, borderStyle: 'solid', borderColor: colors().border,
-      borderWidth: axis === 'y' ? `${bs} ${b}` : `${b} ${bs}` };
+      background: colors().idle, position: 'relative', borderRadius: `${px / 2}px`, boxSizing: 'border-box',
+      border: `1px solid ${colors().border}` };
     return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false },
       ...(curveId ? { curvature_origin_id: curveId } : {}) },
@@ -169,8 +160,8 @@
         el.style.background = colors().active;
         drag = { axis, target, el, start, from, length: axis === 'y' ? r.height : r.width, offset: 0, moved: 0,
                  carry: 0, t0: Date.now(), lastMove: Date.now(),
-                 origin: dot(el, axis, start - from, colors().origin, 10 * S, sx),
-                 knob: dot(el, axis, start - from, colors().knob, 14 * S, sx) };
+                 origin: dot(el, axis, start - from, colors().origin, 10),
+                 knob: dot(el, axis, start - from, colors().knob, 14) };
         drag.timer = setInterval(tick, TICK_MS);
         window.addEventListener('mousemove', onMove, true);
         window.addEventListener('mouseup', onUp, true);
