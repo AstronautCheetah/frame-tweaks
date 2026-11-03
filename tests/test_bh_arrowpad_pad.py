@@ -791,5 +791,24 @@ class DesktopGrabbed(PadTest):
             self.assertEqual(self.ap.desktop_languages()[0], "es_419")
 
 
+
+class HapticsNeverStartSteamVR(unittest.TestCase):
+    """The desktop pad's haptics init SteamVR on their own: only while vrserver runs (the init
+    would otherwise start SteamVR outside SteamOS's VR session: a blue void in the headset).
+    No haptics then, as without SteamVR."""
+
+    def test_no_init_without_vrserver(self):
+        with mock.patch.object(sys, "path", [str(ROOT / "lib")] + sys.path):
+            haptics = module("haptics", PAD / "haptics.py")
+        fake = mock.MagicMock()
+        with mock.patch.dict(sys.modules, {"openvr": fake}):
+            with mock.patch.object(haptics.vrkit, "server_running", lambda: False):
+                self.assertFalse(haptics.Haptics().ok)
+            fake.init.assert_not_called()
+            with mock.patch.object(haptics.vrkit, "server_running", lambda: True):
+                self.assertTrue(haptics.Haptics().ok)
+            fake.init.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()

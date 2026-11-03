@@ -31,6 +31,10 @@ class VRButtons:
         try:
             import openvr
             self.vr = openvr
+            # (never without vrserver: the init would start SteamVR itself, outside SteamOS's VR
+            # session; vrkit.server_running)
+            if not vrkit.server_running():
+                raise RuntimeError("SteamVR isn't running")
             openvr.init(openvr.VRApplication_Overlay)
             self.started = True
             self.readers = {n: vrkit.ButtonReader(openvr, *BUTTONS[n]) for n in handlers if n in BUTTONS}

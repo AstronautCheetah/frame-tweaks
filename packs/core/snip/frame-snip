@@ -1821,11 +1821,14 @@ class NarrationOverlay(QObject):
 
 
 def vr_panel_available():
+    """The narration panel can be a SteamVR overlay: openvr installed and SteamVR's server running
+    (the panel's init would otherwise start SteamVR itself, outside SteamOS's VR session:
+    vrkit.server_running); else it's a window."""
     try:
         import openvr  # noqa: F401  (imported only to see whether it's installed)
-        return True
     except Exception:
         return False
+    return vrkit.server_running()
 
 
 # ---- selection window -----------------------------------------------------------------------

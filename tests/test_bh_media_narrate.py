@@ -42,6 +42,21 @@ def load():
 fs = load()
 
 
+class PanelOnlyWithSteamVR(unittest.TestCase):
+    """The narration panel is a SteamVR overlay only while vrserver runs: its init would otherwise
+    start SteamVR outside SteamOS's VR session (a blue void in the headset); a window then."""
+
+    def test_needs_vrserver_as_well_as_openvr(self):
+        with mock.patch.dict(sys.modules, {"openvr": types.ModuleType("openvr")}):
+            with mock.patch.object(fs.vrkit, "server_running", lambda: False):
+                self.assertFalse(fs.vr_panel_available())
+            with mock.patch.object(fs.vrkit, "server_running", lambda: True):
+                self.assertTrue(fs.vr_panel_available())
+        with mock.patch.dict(sys.modules, {"openvr": None}), \
+                mock.patch.object(fs.vrkit, "server_running", lambda: True):
+            self.assertFalse(fs.vr_panel_available())
+
+
 def stub_at(path, body):
     stub(path.parent, path.name, body)
 

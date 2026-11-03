@@ -1813,6 +1813,9 @@ class ControllerButtons(unittest.TestCase):
         p = mock.patch.object(vrbuttons.vrkit, "ButtonReader", Reader)
         p.start()
         self.addCleanup(p.stop)
+        self.server = mock.patch.object(vrbuttons.vrkit, "server_running", lambda: True)
+        self.server.start()
+        self.addCleanup(self.server.stop)
         self.calls = []
         self.handlers = {n: (lambda n=n: self.calls.append(n)) for n in ("back", "home", "toggle", "up", "down")}
 
@@ -1826,6 +1829,16 @@ class ControllerButtons(unittest.TestCase):
         self.assertTrue(gui.CONTROLLER_BUTTONS)
         texts = [b.text() for b in gui.Preferences(mock.Mock()).findChildren(QCheckBox)]
         self.assertNotIn("Controller buttons in VR", texts)
+
+    def test_never_starts_steamvr(self):
+        """Without vrserver, no init (an overlay app's init would start SteamVR outside SteamOS's
+        VR session: a blue void in the headset): no buttons, no haptics."""
+        self.server.stop()
+        with mock.patch.object(self.vrbuttons.vrkit, "server_running", lambda: False):
+            b = self.buttons(self.handlers)
+        self.server.start()
+        self.fake.init.assert_not_called()
+        self.assertFalse(b.ok or b.started)
 
     def test_a_press_acts_only_with_the_laser_on_the_window(self):
         b = self.buttons(self.handlers)

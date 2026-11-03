@@ -26,6 +26,10 @@ class Haptics:
         try:
             import openvr
             self.vr_mod = openvr
+            if not already_initialised and not vrkit.server_running():
+                # (the init would start SteamVR itself, outside SteamOS's VR session:
+                # vrkit.server_running; no haptics then, as without SteamVR)
+                raise RuntimeError("SteamVR isn't running")
             self.system = openvr.VRSystem() if already_initialised else openvr.init(openvr.VRApplication_Overlay)
             self.input = openvr.VRInput()
             self.input.setActionManifestPath(str(VR_DIR / "actions.json"))
