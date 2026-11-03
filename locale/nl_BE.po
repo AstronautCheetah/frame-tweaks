@@ -61,7 +61,7 @@ msgid "(needed by %s)"
 msgstr "(nodig voor %s)"
 
 # needs review
-#: gui/apply_changes.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
+#: gui/apply_changes.py gui/memory_page.py packs/core/snip/frame-snip packs/core/dictation/README.md packs/core/speech/README.md
 msgid "Apply"
 msgstr "Toepassen"
 
@@ -402,7 +402,7 @@ msgid "{version} is still the latest release."
 msgstr "{version} is nog altijd de nieuwste versie."
 
 # needs review
-#: gui/details_page.py gui/frame-tweaks-gui.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py gui/works_page.py packs/core/snip/frame-snip
+#: gui/details_page.py gui/frame-tweaks-gui.py gui/memory_page.py gui/packs_page.py gui/prefs_page.py gui/report_page.py gui/settings_page.py gui/wallet_page.py gui/works_page.py packs/core/snip/frame-snip
 msgid "← Back"
 msgstr "← Terug"
 
@@ -747,6 +747,12 @@ msgstr "Aanpassingen zoeken"
 msgid "Search: name, description, category"
 msgstr "Zoeken: naam, beschrijving, categorie"
 
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Set how much memory each Flatpak app may use, and how much is kept free for VR"
+msgstr ""
+"Instellen hoeveel geheugen elke Flatpak-app mag gebruiken, en hoeveel er vrij blijft voor VR"
+
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "Settings"
@@ -916,6 +922,10 @@ msgstr "⬇ Bijwerken naar {version}"
 msgid "🐞 Report a problem"
 msgstr "🐞 Een probleem melden"
 
+#: gui/frame-tweaks-gui.py
+msgid "📊 Memory limits"
+msgstr "📊 Geheugenlimieten"
+
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "📖 README"
@@ -930,6 +940,105 @@ msgstr "🔑 Portefeuille-apps"
 #: gui/frame-tweaks-gui.py
 msgid "🧩 Packs"
 msgstr "🧩 Pakketten"
+
+#: gui/memory_page.py
+msgid ""
+"A limit of its own; unticked, it's shared: only the limit all Flatpak apps share applies to it"
+msgstr ""
+"Een eigen limiet; uitgevinkt is ze gedeeld: dan geldt voor deze app alleen de limiet die alle Flatpak-apps delen"
+
+#: gui/memory_page.py
+msgid "Above this, the app is stopped (and it may use some swap on top)"
+msgstr ""
+"Daarboven wordt de app gestopt (en ze kan er nog wat swap bovenop gebruiken)"
+
+# needs review
+#: gui/memory_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
+msgid "Didn't work: %s"
+msgstr "Lukte niet: %s"
+
+#: gui/memory_page.py
+msgid ""
+"Flatpak apps (Firefox, and the apps you install from Discover) share the memory that isn't <b>kept free for VR</b>: past it, the app that asks for more is stopped, and SteamVR, Steam and your game keep running. An app can also have a <b>limit of its own</b>, so it's stopped before it takes the others' share; <b>shared</b> means only the apps' common limit applies to it. Games and the desktop itself aren't limited."
+msgstr ""
+"Flatpak-apps (Firefox, en de apps die je uit Discover installeert) delen het geheugen dat niet <b>vrijgehouden voor VR</b> wordt: daarboven wordt de app die meer vraagt gestopt, en SteamVR, Steam en je game blijven draaien. Een app kan ook een <b>eigen limiet</b> hebben, zodat ze gestopt wordt voor ze het deel van de andere inneemt; <b>gedeeld</b> betekent dat alleen de gezamenlijke limiet van de apps voor haar geldt. Games en het bureaublad zelf worden niet beperkt."
+
+#: gui/memory_page.py
+msgid "Flatpak apps ({n})"
+msgstr "Flatpak-apps ({n})"
+
+#: gui/memory_page.py
+msgid "Flatpak apps together: up to {pool} of {total}."
+msgstr "Flatpak-apps samen: tot {pool} van {total}."
+
+#: gui/memory_page.py
+msgid "Keep less for VR: more for the apps"
+msgstr "Minder voor VR houden: meer voor de apps"
+
+#: gui/memory_page.py
+msgid "Keep more for VR: less for the apps"
+msgstr "Meer voor VR houden: minder voor de apps"
+
+#: gui/memory_page.py
+msgid "Kept free for VR"
+msgstr "Vrijgehouden voor VR"
+
+#: gui/memory_page.py
+msgid "Less memory for this app"
+msgstr "Minder geheugen voor deze app"
+
+#: gui/memory_page.py
+msgid "Memory Flatpak apps leave free for SteamVR, Steam and your game"
+msgstr "Geheugen dat Flatpak-apps vrijlaten voor SteamVR, Steam en je game"
+
+#: gui/memory_page.py
+msgid "Memory limits"
+msgstr "Geheugenlimieten"
+
+#: gui/memory_page.py
+msgid "More memory for this app"
+msgstr "Meer geheugen voor deze app"
+
+#: gui/memory_page.py
+msgid ""
+"More than all Flatpak apps together may use: their common limit applies first."
+msgstr ""
+"Meer dan alle Flatpak-apps samen mogen gebruiken: hun gezamenlijke limiet geldt eerst."
+
+#: gui/memory_page.py
+msgid "No Flatpak apps are installed."
+msgstr "Er zijn geen Flatpak-apps geïnstalleerd."
+
+#: gui/memory_page.py
+msgid "Nothing to apply"
+msgstr "Niets toe te passen"
+
+#: gui/memory_page.py
+msgid "Nothing to apply: change a limit first"
+msgstr "Niets toe te passen: wijzig eerst een limiet"
+
+#: gui/memory_page.py
+msgid "Own limit"
+msgstr "Eigen limiet"
+
+#: gui/memory_page.py
+msgid "Save these limits and put them in force, for the apps open now too"
+msgstr ""
+"Deze limieten opslaan en laten gelden, ook voor de apps die nu open zijn"
+
+#: gui/memory_page.py
+msgid ""
+"This page needs vr-memory-guard-tool, which VR memory guard installs since this version: reinstall it (↻) first."
+msgstr ""
+"Deze pagina heeft vr-memory-guard-tool nodig, dat Geheugenbewaker voor VR sinds deze versie installeert: installeer die eerst opnieuw (↻)."
+
+#: gui/memory_page.py
+msgid "shared"
+msgstr "gedeeld"
+
+#: gui/memory_page.py
+msgid "{n} GB"
+msgstr "{n} GB"
 
 # needs review
 #: gui/packs_page.py
@@ -1615,11 +1724,6 @@ msgstr "Er loopt nog een andere actie: probeer het opnieuw als die klaar is."
 #: gui/settings_page.py
 msgid "Back to the defaults."
 msgstr "Terug naar de standaardwaarden."
-
-# needs review
-#: gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
-msgid "Didn't work: %s"
-msgstr "Lukte niet: %s"
 
 # needs review
 #: gui/settings_page.py lib/splash.py packs/core/snip/frame-snip install.sh
@@ -4428,7 +4532,7 @@ msgstr ""
 "Zwevend blok met pijltjes, Home/End, F-toetsen, Ctrl/Alt/Super en een dicteerknop; neemt nooit de focus over"
 
 # needs review
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "Open"
 msgstr "Openen"
 
@@ -6147,7 +6251,7 @@ msgid "System"
 msgstr "Systeem"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "VR environment"
 msgstr "VR-omgeving"
 
@@ -7179,12 +7283,11 @@ msgstr "geïnstalleerd, %s patch(es) (actief zolang SteamVR draait)"
 msgid "waiting for a SteamVR restart (reboot once)"
 msgstr "wacht op een herstart van SteamVR (één keer opnieuw opstarten)"
 
-# needs review
 #: packs/core/vr-memory-guard/README.md
 msgid ""
-"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+"Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own, and any other app can have one too (its Memory limits page); and when memory runs out anyway, SteamVR is the last thing stopped."
 msgstr ""
-"Flatpak-apps (Firefox en andere uit Discover) laten samen altijd 5 GB over voor SteamVR, Steam en je game; Firefox krijgt een eigen limiet van 5 GB; en als het geheugen toch opraakt, wordt SteamVR als laatste gestopt."
+"Flatpak-apps (Firefox en andere uit Discover) laten samen altijd 5 GB over voor SteamVR, Steam en je game; Firefox krijgt een eigen limiet van 5 GB, en elke andere app kan er ook een krijgen (op haar pagina Geheugenlimieten); en als het geheugen toch opraakt, wordt SteamVR als laatste gestopt."
 
 # needs review
 #: packs/core/vr-memory-guard/README.md
@@ -7207,58 +7310,20 @@ msgstr "Geheugenbewaker voor VR"
 
 # needs review
 #: packs/core/vr-memory-guard/install.sh
-msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
-msgstr "%s in %s moet een grootte zijn zoals 5G of 512M (het is \"%s\")."
-
-# needs review
-#: packs/core/vr-memory-guard/install.sh
-msgid "Can't read how much memory this device has (%s)."
-msgstr "Kan niet lezen hoeveel geheugen dit apparaat heeft (%s)."
-
-# needs review
-#: packs/core/vr-memory-guard/install.sh
-msgid "Couldn't set the apps' limit now; it applies at your next login."
-msgstr ""
-"Kon de limiet voor de apps nu niet instellen; ze geldt vanaf je volgende aanmelding."
-
-# needs review
-#: packs/core/vr-memory-guard/install.sh
 msgid ""
 "Dictation: up to %s MB; Android Mirror: up to %s MB (from its next start)."
 msgstr ""
 "Dicteren: tot %s MB; Android-spiegel: tot %s MB (vanaf de volgende start)."
 
-# needs review
 #: packs/core/vr-memory-guard/install.sh
-msgid ""
-"Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
-msgstr ""
-"Flatpak-apps samen: tot %s MB (%s MB gereserveerd voor VR); Firefox: tot %s MB."
+msgid "SteamVR is given priority from its next start."
+msgstr "SteamVR krijgt voorrang vanaf de volgende start."
 
-# needs review
-#: packs/core/vr-memory-guard/install.sh
-msgid "SteamVR is stopped last from its next start."
-msgstr "SteamVR wordt als laatste gestopt vanaf de volgende start."
-
-# needs review
-#: packs/core/vr-memory-guard/install.sh
-msgid ""
-"firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
-msgstr ""
-"firefox_max is meer dan alle Flatpak-apps samen mogen gebruiken (%s MB): de limiet voor de apps geldt eerst."
-
-# needs review
-#: packs/core/vr-memory-guard/install.sh
-msgid ""
-"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
-msgstr ""
-"reserve_for_vr (%s) laat minder dan 2 GB van de %s MB over voor Flatpak-apps: maak het kleiner in %s."
-
-# needs review
 #: packs/core/vr-memory-guard/status.sh
-msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+msgid ""
+"Flatpak apps %s of %s MB (apps with a limit of their own: %s); SteamVR given priority"
 msgstr ""
-"Flatpak-apps %s van %s MB; Firefox tot %s; SteamVR als laatste gestopt"
+"Flatpak-apps %s van %s MB (apps met een eigen limiet: %s); SteamVR krijgt voorrang"
 
 # needs review
 #: packs/core/vr-memory-guard/status.sh
@@ -7274,10 +7339,134 @@ msgid ""
 msgstr ""
 "de limiet voor de apps geldt nog niet: voer de installatie opnieuw uit, of meld je af en weer aan"
 
-# needs review
 #: packs/core/vr-memory-guard/uninstall.sh
-msgid "Kept your limits in %s."
-msgstr "Je limieten in %s zijn behouden."
+msgid "Kept your limits in %s and %s."
+msgstr "Je limieten in %s en %s zijn behouden."
+
+# needs review
+#: packs/core/vr-memory-guard/vr-memory-guard-tool packs/core/vr-memory-guard/install.sh
+msgid "%s in %s should be a size such as 5G or 512M (it is \"%s\")."
+msgstr "%s in %s moet een grootte zijn zoals 5G of 512M (het is \"%s\")."
+
+# needs review
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Can't read how much memory this device has (%s)."
+msgstr "Kan niet lezen hoeveel geheugen dit apparaat heeft (%s)."
+
+# needs review
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Couldn't set the apps' limit now; it applies at your next login."
+msgstr ""
+"Kon de limiet voor de apps nu niet instellen; ze geldt vanaf je volgende aanmelding."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Flatpak apps together: up to %s MB (%s MB kept for VR)."
+msgstr "Flatpak-apps samen: tot %s MB (%s MB voor VR gehouden)."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"Keeping {size} for VR leaves less than 2 GB of the {total} MB for Flatpak apps: choose {most}M or less."
+msgstr ""
+"Met {size} voor VR blijft er minder dan 2 GB van de {total} MB over voor Flatpak-apps: kies {most}M of minder."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "No Flatpak app has a limit of its own."
+msgstr "Geen enkele Flatpak-app heeft een eigen limiet."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "Run vr-memory-guard-tool apply to put it in force."
+msgstr "Voer vr-memory-guard-tool apply uit om ze te laten gelden."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "VR memory guard isn't set up here (no {file}): install it first."
+msgstr ""
+"Geheugenbewaker voor VR is hier niet ingesteld (geen {file}): installeer die eerst."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "With a limit of their own: {apps}."
+msgstr "Met een eigen limiet: {apps}."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "firefox_max in {file} should be 256M at least."
+msgstr "firefox_max in {file} moet minstens 256M zijn."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"line {n}: after the app ID, a size (such as 5G) and optionally its swap, or “shared”"
+msgstr ""
+"regel {n}: na de app-ID een grootte (zoals 5G) en eventueel de swap ervan, of “shared”"
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "line {n}: {app} is already on an earlier line"
+msgstr "regel {n}: {app} staat al op een eerdere regel"
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"line {n}: “{app}” isn't a Flatpak app ID (such as org.mozilla.firefox)"
+msgstr "regel {n}: “{app}” is geen Flatpak-app-ID (zoals org.mozilla.firefox)"
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "line {n}: “{size}” isn't a limit such as 512M or 5G (256M at least)"
+msgstr "regel {n}: “{size}” is geen limiet zoals 512M of 5G (minstens 256M)"
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "line {n}: “{size}” isn't a swap size such as 0, 512M or 1G"
+msgstr "regel {n}: “{size}” is geen swapgrootte zoals 0, 512M of 1G"
+
+# needs review
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"reserve_for_vr (%s) leaves less than 2 GB of the %s MB for Flatpak apps: make it smaller in %s."
+msgstr ""
+"reserve_for_vr (%s) laat minder dan 2 GB van de %s MB over voor Flatpak-apps: maak het kleiner in %s."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"{app}: its limit ({size}) is more than all Flatpak apps together may use ({pool} MB): the apps' limit applies first."
+msgstr ""
+"{app}: de limiet ervan ({size}) is meer dan alle Flatpak-apps samen mogen gebruiken ({pool} MB): de limiet voor de apps geldt eerst."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{app}: no limit of its own, only the one all Flatpak apps share."
+msgstr "{app}: geen eigen limiet, alleen die welke alle Flatpak-apps delen."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{app}: up to {size}, and {swap} of swap."
+msgstr "{app}: tot {size}, en {swap} swap."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{file} has lines that can't be read:"
+msgstr "{file} heeft regels die niet te lezen zijn:"
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid ""
+"{size} is more than all Flatpak apps together may use ({pool} MB): choose {pool}M or less, or keep less memory for VR."
+msgstr ""
+"{size} is meer dan alle Flatpak-apps samen mogen gebruiken ({pool} MB): kies {pool}M of minder, of houd minder geheugen voor VR."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "{size} kept for VR: Flatpak apps together up to {pool} MB."
+msgstr "{size} voor VR gehouden: Flatpak-apps samen tot {pool} MB."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“shared” takes no swap size: the apps' own applies."
+msgstr "“shared” neemt geen swapgrootte: die van de apps geldt."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{app}” isn't a Flatpak app ID (such as org.mozilla.firefox)."
+msgstr "“{app}” is geen Flatpak-app-ID (zoals org.mozilla.firefox)."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{size}” isn't a limit such as 512M or 5G (256M at least)."
+msgstr "“{size}” is geen limiet zoals 512M of 5G (minstens 256M)."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{size}” isn't a size such as 4G or 4608M (1G at least)."
+msgstr "“{size}” is geen grootte zoals 4G of 4608M (minstens 1G)."
+
+#: packs/core/vr-memory-guard/vr-memory-guard-tool
+msgid "“{size}” isn't a swap size such as 0, 512M or 1G."
+msgstr "“{size}” is geen swapgrootte zoals 0, 512M of 1G."
 
 # needs review
 #: packs/core/wallet/README.md
@@ -7681,6 +7870,12 @@ msgstr "Niets opgeslagen."
 msgid "Paste the token (it isn't shown), then Enter: "
 msgstr "Plak het token (het wordt niet getoond) en druk op Enter: "
 
+#: packs/core/wallet/wallet-tool
+msgid ""
+"Remote Control and claude.ai connectors can't use the wallet's token, only this sign-in. If you use them, keep this file and start those sessions with Homebrew's own claude: {real}"
+msgstr ""
+"Remote Control en connectors van claude.ai kunnen het token uit de portefeuille niet gebruiken, alleen deze aanmelding. Gebruik je ze, houd dit bestand dan en start die sessies met Homebrews eigen claude: {real}"
+
 # needs review
 #: packs/core/wallet/wallet-tool
 msgid ""
@@ -8008,7 +8203,7 @@ msgstr ""
 "Claude voor desktop, de officiële Linux-app van Anthropic (arm64), geïnstalleerd in je persoonlijke map en bijgewerkt met één opdracht."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr "van"
 
@@ -8718,6 +8913,76 @@ msgstr "softwarecursor actief"
 msgid "Takes effect after a reboot."
 msgstr "Wordt van kracht na opnieuw opstarten."
 
+#: packs/third-party/frame-passthrough-pip/README.md
+msgid ""
+"Passthrough on the Frame replaces the game, so checking the room, a drink or a controller means leaving it. This keeps a camera view in the corner of any game, streamed or standalone."
+msgstr ""
+"Kamerweergave op de Frame vervangt de game, dus om de kamer, een drankje of een controller te bekijken moet je hem verlaten. Dit houdt een camerabeeld in de hoek van elke game, gestreamd of standalone."
+
+#: packs/third-party/frame-passthrough-pip/README.md
+msgid ""
+"Sippbox's frame-passthrough-pip: a small, monochrome view from the headset's passthrough cameras, over whatever you're playing, pinned to your view or placed in the room, with a panel in the SteamVR dashboard for its settings. Installed from its GitHub release, the way its README describes."
+msgstr ""
+"frame-passthrough-pip van Sippbox: een klein, zwart-wit beeld van de passthrough-camera's van de headset, over wat je ook speelt, vastgezet in je zicht of in de kamer geplaatst, met een paneel in het SteamVR-dashboard voor de instellingen ervan. Geïnstalleerd vanaf de GitHub-release ervan, zoals de README ervan beschrijft."
+
+#: packs/third-party/frame-passthrough-pip/README.md
+msgid ""
+"The passthrough camera as a small picture-in-picture panel over any game, pinned to your view or placed in the room (Sippbox's frame-passthrough-pip)"
+msgstr ""
+"De passthrough-camera als een klein scherm-in-schermpaneel over elke game, vastgezet in je zicht of in de kamer geplaatst (frame-passthrough-pip van Sippbox)"
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/perf-overlay/run.sh
+msgid "Could not start %s: see %s"
+msgstr "Kan %s niet starten: zie %s"
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/perf-overlay/run.sh
+msgid "From now on it starts with SteamVR, as its installer meant to set up."
+msgstr ""
+"Vanaf nu start het met SteamVR, zoals het installatieprogramma het wilde instellen."
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/perf-overlay/run.sh
+msgid ""
+"It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
+msgstr ""
+"Het is niet ingesteld om met SteamVR te starten, en dat kon niet hersteld worden: voer %s uit in een terminal."
+
+#: packs/third-party/frame-passthrough-pip/run.sh
+msgid "Not installed: tick Passthrough PiP and Apply changes first."
+msgstr ""
+"Niet geïnstalleerd: vink eerst Passthrough PiP aan en kies Wijzigingen toepassen."
+
+#: packs/third-party/frame-passthrough-pip/run.sh
+msgid ""
+"Opened: its panel is in the SteamVR dashboard; double-tap View on the left controller shows or hides the camera view."
+msgstr ""
+"Geopend: het paneel staat in het SteamVR-dashboard; dubbeltik op View op de linkercontroller om het camerabeeld te tonen of te verbergen."
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/frame-passthrough-pip/README.md
+msgid "Passthrough PiP"
+msgstr "Passthrough PiP"
+
+#: packs/third-party/frame-passthrough-pip/run.sh
+msgid "SteamVR is not running: the camera view shows once it is."
+msgstr "SteamVR is niet actief: het camerabeeld verschijnt zodra het draait."
+
+#: packs/third-party/frame-passthrough-pip/status.sh
+msgid ""
+"installed, but its service failed (exit status %s): Open on its row starts it again; its log: %s"
+msgstr ""
+"geïnstalleerd, maar de service ervan faalde (afsluitstatus %s): Openen in de rij ervan start ze opnieuw; logboek: %s"
+
+#: packs/third-party/frame-passthrough-pip/status.sh
+msgid ""
+"installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Open on its row sets it, or %s"
+msgstr ""
+"geïnstalleerd, maar niet ingesteld om met SteamVR te starten (de inschakelstap van het installatieprogramma faalt vanuit bureaubladmodus): Openen in de rij ervan stelt het in, of %s"
+
+#: packs/third-party/frame-passthrough-pip/status.sh
+msgid ""
+"installed; starts with the next SteamVR start (Open on its row starts it now)"
+msgstr ""
+"geïnstalleerd; start bij de volgende start van SteamVR (Openen in de rij ervan start het nu)"
+
 # needs review
 #: packs/third-party/full-keyboard/README.md
 msgid "Full Keyboard (VR)"
@@ -8871,23 +9136,8 @@ msgstr ""
 "Een kopie die vanuit het menu startte, hield het paneel bezet zonder het te tonen: beëindigd."
 
 #: packs/third-party/perf-overlay/run.sh
-msgid "Could not start %s: see %s"
-msgstr "Kan %s niet starten: zie %s"
-
-#: packs/third-party/perf-overlay/run.sh
-msgid "From now on it starts with SteamVR, as its installer meant to set up."
-msgstr ""
-"Vanaf nu start het met SteamVR, zoals het installatieprogramma het wilde instellen."
-
-#: packs/third-party/perf-overlay/run.sh
 msgid "Hidden in VR (Show brings it back)."
 msgstr "Verborgen in VR (Tonen haalt het terug)."
-
-#: packs/third-party/perf-overlay/run.sh
-msgid ""
-"It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
-msgstr ""
-"Het is niet ingesteld om met SteamVR te starten, en dat kon niet hersteld worden: voer %s uit in een terminal."
 
 #: packs/third-party/perf-overlay/run.sh
 msgid "Not installed: tick Performance Overlay and Apply changes first."
@@ -9229,3 +9479,34 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ # needs review
 #~ msgid "Voice activity detection"
 #~ msgstr "Detectie van spraakactiviteit"
+
+#~ # needs review
+#~ msgid ""
+#~ "Flatpak apps (Firefox and others from Discover) together always leave 5 GB for SteamVR, Steam and your game; Firefox gets a 5 GB limit of its own; and when memory runs out anyway, SteamVR is the last thing stopped."
+#~ msgstr ""
+#~ "Flatpak-apps (Firefox en andere uit Discover) laten samen altijd 5 GB over voor SteamVR, Steam en je game; Firefox krijgt een eigen limiet van 5 GB; en als het geheugen toch opraakt, wordt SteamVR als laatste gestopt."
+
+#~ # needs review
+#~ msgid ""
+#~ "Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB."
+#~ msgstr ""
+#~ "Flatpak-apps samen: tot %s MB (%s MB gereserveerd voor VR); Firefox: tot %s MB."
+
+#~ # needs review
+#~ msgid "SteamVR is stopped last from its next start."
+#~ msgstr "SteamVR wordt als laatste gestopt vanaf de volgende start."
+
+#~ # needs review
+#~ msgid ""
+#~ "firefox_max is more than all Flatpak apps together may use (%s MB): the apps limit applies first."
+#~ msgstr ""
+#~ "firefox_max is meer dan alle Flatpak-apps samen mogen gebruiken (%s MB): de limiet voor de apps geldt eerst."
+
+#~ # needs review
+#~ msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+#~ msgstr ""
+#~ "Flatpak-apps %s van %s MB; Firefox tot %s; SteamVR als laatste gestopt"
+
+#~ # needs review
+#~ msgid "Kept your limits in %s."
+#~ msgstr "Je limieten in %s zijn behouden."
