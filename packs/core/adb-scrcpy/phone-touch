@@ -425,8 +425,10 @@ def focused_is_secure(dumpsys):
     return False
 
 
-def watch_secure(dev, state, every=3.0):
-    """state["secure"]: the phone's focused window hides itself from the mirror (checked every few s)."""
+def watch_secure(dev, state, every=3.0, hidden_every=1.0):
+    """state["secure"]: the phone's focused window hides itself from the mirror: checked every 3 s,
+    and every second while it does (the notice and the unlock keypads go as soon as it's unlocked;
+    a 3 s check, and the layer told at its next 2 s beat, left them up several seconds)."""
     while scrcpy_running():
         try:
             # (one call: the windows and their flags, then the focus lines, only in the full dump)
@@ -434,7 +436,7 @@ def watch_secure(dev, state, every=3.0):
             state["secure"] = r.returncode == 0 and focused_is_secure(r.stdout)
         except OSError:
             state["secure"] = False
-        time.sleep(every)
+        time.sleep(hidden_every if state.get("secure") else every)
 
 
 def publish(ws, state):
@@ -457,10 +459,13 @@ def serve(phone, sd, state):
             # (Runtime.enable first: without it a reloaded page doesn't get the binding again)
             ws.send({"id": 1, "method": "Runtime.enable"})
             ws.send({"id": 2, "method": "Runtime.addBinding", "params": {"name": BINDING}})
-            n, beat = 2, 0.0
+            n, beat, told = 2, 0.0, None
             publish(ws, state)
             while True:
                 now = time.monotonic()
+                if bool(state.get("secure")) != told:     # (a change: at once, not at the next beat)
+                    beat = 0.0
+                    told = bool(state.get("secure"))
                 if now - beat > 2:
                     if not scrcpy_running():
                         break

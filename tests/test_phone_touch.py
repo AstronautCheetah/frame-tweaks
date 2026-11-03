@@ -135,6 +135,19 @@ class SecureScreen(unittest.TestCase):
                               "  mCurrentFocus=null\n  mCurrentFocus=Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}\n")
         self.assertTrue(pt.focused_is_secure(two))
 
+    def test_checked_every_second_while_hidden(self):
+        """The notice and keypads stayed up several seconds after unlocking: while the screen is
+        hidden it's checked every second (3 s otherwise)."""
+        hidden = DUMPSYS.replace("Window{FOCUS u0 X}", "Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}")
+        answers = iter([hidden, hidden, DUMPSYS, DUMPSYS])
+        sleeps, state = [], {}
+        runs = iter([True, True, True, True, False])
+        with mock.patch.object(pt, "scrcpy_running", lambda: next(runs)), \
+                mock.patch.object(pt, "adb", lambda *a: mock.Mock(returncode=0, stdout=next(answers))), \
+                mock.patch.object(pt.time, "sleep", sleeps.append):
+            pt.watch_secure("d", state)
+        self.assertEqual(sleeps, [1.0, 1.0, 3.0, 3.0])
+
     def test_the_layer_shows_a_notice_while_it_is_hidden(self):
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
         layer = js.split("const buildLayer", 1)[1].split("// ---- the gear", 1)[0]

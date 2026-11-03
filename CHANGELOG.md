@@ -70,7 +70,7 @@
   desktop's clipboard.
 
 ### Added
-- **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice in the mirror now says why while one is in front. Two ways to unlock it blind: **Type PIN**, a keypad that types on the phone as a keyboard would (digits, ⌫, ↵, and Wake / show PIN; one dot per digit, nothing logged), and **Where the digits are**, a reference PIN pad over the picture with arrows to nudge it onto the phone's own, for screens that don't take typed keys (taps go through it).
+- **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice in the mirror now says why while one is in front. Two ways to unlock it blind: **Type PIN**, a keypad that types on the phone as a keyboard would (digits, ⌫, ↵, and Wake / show PIN; one dot per digit, nothing logged), and **Where the digits are**, a reference PIN pad over the picture with arrows to nudge it onto the phone's own, for screens that don't take typed keys (taps go through it). Both go within about a second of the phone unlocking.
 - **Tweaks whose files changed since you installed them say so:** after the checkout changes
   (a `git pull`, a pack you edit), an installed tweak keeps running its old copy until its
   installer runs again. Its row now says **↻ updated** (with a Reinstall link, and its ↻ button
