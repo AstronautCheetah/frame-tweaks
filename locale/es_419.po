@@ -4596,9 +4596,26 @@ msgstr "Copiado al portapapeles"
 msgid "Dictation is busy"
 msgstr "El dictado está ocupado"
 
+# needs review
+#: packs/core/dictation/dictate
+msgid ""
+"Is it muted, or is another microphone chosen? Check the volume control, then dictate again."
+msgstr ""
+"¿Está silenciado o hay otro micrófono elegido? Revisa el control de volumen y vuelve a dictar."
+
 #: packs/core/dictation/dictate
 msgid "Listening… (run again to stop)"
 msgstr "Escuchando… (ejecuta otra vez para detener)"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "Microphone muted"
+msgstr "Micrófono silenciado"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "No sound from the microphone"
+msgstr "No llega sonido del micrófono"
 
 #: packs/core/dictation/dictate
 msgid "No speech detected"
@@ -4626,6 +4643,13 @@ msgstr "Todavía transcribiendo…"
 #: packs/core/dictation/dictate
 msgid "Transcribing…"
 msgstr "Transcribiendo…"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid ""
+"Unmute it (Steam's microphone button in the VR menu, or the desktop's volume control), then dictate again."
+msgstr ""
+"Quítale el silencio (el botón de micrófono de Steam en el menú de RV, o el control de volumen del escritorio) y vuelve a dictar."
 
 # needs review
 #: packs/core/dictation/dictate

@@ -5181,8 +5181,25 @@ msgstr "La Dictée est occupée"
 
 # needs review
 #: packs/core/dictation/dictate
+msgid ""
+"Is it muted, or is another microphone chosen? Check the volume control, then dictate again."
+msgstr ""
+"Est-il coupé, ou un autre micro est-il choisi ? Vérifiez le contrôle du volume, puis dictez à nouveau."
+
+# needs review
+#: packs/core/dictation/dictate
 msgid "Listening… (run again to stop)"
 msgstr "Écoute… (relancez pour arrêter)"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "Microphone muted"
+msgstr "Micro coupé"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "No sound from the microphone"
+msgstr "Aucun son du micro"
 
 # needs review
 #: packs/core/dictation/dictate
@@ -5213,6 +5230,13 @@ msgstr "Transcription en cours…"
 #: packs/core/dictation/dictate
 msgid "Transcribing…"
 msgstr "Transcription…"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid ""
+"Unmute it (Steam's microphone button in the VR menu, or the desktop's volume control), then dictate again."
+msgstr ""
+"Réactivez-le (le bouton micro de Steam dans le menu VR, ou le contrôle du volume du bureau), puis dictez à nouveau."
 
 # needs review
 #: packs/core/dictation/dictate

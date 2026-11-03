@@ -98,6 +98,8 @@ status_out() {
 cue() { pw-play "$SOUNDS/$1.oga" 9>&- 2>/dev/null & }   # 9>&-: never hold the toggle lock
 log() { echo "$(date +%T) $*" >> "$LOG"; }
 alive() { [ -f "$1" ] && kill -0 "$(cat "$1")" 2>/dev/null; }
+# mic_muted: the default microphone is muted (wpctl; without it, not known: not muted)
+mic_muted() { wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q MUTED; }
 
 # type_text TEXT: into the focused window. ydotool's own typing assumes a US keyboard, so on
 # another layout (KDE's, in desktop mode) the keys for each character come from that layout
@@ -237,7 +239,13 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     peak=$(ffmpeg -nostats -i "$wav" -af volumedetect -f null - 2>&1 | sed -n 's/.*max_volume: \(-*[0-9.]*\) dB/\1/p')
     if [ -n "$peak" ] && awk -v p="$peak" 'BEGIN{exit !(p < -40)}'; then
         log "no speech (peak ${peak} dB)"; mv -f "$wav" "$STATE/last.wav"; rm -f "$BUSY"
-        notify "$(t 'No speech detected')"; status_out idle; return
+        # (-90 dB and below: not a quiet room, nothing at all came in; muted, or the wrong microphone)
+        if awk -v p="$peak" 'BEGIN{exit !(p <= -90)}'; then
+            notify "$(t 'No sound from the microphone')" "$(t 'Is it muted, or is another microphone chosen? Check the volume control, then dictate again.')"
+        else
+            notify "$(t 'No speech detected')"
+        fi
+        status_out idle; return
     fi
     # Quiet speech (a soft voice, the microphone far away) is raised to a peak of -3 dB first: the
     # engines punctuate it better (Whisper left out the commas of a sentence spoken at -37 dB).
@@ -319,6 +327,12 @@ elif alive "$BUSY"; then
     log "ignored: still transcribing"
     notify "$(t 'Still transcribing…')" "$(t 'Wait for the text before dictating again.')"
     status_out error "$(t 'Still transcribing…')"
+elif mic_muted; then
+    # A muted microphone records silence, which then read as "No speech detected" (Steam's mute in
+    # the VR menu, or another app's, mutes the default source for every app).
+    log "not recording: the microphone is muted"
+    notify "$(t 'Microphone muted')" "$(t "Unmute it (Steam's microphone button in the VR menu, or the desktop's volume control), then dictate again.")"
+    status_out error "$(t 'Microphone muted')"
 else
     wav="$STATE/rec-$(date +%s%N).wav"   # own file per recording: never clobbers one being transcribed
     apply_engine 9>&-                 # (loads it while you speak, if it's to be kept loaded and isn't yet)

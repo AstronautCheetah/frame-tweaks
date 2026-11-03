@@ -444,6 +444,23 @@ class DictateEngine(Home):
         self.assertIn("notify -a Dictation -t 1500 Parakeet isn't downloaded Using Whisper. To download Parakeet, "
                       "press Apply in Dictation's ⚙ Settings.", log)
 
+    def test_a_muted_microphone_says_so_instead_of_recording(self):
+        """Muted (Steam's mute in the VR menu mutes it for every app), it recorded silence, which
+        read as "No speech detected": nothing is recorded, and the notice says it's muted."""
+        log = self.dictate("Hello.", stubs=(("wpctl", 'echo "Volume: 1.00 [MUTED]"'),
+                                            ("pw-record", f'echo "pw-record $*" >> {self.log}; exec sleep 30')))
+        self.assertFalse([line for line in log if line.startswith("whisper ")], log)
+        self.assertIn("notify -a Dictation -t 1500 Microphone muted Unmute it (Steam's microphone button in "
+                      "the VR menu, or the desktop's volume control), then dictate again.", log)
+        self.assertNotIn("pw-record", self.log.read_text())
+
+    def test_nothing_at_all_from_the_microphone(self):
+        """A recording of pure silence (-91 dB: no microphone, or muted after it started) says so,
+        not just "No speech detected"."""
+        log = self.dictate("Hello.", peak="-91.0")
+        self.assertIn("notify -a Dictation -t 1500 No sound from the microphone Is it muted, or is another "
+                      "microphone chosen? Check the volume control, then dictate again.", log)
+
     def test_parakeet_when_downloaded(self):
         model = self.home / ".local/share/frame-tweaks/parakeet/model"
         model.mkdir(parents=True)

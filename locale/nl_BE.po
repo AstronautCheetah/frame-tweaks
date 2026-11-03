@@ -5162,8 +5162,25 @@ msgstr "Dicteren is bezig"
 
 # needs review
 #: packs/core/dictation/dictate
+msgid ""
+"Is it muted, or is another microphone chosen? Check the volume control, then dictate again."
+msgstr ""
+"Staat hij gedempt, of is er een andere microfoon gekozen? Kijk het volume na en dicteer opnieuw."
+
+# needs review
+#: packs/core/dictation/dictate
 msgid "Listening… (run again to stop)"
 msgstr "Luisteren… (nogmaals starten om te stoppen)"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "Microphone muted"
+msgstr "Microfoon gedempt"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid "No sound from the microphone"
+msgstr "Geen geluid van de microfoon"
 
 # needs review
 #: packs/core/dictation/dictate
@@ -5194,6 +5211,13 @@ msgstr "Nog aan het transcriberen…"
 #: packs/core/dictation/dictate
 msgid "Transcribing…"
 msgstr "Transcriberen…"
+
+# needs review
+#: packs/core/dictation/dictate
+msgid ""
+"Unmute it (Steam's microphone button in the VR menu, or the desktop's volume control), then dictate again."
+msgstr ""
+"Zet het dempen uit (de microfoonknop van Steam in het VR-menu, of het volume van het bureaublad) en dicteer opnieuw."
 
 # needs review
 #: packs/core/dictation/dictate
