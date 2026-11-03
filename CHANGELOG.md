@@ -145,7 +145,7 @@
 - **Dictation's voice activity detection says it's Whisper's:** its setting is now *Whisper voice activity detection*, dimmed with a note while Parakeet is the engine (Parakeet doesn't use it). Settings pages can do this for any option (`only_with`, docs/mods.md).
 - **Dictation keeps a recording the engine heard nothing in** (`last-no-text.wav`, beside `last.wav`), and logs each recording's peak, to find out why.
 - **Homebrew shows its own logo** on its row and its page.
-- **Tooltips come sooner and stay twice as long** in the Frame Tweaks window, Arrow Pad, Screen snip and the NordVPN tray: in VR, reading them takes longer, and the laser's wobble kept putting them off: Qt waits 700 ms with the pointer still, starting again at every move; now 150 ms, and a wobble of a few pixels doesn't start it again.
+- **Tooltips come sooner and stay twice as long** in the Frame Tweaks window, Arrow Pad, Screen snip and the NordVPN tray: in VR, reading them takes longer, and the laser's wobble kept putting them off: Qt waits 700 ms with the pointer still and starts again at every move; now a wobble of a few pixels doesn't start it again.
 - **Screen snip's Save says where:** a tooltip on Save shows the file's path for a few seconds before the snip closes (in VR the notification may not show).
 - **KnockThru and Performance Overlay show their own logos** on their rows, instead of a generic icon.
 - **↻ Reinstall asks first,** on the confirm page Apply changes uses: what reinstalling does, whether its files changed, and whether it asks for the sudo password.
