@@ -23,6 +23,11 @@ whatever the keyring. Its wrapper also hands it a long-lived token kept in the w
   wallet-tool --candidates      Homebrew commands that could be: from the formulae you installed
                                 (brew leaves) and the casks, not those Frame Tweaks' tweaks
                                 install and run, as "command<TAB>formula or cask"
+  wallet-tool --candidates --all
+                                every Homebrew command that could be, as "command<TAB>formula or
+                                cask<TAB>why it isn't offered": empty for the ones above,
+                                "dependency" (installed for another formula), "tweak" (a Frame
+                                Tweaks tweak runs it, where a wallet prompt can't be answered)
 """
 import getpass
 import json
@@ -108,13 +113,21 @@ def for_tweaks():
         return set()
 
 
-def candidates():
+def candidates(everything=False):
+    """[(command, formula or cask)] that could be protected: those you installed, not a tweak's.
+    everything: every command Homebrew has, as (command, formula or cask, why it's left out of
+    the short list: "", "dependency" or "tweak")."""
     mine, done, kept, theirs = leaves(), protected(), [], for_tweaks()
     for f in sorted((PREFIX / "bin").iterdir()) if (PREFIX / "bin").is_dir() else []:
         if f.name in done or f.name in MANAGED or f.name.startswith("."):
             continue
         o = owner(f.name)
-        if o and (o[0] == "Caskroom" or o[1] in mine) and same(o[1]) not in theirs and os.access(f, os.X_OK):
+        if not o or not os.access(f, os.X_OK):
+            continue
+        why = ("tweak" if same(o[1]) in theirs else "" if o[0] == "Caskroom" or o[1] in mine else "dependency")
+        if everything:
+            kept.append((f.name, o[1], why))
+        elif not why:
             kept.append((f.name, o[1]))
     return kept
 
@@ -260,6 +273,9 @@ def main(a):
     elif a == ["--candidates"]:
         for cmd, src in candidates():
             print(f"{cmd}\t{src}")
+    elif a == ["--candidates", "--all"]:
+        for cmd, src, why in candidates(everything=True):
+            print(f"{cmd}\t{src}\t{why}")
     elif len(a) == 2 and a[0] == "--remove":
         remove(a[1])
     elif len(a) == 2 and a[0] == "--store-token":

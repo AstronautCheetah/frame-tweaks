@@ -7,4 +7,17 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 `dev/i18n.py export` hands translators what a changed text was, and its old translation, to
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
-Nothing waiting: no English text has changed since the languages last caught up.
+## 2026-11-03
+- New in `gui/wallet_page.py:575`
+  - now: "Show all Homebrew commands ({n} more formula)"
+  - plural: "Show all Homebrew commands ({n} more formulae)"
+- New in `gui/wallet_page.py:578`
+  - now: "Show all Homebrew commands"
+- New in `gui/wallet_page.py:581`
+  - now: "Also list the commands of formulae installed for another one, and those Frame Tweaks' tweaks run, to protect any of them"
+- New in `gui/wallet_page.py:596`
+  - now: "Installed for another formula, not by you."
+- New in `gui/wallet_page.py:597`
+  - now: "A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
+- New in `gui/wallet_page.py:606`
+  - now: "Protect selected"

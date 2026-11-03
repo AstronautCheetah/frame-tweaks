@@ -1233,6 +1233,11 @@ msgid ""
 msgstr ""
 
 #: gui/wallet_page.py
+msgid ""
+"A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Add a terminal tool ({n} from Homebrew)"
 msgid_plural "Add a terminal tool ({n} from Homebrew)"
 msgstr[0] ""
@@ -1243,6 +1248,11 @@ msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] ""
 msgstr[1] ""
+
+#: gui/wallet_page.py
+msgid ""
+"Also list the commands of formulae installed for another one, and those Frame Tweaks' tweaks run, to protect any of them"
+msgstr ""
 
 #: gui/wallet_page.py
 msgid "Also quit it about 10 s after the headset is taken off"
@@ -1300,6 +1310,10 @@ msgid "Homebrew's {src}: its command {cmds}"
 msgid_plural "Homebrew's {src}: its commands {cmds}"
 msgstr[0] ""
 msgstr[1] ""
+
+#: gui/wallet_page.py
+msgid "Installed for another formula, not by you."
+msgstr ""
 
 #: gui/wallet_page.py
 msgid ""
@@ -1368,6 +1382,10 @@ msgid "Protect"
 msgstr ""
 
 #: gui/wallet_page.py
+msgid "Protect selected"
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Protected ({n})"
 msgstr ""
 
@@ -1400,6 +1418,16 @@ msgstr ""
 #: gui/wallet_page.py
 msgid "Shorter"
 msgstr ""
+
+#: gui/wallet_page.py
+msgid "Show all Homebrew commands"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "Show all Homebrew commands ({n} more formula)"
+msgid_plural "Show all Homebrew commands ({n} more formulae)"
+msgstr[0] ""
+msgstr[1] ""
 
 #: gui/wallet_page.py
 msgid "Start the {time} countdown to the auto-lock again, from now"

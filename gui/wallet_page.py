@@ -14,8 +14,8 @@ from pathlib import Path
 from PyQt6 import sip
 from PyQt6.QtCore import QProcess, Qt, QTimer
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QCheckBox, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout,
-                             QWidget)
+from PyQt6.QtWidgets import (QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea,
+                             QVBoxLayout, QWidget)
 
 import i18n  # noqa: E402
 from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
@@ -273,6 +273,19 @@ def terminal_tools():
     if not WALLET_TOOL.exists():
         return [], []
     return ask("--list"), ask("--candidates")
+
+
+def all_terminal_tools():
+    """Every Homebrew command wallet-tool could protect: [(command, formula or cask, why it's not
+    in the short list: "", "dependency" or "tweak")]. Empty without wallet-tool or Homebrew, or
+    with a wallet-tool from before --all (it answers with its usage, not tab-separated lines)."""
+    if not WALLET_TOOL.exists():
+        return []
+    try:
+        r = subprocess.run([str(WALLET_TOOL), "--candidates", "--all"], capture_output=True, text=True, timeout=90)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    return [tuple(line.split("\t", 2)) for line in r.stdout.splitlines() if line.count("\t") == 2]
 
 
 def app_icon(name):
@@ -548,6 +561,60 @@ class WalletApps(QWidget):
             note = ngettext("Homebrew's {src}: its command {cmds}", "Homebrew's {src}: its commands {cmds}",
                             len(cmds)).format(src=html.escape(src), cmds=", ".join(html.escape(c) for c in cmds))
             self.rows.addWidget(self.row({"name": src, "icon": "utilities-terminal"}, note, [add]))
+        self.fill_all_tools(set(packages))
+
+    def fill_all_tools(self, offered):
+        """Show all Homebrew commands (off each time the page opens, like Show hidden on the
+        tweaks list): the formulae installed as another's dependency, and those a tweak runs, one
+        row a formula with a check box a command, and Protect selected. Asked only when turned
+        on: it's every command Homebrew has, hundreds."""
+        showing = getattr(self, "showing_all_tools", False)
+        if showing and getattr(self, "all_tools", None) is None:
+            self.all_tools = all_terminal_tools()
+        rest = [t for t in (getattr(self, "all_tools", None) or []) if t[1] not in offered and t[2]]
+        toggle = QPushButton(ngettext("Show all Homebrew commands ({n} more formula)",
+                                      "Show all Homebrew commands ({n} more formulae)", len({t[1] for t in rest})
+                                      ).format(n=len({t[1] for t in rest})) if showing
+                             else _("Show all Homebrew commands"))
+        toggle.setCheckable(True)
+        toggle.setChecked(showing)
+        toggle.setToolTip(_("Also list the commands of formulae installed for another one, and those Frame Tweaks' "
+                            "tweaks run, to protect any of them"))
+        toggle.toggled.connect(self.show_all_tools)
+        bar = QHBoxLayout()
+        bar.addWidget(toggle)
+        bar.addStretch(1)
+        holder = QWidget()
+        holder.setLayout(bar)
+        self.rows.addWidget(holder)
+        if not showing:
+            return
+        packages = {}
+        for cmd, src, why in rest:
+            packages.setdefault((src, why), []).append(cmd)
+        for (src, why), cmds in sorted(packages.items()):
+            note = (_("Installed for another formula, not by you.") if why == "dependency" else
+                    _("A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where "
+                      "nobody sees the dialog (Dictation in VR, say)."))
+            boxes, grid, box = [], QGridLayout(), QWidget()
+            grid.setContentsMargins(0, 4, 0, 0)
+            for i, cmd in enumerate(cmds):
+                check = QCheckBox(cmd)
+                boxes.append(check)
+                grid.addWidget(check, i // 4, i % 4)
+            box.setLayout(grid)
+            add = QPushButton(_("Protect selected"))
+            add.setObjectName("run")
+            add.setEnabled(False)
+            for check in boxes:
+                check.toggled.connect(lambda _on, b=boxes, a=add: a.setEnabled(any(c.isChecked() for c in b)))
+            add.clicked.connect(lambda _checked=False, b=boxes: self.run_tool([c.text() for c in b if c.isChecked()], None))
+            self.rows.addWidget(self.row({"name": src, "icon": "utilities-terminal"}, html.escape(note, quote=False),
+                                         [add], below=box))
+
+    def show_all_tools(self, on):
+        self.showing_all_tools = on
+        QTimer.singleShot(0, self.fill)
 
     def run_tool(self, args, cmd):
         """wallet-tool: ["--remove", cmd], or the commands of one package to protect (cmd None),
@@ -572,6 +639,9 @@ class WalletApps(QWidget):
                 candidates = sorted(candidates + [(cmd, "Homebrew")])
             candidates = [t for t in candidates if t[0] not in done]
             self.tools = (protected, candidates)
+            if getattr(self, "all_tools", None) is not None:
+                # (a removed one comes back with its reason: asked again, only while it's shown)
+                self.all_tools = (None if args[0] == "--remove" else [t for t in self.all_tools if t[0] not in done])
         QTimer.singleShot(0, self.fill)
 
     @staticmethod
@@ -581,7 +651,8 @@ class WalletApps(QWidget):
         return label
 
     @staticmethod
-    def row(app, note, buttons):
+    def row(app, note, buttons, below=None):
+        """An app's row: icon, name and note (and below them, if given, a widget: check boxes), buttons."""
         w = QWidget()
         w.setObjectName("row")
         w.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
@@ -594,7 +665,13 @@ class WalletApps(QWidget):
         text = QLabel(f"<b>{html.escape(app['name'], quote=False)}</b><br>"
                       f"<span style='color:#9aa6b2;font-size:13px'>{note}</span>")
         text.setWordWrap(True)
-        g.addWidget(text, 1)
+        if below is None:
+            g.addWidget(text, 1)
+        else:
+            col = QVBoxLayout()
+            col.addWidget(text)
+            col.addWidget(below)
+            g.addLayout(col, 1)
         for b in buttons:
             g.addWidget(b)
         return w

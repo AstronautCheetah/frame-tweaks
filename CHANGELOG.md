@@ -114,7 +114,9 @@
   page lists the commands of the formulae you installed and of casks, and **Protect** makes one ask
   for the wallet password first while the wallet is locked, with the wallet as its keyring (where
   a tool that can keeps its sign-in instead of a plain-text file). `wallet-tool` does the same
-  from a terminal; **Remove** puts Homebrew's command back.
+  from a terminal; **Remove** puts Homebrew's command back. **Show all Homebrew commands** (off
+  each time the page opens) also lists the formulae installed for another one and those a tweak
+  runs, with a check box per command and **Protect selected** (`wallet-tool --candidates --all`).
 - **Claude Code's sign-in in the wallet:** on Linux, `claude` keeps its sign-in in
   `~/.claude/.credentials.json` (plain text) even with the wallet as its keyring, so protecting it
   only asked for the password. `wallet-tool --store-token claude` now keeps a long-lived token

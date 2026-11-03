@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script  # noqa: E402
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 import wallet_page as wp  # noqa: E402  (the window's Wallet apps page; gui put it on sys.path)
+from PyQt6 import sip  # noqa: E402
 wl = load_script(ROOT / "packs/core/wallet" / "wallet-launcher", "wl")
 
 
@@ -321,3 +322,48 @@ class Background(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AllHomebrewCommands(unittest.TestCase):
+    """Show all Homebrew commands: off when the page opens (wallet-tool isn't asked for them);
+    on, a row a formula with a check box a command, and Protect selected protects just those."""
+    def test_off_by_default_then_pick_and_protect(self):
+        from PyQt6.QtWidgets import QApplication, QCheckBox, QPushButton, QWidget
+        app = QApplication.instance() or QApplication([])   # noqa: F841  (kept alive for the page)
+        t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
+        unlock = t / "wallet-unlock"
+        unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked", "password": true}\'; exit; }\n')
+        tool = t / "wallet-tool"
+        tool.write_text(f'#!/bin/bash\necho "$*" >> {t}/asked\ncase "$*" in\n'
+                        '  --list) printf "gh\\t/hb/gh\\n" ;;\n  --candidates) printf "rg\\tripgrep\\n" ;;\n'
+                        '  "--candidates --all") printf "rg\\tripgrep\\t\\npcre2grep\\tpcre2\\tdependency\\n'
+                        'pcre2test\\tpcre2\\tdependency\\nwhisper-cli\\twhisper.cpp\\ttweak\\n" ;;\nesac\n')
+        for f in (unlock, tool):
+            f.chmod(0o755)
+
+        class Window(QWidget):
+            def go_back(self):
+                pass
+        with mock.patch.multiple(wp, WALLET_UNLOCK=unlock, WALLET_TOOL=tool, APP_TIMERS=t / "none", LAUNCHERS=t / "none",
+                                 FLATPAK_APPS=[], SYSTEM_APPS=[], FLATPAK_ROOTS=[], LOCK_CONF=t / "wallet.conf"), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}):
+            page = wp.WalletApps(Window())
+            app.processEvents()
+            self.assertNotIn("--all", (t / "asked").read_text())
+            toggle = next(b for b in page.findChildren(QPushButton) if b.text().startswith("Show all Homebrew"))
+            self.assertFalse(toggle.isChecked())
+            self.assertFalse([c for c in page.findChildren(QCheckBox) if c.text() == "pcre2grep"])
+            toggle.setChecked(True)
+            for _i in range(3):
+                app.processEvents()
+            boxes = {c.text(): c for c in page.findChildren(QCheckBox) if not sip.isdeleted(c)}
+            self.assertLessEqual({"pcre2grep", "pcre2test", "whisper-cli"}, set(boxes))
+            self.assertNotIn("rg", boxes)                                  # (already offered above)
+            boxes["pcre2test"].setChecked(True)
+            protect = [b for b in page.findChildren(QPushButton) if not sip.isdeleted(b) and b.text() == "Protect selected"
+                       and b.isEnabled()]
+            self.assertEqual(len(protect), 1)
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                protect[0].click()
+            self.assertEqual(out.getvalue(), "would run: wallet-tool pcre2test\n")

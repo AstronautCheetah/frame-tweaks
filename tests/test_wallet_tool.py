@@ -68,6 +68,14 @@ class WalletTool(unittest.TestCase):
         # (whisper.cpp is a leaf, but Dictation runs whisper-cli: it mustn't wait for the wallet)
         self.assertEqual(self.listed("--candidates"), {"claude": "claude-code@latest", "rg": "ripgrep"})
 
+    def test_all_lists_every_command_with_why_it_isnt_offered(self):
+        got = {line.split("\t")[0]: tuple(line.split("\t")[1:]) for line in self.tool("--candidates", "--all").stdout.splitlines()}
+        self.assertEqual(got, {"claude": ("claude-code@latest", ""), "rg": ("ripgrep", ""),
+                               "pcre2grep": ("pcre2", "dependency"), "whisper-cli": ("whisper.cpp", "tweak")})
+        self.tool("pcre2grep")                              # (and any of them can be protected)
+        self.assertIn("pcre2grep", self.listed("--list"))
+        self.assertNotIn("pcre2grep", {line.split("\t")[0] for line in self.tool("--candidates", "--all").stdout.splitlines()})
+
     def test_protect_runs_it_through_with_keyring_then_remove(self):
         self.tool("claude")
         wrapper = self.home / ".local/bin/claude"
