@@ -322,3 +322,17 @@ class Scripts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PiecesFitTheirCorner(unittest.TestCase):
+    """A patch's pieces are drawn from its corner of the dashboard's shared page (lib.js area(),
+    920 px wide); one that runs out of it covers the dashboard's own pieces (scroll strips drawn
+    up to 2400 px long broke the grab bars and showed on the controllers)."""
+    def test_scroll_strips_stay_short(self):
+        import re
+        lib = (ROOT / "packs/core/vr-dashboard" / "lib.js").read_text()
+        width = int(re.search(r"width: '(\d+)px'", lib[lib.index("const area = "):]).group(1))
+        js = (ROOT / "packs/core/scroll-strips" / "patch.js").read_text()
+        m = re.search(r"lenPx = Math\.min\((\d+), ", js)
+        self.assertIsNotNone(m, "the strip's length in the page must have a fixed limit")
+        self.assertLessEqual(int(m.group(1)), min(width, 600))
