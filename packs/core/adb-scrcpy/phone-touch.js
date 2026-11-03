@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 29;
+  const NAME = 'phone-touch', VERSION = 30;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -271,7 +271,9 @@
     [N('Disconnect by itself after'), 'PHONE_TIMEOUT',
      [[N('Never'), '0'], [N('15 min'), '15'], [N('30 min'), '30'], [N('1 h'), '60'], [N('2 h'), '120'], [N('4 h'), '240'],
       [N('8 h'), '480']], false],
-    // The hardware-key buttons in a row below the grab bar (hwKeys), each on or off
+    // The hardware-key buttons (hwKeys): which side of the mirror, then each on or off
+    [N('Buttons'), 'PHONE_KEY_SIDE', [[N('Below'), 'below'], [N('Above'), 'above'], [N('Left'), 'left'], [N('Right'), 'right']],
+     false],
     [N('Back button'), 'PHONE_KEY_BACK', [[N('On'), 'on'], [N('Off'), 'off']], false],
     [N('App switcher button'), 'PHONE_KEY_RECENTS', [[N('On'), 'on'], [N('Off'), 'off']], false],
     [N('Volume up button'), 'PHONE_KEY_VOLUP', [[N('On'), 'on'], [N('Off'), 'off']], false],
@@ -363,7 +365,7 @@
     }
   };
   const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15',
-                     PHONE_CLIPBOARD: 'both', PHONE_TIMEOUT: '60', PHONE_KEY_BACK: 'off', PHONE_KEY_RECENTS: 'off',
+                     PHONE_CLIPBOARD: 'both', PHONE_TIMEOUT: '60', PHONE_KEY_SIDE: 'below', PHONE_KEY_BACK: 'off', PHONE_KEY_RECENTS: 'off',
                      PHONE_KEY_VOLUP: 'off', PHONE_KEY_VOLDOWN: 'off', PHONE_KEY_POWER: 'off', PHONE_KEY_NOTIFY: 'off' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
@@ -412,8 +414,8 @@
       border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}` } }, T(label));
     const rows = [];
     const isToggle = (choices) => choices.length === 2 && choices[0][1] === 'on' && choices[1][1] === 'off';
-    // The on/off ones (the buttons below the mirror): one compact row each, a grab handle, the name
-    // and a switch. Drag a handle up or down to change the buttons' order below the mirror.
+    // The on/off ones (the mirror's buttons): one compact row each, a grab handle, the name and a
+    // switch. Drag a handle up or down to change the buttons' order by the mirror.
     const order = keyOrder(conf);
     const moveTo = (name) => {
       if (!dragKey || dragKey === name) return;
@@ -456,11 +458,27 @@
     };
     let toggles = false;
     for (const [title, key, choices, restart] of OPTIONS) {
+      if (key === 'PHONE_KEY_SIDE') continue;          // (on the buttons' heading row, below)
       if (isToggle(choices)) {
         if (!toggles) {
           toggles = true;
-          rows.push(el('div', { key: 'buttons-below', style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 4px' } },
-                       T('Buttons below the mirror')));
+          // Their heading and their side of the mirror on one row: "Buttons  Below Above Left Right".
+          const side = OPTIONS.find((o) => o[1] === 'PHONE_KEY_SIDE');
+          rows.push(el('div', { key: 'buttons-side', style: { display: 'flex', alignItems: 'center', margin: '10px 0 2px' } },
+            el('div', { style: { fontSize: '17px', color: '#9aa6b2', margin: '0 8px 0 4px', whiteSpace: 'nowrap' } }, T(side[0])),
+            ...side[2].map(([label, value]) => el('div', { key: value, ...tap(), onClick: () => {
+                if (conf.PHONE_KEY_SIDE === value) return;
+                window.__sftPhoneTouchConf = { ...conf, PHONE_KEY_SIDE: value };
+                call({ a: 'set', conf: { PHONE_KEY_SIDE: value } });
+                redraw();
+              }, style: { flex: '1 1 0', minWidth: '0', padding: '8px 2px', margin: '2px', borderRadius: '8px', textAlign: 'center',
+                          fontSize: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          fontWeight: conf.PHONE_KEY_SIDE === value ? 700 : 500,
+                          color: conf.PHONE_KEY_SIDE === value ? '#fff' : '#d8dee6',
+                          background: conf.PHONE_KEY_SIDE === value ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.08)',
+                          border: `1px solid ${conf.PHONE_KEY_SIDE === value ? `hsla(${h}, 60%, 70%, 0.9)`
+                                                                              : 'rgba(255, 255, 255, 0.15)'}` } },
+              T(label)))));
           // (all of them here, in the buttons' order: the rest of OPTIONS' on/off ones are skipped)
           const named = order.map((n) => HW.find((x) => x[1] === n)?.[0]);
           for (const k2 of named) {
@@ -496,7 +514,10 @@
     const pxW = 460;
     return el(XFORM, { key: `${f.frameID}-sft-set`, parent_id: id,
                        // (left of the window; beside: left of the gear, which is beside it)
-                       translation: { x: -(GAP_M * k + (beside ? GEAR_M * k + GAP_M * k : 0) + SETTINGS_M * k / 2),
+                       // (and left of the buttons, when they're a column on the left)
+                       translation: { x: -(GAP_M * k + (beside ? GEAR_M * k + GAP_M * k : 0) +
+                                           (conf.PHONE_KEY_SIDE === 'left' ? keysOut(f, k, 'left', beside) + KEY_M * k : 0) +
+                                           SETTINGS_M * k / 2),
                                       z: LIFT_M * k } },
       el(PANEL, { key: `${f.frameID}-sft-set-p`, width: SETTINGS_M * k, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftPhoneSettings', origin: 4, inputFocusParams: { bCanTakeKeyboardFocus: false } },
@@ -512,10 +533,18 @@
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
              T('Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once.')))));
   };
-  // The phone's hardware keys, as buttons in a row below the window's grab bar (the ones the
+  // The phone's hardware keys, as buttons on one side of the window (PHONE_KEY_SIDE; the ones the
   // settings turn on): Back, App switcher (recent apps), Volume up and down, sent as the phone's own
   // keys (phone-touch HW_KEYS).
-  const BOTTOM_CENTER = 7, BAR_M = 0.06, KEY_M = 0.05;
+  const BOTTOM_CENTER = 7, CENTER_RIGHT = 5, BAR_M = 0.06, KEY_M = 0.05;
+  // How far the buttons' near edge is from the window, on that side: beyond a scroll strip there
+  // (scroll-strips' room()), below also beyond the grab bar, left also beyond the gear when it sits
+  // beside the window.
+  const stripRoom = () => { try { return window.__sftPatches?.['scroll-strips']?.room?.() ?? {}; } catch (e) { return {}; } };
+  const keysOut = (f, k, side, beside) => {
+    const room = stripRoom(), edge = { below: 'bottom', above: 'top', left: 'left', right: 'right' }[side];
+    return (GAP_M + (room[edge] || 0) + (side === 'below' ? BAR_M : 0) + (side === 'left' && beside ? GEAR_M + GAP_M : 0)) * k;
+  };
   const HW = [['PHONE_KEY_BACK', 'back', 'M15 5 8 12l7 7', N('Back')],
               ['PHONE_KEY_RECENTS', 'recents', 'M6 6h12v12H6z', N('App switcher')],
               ['PHONE_KEY_VOLDOWN', 'vol_down', 'M4 9v6h4l5 4V5L8 9zM16 12h5', N('Volume down')],
@@ -531,18 +560,25 @@
   // One panel of a constant size, always there while the mirror is (the buttons turned off are
   // only hidden inside it): a panel made anew, or resized, as buttons were turned on or off was
   // drawn for a moment at its picture's size in the middle of the mirror before going below it.
-  const hwKeys = (f, k, H) => {
+  // A row below or above the window, or a column left or right of it (PHONE_KEY_SIDE).
+  const hwKeys = (f, k, H, beside) => {
     const conf = window.__sftPhoneTouchConf || {};
     const on = keyOrder(conf).map((n) => HW.find((x) => x[1] === n)).filter((x) => x && conf[x[0]] === 'on');
-    const id = typeof f.activePage?.GetPanelAnchorID === 'function' && f.activePage.GetPanelAnchorID(BOTTOM_CENTER);
+    const side = ['below', 'above', 'left', 'right'].includes(conf.PHONE_KEY_SIDE) ? conf.PHONE_KEY_SIDE : 'below';
+    const anchor = { below: BOTTOM_CENTER, above: TOP_CENTER, left: CENTER_LEFT, right: CENTER_RIGHT }[side];
+    const id = typeof f.activePage?.GetPanelAnchorID === 'function' && f.activePage.GetPanelAnchorID(anchor);
     if (!id) return null;
-    const h = hueOf(), px = 60;
-    return el(XFORM, { key: `${f.frameID}-sft-keys`, parent_id: id,
-                       translation: { y: -(GAP_M * k + BAR_M * k + KEY_M * k / 2), z: LIFT_M * k } },
-      el(PANEL, { key: `${f.frameID}-sft-keys-p`, width: KEY_M * k * HW.length, interactive: on.length > 0,
-        only_visible_with_laser: false, debug_name: 'SftPhoneKeys', origin: 4,
+    const h = hueOf(), px = 60, column = side === 'left' || side === 'right', d = keysOut(f, k, side, beside) + KEY_M * k / 2;
+    const at = { below: { y: -d }, above: { y: d }, left: { x: -d }, right: { x: d } }[side];
+    // (the panel's key has the side in it: a panel turned from a row to a column is a new one,
+    // not one resized, which would be drawn for a moment in the middle of the mirror)
+    return el(XFORM, { key: `${f.frameID}-sft-keys-${column ? 'c' : 'r'}`, parent_id: id, translation: { ...at, z: LIFT_M * k } },
+      el(PANEL, { key: `${f.frameID}-sft-keys-p-${column ? 'c' : 'r'}`, width: KEY_M * k * (column ? 1 : HW.length),
+        interactive: on.length > 0, only_visible_with_laser: false, debug_name: 'SftPhoneKeys', origin: 4,
         inputFocusParams: { bCanTakeKeyboardFocus: false } },
-        el('div', { style: { display: 'flex', justifyContent: 'center', width: `${px * HW.length}px`, height: `${px}px` } },
+        el('div', { style: { display: 'flex', flexDirection: column ? 'column' : 'row', justifyContent: 'center',
+                             alignItems: 'center', width: `${px * (column ? 1 : HW.length)}px`,
+                             height: `${px * (column ? HW.length : 1)}px` } },
           ...on.map(([, k2, d, label]) => el('div', { key: k2, ...tap(), title: T(label),
               onClick: () => call({ a: 'hwkey', k: k2 }),
               style: { width: `${px - 8}px`, height: `${px - 8}px`, margin: '4px', borderRadius: '50%',
@@ -560,7 +596,7 @@
     const k = H / Hw, c = pictureSize(page);
     const beside = f.docking?.dockLocation === DASH && c && c.w < c.h;      // upright, docked
     return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null,
-            hwKeys(f, k, H)];
+            hwKeys(f, k, H, beside)];
   };
 
   const sizes = (f) => {
@@ -575,7 +611,7 @@
                               () => buildLayer(f));
   const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
                                                settingsOpen.has(f.frameID), pending, hueOf(),
-                                               window.__sftPhoneTouchConf ?? null]), () => buildExtras(f));
+                                               window.__sftPhoneTouchConf ?? null, stripRoom()]), () => buildExtras(f));
 
   // Drawn as the last child of the dashboard app, in the page's bottom-right corner (L.mount; the
   // scroll strips have the left), four times a second.

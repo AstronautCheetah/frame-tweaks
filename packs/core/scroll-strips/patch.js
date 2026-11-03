@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 24;
+  const NAME = 'scroll-strips', VERSION = 25;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -334,6 +334,13 @@
   redraw = mounted.redraw;
   all[NAME] = {
     version: VERSION, stats,
+    // How far out from each side of a window its strip reaches (metres; 0: no strip there), so
+    // Android Mirror's buttons go beyond it rather than on it.
+    room: () => {
+      const o = cfg(), r = o.gap + o.thickness;
+      return { left: o.vertical === 'left' ? r : 0, right: o.vertical === 'right' ? r : 0,
+               top: o.horizontal === 'top' ? r : 0, bottom: o.horizontal === 'bottom' ? r : 0 };
+    },
     stop: () => { mounted.stop(); onUp(); },
     configChanged: () => {},                                // ours re-renders twice a second anyway
   };

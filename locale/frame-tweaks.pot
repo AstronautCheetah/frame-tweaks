@@ -2584,31 +2584,6 @@ msgid ""
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: App switcher"
-msgstr ""
-
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Back"
-msgstr ""
-
-#: packs/core/adb-scrcpy/README.md
-msgid ""
-"Button below the mirror: Notifications (open or close the phone's panel)"
-msgstr ""
-
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Power (screen off or on)"
-msgstr ""
-
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Volume down"
-msgstr ""
-
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Volume up"
-msgstr ""
-
-#: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr ""
 
@@ -2617,8 +2592,32 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: App switcher"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Back"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Notifications (open or close the phone's panel)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Power (screen off or on)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Volume down"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Volume up"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the mirror's buttons apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
@@ -2633,6 +2632,10 @@ msgstr ""
 #: packs/core/adb-scrcpy/README.md
 msgid ""
 "Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "The mirror's buttons go"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
@@ -2983,6 +2986,10 @@ msgstr ""
 msgid "8 h"
 msgstr ""
 
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Above"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "App switcher"
 msgstr ""
@@ -3000,11 +3007,15 @@ msgid "Back button"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Below"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
-msgid "Buttons below the mirror"
+msgid "Buttons"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3029,6 +3040,10 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Joystick scrolling"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "Left"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -3078,6 +3093,10 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Restart stream to apply"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "Right"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4575,10 +4594,6 @@ msgstr ""
 msgid "Horizontal strip"
 msgstr ""
 
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "Left"
-msgstr ""
-
 #: packs/core/scroll-strips/patch.js
 msgid ""
 "Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
@@ -4586,10 +4601,6 @@ msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "Right"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md

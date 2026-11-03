@@ -385,6 +385,15 @@ class ButtonOrder(unittest.TestCase):
         self.assertEqual(tuple(re.findall(r"\['PHONE_KEY_\w+', '(\w+)'", hw)), pt.KEY_NAMES)
         self.assertNotIn(pt.ORDER_KEY, pt.CHOICES)            # (not a settings-page option: dragged in VR)
 
+    def test_every_side_has_a_place(self):
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        body = js[js.index("const hwKeys = "):]
+        for side in pt.CHOICES["PHONE_KEY_SIDE"]:
+            self.assertRegex(body, rf"{side}: (BOTTOM_CENTER|TOP_CENTER|CENTER_LEFT|CENTER_RIGHT)")
+            self.assertRegex(body, rf"{side}: {{ [xy]: -?d }}")
+        strips = (ROOT / "packs/core/scroll-strips" / "patch.js").read_text()
+        self.assertIn("room: () =>", strips)                  # (what keysOut reads, to clear a strip)
+
 
 class Defaults(unittest.TestCase):
     def test_panel_and_helper_agree(self):
