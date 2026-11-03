@@ -79,15 +79,6 @@ class LinkUpdateCheck(unittest.TestCase):
                 self.assertEqual(self.check("full-keyboard", moved_to("0.6.0")), f"0.5.0 0.6.0 {tested}\n")
         self.assertIn("https://github.com/TaiKeid/steam-frame-full-keyboard/releases/latest", self.asked.read_text())
 
-    def test_cuff_a_commit(self):
-        """Cuff has no releases: its tested version is a commit, and its newest its default branch's head."""
-        (self.home / ".local/share/cuff").mkdir(parents=True)
-        (self.home / ".local/share/cuff/frame-tweaks-commit").write_text("bea0789\n")
-        self.assertEqual(self.check("cuff", head="0123456789abcdef0123456789abcdef01234567"),
-                         f"bea0789 0123456 {TESTED['link-cuff'][:7]}\n")
-        self.assertIn("git ls-remote https://github.com/Brobert-in-aus/cuff HEAD", self.asked.read_text())
-        self.assertEqual(self.check("cuff"), "bea0789 - bea0789\n")          # (offline)
-
     def test_offline_or_no_release(self):
         """Nothing newer to say, but the tested version still is (the way back to it)."""
         self.recline("v1.3.0")
@@ -108,12 +99,11 @@ class LinkUpdateCheck(unittest.TestCase):
         """Each official link reads $FT_LINK_VERSION, and lib/tested-versions has its link-<id>: a
         release tag, or for a project without releases a whole commit (its archive by commit)."""
         links = [c for c in sft.load(refresh=True)["components"] if c["link"] and c["official"]]
-        self.assertLessEqual({"recline", "full-keyboard", "perf-overlay", "knockthru", "cuff"}, {c["id"] for c in links})
+        self.assertLessEqual({"recline", "full-keyboard", "perf-overlay", "knockthru"}, {c["id"] for c in links})
         for c in links:
             with self.subTest(c["id"]):
                 self.assertRegex(c["link"]["install"], r"\$\{?FT_LINK_VERSION\b")
                 self.assertEqual(c["link"]["tested"], TESTED[f"link-{c['id']}"])
-        self.assertRegex(TESTED["link-cuff"], r"^[0-9a-f]{40}$")
 
     def test_github_repo(self):
         self.assertEqual(sft.github_repo(None, "https://github.com/a/b#readme"), "a/b")

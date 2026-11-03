@@ -18,4 +18,3 @@ link-full-keyboard=0.14.1
 link-perf-overlay=v0.3.2
 link-knockthru=v1.2.0
 # (Cuff has no releases yet: the commit tested, whole, as its link downloads it by commit)
-link-cuff=bea0789859d3d6ae3d1972dc91189544e7f831b9
