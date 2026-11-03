@@ -1,6 +1,7 @@
 """The pop-up by the pointer after a click on a link (or Open folder): what it did ("Opening in
-Firefox in desktop mode", "Link copied"). Twice a tooltip's size and twice its time: Qt's own was
-small, and gone before you'd read it, in VR especially.
+Firefox in desktop mode", "Link copied"). Twice a tooltip's size, for Qt's tooltip time (10 s, longer
+for long texts; twice that, tried in VR, was too long): Qt's own was small, and gone before you'd
+read it, in VR especially.
 
 Not a QToolTip: Qt hides a tooltip as soon as its window loses the focus, and a link that opens in
 Firefox takes the focus, so "Opened in Firefox (VR)" vanished within a second, whatever time it was
@@ -12,7 +13,8 @@ from PyQt6.QtCore import QPoint, Qt, QTimer
 from PyQt6.QtGui import QCursor
 from PyQt6.QtWidgets import QLabel, QToolTip
 
-SCALE = 2
+SCALE = 2                         # (its size; its time is Qt's own: TIME)
+TIME = 1
 # (the window's QToolTip look, STYLE in frame-tweaks-gui.py; a QLabel doesn't take that selector)
 LOOK = ("color: #e8ecf0; background: #1f2731; border: 1px solid #355b7a; border-radius: 6px; "
         "padding: 8px 10px;")
@@ -30,7 +32,7 @@ class _Tip(QLabel):
 
 
 def show(text):
-    """The pop-up with text, by the pointer, for twice Qt's tooltip time; returns it."""
+    """The pop-up with text, by the pointer, for Qt's tooltip time; returns it."""
     global _shown
     if _shown is not None:
         _shown.close()
@@ -46,7 +48,7 @@ def show(text):
     tip.adjustSize()
     tip.move(QCursor.pos() + QPoint(16, 16))
     tip.show()
-    tip.time_ms = qt_time(text) * SCALE
+    tip.time_ms = qt_time(text) * TIME
     QTimer(tip, singleShot=True, interval=tip.time_ms, timeout=tip.close).start()     # (goes with the pop-up)
     _shown = tip
     tip.destroyed.connect(lambda *_: _forget(tip))

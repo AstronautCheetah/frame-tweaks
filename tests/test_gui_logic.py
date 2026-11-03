@@ -749,7 +749,7 @@ class Links(unittest.TestCase):
 
     def test_the_pop_up_after_a_link_is_twice_a_tooltip(self):
         """The owner's ask: the pop-up by the pointer ("Link copied", "Opening in Firefox…") twice a
-        tooltip's size and twice as long (Qt's: small, and gone too soon in VR)."""
+        tooltip's size, for Qt's tooltip time (Qt's: small, and gone too soon in VR)."""
         from PyQt6.QtCore import QEvent
         from PyQt6.QtWidgets import QApplication, QToolTip
         self.app = QApplication.instance() or QApplication([])
@@ -759,8 +759,8 @@ class Links(unittest.TestCase):
         self.assertIn("Link copied", tip.text())
         size = QToolTip.font().pointSizeF()
         self.assertIn(f"font-size:{size * 2:g}pt" if size > 0 else "px", tip.text())
-        self.assertEqual(tip.time_ms, 2 * gui.link_tip.qt_time("Link copied"))
-        self.assertEqual(tip.time_ms, 20000)
+        self.assertEqual(tip.time_ms, gui.link_tip.qt_time("Link copied"))     # (twice it was too long, in VR)
+        self.assertEqual(tip.time_ms, 10000)
         # A link opening in Firefox takes the focus: a QToolTip went at once; this one stays.
         QApplication.sendEvent(tip, QEvent(QEvent.Type.WindowDeactivate))
         QApplication.sendEvent(self.app, QEvent(QEvent.Type.ApplicationDeactivate))
