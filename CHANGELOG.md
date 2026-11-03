@@ -145,7 +145,7 @@
 - **Dictation's voice activity detection says it's Whisper's:** its setting is now *Whisper voice activity detection*, dimmed with a note while Parakeet is the engine (Parakeet doesn't use it). Settings pages can do this for any option (`only_with`, docs/mods.md).
 - **Dictation keeps a recording the engine heard nothing in** (`last-no-text.wav`, beside `last.wav`), and logs each recording's peak, to find out why.
 - **Homebrew shows its own logo** on its row and its page.
-- **Tooltips come sooner and stay twice as long** in the Frame Tweaks window, Arrow Pad, Screen snip and the NordVPN tray: in VR, reading them takes longer, and the laser's wobble kept putting them off (Qt waits 700 ms with the pointer still; now 150 ms).
+- **Tooltips come sooner and stay twice as long** in the Frame Tweaks window, Arrow Pad, Screen snip and the NordVPN tray: in VR, reading them takes longer, and the laser's wobble kept putting them off: Qt waits 700 ms with the pointer still, starting again at every move; now 150 ms, and a wobble of a few pixels doesn't start it again.
 - **Screen snip's Save says where:** a tooltip on Save shows the file's path for a few seconds before the snip closes (in VR the notification may not show).
 - **KnockThru and Performance Overlay show their own logos** on their rows, instead of a generic icon.
 - **↻ Reinstall asks first,** on the confirm page Apply changes uses: what reinstalling does, whether its files changed, and whether it asks for the sudo password.
@@ -210,6 +210,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **`reinstall-changed` updates the shared files too:** the translations, tooltips and other shared modules Arrow Pad, Screen snip and the NordVPN tray load are copied again when the checkout's differ; no tweak's folder holds them, so no change to them was noticed.
 - **Parakeet no longer drops a whole dictation:** its int8 model sometimes heard nothing in a recording with clear speech (3.5 seconds of "dictation test, the first one failed": nothing; Whisper heard all of it). When Parakeet hears nothing in a recording loud enough to hold speech, Whisper tries it.
 - **Performance Overlay starts with SteamVR, as meant, and has a Show button.** Its installer
   enables a user service that starts the panel with SteamVR, but `systemctl --user enable` fails

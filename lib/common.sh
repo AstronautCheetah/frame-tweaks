@@ -271,13 +271,20 @@ fetch_mirror() {
 # (and the Python modules the programs share: lib/ftconf.py, settings files and logs; lib/vrkit.py,
 # SteamVR poses, grips and haptics; lib/needs.py, "this needs a tweak that isn't installed";
 # lib/xkb.py, keys on the desktop's keyboard layout)
+SHARED_LIB=(i18n.py i18n.sh ftconf.py vrkit.py needs.py xkb.py menuedits.py tooltips.py)
 install_i18n() {
     local d="$HOME/.local/share/frame-tweaks/i18n"
     mkdir -p "$d/locale"
-    install -m644 "$REPO_DIR/lib/i18n.py" "$REPO_DIR/lib/i18n.sh" "$REPO_DIR/lib/ftconf.py" "$REPO_DIR/lib/vrkit.py" "$REPO_DIR/lib/needs.py" "$REPO_DIR/lib/xkb.py" \
-        "$REPO_DIR/lib/menuedits.py" "$REPO_DIR/lib/tooltips.py" "$d/"
+    install -m644 "${SHARED_LIB[@]/#/$REPO_DIR/lib/}" "$d/"
     find "$d/locale" -name '*.po' -delete
     find "$REPO_DIR/locale" -maxdepth 1 -name '*.po' -exec install -m644 -t "$d/locale" {} +
+}
+# shared_current: the copies install_i18n made are those of this checkout (files and translations).
+shared_current() {
+    local d="$HOME/.local/share/frame-tweaks/i18n" f
+    for f in "${SHARED_LIB[@]}"; do cmp -s "$REPO_DIR/lib/$f" "$d/$f" || return 1; done
+    for f in "$REPO_DIR"/locale/*.po; do [ -e "$f" ] || continue; cmp -s "$f" "$d/locale/${f##*/}" || return 1; done
+    return 0
 }
 # (a file not there yet is no match, quietly: sha256sum said "FAILED open or read" for each, on stdout)
 sha_ok() { [ -n "$1" ] && [ -f "$2" ] && echo "$1  $2" | sha256sum -c --quiet - >/dev/null 2>&1; }

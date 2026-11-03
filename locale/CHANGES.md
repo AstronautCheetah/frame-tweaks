@@ -23,6 +23,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
 - New in `gui/wallet_page.py:606`
   - now: "Protect selected"
+- New in `install.sh:666`
+  - now: "The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
 - Changed in `packs/core/dictation/README.md`
   - was: "Voice activity detection"
   - now: "Whisper voice activity detection"

@@ -659,6 +659,12 @@ cmd_reinstall_changed() {
     local ids=("$@") id found cand=() changed=()
     [[ ${#ids[@]} -eq 0 ]] && ids=("${IDS[@]}")
     check_ids "${ids[@]}"
+    # The shared files the tweaks' programs load from ~/.local/share/frame-tweaks/i18n (tooltips.py,
+    # i18n.py, xkb.py, the translations): no tweak's folder holds them, so no fingerprint saw them
+    # change; copied again when they differ (Arrow Pad, Screen snip and the tray: at their next start).
+    if [[ -d $HOME/.local/share/frame-tweaks/i18n ]] && ! shared_current; then
+        install_i18n && say "$(t 'The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start.')"
+    fi
     # (read whole first: status scripts get this script's stdin, as they always did, not the list)
     found=$(files_changed "${ids[@]}")
     [[ -z $found ]] || mapfile -t cand <<<"$found"

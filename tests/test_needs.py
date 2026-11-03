@@ -62,7 +62,9 @@ class Callers(unittest.TestCase):
             self.assertNotIn("in Frame Tweaks to use this button", text)      # (the old notification only)
 
     def test_installed_with_the_shared_modules(self):
-        self.assertIn('"$REPO_DIR/lib/needs.py"', (ROOT / "lib/common.sh").read_text())
+        import re
+        shared = re.search(r"^SHARED_LIB=\(([^)]*)\)", (ROOT / "lib/common.sh").read_text(), re.M).group(1).split()
+        self.assertIn("needs.py", shared)
 
 
 if __name__ == "__main__":

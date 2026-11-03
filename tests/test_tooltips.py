@@ -3,6 +3,7 @@ character past 100), recomputed when the text changes; a widget with a duration 
 import os
 import sys
 import unittest
+import unittest.mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -51,7 +52,38 @@ class Sooner(unittest.TestCase):
         self.app = QApplication.instance() or QApplication([])
         import tooltips
         self.tooltips = tooltips
-        self.addCleanup(self.app.removeEventFilter, tooltips.longer_tooltips(self.app))
+        self.tip_filter = tooltips.longer_tooltips(self.app)
+        self.addCleanup(self.app.removeEventFilter, self.tip_filter)
+
+    def test_a_wobble_doesnt_start_the_wait_again(self):
+        from PyQt6.QtCore import QPoint
+        from PyQt6.QtWidgets import QPushButton
+        b = QPushButton("x")
+        b.setToolTip("tip")
+        b.resize(200, 60)
+        b.show()
+        f = self.tip_filter
+        at = b.mapToGlobal(QPoint(50, 30))
+        with unittest.mock.patch.object(QApplication, "widgetAt", lambda *_: b):
+            f.moved(at)
+            first = f.anchor
+            f.moved(at + QPoint(3, 4))                   # (7 px: within JITTER_PX)
+            self.assertEqual(f.anchor, first)
+            f.moved(at + QPoint(20, 0))                  # (a real move: the wait starts again)
+            self.assertNotEqual(f.anchor, first)
+        self.assertTrue(f.timer.isActive())
+        from PyQt6.QtCore import QObject
+        shown = []
+
+        class Watch(QObject):
+            def eventFilter(self, _obj, e):
+                if e.type() == QEvent.Type.ToolTip:
+                    shown.append(e.type())
+                return False
+        watch = Watch()
+        b.installEventFilter(watch)
+        f.wake()
+        self.assertEqual(shown, [QEvent.Type.ToolTip])
 
     def test_they_come_sooner_than_qts_700_ms(self):
         from PyQt6.QtWidgets import QStyle

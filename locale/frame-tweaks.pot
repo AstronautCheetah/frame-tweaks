@@ -1858,6 +1858,11 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid ""
+"The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
+msgstr ""
+
+#: install.sh
 msgid "The version Frame Tweaks tested: %s"
 msgstr ""
 

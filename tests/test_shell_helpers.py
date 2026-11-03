@@ -108,6 +108,17 @@ class NewVenv(unittest.TestCase):
                 self.assertNotIn("python3 -m venv", (ROOT / f).read_text(), f)
 
 
+class SharedFiles(unittest.TestCase):
+    """The shared files install_i18n copies (tooltips.py and the rest): shared_current says when a
+    copy is behind the checkout, which no tweak's fingerprint sees (reinstall-changed copies them)."""
+    def test_a_changed_shared_file_is_noticed_and_copied(self):
+        script = ('install_i18n; shared_current && echo same; d="$HOME/.local/share/frame-tweaks/i18n"; '
+                  'echo old > "$d/tooltips.py"; shared_current || echo behind; '
+                  'echo old > "$d/locale/fr.po"; install_i18n; shared_current && echo same')
+        self.assertEqual(sh(script).split(), ["same", "behind", "same"])
+        self.assertIn("shared_current", (ROOT / "install.sh").read_text())
+
+
 class Bashrc(unittest.TestCase):
     """ensure_path (and need_brew, after installing Homebrew) add their line to ~/.bashrc once, on
     a line of its own: to a file whose last line had no newline it was glued onto that line, and
