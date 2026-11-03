@@ -3374,6 +3374,26 @@ msgstr ""
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: App switcher"
+msgstr "Bouton sous le miroir : changer d'application"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Back"
+msgstr "Bouton sous le miroir : retour"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume down"
+msgstr "Bouton sous le miroir : baisser le volume"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume up"
+msgstr "Bouton sous le miroir : monter le volume"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr "Oublier {PHONE_NAME}"
 
@@ -3386,9 +3406,9 @@ msgstr ""
 # needs review
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
-"L'image, la fréquence d'images et le presse-papiers s'appliquent au prochain démarrage du miroir (ou avec « Redémarrer le flux » sous sa roue dentée, en VR). La vitesse du stick s'applique tout de suite, de même que le délai de déconnexion, compté à partir du moment où vous le modifiez."
+"L'image, la fréquence d'images et le presse-papiers s'appliquent au prochain démarrage du miroir (ou avec « Redémarrer le flux » sous sa roue dentée, en VR). La vitesse du stick et les boutons sous le miroir s'appliquent tout de suite, de même que le délai de déconnexion, compté à partir du moment où vous le modifiez."
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
@@ -3875,6 +3895,26 @@ msgid "8 h"
 msgstr "8 h"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher"
+msgstr "Changer d'application"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher button"
+msgstr "Bouton changer d'application"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back"
+msgstr "Retour"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back button"
+msgstr "Bouton retour"
+
+# needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr "Débit (Mbit/s)"
@@ -3918,6 +3958,11 @@ msgstr "Déplacer le pavé"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
 msgstr "Non partagé"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "On"
+msgstr "Activé"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3967,6 +4012,16 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Type your PIN on the phone"
 msgstr "Taper votre code PIN sur le téléphone"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume down button"
+msgstr "Bouton baisser le volume"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume up button"
+msgstr "Bouton monter le volume"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -4244,7 +4299,7 @@ msgid "Normal"
 msgstr "Normal"
 
 # needs review
-#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+#: packs/core/arrowpad/arrowpad.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Off"
 msgstr "Désactivé"
 
@@ -5900,11 +5955,6 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "On"
-msgstr "Activé"
-
-# needs review
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Teinte de la vue de la pièce"
 
@@ -6287,12 +6337,12 @@ msgid "The clipboard has no text."
 msgstr "Le presse-papiers ne contient pas de texte."
 
 # needs review
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume down"
 msgstr "Baisser le volume"
 
 # needs review
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr "Augmenter le volume"
 
@@ -8734,3 +8784,9 @@ msgstr "Installateur d'ajustements"
 #~ "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
 #~ msgstr ""
 #~ "Le Frame n'affiche pas ses propres températures, fréquences ou mémoire pendant que vous jouez, donc un ralentissement ou un casque chaud est difficile à expliquer. Lié : il s'installe depuis sa dernière version avec son propre installateur, comme le décrit son README."
+
+#~ # needs review
+#~ msgid ""
+#~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+#~ msgstr ""
+#~ "L'image, la fréquence d'images et le presse-papiers s'appliquent au prochain démarrage du miroir (ou avec « Redémarrer le flux » sous sa roue dentée, en VR). La vitesse du stick s'applique tout de suite, de même que le délai de déconnexion, compté à partir du moment où vous le modifiez."

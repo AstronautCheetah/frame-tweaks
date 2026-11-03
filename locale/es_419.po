@@ -2993,6 +2993,26 @@ msgid ""
 msgstr ""
 "Espejo de Android deja de conectarse a este teléfono de forma predeterminada. La próxima vez toma el teléfono que encuentre, o pregunta cuál si hay varios."
 
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: App switcher"
+msgstr "Botón debajo del espejo: cambiar de app"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Back"
+msgstr "Botón debajo del espejo: atrás"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume down"
+msgstr "Botón debajo del espejo: bajar volumen"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume up"
+msgstr "Botón debajo del espejo: subir volumen"
+
 #: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr "Olvidar {PHONE_NAME}"
@@ -3002,11 +3022,12 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 "Cuadros por segundo (fps, como máximo; 72-144: las frecuencias de actualización del Steam Frame)"
 
+# needs review
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
-"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."
+"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick y los botones debajo del espejo se aplican de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -3417,6 +3438,26 @@ msgstr "4 h"
 msgid "8 h"
 msgstr "8 h"
 
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher"
+msgstr "Cambiar de app"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher button"
+msgstr "Botón de cambiar de app"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back"
+msgstr "Atrás"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back button"
+msgstr "Botón de atrás"
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr "Tasa de bits (Mbit/s)"
@@ -3455,6 +3496,10 @@ msgstr "Mover el teclado"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
 msgstr "Sin compartir"
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "On"
+msgstr "Activado"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid ""
@@ -3499,6 +3544,16 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Type your PIN on the phone"
 msgstr "Escribe tu PIN en el teléfono"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume down button"
+msgstr "Botón de bajar volumen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume up button"
+msgstr "Botón de subir volumen"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3732,7 +3787,7 @@ msgstr "Medianoche"
 msgid "Normal"
 msgstr "Normal"
 
-#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+#: packs/core/arrowpad/arrowpad.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Off"
 msgstr "Desactivado"
 
@@ -5231,10 +5286,6 @@ msgstr ""
 "No se guardó: reinstala Parches del menú principal de RV (vr-dashboard) para conservar la configuración."
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "On"
-msgstr "Activado"
-
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Tinte del passthrough"
 
@@ -5550,12 +5601,12 @@ msgid "The clipboard has no text."
 msgstr "El portapapeles no tiene texto."
 
 # needs review
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume down"
 msgstr "Bajar el volumen"
 
 # needs review
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr "Subir el volumen"
 
@@ -8330,3 +8381,8 @@ msgstr "Instalador de ajustes"
 #~ "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
 #~ msgstr ""
 #~ "El Frame no muestra sus propias temperaturas, frecuencias ni memoria mientras juegas, así que una ralentización o un visor caliente es difícil de explicar. Vinculado: se instala desde su versión más reciente con su propio instalador, como lo describe su README."
+
+#~ msgid ""
+#~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+#~ msgstr ""
+#~ "La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick se aplica de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."

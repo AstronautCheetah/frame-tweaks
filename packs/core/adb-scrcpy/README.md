@@ -26,8 +26,8 @@ settings:
   about: The phone mirror's stream, joystick scrolling, its clipboard, and when it disconnects by itself.
   note: >-
     Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's
-    Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects
-    after, counted from when you change it.
+    Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so
+    does the time it disconnects after, counted from when you change it.
   options:
     - key: PHONE_MAX_SIZE
       title: "Picture size (long side, pixels)"
@@ -88,6 +88,34 @@ settings:
         - {label: "2 hours", value: "120"}
         - {label: "4 hours", value: "240"}
         - {label: "8 hours", value: "480"}
+    - key: PHONE_KEY_BACK
+      title: "Button below the mirror: Back"
+      default: "off"
+      checkbox: true
+      choices:
+        - {label: "On", value: "on"}
+        - {label: "Off", value: "off"}
+    - key: PHONE_KEY_RECENTS
+      title: "Button below the mirror: App switcher"
+      default: "off"
+      checkbox: true
+      choices:
+        - {label: "On", value: "on"}
+        - {label: "Off", value: "off"}
+    - key: PHONE_KEY_VOLUP
+      title: "Button below the mirror: Volume up"
+      default: "off"
+      checkbox: true
+      choices:
+        - {label: "On", value: "on"}
+        - {label: "Off", value: "off"}
+    - key: PHONE_KEY_VOLDOWN
+      title: "Button below the mirror: Volume down"
+      default: "off"
+      checkbox: true
+      choices:
+        - {label: "On", value: "on"}
+        - {label: "Off", value: "off"}
   actions:
     - label: "Forget {PHONE_NAME}"
       script: phone

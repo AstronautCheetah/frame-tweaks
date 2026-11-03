@@ -218,6 +218,17 @@ class UnlockKeypad(unittest.TestCase):
         self.assertGreater(downs[0][4], touches[-1][4])               # (from low on the screen, up)
         self.assertEqual(touches[-1][1], pt.UP)
 
+    def test_hardware_key_buttons(self):
+        """The buttons below the mirror press Android's Back, App switcher and volume keys; each has a
+        setting of its own, off unless turned on, in the gear's panel and the window's ⚙ Settings."""
+        self.assertEqual(pt.HW_KEYS, {"back": 4, "recents": 187, "vol_up": 24, "vol_down": 25})
+        for key in ("PHONE_KEY_BACK", "PHONE_KEY_RECENTS", "PHONE_KEY_VOLUP", "PHONE_KEY_VOLDOWN"):
+            self.assertEqual((pt.CHOICES[key], pt.DEFAULTS[key]), (("on", "off"), "off"))
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        self.assertIn("call({ a: 'hwkey', k: k2 })", js)
+        for name in pt.HW_KEYS:
+            self.assertIn(f"'{name}'", js)
+
     def test_the_layer_never_records_a_digit(self):
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
         pad = js.split("const typingPad", 1)[1].split("const hidden", 1)[0]

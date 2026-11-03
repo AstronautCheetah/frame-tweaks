@@ -60,6 +60,9 @@ KEYCODE_WAKEUP = 224                            # (Android's AKEYCODE_WAKEUP)
 # which a lock screen's PIN entry takes as from a keyboard plugged into the phone. Only these: a
 # key the layer names that isn't here is refused. (Which key was pressed is never logged.)
 UNLOCK_KEYS = {**{str(d): 7 + d for d in range(10)}, "del": 67, "enter": 66}
+# The hardware-key buttons below the mirror (the layer's {"a": "hwkey", "k": …}): Android's Back, App
+# Switcher (recent apps) and volume keys, as the phone's own buttons press them.
+HW_KEYS = {"back": 4, "recents": 187, "vol_up": 24, "vol_down": 25}
 # scrcpy versions (major) whose control protocol this was tested with: the touch and scroll
 # messages below and the server's options. scrcpy has changed them between major versions
 # before, and a mismatch would make taps go nowhere without an error, so with any other version
@@ -257,9 +260,13 @@ CHOICES = {"PHONE_MAX_SIZE": ("720", "800", "1024", "1280", "1600", "1920"),
            "PHONE_BIT_RATE": ("1M", "1500K", "2M", "3M", "4M", "6M", "8M"),
            "PHONE_MAX_FPS": ("30", "60", "72", "80", "90", "96", "108", "120", "144"),
            "PHONE_STICK_SPEED": ("8", "15", "25"), "PHONE_CLIPBOARD": ("both", "off"),
-           "PHONE_TIMEOUT": ("0", "15", "30", "60", "120", "240", "480")}     # (minutes: `phone` disconnects after)
+           "PHONE_TIMEOUT": ("0", "15", "30", "60", "120", "240", "480"),     # (minutes: `phone` disconnects after)
+           # The hardware-key buttons in a row below the mirror's grab bar, each on or off (HW_KEYS)
+           "PHONE_KEY_BACK": ("on", "off"), "PHONE_KEY_RECENTS": ("on", "off"),
+           "PHONE_KEY_VOLUP": ("on", "off"), "PHONE_KEY_VOLDOWN": ("on", "off")}
 DEFAULTS = {"PHONE_MAX_SIZE": "1024", "PHONE_BIT_RATE": "2M", "PHONE_MAX_FPS": "60", "PHONE_STICK_SPEED": "15",
-            "PHONE_CLIPBOARD": "both", "PHONE_TIMEOUT": "60"}
+            "PHONE_CLIPBOARD": "both", "PHONE_TIMEOUT": "60", "PHONE_KEY_BACK": "off", "PHONE_KEY_RECENTS": "off",
+            "PHONE_KEY_VOLUP": "off", "PHONE_KEY_VOLDOWN": "off"}
 PHONE_PIDFILE = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}") / "sft-phone.pid"   # written by `phone` (same folder)
 PHONE_RESTART = PHONE_PIDFILE.with_name("sft-phone.restart")      # (the request; `phone` removes it)
 
@@ -532,6 +539,11 @@ def serve(phone, sd, state):
                             continue
                         if req["a"] == "key":             # (the unlock keypad: never logged, what it typed)
                             code = UNLOCK_KEYS.get(str(req.get("k")))
+                            if code is not None:
+                                phone.key(code)
+                            continue
+                        if req["a"] == "hwkey":
+                            code = HW_KEYS.get(str(req.get("k")))
                             if code is not None:
                                 phone.key(code)
                             continue

@@ -3360,6 +3360,26 @@ msgstr ""
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: App switcher"
+msgstr "Knop onder de spiegel: app wisselen"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Back"
+msgstr "Knop onder de spiegel: terug"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume down"
+msgstr "Knop onder de spiegel: volume lager"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume up"
+msgstr "Knop onder de spiegel: volume hoger"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr "{PHONE_NAME} vergeten"
 
@@ -3372,9 +3392,9 @@ msgstr ""
 # needs review
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
-"Beeld, framesnelheid en het klembord gelden vanaf de volgende start van de spiegel (of na Stream herstarten via het tandwiel, in VR). De joysticksnelheid geldt meteen, net als de tijd waarna de verbinding vanzelf verbroken wordt, gerekend vanaf je wijziging."
+"Beeld, framesnelheid en het klembord gelden vanaf de volgende start van de spiegel (of na Stream herstarten via het tandwiel, in VR). De joysticksnelheid en de knoppen onder de spiegel gelden meteen, net als de tijd waarna de verbinding vanzelf verbroken wordt, gerekend vanaf je wijziging."
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
@@ -3860,6 +3880,26 @@ msgid "8 h"
 msgstr "8 u"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher"
+msgstr "App wisselen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher button"
+msgstr "Knop app wisselen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back"
+msgstr "Terug"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back button"
+msgstr "Terugknop"
+
+# needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr "Bitrate (Mbit/s)"
@@ -3903,6 +3943,11 @@ msgstr "Het toetsenblok verplaatsen"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
 msgstr "Niet gedeeld"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "On"
+msgstr "Aan"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3952,6 +3997,16 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Type your PIN on the phone"
 msgstr "Je pincode op de telefoon typen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume down button"
+msgstr "Knop volume lager"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume up button"
+msgstr "Knop volume hoger"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -4228,7 +4283,7 @@ msgid "Normal"
 msgstr "Normaal"
 
 # needs review
-#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+#: packs/core/arrowpad/arrowpad.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Off"
 msgstr "Uit"
 
@@ -5879,11 +5934,6 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "On"
-msgstr "Aan"
-
-# needs review
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Tint van Kamerweergave"
 
@@ -6269,12 +6319,12 @@ msgid "The clipboard has no text."
 msgstr "Er staat geen tekst op het klembord."
 
 # needs review
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume down"
 msgstr "Volume verlagen"
 
 # needs review
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr "Volume verhogen"
 
@@ -8699,3 +8749,9 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
 #~ msgstr ""
 #~ "De Frame toont zijn eigen temperaturen, kloksnelheden of geheugen niet terwijl je speelt, dus een vertraging of een warme headset is moeilijk te verklaren. Gekoppeld: het wordt geïnstalleerd vanuit de nieuwste versie, met het eigen installatieprogramma, zoals de README het beschrijft."
+
+#~ # needs review
+#~ msgid ""
+#~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+#~ msgstr ""
+#~ "Beeld, framesnelheid en het klembord gelden vanaf de volgende start van de spiegel (of na Stream herstarten via het tandwiel, in VR). De joysticksnelheid geldt meteen, net als de tijd waarna de verbinding vanzelf verbroken wordt, gerekend vanaf je wijziging."

@@ -2584,6 +2584,22 @@ msgid ""
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: App switcher"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Back"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume down"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Volume up"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr ""
 
@@ -2593,7 +2609,7 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
@@ -2958,6 +2974,22 @@ msgstr ""
 msgid "8 h"
 msgstr ""
 
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "App switcher button"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Back button"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr ""
@@ -2992,6 +3024,10 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "On"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3030,6 +3066,14 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Type your PIN on the phone"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume down button"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Volume up button"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3246,7 +3290,7 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad.py packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+#: packs/core/arrowpad/arrowpad.py packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Off"
 msgstr ""
 
@@ -4508,10 +4552,6 @@ msgid ""
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "On"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr ""
 
@@ -4811,11 +4851,11 @@ msgstr ""
 msgid "The clipboard has no text."
 msgstr ""
 
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume down"
 msgstr ""
 
-#: packs/core/snip/frame-snip
+#: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr ""
 

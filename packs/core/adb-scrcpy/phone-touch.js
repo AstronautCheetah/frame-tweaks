@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 24;
+  const NAME = 'phone-touch', VERSION = 25;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -271,6 +271,11 @@
     [N('Disconnect by itself after'), 'PHONE_TIMEOUT',
      [[N('Never'), '0'], [N('15 min'), '15'], [N('30 min'), '30'], [N('1 h'), '60'], [N('2 h'), '120'], [N('4 h'), '240'],
       [N('8 h'), '480']], false],
+    // The hardware-key buttons in a row below the grab bar (hwKeys), each on or off
+    [N('Back button'), 'PHONE_KEY_BACK', [[N('On'), 'on'], [N('Off'), 'off']], false],
+    [N('App switcher button'), 'PHONE_KEY_RECENTS', [[N('On'), 'on'], [N('Off'), 'off']], false],
+    [N('Volume up button'), 'PHONE_KEY_VOLUP', [[N('On'), 'on'], [N('Off'), 'off']], false],
+    [N('Volume down button'), 'PHONE_KEY_VOLDOWN', [[N('On'), 'on'], [N('Off'), 'off']], false],
   ];
   // A restart (Restart stream, or phone reconnecting) makes a new window, which the dashboard docks
   // or floats somewhere of its own. Where a floating mirror was (and whether its settings were
@@ -351,7 +356,8 @@
     }
   };
   const DEFAULTS = { PHONE_MAX_SIZE: '1024', PHONE_BIT_RATE: '2M', PHONE_MAX_FPS: '60', PHONE_STICK_SPEED: '15',
-                     PHONE_CLIPBOARD: 'both', PHONE_TIMEOUT: '60' };
+                     PHONE_CLIPBOARD: 'both', PHONE_TIMEOUT: '60', PHONE_KEY_BACK: 'off', PHONE_KEY_RECENTS: 'off',
+                     PHONE_KEY_VOLUP: 'off', PHONE_KEY_VOLDOWN: 'off' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
   let redraw = () => {};
@@ -440,6 +446,34 @@
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
              T('Picture and smoothness apply when the stream restarts; joystick speed and disconnecting at once.')))));
   };
+  // The phone's hardware keys, as buttons in a row below the window's grab bar (the ones the
+  // settings turn on): Back, App switcher (recent apps), Volume up and down, sent as the phone's own
+  // keys (phone-touch HW_KEYS).
+  const BOTTOM_CENTER = 7, BAR_M = 0.06, KEY_M = 0.05;
+  const HW = [['PHONE_KEY_BACK', 'back', 'M15 5 8 12l7 7', N('Back')],
+              ['PHONE_KEY_RECENTS', 'recents', 'M6 6h12v12H6z', N('App switcher')],
+              ['PHONE_KEY_VOLDOWN', 'vol_down', 'M4 9v6h4l5 4V5L8 9zM16 12h5', N('Volume down')],
+              ['PHONE_KEY_VOLUP', 'vol_up', 'M4 9v6h4l5 4V5L8 9zM16 12h5M18.5 9.5v5', N('Volume up')]];
+  const hwKeys = (f, k, H) => {
+    const conf = window.__sftPhoneTouchConf || {}, on = HW.filter(([key]) => conf[key] === 'on');
+    const id = on.length && typeof f.activePage?.GetPanelAnchorID === 'function' && f.activePage.GetPanelAnchorID(BOTTOM_CENTER);
+    if (!id) return null;
+    const h = hueOf(), px = 60;
+    return el(XFORM, { key: `${f.frameID}-sft-keys`, parent_id: id,
+                       translation: { y: -(GAP_M * k + BAR_M * k + KEY_M * k / 2), z: LIFT_M * k } },
+      el(PANEL, { key: `${f.frameID}-sft-keys-p`, width: KEY_M * k * on.length, interactive: true,
+        only_visible_with_laser: false, debug_name: 'SftPhoneKeys', origin: 4,
+        inputFocusParams: { bCanTakeKeyboardFocus: false } },
+        el('div', { style: { display: 'flex', width: `${px * on.length}px`, height: `${px}px` } },
+          ...on.map(([, k2, d, label]) => el('div', { key: k2, ...tap(), title: T(label),
+              onClick: () => call({ a: 'hwkey', k: k2 }),
+              style: { width: `${px - 8}px`, height: `${px - 8}px`, margin: '4px', borderRadius: '50%',
+                       display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box',
+                       background: `hsla(${h}, 18%, 20%, 0.8)`, border: `2px solid hsla(${h}, 60%, 68%, 0.7)` } },
+            el('svg', { width: 30, height: 30, viewBox: '0 0 24 24' },
+              el('path', { d, fill: 'none', stroke: `hsl(${h}, 65%, 82%)`, strokeWidth: 2,
+                           strokeLinecap: 'round', strokeLinejoin: 'round' })))))));
+  };
   const buildExtras = (f) => {
     const page = f.activePage, sz = page?.size;
     const H = sz?.latestMeasuredPanelLocalHeight, Hw = sz?.latestMeasuredPanelWorldHeight;
@@ -447,7 +481,8 @@
     if (!H || !Hw || !id) return [];
     const k = H / Hw, c = pictureSize(page);
     const beside = f.docking?.dockLocation === DASH && c && c.w < c.h;      // upright, docked
-    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null];
+    return [gear(f, k, H, id, beside), settingsOpen.has(f.frameID) ? settings(f, k, id, beside) : null,
+            hwKeys(f, k, H)];
   };
 
   const sizes = (f) => {
