@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 28;
+  const NAME = 'phone-touch', VERSION = 29;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -367,6 +367,7 @@
                      PHONE_KEY_VOLUP: 'off', PHONE_KEY_VOLDOWN: 'off', PHONE_KEY_POWER: 'off', PHONE_KEY_NOTIFY: 'off' };
   const settingsOpen = new Set();               // frame IDs whose panel is showing
   let pending = false;                          // a picture change waits for "Restart stream"
+  let dragKey = null, dragMoved = false;        // a button being dragged by its handle (settings)
   let redraw = () => {};
   const call = (req) => { try { window.sftPhoneTouch(JSON.stringify(req)); } catch (e) {} };
   const hueOf = () => {
@@ -411,15 +412,41 @@
       border: `1px solid ${on ? `hsla(${h}, 60%, 70%, 0.9)` : 'rgba(255, 255, 255, 0.15)'}` } }, T(label));
     const rows = [];
     const isToggle = (choices) => choices.length === 2 && choices[0][1] === 'on' && choices[1][1] === 'off';
-    // The on/off ones (the buttons below the mirror): one compact row each, the name and a switch.
+    // The on/off ones (the buttons below the mirror): one compact row each, a grab handle, the name
+    // and a switch. Drag a handle up or down to change the buttons' order below the mirror.
+    const order = keyOrder(conf);
+    const moveTo = (name) => {
+      if (!dragKey || dragKey === name) return;
+      const next = order.filter((n) => n !== dragKey);
+      next.splice(next.indexOf(name) + (order.indexOf(dragKey) < order.indexOf(name) ? 1 : 0), 0, dragKey);
+      window.__sftPhoneTouchConf = { ...conf, PHONE_KEY_ORDER: next.join(',') };
+      dragMoved = true;
+      redraw();
+    };
+    const endDrag = () => {
+      if (dragKey && dragMoved) call({ a: 'set', conf: { PHONE_KEY_ORDER: (window.__sftPhoneTouchConf || {}).PHONE_KEY_ORDER } });
+      dragKey = null;
+      dragMoved = false;
+      redraw();
+    };
     const toggle = (title, key) => {
-      const on = conf[key] === 'on';
+      const on = conf[key] === 'on', name = HW.find((x) => x[0] === key)?.[1];
       return el('div', { key: `s-${key}`, ...tap(), onClick: () => {
           window.__sftPhoneTouchConf = { ...conf, [key]: on ? 'off' : 'on' };
           call({ a: 'set', conf: { [key]: on ? 'off' : 'on' } });
           redraw();
-        }, style: { display: 'flex', alignItems: 'center', padding: '7px 6px', margin: '2px 0', borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.04)' } },
+        }, onMouseEnter: () => { buzz('Enter'); moveTo(name); },
+        style: { display: 'flex', alignItems: 'center', padding: '7px 6px', margin: '2px 0', borderRadius: '8px',
+                 background: dragKey === name ? `hsla(${h}, 40%, 30%, 0.8)` : 'rgba(255, 255, 255, 0.04)' } },
+        el('div', { title: T('Drag to change the order'), style: { padding: '0 10px 0 4px', fontSize: '22px', color: '#9aa6b2',
+                                                                 cursor: 'grab' },
+                    onMouseDown: (ev) => {
+                      ev.stopPropagation(); ev.preventDefault(); buzz('Snap');
+                      dragKey = name; dragMoved = false;
+                      window.addEventListener('mouseup', endDrag, { once: true, capture: true });
+                      redraw();
+                    },
+                    onClick: (ev) => ev.stopPropagation() }, '⠿'),
         el('div', { style: { flex: '1', fontSize: '18px', color: '#d8dee6' } }, T(title)),
         el('div', { style: { width: '46px', height: '26px', borderRadius: '13px', position: 'relative',
                              background: on ? `hsla(${h}, 50%, 45%, 0.95)` : 'rgba(255, 255, 255, 0.15)',
@@ -434,8 +461,13 @@
           toggles = true;
           rows.push(el('div', { key: 'buttons-below', style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 4px' } },
                        T('Buttons below the mirror')));
+          // (all of them here, in the buttons' order: the rest of OPTIONS' on/off ones are skipped)
+          const named = order.map((n) => HW.find((x) => x[1] === n)?.[0]);
+          for (const k2 of named) {
+            const opt = OPTIONS.find((o) => o[1] === k2);
+            if (opt) rows.push(toggle(opt[0], k2));
+          }
         }
-        rows.push(toggle(title, key));
         continue;
       }
       rows.push(el('div', { key: `t-${key}`, style: { fontSize: '17px', color: '#9aa6b2', margin: '14px 4px 2px' } }, T(title)));
@@ -490,11 +522,18 @@
               ['PHONE_KEY_VOLUP', 'vol_up', 'M4 9v6h4l5 4V5L8 9zM16 12h5M18.5 9.5v5', N('Volume up')],
               ['PHONE_KEY_POWER', 'power', 'M12 3v8M7.5 6.2a7 7 0 1 0 9 0', N('Power')],
               ['PHONE_KEY_NOTIFY', 'notifications', 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0', N('Notifications')]];
+  // The buttons' order (phone-touch's PHONE_KEY_ORDER, names comma-separated; the gear's panel
+  // changes it by dragging the handles), any it leaves out last in the usual order.
+  const keyOrder = (conf) => {
+    const named = [...new Set(String(conf.PHONE_KEY_ORDER || '').split(','))].filter((n) => HW.some((x) => x[1] === n));
+    return [...named, ...HW.map((x) => x[1]).filter((n) => !named.includes(n))];
+  };
   // One panel of a constant size, always there while the mirror is (the buttons turned off are
   // only hidden inside it): a panel made anew, or resized, as buttons were turned on or off was
   // drawn for a moment at its picture's size in the middle of the mirror before going below it.
   const hwKeys = (f, k, H) => {
-    const conf = window.__sftPhoneTouchConf || {}, on = HW.filter(([key]) => conf[key] === 'on');
+    const conf = window.__sftPhoneTouchConf || {};
+    const on = keyOrder(conf).map((n) => HW.find((x) => x[1] === n)).filter((x) => x && conf[x[0]] === 'on');
     const id = typeof f.activePage?.GetPanelAnchorID === 'function' && f.activePage.GetPanelAnchorID(BOTTOM_CENTER);
     if (!id) return null;
     const h = hueOf(), px = 60;

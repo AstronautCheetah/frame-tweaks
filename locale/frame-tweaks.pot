@@ -3015,6 +3015,10 @@ msgstr ""
 msgid "Disconnect by itself after"
 msgstr ""
 
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Drag to change the order"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Fast"
 msgstr ""

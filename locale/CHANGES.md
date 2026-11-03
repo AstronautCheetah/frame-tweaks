@@ -7,4 +7,6 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 `dev/i18n.py export` hands translators what a changed text was, and its old translation, to
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
-Nothing waiting: no English text has changed since the languages last caught up.
+## 2026-11-03
+- New in `packs/core/adb-scrcpy/phone-touch.js:441`
+  - now: "Drag to change the order"

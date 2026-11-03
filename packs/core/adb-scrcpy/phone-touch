@@ -281,21 +281,39 @@ PHONE_PIDFILE = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid
 PHONE_RESTART = PHONE_PIDFILE.with_name("sft-phone.restart")      # (the request; `phone` removes it)
 
 
+# The order of the buttons below the mirror (the gear's panel: dragged by their handles), as their
+# names comma-separated. Not one of CHOICES (an order isn't a listed value): checked here instead.
+ORDER_KEY = "PHONE_KEY_ORDER"
+KEY_NAMES = ("back", "recents", "vol_down", "vol_up", "power", "notifications")
+
+
+def key_order(text):
+    """The buttons' order from PHONE_KEY_ORDER: its known names, once each, in its order, then any
+    it leaves out in the usual order (a file from before a button existed)."""
+    named = [n for n in dict.fromkeys(str(text or "").split(",")) if n in KEY_NAMES]
+    return named + [n for n in KEY_NAMES if n not in named]
+
+
 def read_conf(path=CONF):
     conf = dict(DEFAULTS)
-    conf.update({k: v for k, v in ftconf.read_shell(path).items() if k in CHOICES and v in CHOICES[k]})
+    raw = ftconf.read_shell(path)
+    conf.update({k: v for k, v in raw.items() if k in CHOICES and v in CHOICES[k]})
+    conf[ORDER_KEY] = ",".join(key_order(raw.get(ORDER_KEY)))
     return conf
 
 
 def write_conf(changes, path=CONF):
     """Set these keys (allowed values only) in the file, keeping its other lines."""
-    ftconf.set_shell(path, {k: str(v) for k, v in changes.items() if k in CHOICES and str(v) in CHOICES[k]})
+    keep = {k: str(v) for k, v in changes.items() if k in CHOICES and str(v) in CHOICES[k]}
+    if ORDER_KEY in changes:
+        keep[ORDER_KEY] = ",".join(key_order(changes[ORDER_KEY]))
+    ftconf.set_shell(path, keep)
 
 
 def reset_conf(path=CONF):
     """Back to the defaults: remove our keys' lines, keeping the rest of the file."""
     if path.exists():
-        ftconf.set_shell(path, drop=CHOICES)
+        ftconf.set_shell(path, drop=[*CHOICES, ORDER_KEY])
 
 
 def running(pidfile, name):

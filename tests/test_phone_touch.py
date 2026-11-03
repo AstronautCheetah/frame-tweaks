@@ -357,6 +357,35 @@ class Settings(unittest.TestCase):
             self.assertEqual(pt.read_conf(conf)["PHONE_BIT_RATE"], "2M")
 
 
+class ButtonOrder(unittest.TestCase):
+    def test_order_round_trips_and_resets(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            conf = Path(d) / "phone.conf"
+            self.assertEqual(pt.read_conf(conf)[pt.ORDER_KEY], ",".join(pt.KEY_NAMES))
+            pt.write_conf({pt.ORDER_KEY: "power,back"}, conf)
+            self.assertEqual(pt.read_conf(conf)[pt.ORDER_KEY].split(","),
+                             ["power", "back", "recents", "vol_down", "vol_up", "notifications"])
+            pt.reset_conf(conf)
+            self.assertEqual(conf.read_text(), "")
+
+    def test_any_text_gives_each_button_once(self):
+        import random
+        rng = random.Random(7)
+        parts = [*pt.KEY_NAMES, "", " ", "evil", "$(rm -rf ~)", "back ", ";"]
+        for _ in range(2000):
+            text = ",".join(rng.choice(parts) for _ in range(rng.randrange(0, 12)))
+            got = pt.key_order(text)
+            self.assertEqual(sorted(got), sorted(pt.KEY_NAMES), text)
+            self.assertEqual(pt.key_order(",".join(got)), got)       # (a saved order reads back the same)
+
+    def test_panel_knows_the_same_buttons(self):
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        hw = re.search(r"const HW = \[(.*?)\]\];", js, re.S).group(1)
+        self.assertEqual(tuple(re.findall(r"\['PHONE_KEY_\w+', '(\w+)'", hw)), pt.KEY_NAMES)
+        self.assertNotIn(pt.ORDER_KEY, pt.CHOICES)            # (not a settings-page option: dragged in VR)
+
+
 class Defaults(unittest.TestCase):
     def test_panel_and_helper_agree(self):
         import re
