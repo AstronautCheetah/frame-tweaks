@@ -206,6 +206,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Scroll strips have sharp edges:** their borders looked fuzzy beside the gear and Android Mirror's buttons; the strips are now drawn three times as thick in the dashboard's page, and shorter, so they take less of it than before and cover nothing else in VR.
 - **No more "repeated failed attempts to gain access to a wallet":** to tell whether the wallet has a password, Frame Tweaks tried it once with none; every save into the wallet made it try again, and kwalletd counted each try as a failed attempt. A wallet known to have a password isn't tried again.
 - **Dictation's start sound plays at once with Bluetooth headphones:** SteamOS stops their audio while an app records (SteamOS issue #2896), so the sound waited until the recording stopped; it now plays before the microphone opens.
 - **A tweak's row follows its settings:** after a change in ⚙ Settings (Dictation's button from Menu to Y, say), its status line still named the old one until the window was refreshed; it's checked again at once.
