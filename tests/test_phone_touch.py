@@ -222,12 +222,20 @@ class UnlockKeypad(unittest.TestCase):
         """The buttons below the mirror press Android's Back, App switcher and volume keys; each has a
         setting of its own, off unless turned on, in the gear's panel and the window's ⚙ Settings."""
         self.assertEqual(pt.HW_KEYS, {"back": 4, "recents": 187, "vol_up": 24, "vol_down": 25, "power": 26})
-        for key in ("PHONE_KEY_BACK", "PHONE_KEY_RECENTS", "PHONE_KEY_VOLUP", "PHONE_KEY_VOLDOWN", "PHONE_KEY_POWER"):
+        for key in ("PHONE_KEY_BACK", "PHONE_KEY_RECENTS", "PHONE_KEY_VOLUP", "PHONE_KEY_VOLDOWN", "PHONE_KEY_POWER",
+                    "PHONE_KEY_NOTIFY"):
             self.assertEqual((pt.CHOICES[key], pt.DEFAULTS[key]), (("on", "off"), "off"))
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
         self.assertIn("call({ a: 'hwkey', k: k2 })", js)
         for name in pt.HW_KEYS:
             self.assertIn(f"'{name}'", js)
+
+    def test_the_notifications_button_opens_then_closes_the_panel(self):
+        """scrcpy's own messages: 5 opens the phone's notification panel, 7 closes it again."""
+        p = phone()
+        p.notifications()
+        p.notifications()
+        self.assertEqual([c[0][0] for c in p.sock.sendall.call_args_list], [b"\x05", b"\x07"])
 
     def test_the_layer_never_records_a_digit(self):
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()

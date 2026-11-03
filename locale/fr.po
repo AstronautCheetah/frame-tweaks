@@ -3384,6 +3384,13 @@ msgstr "Bouton sous le miroir : retour"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
+msgid ""
+"Button below the mirror: Notifications (open or close the phone's panel)"
+msgstr ""
+"Bouton sous le miroir : notifications (ouvre ou ferme le volet du téléphone)"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
 msgid "Button below the mirror: Power (screen off or on)"
 msgstr "Bouton sous le miroir : marche/arrêt (écran éteint ou allumé)"
 
@@ -3926,6 +3933,11 @@ msgstr "Débit (Mbit/s)"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
+msgid "Buttons below the mirror"
+msgstr "Boutons sous le miroir"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
 msgid "Clipboard with the phone"
 msgstr "Presse-papiers avec le téléphone"
 
@@ -3963,6 +3975,16 @@ msgstr "Déplacer le pavé"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
 msgstr "Non partagé"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Notifications"
+msgstr "Notifications"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Notifications button"
+msgstr "Bouton notifications"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
@@ -5825,7 +5847,7 @@ msgid "System"
 msgstr "Système"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/cuff/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
 msgid "VR environment"
 msgstr "Environnement VR"
 
@@ -7691,7 +7713,7 @@ msgstr ""
 "Claude pour ordinateur, l'application Linux officielle d'Anthropic (arm64), installée dans votre dossier personnel et mise à jour d'une seule commande."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cuff/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
 msgid "from"
 msgstr "de"
 
@@ -8329,31 +8351,6 @@ msgstr ""
 "Le paramètre kwallet6 est conservé : la clé de la base de données de Signal se trouve maintenant dans le portefeuille, et revenir en arrière vous en bloquerait l'accès."
 
 # needs review
-#: packs/third-party/cuff/README.md
-msgid "A wrist panel in VR with the time, batteries, quick actions and tabs"
-msgstr ""
-"Un panneau au poignet en VR avec l'heure, les batteries, des actions rapides et des onglets"
-
-# needs review
-#: packs/third-party/cuff/README.md
-msgid "Cuff"
-msgstr "Cuff"
-
-# needs review
-#: packs/third-party/cuff/README.md
-msgid ""
-"Look at the back of your wrist in VR and a panel is there: the time, the headset's, the controllers' and Bluetooth headphones' batteries, six quick actions (dictation, mic mute, passthrough, recenter, the SteamVR keyboard, a screenshot), and tabs for what's playing, audio, a timer and performance. Touch it with the sphere in front of your other controller."
-msgstr ""
-"Regardez le dos de votre poignet en VR et un panneau s'y trouve : l'heure, les batteries du casque, des contrôleurs et des écouteurs Bluetooth, six actions rapides (dictée, coupure du micro, vue de la pièce, recentrage, le clavier SteamVR, une capture d'écran), et des onglets pour la lecture en cours, l'audio, un minuteur et les performances. Touchez-le avec la sphère devant votre autre contrôleur."
-
-# needs review
-#: packs/third-party/cuff/README.md
-msgid ""
-"The Frame has no glanceable status in VR: the time and batteries are behind the dashboard. Linked: [Cuff](https://github.com/Brobert-in-aus/cuff) installs itself on the Frame, the way its README describes, at the commit Frame Tweaks tried it at."
-msgstr ""
-"Le Frame n'affiche aucun état visible d'un coup d'œil en VR : l'heure et les batteries sont derrière le tableau de bord. Lié : [Cuff](https://github.com/Brobert-in-aus/cuff) s'installe lui-même sur le Frame, comme le décrit son README, au commit auquel Frame Tweaks l'a essayé."
-
-# needs review
 #: packs/third-party/cursor/README.md
 msgid ""
 "In desktop mode on the Frame, the mouse moves but its pointer isn't shown: the desktop draws it on a separate layer that the headset's view leaves out."
@@ -8805,3 +8802,24 @@ msgstr "Installateur d'ajustements"
 #~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed applies at once, and so does the time it disconnects after, counted from when you change it."
 #~ msgstr ""
 #~ "L'image, la fréquence d'images et le presse-papiers s'appliquent au prochain démarrage du miroir (ou avec « Redémarrer le flux » sous sa roue dentée, en VR). La vitesse du stick s'applique tout de suite, de même que le délai de déconnexion, compté à partir du moment où vous le modifiez."
+
+#~ # needs review
+#~ msgid "A wrist panel in VR with the time, batteries, quick actions and tabs"
+#~ msgstr ""
+#~ "Un panneau au poignet en VR avec l'heure, les batteries, des actions rapides et des onglets"
+
+#~ # needs review
+#~ msgid "Cuff"
+#~ msgstr "Cuff"
+
+#~ # needs review
+#~ msgid ""
+#~ "Look at the back of your wrist in VR and a panel is there: the time, the headset's, the controllers' and Bluetooth headphones' batteries, six quick actions (dictation, mic mute, passthrough, recenter, the SteamVR keyboard, a screenshot), and tabs for what's playing, audio, a timer and performance. Touch it with the sphere in front of your other controller."
+#~ msgstr ""
+#~ "Regardez le dos de votre poignet en VR et un panneau s'y trouve : l'heure, les batteries du casque, des contrôleurs et des écouteurs Bluetooth, six actions rapides (dictée, coupure du micro, vue de la pièce, recentrage, le clavier SteamVR, une capture d'écran), et des onglets pour la lecture en cours, l'audio, un minuteur et les performances. Touchez-le avec la sphère devant votre autre contrôleur."
+
+#~ # needs review
+#~ msgid ""
+#~ "The Frame has no glanceable status in VR: the time and batteries are behind the dashboard. Linked: [Cuff](https://github.com/Brobert-in-aus/cuff) installs itself on the Frame, the way its README describes, at the commit Frame Tweaks tried it at."
+#~ msgstr ""
+#~ "Le Frame n'affiche aucun état visible d'un coup d'œil en VR : l'heure et les batteries sont derrière le tableau de bord. Lié : [Cuff](https://github.com/Brobert-in-aus/cuff) s'installe lui-même sur le Frame, comme le décrit son README, au commit auquel Frame Tweaks l'a essayé."

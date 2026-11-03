@@ -123,6 +123,13 @@ settings:
       choices:
         - {label: "On", value: "on"}
         - {label: "Off", value: "off"}
+    - key: PHONE_KEY_NOTIFY
+      title: "Button below the mirror: Notifications (open or close the phone's panel)"
+      default: "off"
+      checkbox: true
+      choices:
+        - {label: "On", value: "on"}
+        - {label: "Off", value: "off"}
   actions:
     - label: "Forget {PHONE_NAME}"
       script: phone

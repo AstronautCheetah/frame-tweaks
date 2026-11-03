@@ -70,7 +70,7 @@
   desktop's clipboard.
 
 ### Added
-- **Android Mirror: hardware-key buttons** below the mirror's grab bar, in VR: Back, App switcher, Volume up, Volume down and Power, each turned on in ⚙ Settings or the gear's panel (all off by default).
+- **Android Mirror: hardware-key buttons** below the mirror's grab bar, in VR: Back, App switcher, Volume up, Volume down, Power and Notifications (opens the phone's notification panel; again, closes it), each turned on in ⚙ Settings or the gear's panel (all off by default); the gear's panel shows them as one compact row each, the name and a switch.
 - **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice in the mirror now says why while one is in front. Two ways to unlock it blind: **Type PIN**, a keypad that types on the phone as a keyboard would (digits, ⌫, ↵, and Wake / show PIN; one dot per digit, nothing logged), and **Where the digits are**, a reference PIN pad over the picture with arrows to nudge it onto the phone's own, for screens that don't take typed keys (taps go through it). Both go within about a second of the phone unlocking. The phone's fingerprint or face prompt gets a notice of its own (use its sensor, or Use PIN on the phone and type the PIN here), and a fingerprint shows where the phone's under-screen sensor is.
 - **Tweaks whose files changed since you installed them say so:** after the checkout changes
   (a `git pull`, a pack you edit), an installed tweak keeps running its old copy until its
@@ -108,11 +108,8 @@
   newest GitHub release, checked against its `SHA256SUMS`, with its own installer.
 - **KnockThru** (3rd Party, linked, experimental): VioletTides' KnockThru turns passthrough on or
   off when you knock. It needs CEF Remote Debugging on; its page says what that allows.
-- **Cuff** (3rd Party, linked, experimental): Brobert-in-aus' Cuff, a wrist panel in VR with the
-  time, batteries, quick actions and tabs. Installed at the commit Frame Tweaks tried it at, with
-  its own installer; it downloads its own speech model (about 650 MB). With Frame Tweaks'
-  Dictation installed first, Cuff's dictation button uses it (`dictate --ptt`): one engine,
-  language and history, and Cuff's own model isn't loaded.
+- **`dictate --ptt`:** push to talk for another program's dictation button, such as Cuff's
+  `[dictation]` command (records until it's told to stop, then hands back the text).
 - **Wallet apps protects terminal tools from Homebrew too**, such as Claude Code's `claude`: the
   page lists the commands of the formulae you installed and of casks, and **Protect** makes one ask
   for the wallet password first while the wallet is locked, with the wallet as its keyring (where
@@ -153,12 +150,12 @@
   `mirror_max`). Opened from Steam's "+" menu, Android Mirror ran inside Steam's own service,
   which nothing limited; it now runs in a scope of its own.
 - **Linked projects install the version Frame Tweaks tested:** ticking one (Recline, Full
-  Keyboard, Performance Overlay, KnockThru, Cuff) installs the release Frame Tweaks tested, and
-  its row says so. They used to install whatever was newest (Cuff: one fixed commit).
+  Keyboard, Performance Overlay, KnockThru) installs the release Frame Tweaks tested, and
+  its row says so. They used to install whatever was newest.
 - **A newer release is offered, marked untested:** "↑ *version* available (not yet tested by
   Frame Tweaks) · Update" installs it with the project's own installer, checksums checked as
   before. Once it's installed, **↩ Back to the tested version** installs the tested one again.
-  Cuff, which has no releases, offers its newest commit the same way.
+  A project with no releases can be linked at a commit, and offers its newest commit the same way.
 - **Frame Tweaks' updates** move a linked tweak installed at the tested version to the newer one
   a release has tested, and never to an untested one by themselves.
 - **`./install.sh link-version ID [tested|newest]`** shows a linked tweak's versions, or installs
@@ -209,6 +206,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **No more "repeated failed attempts to gain access to a wallet":** to tell whether the wallet has a password, Frame Tweaks tried it once with none; every save into the wallet made it try again, and kwalletd counted each try as a failed attempt. A wallet known to have a password isn't tried again.
 - **Dictation's start sound plays at once with Bluetooth headphones:** SteamOS stops their audio while an app records (SteamOS issue #2896), so the sound waited until the recording stopped; it now plays before the microphone opens.
 - **A tweak's row follows its settings:** after a change in ⚙ Settings (Dictation's button from Menu to Y, say), its status line still named the old one until the window was refreshed; it's checked again at once.
 - **"Opened in Firefox" stays up:** the pop-up after a link went within a second when Firefox took the focus (Qt hides a tooltip then); it's now a pop-up of its own that stays 10 seconds (longer for long texts), or until you click it.

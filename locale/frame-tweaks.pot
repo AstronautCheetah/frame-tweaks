@@ -2592,6 +2592,11 @@ msgid "Button below the mirror: Back"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
+msgid ""
+"Button below the mirror: Notifications (open or close the phone's panel)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
 msgid "Button below the mirror: Power (screen off or on)"
 msgstr ""
 
@@ -2999,6 +3004,10 @@ msgid "Bit rate (Mbit/s)"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
+msgid "Buttons below the mirror"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
 msgid "Clipboard with the phone"
 msgstr ""
 
@@ -3028,6 +3037,14 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Not shared"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Notifications"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Notifications button"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
@@ -4453,7 +4470,7 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/cuff/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
 msgid "VR environment"
 msgstr ""
 
@@ -5865,7 +5882,7 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cuff/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
 msgid "from"
 msgstr ""
 
@@ -6344,24 +6361,6 @@ msgstr ""
 #: packs/integrations/signal/uninstall.sh
 msgid ""
 "The kwallet6 setting stays: Signal's database key now lives in the wallet, and switching back would lock you out."
-msgstr ""
-
-#: packs/third-party/cuff/README.md
-msgid "A wrist panel in VR with the time, batteries, quick actions and tabs"
-msgstr ""
-
-#: packs/third-party/cuff/README.md
-msgid "Cuff"
-msgstr ""
-
-#: packs/third-party/cuff/README.md
-msgid ""
-"Look at the back of your wrist in VR and a panel is there: the time, the headset's, the controllers' and Bluetooth headphones' batteries, six quick actions (dictation, mic mute, passthrough, recenter, the SteamVR keyboard, a screenshot), and tabs for what's playing, audio, a timer and performance. Touch it with the sphere in front of your other controller."
-msgstr ""
-
-#: packs/third-party/cuff/README.md
-msgid ""
-"The Frame has no glanceable status in VR: the time and batteries are behind the dashboard. Linked: [Cuff](https://github.com/Brobert-in-aus/cuff) installs itself on the Frame, the way its README describes, at the commit Frame Tweaks tried it at."
 msgstr ""
 
 #: packs/third-party/cursor/README.md
