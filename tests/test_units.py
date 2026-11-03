@@ -30,7 +30,10 @@ exit 0'''
 # RUN_EXEC, it also runs the command after "--", as the unit would.
 SYSTEMD_RUN = r'''printf '%s\n' "$@" > "$HOME/run-args"
 echo "$XDG_RUNTIME_DIR" > "$HOME/run-runtime"
-if [ -n "${RUN_EXEC:-}" ]; then while [ $# -gt 0 ] && [ "$1" != -- ]; do shift; done; shift; "$@"; fi
+if [ -n "${RUN_EXEC:-}" ]; then
+    while [ $# -gt 0 ] && [ "$1" != -- ]; do case $1 in --setenv=*) export "${1#--setenv=}" ;; esac; shift; done
+    shift; "$@"
+fi
 exit "${RUN_STATUS:-0}"'''
 
 
@@ -229,6 +232,21 @@ class DetachedTmux(Sandbox):
         self.assertRegex(args[i + 3], r"^ft-install-\d+$")
         self.assertIn("status", args)                                 # (its status bar off)
         self.assertTrue(any("attach-session" in c for c in self.calls()))
+
+    def test_the_splash_is_drawn_inside_the_session_and_its_replay_printed_after(self):
+        """Around tmux's attach, the splash saw tmux take the alternate screen, handed it the whole
+        terminal and only came back at the very end: so it runs inside the session, around the
+        command, and what it prints again at the end (FRAME_TWEAKS_SPLASH_REPLAY) is printed
+        here once the session is over (tmux's screen goes with it)."""
+        r = self.detached("bash", "-c", 'printf "the output again" > "$FRAME_TWEAKS_SPLASH_REPLAY"', RUN_EXEC="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        args = self.run_args()
+        session = next(a for a in args if "lib/splash.py" in a)
+        self.assertRegex(session, r"python3 lib/splash\.py -- bash -c ")
+        self.assertIn("--setenv=FRAME_TWEAKS_SPLASH=off", args)          # (the caller's choice goes in)
+        self.assertTrue(any(a.startswith("--setenv=FRAME_TWEAKS_SPLASH_REPLAY=") for a in args))
+        self.assertTrue(r.stdout.endswith("the output again"), r.stdout)
+        self.assertFalse(list(Path(self.tmp.name).rglob("ft-install-*.out")))   # (and removed)
 
     def test_detached_it_goes_on_and_says_so(self):
         r = self.detached("bash", "-c", "exit 0", HAS="0")             # (the session still there)

@@ -182,6 +182,10 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **The window opens with less of a CPU burst.** Its status checks (about 12 s of CPU for 47 tweaks
+  on the Frame) run at a low priority, so drawing the window and VR come first, and the checks for
+  what's newer (Frame Tweaks itself, packs, each tweak's newer version) start 2 s after the
+  statuses are in instead of all at once with them.
 - **VR memory guard says "SteamVR given priority"** where it said "SteamVR stopped last": the same
   arrangement (SteamVR is the last thing the kernel would stop when memory runs out), named by
   what it does for you.
@@ -260,6 +264,14 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Reinstall updated (and every install from the window) shows the animation from the start.**
+  With tmux, the splash was drawn around tmux's attach, saw tmux take the alternate screen and
+  handed it the whole terminal, as to a pager, until the very end. It's now drawn inside the
+  install's tmux session, and the output it prints again at the end is printed into the terminal
+  once the session is over.
+- **Android Mirror's messages say they're Android Mirror's.** "It didn't turn up on the Wi-Fi…"
+  comes up to 3 minutes after it was opened: its notification and dialog now start with
+  "Android Mirror:", in the text as well, since VR shows no title bar.
 - **A blue void in the headset after a boot.** When SteamOS's VR session was slow to come up,
   Dictation's controller button service could start SteamVR itself, without the session: SteamVR
   then ran with no X server for its web helper, so the headset showed only a blue screen, with no

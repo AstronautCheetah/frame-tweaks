@@ -204,7 +204,11 @@ def run(cmd):
         except (OSError, termios.error):
             pass
     try:
-        stage.replay()
+        text = stage.replay()
+        # (lib/detached.sh in tmux: tmux's screen goes with the session, so it prints this again
+        # after, into the terminal's scrollback)
+        if os.environ.get("FRAME_TWEAKS_SPLASH_REPLAY"):
+            Path(os.environ["FRAME_TWEAKS_SPLASH_REPLAY"]).write_text(text)
     except OSError:
         pass
     if status is None:

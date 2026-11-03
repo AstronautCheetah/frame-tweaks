@@ -21,7 +21,12 @@
 # doesn't hand it back.
 #
 # The splash (lib/splash.py) is drawn here, around the relay: inside, it would pass the hangup on
-# to the command (it does, on purpose, in a terminal). Without a usable systemd (units_usable),
+# to the command (it does, on purpose, in a terminal). With tmux it's drawn inside the session,
+# around the command: around tmux's attach, it saw tmux switch to the alternate screen, handed it
+# the whole terminal (as to a pager) and only came back at the very end. Closing the terminal
+# there only detaches, so no hangup reaches it. tmux's screen goes when it ends, so the splash
+# leaves the output it prints again at the end in a file ($RUN_DIR/ft-install-PID.out,
+# FRAME_TWEAKS_SPLASH_REPLAY), printed here once the session is over: in the terminal's scrollback. Without a usable systemd (units_usable),
 # the command runs as it did before, in this terminal. FRAME_TWEAKS_DRY_RUN: print the command.
 set -uo pipefail
 cd "$(dirname "$(readlink -f "$0")")/.." || exit 1
@@ -32,16 +37,20 @@ set +e     # (common.sh turns on -e for tweak scripts)
 
 if units_usable && command -v tmux >/dev/null && [ -z "${FRAME_TWEAKS_NO_TMUX:-}" ]; then
     unit="ft-install-$$"
-    rcfile="$XDG_RUNTIME_DIR_USER/$unit.rc"
-    rm -f "$rcfile"
+    rcfile="$XDG_RUNTIME_DIR_USER/$unit.rc" replay="$XDG_RUNTIME_DIR_USER/$unit.out"
+    rm -f "$rcfile" "$replay"
     session_env_args
-    inner=$(printf '%q ' "$@")
+    splash=()
+    command -v python3 >/dev/null && splash=(python3 lib/splash.py --)
+    inner=$(printf '%q ' "${splash[@]}" "$@")
+    # (the caller's own choice for the splash goes in with it; else the splash reads ⚙ Preferences')
+    [ -z "${FRAME_TWEAKS_SPLASH:-}" ] || SESSION_ENV_ARGS+=("--setenv=FRAME_TWEAKS_SPLASH=$FRAME_TWEAKS_SPLASH")
     note=$(t 'Closing this terminal does not stop it: it goes on, and "./install.sh attach" (or Show it in the window) brings it back.')
     # (Type=forking: tmux new-session -d starts its server and returns; the server is the unit.
     # remain-on-exit off: the session ends with the command, and so does the unit.)
     start=(env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR_USER" DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus"
            systemd-run --user --quiet --collect --unit="$unit" -p Type=forking --working-directory="$REPO_DIR"
-           --setenv=FRAME_TWEAKS_SPLASH=off "${SESSION_ENV_ARGS[@]}"
+           --setenv=FRAME_TWEAKS_SPLASH_REPLAY="$replay" "${SESSION_ENV_ARGS[@]}"
            -- tmux -L "$unit" new-session -d -s "$unit" -x 200 -y 50
            "printf '%s\n\n' $(printf '%q' "$note"); $inner; echo \$? > $(printf '%q' "$rcfile")"
            \; set-option -t "$unit" status off)      # (no status bar: it read as part of the output)
@@ -50,8 +59,7 @@ if units_usable && command -v tmux >/dev/null && [ -z "${FRAME_TWEAKS_NO_TMUX:-}
         exit 0
     fi
     "${start[@]}" || exit 1
-    attach=(tmux -L "$unit" attach-session -t "$unit")
-    if command -v python3 >/dev/null; then python3 lib/splash.py -- "${attach[@]}"; else "${attach[@]}"; fi
+    tmux -L "$unit" attach-session -t "$unit"
     # (the terminal closed meanwhile: nothing runs this; the install goes on. Detached by hand
     # (tmux's Ctrl+B D): it goes on too, and this says so.)
     if tmux -L "$unit" has-session -t "$unit" 2>/dev/null; then
@@ -60,7 +68,8 @@ if units_usable && command -v tmux >/dev/null && [ -z "${FRAME_TWEAKS_NO_TMUX:-}
     fi
     for _ in 1 2 3 4 5 6 7 8 9 10; do [ -s "$rcfile" ] && break; sleep 0.2; done
     rc=$(cat "$rcfile" 2>/dev/null || echo 1)
-    rm -f "$rcfile"
+    [ ! -s "$replay" ] || cat "$replay"
+    rm -f "$rcfile" "$replay"
     exit "$rc"
 elif units_usable; then
     unit="ft-install-$$"

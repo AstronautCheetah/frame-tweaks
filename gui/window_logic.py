@@ -43,12 +43,17 @@ def refresh_run_label(c):
     if cmd is None:
         return
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        r = subprocess.run(LOW + cmd, capture_output=True, text=True, timeout=10)
         lines = r.stdout.strip().splitlines() if r.returncode == 0 else []
         label = lines[0].strip() if lines else ""
     except (OSError, subprocess.SubprocessError):
         label = ""
     RUN_LABELS[c["id"]] = label or None                  # (nothing, or it failed: the manifest's)
+
+
+# The window's checks run at a low priority (nice): 47 status checks cost about 12 s of CPU on
+# the Frame, four at a time as the window opens, and the window's drawing and VR come first.
+LOW = ["nice", "-n", "10"]
 
 
 def status(cid):
@@ -61,7 +66,7 @@ def status(cid):
         return UNAVAILABLE, _("not available any more")
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
-        r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
+        r = subprocess.run(LOW + sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         return 2, _("status check didn't finish (took over a minute)")
     refresh_run_label(c)
@@ -77,7 +82,7 @@ def update_check(cid):
     if cmd is None:                                      # (its pack or folder went since the list was read)
         return None
     try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=20).stdout.split()
+        out = subprocess.run(LOW + cmd, capture_output=True, text=True, timeout=20).stdout.split()
     except (OSError, subprocess.TimeoutExpired):
         return None
     if len(out) == 3 and c.get("link"):

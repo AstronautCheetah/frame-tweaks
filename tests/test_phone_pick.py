@@ -105,6 +105,10 @@ class PhonePick(unittest.TestCase):
         self.assertIn("Pixel 9 didn't appear", log)
         self.assertNotIn("--menu", log)                            # nothing else to choose
         self.assertIn("--error", log)                              # it says why it stopped
+        # (minutes after it was opened, it says whose message it is: in the text too, as VR shows
+        # no title bar, and in the notification)
+        self.assertIn("--error Android Mirror: Pixel 9 didn't appear\n\nIt didn't turn up", log)
+        self.assertIn("notify -a Android Mirror Android Mirror: Pixel 9 didn't appear", log)
 
     def test_failed_connection_offers_pairing_again(self):
         """adb can't connect (the phone forgot the Frame): Pair it again finds the phone's pairing
@@ -198,7 +202,7 @@ class PhonePick(unittest.TestCase):
         code, log, _ = self.run_phone([(*IMPOSTOR[:3], REAL[3]), REAL], conf=conf, extra={"kdialog": None},
                                       path=(str(tools),))
         self.assertNotEqual(code, 0)
-        self.assertIn("notify -a Phone More than one Pixel 9 More than one device on the Wi-Fi says it's Pixel 9", log)
+        self.assertIn("notify -a Android Mirror Android Mirror: More than one Pixel 9 More than one device on the Wi-Fi says it's Pixel 9", log)
         self.assertNotIn("kdialog", log)
         self.assertNotIn("adb connect", log)
         self.assertNotIn("scrcpy", log)
@@ -507,7 +511,7 @@ class AutoDisconnect(unittest.TestCase):
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
         self.assertIn("adb kill-server", log)                        # (no other device on adb: nothing left on)
         # (the minute it was on, then the minute to answer)
-        self.assertIn("notify -a Phone Android Mirror disconnected Pixel 9 was mirrored for 2 min", log)
+        self.assertIn("notify -a Android Mirror Android Mirror disconnected Pixel 9 was mirrored for 2 min", log)
         self.assertNotIn("--title Android Mirror --", log)           # (the mirror window's own title)
 
     def test_keep_it_on_asks_again_after_the_same_time(self):

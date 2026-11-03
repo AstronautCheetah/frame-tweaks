@@ -209,7 +209,11 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.latest = {}              # id -> newest upstream tag (known-issue rows), None if unknown
         self.latest_futures = {}
         self.tidied = False           # tidy_unneeded ran (once the first round of statuses is in)
-        self.check_known_issues()
+        # Checks for what's newer (Frame Tweaks itself, packs, known issues' apps, each tweak's
+        # update check) wait until the statuses are in, then UPDATE_DELAY_MS more: as the window
+        # opens, its drawing and the statuses (what it shows) come first. update_waiting: the
+        # tweaks whose update check waits; updates_started: the window's own ones have run.
+        self.update_waiting, self.updates_started, self.updates_timer = set(), False, False
         self.details = None
         self.updates, self.update_futures = {}, {}     # id -> (installed, latest) when newer
         # Tweaks whose files changed since they were installed (sft.files_changed), and its job:
@@ -220,10 +224,10 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             sft.apply_formerly()
         except OSError:
             pass
-        self.self_update = self.pool.submit(self_update_check) if self.prefs["update_check"] else None
+        self.self_update = None       # (start_update_checks)
         # packs added from a link whose source has a newer version (with Frame Tweaks' own check)
         self.pack_updates = set()
-        self.pack_check = self.pool.submit(sft.packs_with_updates) if self.prefs["update_check"] else None
+        self.pack_check = None
 
         self.release_at_start = current_release()
         self.update_state, self.update_newest = "check", None
@@ -542,7 +546,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
                 if self.state[cid][0] in GONE:
                     self.updates.pop(cid, None)          # (not installed: nothing to update)
                 elif c is not None and sft.script(c, "update-check") is not None:
-                    self.update_futures[cid] = self.pool.submit(update_check, cid)
+                    self.update_waiting.add(cid)         # (start_update_checks, once the statuses are in)
                 self.show_status(cid)
                 shown = True
                 if cid in self.status_labels:
@@ -565,6 +569,13 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             tidy = False
         if tidy:
             self.tidy_unneeded()
+        try:
+            due = not self.futures and (self.update_waiting or not self.updates_started) and not self.updates_timer
+        except (AttributeError, RuntimeError):            # (a test's bare window)
+            due = False
+        if due:
+            self.updates_timer = True                    # (one on its way)
+            QTimer.singleShot(UPDATE_DELAY_MS, self.start_update_checks)
         if shown:
             self.update_repair_bar()                     # (it waits for every row's status itself)
         if shown:
@@ -1247,9 +1258,29 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         SETTINGS_PAGES.update({cid: (lambda w, c=cid: SettingsPage(w, c)) for cid in sft.SETTINGS})
         KNOWN_ISSUES.clear()                             # (in place: window_logic.KNOWN_ISSUES)
         KNOWN_ISSUES.update({c["id"]: c["known_issue"] for c in components() if c["known_issue"]})
-        self.check_known_issues()
+        if self.updates_started:                         # (else start_update_checks does)
+            self.check_known_issues()
         self.rows = components()
         self.refresh()
+
+    def start_update_checks(self):
+        """What's newer, once the statuses are in (and UPDATE_DELAY_MS): Frame Tweaks itself and
+        packs from a link (if ⚙ Preferences checks), known issues' apps, and each installed
+        tweak's update check that waited."""
+        self.updates_timer = False
+        if not self.updates_started:
+            self.updates_started = True
+            if self.prefs["update_check"]:
+                if self.self_update is None:
+                    self.self_update = self.pool.submit(self_update_check)
+                if self.pack_check is None:
+                    self.pack_check = self.pool.submit(sft.packs_with_updates)
+            self.check_known_issues()
+        for cid in sorted(self.update_waiting):
+            if cid not in self.update_futures:
+                self.update_futures[cid] = self.pool.submit(update_check, cid)
+        self.update_waiting.clear()
+        self.collecting()
 
     def check_known_issues(self):
         """Has a known issue's app a newer release? Looked for once each, in the background: as the
@@ -1398,6 +1429,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
 SERVER = f"frame-tweaks-gui-{os.getuid()}"
 
 
+UPDATE_DELAY_MS = 2000  # (after the statuses are in: then the checks for what's newer, start_update_checks)
 ANSWER_MS = 3000      # (how long an open window has to answer a second launch before it's taken as stuck)
 
 

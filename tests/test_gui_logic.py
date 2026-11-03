@@ -277,6 +277,7 @@ def collecting_window(**attrs):
     w.latest_futures, w.update_futures, w.futures, w.self_update, w.pack_check = {}, {}, {}, None, None
     w.state, w.updates, w.status_labels, w.details = {}, {}, {}, None
     w.pool, w.update_apply, w.fit_list = mock.Mock(), mock.Mock(), mock.Mock()
+    w.update_waiting, w.updates_started, w.updates_timer = set(), True, True     # (no timer: start_update_checks by hand)
     for k, v in attrs.items():
         setattr(w, k, v)
     return w
@@ -294,6 +295,41 @@ def finished(result=None, error=None):
 
 class Collect(unittest.TestCase):
     """What the window does with its background checks' results (collect)."""
+    def test_update_checks_wait_for_the_statuses(self):
+        """As the window opens, what it shows comes first: a tweak's update check isn't started as
+        its status comes in, nor are Frame Tweaks' and the packs' own, but once every status is in
+        (UPDATE_DELAY_MS later: start_update_checks); its status checks run at a low priority."""
+        from concurrent.futures import Future
+        wl = sys.modules["window_logic"]
+        c = gui.component("full-keyboard")
+        w = collecting_window(futures={"full-keyboard": finished((0, "installed")), "clipboard": Future()},
+                              updates_started=False, updates_timer=False, prefs={"update_check": True},
+                              show_status=mock.Mock(), update_repair_bar=mock.Mock(), tidied=True,
+                              files_job=None, pack_job=None, finish_pack_job=mock.Mock(), check_known_issues=mock.Mock())
+        with mock.patch.object(gui.sft, "script", return_value=["true"]), \
+                mock.patch.object(gui, "component", return_value=c), mock.patch.object(gui.QTimer, "singleShot") as later:
+            w.collect()
+            w.pool.submit.assert_not_called()                          # (one status still out: nothing yet)
+            self.assertEqual(w.update_waiting, {"full-keyboard"})
+            later.assert_not_called()
+            w.futures["clipboard"].set_result((1, "not installed"))
+            w.collect()
+            later.assert_called_once_with(gui.UPDATE_DELAY_MS, w.start_update_checks)
+            w.pool.submit.assert_not_called()
+            w.collect()
+            later.assert_called_once()                                  # (one on its way: not another)
+            w.start_update_checks()
+        submitted = [call.args[0] for call in w.pool.submit.call_args_list]
+        self.assertEqual(submitted, [gui.self_update_check, gui.sft.packs_with_updates, gui.update_check])
+        w.check_known_issues.assert_called_once()
+        self.assertEqual(wl.LOW, ["nice", "-n", "10"])
+        with mock.patch.object(wl.subprocess, "run") as run, \
+                mock.patch.object(wl.sft, "script", return_value=["bash", "status.sh"]), \
+                mock.patch.object(wl, "component", return_value=c):
+            run.return_value = mock.Mock(returncode=0, stdout="", stderr="")
+            wl.status("full-keyboard")
+        self.assertEqual(run.call_args_list[0].args[0][:4], ["nice", "-n", "10", "bash"])
+
     def test_a_check_that_failed_is_said_on_its_row(self):
         """A status check that raised is a warning on its row: not "checking…" for good and the
         error page; the other rows' results come in too."""
@@ -430,6 +466,7 @@ class Reload(unittest.TestCase):
         good on its page), once."""
         w = gui.Window.__new__(gui.Window)
         w.pool, w.latest, w.latest_futures, w.refresh, w.collecting = mock.Mock(), {}, {}, mock.Mock(), mock.Mock()
+        w.updates_started = True                         # (the window's own checks have run: start_update_checks)
         issue = {"version": "1.0", "short": "s", "long": "l", "latest": "https://api.github.com/repos/o/r/releases/latest"}
         rows = gui.components() + [dict(gui.component("clipboard"), id="x-issue", known_issue=issue, settings=None)]
         with mock.patch.object(gui, "components", return_value=rows), mock.patch.object(registry, "load"), \

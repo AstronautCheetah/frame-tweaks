@@ -504,8 +504,11 @@ class Stage:
         self.write("\x1b[0m\x1b[?6l\x1b[r\x1b[?1049l\x1b[?25h")
 
     def replay(self):
+        """The output printed again, under the banner; returned too (FRAME_TWEAKS_SPLASH_REPLAY)."""
         out = self.banner() + [""]
         out += self.transcript.rendered()
-        self.write("\r\n".join(out) + "\r\n")
+        text = "\r\n".join(out) + "\r\n"
+        self.write(text)
+        return text
 
 

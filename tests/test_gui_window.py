@@ -63,7 +63,8 @@ class WindowTest(unittest.TestCase):
         """Until what the window started is in (collect, as its timer runs it). (Up to 30 s: a
         busy machine is slow.)"""
         for _ in range(1500):
-            if not (w.futures or w.update_futures or w.pack_check or w.self_update or getattr(w, "pack_job", None)):
+            if not (w.futures or w.update_futures or w.pack_check or w.self_update or getattr(w, "pack_job", None)
+                    or w.updates_timer or w.update_waiting):
                 return
             QTest.qWait(20)
         self.fail("still checking")

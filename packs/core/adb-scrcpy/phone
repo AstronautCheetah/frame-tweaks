@@ -135,8 +135,11 @@ cancelled() { [ ${#SPLASH[@]} -eq 2 ] && [ "$(qdbus6 "${SPLASH[@]}" wasCancelled
 fail() {
     plog "stopped: $1: ${2%%$'\n'*}"
     splash_end
-    notify-send -a Phone "$1" "$2"
-    command -v kdialog >/dev/null && kdialog --title "$(t 'Android Mirror: %s' "$1")" --error "$2" 2>/dev/null
+    # (named in the text as well: it may come minutes after Android Mirror was opened, when what
+    # started it is forgotten, and in VR the dialog's title bar isn't shown)
+    notify-send -a "$(t 'Android Mirror')" "$(t 'Android Mirror: %s' "$1")" "$2"
+    command -v kdialog >/dev/null &&
+        kdialog --title "$(t 'Android Mirror: %s' "$1")" --error "$(t 'Android Mirror: %s' "$1")"$'\n\n'"$2" 2>/dev/null
     exit 1
 }
 trap 'splash_end' EXIT
@@ -208,13 +211,13 @@ if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
         fail "$(t 'No phone found')" "$(t "No phone with Wireless debugging on is on the Wi-Fi. Turn it on in the phone's Developer options (main profile, same Wi-Fi as the Frame). First time? Pair it once: see Android Mirror's README.")"
     elif [ "$count" -eq 1 ] && [ -z "$pick" ]; then
         remember "$names"
-        notify-send -a Phone "$(t 'Android Mirror')" "$(t "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)." "$PHONE_NAME")"
+        notify-send -a "$(t 'Android Mirror')" "$(t 'Android Mirror')" "$(t "Connecting to %s from now on. To choose another: Android Mirror's \"Choose phone…\" (or phone --pick)." "$PHONE_NAME")"
     else
         mapfile -t list <<< "$names"
         args=(); for n in "${list[@]}"; do args+=("$n" "$n"); done
         splash_end
         chosen=$(ask "$DLG" "$(t 'Which phone?')" "${args[@]}")
-        [ -n "$chosen" ] || { [ -z "${PHONE_NAME:-}" ] && notify-send -a Phone "$(t 'Which phone?')" "$(t 'Several are advertising: %s. Run: phone --pick' "$(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g')")"; exit 1; }
+        [ -n "$chosen" ] || { [ -z "${PHONE_NAME:-}" ] && notify-send -a "$(t 'Android Mirror')" "$(t 'Android Mirror: %s' "$(t 'Which phone?')")" "$(t 'Several are advertising: %s. Run: phone --pick' "$(printf '%s' "$names" | paste -sd, - | sed 's/,/, /g')")"; exit 1; }
         remember "$chosen"
     fi
 fi
@@ -440,7 +443,7 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
     done
     if [ -n "$timed_out" ]; then
         close_all
-        notify-send -a Phone "$(t 'Android Mirror disconnected')" "$(t "%s was mirrored for %s, so Android Mirror disconnected to save its battery. Open Android Mirror to connect again; the time is in its settings." \
+        notify-send -a "$(t 'Android Mirror')" "$(t 'Android Mirror disconnected')" "$(t "%s was mirrored for %s, so Android Mirror disconnected to save its battery. Open Android Mirror to connect again; the time is in its settings." \
             "${PHONE_NAME:-$(t 'The phone')}" "$(span $((($(date +%s) - opened) / MINUTE)))")"
         exit 0
     fi
@@ -457,7 +460,7 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
         kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null       # frozen
     fi
     adb disconnect "$dev" >/dev/null 2>&1
-    notify-send -a Phone "$(t 'Phone connection lost')" "$(t 'Reconnecting…')"
+    notify-send -a "$(t 'Android Mirror')" "$(t 'Android Mirror: %s' "$(t 'Phone connection lost')")" "$(t 'Reconnecting…')"
     splash "$(t 'The connection to %s was lost. Reconnecting…' "${PHONE_NAME:-$(t 'the phone')}")"
     found=
     for _ in $(seq 12); do                             # up to a minute
