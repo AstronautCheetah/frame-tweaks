@@ -17,11 +17,11 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer
+from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, pyqtSignal
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea,
-                             QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+                             QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "lib"))
@@ -158,6 +158,25 @@ CONTROLLER_BUTTONS = True
 PAGES = {"wallet": (N_("🔑 Wallet apps"), WalletApps)}         # (label: translated where it's shown)
 
 
+def matches(comp, query):
+    """A tweak the search finds: every word of the query in its name, description, category, id or
+    pack (any case; the shown texts, in the reader's language)."""
+    text = " ".join(str(comp.get(k) or "") for k in ("title", "desc", "what", "category", "category_en", "id",
+                                                      "pack")).casefold()
+    return all(word in text for word in query.split())
+
+
+class SearchBox(QLineEdit):
+    """The search field: Esc closes the search (the whole list again)."""
+    closed = pyqtSignal()
+
+    def keyPressEvent(self, ev):
+        if ev.key() == Qt.Key.Key_Escape:
+            self.closed.emit()
+            return
+        super().keyPressEvent(ev)
+
+
 class Window(ApplyChanges, ControllerInput, QWidget):
     """The installer window. Apply changes (apply_changes.py) and the controller in VR
     (vr_controls.py) are parts of it in modules of their own: mixins, before QWidget so their
@@ -249,6 +268,26 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.pack_update_label.linkActivated.connect(lambda _: self.show_packs())
         top.addWidget(self.pack_update_label)
         self.show_pack_updates()
+        # Search: an icon (Breeze's edit-find; 🔍 without it), and a field beside it while searching
+        self.search_button = QPushButton()
+        found = sorted(BREEZE.glob("*/*/edit-find.svg"))
+        if found:
+            self.search_button.setIcon(QIcon(str(found[-1])))
+        else:
+            self.search_button.setText("🔍")
+        self.search_button.setToolTip(_("Search the tweaks"))
+        self.search_button.setAccessibleName(_("Search the tweaks"))
+        self.search_button.setCheckable(True)
+        self.search_button.toggled.connect(self.toggle_search)
+        self.search_box = SearchBox()
+        self.search_box.setPlaceholderText(_("Search: name, description, category"))
+        self.search_box.setClearButtonEnabled(True)
+        self.search_box.setMinimumWidth(260)
+        self.search_box.setHidden(True)
+        self.search_box.textChanged.connect(self.rebuild)
+        self.search_box.closed.connect(lambda: self.search_button.setChecked(False))
+        top.addWidget(self.search_box)
+        top.addWidget(self.search_button)
         prefs = QPushButton("⚙")
         prefs.setToolTip(_("Preferences: the language, and how this window behaves"))
         prefs.clicked.connect(self.show_prefs)
@@ -298,10 +337,6 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         diag.setToolTip(_("Save a diagnostics report (user names and paths removed) and open the bug form"))
         diag.clicked.connect(self.show_report)
         bottom.addWidget(diag)
-        works = QPushButton(_("✔ Works on my Frame"))
-        works.setToolTip(_("Report which tweaks work on your SteamOS and SteamVR versions (on GitHub, when you choose to)"))
-        works.clicked.connect(self.show_works)
-        bottom.addWidget(works)
         apply_ = QPushButton(_("Apply changes"))
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
@@ -530,6 +565,19 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.collect_every(100 if busy else 1000)
 
     # ---- layout -----------------------------------------------------------------
+    def search_query(self):
+        box = getattr(self, "search_box", None)
+        return box.text().strip().casefold() if box is not None and not box.isHidden() else ""
+
+    def toggle_search(self, on):
+        self.search_box.setHidden(not on)
+        if on:
+            self.search_box.setFocus()
+        elif self.search_box.text():
+            self.search_box.clear()                # (rebuilds: the whole list again)
+        else:
+            self.rebuild()
+
     def rebuild(self, *_args):
         self.row_widgets, self.focus_index = [], -1
         while self.grid.count():
@@ -541,6 +589,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         hidden_cats = sft.read_categories(HIDDEN_CATS, self.rows) & {c["category_en"] for c in self.rows}
         collapsed = sft.read_categories(COLLAPSED, self.rows)
         showing = self.show_hidden.isChecked()
+        query = self.search_query()
+        if query:      # (searching: only the matches, categories unfolded)
+            collapsed = set()
         n_hidden = sum(1 for c in self.rows if c["id"] in hidden and c["category_en"] not in hidden_cats)
         n_hidden += len(hidden_cats)
         self.show_hidden.setText(_("Show hidden ({n})").format(n=n_hidden))
@@ -556,9 +607,12 @@ class Window(ApplyChanges, ControllerInput, QWidget):
                 continue
             if is_hidden and not showing:
                 continue
+            if query and not matches(comp, query):
+                continue
             if cat != category:
                 category = cat
-                count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden))
+                count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden)
+                            and (not query or matches(c, query)))
                 self.grid.addWidget(CategoryHeader(self, cat, count, key in collapsed, key in hidden_cats, key))
             if key in collapsed:
                 continue
@@ -723,11 +777,16 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         read = QPushButton(_("Get involved"))
         read.setObjectName("apply")
         read.clicked.connect(self.show_contribute)
+        # (Works on my Frame: a way to help too, so here rather than in the bottom row)
+        works = QPushButton(_("✔ Works on my Frame"))
+        works.setToolTip(_("Report which tweaks work on your SteamOS and SteamVR versions (on GitHub, when you choose to)"))
+        works.clicked.connect(self.show_works)
         g.addWidget(spacer, 0, 0, 2, 1)
         g.addWidget(icon, 0, 1, 2, 1)
         g.addWidget(name, 0, 2)
         g.addWidget(info, 1, 2)
-        g.addWidget(read, 0, 4, 2, 1)
+        g.addWidget(read, 0, 4)
+        g.addWidget(works, 1, 4)
         g.setColumnStretch(2, 3)
         g.setColumnStretch(3, 2)
         self.grid.addWidget(row)

@@ -79,6 +79,30 @@ class WindowTest(unittest.TestCase):
     def ids(self, w):
         return [c["id"] for c in w.rows]
 
+    def test_search_shows_only_the_matches_and_esc_brings_back_the_list(self):
+        w = self.window()
+        everything = len(w.boxes)
+        self.assertTrue(w.search_box.isHidden())
+        w.search_button.setChecked(True)
+        self.assertFalse(w.search_box.isHidden())
+        w.search_box.setText("dictation")
+        self.assertIn("dictation", w.boxes)
+        self.assertLess(len(w.boxes), everything)
+        self.assertTrue(all(gui.matches(next(c for c in w.rows if c["id"] == cid), "dictation") for cid in w.boxes))
+        w.search_box.setText("no such tweak anywhere")
+        self.assertEqual(w.boxes, {})
+        QTest.keyClick(w.search_box, gui.Qt.Key.Key_Escape)
+        self.assertFalse(w.search_button.isChecked())
+        self.assertTrue(w.search_box.isHidden())
+        self.assertEqual(w.search_box.text(), "")
+        self.assertEqual(len(w.boxes), everything)
+
+    def test_works_on_my_frame_is_with_get_involved(self):
+        w = self.window()
+        works = [b for b in w.findChildren(QPushButton) if b.text().endswith("Works on my Frame")]
+        self.assertEqual(len(works), 1)
+        self.assertIsInstance(works[0].parent(), gui.ContributeRow)
+
 
 class PacksChangeUnderIt(WindowTest):
     """sft read the packs again behind the list's back (the Packs page opening, Check for updates,

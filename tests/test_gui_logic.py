@@ -1705,11 +1705,14 @@ class ContributeRow(unittest.TestCase):
         row = window.row_widgets[0]
         self.assertIsInstance(row, gui.ContributeRow)
         self.assertNotIn("_contribute", [c["id"] for c in gui.sft.components()])     # (not a tweak)
-        self.assertEqual([b.text() for b in row.findChildren(QPushButton)], ["Get involved"])   # (no tick, ↻ or Hide)
+        # (no tick, ↻ or Hide; Works on my Frame is a way to help, so under Get involved)
+        self.assertEqual([b.text() for b in row.findChildren(QPushButton)], ["Get involved", "✔ Works on my Frame"])
         self.assertIn("Help make Frame Tweaks better", [w.text() for w in row.findChildren(QLabel)])
         self.assertFalse(any("Not a tweak" in w.text() for w in row.findChildren(QLabel)))
         row.findChildren(QPushButton)[0].click()
         window.show_contribute.assert_called_once()
+        row.findChildren(QPushButton)[1].click()
+        window.show_works.assert_called_once()
         page = gui.ReadmePage(mock.Mock(), gui.REPO / "docs/contribute.md", "Help make Frame Tweaks better")
         text = page.findChildren(QTextBrowser)[0].toPlainText()
         for part in ("give it a star on GitHub", "Suggest a third-party app", "tweak nobody has written yet",

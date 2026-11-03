@@ -8,6 +8,10 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-03
+- New in `gui/frame-tweaks-gui.py:278`
+  - now: "Search the tweaks"
+- New in `gui/frame-tweaks-gui.py:283`
+  - now: "Search: name, description, category"
 - New in `gui/settings_page.py:66`
   - now: "Not used with the {setting} you chose."
 - New in `gui/wallet_page.py:575`

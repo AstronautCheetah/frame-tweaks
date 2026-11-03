@@ -523,6 +523,14 @@ msgid ""
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "Search the tweaks"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Search: name, description, category"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Settings"
 msgstr ""
 
