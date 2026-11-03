@@ -127,6 +127,12 @@ class SecureScreen(unittest.TestCase):
         self.assertFalse(pt.focused_is_secure(notes))            # (SECURE on another window doesn't count)
         self.assertFalse(pt.focused_is_secure(DUMPSYS.replace("mCurrentFocus=Window{FOCUS u0 X}", "mCurrentFocus=null")))
         self.assertFalse(pt.focused_is_secure(""))
+        # (A Pixel: two displays, the first with no focus; its PIN prompt focused on the second. Its
+        # `dumpsys window windows` has no focus lines at all: watch_secure adds them from the full
+        # dump, checked on the phone, not here.)
+        two = DUMPSYS.replace("  mCurrentFocus=Window{FOCUS u0 X}\n",
+                              "  mCurrentFocus=null\n  mCurrentFocus=Window{d4e5f6 u0 com.bank.app/com.bank.app.Main}\n")
+        self.assertTrue(pt.focused_is_secure(two))
 
     def test_the_layer_shows_a_notice_while_it_is_hidden(self):
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()

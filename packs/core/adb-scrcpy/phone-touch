@@ -389,15 +389,19 @@ WINDOW_BLOCK = re.compile(r"^\s*Window #\d+ (Window\{[0-9a-f]+ [^}]*\}):", re.M)
 
 
 def focused_is_secure(dumpsys):
-    """Whether the focused window in `dumpsys window windows` output has FLAG_SECURE (fl=… SECURE)."""
-    m = re.search(r"mCurrentFocus=(Window\{[0-9a-f]+ [^}]*\})", dumpsys)
-    if not m:
+    """Whether a focused window in `dumpsys window windows` output (followed by the focus lines, which
+    only the full `dumpsys window` has) has FLAG_SECURE (fl=… SECURE). Each display has a focus line,
+    and on a phone with several the first can say null (a Pixel's: its PIN prompt was focused on
+    the second): any focused window counts."""
+    focused = set(re.findall(r"mCurrentFocus=(Window\{[0-9a-f]+ [^}]*\})", dumpsys))
+    if not focused:
         return False
     blocks = list(WINDOW_BLOCK.finditer(dumpsys))
     for i, b in enumerate(blocks):
-        if b.group(1) == m.group(1):
+        if b.group(1) in focused:
             end = blocks[i + 1].start() if i + 1 < len(blocks) else len(dumpsys)
-            return re.search(r"\bfl=[^\n]*\bSECURE\b", dumpsys[b.start():end]) is not None
+            if re.search(r"\bfl=[^\n]*\bSECURE\b", dumpsys[b.start():end]):
+                return True
     return False
 
 
@@ -405,7 +409,8 @@ def watch_secure(dev, state, every=3.0):
     """state["secure"]: the phone's focused window hides itself from the mirror (checked every few s)."""
     while scrcpy_running():
         try:
-            r = adb(dev, "shell", "dumpsys", "window", "windows")
+            # (one call: the windows and their flags, then the focus lines, only in the full dump)
+            r = adb(dev, "shell", "dumpsys window windows; dumpsys window | grep mCurrentFocus")
             state["secure"] = r.returncode == 0 and focused_is_secure(r.stdout)
         except OSError:
             state["secure"] = False
