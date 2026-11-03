@@ -222,6 +222,29 @@ class Status(unittest.TestCase):
                     mock.patch.object(gui.sft, "installed_record", return_value=record):
                 self.assertEqual(gui.status("adb-scrcpy"), want, (code, out, err, record))
 
+    def test_run_label_follows_run_label_sh(self):
+        """A tweak's run-label.sh (the Performance Overlay's: Show or Hide) sets its Run button's label
+        with each status check; nothing printed, or no such script, leaves the manifest's."""
+        import window_logic
+        comp = gui.component("perf-overlay")
+        self.assertTrue((comp["dir"] / "run-label.sh").is_file())
+
+        def run(cmd, **k):
+            if cmd[-1].endswith("run-label.sh"):
+                return subprocess.CompletedProcess(cmd, 0, stdout="Hide\n", stderr="")
+            return subprocess.CompletedProcess(cmd, 0, stdout="ok       installed\n", stderr="")
+        try:
+            with mock.patch.object(gui.subprocess, "run", run):
+                self.assertEqual(gui.status("perf-overlay"), (0, "installed"))
+            self.assertEqual(gui.run_label("perf-overlay"), "Hide")
+            with mock.patch.object(gui.subprocess, "run", lambda cmd, **k: subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")):
+                gui.status("perf-overlay")
+            self.assertEqual(gui.run_label("perf-overlay"), "Show")           # (the manifest's)
+            window_logic.refresh_run_label({"id": "adb-scrcpy", "dir": comp["dir"].parent / "adb-scrcpy"})
+            self.assertNotIn("adb-scrcpy", window_logic.RUN_LABELS)           # (no run-label.sh: untouched)
+        finally:
+            window_logic.RUN_LABELS.pop("perf-overlay", None)
+
     def test_update_check_parsing(self):
         with tempfile.TemporaryDirectory() as d, \
                 mock.patch.object(window_logic, "component", return_value={"dir": Path(d) / "x"}):

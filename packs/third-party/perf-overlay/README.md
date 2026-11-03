@@ -71,9 +71,10 @@ it opens for installs, and doesn't change what they install.
 ## Use
 
 With SteamVR running the panel shows on its own. **Show** on its row in the Frame Tweaks window
-shows or hides it, starts it if it isn't running, and, if an install left its service disabled,
-enables it so it starts with SteamVR again (`./install.sh run perf-overlay` does the same; the
-status says when that's needed). Its **Perf** tab in the SteamVR
+shows it, starting it first if it isn't running; while it's shown the button reads **Hide** and
+hides it. If an install left its service disabled, Show also enables it so it starts with SteamVR
+again (`./install.sh run perf-overlay` does the same; the status says when that's needed). Its
+**Perf** tab in the SteamVR
 dashboard chooses what it shows, where (wrist, view or a fixed spot) and its profiles, and turns
 it off until the next SteamVR start. Its
 [README](https://github.com/sasaken1102r/frame-perf-overlay#usage) explains every value and

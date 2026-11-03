@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO / "lib"))
 os.environ.setdefault("FRAME_TWEAKS_LIB", str(REPO / "lib"))   # (packs' scripts source the helpers through it)
 sys.path.insert(0, str(REPO / "gui"))           # (its pages, e.g. wallet_page.py)
 import sft  # noqa: E402  (shared with ./install.sh: components, hidden rows, settings)
-from sft import COLLAPSED, HIDDEN_CATS, component, components, current_release, run_label, write_set  # noqa: E402
+from sft import COLLAPSED, HIDDEN_CATS, component, components, current_release, write_set  # noqa: E402
 import browser  # noqa: E402  (web links, across the VR and desktop sessions)
 import i18n  # noqa: E402
 from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md)
@@ -55,7 +55,7 @@ from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences
 from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
 from works_page import WorksPage  # noqa: E402  (✔ Works on my Frame page)
 from window_logic import (GONE, KNOWN_ISSUES, RESTART, UNLOAD, close_prompt, in_terminal,  # noqa: E402
-                          latest_release, self_update_check, status, status_text, update_check)
+                          latest_release, run_label, self_update_check, status, status_text, update_check)
 from readme_view import follow_link, link_label, with_copy  # noqa: E402  (READMEs and links)
 from tweak_rows import BREEZE, CONTRIBUTE, CategoryHeader, ContributeRow, Row, row_icon  # noqa: E402  (the list's rows)
 from details_page import Details, ReadmePage  # noqa: E402  (a tweak's page, a README's)

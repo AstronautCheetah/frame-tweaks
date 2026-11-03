@@ -216,7 +216,8 @@
   panel sat installed and never started, with nothing in the window to start it. The install now
   enables the service with the Steam session's bus after the project's installer; the status warns
   when the service is disabled; and **Show** on its row enables it if needed, starts it when
-  SteamVR runs, and shows or hides the panel when it's running (`./install.sh run perf-overlay`).
+  SteamVR runs, and shows the panel; while the panel is shown the button reads **Hide** and hides it
+  (`./install.sh run perf-overlay` toggles the same way).
   While SteamVR runs without the panel, the status says why: closed from its dashboard until the
   next SteamVR start (systemd files that exit as failed; it isn't), not started yet, or failed.
 - **Parakeet installs again with Homebrew's Python around:** its runtime's venv took the first `python3` on the PATH, Homebrew's 3.15 (brought in as a dependency), which onnxruntime has no build for, so Apply failed with "conflicting dependencies". Frame Tweaks' venvs now use SteamOS's own Python, and one left half-made is made anew.
@@ -281,6 +282,11 @@
   puts that page's address on your clipboard for the browser, and says how to paste the hidden
   token. It used to say only "Run 'nordvpn-wg setup' first." and "NordVPN access token (input
   hidden):".
+### For pack authors
+- **`run-label.sh`**, an optional script beside `run.sh`: prints the Run button's label for the
+  tweak's state now; the window runs it with each status check (docs/mods.md). The Performance
+  Overlay's reads Show or Hide.
+
 ### For contributors
 - **The lint check also looks for likely bugs** (Ruff's Bugbear and Pylint error rules), not
   style; what it found in the code is fixed or marked on purpose.

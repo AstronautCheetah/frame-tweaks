@@ -263,8 +263,37 @@ class PerfOverlay(Home):
         r = self.run_script("perf-overlay/run.sh")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("gtk-launch frame-perf-overlay", self.calls())
-        self.assertIn("Shown or hidden", r.stdout)
+        self.assertIn("Shown in VR", r.stdout)                 # (no config.json yet: it was hidden)
         self.assertNotIn("--user start frame-perf-overlay.service", "\n".join(self.calls()))
+
+    def visible(self, value):
+        conf = self.home / ".config/frame-perf-overlay/config.json"
+        conf.parent.mkdir(parents=True, exist_ok=True)
+        conf.write_text('{\n  "alpha": 0.9,\n  "visible": %s,\n  "width_m": 0.3\n}\n' % ("true" if value else "false"))
+
+    def test_label_follows_the_panel(self):
+        """run-label.sh: Hide while the service runs and config.json says visible, Show otherwise."""
+        self.installed(enabled=True)
+        self.visible(True)
+        self.assertEqual(self.run_script("perf-overlay/run-label.sh").stdout.strip(), "Show")     # (not running)
+        (self.home / "running").touch()
+        self.assertEqual(self.run_script("perf-overlay/run-label.sh").stdout.strip(), "Hide")
+        self.visible(False)
+        self.assertEqual(self.run_script("perf-overlay/run-label.sh").stdout.strip(), "Show")
+        (self.home / ".config/frame-perf-overlay/config.json").unlink()                        # (no config yet: Show)
+        self.assertEqual(self.run_script("perf-overlay/run-label.sh").stdout.strip(), "Show")
+
+    def test_show_says_which_way_it_toggled(self):
+        self.installed(enabled=True)
+        (self.home / "vr").touch()
+        (self.home / "running").touch()
+        self.visible(True)
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertIn("Hidden in VR", r.stdout)
+        self.visible(False)
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertIn("Shown in VR", r.stdout)
+        self.assertEqual([c for c in self.calls() if c.startswith("gtk-launch")], ["gtk-launch frame-perf-overlay"] * 2)
 
     def test_show_without_the_program_says_to_install(self):
         r = self.run_script("perf-overlay/run.sh")

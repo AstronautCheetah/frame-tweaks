@@ -38,10 +38,12 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "SteamVR is not running: the panel shows once it is."
 - New in `packs/third-party/perf-overlay/run.sh:27`
   - now: "Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings."
-- New in `packs/third-party/perf-overlay/run.sh:31`
-  - now: "Shown or hidden in VR (it was running)."
 - New in `packs/third-party/perf-overlay/run.sh:35`
   - now: "Could not start %s: see %s"
+- New in `packs/third-party/perf-overlay/run.sh:35`
+  - now: "Hidden in VR (Show brings it back)."
+- New in `packs/third-party/perf-overlay/run.sh:36`
+  - now: "Shown in VR."
 - New in `packs/third-party/perf-overlay/status.sh:13`
   - now: "installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Show on its row sets it, or %s"
 - New in `packs/third-party/perf-overlay/status.sh:19`

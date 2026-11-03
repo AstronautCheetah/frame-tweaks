@@ -26,11 +26,36 @@ UNAVAILABLE = 256    # its pack or folder went since the list was read (no progr
 GONE = (1, UNLOAD, UNAVAILABLE)   # the codes of a tweak that isn't installed
 
 
+RUN_LABELS = {}      # id -> what its run-label.sh printed at its last status check (run_label)
+
+
+def run_label(cid):
+    """The Run button's label: what the tweak's optional run-label.sh printed at its last status
+    check, a label that follows its state (the Performance Overlay's Show or Hide), else the
+    manifest's (sft.run_label; None: nothing to launch)."""
+    return RUN_LABELS.get(cid) or sft.run_label(cid)
+
+
+def refresh_run_label(c):
+    """Run the tweak's run-label.sh, if it has one, for RUN_LABELS (in the status worker, with each
+    status check: the window checks a row again a few seconds after Run, so the label follows)."""
+    cmd = sft.script(c, "run-label")
+    if cmd is None:
+        return
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        lines = r.stdout.strip().splitlines() if r.returncode == 0 else []
+        label = lines[0].strip() if lines else ""
+    except (OSError, subprocess.SubprocessError):
+        label = ""
+    RUN_LABELS[c["id"]] = label or None                  # (nothing, or it failed: the manifest's)
+
+
 def status(cid):
     """(code, text): what its status.sh says, as lib/installer.py read_status reads it (0 ok, 1 not
     installed, 2 needs attention, RESTART or UNLOAD waiting for a SteamVR restart; the same rule
     as ./install.sh status_of). UNAVAILABLE: its pack or folder went since the window read the
-    list."""
+    list. Its run-label.sh, if any, is run after it (refresh_run_label)."""
     c = component(cid)
     if c is None or sft.script(c, "status") is None:     # (its pack or folder went since the list was read)
         return UNAVAILABLE, _("not available any more")
@@ -39,6 +64,7 @@ def status(cid):
         r = subprocess.run(sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
     except subprocess.TimeoutExpired:
         return 2, _("status check didn't finish (took over a minute)")
+    refresh_run_label(c)
     return read_status(r.returncode, r.stdout, r.stderr, sft.installed_record(cid))
 
 

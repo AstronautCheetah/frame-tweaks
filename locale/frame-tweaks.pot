@@ -418,7 +418,7 @@ msgstr ""
 msgid "Help make Frame Tweaks better"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py
+#: gui/frame-tweaks-gui.py packs/third-party/perf-overlay/run-label.sh
 msgid "Hide"
 msgstr ""
 
@@ -6560,10 +6560,6 @@ msgid ""
 msgstr ""
 
 #: packs/third-party/perf-overlay/README.md
-msgid "Show"
-msgstr ""
-
-#: packs/third-party/perf-overlay/README.md
 msgid ""
 "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
@@ -6578,12 +6574,20 @@ msgid ""
 "sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
 msgstr ""
 
+#: packs/third-party/perf-overlay/run-label.sh packs/third-party/perf-overlay/README.md
+msgid "Show"
+msgstr ""
+
 #: packs/third-party/perf-overlay/run.sh
 msgid "Could not start %s: see %s"
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh
 msgid "From now on it starts with SteamVR, as its installer meant to set up."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Hidden in VR (Show brings it back)."
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh
@@ -6600,7 +6604,7 @@ msgid "Performance Overlay"
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh
-msgid "Shown or hidden in VR (it was running)."
+msgid "Shown in VR."
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh

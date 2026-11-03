@@ -43,7 +43,7 @@ my-pack/
   my-tweak/
     README.md        the manifest (front matter) and the tweak's documentation
     install.sh  uninstall.sh  status.sh
-    run.sh  check-system.sh  needed.sh  update-check.sh  migrate.sh  stopped.sh    (optional)
+    run.sh  run-label.sh  check-system.sh  needed.sh  update-check.sh  migrate.sh  stopped.sh    (optional)
     ...              whatever the scripts install: programs, .desktop files, icons, pins
 ```
 
@@ -258,6 +258,10 @@ user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
   `status.sh` is an example.
 - `run.sh` (with `run:`): what the Run button does. Launch apps through their menu entry
   (`gtk-launch <id>`), so wallet gates apply.
+- `run-label.sh` (optional, with `run:`): prints the Run button's label for the tweak's state
+  now, one line, translated with `t`. The window runs it with each status check, and checks a row
+  again a few seconds after Run, so a button can read **Show** or **Hide** (the Performance
+  Overlay's). Nothing printed, or none, leaves the manifest's `run.label`.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one
   line; exit 0 or 1); `./install.sh check-system` and updates run it.
 - `needed.sh`: whether this Frame needs the tweak at all: exit 0 if it does, exit 1 with one line
