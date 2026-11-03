@@ -3360,38 +3360,6 @@ msgstr ""
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: App switcher"
-msgstr "Knop onder de spiegel: app wisselen"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Back"
-msgstr "Knop onder de spiegel: terug"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid ""
-"Button below the mirror: Notifications (open or close the phone's panel)"
-msgstr ""
-"Knop onder de spiegel: meldingen (opent of sluit het paneel van de telefoon)"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Power (screen off or on)"
-msgstr "Knop onder de spiegel: aan/uit (scherm uit of aan)"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Volume down"
-msgstr "Knop onder de spiegel: volume lager"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Volume up"
-msgstr "Knop onder de spiegel: volume hoger"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr "{PHONE_NAME} vergeten"
 
@@ -3401,12 +3369,36 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 "Framesnelheid (fps, maximaal; 72-144: de vernieuwingsfrequenties van de Steam Frame)"
 
-# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: App switcher"
+msgstr "Knop bij de spiegel: app wisselen"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Back"
+msgstr "Knop bij de spiegel: terug"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Notifications (open or close the phone's panel)"
+msgstr ""
+"Knop bij de spiegel: meldingen (opent of sluit het paneel van de telefoon)"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Power (screen off or on)"
+msgstr "Knop bij de spiegel: aan/uit (scherm uit of aan)"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Volume down"
+msgstr "Knop bij de spiegel: volume lager"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Volume up"
+msgstr "Knop bij de spiegel: volume hoger"
+
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the mirror's buttons apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
-"Beeld, framesnelheid en het klembord gelden vanaf de volgende start van de spiegel (of na Stream herstarten via het tandwiel, in VR). De joysticksnelheid en de knoppen onder de spiegel gelden meteen, net als de tijd waarna de verbinding vanzelf verbroken wordt, gerekend vanaf je wijziging."
+"Beeld, framesnelheid en het klembord gelden vanaf de volgende start van de spiegel (of na Stream herstarten via het tandwiel, in VR). De joysticksnelheid en de knoppen bij de spiegel gelden meteen, net als de tijd waarna de verbinding vanzelf verbroken wordt, gerekend vanaf je wijziging."
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
@@ -3426,6 +3418,10 @@ msgid ""
 "Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
 msgstr ""
 "Toont het scherm van je Android-telefoon in een venster waarin je kunt klikken, typen en scrollen, via wifi (scrcpy met Draadloze foutopsporing van Android). De telefoon wordt vanzelf op het netwerk gevonden."
+
+#: packs/core/adb-scrcpy/README.md
+msgid "The mirror's buttons go"
+msgstr "De knoppen van de spiegel staan"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
@@ -3891,6 +3887,10 @@ msgstr "4 u"
 msgid "8 h"
 msgstr "8 u"
 
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Above"
+msgstr "Boven"
+
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "App switcher"
@@ -3911,15 +3911,18 @@ msgstr "Terug"
 msgid "Back button"
 msgstr "Terugknop"
 
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Below"
+msgstr "Onder"
+
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr "Bitrate (Mbit/s)"
 
-# needs review
 #: packs/core/adb-scrcpy/phone-touch.js
-msgid "Buttons below the mirror"
-msgstr "Knoppen onder de spiegel"
+msgid "Buttons"
+msgstr "Knoppen"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3930,6 +3933,10 @@ msgstr "Klembord met de telefoon"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
 msgstr "Verbinding vanzelf verbreken na"
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Drag to change the order"
+msgstr "Sleep om de volgorde te wijzigen"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -3945,6 +3952,11 @@ msgstr "Framesnelheid (fps, maximaal)"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Joystick scrolling"
 msgstr "Scrollen met joystick"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "Left"
+msgstr "Links"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4007,6 +4019,11 @@ msgstr "Stream herstarten"
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Restart stream to apply"
 msgstr "Stream herstarten om toe te passen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "Right"
+msgstr "Rechts"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -5958,11 +5975,6 @@ msgid "Horizontal strip"
 msgstr "Horizontale strook"
 
 # needs review
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "Left"
-msgstr "Links"
-
-# needs review
 #: packs/core/scroll-strips/patch.js
 msgid ""
 "Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
@@ -5973,11 +5985,6 @@ msgstr ""
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Tint van Kamerweergave"
-
-# needs review
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "Right"
-msgstr "Rechts"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -8788,3 +8795,39 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "The Frame has no glanceable status in VR: the time and batteries are behind the dashboard. Linked: [Cuff](https://github.com/Brobert-in-aus/cuff) installs itself on the Frame, the way its README describes, at the commit Frame Tweaks tried it at."
 #~ msgstr ""
 #~ "De Frame heeft in VR geen status die je in één oogopslag ziet: de tijd en de batterijen zitten achter het dashboard. Gekoppeld: [Cuff](https://github.com/Brobert-in-aus/cuff) installeert zichzelf op de Frame, zoals de README het beschrijft, op de commit waarmee Frame Tweaks het getest heeft."
+
+#~ # needs review
+#~ msgid "Button below the mirror: App switcher"
+#~ msgstr "Knop onder de spiegel: app wisselen"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Back"
+#~ msgstr "Knop onder de spiegel: terug"
+
+#~ # needs review
+#~ msgid ""
+#~ "Button below the mirror: Notifications (open or close the phone's panel)"
+#~ msgstr ""
+#~ "Knop onder de spiegel: meldingen (opent of sluit het paneel van de telefoon)"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Power (screen off or on)"
+#~ msgstr "Knop onder de spiegel: aan/uit (scherm uit of aan)"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Volume down"
+#~ msgstr "Knop onder de spiegel: volume lager"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Volume up"
+#~ msgstr "Knop onder de spiegel: volume hoger"
+
+#~ # needs review
+#~ msgid ""
+#~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
+#~ msgstr ""
+#~ "Beeld, framesnelheid en het klembord gelden vanaf de volgende start van de spiegel (of na Stream herstarten via het tandwiel, in VR). De joysticksnelheid en de knoppen onder de spiegel gelden meteen, net als de tijd waarna de verbinding vanzelf verbroken wordt, gerekend vanaf je wijziging."
+
+#~ # needs review
+#~ msgid "Buttons below the mirror"
+#~ msgstr "Knoppen onder de spiegel"

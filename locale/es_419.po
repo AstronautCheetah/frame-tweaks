@@ -2993,38 +2993,6 @@ msgid ""
 msgstr ""
 "Espejo de Android deja de conectarse a este teléfono de forma predeterminada. La próxima vez toma el teléfono que encuentre, o pregunta cuál si hay varios."
 
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: App switcher"
-msgstr "Botón debajo del espejo: cambiar de app"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Back"
-msgstr "Botón debajo del espejo: atrás"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid ""
-"Button below the mirror: Notifications (open or close the phone's panel)"
-msgstr ""
-"Botón debajo del espejo: notificaciones (abre o cierra el panel del teléfono)"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Power (screen off or on)"
-msgstr "Botón debajo del espejo: encendido (pantalla apagada o encendida)"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Volume down"
-msgstr "Botón debajo del espejo: bajar volumen"
-
-# needs review
-#: packs/core/adb-scrcpy/README.md
-msgid "Button below the mirror: Volume up"
-msgstr "Botón debajo del espejo: subir volumen"
-
 #: packs/core/adb-scrcpy/README.md
 msgid "Forget {PHONE_NAME}"
 msgstr "Olvidar {PHONE_NAME}"
@@ -3034,12 +3002,36 @@ msgid "Frame rate (fps, at most; 72-144: the Steam Frame's refresh rates)"
 msgstr ""
 "Cuadros por segundo (fps, como máximo; 72-144: las frecuencias de actualización del Steam Frame)"
 
-# needs review
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: App switcher"
+msgstr "Botón del espejo: cambiar de app"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Back"
+msgstr "Botón del espejo: atrás"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Notifications (open or close the phone's panel)"
+msgstr ""
+"Botón del espejo: notificaciones (abre o cierra el panel del teléfono)"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Power (screen off or on)"
+msgstr "Botón del espejo: encendido (pantalla apagada o encendida)"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Volume down"
+msgstr "Botón del espejo: bajar volumen"
+
+#: packs/core/adb-scrcpy/README.md
+msgid "Mirror button: Volume up"
+msgstr "Botón del espejo: subir volumen"
+
 #: packs/core/adb-scrcpy/README.md
 msgid ""
-"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
+"Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the mirror's buttons apply at once, and so does the time it disconnects after, counted from when you change it."
 msgstr ""
-"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick y los botones debajo del espejo se aplican de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."
+"La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick y los botones del espejo se aplican de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -3057,6 +3049,10 @@ msgid ""
 "Shows your Android phone's screen in a window you can click, type and scroll in, over Wi-Fi (scrcpy with Android's wireless debugging). It finds the phone on the network by itself."
 msgstr ""
 "Muestra la pantalla de tu teléfono Android en una ventana donde puedes hacer clic, escribir y desplazarte, por Wi-Fi (scrcpy con la depuración inalámbrica de Android). Encuentra el teléfono en la red por sí solo."
+
+#: packs/core/adb-scrcpy/README.md
+msgid "The mirror's buttons go"
+msgstr "Los botones del espejo van"
 
 #: packs/core/adb-scrcpy/README.md
 msgid ""
@@ -3450,6 +3446,10 @@ msgstr "4 h"
 msgid "8 h"
 msgstr "8 h"
 
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Above"
+msgstr "Encima"
+
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "App switcher"
@@ -3471,13 +3471,16 @@ msgid "Back button"
 msgstr "Botón de atrás"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+msgid "Below"
+msgstr "Debajo"
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Bit rate (Mbit/s)"
 msgstr "Tasa de bits (Mbit/s)"
 
-# needs review
 #: packs/core/adb-scrcpy/phone-touch.js
-msgid "Buttons below the mirror"
-msgstr "Botones debajo del espejo"
+msgid "Buttons"
+msgstr "Botones"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js
@@ -3487,6 +3490,10 @@ msgstr "Portapapeles con el teléfono"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
 msgstr "Desconectarse solo después de"
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Drag to change the order"
+msgstr "Arrastra para cambiar el orden"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Fast"
@@ -3499,6 +3506,10 @@ msgstr "Cuadros por segundo (fps, como máximo)"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Joystick scrolling"
 msgstr "Desplazamiento con joystick"
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "Left"
+msgstr "Izquierda"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Medium"
@@ -3555,6 +3566,10 @@ msgstr "Reiniciar transmisión"
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Restart stream to apply"
 msgstr "Reinicia la transmisión para aplicar"
+
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
+msgid "Right"
+msgstr "Derecha"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -5312,10 +5327,6 @@ msgstr "Separación de la ventana (cm)"
 msgid "Horizontal strip"
 msgstr "Franja horizontal"
 
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "Left"
-msgstr "Izquierda"
-
 #: packs/core/scroll-strips/patch.js
 msgid ""
 "Not saved: reinstall VR dashboard patching (vr-dashboard) to keep settings."
@@ -5325,10 +5336,6 @@ msgstr ""
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Tinte del passthrough"
-
-#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
-msgid "Right"
-msgstr "Derecha"
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Scroll strips"
@@ -8419,3 +8426,39 @@ msgstr "Instalador de ajustes"
 #~ "The Frame has no glanceable status in VR: the time and batteries are behind the dashboard. Linked: [Cuff](https://github.com/Brobert-in-aus/cuff) installs itself on the Frame, the way its README describes, at the commit Frame Tweaks tried it at."
 #~ msgstr ""
 #~ "El Frame no tiene un estado visible de un vistazo en RV: la hora y las baterías están detrás del menú principal. Vinculado: [Cuff](https://github.com/Brobert-in-aus/cuff) se instala en el Frame por sí mismo, como lo describe su README, en el commit con el que Frame Tweaks lo probó."
+
+#~ # needs review
+#~ msgid "Button below the mirror: App switcher"
+#~ msgstr "Botón debajo del espejo: cambiar de app"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Back"
+#~ msgstr "Botón debajo del espejo: atrás"
+
+#~ # needs review
+#~ msgid ""
+#~ "Button below the mirror: Notifications (open or close the phone's panel)"
+#~ msgstr ""
+#~ "Botón debajo del espejo: notificaciones (abre o cierra el panel del teléfono)"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Power (screen off or on)"
+#~ msgstr "Botón debajo del espejo: encendido (pantalla apagada o encendida)"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Volume down"
+#~ msgstr "Botón debajo del espejo: bajar volumen"
+
+#~ # needs review
+#~ msgid "Button below the mirror: Volume up"
+#~ msgstr "Botón debajo del espejo: subir volumen"
+
+#~ # needs review
+#~ msgid ""
+#~ "Picture, frame rate and the clipboard apply the next time the mirror starts (or its gear's Restart stream, in VR). Joystick speed and the buttons below the mirror apply at once, and so does the time it disconnects after, counted from when you change it."
+#~ msgstr ""
+#~ "La imagen, los cuadros por segundo y el portapapeles se aplican la próxima vez que se inicia el espejo (o con Reiniciar transmisión en su engranaje, en RV). La velocidad del joystick y los botones debajo del espejo se aplican de inmediato, y también el tiempo tras el que se desconecta, contado desde que lo cambias."
+
+#~ # needs review
+#~ msgid "Buttons below the mirror"
+#~ msgstr "Botones debajo del espejo"
