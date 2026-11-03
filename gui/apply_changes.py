@@ -227,6 +227,88 @@ class ApplyChanges:
         bar.setVisible(not sft.has_password())
         return bar
 
+    # ---- after a SteamOS update: 🛠 Repair (./install.sh repair) ---------------------------------
+    def make_repair_bar(self):
+        """A line under the title once SteamOS's build differs from the one Frame Tweaks recorded
+        and an installed tweak's status isn't OK (a SteamOS update replaced what it kept outside
+        the home folder, say), with a button that repairs them (update_repair_bar)."""
+        bar = QWidget()
+        bar.setObjectName("repairbar")
+        bar.setStyleSheet("QWidget#repairbar { background: #3a3020; border-radius: 6px; }")
+        row = QHBoxLayout(bar)
+        row.setContentsMargins(12, 8, 12, 8)
+        self.repair_text = QLabel()
+        self.repair_text.setWordWrap(True)
+        row.addWidget(self.repair_text, 1)
+        b = QPushButton(_("🛠 Repair"))
+        b.setToolTip(_("Installs again the installed tweaks whose status says they're broken (./install.sh repair)"))
+        b.clicked.connect(self.ask_repair)
+        row.addWidget(b)
+        self.repair_bar = bar
+        bar.setVisible(False)
+        self.update_repair_bar()          # (again after a change of language: build_ui)
+        return bar
+
+    def broken_ids(self):
+        """The tweaks the window counts as installed but broken (sft.broken), in the list's order."""
+        return [c["id"] for c in self.rows if sft.broken(self.state.get(c["id"]), sft.installed_record(c["id"]))]
+
+    def update_repair_bar(self):
+        """Once every row's status is in: the bar shows while the build changed and a tweak is
+        broken. A build change that broke nothing is recorded as seen: a problem weeks later
+        mustn't be put down to that update."""
+        bar = self.repair_bar
+        if bar is None or any(self.state.get(c["id"]) is None for c in self.rows):
+            return
+        change = sft.build_change()
+        ids = self.broken_ids() if change else []
+        if change and not ids:
+            try:
+                sft.record_build()
+            except OSError:
+                pass
+        bar.setVisible(bool(ids))
+        if ids:
+            titles = {c["id"]: c["title"] for c in self.rows}
+            self.repair_text.setText("🛠 " + html.escape(
+                _("SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}.").format(
+                    old=change[0], new=change[1], tweaks=", ".join(titles[cid] for cid in ids))))
+
+    def ask_repair(self):
+        """🛠 Repair: the confirm page says first which tweaks it installs again and which it leaves
+        (their manifest says SteamOS updates don't touch them; held), as Apply changes does."""
+        comps = {c["id"]: c for c in self.rows}
+        ids = self.broken_ids()
+        held = sft.STATE / "held"
+        fix = [cid for cid in ids if not sft.survives_updates(comps[cid]) and not (held / cid).exists()]
+        left = [cid for cid in ids if cid not in fix]
+        dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
+
+        def line(cid):
+            note = sft.sudo_note(comps[cid])
+            return "• " + html.escape(comps[cid]["title"]) + (
+                " " + dim % html.escape(_("(asks for your sudo password: %s)") % note) if note else "")
+        parts = []
+        if fix:
+            parts.append("<b>" + _("Install again, over what's there:") + "</b><br>" + "<br>".join(line(cid) for cid in fix))
+        if left:
+            parts.append("<b>" + _("Left as they are (their manifest says SteamOS updates don't touch them, or held):")
+                         + "</b><br>" + "<br>".join("• " + html.escape(comps[cid]["title"]) for cid in left))
+        parts.append(dim % _("Their settings and data are kept. The terminal says what's still broken after."))
+        self.confirm("<br><br>".join(parts), _("Repair"), self.run_repair)
+
+    def run_repair(self):
+        """./install.sh repair in a terminal (the window's usual runner); the rows are checked again
+        when it closes, and the bar goes with what's fixed (repair records the build)."""
+        cmd = "./install.sh repair --steamos-update"
+        if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing
+            print("would run:", cmd)
+            return
+        full = f"cd {shlex.quote(str(REPO))} && {cmd}; echo; read -rp {close_prompt()}"
+        self.repair_proc = QProcess(self)
+        self.repair_proc.finished.connect(lambda *_: self.changed(self.broken_ids()))
+        in_terminal(self.repair_proc, full)
+
     def set_password(self):
         """passwd in a terminal, with a word on what it asks; the bar goes once it's set."""
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):      # for tests: show the plan, change nothing

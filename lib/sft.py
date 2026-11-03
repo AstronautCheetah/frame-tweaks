@@ -30,7 +30,8 @@ Command line (through ./install.sh):
   sft.py settings ID --reset            back to the defaults
 For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID, link ID FIELD,
 apps, uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
-test-keeps ID, install-check-ids ID..., install-problems "INSTALLED_ID..." ID...
+test-keeps ID, install-check-ids ID..., install-problems "INSTALLED_ID..." ID...,
+steamos-build [--record|--record-first].
 """
 # (The docstring above is the usage the command line prints: it says nothing of the code's layout.
 # The packs and tweaks are lib/registry.py's, adding, updating and removing packs and `mods`
@@ -268,6 +269,74 @@ def unfinished_update():
     return sorted(c["id"] for c in registry.components()
                   if c["id"] in records and records[c["id"]] != version and not c.get("link")
                   and not (held / c["id"]).exists())
+
+
+# ---- after a SteamOS update: ./install.sh repair ---------------------------------------------
+# A SteamOS update replaces the system partition, and with it whatever a tweak put outside the
+# home folder that the update doesn't keep. steamos-build holds the build ./install.sh saw at the
+# last repair (and at the first install): the window offers Repair once the build differs and an
+# installed tweak's status isn't OK. Not rewritten at every install: installing one new tweak right
+# after an update would hide the offer while the others are still broken.
+OS_RELEASE = Path("/etc/os-release")
+
+
+def steamos_build(text=None):
+    """This Frame's SteamOS as a person reads it: "3.8.2 (20261020.1)", from os-release's
+    VERSION_ID and BUILD_ID (the beta and stable branches can share a VERSION_ID: the build tells
+    them apart). "" when it can't tell. (FRAME_TWEAKS_OS_RELEASE: another file, for the tests.)"""
+    if text is None:
+        try:
+            text = Path(os.environ.get("FRAME_TWEAKS_OS_RELEASE") or OS_RELEASE).read_text(errors="replace")
+        except OSError:
+            return ""
+
+    def field(name):
+        m = re.search(rf'^{name}=["\']?([^"\'\n]*)["\']?\s*$', text, re.M)
+        return m[1].strip() if m else ""
+    version, build = field("VERSION_ID"), field("BUILD_ID")
+    if version and build:
+        return f"{version} ({build})"
+    return version or build
+
+
+def recorded_build():
+    try:
+        return (STATE / "steamos-build").read_text().strip()
+    except OSError:
+        return ""
+
+
+def record_build(only_if_missing=False):
+    """Write the build seen now (nothing when it can't tell: an empty record would read as "no
+    record" anyway). Returns it."""
+    now = steamos_build()
+    if now and not (only_if_missing and recorded_build()):
+        STATE.mkdir(parents=True, exist_ok=True)
+        (STATE / "steamos-build").write_text(now + "\n")
+    return now
+
+
+def build_change():
+    """(recorded, now) when SteamOS's build differs from the one recorded, else None (also without
+    a record, or when it can't tell: nothing to compare)."""
+    old, now = recorded_build(), steamos_build()
+    return (old, now) if old and now and old != now else None
+
+
+def survives_updates(c):
+    """Its manifest says it survives SteamOS updates (survives_updates: starting with Yes, as
+    "Yes (everything is in your home folder)"). Anything else ("No", "Partly", a sentence, nothing)
+    is a maybe: ./install.sh repair reinstalls it when its status says it's broken."""
+    return bool(re.match(r"\s*yes\b", c.get("survives_updates") or "", re.I))
+
+
+def broken(state, record):
+    """A status (code, text) the window counts as broken: a warning (2; "status check failed" too),
+    or missing (1) for a tweak Frame Tweaks installed (record): what a SteamOS update leaves of
+    one. Not one waiting for a SteamVR restart: that's the restart's to fix."""
+    if state is None:
+        return False
+    return state[0] == 2 or (state[0] == 1 and record)
 
 
 # ---- hidden rows: yours, plus defaults you haven't unhidden ----------------
@@ -583,7 +652,8 @@ def main(argv):
             print("\x1f".join(re.sub(r"[\n\r\x1f]", " ", f) for f in [c["id"], c["title"], " ".join(c["deps"]),
                                                                   c["desc"], str(c["dir"]), "1" if c["experimental"] else "",
                                                                   "1" if c["link"] else "", "1" if sudo_note(c) else "",
-                                                                  "1" if c["when_not_needed"] == "uninstall" else ""]))
+                                                                  "1" if c["when_not_needed"] == "uninstall" else "",
+                                                                  "1" if survives_updates(c) else ""]))
     elif cmd == "install-check-ids":            # whose install state install-problems needs to know
         # (./install.sh runs a status.sh for each to tell: only these, so an install of tweaks that
         # declare nothing checks nothing. The ids that need a newer Frame Tweaks, those that
@@ -598,6 +668,9 @@ def main(argv):
         problems = registry.install_problems(args[1:], args[0].split())
         print("\n".join(problems))
         sys.exit(1 if problems else 0)
+    elif cmd == "steamos-build" and args in ([], ["--record"], ["--record-first"]):
+        # (for ./install.sh: --record after a repair, --record-first after an install)
+        print(record_build(only_if_missing=args == ["--record-first"]) if args else steamos_build())
     elif cmd == "dir" and len(args) == 1:
         c = registry.component(args[0])
         sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])

@@ -1939,6 +1939,88 @@ class Conflicts(unittest.TestCase):
         self.assertIn("would install: " + a["id"], out.getvalue())
 
 
+class RepairBar(unittest.TestCase):
+    """After a SteamOS update: the bar shows once every status is in, the build differs from the one
+    recorded and an installed tweak is broken; 🛠 Repair names what it installs again (and what it
+    leaves: their manifest says they survive updates), then runs ./install.sh repair. A build
+    change that broke nothing is recorded as seen."""
+    def window(self, change=("3.8.0 (1)", "3.8.0 (2)"), records=()):
+        w = bare_window()
+        state = tempfile.TemporaryDirectory()                      # (held tweaks: none, whatever this machine has)
+        self.addCleanup(state.cleanup)
+        for p in (mock.patch.object(gui.sft, "build_change", return_value=change),
+                  mock.patch.object(gui.sft, "STATE", Path(state.name)),
+                  mock.patch.object(gui.sft, "record_build"),
+                  mock.patch.object(gui.sft, "installed_record", side_effect=lambda cid: cid in records)):
+            p.start()
+            self.addCleanup(p.stop)
+        w.make_repair_bar()
+        return w
+
+    def fragile(self, w):
+        """A tweak of the official packs, saying for the test that SteamOS updates may undo it."""
+        c = next(c for c in w.rows if not gui.sft.sudo_note(c))
+        p = mock.patch.dict(c, {"survives_updates": "No, an update removes its rule"})
+        p.start()
+        self.addCleanup(p.stop)
+        return c
+
+    def test_shown_with_the_build_change_and_whats_broken(self):
+        w = self.window()
+        self.assertTrue(w.repair_bar.isHidden())                   # (nothing broken: every row not installed)
+        gui.sft.record_build.assert_called_once()                  # (a change that broke nothing: seen)
+        c = self.fragile(w)
+        w.state[c["id"]] = (2, "its rule is gone")
+        w.update_repair_bar()
+        self.assertFalse(w.repair_bar.isHidden())
+        self.assertIn("SteamOS was updated (3.8.0 (1) → 3.8.0 (2))", w.repair_text.text())
+        self.assertIn(html_escape(c["title"]), w.repair_text.text())
+
+    def test_missing_counts_only_with_an_install_record(self):
+        w = self.window()
+        c = self.fragile(w)
+        w.update_repair_bar()
+        self.assertTrue(w.repair_bar.isHidden())                   # (missing, never installed)
+        w = self.window(records=(c["id"],))
+        self.assertFalse(w.repair_bar.isHidden())                  # (missing, though installed: a SteamOS update)
+
+    def test_not_while_statuses_are_coming_or_without_a_change(self):
+        w = self.window(change=None)
+        c = self.fragile(w)
+        w.state[c["id"]] = (2, "its rule is gone")
+        w.update_repair_bar()
+        self.assertTrue(w.repair_bar.isHidden())
+        w = self.window()
+        gui.sft.record_build.reset_mock()
+        w.state[c["id"]] = (2, "its rule is gone")
+        del w.state[next(x["id"] for x in w.rows if x["id"] != c["id"])]                               # (one still being checked)
+        w.update_repair_bar()
+        self.assertTrue(w.repair_bar.isHidden())
+        gui.sft.record_build.assert_not_called()
+
+    def test_repair_names_what_it_does_then_runs_it(self):
+        w = self.window()
+        c = self.fragile(w)
+        sure = next(x for x in w.rows if x["id"] != c["id"] and gui.sft.survives_updates(x))
+        w.state[c["id"]], w.state[sure["id"]] = (2, "its rule is gone"), (2, "something else")
+        w.update_repair_bar()
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.ask_repair()
+            text = w.confirm_text.text()
+            self.assertIn("Install again, over what's there:</b><br>• " + html_escape(c["title"]), text)
+            self.assertIn("Left as they are", text)
+            self.assertIn(html_escape(sure["title"]), text.split("Left as they are")[1])
+            self.assertEqual(out.getvalue(), "")                   # (asks first)
+            self.assertEqual(w.confirm_yes.text(), "Repair")
+            w.confirm_yes.click()
+        self.assertEqual(out.getvalue(), "would run: ./install.sh repair --steamos-update\n")
+
+
+def html_escape(text):
+    import html
+    return html.escape(text)
+
+
 class ApplyConfirm(unittest.TestCase):
     """Apply changes says first what it will install (with what those need, and which ask for
     sudo) and remove, by name, and does it on Apply; Cancel is the confirm page's."""

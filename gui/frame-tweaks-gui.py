@@ -186,6 +186,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     files_job, files_changed = None, frozenset()
     pack_job = None         # a pack being added or updated from a link, (future, done, saying): finish_pack_job
     blocked = {}            # id -> why its box can't be ticked (apply_changes.py update_blocks)
+    repair_bar = None       # after a SteamOS update: 🛠 Repair (apply_changes.py make_repair_bar)
 
     def __init__(self):
         super().__init__()
@@ -352,6 +353,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addLayout(top)
         lay.addWidget(self.make_password_bar())
+        lay.addWidget(self.make_repair_bar())
         lay.addWidget(scroll, 1)
         lay.addLayout(bottom)
         self.row_widgets, self.focus_index = [], -1
@@ -550,6 +552,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             tidy = False
         if tidy:
             self.tidy_unneeded()
+        if shown:
+            self.update_repair_bar()                     # (it waits for every row's status itself)
         if shown:
             self.fit_list()                              # (a status can make its row wider)
         if self.files_job is not None and self.files_job.done():

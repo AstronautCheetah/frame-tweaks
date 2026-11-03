@@ -10,6 +10,20 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 ## 2026-11-03
 - New in `gui/apply_changes.py:181`
   - now: "These changes can't be applied:"
+- New in `gui/apply_changes.py:243`
+  - now: "🛠 Repair"
+- New in `gui/apply_changes.py:244`
+  - now: "Installs again the installed tweaks whose status says they're broken (./install.sh repair)"
+- New in `gui/apply_changes.py:274`
+  - now: "SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
+- New in `gui/apply_changes.py:293`
+  - now: "Install again, over what's there:"
+- New in `gui/apply_changes.py:295`
+  - now: "Left as they are (their manifest says SteamOS updates don't touch them, or held):"
+- New in `gui/apply_changes.py:297`
+  - now: "Their settings and data are kept. The terminal says what's still broken after."
+- New in `gui/apply_changes.py:298`
+  - now: "Repair"
 - New in `gui/frame-tweaks-gui.py:278`
   - now: "Search the tweaks"
 - New in `gui/frame-tweaks-gui.py:283`
@@ -33,6 +47,28 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Nothing was installed."
 - New in `install.sh:666`
   - now: "The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
+- New in `install.sh:745`
+  - now: "repair: unknown option %s (it checks every installed tweak; --steamos-update)"
+- New in `install.sh:752`
+  - now: "Checking the installed tweaks"
+- New in `install.sh:763`
+  - now: "held: left as it is (./install.sh unhold %s)"
+- New in `install.sh:765`
+  - now: "its manifest says it survives SteamOS updates, so it was left as it is (to install it again anyway: %s)"
+- New in `install.sh:770`
+  - now: "Installing again: %s"
+- New in `install.sh:771`
+  - now: "These ask for your sudo password as they install: %s"
+- New in `install.sh:785`
+  - now: "Nothing to repair: every installed tweak is working."
+- New in `install.sh:788`
+  - now: "Repaired: %s"
+- New in `install.sh:789`
+  - now: "Nothing was installed again."
+- New in `install.sh:791`
+  - now: "still broken after installing it again: %s"
+- New in `install.sh:796`
+  - now: "Still broken: %s"
 - New in `lib/registry.py:606`
   - now: "needs Frame Tweaks {want} (this is {have}): update first"
 - New in `lib/registry.py:616`

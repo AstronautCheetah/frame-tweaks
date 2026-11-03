@@ -68,6 +68,10 @@ msgid "I understand the risk: apply"
 msgstr ""
 
 #: gui/apply_changes.py
+msgid "Install again, over what's there:"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Install again, with the files that changed since they were installed:"
 msgstr ""
 
@@ -80,11 +84,21 @@ msgid "Install: %s"
 msgstr ""
 
 #: gui/apply_changes.py
+msgid ""
+"Installs again the installed tweaks whose status says they're broken (./install.sh repair)"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Its files changed since it was installed: the new ones are used."
 msgstr ""
 
 #: gui/apply_changes.py
 msgid "Its settings and data are kept."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"Left as they are (their manifest says SteamOS updates don't touch them, or held):"
 msgstr ""
 
 #: gui/apply_changes.py
@@ -130,11 +144,20 @@ msgid ""
 msgstr ""
 
 #: gui/apply_changes.py
+msgid "Repair"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid "Runs its own uninstaller, then its own installer again."
 msgstr ""
 
 #: gui/apply_changes.py
 msgid "Set a password…"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
 msgstr ""
 
 #: gui/apply_changes.py
@@ -148,6 +171,11 @@ msgstr ""
 
 #: gui/apply_changes.py
 msgid "Their settings and data are kept."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"Their settings and data are kept. The terminal says what's still broken after."
 msgstr ""
 
 #: gui/apply_changes.py
@@ -175,6 +203,10 @@ msgstr ""
 #: gui/apply_changes.py
 msgid ""
 "⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}"
+msgstr ""
+
+#: gui/apply_changes.py
+msgid "🛠 Repair"
 msgstr ""
 
 #: gui/details_page.py
@@ -1698,6 +1730,10 @@ msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 
 #: install.sh
+msgid "Checking the installed tweaks"
+msgstr ""
+
+#: install.sh
 msgid ""
 "Couldn't install PyQt6 (what happened: %s); using the simple checklist."
 msgstr ""
@@ -1726,6 +1762,10 @@ msgstr ""
 
 #: install.sh
 msgid "Installing again, with their changed files: %s"
+msgstr ""
+
+#: install.sh
+msgid "Installing again: %s"
 msgstr ""
 
 #: install.sh
@@ -1813,6 +1853,14 @@ msgid "Nothing installed."
 msgstr ""
 
 #: install.sh
+msgid "Nothing to repair: every installed tweak is working."
+msgstr ""
+
+#: install.sh
+msgid "Nothing was installed again."
+msgstr ""
+
+#: install.sh
 msgid "Nothing was installed."
 msgstr ""
 
@@ -1843,6 +1891,10 @@ msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr ""
 
 #: install.sh
+msgid "Repaired: %s"
+msgstr ""
+
+#: install.sh
 msgid "Setting up the full installer window"
 msgstr ""
 
@@ -1853,6 +1905,10 @@ msgstr ""
 #: install.sh
 msgid ""
 "SteamVR's own setting goes back when SteamVR stops; then this goes too: %s"
+msgstr ""
+
+#: install.sh
+msgid "Still broken: %s"
 msgstr ""
 
 #: install.sh
@@ -1880,6 +1936,10 @@ msgstr ""
 
 #: install.sh
 msgid "The version Frame Tweaks tested: %s"
+msgstr ""
+
+#: install.sh
+msgid "These ask for your sudo password as they install: %s"
 msgstr ""
 
 #: install.sh
@@ -1950,6 +2010,10 @@ msgid "git pull failed; not reinstalling"
 msgstr ""
 
 #: install.sh
+msgid "held: left as it is (./install.sh unhold %s)"
+msgstr ""
+
+#: install.sh
 msgid "install what? (./install.sh list)"
 msgstr ""
 
@@ -1980,6 +2044,11 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid ""
+"its manifest says it survives SteamOS updates, so it was left as it is (to install it again anyway: %s)"
+msgstr ""
+
+#: install.sh
 msgid "link-version ID [tested|newest]"
 msgstr ""
 
@@ -2004,7 +2073,16 @@ msgid "removing %s"
 msgstr ""
 
 #: install.sh
+msgid ""
+"repair: unknown option %s (it checks every installed tweak; --steamos-update)"
+msgstr ""
+
+#: install.sh
 msgid "run what?"
+msgstr ""
+
+#: install.sh
+msgid "still broken after installing it again: %s"
 msgstr ""
 
 #: install.sh

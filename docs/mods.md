@@ -104,7 +104,7 @@ undo: "`./install.sh uninstall hello-frame`"
 | `summary` | One line, shown in the list and in `./install.sh list`. |
 | `what`, `why` | Its details page. |
 | `author` | Who made it ("Made by"). |
-| `changes`, `access`, `survives_updates`, `undo` | What it changes on the system, any unusual access it has, whether it survives SteamOS updates, and how to undo it (docs/tweaks.md's tables and SECURITY.md are made from these). |
+| `changes`, `access`, `survives_updates`, `undo` | What it changes on the system, any unusual access it has, whether it survives SteamOS updates, and how to undo it (docs/tweaks.md's tables and SECURITY.md are made from these). Start `survives_updates` with **Yes** only when a SteamOS update leaves everything it installed: `./install.sh repair` installs a broken tweak again only when it doesn't say Yes. |
 
 **Optional:**
 
@@ -222,6 +222,21 @@ That gives you `$TWEAK_DIR` (the tweak's own folder: use it for its files), `$BI
 `set -euo pipefail`: a command that fails stops the script (add `|| true` where a failure is
 fine). During the ↻ Reinstall button's uninstall, `$FRAME_TWEAKS_REINSTALL` is set (keep the
 user's setup, the install follows); during an update, `$FRAME_TWEAKS_UPDATING`.
+
+**Why a script runs.** `install.sh`, `uninstall.sh` and `migrate.sh` (and a linked project's
+install and uninstall) get three variables; read these rather than guessing from the others:
+
+| Variable | Values | Means |
+|---|---|---|
+| `FT_PHASE` | `install`, `reinstall`, `update`, `repair`, `uninstall` | What Frame Tweaks is doing: installing it; installing it again (↻ Reinstall, whose uninstall comes first, or `reinstall-changed`, which installs over what's there); an update's second stage; `./install.sh repair` after a SteamOS update; removing it. |
+| `FT_REASON` | `user`, `reinstall-changed`, `update`, `repair`, `steamos-update`, `link-version`, `not-needed`, `uninstall-self` | A word on what started it: asked for by name, files changed, Frame Tweaks updated, `repair` run by hand or by the window after it saw the SteamOS build change, a linked project's version chosen, removed by `tidy` (`when_not_needed`), Frame Tweaks uninstalling itself. More may come: treat one you don't know as `user`. |
+| `FT_PREVIOUS_VERSION` | `0.6.22`, or empty | The Frame Tweaks version that last installed this tweak (its install record), as it was before this run; empty if it wasn't installed. `migrate.sh` gets it as `$1` too. |
+
+`FRAME_TWEAKS_REINSTALL` stays, for the scripts that read it: it's set exactly when `FT_PHASE` is
+`reinstall` in an uninstall. A tweak whose `install.sh` puts something outside the home folder
+(where a SteamOS update may remove it) can tell a repair by `FT_PHASE=repair` (say less, skip a
+question already answered); say so in `survives_updates`, which `./install.sh repair` reads: a
+tweak whose `survives_updates` starts with **Yes** isn't installed again by it.
 
 - `install.sh`: installs it. It must be safe to run again, and install only into your home
   folder (SteamOS's system partition is read-only and updates wipe it). Exit non-zero on failure.

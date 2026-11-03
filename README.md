@@ -214,6 +214,7 @@ same code, [`lib/sft.py`](lib/sft.py), or the same tools):
 ./install.sh reinstall arrowpad remove and install again in one step (the ↻ button)
 ./install.sh reinstall-changed  install again the tweaks whose files changed since (status: ↻ updated)
 ./install.sh status             health check, changes nothing
+./install.sh repair             after a SteamOS update: install again the tweaks it broke (the window's 🛠 Repair)
 ./install.sh check-system       are the SteamOS/SteamVR parts the tweaks rely on still there?
 ./install.sh debug-info         a redacted report for bug reports
 ./install.sh report             the same, and the bug form's address to attach it to

@@ -186,8 +186,10 @@ A new tweak with a dashboard patch (`install_dashboard_patch`) is picked up by
 | `ALARM_MIRROR=URL`, `ALARM_ALLOW_DOWNGRADE=1` | The Arch Linux ARM mirror to use; allow a package older than one installed before. |
 | `TEST_IGNORE=REGEX`, `TEST_WORK=DIR` | `dev/test-tweaks.sh`: paths other programs write meanwhile; keep its work folder there. |
 
-The installer sets more for the tweaks' scripts (`FRAME_TWEAKS_LIB`, `FRAME_TWEAKS_REINSTALL`,
-`FRAME_TWEAKS_UPDATING`): [docs/mods.md](docs/mods.md), "The scripts". Under the splash, the
+The installer sets more for the tweaks' scripts (`FRAME_TWEAKS_LIB`, `FT_PHASE`, `FT_REASON`,
+`FT_PREVIOUS_VERSION`, `FRAME_TWEAKS_REINSTALL`, `FRAME_TWEAKS_UPDATING`): [docs/mods.md](docs/mods.md),
+"The scripts". `FRAME_TWEAKS_OS_RELEASE=FILE` stands in for `/etc/os-release` (the tests: the
+SteamOS build `./install.sh repair` and the window compare). Under the splash, the
 command finds `FRAME_TWEAKS_SPLASH_TTY` set to its terminal (so `./install.sh` doesn't start another).
 
 ## Adding a tweak

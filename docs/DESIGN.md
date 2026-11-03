@@ -260,6 +260,15 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
   flagged instead, every old install would say so until reinstalled by hand; recorded by
   `status`, a checkout pulled since would pass for what was installed (and `status` changes
   nothing).
+- **After a SteamOS update.** `steamos-build` in the state folder is the SteamOS build (os-release's
+  `VERSION_ID` and `BUILD_ID`) seen at the last `./install.sh repair`, or at the first install.
+  Not at every install: installing one new tweak right after an update would hide the window's
+  **🛠 Repair** offer while others are still broken. The window shows that offer once the build
+  differs and an installed tweak is broken (a warning, or missing with an install record); a
+  build change that broke nothing is recorded as seen. `repair` installs those tweaks again as
+  `reinstall-changed` does, except held ones and those whose `survives_updates` starts with Yes,
+  and records the build. Tweak scripts learn why they run from `FT_PHASE` and `FT_REASON`
+  (docs/mods.md).
 - **Releases** are made by the Release workflow
   ([`release.yml`](../.github/workflows/release.yml)). It turns CHANGELOG.md's
   `## Unreleased` section into the release notes, bumps `VERSION` and the AppStream metadata,

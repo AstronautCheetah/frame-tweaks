@@ -17,6 +17,9 @@
 #                                    install again the tweaks whose files changed since they were
 #                                    installed (pulled, or edited): status marks them ↻ updated
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
+#   ./install.sh repair              after a SteamOS update: install again the installed tweaks whose
+#                                    status says they're broken, unless their manifest says they
+#                                    survive SteamOS updates; then what's still broken
 #   ./install.sh link-version ID [tested|newest]
 #                                    a linked project: which version is installed, the one Frame
 #                                    Tweaks tested and its newest; or install the tested one (what
@@ -58,7 +61,7 @@ cd "$(dirname "$(readlink -f "$0")")" || exit 1
 # terminal: it marks the one it runs the command in (FRAME_TWEAKS_SPLASH_TTY). ⚙ Preferences
 # (~/.config/frame-tweaks/splash) or FRAME_TWEAKS_SPLASH: off turns it off, still keeps it still.
 case ${1:-} in
-    install|uninstall|remove|reinstall|reinstall-changed|update|uninstall-self|link-version)
+    install|uninstall|remove|reinstall|reinstall-changed|repair|update|uninstall-self|link-version)
         # (the terminal is read from /proc: in $(tty <&1), fd 1 is the pipe that collects the answer)
         if [[ -t 1 && ${FRAME_TWEAKS_SPLASH:-$(cat "$HOME/.config/frame-tweaks/splash" 2>/dev/null)} != off &&
               ${FRAME_TWEAKS_SPLASH_TTY:-} != "$(readlink "/proc/$$/fd/1")" ]] &&
@@ -113,11 +116,12 @@ start_log() {
 
 # The tweaks, from the packs (lib/sft.py registry: the official packs and the user's trusted
 # packs, each tweak described by its README.md front matter; see docs/mods.md).
-declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED SUDO AUTO_REMOVE
+declare -A TITLE DEPS DESC DIR EXPERIMENTAL LINKED SUDO AUTO_REMOVE SURVIVES
 IDS=()
-while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo autoremove; do
+while IFS=$'\x1f' read -r id title deps desc dir exp linked sudo autoremove survives; do
     IDS+=("$id"); TITLE[$id]=$title; DEPS[$id]=$deps; DESC[$id]=$desc; DIR[$id]=$dir; EXPERIMENTAL[$id]=$exp
     LINKED[$id]=$linked; SUDO[$id]=$sudo; AUTO_REMOVE[$id]=$autoremove       # (when_not_needed: uninstall)
+    SURVIVES[$id]=$survives          # (survives_updates: Yes…; lib/sft.py survives_updates)
 done < <(python3 lib/sft.py registry)
 # (Frame Tweaks' own commands work without: every pack off or not trusted. mods too: "mods on
 # core" is the way back.)
@@ -128,6 +132,23 @@ done < <(python3 lib/sft.py registry)
 # Where each tweak is, for scripts that call another tweak's (lib/common.sh tweak_dir).
 FRAME_TWEAKS_DIRS=$(for id in "${IDS[@]}"; do echo "$id=${DIR[$id]}"; done)
 export FRAME_TWEAKS_DIRS
+
+# ---- the lifecycle context of a tweak's install.sh, uninstall.sh and migrate.sh (docs/mods.md) ----
+# FT_PHASE (install, reinstall, update, repair, uninstall), FT_REASON (a few words: user,
+# reinstall-changed, update, steamos-update, …) and FT_PREVIOUS_VERSION (the Frame Tweaks version
+# that last installed it, empty if none). Each command sets PHASE and REASON as it starts (the
+# dispatch at the end). The versions are read once, before anything runs: a reinstall forgets the
+# record between its uninstall and its install, and the install then would see none.
+PHASE=install REASON=user
+declare -A PREVIOUS=()
+for r in "$STATE"/installed/*; do [[ -f $r ]] && PREVIOUS[${r##*/}]=$(<"$r"); done
+lifecycle() { PHASE=$1 REASON=$2; }
+# with_lifecycle ID COMMAND...: COMMAND with the tweak's context in its environment (only there:
+# exported for good, every status.sh run alongside would see it too)
+with_lifecycle() {
+    local id=$1; shift
+    FT_PHASE=$PHASE FT_REASON=$REASON FT_PREVIOUS_VERSION=${PREVIOUS[$id]:-} "$@"
+}
 
 # The installer's own app-menu entry (desktop menu and Steam's VR "+" menu).
 ensure_menu_entry() {
@@ -217,9 +238,10 @@ tweak_script() {
     if [[ -n $STATUS_IN ]]; then tweak_script_run "$@" {STATUS_IN}>&- {STATUS_OUT}<&-; else tweak_script_run "$@"; fi
 }
 tweak_script_run() {
-    local id=$1 name=$2; shift 2
-    if [[ -f ${DIR[$id]}/$name.sh ]]; then bash "${DIR[$id]}/$name.sh" "$@"
-    elif [[ -n ${LINKED[$id]:-} ]]; then bash "$REPO_DIR/lib/link.sh" "$name" "$id" "$@"
+    local id=$1 name=$2 ctx=(); shift 2
+    case $name in install|uninstall) ctx=(with_lifecycle "$id") ;; esac
+    if [[ -f ${DIR[$id]}/$name.sh ]]; then "${ctx[@]}" bash "${DIR[$id]}/$name.sh" "$@"
+    elif [[ -n ${LINKED[$id]:-} ]]; then "${ctx[@]}" bash "$REPO_DIR/lib/link.sh" "$name" "$id" "$@"
     else return 127; fi
 }
 
@@ -404,6 +426,8 @@ cmd_install() {
         drop_sudo
         echo
     done
+    # (the SteamOS build, the first time only: lib/sft.py record_build says why not every time)
+    [[ -f $STATE/steamos-build ]] || python3 lib/sft.py steamos-build --record-first >/dev/null 2>&1
     [[ ${#failed[@]} -eq 0 ]] || { echo "$(t 'Failed: %s' "${failed[*]}")" >&2; return 1; }
     bold "$(t 'Done.')"; cmd_status "$@"
 }
@@ -668,7 +692,8 @@ cmd_reinstall_ids() {
     drop_sudo                          # (as cmd_install: each script asks for its own)
     for id in "$@"; do
         [[ -n ${LINKED[$id]:-} ]] && continue
-        bold "── $(t 'removing %s' "$id")"; stop_processes "$id"; FRAME_TWEAKS_REINSTALL=1 bash "${DIR[$id]}/uninstall.sh" 8>&-
+        bold "── $(t 'removing %s' "$id")"; stop_processes "$id"
+        FRAME_TWEAKS_REINSTALL=1 with_lifecycle "$id" bash "${DIR[$id]}/uninstall.sh" 8>&-
         drop_sudo; forget_version "$id"; echo
     done
     cmd_install "$@"
@@ -699,6 +724,77 @@ cmd_reinstall_changed() {
     WAS_INSTALLED=("${changed[@]}")
     run_migrations "${changed[@]}"
     cmd_install "${changed[@]}"
+}
+
+# repair [--steamos-update]: a SteamOS update replaces the system partition, and what tweaks keep
+# outside the home folder that it doesn't keep goes with it (a udev rule, a file under /etc).
+# Every tweak Frame Tweaks installed whose status now says it's broken (a warning, or missing
+# though its record says it was installed) is installed again, as reinstall-changed does it
+# (migrations, then its installer over what's there, not removed first), unless its manifest says
+# it survives SteamOS updates (survives_updates: Yes…): reinstalling that one wouldn't be what
+# fixes it, so it's named with what's still broken. Held tweaks stay as they are, as during
+# updates. Each tweak still asks for its own sudo password (drop_sudo between them, as
+# cmd_install): the ones that will are named once, before anything runs. --steamos-update: the
+# window, which saw the build change (FT_REASON). The build seen is recorded at the end
+# (lib/sft.py record_build), so the window's offer goes.
+cmd_repair() {
+    local reason=repair
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --steamos-update) reason=steamos-update ;;
+            *) echo "$(t 'repair: unknown option %s (it checks every installed tweak; --steamos-update)' "$1")" >&2; exit 2 ;;
+        esac
+        shift
+    done
+    lifecycle repair "$reason"
+    local id line rc fix=() kept=() asks=() left=() done_=() bad=0
+    local -A why=()
+    bold "$(t 'Checking the installed tweaks')"
+    for id in "${IDS[@]}"; do
+        line=$(status_of "$id"); rc=$?
+        case $rc in
+            0) continue ;;
+            # (missing counts only for a tweak Frame Tweaks installed; "restart" with 1 is one
+            # removed that SteamVR still runs, and with 2 one SteamVR loads at its next start:
+            # a SteamVR restart fixes those, not a reinstall)
+            1) [[ -f $STATE/installed/$id && $line != "restart  "* ]] || continue ;;
+            *) [[ $line != "restart  "* ]] || continue ;;
+        esac
+        if held "$id"; then why[$id]=$(t 'held: left as it is (./install.sh unhold %s)' "$id"); kept+=("$id")
+        elif [[ -n ${SURVIVES[$id]} ]]; then
+            why[$id]=$(t 'its manifest says it survives SteamOS updates, so it was left as it is (to install it again anyway: %s)' "./install.sh reinstall $id")
+            kept+=("$id")
+        else fix+=("$id"); asks_sudo_now "$id" && asks+=("${TITLE[$id]}"); fi
+    done
+    if [[ ${#fix[@]} -gt 0 ]]; then
+        bold "$(t 'Installing again: %s' "${fix[*]}")"
+        [[ ${#asks[@]} -eq 0 ]] || say "$(t 'These ask for your sudo password as they install: %s' "${asks[*]}")"
+        echo
+        WAS_INSTALLED=("${fix[@]}")
+        run_migrations "${fix[@]}"
+        # (what it says as it goes, as an install does; what counts is each one's status after it)
+        cmd_install "${fix[@]}" || true
+        for id in "${fix[@]}"; do
+            line=$(status_of "$id"); rc=$?
+            if [[ $rc -eq 0 || $line == "restart  "* ]]; then done_+=("$id"); else left+=("$id"); bad=1; fi
+        done
+    fi
+    python3 lib/sft.py steamos-build --record >/dev/null 2>&1
+    echo
+    if [[ ${#fix[@]} -eq 0 && ${#kept[@]} -eq 0 ]]; then
+        bold "$(t 'Nothing to repair: every installed tweak is working.')"
+        return 0
+    fi
+    [[ ${#done_[@]} -eq 0 ]] || bold "$(t 'Repaired: %s' "${done_[*]}")"
+    [[ ${#fix[@]} -gt 0 ]] || say "$(t 'Nothing was installed again.')"
+    for id in "${left[@]}"; do
+        printf '  \033[33m!\033[0m %-15s %s\n' "$id" "$(t 'still broken after installing it again: %s' "$(status_of "$id" | sed 's/^[a-z]*  *//')")"
+    done
+    for id in "${kept[@]}"; do
+        printf '  \033[33m!\033[0m %-15s %s\n' "$id" "${why[$id]}"; bad=1
+    done
+    [[ $bad -eq 0 ]] || say "$(t 'Still broken: %s' "${left[*]}${left[*]:+ }${kept[*]}")"
+    return $bad
 }
 
 cmd_update() {
@@ -760,6 +856,7 @@ keep: git reset --hard @{upstream}")" >&2
     fi
     export FRAME_TWEAKS_UPDATING=1      # (no git: an update all the same, so holds count)
     mark_update
+    lifecycle update update
     cmd_reinstall
 }
 
@@ -1066,7 +1163,7 @@ run_migrations() {
         # (Ranked as releases are: 0.7.0-rc.2 before 0.7.0, which plain sort -V puts after it.)
         tag_newer "$VERSION" "$old" || continue
         bold "── migrating $id from $old"
-        bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $(t '%s migration failed' "$id")" >&2
+        with_lifecycle "$id" bash "${DIR[$id]}/migrate.sh" "$old" 8>&- || echo "!! $(t '%s migration failed' "$id")" >&2
         drop_sudo
     done
 }
@@ -1183,7 +1280,7 @@ cmd_check_system() {
 
 # (the commands that read many statuses: one Python for them all, see start_status_server)
 case ${1:-} in
-    ""|status|check|update|_reinstall|reinstall|reinstall-changed|install|tidy|uninstall|remove|uninstall-self|forget-settings)
+    ""|status|check|update|_reinstall|reinstall|reinstall-changed|repair|install|tidy|uninstall|remove|uninstall-self|forget-settings)
         start_status_server || true ;;
 esac
 case ${1:-} in
@@ -1192,14 +1289,15 @@ case ${1:-} in
     gui)         shift; cmd_gui "$@" ;;
     # ("all" is every tweak, for the migrations as for the installs)
     install)     shift; take_lock; start_log install "$@"; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; run_migrations "$@"; cmd_install "$@" ;;
-    uninstall|remove) shift; take_lock; start_log uninstall "$@"; cmd_uninstall "$@" ;;
-    reinstall)   shift; take_lock; start_log reinstall "$@"; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
-    reinstall-changed) shift; take_lock; start_log reinstall-changed "$@"; cmd_reinstall_changed "$@" ;;
+    uninstall|remove) shift; take_lock; start_log uninstall "$@"; lifecycle uninstall user; cmd_uninstall "$@" ;;
+    reinstall)   shift; take_lock; start_log reinstall "$@"; lifecycle reinstall user; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
+    reinstall-changed) shift; take_lock; start_log reinstall-changed "$@"; lifecycle reinstall reinstall-changed; cmd_reinstall_changed "$@" ;;
+    repair)      shift; take_lock; start_log repair "$@"; cmd_repair "$@" ;;
     status|check) shift; cmd_status "$@" ;;
-    link-version) shift; if [[ $# -eq 2 ]]; then take_lock; start_log link-version "$@"; fi; cmd_link_version "$@" ;;
-    tidy)        take_lock; start_log tidy; cmd_tidy ;;
+    link-version) shift; if [[ $# -eq 2 ]]; then take_lock; start_log link-version "$@"; fi; lifecycle install link-version; cmd_link_version "$@" ;;
+    tidy)        take_lock; start_log tidy; lifecycle uninstall not-needed; cmd_tidy ;;
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
-    _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;
+    _reinstall)  take_lock; start_log reinstall; lifecycle update update; cmd_reinstall ;;
     _setup-window) cmd_setup_window ;;
     hold|unhold) cmd_hold "$@" ;;
     channel)     shift; cmd_channel "$@" ;;
@@ -1225,7 +1323,7 @@ case ${1:-} in
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
     bindings)    shift; exec python3 lib/vrbindings.py "$@" ;;
     forget-settings) shift; take_lock; start_log forget-settings "$@"; cmd_forget_settings "$@" ;;
-    uninstall-self) shift; take_lock; start_log uninstall-self "$@"; cmd_uninstall_self "$@" ;;
+    uninstall-self) shift; take_lock; start_log uninstall-self "$@"; lifecycle uninstall uninstall-self; cmd_uninstall_self "$@" ;;
     menu)        if [[ ${2:-} == --remove ]]; then remove_menu_entry; echo "$(t "Removed 'Frame Tweaks' from the app menu.")"
                  else ensure_menu_entry; echo "$(t "Added 'Frame Tweaks' to the app menu.")"; fi ;;
     -h|--help|help) usage ;;
