@@ -128,6 +128,10 @@ class WalletTool(unittest.TestCase):
         self.assertIn("also holds: mcpOAuth", out)
         self.assertIn(f"rm {cred}", out)
         self.assertTrue(cred.exists())
+        # (the wallet's token can't do Remote Control: said before the file goes, with the way to keep
+        # it, so a later deletion doesn't take Remote Control with it unawares)
+        self.assertIn("Remote Control and claude.ai connectors can't use the wallet's token", out)
+        self.assertIn(f"Homebrew's own claude: {self.prefix / 'bin/claude'}", out)
 
     def test_store_token_with_nothing_stores_nothing(self):
         self.assertIn("Nothing stored", self.tool("--store-token", "claude", input="\n", ok=False).stderr)

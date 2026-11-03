@@ -179,10 +179,18 @@ wallet-tool --forget-token claude   # the token out of the wallet
 - **Remove** (or `wallet-tool --remove claude`) also takes the token out of the wallet, if the
   wallet is unlocked (a Remove asks for no password); otherwise it says how. Taking it out of the
   wallet doesn't revoke it.
-- What changes for Claude Code: the token can only make model requests, so Remote Control and
-  claude.ai connectors need its usual sign-in (your own MCP servers still work); `/login` in a
-  session signs it in the usual way again, and writes `.credentials.json` again. Claude Desktop
-  and editors that start their own `claude` don't use the wrapper.
+- **Remote Control doesn't work with the wallet's token.** The token can only make model
+  requests ([Claude Code: Remote Control](https://code.claude.com/docs/en/remote-control),
+  "Remote Control requires a full-scope login token"), so Remote Control and claude.ai connectors
+  need Claude Code's usual sign-in; your own MCP servers still work. A session started by the
+  protected `claude` says "Claude.ai login expired" for Remote Control, though Claude Code itself
+  works: the token in its environment goes before `.credentials.json` even when that file is
+  there. If you use Remote Control, keep `.credentials.json` (don't move it aside, and don't
+  delete it after a `/login`) and start those sessions with Homebrew's own claude,
+  `/home/linuxbrew/.linuxbrew/bin/claude`, which signs in from the file: in plain text, as without
+  the wallet. Linux has no other place for that sign-in: Claude Code keeps it only in the file.
+- `/login` in a session signs it in the usual way again, and writes `.credentials.json` again.
+  Claude Desktop and editors that start their own `claude` don't use the wrapper.
 - While it runs, the token is in `claude`'s environment, and so in that of the commands, hooks
   and MCP servers it starts, as the plain-text file is open to them now. Set
   `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` (Claude Code's `env` setting) to keep it from them (its

@@ -84,6 +84,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/core/vr-memory-guard/status.sh:14`
   - was: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
   - now: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR given priority"
+- New in `packs/core/wallet/wallet-tool:250`
+  - now: "Remote Control and claude.ai connectors can't use the wallet's token, only this sign-in. If you use them, keep this file and start those sessions with Homebrew's own claude: {real}"
 - New in `packs/third-party/frame-passthrough-pip/README.md`
   - now: "Passthrough on the Frame replaces the game, so checking the room, a drink or a controller means leaving it. This keeps a camera view in the corner of any game, streamed or standalone."
 - New in `packs/third-party/frame-passthrough-pip/README.md`

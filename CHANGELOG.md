@@ -182,6 +182,11 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Wallet: Remote Control and the protected `claude`, said plainly.** The wallet's Claude Code
+  token can only make model requests, so a session the protected `claude` starts can't use Remote
+  Control ("Claude.ai login expired"). `wallet-tool --store-token claude` now says so before it
+  offers to move `.credentials.json` aside, with how to keep Remote Control (keep the file, start
+  those sessions with Homebrew's own `claude`), and the README says it up front.
 - **The window opens with less of a CPU burst.** Its status checks (about 12 s of CPU for 47 tweaks
   on the Frame) run at a low priority, so drawing the window and VR come first, and the checks for
   what's newer (Frame Tweaks itself, packs, each tweak's newer version) start 2 s after the

@@ -243,6 +243,13 @@ def offer_move(cmd):
     if others:
         print(_("It also holds: {keys} (MCP servers' sign-ins, say); with it moved aside, {cmd} asks for those "
                 "again.").format(keys=", ".join(others), cmd=cmd))
+    if cmd == "claude":
+        # (the wallet's token can only make model requests: Claude Code's docs, "Remote Control
+        # requires a full-scope login token". Said before the move, so it isn't undone later by a
+        # /login that writes the file again and a deletion that takes Remote Control with it.)
+        print(_("Remote Control and claude.ai connectors can't use the wallet's token, only this sign-in. "
+                "If you use them, keep this file and start those sessions with Homebrew's own claude: "
+                "{real}").format(real=PREFIX / "bin/claude"))
     aside = f.with_name(f.name + ".before-wallet")
     if (sys.stdin.isatty() and not aside.exists()
             and yes(_("Move it to {path}? Nothing is deleted or signed out: move it back to undo.").format(
