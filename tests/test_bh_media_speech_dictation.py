@@ -446,9 +446,22 @@ class DictateEngine(Home):
 
     def test_a_muted_microphone_says_so_instead_of_recording(self):
         """Muted (Steam's mute in the VR menu mutes it for every app), it recorded silence, which
-        read as "No speech detected": nothing is recorded, and the notice says it's muted."""
+        read as "No speech detected": nothing is recorded, the Speech engine's voice says
+        "Microphone muted" (heard in VR, where a notification may not show), and so does a notice."""
+        speech = self.home / ".local/share/frame-tweaks/speech"
+        (speech / "piper").mkdir(parents=True, exist_ok=True)
+        (speech / "voice.onnx").write_text("voice")
+        self.stub(speech / "piper", "piper", f'echo "said $(cat)" >> {self.log}; '
+                                             'while [ "$1" != --output_file ]; do shift; done; echo RIFF > "$2"')
         log = self.dictate("Hello.", stubs=(("wpctl", 'echo "Volume: 1.00 [MUTED]"'),
-                                            ("pw-record", f'echo "pw-record $*" >> {self.log}; exec sleep 30')))
+                                            ("pw-record", f'echo "pw-record $*" >> {self.log}; exec sleep 30'),
+                                            ("pw-play", f'echo "pw-play $*" >> {self.log}')))
+        for _ in range(50):                       # (said in the background)
+            if "pw-play" in self.log.read_text():
+                break
+            time.sleep(0.1)
+        self.assertIn("said Microphone muted", self.log.read_text())
+        self.assertRegex(self.log.read_text(), r"pw-play \S*said\.wav")
         self.assertFalse([line for line in log if line.startswith("whisper ")], log)
         self.assertIn("notify -a Dictation -t 1500 Microphone muted Unmute it (Steam's microphone button in "
                       "the VR menu, or the desktop's volume control), then dictate again.", log)

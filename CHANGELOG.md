@@ -200,7 +200,9 @@
 ### Fixed
 - **Dictation says when the microphone is muted:** muted (by Steam's mute in the VR menu, or
   another app's), it recorded silence and said only "No speech detected". It now says the
-  microphone is muted, before recording, and a recording with no sound at all says so too.
+  microphone is muted, before recording, and a recording with no sound at all says so too: aloud,
+  in the Speech engine's voice (heard in VR, where a notification may not show), or with a
+  warning sound without it.
 - **Full Keyboard's version** shows right again (its installer now names a release's folder
   `0.14.1-install-…`, which the window took for a pre-release older than 0.14.1).
 - **The Packs page keeps its place:** Trust (or any button there) on one of many packs left the
