@@ -48,6 +48,7 @@ class ApplyChanges:
 
     def update_apply(self):
         """Apply changes is dimmed while there's nothing to change."""
+        self.update_blocks()
         button = getattr(self, "apply_button", None)
         if button is None:
             return
@@ -57,6 +58,42 @@ class ApplyChanges:
                           + (_("Remove: %s") % ", ".join(remove) if remove else "")
                           or _("Nothing to change: tick or untick a tweak first"))
         self.update_reinstall_changed()
+
+    # ---- what can't be ticked: a newer Frame Tweaks needed, a conflict with an installed tweak ---
+    def staying_installed(self):
+        """The tweaks installed that stay so with what's ticked now (unticked ones are removed
+        before anything is installed: Window.run_changes)."""
+        return {cid for cid, st in self.state.items()
+                if st is not None and st[0] not in GONE and self.wanted.get(cid, True)}
+
+    def update_blocks(self):
+        """A tweak not installed that needs a newer Frame Tweaks, or conflicts with one that stays
+        installed (lib/registry.py install_block), can't be ticked: its box is off, its tooltip says
+        why and names the other. Unticking that other frees it again. (A box a status made blocked
+        after it was ticked is unticked: a box that's off couldn't be.)"""
+        boxes = getattr(self, "boxes", None) or {}
+        installed = self.staying_installed()
+        self.blocked = {}
+        for c in self.rows:
+            st = self.state.get(c["id"])
+            if st is not None and st[0] not in GONE:
+                continue                                  # (installed: its box removes it)
+            why = sft.install_block(c, installed, self.rows)
+            if why:
+                self.blocked[c["id"]] = why
+        for cid, box in boxes.items():
+            why = self.blocked.get(cid)
+            if why:
+                if box.isChecked():
+                    box.blockSignals(True)
+                    box.setChecked(False)
+                    box.blockSignals(False)
+                self.wanted.pop(cid, None)
+                box.setEnabled(False)
+                box.setToolTip(why)
+            else:                                         # (as rebuild made it: not needed, say)
+                box.setEnabled(box.property("base_enabled") is not False)
+                box.setToolTip(box.property("base_tip") or box.toolTip())
 
     # ---- files changed since installed: ↻ Reinstall updated ------------------------------------
     def files_updated(self, cid):
@@ -137,6 +174,14 @@ class ApplyChanges:
         if not add and not remove:
             self.say(_("Nothing to change."))
             return
+        # (what they need is installed too, and checked as well: ./install.sh would refuse the lot)
+        staying = [cid for cid, st in self.state.items() if st is not None and st[0] not in GONE and cid not in remove]
+        problems = sft.install_problems(add + list(self.needed(add)), staying, self.rows, window=True)
+        if problems:                 # (said, with Apply off: nothing of it could install)
+            self.confirm("<b>" + html.escape(_("These changes can't be applied:"), quote=False) + "</b><br>"
+                         + "<br>".join("• " + html.escape(p, quote=False) for p in problems)
+                         + "<br><br>" + self.changes_text(add, remove), _("Apply"), lambda: None, enabled=False)
+            return
         blocked = self.needs_password(add)
         if blocked:                  # (sudo can't work yet: set a password first, then Apply again)
             self.confirm(_("{tweaks} need your sudo password, and your user has none yet. Set one, then "
@@ -200,6 +245,19 @@ class ApplyChanges:
         self.say(_("Password set: the tweaks tagged sudo can install now.") if has
                  else _("No password yet: Set a password… again when you're ready."))
 
+    def needed(self, add):
+        """{id: the tweak needing it} for what the tweaks in add depend on that isn't installed yet
+        (./install.sh installs those first, from any pack in use)."""
+        comps = {c["id"]: c for c in self.rows}
+        installed = {cid for cid, st in self.state.items() if st is not None and st[0] not in GONE}
+        needed, queue = {}, list(add)
+        while queue:
+            for d in comps.get(queue.pop(0), {}).get("deps", []):
+                if d in comps and d not in add and d not in installed and d not in needed:
+                    needed[d] = next(c["id"] for c in comps.values() if d in c["deps"] and (c["id"] in add or c["id"] in needed))
+                    queue.append(d)
+        return needed
+
     def changes_text(self, add, remove):
         """What Apply changes will do, for the confirm page, by name: the tweaks installed (with the
         ones they need that aren't installed yet, and which ask for the sudo password) and removed."""
@@ -220,15 +278,7 @@ class ApplyChanges:
         parts = []
         if add:
             lines = [title(cid) + sudo(cid) + hardware(cid) for cid in add]
-            # (./install.sh installs what they depend on first, from any pack in use)
-            installed = {cid for cid, st in self.state.items() if st[0] not in GONE}
-            needed, queue = {}, list(add)
-            while queue:
-                for d in comps.get(queue.pop(0), {}).get("deps", []):
-                    if d in comps and d not in add and d not in installed and d not in needed:
-                        needed[d] = next(c["id"] for c in comps.values() if d in c["deps"] and (c["id"] in add or c["id"] in needed))
-                        queue.append(d)
-            for d, by in needed.items():
+            for d, by in self.needed(add).items():
                 lines.append(title(d) + " " + dim % html.escape(_("(needed by %s)") % comps[by]["title"]) + sudo(d))
             parts.append("<b>" + _("Install:") + "</b><br>" + "<br>".join("• " + line for line in lines))
         if remove:
@@ -237,11 +287,13 @@ class ApplyChanges:
                                            if sft.uninstall_settings() == "remove" else _("Their settings and data are kept.")))
         return "<br><br>".join(parts)
 
-    def confirm(self, text, yes_label, on_yes):
+    def confirm(self, text, yes_label, on_yes, enabled=True):
         """Ask on the confirm page (text: rich text): Cancel goes back to the list, the yes button
-        (yes_label) back too, then does on_yes."""
+        (yes_label) back too, then does on_yes. enabled false: the yes button is shown off (what
+        the text says stops it), until the next question."""
         self.confirm_text.setText(text)
         self.confirm_yes.setText(yes_label)
+        self.confirm_yes.setEnabled(enabled)
         try:
             self.confirm_yes.clicked.disconnect()
         except TypeError:

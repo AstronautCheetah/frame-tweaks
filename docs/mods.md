@@ -111,6 +111,9 @@ undo: "`./install.sh uninstall hello-frame`"
 | Key | Example | What it does |
 |---|---|---|
 | `depends` | `[ydotool]` | Tweaks installed first (from any pack in use). If one is missing, this one isn't offered. |
+| `conflicts` | `[other-tweak]` | Tweaks it can't be installed together with (ids; one from a pack that isn't there is fine). Either side naming the other is enough, so your pack can declare a conflict with an official tweak. Installing it while the other is installed, or both in one go, is refused: `./install.sh` says which one to remove first and installs nothing, the window keeps its tick box off with a tooltip naming the other, and its Apply page says why, with Apply off. Only new installs are checked: two that were installed before either said so stay, and update. |
+| `claims` | `[steamvr.dashboard-button-row]` | Things only one tweak at a time can have, by a name of your choosing (one word: letters, digits and `. _ : / -`), such as a controller button or the dictation engine. Two tweaks claiming the same name conflict, as with `conflicts`, without either knowing of the other; the messages say what both use. |
+| `requires_ft` | `">=0.8"` | The oldest Frame Tweaks it works with: `>=X.Y` or `>=X.Y.Z`, quoted (a value starting with `>` must be). With an older one, it's listed but not installable: its row says "needs Frame Tweaks 0.8 (this is 0.6.23): update first" and `./install.sh install` refuses with that. A development checkout counts as its release (0.6.23+128.abc1234 is 0.6.23), and a test release as the release it becomes. A Frame Tweaks from before this field ignores it, with a warning. |
 | `source` | `{relation: from, url: https://…}` | The project it's linked to in the list, and how: `from`, `uses` (the default), or a few words of your own such as `styled after`. |
 | `hidden_by_default` | `true` | Hidden in the list until you choose to show it. |
 | `when_not_needed` | `uninstall` | With a `needed.sh` (below): once this Frame doesn't need the tweak any more (a SteamOS update does the thing itself, say), it's removed by itself: by the window as it opens, with a note, and by a login-time service (`./install.sh tidy`); its settings are kept. Its `uninstall.sh` must then run without asking (no sudo). Without this, an installed tweak stays, and its status should ask you to remove it. |
@@ -446,7 +449,8 @@ to the Frame, or when the installer window should vouch for exactly what it inst
 `api:` in `pack.md` is the version of this format the pack is written for. A Frame Tweaks that
 only knows older versions leaves the pack out and says so, rather than misreading it. Fields
 it doesn't know are reported as warnings and ignored, so packs can use newer optional fields.
-The helpers in `lib/common.sh` and the manifest fields above are what a pack can rely on.
+The helpers in `lib/common.sh` and the manifest fields above are what a pack can rely on. A tweak that
+needs something newer says so with `requires_ft` (the oldest Frame Tweaks it works with).
 
 ## Sharing a pack
 

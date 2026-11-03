@@ -5,6 +5,7 @@ missing a dependency or needing a newer pack api isn't offered."""
 import contextlib
 import io
 import os
+import random
 import shutil
 import sys
 import tempfile
@@ -626,6 +627,109 @@ class Packs(unittest.TestCase):
         rows = [c["id"] for c in sft.load(refresh=True)["components"]]
         self.assertEqual(rows[-1], "hello")                          # its own category, last
         self.assertLess(rows.index("hello2"), rows.index("claude-desktop"))   # joins Accessibility
+
+    def test_conflicts_claims_and_requires_ft_are_checked(self):
+        """conflicts: tweak ids, never its own; claims: one-word names; requires_ft: >=X.Y[.Z],
+        nothing else. A wrong one leaves the tweak out, saying why; an id no pack has is fine."""
+        bad = {"conflicts must be a list of tweak ids": ["conflicts: other\n", "conflicts: [Other]\n",
+                                                         "conflicts: [1]\n", "conflicts: {a: b}\n"],
+               "conflicts: a tweak can't conflict with itself": ["conflicts: [hello]\n"],
+               "claims must be a list of names": ["claims: steamvr.button\n", "claims: [\"two words\"]\n",
+                                                  "claims: [\"\"]\n", "claims: [3]\n"],
+               "requires_ft must be": ["requires_ft: \"0.8\"\n", "requires_ft: \">0.8\"\n", "requires_ft: \"<=0.8\"\n",
+                                       "requires_ft: \">=0.8, <1\"\n", "requires_ft: \">=1\"\n",
+                                       "requires_ft: \">=0.8.1.2\"\n", "requires_ft: 0.8\n", "requires_ft: [\">=0.8\"]\n"]}
+        for says, extras in bad.items():
+            for extra in extras:
+                d = self.tweak("mypack", "hello", extra=extra)
+                sft.set_trusted(d.parent, True)
+                self.assertNotIn("hello", self.ids(), extra)
+                self.assertTrue(any(f"hello: {says}" in p for p in sft.load()["problems"]), (extra, sft.load()["problems"]))
+        d = self.tweak("mypack", "hello", extra="conflicts: [no-such-tweak, arrowpad]\nclaims: [steamvr.system-button]\n"
+                                                "requires_ft: \">= 0.6.1\"\n")
+        sft.set_trusted(d.parent, True)
+        c = self.ids()["hello"]
+        self.assertEqual((c["conflicts"], c["claims"], c["requires_ft"]),
+                         (["no-such-tweak", "arrowpad"], ["steamvr.system-button"], "0.6.1"))
+        self.assertEqual([p for p in sft.load()["problems"] if "hello" in p], [])
+        self.assertEqual((self.ids()["arrowpad"]["conflicts"], self.ids()["arrowpad"]["requires_ft"]), ([], ""))
+
+    def test_random_values_never_crash_only_rejected_or_used(self):
+        """Any YAML value in these three fields: the tweak is read or left out with a problem, never
+        a crash; one that's used has the kinds the installer relies on."""
+        rnd = random.Random(1103)
+        atoms = ["a", "hello", "x-y", "steamvr.system-button", ">=0.8", ">=1.2.3", ">= 2.0", "0.8", "", "two words",
+                 "Upper", "-lead", "a:b", "#", "~", "null", "true", "3", "1.5", "[a]", "{a: b}"]
+        quote = lambda a: '"' + a.replace('"', '\\"') + '"'          # noqa: E731  (a one-line helper for this test only)
+
+        def value():
+            k = rnd.randrange(4)
+            if k == 0:
+                return quote(rnd.choice(atoms))
+            if k == 1:
+                return "[" + ", ".join(quote(rnd.choice(atoms)) for _ in range(rnd.randrange(4))) + "]"
+            if k == 2:
+                return rnd.choice(["3", "true", "~", "{a: b}", "[1, 2]"])
+            return quote("".join(rnd.choice("ab>=.0189 -_:/") for _ in range(rnd.randrange(8))))
+        for _ in range(150):
+            extra = "".join(f"{k}: {value()}\n" for k in ("conflicts", "claims", "requires_ft") if rnd.random() < 0.7)
+            d = self.tweak("mypack", "hello", extra=extra)
+            sft.set_trusted(d.parent, True)
+            c = self.ids().get("hello")
+            if c is None:
+                self.assertTrue(any("hello" in p for p in sft.load()["problems"]), extra)
+                continue
+            self.assertTrue(all(isinstance(x, str) and x != "hello" for x in c["conflicts"]), extra)
+            self.assertTrue(all(isinstance(x, str) and x and " " not in x for x in c["claims"]), extra)
+            self.assertTrue(c["requires_ft"] == "" or registry.version_numbers(c["requires_ft"]), extra)
+            registry.install_problems(["hello"], ["arrowpad"])                   # (and no crash)
+
+    def test_what_stops_an_install(self):
+        """requires_ft against this version (a development build counts as its release); a conflict
+        named on either side, or a shared claim, with an installed tweak or another being installed;
+        one already installed isn't checked."""
+        self.assertEqual(registry.version_numbers("0.6.23+128.abc1234-dirty"), (0, 6, 23))
+        self.assertEqual(registry.version_numbers("0.8"), (0, 8, 0))
+        self.assertEqual(registry.version_numbers("0.6.4-rc.1"), (0, 6, 4))
+        self.assertIsNone(registry.version_numbers("dev"))
+        c = {"id": "x", "title": "X", "requires_ft": "0.8"}
+        self.assertEqual(registry.needs_newer_ft(c, "0.6.23"), "needs Frame Tweaks 0.8 (this is 0.6.23): update first")
+        for have in ("0.8", "0.8.0", "0.8.1+3.abc", "1.0", "dev"):
+            self.assertEqual(registry.needs_newer_ft(c, have), "", have)
+        self.assertEqual(registry.needs_newer_ft(dict(c, requires_ft="0.6.23"), "0.6.23+128.abc"), "")
+        self.assertNotEqual(registry.needs_newer_ft(dict(c, requires_ft="0.6.24"), "0.6.23+128.abc"), "")
+
+        rows = [{"id": "a", "title": "A", "conflicts": ["b"], "claims": []},
+                {"id": "b", "title": "B", "conflicts": [], "claims": []},
+                {"id": "c", "title": "C", "conflicts": [], "claims": ["dictation.engine"]},
+                {"id": "d", "title": "D", "conflicts": [], "claims": ["dictation.engine", "other"]},
+                {"id": "e", "title": "E", "conflicts": [], "claims": [], "requires_ft": "99.0"}]
+        problems = lambda new, installed, **kw: registry.install_problems(new, installed, rows, **kw)   # noqa: E731  (a one-line helper for this test only)
+        self.assertEqual(problems(["b"], ["a"]), ["B can't be installed with A, which is installed: remove A first "
+                                                  "(./install.sh uninstall a)."])        # (a names b: either side will do)
+        self.assertEqual(problems(["a", "b"], []), ["A and B can't be installed together: choose one of them."])
+        self.assertEqual(problems(["c"], ["d"]), ["C can't be installed with D, which is installed (both use "
+                                                  "dictation.engine): remove D first (./install.sh uninstall d)."])
+        self.assertIn("untick D first", problems(["c"], ["d"], window=True)[0])
+        self.assertEqual(problems(["a", "b"], ["a", "b"]), [])          # (both installed already: a reinstall)
+        self.assertEqual(problems(["a"], ["c", "d"]), [])
+        self.assertEqual(problems(["e"], []), [f"E: needs Frame Tweaks 99.0 (this is {registry.ft_version()}): update "
+                                               "first (./install.sh update)"])
+        self.assertEqual(registry.install_block(rows[1], {"a"}, rows), "Can't be installed with A, which is installed: remove A first")
+        self.assertEqual(registry.install_block(rows[1], set(), rows), "")
+        self.assertTrue(registry.install_block(rows[4], set(), rows).startswith("Needs Frame Tweaks 99.0"))
+        self.assertEqual(registry.conflicting("c", rows), ["d"])
+
+    def test_conflicts_follow_a_rename(self):
+        """conflicts: naming a tweak's former id (formerly:) means it."""
+        self.tweak("mypack", "newname", extra="formerly: [oldname]\n")
+        d = self.tweak("mypack", "hello", extra="conflicts: [oldname]\n")
+        sft.set_trusted(d.parent, True)
+        self.assertEqual(self.ids()["hello"]["conflicts"], ["newname"])
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            sft.main(["install-check-ids", "newname", "scroll-strips"])
+        self.assertEqual(out.getvalue().split(), ["newname", "hello"])
 
 
 if __name__ == "__main__":

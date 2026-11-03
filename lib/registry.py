@@ -39,7 +39,18 @@ TEXT = ("title", "emoji", "category", "tier", "summary", "what", "why", "author"
         "changes", "access", "survives_updates", "undo")
 OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "run", "processes",
             "settings", "known_issue", "wallet_apps", "test", "replaces", "upstream_readme", "config",
-            "app", "link", "sudo", "formerly", "when_not_needed", "hardware", "fail_safe")
+            "app", "link", "sudo", "formerly", "when_not_needed", "hardware", "fail_safe",
+            "conflicts", "claims", "requires_ft")
+# conflicts, claims: tweaks that can't be installed together. conflicts names other tweaks (either
+# side naming the other is enough: a pack can't edit an official manifest to add itself); claims
+# names things only one tweak at a time can have, free-form (steamvr.system-button,
+# dictation.engine): two tweaks claiming the same one conflict, with no need to know of each other.
+# Only new installs are refused (install_problems): a pair installed before either said so stays,
+# and an update's reinstall of both goes on. An id no pack has is fine: its pack may be elsewhere.
+CLAIM = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$")     # (one word: it's printed in a sentence)
+# requires_ft: the oldest Frame Tweaks a tweak works with, ">=X.Y" or ">=X.Y.Z" (nothing else: a
+# range or a ceiling would hide tweaks after an update, which is what packs must not break).
+REQUIRES_FT = re.compile(r"^>=\s*(\d+\.\d+(?:\.\d+)?)$")
 # hardware: what part of the Frame's hardware the tweak drives (a charger switch, a fan, a
 # display setting). Such a tweak must also be experimental and say, in fail_safe, what it does
 # by itself when things go wrong: a tweak that drove the charger's pause switch was on a Frame
@@ -345,6 +356,19 @@ def read_tweak(d):
         errs.append(f"{where}: known_issue needs version, short, long and latest (text)")
     if "settings" in data:
         errs += check_settings(data["settings"], cid, where)
+    conflicts, claims = data.get("conflicts", []), data.get("claims", [])
+    if not (isinstance(conflicts, list) and all(isinstance(x, str) and ID.match(x) for x in conflicts)):
+        errs.append(f"{where}: conflicts must be a list of tweak ids, like [other-tweak]")
+        conflicts = []
+    elif cid in conflicts:
+        errs.append(f"{where}: conflicts: a tweak can't conflict with itself")
+    if not (isinstance(claims, list) and all(isinstance(x, str) and CLAIM.match(x) for x in claims)):
+        errs.append(f"{where}: claims must be a list of names, one word each, like [steamvr.system-button]")
+        claims = []
+    requires_ft = data.get("requires_ft", "")
+    m = REQUIRES_FT.match(requires_ft) if isinstance(requires_ft, str) else None
+    if "requires_ft" in data and not m:
+        errs.append(f"{where}: requires_ft must be the oldest Frame Tweaks it works with, quoted, like \">=0.8\"")
     if errs:
         return None, errs + warn
     src = data.get("source") or {}
@@ -366,6 +390,8 @@ def read_tweak(d):
         upstream_readme=data.get("upstream_readme", ""),
         when_not_needed=data.get("when_not_needed") or "",     # ("uninstall": ./install.sh tidy removes it then)
         test=data.get("test") or {}, replaces=data.get("replaces", False),
+        conflicts=list(dict.fromkeys(conflicts)), claims=list(dict.fromkeys(claims)),
+        requires_ft=m[1] if m else "",
         changes=data["changes"], access=data["access"], survives_updates=data["survives_updates"],
         undo=data["undo"]), warn
 
@@ -531,6 +557,7 @@ def load(refresh=False):
                 renamed[old] = i
     for c in comps.values():
         c["deps"] = [renamed.get(x, x) for x in c["deps"]]
+        c["conflicts"] = [renamed.get(x, x) for x in c["conflicts"]]
     # a tweak needing one that isn't there can't be installed
     while True:
         gone = [i for i, c in comps.items() if any(dep not in comps for dep in c["deps"])]
@@ -549,6 +576,103 @@ def load(refresh=False):
 
 def components():
     return load()["components"]
+
+
+# ---- what stops an install: an older Frame Tweaks, a conflict ---------------------------------
+def version_numbers(text):
+    """(X, Y, Z) of a version: 0.6.23, 0.8 (0.8.0), a development build 0.6.23+128.abc1234 (its
+    release's: a checkout past 0.6.23 has what 0.6.23 has), a test release 0.6.4-rc.1 (its
+    release's: it becomes that release unchanged). None for one without numbers (dev)."""
+    m = re.match(r"^v?(\d+)\.(\d+)(?:\.(\d+))?", text or "")
+    return tuple(int(x or 0) for x in m.groups()) if m else None
+
+
+def ft_version():
+    """This Frame Tweaks' release (VERSION), as ./install.sh and the window name it."""
+    try:
+        return (REPO / "VERSION").read_text().strip()
+    except OSError:
+        return "dev"
+
+
+def needs_newer_ft(c, have=None):
+    """Why c can't be installed by this Frame Tweaks (its requires_ft is newer), or "". A version
+    without numbers (no VERSION file) can't tell, and doesn't refuse."""
+    want = c.get("requires_ft") or ""
+    have = ft_version() if have is None else have
+    h = version_numbers(have)
+    if not want or h is None or h >= version_numbers(want):
+        return ""
+    return _("needs Frame Tweaks {want} (this is {have}): update first").format(want=want, have=have)
+
+
+def conflict(a, b):
+    """Why tweaks a and b can't be installed together: None when they can, "" when one names the
+    other in conflicts:, else the resources both claim."""
+    if a["id"] == b["id"]:
+        return None
+    shared = [x for x in a.get("claims", []) if x in b.get("claims", [])]
+    if shared:
+        return _("both use {what}").format(what=", ".join(shared))
+    if b["id"] in a.get("conflicts", []) or a["id"] in b.get("conflicts", []):
+        return ""
+    return None
+
+
+def conflicting(cid, rows=None):
+    """The ids of the tweaks in use that conflict with cid (either way), in the list's order."""
+    rows = components() if rows is None else rows
+    c = next((r for r in rows if r["id"] == cid), None)
+    return [r["id"] for r in rows if c is not None and conflict(c, r) is not None]
+
+
+def install_problems(new, installed, rows=None, window=False):
+    """What stops installing the tweaks new (ids) next to the ones installed (ids): a requires_ft
+    newer than this Frame Tweaks, or a conflict with an installed tweak or with another of new.
+    One sentence each, for ./install.sh (window false: with the command that fixes it) or the
+    window's Apply page. A tweak already installed isn't checked: only new installs are refused."""
+    rows = components() if rows is None else rows
+    comps = {c["id"]: c for c in rows}
+    new = [i for i in dict.fromkeys(new) if i in comps and i not in installed]
+    out = []
+    for i in new:
+        note = needs_newer_ft(comps[i])
+        if note:
+            out.append(f"{comps[i]['title']}: {note}" + ("" if window else " (./install.sh update)"))
+    why = lambda w: f" ({w})" if w else ""             # noqa: E731  (a one-line helper for this function only)
+    for n, i in enumerate(new):
+        c = comps[i]
+        for o in [o for o in installed if o in comps and o not in new]:
+            w = conflict(c, comps[o])
+            if w is None:
+                continue
+            other = comps[o]["title"]
+            out.append((_("{title} can't be installed with {other}, which is installed{why}: untick {other} "
+                          "first, to remove it.") if window else
+                        _("{title} can't be installed with {other}, which is installed{why}: remove {other} "
+                          "first (./install.sh uninstall {id}).")).format(title=c["title"], other=other, why=why(w), id=o))
+        for o in new[n + 1:]:
+            w = conflict(c, comps[o])
+            if w is not None:
+                out.append(_("{title} and {other} can't be installed together{why}: choose one of them.").format(
+                    title=c["title"], other=comps[o]["title"], why=why(w)))
+    return out
+
+
+def install_block(c, installed, rows=None):
+    """Why c's tick box in the window is off, as its tooltip: it needs a newer Frame Tweaks, or
+    conflicts with an installed tweak (installed: ids); "" when it can be ticked."""
+    note = needs_newer_ft(c)
+    if note:
+        return note[:1].upper() + note[1:]
+    rows = components() if rows is None else rows
+    for r in rows:
+        if r["id"] in installed:
+            w = conflict(c, r)
+            if w is not None:
+                return _("Can't be installed with {other}, which is installed{why}: remove {other} first").format(
+                    other=r["title"], why=f" ({w})" if w else "")
+    return ""
 
 
 def component(cid):

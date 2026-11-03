@@ -71,6 +71,14 @@
 
 ### Added
 - **Search the tweaks:** a 🔍 button left of ⚙ in the window's top row opens a search field; the list shows only the tweaks whose name, description, category or pack has every word typed (categories unfolded). Esc, or the button again, brings back the whole list.
+- **Tweaks that can't go together, or need a newer Frame Tweaks, say so before installing:** a
+  tweak's manifest can name the tweaks it conflicts with (`conflicts:`), the things only one tweak
+  at a time can have (`claims:`, such as a controller button), and the oldest Frame Tweaks it works
+  with (`requires_ft: ">=0.8"`). `./install.sh install` then refuses, installing nothing, and says
+  which tweak to remove first or that Frame Tweaks needs an update; in the window, such a tweak's
+  tick box is off with a tooltip naming the other, its row says "needs Frame Tweaks 0.8 (this is
+  0.6.23): update first", and the Apply page says why, with Apply off. Tweaks you already have
+  installed together are left as they are (docs/mods.md).
 - **Android Mirror: hardware-key buttons** by the mirror, in VR: Back, App switcher, Volume up, Volume down, Power and Notifications (opens the phone's notification panel; again, closes it), each turned on in ⚙ Settings or the gear's panel (all off by default); the gear's panel shows them as one compact row each: a grab handle, the name and a switch. Drag a row by its handle to change the buttons' order (kept in `phone.conf`). The buttons go below the mirror, above it, or in a column left or right of it ("Buttons: Below, Above, Left, Right", one row in the gear's panel; also in ⚙ Settings), beyond a scroll strip on that side.
 - **Android Mirror says when an app hides its screen:** banking apps, password managers and the like can hide their screen from mirroring (it shows black); in VR a notice in the mirror now says why while one is in front. Two ways to unlock it blind: **Type PIN**, a keypad that types on the phone as a keyboard would (digits, ⌫, ↵, and Wake / show PIN; one dot per digit, nothing logged), and **Where the digits are**, a reference PIN pad over the picture with arrows to nudge it onto the phone's own, for screens that don't take typed keys (taps go through it). Both go within about a second of the phone unlocking. The phone's fingerprint or face prompt gets a notice of its own (use its sensor, or Use PIN on the phone and type the PIN here), and a fingerprint shows where the phone's under-screen sensor is.
 - **Tweaks whose files changed since you installed them say so:** after the checkout changes

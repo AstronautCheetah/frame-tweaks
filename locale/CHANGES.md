@@ -8,6 +8,8 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-03
+- New in `gui/apply_changes.py:181`
+  - now: "These changes can't be applied:"
 - New in `gui/frame-tweaks-gui.py:278`
   - now: "Search the tweaks"
 - New in `gui/frame-tweaks-gui.py:283`
@@ -27,8 +29,22 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
 - New in `gui/wallet_page.py:606`
   - now: "Protect selected"
+- New in `install.sh:373`
+  - now: "Nothing was installed."
 - New in `install.sh:666`
   - now: "The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
+- New in `lib/registry.py:606`
+  - now: "needs Frame Tweaks {want} (this is {have}): update first"
+- New in `lib/registry.py:616`
+  - now: "both use {what}"
+- New in `lib/registry.py:650`
+  - now: "{title} can't be installed with {other}, which is installed{why}: untick {other} first, to remove it."
+- New in `lib/registry.py:652`
+  - now: "{title} can't be installed with {other}, which is installed{why}: remove {other} first (./install.sh uninstall {id})."
+- New in `lib/registry.py:657`
+  - now: "{title} and {other} can't be installed together{why}: choose one of them."
+- New in `lib/registry.py:673`
+  - now: "Can't be installed with {other}, which is installed{why}: remove {other} first"
 - New in `lib/vrbindings.py:109`
   - now: "SteamVR refused {what} (HTTP {code})"
 - New in `lib/vrbindings.py:111`

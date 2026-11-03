@@ -1872,6 +1872,73 @@ def bare_window():
     return w
 
 
+class Conflicts(unittest.TestCase):
+    """A tweak that conflicts with an installed one (manifest conflicts: or a shared claims:), or
+    needs a newer Frame Tweaks (requires_ft:), can't be ticked: its box is off, its tooltip says
+    why; unticking the other frees it. Apply with two that conflict says so, with Apply off."""
+    def setUp(self):
+        p = mock.patch.object(gui.sft, "has_password", return_value=True)   # (whatever this machine's user has)
+        p.start()
+        self.addCleanup(p.stop)
+        self.w = bare_window()
+        free = [c for c in self.w.rows if not c["deps"] and not c.get("hardware")]
+        self.a, self.b = free[0], free[1]
+        for c, extra in ((self.a, {"claims": ["steamvr.system-button"]}), (self.b, {"claims": ["steamvr.system-button"]})):
+            p = mock.patch.dict(c, extra)
+            p.start()
+            self.addCleanup(p.stop)
+        from PyQt6.QtWidgets import QCheckBox
+        self.w.boxes = {}
+        for c in (self.a, self.b):
+            box = QCheckBox()
+            box.setToolTip("Tick to install, untick to remove")
+            box.setProperty("base_enabled", True)
+            box.setProperty("base_tip", box.toolTip())
+            self.w.boxes[c["id"]] = box
+
+    def test_a_box_conflicting_with_an_installed_tweak_is_off_until_that_one_is_unticked(self):
+        w, a, b = self.w, self.a, self.b
+        w.state[a["id"]] = (0, "ok")
+        w.update_blocks()
+        box = w.boxes[b["id"]]
+        self.assertFalse(box.isEnabled())
+        self.assertEqual(box.toolTip(), f"Can't be installed with {a['title']}, which is installed (both use "
+                                        f"steamvr.system-button): remove {a['title']} first")
+        self.assertTrue(w.boxes[a["id"]].isEnabled())                   # (installed: its box removes it)
+        w.wanted[a["id"]] = False                                       # (unticked: removed first, on Apply)
+        w.update_blocks()
+        self.assertTrue(box.isEnabled())
+        self.assertEqual(box.toolTip(), "Tick to install, untick to remove")
+        box.setChecked(True)
+        w.wanted[b["id"]] = True
+        w.wanted.pop(a["id"])                                           # (ticked again: b can't stay ticked)
+        w.update_blocks()
+        self.assertFalse(box.isChecked())
+        self.assertNotIn(b["id"], w.wanted)
+
+    def test_a_tweak_needing_a_newer_frame_tweaks_cant_be_ticked(self):
+        with mock.patch.dict(self.b, {"requires_ft": "99.0", "claims": []}):
+            self.w.update_blocks()
+            self.assertFalse(self.w.boxes[self.b["id"]].isEnabled())
+            self.assertEqual(self.w.boxes[self.b["id"]].toolTip(),
+                             f"Needs Frame Tweaks 99.0 (this is {gui.sft.ft_version()}): update first")
+
+    def test_apply_with_two_that_conflict_says_so_and_stays_off(self):
+        w, a, b = self.w, self.a, self.b
+        w.wanted = {a["id"]: True, b["id"]: True}
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            w.apply()
+            self.assertIs(w.stack.currentWidget(), w.confirm_page)
+            self.assertIn("These changes can't be applied", w.confirm_text.text())
+            self.assertIn(f"{a['title']} and {b['title']} can't be installed together", w.confirm_text.text())
+            self.assertFalse(w.confirm_yes.isEnabled())
+            w.wanted = {a["id"]: True}                                  # (one of them: Apply as usual)
+            w.apply()
+            self.assertTrue(w.confirm_yes.isEnabled())
+            w.confirm_yes.click()
+        self.assertIn("would install: " + a["id"], out.getvalue())
+
+
 class ApplyConfirm(unittest.TestCase):
     """Apply changes says first what it will install (with what those need, and which ask for
     sudo) and remove, by name, and does it on Apply; Cancel is the confirm page's."""

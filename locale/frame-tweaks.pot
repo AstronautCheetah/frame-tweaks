@@ -155,6 +155,10 @@ msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 
 #: gui/apply_changes.py
+msgid "These changes can't be applied:"
+msgstr ""
+
+#: gui/apply_changes.py
 msgid ""
 "Your user has no password yet, so tweaks that ask for the sudo password (tagged sudo) can't install. Set one first: you'll type it when they ask."
 msgstr ""
@@ -1809,6 +1813,10 @@ msgid "Nothing installed."
 msgstr ""
 
 #: install.sh
+msgid "Nothing was installed."
+msgstr ""
+
+#: install.sh
 msgid ""
 "Nothing was selected, so nothing will be removed. To remove everything, use: %s"
 msgstr ""
@@ -2267,6 +2275,34 @@ msgstr ""
 
 #: lib/needs.py
 msgid "Open Frame Tweaks to install it?"
+msgstr ""
+
+#: lib/registry.py
+msgid ""
+"Can't be installed with {other}, which is installed{why}: remove {other} first"
+msgstr ""
+
+#: lib/registry.py
+msgid "both use {what}"
+msgstr ""
+
+#: lib/registry.py
+msgid "needs Frame Tweaks {want} (this is {have}): update first"
+msgstr ""
+
+#: lib/registry.py
+msgid ""
+"{title} and {other} can't be installed together{why}: choose one of them."
+msgstr ""
+
+#: lib/registry.py
+msgid ""
+"{title} can't be installed with {other}, which is installed{why}: remove {other} first (./install.sh uninstall {id})."
+msgstr ""
+
+#: lib/registry.py
+msgid ""
+"{title} can't be installed with {other}, which is installed{why}: untick {other} first, to remove it."
 msgstr ""
 
 #: lib/sft.py

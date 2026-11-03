@@ -30,7 +30,7 @@ Command line (through ./install.sh):
   sft.py settings ID --reset            back to the defaults
 For ./install.sh and dev/test-tweaks.sh: registry, dir ID, deps ID, processes ID, config ID, link ID FIELD,
 apps, uninstall-settings [keep|remove], leftover-settings [--delete] INSTALLED_ID..., test-list,
-test-keeps ID.
+test-keeps ID, install-check-ids ID..., install-problems "INSTALLED_ID..." ID...
 """
 # (The docstring above is the usage the command line prints: it says nothing of the code's layout.
 # The packs and tweaks are lib/registry.py's, adding, updating and removing packs and `mods`
@@ -584,6 +584,20 @@ def main(argv):
                                                                   c["desc"], str(c["dir"]), "1" if c["experimental"] else "",
                                                                   "1" if c["link"] else "", "1" if sudo_note(c) else "",
                                                                   "1" if c["when_not_needed"] == "uninstall" else ""]))
+    elif cmd == "install-check-ids":            # whose install state install-problems needs to know
+        # (./install.sh runs a status.sh for each to tell: only these, so an install of tweaks that
+        # declare nothing checks nothing. The ids that need a newer Frame Tweaks, those that
+        # conflict with another, and those others.)
+        rows = registry.components()
+        out = [i for i in args if registry.needs_newer_ft(registry.component(i) or {})]
+        for i in args:
+            others = registry.conflicting(i, rows)
+            out += [i] + others if others else []
+        print("\n".join(dict.fromkeys(out)))
+    elif cmd == "install-problems" and args:    # "INSTALLED..." ID...: what stops installing the IDs
+        problems = registry.install_problems(args[1:], args[0].split())
+        print("\n".join(problems))
+        sys.exit(1 if problems else 0)
     elif cmd == "dir" and len(args) == 1:
         c = registry.component(args[0])
         sys.exit(_("unknown component: %s") % args[0]) if not c else print(c["dir"])

@@ -185,6 +185,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     # attribute raises RuntimeError rather than AttributeError, so getattr's default wouldn't help)
     files_job, files_changed = None, frozenset()
     pack_job = None         # a pack being added or updated from a link, (future, done, saying): finish_pack_job
+    blocked = {}            # id -> why its box can't be ticked (apply_changes.py update_blocks)
 
     def __init__(self):
         super().__init__()
@@ -413,6 +414,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
                 continue
             if cid in not_needed and not sft.installed_record(cid):
                 continue
+            if on and cid in self.blocked:             # (a conflict, a newer Frame Tweaks: update_blocks)
+                continue
             box = self.boxes.get(cid)
             if box is not None:
                 box.setChecked(on)                      # (its toggled sets wanted)
@@ -630,6 +633,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             if why_not is not None and not sft.installed_record(cid):    # (installed: untick to remove)
                 box.setEnabled(False)
                 box.setToolTip(_("Not needed on this Frame: %s") % why_not)
+            # (what update_blocks puts back once a conflict or a newer Frame Tweaks no longer stops it)
+            box.setProperty("base_enabled", box.isEnabled())
+            box.setProperty("base_tip", box.toolTip())
             box.toggled.connect(lambda on, c=cid: (self.wanted.__setitem__(c, on), self.update_apply()))
             self.boxes[cid] = box
             icon = QLabel()
@@ -668,6 +674,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             if why_not is not None:
                 info.setText(info.text() + "<br><span style='color:#e0b33a'>" + html.escape(
                     _("Not needed on this Frame: %s") % why_not, quote=False) + "</span>")
+            newer = sft.needs_newer_ft(comp)
+            if newer:
+                info.setText(info.text() + "<br><span style='color:#e0b33a'>" + html.escape(newer, quote=False) + "</span>")
             link = QLabel()
             if "|" in comp["source"]:
                 rel, url = comp["source"].split("|", 1)

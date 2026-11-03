@@ -663,6 +663,69 @@ class InstallState(unittest.TestCase):
             (d / name).write_text(f"#!/bin/bash\n{body}\n")
         self.trust()
 
+    def rival(self, probe_extra="", rival_extra=""):
+        """A second tweak, "rival", logging as the probe does; each with these manifest lines."""
+        d = self.pack / "rival"
+        d.mkdir(exist_ok=True)
+        (d / "README.md").write_text(README.replace("title: Probe", "title: Rival")
+                                     .replace("processes: []", "processes: []\n" + rival_extra)
+                                     .replace("uninstall probe", "uninstall rival")
+                                     .replace("config: [~/.config/probe.conf, ~/.config/probe]\n", ""))
+        for name, body in SCRIPTS.items():
+            (d / name).write_text("#!/bin/bash\n" + body.replace("probe", "rival") + "\n")
+        (self.pack / "probe/README.md").write_text(README.replace("processes: []", "processes: []\n" + probe_extra))
+        self.trust()
+
+    def test_a_tweak_conflicting_with_an_installed_one_is_refused(self):
+        """conflicts: on either side, or a shared claim: installing one next to the other, or both at
+        once, is refused before anything runs, naming the one to remove; the other way round too."""
+        for probe_extra, rival_extra in (("conflicts: [rival]\n", ""), ("", "conflicts: [probe]\n"),
+                                         ("claims: [steamvr.system-button]\n", "claims: [steamvr.system-button]\n")):
+            for f in ("probe.log", "probe-installed", "rival-installed", "rival.log"):
+                (self.home / f).unlink(missing_ok=True)
+            self.rival(probe_extra, rival_extra)
+            self.assertEqual(self.sh("install", "probe").returncode, 0)
+            r = self.sh("install", "rival")
+            self.assertNotEqual(r.returncode, 0, r.stdout)
+            self.assertIn("Rival can't be installed with Probe, which is installed", r.stdout + r.stderr)
+            self.assertIn("remove Probe first (./install.sh uninstall probe)", r.stdout + r.stderr)
+            self.assertIn("Nothing was installed.", r.stdout + r.stderr)
+            self.assertFalse((self.home / "rival.log").exists())                  # (its installer never ran)
+            if "claims" in probe_extra:
+                self.assertIn("(both use steamvr.system-button)", r.stdout + r.stderr)
+        self.sh("uninstall", "probe")
+        r = self.sh("install", "probe", "rival")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("Probe and Rival can't be installed together", r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["install", "uninstall"])                   # (the first round's only)
+        r = self.sh("install", "rival")                                           # (probe removed: fine)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_a_pair_installed_before_the_conflict_was_declared_still_reinstalls(self):
+        """Both installed, then a manifest says they conflict: a reinstall, reinstall-changed or an
+        update installs them again (only new installs are checked)."""
+        self.rival()
+        self.assertEqual(self.sh("install", "probe", "rival").returncode, 0)
+        self.rival("conflicts: [rival]\n")
+        for args in (("reinstall", "probe", "rival"), ("install", "probe"), ("reinstall-changed",)):
+            r = self.sh(*args)
+            self.assertEqual(r.returncode, 0, (args, r.stdout + r.stderr))
+            self.assertNotIn("can't be installed", r.stdout + r.stderr)
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("install", (self.home / "rival.log").read_text())
+
+    def test_a_tweak_needing_a_newer_frame_tweaks_is_refused(self):
+        """requires_ft newer than this release: refused, saying so; this release's own: installed."""
+        self.rival(rival_extra='requires_ft: ">=99.0"\n')
+        r = self.sh("install", "probe", "rival")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn(f"Rival: needs Frame Tweaks 99.0 (this is {VERSION}): update first", r.stdout + r.stderr)
+        self.assertEqual(self.log(), [])                                          # (nothing, the probe neither)
+        self.rival(rival_extra=f'requires_ft: ">={VERSION.split("-")[0]}"\n')
+        r = self.sh("install", "rival")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
     def test_a_tweak_one_installed_needs_isnt_removed(self):
         """Installed with a warning (status 2) is installed, as everywhere else: only status 0 was."""
         self.dependent()

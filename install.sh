@@ -355,6 +355,24 @@ asks_sudo_now() {
     [[ ${SUDO[$1]} != homebrew ]] && return 0
     ! command -v brew >/dev/null && [[ ! -x $BREW ]]
 }
+# check_installable ID...: nothing stops installing them, before any is installed (else it says
+# what does, and returns 1): a manifest's requires_ft newer than this Frame Tweaks, or conflicts:
+# and claims: with an installed tweak or another of these (lib/registry.py install_problems).
+# Only new installs count: one installed (or being reinstalled: WAS_INSTALLED) isn't checked, so a
+# pair installed before either declared the conflict still updates. Status checks only for the
+# tweaks the manifests make it matter for (install-check-ids): usually none.
+check_installable() {
+    local ids id installed=() problems
+    ids=$(python3 lib/sft.py install-check-ids "$@") || exit 1
+    [[ -n $ids ]] || return 0
+    for id in $ids; do
+        if [[ " ${WAS_INSTALLED[*]} " == *" $id "* ]] || is_installed "$id"; then installed+=("$id"); fi
+    done
+    problems=$(python3 lib/sft.py install-problems "${installed[*]}" "$@") && return 0
+    printf '%s\n' "$problems" >&2
+    echo "$(t 'Nothing was installed.')" >&2
+    return 1
+}
 cmd_install() {
     [[ $# -eq 0 ]] && { echo "$(t 'install what? (./install.sh list)')" >&2; exit 1; }
     ensure_menu_entry
@@ -362,6 +380,8 @@ cmd_install() {
     check_ids "$@"
     local id why failed=() order
     order=$(with_deps "$@") || exit 1
+    # shellcheck disable=SC2086   # (split on purpose: with_deps prints one id per line)
+    check_installable $order || return 1
     # Each tweak's script starts without a sudo password that sudo remembers (typed for the tweak
     # before it, or before this run): it asks for its own (lib/common.sh drop_sudo).
     drop_sudo
