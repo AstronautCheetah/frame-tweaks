@@ -21,12 +21,31 @@ if [ -f "$HOME/.config/systemd/user/$UNIT" ] && [ "$(sysctl_user is-enabled "$UN
                    "systemctl --user enable $UNIT")"
     fi
 fi
+# A copy started from a menu entry (Steam's "+" menu, say) while the service's was stopped holds
+# the panel's lock without showing anything in VR, and the service's copy, started next, waits
+# behind it for good. End such copies (every process but the service's own) so the service's shows.
+PROG="^$HOME/.local/bin/frame-perf-overlay( |$)"
+main=$(sysctl_user show "$UNIT" -p MainPID --value 2>/dev/null) || main=0
+strays=$(pgrep -f "$PROG" 2>/dev/null | grep -vx "${main:-0}" || true)
+stray=""
+if [ -n "$strays" ]; then
+    # shellcheck disable=SC2086   # (split on purpose: one pid per line; env: the kill on PATH, not bash's builtin, which the tests can't stand in)
+    env kill -TERM $strays 2>/dev/null || true
+    for _ in 1 2 3 4 5 6; do
+        [ -n "$(pgrep -f "$PROG" 2>/dev/null | grep -vx "${main:-0}" || true)" ] || break
+        sleep 0.5
+    done
+    stray=" $(t 'A copy started from the menu held the panel without showing it: ended.')"
+fi
 if ! sysctl_user is-active --quiet steamvr.service; then
-    tell "$(t 'SteamVR is not running: the panel shows once it is.')$fixed"
+    tell "$(t 'SteamVR is not running: the panel shows once it is.')$fixed$stray"
 elif [ ! -f "$HOME/.config/systemd/user/$UNIT" ]; then
     # (a version without the service: the program itself, as its menu entry runs it)
     setsid -f gtk-launch frame-perf-overlay >/dev/null 2>&1 </dev/null
     tell "$(t 'Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings.')"
+elif [ -n "$stray" ] && sysctl_user is-active --quiet "$UNIT"; then
+    # (the service's copy was waiting behind the stray: it shows the panel now)
+    tell "$(t 'Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings.')$fixed$stray"
 elif sysctl_user is-active --quiet "$UNIT"; then
     # (running: the program run again flips "visible" in config.json, which the running one reads
     # back: shown becomes hidden and the other way, as its menu entry says)
@@ -35,7 +54,7 @@ elif sysctl_user is-active --quiet "$UNIT"; then
     if [ "$was" = shown ]; then tell "$(t 'Hidden in VR (Show brings it back).')$fixed"
     else tell "$(t 'Shown in VR.')$fixed"; fi
 elif sysctl_user start "$UNIT" 2>/dev/null; then
-    tell "$(t 'Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings.')$fixed"
+    tell "$(t 'Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings.')$fixed$stray"
 else
     tell "$(t 'Could not start %s: see %s' "$UNIT" "journalctl --user -u $UNIT")$fixed"
     exit 1

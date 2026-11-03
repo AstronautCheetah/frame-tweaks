@@ -54,10 +54,14 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Hidden in VR (Show brings it back)."
 - New in `packs/third-party/perf-overlay/run.sh:36`
   - now: "Shown in VR."
+- New in `packs/third-party/perf-overlay/run.sh:38`
+  - now: "A copy started from the menu held the panel without showing it: ended."
 - New in `packs/third-party/perf-overlay/status.sh:13`
   - now: "installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Show on its row sets it, or %s"
 - New in `packs/third-party/perf-overlay/status.sh:19`
   - now: "installed; closed from its dashboard until the next SteamVR start (Show on its row starts it again)"
+- New in `packs/third-party/perf-overlay/status.sh:20`
+  - now: "a copy started from the menu is running outside its service and shows nothing: Show on its row ends it, so the service can show the panel"
 - New in `packs/third-party/perf-overlay/status.sh:21`
   - now: "installed, but its service failed (exit status %s): Show on its row starts it again; its log: %s"
 - New in `packs/third-party/perf-overlay/status.sh:24`

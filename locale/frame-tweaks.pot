@@ -6602,6 +6602,11 @@ msgid "Show"
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh
+msgid ""
+"A copy started from the menu held the panel without showing it: ended."
+msgstr ""
+
+#: packs/third-party/perf-overlay/run.sh
 msgid "Could not start %s: see %s"
 msgstr ""
 
@@ -6637,6 +6642,11 @@ msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh
 msgid "SteamVR is not running: the panel shows once it is."
+msgstr ""
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"a copy started from the menu is running outside its service and shows nothing: Show on its row ends it, so the service can show the panel"
 msgstr ""
 
 #: packs/third-party/perf-overlay/status.sh

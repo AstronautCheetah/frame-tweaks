@@ -12,6 +12,14 @@ if [ "$rc" -eq 0 ] && [ -f "$HOME/.config/systemd/user/$UNIT" ] &&
         [ "$(sysctl_user is-enabled "$UNIT" 2>/dev/null)" != enabled ]; then
     status_warn "$(t "installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Show on its row sets it, or %s" "./install.sh run perf-overlay")"
 fi
+if [ "$rc" -eq 0 ] && [ -f "$HOME/.config/systemd/user/$UNIT" ]; then
+    # (a copy outside the service, started from a menu entry while the service's was stopped: it holds
+    # the panel's lock and shows nothing, and the service's copy waits behind it; Show ends it)
+    main=$(sysctl_user show "$UNIT" -p MainPID --value 2>/dev/null) || main=0
+    if [ -n "$(pgrep -f "^$HOME/.local/bin/frame-perf-overlay( |$)" 2>/dev/null | grep -vx "${main:-0}" || true)" ]; then
+        status_warn "$(t 'a copy started from the menu is running outside its service and shows nothing: Show on its row ends it, so the service can show the panel')"
+    fi
+fi
 if [ "$rc" -eq 0 ] && [ -f "$HOME/.config/systemd/user/$UNIT" ] && sysctl_user is-active --quiet steamvr.service &&
         ! sysctl_user is-active --quiet "$UNIT"; then
     code=$(sysctl_user show "$UNIT" -p ExecMainStatus --value 2>/dev/null) || code=""   # (common.sh: set -e)

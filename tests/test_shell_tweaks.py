@@ -178,12 +178,15 @@ class PerfOverlay(Home):
                   '  *" is-active "*steamvr.service*) [ -f "$HOME/vr" ] ;;\n'
                   '  *" is-active "*) [ -f "$HOME/failed" ] && echo failed; [ -f "$HOME/running" ] ;;\n'
                   '  *" show "*ExecMainStatus*) cat "$HOME/exitcode" 2>/dev/null ;;\n'
+                  '  *" show "*MainPID*) cat "$HOME/mainpid" 2>/dev/null || echo 0 ;;\n'
                   '  *" enable "*) echo enabled > "$HOME/enabled" ;;\n'
                   '  *" start "*) touch "$HOME/running" ;;\n'
                   'esac')
         for tool in ("notify-send", "gtk-launch"):
             self.stub(tool, f'echo "{tool} $*" >> "$HOME/calls.log"')
-        self.stub("pgrep", "exit 1")
+        # (processes: the pids in $HOME/pids, one per line; kill removes them)
+        self.stub("pgrep", '[ -s "$HOME/pids" ] || exit 1; cat "$HOME/pids"')
+        self.stub("kill", 'echo "kill $*" >> "$HOME/calls.log"; : > "$HOME/pids"')
 
     def installed(self, service=True, enabled=False):
         prog = self.home / ".local/bin/frame-perf-overlay"
@@ -294,6 +297,41 @@ class PerfOverlay(Home):
         r = self.run_script("perf-overlay/run.sh")
         self.assertIn("Shown in VR", r.stdout)
         self.assertEqual([c for c in self.calls() if c.startswith("gtk-launch")], ["gtk-launch frame-perf-overlay"] * 2)
+
+    def test_show_ends_a_copy_running_outside_the_service(self):
+        """Started from a menu entry while the service's copy was stopped, the panel holds its lock
+        and shows nothing; the service's copy, started next, waits behind it. Show ends every copy
+        but the service's own, then the service's shows."""
+        self.installed(enabled=True)
+        (self.home / "vr").touch()
+        (self.home / "pids").write_text("4242\n")                  # (a stray; the service isn't running)
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("kill -TERM 4242", self.calls())
+        self.assertIn("--user start frame-perf-overlay.service", "\n".join(self.calls()))
+        self.assertIn("held the panel without showing it: ended", r.stdout)
+        # the service running and waiting behind a stray: the stray goes, nothing is toggled
+        (self.home / "running").touch()
+        (self.home / "mainpid").write_text("777\n")
+        (self.home / "pids").write_text("777\n4343\n")
+        self.log.unlink()
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertIn("kill -TERM 4343", self.calls())
+        self.assertFalse([c for c in self.calls() if c.startswith("gtk-launch")])
+        self.assertIn("Started", r.stdout)
+        # only the service's own process: nothing to end, the usual toggle
+        (self.home / "pids").write_text("777\n")
+        self.visible(True)
+        r = self.run_script("perf-overlay/run.sh")
+        self.assertNotIn("ended", r.stdout)
+        self.assertIn("Hidden in VR", r.stdout)
+
+    def test_status_warns_about_a_copy_outside_the_service(self):
+        self.installed(enabled=True)
+        (self.home / "pids").write_text("4242\n")
+        r = self.run_script("perf-overlay/status.sh")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("running outside its service", r.stdout)
 
     def test_show_without_the_program_says_to_install(self):
         r = self.run_script("perf-overlay/run.sh")

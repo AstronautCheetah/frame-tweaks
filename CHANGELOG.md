@@ -229,6 +229,8 @@
   (`./install.sh run perf-overlay` toggles the same way).
   While SteamVR runs without the panel, the status says why: closed from its dashboard until the
   next SteamVR start (systemd files that exit as failed; it isn't), not started yet, or failed.
+  A copy started from the menu entry while the service's was stopped holds the panel's lock and
+  shows nothing, and the service's copy waits behind it: the status says so, and Show ends it.
 - **Parakeet installs again with Homebrew's Python around:** its runtime's venv took the first `python3` on the PATH, Homebrew's 3.15 (brought in as a dependency), which onnxruntime has no build for, so Apply failed with "conflicting dependencies". Frame Tweaks' venvs now use SteamOS's own Python, and one left half-made is made anew.
 - **↻ Reinstall keeps Dictation's downloads:** it removed the Whisper and voice-detection models and Parakeet's model and runtime, about 1.1 GB, all downloaded again. They stay now; uninstalling still removes them.
 - **Charge limit lifts its pause when stopped, every time:** stopped in the instant between pausing charging and noting that the pause was its own, it took the pause for someone else's and left charging paused.
