@@ -1452,7 +1452,10 @@ class PreferencesPage(unittest.TestCase):
             (local / "fr.po").write_text('msgid "Refresh"\nmsgstr "Rafraîchir"\n\n'
                                          'msgid "Saved {path}"\nmsgstr "Enregistré"\n', encoding="utf-8")
             (local / "de.po").write_text('msgid "Refresh"\nmsgstr "Aktualisieren"\n', encoding="utf-8")
-            fr = gui.i18n.Catalogue(["fr"], gui.i18n.LOCALE, local)
+            # (no shipped translations: the page's other texts stay English, whatever fr.po holds)
+            shipped = Path(d) / "shipped"
+            shipped.mkdir()
+            fr = gui.i18n.Catalogue(["fr"], shipped, local)
             window = mock.Mock()
             with mock.patch.object(gui.i18n, "LOCAL", local), mock.patch.object(gui.i18n, "CATALOGUE", fr), \
                     mock.patch.object(gui.i18n, "unconfirmed", lambda: None):

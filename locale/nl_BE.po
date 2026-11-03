@@ -87,6 +87,10 @@ msgstr ""
 msgid "I understand the risk: apply"
 msgstr "Ik begrijp het risico: toepassen"
 
+#: gui/apply_changes.py
+msgid "Install again, over what's there:"
+msgstr "Opnieuw installeren, over wat er al staat:"
+
 # needs review
 #: gui/apply_changes.py
 msgid "Install again, with the files that changed since they were installed:"
@@ -103,6 +107,12 @@ msgstr "Installeren:"
 msgid "Install: %s"
 msgstr "Installeren: %s"
 
+#: gui/apply_changes.py
+msgid ""
+"Installs again the installed tweaks whose status says they're broken (./install.sh repair)"
+msgstr ""
+"Installeert de geïnstalleerde aanpassingen opnieuw waarvan de status zegt dat ze defect zijn (./install.sh repair)"
+
 # needs review
 #: gui/apply_changes.py
 msgid "Its files changed since it was installed: the new ones are used."
@@ -113,6 +123,12 @@ msgstr ""
 #: gui/apply_changes.py
 msgid "Its settings and data are kept."
 msgstr "De instellingen en gegevens blijven behouden."
+
+#: gui/apply_changes.py
+msgid ""
+"Left as they are (their manifest says SteamOS updates don't touch them, or held):"
+msgstr ""
+"Ongemoeid gelaten (volgens hun manifest raken SteamOS-updates ze niet, of vastgehouden):"
 
 # needs review
 #: gui/apply_changes.py
@@ -170,6 +186,10 @@ msgid ""
 msgstr ""
 "Verwijdert het en installeert het opnieuw in één stap; de programma's die draaien worden eerst gestopt."
 
+#: gui/apply_changes.py
+msgid "Repair"
+msgstr "Herstellen"
+
 # needs review
 #: gui/apply_changes.py
 msgid "Runs its own uninstaller, then its own installer again."
@@ -180,6 +200,12 @@ msgstr ""
 #: gui/apply_changes.py
 msgid "Set a password…"
 msgstr "Wachtwoord instellen…"
+
+#: gui/apply_changes.py
+msgid ""
+"SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
+msgstr ""
+"SteamOS is bijgewerkt ({old} → {new}), en deze aanpassingen hebben sindsdien aandacht nodig: {tweaks}."
 
 # needs review
 #: gui/apply_changes.py
@@ -198,11 +224,21 @@ msgstr ""
 msgid "Their settings and data are kept."
 msgstr "Hun instellingen en gegevens blijven behouden."
 
+#: gui/apply_changes.py
+msgid ""
+"Their settings and data are kept. The terminal says what's still broken after."
+msgstr ""
+"Hun instellingen en gegevens blijven behouden. De terminal toont daarna wat nog defect is."
+
 # needs review
 #: gui/apply_changes.py
 msgid "Their settings are removed too (⚙ Preferences); their data is kept."
 msgstr ""
 "Hun instellingen worden ook gewist (⚙ Voorkeuren); hun gegevens blijven behouden."
+
+#: gui/apply_changes.py
+msgid "These changes can't be applied:"
+msgstr "Deze wijzigingen kunnen niet toegepast worden:"
 
 # needs review
 #: gui/apply_changes.py
@@ -229,6 +265,10 @@ msgid ""
 "⚠ Drives the Frame's hardware: {hardware}. If something goes wrong: {fail_safe}"
 msgstr ""
 "⚠ Stuurt de hardware van de Frame aan: {hardware}. Als er iets misgaat: {fail_safe}"
+
+#: gui/apply_changes.py
+msgid "🛠 Repair"
+msgstr "🛠 Herstellen"
 
 # needs review
 #: gui/details_page.py
@@ -400,6 +440,18 @@ msgid ""
 msgstr ""
 "Een nieuwere versie dan die Frame Tweaks op een Frame getest heeft: ze kan anders werken, of nog niet op de Frame, en de pagina van deze aanpassing klopt er misschien niet mee. Zodra ze geïnstalleerd is, biedt de rij ervan aan om terug te gaan naar de geteste versie."
 
+#: gui/frame-tweaks-gui.py
+msgid ""
+"An install or update is still running (one started before this window opened goes on by itself): check again once it's done. Its output: {folder}"
+msgstr ""
+"Er loopt nog een installatie of update (een die startte voordat dit venster openging, loopt vanzelf verder): controleer opnieuw als die klaar is. De uitvoer ervan: {folder}"
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"An install, update or removal is still running on its own (its terminal was closed): open it again, to see it or answer it"
+msgstr ""
+"Er loopt nog een installatie, update of verwijdering op zichzelf (de terminal ervan werd gesloten): open die opnieuw om ze te zien of te beantwoorden"
+
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "Apply changes"
@@ -551,7 +603,7 @@ msgid "Help make Frame Tweaks better"
 msgstr "Help Frame Tweaks verbeteren"
 
 # needs review
-#: gui/frame-tweaks-gui.py
+#: gui/frame-tweaks-gui.py packs/third-party/perf-overlay/run-label.sh
 msgid "Hide"
 msgstr "Verbergen"
 
@@ -687,6 +739,14 @@ msgid ""
 msgstr ""
 "Een diagnoserapport opslaan (zonder gebruikersnamen en paden) en het bugformulier openen"
 
+#: gui/frame-tweaks-gui.py
+msgid "Search the tweaks"
+msgstr "Aanpassingen zoeken"
+
+#: gui/frame-tweaks-gui.py
+msgid "Search: name, description, category"
+msgstr "Zoeken: naam, beschrijving, categorie"
+
 # needs review
 #: gui/frame-tweaks-gui.py
 msgid "Settings"
@@ -811,6 +871,10 @@ msgstr "{version} beschikbaar (getest door Frame Tweaks)"
 #: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
 msgstr "↻ Herstarten"
+
+#: gui/frame-tweaks-gui.py
+msgid "▶ Show the running install"
+msgstr "▶ Lopende installatie tonen"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1131,6 +1195,10 @@ msgstr "Een vertaling controleren (juist of niet)"
 msgid "Couldn't delete: {paths}"
 msgstr "Kon niet wissen: {paths}"
 
+#: gui/prefs_page.py
+msgid "Couldn't save the template: {error}"
+msgstr "Kan de sjabloon niet opslaan: {error}"
+
 # needs review
 #: gui/prefs_page.py
 msgid "Delete settings left by uninstalled tweaks…"
@@ -1232,6 +1300,17 @@ msgstr "Taal"
 msgid "Leave every tweak installed"
 msgstr "Alle aanpassingen geïnstalleerd laten"
 
+#: gui/prefs_page.py
+msgid "Left out (the shipped translation or the English shows instead):"
+msgstr ""
+"Weggelaten (de meegeleverde vertaling of het Engels verschijnt in de plaats):"
+
+#: gui/prefs_page.py
+msgid "Local translation: {file} ({n} text; {m} left out)"
+msgid_plural "Local translation: {file} ({n} texts; {m} left out)"
+msgstr[0] "Lokale vertaling: {file} ({n} tekst; {m} weggelaten)"
+msgstr[1] "Lokale vertaling: {file} ({n} teksten; {m} weggelaten)"
+
 # needs review
 #: gui/prefs_page.py
 msgid "Look for a new Frame Tweaks release when this window opens"
@@ -1246,6 +1325,10 @@ msgstr "Geen instellingen achtergelaten door verwijderde aanpassingen."
 #: gui/prefs_page.py
 msgid "Off: only when you press ⟳ Check for updates."
 msgstr "Uit: alleen als je op ⟳ Naar updates zoeken drukt."
+
+#: gui/prefs_page.py
+msgid "Open the folder"
+msgstr "Map openen"
 
 # needs review
 #: gui/prefs_page.py
@@ -1273,6 +1356,14 @@ msgid ""
 "Removing settings also signs you out of Claude Desktop and deletes NordVPN's key (setting NordVPN up again then needs a new access token)."
 msgstr ""
 "Instellingen wissen meldt je ook af bij Claude voor desktop en wist de sleutel van NordVPN (NordVPN opnieuw instellen vereist dan een nieuw toegangstoken)."
+
+#: gui/prefs_page.py
+msgid "Save the template"
+msgstr "Sjabloon opslaan"
+
+#: gui/prefs_page.py
+msgid "Saved {path}"
+msgstr "{path} opgeslagen"
 
 # needs review
 #: gui/prefs_page.py gui/settings_page.py
@@ -1349,6 +1440,12 @@ msgstr "Dit venster"
 #: gui/prefs_page.py
 msgid "Translate it yourself"
 msgstr "Zelf vertalen"
+
+#: gui/prefs_page.py
+msgid ""
+"Translating without a copy of the repository: Save the template, translate it (Poedit, Lokalize or a text editor) and keep it in this folder as <language>.po, de.po or pt_BR.po say: {folder}. Frame Tweaks reads it at once. Each of its texts takes the place of the shipped one, and a language only it has appears above, marked (local). A text that would lose a placeholder, a tag or a space is left out and listed here."
+msgstr ""
+"Vertalen zonder kopie van de repository: kies Sjabloon opslaan, vertaal ze (Poedit, Lokalize of een teksteditor) en zet ze in deze map als <language>.po, zoals de.po of pt_BR.po: {folder}. Frame Tweaks leest ze meteen. Elke tekst erin vervangt de meegeleverde, en een taal die alleen zij heeft, verschijnt hierboven met (lokaal) erbij. Een tekst die een placeholder, een tag of een spatie zou verliezen, wordt weggelaten en hier opgesomd."
 
 # needs review
 #: gui/prefs_page.py
@@ -1529,6 +1626,10 @@ msgstr "Lukte niet: %s"
 msgid "Done."
 msgstr "Klaar."
 
+#: gui/settings_page.py
+msgid "Not used with the {setting} you chose."
+msgstr "Niet gebruikt met de {setting} die je koos."
+
 # needs review
 #: gui/settings_page.py
 msgid "Nothing to apply: change %s first"
@@ -1603,6 +1704,12 @@ msgid ""
 msgstr ""
 "<b>Waarom dit gebruiken?</b> Veel mensen zetten geen wachtwoord op hun Steam Frame: zo kun je hem sneller opzetten, en hij gaat van hand tot hand bij familie en vrienden. Maar de apps die je erop gebruikt, kunnen toch gevoelige dingen bevatten, zoals berichten, notities en accounts waarop je bent aangemeld. Hier kun je die apps achter <b>één wachtwoord, dat van je KDE-portefeuille</b>, houden zonder de hele headset te vergrendelen: de portefeuille wordt één keer ontgrendeld als je hem nodig hebt, en vergrendelt daarna vanzelf weer."
 
+#: gui/wallet_page.py
+msgid ""
+"A Frame Tweaks tweak runs it: protected, it can wait for the wallet password where nobody sees the dialog (Dictation in VR, say)."
+msgstr ""
+"Een aanpassing van Frame Tweaks start het: beveiligd kan het wachten op het portefeuillewachtwoord waar niemand het dialoogvenster ziet (bv. Dicteren in VR)."
+
 # needs review
 #: gui/wallet_page.py
 msgid "Add a terminal tool ({n} from Homebrew)"
@@ -1616,6 +1723,12 @@ msgid "Add an app ({n} installed app)"
 msgid_plural "Add an app ({n} installed apps)"
 msgstr[0] "Een app toevoegen ({n} geïnstalleerde app)"
 msgstr[1] "Een app toevoegen ({n} geïnstalleerde apps)"
+
+#: gui/wallet_page.py
+msgid ""
+"Also list the commands of formulae installed for another one, and those Frame Tweaks' tweaks run, to protect any of them"
+msgstr ""
+"Ook de commando's tonen van formules die voor een andere geïnstalleerd zijn, en die welke de aanpassingen van Frame Tweaks starten, om er een van te beveiligen"
 
 # needs review
 #: gui/wallet_page.py
@@ -1689,6 +1802,10 @@ msgid "Homebrew's {src}: its command {cmds}"
 msgid_plural "Homebrew's {src}: its commands {cmds}"
 msgstr[0] "{src} van Homebrew: de opdracht {cmds}"
 msgstr[1] "{src} van Homebrew: de opdrachten {cmds}"
+
+#: gui/wallet_page.py
+msgid "Installed for another formula, not by you."
+msgstr "Geïnstalleerd voor een andere formule, niet door jou."
 
 # needs review
 #: gui/wallet_page.py
@@ -1778,6 +1895,10 @@ msgstr "Eerst wachtwoord"
 msgid "Protect"
 msgstr "Beveiligen"
 
+#: gui/wallet_page.py
+msgid "Protect selected"
+msgstr "Selectie beveiligen"
+
 # needs review
 #: gui/wallet_page.py
 msgid "Protected ({n})"
@@ -1821,6 +1942,16 @@ msgstr "Ingesteld door de installatie van deze aanpassing."
 #: gui/wallet_page.py
 msgid "Shorter"
 msgstr "Korter"
+
+#: gui/wallet_page.py
+msgid "Show all Homebrew commands"
+msgstr "Alle Homebrew-commando's tonen"
+
+#: gui/wallet_page.py
+msgid "Show all Homebrew commands ({n} more formula)"
+msgid_plural "Show all Homebrew commands ({n} more formulae)"
+msgstr[0] "Alle Homebrew-commando's tonen ({n} formule meer)"
+msgstr[1] "Alle Homebrew-commando's tonen ({n} formules meer)"
 
 # needs review
 #: gui/wallet_page.py
@@ -2144,6 +2275,10 @@ msgid "Checking the SteamOS/SteamVR parts the tweaks rely on"
 msgstr ""
 "Onderdelen van SteamOS/SteamVR controleren waarop de aanpassingen steunen"
 
+#: install.sh
+msgid "Checking the installed tweaks"
+msgstr "De geïnstalleerde aanpassingen controleren"
+
 # needs review
 #: install.sh
 msgid ""
@@ -2184,6 +2319,10 @@ msgstr "Geïnstalleerd: %s"
 #: install.sh
 msgid "Installing again, with their changed files: %s"
 msgstr "Opnieuw installeren, met hun veranderde bestanden: %s"
+
+#: install.sh
+msgid "Installing again: %s"
+msgstr "Opnieuw installeren: %s"
 
 # needs review
 #: install.sh
@@ -2236,6 +2375,10 @@ msgstr "Deze map is behouden, om dit later opnieuw uit te voeren: %s"
 msgid "Kept your own packs: %s"
 msgstr "Je eigen pakketten behouden: %s"
 
+#: install.sh
+msgid "Kept your own translations: %s"
+msgstr "Je eigen vertalingen behouden: %s"
+
 # needs review
 #: install.sh
 msgid ""
@@ -2256,6 +2399,10 @@ msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 "Gekoppeld, dus ze worden op hun eigen manier bijgewerkt (in hun rij voert ↻ hun installatieprogramma opnieuw uit): %s"
+
+#: install.sh
+msgid "No install is running. The output of past ones: %s"
+msgstr "Er loopt geen installatie. De uitvoer van eerdere: %s"
 
 # needs review
 #: install.sh
@@ -2296,6 +2443,18 @@ msgstr "Nog niets geïnstalleerd."
 msgid "Nothing installed."
 msgstr "Niets geïnstalleerd."
 
+#: install.sh
+msgid "Nothing to repair: every installed tweak is working."
+msgstr "Niets te herstellen: elke geïnstalleerde aanpassing werkt."
+
+#: install.sh
+msgid "Nothing was installed again."
+msgstr "Er is niets opnieuw geïnstalleerd."
+
+#: install.sh
+msgid "Nothing was installed."
+msgstr "Er is niets geïnstalleerd."
+
 # needs review
 #: install.sh
 msgid ""
@@ -2330,6 +2489,10 @@ msgstr "%s verwijderd: niet nodig op deze Frame (%s)."
 msgid "Removed 'Frame Tweaks' from the app menu."
 msgstr "'Frame Tweaks' verwijderd uit het appmenu."
 
+#: install.sh
+msgid "Repaired: %s"
+msgstr "Hersteld: %s"
+
 # needs review
 #: install.sh
 msgid "Setting up the full installer window"
@@ -2346,6 +2509,10 @@ msgid ""
 "SteamVR's own setting goes back when SteamVR stops; then this goes too: %s"
 msgstr ""
 "De eigen instelling van SteamVR wordt hersteld als SteamVR stopt; daarna verdwijnt ook dit: %s"
+
+#: install.sh
+msgid "Still broken: %s"
+msgstr "Nog defect: %s"
 
 # needs review
 #: install.sh
@@ -2371,10 +2538,20 @@ msgid ""
 msgstr ""
 "Het volledige venster ging niet open (wat er gebeurde: %s); de eenvoudige checklist wordt gebruikt."
 
+#: install.sh
+msgid ""
+"The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
+msgstr ""
+"De gedeelde bestanden die de aanpassingen laden (vertalingen, tooltips) zijn weer bijgewerkt; programma's die nu draaien, gebruiken ze vanaf hun volgende start."
+
 # needs review
 #: install.sh
 msgid "The version Frame Tweaks tested: %s"
 msgstr "De versie die Frame Tweaks getest heeft: %s"
+
+#: install.sh
+msgid "These ask for your sudo password as they install: %s"
+msgstr "Deze vragen tijdens de installatie om je sudo-wachtwoord: %s"
 
 # needs review
 #: install.sh
@@ -2465,6 +2642,10 @@ msgstr "git checkout mislukt; er wordt niet opnieuw geïnstalleerd"
 msgid "git pull failed; not reinstalling"
 msgstr "git pull mislukt; er wordt niet opnieuw geïnstalleerd"
 
+#: install.sh
+msgid "held: left as it is (./install.sh unhold %s)"
+msgstr "vastgehouden: ongemoeid gelaten (./install.sh unhold %s)"
+
 # needs review
 #: install.sh
 msgid "install what? (./install.sh list)"
@@ -2504,6 +2685,12 @@ msgid ""
 msgstr ""
 "het is geen git-checkout, dus je eigen wijzigingen erin zijn niet te onderscheiden van die van Frame Tweaks"
 
+#: install.sh
+msgid ""
+"its manifest says it survives SteamOS updates, so it was left as it is (to install it again anyway: %s)"
+msgstr ""
+"volgens het manifest overleeft het SteamOS-updates, dus het is ongemoeid gelaten (om het toch opnieuw te installeren: %s)"
+
 # needs review
 #: install.sh
 msgid "link-version ID [tested|newest]"
@@ -2534,15 +2721,29 @@ msgstr "%s verwijderd"
 msgid "removing %s"
 msgstr "%s wordt verwijderd"
 
+#: install.sh
+msgid ""
+"repair: unknown option %s (it checks every installed tweak; --steamos-update)"
+msgstr ""
+"repair: onbekende optie %s (het controleert elke geïnstalleerde aanpassing; --steamos-update)"
+
 # needs review
 #: install.sh
 msgid "run what?"
 msgstr "welke aanpassing starten?"
 
+#: install.sh
+msgid "still broken after installing it again: %s"
+msgstr "nog defect na opnieuw installeren: %s"
+
 # needs review
 #: install.sh
 msgid "stopped %s's running programs"
 msgstr "lopende programma's van %s gestopt"
+
+#: install.sh
+msgid "translation-check FILE.po"
+msgstr "translation-check BESTAND.po"
 
 # needs review
 #: install.sh
@@ -2786,6 +2987,70 @@ msgid "waiting for a SteamVR restart (restart SteamVR or reboot once)"
 msgstr ""
 "wacht op een herstart van SteamVR (herstart SteamVR of start één keer opnieuw op)"
 
+#: lib/detached.sh
+msgid ""
+"Closing this terminal does not stop it: it goes on as %s (its output: %s)."
+msgstr ""
+"Deze terminal sluiten stopt het niet: het loopt verder als %s (uitvoer: %s)."
+
+#: lib/detached.sh
+msgid ""
+"Closing this terminal does not stop it: it goes on, and \"./install.sh attach\" (or Show it in the window) brings it back."
+msgstr ""
+"Deze terminal sluiten stopt het niet: het loopt verder, en \"./install.sh attach\" (of Tonen in het venster) haalt het terug."
+
+#: lib/detached.sh
+msgid "Still running on its own: ./install.sh attach brings it back."
+msgstr "Loopt nog op zichzelf: ./install.sh attach haalt het terug."
+
+#: lib/i18n.py
+msgid "Left out: {n} (the shipped translation or the English shows instead)"
+msgstr ""
+"Weggelaten: {n} (de meegeleverde vertaling of het Engels verschijnt in de plaats)"
+
+#: lib/i18n.py
+msgid "couldn't be read: {error}"
+msgstr "kon niet gelezen worden: {error}"
+
+#: lib/i18n.py
+msgid "not a .po file gettext could read: {error}"
+msgstr "geen .po-bestand dat gettext kan lezen: {error}"
+
+#: lib/i18n.py
+msgid "placeholders/tags {want} became {got}"
+msgstr "placeholders/tags {want} werden {got}"
+
+#: lib/i18n.py
+msgid "plural forms given for a text without a plural"
+msgstr "meervoudsvormen gegeven voor een tekst zonder meervoud"
+
+#: lib/i18n.py
+msgid "spacing at the end differs"
+msgstr "spaties aan het einde verschillen"
+
+#: lib/i18n.py
+msgid "spacing at the start differs"
+msgstr "spaties aan het begin verschillen"
+
+#: lib/i18n.py
+msgid "the file's Plural-Forms line can't be read"
+msgstr "de Plural-Forms-regel van het bestand kan niet gelezen worden"
+
+#: lib/i18n.py
+msgid "{file}: {n} text passes the checks"
+msgid_plural "{file}: {n} texts pass the checks"
+msgstr[0] "{file}: {n} tekst doorstaat de controles"
+msgstr[1] "{file}: {n} teksten doorstaan de controles"
+
+#: lib/i18n.py
+msgid "{got} plural forms, but the file's Plural-Forms says {want}"
+msgstr ""
+"{got} meervoudsvormen, maar de Plural-Forms van het bestand zegt {want}"
+
+#: lib/i18n.py
+msgid "{language} (local)"
+msgstr "{language} (lokaal)"
+
 # needs review
 #: lib/installer.py
 msgid "status check failed"
@@ -2896,6 +3161,38 @@ msgstr "Frame Tweaks openen"
 #: lib/needs.py
 msgid "Open Frame Tweaks to install it?"
 msgstr "Frame Tweaks openen om het te installeren?"
+
+#: lib/registry.py
+msgid ""
+"Can't be installed with {other}, which is installed{why}: remove {other} first"
+msgstr ""
+"Kan niet geïnstalleerd worden met {other}, dat geïnstalleerd is{why}: verwijder eerst {other}"
+
+#: lib/registry.py
+msgid "both use {what}"
+msgstr "beide gebruiken {what}"
+
+#: lib/registry.py
+msgid "needs Frame Tweaks {want} (this is {have}): update first"
+msgstr "vereist Frame Tweaks {want} (dit is {have}): werk eerst bij"
+
+#: lib/registry.py
+msgid ""
+"{title} and {other} can't be installed together{why}: choose one of them."
+msgstr ""
+"{title} en {other} kunnen niet samen geïnstalleerd worden{why}: kies er een van."
+
+#: lib/registry.py
+msgid ""
+"{title} can't be installed with {other}, which is installed{why}: remove {other} first (./install.sh uninstall {id})."
+msgstr ""
+"{title} kan niet geïnstalleerd worden met {other}, dat geïnstalleerd is{why}: verwijder eerst {other} (./install.sh uninstall {id})."
+
+#: lib/registry.py
+msgid ""
+"{title} can't be installed with {other}, which is installed{why}: untick {other} first, to remove it."
+msgstr ""
+"{title} kan niet geïnstalleerd worden met {other}, dat geïnstalleerd is{why}: vink eerst {other} uit om het te verwijderen."
 
 # needs review
 #: lib/sft.py
@@ -4331,6 +4628,12 @@ msgstr "Middelklik: je volgende klik wordt een middelklik"
 msgid "Midnight"
 msgstr "Middernacht"
 
+#: packs/core/arrowpad/arrowpad.py
+msgid ""
+"No keyboard holds a key. If Shift, Ctrl, Alt or Super still acts as held, the stuck state is inside SteamVR, and only restarting SteamVR clears it: ⟳ Restart SteamVR in the Frame Tweaks window, or 'steamvr restart' in a terminal."
+msgstr ""
+"Geen enkel toetsenbord houdt een toets ingedrukt. Als Shift, Ctrl, Alt of Super nog ingedrukt lijkt, zit die vastgelopen toestand in SteamVR, en alleen SteamVR herstarten lost het op: ⟳ SteamVR herstarten in het Frame Tweaks-venster, of 'steamvr restart' in een terminal."
+
 # needs review
 #: packs/core/arrowpad/arrowpad.py
 msgid "Normal"
@@ -5197,13 +5500,12 @@ msgstr ""
 
 # needs review
 #: packs/core/dictation/README.md
-msgid "Voice activity detection"
-msgstr "Detectie van spraakactiviteit"
-
-# needs review
-#: packs/core/dictation/README.md
 msgid "Whisper (the default): 99 languages, uses your word list"
 msgstr "Whisper (standaard): 99 talen, gebruikt je woordenlijst"
+
+#: packs/core/dictation/README.md
+msgid "Whisper voice activity detection"
+msgstr "Detectie van spraakactiviteit voor Whisper"
 
 # needs review
 #: packs/core/dictation/README.md
@@ -6147,6 +6449,10 @@ msgstr "Klaar."
 msgid "Image copied to the clipboard."
 msgstr "Afbeelding gekopieerd naar het klembord."
 
+#: packs/core/snip/frame-snip
+msgid "Kept as {path}"
+msgstr "Bewaard als {path}"
+
 # needs review
 #: packs/core/snip/frame-snip
 msgid "Narrate"
@@ -6183,6 +6489,10 @@ msgstr "Volgende deel"
 #: packs/core/snip/frame-snip
 msgid "No text found in the snip"
 msgstr "Geen tekst gevonden in het knipsel"
+
+#: packs/core/snip/frame-snip
+msgid "No text found in the snip."
+msgstr "Geen tekst gevonden in het knipsel."
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6361,6 +6671,12 @@ msgstr "De Spraakengine kon deel {part} niet voorlezen."
 #: packs/core/snip/frame-snip
 msgid "The clipboard has no text."
 msgstr "Er staat geen tekst op het klembord."
+
+#: packs/core/snip/frame-snip
+msgid ""
+"The snip is black: this window can't be captured, so there's no text to read."
+msgstr ""
+"Het knipsel is zwart: dit venster kan niet vastgelegd worden, dus er is geen tekst om te lezen."
 
 # needs review
 #: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
@@ -8525,11 +8841,6 @@ msgstr ""
 
 # needs review
 #: packs/third-party/perf-overlay/README.md
-msgid "Performance Overlay"
-msgstr "Performance Overlay"
-
-# needs review
-#: packs/third-party/perf-overlay/README.md
 msgid ""
 "The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
@@ -8548,6 +8859,89 @@ msgid ""
 "sasaken1102r's performance panel in VR: frame rate, CPU and GPU load, temperatures, memory and battery, on your wrist or in the dashboard"
 msgstr ""
 "Prestatiepaneel van sasaken1102r in VR: framesnelheid, CPU- en GPU-belasting, temperaturen, geheugen en batterij, op je pols of in het dashboard"
+
+#: packs/third-party/perf-overlay/run-label.sh packs/third-party/perf-overlay/README.md
+msgid "Show"
+msgstr "Tonen"
+
+#: packs/third-party/perf-overlay/run.sh
+msgid ""
+"A copy started from the menu held the panel without showing it: ended."
+msgstr ""
+"Een kopie die vanuit het menu startte, hield het paneel bezet zonder het te tonen: beëindigd."
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Could not start %s: see %s"
+msgstr "Kan %s niet starten: zie %s"
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "From now on it starts with SteamVR, as its installer meant to set up."
+msgstr ""
+"Vanaf nu start het met SteamVR, zoals het installatieprogramma het wilde instellen."
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Hidden in VR (Show brings it back)."
+msgstr "Verborgen in VR (Tonen haalt het terug)."
+
+#: packs/third-party/perf-overlay/run.sh
+msgid ""
+"It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
+msgstr ""
+"Het is niet ingesteld om met SteamVR te starten, en dat kon niet hersteld worden: voer %s uit in een terminal."
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Not installed: tick Performance Overlay and Apply changes first."
+msgstr ""
+"Niet geïnstalleerd: vink eerst Performance Overlay aan en kies Wijzigingen toepassen."
+
+# needs review
+#: packs/third-party/perf-overlay/run.sh packs/third-party/perf-overlay/README.md
+msgid "Performance Overlay"
+msgstr "Performance Overlay"
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "Shown in VR."
+msgstr "Getoond in VR."
+
+#: packs/third-party/perf-overlay/run.sh
+msgid ""
+"Started: look for the panel in VR; its Perf tab in the SteamVR dashboard has the settings."
+msgstr ""
+"Gestart: zoek het paneel in VR; het tabblad Perf ervan in het SteamVR-dashboard heeft de instellingen."
+
+#: packs/third-party/perf-overlay/run.sh
+msgid "SteamVR is not running: the panel shows once it is."
+msgstr "SteamVR is niet actief: het paneel verschijnt zodra het dat is."
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"a copy started from the menu is running outside its service and shows nothing: Show on its row ends it, so the service can show the panel"
+msgstr ""
+"een kopie die vanuit het menu startte, draait buiten de dienst en toont niets: Tonen in de rij beëindigt die, zodat de dienst het paneel kan tonen"
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed, but its service failed (exit status %s): Show on its row starts it again; its log: %s"
+msgstr ""
+"geïnstalleerd, maar de dienst is mislukt (afsluitstatus %s): Tonen in de rij start die opnieuw; het logboek: %s"
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Show on its row sets it, or %s"
+msgstr ""
+"geïnstalleerd, maar niet ingesteld om met SteamVR te starten (de activeerstap van het installatieprogramma mislukt in bureaubladmodus): Tonen in de rij stelt het in, of %s"
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed; closed from its dashboard until the next SteamVR start (Show on its row starts it again)"
+msgstr ""
+"geïnstalleerd; gesloten vanuit het dashboard tot de volgende start van SteamVR (Tonen in de rij start het opnieuw)"
+
+#: packs/third-party/perf-overlay/status.sh
+msgid ""
+"installed; starts with the next SteamVR start (Show on its row starts it now)"
+msgstr ""
+"geïnstalleerd; start bij de volgende start van SteamVR (Tonen in de rij start het nu)"
 
 # needs review
 #: packs/third-party/recline/README.md
@@ -8831,3 +9225,7 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ # needs review
 #~ msgid "Buttons below the mirror"
 #~ msgstr "Knoppen onder de spiegel"
+
+#~ # needs review
+#~ msgid "Voice activity detection"
+#~ msgstr "Detectie van spraakactiviteit"
