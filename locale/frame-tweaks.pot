@@ -1243,7 +1243,7 @@ msgstr ""
 msgid "📋 Copy the report"
 msgstr ""
 
-#: gui/settings_page.py
+#: gui/settings_page.py packs/core/snip/frame-snip
 msgid " or "
 msgstr ""
 
@@ -1267,7 +1267,7 @@ msgstr ""
 msgid "Not used with the {setting} you chose."
 msgstr ""
 
-#: gui/settings_page.py
+#: gui/settings_page.py packs/core/snip/frame-snip
 msgid "Nothing to apply: change %s first"
 msgstr ""
 

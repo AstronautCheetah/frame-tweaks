@@ -312,6 +312,28 @@ class Narration(unittest.TestCase):
         shown = {w.text() for w in view.findChildren(QLabel) + view.findChildren(QPushButton)}
         self.assertLessEqual(set(de.values()), shown)
 
+    def test_the_settings_views_apply_is_at_the_top_and_dimmed_until_a_change(self):
+        """As on Frame Tweaks' settings pages: Apply beside the title, off while the engine and
+        language chosen are the ones applied (Frame Tweaks' record), on after a change."""
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            applied, conf = d / "settings-applied.json", d / "speech.conf"
+            applied.write_text('{"speech": {"SPEECH_ENGINE": "piper", "SPEECH_LANGUAGE": "en_US"}}')
+            with mock.patch.object(fs, "APPLIED", applied), mock.patch.object(fs, "SPEECH_CONF", conf):
+                view = fs.SpeechConfig(lambda: None)
+                view.refresh()
+                head = view.layout().itemAt(0).layout()
+                self.assertIs(head.itemAt(head.count() - 1).widget(), view.apply)    # (top right)
+                self.assertEqual(view.apply.objectName(), "apply")
+                self.assertFalse(view.apply.isEnabled())
+                self.assertIn("Nothing to apply", view.apply.toolTip())
+                view.pick("SPEECH_LANGUAGE", "de_DE")
+                self.assertTrue(view.apply.isEnabled())
+                applied.write_text('{"speech": {"SPEECH_ENGINE": "piper", "SPEECH_LANGUAGE": "de_DE"}}')
+                view.refresh()                                              # (applied: dimmed again)
+                self.assertFalse(view.apply.isEnabled())
+                self.assertEqual(view.state.text(), "")
+
     # ---- The VR panel's own overlay (NarrationOverlay), with a stand-in openvr (below) whose
     # calls start failing, as they would with SteamVR restarting under an open panel.
     def panel(self):

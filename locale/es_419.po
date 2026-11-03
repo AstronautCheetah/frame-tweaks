@@ -1449,7 +1449,7 @@ msgid "📋 Copy the report"
 msgstr "📋 Copiar el informe"
 
 # needs review
-#: gui/settings_page.py
+#: gui/settings_page.py packs/core/snip/frame-snip
 msgid " or "
 msgstr " o "
 
@@ -1476,7 +1476,7 @@ msgid "Not used with the {setting} you chose."
 msgstr "No se usa con la {setting} que elegiste."
 
 # needs review
-#: gui/settings_page.py
+#: gui/settings_page.py packs/core/snip/frame-snip
 msgid "Nothing to apply: change %s first"
 msgstr "Nada que aplicar: primero cambia %s"
 

@@ -802,6 +802,20 @@ def speech_settings():
     return conf["SPEECH_ENGINE"], conf["SPEECH_LANGUAGE"]
 
 
+# What the Speech engine's Apply (its install.sh) last applied: Frame Tweaks' record of it
+# (lib/sft.py applied, settings_applied in lib/common.sh), read here as the window reads it, so this
+# view's Apply is dimmed while nothing changed since, as on the Speech engine's settings page.
+APPLIED = Path.home() / ".local/state/frame-tweaks/settings-applied.json"
+
+
+def speech_unapplied():
+    """Whether the engine or language chosen differs from what was last applied."""
+    rec = ftconf.read_json(APPLIED).get("speech")
+    rec = rec if isinstance(rec, dict) else {}
+    was = (rec.get("SPEECH_ENGINE", "piper"), rec.get("SPEECH_LANGUAGE", "en_US"))
+    return speech_settings() != was
+
+
 def save_speech_setting(key, value):
     """One KEY=value line in speech.conf (other lines kept)."""
     ftconf.set_shell(SPEECH_CONF, {key: value})
@@ -822,6 +836,13 @@ class SpeechConfig(QWidget):
         title = tr_text(QLabel(), N_("Narrate's voice"))
         title.setStyleSheet("font-size: 22px; font-weight: 600;")
         head.addWidget(title, 1)
+        # Apply at the top right, dimmed until the engine or language changes, as on Frame Tweaks'
+        # settings pages (its "apply" look: the installer window's STYLE).
+        self.apply = tr_text(QPushButton(), N_("Apply"))
+        self.apply.setObjectName("apply")
+        self.apply.clicked.connect(self.run_apply)
+        head.addWidget(self.apply)
+        self.running = False
         lay.addLayout(head)
         self.buttons = {}
         lay.addWidget(self.heading(N_("Narrate with")))
@@ -840,10 +861,6 @@ class SpeechConfig(QWidget):
             grid.addWidget(self.choice("SPEECH_LANGUAGE", r[0], r[1]), n // 4, n % 4)
         lay.addLayout(grid)
         foot = QHBoxLayout()
-        self.apply = tr_text(QPushButton(), N_("Apply"))
-        tr_tip(self.apply, N_("Download the chosen language's voice if needed, and switch"))
-        self.apply.clicked.connect(self.run_apply)
-        foot.addWidget(self.apply)
         self.state = QLabel()
         self.state.setStyleSheet("color: #9aa6b2;")
         self.state.setWordWrap(True)
@@ -851,7 +868,22 @@ class SpeechConfig(QWidget):
         lay.addLayout(foot)
         for w in self.findChildren(QPushButton):
             w.setStyleSheet("QPushButton { padding: 12px 14px; font-size: 20px; }"
-                            " QPushButton:checked { background: #355b7a; font-weight: 700; }")
+                            " QPushButton:checked { background: #355b7a; font-weight: 700; }"
+                            " QPushButton#apply { background: #355b7a; font-weight: 600; }"
+                            " QPushButton#apply:disabled { background: #161c23; color: #3a434d; }")
+        self.show_apply()
+
+    def show_apply(self):
+        """Apply on while the engine or language chosen isn't the one applied (and not running)."""
+        pending = speech_unapplied()
+        self.apply.setEnabled(pending and not self.running)
+        if pending:
+            tr_tip(self.apply, N_("Download the chosen language's voice if needed, and switch"))
+        else:        # (the settings page's own words, already in every language)
+            self.apply.setProperty("tr_tip", None)
+            tip = _("Nothing to apply: change %s first") % _(" or ").join((_("Narrate with"), _("Language")))
+            self.apply.setToolTip(tip)
+            self.apply.setAccessibleName(tip)
 
     @staticmethod
     def heading(text):
@@ -870,7 +902,12 @@ class SpeechConfig(QWidget):
         engine, lang = speech_settings()
         for (key, value), b in self.buttons.items():
             b.setChecked(value == (engine if key == "SPEECH_ENGINE" else lang))
-        tr_text(self.state, N_("Changes apply when you press Apply."))
+        if speech_unapplied():
+            tr_text(self.state, N_("Changes apply when you press Apply."))
+        else:                            # (not tr_text(""): _("") is the translation file's header)
+            self.state.setProperty("tr_text", None)
+            self.state.setText("")
+        self.show_apply()
 
     def pick(self, key, value):
         save_speech_setting(key, value)
@@ -881,7 +918,8 @@ class SpeechConfig(QWidget):
         if not apply_cmd.exists():
             tr_text(self.state, N_("Reinstall the Speech engine in Frame Tweaks first."))
             return
-        self.apply.setEnabled(False)
+        self.running = True
+        self.show_apply()
         tr_text(self.state, N_("Applying… (a new language downloads its voice, about 60 MB)"))
         proc = QProcess(self)
         proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
@@ -892,7 +930,8 @@ class SpeechConfig(QWidget):
             ok = proc.exitStatus() == QProcess.ExitStatus.NormalExit and proc.exitCode() == 0
             msg = out[-1].removeprefix("==> ") if out else _("Done.")
             self.state.setText(msg if ok else _("Didn't work: %s") % msg)
-            self.apply.setEnabled(True)
+            self.running = False
+            self.show_apply()           # (applied: dimmed again; it records what it applied)
         proc.finished.connect(done)
         proc.start(str(apply_cmd), [])
         self.proc = proc
