@@ -121,6 +121,8 @@ Big scroll strips beside each window, docked in the dashboard or floating (right
 **Why on a Steam Frame:** In VR you point with a laser, and the scroll bars in desktop apps are sized for a mouse: thin and hard to hit.
 <!-- /generated:intro -->
 
+![Scroll strips beside a window: one on top, one on the right being held (where it was pressed, and where the laser is now), and the gear where they meet](../../../docs/images/scroll-strips.png)
+
 ## Install
 Tick it in the Frame Tweaks window, or:
 

@@ -190,6 +190,11 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Pictures in more READMEs.** Scroll strips (beside a generic window, drawn with the patch's own
+  colours, as they exist only in VR), VR memory guard's Memory limits page, and the 3rd Party
+  tweaks: Performance Overlay's and Full Keyboard's own screenshots, a frame of KnockThru's and of
+  Passthrough PiP's own animations, and drawings for Recline and Menu icons (`dev/screenshots.py`
+  takes the drawn ones again). Credited in each README and CREDITS.md.
 - **Wallet: Remote Control and the protected `claude`, said plainly.** The wallet's Claude Code
   token can only make model requests, so a session the protected `claude` starts can't use Remote
   Control ("Claude.ai login expired"). `wallet-tool --store-token claude` now says so before it
@@ -277,6 +282,10 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Reinstalling a linked tweak no longer asks for a SteamVR restart it doesn't need.** A tweak
+  SteamVR loads only as it starts (Passthrough PiP, Recline) said "restart SteamVR to load it"
+  after every ↻, since the install record is rewritten. Putting back the version SteamVR has
+  loaded already now asks for nothing; a fresh install or another version still does.
 - **Reinstall updated (and every install from the window) shows the animation from the start.**
   With tmux, the splash was drawn around tmux's attach, saw tmux take the alternate screen and
   handed it the whole terminal, as to a pager, until the very end. It's now drawn inside the

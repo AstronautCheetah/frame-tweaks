@@ -52,6 +52,8 @@ Lie back and keep playing. Recenter while lying back (SteamVR's own recenter) an
 **Why on a Steam Frame:** SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes.
 <!-- /generated:intro -->
 
+![Lying back you'd look at the sky; recentered with Recline, that way is forward and level](../../../docs/images/recline.png)
+
 A **link**: Frame Tweaks runs Recline-VR's own commands, as its
 [README](https://github.com/new-waifu/Recline-VR#readme) gives them, in the terminal it opens for
 installs, and doesn't check or change what they install.
@@ -114,7 +116,7 @@ OpenVR SDK (BSD-3-Clause, Valve) and DejaVu Sans Mono glyphs; its `LICENSE` and
 `THIRD_PARTY.md` are installed with it. This tweak's icon, `recline.png`, is Recline-VR's own
 (`packaging/resources/icon.png`, MIT), unchanged. We also looked at
 [RobcPeng/steam-frame-recline](https://github.com/RobcPeng/steam-frame-recline), a similar
-project. See also [CREDITS.md](../../../CREDITS.md).
+project. The diagram above is Frame Tweaks' own (`dev/screenshots.py`). See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status recline` · Remove: `./install.sh uninstall recline`

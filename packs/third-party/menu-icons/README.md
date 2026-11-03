@@ -30,6 +30,8 @@ Icons for Konsole, System Settings and other apps that show blank in Steam's VR 
 **Why on a Steam Frame:** Steam only looks icons up in the hicolor theme; these apps' icons exist only in KDE's Breeze theme.
 <!-- /generated:intro -->
 
+![Apps in Steam's VR "+" menu: blank icons before, Breeze's icons with Menu icons](../../../docs/images/menu-icons.png)
+
 ## Install
 Tick it in the Frame Tweaks window, or:
 
@@ -69,7 +71,7 @@ Afterwards it touches the applications folder, which makes Steam rescan its "+" 
 The finding (Steam only resolves hicolor icons) and the fix, Breeze's `utilities-terminal` and
 `preferences-system` in hicolor, are from [lhns/steam-frame-nix](https://github.com/lhns/steam-frame-nix/blob/main/docs/launcher-menu.md#icon-fallbacks)
 (Apache-2.0); this generalises it to any app in the menu. Icons: [KDE Breeze](https://invent.kde.org/frameworks/breeze-icons)
-(LGPL-3.0), copied from your system's own Breeze theme. See also [CREDITS.md](../../../CREDITS.md).
+(LGPL-3.0), copied from your system's own Breeze theme. The picture above is Frame Tweaks' own drawing (`dev/screenshots.py`), with Breeze's icons. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status menu-icons` · Remove: `./install.sh uninstall menu-icons`

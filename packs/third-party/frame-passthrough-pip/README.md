@@ -59,6 +59,8 @@ Sippbox's frame-passthrough-pip: a small, monochrome view from the headset's pas
 **Why on a Steam Frame:** Passthrough on the Frame replaces the game, so checking the room, a drink or a controller means leaving it. This keeps a camera view in the corner of any game, streamed or standalone.
 <!-- /generated:intro -->
 
+![Passthrough PiP's panel in the dashboard, with the camera view beside it (a frame of its own animation)](../../../docs/images/frame-passthrough-pip.png)
+
 A **link**: Frame Tweaks runs frame-passthrough-pip's own steps, as its
 [README](https://github.com/Sippbox/frame-passthrough-pip#readme) gives them, in the terminal it
 opens for installs, and doesn't change what they install.
@@ -112,7 +114,7 @@ frame-passthrough-pip is by [Sippbox](https://github.com/Sippbox/frame-passthrou
 Frame Tweaks only runs its install steps. This tweak's icon, `frame-passthrough-pip.png`, is its
 own app icon (`resources/icon.png`, MIT), resized to 256 px and otherwise unchanged. Listed in
 [frame-commons' field guide](https://github.com/frame-commons/catalog/blob/main/GUIDE.md#passthrough).
-See also [CREDITS.md](../../../CREDITS.md).
+The picture above is one frame of its README's animation (`resources/readme/adjusting.gif`, MIT). See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status frame-passthrough-pip` · Remove: `./install.sh uninstall frame-passthrough-pip`
