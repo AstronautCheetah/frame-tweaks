@@ -2592,6 +2592,10 @@ msgid "Button below the mirror: Back"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Power (screen off or on)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/README.md
 msgid "Button below the mirror: Volume down"
 msgstr ""
 
@@ -3037,6 +3041,14 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power button"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js

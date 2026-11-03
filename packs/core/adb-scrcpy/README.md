@@ -116,6 +116,13 @@ settings:
       choices:
         - {label: "On", value: "on"}
         - {label: "Off", value: "off"}
+    - key: PHONE_KEY_POWER
+      title: "Button below the mirror: Power (screen off or on)"
+      default: "off"
+      checkbox: true
+      choices:
+        - {label: "On", value: "on"}
+        - {label: "Off", value: "off"}
   actions:
     - label: "Forget {PHONE_NAME}"
       script: phone

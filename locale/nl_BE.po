@@ -3370,6 +3370,11 @@ msgstr "Knop onder de spiegel: terug"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Power (screen off or on)"
+msgstr "Knop onder de spiegel: aan/uit (scherm uit of aan)"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
 msgid "Button below the mirror: Volume down"
 msgstr "Knop onder de spiegel: volume lager"
 
@@ -3960,6 +3965,16 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
 msgstr "Beeldgrootte (lange zijde, pixels)"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power"
+msgstr "Aan/uit"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power button"
+msgstr "Aan/uit-knop"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js

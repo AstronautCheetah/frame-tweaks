@@ -3384,6 +3384,11 @@ msgstr "Bouton sous le miroir : retour"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Power (screen off or on)"
+msgstr "Bouton sous le miroir : marche/arrêt (écran éteint ou allumé)"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
 msgid "Button below the mirror: Volume down"
 msgstr "Bouton sous le miroir : baisser le volume"
 
@@ -3975,6 +3980,16 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
 msgstr "Taille de l'image (grand côté, en pixels)"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power"
+msgstr "Marche/arrêt"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power button"
+msgstr "Bouton marche/arrêt"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js

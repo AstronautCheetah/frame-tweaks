@@ -3005,6 +3005,11 @@ msgstr "Botón debajo del espejo: atrás"
 
 # needs review
 #: packs/core/adb-scrcpy/README.md
+msgid "Button below the mirror: Power (screen off or on)"
+msgstr "Botón debajo del espejo: encendido (pantalla apagada o encendida)"
+
+# needs review
+#: packs/core/adb-scrcpy/README.md
 msgid "Button below the mirror: Volume down"
 msgstr "Botón debajo del espejo: bajar volumen"
 
@@ -3510,6 +3515,16 @@ msgstr ""
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Picture size (long side, pixels)"
 msgstr "Tamaño de imagen (lado largo, píxeles)"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power"
+msgstr "Encendido"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Power button"
+msgstr "Botón de encendido"
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Restart stream"

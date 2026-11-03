@@ -221,8 +221,8 @@ class UnlockKeypad(unittest.TestCase):
     def test_hardware_key_buttons(self):
         """The buttons below the mirror press Android's Back, App switcher and volume keys; each has a
         setting of its own, off unless turned on, in the gear's panel and the window's ⚙ Settings."""
-        self.assertEqual(pt.HW_KEYS, {"back": 4, "recents": 187, "vol_up": 24, "vol_down": 25})
-        for key in ("PHONE_KEY_BACK", "PHONE_KEY_RECENTS", "PHONE_KEY_VOLUP", "PHONE_KEY_VOLDOWN"):
+        self.assertEqual(pt.HW_KEYS, {"back": 4, "recents": 187, "vol_up": 24, "vol_down": 25, "power": 26})
+        for key in ("PHONE_KEY_BACK", "PHONE_KEY_RECENTS", "PHONE_KEY_VOLUP", "PHONE_KEY_VOLDOWN", "PHONE_KEY_POWER"):
             self.assertEqual((pt.CHOICES[key], pt.DEFAULTS[key]), (("on", "off"), "off"))
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
         self.assertIn("call({ a: 'hwkey', k: k2 })", js)
