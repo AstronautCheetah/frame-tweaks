@@ -40,6 +40,14 @@ does nothing in VR:
   `wallet-unlock --lock` in a terminal. The wallet also locks itself after a set time (4 hours unless you change it on the
   Wallet apps page).
 
+## For tweak authors: SteamVR's own bindings
+
+What a button does in SteamVR itself (the dashboard, the system button's long press) is SteamVR's
+controller binding, not Steam Input's. A tweak can change it and put it back on uninstall with
+`lib/vrbindings.py` (experimental): [docs/mods.md, "Changing a SteamVR controller
+binding"](mods.md#changing-a-steamvr-controller-binding-experimental).
+`./install.sh bindings show` prints what each input does now.
+
 ## Undo
 
 Remove the shortcuts in System Settings → Keyboard → Shortcuts, and the bindings in Steam's

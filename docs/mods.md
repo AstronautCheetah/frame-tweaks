@@ -328,6 +328,63 @@ tweak whose `survives_updates` starts with **Yes** isn't installed again by it.
 optionally `latest=`, an API URL `dev/check-pins.sh` reads). `fetch_pinned <id> <file>` then
 refuses anything that doesn't match the checksum.
 
+### Changing a SteamVR controller binding (experimental)
+
+A tweak that needs a controller input SteamVR already uses (the system button's long press
+recenters, say) can change SteamVR's binding for it, and put it back on uninstall, with
+`lib/vrbindings.py`. **Experimental:** it goes through the API of SteamVR's own binding editor
+(`127.0.0.1:27062`), which Valve doesn't document and may change; SteamVR must be running; and
+SteamVR may go on acting on the old binding until it restarts (have `status.sh` say
+`status_restart`). Steam's own files aren't touched: the changed binding is a copy in
+`~/.local/share/frame-tweaks/bindings/`, selected as if chosen in SteamVR's controller settings,
+and what it replaced is recorded in `~/.local/state/frame-tweaks/vrbindings.json`.
+
+An edit file (JSON) says what to change; this one makes a long press of the right system button
+show the room view instead of recentering:
+
+```json
+{
+  "app": "openvr.component.vrcompositor",
+  "controller": "frame_controller",
+  "edits": [
+    {"op": "remove", "action_set": "/actions/quickrecenter",
+     "path": "/user/hand/right/input/system", "input": "long"},
+    {"op": "set", "action_set": "/actions/system", "path": "/user/hand/right/input/system",
+     "input": "long", "output": "/actions/system/in/ToggleRoomView"}
+  ]
+}
+```
+
+- `app` (default: the dashboard's, `openvr.component.vrcompositor`, which has the system
+  button's actions) and `controller` (default `frame_controller`) pick the binding.
+- `remove` drops one input (`click`, `long`, `held`, `double`...) of the sources with that `path`
+  in that action set; with `output`, only where it does that. A source left with no inputs goes.
+- `set` makes that input do `output` on the source with that `path` (and `mode`, if given),
+  adding a source when there's none (then `mode`, such as `button`, is needed).
+- An unknown key is an error, so a typo doesn't pass silently.
+
+`./install.sh bindings show` prints the binding in use and what each input does (`--json`: all
+of it; `--controller`, `--app`: another one), which gives the names to use. In the tweak's
+scripts:
+
+```bash
+python3 "$FRAME_TWEAKS_LIB/vrbindings.py" patch my-tweak "$TWEAK_DIR/binding-edit.json"   # install.sh
+python3 "$FRAME_TWEAKS_LIB/vrbindings.py" restore my-tweak                                # uninstall.sh
+```
+
+Use the tweak's id as the patch's name. Exit 0: done, or nothing to do (already patched, the
+binding reads that way already, no such patch to restore); 1: it failed and nothing changed
+(SteamVR not running, say: `restore` keeps its record, so running it again later works); 2: a
+wrong argument or edit file. `./install.sh bindings status` lists the patches and whether
+SteamVR still uses them. A Python program can `import vrbindings` (from `$FRAME_TWEAKS_LIB`)
+and call `patch`, `restore`, `status` and `show` itself.
+
+**Several tweaks.** Patches of the same binding stack: the copy has every patch's edits, made in
+order on the binding they replaced, and restoring one rebuilds it from the others (the last one
+selects the original again). A patch is put back only while SteamVR still uses Frame Tweaks'
+copy as it was written. If someone chose another binding since, that choice stays, `restore`
+just drops the record, and a new `patch` is refused until those patches are restored.
+
 ## Linking a project
 
 Some projects install themselves well and only need to be found, with a way to install,

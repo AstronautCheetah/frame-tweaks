@@ -49,6 +49,8 @@
 #   ./install.sh timers [ARGS]       close-after timers for apps (app-timers; --help for its options)
 #   ./install.sh menu [--remove]     (re)create the "Frame Tweaks" app-menu entry (or remove it)
 #   ./install.sh attach              back to an install the window started whose terminal was closed
+#   ./install.sh bindings show|patch|restore|status [ARGS]   SteamVR controller bindings changed
+#                                    by tweaks (experimental; lib/vrbindings.py, docs/mods.md)
 #   ./install.sh translation-check FILE.po   check a translation of your own as Frame Tweaks reads
 #                                    it from ~/.config/frame-tweaks/locale (locale/README.md)
 #   ./install.sh ID...               same as "install ID..."
@@ -1332,6 +1334,7 @@ case ${1:-} in
                  esac ;;
     wallet-apps) shift; exec "$HOME/.local/bin/wallet-launcher" "${@:---list}" ;;
     timers)      shift; exec "$HOME/.local/bin/app-timers" "${@:---list}" ;;
+    bindings)    shift; exec python3 lib/vrbindings.py "$@" ;;
     attach)      shift
                  # (lib/detached.sh: the newest install the window started, still running in tmux)
                  sess=$(for sock in "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"/ft-install-*; do
