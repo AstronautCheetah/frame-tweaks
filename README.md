@@ -123,6 +123,9 @@ need **SteamVR restarted (or a reboot)** once after installing; the installer te
 
 🔗 marks linked projects: Frame Tweaks runs the project's own installer and uninstaller, as its
 README gives them, and it updates its own way ([docs/mods.md](docs/mods.md#linking-a-project)).
+Ticking one installs the version Frame Tweaks tested; a newer one is offered on its row as *not
+yet tested*, with **↩ Back to the tested version** once it's installed (`./install.sh
+link-version ID [tested|newest]`).
 
 *(sudo)* marks tweaks whose install can ask for your sudo (admin) password: Battery charge limit,
 and those that use Homebrew while Homebrew isn't installed yet. The Frame Tweaks window tags
@@ -287,7 +290,9 @@ own: a tweak only changes when you update.
   text only, arrives with the next release. For packs added from a link, **⟳ Check for updates**
   also asks where each came from (nothing is downloaded) and says how many have a newer version
   (**🧩 N pack updates**, a link to the Packs page); **Update** on the Packs page gets one (`./install.sh mods updates` lists
-  them). Linked tweaks (🔗) update their own way: ↻ on their row runs their installer again.
+  them). Linked tweaks (🔗) update their own way: ↻ on their row runs their installer again. One
+  installed at the version Frame Tweaks tested moves to the newer tested version a release brings;
+  a newer one not yet tested is installed only from its row (or `./install.sh link-version`).
 - **Test releases** (such as `0.7.0-rc.1`, newer and less tested): ⚙ Preferences → **Get test
   releases too**, or `./install.sh channel beta`. Unticking it (`./install.sh channel stable`)
   keeps you on the test release until the next stable one is out, or takes you back at once

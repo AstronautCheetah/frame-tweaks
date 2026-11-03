@@ -197,7 +197,10 @@ uninstall. Then a tweak can keep what other tweaks left in its care; for example
   installed tweak, and so does every update.
 - **`update-check.sh`** prints the installed and latest upstream versions; the window offers an
   update when the second is newer. A linked project's `version:` does the same against its
-  newest GitHub release (`lib/link.sh update-check`).
+  newest GitHub release (`lib/link.sh update-check`); one with a tested version (`$FT_LINK_VERSION`
+  in its install, `link-ID` in `lib/tested-versions`) installs that one when ticked, offers the
+  newest as not yet tested, and the way back once that's installed (`link_offer` in
+  `gui/window_logic.py`).
 - **`needed.sh`** says whether this Frame needs the tweak: exit 0, or exit 1 with one line
   saying why not (SteamOS now does it itself, say). It checks what the Frame has, a package's
   version or a file, not the SteamOS version, which the beta and stable branches number
@@ -326,7 +329,8 @@ against a checksum fetched next to the file.
 - **Linked projects.** A daily workflow ([`linked.yml`](../.github/workflows/linked.yml),
   [`dev/check-links.py`](../dev/check-links.py)) keeps an issue labelled `linked-check` for the
   projects Frame Tweaks runs the installers of: a release newer than the one last looked at
-  (`lib/tested-versions`), or a README that no longer names the file the link's status checks.
+  (`lib/tested-versions`; for a commit there, newer commits), or a README that no longer names the
+  file the link's status checks.
 - **Bumping.** [`dev/bump-pin.py`](../dev/bump-pin.py) moves a pin, or the Python constraints,
   to upstream's newest version. It computes the SHA256 itself, cross-checks it against a
   published `.sha256` when there is one, and prints the upstream changes to read. Nothing is

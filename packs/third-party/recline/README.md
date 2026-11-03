@@ -23,7 +23,7 @@ experimental: >-
   and `reclinectl status` say so) until Recline-VR catches up.
 icon: {theme: go-down-skip}
 link:
-  install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR pull --ff-only; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR && touch ~/Recline-VR/.git/frame-tweaks-cloned; fi && ~/Recline-VR/install.sh
+  install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR fetch --tags origin; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR && touch ~/Recline-VR/.git/frame-tweaks-cloned; fi && if [ -n "$FT_LINK_VERSION" ]; then git -C ~/Recline-VR -c advice.detachedHead=false checkout -q "refs/tags/$FT_LINK_VERSION"; else git -C ~/Recline-VR checkout -q main && git -C ~/Recline-VR pull --ff-only; fi && ~/Recline-VR/install.sh
   uninstall: >-
     ~/.local/share/recline-vr/uninstall.sh && rm -rf ~/.local/share/recline-vr && { [ ! -e ~/Recline-VR/.git/frame-tweaks-cloned ] || [ -n "$(git -C ~/Recline-VR status --porcelain)" ] || [ -n "$(git -C ~/Recline-VR log --oneline '@{u}..' 2>/dev/null)" ] || rm -rf ~/Recline-VR; }
   installed: ~/.local/share/recline-vr/uninstall.sh
@@ -54,17 +54,21 @@ Lie back and keep playing. Recenter while lying back (SteamVR's own recenter) an
 
 A **link**: Frame Tweaks runs Recline-VR's own commands, as its
 [README](https://github.com/new-waifu/Recline-VR#readme) gives them, in the terminal it opens for
-installs, and doesn't pin, check or change what they install.
+installs, and doesn't check or change what they install.
 
-- **Install** (tick it): clones Recline-VR into `~/Recline-VR` and runs its `install.sh`, which
-  builds it on the Frame, runs its tests and installs it into `~/.local/share/recline-vr` (under
-  a minute). It builds Recline-VR's `main` branch, as its README says for the Frame; Recline-VR
-  keeps `main` at its latest release. **Then restart SteamVR**: SteamVR loads drivers only when it starts. Until then its
+- **Install** (tick it): clones Recline-VR into `~/Recline-VR`, checks out the release Frame
+  Tweaks tested (its tag, `link-recline` in `lib/tested-versions`) and runs its `install.sh`,
+  which builds it on the Frame, runs its tests and installs it into `~/.local/share/recline-vr`
+  (under a minute). Its newest, when you choose it, is Recline-VR's `main` branch, as its README
+  says for the Frame; Recline-VR keeps `main` at its latest release. **Then restart SteamVR**: SteamVR loads drivers only when it starts. Until then its
   row in the Frame Tweaks window says so and offers **⟳ Restart SteamVR** (every open app
   closes); rebooting works too.
-- **Update:** when Recline-VR publishes a new release, its row says so (↑ *version* available ·
-  **Update**). Update, or ↻ on its row, pulls the latest Recline-VR and runs its installer again;
-  then restart SteamVR. Frame Tweaks' own updates leave it alone.
+- **Update:** when Recline-VR publishes a release newer than the one Frame Tweaks tested, its row
+  offers it as *not yet tested by Frame Tweaks* (↑ *version* available · **Update**); once
+  it's installed, **↩ Back to the tested version** installs the tested one again. Frame
+  Tweaks' own updates move it to a newer tested version, never to an untested one.
+  `./install.sh link-version recline tested|newest` does the same.
+  Each builds and installs that version; then restart SteamVR.
 - **Uninstall** (untick it): runs `~/.local/share/recline-vr/uninstall.sh`, which unregisters its
   panel and driver, then removes `~/.local/share/recline-vr` and `~/Recline-VR`. **Then restart
   SteamVR** to unload the driver: until then its row offers **⟳ Restart SteamVR**. Your panel

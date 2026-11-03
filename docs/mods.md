@@ -308,7 +308,7 @@ refuses anything that doesn't match the checksum.
 Some projects install themselves well and only need to be found, with a way to install,
 uninstall and start them from the Frame Tweaks window. A **link** does that without integrating
 anything: Frame Tweaks runs the project's own commands, as its README gives them, and doesn't
-pin, check, copy or patch what they install. The project's own channel is what's trusted, and
+check, copy or patch what they install. The project's own channel is what's trusted, and
 the window says so (🔗 on its row, and on its details page). A linked tweak needs no scripts:
 its manifest's `link:` says what they'd do.
 
@@ -321,6 +321,7 @@ link:
   readme: https://github.com/someone/project#readme   # its README, linked (not copied)
   restart: steamvr                                 # optional: SteamVR loads it only as it starts
   version: cat ~/.local/share/project/VERSION      # optional: prints the installed version
+  tested: v1.2.0                                   # optional: the version you tried (see Versions)
 run: {label: Open}                                 # the Run button's label, with link.run
 ```
 
@@ -338,10 +339,32 @@ run: {label: Open}                                 # the Run button's label, wit
   restarted.
 - **Updates:** ↻ runs its installer again, which updates most projects; Frame Tweaks' own updates
   leave it alone (it updates its own way). With `version:`, a command that prints the installed
-  version (a leading `v` is dropped; nothing, or something that doesn't start with a digit, means
-  "don't know"), its row says when the project has a newer release on GitHub (↑ *version*
-  available · Update), compared with the tag of its newest release. Its GitHub address comes from
-  `source.url` or `readme`. Nothing to change here when it publishes the next one.
+  version (a leading `v` is dropped; nothing, or something that doesn't start with a digit and
+  isn't a commit, means "don't know"), its row says when the project has a newer release on
+  GitHub (↑ *version* available · Update), compared with the tag of its newest release. Its
+  GitHub address comes from `source.url` or `readme`. Nothing to change here when it publishes the
+  next one.
+- **Versions** (two stages: the version you tested, then its newest): an install command that
+  reads `$FT_LINK_VERSION` can install a given version, a release tag, or a commit for a project
+  without releases; empty means its newest. Keep the project's own checks (its `SHA256SUMS`,
+  say) for both. With `tested:` (the official packs: `link-ID=TAG` in `lib/tested-versions`
+  instead), ticking the tweak installs that version, and its status says so. When the project has
+  a newer release (with a commit as `tested:`, newer commits on its default branch), its row
+  offers it as *not yet tested by Frame Tweaks*; once that's installed, **↩ Back to the tested
+  version** runs the install again with the tested one, over the top, so the project's installer
+  must accept an older version over a newer one. ↻ keeps whichever was chosen. Frame Tweaks'
+  updates move a tweak installed at the tested version to a new `tested:`, and leave the newest
+  alone. `./install.sh link-version ID` shows the versions; `link-version ID tested|newest`
+  installs one. Which one is installed is kept in `~/.local/state/frame-tweaks/link-version/ID`
+  until it's uninstalled. A release tag goes into a URL and a git command: letters, digits and
+  `. _ + -` only.
+
+  ```yaml
+  install: >-
+    u=https://github.com/someone/project/releases &&
+    if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi &&
+    curl -fsSLO "$u/SHA256SUMS" && ...
+  ```
 - The other fields are as for any tweak; `changes`, `access` and `undo` describe what the
   project's installer does. Name the app in `app:` if it should stay installed when Frame Tweaks
   itself is uninstalled.

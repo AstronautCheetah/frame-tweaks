@@ -28,10 +28,11 @@ link:
     mkdir -p ~/.config/cuff && printf '%s\n' '' '# Frame Tweaks Dictation instead of a model of its own (written by Frame Tweaks)'
     '[dictation]' 'command = ["~/.local/bin/dictate", "--ptt"]' 'env = { DICTATE_STATUS = "stdout" }' 'local = false'
     >> ~/.config/cuff/config.toml || exit; fi;
+    c=${FT_LINK_VERSION:-$(git ls-remote https://github.com/Brobert-in-aus/cuff HEAD | cut -c1-40)} && [ -n "$c" ] &&
     d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT &&
-    curl -fsSL https://github.com/Brobert-in-aus/cuff/archive/bea0789859d3d6ae3d1972dc91189544e7f831b9.tar.gz | tar -C "$d" -xzf - &&
-    sh "$d"/cuff-bea0789859d3d6ae3d1972dc91189544e7f831b9/install.sh --here &&
-    echo bea0789 > ~/.local/share/cuff/frame-tweaks-commit
+    curl -fsSL "https://github.com/Brobert-in-aus/cuff/archive/$c.tar.gz" | tar -C "$d" --strip-components=1 -xzf - &&
+    sh "$d"/install.sh --here &&
+    echo "${c:0:7}" > ~/.local/share/cuff/frame-tweaks-commit
   uninstall: >-
     systemctl --user disable --now cuff; rm -rf ~/.local/share/cuff ~/.cache/cuff
     ~/.config/systemd/user/cuff.service ~/.config/systemd/user/cuff.service.d;
@@ -59,7 +60,11 @@ Look at the back of your wrist in VR and a panel is there: the time, the headset
 <!-- /generated:intro -->
 
 Frame Tweaks runs [Cuff](https://github.com/Brobert-in-aus/cuff)'s own installer at the commit
-it was tried at (bea0789, 2026-10-25).
+it was tried at (`link-cuff` in `lib/tested-versions`: bea0789, 2026-10-25). Cuff has no releases
+yet, so when its default branch has newer commits, its row offers the newest as *not yet tested by
+Frame Tweaks* (↑ *commit* available · **Update**); once that's installed, **↩ Back to the tested
+version** installs the tested commit again. Frame Tweaks' own updates move it to a newer tested
+commit, never to an untested one. `./install.sh link-version cuff tested|newest` does the same.
 
 ## Before trying it
 - **One dictation.** With Frame Tweaks' Dictation installed first, Cuff's dictation button uses

@@ -10,8 +10,8 @@ what: >-
   pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR.
 why: >-
   Checking the room means finding the Room View button in the dashboard, or a controller
-  binding. A knock works with a controller in your hand or set down. Linked: it installs from
-  its newest release with its own installer, the way its README describes.
+  binding. A knock works with a controller in your hand or set down. Linked: it installs the
+  release Frame Tweaks tested with its own installer, the way its README describes.
 author: VioletTides (KnockThru)
 source:
   relation: from
@@ -26,7 +26,7 @@ icon: {theme: view-visible}
 processes: [/KnockThru/knockthru( |$)]
 config: [~/.config/knockthru]
 link:
-  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && curl -fsSL https://github.com/VioletTides/KnockThru/releases/latest/download/install.sh -o "$d/install.sh" && sh "$d/install.sh"
+  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && u=https://github.com/VioletTides/KnockThru/releases && if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi && curl -fsSL "$u/install.sh" -o "$d/install.sh" && KNOCKTHRU_RELEASE_URL=$u sh "$d/install.sh"
   uninstall: ~/KnockThru/knockthru --uninstall && rm -rf ~/KnockThru
   installed: ~/KnockThru/knockthru
   version: python3 -c 'import json, os; print(json.load(open(os.path.expanduser("~/.config/knockthru/state.json")))["knockthru_version"])'
@@ -49,24 +49,29 @@ undo: >-
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR.
 
-**Why on a Steam Frame:** Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes.
+**Why on a Steam Frame:** Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
 A **link**: Frame Tweaks runs KnockThru's own steps, as its
 [README](https://github.com/VioletTides/KnockThru#readme) gives them, in the terminal it opens
-for installs, and doesn't pin or change what they install.
+for installs, and doesn't change what they install.
 
 **Before you install:** turn on **Developer Mode**, then **CEF Remote Debugging** in the
 Developer settings. KnockThru needs it to press Room View for you. Leaving it on lets programs
 on the headset control Steam's interface, not just KnockThru: turn it off again if you remove
 KnockThru.
 
-- **Install** (tick it): downloads the installer from KnockThru's newest GitHub release and runs
-  it. The installer downloads the release, checks its SHA-256, unpacks it to `~/KnockThru`,
+- **Install** (tick it): downloads the installer from the KnockThru release Frame Tweaks tested
+  (`link-knockthru` in `lib/tested-versions`) and runs it with that release
+  (`KNOCKTHRU_RELEASE_URL`). The installer downloads it, checks its SHA-256, unpacks it to `~/KnockThru`,
   adds it to your Steam library under Non-Steam, and starts it. If SteamVR doesn't answer,
   launch **KnockThru** once from **Library → Non-Steam** in Gaming mode.
-- **Update:** its row says when a newer release is out, and ↻ installs it the same way. Its own
-  **Check for updates** in its Settings works too. Frame Tweaks' own updates leave it alone.
+- **Update:** when VioletTides publishes a release newer than the one Frame Tweaks tested, its row
+  offers it as *not yet tested by Frame Tweaks* (↑ *version* available · **Update**); once
+  it's installed, **↩ Back to the tested version** installs the tested one again. Frame
+  Tweaks' own updates move it to a newer tested version, never to an untested one.
+  `./install.sh link-version knockthru tested|newest` does the same.
+  Its own **Check for updates** in its Settings installs its newest too.
 - **Uninstall** (untick it): runs `~/KnockThru/knockthru --uninstall`, which stops it and
   removes it from SteamVR, then deletes `~/KnockThru`. Your settings and calibration in
   `~/.config/knockthru` stay; `~/KnockThru/knockthru --uninstall --purge` before unticking

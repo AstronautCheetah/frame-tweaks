@@ -44,7 +44,8 @@ def status(cid):
 
 def update_check(cid):
     """(installed, latest) when its update check (<id>/update-check.sh, or a link's version:)
-    reports a newer upstream version, else None."""
+    reports a newer upstream version, else None. A link with a tested version reports that too
+    (lib/link.sh update-check): what its row offers is then link_offer's dict."""
     c = component(cid)
     cmd = sft.script(c, "update-check") if c else None
     if cmd is None:                                      # (its pack or folder went since the list was read)
@@ -53,9 +54,45 @@ def update_check(cid):
         out = subprocess.run(cmd, capture_output=True, text=True, timeout=20).stdout.split()
     except (OSError, subprocess.TimeoutExpired):
         return None
+    if len(out) == 3 and c.get("link"):
+        return link_offer(*out, choice=sft.link_choice(cid)[0])
     if len(out) == 2 and version_tuple(out[1]) > version_tuple(out[0]):
         return out[0], out[1]
     return None
+
+
+COMMIT = re.compile(r"^[0-9a-f]{7,40}$")
+
+
+def same_version(a, b):
+    """The same version of a linked project: a leading v either way, and a commit the same as one
+    abbreviating it (lib/link.sh same_version)."""
+    a, b = ((v or "")[1:] if (v or "").startswith("v") else (v or "") for v in (a, b))
+    if COMMIT.match(a) and COMMIT.match(b):
+        return a.startswith(b) or b.startswith(a)
+    return a == b
+
+
+def link_offer(installed, newest, tested, choice=None):
+    """What a linked project's row offers, from lib/link.sh update-check's "<installed> <newest>
+    <tested>" (newest "-": couldn't look it up) and which one Frame Tweaks installed (choice:
+    "tested", "newest" or None): None for nothing, else {"tested": the tested version, "newest":
+    a newer release not yet tested to offer (or None), "to_tested": "up" when the tested one is
+    newer than what's installed, "back" when what's installed is newer (or None)}.
+    A commit as the tested version (a project without releases) can't be ordered: any other
+    commit is newer than it, and what's installed goes back to it if it was the newest asked for."""
+    newest = None if newest in (None, "", "-") else newest
+    commits = bool(COMMIT.match(tested[1:] if tested.startswith("v") else tested))
+
+    def newer(a, b):
+        return not same_version(a, b) if commits else version_tuple(a) > version_tuple(b)
+    offer = {"tested": tested, "newest": None, "to_tested": None}
+    if newest and newer(newest, tested) and not same_version(newest, installed) and (commits or newer(newest, installed)):
+        offer["newest"] = newest
+    if not same_version(installed, tested):
+        older = choice != "newest" if commits else version_tuple(installed) < version_tuple(tested)
+        offer["to_tested"] = "up" if older else "back"
+    return offer if offer["newest"] or offer["to_tested"] else None
 
 
 STABLE_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")

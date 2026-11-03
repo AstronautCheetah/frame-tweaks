@@ -7,13 +7,17 @@ checks (Recline-VR 1.3 did). Prints a Markdown report; exits 1 if something need
 
   Needs attention: none of the files a link's installed: names is in the project's README any
   more (a release may have moved them: its status would read "not installed").
-  Worth a look: a release newer than the one last looked at (lib/tested-versions, link-ID=TAG).
-  Read its notes, check the link's commands and the tweak's page, then set the new tag there.
+  Worth a look: a release newer than the one last looked at (lib/tested-versions, link-ID=TAG),
+  or for a project without releases (link-ID=COMMIT), newer commits on its default branch. Read
+  its notes, check the link's commands and the tweak's page, try it on a Frame, then set the new
+  tag there: ticking the tweak installs that version, and ./install.sh update moves tested
+  installs to it (until then the window offers the newer one as not yet tested).
 
   dev/check-links.py          (GH_TOKEN, if set, for GitHub's API)
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -56,6 +60,9 @@ def links():
                github_repo((meta.get("source") or {}).get("url"), link.get("readme")))
 
 
+COMMIT = re.compile(r"^[0-9a-f]{7,40}$")
+
+
 def tested():
     lines = (ROOT / "lib/tested-versions").read_text().splitlines()
     return dict(line.split("=", 1) for line in lines if "=" in line and not line.startswith("#"))
@@ -80,9 +87,22 @@ def check(found, seen, get=get):
             red.append(f"**{title}**: its [README](https://github.com/{repo}#readme) no longer names "
                        f"{', '.join(f'`{p}`' for p in paths)}, what `link.installed` checks: if a release "
                        "moved it, the status reads \"not installed\". Name a file it documents now.")
-        if release:
+        was = seen.get(f"link-{tid}")
+        if was and COMMIT.match(was):                    # (no releases: its link installs a commit)
+            try:
+                head = get(f"https://api.github.com/repos/{repo}/commits/HEAD")
+            except (OSError, urllib.error.URLError) as e:
+                yellow.append(f"**{title}**: couldn't reach [{repo}](https://github.com/{repo}) ({e})")
+                continue
+            sha = head and json.loads(head).get("sha", "")
+            if sha and not sha.startswith(was):
+                yellow.append(f"**{title}**: [{repo}](https://github.com/{repo}) has commits newer than "
+                              f"{was[:7]}, the one tested ([compare](https://github.com/{repo}/compare/"
+                              f"{was}...{sha})). Check `{tid}`'s link and page, try it, then set "
+                              f"`link-{tid}={sha}` in `lib/tested-versions`.")
+        elif release:
             r = json.loads(release)
-            tag, was = r["tag_name"], seen.get(f"link-{tid}")
+            tag = r["tag_name"]
             if tag != was:
                 yellow.append(f"**{title}**: [{repo}](https://github.com/{repo}) **{tag}** is out "
                               f"({r['published_at'][:10]}; last looked at: {was or 'none'}). Read "

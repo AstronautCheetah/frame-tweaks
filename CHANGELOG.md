@@ -141,6 +141,18 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **Linked projects install the version Frame Tweaks tested:** ticking one (Recline, Full
+  Keyboard, Performance Overlay, KnockThru, Cuff) installs the release Frame Tweaks tested, and
+  its row says so. They used to install whatever was newest (Cuff: one fixed commit).
+- **A newer release is offered, marked untested:** "↑ *version* available (not yet tested by
+  Frame Tweaks) · Update" installs it with the project's own installer, checksums checked as
+  before. Once it's installed, **↩ Back to the tested version** installs the tested one again.
+  Cuff, which has no releases, offers its newest commit the same way.
+- **Frame Tweaks' updates** move a linked tweak installed at the tested version to the newer one
+  a release has tested, and never to an untested one by themselves.
+- **`./install.sh link-version ID [tested|newest]`** shows a linked tweak's versions, or installs
+  one. Which one is installed is kept in `~/.local/state/frame-tweaks/link-version/` until it's
+  uninstalled. Packs can do the same: docs/mods.md, "Linking a project".
 - **Yes/no questions in a terminal take your language's yes:** `[s/N]` in Spanish, `[o/N]` in
   French, `[j/N]` in Flemish, and the letter shown counts as yes; `y` still does in every language.
 - **Dictation and Full Keyboard share their Whisper model.** Full Keyboard's on-device dictation
@@ -186,6 +198,8 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Full Keyboard's version** shows right again (its installer now names a release's folder
+  `0.14.1-install-…`, which the window took for a pre-release older than 0.14.1).
 - **The Packs page keeps its place:** Trust (or any button there) on one of many packs left the
   list scrolled to an end; it now stays where you were.
 - **Android Mirror's Restart stream always restarts:** the gear's request is now left as a file

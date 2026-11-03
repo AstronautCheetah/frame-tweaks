@@ -4,15 +4,15 @@ emoji: ⌨️
 category: Convenience
 tier: core
 summary: >-
-  TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest
-  release
+  TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from the release
+  Frame Tweaks tested
 what: >-
   TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with
   arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste. It shows while the SteamVR dashboard is
   open, and types into the app you're using, desktop mode's included.
 why: >-
   Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys.
-  Linked: it installs from its newest release with its own installer, the way its README
+  Linked: it installs the release Frame Tweaks tested with its own installer, the way its README
   describes.
 author: TaiKeid (steam-frame-full-keyboard)
 source:
@@ -24,14 +24,14 @@ processes: [/framekeyboard( |$)]
 config: [~/.config/framekeyboard]
 app: Full Keyboard
 link:
-  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/TaiKeid/steam-frame-full-keyboard/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'framekeyboard-.*-aarch64\.tar\.gz' SHA256SUMS) && v=${f#framekeyboard-} && v=${v%-aarch64.tar.gz} && if [ -e ~/.local/share/framekeyboard/releases/$v ]; then echo "Full Keyboard $v, its newest release, is already installed"; else curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && bash "${f%.tar.gz}/install.sh"; fi && frame-tweaks-share-whisper
+  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/TaiKeid/steam-frame-full-keyboard/releases && if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'framekeyboard-.*-aarch64\.tar\.gz' SHA256SUMS) && v=${f#framekeyboard-} && v=${v%-aarch64.tar.gz} && c=$(basename "$(readlink ~/.local/share/framekeyboard/current)") && if [ "${c%%-install-*}" = "$v" ]; then echo "Full Keyboard $v is already installed"; else curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && bash "${f%.tar.gz}/install.sh"; fi && frame-tweaks-share-whisper
   uninstall: rm -f ~/.local/bin/framekeyboard ~/.local/share/applications/framekeyboard.desktop && rm -rf ~/.local/share/framekeyboard
   installed: ~/.local/share/framekeyboard/current
-  version: basename "$(readlink ~/.local/share/framekeyboard/current)"
+  version: c=$(basename "$(readlink ~/.local/share/framekeyboard/current)") && echo "${c%%-install-*}"
   run: gtk-launch framekeyboard
   readme: https://github.com/TaiKeid/steam-frame-full-keyboard#readme
 changes: >-
-  Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in
+  Whatever Full Keyboard's own installer sets up (its README lists it): its release in
   `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry. With
   Frame Tweaks' Dictation installed, its on-device dictation model is the same file as
   Dictation's: a hard link to it in `~/.local/share/framekeyboard/models`, so it's on disk once
@@ -47,19 +47,23 @@ undo: >-
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller lasers, with arrows, F-keys, a numpad, Ctrl/Alt and Copy/Paste. It shows while the SteamVR dashboard is open, and types into the app you're using, desktop mode's included.
 
-**Why on a Steam Frame:** Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes.
+**Why on a Steam Frame:** Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
 A **link**: Frame Tweaks runs Full Keyboard's own steps, as its
 [README](https://github.com/TaiKeid/steam-frame-full-keyboard#readme) gives them, in the terminal
-it opens for installs, and doesn't pin or change what they install.
+it opens for installs, and doesn't change what they install.
 
-- **Install** (tick it): downloads the newest release and its `SHA256SUMS` from GitHub, checks
+- **Install** (tick it): downloads the release Frame Tweaks tested (`link-full-keyboard` in
+  `lib/tested-versions`) and its `SHA256SUMS` from GitHub, checks
   the one against the other (`sha256sum -c`), unpacks it and runs its `install.sh`. Nothing else
   to do.
-- **Update:** when TaiKeid publishes a newer release, its row says so; ↻ installs it the same
-  way. Frame Tweaks' own updates leave it alone. Full Keyboard's installer keeps the previous
-  release for rollback.
+- **Update:** when TaiKeid publishes a release newer than the one Frame Tweaks tested, its row
+  offers it as *not yet tested by Frame Tweaks* (↑ *version* available · **Update**); once
+  it's installed, **↩ Back to the tested version** installs the tested one again. Frame
+  Tweaks' own updates move it to a newer tested version, never to an untested one.
+  `./install.sh link-version full-keyboard tested|newest` does the same.
+  Full Keyboard's installer installs an older release over a newer one too.
 - **Uninstall** (untick it): removes `~/.local/bin/framekeyboard`, its app-menu entry and
   `~/.local/share/framekeyboard` (every installed release), and keeps your settings, layouts and
   themes in `~/.config/framekeyboard`.
@@ -85,7 +89,7 @@ Not sure which keyboard to use? See the [keyboard guide](../../core/arrowpad/REA
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** Whatever Full Keyboard's own installer sets up (its README lists it): its newest release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry. With Frame Tweaks' Dictation installed, its on-device dictation model is the same file as Dictation's: a hard link to it in `~/.local/share/framekeyboard/models`, so it's on disk once and isn't downloaded again
+- **Changes:** Whatever Full Keyboard's own installer sets up (its README lists it): its release in `~/.local/share/framekeyboard`, with `~/.local/bin/framekeyboard` and an app-menu entry. With Frame Tweaks' Dictation installed, its on-device dictation model is the same file as Dictation's: a hard link to it in `~/.local/share/framekeyboard/models`, so it's on disk once and isn't downloaded again
 - **Unusual access:** A SteamVR overlay; types into the app you're using
 - **Undo:** Uncheck it, or `./install.sh uninstall full-keyboard`: Full Keyboard's own removal steps (keeps its settings in `~/.config/framekeyboard`)
 <!-- /generated:changes -->

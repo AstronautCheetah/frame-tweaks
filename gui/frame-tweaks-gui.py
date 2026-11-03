@@ -631,7 +631,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             st.setWordWrap(True)
             st.setTextFormat(Qt.TextFormat.RichText)
             # (two links: u, a newer upstream version, Update; r, files changed since installed, Reinstall)
-            st.linkActivated.connect(lambda href, c=cid: self.run_reinstall(c) if href == "r" else self.run_update(c))
+            st.linkActivated.connect(lambda href, c=cid: self.status_link(c, href))
             self.status_labels[cid] = st
             self.show_status(cid)
             run = QPushButton()
@@ -742,24 +742,54 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             return
         text, _kind = status_text(self.state.get(cid))
         text = html.escape(text, quote=False)
-        if cid in self.updates:
-            cur, new = self.updates[cid]
-            text += ("<br><span style='color:#7fb2e5'>↑ " + _("{version} available").format(version=html.escape(new))
-                     + " · <a style='color:#7fb2e5' href='u'>" + _("Update") + "</a></span>")
+        tips = []
+        found = self.updates.get(cid)
+        line = "<br><span style='color:#7fb2e5'>{text} · <a style='color:#7fb2e5' href='{href}'>{link}</a></span>"
+        if isinstance(found, dict):                      # (a link with a tested version: window_logic.link_offer)
+            if found["to_tested"] == "up":
+                text += line.format(text="↑ " + html.escape(_("{version} available (tested by Frame Tweaks)").format(
+                    version=found["tested"])), href="t", link=html.escape(_("Update")))
+            if found["newest"]:
+                text += line.format(text="↑ " + html.escape(_("{version} available (not yet tested by Frame Tweaks)").format(
+                    version=found["newest"])), href="n", link=html.escape(_("Update")))
+                tips.append(_("A newer release than the one Frame Tweaks tested on a Frame: it may work differently, or "
+                              "not yet on the Frame, and this tweak's page may not match it. Once it's installed, its row "
+                              "offers to go back to the tested version."))
+            if found["to_tested"] == "back":
+                text += ("<br><span style='color:#7fb2e5'><a style='color:#7fb2e5' href='t'>↩ " + html.escape(
+                    _("Back to the tested version {version}").format(version=found["tested"])) + "</a></span>")
+                tips.append(_("Installs the version Frame Tweaks tested again, with the project's own installer (its "
+                              "settings stay)."))
+        elif found:
+            cur, new = found
+            text += line.format(text="↑ " + html.escape(_("{version} available").format(version=new)), href="u",
+                                link=html.escape(_("Update")))
         updated = self.files_updated(cid)
         if updated:
             text += ("<br><span style='color:#7fb2e5'>↻ " + html.escape(_("updated")) + " · <a style='color:#7fb2e5' "
                      "href='r'>" + html.escape(_("Reinstall")) + "</a></span>")
+            tips.append(_("Its files changed since it was installed (Frame Tweaks updated, or its pack edited), and "
+                          "the installed copy is still the old one. Reinstall installs it again with them."))
         label.setText(text)
-        label.setToolTip(_("Its files changed since it was installed (Frame Tweaks updated, or its pack edited), and "
-                           "the installed copy is still the old one. Reinstall installs it again with them.")
-                         if updated else "")
+        label.setToolTip("\n\n".join(tips))
+
+    def status_link(self, cid, href):
+        """A link on a tweak's status: r Reinstall, u Update, and for a link with a tested version
+        n (its newest, not yet tested) or t (the tested one: up to it, or back to it)."""
+        if href == "r":
+            self.run_reinstall(cid)
+        else:
+            self.run_update(cid, to={"n": "newest", "t": "tested"}.get(href))
 
     def run_update(self, cid, to=None):
-        """Reinstall one tweak (fetches its latest upstream version), or update this repo (cid None;
-        to: a release, or "stable" for the newest stable one)."""
-        cmd = "./install.sh install " + shlex.quote(cid) if cid else "./install.sh update" + (
-            " --to " + shlex.quote(to) if to else "")
+        """Reinstall one tweak (fetches its latest upstream version; for a linked project, to:
+        "tested" or "newest", the version ./install.sh link-version installs), or update this repo
+        (cid None; to: a release, or "stable" for the newest stable one)."""
+        if cid and to:
+            cmd = f"./install.sh link-version {shlex.quote(cid)} {shlex.quote(to)}"
+        else:
+            cmd = "./install.sh install " + shlex.quote(cid) if cid else "./install.sh update" + (
+                " --to " + shlex.quote(to) if to else "")
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run:", cmd)
             return

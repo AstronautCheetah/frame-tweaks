@@ -12,8 +12,8 @@ what: >-
   and where, in its Perf tab in the SteamVR dashboard. It starts with SteamVR.
 why: >-
   The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or
-  a hot headset is hard to explain. Linked: it installs from its newest release with its own
-  installer, the way its README describes.
+  a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its
+  own installer, the way its README describes.
 author: sasaken1102r (frame-perf-overlay)
 source:
   relation: from
@@ -22,7 +22,7 @@ icon: {theme: utilities-system-monitor}
 processes: [/frame-perf-overlay( |$)]
 config: [~/.config/frame-perf-overlay]
 link:
-  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/sasaken1102r/frame-perf-overlay/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'frame-perf-overlay-[0-9.]*\.tar\.gz' SHA256SUMS | head -1) && curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && cd frame-perf-overlay && ./install.sh
+  install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/sasaken1102r/frame-perf-overlay/releases && if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'frame-perf-overlay-[0-9.]*\.tar\.gz' SHA256SUMS | head -1) && curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && cd frame-perf-overlay && ./install.sh
   uninstall: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/sasaken1102r/frame-perf-overlay/releases/latest/download && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'frame-perf-overlay-[0-9.]*\.tar\.gz' SHA256SUMS | head -1) && curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && cd frame-perf-overlay && ./install.sh --uninstall
   installed: ~/.local/bin/frame-perf-overlay
   version: ~/.local/bin/frame-perf-overlay --version | awk '{print $2}'
@@ -42,20 +42,24 @@ undo: >-
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 sasaken1102r's frame-perf-overlay: a small panel in VR with the frame rate and frame times, CPU and GPU load and clocks, temperatures, memory, battery and Wi-Fi. You choose what it shows and where, in its Perf tab in the SteamVR dashboard. It starts with SteamVR.
 
-**Why on a Steam Frame:** The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes.
+**Why on a Steam Frame:** The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
 A **link**: Frame Tweaks runs frame-perf-overlay's own steps, as its
 [README](https://github.com/sasaken1102r/frame-perf-overlay#readme) gives them, in the terminal
-it opens for installs, and doesn't pin or change what they install.
+it opens for installs, and doesn't change what they install.
 
-- **Install** (tick it): downloads the newest release and its `SHA256SUMS` from GitHub, checks
+- **Install** (tick it): downloads the release Frame Tweaks tested (`link-perf-overlay` in
+  `lib/tested-versions`) and its `SHA256SUMS` from GitHub, checks
   the one against the other (`sha256sum -c`), unpacks it and runs its `install.sh`. Its README
   also offers a one-line installer from the author's own website; Frame Tweaks uses the GitHub
   release instead, so what runs is what the checksum covers.
-- **Update:** its row says when a newer release is out, and ↻ installs it the same way. The
-  panel's own **Update** button (in its Perf tab) works too. Frame Tweaks' own updates leave it
-  alone.
+- **Update:** when sasaken1102r publishes a release newer than the one Frame Tweaks tested, its row
+  offers it as *not yet tested by Frame Tweaks* (↑ *version* available · **Update**); once
+  it's installed, **↩ Back to the tested version** installs the tested one again. Frame
+  Tweaks' own updates move it to a newer tested version, never to an untested one.
+  `./install.sh link-version perf-overlay tested|newest` does the same.
+  The panel's own **Update** button (in its Perf tab) installs its newest too.
 - **Uninstall** (untick it): downloads the release again and runs its `install.sh --uninstall`,
   which stops it and removes what it installed. Your settings and profiles in
   `~/.config/frame-perf-overlay` stay; delete that folder too if you want them gone.

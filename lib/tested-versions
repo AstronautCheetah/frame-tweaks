@@ -10,10 +10,12 @@ ydotool=1.0.4-3
 steamos-glibc=2.39
 steamos-glibcxx=3.4.34
 # The linked projects' releases last looked at (dev/check-links.py flags a newer one daily): its
-# notes read, the link and the tweak's page checked.
+# notes read, the link and the tweak's page checked, and tried on a Frame. Ticking a linked tweak
+# installs this version; a newer one is offered on its row as not yet tested, and ./install.sh
+# update moves what's installed at the tested version to a new one set here.
 link-recline=v1.4.0
 link-full-keyboard=0.14.1
 link-perf-overlay=v0.3.2
 link-knockthru=v1.2.0
-# (Cuff has no releases yet: the commit its link installs, which a new commit doesn't move)
-link-cuff=bea0789
+# (Cuff has no releases yet: the commit tested, whole, as its link downloads it by commit)
+link-cuff=bea0789859d3d6ae3d1972dc91189544e7f831b9

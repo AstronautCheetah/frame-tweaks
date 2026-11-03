@@ -1021,6 +1021,105 @@ class LinkedProject(unittest.TestCase):
         self.assertTrue((self.home / "linked-ran").exists())
 
 
+# A link with a tested version: its install reads $FT_LINK_VERSION (empty: its newest, v2.0.0
+# here) and logs which one it installed; its version: prints what's there.
+LINKED_TESTED = LINKED.replace(
+    "  install: echo installed >> ~/linked.log; mkdir -p ~/linked-project",
+    '  install: echo "installed ${FT_LINK_VERSION:-newest}" >> ~/linked.log; mkdir -p ~/linked-project; '
+    'echo "${FT_LINK_VERSION:-v2.0.0}" > ~/linked-project/VERSION\n'
+    "  version: cat ~/linked-project/VERSION\n"
+    "  tested: v1.0.0").replace("https://example.org/linked#readme", "https://github.com/someone/linked#readme")
+
+
+class LinkedTestedVersion(unittest.TestCase):
+    """A link with a tested version (link.tested; lib/tested-versions for the official packs):
+    ticking it installs the tested one, link-version installs its newest (not yet tested) and
+    back, ↻ keeps the choice, an update moves only a tested install and only when the tested
+    version moved, and uninstalling forgets the choice. (InstallState's home and probe pack.)"""
+    stub, trust, only_the_probe, sh, tearDown = (InstallState.stub, InstallState.trust, InstallState.only_the_probe,
+                                                 InstallState.sh, InstallState.tearDown)
+
+    def setUp(self):
+        InstallState.setUp(self)
+        self.stub("curl", "exit 6")                     # (GitHub out of reach: its newest unknown)
+        self.write(LINKED_TESTED)
+        self.choice = self.state / "link-version/linked"
+
+    def write(self, readme):
+        (self.pack / "linked").mkdir(exist_ok=True)
+        (self.pack / "linked/README.md").write_text(readme)
+        self.trust()
+
+    def log(self):
+        """The versions its installs installed, in order (the uninstalls left out)."""
+        p = self.home / "linked.log"
+        lines = p.read_text().splitlines() if p.exists() else []
+        return [line.split()[1] for line in lines if line.startswith("installed ")]
+
+    def test_tick_installs_the_tested_version(self):
+        r = self.sh("install", "linked")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Linked v1.0.0, the version Frame Tweaks tested", r.stdout)
+        self.assertEqual(self.log(), ["v1.0.0"])
+        self.assertEqual(self.choice.read_text(), "tested v1.0.0\n")
+        self.assertIn("the version Frame Tweaks tested (v1.0.0)", self.sh("status", "linked").stdout)
+
+    def test_newest_then_back_to_the_tested_one(self):
+        self.sh("install", "linked")
+        r = self.sh("link-version", "linked", "newest")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("not yet tested by Frame Tweaks", r.stdout)
+        self.assertEqual(self.log(), ["v1.0.0", "newest"])
+        self.assertEqual(self.choice.read_text(), "newest\n")
+        self.assertIn("2.0.0, not the version Frame Tweaks tested (v1.0.0)", self.sh("status", "linked").stdout)
+        self.sh("reinstall", "linked")                                  # (↻: the newest again, as chosen)
+        self.assertEqual(self.log(), ["v1.0.0", "newest", "newest"])
+        r = self.sh("link-version", "linked", "tested")                 # (↩ Back to the tested version)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["v1.0.0", "newest", "newest", "v1.0.0"])
+        self.assertEqual(self.choice.read_text(), "tested v1.0.0\n")
+        r = self.sh("link-version", "linked")                           # (what's there, what's tested)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        for says in ("The version Frame Tweaks tested: v1.0.0", "Installed: 1.0.0", "Its newest: couldn't look it up"):
+            self.assertIn(says, r.stdout)
+
+    def test_link_version_refuses_what_it_cant_do(self):
+        self.assertNotEqual(self.sh("link-version", "probe", "newest").returncode, 0)    # (not linked)
+        self.assertNotEqual(self.sh("link-version", "linked", "oldest").returncode, 0)
+        self.write(LINKED)                                              # (no tested version)
+        r = self.sh("link-version", "linked", "tested")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("has no tested version", r.stdout + r.stderr)     # (the log has both)
+        self.assertEqual(self.log(), [])
+
+    def test_an_update_moves_a_tested_install_to_a_newer_tested_version_only(self):
+        self.sh("install", "linked")
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")            # (the tested version didn't move)
+        self.assertIn("Linked, so they update their own way", r.stdout)
+        self.assertEqual(self.log(), ["v1.0.0"])
+        self.write(LINKED_TESTED.replace("tested: v1.0.0", "tested: v1.1.0"))     # (the next release tested v1.1.0)
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("which this release moves to a newer one: linked", r.stdout)
+        self.assertEqual(self.log(), ["v1.0.0", "v1.1.0"])
+        self.assertEqual(self.choice.read_text(), "tested v1.1.0\n")
+        self.sh("link-version", "linked", "newest")                     # (the newest, chosen: never moved by an update)
+        self.write(LINKED_TESTED.replace("tested: v1.0.0", "tested: v1.2.0"))
+        r = self.sh("_reinstall", FRAME_TWEAKS_UPDATING="1")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.log(), ["v1.0.0", "v1.1.0", "newest"])
+        self.assertEqual(self.choice.read_text(), "newest\n")
+
+    def test_uninstall_forgets_the_choice(self):
+        self.sh("link-version", "linked", "newest")
+        self.assertTrue(self.choice.exists())
+        r = self.sh("uninstall", "linked")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse(self.choice.exists())
+        self.sh("install", "linked")                                    # (installed again: the tested one)
+        self.assertEqual(self.log(), ["newest", "v1.0.0"])
+
+
 class UpdateWithoutGit(unittest.TestCase):
     """./install.sh update in a copy without git (from an archive, say): there's no checkout to
     move, but it's an update all the same, so held tweaks are left as they are; and with no tweak

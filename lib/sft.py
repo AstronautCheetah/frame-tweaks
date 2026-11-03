@@ -162,12 +162,12 @@ STATE = Path.home() / ".local/state/frame-tweaks"           # (install.sh's $STA
 
 def apply_formerly():
     """What's kept under a tweak's former id (formerly: in its manifest) moves to its id, once:
-    its install record and fingerprint, held, unloaded and backups entries, and hidden or shown
+    its install record and fingerprint, held, unloaded, backups and link-version entries, and hidden or shown
     rows; and an official pack turned off under a former folder name is recorded under its own.
     ./install.sh and the window run this as they start. Returns what moved."""
     moved = []
     for old, new in registry.load(refresh=True).get("renamed", {}).items():
-        for sub in ("installed", "fingerprints", "held", "unloaded", "backups"):
+        for sub in ("installed", "fingerprints", "held", "unloaded", "backups", "link-version"):
             src, dst = STATE / sub / old, STATE / sub / new
             if (src.exists() or src.is_symlink()) and not (dst.exists() or dst.is_symlink()):
                 src.rename(dst)
@@ -217,6 +217,24 @@ def not_needed(rows=None, refresh=False):
 
 def installed_record(cid):
     return (STATE / "installed" / cid).exists()
+
+
+# link-version/<id>: which version of a linked project Frame Tweaks installed, "tested <version>"
+# or "newest" (lib/link.sh writes it, ./install.sh's forget_version removes it). ./install.sh update
+# moves only a "tested" one, to a newer tested version; a "newest" one is the user's choice.
+LINK_CHOICES = STATE / "link-version"
+
+
+def link_choice(cid):
+    """(choice, version): ("tested", "v1.2.0"), ("newest", ""), or (None, "") without a record
+    (not installed by this version of Frame Tweaks, or a link without a tested version)."""
+    try:
+        words = (LINK_CHOICES / cid).read_text().split()
+    except OSError:
+        return None, ""
+    if words[:1] == ["tested"] and len(words) == 2:
+        return "tested", words[1]
+    return ("newest", "") if words == ["newest"] else (None, "")
 
 
 def files_changed(rows=None):

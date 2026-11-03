@@ -277,11 +277,20 @@ msgid "(hidden)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid ""
+"A newer release than the one Frame Tweaks tested on a Frame: it may work differently, or not yet on the Frame, and this tweak's page may not match it. Once it's installed, its row offers to go back to the tested version."
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "Apply changes"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py lib/sft.py
 msgid "Asks for your sudo password: %s"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "Back to the tested version {version}"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -402,6 +411,11 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "Install the tweaks the last update didn't get to"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid ""
+"Installs the version Frame Tweaks tested again, with the project's own installer (its settings stay)."
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -568,6 +582,14 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "{version} available"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{version} available (not yet tested by Frame Tweaks)"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
+msgid "{version} available (tested by Frame Tweaks)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1536,6 +1558,11 @@ msgstr ""
 msgid "%s failed"
 msgstr ""
 
+#: install.sh
+msgid ""
+"%s has no tested version: it installs its newest (./install.sh install %s)"
+msgstr ""
+
 #: install.sh lib/link.sh
 msgid "%s has nothing to run"
 msgstr ""
@@ -1546,6 +1573,10 @@ msgstr ""
 
 #: install.sh
 msgid "%s is now called %s"
+msgstr ""
+
+#: install.sh
+msgid "%s isn't linked: it installs what Frame Tweaks has"
 msgstr ""
 
 #: install.sh
@@ -1625,7 +1656,19 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid "Installed: %s"
+msgstr ""
+
+#: install.sh
 msgid "Installing again, with their changed files: %s"
+msgstr ""
+
+#: install.sh
+msgid "Its newest: %s"
+msgstr ""
+
+#: install.sh
+msgid "Its newest: couldn't look it up"
 msgstr ""
 
 #: install.sh
@@ -1666,6 +1709,11 @@ msgstr ""
 
 #: install.sh
 msgid ""
+"Linked, at the version Frame Tweaks tested, which this release moves to a newer one: %s"
+msgstr ""
+
+#: install.sh
+msgid ""
 "Linked, so they update their own way (their row: ↻ runs their installer again): %s"
 msgstr ""
 
@@ -1677,6 +1725,10 @@ msgstr ""
 #: install.sh
 msgid ""
 "No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go."
+msgstr ""
+
+#: install.sh
+msgid "No tested version: it installs its newest."
 msgstr ""
 
 #: install.sh
@@ -1753,6 +1805,10 @@ msgid ""
 msgstr ""
 
 #: install.sh
+msgid "The version Frame Tweaks tested: %s"
+msgstr ""
+
+#: install.sh
 msgid ""
 "These installed tweaks were unticked and will be REMOVED:\\n\\n  %s\\n\\nContinue?"
 msgstr ""
@@ -1766,6 +1822,10 @@ msgstr ""
 #: install.sh
 msgid ""
 "Tick what you want installed. Unticking an installed tweak removes it."
+msgstr ""
+
+#: install.sh
+msgid "To install one: %s"
 msgstr ""
 
 #: install.sh
@@ -1843,6 +1903,10 @@ msgstr ""
 #: install.sh
 msgid ""
 "it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own"
+msgstr ""
+
+#: install.sh
+msgid "link-version ID [tested|newest]"
 msgstr ""
 
 #: install.sh
@@ -2065,12 +2129,26 @@ msgid "status check failed: %s"
 msgstr ""
 
 #: lib/link.sh
+msgid "%s has no tested version here: it installs its newest"
+msgstr ""
+
+#: lib/link.sh
 msgid "%s has no uninstall command here: see its README"
 msgstr ""
 
 #: lib/link.sh
 msgid ""
+"Installing %s %s, the version Frame Tweaks tested, with its own installer (from the project):"
+msgstr ""
+
+#: lib/link.sh
+msgid ""
 "Installing %s with its own installer (from the project, not checked by Frame Tweaks):"
+msgstr ""
+
+#: lib/link.sh
+msgid ""
+"Installing the newest %s, not yet tested by Frame Tweaks, with its own installer (from the project):"
 msgstr ""
 
 #: lib/link.sh
@@ -2084,6 +2162,20 @@ msgstr ""
 
 #: lib/link.sh
 msgid "installed by its own installer (it updates its own way)"
+msgstr ""
+
+#: lib/link.sh
+msgid ""
+"installed by its own installer: %s, not the version Frame Tweaks tested (%s)"
+msgstr ""
+
+#: lib/link.sh
+msgid ""
+"installed by its own installer: its newest version, not yet tested by Frame Tweaks"
+msgstr ""
+
+#: lib/link.sh
+msgid "installed by its own installer: the version Frame Tweaks tested (%s)"
 msgstr ""
 
 #: lib/link.sh
@@ -6207,7 +6299,7 @@ msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs from its newest release with its own installer, the way its README describes."
+"Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
@@ -6217,12 +6309,12 @@ msgstr ""
 
 #: packs/third-party/full-keyboard/README.md
 msgid ""
-"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from its newest release"
+"TaiKeid's full-size VR keyboard, shown with the SteamVR dashboard, installed from the release Frame Tweaks tested"
 msgstr ""
 
 #: packs/third-party/knockthru/README.md
 msgid ""
-"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs from its newest release with its own installer, the way its README describes."
+"Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
 
 #: packs/third-party/knockthru/README.md
@@ -6297,7 +6389,7 @@ msgstr ""
 
 #: packs/third-party/perf-overlay/README.md
 msgid ""
-"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs from its newest release with its own installer, the way its README describes."
+"The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
 msgstr ""
 
 #: packs/third-party/perf-overlay/README.md

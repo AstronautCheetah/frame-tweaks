@@ -52,12 +52,23 @@ OPTIONAL = ("source", "depends", "hidden_by_default", "experimental", "icon", "r
 CONFIG_ROOTS = ("~/.config/", "~/.var/app/", "~/.local/state/frame-tweaks/")
 # link: a project linked rather than integrated (docs/mods.md, Linking a project): Frame Tweaks runs
 # its own install and uninstall commands as its README gives them, checks a path to tell whether
-# it's installed, can start it (run), and links its README. Nothing of it is pinned, checked,
-# copied or patched; the project's own channel is trusted. Such a tweak needs no scripts of its
+# it's installed, can start it (run), and links its README. Nothing of it is copied or patched;
+# the project's own channel (and its own checksums) is trusted. Such a tweak needs no scripts of its
 # own: lib/link.sh does their part (script()). Its version: (a command printing the installed
 # version) gives it an update check: the window compares it with the newest release of its GitHub
 # project (github, from source.url or link.readme).
-LINK_KEYS = ("install", "uninstall", "installed", "run", "readme", "restart", "version")
+# A link can also install the version Frame Tweaks tested: its install command reads
+# $FT_LINK_VERSION (a release tag, or a commit for a project without releases; empty: the newest).
+# Ticking it installs that one; a newer, untested release is offered beside it, and going back
+# from one too (lib/link.sh, docs/mods.md "Linking a project"). The tested version: lib/tested-versions'
+# link-<id> for the official packs (dev/check-links.py says when a newer one is out), or the
+# manifest's link.tested for anyone else's.
+LINK_KEYS = ("install", "uninstall", "installed", "run", "readme", "restart", "version", "tested")
+LINK_VERSION_VAR = "FT_LINK_VERSION"
+# (a tag or commit, put in a URL and a git command by the link's install: nothing a shell or URL reads
+# as more than one word)
+LINK_TESTED = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
+TESTED_VERSIONS = REPO / "lib/tested-versions"
 LINK_ACTIONS = ("install", "uninstall", "status", "run", "update-check")
 LINK_NEEDS = {"run": "run", "update-check": "version"}     # (actions a link has only with that field)
 LINK_HELPER = REPO / "lib/link.sh"
@@ -373,7 +384,35 @@ def check_link(link, where):
         errs.append(f"{where}: link.readme must be an https:// address")
     if "restart" in link and link["restart"] != "steamvr":
         errs.append(f"{where}: link.restart can only be steamvr (SteamVR loads it only as it starts)")
+    if "tested" in link:
+        if not (isinstance(link["tested"], str) and LINK_TESTED.match(link["tested"])):
+            errs.append(f"{where}: link.tested must be a release tag or a commit, e.g. v1.2.0")
+        elif LINK_VERSION_VAR not in str(link.get("install", "")):
+            errs.append(f"{where}: link.tested: its install command must read ${LINK_VERSION_VAR} (the version "
+                        "to install; empty: the newest)")
     return errs
+
+
+def tested_versions():
+    """lib/tested-versions as {name: value} (comments and blank lines left out)."""
+    try:
+        lines = TESTED_VERSIONS.read_text().splitlines()
+    except OSError:
+        return {}
+    return dict(line.split("=", 1) for line in lines if "=" in line and not line.lstrip().startswith("#"))
+
+
+def link_tested(c, seen=None):
+    """The version of a linked project Frame Tweaks tested, which ticking it installs: for the
+    official packs lib/tested-versions' link-<id>, for anyone else's the manifest's link.tested;
+    "" when there's none, or its install can't install a given version (no $FT_LINK_VERSION)."""
+    link = c.get("link") or {}
+    if LINK_VERSION_VAR not in link.get("install", ""):
+        return ""
+    if c.get("official"):
+        v = (tested_versions() if seen is None else seen).get(f"link-{c['id']}", "")
+        return v if LINK_TESTED.match(v) else ""
+    return link.get("tested") or ""
 
 
 def link_paths(link, github=None):
@@ -470,6 +509,11 @@ def load(refresh=False):
                                     f"{c['id']!r}; to use this one instead, add  replaces: true")
                 continue
             comps[c["id"]] = c
+    # (the official packs' tested versions are lib/tested-versions', read once here)
+    seen = tested_versions()
+    for c in comps.values():
+        if c["link"]:
+            c["link"]["tested"] = link_tested(c, seen)
     # formerly: a tweak's earlier ids still name it (in depends:, say), unless another tweak has one
     renamed = {}
     for i, c in comps.items():

@@ -312,11 +312,14 @@ A tweak that installs another project shows that project's README below its own
 version and run `dev/fetch-upstream-readmes.py <tweak>` and `dev/gen-docs.py`.
 
 A daily workflow (**Linked projects**, `dev/check-links.py`) does the same for the projects
-Frame Tweaks links to (Recline, Full Keyboard, Performance Overlay, KnockThru), with an issue labelled `linked-check`.
+Frame Tweaks links to (Recline, Full Keyboard, Performance Overlay, KnockThru, Cuff), with an issue labelled `linked-check`.
 🔴 when a project's README no longer names the file its `link.installed` checks (a release may
-have moved it); 🟡 when it has a release newer than the one last looked at. Then read the
-release notes, check the link's commands and the tweak's page, and set `link-ID=TAG` in
-`lib/tested-versions`.
+have moved it); 🟡 when it has a release newer than the one last looked at (Cuff, without
+releases: newer commits). Then read the release notes, check the link's commands and the tweak's
+page, try it on a Frame (`./install.sh link-version ID newest`), and set `link-ID=TAG` (Cuff: the
+whole commit) in `lib/tested-versions`. That's the version ticking the tweak installs, and the
+next release's update moves installs of the old tested version to it. Until then the window
+offers the newer one as not yet tested.
 
 After bumping a pin that has a `mirror=` line, run `dev/mirror-pins.sh` to upload Frame Tweaks'
 copy and its licence texts (a new pin needs `mirror=`, `license=` and `license_file=`, or

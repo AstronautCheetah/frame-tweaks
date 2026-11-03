@@ -17,6 +17,10 @@
 #                                    install again the tweaks whose files changed since they were
 #                                    installed (pulled, or edited): status marks them ↻ updated
 #   ./install.sh status [ID...]      health check of installed components (changes nothing)
+#   ./install.sh link-version ID [tested|newest]
+#                                    a linked project: which version is installed, the one Frame
+#                                    Tweaks tested and its newest; or install the tested one (what
+#                                    ticking it installs) or its newest, not yet tested
 #   ./install.sh update [--to vX.Y.Z | --to stable] [--reinstall]
 #                                    move to the newest (or given) release, re-run what's installed
 #                                    (--to stable: the newest stable one, e.g. back from a test release;
@@ -52,7 +56,7 @@ cd "$(dirname "$(readlink -f "$0")")" || exit 1
 # terminal: it marks the one it runs the command in (FRAME_TWEAKS_SPLASH_TTY). ⚙ Preferences
 # (~/.config/frame-tweaks/splash) or FRAME_TWEAKS_SPLASH: off turns it off, still keeps it still.
 case ${1:-} in
-    install|uninstall|remove|reinstall|reinstall-changed|update|uninstall-self)
+    install|uninstall|remove|reinstall|reinstall-changed|update|uninstall-self|link-version)
         # (the terminal is read from /proc: in $(tty <&1), fd 1 is the pipe that collects the answer)
         if [[ -t 1 && ${FRAME_TWEAKS_SPLASH:-$(cat "$HOME/.config/frame-tweaks/splash" 2>/dev/null)} != off &&
               ${FRAME_TWEAKS_SPLASH_TTY:-} != "$(readlink "/proc/$$/fd/1")" ]] &&
@@ -558,7 +562,7 @@ cmd_uninstall_self() {
     fi
     if [[ ${#gone[@]} -gt 0 ]]; then
         say "$(t "No longer part of Frame Tweaks, so not uninstalled from here: %s (each one's README said how it was set up). Their records go." "${gone[*]}")"
-        for r in "${gone[@]}"; do rm -f "$STATE/installed/$r"; done
+        for r in "${gone[@]}"; do rm -f "$STATE/installed/$r" "$STATE/link-version/$r"; done
     fi
     [[ $settings == remove ]] && cmd_forget_settings | grep -v "^$(t 'No settings left behind by uninstalled tweaks.')$"
     if [[ -n $installed ]]; then
@@ -750,13 +754,18 @@ cmd_channel() {
 }
 
 cmd_reinstall() {
-    local id installed=() linked=() rc
+    local id installed=() linked=() moved=() rc
     for id in "${IDS[@]}"; do
         # (not installed: a version record it left would have every update run again: it goes)
         is_installed "$id" || { forget_version "$id"; continue; }
-        # (a linked project updates its own way: its installer isn't run with every update)
-        if [[ -n ${LINKED[$id]:-} ]]; then linked+=("$id"); else installed+=("$id"); fi
+        # (a linked project updates its own way: its installer isn't run with every update. One
+        # installed at the version Frame Tweaks tested moves when this release tested a newer one;
+        # never to one not yet tested, which only its row's Update or link-version installs.)
+        if [[ -n ${LINKED[$id]:-} ]]; then
+            if link_tested_moved "$id"; then moved+=("$id"); installed+=("$id"); else linked+=("$id"); fi
+        else installed+=("$id"); fi
     done
+    [[ ${#moved[@]} -gt 0 ]] && say "$(t 'Linked, at the version Frame Tweaks tested, which this release moves to a newer one: %s' "${moved[*]}")"
     [[ ${#linked[@]} -gt 0 ]] && say "$(t 'Linked, so they update their own way (their row: ↻ runs their installer again): %s' "${linked[*]}")"
     [[ ${#installed[@]} -eq 0 ]] && { t 'Nothing installed yet.'; echo; return; }
     WAS_INSTALLED=("${installed[@]}")
@@ -770,6 +779,48 @@ cmd_reinstall() {
     # tweak didn't install again, which get.sh tells from an update that couldn't happen.)
     [[ $rc -eq 0 || $rc -eq 2 ]] && return 0
     return 3
+}
+
+# link_tested_moved ID: a linked project installed at the version Frame Tweaks tested (its
+# link-version record), and the tested version is another one now (lib/tested-versions changed
+# with this release). (Back to an older one too, if a release goes back: what's tested is what
+# a tested install follows.)
+link_tested_moved() {
+    local rec tested
+    rec=$(head -1 "$STATE/link-version/$1" 2>/dev/null) || return 1
+    [[ $rec == "tested "* ]] || return 1
+    tested=$(python3 lib/sft.py link "$1" tested 2>/dev/null) || return 1
+    [[ -n $tested && ${rec#tested } != "$tested" ]]
+}
+
+# link-version ID [tested|newest]: a linked project's versions (installed, tested, newest), or
+# install one of them: tested (what ticking it installs) or newest (not yet tested). The window's
+# "↑ … available (not yet tested)" and "↩ Back to the tested version" run this.
+cmd_link_version() {
+    local id=${1:-} want=${2:-} tested out cur newest line
+    [[ -n $id && $# -le 2 ]] || { echo "$(t 'link-version ID [tested|newest]')" >&2; exit 1; }
+    check_ids "$id"
+    [[ -n ${LINKED[$id]:-} ]] || { echo "$(t "%s isn't linked: it installs what Frame Tweaks has" "$id")" >&2; exit 1; }
+    tested=$(python3 lib/sft.py link "$id" tested)
+    case $want in
+        "")
+            line=$(status_of "$id")
+            echo "  $id: ${line#* }" | sed 's/:  */: /'
+            if [[ -z $tested ]]; then echo "  $(t 'No tested version: it installs its newest.')"; return 0; fi
+            out=$(bash lib/link.sh update-check "$id" 2>/dev/null) || out=
+            read -r cur newest _ <<<"$out"
+            echo "  $(t 'The version Frame Tweaks tested: %s' "$tested")"
+            [[ -z $cur ]] || echo "  $(t 'Installed: %s' "$cur")"
+            if [[ -n $newest && $newest != - ]]; then echo "  $(t 'Its newest: %s' "$newest")"
+            else echo "  $(t "Its newest: couldn't look it up")"; fi
+            echo "  $(t 'To install one: %s' "./install.sh link-version $id tested|newest")"
+            return 0 ;;
+        tested|newest) ;;
+        *) echo "$(t 'link-version ID [tested|newest]')" >&2; exit 1 ;;
+    esac
+    [[ -n $tested ]] || { echo "$(t '%s has no tested version: it installs its newest (./install.sh install %s)' "$id" "$id")" >&2; exit 1; }
+    # (for this tweak alone: lib/link.sh reads ID:CHOICE, so a linked dependency keeps its own)
+    FT_LINK_CHOICE="$id:$want" cmd_install "$id"
 }
 
 cmd_gui() {               # [--show ID]: open on that tweak's page
@@ -918,7 +969,8 @@ stop_processes() {
 # old version as $1 (e.g. to move a setting to a new place).
 record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; record_files "$1"; }
 forget_version() {
-    rm -f "$STATE/installed/$1" "$STATE/fingerprints/$1"
+    # (link-version/<id>: which version of a linked project was installed, lib/link.sh)
+    rm -f "$STATE/installed/$1" "$STATE/fingerprints/$1" "$STATE/link-version/$1"
     # (and what its Apply last applied: lib/sft.py forget_applied)
     [ ! -f "$STATE/settings-applied.json" ] || python3 lib/sft.py settings-applied --forget "$1" || true
 }
@@ -1116,6 +1168,7 @@ case ${1:-} in
     reinstall)   shift; take_lock; start_log reinstall "$@"; run_migrations "$@"; cmd_reinstall_ids "$@" ;;
     reinstall-changed) shift; take_lock; start_log reinstall-changed "$@"; cmd_reinstall_changed "$@" ;;
     status|check) shift; cmd_status "$@" ;;
+    link-version) shift; if [[ $# -eq 2 ]]; then take_lock; start_log link-version "$@"; fi; cmd_link_version "$@" ;;
     tidy)        take_lock; start_log tidy; cmd_tidy ;;
     update)      shift; take_lock; start_log update "$@"; cmd_update "$@" ;;
     _reinstall)  take_lock; start_log reinstall; cmd_reinstall ;;

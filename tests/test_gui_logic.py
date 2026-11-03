@@ -1137,6 +1137,43 @@ class LinkedProject(unittest.TestCase):
         gui.sft.load(refresh=True)
 
 
+class LinkVersions(unittest.TestCase):
+    """A linked project with a tested version: what its row offers (window_logic.link_offer) and
+    what each of those links runs (./install.sh link-version)."""
+    def test_row_and_links(self):
+        from PyQt6.QtWidgets import QApplication, QLabel
+        self.app = QApplication.instance() or QApplication([])
+        w = gui.Window.__new__(gui.Window)
+        label = QLabel()
+        w.status_labels, w.state, w.details = {"recline": label}, {"recline": (0, "installed")}, None
+        w.files_updated = lambda cid: False
+        for offer, says, href in (
+                ({"tested": "v1.4.0", "newest": "1.5.0", "to_tested": None},
+                 "↑ 1.5.0 available (not yet tested by Frame Tweaks)", "n"),
+                ({"tested": "v1.4.0", "newest": None, "to_tested": "back"}, "↩ Back to the tested version v1.4.0", "t"),
+                ({"tested": "v1.4.0", "newest": None, "to_tested": "up"}, "↑ v1.4.0 available (tested by Frame Tweaks)", "t")):
+            with self.subTest(says):
+                w.updates = {"recline": offer}
+                w.show_status("recline")
+                self.assertIn(says, label.text())
+                self.assertIn(f"href='{href}'", label.text())
+        w.updates = {"recline": {"tested": "v1.4.0", "newest": "1.5.0", "to_tested": None}}
+        w.show_status("recline")
+        self.assertIn("A newer release than the one Frame Tweaks tested", label.toolTip())
+        w.run_update, w.run_reinstall = mock.Mock(), mock.Mock()
+        for href, to in (("n", "newest"), ("t", "tested"), ("u", None)):
+            w.status_link("recline", href)
+            w.run_update.assert_called_with("recline", to=to)
+        w.status_link("recline", "r")
+        w.run_reinstall.assert_called_once_with("recline")
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}), contextlib.redirect_stdout(out):
+            gui.Window.run_update(mock.Mock(), "recline", to="newest")
+            gui.Window.run_update(mock.Mock(), "recline")
+        self.assertEqual(out.getvalue(), "would run: ./install.sh link-version recline newest\n"
+                                         "would run: ./install.sh install recline\n")
+
+
 class SudoTag(unittest.TestCase):
     """A tweak whose install asks for the sudo password (manifest sudo:) says so on its page; a
     Homebrew one only while Homebrew isn't installed."""

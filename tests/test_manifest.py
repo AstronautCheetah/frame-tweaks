@@ -524,6 +524,11 @@ class Packs(unittest.TestCase):
         self.assertEqual(c["run_label"], "Open")
         self.assertEqual(sft.script(c, "status")[1:], [str(sft.LINK_HELPER), "status", "linked"])
         self.assertIsNone(sft.script(c, "check-system"))
+        self.assertEqual(c["link"]["tested"], "")                   # (no tested version: it installs its newest)
+        (d / "README.md").write_text(TWEAK.format(id="linked", title="Mine", category="Mods", extra=good.replace(
+            "get.sh | bash", 'get.sh | bash -s "$FT_LINK_VERSION"').replace("  run:", "  tested: v1.2.0\n  run:")))
+        sft.set_trusted(self.user / "mine", True)
+        self.assertEqual(self.ids()["linked"]["link"]["tested"], "v1.2.0")
         for bad, says in (("link:\n  installed: ~/p\n", "link.install is missing"),
                           ("link:\n  install: x\n  installed: project\n", "link.installed must be a path"),
                           ("link:\n  install: x\n  installed: ~/p/*/bin\n", "not a pattern"),
@@ -532,6 +537,10 @@ class Packs(unittest.TestCase):
                           ("link:\n  install: x\n  installed: ~/p\n  version: cat ~/p/VERSION\n", "looked up on GitHub"),
                           ("link:\n  install: x\n  installed: ~/p\n  version: [a]\n  readme: https://github.com/a/b\n",
                            "link.version must be one command line"),
+                          # (tested: its install must be able to install a given version)
+                          ("link:\n  install: x\n  installed: ~/p\n  tested: v1.0.0\n", "must read $FT_LINK_VERSION"),
+                          ("link:\n  install: x $FT_LINK_VERSION\n  installed: ~/p\n  tested: 'v1; rm -rf ~'\n",
+                           "link.tested must be a release tag or a commit"),
                           ("link: x\n", "link must be a mapping")):
             (d / "README.md").write_text(TWEAK.format(id="linked", title="Mine", category="Mods", extra=bad))
             sft.set_trusted(self.user / "mine", True)
