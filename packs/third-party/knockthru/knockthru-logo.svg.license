@@ -1,0 +1,6 @@
+knockthru-logo.svg: KnockThru's logo (images/logo.svg in https://github.com/VioletTides/KnockThru),
+unchanged. As KnockThru's THIRD_PARTY_NOTICES.md says, it is traced from Valve's Steam Frame CAD
+files (https://gitlab.steamos.cloud/SteamHardware/SteamFrame) and is under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International license
+(https://creativecommons.org/licenses/by-nc-sa/4.0/), not the MIT license of the rest of Frame
+Tweaks. KnockThru is by VioletTides; it is not associated with or endorsed by Valve.

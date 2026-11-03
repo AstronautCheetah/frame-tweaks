@@ -13,7 +13,7 @@ why: >-
 author: Homebrew project
 sudo: homebrew
 source: {relation: uses, url: https://brew.sh}
-icon: {theme: package-x-generic}
+icon: {file: homebrew-logo.svg}
 app: Homebrew
 changes: "`/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew`"
 access: "**Needs your sudo password once**, to create `/home/linuxbrew`"
@@ -80,8 +80,10 @@ new terminals find `brew` and the programs it installs.
 
 ## Credits
 [Homebrew](https://github.com/Homebrew/brew) (BSD-2-Clause), installed with its official
-installer ([Homebrew/install](https://github.com/Homebrew/install), BSD-2-Clause). See also
-[CREDITS.md](../../../CREDITS.md).
+installer ([Homebrew/install](https://github.com/Homebrew/install), BSD-2-Clause). This tweak's
+icon, `homebrew-logo.svg`, is Homebrew's logo from [brew.sh](https://brew.sh/assets/img/homebrew.svg)
+(its site's repository, [Homebrew/brew.sh](https://github.com/Homebrew/brew.sh): BSD-2-Clause,
+Copyright (c) 2009-present, Homebrew contributors), unchanged. See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status homebrew` · Remove: `./install.sh uninstall homebrew`
