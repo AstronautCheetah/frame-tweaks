@@ -674,6 +674,31 @@ class PageActions(unittest.TestCase):
                 self.assertEqual(alone.sections[0].actions[0][1].text(), "Apply")
 
 
+    def test_a_change_checks_the_row_again(self):
+        """Dictation's row still said "hold Menu" after Y was chosen: a change on the page asks the
+        window to check that tweak's status again."""
+        from PyQt6.QtWidgets import QApplication, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            opts = [("BUTTON", "Button", [("Menu", "menu"), ("Y", "y")], "menu")]
+            spec = {"file": d / "x.conf", "format": "shell", "about": "", "note": "", "options": opts,
+                    "actions": [], "checkboxes": set(), "swatches": set(), "include": []}
+
+            class Window(QWidget):
+                def go_back(self):
+                    pass
+            window = Window()
+            window.recheck = mock.Mock()
+            self.addCleanup(window.deleteLater)
+            with mock.patch.dict(gui.sft.SETTINGS, {"x-test": spec}), mock.patch.dict(os.environ):
+                os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+                page = gui.SettingsPage(window, "x-test")
+                page.sections[0].choose("BUTTON", "y")
+                window.recheck.assert_called_once_with("x-test")
+                page.sections[0].reset()
+                self.assertEqual(window.recheck.call_count, 2)
+
     def test_apply_is_dimmed_until_a_setting_it_applies_changes(self):
         """As Apply changes on the main page: an Apply (an action with keys:) is dimmed while what
         it applies is as it last applied it, with a tooltip saying what to change; choosing another

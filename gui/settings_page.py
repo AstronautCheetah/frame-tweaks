@@ -129,6 +129,8 @@ class SettingsSection(QWidget):
         self.commands = {"\0".join(action_command(a)) for a in self.spec["actions"]}
         self.suffix = ""                             # (SettingsPage: which section's, when two share a label)
         self.busy = False                            # (one of its actions running: all dimmed)
+        # (SettingsPage: the row's status is checked again after a change: it named the old button)
+        self.on_change = lambda: None
         self.show_actions()
 
     def show_actions(self):
@@ -183,6 +185,7 @@ class SettingsSection(QWidget):
             self.notice.setText(proc.property("said") or _("Done."))
             self.busy = False
             self.show_actions()
+            self.on_change()
         proc.finished.connect(done)
 
     def show_choices(self):
@@ -200,6 +203,7 @@ class SettingsSection(QWidget):
         sft.write_settings(self.cid, {key: value})
         self.notice.setText(_("Saved.") + " " + self.spec["note"])
         self.show_actions()
+        self.on_change()
 
     def reset(self):
         self.conf = sft.defaults(self.cid)
@@ -210,6 +214,7 @@ class SettingsSection(QWidget):
         sft.write_settings(self.cid, {}, reset=True)
         self.notice.setText(_("Back to the defaults.") + " " + self.spec["note"])
         self.show_actions()
+        self.on_change()
 
 
 class SettingsPage(QWidget):
@@ -247,6 +252,10 @@ class SettingsPage(QWidget):
             self.sections.append(SettingsSection(other, self.notice))
             col.addWidget(self.sections[-1])
         col.addStretch(1)
+        # A change checks the tweak's row again, so its status says what's set now (Dictation's
+        # named the old controller button until the window was refreshed).
+        for section in self.sections:
+            section.on_change = lambda c=section.cid: getattr(window, "recheck", lambda _cid: None)(c)
         # The actions, at the top right: two sections' with the same label ("Apply") say whose.
         labels = [a["label"] for section in self.sections for a, _b in section.actions]
         for section in self.sections:

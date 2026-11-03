@@ -207,6 +207,7 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **A tweak's row follows its settings:** after a change in ⚙ Settings (Dictation's button from Menu to Y, say), its status line still named the old one until the window was refreshed; it's checked again at once.
 - **"Opened in Firefox" stays up:** the pop-up after a link went within a second when Firefox took the focus (Qt hides a tooltip then); it's now a pop-up of its own that stays 10 seconds (longer for long texts), or until you click it.
 - **Android Mirror wakes a sleeping phone:** a press on the mirror did nothing while the phone's screen was off (Android ignores touches then); each press now sends Android's wake-up key first.
 - **Dictation says when the microphone is muted:** muted (by Steam's mute in the VR menu, or
