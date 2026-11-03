@@ -210,6 +210,12 @@
   only when something was being removed, and listed ids.
 
 ### Fixed
+- **Unstick says when only a SteamVR restart can help.** A modifier that stays "held" after a key's
+  release went to another VR window lives in SteamVR's compositor, which counts presses per key;
+  no key event from a keyboard, Arrow Pad or a virtual device can bring that count back, so
+  Unstick's "pressed and let go" was false comfort. When no keyboard holds a key, it now says the
+  stuck state is inside SteamVR and that ⟳ Restart SteamVR (or `steamvr restart`) clears it.
+  Why, and what was tried: docs/research/stuck-modifiers.md.
 - **`reinstall-changed` updates the shared files too:** the translations, tooltips and other shared modules Arrow Pad, Screen snip and the NordVPN tray load are copied again when the checkout's differ; no tweak's folder holds them, so no change to them was noticed.
 - **Parakeet no longer drops a whole dictation:** its int8 model sometimes heard nothing in a recording with clear speech (3.5 seconds of "dictation test, the first one failed": nothing; Whisper heard all of it). When Parakeet hears nothing in a recording loud enough to hold speech, Whisper tries it.
 - **Performance Overlay starts with SteamVR, as meant, and has a Show button.** Its installer

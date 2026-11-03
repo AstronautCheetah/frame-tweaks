@@ -1438,6 +1438,13 @@ class ArrowPad(QWidget):
         for device, keys in held.items():
             text += " " + _("{device} still held {keys}: released too.").format(
                 device=device, keys=", ".join(key_name(k) for k in keys))
+        if not held:
+            # Nothing held at the kernel: a modifier that still acts held is stuck in SteamVR's
+            # compositor, which counts presses per key and lost a release; no key event from
+            # anywhere can bring that count back to zero (docs/research/stuck-modifiers.md).
+            text += " " + _("No keyboard holds a key. If Shift, Ctrl, Alt or Super still acts as held, the stuck state "
+                            "is inside SteamVR, and only restarting SteamVR clears it: ⟳ Restart SteamVR in the Frame "
+                            "Tweaks window, or 'steamvr restart' in a terminal.")
         found = "; ".join(f"{d}: {', '.join(key_name(k) for k in ks)}" for d, ks in held.items()) or "nothing"
         if not desktop_grabbed():
             unstick_log(f"held keys released: {found}; desktop mode's input grab: off")

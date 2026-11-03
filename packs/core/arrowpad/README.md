@@ -106,8 +106,13 @@ Neither takes keyboard focus, so whatever you press goes to the app you were usi
   app). If desktop mode has taken all input (its title says "Press right control to **ungrab**
   input", in desktop mode's language: typing and clicks go to the desktop instead of the window
   you're using), it gives it back with a Right Ctrl tap and checks that it did; if not, its
-  message says to tap Right Ctrl on a keyboard. What it found goes to
-  `~/.local/state/frame-tweaks/logs/unstick.log`, which 🐞 Report a problem includes.
+  message says to tap Right Ctrl on a keyboard. When no keyboard holds a key and a modifier
+  still acts as held, the stuck state is inside SteamVR's compositor, which lost a key's release
+  and counts every later press and release as a pair: no key event from anywhere clears it, and
+  Unstick says so, with the fix: ⟳ Restart SteamVR in the Frame Tweaks window (or
+  `steamvr restart`). The layers and what was tried:
+  [docs/research/stuck-modifiers.md](../../../docs/research/stuck-modifiers.md). What it found
+  goes to `~/.local/state/frame-tweaks/logs/unstick.log`, which 🐞 Report a problem includes.
   In VR, while desktop mode has taken all input, a note under the pad says so (and to tap
   Unstick); it goes once input is back. It shares its spot with the note about sliding while
   Steam's keyboard is open: with both, one note shows both messages.

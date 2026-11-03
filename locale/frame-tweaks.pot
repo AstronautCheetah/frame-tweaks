@@ -3376,6 +3376,11 @@ msgid "Midnight"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
+msgid ""
+"No keyboard holds a key. If Shift, Ctrl, Alt or Super still acts as held, the stuck state is inside SteamVR, and only restarting SteamVR clears it: ⟳ Restart SteamVR in the Frame Tweaks window, or 'steamvr restart' in a terminal."
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
 msgid "Normal"
 msgstr ""
 

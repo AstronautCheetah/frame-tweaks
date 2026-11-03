@@ -25,6 +25,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Protect selected"
 - New in `install.sh:666`
   - now: "The shared files the tweaks load (translations, tooltips) are up to date again; programs running now use them from their next start."
+- New in `packs/core/arrowpad/arrowpad.py:1445`
+  - now: "No keyboard holds a key. If Shift, Ctrl, Alt or Super still acts as held, the stuck state is inside SteamVR, and only restarting SteamVR clears it: ⟳ Restart SteamVR in the Frame Tweaks window, or 'steamvr restart' in a terminal."
 - Changed in `packs/core/dictation/README.md`
   - was: "Voice activity detection"
   - now: "Whisper voice activity detection"
