@@ -9,7 +9,7 @@ if [ "$(setting DICTATE_ENGINE)" = parakeet ]; then
     if ! "$P/venv/bin/python" -c 'import onnx_asr, onnxruntime' 2>/dev/null; then
         say "$(t 'Setting up onnx-asr, the runtime Parakeet runs on')"
         echo "    $(t 'About 150 MB, in ~/.local/share/frame-tweaks/parakeet.')"
-        python3 -m venv "$P/venv" && pip_pinned "$P/venv" onnx-asr onnxruntime ||
+        new_venv "$P/venv" && pip_pinned "$P/venv" onnx-asr onnxruntime ||
             die "$(t "Parakeet's runtime couldn't be installed; Dictation goes on with Whisper")"
     fi
     # The model: each file checked against its pin (a file from an older pin, or cut short, is

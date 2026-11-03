@@ -326,6 +326,23 @@ class InstallService(unittest.TestCase):
         self.assertIn("systemctl --user disable --now frame-tweaks-dictate-button.service", self.log.read_text())
 
 
+    def test_a_reinstall_keeps_the_downloads_an_uninstall_removes_them(self):
+        """↻ (FRAME_TWEAKS_REINSTALL) removed Parakeet's model and runtime and the Whisper models
+        too, all downloaded again (about 1.1 GB): they stay; an uninstall still removes them."""
+        share = self.home / ".local/share"
+        files = [share / "frame-tweaks/parakeet/model/encoder.onnx", share / "whisper/ggml-silero-v6.2.0.bin",
+                 share / "whisper/ggml-small-q8_0.bin"]
+        for f in files:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("x")
+        self.env["FRAME_TWEAKS_REINSTALL"] = "1"
+        self.run_script("uninstall.sh")
+        self.assertTrue(all(f.exists() for f in files))
+        del self.env["FRAME_TWEAKS_REINSTALL"]
+        self.run_script("uninstall.sh")
+        self.assertFalse(any(f.exists() for f in files))
+
+
 class SettingsPage(unittest.TestCase):
     """What Dictation's ⚙ Settings writes (./install.sh settings, the window's page) is what
     dictate-button reads, and the example settings stay commented out around it."""

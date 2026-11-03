@@ -91,6 +91,23 @@ class QtVenv(unittest.TestCase):
         self.assertEqual(self.left(FRAME_TWEAKS_REINSTALL="1"), "kept")
 
 
+class NewVenv(unittest.TestCase):
+    """new_venv: on SteamOS's Python, not the python3 first on the PATH (Homebrew's 3.15, which
+    the pinned onnxruntime has no build for: Parakeet's runtime couldn't install), and made anew."""
+    def test_steamos_python_not_the_paths(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            for name, says in (("brew/python3", "brew"), ("os/python3", "os")):
+                stub(t / Path(name).parent, "python3", f'echo "{says} $*"')
+            path = f"{t}/brew:{os.environ['PATH']}"
+            self.assertEqual(sh("new_venv /v", PATH=path, FRAME_TWEAKS_PYTHON=f"{t}/os/python3"), "os -m venv --clear /v")
+            # (no such Python: the PATH's, as before)
+            self.assertEqual(sh("new_venv /v", PATH=path, FRAME_TWEAKS_PYTHON=f"{t}/none"), "brew -m venv --clear /v")
+            self.assertIn("FRAME_TWEAKS_PYTHON:-/usr/bin/python3", (ROOT / "lib/common.sh").read_text())
+            for f in ("lib/common.sh", "packs/core/dictation/engine.sh"):
+                self.assertNotIn("python3 -m venv", (ROOT / f).read_text(), f)
+
+
 class Bashrc(unittest.TestCase):
     """ensure_path (and need_brew, after installing Homebrew) add their line to ~/.bashrc once, on
     a line of its own: to a file whose last line had no newline it was glued onto that line, and

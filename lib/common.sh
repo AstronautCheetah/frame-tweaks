@@ -440,6 +440,16 @@ for pin in open(sys.argv[2]).read().split("\n"):
     rm -rf "$tmp"; return 1
 }
 
+# new_venv DIR: a venv on SteamOS's own Python, whatever python3 comes first on the PATH: Homebrew
+# brings its own (python@3.15, a dependency of the tweaks' formulae), newer than the pinned packages
+# have builds for (onnxruntime 1.31 has none for 3.15: Parakeet's runtime couldn't install). A venv
+# there on another Python, or one cut short, is made anew (--clear); FRAME_TWEAKS_PYTHON overrides.
+new_venv() {
+    local py=${FRAME_TWEAKS_PYTHON:-/usr/bin/python3}
+    [ -x "$py" ] || py=python3
+    "$py" -m venv --clear "$1"
+}
+
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 # ensure_qt_venv [TITLE [DETAILS]]: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip,
@@ -451,13 +461,13 @@ ensure_qt_venv() {
     "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null && return 0
     say "${1:-$(t 'Setting up PyQt6, a window toolkit')}"
     echo "    ${2:-$(t 'About 280 MB to download, shared by the installer window and the tweaks that use it.')}"
-    python3 -m venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
+    new_venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
 }
 
 ensure_tweaks_venv() {
     if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
         say "$(t 'Creating Python venv with jeepney')"
-        python3 -m venv "$TWEAKS_VENV"
+        new_venv "$TWEAKS_VENV"
         pip_pinned "$TWEAKS_VENV" jeepney
     fi
 }
