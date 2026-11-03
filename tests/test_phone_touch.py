@@ -148,6 +148,19 @@ class SecureScreen(unittest.TestCase):
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
         self.assertIn("window.__sftPhoneSecure === 'biometric'", js)
 
+    def test_the_fingerprint_sensor_spot(self):
+        """The fingerprint goes where the sensor is: its overlay window's frame while the prompt shows
+        it, else a Pixel's usual spot."""
+        udfps = DUMPSYS.replace("Window #2 Window{778899 u0 com.example.notes/com.example.notes.Edit}:",
+                                "Window #2 Window{a1ee52e u0 UdfpsControllerOverlay}:\n"
+                                "    Frames: parent=[0,0][1344,2992] display=[0,0][1344,2992] frame=[522,2400][822,2700]")
+        spot = pt.sensor_spot(udfps, (1344, 2992))
+        self.assertAlmostEqual(spot["u"], 672 / 1344)
+        self.assertAlmostEqual(spot["v"], 2550 / 2992)
+        self.assertAlmostEqual(spot["d"], 300 / 1344)
+        self.assertEqual(pt.sensor_spot(DUMPSYS, (1344, 2992)), pt.SENSOR_GUESS)
+        self.assertEqual(pt.sensor_spot(udfps, None), pt.SENSOR_GUESS)          # (screen size not known yet)
+
     def test_checked_every_second_while_hidden(self):
         """The notice and keypads stayed up several seconds after unlocking: while the screen is
         hidden it's checked every second (3 s otherwise)."""

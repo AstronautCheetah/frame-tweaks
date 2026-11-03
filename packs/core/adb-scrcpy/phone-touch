@@ -418,6 +418,29 @@ def hidden_kind(dumpsys):
     return "biometric" if any("BiometricPrompt" in w for w in focused) else "screen"
 
 
+# Where a phone's under-screen fingerprint sensor usually is, as parts of the screen across and down
+# (a Pixel's: centred, low), when its prompt doesn't say: the sensor's overlay window's frame.
+SENSOR_GUESS = {"u": 0.5, "v": 0.82, "d": 0.11}
+
+
+def sensor_spot(dumpsys, size):
+    """Where the fingerprint sensor is, as {"u", "v", "d"}: its centre across and down and its
+    width, as parts of the screen (size: its pixels, w × h), from the frame of system UI's
+    UdfpsControllerOverlay window while the prompt shows it; else the usual spot (SENSOR_GUESS)."""
+    blocks = list(WINDOW_BLOCK.finditer(dumpsys))
+    for i, b in enumerate(blocks):
+        if "UdfpsControllerOverlay" not in b.group(1):
+            continue
+        end = blocks[i + 1].start() if i + 1 < len(blocks) else len(dumpsys)
+        m = re.search(r"\bframe=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", dumpsys[b.start():end])
+        if m and size and size[0] > 0 and size[1] > 0:
+            l, t, r, bt = map(int, m.groups())
+            w, h = size
+            if 0 < r - l < w and 0 < bt - t < h:
+                return {"u": (l + r) / 2 / w, "v": (t + bt) / 2 / h, "d": (r - l) / w}
+    return dict(SENSOR_GUESS)
+
+
 def focused_is_secure(dumpsys):
     """Whether a focused window in `dumpsys window windows` output (followed by the focus lines, which
     only the full `dumpsys window` has) has FLAG_SECURE (fl=… SECURE). Each display has a focus line,
@@ -435,7 +458,7 @@ def focused_is_secure(dumpsys):
     return False
 
 
-def watch_secure(dev, state, every=3.0, hidden_every=1.0):
+def watch_secure(dev, state, every=3.0, hidden_every=1.0, phone=None):
     """state["secure"]: the phone's focused window hides itself from the mirror: checked every 3 s,
     and every second while it does (the notice and the unlock keypads go as soon as it's unlocked;
     a 3 s check, and the layer told at its next 2 s beat, left them up several seconds)."""
@@ -444,6 +467,8 @@ def watch_secure(dev, state, every=3.0, hidden_every=1.0):
             # (one call: the windows and their flags, then the focus lines, only in the full dump)
             r = adb(dev, "shell", "dumpsys window windows; dumpsys window | grep mCurrentFocus")
             state["secure"] = hidden_kind(r.stdout) if r.returncode == 0 else ""
+            # (phone.size: read once connected, which may be after this starts)
+            state["sensor"] = sensor_spot(r.stdout, getattr(phone, "size", None)) if state["secure"] == "biometric" else None
         except OSError:
             state["secure"] = ""
         time.sleep(hidden_every if state.get("secure") else every)
@@ -482,7 +507,8 @@ def serve(phone, sd, state):
                     n += 1
                     ws.send({"id": n, "method": "Runtime.evaluate",
                              "params": {"expression": "window.__sftPhoneTouchAlive = Date.now(); "
-                                        f"window.__sftPhoneSecure = {json.dumps(state.get('secure') or '')}"}})
+                                        f"window.__sftPhoneSecure = {json.dumps(state.get('secure') or '')}; "
+                                        f"window.__sftPhoneSensor = {json.dumps(state.get('sensor'))}"}})
                     beat = now
                 # Wait for a message without a timeout cutting one in half.
                 if not ws.rest and not select.select([ws.s], [], [], 0.5)[0]:
@@ -558,7 +584,7 @@ def main():
             log("phone:", e)                      # tried again at the first touch
         state = {}                                # where the laser is on the mirror (from the layer)
         threading.Thread(target=scroll_with_sticks, args=(phone, state), daemon=True).start()
-        threading.Thread(target=watch_secure, args=(phone.dev, state), daemon=True).start()
+        threading.Thread(target=watch_secure, args=(phone.dev, state), kwargs={"phone": phone}, daemon=True).start()
         serve(phone, dashboard(), state)
     finally:
         phone.close()

@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 23;
+  const NAME = 'phone-touch', VERSION = 24;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -158,6 +158,8 @@
                          onMouseUp: (ev) => ev.stopPropagation(),
                          onClick: (ev) => { ev.stopPropagation(); fn(); redraw(); },
                          onMouseEnter: () => buzz('Enter') });
+  const FINGERPRINT_SVG = 'M12 3a8 8 0 0 0-8 8M12 3a8 8 0 0 1 8 8v1M8 20a14 14 0 0 1-1.5-6.5 5.5 5.5 0 0 1 11 0v.5' +
+    'M12 11v3a9 9 0 0 0 2 6M9.5 13.5a2.5 2.5 0 0 1 5 0V15M15 19a12 12 0 0 0 .5-3';
   const OUTLINE_SVG = 'M4 2h4v4H4zM10 2h4v4h-4zM16 2h4v4h-4zM4 8h4v4H4zM10 8h4v4h-4zM16 8h4v4h-4zM4 14h4v4H4zM10 14h4v4h-4z' +
     'M16 14h4v4h-4zM10 20h4v3h-4z';
   const iconButton = (h, on, svg, outline, tip, fn) =>
@@ -208,6 +210,19 @@
                    () => { unlock.on = !unlock.on; unlock.count = 0; }),
         iconButton(h, keypad.on, OUTLINE_SVG, true, T('Show where a lock screen has its digits'),
                    () => { keypad.on = !keypad.on; })));
+    }
+    // The fingerprint prompt: a fingerprint where the phone's sensor is (phone-touch reads it from
+    // the sensor's overlay window, or guesses a Pixel's spot), so a thumb finds it without seeing.
+    const spot = window.__sftPhoneSecure === 'biometric' && window.__sftPhoneSensor;
+    if (spot) {
+      const d = Math.max(24, (spot.d || 0.11) * pxW);
+      out.push(el('div', { key: 'sensor', style: { position: 'absolute', left: `${spot.u * pxW - d / 2}px`,
+          top: `${spot.v * pxH - d / 2}px`, width: `${d}px`, height: `${d}px`, pointerEvents: 'none',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%',
+          border: `2px solid hsla(${h}, 70%, 75%, 0.8)`, background: 'rgba(255, 255, 255, 0.06)' } },
+        el('svg', { width: d * 0.7, height: d * 0.7, viewBox: '0 0 24 24' },
+          el('path', { d: FINGERPRINT_SVG, fill: 'none', stroke: `hsl(${h}, 70%, 82%)`, strokeWidth: 1.5,
+                       strokeLinecap: 'round' }))));
     }
     if (unlock.on) out.push(typingPad(pxW, pxH, h));
     if (!keypad.on) return out;
@@ -442,7 +457,8 @@
             f.activePage?.GetPanelAnchorID?.(TOP_CENTER) ?? null];
   };
   const layer = (f) => cached(JSON.stringify(['layer', ...sizes(f), f.activePage?.mainPanelSGID ?? null,
-                                              window.__sftPhoneSecure || '', keypad, unlock, window.__sftI18n?.lang ?? null, hueOf()]),
+                                              window.__sftPhoneSecure || '', window.__sftPhoneSensor ?? null, keypad, unlock,
+                                              window.__sftI18n?.lang ?? null, hueOf()]),
                               () => buildLayer(f));
   const extras = (f) => cached(JSON.stringify(['extras', window.__sftI18n?.lang ?? null, ...sizes(f), f.docking?.dockLocation,
                                                settingsOpen.has(f.frameID), pending, hueOf(),
