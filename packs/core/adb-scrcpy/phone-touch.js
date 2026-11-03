@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 30;
+  const NAME = 'phone-touch', VERSION = 31;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -536,14 +536,14 @@
   // The phone's hardware keys, as buttons on one side of the window (PHONE_KEY_SIDE; the ones the
   // settings turn on): Back, App switcher (recent apps), Volume up and down, sent as the phone's own
   // keys (phone-touch HW_KEYS).
-  const BOTTOM_CENTER = 7, CENTER_RIGHT = 5, BAR_M = 0.06, KEY_M = 0.05;
+  const BOTTOM_CENTER = 7, CENTER_RIGHT = 5, BAR_M = 0.06, TOP_M = 0.06, KEY_M = 0.05;
   // How far the buttons' near edge is from the window, on that side: beyond a scroll strip there
-  // (scroll-strips' room()), below also beyond the grab bar, left also beyond the gear when it sits
-  // beside the window.
+  // (scroll-strips' room()), below also beyond the grab bar, above also beyond SteamVR's "Enter
+  // Gamepad Mode" over the window (TOP_M), left also beyond the gear when it sits beside the window.
   const stripRoom = () => { try { return window.__sftPatches?.['scroll-strips']?.room?.() ?? {}; } catch (e) { return {}; } };
   const keysOut = (f, k, side, beside) => {
     const room = stripRoom(), edge = { below: 'bottom', above: 'top', left: 'left', right: 'right' }[side];
-    return (GAP_M + (room[edge] || 0) + (side === 'below' ? BAR_M : 0) + (side === 'left' && beside ? GEAR_M + GAP_M : 0)) * k;
+    return (GAP_M + (room[edge] || 0) + (side === 'below' ? BAR_M : side === 'above' ? TOP_M : 0) + (side === 'left' && beside ? GEAR_M + GAP_M : 0)) * k;
   };
   const HW = [['PHONE_KEY_BACK', 'back', 'M15 5 8 12l7 7', N('Back')],
               ['PHONE_KEY_RECENTS', 'recents', 'M6 6h12v12H6z', N('App switcher')],
