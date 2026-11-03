@@ -59,6 +59,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | knockthru | Whatever KnockThru's own installer sets up (its README lists it): the program in `~/KnockThru`, registered with SteamVR to start with it, and a Non-Steam entry in your Steam library | Reads controller and headset motion from SteamVR; presses Room View through Steam's interface (CEF Remote Debugging, which you turn on); asks GitHub once a day for a newer release |
 | cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
+| frame-passthrough-pip | What its AppImage's installer sets up, all in your home folder: the app and its camera driver in `~/.local/share/framepip` (the driver registered with SteamVR), a user service (`framepip.service`) that starts it with SteamVR, and an app-menu entry; settings in `~/.config/framepip` | Reads the headset's tracking cameras through its own SteamVR driver; a SteamVR overlay with a dashboard panel; a controller binding (double-tap View on the left controller) |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 

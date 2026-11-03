@@ -3454,7 +3454,7 @@ msgid ""
 "Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
 msgstr ""
 
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "Open"
 msgstr ""
 
@@ -4774,7 +4774,7 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "VR environment"
 msgstr ""
 
@@ -6191,7 +6191,7 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr ""
 
@@ -6731,6 +6731,66 @@ msgstr ""
 msgid "Takes effect after a reboot."
 msgstr ""
 
+#: packs/third-party/frame-passthrough-pip/README.md
+msgid ""
+"Passthrough on the Frame replaces the game, so checking the room, a drink or a controller means leaving it. This keeps a camera view in the corner of any game, streamed or standalone."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/README.md
+msgid ""
+"Sippbox's frame-passthrough-pip: a small, monochrome view from the headset's passthrough cameras, over whatever you're playing, pinned to your view or placed in the room, with a panel in the SteamVR dashboard for its settings. Installed from its GitHub release, the way its README describes."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/README.md
+msgid ""
+"The passthrough camera as a small picture-in-picture panel over any game, pinned to your view or placed in the room (Sippbox's frame-passthrough-pip)"
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/perf-overlay/run.sh
+msgid "Could not start %s: see %s"
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/perf-overlay/run.sh
+msgid "From now on it starts with SteamVR, as its installer meant to set up."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/perf-overlay/run.sh
+msgid ""
+"It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh
+msgid "Not installed: tick Passthrough PiP and Apply changes first."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh
+msgid ""
+"Opened: its panel is in the SteamVR dashboard; double-tap View on the left controller shows or hides the camera view."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh packs/third-party/frame-passthrough-pip/README.md
+msgid "Passthrough PiP"
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/run.sh
+msgid "SteamVR is not running: the camera view shows once it is."
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/status.sh
+msgid ""
+"installed, but its service failed (exit status %s): Open on its row starts it again; its log: %s"
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/status.sh
+msgid ""
+"installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Open on its row sets it, or %s"
+msgstr ""
+
+#: packs/third-party/frame-passthrough-pip/status.sh
+msgid ""
+"installed; starts with the next SteamVR start (Open on its row starts it now)"
+msgstr ""
+
 #: packs/third-party/full-keyboard/README.md
 msgid "Full Keyboard (VR)"
 msgstr ""
@@ -6846,20 +6906,7 @@ msgid ""
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh
-msgid "Could not start %s: see %s"
-msgstr ""
-
-#: packs/third-party/perf-overlay/run.sh
-msgid "From now on it starts with SteamVR, as its installer meant to set up."
-msgstr ""
-
-#: packs/third-party/perf-overlay/run.sh
 msgid "Hidden in VR (Show brings it back)."
-msgstr ""
-
-#: packs/third-party/perf-overlay/run.sh
-msgid ""
-"It is not set to start with SteamVR, and that could not be fixed: run %s in a terminal."
 msgstr ""
 
 #: packs/third-party/perf-overlay/run.sh

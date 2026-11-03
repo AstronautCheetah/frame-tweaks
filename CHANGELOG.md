@@ -70,6 +70,12 @@
   desktop's clipboard.
 
 ### Added
+- **Passthrough PiP** (VR environment): Sippbox's frame-passthrough-pip, the passthrough camera as a
+  small picture-in-picture panel over any game, pinned to your view or placed in the room, as a
+  linked tweak with a tested release (0.9.1). Tried on a Frame: the camera came up at about 9% of
+  one CPU core and 43 MB. **Open** on its row starts it and opens its dashboard panel, and enables
+  its service when an install left it disabled; the status says when that's needed. From the
+  frame-commons field guide's Passthrough picks.
 - **An install whose terminal was closed can be brought back:** installs, updates and removals the window starts run in a tmux session (part of SteamOS) owned by their own service. Closing the terminal only detaches: a question or sudo's password prompt waits, and **▶ Show the running install** in the window (or `./install.sh attach`) opens it again.
 - **Search the tweaks:** a 🔍 button left of ⚙ in the window's top row opens a search field; the list shows only the tweaks whose name, description, category or pack has every word typed (categories unfolded). Esc, or the button again, brings back the whole list.
 - **Tweaks that can't go together, or need a newer Frame Tweaks, say so before installing:** a

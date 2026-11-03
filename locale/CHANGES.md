@@ -84,3 +84,23 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/core/vr-memory-guard/status.sh:14`
   - was: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
   - now: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR given priority"
+- New in `packs/third-party/frame-passthrough-pip/README.md`
+  - now: "Passthrough on the Frame replaces the game, so checking the room, a drink or a controller means leaving it. This keeps a camera view in the corner of any game, streamed or standalone."
+- New in `packs/third-party/frame-passthrough-pip/README.md`
+  - now: "Sippbox's frame-passthrough-pip: a small, monochrome view from the headset's passthrough cameras, over whatever you're playing, pinned to your view or placed in the room, with a panel in the SteamVR dashboard for its settings. Installed from its GitHub release, the way its README describes."
+- New in `packs/third-party/frame-passthrough-pip/README.md`
+  - now: "The passthrough camera as a small picture-in-picture panel over any game, pinned to your view or placed in the room (Sippbox's frame-passthrough-pip)"
+- New in `packs/third-party/frame-passthrough-pip/run.sh:11`
+  - now: "Passthrough PiP"
+- New in `packs/third-party/frame-passthrough-pip/run.sh:12`
+  - now: "Not installed: tick Passthrough PiP and Apply changes first."
+- New in `packs/third-party/frame-passthrough-pip/run.sh:23`
+  - now: "SteamVR is not running: the camera view shows once it is."
+- New in `packs/third-party/frame-passthrough-pip/run.sh:26`
+  - now: "Opened: its panel is in the SteamVR dashboard; double-tap View on the left controller shows or hides the camera view."
+- New in `packs/third-party/frame-passthrough-pip/status.sh:11`
+  - now: "installed, but not set to start with SteamVR (its installer's enable step fails from desktop mode): Open on its row sets it, or %s"
+- New in `packs/third-party/frame-passthrough-pip/status.sh:17`
+  - now: "installed, but its service failed (exit status %s): Open on its row starts it again; its log: %s"
+- New in `packs/third-party/frame-passthrough-pip/status.sh:20`
+  - now: "installed; starts with the next SteamVR start (Open on its row starts it now)"

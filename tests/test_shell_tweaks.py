@@ -8,6 +8,7 @@ import sys
 import hashlib
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -337,6 +338,70 @@ class PerfOverlay(Home):
         r = self.run_script("perf-overlay/run.sh")
         self.assertEqual(r.returncode, 1)
         self.assertIn("Not installed", r.stdout)
+
+
+class PassthroughPip(Home):
+    """Passthrough PiP (a link with scripts of its own, like the Performance Overlay): the status
+    adds whether its service is enabled; Open enables it, starts it while SteamVR runs, and runs the
+    program with --open for its dashboard panel. systemctl and notify-send are stand-ins."""
+    def setUp(self):
+        super().setUp()
+        self.log = self.home / "calls.log"
+        self.stub("systemctl", 'echo "$*" >> "$HOME/calls.log"\n'
+                  'case " $* " in\n'
+                  '  *" is-enabled "*) cat "$HOME/enabled" 2>/dev/null || echo disabled; [ "$(cat "$HOME/enabled" 2>/dev/null)" = enabled ] ;;\n'
+                  '  *" is-active "*steamvr.service*) [ -f "$HOME/vr" ] ;;\n'
+                  '  *" is-active "*) [ -f "$HOME/failed" ] && echo failed; [ -f "$HOME/running" ] ;;\n'
+                  '  *" show "*ExecMainStatus*) cat "$HOME/exitcode" 2>/dev/null ;;\n'
+                  '  *" enable "*) echo enabled > "$HOME/enabled" ;;\n'
+                  '  *" start "*) touch "$HOME/running" ;;\n'
+                  'esac')
+        self.stub("notify-send", 'echo "notify-send $*" >> "$HOME/calls.log"')
+        self.stub("pgrep", "exit 1")
+        prog = self.home / ".local/share/framepip/bin/framepip"
+        prog.parent.mkdir(parents=True)
+        prog.write_text('#!/bin/bash\necho "framepip $*" >> "$HOME/calls.log"\n')
+        prog.chmod(0o755)
+        (self.home / ".local/share/framepip/share").mkdir()
+        (self.home / ".local/share/framepip/share/VERSION").write_text("0.9.1\n")
+        unit = self.home / ".config/systemd/user/framepip.service"
+        unit.parent.mkdir(parents=True)
+        unit.write_text("[Unit]\nDescription=x\n")
+
+    def calls(self):
+        return self.log.read_text().splitlines() if self.log.exists() else []
+
+    def test_status_warns_while_disabled_then_is_the_links(self):
+        r = self.run_script("frame-passthrough-pip/status.sh")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("not set to start with SteamVR", r.stdout)
+        (self.home / "enabled").write_text("enabled\n")
+        r = self.run_script("frame-passthrough-pip/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (0, "ok       installed by its own installer: the version Frame Tweaks tested (v0.9.1)"), r.stderr)
+        (self.home / "vr").touch()
+        r = self.run_script("frame-passthrough-pip/status.sh")
+        self.assertIn("starts with the next SteamVR start", r.stdout)
+
+    def test_open_enables_starts_and_opens_the_panel(self):
+        (self.home / "vr").touch()
+        r = self.run_script("frame-passthrough-pip/run.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        calls = "\n".join(self.calls())
+        self.assertIn("enable framepip.service", calls)
+        self.assertIn("--user start framepip.service", calls)
+        for _ in range(20):                                     # (the program runs detached: a moment)
+            if "framepip --open" in "\n".join(self.calls()):
+                break
+            time.sleep(0.1)
+        self.assertIn("framepip --open", self.calls())
+        self.assertIn("From now on it starts with SteamVR", r.stdout)
+        self.assertIn("Opened", r.stdout)
+
+    def test_open_without_steamvr_waits(self):
+        (self.home / "enabled").write_text("enabled\n")
+        r = self.run_script("frame-passthrough-pip/run.sh")
+        self.assertIn("SteamVR is not running", r.stdout)
+        self.assertNotIn("--user start", "\n".join(self.calls()))
 
 
 class CursorNotNeeded(Home):
