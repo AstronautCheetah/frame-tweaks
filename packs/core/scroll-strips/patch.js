@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 23;
+  const NAME = 'scroll-strips', VERSION = 24;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -141,14 +141,13 @@
     return m;
   };
   const strip = (key, axis, length, thick, target, curveId) => {   // sizes in the anchor's units
-    // The strip's picture is drawn px across and stretched to its width in the world: at 16 px its
-    // 1 px border, stretched some 30 times, came out fuzzy. 64 px, as the gear (and Android Mirror's
-    // buttons) use, keeps the edges sharp; sizes inside scale with px (S), and the drag maths uses
-    // fractions of the strip, not pixels.
-    const px = 64, S = px / 16, lenPx = Math.min(600 * S, Math.round(px * length / thick));
+    // Small page elements: each panel's picture is a piece of the dashboard's one shared page, and
+    // at 64 px (a strip up to 2400 px long) they overlapped the dashboard's own pieces there, so the
+    // grab bars stopped working and other panels showed bits of the strips.
+    const px = 16, lenPx = Math.min(600, Math.round(px * length / thick));
     const style = { width: `${axis === 'y' ? px : lenPx}px`, height: `${axis === 'y' ? lenPx : px}px`,
       background: colors().idle, position: 'relative', borderRadius: `${px / 2}px`, boxSizing: 'border-box',
-      border: `${S}px solid ${colors().border}` };
+      border: `1px solid ${colors().border}` };
     return el(PANEL, { key, width: axis === 'y' ? thick : length, interactive: true, only_visible_with_laser: false,
       debug_name: `SftScroll${axis.toUpperCase()}`, origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false },
       ...(curveId ? { curvature_origin_id: curveId } : {}) },
@@ -161,8 +160,8 @@
         el.style.background = colors().active;
         drag = { axis, target, el, start, from, length: axis === 'y' ? r.height : r.width, offset: 0, moved: 0,
                  carry: 0, t0: Date.now(), lastMove: Date.now(),
-                 origin: dot(el, axis, start - from, colors().origin, 10 * S),
-                 knob: dot(el, axis, start - from, colors().knob, 14 * S) };
+                 origin: dot(el, axis, start - from, colors().origin, 10),
+                 knob: dot(el, axis, start - from, colors().knob, 14) };
         drag.timer = setInterval(tick, TICK_MS);
         window.addEventListener('mousemove', onMove, true);
         window.addEventListener('mouseup', onUp, true);
