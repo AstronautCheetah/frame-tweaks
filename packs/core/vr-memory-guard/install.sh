@@ -82,5 +82,5 @@ done
 say "$(t 'Flatpak apps together: up to %s MB (%s MB kept for VR); Firefox: up to %s MB.' "$apps" "$reserve" "$ff")"
 say "$(t 'Dictation: up to %s MB; Android Mirror: up to %s MB (from its next start).' "$dict" "$mirror")"
 if sysctl_user is-active --quiet steamvr.service; then
-    say "$(t 'SteamVR is stopped last from its next start.')"
+    say "$(t 'SteamVR is given priority from its next start.')"
 fi

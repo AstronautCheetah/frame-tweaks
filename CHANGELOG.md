@@ -176,6 +176,9 @@
   compositor crashed. The limits are in `~/.config/frame-tweaks/vr-memory-guard.conf`.
 
 ### Changed
+- **VR memory guard says "SteamVR given priority"** where it said "SteamVR stopped last": the same
+  arrangement (SteamVR is the last thing the kernel would stop when memory runs out), named by
+  what it does for you.
 - **Narrate's ⚙ view has Apply at the top right, dimmed until something changes,** as Frame Tweaks' settings pages do: off while the engine and language chosen are the ones applied, on after a change, off again once it has run.
 - **Recline shows Recline-VR's own icon** in the list, instead of a stock arrow.
 - **✔ Works on my Frame moved** from the window's bottom row to the "Help make Frame Tweaks better" row, under **Get involved**: reporting what works is a way to help.

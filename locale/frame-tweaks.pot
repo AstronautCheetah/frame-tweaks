@@ -5612,7 +5612,7 @@ msgid ""
 msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
-msgid "SteamVR is stopped last from its next start."
+msgid "SteamVR is given priority from its next start."
 msgstr ""
 
 #: packs/core/vr-memory-guard/install.sh
@@ -5626,7 +5626,7 @@ msgid ""
 msgstr ""
 
 #: packs/core/vr-memory-guard/status.sh
-msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+msgid "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR given priority"
 msgstr ""
 
 #: packs/core/vr-memory-guard/status.sh

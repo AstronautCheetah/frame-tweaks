@@ -50,7 +50,7 @@ time it starts.
   app that asks for more is stopped; SteamVR, Steam and your game keep running.
 - **Firefox has its own limit (5 GB).** Above it, Firefox stops one of its processes (a tab
   shows "Gah. Your tab just crashed.", or Firefox closes) before anything else is affected.
-- **SteamVR is stopped last.** If memory runs out anyway, the kernel picks an app before
+- **SteamVR is given priority.** If memory runs out anyway, the kernel picks an app before
   SteamVR.
 
 **Not limited:** games you start from Steam, and the desktop itself with its own programs

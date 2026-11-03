@@ -78,3 +78,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "SteamVR not running"
 - New in `lib/vrbindings.py:497`
   - now: "unknown command: {cmd}"
+- Changed in `packs/core/vr-memory-guard/install.sh:85`
+  - was: "SteamVR is stopped last from its next start."
+  - now: "SteamVR is given priority from its next start."
+- Changed in `packs/core/vr-memory-guard/status.sh:14`
+  - was: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR stopped last"
+  - now: "Flatpak apps %s of %s MB; Firefox up to %s; SteamVR given priority"
