@@ -358,6 +358,10 @@ elif mic_muted; then
 else
     wav="$STATE/rec-$(date +%s%N).wav"   # own file per recording: never clobbers one being transcribed
     apply_engine 9>&-                 # (loads it while you speak, if it's to be kept loaded and isn't yet)
+    # The start sound before the microphone opens: with Bluetooth or USB headphones, SteamOS stops
+    # their audio while an app records (its echo-cancel route; SteamOS issue #2896), and the sound,
+    # played after, waited until recording stopped, just before the stop sound. (At most 1.5 s.)
+    timeout 1.5 pw-play "$SOUNDS/device-added.oga" 9>&- 2>/dev/null
     pw-record --rate 16000 --channels 1 --format s16 "$wav" 9>&- 2>/dev/null &   # 9>&-: don't inherit the lock
     rec=$!
     echo "$rec" > "$PID"; echo "$wav" > "$CUR"
@@ -372,7 +376,6 @@ else
       fi
     ) >/dev/null 2>&1 &
     echo $! > "$TIMER"
-    sleep 0.15; cue device-added
     notify "🎙 $(t 'Listening… (run again to stop)')"
     status_out listening
 fi

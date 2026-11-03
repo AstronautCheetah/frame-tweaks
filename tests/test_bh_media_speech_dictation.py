@@ -474,6 +474,16 @@ class DictateEngine(Home):
         self.assertIn("notify -a Dictation -t 1500 No sound from the microphone Is it muted, or is another "
                       "microphone chosen? Check the volume control, then dictate again.", log)
 
+    def test_the_start_sound_plays_before_the_microphone_opens(self):
+        """With Bluetooth headphones, SteamOS stops their audio while an app records (issue #2896):
+        the start sound, played after pw-record started, waited until the recording stopped."""
+        self.dictate("Hello.", stubs=(("pw-play", f'echo "pw-play $*" >> {self.log}'),
+                                      ("pw-record", f'echo "pw-record $*" >> {self.log}; exec sleep 30')))
+        lines = self.log.read_text().splitlines()
+        start = next(i for i, line in enumerate(lines) if "device-added" in line)
+        record = next(i for i, line in enumerate(lines) if line.startswith("pw-record"))
+        self.assertLess(start, record, lines)
+
     def test_parakeet_when_downloaded(self):
         model = self.home / ".local/share/frame-tweaks/parakeet/model"
         model.mkdir(parents=True)
