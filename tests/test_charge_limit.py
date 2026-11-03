@@ -124,6 +124,32 @@ class ChargeLimit(unittest.TestCase):
         self.assertFalse(self.paused())
         self.assertIn("charging paused at 90% (limit 80%)", out)
 
+    def test_a_stop_right_after_the_pause_still_lifts_it(self):
+        """A stop between the pause and the mark that it's ours (CI's flaky failure): the mark
+        goes down first. The stand-in mkdir stops it the moment it runs after the switch is 1."""
+        stub = self.stubs / "mkdir"
+        stub.parent.mkdir(parents=True, exist_ok=True)
+        once = self.home / "stopped-once"            # (once: the trap's own mkdir mustn't stop it again)
+        stub.write_text(f'#!/bin/bash\nif [ "$(cat {self.switch})" = 1 ] && [ ! -e {once} ]; then touch {once}; kill -TERM $PPID; fi\n'
+                        'PATH=/usr/bin:/bin exec mkdir "$@"\n')
+        stub.chmod(0o755)
+        self.battery(90)
+        p = subprocess.Popen(["bash", str(TWEAK / "charge-limit"), "--run"], env=self.env,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            for _ in range(50):
+                if self.paused() or p.poll() is not None:
+                    break
+                time.sleep(0.1)
+            time.sleep(0.3)
+            if p.poll() is None:
+                p.send_signal(signal.SIGTERM)
+            p.communicate(timeout=10)
+        finally:
+            p.kill()
+            p.communicate()
+        self.assertFalse(self.paused())
+
     def test_paused_before_sleep_near_the_limit(self):
         """Asleep, nothing checks the battery: going to sleep within SLEEP_WITHIN (10%) of the
         limit, or over it, charging pauses (and is ours to lift once awake); lower, it charges on

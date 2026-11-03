@@ -50,9 +50,15 @@ limit() {       # CHARGE_LIMIT from the settings: 50-100 or off; anything else i
 }
 
 set_switch() {  # 1 pauses charging, 0 lets it charge
-    printf '%s\n' "$1" > "$SWITCH" 2>/dev/null || { log "can't write $SWITCH (reinstall the tweak: its udev rule makes it yours)"; return 1; }
+    # The mark that the pause is ours goes down before the pause, and comes off after it's lifted:
+    # a stop (the trap: release) between the two found a pause without its mark, took it for
+    # someone else's, and left charging paused.
     mkdir -p "$RUN"
-    if [ "$1" = 1 ]; then touch "$RUN/paused"; else rm -f "$RUN/paused"; fi
+    [ "$1" = 1 ] && touch "$RUN/paused"
+    printf '%s\n' "$1" > "$SWITCH" 2>/dev/null || {
+        [ "$1" = 1 ] && rm -f "$RUN/paused"
+        log "can't write $SWITCH (reinstall the tweak: its udev rule makes it yours)"; return 1; }
+    [ "$1" = 1 ] || rm -f "$RUN/paused"
 }
 
 release() {     # lift our pause, if it's still ours
