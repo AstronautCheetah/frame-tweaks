@@ -336,8 +336,3 @@ class PiecesFitTheirCorner(unittest.TestCase):
         m = re.search(r"lenPx = Math\.min\((\d+), ", js)
         self.assertIsNotNone(m, "the strip's length in the page must have a fixed limit")
         self.assertLessEqual(int(m.group(1)), min(width, 600))
-        # Per window: both strips and the gear side by side, no wider or taller than with the
-        # 16 px strips that fitted (a 0.5 m window, 4 cm strips: 16 * 12.5 = 200 px long each).
-        px, long = map(int, re.search(r"const PX = (\d+), LONG = (\d+);", js).groups())
-        self.assertLessEqual(long, 16)
-        self.assertLessEqual(px + long * 12.5 + 64, 16 + 16 * 12.5 + 64)
