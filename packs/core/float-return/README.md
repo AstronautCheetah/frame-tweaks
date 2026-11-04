@@ -21,6 +21,7 @@ experimental: >-
   SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown
   in its status) until a Frame Tweaks update catches up.
 icon: {theme: go-previous}
+run: {label: Turn off}
 changes: >-
   One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-return.js`), via
   VR dashboard patching (helper)
@@ -66,6 +67,9 @@ Nothing to press. It acts in two cases:
 It only goes back to a window that is still in the dashboard. If there's none, the dashboard
 behaves as usual. Untick it and it stops in the running dashboard within a few seconds. It
 works well with [Pick up when floating](../float-grab/).
+
+**Turn off** on its row in the Frame Tweaks window stops it without uninstalling it (the
+dashboard stays as SteamVR leaves it) within a few seconds; **Turn on** brings it back.
 
 ## How it works
 One small patch, [`patch.js`](patch.js), injected by [VR dashboard patching](../vr-dashboard/).

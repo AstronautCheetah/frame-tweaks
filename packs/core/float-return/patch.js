@@ -3,6 +3,10 @@
 // leaving an empty space. And when the window it shows is closed (a finished Screen snip, say),
 // it goes back to the one before that instead of falling back to Steam. Injected into SteamVR's dashboard page ("systemui") by vr-dashboard.
 // It only switches the way a click on that window's dashboard button does (switchToFrameInternal).
+// Turned off with its Run button ("enabled": false in its settings, which vr-dashboard hands over
+// as window.__sftPatchConfig['float-return']), it switches nothing and leaves the dashboard's own
+// choice on a close alone, as stock; what it was waiting for is forgotten, so turning it on again
+// doesn't act on a float from before.
 // requires: window.Dashboard | window.Dashboard=
 // requires: Dashboard.switchToFrameInternal() | switchToFrameInternal(
 // requires: Dashboard.autoSwitchOverlayIfNeeded() | autoSwitchOverlayIfNeeded(){
@@ -11,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'float-return', VERSION = 4, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
+  const NAME = 'float-return', VERSION = 5, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -23,7 +27,14 @@
   let pending = null;      // {from: the floated window, at: when}
   let closed = null;       // {gone: the closed window, at: when}
   let returned = 0;
+  const on = () => window.__sftPatchConfig?.[NAME]?.enabled !== false;   // (no setting: on)
   const tick = () => {
+    if (!on()) {
+      last = null;                // (seen afresh when it's on again: no float or close from before)
+      pending = null;
+      closed = null;
+      return;
+    }
     // The shown window was closed (checked first: the dashboard's own fallback, usually Steam,
     // mustn't count as "the window before"). Shortly after, go back to the window before it.
     if (last && last.dock === DASH && !FS.GetFrame(last.id) && !closed) {
@@ -72,7 +83,7 @@
   if (typeof origAuto === 'function') {
     D.autoSwitchOverlayIfNeeded = function (...args) {
       try {
-        if (!DS.activeFrame && last && last.dock === DASH && !FS.GetFrame(last.id)) {
+        if (on() && !DS.activeFrame && last && last.dock === DASH && !FS.GetFrame(last.id)) {
           const prev = [...history].reverse().find((x) => x !== last.id && dockOf(x) === DASH);
           if (prev != null && D.switchToFrameInternal(FS.GetFrame(prev), undefined, 'sft-float-return-closed')) {
             history = history.filter((x) => x !== last.id);

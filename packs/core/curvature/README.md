@@ -23,6 +23,7 @@ experimental: >-
   SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown
   in its status) until a Frame Tweaks update catches up.
 icon: {theme: object-rotate-right}
+run: {label: Turn off}
 changes: >-
   One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/curvature.js`), via VR
   dashboard patching (helper)
@@ -63,6 +64,8 @@ curved.
   toggle when a window is docked).
 - Untick it and it stops in the running dashboard within a few seconds; windows keep the
   curvature they have.
+- **Turn off** on its row in the Frame Tweaks window stops it without uninstalling it (new world
+  windows start flat, as in SteamVR) within a few seconds; **Turn on** brings it back.
 
 ## How it works
 SteamVR's rule for curving windows is fixed in its dashboard code: curved in the dashboard,

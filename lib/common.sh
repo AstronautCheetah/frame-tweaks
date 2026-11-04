@@ -926,9 +926,16 @@ install_dashboard_patch() {    # install_dashboard_patch NAME FILE
 }
 remove_dashboard_patch() {     # remove_dashboard_patch NAME: the watcher stops it in the dashboard
     remove_files "$VR_DASHBOARD/patches/$1.js"
+    # Unticked and ticked again, it's on: a real uninstall forgets a Run button's "turned off"
+    # (dashboard_patch_switch); a reinstall or an update keeps it. (The watcher drops the page's
+    # copy of the settings as it stops the patch: sft-dashboard stop_expr.)
+    [ -n "${FRAME_TWEAKS_REINSTALL:-}" ] || [ ! -f "$DASHBOARD_CONF/$1.json" ] ||
+        dashboard_patch_switch "$1" forget >/dev/null || true
 }
 dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
     [ -f "$VR_DASHBOARD/patches/$1.js" ] || status_missing "$(t 'not installed')"
+    # (turned off with its Run button: on purpose, so ok, and the button's word says how back)
+    [ "$(dashboard_patch_switch "$1")" != off ] || status_ok "$(t 'installed, turned off (Turn on on its row turns it back on)')"
     sysctl_user is-active --quiet steamvr.service || status_ok "$(t 'installed (active while SteamVR runs)')"
     local s
     s=$(timeout 8 "$VR_DASHBOARD/sft-dashboard" status "$1" 2>/dev/null) || true
@@ -937,6 +944,56 @@ dashboard_patch_status() {     # dashboard_patch_status NAME OK-TEXT
         *port*closed*) status_restart "$(t 'waiting for a SteamVR restart (restart SteamVR or reboot once)')" ;;
         *) status_warn "${s:-$(t 'not responding')}" ;;
     esac
+}
+# A patch turned off and on again without uninstalling it (Curved world windows' Run button, say):
+# "enabled": false in its settings file, which sft-dashboard hands to the page with the patch's
+# other settings within 5 s; the patch looks at it before each thing it does, so no SteamVR restart
+# or dashboard reload. Turning on writes "enabled": true rather than removing the key: the watcher
+# only hands over a file that exists, so the page would keep the false it had.
+DASHBOARD_CONF="$HOME/.config/frame-tweaks"     # (sft-dashboard's CONF_DIR)
+dashboard_patch_switch() {     # dashboard_patch_switch NAME [on|off|forget]: set it, then print on or off
+    python3 -c '
+import json, os, sys
+f, want = sys.argv[1], sys.argv[2]
+try:
+    with open(f) as fh:
+        c = json.load(fh)
+except (OSError, ValueError):
+    c = None
+c = c if isinstance(c, dict) else {}
+if want:
+    if want == "forget":
+        c.pop("enabled", None)
+    else:
+        c["enabled"] = want == "on"
+    if c:
+        os.makedirs(os.path.dirname(f), exist_ok=True)
+        tmp = os.path.join(os.path.dirname(f), "." + os.path.basename(f) + ".tmp")
+        with open(tmp, "w") as fh:
+            fh.write(json.dumps(c) + "\n")
+        os.replace(tmp, f)                  # (the watcher never reads half a file)
+    elif os.path.exists(f):
+        os.remove(f)
+print("off" if c.get("enabled") is False else "on")
+' "$DASHBOARD_CONF/$1.json" "${2:-}"
+}
+# dashboard_patch_toggle NAME TITLE ON-TEXT OFF-TEXT: the Run button of such a patch. Said with a
+# notification, as other Run buttons do (a button, no terminal), and on stdout.
+dashboard_patch_toggle() {
+    local now msg rc=0
+    now=$(dashboard_patch_switch "$1") || now=""
+    if [ ! -f "$VR_DASHBOARD/patches/$1.js" ]; then
+        msg=$(t 'Not installed: tick %s and Apply changes first.' "$2"); rc=1
+    elif [ "$now" = off ] && [ "$(dashboard_patch_switch "$1" on)" = on ]; then
+        msg=$3
+    elif [ "$now" = on ] && [ "$(dashboard_patch_switch "$1" off)" = off ]; then
+        msg=$4
+    else
+        msg=$(t 'Could not save the setting in %s.' "$DASHBOARD_CONF/$1.json"); rc=1
+    fi
+    notify-send -a "Frame Tweaks" "$2" "$msg" 2>/dev/null || true
+    echo "$msg"
+    return "$rc"
 }
 
 # release_signed DIR TAG SIGNERS: TAG is SSH-signed by a key in the file SIGNERS. An SSH signature

@@ -83,12 +83,25 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `gui/frame-tweaks-gui.py:915`
   - was: "⟳ Check for updates"
   - now: "↻ Check for updates"
+- Changed in `gui/packs_page.py:74`
+  - was: "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+  - now: "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 - Changed in `gui/prefs_page.py:34`
   - was: "Off: only when you press ⟳ Check for updates."
   - now: "Off: only when you press ↻ Check for updates."
 - Changed in `gui/prefs_page.py:430`
   - was: "Saved. ⟳ Check for updates finds test releases too."
   - now: "Saved. ↻ Check for updates finds test releases too."
+- New in `lib/common.sh:935`
+  - now: "installed, turned off (Turn on on its row turns it back on)"
+- New in `lib/common.sh:983`
+  - now: "Not installed: tick %s and Apply changes first."
+- New in `lib/common.sh:989`
+  - now: "Could not save the setting in %s."
+- New in `packs/bugfixes/pack.md`
+  - now: "Bugfixes"
+- New in `packs/bugfixes/pack.md`
+  - now: "Frame Tweaks' fixes for problems in SteamOS, SteamVR and Steam themselves, until Valve fixes them: each one works around a bug found on a Frame, and checks whether your Frame still has it. A fix your SteamOS no longer needs isn't offered."
 - New in `packs/core/adb-scrcpy/phone-touch.js:205`
   - now: "Delete the last digit"
 - New in `packs/core/adb-scrcpy/phone-touch.js:205`
@@ -103,6 +116,22 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Right arrow"
 - New in `packs/core/arrowpad/arrowpad.py:382`
   - now: "Up arrow"
+- New in `packs/core/curvature/run-label.sh:5`
+  - now: "Turn off"
+- New in `packs/core/curvature/run-label.sh:5`
+  - now: "Turn on"
+- New in `packs/core/curvature/run.sh:7`
+  - now: "Turned on: windows you float into the world start curved."
+- New in `packs/core/curvature/run.sh:8`
+  - now: "Turned off: windows you float into the world start flat, as in SteamVR. Windows curved already stay as they are."
+- New in `packs/core/float-grab/run.sh:7`
+  - now: "Turned on: Float in World picks the window up for placing."
+- New in `packs/core/float-grab/run.sh:8`
+  - now: "Turned off: Float in World only floats the window, as in SteamVR."
+- New in `packs/core/float-return/run.sh:7`
+  - now: "Turned on: after you float a window out, the dashboard goes back to the one before."
+- New in `packs/core/float-return/run.sh:8`
+  - now: "Turned off: the dashboard stays as SteamVR leaves it after you float a window out or close one."
 - New in `packs/core/scroll-strips/patch.js:272`
   - now: "Close the settings"
 - New in `packs/core/scroll-strips/patch.js:272`

@@ -7,6 +7,10 @@
 // own drag (UndockedOverlay.startFloatingWindowMove / endFloatingWindowMove), with the controller
 // that pressed the button (the dashboard's primary device), encoded the way SteamVR's laser
 // mouse events encode it (NumLock = left hand, NumLock + CapsLock = right hand).
+// Turned off with its Run button ("enabled": false in its settings, which vr-dashboard hands over
+// as window.__sftPatchConfig['float-grab']), each window's SetDockLocation wrapper just calls the
+// dashboard's own (Float in World only floats, Return to Dashboard always docks), as stock, and a
+// window held at that moment is put down.
 // requires: the Float in World button | "#FloatInWorld"
 // requires: it sets the dock | docking.SetDockLocation(
 // requires: UndockedOverlay.startFloatingWindowMove | startFloatingWindowMove(e){
@@ -17,7 +21,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'float-grab', VERSION = 4;
+  const NAME = 'float-grab', VERSION = 5;
   const RELEASE_DEG = 2;            // trigger moved this far from where it was: a click ended or began
   const NO_REDOCK_MS = 1500;        // after putting it down, ignore Return to Dashboard this long
   const all = (window.__sftPatches ??= {});
@@ -27,6 +31,7 @@
   if (!FS || !V?.VROverlay?.GetPrimaryDashboardDevice) return 'not patched: dashboard objects missing';
   if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
   const DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
+  const on = () => window.__sftPatchConfig?.[NAME]?.enabled !== false;   // (no setting: on)
 
   // The React component that floats frame f (exists once the window is in the world).
   const mover = (f) => L.walk((fb) => typeof fb.stateNode?.startFloatingWindowMove === 'function' &&
@@ -69,7 +74,7 @@
       if (!s?.state?.xfTransform && ++tries < 25) return;
       clearInterval(wait);
       waiting = null;
-      if (!s || f.docking.dockLocation !== WORLD || f.docking.beingDragged) return;
+      if (!s || !on() || f.docking.dockLocation !== WORLD || f.docking.beingDragged) return;
       const ev = { getModifierState: (k) => k === 'NumLock' || (h === 'right' && k === 'CapsLock'),
                    preventDefault() {}, stopPropagation() {} };
       s.startFloatingWindowMove(ev);
@@ -97,6 +102,7 @@
       if (!d || wrapped.has(d) || typeof d.SetDockLocation !== 'function') continue;
       const orig = d.SetDockLocation, own = Object.prototype.hasOwnProperty.call(d, 'SetDockLocation');
       d.SetDockLocation = function (loc, ...rest) {
+        if (!on()) return orig.call(this, loc, ...rest);
         const from = d.dockLocation, dragging = d.beingDragged;
         if (loc === DASH && from === WORLD &&
             ((active && active.frame === f) || (noRedock.frame === f && Date.now() < noRedock.until))) {
@@ -118,13 +124,18 @@
   };
   wrapAll();
   const timer = setInterval(() => { try { wrapAll(); } catch (e) {} }, 500);
+  const putDown = () => {          // turned off: nothing waits to be picked up, nothing stays held
+    clearInterval(waiting);
+    waiting = null;
+    finish();
+    noRedock = { frame: null, until: 0 };
+  };
   all[NAME] = {
     version: VERSION,
+    configChanged: () => { if (!on()) putDown(); },
     stop: () => {
       clearInterval(timer);
-      clearInterval(waiting);
-      waiting = null;
-      finish();
+      putDown();
       for (const f of FS.frames ?? []) {
         const d = f?.docking, saved = d?.__sftOrigSetDock;
         if (!saved) continue;

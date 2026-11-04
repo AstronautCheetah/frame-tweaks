@@ -10,8 +10,10 @@ Back to the previous window, and any later dashboard tweak.
   sft-dashboard check     is SteamVR's dashboard code still what the patches expect?
 
 A patch's settings, if any, are ~/.config/frame-tweaks/NAME.json, handed to the page as
-window.__sftPatchConfig[NAME]. Patches can ask for actions the page can't do itself through
-bindings this service registers on the page (sftScroll: scrolling; see scroll() below).
+window.__sftPatchConfig[NAME] (with "enabled": false, a patch that has a Run button to turn it off
+and on does nothing: lib/common.sh dashboard_patch_switch). Patches can ask for actions the page
+can't do itself through bindings this service registers on the page (sftScroll: scrolling;
+see scroll() below).
 Frame Tweaks' own VR panels (Arrow Pad, Screen snip's) say where they are in
 $XDG_RUNTIME_DIR/frame-tweaks/panels (lib/vrkit.py DashboardGrab): this hands that to the
 panel-grab patch while Steam's keyboard is open, and tells a panel where its bar left it.
@@ -411,7 +413,10 @@ def missing(path, code):
 
 def stop_expr(name):
     n = json.dumps(name)          # (unregistered even if its stop() throws: ticked again, it's injected anew)
-    return f"try {{ window.__sftPatches?.[{n}]?.stop?.(); }} catch (e) {{}} delete window.__sftPatches?.[{n}]; 'stopped'"
+    # Its settings go too: config_expr hands over only a file that exists, so a setting its uninstall
+    # removed (a Run button's "enabled": false) would otherwise still hold when it's ticked again.
+    return (f"try {{ window.__sftPatches?.[{n}]?.stop?.(); }} catch (e) {{}} delete window.__sftPatches?.[{n}];"
+            f" delete window.__sftPatchConfig?.[{n}]; 'stopped'")
 
 
 def config_expr(name, path):

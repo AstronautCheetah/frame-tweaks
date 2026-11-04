@@ -20,6 +20,7 @@ experimental: >-
   SteamVR starts, it's checked against that code and left off if a piece it needs is gone (shown
   in its status) until a Frame Tweaks update catches up.
 icon: {theme: transform-move}
+run: {label: Turn off}
 changes: >-
   One dashboard patch (`~/.local/share/frame-tweaks/vr-dashboard/patches/float-grab.js`), via VR
   dashboard patching (helper)
@@ -62,6 +63,8 @@ you had grabbed the bar under it: it follows the controller that pressed the but
   window down can't send it back. Press it again afterwards to dock the window.
 - Untick it and it stops in the running dashboard within a few seconds. It works well with
   [Back to the previous window](../float-return/).
+- **Turn off** on its row in the Frame Tweaks window stops it without uninstalling it (Float in
+  World only floats, as in SteamVR) within a few seconds; **Turn on** brings it back.
 
 ## How it works
 One small patch, [`patch.js`](patch.js), injected by [VR dashboard patching](../vr-dashboard/).

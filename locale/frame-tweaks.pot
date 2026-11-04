@@ -882,7 +882,7 @@ msgstr ""
 
 #: gui/packs_page.py
 msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 
 #: gui/packs_page.py
@@ -1764,7 +1764,7 @@ msgstr ""
 msgid "not available any more"
 msgstr ""
 
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/tray-host/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
 
@@ -2336,6 +2336,10 @@ msgid "Active now."
 msgstr ""
 
 #: lib/common.sh
+msgid "Could not save the setting in %s."
+msgstr ""
+
+#: lib/common.sh
 msgid "Couldn't install %s (see above)."
 msgstr ""
 
@@ -2382,6 +2386,10 @@ msgid "Not active yet: %s"
 msgstr ""
 
 #: lib/common.sh
+msgid "Not installed: tick %s and Apply changes first."
+msgstr ""
+
+#: lib/common.sh
 msgid ""
 "PyPI has no build of %s for this Python (%s) and system; installing the newest %s that has one instead. The other tested versions stay."
 msgstr ""
@@ -2416,6 +2424,10 @@ msgstr ""
 
 #: lib/common.sh
 msgid "installed (active while SteamVR runs)"
+msgstr ""
+
+#: lib/common.sh
+msgid "installed, turned off (Turn on on its row turns it back on)"
 msgstr ""
 
 #: lib/common.sh
@@ -2945,6 +2957,88 @@ msgstr ""
 
 #: lib/userpacks.py
 msgid "{ref} isn't a branch or tag name"
+msgstr ""
+
+#: packs/bugfixes/pack.md
+msgid "Bugfixes"
+msgstr ""
+
+#: packs/bugfixes/pack.md
+msgid ""
+"Frame Tweaks' fixes for problems in SteamOS, SteamVR and Steam themselves, until Valve fixes them: each one works around a bug found on a Frame, and checks whether your Frame still has it. A fix your SteamOS no longer needs isn't offered."
+msgstr ""
+
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
+msgstr ""
+
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"Keeps apps with a tray icon, such as VLC, from taking the VR session down"
+msgstr ""
+
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
+msgstr ""
+
+#: packs/bugfixes/tray-host/README.md
+msgid "Tray icon crash fix"
+msgstr ""
+
+#: packs/bugfixes/tray-host/install.sh packs/core/ydotool/install.sh
+msgid "%s didn't start; see: %s"
+msgstr ""
+
+#: packs/bugfixes/tray-host/install.sh
+msgid "It starts with the VR session"
+msgstr ""
+
+#: packs/bugfixes/tray-host/install.sh
+msgid ""
+"SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+msgstr ""
+
+#: packs/bugfixes/tray-host/install.sh
+msgid "Tray icons in the VR session get an answer now"
+msgstr ""
+
+#: packs/bugfixes/tray-host/needed.sh
+msgid ""
+"this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
+msgstr ""
+
+#: packs/bugfixes/tray-host/run.sh packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
+msgid "%s restarted"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "another program answers tray icons in the VR session (%s)"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "installed; starts with the VR session"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "running, but not answering tray icons yet (%s)"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "running: tray icons in the VR session get an answer"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "service failed (%s)"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "service not running (▶ Restart starts it)"
+msgstr ""
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 msgstr ""
 
 #: packs/core/adb-scrcpy/README.md
@@ -4201,10 +4295,6 @@ msgid "Removing its udev rule needs your sudo (admin) password."
 msgstr ""
 
 #: packs/core/curvature/README.md
-msgid "Curved world windows"
-msgstr ""
-
-#: packs/core/curvature/README.md
 msgid ""
 "On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
 msgstr ""
@@ -4221,6 +4311,27 @@ msgstr ""
 
 #: packs/core/curvature/README.md
 msgid "idea from"
+msgstr ""
+
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md
+msgid "Turn off"
+msgstr ""
+
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh
+msgid "Turn on"
+msgstr ""
+
+#: packs/core/curvature/run.sh packs/core/curvature/README.md
+msgid "Curved world windows"
+msgstr ""
+
+#: packs/core/curvature/run.sh
+msgid ""
+"Turned off: windows you float into the world start flat, as in SteamVR. Windows curved already stay as they are."
+msgstr ""
+
+#: packs/core/curvature/run.sh
+msgid "Turned on: windows you float into the world start curved."
 msgstr ""
 
 #: packs/core/curvature/status.sh
@@ -4822,8 +4933,16 @@ msgid ""
 "In SteamVR, floating a window and then placing it takes two steps: press Float in World, then grab the bar under the window. This makes it one."
 msgstr ""
 
-#: packs/core/float-grab/README.md
+#: packs/core/float-grab/run.sh packs/core/float-grab/README.md
 msgid "Pick up when floating"
+msgstr ""
+
+#: packs/core/float-grab/run.sh
+msgid "Turned off: Float in World only floats the window, as in SteamVR."
+msgstr ""
+
+#: packs/core/float-grab/run.sh
+msgid "Turned on: Float in World picks the window up for placing."
 msgstr ""
 
 #: packs/core/float-grab/status.sh
@@ -4841,12 +4960,22 @@ msgid ""
 msgstr ""
 
 #: packs/core/float-return/README.md
+msgid ""
+"SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
+msgstr ""
+
+#: packs/core/float-return/run.sh packs/core/float-return/README.md
 msgid "Back to the previous window"
 msgstr ""
 
-#: packs/core/float-return/README.md
+#: packs/core/float-return/run.sh
 msgid ""
-"SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
+"Turned off: the dashboard stays as SteamVR leaves it after you float a window out or close one."
+msgstr ""
+
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned on: after you float a window out, the dashboard goes back to the one before."
 msgstr ""
 
 #: packs/core/float-return/status.sh
@@ -4890,11 +5019,11 @@ msgid ""
 "To remove it and everything in it, use Homebrew's own uninstaller:"
 msgstr ""
 
-#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Accessibility"
 msgstr ""
 
-#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/integrations/moonlight-xr/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/integrations/moonlight-xr/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md packs/bugfixes/pack.md
 msgid "Convenience"
 msgstr ""
 
@@ -4902,7 +5031,7 @@ msgstr ""
 msgid "Core"
 msgstr ""
 
-#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Developer"
 msgstr ""
 
@@ -4911,19 +5040,19 @@ msgid ""
 "Frame Tweaks' own fixes and app setups for the Steam Frame, and the helpers many of them need: other projects' tools, installed with the tweaks that use them and credited to their makers. Homebrew installs the programs that Dictation, Screen snip and Android Mirror run (whisper.cpp, tesseract, scrcpy); ydotool types for Arrow Pad, Dictation and Scroll strips; Piper speaks for Narrate. Each one is tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep)."
 msgstr ""
 
-#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Hardware"
 msgstr ""
 
-#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/tray-host/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md
 msgid "System"
 msgstr ""
 
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md packs/bugfixes/pack.md
 msgid "VR environment"
 msgstr ""
 
@@ -5707,10 +5836,6 @@ msgstr ""
 msgid "%s failed; see %s"
 msgstr ""
 
-#: packs/core/tools/restart-plasmashell packs/core/tray-host/run.sh packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
-msgid "%s restarted"
-msgstr ""
-
 #: packs/core/tools/restart-plasmashell
 msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
 msgstr ""
@@ -5744,79 +5869,6 @@ msgstr ""
 #: packs/core/tools/taskbar-guard
 msgid ""
 "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need it."
-msgstr ""
-
-#: packs/core/tray-host/README.md
-msgid ""
-"A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
-msgstr ""
-
-#: packs/core/tray-host/README.md
-msgid ""
-"Keeps apps with a tray icon, such as VLC, from taking the VR session down"
-msgstr ""
-
-#: packs/core/tray-host/README.md
-msgid ""
-"On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
-msgstr ""
-
-#: packs/core/tray-host/README.md packs/core/ydotool/README.md packs/integrations/clipboard/README.md
-msgid "Restart"
-msgstr ""
-
-#: packs/core/tray-host/README.md
-msgid "Tray icon crash fix"
-msgstr ""
-
-#: packs/core/tray-host/install.sh packs/core/ydotool/install.sh
-msgid "%s didn't start; see: %s"
-msgstr ""
-
-#: packs/core/tray-host/install.sh
-msgid "It starts with the VR session"
-msgstr ""
-
-#: packs/core/tray-host/install.sh
-msgid ""
-"SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
-msgstr ""
-
-#: packs/core/tray-host/install.sh
-msgid "Tray icons in the VR session get an answer now"
-msgstr ""
-
-#: packs/core/tray-host/needed.sh
-msgid ""
-"this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "another program answers tray icons in the VR session (%s)"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "installed; starts with the VR session"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "running, but not answering tray icons yet (%s)"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "running: tray icons in the VR session get an answer"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "service failed (%s)"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "service not running (▶ Restart starts it)"
-msgstr ""
-
-#: packs/core/tray-host/status.sh
-msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 msgstr ""
 
 #: packs/core/vr-dashboard/README.md
@@ -6522,6 +6574,10 @@ msgstr ""
 #: packs/core/ydotool/README.md
 msgid ""
 "On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one."
+msgstr ""
+
+#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md packs/bugfixes/tray-host/README.md
+msgid "Restart"
 msgstr ""
 
 #: packs/core/ydotool/README.md

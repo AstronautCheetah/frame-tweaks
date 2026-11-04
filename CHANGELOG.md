@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Turn off / Turn on for Curved world windows, Back to the previous window and Pick up when
+  floating:** a button on each one's row stops it in the running SteamVR dashboard within a few
+  seconds, without uninstalling it or restarting SteamVR, and starts it again the same way; its
+  status says when it's turned off. Unticking still removes it.
 - **Moonlight XR for Frame:** a new tweak in Integrations. It installs simplysanatori's native
   game-streaming client, which shows your PC's desktop or games on a screen in a virtual room,
   decoded in the Frame's hardware, streamed from Sunshine on the PC (`ujust
@@ -20,6 +24,11 @@
   trying, opening a new D-Bus connection each time, until the session's bus, and Steam with it,
   went down a few seconds after the app started. A small service now answers such apps in the
   VR session, so they ask once. No icon is shown: the VR session has no tray.
+- **Bugfixes, a new official pack:** Frame Tweaks' fixes for problems in SteamOS, SteamVR and
+  Steam themselves, beside Core's own features, Integrations' app setups and 3rd Party's other
+  people's projects. Tray icon crash fix is its first (from Core); like the others, it's on
+  unless you turn it off on the Packs page. Which packs are official is now listed in one place,
+  `lib/official-packs`, that the installer, the window and the checks read.
 - **Desktop & VR Recovery brings back a broken VR session** (Desktop Recovery before): when the
   headset shows only the room or the backdrop and Steam won't start (SteamOS 0.5.7's beta does
   this as VLC starts), `recover-session`, over SSH or in desktop mode's Konsole, puts the
