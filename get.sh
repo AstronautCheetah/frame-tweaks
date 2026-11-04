@@ -134,6 +134,12 @@ main() {
         # checkout here skipped both.)
         installed_texts "$DIR"
         echo "$(t 'Updating %s (./install.sh update)' "$DIR")"
+        # A copy on a branch (a git clone, as the README once said to make, or a developer's) follows
+        # that branch, and its updates aren't signature-checked: said here, as an older install.sh
+        # doesn't say it. Not switched for them: a developer's checkout is on its branch on purpose.
+        if branch=$(git -C "$DIR" symbolic-ref -q --short HEAD 2>/dev/null); then
+            echo "$(t "%s follows the branch %s, not Frame Tweaks' releases: its updates aren't signature-checked. To follow signed releases instead: %s" "$DIR" "$branch" "cd $DIR && ./install.sh update --to stable")" >&2
+        fi
         # (3: updated, but a tweak didn't install again: no reason to stop, the window, opened
         # below, shows which. Anything else: it couldn't update, so the old version isn't opened.)
         rc=0

@@ -28,7 +28,9 @@
 #                                    move to the newest (or given) release, re-run what's installed
 #                                    (--to stable: the newest stable one, e.g. back from a test release;
 #                                    already there, nothing is re-run unless --reinstall; exit 3:
-#                                    updated, but a tweak didn't install again)
+#                                    updated, but a tweak didn't install again). A checkout on a
+#                                    branch pulls it instead, not signature-checked; --to moves it
+#                                    to signed releases
 #   ./install.sh channel [stable|beta]  which releases updates take: stable, or test releases too
 #   ./install.sh hold|unhold ID...   keep a tweak as it is during updates (or stop doing so)
 #   ./install.sh debug-info          write a redacted report for bug reports
@@ -846,9 +848,13 @@ cmd_update() {
         esac
     done
     if [[ -d .git ]]; then
-        local before; before=$(git rev-parse -q --verify HEAD)
-        if git symbolic-ref -q HEAD >/dev/null; then       # a developer checkout on a branch
+        local before branch; before=$(git rev-parse -q --verify HEAD)
+        # A developer checkout on a branch follows it (git pull), unchecked: say so, every time, and
+        # how to change to releases. Not changed for them (the maintainer's own Frame runs main on
+        # purpose); --to is that choice made: it checks out a signed release as below.
+        if branch=$(git symbolic-ref -q --short HEAD) && [[ -z $want ]]; then
             bold "$(t 'Updating the checkout')"
+            say "$(t "This copy follows the branch %s, not Frame Tweaks' releases: what it pulls isn't signature-checked. To follow signed releases instead: %s" "$branch" "./install.sh update --to stable")"
             if ! git pull --ff-only; then
                 git fetch --quiet origin 2>/dev/null
                 if ! git merge-base --is-ancestor HEAD "@{upstream}" 2>/dev/null; then
@@ -873,6 +879,8 @@ keep: git reset --hard @{upstream}")" >&2
             fi
             git rev-parse -q --verify "refs/tags/$tag" >/dev/null || { echo "$(t 'no release %s' "$tag")" >&2; exit 1; }
             verify_release "$PWD" "$tag" || exit 1
+            # (a checkout on a branch given --to: said once the release it moves to is verified)
+            [[ -z $branch ]] || say "$(t 'Leaving the branch %s for signed releases. To go back: %s' "$branch" "git checkout $branch")"
             [[ $(git rev-parse "refs/tags/$tag^{commit}") == "$before" ]] ||
                 bold "$(t 'Updating to %s (%s channel)' "$tag" "$(release_channel)")"
             # (refs/tags/: the tag just verified, even if a branch has its name. A failed checkout,
@@ -1193,9 +1201,13 @@ stale_tweaks() {
     return 1
 }
 run_migrations() {
-    local id old
+    local id old out ids=("$@")
     drop_sudo                          # (as cmd_install: each script asks for its own)
-    for id in "$@"; do
+    # The ids and their dependencies, in cmd_install's order: it installs those again too and
+    # records this version for them, so a dependency's migrate.sh left out here never ran at all.
+    # (If with_deps fails, cmd_install stops on it right after, and says why.)
+    if out=$(with_deps "$@" 2>/dev/null); then mapfile -t ids <<<"$out"; fi
+    for id in "${ids[@]}"; do
         is_component "$id" || continue           # (unknown ids are refused right after)
         [[ -f ${DIR[$id]}/migrate.sh && -f $STATE/installed/$id ]] || continue
         held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
@@ -1361,7 +1373,7 @@ case ${1:-} in
     check-system) cmd_check_system ;;
     # (nothing stale, as at nearly every login: no lock, so tidy isn't kept from it, and no log,
     # which pushed the logs worth keeping out of the last 5)
-    _heal)       any_venv_stale || exit 0; take_lock; start_log heal; heal_venvs ;;
+    _heal)       any_venv_stale || exit 0; take_lock; start_log heal; heal_venvs --login ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; deps=$(with_deps "$@") || exit 1
                  [[ -z $deps ]] || printf '%s\n' "$deps" | tr "\n" " "; echo ;;
     list)        cmd_list ;;

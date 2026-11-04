@@ -142,7 +142,14 @@ def set_uninstall_settings(value):
 
 def leftover_settings(installed):
     """[(tweak, path)]: the settings that tweaks not installed left behind (kept on uninstall), and
-    are still there. A place an installed tweak also lists stays theirs."""
+    are still there. A place an installed tweak also lists stays theirs. A tweak with an install
+    record counts as installed whatever its status says: one that's broken (status "missing", a
+    SteamOS update took part of it) is what repair and updates install again, settings and all.
+    (installed: the ids the caller found installed by status; ./install.sh and the window.)"""
+    try:
+        installed = set(installed) | {f.name for f in (STATE / "installed").iterdir()}
+    except OSError:
+        installed = set(installed)
     comps = registry.components()
     used = {p for c in comps if c["id"] in installed for p in c["config"]}
     return [(c, p) for c in comps if c["id"] not in installed for p in c["config"]

@@ -655,6 +655,40 @@ class InstallState(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.log(), ["migrate 0.0.1", "install"])
 
+    def test_a_dependency_installed_again_migrates_too(self):
+        """Installing a tweak installs what it depends on again too, and records this version for
+        it: a dependency's migrate.sh had to run then, or it never would."""
+        base = self.pack / "base"
+        base.mkdir()
+        (base / "README.md").write_text(README.replace("title: Probe", "title: Base").replace(
+            "uninstall probe", "uninstall base").replace("config: [~/.config/probe.conf, ~/.config/probe]", "config: []"))
+        for name, body in SCRIPTS.items():
+            (base / name).write_text("#!/bin/bash\n" + body.replace("probe", "base") + "\n")
+        (self.pack / "probe/README.md").write_text(README.replace("processes: []", "processes: []\ndepends: [base]"))
+        self.trust()
+        self.installed_at("0.0.1")
+        (self.state / "installed/base").write_text("0.0.1\n")
+        (self.home / "base-installed").touch()
+        r = self.sh("install", "probe")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual((self.home / "base.log").read_text().split("\n")[:-1], ["migrate 0.0.1", "install"])
+        self.assertEqual(self.log(), ["migrate 0.0.1", "install"])
+        self.assertEqual((self.state / "installed/base").read_text(), VERSION + "\n")
+
+    def test_a_broken_tweak_keeps_its_settings(self):
+        """forget-settings (and uninstall-self's --remove-settings) take only what uninstalled tweaks
+        left: a tweak whose status says missing but which has an install record is broken, not
+        uninstalled (repair and updates install it again), and its settings stay."""
+        self.assertEqual(self.sh("install", "probe").returncode, 0)
+        self.settings_made()
+        (self.home / "probe-installed").unlink()                # (its status: missing)
+        self.assertTrue(self.record.exists())
+        r = self.sh("forget-settings")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("No settings left behind", r.stdout)
+        self.assertTrue((self.home / ".config/probe.conf").exists())
+        self.assertTrue((self.home / ".config/probe/state.json").exists())
+
     def test_a_failed_uninstall_is_reported_and_keeps_the_record(self):
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         (self.pack / "probe/uninstall.sh").write_text('#!/bin/bash\necho uninstall >> "$HOME/probe.log"; exit 1\n')

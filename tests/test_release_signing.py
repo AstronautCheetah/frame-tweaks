@@ -435,6 +435,26 @@ class Update(unittest.TestCase):
         self.assertEqual(self.at(co), self.commit("v0.0.2"))
         self.assertNotEqual(self.git(co, "symbolic-ref", "-q", "HEAD", check=False).returncode, 0)   # (detached)
 
+    def test_a_checkout_on_a_branch_says_its_unchecked_and_to_moves_it_to_releases(self):
+        """A git clone is on a branch: update pulls it, with no signature check. It says so, and how to
+        follow releases; --to stable is that choice made: the newest signed stable release, checked."""
+        co = self.checkout()
+        self.git(co, "checkout", "-q", "-b", "main", self.commit("v0.0.3-rc.1"))   # (as a clone of main is)
+        upstream = self.git(self.src, "symbolic-ref", "--short", "HEAD").stdout.strip()
+        self.git(co, "branch", "-q", f"--set-upstream-to=origin/{upstream}")
+        r = self.update(co)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("This copy follows the branch main, not Frame Tweaks' releases: what it pulls isn't "
+                      "signature-checked. To follow signed releases instead: ./install.sh update --to stable", r.stdout)
+        self.assertNotIn("signature verified", r.stdout)
+        self.assertEqual(self.git(co, "symbolic-ref", "--short", "HEAD").stdout.strip(), "main")   # (not moved unasked)
+        r = self.update(co, "--to", "stable")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("Leaving the branch main for signed releases", r.stdout)
+        self.assertIn("Release v0.0.2: signature verified.", r.stdout)
+        self.assertEqual(self.at(co), self.commit("v0.0.2"))
+        self.assertNotEqual(self.git(co, "symbolic-ref", "-q", "HEAD", check=False).returncode, 0)   # (detached)
+
     def test_a_failed_checkout_stops_before_the_reinstall(self):
         co = self.checkout()
         (co / "README.md").write_text("Local changes, in the way of v0.0.2's\n")

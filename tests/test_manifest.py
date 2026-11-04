@@ -327,15 +327,70 @@ class Packs(unittest.TestCase):
         d = self.tweak("mypack", "hello")
         sft.set_trusted(d.parent, True)
         self.assertIn("hello", self.ids())
-        (d.parent / "__pycache__").mkdir()                # (left out of the hash, as .git is)
-        (d.parent / "__pycache__" / "x.pyc").write_bytes(b"x")
+        (d.parent / ".git").mkdir()                       # (left out of the hash: git's, not the pack's)
+        (d.parent / ".git" / "x").write_bytes(b"x")
         self.assertIn("hello", self.ids())
-        (d.parent / "more").symlink_to(d.parent / "__pycache__")   # (a new link counts, even to a left-out folder)
+        (d.parent / "more").symlink_to(d.parent / ".git")   # (a new link counts, even to a left-out folder)
         self.assertNotIn("hello", self.ids())
         (d.parent / "more").unlink()
         self.assertIn("hello", self.ids())
         os.chmod(d / "status.sh", 0o755)
         self.assertNotIn("hello", self.ids())
+
+    def test_a_pyc_dropped_into_a_trusted_pack_is_a_change(self):
+        """Python runs a .pyc in place of its source: an unchecked-hash one whatever the source
+        says. __pycache__ was left out of the hash, so a pushed one kept the pack trusted and
+        its code ran in place of the helper.py that was trusted."""
+        import importlib.util
+        import py_compile
+        d = self.tweak("mypack", "hello")
+        (d / "helper.py").write_text('X = "trusted"\n')
+        sft.set_trusted(d.parent, True)
+        self.assertIn("hello", self.ids())
+        other = Path(self.tmp.name) / "other.py"
+        other.write_text('X = "not what was trusted"\n')
+        pyc = importlib.util.cache_from_source(str(d / "helper.py"))
+        py_compile.compile(str(other), cfile=pyc, invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+        sys.path.insert(0, str(d))
+        self.addCleanup(sys.path.remove, str(d))
+        sys.modules.pop("helper", None)
+        self.addCleanup(sys.modules.pop, "helper", None)
+        self.assertEqual(__import__("helper").X, "not what was trusted")   # (what would run)
+        self.assertNotIn("hello", self.ids())
+        self.assertEqual(next(p["state"] for p in sft.load()["packs"] if p["dir"] == d.parent.resolve()), "changed")
+
+    def test_an_update_that_changed_files_isnt_trusted_whatever_the_hash(self):
+        """mods update: the newer version waits until it's trusted again (docs/mods.md), even if the
+        hash can't tell (it once left __pycache__ out). An update that changed nothing stays trusted."""
+        import subprocess
+        src = Path(self.tmp.name) / "src"
+        env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        run = lambda *a: subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *a], cwd=src, env=env,  # noqa: E731  (this test's git)
+                                        check=True, capture_output=True)
+        (src / "hello").mkdir(parents=True)
+        (src / "hello/README.md").write_text(TWEAK.format(id="hello", title="Mine", category="Mods", extra=""))
+        for name in ("install.sh", "uninstall.sh", "status.sh"):
+            (src / "hello" / name).write_text("#!/bin/bash\n")
+        run("init", "-q", "-b", "main")
+        run("add", "-A")
+        run("commit", "-qm", "first")
+        with mock.patch.dict(os.environ, env, clear=True):                  # (no GIT_DIR of a hook running this)
+            d = sft.add_pack(f"file://{src}")
+            sft.set_trusted(d, True)
+            state = lambda: next(p["state"] for p in sft.load(refresh=True)["packs"] if p["dir"] == d.resolve())  # noqa: E731
+            self.assertEqual(state(), "trusted")
+            run("commit", "-q", "--allow-empty", "-m", "nothing changed")
+            self.assertEqual(sft.update_pack(d)["files"], [])
+            self.assertEqual(state(), "trusted")
+            (src / "hello/__pycache__").mkdir()
+            (src / "hello/__pycache__/helper.cpython-313.pyc").write_bytes(b"code")
+            run("add", "-f", "-A")
+            run("commit", "-qm", "a pyc")
+            with mock.patch.object(registry, "pack_hash", lambda folder: "same"):   # (a hash that can't tell)
+                sft.set_trusted(d, True)
+                got = sft.update_pack(d)
+                self.assertEqual(got["files"], ["hello/__pycache__/helper.cpython-313.pyc"])
+                self.assertEqual(state(), "changed")
 
     def test_a_broken_pack_md_is_a_problem_not_a_crash(self):
         """Any pack's pack.md is read, trusted or not: empty lists or wrong kinds of values must
@@ -568,7 +623,9 @@ class Packs(unittest.TestCase):
         ~/.var/app/<app> or ~/.local/state/frame-tweaks/, never one of those folders whole, nor a
         way out of them. The settings file counts without being listed."""
         for bad in ("~/.config/", "~/.config", "~/.bashrc", "~/.config/../.ssh", "~/.var/app/", "~/.var/app/a/b",
-                    "~/.local/state/frame-tweaks", "/etc/x", "~/.config/~/x", ".config/x"):
+                    "~/.local/state/frame-tweaks", "/etc/x", "~/.config/~/x", ".config/x",
+                    "~/.config//", "~/.config/.", "~/.config/./", "~/.config/a//b", "~/.config/a/..", "~/.var/app//",
+                    "~/.var/app/./", "~/.local/state/frame-tweaks//"):
             d = self.tweak("mypack", "hello", extra=f"config: [{bad!r}]\n")
             sft.set_trusted(d.parent, True)
             self.assertNotIn("hello", self.ids(), bad)
@@ -579,6 +636,73 @@ class Packs(unittest.TestCase):
         sft.set_trusted(d.parent, True)
         self.assertEqual(self.ids()["hello"]["config"], ["~/.config/hello.json", "~/.var/app/org.example.Hello",
                                                          "~/.local/state/frame-tweaks/hello", "~/.config/frame-tweaks/hello.conf"])
+
+    def test_config_never_names_a_root_or_outside_it(self):
+        """Randomized (fixed seed): whatever config_path_ok accepts is, once resolved, strictly below
+        one of CONFIG_ROOTS (one name below ~/.var/app/), never a root itself nor outside: an
+        uninstall with --remove-settings deletes it whole. It must also accept some."""
+        rnd = random.Random(2611)
+        bits = ["", "/", "//", ".", "..", "./", "../", "a", "b.json", "~", "~/", " ", ".x", "a/", "\n", "\0", "..."]
+        home = "/home/u"
+        roots = [os.path.normpath(home + "/" + r[2:]) for r in registry.CONFIG_ROOTS]
+        starts = list(registry.CONFIG_ROOTS) + [r[:-1] for r in registry.CONFIG_ROOTS] + ["~/", "~", "/", ""]
+        accepted = 0
+        for _ in range(30000):
+            c = rnd.choice(starts) + "".join(rnd.choice(bits) for _ in range(rnd.randrange(5)))
+            if not registry.config_path_ok(c):
+                continue
+            accepted += 1
+            self.assertTrue(c.startswith("~/"), repr(c))
+            where = os.path.normpath(home + "/" + c[2:])
+            below = [r for r in roots if where.startswith(r + "/")]
+            self.assertTrue(below, repr(c))
+            self.assertNotIn(where, roots, repr(c))
+            if below[0].endswith("/.var/app"):
+                self.assertNotIn("/", where[len(below[0]) + 1:], repr(c))
+        self.assertGreater(accepted, 1000)
+
+    def test_a_source_that_isnt_a_mapping_is_a_problem_not_a_crash(self):
+        """source: was read as a mapping (for link.version's GitHub project) before it was checked to
+        be one: `source: [x]` crashed the whole registry, and every ./install.sh command said
+        "No tweaks found"."""
+        d = self.tweak("mypack", "hello", extra="source: [x]\nlink:\n  install: true\n  installed: ~/x\n"
+                       "  version: cat ~/x\n")
+        for f in d.glob("*.sh"):
+            f.unlink()
+        sft.set_trusted(d.parent, True)
+        ids = self.ids()
+        self.assertIn("arrowpad", ids)
+        self.assertNotIn("hello", ids)
+        self.assertTrue(any("hello: source must be a mapping" in p for p in sft.load()["problems"]))
+
+    def test_random_manifests_never_crash_only_rejected(self):
+        """Randomized (fixed seed, 30,000 manifests): any mix of values, of any kind, in the
+        manifest's keys gives a tweak or problems from read_tweak, never an exception (one bad
+        manifest took every tweak down)."""
+        d = self.tweak("mypack", "t-a")
+        keys = list(registry.TEXT) + list(registry.OPTIONAL)
+        rnd = random.Random(1)
+        inner = ["install", "installed", "version", "readme", "url", "label", "file", "format", "options", "tested",
+                 "restart", "run", "relation", "short"]
+
+        def val(depth=0):
+            r = rnd.random()
+            if depth > 1 or r < 0.4:
+                return rnd.choice(["x", "", "~/.config/a", "uninstall", "v1.2.0", "steamvr", 1, True, None, "a b",
+                                   "https://github.com/a/b"])
+            if r < 0.7:
+                return [val(depth + 1) for _ in range(rnd.randint(0, 2))]
+            return {rnd.choice(inner): val(depth + 1) for _ in range(rnd.randint(0, 3))}
+        for _ in range(30000):
+            data = {k: "x" for k in registry.TEXT}
+            for k in rnd.sample(keys, rnd.randint(1, 5)):
+                data[k] = val()
+            with mock.patch.object(manifest, "front_matter", lambda text, data=data: (data, "")):
+                try:
+                    c, problems = registry.read_tweak(d)
+                except Exception as e:                  # noqa: BLE001  (any exception is the failure)
+                    self.fail(f"{type(e).__name__}: {e} for {data!r}")
+            self.assertTrue(c is not None or any(not p.startswith("warning") for p in problems), data)
 
     def test_official_tweaks_settings_places(self):
         ids = self.ids()

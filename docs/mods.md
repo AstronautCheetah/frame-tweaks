@@ -31,6 +31,9 @@ uses most of what's described here.
   `./install.sh mods trust "<pack name>"` (or its folder, if two packs share a name). Trust
   covers the pack's files as they are then (names, contents, links, which ones can run); if any
   change (an update, or something tampering with them), the pack waits until you trust it again.
+  Python's `__pycache__` folders count too (Python runs a `.pyc` in place of its source), so
+  run your pack's Python with `python3 -B` (or `PYTHONDONTWRITEBYTECODE=1`): caches Python
+  writes into the pack as it runs would make it changed. Don't commit `.pyc` files.
 - `./install.sh mods` lists the packs, whether each is in use, and any problems.
   `./install.sh mods untrust "<pack name>"` stops using one; tweaks of it you installed stay
   until you uninstall them, which takes trusting the pack again first (Frame Tweaks only knows

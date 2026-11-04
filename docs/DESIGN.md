@@ -106,10 +106,11 @@ listed in `FRAME_TWEAKS_PACKS`.
   `install.sh` and `dev/`.
 - **Other packs need trusting.** A pack's scripts run as the user, with their files and
   passwords in reach. `./install.sh mods trust PACK` records the pack's folder and a SHA256
-  over its file names and contents (`.git` and `__pycache__` left out) in
+  over its file names and contents (`.git` left out; `__pycache__` counts, as Python runs a `.pyc` in place of its source) in
   `~/.config/frame-tweaks/installer/trusted-packs`. If any file changes, the hash no longer
   matches and the pack is shown as "changed" and not used until it is trusted again. Trust
-  covers content, not a name or a location.
+  covers content, not a name or a location. `mods update` untrusts a pack whose update changed
+  any file, without relying on the hash to see it.
 - **Ids are folder names.** If a trusted pack has a tweak with an id that is already taken,
   it is left out with a problem message, unless its manifest says `replaces: true`. Then it
   takes the earlier tweak's place in the list, and the window says which one it replaced.
@@ -254,7 +255,9 @@ Releases are git tags, `vX.Y.Z`. Pre-releases are `vX.Y.Z-rc.N`.
   tags, pick the newest one for the channel (or the one given with `--to`, to roll back), and
   check it out. Then it re-runs itself as `./install.sh _reinstall`, so the *new* version of the
   script does the rest: migrations, a reinstall of everything installed (holds respected) and
-  `check-system`. In a developer checkout on a branch it uses `git pull --ff-only` instead.
+  `check-system`. In a checkout on a branch it uses `git pull --ff-only` instead, and says
+  that this isn't signature-checked; `--to` moves such a checkout to a signed release. It isn't
+  moved unasked: a developer's checkout is on its branch on purpose.
 - **Nothing to do.** When the checkout didn't move, the second stage is skipped, unless a tweak
   it reinstalls (not held, not linked, still installed) was last installed by another version
   (`$STATE/installed/<id>`, written only when its installer succeeds): an update whose second

@@ -67,10 +67,14 @@ small user service that keeps it in your keyboard's language) and the window's P
 <details><summary>Prefer to read the script first?</summary>
 
 ```sh
-git clone https://github.com/AstronautCheetah/frame-tweaks ~/frame-tweaks
-less ~/frame-tweaks/get.sh        # short: finds the newest release, checks it out, opens the installer
-~/frame-tweaks/get.sh
+curl -fsSLo get.sh https://raw.githubusercontent.com/AstronautCheetah/frame-tweaks/main/get.sh
+less get.sh        # short: finds the newest release, checks its signature, checks it out, opens the installer
+bash get.sh
 ```
+
+Don't `git clone` the repository for this: a clone is on the `main` branch, and a copy on a
+branch follows it, without the signature check releases get ([SECURITY.md](SECURITY.md)).
+`./install.sh update --to stable` moves such a copy to the newest signed release.
 </details>
 
 **What it touches.** Frame Tweaks installs into your home folder (`~/.local`, `~/.config` and

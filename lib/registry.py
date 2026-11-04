@@ -149,11 +149,15 @@ def pack_hash(d):
     """sha256 over a pack's files (names, contents, whether they can be run) and its links
     (where they point): trust is for this content only. Each goes in as a kind, its name, a NUL,
     then a fixed-size digest or a link's target and a NUL, so two different packs can't give the
-    same input. (Folders behind links aren't followed, but adding or changing a link counts.)"""
+    same input. (Folders behind links aren't followed, but adding or changing a link counts.)
+    __pycache__ counts too: Python runs a .pyc in place of its source (an unchecked-hash one
+    whatever the source says), so one pushed or dropped there is a change of code. Python
+    writing its own caches in a pack makes it "changed" as well, so packs run their Python with
+    -B (docs/mods.md). Only .git is left out: git's own files, not the pack's."""
     h = hashlib.sha256()
     for root, dirs, files in os.walk(d):
-        dirs[:] = sorted(x for x in dirs if x not in (".git", "__pycache__"))
-        for name in sorted(dirs + [f for f in files if f not in (".git", "__pycache__")]):
+        dirs[:] = sorted(x for x in dirs if x != ".git")
+        for name in sorted(dirs + [f for f in files if f != ".git"]):
             p = os.path.join(root, name)
             rel = os.fsencode(os.path.relpath(p, d))
             if os.path.islink(p):
@@ -184,8 +188,13 @@ def trusted_packs():
 
 
 def set_trusted(d, trust):
+    """Trust a pack's files as they are now (True), or stop (False); "changed": trusted before, but
+    not what's there now, whatever the hash says (lib/userpacks.py update_pack). Kept as a digest
+    no hash can match, so the pack shows as changed since you trusted it, not as never trusted."""
     t = trusted_packs()
-    if trust:
+    if trust == "changed":
+        t[str(Path(d).resolve())] = "changed"
+    elif trust:
         t[str(Path(d).resolve())] = pack_hash(d)
     else:
         t.pop(str(Path(d).resolve()), None)
@@ -212,13 +221,20 @@ def set_official(d, on):
 
 
 def config_path_ok(c):
-    """A config: entry: a path below one of CONFIG_ROOTS, one level down at least (never a whole
-    ~/.config), without .. or a ~ inside."""
-    if not (isinstance(c, str) and "\n" not in c and "~" not in c[1:]):
+    """A config: entry: a path below one of CONFIG_ROOTS, one real name down at least (never a
+    whole ~/.config), without an empty, . or .. part or a ~ inside. Taken apart by hand, not with
+    Path: Path("//").parts is ("/",), which counted as a name below the root, so `~/.config//`
+    passed, and an uninstall with --remove-settings (or forget-settings) deleted all of ~/.config.
+    One trailing / is fine (a folder)."""
+    if not (isinstance(c, str) and "\n" not in c and "\0" not in c and "~" not in c[1:]):
         return False
     root = next((r for r in CONFIG_ROOTS if c.startswith(r)), None)
-    rest = Path(c[len(root):]).parts if root else ()
-    return bool(rest) and ".." not in rest and (root != "~/.var/app/" or len(rest) == 1)
+    if root is None:
+        return False
+    rest = c[len(root):]
+    parts = (rest[:-1] if rest.endswith("/") else rest).split("/")
+    return (all(x not in ("", ".", "..") for x in parts)
+            and (root != "~/.var/app/" or len(parts) == 1))
 
 
 SHELL_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")       # (a shell settings file's keys: variable names)
@@ -229,7 +245,7 @@ def check_settings(st, cid, where):
     if not isinstance(st, dict):
         return [f"{where}: settings must be a mapping"]
     f = st.get("file")
-    if not (isinstance(f, str) and f.startswith("~/.config/") and len(Path(f).parts) > 2 and ".." not in Path(f).parts):
+    if not (isinstance(f, str) and f.startswith("~/.config/") and config_path_ok(f)):
         errs.append(f"{where}: settings.file must be a file under ~/.config/")
     if st.get("format") not in ("json", "shell"):
         errs.append(f"{where}: settings.format must be json or shell")
@@ -309,7 +325,9 @@ def read_tweak(d):
     link = data.get("link")
     if link is not None:
         errs += check_link(link, where)
-        if isinstance(link, dict) and "version" in link and not github_repo((data.get("source") or {}).get("url"), link.get("readme")):
+        # (source: may be anything here: it's checked below, after this)
+        src = data.get("source") if isinstance(data.get("source"), dict) else {}
+        if isinstance(link, dict) and "version" in link and not github_repo(src.get("url"), link.get("readme")):
             errs.append(f"{where}: link.version: its newest release is looked up on GitHub: name the "
                         "project's GitHub address in source.url or link.readme")
         warn += [f"warning: {where}: link: unknown key {k!r} (ignored)" for k in (link if isinstance(link, dict) else {})

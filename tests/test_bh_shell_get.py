@@ -167,6 +167,24 @@ class GetSh(unittest.TestCase):
         self.assertIn("Updating", r.stdout)
         self.assertEqual(self.ran(), ["install.sh update", "install.sh menu", "install.sh "])
 
+    def test_a_copy_on_a_branch_is_told_its_updates_arent_checked(self):
+        """A git clone (as the README once said to make) is on a branch, and ./install.sh update
+        follows it unsigned: get.sh says so, and how to follow signed releases, without switching it."""
+        self.release("v0.9.0")
+        self.git(self.tmp, "clone", "-q", str(self.src), str(self.dest))
+        branch = self.git(self.dest, "symbolic-ref", "--short", "HEAD")
+        r = self.get()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn(f"follows the branch {branch}, not Frame Tweaks' releases: its updates aren't signature-checked", r.stderr)
+        self.assertIn("./install.sh update --to stable", r.stderr)
+        self.assertEqual(self.ran(), ["install.sh update", "install.sh menu", "install.sh "])
+        self.assertEqual(self.git(self.dest, "symbolic-ref", "--short", "HEAD"), branch)
+        self.log.unlink()
+        shutil.rmtree(self.dest)
+        self.assertEqual(self.get().returncode, 0)                 # (a release: detached, nothing said)
+        r = self.get()
+        self.assertNotIn("follows the branch", r.stderr)
+
     def test_no_release_says_so(self):
         self.release("v0.11.0-rc.1")                      # (a pre-release only: none for stable)
         r = self.get()

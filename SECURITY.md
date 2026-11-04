@@ -99,7 +99,7 @@ protected. Avoid changing it while a second wallet service is running (see
 ([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
 `~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
 and trust covers its files as they were then (their names, contents, links and which ones can
-run): if any change, it's ignored again until you trust it again. Tweaks from them are marked 🧩 with the pack's name, and one can take an
+run, Python's `__pycache__` included): if any change, it's ignored again until you trust it again. Tweaks from them are marked 🧩 with the pack's name, and one can take an
 official tweak's place only by declaring `replaces: true` (the window says so). Frame Tweaks
 doesn't review or sandbox other people's packs.
 
@@ -144,8 +144,10 @@ doesn't review or sandbox other people's packs.
   checks only that one, and never trusts the old key again.
   The first install (`get.sh`) checks the release it installs against the key it carries;
   running `get.sh` again on an existing copy is an update (`./install.sh update`), with the same
-  check. `FRAME_TWEAKS_ALLOW_UNSIGNED=1`
-  skips the check, for an emergency.
+  check. A copy on a branch (a `git clone` of the repository is on `main`) follows that branch
+  instead, and its updates aren't checked: `get.sh` and `./install.sh update` say so, and
+  `./install.sh update --to stable` moves it to the newest signed release.
+  `FRAME_TWEAKS_ALLOW_UNSIGNED=1` skips the check, for an emergency.
 
 ## What release signing protects against
 

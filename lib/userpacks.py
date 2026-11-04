@@ -129,10 +129,17 @@ def update_pack(d):
     old = git("rev-parse", "HEAD", cwd=d).strip()
     git("pull", "--ff-only", "--quiet", cwd=d)
     new = git("rev-parse", "HEAD", cwd=d).strip()
+    files = [plain(x) for x in git("diff", "--name-only", old, new, cwd=d).splitlines()] if old != new else []
+    # Any file the update changed: trusted no more, whatever the hash says (docs/mods.md: an
+    # update waits until you trust it again). The hash is what's checked while nothing moves; it
+    # once left __pycache__ out, so a pushed .pyc kept the pack trusted and its code ran. Marking it
+    # changed here doesn't depend on the hash seeing every kind of file git can bring.
+    if files:
+        registry.set_trusted(d, "changed")
     registry.load(refresh=True)
-    if old == new:
+    if not files:
         return {"files": [], "log": []}
-    return {"files": [plain(x) for x in git("diff", "--name-only", old, new, cwd=d).splitlines()],
+    return {"files": files,
             "log": [plain(x) for x in git("log", "--format=%s", f"{old}..{new}", cwd=d).splitlines()[:20]]}
 
 
