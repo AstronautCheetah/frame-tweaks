@@ -1,4 +1,4 @@
-"""Tray icon crash fix (packs/core/tray-host): the tray watcher's bookkeeping (which item an app
+"""Tray icon crash fix (packs/bugfixes/tray-host): the tray watcher's bookkeeping (which item an app
 registers, the list dropping apps that left), its status line, and, where this machine has
 dbus-daemon and a system Python with PyGObject, the program itself on a private bus: registering,
 the list, an app leaving, a name changing hands, a bad argument, and another program taking the
@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import ROOT, load_script, sandbox_env, stub  # noqa: E402
 
-TWEAK = ROOT / "packs/core/tray-host"
+TWEAK = ROOT / "packs/bugfixes/tray-host"
 SCRIPT = TWEAK / "frame-tweaks-tray-host"
 host = load_script(SCRIPT)          # (gi is imported only by main(): this needs none)
 

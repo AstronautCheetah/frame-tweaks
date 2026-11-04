@@ -167,10 +167,11 @@ class Packs(unittest.TestCase):
         self.assertIn("scroll-strips", self.ids())
 
     def test_two_official_packs_on_until_turned_off(self):
-        """Core, Integrations and 3rd Party: in use without trusting; each can be turned off."""
+        """Core, Integrations, 3rd Party and Bugfixes: in use without trusting; each can be turned off."""
         packs = {p["name"]: p for p in sft.load(refresh=True)["packs"]}
-        self.assertEqual([packs[n]["state"] for n in ("Core", "Integrations", "3rd Party")], ["official"] * 3)
-        self.assertEqual(self.ids()["signal"]["pack"], "Integrations")
+        self.assertEqual([packs[n]["state"] for n in ("Core", "Integrations", "3rd Party", "Bugfixes")], ["official"] * 4)
+        self.assertEqual([p["name"] for p in sft.load()["packs"]][:4], ["Core", "Integrations", "3rd Party", "Bugfixes"])
+        self.assertEqual((self.ids()["signal"]["pack"], self.ids()["tray-host"]["pack"]), ("Integrations", "Bugfixes"))
         self.assertEqual((self.ids()["arrowpad"]["pack"], self.ids()["recline"]["pack"]), ("Core", "3rd Party"))
         self.assertTrue(self.ids()["recline"]["official"])
         sft.set_official(sft.THIRD_PARTY, False)

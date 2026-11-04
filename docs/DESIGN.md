@@ -91,14 +91,19 @@ reader, to PyYAML and to a person:
 
 Every tweak comes from a pack: a folder of tweak folders with an optional `pack.md`.
 `lib/registry.py` `pack_dirs` looks in three places, in this order: the official packs
-(`packs/core/`, `packs/integrations/`, then `packs/third-party/`; other folders in `packs/` are local packs that
+(`lib/official-packs` lists them, in order: `packs/core/`, `packs/integrations/`,
+`packs/third-party/`, then `packs/bugfixes/`; other folders in `packs/` are local packs that
 need trusting), the folders in `~/.local/share/frame-tweaks/packs/`, and the folders
 listed in `FRAME_TWEAKS_PACKS`.
 
 - **The official packs load like any other.** They go through the same `read_pack` and
   `read_tweak` checks. The only differences: they don't need trusting, and they're on unless
   turned off (`./install.sh mods off NAME`, kept in `~/.config/frame-tweaks/installer/off-packs`).
-  Core's `pack.md` sets the category order; 3rd Party lists the same categories.
+  Core's `pack.md` sets the category order; the others list the same categories. A tweak can
+  move from one official pack to another (Tray icon crash fix, from Core to Bugfixes): what's
+  recorded of an installed tweak is by its id, not its pack's folder, so it needs no migration.
+  `lib/official-packs` is the one list of them, for `lib/registry.py`, `lib/common.sh`,
+  `install.sh` and `dev/`.
 - **Other packs need trusting.** A pack's scripts run as the user, with their files and
   passwords in reach. `./install.sh mods trust PACK` records the pack's folder and a SHA256
   over its file names and contents (`.git` and `__pycache__` left out) in

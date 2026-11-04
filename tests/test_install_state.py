@@ -111,7 +111,7 @@ class InstallState(unittest.TestCase):
         scripts (install all, debug-info's status), and make sure the probe is all that's left."""
         off = self.home / ".config/frame-tweaks/installer/off-packs"
         off.parent.mkdir(parents=True, exist_ok=True)
-        off.write_text("integrations\noriginal\nthird-party\n")
+        off.write_text("integrations\noriginal\nthird-party\nbugfixes\n")
         r = self.sh("_deps", "all")
         self.assertEqual(r.stdout.split(), ["probe"], r.stdout + r.stderr)
 
@@ -1230,7 +1230,7 @@ class UpdateWithoutGit(unittest.TestCase):
         """With no git, changes of yours in it can't be told from Frame Tweaks' own: it was
         deleted, edits included (only your own packs in packs/ kept it)."""
         for pack in (self.root / "packs").iterdir():      # (a maintainer's own packs: they keep it already)
-            if pack.is_dir() and pack.name not in ("core", "integrations", "third-party"):
+            if pack.is_dir() and pack.name not in [line for line in (self.root / "lib/official-packs").read_text().splitlines() if line[:1] != "#"]:
                 shutil.rmtree(pack)
         (self.root / "my-notes.txt").write_text("mine\n")
         r = self.sh("uninstall-self", "--keep-settings", FRAME_TWEAKS_KEEP_CHECKOUT="")

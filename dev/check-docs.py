@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-ids = [d.name for pack in ("core", "integrations", "third-party") for d in (root / "packs" / pack).iterdir() if (d / "README.md").is_file()]
+# (the official packs' folders: lib/official-packs, read as lib/registry.py reads it)
+OFFICIAL = [m[0] for line in (root / "lib/official-packs").read_text().splitlines() if (m := re.match(r"[a-z0-9-]+", line))]
+ids = [d.name for pack in OFFICIAL for d in (root / "packs" / pack).iterdir() if (d / "README.md").is_file()]
 
 
 def read(path):
@@ -19,7 +21,7 @@ def anchor(heading):
     return re.sub(r"[^\w\- ]", "", heading.lower()).replace(" ", "-")
 
 
-TWEAK = r"(?:\.\./)?packs/(?:core|integrations|third-party)/([a-z0-9-]+)/\)"
+TWEAK = r"(?:\.\./)?packs/(?:" + "|".join(map(re.escape, OFFICIAL)) + r")/([a-z0-9-]+)/\)"
 tables = read("docs/tweaks.md")
 overview = re.search(r"<!-- generated:overview .*?<!-- /generated:overview -->", read("README.md"), re.S)
 found = {"docs/tweaks.md": set(re.findall(r"^\|[^|]*\| \[\*\*[^]]+\*\*\]\(" + TWEAK, tables, re.M)),
@@ -33,7 +35,7 @@ for md in root.rglob("*.md"):
     parts = md.relative_to(root).parts
     if {".git", "tmp", "references"} & set(parts):
         continue
-    if parts[0] == "packs" and len(parts) > 2 and parts[1] not in ("core", "integrations", "third-party"):
+    if parts[0] == "packs" and len(parts) > 2 and parts[1] not in OFFICIAL:
         continue                    # (a local pack, not published: packs/attic, say)
     text = re.sub(r"```.*?```", "", md.read_text(), flags=re.S)
     text = re.sub(r"`[^`\n]*`", "", text)                # code isn't a link

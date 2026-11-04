@@ -19,7 +19,8 @@ flowchart LR
 1. **Packs and tweaks.** A tweak is a folder: a `README.md` whose YAML front matter is its
    manifest (title, what it changes, dependencies, settings), plus `install.sh`,
    `uninstall.sh` and `status.sh`. A pack is a folder of tweaks. The official packs are
-   `packs/core`, `packs/integrations` and `packs/third-party`; users can add their own.
+   `packs/core`, `packs/integrations`, `packs/third-party` and `packs/bugfixes`
+   (`lib/official-packs`); users can add their own.
 2. **The registry.** `lib/sft.py` reads every trusted pack's manifests (`lib/manifest.py`) and is
    the one place both front ends ask: which tweaks exist, what they need, which are hidden or
    not needed on this Frame.

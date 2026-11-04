@@ -18,7 +18,6 @@ order:
   - firefox
   - homebrew
   - tools
-  - tray-host
   - ydotool
   - speech
   - charge-limit
@@ -34,7 +33,7 @@ SteamOS updates keep).
 
 How it's loaded: like any other pack (see [docs/mods.md](../../docs/mods.md)), one folder per
 tweak, each described by the front matter of its README.md. Frame Tweaks' other official packs,
-[Integrations](../integrations/pack.md) and [3rd Party](../third-party/pack.md), use the same
-categories. This file sets the order of the
-categories (for all three) and of this pack's tweaks in the installer window, the README and
+[Integrations](../integrations/pack.md), [3rd Party](../third-party/pack.md) and
+[Bugfixes](../bugfixes/pack.md), use the same categories. This file sets the order of the
+categories (for all four) and of this pack's tweaks in the installer window, the README and
 `./install.sh list`.

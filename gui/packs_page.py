@@ -73,12 +73,15 @@ class Packs(QWidget):
         lay.addLayout(head)
         about = QLabel(_(
             "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its "
-            "README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd "
-            "Party, all in use unless you turn one off. To add more, add one from its link below, or put "
+            "README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless "
+            "you turn one off. To add more, add one from its link below, or put "
             "a pack's folder in <code>{folder}</code>; then trust it. "
             "<b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs "
             "from people you trust, and read what they do first. If a pack's files change, it waits "
-            "until you trust it again. How to write one: docs/mods.md.").format(folder=html.escape(str(sft.USER_PACKS))))
+            "until you trust it again. How to write one: docs/mods.md.").format(
+                folder=html.escape(str(sft.USER_PACKS)),
+                # (named from lib/official-packs, so a new official pack needs no new text here)
+                official=html.escape(", ".join(_(sft.read_pack(d)[0]["name"]) for d in sft.OFFICIAL_PACKS if d.is_dir()))))
         about.setWordWrap(True)
         about.setTextFormat(Qt.TextFormat.RichText)
         lay.addWidget(about)

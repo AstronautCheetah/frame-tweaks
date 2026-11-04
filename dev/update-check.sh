@@ -171,13 +171,17 @@ record() {
     row="$(date -u +%F)\t$(get VERSION_ID)\t$(get BUILD_ID)\t$(get STEAMVR)\t$(get CHANNEL)\t$(get RELEASE)"
     # (the status text only where something needs looking at: a working tweak's text can say
     # personal things, a VPN's location say, and the records are public once committed)
-    local id
+    local id pack official found
+    # (only the official packs' tweaks, lib/official-packs': a local pack's, on trial on this
+    # Frame, isn't published, and the records are public)
+    official=$(sed -n 's/^\([a-z0-9-][a-z0-9-]*\).*/\1/p' "$REPO/lib/official-packs")
     while IFS= read -r line; do
-        # (only the official packs' tweaks: a local pack's, on trial on this Frame, isn't
-        # published, and the records are public)
         id=$(cut -f2 <<<"$line")
-        [ -f "$REPO/packs/core/$id/README.md" ] || [ -f "$REPO/packs/integrations/$id/README.md" ] ||
-            [ -f "$REPO/packs/third-party/$id/README.md" ] || continue
+        found=
+        for pack in $official; do
+            [ -f "$REPO/packs/$pack/$id/README.md" ] && found=1
+        done
+        [ -n "$found" ] || continue
         case $line in "✔"$'\t'*|"·"$'\t'*) line=${line%$'\t'*}$'\t' ;; esac
         printf '%b\t%s\n' "$row" "${line//$'\r'/}" >> "$REPO/docs/compat/records.tsv"
         n=$((n + 1))

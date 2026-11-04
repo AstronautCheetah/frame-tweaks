@@ -1,7 +1,7 @@
 # Tray icon flood: research and decisions
 
 For maintainers and reviewers; not shown in the app. Why launching VLC in the VR session took the
-whole session down on SteamOS 0.5.7's beta, and why [Tray icon crash fix](../../packs/core/tray-host/)
+whole session down on SteamOS 0.5.7's beta, and why [Tray icon crash fix](../../packs/bugfixes/tray-host/)
 is the general answer. Measured on 4 November 2026 on one Frame (SteamOS 0.5.7 beta, Flatpak
 `org.videolan.VLC` 3.0.24 on runtime `org.kde.Platform` 5.15-25.08).
 

@@ -139,7 +139,7 @@ it's there on a Steam Frame.
 - **[Accessibility](docs/tweaks.md#accessibility):** ⌨️ [Dictation](packs/core/dictation/) *(sudo)*, ⌨️ [Arrow Pad](packs/core/arrowpad/), ✂️ [Screen snip + Narrate](packs/core/snip/) *(sudo)*
 - **[Convenience](docs/tweaks.md#convenience):** 📱 [Android Mirror](packs/core/adb-scrcpy/) 🧪 *(sudo)*, 📋 [Shared clipboard](packs/integrations/clipboard/), 🌙 [Moonlight XR for Frame](packs/integrations/moonlight-xr/) 🧪, ⌨️ [Full Keyboard (VR)](packs/third-party/full-keyboard/) 🔗, 🖱️ [Mouse cursor fix](packs/third-party/cursor/)
 - **[VR environment](docs/tweaks.md#vr-environment):** 🧩 [VR dashboard patching (helper)](packs/core/vr-dashboard/) 🧪, 🌀 [Curved world windows](packs/core/curvature/) 🧪, ↩️ [Back to the previous window](packs/core/float-return/) 🧪, ✋ [Pick up when floating](packs/core/float-grab/) 🧪, 📜 [Scroll strips](packs/core/scroll-strips/) 🧪, 🛋️ [Recline](packs/third-party/recline/) 🧪 🔗, ✊ [KnockThru](packs/third-party/knockthru/) 🧪 🔗, 📷 [Passthrough PiP](packs/third-party/frame-passthrough-pip/) 🧪 🔗
-- **[System](docs/tweaks.md#system):** 🍺 [Homebrew](packs/core/homebrew/) *(helper)* *(sudo)*, 🛠️ [Desktop & VR Recovery](packs/core/tools/), 🛟 [Tray icon crash fix](packs/core/tray-host/), ⌨️ [ydotool (helper)](packs/core/ydotool/), 🗣️ [Speech engine (helper)](packs/core/speech/), 🛡️ [VR memory guard](packs/core/vr-memory-guard/), 📈 [Performance Overlay](packs/third-party/perf-overlay/) 🔗, 🖼️ [Menu icons](packs/third-party/menu-icons/)
+- **[System](docs/tweaks.md#system):** 🍺 [Homebrew](packs/core/homebrew/) *(helper)* *(sudo)*, 🛠️ [Desktop & VR Recovery](packs/core/tools/), ⌨️ [ydotool (helper)](packs/core/ydotool/), 🗣️ [Speech engine (helper)](packs/core/speech/), 🛡️ [VR memory guard](packs/core/vr-memory-guard/), 📈 [Performance Overlay](packs/third-party/perf-overlay/) 🔗, 🖼️ [Menu icons](packs/third-party/menu-icons/), 🛟 [Tray icon crash fix](packs/bugfixes/tray-host/)
 - **[Hardware](docs/tweaks.md#hardware):** 🔋 [Battery charge limit](packs/core/charge-limit/) 🧪 *(sudo)*
 - **[Privacy & security](docs/tweaks.md#privacy--security):** 🔐 [Shared KDE wallet](packs/core/wallet/), 🕵️ [Firefox privacy](packs/core/firefox/), 🔐 [Signal: key in the wallet](packs/integrations/signal/), 🌐 [NordVPN (WireGuard)](packs/integrations/nordvpn/)
 - **[Developer](docs/tweaks.md#developer):** 🤖 [Claude Desktop](packs/integrations/claude-desktop/)
@@ -251,13 +251,14 @@ Only one install, update or removal can run at a time, from the window or the te
 ### Adding your own tweaks
 
 Every tweak comes from a *pack*: a folder of tweak folders, each described by the YAML front
-matter of its README.md. Frame Tweaks' own tweaks are in three official packs, all on unless
+matter of its README.md. Frame Tweaks' own tweaks are in four official packs, all on unless
 you turn one off: **Core**, Frame Tweaks' own tweaks for the Frame and the helpers many of them
 need, such as Homebrew and ydotool ([`packs/core/`](packs/core/)); **Integrations**, other
 projects' apps that Frame Tweaks fits to the Frame ([`packs/integrations/`](packs/integrations/));
-and **3rd Party**, other people's projects and fixes for the Frame, most of them linked
-([`packs/third-party/`](packs/third-party/)). To try someone's pack, add it from
-its link (**🧩 Packs → Add a pack from a link**), or put its folder in
+**3rd Party**, other people's projects and fixes for the Frame, most of them linked
+([`packs/third-party/`](packs/third-party/)); and **Bugfixes**, Frame Tweaks' fixes for
+problems in SteamOS, SteamVR and Steam themselves ([`packs/bugfixes/`](packs/bugfixes/)). To
+try someone's pack, add it from its link (**🧩 Packs → Add a pack from a link**), or put its folder in
 `~/.local/share/frame-tweaks/packs/`; then trust it. A pack's tweaks run as you, so only trust
 packs from people you trust. Packs others share: [Community packs](docs/community-packs.md).
 How to write one, and share it: [docs/mods.md](docs/mods.md).

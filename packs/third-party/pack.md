@@ -16,6 +16,6 @@ linked (🔗): Frame Tweaks runs their own installer, as their README gives it, 
 folder, and they update their own way (↻ on their row). Fixes others found, such as the mouse
 cursor's and the menu icons', Frame Tweaks applies itself.
 
-How it's loaded: like [Core](../core/pack.md) and
-[Integrations](../integrations/pack.md), Frame Tweaks' other official packs, with the same
+How it's loaded: like [Core](../core/pack.md), [Integrations](../integrations/pack.md)
+and [Bugfixes](../bugfixes/pack.md), Frame Tweaks' other official packs, with the same
 categories; it's on unless you turn it off on the Packs page.

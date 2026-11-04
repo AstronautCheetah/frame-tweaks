@@ -73,7 +73,8 @@ check_manifests() {
     local pack pin
     # Every tweak's manifest (README.md front matter) is valid and names its scripts, the
     # example's too (dev/test-tweaks.sh would leave a broken one out, unseen).
-    for pack in packs/core packs/integrations packs/third-party examples/hello-pack; do
+    # (the official packs: lib/official-packs' lines that name a folder)
+    for pack in $(sed -n 's|^\([a-z0-9-][a-z0-9-]*\).*|packs/\1|p' lib/official-packs) examples/hello-pack; do
         python3 lib/sft.py mods check "$pack" >/dev/null || { python3 lib/sft.py mods check "$pack"; return 1; }
     done
     ./install.sh list >/dev/null && ./install.sh _deps all >/dev/null || return 1

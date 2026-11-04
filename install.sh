@@ -81,9 +81,12 @@ WINDOW_LOG="$LOGS/window.log"   # setting up and opening the full window (./inst
 migrate_legacy_dirs
 # The tweaks moved into packs/official/ (0.6): an update leaves their old folders behind
 # holding only Python's __pycache__ (git doesn't track it).
-# The same for packs/official, which became packs/core, packs/integrations and packs/third-party (after 0.6.0).
+# The same for packs/official, which became packs/core, packs/integrations and packs/third-party (after 0.6.0),
+# and for a tweak moved from one official pack to another (tray-host, from Core to Bugfixes, after 0.7.1).
 shopt -s nullglob
-for d in */__pycache__ packs/official/*/__pycache__; do
+cached=(*/__pycache__ packs/official/*/__pycache__)
+while IFS= read -r pack; do cached+=("packs/$pack"/*/__pycache__); done < <(official_packs)
+for d in "${cached[@]}"; do
     d=${d%/__pycache__}
     others=("$d"/* "$d"/.[!.]*)
     [[ -d $d && ${#others[@]} -eq 1 ]] && rm -rf -- "$d"     # (nothing but __pycache__)
@@ -693,7 +696,8 @@ remove_checkout() {
         elif [[ $(git worktree list 2>/dev/null | wc -l) -gt 1 || -n $(git stash list 2>/dev/null | head -1) ]]; then
             why=$(t 'it has other worktrees or stashed changes')
         fi
-    elif [[ -n $(find packs -mindepth 1 -maxdepth 1 -type d ! -name core ! -name original ! -name integrations ! -name third-party -print -quit) ]]; then
+    # (packs/original: Core's folder before 0.6.6, which an update can leave holding only caches)
+    elif [[ -n $(find packs -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | grep -vxF -e original -f <(official_packs)) ]]; then
         why=$(t 'it has your own packs in packs/')
     else                                        # (a copy without git: a download, say)
         why=$(t "it isn't a git checkout, so changes of yours in it can't be told from Frame Tweaks' own")

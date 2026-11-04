@@ -38,11 +38,14 @@ tweak_dir() {
         [ "${line%%=*}" = "$1" ] && { echo "${line#*=}"; return; }
     done <<<"${FRAME_TWEAKS_DIRS:-}"
     local pack
-    for pack in core integrations third-party; do
+    while IFS= read -r pack; do
         [ -d "$REPO_DIR/packs/$pack/$1" ] && { echo "$REPO_DIR/packs/$pack/$1"; return; }
-    done
+    done < <(official_packs)
     echo "$REPO_DIR/packs/core/$1"
 }
+# The official packs' folder names, one per line, in order: lib/official-packs, the one list of
+# them (lib/registry.py reads it too), so a pack added there needs no change here.
+official_packs() { sed -n 's/^\([a-z0-9-][a-z0-9-]*\).*/\1/p' "$REPO_DIR/lib/official-packs"; }
 export FRAME_TWEAKS_LIB="$REPO_DIR/lib"     # (for the scripts a tweak runs in turn, wherever they are)
 BIN="$HOME/.local/bin"
 APPS="$HOME/.local/share/applications"

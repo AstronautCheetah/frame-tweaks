@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Generate the docs that list tweaks, from the official packs (packs/core,
-packs/integrations, then packs/third-party: each tweak's README.md front matter, in their pack.md's order):
+"""Generate the docs that list tweaks, from the official packs (lib/official-packs' order:
+packs/core, packs/integrations, packs/third-party, then packs/bugfixes: each tweak's README.md
+front matter, in their pack.md's order):
 
   docs/tweaks.md  a table of tweaks per category, in the installer window's order
   README.md       a line per category: its tweaks' names, each linking to the tweak's README

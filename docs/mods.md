@@ -1,9 +1,10 @@
 # Packs: adding your own tweaks
 
 Every tweak Frame Tweaks offers comes from a **pack**: a folder of tweak folders. Its own tweaks
-are in three official packs, [`packs/core/`](../packs/core/),
-[`packs/integrations/`](../packs/integrations/) (other projects' apps it fits to the Frame) and
-[`packs/third-party/`](../packs/third-party/) (other projects' apps installed as they are), and
+are in four official packs, [`packs/core/`](../packs/core/),
+[`packs/integrations/`](../packs/integrations/) (other projects' apps it fits to the Frame),
+[`packs/third-party/`](../packs/third-party/) (other projects' apps installed as they are) and
+[`packs/bugfixes/`](../packs/bugfixes/) (fixes for problems in SteamOS, SteamVR and Steam), and
 they're loaded exactly like anyone else's. To add programs or fixes of your own, write a pack.
 You don't need to change
 Frame Tweaks itself, and your pack survives its updates.
@@ -438,5 +439,5 @@ needs something newer says so with `requires_ft` (the oldest Frame Tweaks it wor
 A tweak in a pack is already in the shape the official packs use: to propose it for Frame
 Tweaks itself, add its folder to `packs/core/` and its id to `packs/core/pack.md` (or the
 same in `packs/integrations/` or `packs/third-party/` for a tweak that installs another
-project's app), then
+project's app, or in `packs/bugfixes/` for a fix for a bug in SteamOS, SteamVR or Steam), then
 follow [CONTRIBUTING.md](../CONTRIBUTING.md).

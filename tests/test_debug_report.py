@@ -29,7 +29,7 @@ class DebugReport(unittest.TestCase):
         t = Path(self.tmp.name)
         self.home, self.stubs = t / "home", t / "stubs"
         (self.home / ".config/frame-tweaks/installer").mkdir(parents=True)
-        (self.home / ".config/frame-tweaks/installer/off-packs").write_text("core\nintegrations\nthird-party\n")
+        (self.home / ".config/frame-tweaks/installer/off-packs").write_text("core\nintegrations\nthird-party\nbugfixes\n")
         stub(self.stubs, "systemctl", "exit 0")
         stub(self.stubs, "hostname", "echo frame-bob")
         stub(self.stubs, "git", "exit 128")                  # (the version: VERSION's)

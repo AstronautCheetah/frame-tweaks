@@ -325,7 +325,7 @@ class RestartPolicy(unittest.TestCase):
     WANT_UNIT = {"StartLimitIntervalSec": "300", "StartLimitBurst": "10"}
     # (Tray icon crash fix's watcher: a bus outage outlasts any limit, and given up on, the next
     # tray icon takes the bus down again)
-    NEVER_GIVE_UP = {"packs/core/tray-host/frame-tweaks-tray-host.service": {"StartLimitIntervalSec": "0", "StartLimitBurst": None}}
+    NEVER_GIVE_UP = {"packs/bugfixes/tray-host/frame-tweaks-tray-host.service": {"StartLimitIntervalSec": "0", "StartLimitBurst": None}}
 
     @staticmethod
     def units():

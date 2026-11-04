@@ -1,0 +1,10 @@
+# Frame Tweaks' official packs: their folders in packs/, one per line, in the order they're loaded
+# and listed (the installer window, ./install.sh list, README.md, docs/tweaks.md, SECURITY.md).
+# The one list of them: lib/registry.py (OFFICIAL_PACKS), lib/common.sh (official_packs), and
+# install.sh and dev/ through those or by reading this file. A pack left out here would be taken
+# for a user's local pack: asked to be trusted, its texts not translated, its docs not checked.
+# A new one also needs its folder un-ignored in .gitignore, which publishes only these.
+core
+integrations
+third-party
+bugfixes

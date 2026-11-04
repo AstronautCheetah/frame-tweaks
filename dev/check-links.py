@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "lib"))
 import manifest  # noqa: E402
-from sft import github_repo  # noqa: E402
+from sft import OFFICIAL_PACKS, github_repo  # noqa: E402
 
 
 def get(url):
@@ -50,8 +50,7 @@ def get(url):
 def links():
     """(id, title, its manifest's link, the project's GitHub owner/name) for each linked tweak of
     the official packs (a local pack in packs/, the Attic say, isn't published: not checked)."""
-    for readme in sorted(r for pack in ("core", "integrations", "third-party")
-                         for r in ROOT.glob(f"packs/{pack}/*/README.md")):
+    for readme in sorted(r for pack in OFFICIAL_PACKS for r in pack.glob("*/README.md")):
         meta, _body = manifest.front_matter(readme.read_text())
         link = meta.get("link")
         if not link:

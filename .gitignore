@@ -10,4 +10,5 @@ __pycache__/
 !/packs/core/
 !/packs/integrations/
 !/packs/third-party/
+!/packs/bugfixes/
 /.cache/

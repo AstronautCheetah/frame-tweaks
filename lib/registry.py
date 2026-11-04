@@ -24,14 +24,21 @@ OFF_PACKS = CONF / "off-packs"                      # official packs turned off 
 # A pack is a folder of tweak folders, with an optional pack.md; a tweak is a folder whose
 # README.md starts with front matter (docs/mods.md). Frame Tweaks' own packs (official) are loaded
 # like any other, and are on unless turned off: Core (our own tweaks, and the helpers they need),
-# Integrations (other projects' apps that Frame Tweaks fits to the Frame) and 3rd Party (other
-# people's Frame projects and fixes, most of them linked). (Core was "Original", in
-# packs/original, before 0.6.6.) A user's packs need trusting first (they run as you),
+# Integrations (other projects' apps that Frame Tweaks fits to the Frame), 3rd Party (other
+# people's Frame projects and fixes, most of them linked) and Bugfixes (fixes for problems in
+# SteamOS, SteamVR or Steam themselves). (Core was "Original", in packs/original, before 0.6.6.)
+# A user's packs need trusting first (they run as you),
 # and a tweak of theirs may take the place of one with the same id only by saying `replaces: true`.
-CORE = REPO / "packs/core"
+# Which folders are official, and their order, is lib/official-packs' (one list for the shell
+# scripts and dev/ too). A tweak moves between official packs freely: what's recorded of it
+# ($STATE/installed, fingerprints, units) is by id, never by its pack's folder.
+OFFICIAL_LIST = REPO / "lib/official-packs"
+OFFICIAL_PACKS = [REPO / "packs" / m[0] for line in OFFICIAL_LIST.read_text().splitlines()
+                  if (m := re.match(r"[a-z0-9-]+", line))]     # (also dev/i18n.py's: the packs whose text is in the template)
+CORE = REPO / "packs/core"                          # (its pack.md sets the categories' order for all)
 INTEGRATIONS = REPO / "packs/integrations"
 THIRD_PARTY = REPO / "packs/third-party"
-OFFICIAL_PACKS = [CORE, INTEGRATIONS, THIRD_PARTY]    # (also dev/i18n.py's: the packs whose text is in the template)
+BUGFIXES = REPO / "packs/bugfixes"
 USER_PACKS = Path.home() / ".local/share/frame-tweaks/packs"
 API = 1                                             # the newest pack api this version knows
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")

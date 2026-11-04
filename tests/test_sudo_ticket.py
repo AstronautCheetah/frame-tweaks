@@ -226,7 +226,7 @@ class InstallRun(Home):
         # (the official packs off: only these two run)
         off = self.home / "h/.config/frame-tweaks/installer/off-packs"
         off.parent.mkdir(parents=True)
-        off.write_text("core\nintegrations\nthird-party\n")
+        off.write_text("core\nintegrations\nthird-party\nbugfixes\n")
         r = subprocess.run(["python3", str(ROOT / "lib/sft.py"), "mods", "trust", str(self.pack)], env=self.env,
                            capture_output=True, text=True, timeout=60)
         self.assertEqual(r.returncode, 0, r.stderr)

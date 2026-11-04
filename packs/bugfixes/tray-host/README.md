@@ -74,7 +74,7 @@ answers again.
   running with no window; start it again to get the window back, or turn that setting off.
 - Without it, VLC also starts fine with its tray icon turned off (VLC: Tools → Preferences →
   Interface → *Show systray icon*, or `--no-qt-system-tray`), but only VLC.
-- If the VR session already went down this way, [Desktop & VR Recovery](../tools/)'s
+- If the VR session already went down this way, [Desktop & VR Recovery](../../core/tools/)'s
   `recover-session` brings it back without a reboot.
 
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->

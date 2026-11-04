@@ -47,7 +47,7 @@ Say in your pull request what you tested, and on what; the maintainer tests the 
   is the VR session's D-Bus.
 - **Tweak:** one row of the checklist: a folder with a README (its *manifest* is the README's
   YAML front matter) and `install.sh`, `status.sh` and `uninstall.sh`.
-- **Pack:** a folder of tweaks. The three *official packs* (Core, Integrations, 3rd Party)
+- **Pack:** a folder of tweaks. The four *official packs* (Core, Integrations, 3rd Party, Bugfixes)
   are in `packs/`; anyone else's needs trusting first.
 - **Helper:** a tweak others depend on, installed along with them (`tier: helper`), such as
   ydotool. Not to be confused with the shell helpers in `lib/common.sh`.
@@ -194,11 +194,14 @@ command finds `FRAME_TWEAKS_SPLASH_TTY` set to its terminal (so `./install.sh` d
 
 ## Adding a tweak
 
-Tweaks are self-contained folders in packs. Frame Tweaks' own are in three official packs:
+Tweaks are self-contained folders in packs. Frame Tweaks' own are in four official packs:
 `packs/core/` (tweaks written for Frame Tweaks), `packs/integrations/` (other projects' apps
-that Frame Tweaks fits to the Frame: a tray icon, a key in the wallet, menu entries) and
+that Frame Tweaks fits to the Frame: a tray icon, a key in the wallet, menu entries),
 `packs/third-party/` (other projects' apps installed as they are, from their pinned source or
-release, with their own README appended). A tweak's README.md starts with its manifest (YAML
+release, with their own README appended) and `packs/bugfixes/` (fixes for problems in SteamOS,
+SteamVR or Steam themselves, with a `needed.sh` where it can tell when SteamOS no longer
+needs one). `lib/official-packs` lists them; a new official pack goes there, with its folder
+un-ignored in `.gitignore`. A tweak's README.md starts with its manifest (YAML
 front matter), which is all the installer, the installer window, the docs and the tests know
 about it. To add one:
 

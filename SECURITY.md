@@ -45,7 +45,6 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | firefox | Preferences in Firefox's profile (`user.js`) | – |
 | homebrew | `/home/linuxbrew`; one line in `~/.bashrc` so terminals find `brew` | **Needs your sudo password once**, to create `/home/linuxbrew` |
 | tools | `~/.local/bin/restart-plasmashell`, `~/.local/bin/taskbar-guard`, its autostart entry `~/.config/autostart/frame-tweaks-taskbar-guard.desktop`, and `~/.local/bin/recover-session` | – |
-| tray-host | `~/.local/bin/frame-tweaks-tray-host`, user service `frame-tweaks-tray-host` (runs with the VR session) | – |
 | ydotool | `ydotool` and `ydotoold` in `~/.local/bin` (Arch Linux ARM package, signature-checked), user service `ydotoold` | **Writes to `/dev/uinput`** (a virtual keyboard any program you run could use while it's running) |
 | speech | Piper (with espeak-ng) and a voice in `~/.local/share/frame-tweaks/speech` (checksum-pinned); on SteamOS before 0.5.6, a speech-dispatcher setup in `~/.config/speech-dispatcher` (yours backed up, restored on uninstall) | None beyond your home folder |
 | charge-limit | `charge-limit` and `charge-limit-sleep` in `~/.local/bin` and its user service; a udev rule (`/etc/udev/rules.d/90-frame-tweaks-charge-limit.rules`, kept by SteamOS updates through `/etc/atomic-update.conf.d/frame-tweaks-charge-limit.conf`) that makes the charger's pause switch yours each time the Frame starts | Pauses and resumes the battery's charging. Asks for your sudo password once to add the udev rule, and again to remove it |
@@ -62,6 +61,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | cursor | `~/.config/environment.d/` (one setting for the desktop) | – |
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | frame-passthrough-pip | What its AppImage's installer sets up, all in your home folder: the app and its camera driver in `~/.local/share/framepip` (the driver registered with SteamVR), a user service (`framepip.service`) that starts it with SteamVR, and an app-menu entry; settings in `~/.config/framepip` | Reads the headset's tracking cameras through its own SteamVR driver; a SteamVR overlay with a dashboard panel; a controller binding (double-tap View on the left controller) |
+| tray-host | `~/.local/bin/frame-tweaks-tray-host`, user service `frame-tweaks-tray-host` (runs with the VR session) | – |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 
@@ -95,7 +95,7 @@ password. Until you set one (KWalletManager → *Change Password*), nothing abov
 protected. Avoid changing it while a second wallet service is running (see
 [wallet/README.md](packs/core/wallet/README.md#kde-6-gotcha-ksecretd-holds-the-wallet)).
 
-**Other people's packs.** Tweaks can come from packs other than the official ones (Core, Integrations and 3rd Party)
+**Other people's packs.** Tweaks can come from packs other than the official ones (Core, Integrations, 3rd Party and Bugfixes)
 ([docs/mods.md](docs/mods.md)). Their scripts run as you, as Frame Tweaks' own do, so a pack in
 `~/.local/share/frame-tweaks/packs/` (or `FRAME_TWEAKS_PACKS`) is ignored until you trust it,
 and trust covers its files as they were then (their names, contents, links and which ones can

@@ -45,6 +45,18 @@ def stubs(d, **scripts):
     return d
 
 
+# The official packs' folders (lib/official-packs: dev/check-docs.py reads it, in a copy too).
+OFFICIAL = [line.split()[0] for line in (ROOT / "lib/official-packs").read_text().splitlines() if line[:1].isalnum()]
+
+
+def official_packs_in(d):
+    """lib/official-packs in d (a stand-in repo), and its packs' folders, empty."""
+    (d / "lib").mkdir(exist_ok=True)
+    shutil.copy(ROOT / "lib/official-packs", d / "lib")
+    for pack in OFFICIAL:
+        (d / "packs" / pack).mkdir(parents=True, exist_ok=True)
+
+
 def copy_repo(dest):
     shutil.copytree(ROOT, dest, ignore=shutil.ignore_patterns(".git", "tmp", "references", "__pycache__", ".venv",
                                                               ".cache", ".ruff_cache"))
@@ -331,8 +343,7 @@ class CheckDocs(Temp):
     def test_a_broken_html_picture_is_reported(self):
         (self.d / "dev").mkdir()
         shutil.copy(ROOT / "dev/check-docs.py", self.d / "dev")
-        for pack in ("core", "integrations", "third-party"):
-            (self.d / "packs" / pack).mkdir(parents=True)
+        official_packs_in(self.d)
         (self.d / "docs").mkdir()
         (self.d / "docs/here.png").write_bytes(b"")
         (self.d / "README.md").write_text('<p align="center"><img src="docs/here.png" width="9" alt="ok"></p>\n\n'
@@ -344,8 +355,7 @@ class CheckDocs(Temp):
     def test_a_tweak_missing_from_the_overview_and_a_wrong_table_link_are_reported(self):
         (self.d / "dev").mkdir()
         shutil.copy(ROOT / "dev/check-docs.py", self.d / "dev")
-        for pack in ("integrations", "third-party"):
-            (self.d / "packs" / pack).mkdir(parents=True)
+        official_packs_in(self.d)
         for tweak in ("foo", "bar"):
             (self.d / "packs/core" / tweak).mkdir(parents=True)
             (self.d / "packs/core" / tweak / "README.md").write_text("# T\n")
@@ -363,7 +373,7 @@ class CheckDocs(Temp):
 class GenDocs(Temp):
     def test_an_upstream_readme_no_longer_named_goes(self):
         repo = copy_repo(self.d / "repo")
-        official = [p for pack in ("core", "integrations", "third-party") for p in sorted(repo.glob(f"packs/{pack}/*/README.md"))]
+        official = [p for pack in OFFICIAL for p in sorted(repo.glob(f"packs/{pack}/*/README.md"))]
         readme = next((p for p in official            # (not a local pack's: gen-docs leaves those alone)
                        if any(l.startswith("upstream_readme:") for l in p.read_text().splitlines())), None)
         if not readme:

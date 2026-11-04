@@ -292,7 +292,7 @@ class Update(unittest.TestCase):
         self.home = d / "home"
         off = self.home / ".config/frame-tweaks/installer/off-packs"
         off.parent.mkdir(parents=True)
-        off.write_text("integrations\noriginal\nthird-party\n")
+        off.write_text("integrations\noriginal\nthird-party\nbugfixes\n")
         r = subprocess.run(["python3", str(ROOT / "lib/sft.py"), "mods", "trust", str(self.pack)],
                            env=self.run_env(), capture_output=True, text=True, timeout=60)
         self.assertEqual(r.returncode, 0, r.stderr)

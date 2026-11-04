@@ -20,6 +20,8 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# (the official packs' folders: lib/official-packs, read as lib/registry.py reads it)
+OFFICIAL = [m[0] for line in (ROOT / "lib/official-packs").read_text().splitlines() if (m := re.match(r"[a-z0-9-]+", line))]
 
 
 def get(url, binary=False):
@@ -143,7 +145,7 @@ def main(args):
             bump_python()
             continue
         tweak, _, name = a.partition("/")
-        path = next((d for p in ("core", "integrations", "third-party") if (d := ROOT / "packs" / p / tweak).is_dir()),
+        path = next((d for p in OFFICIAL if (d := ROOT / "packs" / p / tweak).is_dir()),
                     ROOT / "packs/core" / tweak) / (f"{name}.pin" if name else "pin")
         if not path.is_file():
             sys.exit(f"no pin {path.relative_to(ROOT)}")
