@@ -263,3 +263,20 @@ class ErrorPage(WindowTest):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SymbolFonts(unittest.TestCase):
+    """ⓘ and ⚙ came out squeezed sideways after SteamOS 0.5.7's beta: the window's font has no such
+    glyphs, and fontconfig filled them from Adwaita Mono, a monospace font. Noto's symbol fonts
+    come right after the window's own now."""
+
+    def test_the_symbol_fonts_follow_the_windows_font(self):
+        app = QApplication.instance() or QApplication([])
+        before = app.font()
+        self.addCleanup(app.setFont, before)
+        gui._symbol_fonts(app)
+        fams = app.font().families()
+        self.assertEqual(fams[0], before.families()[0] if before.families() else before.family())
+        self.assertEqual(fams[-2:], ["Noto Sans Symbols", "Noto Sans Symbols 2"])
+        gui._symbol_fonts(app)                                  # (twice: no duplicates)
+        self.assertEqual(app.font().families().count("Noto Sans Symbols"), 1)

@@ -26,6 +26,9 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **ⓘ and ⚙ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
+  window's font has no such symbols, and SteamOS now filled them from a narrow monospace font.
+  Noto's symbol fonts draw them now.
 - **Android Mirror swipes again:** since a Steam or SteamVR update, the laser's moves said no
   button was held while you held the trigger, so each press ended at its first move and a swipe
   reached the phone as a tap. A press now ends only on its real let-go, unless the laser reports

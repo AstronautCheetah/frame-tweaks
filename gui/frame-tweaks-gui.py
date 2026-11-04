@@ -1553,9 +1553,23 @@ def _longer_tooltips(app):
     longer_tooltips(app)
 
 
+# Fonts for the symbols the window draws as text (ⓘ, ⚙, ▶, ✕…), tried after the window's own:
+# its font (Noto Sans) has none of them, and fontconfig's fallback picks the next font that does.
+# SteamOS 0.5.7's beta ranks Adwaita Mono second, a monospace font whose narrow cells drew ⓘ and ⚙
+# squeezed sideways; Noto's symbol fonts draw them at their own width.
+SYMBOL_FONTS = ["Noto Sans Symbols", "Noto Sans Symbols 2"]
+
+
+def _symbol_fonts(app):
+    f = app.font()
+    f.setFamilies([*f.families(), *[s for s in SYMBOL_FONTS if s not in f.families()]])
+    app.setFont(f)
+
+
 def main():
     app = QApplication(sys.argv)
     _longer_tooltips(app)
+    _symbol_fonts(app)
     app.setApplicationName("frame-tweaks")
     app.setDesktopFileName("io.github.AstronautCheetah.FrameTweaks")
     # --show ID: open on that tweak's page (lib/needs.py: a feature that needs it, not installed).
