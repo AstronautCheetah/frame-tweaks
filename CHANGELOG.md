@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.2 (2026-11-04)
 
 ### Added
 - **Turn off / Turn on for Curved world windows, Back to the previous window and Pick up when
