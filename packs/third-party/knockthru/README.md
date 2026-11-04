@@ -52,7 +52,7 @@ VioletTides' KnockThru: knock the controllers together, one controller on a tabl
 **Why on a Steam Frame:** Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
-![Knocking twice: your room fades in over VR (a frame of KnockThru's own animation)](../../../docs/images/third-party/knockthru.png)
+![Three ways to knock: the controllers together, one controller on a surface, or on the headset; each knocks twice, then three times (KnockThru's own animation)](../../../docs/images/third-party/knockthru.gif)
 
 A **link**: Frame Tweaks runs KnockThru's own steps, as its
 [README](https://github.com/VioletTides/KnockThru#readme) gives them, in the terminal it opens
@@ -105,7 +105,7 @@ KnockThru is by [VioletTides](https://github.com/VioletTides/KnockThru) (MIT); i
 headset drawings come from Valve's Steam Frame CAD files (CC BY-NC-SA 4.0). Frame Tweaks only
 runs its install steps. This tweak's icon, `knockthru-logo.svg`, is KnockThru's own logo
 (`images/logo.svg`), unchanged; traced from the same CAD files, it's CC BY-NC-SA 4.0 too, not
-MIT like the rest of Frame Tweaks. The picture above is one frame of KnockThru's own README animation (`images/hero.gif`, MIT), cropped to leave out the controller drawings (CC BY-NC-SA 4.0). See also [CREDITS.md](../../../CREDITS.md).
+MIT like the rest of Frame Tweaks. The animation above is KnockThru's own (`images/knock-kinds.gif`), unchanged; its controller and headset drawings make it CC BY-NC-SA 4.0 as well (`docs/images/third-party/knockthru.gif.license`). See also [CREDITS.md](../../../CREDITS.md).
 
 ---
 Check: `./install.sh status knockthru` · Remove: `./install.sh uninstall knockthru`

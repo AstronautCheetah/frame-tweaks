@@ -1,0 +1,7 @@
+knockthru.gif: KnockThru's README animation of its three kinds of knock (images/knock-kinds.gif in
+https://github.com/VioletTides/KnockThru), unchanged. Its controller and headset drawings are
+rendered from Valve's Steam Frame CAD files (https://gitlab.steamos.cloud/SteamHardware/SteamFrame),
+so, as KnockThru's README and THIRD_PARTY_NOTICES.md say, it is under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International license
+(https://creativecommons.org/licenses/by-nc-sa/4.0/), not the MIT license of the rest of Frame
+Tweaks. KnockThru is by VioletTides; it is not associated with or endorsed by Valve.
