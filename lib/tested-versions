@@ -17,6 +17,5 @@ link-recline=v1.4.0
 link-full-keyboard=0.14.1
 link-perf-overlay=v0.3.2
 link-knockthru=v1.2.0
-link-moonlight-xr=v1.1.2
 # (Cuff has no releases yet: the commit tested, whole, as its link downloads it by commit)
 link-frame-passthrough-pip=v0.9.1

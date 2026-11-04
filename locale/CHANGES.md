@@ -80,9 +80,25 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "unknown command: {cmd}"
 
 ## 2026-11-04
+- New in `packs/core/arrowpad/arrowpad.py:382`
+  - now: "Down arrow"
+- New in `packs/core/arrowpad/arrowpad.py:382`
+  - now: "Left arrow"
+- New in `packs/core/arrowpad/arrowpad.py:382`
+  - now: "Right arrow"
+- New in `packs/core/arrowpad/arrowpad.py:382`
+  - now: "Up arrow"
+- New in `packs/core/scroll-strips/patch.js:272`
+  - now: "Close the settings"
+- New in `packs/core/scroll-strips/patch.js:272`
+  - now: "Settings: where the strips go and how they look"
 - Changed in `packs/core/snip/frame-snip:1226`
   - was: "Couldn't copy (is desktop mode running?)"
   - now: "Couldn't copy to the clipboard."
+- New in `packs/core/snip/frame-snip:1329`
+  - now: "Read slower"
+- New in `packs/core/snip/frame-snip:1330`
+  - now: "Read faster"
 - Changed in `packs/core/snip/frame-snip:1343`
   - was: "Paste: read the clipboard's text instead"
   - now: "Paste: read the clipboard's text or picture instead"
@@ -129,8 +145,22 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 - New in `packs/integrations/clipboard/status.sh:22`
   - now: "this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
-- New in `packs/third-party/moonlight-xr/README.md`
-  - now: "A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
+- New in `packs/integrations/moonlight-xr/README.md`
+  - now: "A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with its own installer and adds an app-menu entry and an Open button."
+- New in `packs/integrations/moonlight-xr/install.sh:11`
+  - now: "Steam isn't running: the program installs, but its Steam library entry is added only when you install it again with Steam running"
+- New in `packs/integrations/moonlight-xr/install.sh:16`
+  - now: "Moonlight XR's installer stopped (its log: %s)"
+- New in `packs/integrations/moonlight-xr/install.sh:21`
+  - now: "Start it from your Steam library, the app menu, or Open on its row; pair with your PC on first start."
+- New in `packs/integrations/moonlight-xr/moonlight-xr.desktop:4`
+  - now: "Stream your PC to a screen in VR"
+- New in `packs/integrations/moonlight-xr/status.sh:6`
+  - now: "its app-menu entry is missing (Reinstall adds it)"
+- New in `packs/integrations/moonlight-xr/status.sh:7`
+  - now: "Moonlight XR for Frame %s"
+- New in `packs/integrations/moonlight-xr/uninstall.sh:9`
+  - now: "Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
 - New in `packs/third-party/moonlight-xr/README.md`
   - now: "Moonlight XR for Frame"
 - New in `packs/third-party/moonlight-xr/README.md`

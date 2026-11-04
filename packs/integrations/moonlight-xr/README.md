@@ -13,8 +13,8 @@ why: >-
   A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA
   PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics
   card, so the stream has lower latency, a higher frame rate and controller input, and its
-  Desktop app covers games outside Steam too. Linked: it installs the release Frame Tweaks tested
-  with its own installer, the way its README describes.
+  Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with
+  its own installer and adds an app-menu entry and an Open button.
 author: simplysanatori (Moonlight XR for Frame)
 source:
   relation: from
@@ -24,21 +24,15 @@ experimental: >-
   on one Frame (SteamOS 0.4.5) against one Windows PC; 1.1.1 fixed its start on the newer
   SteamOS previews. It needs a PC running Sunshine or Apollo, which this tweak doesn't set up.
 icon: {file: moonlight-xr.png}
+run: {label: Open}
 processes: [/MoonlightXRNative/app/moonlight-xr]
 config: [~/.config/moonlight-xr]
-link:
-  install: >-
-    d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && r=https://github.com/simplysanatori/moonlight-xr-steam-frame/releases && v=${FT_LINK_VERSION:-$(curl -fsSL https://api.github.com/repos/simplysanatori/moonlight-xr-steam-frame/releases/latest | python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])')} && f=moonlight-xr-steam-frame-${v#v}-linux-arm64.tar.gz && curl -fL# -o "$d/$f" "$r/download/$v/$f" && curl -fsSL -o "$d/SHA256SUMS" "$r/download/$v/SHA256SUMS" && (cd "$d" && sha256sum -c --ignore-missing SHA256SUMS) && tar -xzf "$d/$f" -C "$d" && (cd "$d/MoonlightXRNative" && ./install.sh) && install -m644 "$d/MoonlightXRNative/dock_icon.py" ~/Games/MoonlightXRNative/.frame-tweaks-dock_icon.py
-  uninstall: >-
-    { [ ! -f ~/Games/MoonlightXRNative/.frame-tweaks-dock_icon.py ] || python3 ~/Games/MoonlightXRNative/.frame-tweaks-dock_icon.py remove ~/Games/MoonlightXRNative/app; } && rm -rf ~/Games/MoonlightXRNative
-  installed: ~/Games/MoonlightXRNative/app/moonlight-xr
-  version: cat ~/Games/MoonlightXRNative/app/VERSION
-  readme: https://github.com/simplysanatori/moonlight-xr-steam-frame#readme
 changes: >-
   Whatever Moonlight XR's own installer sets up (its README lists it): the program in
   `~/Games/MoonlightXRNative`, a Non-Steam entry **Moonlight XR for Frame** in your Steam library
   with its artwork, SteamVR's per-app settings for it (90 Hz, no motion smoothing, the highest
-  render resolution), its SteamVR dock icon, and its settings and pairing in
+  render resolution), its SteamVR dock icon, an app-menu entry Frame Tweaks adds
+  (`frame-tweaks-moonlight-xr.desktop`), and its settings and pairing in
   `~/.config/moonlight-xr`
 access: >-
   Connects to the PC you pair it with (the stream, its input and audio) over your network, the
@@ -46,8 +40,8 @@ access: >-
   Settings)
 survives_updates: Yes (everything is in your home folder)
 undo: >-
-  Uncheck it, or `./install.sh uninstall moonlight-xr`: its SteamVR dock icon is removed and
-  `~/Games/MoonlightXRNative` deleted (keeps your settings and pairing in
+  Uncheck it, or `./install.sh uninstall moonlight-xr`: its SteamVR dock icon and app-menu entry
+  are removed and `~/Games/MoonlightXRNative` deleted (keeps your settings and pairing in
   `~/.config/moonlight-xr`). Remove its Non-Steam library entry yourself, and unpair the Frame in
   Sunshine's web page.
 ---
@@ -56,29 +50,28 @@ undo: >-
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library.
 
-**Why on a Steam Frame:** A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
+**Why on a Steam Frame:** A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with its own installer and adds an app-menu entry and an Open button.
 <!-- /generated:intro -->
 
-A **link**: Frame Tweaks runs Moonlight XR's own steps, as its
-[README](https://github.com/simplysanatori/moonlight-xr-steam-frame#readme) gives them, in the
-terminal it opens for installs, and doesn't change what they install.
+Frame Tweaks installs it from its maker's release with the release's own installer, and adds
+what makes it easy to start on the Frame.
 
 **Before you install:** have Steam running on the Frame (its installer adds the library entry
 through Steam; without Steam it installs the program and says the entry was skipped, and
 installing again with Steam up adds it).
 
-- **Install** (tick it): downloads the Moonlight XR release Frame Tweaks tested
-  (`link-moonlight-xr` in `lib/tested-versions`) and its `SHA256SUMS`, checks the download
-  against it, unpacks it and runs its `install.sh`. That copies the program to
-  `~/Games/MoonlightXRNative/app`, adds **Moonlight XR for Frame** to your Steam library, and sets
-  SteamVR's settings for it. Its icon in the SteamVR dock stays grey until Steam has restarted
-  once.
-- **Update:** when simplysanatori publishes a release newer than the one Frame Tweaks tested, its
-  row offers it as *not yet tested by Frame Tweaks* (↑ *version* available · **Update**); once
-  it's installed, **↩ Back to the tested version** installs the tested one again.
-  `./install.sh link-version moonlight-xr tested|newest` does the same. Your settings, pairing
-  and library entry are kept.
-- **Uninstall** (untick it): removes its SteamVR dock icon and deletes
+- **Install** (tick it): downloads the Moonlight XR release Frame Tweaks tested (`pin`), checks
+  it against the hash recorded there, unpacks it and runs its `install.sh`. That copies the
+  program to `~/Games/MoonlightXRNative/app`, adds **Moonlight XR for Frame** to your Steam
+  library and sets SteamVR's settings for it. Then Frame Tweaks adds its app-menu entry. Its icon
+  in the SteamVR dock stays grey until Steam has restarted once.
+- **Open** on its row, or **Moonlight XR for Frame** in the app menu (Steam's **+** menu, the
+  desktop's launcher), starts it the way its Steam library entry does. (Its installer's own menu
+  entry is hidden: it's there for the SteamVR dock icon, so Frame Tweaks adds a visible one.)
+- **Update:** Frame Tweaks' updates move it to a newer release once it's been tried on the Frame;
+  your settings, pairing and library entry are kept. Its own window also says when a newer
+  release is out.
+- **Uninstall** (untick it): removes its SteamVR dock icon and app-menu entry and deletes
   `~/Games/MoonlightXRNative`. Your settings and pairing in `~/.config/moonlight-xr` stay
   (delete that folder too to forget them). Remove the library entry in Steam yourself (Manage →
   Remove non-Steam game from your library).
@@ -117,18 +110,18 @@ PC's name and addresses: don't post them as they are.
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** Whatever Moonlight XR's own installer sets up (its README lists it): the program in `~/Games/MoonlightXRNative`, a Non-Steam entry **Moonlight XR for Frame** in your Steam library with its artwork, SteamVR's per-app settings for it (90 Hz, no motion smoothing, the highest render resolution), its SteamVR dock icon, and its settings and pairing in `~/.config/moonlight-xr`
+- **Changes:** Whatever Moonlight XR's own installer sets up (its README lists it): the program in `~/Games/MoonlightXRNative`, a Non-Steam entry **Moonlight XR for Frame** in your Steam library with its artwork, SteamVR's per-app settings for it (90 Hz, no motion smoothing, the highest render resolution), its SteamVR dock icon, an app-menu entry Frame Tweaks adds (`frame-tweaks-moonlight-xr.desktop`), and its settings and pairing in `~/.config/moonlight-xr`
 - **🧪 Experimental:** A community project: its author wrote its Frame-specific code with Claude and has tested it on one Frame (SteamOS 0.4.5) against one Windows PC; 1.1.1 fixed its start on the newer SteamOS previews. It needs a PC running Sunshine or Apollo, which this tweak doesn't set up.
 - **Unusual access:** Connects to the PC you pair it with (the stream, its input and audio) over your network, the Frame's wireless adapter or USB; asks GitHub once a day for a newer release (off in its Settings)
-- **Undo:** Uncheck it, or `./install.sh uninstall moonlight-xr`: its SteamVR dock icon is removed and `~/Games/MoonlightXRNative` deleted (keeps your settings and pairing in `~/.config/moonlight-xr`). Remove its Non-Steam library entry yourself, and unpair the Frame in Sunshine's web page.
+- **Undo:** Uncheck it, or `./install.sh uninstall moonlight-xr`: its SteamVR dock icon and app-menu entry are removed and `~/Games/MoonlightXRNative` deleted (keeps your settings and pairing in `~/.config/moonlight-xr`). Remove its Non-Steam library entry yourself, and unpair the Frame in Sunshine's web page.
 <!-- /generated:changes -->
 
 ## Credits
 
 Moonlight XR for Frame is by [simplysanatori](https://github.com/simplysanatori/moonlight-xr-steam-frame)
 (GPL-3.0), a port of [Moonlight XR](https://github.com/Gilleece/moonlight-android-xr) by Sean
-Gilleece, built on [Moonlight](https://github.com/moonlight-stream). Frame Tweaks only runs its
-install steps and copies none of its code. This tweak's icon, `moonlight-xr.png`, is its own app
+Gilleece, built on [Moonlight](https://github.com/moonlight-stream). Frame Tweaks downloads its
+release and runs its installer, and copies none of its code. This tweak's icon, `moonlight-xr.png`, is its own app
 icon (`app/assets/branding/icon-256.png` in its release), unchanged: the disc of Moonlight XR's
 logo, their mark, GPL-3.0 like the app, not MIT like the rest of Frame Tweaks
 (`moonlight-xr.png.license`). See also [CREDITS.md](../../../CREDITS.md).

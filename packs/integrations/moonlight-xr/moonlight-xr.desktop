@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Moonlight XR for Frame
+Comment=Stream your PC to a screen in VR
+Exec=gtk-launch moonlight-xr-launcher
+Icon=moonlight-xr-launcher
+Categories=Game;

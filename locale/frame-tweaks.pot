@@ -368,7 +368,7 @@ msgstr ""
 msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
 msgid "Close"
 msgstr ""
 
@@ -1764,7 +1764,7 @@ msgstr ""
 msgid "not available any more"
 msgstr ""
 
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/tray-host/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/tray-host/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
 
@@ -3571,7 +3571,7 @@ msgid ""
 "Floating pad with arrows, Home/End, F-keys, Ctrl/Alt/Super and a dictation button; never steals focus"
 msgstr ""
 
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "Open"
 msgstr ""
 
@@ -3652,6 +3652,10 @@ msgid ""
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
+msgid "Down arrow"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
 msgid "End"
 msgstr ""
@@ -3707,6 +3711,10 @@ msgstr ""
 #: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
 msgid "Launcher"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Left arrow"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
@@ -3786,6 +3794,10 @@ msgstr ""
 #: packs/core/arrowpad/arrowpad.py
 msgctxt "mouse button"
 msgid "Right"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Right arrow"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
@@ -3882,6 +3894,10 @@ msgstr ""
 #: packs/core/arrowpad/arrowpad.py
 msgid ""
 "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
+msgstr ""
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Up arrow"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.py
@@ -4862,7 +4878,7 @@ msgstr ""
 msgid "Accessibility"
 msgstr ""
 
-#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/moonlight-xr/README.md packs/third-party/cursor/README.md
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/integrations/moonlight-xr/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
 msgid "Convenience"
 msgstr ""
 
@@ -4911,20 +4927,8 @@ msgid ""
 msgstr ""
 
 #: packs/core/scroll-strips/README.md
-msgid "Blue"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
 msgid ""
 "Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Cyan"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Green"
 msgstr ""
 
 #: packs/core/scroll-strips/README.md
@@ -4941,43 +4945,27 @@ msgid ""
 msgstr ""
 
 #: packs/core/scroll-strips/README.md
-msgid "Magenta"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Orange"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Pink"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Red"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Sky"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
 msgid "Vertical strip (scrolls up and down)"
 msgstr ""
 
-#: packs/core/scroll-strips/README.md
-msgid "Violet"
-msgstr ""
-
-#: packs/core/scroll-strips/README.md
-msgid "Yellow"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Blue"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Bottom"
 msgstr ""
 
+#: packs/core/scroll-strips/patch.js
+msgid "Close the settings"
+msgstr ""
+
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Colour"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Cyan"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js
@@ -4988,8 +4976,16 @@ msgstr ""
 msgid "Gap from the window (cm)"
 msgstr ""
 
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Green"
+msgstr ""
+
 #: packs/core/scroll-strips/patch.js
 msgid "Horizontal strip"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Magenta"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js
@@ -4998,7 +4994,19 @@ msgid ""
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Orange"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Pink"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Red"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -5007,6 +5015,14 @@ msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Set back behind the window (cm)"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js
+msgid "Settings: where the strips go and how they look"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Sky"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -5019,6 +5035,14 @@ msgstr ""
 
 #: packs/core/scroll-strips/patch.js
 msgid "Vertical strip"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Violet"
+msgstr ""
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Yellow"
 msgstr ""
 
 #: packs/core/scroll-strips/status.sh
@@ -5210,7 +5234,15 @@ msgid "Put the text being read on the clipboard"
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Read faster"
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Read it again"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Read slower"
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -6541,7 +6573,7 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/moonlight-xr/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr ""
 
@@ -6619,7 +6651,7 @@ msgstr ""
 msgid "%s starts with desktop mode."
 msgstr ""
 
-#: packs/integrations/clipboard/install.sh
+#: packs/integrations/clipboard/install.sh packs/integrations/moonlight-xr/install.sh
 msgid "Downloading %s %s"
 msgstr ""
 
@@ -6678,6 +6710,56 @@ msgstr ""
 #: packs/integrations/clipboard/uninstall.sh
 msgid ""
 "Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with its own installer and adds an app-menu entry and an Open button."
+msgstr ""
+
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
+msgstr ""
+
+#: packs/integrations/moonlight-xr/install.sh
+msgid "Moonlight XR's installer stopped (its log: %s)"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Start it from your Steam library, the app menu, or Open on its row; pair with your PC on first start."
+msgstr ""
+
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Steam isn't running: the program installs, but its Steam library entry is added only when you install it again with Steam running"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop packs/integrations/moonlight-xr/README.md
+msgid "Moonlight XR for Frame"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop
+msgid "Stream your PC to a screen in VR"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/status.sh
+msgid "Moonlight XR for Frame %s"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/status.sh
+msgid "its app-menu entry is missing (Reinstall adds it)"
+msgstr ""
+
+#: packs/integrations/moonlight-xr/uninstall.sh
+msgid ""
+"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
 msgstr ""
 
 #: packs/integrations/nordvpn/README.md
@@ -7246,25 +7328,6 @@ msgstr ""
 
 #: packs/third-party/menu-icons/status.sh
 msgid "%s icon(s) added for the \"+\" menu"
-msgstr ""
-
-#: packs/third-party/moonlight-xr/README.md
-msgid ""
-"A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
-msgstr ""
-
-#: packs/third-party/moonlight-xr/README.md
-msgid "Moonlight XR for Frame"
-msgstr ""
-
-#: packs/third-party/moonlight-xr/README.md
-msgid ""
-"Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
-msgstr ""
-
-#: packs/third-party/moonlight-xr/README.md
-msgid ""
-"simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
 msgstr ""
 
 #: packs/third-party/pack.md

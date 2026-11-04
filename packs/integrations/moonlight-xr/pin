@@ -1,0 +1,10 @@
+# Moonlight XR for Frame's release (simplysanatori/moonlight-xr-steam-frame, GPL-3.0): its aarch64
+# tarball, checked against this hash (recorded here from the release's SHA256SUMS, not fetched with
+# it). Bump with dev/check-pins.sh after trying a new release on the Frame.
+version=1.1.2
+url=https://github.com/simplysanatori/moonlight-xr-steam-frame/releases/download/v1.1.2/moonlight-xr-steam-frame-1.1.2-linux-arm64.tar.gz
+sha256=cb84780d1fc3313a4eed48135fb39c746dbf64ba6e7bdaa8972f24a6c85d518a
+latest=https://api.github.com/repos/simplysanatori/moonlight-xr-steam-frame/releases/latest
+nomirror=GPL-3.0 binaries: Frame Tweaks downloads them from their maker's release, it doesn't redistribute them
+license=GPL-3.0
+license_file=https://raw.githubusercontent.com/simplysanatori/moonlight-xr-steam-frame/v1.1.2/LICENSE.txt

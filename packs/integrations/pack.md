@@ -8,6 +8,7 @@ order:
   - nordvpn
   - clipboard
   - claude-desktop
+  - moonlight-xr
 ---
 Other projects' apps and services, fitted to the Steam Frame by Frame Tweaks: installed from their
 makers' own releases, Flathub, or Frame Tweaks' own build of them (Shared clipboard), and set up
