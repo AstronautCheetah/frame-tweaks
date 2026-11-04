@@ -2,8 +2,8 @@
 kept it); a big pasted picture is read at a bounded size, in bounded time, and Paste comes back
 whatever goes wrong; the X clipboard owner serves STRING as Latin-1 and answers TEXT as
 UTF8_STRING; Copy says "copied" only once the owner holds the clipboard, and falls back to
-wl-copy on the desktop; a transparent picture is read on white. Offline: stand-ins for libX11,
-Tesseract, Piper and the owner's process."""
+wl-copy on the desktop; a transparent picture is read on white, or on dark grey when what's drawn
+is light. Offline: stand-ins for libX11, Tesseract, Piper and the owner's process."""
 import ctypes
 import os
 import sys
@@ -330,6 +330,27 @@ class TransparentPicture(unittest.TestCase):
         self.assertEqual(seen[0].pixelColor(5, 5).lightness(), 255)
         self.assertEqual(seen[0].pixelColor(30, 20).lightness(), 0)
         self.assertEqual(shown.pixelColor(5, 5).lightness(), 255)
+
+    def test_light_glyphs_go_on_dark(self):
+        # (a dark theme's logo or text: white on transparent went white on white, no text and a
+        # blank box on the panel)
+        from PyQt6.QtGui import QColor, QImage
+        app()
+        img = QImage(600, 400, QImage.Format.Format_ARGB32)     # (over 256 px: the sampled path)
+        img.fill(QColor(255, 255, 255, 0))                       # (transparent white: the colour mustn't count)
+        for x in range(200, 400):
+            for y in range(100, 300):
+                img.setPixelColor(x, y, QColor(240, 240, 240))
+        seen = []
+        with tempfile.TemporaryDirectory() as d, \
+                mock.patch.object(fs, "read_clipboard", return_value=("image", encoded(img))), \
+                mock.patch.object(fs, "ocr", side_effect=lambda i: seen.append(i) or ""), \
+                mock.patch.object(fs, "NO_TEXT_SNIP", Path(d) / "no-text.png"):
+            kind, (shown, text) = fs.pasted_content()
+        self.assertEqual(text, "No text found in the snip.")       # (dark grey, not "the snip is black")
+        self.assertLess(seen[0].pixelColor(5, 5).lightness(), 64)
+        self.assertGreater(seen[0].pixelColor(300, 200).lightness(), 200)
+        self.assertLess(shown.pixelColor(5, 5).lightness(), 64)
 
 
 if __name__ == "__main__":

@@ -104,6 +104,73 @@ class Heal(unittest.TestCase):
             self.assertEqual(sorted(p.name for p in (v / f"lib/python{NOW}/site-packages").iterdir()), before)
 
 
+class LoginTries(unittest.TestCase):
+    """The login service restarts on failure, 2 minutes on: a pip that kept failing (a tested
+    version gone from PyPI, no build) took the lock, wrote a log and ran pip 3 times every 2
+    minutes, for good. Now only offline is tried again, and that at most HEAL_TRIES times or for a
+    day; repair still tries, and the venv stays stale for check-system."""
+    # (the service's run, as install.sh _heal does it, minus the lock and log)
+    LOGIN = "any_venv_stale || exit 0; heal_venvs --login"
+
+    def pip(self, why):
+        return f'pip_pinned() {{ shift; echo "$*" >> "$HOME/pip.log"; PIP_PINNED_WHY={why}; return 1; }}; '
+
+    def runs(self, home, v, why, n):
+        """n runs of the login service; how many pip was asked."""
+        for _ in range(n):
+            sh(home, self.pip(why) + f"ft_venvs() {{ echo {v}; }}; heal_units() {{ :; }}; {self.LOGIN}")
+        log = Path(home) / "pip.log"
+        return len(log.read_text().splitlines()) if log.exists() else 0
+
+    def test_a_version_gone_from_pypi_is_tried_once_at_login(self):
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v", compiled=True)
+            self.assertEqual(self.runs(home, v, '"gone pkgx==1.0"', 5), 1)
+            self.assertEqual(sh(home, f"venv_stale {v}").returncode, 0, "check-system must still warn")
+            r = sh(home, self.pip("other") + f"ft_venvs() {{ echo {v}; }}; heal_units() {{ :; }}; heal_venvs")
+            self.assertNotEqual(r.returncode, 0)
+            self.assertEqual(len((Path(home) / "pip.log").read_text().splitlines()), 2)   # (repair still tries)
+            ok = 'pip_pinned() { return 0; }; '
+            self.assertEqual(sh(home, ok + f"ft_venvs() {{ echo {v}; }}; heal_units() {{ :; }}; heal_venvs").returncode, 0)
+            self.assertNotEqual(sh(home, f"venv_stale {v}").returncode, 0)            # (a repair that got them)
+
+    def test_offline_is_tried_again_a_bounded_number_of_times(self):
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v", compiled=True)
+            tries = int(sh(home, "echo $HEAL_TRIES").stdout)
+            self.assertEqual(self.runs(home, v, "offline", tries + 3), tries)
+            r = sh(home, f"ft_venvs() {{ echo {v}; }}; any_venv_stale")
+            self.assertNotEqual(r.returncode, 0, "the login service must stop")
+            self.assertEqual(sh(home, f"venv_stale {v}").returncode, 0)
+
+    def test_offline_for_over_a_day_stops_too(self):
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v", compiled=True)
+            self.assertEqual(self.runs(home, v, "offline", 2), 2)
+            pending = v / ".ft-heal-pending"
+            first = [line for line in pending.read_text().splitlines() if line.startswith("#tries ")][0].split()
+            self.assertEqual(first[1], "2")
+            pending.write_text(pending.read_text().replace(f" {first[2]} ", f" {int(first[2]) - 86400} "))
+            self.assertEqual(self.runs(home, v, "offline", 3), 2)       # (a day on: not tried again)
+
+    def test_back_online_the_packages_come(self):
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v", compiled=True)
+            self.runs(home, v, "offline", 2)
+            ok = 'pip_pinned() { shift; echo "$*" >> "$HOME/ok.log"; return 0; }; '
+            r = sh(home, ok + f"ft_venvs() {{ echo {v}; }}; heal_units() {{ :; }}; {self.LOGIN}")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertEqual((Path(home) / "ok.log").read_text().split(), ["pkgx"])   # (not the #tries note)
+            self.assertFalse((v / ".ft-heal-pending").exists())
+
+    def test_a_note_it_cant_read_ends_the_tries(self):
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v", NOW)
+            (v / ".ft-heal-pending").write_text("pkgx\n#tries x$(touch boom) 1 offline\n")
+            self.assertEqual(self.runs(home, v, "offline", 2), 0)
+            self.assertFalse((Path(home) / "boom").exists())
+
+
 class Lock(unittest.TestCase):
     def test_heal_waits_for_a_setup_of_the_same_venv(self):
         # (the window's ensure_qt_venv holding the venv, as when it opens during a login's heal:
@@ -168,6 +235,7 @@ class Unit(unittest.TestCase):
                              capture_output=True, text=True).stdout
         self.assertIn("ExecStart=/bin/bash /opt/ft/install.sh _heal\n", out)
         self.assertIn("WantedBy=default.target", out)
+        self.assertIn("RestartMaxDelaySec=", out)                   # (tries further apart: LoginTries)
 
 
 if __name__ == "__main__":

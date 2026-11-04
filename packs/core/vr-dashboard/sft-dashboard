@@ -423,19 +423,25 @@ def config_expr(name, path):
     """window.__sftPatchConfig[NAME] = patches/NAME.json, and tell the patch if it changed. A file
     that's gone takes the page's copy with it: an uninstall forgets a setting (Turn off's
     enabled: false) by deleting the file, and a tick again before this watcher's next pass would
-    otherwise leave the page on the old setting, the patch off while its status said on."""
+    otherwise leave the page on the old setting, the patch off while its status said on.
+    Only a copy that came from the file, though (window.__sftFromFile holds the very object): with
+    no sftConfig binding, Scroll strips keeps a change on the page alone ("Not saved: ..."), a new
+    object there, which with no file yet was otherwise deleted within the 5 s of a pass."""
     n = json.dumps(name)
     try:
         conf = json.loads(path.read_text())
     except FileNotFoundError:
-        return (f"(() => {{ const all = window.__sftPatchConfig; if (all && {n} in all) {{ delete all[{n}];"
+        return (f"(() => {{ const all = window.__sftPatchConfig, from = window.__sftFromFile;"
+                f" if (all && from && {n} in all && all[{n}] === from[{n}]) {{ delete all[{n}]; delete from[{n}];"
                 f" window.__sftPatches?.[{n}]?.configChanged?.(); }} }})()")
     except (OSError, ValueError):
         return None
     c = json.dumps(conf)
+    # (marked when equal too: a change the page saved through sftConfig is the file's from then on)
     return (f"(() => {{ const all = (window.__sftPatchConfig ??= {{}}); const c = {c};"
             f" if (JSON.stringify(all[{n}]) !== JSON.stringify(c)) {{ all[{n}] = c;"
-            f" window.__sftPatches?.[{n}]?.configChanged?.(); }} }})()")
+            f" window.__sftPatches?.[{n}]?.configChanged?.(); }}"
+            f" (window.__sftFromFile ??= {{}})[{n}] = all[{n}]; }})()")
 
 
 def watch():

@@ -512,7 +512,7 @@ install_desktop() {
 # newest that has one, with a warning: working beats exact. Only that one: the other tested
 # versions stay. Not when PyPI couldn't be reached, nor when that version is gone from PyPI (a
 # hijacked account could delete it, to have its own newer one taken), nor for any other failure:
-# then it fails, and says which.
+# then it fails, and says which (and sets PIP_PINNED_WHY: offline, gone <pin>, other or nobuild).
 pip_pinned() {
     local venv=$1 quiet=(-q) tmp pin name code why=other needs=() missing=() cons="$REPO_DIR/lib/python-constraints.txt"
     shift
@@ -570,6 +570,8 @@ for pin in open(sys.argv[2]).read().split("\n"):
                "${missing[*]}" "$("$venv/bin/python" -V 2>&1)" "${missing[*]%%==*}")"
            if "$venv/bin/pip" install "${quiet[@]}" -c "$tmp/cons" "$@"; then rm -rf "$tmp"; return 0; fi ;;
     esac
+    # (why it failed, for heal_venv_locked: only offline is worth the login's trying again)
+    PIP_PINNED_WHY=${why:-nobuild}
     rm -rf "$tmp"; return 1
 }
 
@@ -616,14 +618,42 @@ venv_stale() {
     now=$(system_python_version) && [ -n "$now" ] || return 1
     [ "$have" != "$now" ]
 }
+# The login service's tries at a heal whose pip failed, in .ft-heal-pending's "#tries N FIRST WHY"
+# line. It restarts on failure (HEAL_UNIT, lib/installer.py), and each try takes the install lock
+# (the window and the CLI refuse meanwhile), writes a log (pushing real ones out of the last 5) and
+# runs pip three times and curl: a Frame overheats under that every 2 minutes for good, as when
+# the tested version is gone from PyPI. So only offline is tried again, at most HEAL_TRIES times
+# over at most a day; then only ./install.sh repair tries (check-system still warns).
+HEAL_TRIES=10 HEAL_DAY=86400
+# heal_failed PENDING: one more failed try noted, with pip_pinned's why.
+heal_failed() {
+    local tries='' first='' _why names
+    read -r _ tries first _why < <(grep -m1 '^#tries ' "$1") || true
+    [[ $tries =~ ^[0-9]{1,6}$ ]] || tries=0
+    [[ $first =~ ^[0-9]{1,12}$ ]] || first=$(date +%s)
+    names=$(grep -v -e '^$' -e '^#' "$1") || true
+    printf '%s\n#tries %d %d %s\n' "$names" $((tries + 1)) "$first" "${PIP_PINNED_WHY:-other}" > "$1" || true
+}
+# heal_given_up DIR: the login service has stopped trying that venv's heal (heal_failed's note).
+heal_given_up() {
+    local tries first why
+    read -r _ tries first why < <(grep -m1 '^#tries ' "$1/.ft-heal-pending" 2>/dev/null) || return 1
+    [[ $tries =~ ^[0-9]{1,6}$ && $first =~ ^[0-9]{1,12}$ ]] || return 0    # (a note it can't read: no loop again)
+    [ "$why" != offline ] || [ "$tries" -ge "$HEAL_TRIES" ] || [ $(( $(date +%s) - first )) -ge "$HEAL_DAY" ]
+}
+# venv_heal_due DIR: stale, and the login service still tries it.
+venv_heal_due() {
+    venv_stale "$1" && ! heal_given_up "$1"
+}
 # The venvs Frame Tweaks makes (a tweak's own folder of them: add it here).
 ft_venvs() {
     printf '%s\n' "$TWEAKS_VENV" "$QT_VENV" "$HOME/.local/share/frame-tweaks/parakeet/venv"
 }
-# any_venv_stale: one of them is (the login service's question before it takes the lock and logs).
+# any_venv_stale: one of them is, and still tried at login (venv_heal_due: the login service's
+# question before it takes the lock and logs).
 any_venv_stale() {
     local venv
-    while IFS= read -r venv; do venv_stale "$venv" && return 0; done < <(ft_venvs)
+    while IFS= read -r venv; do venv_heal_due "$venv" && return 0; done < <(ft_venvs)
     return 1
 }
 # venv_lock DIR / venv_unlock: one setup of a venv at a time. The login service can be
@@ -657,9 +687,9 @@ heal_venv_locked() {
     have=$(venv_python_version "$venv") || return 0
     site="$venv/lib/python$have/site-packages"
     # (a heal that got as far as the new venv but not through pip: what it was to install)
-    [ ! -f "$pending" ] || mapfile -t names < <(grep -v '^$' "$pending")
+    [ ! -f "$pending" ] || mapfile -t names < <(grep -v -e '^$' -e '^#' "$pending")
     if [ -f "$pending" ] && [ "$have" = "$(system_python_version)" ]; then
-        [ ${#names[@]} -eq 0 ] || pip_pinned "$venv" "${names[@]}" || return 1
+        [ ${#names[@]} -eq 0 ] || pip_pinned "$venv" "${names[@]}" || { heal_failed "$pending"; return 1; }
         rm -f "$pending"; return 0
     fi
     # (the packages asked for, not what they pulled in: pip marks those REQUESTED)
@@ -706,18 +736,22 @@ for m in sys.argv[1:]: importlib.import_module(m)' "${mods[@]}" 2>/dev/null; the
     # is up, was never tried again, neither by the service's restart nor by ./install.sh repair.
     # Written after the last new_venv: its --clear empties the folder. Removed once pip got them.)
     printf '%s\n' "${names[@]}" > "$pending" || return 1
-    pip_pinned "$venv" "${names[@]}" || return 1
+    pip_pinned "$venv" "${names[@]}" || { heal_failed "$pending"; return 1; }
     rm -f "$pending"
 }
 # heal_venvs: every stale venv of Frame Tweaks' healed, saying which (one line each); 1 if one
 # couldn't be. Then the openvr bindings linked again to SteamVR's library (heal_venv moves the
 # link with the package, but a reinstall makes the folder anew), and the tweaks' services on them
 # started again (heal_units).
+# --login (the login service): not one whose tries it has given up (heal_given_up), and says so
+# once, as it gives up.
 heal_venvs() {
-    local venv bad=0 have now healed=()
+    local venv bad=0 have now healed=() login=
+    [ "${1:-}" != --login ] || login=1
     now=$(system_python_version)
     while IFS= read -r venv; do
         venv_stale "$venv" || continue
+        [ -z "$login" ] || ! heal_given_up "$venv" || continue
         have=$(venv_python_version "$venv")
         if [ "$have" = "$now" ]; then           # (.ft-heal-pending: an earlier heal's pip failed)
             say "$(t 'Installing the packages of %s again, which an earlier move to Python %s could not download' "${venv/#$HOME/\~}" "$now")"
@@ -730,6 +764,9 @@ heal_venvs() {
                 { ensure_openvr "$venv" || true; }
         else
             warn "$(t "%s couldn't be moved to Python %s: ./install.sh repair tries again." "${venv/#$HOME/\~}" "$now")"; bad=1
+            if [ -n "$login" ] && heal_given_up "$venv"; then
+                warn "$(t "%s is no longer tried again at each login." "${venv/#$HOME/\~}")"
+            fi
         fi
     done < <(ft_venvs)
     [ ${#healed[@]} -eq 0 ] || heal_units "${healed[@]}"

@@ -273,7 +273,9 @@ WantedBy=default.target
 """
 # (At each login, before anything needs them: oneshot, so the tweaks' services it starts again
 # come after it. On a failure, again two minutes later: at a login the network may not be up yet,
-# and a venv that can't be moved offline needs PyPI.)
+# and a venv that can't be moved offline needs PyPI. Each try after that waits longer, up to 2
+# hours (systemd 254's RestartSteps; an older one ignores them and keeps to 2 minutes), and
+# lib/common.sh heal_given_up ends the tries: only offline, 10 at most, over a day at most.)
 HEAL_UNIT = """\
 [Unit]
 Description=Frame Tweaks: its Python venvs moved to SteamOS's Python after an update
@@ -285,6 +287,8 @@ ExecCondition=/usr/bin/test -f {script}
 ExecStart=/bin/bash {script} _heal
 Restart=on-failure
 RestartSec=120
+RestartSteps=6
+RestartMaxDelaySec=2h
 
 [Install]
 WantedBy=default.target

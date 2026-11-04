@@ -302,26 +302,72 @@ class TurnedOnAgain(PatchesHonourTheSwitch):
 class SettingsFileGone(unittest.TestCase):
     """Found in a bug hunt: unticked (the uninstall deletes the settings file) and ticked again
     before the watcher's next pass, the page kept enabled: false: the patch stayed off while its
-    status said on. A file that's gone now takes the page's copy with it."""
+    status said on. A file that's gone now takes the page's copy with it, but only a copy that
+    came from the file: Scroll strips without the sftConfig binding keeps a change on the page
+    alone, which with no file yet the watcher deleted within 5 s."""
+
+    def run_passes(self, name, page, *files):
+        """The watcher's passes over NAME's settings file, one for each of files (its text, or
+        None for no file), after page (JS run first); the page's settings and how often the
+        patch was told."""
+        sft = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sft_switch2")
+        exprs = []
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / f"{name}.json"
+            for text in files:
+                if text is None:
+                    f.unlink(missing_ok=True)
+                else:
+                    f.write_text(text)
+                exprs.append(sft.config_expr(name, f))
+        self.assertNotIn(None, exprs)
+        code = (f"globalThis.window = globalThis; let told = 0;"
+                f"window.__sftPatches = {{ {json.dumps(name)}: {{ configChanged: () => told++ }} }};"
+                f"{page};"
+                + "".join(f"eval({json.dumps(e)});" for e in exprs)
+                + "console.log(JSON.stringify({ conf: window.__sftPatchConfig, told }));")
+        r = subprocess.run(["node", "-e", code], capture_output=True, text=True, timeout=60)
+        return json.loads(r.stdout or "null") or r.stderr
 
     def test_the_pages_copy_goes_with_the_file(self):
-        sft = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sft_switch2")
+        out = self.run_passes("curvature", "window.__sftPatchConfig = { other: { x: 1 } }",
+                              '{"enabled": false}', None, None)
+        self.assertEqual(out, {"conf": {"other": {"x": 1}}, "told": 2})     # (set, then gone; once each)
+
+    def test_a_saved_change_goes_with_the_file_too(self):
+        # (the page changed it and saved it through sftConfig: equal to the file, the file's from then on)
+        out = self.run_passes("curvature", "window.__sftPatchConfig = { curvature: { enabled: false } }",
+                              '{"enabled": false}', None)
+        self.assertEqual(out, {"conf": {}, "told": 1})
+
+    def test_an_unsaved_change_on_the_page_stays(self):
+        out = self.run_passes("scroll-strips", "window.__sftPatchConfig = { 'scroll-strips': { vertical: 'left' } }",
+                              None, None)
+        self.assertEqual(out, {"conf": {"scroll-strips": {"vertical": "left"}}, "told": 0})
+
+    def test_a_change_on_the_page_since_the_file_stays(self):
+        # (from the file, then changed on the page alone: a new object, which a pass with no file leaves)
+        sft = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sft_switch4")
         with tempfile.TemporaryDirectory() as d:
-            expr = sft.config_expr("curvature", Path(d) / "curvature.json")
-        self.assertIsNotNone(expr)
-        code = ("globalThis.window = globalThis; let told = 0;"
-                "window.__sftPatchConfig = { curvature: { enabled: false }, other: { x: 1 } };"
-                "window.__sftPatches = { curvature: { configChanged: () => told++ } };"
-                f"eval({json.dumps(expr)});"
-                "console.log(JSON.stringify({ conf: window.__sftPatchConfig, told }));")
+            f = Path(d) / "scroll-strips.json"
+            f.write_text('{"vertical": "right"}')
+            first = sft.config_expr("scroll-strips", f)
+            f.unlink()
+            gone = sft.config_expr("scroll-strips", f)
+        code = ("globalThis.window = globalThis;"
+                f"eval({json.dumps(first)});"
+                "window.__sftPatchConfig['scroll-strips'] = { ...window.__sftPatchConfig['scroll-strips'], vertical: 'left' };"
+                f"eval({json.dumps(gone)});"
+                "console.log(JSON.stringify(window.__sftPatchConfig));")
         r = subprocess.run(["node", "-e", code], capture_output=True, text=True, timeout=60)
-        self.assertEqual(json.loads(r.stdout), {"conf": {"other": {"x": 1}}, "told": 1}, r.stderr)
+        self.assertEqual(json.loads(r.stdout or "null"), {"scroll-strips": {"vertical": "left"}}, r.stderr)
 
     def test_a_garbled_file_leaves_the_page_alone(self):
         sft = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sft_switch3")
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "curvature.json").write_text("{nope")
             self.assertIsNone(sft.config_expr("curvature", Path(d) / "curvature.json"))
+
 
 if __name__ == "__main__":
     unittest.main()

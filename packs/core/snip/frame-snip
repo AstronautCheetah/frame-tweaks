@@ -886,18 +886,34 @@ def pasted_content():
     img = QImage.fromData(value)
     if img.isNull():
         return "bad-image", None
-    img = on_white(img)             # (shown so on the panel too: dark text on its dark background was lost)
+    img = on_backdrop(img)          # (shown so on the panel too: dark text on its dark background was lost)
     return "image", (img, narration_text(img))
 
 
-def on_white(img):
-    """img with any transparency laid on white. A copied picture (a logo, a diagram) is often
-    black text on transparent pixels, whose colour is black too: it read as "the snip is black"
-    and Tesseract saw black on black."""
+DARK_BACKDROP = QColor(32, 32, 32)   # (not black: looks_black would call a few light glyphs on it "the snip is black")
+
+
+def on_backdrop(img):
+    """img with any transparency laid on white, or on dark grey when what's drawn is mostly light.
+    A copied picture (a logo, a diagram) is often text on transparent pixels, whose colour is
+    black: black text read as "the snip is black", Tesseract seeing black on black. On white
+    always, a dark theme's logo or text (light glyphs) went white on white: no text, and a blank
+    box on the panel. So by the mean lightness of the pixels drawn (alpha over half)."""
     if not img.hasAlphaChannel():
         return img
+    # (a sample, at most 256 px a side, unblended: Fast keeps each pixel's own alpha)
+    small = img.scaled(256, 256, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation) \
+        if max(img.width(), img.height()) > 256 else img
+    small = small.convertToFormat(QImage.Format.Format_ARGB32)
+    bpl, w, h = small.bytesPerLine(), small.width(), small.height()
+    data = bytes(small.constBits().asstring(bpl * h))
+    rows = b"".join(data[y * bpl:y * bpl + 4 * w] for y in range(h))
+    # (ARGB32 is a 32-bit 0xAARRGGBB word: B, G, R, A in memory on the Frame's little-endian CPU)
+    lit = [299 * r + 587 * g + 114 * b for b, g, r, a in zip(rows[0::4], rows[1::4], rows[2::4], rows[3::4])
+           if a > 128]
+    light = bool(lit) and sum(lit) / len(lit) > 128 * 1000
     out = QImage(img.size(), QImage.Format.Format_RGB32)
-    out.fill(QColor("white"))
+    out.fill(DARK_BACKDROP if light else QColor("white"))
     p = QPainter(out)
     p.drawImage(0, 0, img)
     p.end()
