@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""taskbar-guard: Desktop Recovery's watch. It brings the desktop-mode taskbar back by itself when
+"""taskbar-guard: Desktop & VR Recovery's watch. It brings the desktop-mode taskbar back by itself when
 plasmashell (the taskbar, system tray and desktop) ends while desktop mode goes on.
 
 SteamOS switches its graphics layer (Gamescope WSI) on for every app in desktop mode. Now and
@@ -78,7 +78,7 @@ def restart():
 
 
 def notify(text):
-    subprocess.run(["notify-send", "-a", "Frame Tweaks", _("Desktop Recovery"), text], stderr=subprocess.DEVNULL)
+    subprocess.run(["notify-send", "-a", "Frame Tweaks", _("Desktop & VR Recovery"), text], stderr=subprocess.DEVNULL)
 
 
 class Guard:
@@ -130,14 +130,14 @@ class Guard:
             restarts = [r for r in restarts if t - r < WINDOW]
             if len(restarts) >= LIMIT:
                 self.notify(_("The taskbar keeps closing: it was started again {n} times in {minutes} minutes. "
-                              "Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need "
+                              "Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need "
                               "it.").format(n=LIMIT, minutes=WINDOW // 60))
                 return "gave up"
             restarts.append(t)
             log("plasmashell ended while desktop mode runs: starting it again")
             self.restart()
             shell = self.appears("plasmashell", 15, besides=ended)
-        self.notify(_("The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's "
+        self.notify(_("The taskbar couldn't be started again. Press Restart taskbar on Desktop & VR Recovery's "
                       "row in Frame Tweaks to try once more."))
         return "no plasmashell"
 

@@ -1,35 +1,38 @@
 ---
-title: Desktop Recovery
+title: Desktop & VR Recovery
 emoji: 🛠️
 category: System
 tier: core
-summary: "Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+summary: "Brings back a desktop-mode taskbar that has gone missing, and a VR session whose Steam stopped starting"
 what: >-
   Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch
   starts it again by itself when it closes while desktop mode runs, and one button, **Restart
-  taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one.
+  taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one. And one command,
+  `recover-session`, brings back a VR session left with only the room or the backdrop in the
+  headset, without a reboot.
 why: >-
   In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched
   inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar
-  disconnected (a SteamOS bug, not something you did).
+  disconnected (a SteamOS bug, not something you did). In VR, when the session's D-Bus goes down
+  (SteamOS 0.5.7's beta does this as VLC starts), Steam keeps failing to start until a reboot.
 author: Frame Tweaks
 icon: {theme: tools}
 run: {label: Restart taskbar}
 processes: ['^[^ ]*python3 ~/.local/bin/taskbar-guard$']
 changes: >-
-  `~/.local/bin/restart-plasmashell`, `~/.local/bin/taskbar-guard`, and its autostart entry
-  `~/.config/autostart/frame-tweaks-taskbar-guard.desktop`
+  `~/.local/bin/restart-plasmashell`, `~/.local/bin/taskbar-guard`, its autostart entry
+  `~/.config/autostart/frame-tweaks-taskbar-guard.desktop`, and `~/.local/bin/recover-session`
 access: –
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall tools`"
 test: {offline: true}
 ---
-# Desktop Recovery
+# Desktop & VR Recovery
 
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
-Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one.
+Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one. And one command, `recover-session`, brings back a VR session left with only the room or the backdrop in the headset, without a reboot.
 
-**Why on a Steam Frame:** In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did).
+**Why on a Steam Frame:** In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did). In VR, when the session's D-Bus goes down (SteamOS 0.5.7's beta does this as VLC starts), Steam keeps failing to start until a reboot.
 <!-- /generated:intro -->
 
 ## Install
@@ -54,6 +57,36 @@ restart-plasmashell
 If `plasmashell` is still running, it's closed and started again, so this also helps when the
 taskbar is frozen rather than gone (a frozen one that doesn't close within 5 seconds is killed).
 
+### A VR session that won't come back
+If the headset shows only the room or the backdrop, with no Steam menus, and nothing brings them
+back, run in a terminal (over SSH from another computer, or in desktop mode's Konsole):
+
+```sh
+recover-session
+```
+
+It does only what's needed, and says what it did:
+
+1. **Puts the session's display settings back** when they're gone, copied from SteamVR's server,
+   which still runs with them. Without them Steam can't find its display and stops at once,
+   again and again.
+2. **Clears the failed services** (Steam's, the wallet's background service) and waits until Steam
+   stays up.
+3. **Restarts SteamVR**, so its dashboard and the overlays start clean. `recover-session
+   --keep-steamvr` leaves it running.
+4. **Reconnects Bluetooth headphones that came back for calls only** (they say "Call ended" every
+   half minute, and sound flat): connected again, they play in high quality.
+
+If it can't (no program of the session has the settings any more, or Steam still won't start), it
+says so: then restart the Frame.
+
+#### Why the session breaks
+On SteamOS 0.5.7's beta, launching VLC (the Flatpak) in VR ran the session's D-Bus out of file
+descriptors within two seconds, and it went down; every program on it stopped, Steam's
+interface too. Gamescope's cleanup then removed the session's display settings while gamescope
+itself kept running, so each new Steam found no display. Headphones that reconnected meanwhile
+found no high-quality audio profile to use. It's a SteamOS bug, not Frame Tweaks'.
+
 ## How it works
 In the Frame's nested desktop, `plasmashell` isn't a systemd service, so nothing restarts it
 after a crash. It also has to be started with the desktop session's own environment and D-Bus.
@@ -76,7 +109,8 @@ experienced a fatal error" from `plasmashell`). Other apps can be disconnected t
 the taskbar is the one you notice. It's a SteamOS bug, not Frame Tweaks'.
 
 ## Good to know
-- It only works while desktop mode is running; otherwise it says it found no Plasma session.
+- **Restart taskbar** only works while desktop mode is running; otherwise it says it found no
+  Plasma session. `recover-session` only works while the VR session runs.
 - Installed while desktop mode runs, the watch starts at once; otherwise with the next desktop
   mode.
 
@@ -84,7 +118,7 @@ the taskbar is the one you notice. It's a SteamOS bug, not Frame Tweaks'.
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** `~/.local/bin/restart-plasmashell`, `~/.local/bin/taskbar-guard`, and its autostart entry `~/.config/autostart/frame-tweaks-taskbar-guard.desktop`
+- **Changes:** `~/.local/bin/restart-plasmashell`, `~/.local/bin/taskbar-guard`, its autostart entry `~/.config/autostart/frame-tweaks-taskbar-guard.desktop`, and `~/.local/bin/recover-session`
 - **Undo:** `./install.sh uninstall tools`
 <!-- /generated:changes -->
 

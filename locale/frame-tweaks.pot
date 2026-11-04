@@ -5549,17 +5549,17 @@ msgstr ""
 
 #: packs/core/tools/README.md
 msgid ""
-"Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+"Brings back a desktop-mode taskbar that has gone missing, and a VR session whose Steam stopped starting"
 msgstr ""
 
 #: packs/core/tools/README.md
 msgid ""
-"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
+"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one. And one command, `recover-session`, brings back a VR session left with only the room or the backdrop in the headset, without a reboot."
 msgstr ""
 
 #: packs/core/tools/README.md
 msgid ""
-"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
+"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did). In VR, when the session's D-Bus goes down (SteamOS 0.5.7's beta does this as VLC starts), Steam keeps failing to start until a reboot."
 msgstr ""
 
 #: packs/core/tools/README.md
@@ -5583,6 +5583,62 @@ msgid ""
 "Watching the taskbar: if it closes while desktop mode runs, it comes back by itself."
 msgstr ""
 
+#: packs/core/tools/recover-session
+msgid "Couldn't reconnect it: turn it off and on."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid ""
+"Put back the VR session's display settings (%d of them, from %s), which Steam needs to start."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid ""
+"Reconnecting %s, connected for calls only, so it plays in high quality again…"
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "Reset the failed %s."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "Restarting SteamVR, so its dashboard and overlays start clean…"
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "Steam is running."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "Steam still doesn't stay up (see %s): restart the Frame."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "SteamVR didn't restart: restart it from Steam."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid ""
+"The VR session isn't running: nothing to recover (in desktop mode, or a reboot brings it back)."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "The VR session looks fine: nothing to recover."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid ""
+"The session's display settings are gone and no program of the session still has them: restart the Frame."
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "Waiting for Steam to start…"
+msgstr ""
+
+#: packs/core/tools/recover-session
+msgid "recover-session [--keep-steamvr]"
+msgstr ""
+
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
 msgstr ""
@@ -5593,6 +5649,10 @@ msgstr ""
 
 #: packs/core/tools/restart-plasmashell
 msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
+msgstr ""
+
+#: packs/core/tools/status.sh
+msgid "installed without recover-session (an older version): ↻ adds it"
 msgstr ""
 
 #: packs/core/tools/status.sh
@@ -5609,17 +5669,17 @@ msgid "installed; watching the taskbar in desktop mode"
 msgstr ""
 
 #: packs/core/tools/taskbar-guard packs/core/tools/README.md
-msgid "Desktop Recovery"
+msgid "Desktop & VR Recovery"
 msgstr ""
 
 #: packs/core/tools/taskbar-guard
 msgid ""
-"The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+"The taskbar couldn't be started again. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks to try once more."
 msgstr ""
 
 #: packs/core/tools/taskbar-guard
 msgid ""
-"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need it."
 msgstr ""
 
 #: packs/core/vr-dashboard/README.md

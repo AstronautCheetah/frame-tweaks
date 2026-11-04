@@ -78,3 +78,51 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "SteamVR not running"
 - New in `lib/vrbindings.py:497`
   - now: "unknown command: {cmd}"
+
+## 2026-11-04
+- New in `lib/recover-session.sh:102`
+  - now: "Steam still doesn't stay up (see %s): restart the Frame."
+- New in `lib/recover-session.sh:105`
+  - now: "Steam is running."
+- New in `lib/recover-session.sh:110`
+  - now: "Restarting SteamVR, so its dashboard and overlays start clean…"
+- New in `lib/recover-session.sh:111`
+  - now: "SteamVR didn't restart: restart it from Steam."
+- New in `lib/recover-session.sh:119`
+  - now: "Reconnecting %s, connected for calls only, so it plays in high quality again…"
+- New in `lib/recover-session.sh:122`
+  - now: "Couldn't reconnect it: turn it off and on."
+- New in `lib/recover-session.sh:126`
+  - now: "The VR session looks fine: nothing to recover."
+- New in `lib/recover-session.sh:69`
+  - now: "recover-session [--keep-steamvr]"
+- New in `lib/recover-session.sh:72`
+  - now: "The VR session isn't running: nothing to recover (in desktop mode, or a reboot brings it back)."
+- New in `lib/recover-session.sh:79`
+  - now: "Put back the VR session's display settings (%d of them, from %s), which Steam needs to start."
+- New in `lib/recover-session.sh:83`
+  - now: "The session's display settings are gone and no program of the session still has them: restart the Frame."
+- New in `lib/recover-session.sh:90`
+  - now: "Reset the failed %s."
+- New in `lib/recover-session.sh:96`
+  - now: "Waiting for Steam to start…"
+- Changed in `packs/core/tools/README.md`
+  - was: "Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+  - now: "Brings back a desktop-mode taskbar that has gone missing, and a VR session whose Steam stopped starting"
+- Changed in `packs/core/tools/README.md`
+  - was: "Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
+  - now: "Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one. And one command, `recover-session`, brings back a VR session left with only the room or the backdrop in the headset, without a reboot."
+- Changed in `packs/core/tools/README.md`
+  - was: "In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
+  - now: "In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did). In VR, when the session's D-Bus goes down (SteamOS 0.5.7's beta does this as VLC starts), Steam keeps failing to start until a reboot."
+- New in `packs/core/tools/status.sh:5`
+  - now: "installed without recover-session (an older version): ↻ adds it"
+- Changed in `packs/core/tools/taskbar-guard:132`
+  - was: "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+  - now: "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need it."
+- Changed in `packs/core/tools/taskbar-guard:140`
+  - was: "The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+  - now: "The taskbar couldn't be started again. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks to try once more."
+- Changed in `packs/core/tools/taskbar-guard:81`
+  - was: "Desktop Recovery"
+  - now: "Desktop & VR Recovery"

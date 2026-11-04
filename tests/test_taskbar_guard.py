@@ -1,4 +1,4 @@
-"""Desktop Recovery's taskbar watch (packs/core/tools/taskbar-guard) starts the taskbar again when
+"""Desktop & VR Recovery's taskbar watch (packs/core/tools/taskbar-guard) starts the taskbar again when
 it closes while desktop mode runs, and only then: not when something else already started a new
 one, not when desktop mode itself is ending, and not over and over for one that can't start. Run
 against a pretend desktop (its processes, clock and restarts), and the program itself once with

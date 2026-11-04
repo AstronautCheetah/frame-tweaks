@@ -1,14 +1,15 @@
 #!/bin/bash
-# Desktop Recovery: restart-plasmashell (the Restart taskbar button), and taskbar-guard, which runs
-# it by itself when the taskbar closes while desktop mode goes on.
+# Desktop & VR Recovery: restart-plasmashell (the Restart taskbar button), taskbar-guard, which runs
+# it by itself when the taskbar closes while desktop mode goes on, and recover-session, for a VR
+# session whose D-Bus went down under it.
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 ensure_path
 install_i18n
-install -m755 "$TWEAK_DIR/restart-plasmashell" "$TWEAK_DIR/taskbar-guard" "$BIN/"
-say "$(t 'Installed %s' restart-plasmashell)"
+install -m755 "$TWEAK_DIR/restart-plasmashell" "$TWEAK_DIR/taskbar-guard" "$TWEAK_DIR/recover-session" "$BIN/"
+say "$(t 'Installed %s' "restart-plasmashell, recover-session")"
 # The watch starts with desktop mode (KDE autostart: in its environment, as plasmashell needs).
 printf '%s\n' "[Desktop Entry]" "Type=Application" "Name=Taskbar watch" \
-    "Comment=Brings the taskbar back if it closes (Frame Tweaks, Desktop Recovery)" \
+    "Comment=Brings the taskbar back if it closes (Frame Tweaks, Desktop & VR Recovery)" \
     "Exec=systemd-cat -t taskbar-guard $BIN/taskbar-guard" "X-KDE-autostart-phase=2" "NoDisplay=true" |
     write_file "$HOME/.config/autostart/frame-tweaks-taskbar-guard.desktop"
 # And now, if desktop mode is running.

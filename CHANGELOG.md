@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+- **Desktop & VR Recovery brings back a broken VR session** (Desktop Recovery before): when the
+  headset shows only the room or the backdrop and Steam won't start (SteamOS 0.5.7's beta does
+  this as VLC starts), `recover-session`, over SSH or in desktop mode's Konsole, puts the
+  session's display settings back, clears the failed services, restarts SteamVR and reconnects
+  Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
+
 ### Fixed
 - **A SteamOS update that moves Python on no longer breaks the tweaks written in Python:** after
   SteamOS 0.5.7's beta went from Python 3.12 to 3.14, Dictation's controller button, Arrow Pad,

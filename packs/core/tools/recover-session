@@ -1,0 +1,141 @@
+#!/bin/bash
+# recover-session: bring the VR session back after the session's D-Bus went down
+# under it, without a reboot. Seen on SteamOS 0.5.7's beta (launching VLC from the Flatpak ran the
+# user bus out of file descriptors in two seconds): every program on the bus aborted, Steam's
+# interface with them. Gamescope's cleanup then removed DISPLAY and its other variables from the
+# user manager's environment while gamescope itself went on running, so systemd restarted Steam
+# hundreds of times, each copy "Unable to open X11 display", and the headset showed only the
+# room or the backdrop. Programs started by D-Bus activation (ksecretd: the wallet) failed the
+# same way. Bluetooth headphones that reconnected while PipeWire's A2DP endpoints were gone came
+# back with the call profile only (HSP/HFP): "Call ended" every half minute.
+#
+# Each step only when it's needed, saying what it did:
+#   1. the session's variables put back, from a process still running in it (SteamVR's server,
+#      started with them), when the user manager's environment has no DISPLAY;
+#   2. Steam's and other failed user services' failures reset, then Steam given a minute to stay up;
+#   3. SteamVR restarted (its dashboard and its overlays start clean, the tweaks' patches with them),
+#      when step 1 or 2 had something to do, unless --keep-steamvr;
+#   4. Bluetooth audio devices on the call profile only, though they offer A2DP, reconnected.
+# Run from a terminal or over SSH: with Steam down, the headset has no window to run it from.
+# Part of Desktop Recovery (packs/core/tools), installed as ~/.local/bin/recover-session: on its
+# own there, as restart-plasmashell is, so it runs over SSH with nothing else of Frame Tweaks.
+# Translations (lib/i18n.sh; the copy install_i18n puts here), else English
+# shellcheck source=/dev/null
+source "$HOME/.local/share/frame-tweaks/i18n/i18n.sh" 2>/dev/null ||
+    t() { local f=$1; shift; if [ $# -eq 0 ]; then printf '%s' "$f"; else printf -- "$f" "$@"; fi; }
+say()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
+# (the user manager through its own bus: over SSH, or from desktop mode's nested session, the
+# environment may point elsewhere; lib/common.sh sysctl_user does the same)
+sysctl_user() {
+    XDG_RUNTIME_DIR="/run/user/$(id -u)" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus" systemctl --user "$@"
+}
+PROC=${FRAME_TWEAKS_PROC:-/proc}     # (another, for the tests)
+
+# The variables a gamescope session sets for the programs in it (start-gamescope-session and
+# gamescope): the ones Steam needs to find its display, and the ones it reads about gamescope.
+SESSION_VARS='^(DISPLAY|GAMESCOPE_[A-Z0-9_]+|STEAM_[A-Z0-9_]+|SDL_VIDEO_[A-Z0-9_]+|XCURSOR_[A-Z]+|XDG_CURRENT_DESKTOP)='
+
+# session_vars_of PID: that process's session variables, one NAME=value per line (nothing when
+# it has no DISPLAY: not a process of the session).
+session_vars_of() {
+    local vars
+    vars=$(tr '\0' '\n' < "$PROC/$1/environ" 2>/dev/null | grep -E "$SESSION_VARS") || return 1
+    grep -q '^DISPLAY=' <<< "$vars" || return 1
+    printf '%s\n' "$vars"
+}
+
+# session_source: the pid of a process still in the session to copy from: SteamVR's server
+# (started by the session, it outlives Steam's restarts), else the newest of Steam's web helper or
+# SteamVR's compositor that has the variables. Its X display must still exist.
+session_source() {
+    local pid disp
+    for pid in $(pgrep -u "$(id -u)" -x vrserver) $(pgrep -u "$(id -u)" -n -f 'steamwebhelper|vrcompositor'); do
+        disp=$(session_vars_of "$pid" | sed -n 's/^DISPLAY=:\{0,1\}//p') || continue
+        [ -n "$disp" ] && [ -S "/tmp/.X11-unix/X${disp%%.*}" ] && { echo "$pid"; return 0; }
+    done
+    return 1
+}
+
+# call_only_devices: from `pactl list cards` on stdin, the Bluetooth addresses (AA:BB:…) of the
+# cards with a headset profile and no A2DP one: connected for calls only.
+call_only_devices() {
+    awk '
+        function done_card() { if (mac != "" && headset && !a2dp) print mac; mac = ""; headset = a2dp = 0 }
+        /^Card #/ { done_card() }
+        /^[ \t]+Name: bluez_card\./ { mac = $2; sub(/^bluez_card\./, "", mac); gsub(/_/, ":", mac) }
+        /^[ \t]+headset-head-unit[^ ]*: / { headset = 1 }
+        /^[ \t]+a2dp-[^ ]*: / { a2dp = 1 }
+        END { done_card() }'
+}
+
+steam_failures_since() {     # (Steam's failed starts in the last N seconds)
+    XDG_RUNTIME_DIR="/run/user/$(id -u)" journalctl --user -u steam.service --since "-${1}s" --no-pager -o cat 2>/dev/null | grep -c "Failed with result" || true
+}
+
+main() {
+    local keep_vr='' did='' pid vars mac n
+    case ${1:-} in
+        --keep-steamvr) keep_vr=1 ;;
+        "") ;;
+        *) echo "$(t 'recover-session [--keep-steamvr]')" >&2; return 2 ;;
+    esac
+    sysctl_user is-active --quiet gamescope-session.service ||
+        { say "$(t "The VR session isn't running: nothing to recover (in desktop mode, or a reboot brings it back).")"; return 1; }
+
+    # 1. the session's variables
+    if ! sysctl_user show-environment 2>/dev/null | grep -q '^DISPLAY='; then
+        if pid=$(session_source) && vars=$(session_vars_of "$pid"); then
+            mapfile -t vars <<< "$vars"
+            sysctl_user set-environment "${vars[@]}" &&
+                say "$(t "Put back the VR session's display settings (%d of them, from %s), which Steam needs to start." \
+                    "${#vars[@]}" "$(cat "$PROC/$pid/comm" 2>/dev/null)")"
+            did=1
+        else
+            warn "$(t "The session's display settings are gone and no program of the session still has them: restart the Frame.")"
+            return 1
+        fi
+    fi
+
+    # 2. failed services
+    for n in $(sysctl_user --failed --no-legend --plain 2>/dev/null | awk '{print $1}'); do
+        sysctl_user reset-failed "$n" 2>/dev/null && { say "$(t 'Reset the failed %s.' "$n")"; did=1; }
+    done
+    if [ "$(steam_failures_since 30)" -gt 0 ] || ! sysctl_user is-active --quiet steam.service; then
+        did=1
+        sysctl_user reset-failed steam.service 2>/dev/null || true
+        sysctl_user start --no-block steam.service 2>/dev/null || true
+        say "$(t 'Waiting for Steam to start…')"
+        for n in $(seq 1 12); do
+            sleep 5
+            [ "$n" -ge 6 ] && [ "$(steam_failures_since 25)" -eq 0 ] && sysctl_user is-active --quiet steam.service && break
+        done
+        if [ "$(steam_failures_since 25)" -gt 0 ] || ! sysctl_user is-active --quiet steam.service; then
+            warn "$(t "Steam still doesn't stay up (see %s): restart the Frame." "journalctl --user -u steam.service")"
+            return 1
+        fi
+        say "$(t 'Steam is running.')"
+    fi
+
+    # 3. SteamVR
+    if [ -n "$did" ] && [ -z "$keep_vr" ] && sysctl_user is-active --quiet steamvr.service; then
+        say "$(t 'Restarting SteamVR, so its dashboard and overlays start clean…')"
+        sysctl_user restart steamvr.service 2>/dev/null || warn "$(t "SteamVR didn't restart: restart it from Steam.")"
+    fi
+
+    # 4. Bluetooth audio on calls only
+    if command -v pactl >/dev/null && command -v bluetoothctl >/dev/null; then
+        for mac in $(pactl list cards 2>/dev/null | call_only_devices); do
+            # (only one that offers A2DP: a headset made for calls alone stays as it is)
+            bluetoothctl info "$mac" 2>/dev/null | grep -q '0000110b-' || continue
+            say "$(t 'Reconnecting %s, connected for calls only, so it plays in high quality again…' \
+                "$(bluetoothctl info "$mac" | sed -n 's/^[[:space:]]*Name: //p')")"
+            bluetoothctl disconnect "$mac" >/dev/null 2>&1; sleep 3
+            timeout 30 bluetoothctl connect "$mac" >/dev/null 2>&1 || warn "$(t "Couldn't reconnect it: turn it off and on.")"
+            did=1
+        done
+    fi
+    [ -n "$did" ] || say "$(t 'The VR session looks fine: nothing to recover.')"
+}
+
+[ "${BASH_SOURCE[0]}" != "$0" ] || main "$@"
