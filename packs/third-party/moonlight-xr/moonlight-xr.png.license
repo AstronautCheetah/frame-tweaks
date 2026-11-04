@@ -1,0 +1,6 @@
+moonlight-xr.png: Moonlight XR for Frame's own app icon (app/assets/branding/icon-256.png in its
+release, https://github.com/simplysanatori/moonlight-xr-steam-frame), unchanged. As that folder's
+README says, it is the disc of Moonlight XR's logo (moonlight-xr-logo-transparent.png from
+https://github.com/Gilleece/moonlight-android-xr, by Sean Gilleece), cropped. It is under the GNU
+General Public License v3 (https://www.gnu.org/licenses/gpl-3.0.html), as both projects are, not
+the MIT license of the rest of Frame Tweaks. It is their mark, shown here to identify the app.

@@ -129,6 +129,14 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 - New in `packs/integrations/clipboard/status.sh:22`
   - now: "this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
+- New in `packs/third-party/moonlight-xr/README.md`
+  - now: "A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
+- New in `packs/third-party/moonlight-xr/README.md`
+  - now: "Moonlight XR for Frame"
+- New in `packs/third-party/moonlight-xr/README.md`
+  - now: "Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
+- New in `packs/third-party/moonlight-xr/README.md`
+  - now: "simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
 - New in `packs/third-party/recline/run.sh:15`
   - now: "Not installed: tick Recline and Apply changes first."
 - New in `packs/third-party/recline/run.sh:17`

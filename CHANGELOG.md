@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- **Moonlight XR for Frame:** a new linked tweak in 3rd Party. It installs simplysanatori's native
+  game-streaming client, which shows your PC's desktop or games on a screen in a virtual room,
+  decoded in the Frame's hardware, streamed from Sunshine on the PC (`ujust
+  setup-sunshine` where the PC has it). Its README covers the PC's side and pairing.
+- **Recline's Start button** brings its dashboard panel back when it quit or didn't come back
+  after SteamVR restarted, without restarting SteamVR.
 - **Narrate's Paste reads a picture too, and works without desktop mode:** Paste read only text,
   and only from desktop mode's clipboard, so it found nothing while desktop mode wasn't running.
   It now reads a copied picture like a snip (its text, through Tesseract) as well as text, from

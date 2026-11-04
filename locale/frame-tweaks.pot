@@ -4862,7 +4862,7 @@ msgstr ""
 msgid "Accessibility"
 msgstr ""
 
-#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/moonlight-xr/README.md packs/third-party/cursor/README.md
 msgid "Convenience"
 msgstr ""
 
@@ -6541,7 +6541,7 @@ msgid ""
 "Claude Desktop, Anthropic's official Linux app (arm64), installed into your home folder and updated with one command."
 msgstr ""
 
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/moonlight-xr/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr ""
 
@@ -7246,6 +7246,25 @@ msgstr ""
 
 #: packs/third-party/menu-icons/status.sh
 msgid "%s icon(s) added for the \"+\" menu"
+msgstr ""
+
+#: packs/third-party/moonlight-xr/README.md
+msgid ""
+"A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes."
+msgstr ""
+
+#: packs/third-party/moonlight-xr/README.md
+msgid "Moonlight XR for Frame"
+msgstr ""
+
+#: packs/third-party/moonlight-xr/README.md
+msgid ""
+"Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
+msgstr ""
+
+#: packs/third-party/moonlight-xr/README.md
+msgid ""
+"simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
 msgstr ""
 
 #: packs/third-party/pack.md
