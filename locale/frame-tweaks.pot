@@ -5084,15 +5084,15 @@ msgid ""
 msgstr ""
 
 #: packs/core/snip/frame-snip
-msgid "Couldn't copy (is desktop mode running?)"
-msgstr ""
-
-#: packs/core/snip/frame-snip
 msgid "Couldn't copy the snip"
 msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "Couldn't copy the text"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Couldn't copy to the clipboard."
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -5342,10 +5342,6 @@ msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "no focused window"
-msgstr ""
-
-#: packs/core/snip/frame-snip
-msgid "the desktop isn't available"
 msgstr ""
 
 #: packs/core/snip/frame-snip.desktop

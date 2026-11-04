@@ -88,8 +88,9 @@ you floated) and shows it full size:
 
 The actions:
 
-- **Copy**: the picture, to the clipboard. With [Shared clipboard](../../integrations/clipboard/) installed,
-  you can paste it into VR windows too.
+- **Copy**: the picture, to the clipboard: desktop mode's while it's running (with
+  [Shared clipboard](../../integrations/clipboard/) installed, you can paste it into VR windows
+  too), else the VR session's own, for its floating windows.
 - **Save**: to `~/Pictures/Screenshots/Snip_<date>_<time>.png`.
 - **Copy text**: reads the text in it and copies that.
 - **Narrate**: reads the text aloud, offline, at the speed set under the button (**−** / **+**,
@@ -129,7 +130,8 @@ The panel has:
   the text read from it.
 - **Snip** (the dashed rectangle, as on Arrow Pad): snip something new; it's read in this panel.
 - **Copy image** and **Copy text**.
-- **Paste** (icon): read the clipboard's text instead. It's shown in place of the snip.
+- **Paste** (icon): read the clipboard's text instead (desktop mode's: it needs desktop mode
+  running). It's shown in place of the snip.
 - **⚙ Settings:** Narrate's engine (Piper or eSpeak NG) and language, with **Apply**. The same
   settings are on this tweak's ⚙ button in the Frame Tweaks window, with the reading speed.
 - **Close** (✕), and **Collapse** at either end of the bottom row. Collapse shrinks the panel to a
@@ -165,9 +167,12 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 
 ## Good to know
 
-- Copying needs desktop mode to be running: the clipboard lives there.
-- **Copy text** and the panel's **Paste** use `wl-copy` and `wl-paste` from Homebrew's
-  `wl-clipboard`; installing Screen snip adds it if it isn't there yet.
+- Copying goes to desktop mode's clipboard while desktop mode runs, and otherwise to the VR
+  session's own, where floating VR windows paste from. What's copied there stays until something
+  else is copied: a small Screen snip process holds it meanwhile.
+- With desktop mode running, **Copy text** and the panel's **Paste** use `wl-copy` and
+  `wl-paste` from Homebrew's `wl-clipboard`; installing Screen snip adds it if it isn't there
+  yet.
 - Without SteamVR's OpenVR library, the narration panel opens as an ordinary window instead.
 - If the Speech engine fails on a part (it doesn't start, or makes no sound), Narrate tries that
   part once more, then stops there and says so; **Again** tries again. If SteamVR fails under

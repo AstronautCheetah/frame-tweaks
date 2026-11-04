@@ -164,6 +164,51 @@ class Handover(unittest.TestCase):
         self.assertEqual(fs.made_here(d, "snip-clip-"), d.resolve())
 
 
+class VrClipboard(unittest.TestCase):
+    """Without desktop mode, Copy text and Copy image went nowhere ("Couldn't copy (is desktop mode
+    running?)"): now they go on the VR session's own X clipboard, for its floating windows."""
+
+    def test_text_without_desktop_mode_goes_to_the_vr_session(self):
+        handed = []
+        with mock.patch.object(fs, "nested_wayland", return_value=None), \
+             mock.patch.object(fs, "hand_to_clipboard_owner", side_effect=lambda b, d: handed.append((b, d)) or True), \
+             mock.patch.dict(os.environ, {"DISPLAY": ":0"}):
+            self.assertTrue(fs.copy_text_everywhere("héllo"))
+        self.assertEqual(handed, [({"clip.txt": "héllo".encode()}, ":0")])
+
+    def test_text_with_desktop_mode_still_goes_to_the_desktop(self):
+        with mock.patch.object(fs, "nested_wayland", return_value="/run/x/wayland-0"), \
+             mock.patch.object(fs, "to_clipboard", return_value=True) as wl, \
+             mock.patch.object(fs, "hand_to_clipboard_owner") as owner:
+            self.assertTrue(fs.copy_text_everywhere("hi"))
+        wl.assert_called_once_with(b"hi", "text/plain;charset=utf-8")
+        owner.assert_not_called()
+
+    def test_the_vr_display(self):
+        for env, want in ((":0", ":0"), (":1", ":1"), (":2", ":0"), ("", ":0"), ("host:0", ":0")):
+            with self.subTest(env), mock.patch.dict(os.environ, {"DISPLAY": env}):
+                self.assertEqual(fs.vr_display(), want)
+
+    def test_copied_only_while_the_owner_holds_the_clipboard(self):
+        class Proc:
+            def __init__(self, ends):
+                self.ends = ends
+            def wait(self, timeout):
+                if self.ends:
+                    return 1
+                raise subprocess.TimeoutExpired("frame-snip", timeout)
+        for ends, want in ((True, False), (False, True)):
+            with self.subTest(ends=ends), mock.patch.object(fs.subprocess, "Popen", return_value=Proc(ends)):
+                self.assertIs(fs.hand_to_clipboard_owner({"clip.txt": b"x"}, ":0"), want)
+
+    def test_the_owner_takes_only_an_x_display(self):
+        d = Path(tempfile.mkdtemp(prefix="snip-clip-"))
+        self.addCleanup(lambda: d.exists() and d.rmdir())
+        with mock.patch("builtins.print"):
+            self.assertEqual(fs.x_clipboard_owner(str(d), "remote:0"), 1)
+        self.assertTrue(d.exists())                    # (refused before reading or removing it)
+
+
 class OpenPanel(unittest.TestCase):
     def test_the_panels_socket_takes_only_a_snip_narrate_made(self):
         """A panel is open; a request names a file of yours and a picture in a folder of yours: it

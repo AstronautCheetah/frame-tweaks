@@ -15,6 +15,10 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **Screen snip copies without desktop mode:** Copy, Copy text and Narrate's Copy image and Copy
+  text said "Couldn't copy (is desktop mode running?)" whenever desktop mode wasn't running. They
+  now put the picture or text on the VR session's own clipboard then, where floating VR windows
+  paste from; with desktop mode running, they still go to desktop mode's.
 - **A SteamOS update that moves Python on no longer breaks the tweaks written in Python:** after
   SteamOS 0.5.7's beta went from Python 3.12 to 3.14, Dictation's controller button, Arrow Pad,
   Screen snip, the wallet's lock sync and Parakeet found none of their packages and stopped. At

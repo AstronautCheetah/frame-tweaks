@@ -80,6 +80,9 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "unknown command: {cmd}"
 
 ## 2026-11-04
+- Changed in `packs/core/snip/frame-snip:1226`
+  - was: "Couldn't copy (is desktop mode running?)"
+  - now: "Couldn't copy to the clipboard."
 - New in `packs/core/tray-host/README.md`
   - now: "A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
 - New in `packs/core/tray-host/README.md`

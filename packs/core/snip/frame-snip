@@ -397,17 +397,29 @@ def read_handed(folder, files):
     return out
 
 
-def x_clipboard_owner(folder):
-    """frame-snip --x-clipboard DIR: own the desktop's X clipboard (:2) and offer the files in DIR
-    (clip.png, clip.bmp, clip.html) as image/png, image/bmp and text/html, until something else is
-    copied. Some apps (OnlyOffice) don't take an image offered as PNG alone, which is all wl-copy
-    can do; KWin passes the X clipboard on to Wayland apps too. No focus needed, unlike Wayland."""
+# What the clipboard owner offers, and the file in its folder each comes from: an image in the
+# formats apps look for, or text under the names X apps ask for it by.
+CLIP_FILES = {"image/png": "clip.png", "image/bmp": "clip.bmp", "text/html": "clip.html",
+              "UTF8_STRING": "clip.txt", "text/plain;charset=utf-8": "clip.txt", "text/plain": "clip.txt",
+              "STRING": "clip.txt", "TEXT": "clip.txt"}
+
+
+def x_clipboard_owner(folder, display=":2"):
+    """frame-snip --x-clipboard DIR [DISPLAY]: own an X clipboard and offer the files in DIR
+    (CLIP_FILES: clip.png, clip.bmp, clip.html, clip.txt) until something else is copied. On the
+    desktop's X display (:2, the default): some apps (OnlyOffice) don't take an image offered as
+    PNG alone, which is all wl-copy can do, and KWin passes the X clipboard on to Wayland apps too.
+    On the VR session's (:0): the clipboard of its floating windows, when desktop mode isn't
+    running. No focus needed, unlike Wayland."""
+    if not re.fullmatch(r":\d{1,3}", display):
+        print(f"frame-snip: not an X display: {display}", file=sys.stderr)
+        return 1
     try:
         folder = made_here(folder, "snip-clip-")
     except ValueError as e:
         print(f"frame-snip: {e}", file=sys.stderr)
         return 1
-    files = {"image/png": "clip.png", "image/bmp": "clip.bmp", "text/html": "clip.html"}
+    files = CLIP_FILES
     try:
         found = read_handed(folder, {v: "rb" for v in files.values() if (folder / v).exists()})
     except (OSError, ValueError) as e:
@@ -415,15 +427,18 @@ def x_clipboard_owner(folder):
         return 1
     data = {k: found[v] for k, v in files.items() if v in found}
     auth = next(iter(sorted(RUN.glob("nested_plasma/xauth_*"))), None)
-    if auth:
+    if display == ":2" and auth:
         os.environ["XAUTHORITY"] = str(auth)
+    elif display != ":2" and "nested_plasma" in os.environ.get("XAUTHORITY", ""):
+        # (started from desktop mode: its cookie isn't the VR session's display's)
+        del os.environ["XAUTHORITY"]
     x = ctypes.cdll.LoadLibrary(ctypes.util.find_library("X11") or "libX11.so.6")
     x.XOpenDisplay.restype = ctypes.c_void_p
     x.XInternAtom.restype = ctypes.c_ulong
     x.XCreateSimpleWindow.restype = ctypes.c_ulong
     x.XDefaultRootWindow.restype = ctypes.c_ulong
     x.XGetSelectionOwner.restype = ctypes.c_ulong
-    d = ctypes.c_void_p(x.XOpenDisplay(b":2"))
+    d = ctypes.c_void_p(x.XOpenDisplay(display.encode()))
     if not d.value:
         return 1
     atom = lambda n: x.XInternAtom(d, n.encode(), 0)
@@ -475,9 +490,46 @@ def x_clipboard_owner(folder):
         x.XFlush(d)
 
 
+def vr_display():
+    """The VR session's X display (:0), where its floating windows and their clipboard are: this
+    program's own when it runs there, else :0 (gamescope's first)."""
+    d = os.environ.get("DISPLAY", "")
+    return d if re.fullmatch(r":\d{1,3}", d) and d != ":2" else ":0"
+
+
+def hand_to_clipboard_owner(blobs, display):
+    """Start frame-snip --x-clipboard with blobs ({file name: bytes}) for display; True once it
+    holds the clipboard (it ends at once, False, when the display can't be opened or another
+    program kept the clipboard)."""
+    d = Path(tempfile.mkdtemp(prefix="snip-clip-"))
+    for name, data in blobs.items():
+        (d / name).write_bytes(data)
+    p = subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--x-clipboard", str(d), display],
+                         start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        p.wait(timeout=0.5)                           # (a failed start ends within milliseconds)
+    except subprocess.TimeoutExpired:
+        return True                                   # (still holding it: copied)
+    return False
+
+
+def desktop_running():
+    return nested_wayland() is not None
+
+
+def copy_text_everywhere(text):
+    """Text on the desktop's clipboard (wl-copy) when desktop mode is running (the Shared clipboard
+    tweak passes it on to VR), else on the VR session's own X clipboard."""
+    data = text.encode()
+    if desktop_running():
+        return to_clipboard(data, "text/plain;charset=utf-8")
+    return hand_to_clipboard_owner({"clip.txt": data}, vr_display())
+
+
 def copy_image_everywhere(image):
     """Put an image on the clipboard in the formats apps look for (PNG, BMP, an HTML <img>), via an
-    X clipboard owner on the desktop; plain wl-copy (PNG only) if that can't start."""
+    X clipboard owner on the desktop; plain wl-copy (PNG only) if that can't start. Without desktop
+    mode, on the VR session's own X clipboard, for its floating windows."""
     from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
     import base64
     def encoded(fmt):
@@ -487,14 +539,13 @@ def copy_image_everywhere(image):
         image.save(b, fmt)
         return bytes(buf)
     png = encoded("PNG")
+    blobs = {"clip.png": png, "clip.bmp": encoded("BMP"),
+             "clip.html": f'<img src="data:image/png;base64,{base64.b64encode(png).decode()}">'.encode()}
+    if not desktop_running():
+        return hand_to_clipboard_owner(blobs, vr_display())
     if not list(RUN.glob("nested_plasma/xauth_*")):
         return to_clipboard(png, "image/png")
-    d = Path(tempfile.mkdtemp(prefix="snip-clip-"))
-    (d / "clip.png").write_bytes(png)
-    (d / "clip.bmp").write_bytes(encoded("BMP"))
-    (d / "clip.html").write_bytes(f'<img src="data:image/png;base64,{base64.b64encode(png).decode()}">'.encode())
-    subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--x-clipboard", str(d)], start_new_session=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    hand_to_clipboard_owner(blobs, ":2")
     return True
 
 
@@ -1172,11 +1223,11 @@ class NarrationWindow(QWidget):
         if self.image is None:
             return
         ok = copy_image_everywhere(self.image)
-        tr_text(self.state, N_("Image copied to the clipboard.") if ok else N_("Couldn't copy (is desktop mode running?)"))
+        tr_text(self.state, N_("Image copied to the clipboard.") if ok else N_("Couldn't copy to the clipboard."))
 
     def copy_text(self):
-        ok = to_clipboard(self.text.encode(), "text/plain;charset=utf-8")
-        tr_text(self.state, N_("Text copied to the clipboard.") if ok else N_("Couldn't copy (is desktop mode running?)"))
+        ok = copy_text_everywhere(self.text)
+        tr_text(self.state, N_("Text copied to the clipboard.") if ok else N_("Couldn't copy to the clipboard."))
 
     def paste_text(self):
         text = from_clipboard()
@@ -2013,7 +2064,7 @@ class Snip(QWidget):
     # actions
     def copy_image(self):
         ok = copy_image_everywhere(self.snipped())
-        notify(_("Snip copied") if ok else _("Couldn't copy the snip"), "" if ok else _("the desktop isn't available"))
+        notify(_("Snip copied") if ok else _("Couldn't copy the snip"))
         self.close()
 
     SAVED_TIP_MS = 6000
@@ -2057,7 +2108,7 @@ class Snip(QWidget):
         elif not text:
             return self.no_text(snip, getattr(self, "copy_text_button", None))
         else:
-            ok = to_clipboard(text.encode(), "text/plain;charset=utf-8")
+            ok = copy_text_everywhere(text)
             notify(_("Text copied") if ok else _("Couldn't copy the text"), text)
         self.close()
 
@@ -2195,7 +2246,7 @@ def main():
     if started_by_steam():
         return 0
     if XCLIP:
-        return x_clipboard_owner(sys.argv[2])
+        return x_clipboard_owner(sys.argv[2], *sys.argv[3:4])
     if NARRATE:
         return narrate_panel(sys.argv[2], sys.argv[3])
     app = QApplication(sys.argv[:1])
