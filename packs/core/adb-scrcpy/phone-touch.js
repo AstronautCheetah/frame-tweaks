@@ -15,13 +15,13 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 32;
+  const NAME = 'phone-touch', VERSION = 33;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
   const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
-  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, noButtons: 0, focusPushes: 0, trail: [] };
+  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, noButtons: 0, strayZeros: 0, focusPushes: 0, trail: [] };
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -37,15 +37,18 @@
 
   // A press, then drags, then a let-go: one finger on the phone.
   let touch = null;
-  // A let-go that went missing shows as an event with no button held (ev.buttons 0) while the
-  // touch goes on, but only when this press's events report buttons at all: since an update in
-  // November 2026 the laser's moves say 0 while you hold the trigger, so every press ended at its
-  // first move and a swipe reached the phone as a tap. Until one of its events shows a button,
-  // a touch ends only on a real let-go (mouseup/pointerup) or the next press.
-  const letGoMissing = (ev) => {
-    if (ev.buttons !== 0) { touch.buttons = true; return false; }
+  // A let-go that went missing shows as moves with no button held (ev.buttons 0) while the
+  // touch goes on. But the laser sends one such move right after each press (5 ms later, then its
+  // moves report the button again), and that one ended every press there, so a swipe reached the
+  // phone as a tap. So: only 250 ms of nothing but button-less moves means the let-go was lost; a
+  // touch whose events never show a button at all ends only on a real let-go (mouseup/pointerup)
+  // or the next press.
+  const LOST_LET_GO_MS = 250;
+  const letGoMissing = (ev, now = Date.now()) => {
+    if (ev.buttons !== 0) { touch.buttons = true; touch.zeroSince = 0; return false; }
     if (!touch.buttons) { stats.noButtons++; return false; }
-    return true;
+    if (!touch.zeroSince) { touch.zeroSince = now; stats.strayZeros++; return false; }
+    return now - touch.zeroSince >= LOST_LET_GO_MS;
   };
   const send = (a, ev) => {
     const t = touch, r = t.rect;
@@ -135,7 +138,7 @@
             stats.downs++;
             mark('down');
             if (touch) onUp(ev);                    // a new press ends a touch whose let-go went missing
-            touch = { rect: ev.currentTarget.getBoundingClientRect(), size: c, buttons: ev.buttons !== 0 };
+            touch = { rect: ev.currentTarget.getBoundingClientRect(), size: c, buttons: ev.buttons !== 0, zeroSince: 0 };
             send('down', ev);
             focusMirror(f);
             window.addEventListener('mousemove', onMove, true);
@@ -185,7 +188,7 @@
     const w = pxW * 0.72, x = (pxW - w) / 2, y = pxH * 0.22;
     const press = (k) => { call({ a: 'key', k }); unlock.count = k === 'del' ? Math.max(0, unlock.count - 1)
                                                                : k === 'enter' ? 0 : unlock.count + 1; };
-    const key = (label, k) => el('div', { key: `k${label}`, ...own(() => press(k)), style: {
+    const key = (label, k, tip) => el('div', { key: `k${label}`, ...own(() => press(k)), ...(tip ? { title: T(tip) } : {}), style: {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         height: '30px', margin: '3px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, color: '#fff',
         background: 'rgba(255, 255, 255, 0.12)', border: `1px solid hsla(${h}, 60%, 70%, 0.5)` } }, label);
@@ -199,7 +202,7 @@
         el('div', { ...own(() => { unlock.on = false; unlock.count = 0; }), title: T('Close'),
                     style: { fontSize: '14px', color: '#9aa6b2', padding: '0 4px' } }, '✕')),
       el('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' } },
-        ...digits, key('⌫', 'del'), key('0', '0'), key('↵', 'enter')),
+        ...digits, key('⌫', 'del', N('Delete the last digit')), key('0', '0'), key('↵', 'enter', N('Enter: send the PIN'))),
       el('div', { ...own(() => call({ a: 'show-pin' })), style: { marginTop: '4px', textAlign: 'center',
           padding: '6px', borderRadius: '8px', fontSize: '11px', color: '#e8ecf0', background: 'rgba(255, 255, 255, 0.08)',
           border: `1px solid hsla(${h}, 60%, 70%, 0.35)` } }, T('Wake / show PIN')));
@@ -411,6 +414,7 @@
                              display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
                              border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
+                    title: T(isOpen ? N('Close the settings') : N('Settings: the stream, the buttons and where they go')),
                     ...tap(), onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))));
@@ -537,7 +541,7 @@
                              color: '#e8ecf0', fontFamily: 'inherit', zoom: 0.62, textAlign: 'left' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Android Mirror')),
-            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); }, title: T('Close the settings'),
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },

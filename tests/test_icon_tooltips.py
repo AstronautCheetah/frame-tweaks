@@ -18,7 +18,7 @@ FILES = sorted(ROOT.glob("packs/*/*/*.js"))
 # Being reworked in another change: its gear, its settings' ✕, and the typing pad's ⌫ and ↵ (a
 # label passed to key(), which this check can't see) have no title yet. Take it out of here once
 # they do.
-NOT_YET = {"packs/core/adb-scrcpy/phone-touch.js"}
+NOT_YET = set()
 CALL = re.compile(r"\bel\(\s*'(?:div|span|button)'\s*,")
 OPENERS, CLOSERS = "([{", ")]}"
 

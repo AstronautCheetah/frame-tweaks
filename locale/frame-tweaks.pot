@@ -3415,12 +3415,24 @@ msgstr ""
 msgid "Clipboard with the phone"
 msgstr ""
 
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Close the settings"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Delete the last digit"
+msgstr ""
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Drag to change the order"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Enter: send the PIN"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -3490,6 +3502,10 @@ msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Right"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Settings: the stream, the buttons and where they go"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4954,10 +4970,6 @@ msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Bottom"
-msgstr ""
-
-#: packs/core/scroll-strips/patch.js
-msgid "Close the settings"
 msgstr ""
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md

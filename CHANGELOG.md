@@ -30,10 +30,10 @@
 - **ⓘ and ⚙ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
   window's font has no such symbols, and SteamOS now filled them from a narrow monospace font.
   Noto's symbol fonts draw them now.
-- **Android Mirror swipes again:** since a Steam or SteamVR update, the laser's moves said no
-  button was held while you held the trigger, so each press ended at its first move and a swipe
-  reached the phone as a tap. A press now ends only on its real let-go, unless the laser reports
-  buttons and then shows the let-go went missing.
+- **Android Mirror swipes again:** right after each press, the laser sends one move that says no
+  button is held, and the mirror took it for a let-go that went missing: every press ended
+  there, so a swipe reached the phone as a tap. Only a quarter second of such moves ends a touch
+  now.
 - **Screen snip copies without desktop mode:** Copy, Copy text and Narrate's Copy image and Copy
   text said "Couldn't copy (is desktop mode running?)" whenever desktop mode wasn't running. They
   now put the picture or text on the VR session's own clipboard then, where floating VR windows

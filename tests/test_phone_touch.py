@@ -474,25 +474,32 @@ if __name__ == "__main__":
 
 @unittest.skipUnless(shutil.which("node"), "needs Node.js to run the layer's press logic")
 class PressThroughTheLaser(unittest.TestCase):
-    """Since a November 2026 update the laser's moves report no button held (ev.buttons 0) while
-    the trigger is held: the layer took each first move for a missed let-go, so every press ended
-    there (55 presses, 0 moves, 55 "lost" let-gos on the Frame) and swipes reached the phone as
-    taps. A touch now ends on "no button" only once one of its events showed a button."""
+    """Swipes on the mirror reached the phone as taps: right after each press the laser sends one
+    move with no button held (ev.buttons 0, 5 ms later; then its moves report the button), and the
+    layer took that for a missed let-go, ending every press there (26 presses, 0 moves, 26 "lost"
+    let-gos on the Frame). Only 250 ms of button-less moves ends a touch now."""
 
     def run_js(self, events):
+        """events: [kind, buttons, ms]; what letGoMissing says for each move."""
         js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        ms = re.search(r"const LOST_LET_GO_MS = (\d+);", js)[1]
         body = js.split("const letGoMissing = ", 1)[1].split("\n  };", 1)[0] + "\n  }"
-        code = (f"const stats = {{ noButtons: 0 }}; let touch = null; const letGoMissing = {body};\n"
-                f"const out = []; for (const [kind, buttons] of {json.dumps(events)}) {{\n"
-                "  if (kind === 'down') touch = { buttons: buttons !== 0 };\n"
-                "  else out.push(letGoMissing({ buttons }) ? 'ended' : 'goes on');\n"
+        code = (f"const LOST_LET_GO_MS = {ms}; const stats = {{ noButtons: 0, strayZeros: 0 }}; let touch = null;\n"
+                f"const letGoMissing = {body};\n"
+                f"const out = []; for (const [kind, buttons, t] of {json.dumps(events)}) {{\n"
+                "  if (kind === 'down') touch = { buttons: buttons !== 0, zeroSince: 0 };\n"
+                "  else out.push(letGoMissing({ buttons }, t) ? 'ended' : 'goes on');\n"
                 "}\nconsole.log(JSON.stringify(out));")
         return json.loads(subprocess.run(["node", "-e", code], capture_output=True, text=True, check=True).stdout)
 
-    def test_moves_reporting_no_button_keep_the_touch_going(self):
-        self.assertEqual(self.run_js([["down", 0], ["move", 0], ["move", 0], ["move", 0]]), ["goes on"] * 3)
-        self.assertEqual(self.run_js([["down", 1], ["move", 0]]), ["ended"])
+    def test_the_stray_move_after_a_press_is_not_a_let_go(self):
+        # (as recorded on the Frame: press, a button-less move 5 ms later, then held moves)
+        self.assertEqual(self.run_js([["down", 1, 0], ["move", 0, 5], ["move", 1, 15], ["move", 1, 40], ["move", 1, 65]]),
+                         ["goes on"] * 4)
 
-    def test_a_missed_let_go_still_ends_a_touch_that_reports_buttons(self):
-        self.assertEqual(self.run_js([["down", 0], ["move", 1], ["move", 1], ["move", 0]]),
-                         ["goes on", "goes on", "ended"])
+    def test_a_let_go_that_went_missing_still_ends_the_touch(self):
+        self.assertEqual(self.run_js([["down", 1, 0], ["move", 1, 20], ["move", 0, 300], ["move", 0, 420], ["move", 0, 560]]),
+                         ["goes on", "goes on", "goes on", "ended"])
+
+    def test_moves_that_never_show_a_button_keep_the_touch_going(self):
+        self.assertEqual(self.run_js([["down", 0, 0], ["move", 0, 10], ["move", 0, 900]]), ["goes on"] * 2)

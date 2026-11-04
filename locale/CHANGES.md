@@ -80,6 +80,12 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "unknown command: {cmd}"
 
 ## 2026-11-04
+- New in `packs/core/adb-scrcpy/phone-touch.js:205`
+  - now: "Delete the last digit"
+- New in `packs/core/adb-scrcpy/phone-touch.js:205`
+  - now: "Enter: send the PIN"
+- New in `packs/core/adb-scrcpy/phone-touch.js:417`
+  - now: "Settings: the stream, the buttons and where they go"
 - New in `packs/core/arrowpad/arrowpad.py:382`
   - now: "Down arrow"
 - New in `packs/core/arrowpad/arrowpad.py:382`
