@@ -7179,10 +7179,6 @@ msgid "KnockThru"
 msgstr ""
 
 #: packs/third-party/knockthru/README.md
-msgid "Start"
-msgstr ""
-
-#: packs/third-party/knockthru/README.md
 msgid ""
 "VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
 msgstr ""
@@ -7344,6 +7340,10 @@ msgstr ""
 msgid "Recline"
 msgstr ""
 
+#: packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+msgid "Start"
+msgstr ""
+
 #: packs/third-party/recline/README.md
 msgid ""
 "SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes."
@@ -7352,6 +7352,26 @@ msgstr ""
 #: packs/third-party/recline/README.md
 msgid ""
 "Use VR lying down or reclined; recentering makes your view level and forward"
+msgstr ""
+
+#: packs/third-party/recline/run.sh
+msgid "Already running: its panel is in the SteamVR dashboard."
+msgstr ""
+
+#: packs/third-party/recline/run.sh
+msgid "Could not start Recline's panel: %s says why."
+msgstr ""
+
+#: packs/third-party/recline/run.sh
+msgid "Not installed: tick Recline and Apply changes first."
+msgstr ""
+
+#: packs/third-party/recline/run.sh
+msgid "Started: its panel is in the SteamVR dashboard."
+msgstr ""
+
+#: packs/third-party/recline/run.sh
+msgid "SteamVR is not running: Recline starts with it."
 msgstr ""
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop

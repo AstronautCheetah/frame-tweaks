@@ -22,6 +22,7 @@ experimental: >-
   they changed (the driver doesn't load, or the room view looks tilted while reclined; its panel
   and `reclinectl status` say so) until Recline-VR catches up.
 icon: {file: recline.png}
+run: {label: Start}
 link:
   install: if [ -d ~/Recline-VR/.git ]; then git -C ~/Recline-VR fetch --tags origin; else git clone https://github.com/new-waifu/Recline-VR.git ~/Recline-VR && touch ~/Recline-VR/.git/frame-tweaks-cloned; fi && if [ -n "$FT_LINK_VERSION" ]; then git -C ~/Recline-VR -c advice.detachedHead=false checkout -q "refs/tags/$FT_LINK_VERSION"; else git -C ~/Recline-VR checkout -q main && git -C ~/Recline-VR pull --ff-only; fi && ~/Recline-VR/install.sh
   uninstall: >-
@@ -85,6 +86,11 @@ installs, and doesn't check or change what they install.
   SteamVR's boundary is only right without it. The recline is never kept across SteamVR
   restarts.
 - **Command line:** `reclinectl status` (also `recenter`, `reset`).
+- **Start** on its row in the Frame Tweaks window starts the Recline panel when SteamVR is running
+  and the panel isn't (it quit, or didn't come back after SteamVR restarted: `reclinectl status`
+  says "overlay: NOT running"), without restarting SteamVR, and shows its icon in the dashboard;
+  if it's no longer registered with SteamVR, it's registered again first (`./install.sh run
+  recline` does the same).
 
 Recline-VR's [README](https://github.com/new-waifu/Recline-VR#using-it) has the rest: every panel
 option, the default shortcuts and where `reclinectl` is. (They change with its releases, so

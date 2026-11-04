@@ -129,3 +129,13 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 - New in `packs/integrations/clipboard/status.sh:22`
   - now: "this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
+- New in `packs/third-party/recline/run.sh:15`
+  - now: "Not installed: tick Recline and Apply changes first."
+- New in `packs/third-party/recline/run.sh:17`
+  - now: "SteamVR is not running: Recline starts with it."
+- New in `packs/third-party/recline/run.sh:22`
+  - now: "Already running: its panel is in the SteamVR dashboard."
+- New in `packs/third-party/recline/run.sh:32`
+  - now: "Started: its panel is in the SteamVR dashboard."
+- New in `packs/third-party/recline/run.sh:37`
+  - now: "Could not start Recline's panel: %s says why."
