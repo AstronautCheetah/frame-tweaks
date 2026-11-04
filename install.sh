@@ -188,6 +188,7 @@ ensure_menu_entry() {
     update-desktop-database -q "$apps" 2>/dev/null || true
     touch "$apps" "$icons"     # Steam's "+" menu rescans on these
     ensure_menu_language
+    ensure_heal_service
 }
 # Menu entries in the keyboard's language (lib/i18n.py menus): a systemd path unit relabels them
 # when Steam saves its keyboard layout or its own language (registry.vdf), or a language is chosen
@@ -510,6 +511,24 @@ ensure_tidy_service() {
     sysctl_user daemon-reload >/dev/null 2>&1 || true
     sysctl_user enable frame-tweaks-tidy.service >/dev/null 2>&1 || true
 }
+# The user service that moves Frame Tweaks' venvs to SteamOS's Python at each login, when an
+# update changed it (lib/common.sh heal_venvs): set up with Frame Tweaks itself (its menu entry),
+# enabled, not started; uninstall-self removes it.
+HEAL_UNIT="$HOME/.config/systemd/user/frame-tweaks-heal.service"
+ensure_heal_service() {
+    local text
+    text=$(python3 lib/installer.py unit heal "$REPO_DIR") || return 0
+    printf '%s\n' "$text" | cmp -s - "$HEAL_UNIT" && return 0
+    printf '%s\n' "$text" | write_file "$HEAL_UNIT"
+    sysctl_user daemon-reload >/dev/null 2>&1 || true
+    sysctl_user enable frame-tweaks-heal.service >/dev/null 2>&1 || true
+}
+remove_heal_service() {
+    [[ -f $HEAL_UNIT ]] || return 0
+    sysctl_user disable frame-tweaks-heal.service >/dev/null 2>&1 || true
+    remove_files "$HEAL_UNIT"
+    sysctl_user daemon-reload >/dev/null 2>&1 || true
+}
 remove_tidy_service() {
     [[ -f $TIDY_UNIT ]] || return 0
     sysctl_user disable frame-tweaks-tidy.service >/dev/null 2>&1 || true
@@ -619,6 +638,7 @@ cmd_uninstall_self() {
     else
         remove_menu_entry
         remove_tidy_service
+        remove_heal_service
         rm -f "$QT_VENV/bin/sft-python"; remove_qt_venv
         if [[ -d $HOME/.local/share/frame-tweaks ]]; then
             find "$HOME/.local/share/frame-tweaks" -mindepth 1 -maxdepth 1 ! -name packs -exec rm -rf {} +
@@ -756,6 +776,9 @@ cmd_repair() {
     lifecycle repair "$reason"
     local id line rc fix=() kept=() asks=() left=() done_=() bad=0
     local -A why=()
+    # (a Python change breaks the tweaks on its venvs, though their manifests rightly say they
+    # survive updates: moved first, so the statuses below are the ones after)
+    heal_venvs || true
     bold "$(t 'Checking the installed tweaks')"
     for id in "${IDS[@]}"; do
         line=$(status_of "$id"); rc=$?
@@ -1279,6 +1302,17 @@ cmd_debug_info() {
 # SteamOS / SteamVR internals it relies on are still there (useful after a SteamOS update).
 cmd_check_system() {
     local id code out bad=0
+    local venv have now
+    now=$(system_python_version)
+    while IFS= read -r venv; do
+        have=$(venv_python_version "$venv") || continue
+        if [[ $have == "$now" ]]; then
+            printf '  \e[32m✔\e[0m %-15s %s\n' python "$(t "%s on SteamOS's Python %s" "${venv/#$HOME/\~}" "$now")"
+        else
+            printf '  \e[33m!\e[0m %-15s %s\n' python "$(t '%s is for Python %s, SteamOS has %s: ./install.sh repair moves it' \
+                "${venv/#$HOME/\~}" "$have" "$now")"; bad=1
+        fi
+    done < <(ft_venvs)
     for id in "${IDS[@]}"; do
         [[ -f ${DIR[$id]}/check-system.sh ]] || continue
         status_of "$id" >/dev/null; [[ $? -eq 1 ]] && continue
@@ -1315,6 +1349,7 @@ case ${1:-} in
     debug-info)  cmd_debug_info ;;
     report)      cmd_report ;;
     check-system) cmd_check_system ;;
+    _heal)       take_lock; start_log heal; heal_venvs ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; deps=$(with_deps "$@") || exit 1
                  [[ -z $deps ]] || printf '%s\n' "$deps" | tr "\n" " "; echo ;;
     list)        cmd_list ;;

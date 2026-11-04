@@ -550,6 +550,139 @@ new_venv() {
     "$py" -m venv --clear "$1"
 }
 
+# ---- a SteamOS build with another Python: the venvs moved to it (heal_venvs) -----------------
+# A venv runs SteamOS's /usr/bin/python3 through a link, but its packages sit in
+# lib/pythonX.Y/site-packages for the Python it was made with: when an update moves Python on
+# (SteamOS 0.5.7's beta went from 3.12 to 3.14), every package is gone at once and each tool on
+# the venv fails at its first import, its service restarting until systemd gives up. Their
+# tweaks' manifests rightly say they survive SteamOS updates (all of it is in the home folder),
+# so repair alone would leave them; heal_venvs runs first, there and at each login
+# (frame-tweaks-heal.service).
+system_python_version() {
+    local py=${FRAME_TWEAKS_PYTHON:-/usr/bin/python3}
+    [ -x "$py" ] || py=python3
+    "$py" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null
+}
+# venv_python_version DIR: the X.Y its packages are for (its lib/pythonX.Y; pyvenv.cfg's version
+# says the same, but the folder is what Python looks in). Nothing for no venv there.
+venv_python_version() {
+    local d
+    [ -f "$1/pyvenv.cfg" ] || return 1
+    for d in "$1"/lib/python3.*/site-packages; do
+        [ -d "$d" ] || continue
+        d=${d%/site-packages}; echo "${d##*/python}"; return 0
+    done
+    return 1
+}
+# venv_stale DIR: a venv there, made for another Python than SteamOS's now.
+venv_stale() {
+    local have now
+    have=$(venv_python_version "$1") || return 1
+    now=$(system_python_version) && [ -n "$now" ] || return 1
+    [ "$have" != "$now" ]
+}
+# The venvs Frame Tweaks makes (a tweak's own folder of them: add it here).
+ft_venvs() {
+    printf '%s\n' "$TWEAKS_VENV" "$QT_VENV" "$HOME/.local/share/frame-tweaks/parakeet/venv"
+}
+# heal_venv DIR: the venv made again on SteamOS's Python, with the packages it had. Moved over
+# as they are when none has a compiled part tied to one Python (pure Python, or abi3 like PyQt6's:
+# offline, in a second, at a login with no network yet); else installed again with pip_pinned at
+# the tested versions. Either way each package must import afterwards.
+heal_venv() {
+    local venv=$1 old site have tmp names=() mods=() d n m offline=1
+    have=$(venv_python_version "$venv") || return 0
+    site="$venv/lib/python$have/site-packages"
+    # (the packages asked for, not what they pulled in: pip marks those REQUESTED)
+    for d in "$site"/*.dist-info; do
+        [ -f "$d/REQUESTED" ] || continue
+        n=$(sed -n 's/^Name: *//p' "$d/METADATA" 2>/dev/null | head -1 | tr -d '\r')
+        [ -n "$n" ] || continue
+        case ${n,,} in pip|setuptools|wheel) continue ;; esac
+        names+=("$n")
+        if [ -f "$d/top_level.txt" ]; then
+            while IFS= read -r m; do [ -n "$m" ] && mods+=("$m"); done < "$d/top_level.txt"
+        else
+            mods+=("${n//-/_}")
+        fi
+    done
+    # (a compiled part for one Python: name.cpython-312-aarch64-linux-gnu.so; abi3 and pure ones move)
+    find "$site" -name '*.cpython-3*.so' -print -quit 2>/dev/null | grep -q . && offline=
+    tmp=$(mktemp -d "${venv%/}.heal.XXXXXX") || return 1
+    mv "$site" "$tmp/site-packages" || { rm -rf "$tmp"; return 1; }
+    if ! new_venv "$venv" >/dev/null; then
+        warn "$(t "Couldn't make %s again on this Python." "$venv")"; rm -rf "$tmp"; return 1
+    fi
+    site="$venv/lib/python$(venv_python_version "$venv")/site-packages"
+    if [ -n "$offline" ]; then
+        for d in "$tmp/site-packages"/* "$tmp/site-packages"/.[!.]*; do
+            [ -e "$d" ] || continue
+            case ${d##*/} in pip|pip-*.dist-info|_distutils_hack|distutils-precedence.pth|setuptools|setuptools-*.dist-info) continue ;; esac
+            rm -rf "${site:?}/${d##*/}"; mv "$d" "$site/"
+        done
+        find "$site" -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
+        if [ ${#mods[@]} -eq 0 ] || "$venv/bin/python" -c 'import importlib, sys
+for m in sys.argv[1:]: importlib.import_module(m)' "${mods[@]}" 2>/dev/null; then
+            rm -rf "$tmp"; return 0
+        fi
+        # (moved but not importing: start again, from PyPI)
+        new_venv "$venv" >/dev/null || { rm -rf "$tmp"; return 1; }
+    fi
+    rm -rf "$tmp"
+    [ ${#names[@]} -eq 0 ] || pip_pinned "$venv" "${names[@]}" || return 1
+}
+# heal_venvs: every stale venv of Frame Tweaks' healed, saying which (one line each); 1 if one
+# couldn't be. Then the openvr bindings linked again to SteamVR's library (heal_venv moves the
+# link with the package, but a reinstall makes the folder anew), and the tweaks' services on them
+# started again (heal_units).
+heal_venvs() {
+    local venv bad=0 have now healed=()
+    now=$(system_python_version)
+    while IFS= read -r venv; do
+        venv_stale "$venv" || continue
+        have=$(venv_python_version "$venv")
+        say "$(t 'SteamOS has Python %s now: moving %s from Python %s to it' "$now" "${venv/#$HOME/\~}" "$have")"
+        if heal_venv "$venv"; then
+            healed+=("$venv")
+            "$venv/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' 2>/dev/null &&
+                { ensure_openvr "$venv" || true; }
+        else
+            warn "$(t "%s couldn't be moved to Python %s: ./install.sh repair tries again." "${venv/#$HOME/\~}" "$now")"; bad=1
+        fi
+    done < <(ft_venvs)
+    [ ${#healed[@]} -eq 0 ] || heal_units "${healed[@]}"
+    return $bad
+}
+# heal_units VENV...: the user services whose program runs on one of these venvs (its #! line),
+# out of their failed or restarting state: started again where what starts them runs (a
+# WantedBy= that's active: default.target at a login, steamvr.service while SteamVR runs).
+heal_units() {
+    local f unit prog line wanted venv on
+    for f in "$HOME"/.config/systemd/user/*.service; do
+        [ -f "$f" ] || continue
+        prog=$(sed -n 's/^ExecStart=[-@+!]*//p' "$f" | head -1); prog=${prog%% *}
+        prog=${prog/#%h/$HOME}
+        [ -f "$prog" ] || continue
+        IFS= read -r line < "$prog" || continue
+        on=
+        for venv in "$@"; do [[ $line == "#!$venv/bin/python"* ]] && on=1; done
+        [ -n "$on" ] || continue
+        unit=${f##*/}
+        sysctl_user reset-failed "$unit" 2>/dev/null || true
+        if sysctl_user is-active --quiet "$unit" ||
+           [ "$(sysctl_user show -p SubState --value "$unit" 2>/dev/null)" = auto-restart ]; then
+            sysctl_user restart --no-block "$unit" 2>/dev/null || true
+            continue
+        fi
+        sysctl_user is-enabled --quiet "$unit" 2>/dev/null || continue
+        for wanted in $(sed -n 's/^WantedBy=//p' "$f"); do
+            if sysctl_user is-active --quiet "$wanted" 2>/dev/null; then
+                sysctl_user start --no-block "$unit" 2>/dev/null || true; break
+            fi
+        done
+    done
+}
+
 # Shared venv for the small Python tools that talk D-Bus (jeepney, pure Python).
 TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 # ensure_qt_venv [TITLE [DETAILS]]: PyQt6 in QT_VENV (~280 MB, shared by Arrow Pad, Screen snip,

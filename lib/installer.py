@@ -39,6 +39,7 @@ The files ./install.sh writes for itself are rendered here, so a path is quoted 
 ./install.sh writes them (write_file) and runs systemctl:
 
   installer.py unit tidy REPO     frame-tweaks-tidy.service, running REPO/install.sh tidy
+  installer.py unit heal REPO     frame-tweaks-heal.service, running REPO/install.sh _heal
   installer.py unit menus-path    frame-tweaks-menus.path
   installer.py unit menus-service I18N_PY
                                   frame-tweaks-menus.service, running I18N_PY menus
@@ -262,6 +263,23 @@ ExecStart=/bin/bash {script} tidy
 [Install]
 WantedBy=default.target
 """
+# (At each login, before anything needs them: oneshot, so the tweaks' services it starts again
+# come after it. On a failure, again two minutes later: at a login the network may not be up yet,
+# and a venv that can't be moved offline needs PyPI.)
+HEAL_UNIT = """\
+[Unit]
+Description=Frame Tweaks: its Python venvs moved to SteamOS's Python after an update
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash {script} _heal
+Restart=on-failure
+RestartSec=120
+
+[Install]
+WantedBy=default.target
+"""
 MENUS_PATH = """\
 [Unit]
 Description=Frame Tweaks: menu entries in the keyboard's language
@@ -307,6 +325,8 @@ def unit(name, *args):
     skipped), so a change here rewrites every installed unit once."""
     if name == "tidy" and len(args) == 1:
         return TIDY_UNIT.format(script=systemd_word(args[0] + "/install.sh"))
+    if name == "heal" and len(args) == 1:
+        return HEAL_UNIT.format(script=systemd_word(args[0] + "/install.sh"))
     if name == "menus-path" and not args:
         return MENUS_PATH
     if name == "menus-service" and len(args) == 1:

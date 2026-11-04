@@ -1807,6 +1807,10 @@ msgid "%s has nothing to run"
 msgstr ""
 
 #: install.sh
+msgid "%s is for Python %s, SteamOS has %s: ./install.sh repair moves it"
+msgstr ""
+
+#: install.sh
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr ""
 
@@ -1824,6 +1828,10 @@ msgstr ""
 
 #: install.sh
 msgid "%s needs your sudo password, and your user has none yet."
+msgstr ""
+
+#: install.sh
+msgid "%s on SteamOS's Python %s"
 msgstr ""
 
 #: install.sh
@@ -2297,6 +2305,10 @@ msgid ""
 msgstr ""
 
 #: lib/common.sh
+msgid "%s couldn't be moved to Python %s: ./install.sh repair tries again."
+msgstr ""
+
+#: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
 msgstr ""
 
@@ -2325,6 +2337,10 @@ msgstr ""
 
 #: lib/common.sh
 msgid "Couldn't install %s (see above)."
+msgstr ""
+
+#: lib/common.sh
+msgid "Couldn't make %s again on this Python."
 msgstr ""
 
 #: lib/common.sh
@@ -2373,6 +2389,10 @@ msgstr ""
 #: lib/common.sh
 msgid ""
 "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
+msgstr ""
+
+#: lib/common.sh
+msgid "SteamOS has Python %s now: moving %s from Python %s to it"
 msgstr ""
 
 #: lib/common.sh

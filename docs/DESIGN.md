@@ -514,7 +514,7 @@ exit codes, so the window, the tests and users' habits don't notice.
    check it against both copies it replaced, on generated results. Running the scripts
    themselves from Python waits for stage 4.
 3. **Half done: generated files; plans to come.** The files `install.sh` writes for itself
-   (`frame-tweaks-tidy.service`, `frame-tweaks-menus.path` and `.service`, and the window's menu
+   (`frame-tweaks-tidy.service`, `frame-tweaks-heal.service`, `frame-tweaks-menus.path` and `.service`, and the window's menu
    entry from `share/applications/`) are rendered by `lib/installer.py unit` and
    `desktop-entry`, which quote a path in one place: for systemd (`systemd.syntax`, `%` as `%%`,
    `$` as `$$`) or for a desktop entry's `Exec=` (its spec's quoting, `%%`, then the value's

@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **A SteamOS update that moves Python on no longer breaks the tweaks written in Python:** after
+  SteamOS 0.5.7's beta went from Python 3.12 to 3.14, Dictation's controller button, Arrow Pad,
+  Screen snip, the wallet's lock sync and Parakeet found none of their packages and stopped. At
+  each login, Frame Tweaks now moves its Python environments to SteamOS's Python: offline when
+  their packages run on any Python 3, else installed again at the tested versions. Then it starts
+  their services again. `./install.sh repair` does the same first, and `./install.sh
+  check-system` says when an environment is for another Python.
+
 ## 0.7.1 (2026-11-04)
 
 ### Added
