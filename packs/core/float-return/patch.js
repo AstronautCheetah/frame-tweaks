@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'float-return', VERSION = 5, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
+  const NAME = 'float-return', VERSION = 6, DASH = 1, WORLD = 4, DELAY_MS = 2500, CLOSED_DELAY_MS = 300;
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -28,8 +28,19 @@
   let closed = null;       // {gone: the closed window, at: when}
   let returned = 0;
   const on = () => window.__sftPatchConfig?.[NAME]?.enabled !== false;   // (no setting: on)
+  // The windows shown in the dashboard, most recent last: kept while it's turned off too, or after
+  // Turn on a float went back to a window shown before it was turned off, not the one before.
+  const remember = (a) => {
+    const id = a?.frameID;
+    if (a && a.docking?.dockLocation === DASH && history[history.length - 1] !== id) {
+      history = history.filter((x) => x !== id);
+      history.push(id);
+      if (history.length > 20) history.shift();
+    }
+  };
   const tick = () => {
     if (!on()) {
+      remember(DS.activeFrame);
       last = null;                // (seen afresh when it's on again: no float or close from before)
       pending = null;
       closed = null;
@@ -53,11 +64,7 @@
     }
     const a = DS.activeFrame, id = a?.frameID, dock = a?.docking?.dockLocation;
     if (a && dock === DASH) {
-      if (history[history.length - 1] !== id) {
-        history = history.filter((x) => x !== id);
-        history.push(id);
-        if (history.length > 20) history.shift();
-      }
+      remember(a);
       pending = null;
     } else if (last && last.dock === DASH && dockOf(last.id) === WORLD && (!a || id === last.id)) {
       pending ??= { from: last.id, at: Date.now() };     // the shown window was just floated out

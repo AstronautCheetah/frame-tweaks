@@ -217,6 +217,7 @@
   };
   const dropTip = () => {           // (and forget the button: only entering one starts a wait)
     clearTimeout(tips.wait); clearTimeout(tips.grace);
+    tips.grace = 0;                 // (cleared, not only stopped: a stale id read as "already leaving")
     tips.on = null;
     hideTip();
   };

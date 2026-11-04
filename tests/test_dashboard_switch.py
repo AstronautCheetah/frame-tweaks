@@ -243,5 +243,85 @@ class WatcherForgetsARemovedPatchsSettings(unittest.TestCase):
         self.assertIn('delete window.__sftPatchConfig?.["curvature"]', sft.stop_expr("curvature"))
 
 
+
+CURVATURE_TURNED_ON_AGAIN = r"""
+const NAME = 'curvature';
+const frame = () => ({ docking: { dockLocation: 4 }, curvature: { m_bCurveOverride: undefined, shouldCurve: false,
+                       ToggleCurvature() { this.m_bCurveOverride = !this.shouldCurve; this.shouldCurve = this.m_bCurveOverride; } } });
+window.FrameStore = { frames: [] };
+setOn(false);
+eval(PATCH);
+const a = frame(); window.FrameStore.frames.push(a); step(400);      // floated while off
+setOn(true); step(400); step(400);
+const b = frame(); window.FrameStore.frames.push(b); step(400);      // floated once it's on
+a.docking.dockLocation = 1; step(400); a.docking.dockLocation = 4; step(400);   // docked, floated again
+console.log(JSON.stringify({ keptFlat: !b.curvature.shouldCurve ? 'b flat?!' : true, aAfterTurnOn: null,
+                             a: a.curvature.shouldCurve, b: b.curvature.shouldCurve }));
+"""
+
+FLOAT_RETURN_HISTORY_WHILE_OFF = r"""
+const NAME = 'float-return';
+const frames = {};
+const add = (id, dock) => (frames[id] = { frameID: id, docking: { dockLocation: dock } });
+let active = null;
+const switched = [];
+window.FrameStore = { GetFrame: (id) => frames[id] };
+window.DashboardStore = { get activeFrame() { return active; } };
+window.Dashboard = { switchToFrameInternal: (f) => { switched.push(f.frameID); active = f; return true; } };
+setOn(true);
+eval(PATCH);
+active = add('P', 1); step(200);           // shown while on
+setOn(false);
+active = add('A', 1); step(200);           // shown while off
+active = add('B', 1); step(200);
+setOn(true); step(200);
+frames.B.docking.dockLocation = 4; step(200);    // B floated out
+step(3000); step(200);
+console.log(JSON.stringify(switched));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "needs Node.js to run the patches")
+class TurnedOnAgain(PatchesHonourTheSwitch):
+    """Found in a bug hunt: Turn on curved every world window floated while it was off, and Back to
+    the previous window, after being off, went back to a window shown before it was turned off."""
+
+    def test_curvature_leaves_windows_floated_while_off(self):
+        out = self.run_patch("curvature", CURVATURE_TURNED_ON_AGAIN)
+        self.assertEqual((out["a"], out["b"]), (True, True))   # (a: only once floated again with it on)
+
+    def test_curvature_leaves_them_flat_right_after_turn_on(self):
+        body = CURVATURE_TURNED_ON_AGAIN.replace("const b = frame();", "console.log(JSON.stringify({ a: a.curvature.shouldCurve })); process.exit(0); const b = frame();")
+        self.assertEqual(self.run_patch("curvature", body), {"a": False})
+
+    def test_float_return_goes_back_to_the_window_shown_before(self):
+        self.assertEqual(self.run_patch("float-return", FLOAT_RETURN_HISTORY_WHILE_OFF), ["A"])
+
+
+@unittest.skipUnless(shutil.which("node"), "needs Node.js to run the watcher's page code")
+class SettingsFileGone(unittest.TestCase):
+    """Found in a bug hunt: unticked (the uninstall deletes the settings file) and ticked again
+    before the watcher's next pass, the page kept enabled: false: the patch stayed off while its
+    status said on. A file that's gone now takes the page's copy with it."""
+
+    def test_the_pages_copy_goes_with_the_file(self):
+        sft = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sft_switch2")
+        with tempfile.TemporaryDirectory() as d:
+            expr = sft.config_expr("curvature", Path(d) / "curvature.json")
+        self.assertIsNotNone(expr)
+        code = ("globalThis.window = globalThis; let told = 0;"
+                "window.__sftPatchConfig = { curvature: { enabled: false }, other: { x: 1 } };"
+                "window.__sftPatches = { curvature: { configChanged: () => told++ } };"
+                f"eval({json.dumps(expr)});"
+                "console.log(JSON.stringify({ conf: window.__sftPatchConfig, told }));")
+        r = subprocess.run(["node", "-e", code], capture_output=True, text=True, timeout=60)
+        self.assertEqual(json.loads(r.stdout), {"conf": {"other": {"x": 1}}, "told": 1}, r.stderr)
+
+    def test_a_garbled_file_leaves_the_page_alone(self):
+        sft = load_script(ROOT / "packs/core/vr-dashboard/sft-dashboard", "sft_switch3")
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "curvature.json").write_text("{nope")
+            self.assertIsNone(sft.config_expr("curvature", Path(d) / "curvature.json"))
+
 if __name__ == "__main__":
     unittest.main()

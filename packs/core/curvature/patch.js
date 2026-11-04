@@ -12,7 +12,7 @@
 // requires: world windows flat by default | .Curved;default:return!1}
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'curvature', VERSION = 3, WORLD = 4;   // EDockLocation.World
+  const NAME = 'curvature', VERSION = 4, WORLD = 4;   // EDockLocation.World
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -22,12 +22,19 @@
   if (!FS) return 'not patched: window.FrameStore missing';
   let curved = 0;
   const on = () => window.__sftPatchConfig?.[NAME]?.enabled !== false;   // (no setting: on)
+  // Windows floated while it was turned off stay as they were (flat, as stock) when it's turned
+  // on again: only windows floated from then on start curved. Otherwise Turn on curved every
+  // world window floated meanwhile. A window leaves the set when it leaves the world.
+  const floatedWhileOff = new WeakSet();
   const tick = () => {
-    if (!on()) return;
+    const isOn = on();
     for (const f of FS.frames ?? []) {
       const c = f?.curvature;
       if (!c || typeof c.ToggleCurvature !== 'function') continue;
-      if (f.docking?.dockLocation === WORLD && c.m_bCurveOverride === undefined && !c.shouldCurve) {
+      if (f.docking?.dockLocation !== WORLD) { floatedWhileOff.delete(f); continue; }
+      if (!isOn) { floatedWhileOff.add(f); continue; }
+      if (floatedWhileOff.has(f)) continue;
+      if (c.m_bCurveOverride === undefined && !c.shouldCurve) {
         c.ToggleCurvature();
         curved++;
       }
