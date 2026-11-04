@@ -22,7 +22,7 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import load_script, stub  # noqa: E402
+from helpers import load_script, stub, untipped_icon_buttons  # noqa: E402
 SNIP = ROOT / "packs/core/snip/frame-snip"
 HOME = tempfile.TemporaryDirectory()       # (where the module's settings and Speech engine paths point)
 TWO = ("The first sentence is long enough to be read on its own. "
@@ -327,6 +327,19 @@ class Narration(unittest.TestCase):
             fs.retranslate_tips(view)
         shown = {w.text() for w in view.findChildren(QLabel) + view.findChildren(QPushButton)}
         self.assertLessEqual(set(de.values()), shown)
+
+    def test_every_button_without_a_word_has_a_tooltip(self):
+        """The window's and the VR panel's (Collapse, Expand: icons alone), the ⚙ view's, and the
+        snip's own bar (Narrate's speed − and + had none, in both)."""
+        from PyQt6.QtGui import QImage
+        image = QImage(20, 20, QImage.Format.Format_RGB32)
+        for panel in (False, True):
+            with self.subTest(panel=panel):
+                w = fs.NarrationWindow(image, TWO, 1.0, panel=panel)
+                self.addCleanup(w.narrator.cleanup)
+                w.open_config()
+                self.assertEqual(untipped_icon_buttons(w, hidden=True), [])
+        self.assertEqual(untipped_icon_buttons(fs.Snip(image), hidden=True), [])
 
     def test_the_settings_views_apply_is_at_the_top_and_dimmed_until_a_change(self):
         """As on Frame Tweaks' settings pages: Apply beside the title, off while the engine and

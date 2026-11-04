@@ -363,6 +363,8 @@ class WalletApps(QWidget):
         self.hours_text = QLabel()
         self.longer = QPushButton("+")
         self.longer.clicked.connect(lambda: self.step_hours(+1))
+        self.shorter.setToolTip(_("Shorter"))
+        self.longer.setToolTip(_("Longer"))
         for w in (self.shorter, self.hours_text, self.longer):
             hours_row.addWidget(w)
         hours_row.addStretch(1)

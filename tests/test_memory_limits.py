@@ -24,7 +24,7 @@ for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import load_script  # noqa: E402
+from helpers import load_script, untipped_icon_buttons  # noqa: E402
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 import memory_page as mp  # noqa: E402  (the window's Memory limits page; gui put it on sys.path)
 from PyQt6.QtWidgets import QApplication, QLabel, QWidget  # noqa: E402
@@ -77,6 +77,9 @@ class Page(unittest.TestCase):
 
     def page(self):
         return mp.MemoryLimits(Window())
+
+    def test_every_button_without_a_word_has_a_tooltip(self):
+        self.assertEqual(untipped_icon_buttons(self.page(), hidden=True), [])      # (each app's − and +)
 
     def test_shows_the_installed_apps_and_apply_is_dimmed(self):
         page = self.page()

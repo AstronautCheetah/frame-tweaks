@@ -1326,6 +1326,8 @@ class NarrationWindow(QWidget):
         self.speed_label = QLabel()
         self.speed_label.setMinimumWidth(110 if not panel else 70)
         self.speed_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        tr_tip(self.slower, N_("Read slower"))
+        tr_tip(self.faster, N_("Read faster"))
         self.slower.clicked.connect(lambda: self.step(-1))
         self.faster.clicked.connect(lambda: self.step(1))
         for w in (tr_text(QLabel(), N_("Speed")), self.slower, self.speed_label, self.faster):
@@ -2218,6 +2220,7 @@ class Snip(QWidget):
             self.speed_text.setMinimumWidth(70)
             for w, step in ((self.speed_down, -1), (self.speed_up, 1)):
                 w.setStyleSheet("min-width: 44px; max-width: 44px; padding: 6px 0px; font-size: 22px;")
+                w.setToolTip(_("Read slower") if step < 0 else _("Read faster"))
                 w.clicked.connect(lambda _=False, st=step: self.step_speed(st))
             speeds.addWidget(self.speed_down)
             speeds.addWidget(self.speed_text, 1)

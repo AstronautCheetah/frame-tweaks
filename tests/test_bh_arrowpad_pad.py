@@ -18,6 +18,8 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 PAD = ROOT / "packs/core/arrowpad"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from helpers import untipped_icon_buttons  # noqa: E402
 
 
 class Keys:
@@ -437,6 +439,18 @@ class Legends(PadTest):
 class EnglishLegends(PadTest):
     def test_english(self):
         self.assertEqual([self.pad.label(k) for k in ("Del", "Home", "Ctrl")], ["Del", "Home", "Ctrl"])
+
+
+class Tooltips(PadTest):
+    def test_every_key_and_tool_without_a_word_has_one(self):
+        """On every layer, folded or not (the arrows had none: a glyph alone, nothing to hover)."""
+        for layer in self.ap.LAYERS:
+            with self.subTest(layer=layer):
+                self.pad.layer = layer
+                self.pad.relabel()
+                self.assertEqual(untipped_icon_buttons(self.pad, hidden=True), [])
+        self.pad.toggle_collapsed(place=False)
+        self.assertEqual(untipped_icon_buttons(self.pad, hidden=True), [])
 
 
 class Wander(PadTest):

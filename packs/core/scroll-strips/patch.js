@@ -221,6 +221,10 @@
   // Saved through vr-dashboard's sftConfig binding into ~/.config/frame-tweaks/scroll-strips.json
   // (the installer window's settings page writes the same file).
   const SWATCHES = [0, 0.08, 0.15, 0.33, 0.5, 0.58, 0.67, 0.75, 0.83, 0.92];   // hues, as the tint's 0..1
+  // (each swatch's name, its tooltip: the same names as the settings page's (README.md, color);
+  // a circle of colour says nothing to a screen reader or someone who can't tell red from green)
+  const SWATCH_NAMES = [N('Red'), N('Orange'), N('Yellow'), N('Green'), N('Cyan'), N('Sky'), N('Blue'),
+                        N('Violet'), N('Magenta'), N('Pink')];
   const OPTIONS = [
     [N('Vertical strip'), 'vertical', [[N('Right'), 'right'], [N('Left'), 'left'], [N('Off'), 'off']]],
     [N('Horizontal strip'), 'horizontal', [[N('Top'), 'top'], [N('Bottom'), 'bottom'], [N('Off'), 'off']]],
@@ -265,7 +269,8 @@
                              alignItems: 'center', justifyContent: 'center',
                              background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
                              border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
-                    ...tap(), onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
+                    ...tap(), title: isOpen ? T('Close the settings') : T('Settings: where the strips go and how they look'),
+                    onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))))];
     if (!isOpen) return out;
@@ -285,7 +290,8 @@
     rows.push(title('t-color', T('Colour')));
     rows.push(el('div', { key: 'r-color', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center' } },
       button('tint', T('Passthrough tint'), raw.color === 'tint', () => raw.color !== 'tint' && save({ color: 'tint' })),
-      ...SWATCHES.map((v) => el('div', { key: `c${v}`, ...tap(), onClick: () => save({ color: v }), style: {
+      ...SWATCHES.map((v, n) => el('div', { key: `c${v}`, ...tap(), title: T(SWATCH_NAMES[n]),
+                                            onClick: () => save({ color: v }), style: {
         width: '40px', height: '40px', margin: '5px', borderRadius: '50%', boxSizing: 'border-box',
         background: `hsl(${Math.round(v * 360)}, 60%, 55%)`,
         border: raw.color === v ? '4px solid #fff' : '2px solid rgba(255, 255, 255, 0.25)' } }))));
@@ -301,7 +307,7 @@
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`, color: '#e8ecf0' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Scroll strips')),
-            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+            el('div', { ...tap(), title: T('Close'), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },

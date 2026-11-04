@@ -377,6 +377,9 @@ TIPS = {"🎤": N_("Dictation: tap to start (red), tap again to stop; yellow = t
         "Launcher": N_("Open the desktop's application menu (taps Super)"),
         "Super": N_("Super (Meta): tap = next key only, double-tap = lock; hold it while pressing a key with the other hand"),
         "MMB": N_("Middle click: your next click becomes a middle click"),
+        # (the arrows are glyphs alone: in VR the hover tooltip is all that names them, and a
+        # key with no word on it must have one: tests/test_bh_arrowpad_pad.py, Tooltips)
+        "↑": N_("Up arrow"), "↓": N_("Down arrow"), "←": N_("Left arrow"), "→": N_("Right arrow"),
         **{m: N_("{m}: tap = next key only, double-tap = lock; or hold it while pressing a key with the other hand")
            for m in MODIFIERS if m != "Super"}}
 TOOL_TIPS = {"settings": N_("Settings: theme and haptics"), "pin": N_("Pin: stop accidental moves"),

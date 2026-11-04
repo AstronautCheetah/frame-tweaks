@@ -14,7 +14,7 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import load_script  # noqa: E402  (English, throwaway language files: test_00_english.py)
+from helpers import load_script, untipped_icon_buttons  # noqa: E402  (English, throwaway language files: test_00_english.py)
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 # The packs' names live in lib/registry.py and lib/userpacks.py (gui.sft.NAME reads them there):
 # patched there, a patch reaches the window and sft's own code alike.
@@ -97,6 +97,25 @@ class WindowTest(unittest.TestCase):
         self.assertTrue(w.search_box.isHidden())
         self.assertEqual(w.search_box.text(), "")
         self.assertEqual(len(w.boxes), everything)
+
+    def test_every_button_without_a_word_has_a_tooltip(self):
+        """ⓘ, ⚙, ↻, the search icon and the like: the list, and each page the window opens without
+        running anything (Preferences, Packs, a tweak's details, every ⚙ Settings page)."""
+        w = self.window()
+        pages = {"the list": lambda: None, "Preferences": w.show_prefs, "Packs": w.show_packs,
+                 "Details": lambda: w.show_details(w.rows[0])}
+        pages.update({f"Settings of {cid}": (lambda c=cid: w.open_settings(c)) for cid in gui.SETTINGS_PAGES})
+        self.assertGreater(len(pages), 4)
+        for name, show in pages.items():
+            with self.subTest(page=name):
+                show()
+                self.settle(w)
+                self.assertEqual(untipped_icon_buttons(w), [])
+                w.close_details()
+        w.search_button.setChecked(True)               # (the search field and its clear button shown)
+        w.search_box.setText("dictation")
+        self.assertEqual(untipped_icon_buttons(w), [])
+        self.assertEqual(self.errors, [])
 
     def test_works_on_my_frame_is_with_get_involved(self):
         w = self.window()

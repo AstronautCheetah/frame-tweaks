@@ -72,3 +72,28 @@ def kde_saves(text, group="Desktop Entry", **changes):
     for g in sorted({g for g, _k in entry}):
         out += [f"[{g}]"] + [f"{k}={v}" for (gg, k), v in sorted(entry.items()) if gg == g] + [""]
     return "\n".join(out)
+
+
+def untipped_icon_buttons(root, hidden=False):
+    """The buttons under root whose face has no word on it (a symbol such as ⓘ ⚙ ↻ ✕ − +, or an
+    icon alone) and no tooltip: in VR the laser's hover tooltip is the only way to learn what such
+    a button does, and a screen reader has nothing else to read. Shown ones only (hidden=True: all
+    of them, for a page whose buttons appear later). A digit counts as a word: "2.5" under a
+    "Thickness (cm)" heading says what it is. Returns a line per button, to read in a failure."""
+    from PyQt6.QtWidgets import (QAbstractButton, QAbstractSpinBox, QCheckBox, QComboBox, QLineEdit,
+                                 QRadioButton, QTabBar)
+    found = []
+    for b in root.findChildren(QAbstractButton):
+        if isinstance(b, (QCheckBox, QRadioButton)):     # (their box sits beside a label of their own)
+            continue
+        # (Qt's own, such as a search field's clear button: Qt names it to a screen reader itself)
+        if isinstance(b.parent(), (QLineEdit, QAbstractSpinBox, QComboBox, QTabBar)):
+            continue
+        if not hidden and not b.isVisibleTo(root):
+            continue
+        face = b.text().replace("&&", "").replace("&", "")
+        if any(ch.isalnum() for ch in face) or b.toolTip().strip():
+            continue
+        found.append(f"{type(b).__name__} {face!r} (icon: {not b.icon().isNull()}, objectName "
+                     f"{b.objectName()!r}, in {type(b.parent()).__name__})")
+    return found

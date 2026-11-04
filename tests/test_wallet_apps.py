@@ -20,7 +20,7 @@ for k, v in {"FRAME_TWEAKS_LANGUAGE": "en", "FRAME_TWEAKS_KEYBOARD": "0",
     os.environ.setdefault(k, v)
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import load_script  # noqa: E402
+from helpers import load_script, untipped_icon_buttons  # noqa: E402
 gui = load_script(ROOT / "gui" / "frame-tweaks-gui.py", "gui")
 import wallet_page as wp  # noqa: E402  (the window's Wallet apps page; gui put it on sys.path)
 from PyQt6 import sip  # noqa: E402
@@ -279,6 +279,30 @@ class NoPassword(unittest.TestCase):
             page.show_wallet_state()
             self.assertTrue(page.set_password.isHidden())
             self.assertIn("no password", page.wallet_state.text())
+
+
+class Tooltips(unittest.TestCase):
+    def test_every_button_without_a_word_has_one(self):
+        """The auto-lock time's − and + had none: in VR, nothing said what they changed."""
+        from PyQt6.QtWidgets import QApplication, QWidget
+        app = QApplication.instance() or QApplication([])   # noqa: F841  (kept alive for the page)
+        t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
+        unlock = t / "wallet-unlock"
+        unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked", "password": true}\'; exit; }\n')
+        unlock.chmod(0o755)
+        entry(t / "apps", "org.notes", "/home/u/.local/bin/frame-outer-bus flatpak run org.notes",
+              **{"X-FrameTweaks-Wallet": "true"})
+
+        class Window(QWidget):
+            def go_back(self):
+                pass
+        with mock.patch.multiple(wp, WALLET_UNLOCK=unlock, APP_TIMERS=t / "none", LAUNCHERS=t / "apps",
+                                 FLATPAK_APPS=[], SYSTEM_APPS=[], FLATPAK_ROOTS=[], LOCK_CONF=t / "wallet.conf"), \
+                mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}):
+            page = wp.WalletApps(Window())
+            self.assertEqual((page.shorter.text(), page.longer.text()), ("−", "+"))
+            self.assertEqual(untipped_icon_buttons(page, hidden=True), [])
 
 
 class Background(unittest.TestCase):
