@@ -1407,12 +1407,17 @@ class PreferencesPage(unittest.TestCase):
         self.app = QApplication.instance() or QApplication([])
         with tempfile.TemporaryDirectory() as d:
             home = Path(d)
-            for p in (".config/arrowpad.json", ".config/frame-tweaks/snip.json", ".config/frame-tweaks/dictate.conf"):
+            for p in (".config/arrowpad.json", ".config/frame-tweaks/snip.json", ".config/frame-tweaks/dictate.conf",
+                      ".config/nordvpn-wg/locations"):
                 (home / p).parent.mkdir(parents=True, exist_ok=True)
                 (home / p).write_text("{}")
-            with mock.patch.object(Path, "home", lambda: home):
+            state = home / ".local/state/frame-tweaks"
+            (state / "installed").mkdir(parents=True)
+            (state / "installed/nordvpn").write_text("0.7.2\n")          # (broken, not uninstalled: its record)
+            with mock.patch.object(Path, "home", lambda: home), mock.patch.object(gui.sft, "STATE", state):
                 window = mock.Mock()
-                window.state = {"arrowpad": (1, "not installed"), "snip": (0, "ok")}       # (dictation: not known yet)
+                window.state = {"arrowpad": (1, "not installed"), "snip": (0, "ok"),       # (dictation: not known yet)
+                                "nordvpn": (1, "missing")}
                 page = gui.Preferences(window)
                 buttons = {b.text(): b for b in page.findChildren(QPushButton)}
                 buttons["Delete settings left by uninstalled tweaks…"].click()
@@ -1424,6 +1429,7 @@ class PreferencesPage(unittest.TestCase):
                 self.assertFalse((home / ".config/arrowpad.json").exists())
                 self.assertTrue((home / ".config/frame-tweaks/snip.json").exists())
                 self.assertTrue((home / ".config/frame-tweaks/dictate.conf").exists())
+                self.assertTrue((home / ".config/nordvpn-wg/locations").exists())
                 window.say.assert_called_with("Deleted 1 setting.", good=True)
                 buttons["Delete settings left by uninstalled tweaks…"].click()          # nothing left now
                 window.say.assert_called_with("No settings left behind by uninstalled tweaks.", good=True)
@@ -2327,7 +2333,8 @@ class WorksOnMyFrame(unittest.TestCase):
         here = works_page.frame_versions(self.OS, self.VR, "beta")
         with mock.patch.object(works_page, "frame_versions", lambda: here), \
                 mock.patch.object(works_page.sft, "build_version", lambda: "0.6.23+5.abc1234"):
-            page = works_page.WorksPage(types.SimpleNamespace(go_back=lambda: None, state=state), opened.append)
+            page = works_page.WorksPage(types.SimpleNamespace(go_back=lambda: None, state=state,
+                                                              rows=[{"id": cid} for cid in state]), opened.append)
         app.processEvents()
         self.assertEqual(opened, [])                             # (nothing until the button)
         self.assertIn("SteamOS 0.5.6 (build 20261022.6153909, beta)", page.text)
@@ -2345,6 +2352,21 @@ class WorksOnMyFrame(unittest.TestCase):
         self.assertNotIn("United States", url + urllib.parse.unquote(url))
         page.copy.click()
         self.assertEqual(QApplication.clipboard().text(), page.text)
+
+    def test_every_row_in_the_lists_order(self):
+        """(It went by the statuses in the order their checks came back, and left out a row whose
+        check wasn't back yet, rather than "?".)"""
+        import types
+        import works_page
+        from PyQt6.QtWidgets import QApplication
+        app = QApplication.instance() or QApplication([])      # noqa: F841  (kept: a dropped one is gone)
+        rows = [{"id": cid} for cid in ("arrowpad", "snip", "wallet", "cursor")]
+        state = {"wallet": (0, "ok"), "arrowpad": (1, ""), "snip": (0, "ok")}          # (cursor: still checking)
+        here = works_page.frame_versions(self.OS, self.VR, "")
+        with mock.patch.object(works_page, "frame_versions", lambda: here), \
+                mock.patch.object(works_page.sft, "build_version", lambda: "0.7.2"):
+            page = works_page.WorksPage(types.SimpleNamespace(go_back=lambda: None, state=state, rows=rows), print)
+        self.assertEqual(page.text.split("\n\n", 1)[1].splitlines(), ["· arrowpad", "✔ snip", "✔ wallet", "? cursor"])
 
     def test_a_long_list_still_opens_the_form(self):
         import works_page

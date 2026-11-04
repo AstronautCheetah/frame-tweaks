@@ -10,6 +10,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -52,6 +53,16 @@ class Steps(unittest.TestCase):
         self.assertEqual([mp.size_arg(5120), mp.size_arg(2560), mp.size_arg(10542)], ["5G", "2560M", "10542M"])
         self.assertEqual([mp.gb_text(5120), mp.gb_text(2560), mp.gb_text(3500)], ["5 GB", "2.5 GB", "3.42 GB"])
 
+    def test_the_languages_decimal_sign(self):
+        """(It was a point in every language: "2.5 Go" in French.)"""
+        before = mp.i18n.CATALOGUE
+        self.addCleanup(setattr, mp.i18n, "CATALOGUE", before)
+        for language, sign in (("fr", ","), ("nl_BE", ","), ("es_419", ".")):
+            mp.i18n.CATALOGUE = mp.i18n.Catalogue([language])
+            with self.subTest(language=language):
+                self.assertIn(f"2{sign}5", mp.gb_text(2560))
+                self.assertIn(f"3{sign}42", mp.gb_text(3500))
+
 
 class Page(unittest.TestCase):
     def setUp(self):
@@ -76,7 +87,45 @@ class Page(unittest.TestCase):
             self.addCleanup(p.stop)
 
     def page(self):
-        return mp.MemoryLimits(Window())
+        return self.settle(mp.MemoryLimits(Window()))
+
+    def settle(self, page):
+        """Until what the page runs in the background (reading the tool, Apply) is done."""
+        app = QApplication.instance()
+        for _i in range(500):
+            if getattr(page, "job", None) is None:
+                return page
+            app.processEvents()
+            time.sleep(0.01)
+        self.fail("still running")
+
+    def test_the_tool_doesnt_hold_up_the_window(self):
+        """Its info (the Flatpak apps listed) ran on the window's thread, which froze for up to 90 s;
+        Apply's commands for up to 120 s each."""
+        os.environ.pop("FRAME_TWEAKS_DRY_RUN")
+        slow = self.tool.read_text().replace('echo "$*" >>', 'sleep 1.5; echo "$*" >>')
+        self.tool.write_text(slow)
+        start = time.monotonic()
+        page = mp.MemoryLimits(Window())
+        self.assertLess(time.monotonic() - start, 1)
+        self.assertIn("Reading", page.notice.text())
+        self.settle(page)
+        self.assertIn("org.mozilla.firefox", page.controls)
+        page.controls["org.mozilla.firefox"][1].less.click()
+        start = time.monotonic()
+        page.apply.click()
+        self.assertLess(time.monotonic() - start, 1)
+        self.assertFalse(page.apply.isEnabled())                        # (not twice while it runs)
+        self.settle(page)
+        self.assertIn("With a limit of their own", page.notice.text())
+
+    def test_a_tool_that_doesnt_answer(self):
+        os.environ.pop("FRAME_TWEAKS_DRY_RUN")
+        self.tool.write_text("#!/bin/bash\nexec sleep 30\n")
+        with mock.patch.object(mp, "INFO_TIMEOUT", 1):
+            page = self.page()
+        self.assertIn("didn't answer within 1 s", page.notice.text())
+        self.assertFalse(page.apply.isEnabled())
 
     def test_every_button_without_a_word_has_a_tooltip(self):
         self.assertEqual(untipped_icon_buttons(self.page(), hidden=True), [])      # (each app's − and +)
@@ -142,6 +191,7 @@ class Page(unittest.TestCase):
         page = self.page()
         page.controls["org.mozilla.firefox"][1].less.click()
         page.apply.click()
+        self.settle(page)
         asked = self.log.read_text().splitlines()
         self.assertEqual(asked, ["info", "set org.mozilla.firefox 4608M", "apply", "info"])
         self.assertIn("With a limit of their own", page.notice.text())
@@ -149,6 +199,7 @@ class Page(unittest.TestCase):
         (self.t / "refuse").touch()
         page.controls["org.signal.Signal"][0].click()
         page.apply.click()
+        self.settle(page)
         self.assertIn("Didn't work: nope", page.notice.text())
         self.assertNotIn("apply", self.log.read_text().splitlines()[-2:])  # (stopped at the first that failed)
 

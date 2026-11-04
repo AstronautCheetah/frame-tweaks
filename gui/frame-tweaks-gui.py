@@ -18,11 +18,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6 import sip
-from PyQt6.QtCore import QEvent, QProcess, Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import QEvent, QPoint, QProcess, QRect, QSize, Qt, QTimer, pyqtSignal
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                             QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QLayout, QLineEdit,
+                             QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "lib"))
@@ -183,6 +183,82 @@ class SearchBox(QLineEdit):
         super().keyPressEvent(ev)
 
 
+class WrapLayout(QLayout):
+    """The bottom bar's buttons: one line while they fit, else as many as it takes, each line
+    against the right edge (Apply changes and Close last, at the bottom right). On one line they
+    set the window's narrowest width: translated, with the update buttons shown, wider than the
+    1000 px it opens at (French, 1160 px), so the window opened wider than the Frame's panel.
+    (Hidden buttons take no room: Show the running install, Reinstall updated come and go.)"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.items = []
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setSpacing(6)
+
+    def addItem(self, item):
+        self.items.append(item)
+
+    def count(self):
+        return len(self.items)
+
+    def itemAt(self, i):
+        return self.items[i] if 0 <= i < len(self.items) else None
+
+    def takeAt(self, i):
+        return self.items.pop(i) if 0 <= i < len(self.items) else None
+
+    def expandingDirections(self):
+        return Qt.Orientation(0)
+
+    def shown(self):
+        return [i for i in self.items if not i.isEmpty()]
+
+    def sizeHint(self):
+        shown = self.shown()
+        return QSize(sum(i.sizeHint().width() for i in shown) + self.spacing() * max(0, len(shown) - 1),
+                     max((i.sizeHint().height() for i in shown), default=0))
+
+    def minimumSize(self):
+        shown = self.shown()                        # (a button is never narrower than its text)
+        return QSize(max((i.sizeHint().width() for i in shown), default=0),
+                     max((i.sizeHint().height() for i in shown), default=0))
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width):
+        return self.arrange(QRect(0, 0, width, 0), move=False)
+
+    def setGeometry(self, rect):
+        super().setGeometry(rect)
+        self.arrange(rect, move=True)
+
+    def arrange(self, rect, move):
+        """Lines of buttons within rect's width; the height they take."""
+        gap, lines, line, used = self.spacing(), [], [], 0
+        for item in self.shown():
+            w = item.sizeHint().width()
+            if line and used + gap + w > rect.width():
+                lines.append(line)
+                line, used = [], 0
+            used += (gap if line else 0) + w
+            line.append(item)
+        if line:
+            lines.append(line)
+        y = rect.y()
+        for line in lines:
+            height = max(i.sizeHint().height() for i in line)
+            x = rect.x() + rect.width() - (sum(i.sizeHint().width() for i in line) + gap * (len(line) - 1))
+            for item in line:
+                hint = item.sizeHint()
+                if move:
+                    item.setGeometry(QRect(QPoint(x, y + (height - hint.height()) // 2), hint))
+                x += hint.width() + gap
+            y += height + gap
+        return max(0, y - gap - rect.y())
+
+
 class Window(ApplyChanges, ControllerInput, QWidget):
     """The installer window. Apply changes (apply_changes.py) and the controller in VR
     (vr_controls.py) are parts of it in modules of their own: mixins, before QWidget so their
@@ -192,6 +268,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     files_job, files_changed = None, frozenset()
     pack_job = None         # a pack being added or updated from a link, (future, done, saying): finish_pack_job
     blocked = {}            # id -> why its box can't be ticked (apply_changes.py update_blocks)
+    applying = frozenset()  # ids an Apply's terminal is installing or removing now (run_changes)
     repair_bar = None       # after a SteamOS update: 🛠 Repair (apply_changes.py make_repair_bar)
 
     def __init__(self):
@@ -240,6 +317,14 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.outer.setContentsMargins(20, 16, 20, 16)
         self.stack = None
         self.build_ui()
+        # say()'s message on any other page than the list (whose bottom bar, with self.notice,
+        # only the list shows): under the page, for as long as the message lasts.
+        self.page_notice = QLabel()
+        self.page_notice.setObjectName("notice")
+        self.page_notice.setWordWrap(True)
+        self.page_notice.setHidden(True)
+        self.outer.addWidget(self.page_notice)
+        self.say_timer = QTimer(self, singleShot=True, interval=6000, timeout=self.say_over)
         # Results of background jobs (status checks, update checks): looked for 10x a second while
         # any is running, once a second otherwise (collect sets which).
         self.collector = QTimer(self, interval=100, timeout=self.collect)
@@ -326,6 +411,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         scroll.setWidget(self.list)
 
         bottom = QHBoxLayout()
+        buttons = WrapLayout()                       # (the buttons, wrapped when they don't fit: WrapLayout)
         # One line on the left: how the list works, or for a few seconds a message (say()).
         self.hint_text = _("Tick to install, untick to remove, then Apply changes. "
                            "Click a row for details, a category to fold it.")
@@ -335,7 +421,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         bottom.addWidget(self.notice, 1)
         self.update_button = QPushButton()
         self.update_button.clicked.connect(self.update_clicked)
-        bottom.addWidget(self.update_button)
+        buttons.addWidget(self.update_button)
         # An install whose terminal was closed goes on (lib/detached.sh, in tmux): Show it brings it
         # back in a terminal, its questions and sudo prompt included. Shown only while one runs.
         self.show_install_button = QPushButton(_("▶ Show the running install"))
@@ -343,32 +429,35 @@ class Window(ApplyChanges, ControllerInput, QWidget):
                                               "terminal was closed): open it again, to see it or answer it"))
         self.show_install_button.clicked.connect(self.show_install)
         self.show_install_button.setHidden(True)
-        bottom.addWidget(self.show_install_button)
+        buttons.addWidget(self.show_install_button)
         if not getattr(self, "install_timer", None):
             self.install_timer = QTimer(self, interval=3000, timeout=self.check_install_running)
             self.install_timer.start()
         self.check_install_running()
         self.changed_button = QPushButton()
         self.changed_button.clicked.connect(self.reinstall_changed)
-        bottom.addWidget(self.changed_button)
+        buttons.addWidget(self.changed_button)
         self.update_reinstall_changed()
         self.set_update_state(self.update_state, self.update_newest)
         about = QPushButton(_("📖 README"))
         about.setToolTip(_("What Frame Tweaks is, how to install, update and remove it, common issues"))
         about.clicked.connect(self.show_readme)
-        bottom.addWidget(about)
+        buttons.addWidget(about)
         diag = QPushButton(_("🐞 Report a problem"))
         diag.setToolTip(_("Save a diagnostics report (user names and paths removed) and open the bug form"))
         diag.clicked.connect(self.show_report)
-        bottom.addWidget(diag)
+        buttons.addWidget(diag)
         apply_ = QPushButton(_("Apply changes"))
         apply_.setObjectName("apply")
         apply_.clicked.connect(self.apply)
         self.apply_button = apply_
         close = QPushButton(_("Close"))
         close.clicked.connect(self.close)
-        bottom.addWidget(apply_)
-        bottom.addWidget(close)
+        buttons.addWidget(apply_)
+        buttons.addWidget(close)
+        holder = QWidget()
+        holder.setLayout(buttons)
+        bottom.addWidget(holder)
 
         page = QWidget()
         lay = QVBoxLayout(page)
@@ -386,7 +475,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.stack.addWidget(self.confirm_page)
         self.error_page, self.error_text = self.make_error_page()
         self.stack.addWidget(self.error_page)
-        self.outer.addWidget(self.stack)
+        self.stack.currentChanged.connect(self.page_changed)
+        self.outer.insertWidget(0, self.stack)      # (first: page_notice stays under it)
         if old is not None:
             self.outer.removeWidget(old)
             old.deleteLater()
@@ -419,7 +509,11 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         return sft.hidden(self.rows)
 
     def toggle_collapsed(self, category):
-        """category: its English name (category_en), whatever the window's language."""
+        """category: its English name (category_en), whatever the window's language. Not while
+        searching: the list shows every category unfolded then, so a click would save the opposite
+        of what's seen (a folded one, shown open, unfolded for good; an open one folded)."""
+        if self.search_query():
+            return
         collapsed = sft.read_categories(COLLAPSED, self.rows)
         collapsed ^= {category}
         write_set(COLLAPSED, collapsed)
@@ -427,14 +521,18 @@ class Window(ApplyChanges, ControllerInput, QWidget):
 
     def tick_category(self, category, on):
         """Tick (on) or untick every tweak in a category (its English name) that the list shows:
-        not the hidden ones (unless shown), and when ticking, not those this Frame doesn't need.
+        not the hidden ones (unless shown), not those a search leaves out, and when ticking, not
+        those this Frame doesn't need.
         As if each box were clicked: nothing is installed or removed until Apply changes. (A
         folded category has no boxes: what's wanted is set all the same.)"""
         hidden, showing = self.hidden(), self.show_hidden.isChecked()
         not_needed = sft.not_needed(self.rows) if on else {}
+        query = self.search_query()                  # (searching: the matches only, as the header counts)
         for c in self.rows:
             cid = c["id"]
             if c["category_en"] != category or (cid in hidden and not showing):
+                continue
+            if query and not matches(c, query):
                 continue
             if cid in not_needed and not sft.installed_record(cid):
                 continue
@@ -649,7 +747,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
                 category = cat
                 count = sum(1 for c in self.rows if c["category"] == cat and (showing or c["id"] not in hidden)
                             and (not query or matches(c, query)))
-                self.grid.addWidget(CategoryHeader(self, cat, count, key in collapsed, key in hidden_cats, key))
+                self.grid.addWidget(CategoryHeader(self, cat, count, key in collapsed, key in hidden_cats, key,
+                                                   foldable=not query))
             if key in collapsed:
                 continue
             row = Row(self, comp)
@@ -1309,6 +1408,9 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             self.details.finished(fut, done)
         elif fut.exception() is None:
             done(None, fut.result())                 # (no page to tell: the window's part only)
+        else:                                        # (no Packs page to say it: said by the window, not lost)
+            e = fut.exception()
+            self.say(str(e) if isinstance(e, sft.PackError) else _("That didn't work: {error}").format(error=e))
         self.follow_packs()
 
     def close_details(self):
@@ -1330,11 +1432,24 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     # ---- in-window messages (no dialogs: in VR they'd open in the dashboard) ----------
     def say(self, text, good=False):
         """A message on the left of the bottom bar for a few seconds: green when it's good news
-        (as ✔ statuses), amber otherwise."""
+        (as ✔ statuses), amber otherwise. On another page (Preferences, a README, Packs...), under
+        it as well: the bottom bar is the list's, and a message only it had was never seen."""
         colour = "#5cc77a" if good else "#e0b33a"
-        self.notice.setText(f"<span style='color:{colour}'>{html.escape(text)}</span>")
-        shown = self.notice.text()
-        QTimer.singleShot(6000, lambda: self.notice.text() == shown and self.notice.setText(self.hint_text))
+        message = f"<span style='color:{colour}'>{html.escape(text)}</span>"
+        self.notice.setText(message)
+        self.page_notice.setText(message)
+        self.page_notice.setHidden(self.stack.currentIndex() == 0)
+        self.say_timer.start()                       # (again: a newer message gets its own few seconds)
+
+    def say_over(self):
+        self.notice.setText(self.hint_text)
+        self.page_notice.setHidden(True)
+
+    def page_changed(self, index):
+        """Back on the list, its bottom bar says the message: not twice."""
+        notice = getattr(self, "page_notice", None)
+        if index == 0 and notice is not None:
+            notice.setHidden(True)
 
     # ---- changes in a terminal (what Apply changes asks first: apply_changes.py) ------------
     def run_changes(self, add, remove):
@@ -1351,8 +1466,20 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         cmd = (f"cd {shlex.quote(str(REPO))} && {detached('bash -c ' + shlex.quote(' && '.join(steps)))}"
                f"; echo; read -rp {close_prompt()}")
         self.proc = QProcess(self)            # don't block the window while Konsole runs
-        self.proc.finished.connect(lambda *_: (self.wanted.clear(), self.changed(add + remove)))
+        self.applying = self.applying | set(add) | set(remove)    # (pending_changes leaves them out meanwhile)
+        self.proc.finished.connect(lambda *_: self.applied(add, remove))
         in_terminal(self.proc, cmd)
+
+    def applied(self, add, remove):
+        """An Apply's terminal closed: its own ticks are done with (the rows show what's installed
+        now), not those made since. Clearing every tick here undid what was ticked while it ran,
+        for the next Apply. A box turned back meanwhile keeps that wish."""
+        self.applying = self.applying - set(add) - set(remove)
+        for ids, on in ((add, True), (remove, False)):
+            for cid in ids:
+                if self.wanted.get(cid) is on:
+                    del self.wanted[cid]
+        self.changed(add + remove)
 
     def uninstall_self(self, keep_tweaks, settings, keep_apps=True):
         """⚙ Preferences → Uninstall Frame Tweaks: ./install.sh uninstall-self in a terminal, and this

@@ -61,8 +61,8 @@ def mark(code_text):
 
 
 def works_report(build, versions, state):
-    """(versions, status): the form's two boxes, as plain text. state: {id: (code, text)}, the
-    window's, in its order."""
+    """(versions, status): the form's two boxes, as plain text. state: {id: (code, text), or None
+    while its check isn't back}, every row of the list, in its order."""
     lines = [f"Frame Tweaks {build}",
              f"SteamOS {versions['steamos'] or '?'} (build {versions['build'] or '?'}"
              + (f", {versions['channel']}" if versions["channel"] else "") + ")",
@@ -85,7 +85,10 @@ class WorksPage(QWidget):
     def __init__(self, window, follow_link):
         super().__init__()
         self.window = window
-        versions, status = works_report(sft.build_version(), frame_versions(), dict(window.state))
+        # (every row in the list's order: window.state is in the order the checks came in, and
+        # has no row whose check isn't back yet, which the report left out rather than "?")
+        versions, status = works_report(sft.build_version(), frame_versions(),
+                                        {c["id"]: window.state.get(c["id"]) for c in window.rows})
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         head = QHBoxLayout()

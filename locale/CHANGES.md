@@ -78,3 +78,21 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "SteamVR not running"
 - New in `lib/vrbindings.py:497`
   - now: "unknown command: {cmd}"
+
+## 2026-11-04
+- New in `get.sh:141`
+  - now: "%s follows the branch %s, not Frame Tweaks' releases: its updates aren't signature-checked. To follow signed releases instead: %s"
+- New in `gui/memory_page.py:187`
+  - now: "Reading the limits…"
+- New in `gui/memory_page.py:307`
+  - now: "Applying…"
+- New in `gui/wallet_page.py:52`
+  - now: "{command} didn't answer within {n} s"
+- New in `gui/wallet_page.py:633`
+  - now: "Asking Homebrew for its commands…"
+- New in `install.sh:857`
+  - now: "This copy follows the branch %s, not Frame Tweaks' releases: what it pulls isn't signature-checked. To follow signed releases instead: %s"
+- New in `install.sh:867`
+  - now: "Leaving the branch %s for signed releases. To go back: %s"
+- New in `lib/common.sh:768`
+  - now: "%s is no longer tried again at each login."

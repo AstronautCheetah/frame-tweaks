@@ -40,8 +40,10 @@ class ApplyChanges:
     # ---- apply --------------------------------------------------------------
     def pending_changes(self):
         """(install, remove): ticked but not installed, unticked but installed. Rows whose status
-        isn't known yet don't count; a tweak with a warning is reinstalled with its ↻ button."""
-        known = [c["id"] for c in self.rows if self.state.get(c["id"]) is not None]
+        isn't known yet don't count; a tweak with a warning is reinstalled with its ↻ button. Nor
+        do those an Apply's terminal is installing or removing now (applying): a second Apply
+        meanwhile would run them again, as their status isn't checked again until it closes."""
+        known = [c["id"] for c in self.rows if self.state.get(c["id"]) is not None and c["id"] not in self.applying]
         want = {cid: self.wanted.get(cid, self.state[cid][0] not in GONE) for cid in known}
         return ([cid for cid, on in want.items() if on and self.state[cid][0] in GONE],
                 [cid for cid, on in want.items() if not on and self.state[cid][0] not in GONE])

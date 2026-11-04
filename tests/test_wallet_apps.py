@@ -130,6 +130,17 @@ class Timers(unittest.TestCase):
         self.assertEqual(wp.timer_text(0), "Never")
         self.assertEqual(wp.timer_text(120), "2 h")
 
+    def test_the_languages_decimal_sign(self):
+        """(It was a point in every language: "1.5 u" in Dutch.)"""
+        before = wp.i18n.CATALOGUE
+        self.addCleanup(setattr, wp.i18n, "CATALOGUE", before)
+        self.assertIn("1.5", wp.timer_text(90))
+        for language, sign in (("fr", ","), ("nl_BE", ","), ("es_419", ".")):
+            wp.i18n.CATALOGUE = wp.i18n.Catalogue([language])
+            with self.subTest(language=language):
+                self.assertIn(f"1{sign}5", wp.timer_text(90))
+                self.assertIn(f"7{sign}5", wp.timer_text(7.5))
+
     def test_wallet_state_line(self):
         now = 1_000_000.0
         self.assertIn("locked", wp.wallet_state_text({"state": "locked"}, now))
@@ -373,7 +384,7 @@ class AllHomebrewCommands(unittest.TestCase):
                                  FLATPAK_APPS=[], SYSTEM_APPS=[], FLATPAK_ROOTS=[], LOCK_CONF=t / "wallet.conf"), \
                 mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": "1"}):
             page = wp.WalletApps(Window())
-            app.processEvents()
+            settle(page)
             self.assertNotIn("--all", (t / "asked").read_text())
             toggle = next(b for b in page.findChildren(QPushButton) if b.text().startswith("Show all Homebrew"))
             self.assertFalse(toggle.isChecked())
@@ -381,6 +392,7 @@ class AllHomebrewCommands(unittest.TestCase):
             toggle.setChecked(True)
             for _i in range(3):
                 app.processEvents()
+            settle(page)
             boxes = {c.text(): c for c in page.findChildren(QCheckBox) if not sip.isdeleted(c)}
             self.assertLessEqual({"pcre2grep", "pcre2test", "whisper-cli"}, set(boxes))
             self.assertNotIn("rg", boxes)                                  # (already offered above)
@@ -391,3 +403,66 @@ class AllHomebrewCommands(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 protect[0].click()
             self.assertEqual(out.getvalue(), "would run: wallet-tool pcre2test\n")
+
+
+def settle(page):
+    """Until what the page asks Homebrew in the background (wallet-tool) is in."""
+    from PyQt6.QtWidgets import QApplication
+    for _i in range(500):
+        QApplication.processEvents()
+        if page.tools_job is None and page.all_tools_job is None:
+            QApplication.processEvents()                       # (its fill, queued)
+            return
+        time.sleep(0.01)
+    raise AssertionError("still asking")
+
+
+class NothingHoldsUpTheWindow(unittest.TestCase):
+    """Homebrew (wallet-tool, up to 90 s) was asked on the window's thread as the page opened, and
+    app-timers, wallet-launcher and wallet-tool's own commands ran there with no time limit: one
+    that hung, hung the window for good."""
+    def setUp(self):
+        from PyQt6.QtWidgets import QApplication, QWidget
+        self.app = QApplication.instance() or QApplication([])
+        self.t = t = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, t, True)
+        unlock = t / "wallet-unlock"
+        unlock.write_text('#!/bin/bash\n[ "$1" = --info ] && { echo \'{"state": "locked", "password": true}\'; exit; }\n')
+        self.tool = t / "wallet-tool"
+        self.tool.write_text('#!/bin/bash\nsleep 1.5\ncase "$*" in\n  --list) printf "gh\\t/hb/gh\\n" ;;\n'
+                             '  --candidates) printf "rg\\tripgrep\\n" ;;\nesac\n')
+        self.timers = t / "app-timers"
+        self.timers.write_text('#!/bin/bash\n[ "$1" = --list ] && exit 0\nexec sleep 30\n')
+        for f in (unlock, self.tool, self.timers):
+            f.chmod(0o755)
+
+        class Window(QWidget):
+            def go_back(self):
+                pass
+        self.Window = Window
+        for p in (mock.patch.multiple(wp, WALLET_UNLOCK=unlock, WALLET_TOOL=self.tool, APP_TIMERS=self.timers,
+                                      WALLET_LAUNCHER=self.timers, LAUNCHERS=t / "none", FLATPAK_APPS=[],
+                                      SYSTEM_APPS=[], FLATPAK_ROOTS=[], LOCK_CONF=t / "wallet.conf", QUICK=1),
+                  mock.patch.dict(os.environ)):
+            p.start()
+            self.addCleanup(p.stop)
+        os.environ.pop("FRAME_TWEAKS_DRY_RUN", None)
+
+    def test_homebrew_is_asked_in_the_background(self):
+        start = time.monotonic()
+        page = wp.WalletApps(self.Window())
+        self.assertLess(time.monotonic() - start, 1)
+        settle(page)
+        self.assertEqual(page.tools, ([("gh", "/hb/gh")], [("rg", "ripgrep")]))
+
+    def test_a_command_that_doesnt_answer_is_said(self):
+        page = wp.WalletApps(self.Window())
+        app = {"id": "org.notes", "name": "Notes"}
+        for act in (lambda: page.set_timer(app, 15), lambda: page.set_headset(app, True),
+                    lambda: page.run(["org.notes"], "protected")):
+            start = time.monotonic()
+            act()
+            self.assertLess(time.monotonic() - start, 5)
+            self.assertIn("didn't answer within 1 s", page.notice.text())
+            page.notice.setText("")
+        settle(page)

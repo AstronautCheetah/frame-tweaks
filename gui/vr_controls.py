@@ -56,7 +56,9 @@ class ControllerInput:
         if isinstance(w, ContributeRow):
             self.show_contribute()
         elif w is not None and w.comp["id"] in self.boxes:
-            self.boxes[w.comp["id"]].toggle()
+            box = self.boxes[w.comp["id"]]
+            if box.isEnabled():          # (toggle() ignores setEnabled(False): not needed, a conflict)
+                box.toggle()
 
     def move_focus(self, step):
         """Left D-pad up/down: move a highlight through the visible rows."""

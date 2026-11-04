@@ -9,10 +9,11 @@ import shlex
 import shutil
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt6 import sip
-from PyQt6.QtCore import QProcess, Qt, QTimer
+from PyQt6.QtCore import QLocale, QProcess, Qt, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea,
                              QVBoxLayout, QWidget)
@@ -22,6 +23,52 @@ from i18n import _, N_, ngettext  # noqa: E402  (translations: locale/README.md;
 
 from sft import components  # (the tweaks: which one set up an app; lib/ is on the path)
 import ftconf  # noqa: E402  (settings files; lib/ is on the path)
+
+# Commands a page runs that can take long (Homebrew asked through wallet-tool, vr-memory-guard-tool)
+# run in a worker (in_background): on the window's own thread they froze it, in VR too, until they
+# answered. The quick ones run there, but none for longer than QUICK seconds (quick_run): with no
+# limit, one that hung hung the window for good.
+_JOBS = ThreadPoolExecutor(max_workers=2, thread_name_prefix="page-job")
+QUICK = 30
+
+
+def in_background(owner, work, then):
+    """work() in a worker; then(future) on the window's thread once it's done, if owner (the page
+    that asked) is still open: the timer that looks is owner's, and goes with it on Back."""
+    fut = _JOBS.submit(work)
+    timer = QTimer(owner, interval=50)
+
+    def look():
+        if fut.done():
+            timer.stop()
+            timer.deleteLater()
+            then(fut)
+    timer.timeout.connect(look)
+    timer.start()
+    return fut
+
+
+def no_answer(command, seconds):
+    return _("{command} didn't answer within {n} s").format(command=Path(command).name, n=seconds)
+
+
+def quick_run(cmd):
+    """(ok, what it said: its output, else its errors) of a quick command, never more than QUICK s."""
+    try:
+        r = subprocess.run([str(c) for c in cmd], capture_output=True, text=True, timeout=QUICK)
+    except subprocess.TimeoutExpired:
+        return False, no_answer(cmd[0], QUICK)
+    except (OSError, subprocess.SubprocessError) as e:
+        return False, str(e)
+    return r.returncode == 0, (r.stdout if r.returncode == 0 else r.stderr or r.stdout).strip()
+
+
+def local_number(text):
+    """A number as Python writes it ("2.5") with the decimal sign of the window's language: "2,5"
+    in French and Dutch ("2.5 Go" read as wrong there)."""
+    language = getattr(getattr(i18n, "CATALOGUE", None), "language", None) or "en"
+    return text.replace(".", QLocale(language).decimalPoint())
+
 
 FLATPAK_ICONS = Path("/var/lib/flatpak/exports/share/icons/hicolor")
 WALLET_LAUNCHER = Path.home() / ".local/bin/wallet-launcher"
@@ -101,7 +148,9 @@ def app_timers():
     """app-id -> (minutes of no activity before app-timers closes it, also on headset off)."""
     if not APP_TIMERS.exists():
         return {}
-    out = subprocess.run([str(APP_TIMERS), "--list"], capture_output=True, text=True).stdout
+    ok, out = quick_run([APP_TIMERS, "--list"])
+    if not ok:
+        return {}
     timers = {}
     for line in out.splitlines():
         # "app-id minutes [headset]", read from the end: an app id can have spaces ("My App")
@@ -199,7 +248,8 @@ def wallet_state_text(info, now):
 def timer_text(minutes):
     if not minutes:
         return _("Never")
-    return _("{h} h").format(h=f"{minutes / 60:g}") if minutes >= 60 else _("{m} min").format(m=f"{minutes:g}")
+    return (_("{h} h").format(h=local_number(f"{minutes / 60:g}")) if minutes >= 60
+            else _("{m} min").format(m=local_number(f"{minutes:g}")))
 
 
 def timer_step(minutes, step, floor=0):
@@ -306,6 +356,8 @@ def app_icon(name):
 
 class WalletApps(QWidget):
     """Choose which apps open with the shared KDE wallet (wallet-launcher), inside the window."""
+    # Homebrew's terminal tools (wallet-tool), once asked, and the jobs asking (in_background)
+    tools = all_tools = tools_job = all_tools_job = None
 
     def __init__(self, window):
         super().__init__()
@@ -530,9 +582,12 @@ class WalletApps(QWidget):
     def fill_tools(self):
         """Terminal tools from Homebrew (wallet-tool): the protected ones, and the commands that
         could be. Homebrew is asked once per page (brew leaves takes a moment), then kept."""
-        if getattr(self, "tools", None) is None:
-            self.tools = terminal_tools()
-        protected, candidates = self.tools
+        if getattr(self, "tools", None) is None and WALLET_TOOL.exists():
+            if getattr(self, "tools_job", None) is None:           # (Homebrew can take a while: in_background)
+                self.tools_job = in_background(self, terminal_tools, self.tools_found)
+            self.rows.addWidget(self.asking())
+            return
+        protected, candidates = getattr(self, "tools", None) or ([], [])
         if not protected and not candidates:
             return
         self.rows.addWidget(self.heading(_("Terminal tools ({n})").format(n=len(protected))))
@@ -565,14 +620,30 @@ class WalletApps(QWidget):
             self.rows.addWidget(self.row({"name": src, "icon": "utilities-terminal"}, note, [add]))
         self.fill_all_tools(set(packages))
 
+    def tools_found(self, fut):
+        self.tools_job = None
+        self.tools = fut.result() if fut.exception() is None else ([], [])
+        self.fill()
+
+    def all_tools_found(self, fut):
+        self.all_tools_job = None
+        self.all_tools = fut.result() if fut.exception() is None else []
+        self.fill()
+
+    @staticmethod
+    def asking():
+        label = QLabel(_("Asking Homebrew for its commands…"))
+        label.setObjectName("desc")
+        return label
+
     def fill_all_tools(self, offered):
         """Show all Homebrew commands (off each time the page opens, like Show hidden on the
         tweaks list): the formulae installed as another's dependency, and those a tweak runs, one
         row a formula with a check box a command, and Protect selected. Asked only when turned
         on: it's every command Homebrew has, hundreds."""
         showing = getattr(self, "showing_all_tools", False)
-        if showing and getattr(self, "all_tools", None) is None:
-            self.all_tools = all_terminal_tools()
+        if showing and getattr(self, "all_tools", None) is None and getattr(self, "all_tools_job", None) is None:
+            self.all_tools_job = in_background(self, all_terminal_tools, self.all_tools_found)
         rest = [t for t in (getattr(self, "all_tools", None) or []) if t[1] not in offered and t[2]]
         toggle = QPushButton(ngettext("Show all Homebrew commands ({n} more formula)",
                                       "Show all Homebrew commands ({n} more formulae)", len({t[1] for t in rest})
@@ -590,6 +661,9 @@ class WalletApps(QWidget):
         holder.setLayout(bar)
         self.rows.addWidget(holder)
         if not showing:
+            return
+        if getattr(self, "all_tools", None) is None:              # (all_tools_found lists them)
+            self.rows.addWidget(self.asking())
             return
         packages = {}
         for cmd, src, why in rest:
@@ -628,13 +702,15 @@ class WalletApps(QWidget):
             return
         said, ok = [], True
         for a in calls:
-            r = subprocess.run([str(WALLET_TOOL)] + a, capture_output=True, text=True)
-            ok = ok and r.returncode == 0
-            said.append((r.stdout if r.returncode == 0 else _("Didn't work: %s") % (r.stderr or r.stdout)).strip())
+            done, out = quick_run([WALLET_TOOL, *a])
+            ok = ok and done
+            said.append(out if done else _("Didn't work: %s") % out)
         self.notice.setText(html.escape(" ".join(said), quote=False))
+        listed_ok, listed = quick_run([WALLET_TOOL, "--list"]) if self.tools is not None else (False, "")
+        if self.tools is not None and not listed_ok:
+            self.tools = None                    # (not known now: asked again, as the page opened)
         if self.tools is not None:
             _old, candidates = self.tools
-            listed = subprocess.run([str(WALLET_TOOL), "--list"], capture_output=True, text=True).stdout
             protected = [tuple(line.split("\t", 1)) for line in listed.splitlines() if "\t" in line]
             done = {p[0] for p in protected}
             if args[0] == "--remove" and ok:
@@ -716,23 +792,22 @@ class WalletApps(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: app-timers --set", app["id"], minutes)
             return
-        r = subprocess.run([str(APP_TIMERS), "--set", app["id"], f"{minutes:g}"], capture_output=True, text=True)
+        ok, out = quick_run([APP_TIMERS, "--set", app["id"], f"{minutes:g}"])
         self.notice.setText(html.escape(
             (_("{app}: closes after {time} with no activity").format(app=app["name"], time=timer_text(minutes))
-             if minutes else _("{app}: no timer").format(app=app["name"])) if r.returncode == 0 else
-            _("Didn't work: %s") % (r.stderr or r.stdout).strip(), quote=False))
+             if minutes else _("{app}: no timer").format(app=app["name"])) if ok else
+            _("Didn't work: %s") % out, quote=False))
         QTimer.singleShot(0, self.fill)
 
     def set_headset(self, app, on):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: app-timers --headset", app["id"], "on" if on else "off")
             return
-        r = subprocess.run([str(APP_TIMERS), "--headset", app["id"], "on" if on else "off"],
-                           capture_output=True, text=True)
+        ok, out = quick_run([APP_TIMERS, "--headset", app["id"], "on" if on else "off"])
         self.notice.setText(html.escape(
             (f"{app['name']}: " + (_("also closes when the headset is taken off") if on else
-                                   _("no longer closes when the headset is taken off"))) if r.returncode == 0 else
-            _("Didn't work: %s") % (r.stderr or r.stdout).strip(), quote=False))
+                                   _("no longer closes when the headset is taken off"))) if ok else
+            _("Didn't work: %s") % out, quote=False))
         QTimer.singleShot(0, self.fill)
 
     def set_gate(self, app, on):
@@ -748,7 +823,6 @@ class WalletApps(QWidget):
         if os.environ.get("FRAME_TWEAKS_DRY_RUN"):
             print("would run: wallet-launcher", " ".join(args))
             return
-        r = subprocess.run([str(WALLET_LAUNCHER)] + args, capture_output=True, text=True)
-        self.notice.setText(html.escape(done if r.returncode == 0 else
-                                        _("Didn't work: %s") % (r.stderr or r.stdout).strip(), quote=False))
+        ok, out = quick_run([WALLET_LAUNCHER, *args])
+        self.notice.setText(html.escape(done if ok else _("Didn't work: %s") % out, quote=False))
         QTimer.singleShot(0, self.fill)

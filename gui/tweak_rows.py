@@ -57,7 +57,7 @@ class CategoryHeader(QWidget):
     """▾/▸ CATEGORY (n) ☑ ☐: click it (or the empty part of the header) to collapse or expand
     (remembered); its two boxes tick or untick every tweak in it; Hide/Unhide on the right."""
 
-    def __init__(self, window, category, count, collapsed, hidden, key=None):
+    def __init__(self, window, category, count, collapsed, hidden, key=None, foldable=True):
         super().__init__()
         key = key or category                           # (the English name: what's remembered)
         self.toggle_collapsed = lambda: window.toggle_collapsed(key)
@@ -71,6 +71,9 @@ class CategoryHeader(QWidget):
         toggle.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         toggle.setToolTip(_("Expand") if collapsed else _("Collapse"))
         toggle.clicked.connect(self.toggle_collapsed)
+        # (not while searching: every category is shown unfolded then, whatever's saved, and
+        # folding there would save the opposite of what's seen; Window.toggle_collapsed)
+        toggle.setEnabled(foldable)
         lay.addWidget(toggle)
         for ticked, tip in ((True, _("Tick every tweak in this category")),
                             (False, _("Untick every tweak in this category (installed ones are removed when you "

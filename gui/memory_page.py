@@ -14,9 +14,11 @@ from PyQt6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QPushButton, QScroll
 import i18n  # noqa: E402
 from i18n import _  # noqa: E402  (translations: locale/README.md; lib/ is on the path)
 
-from wallet_page import FLATPAK_APPS, WalletApps, desktop_entry  # (the Wallet apps page's rows, and menu entries)
+# (the Wallet apps page's rows, menu entries, and its way of running slow commands and writing numbers)
+from wallet_page import FLATPAK_APPS, WalletApps, desktop_entry, in_background, local_number, no_answer
 
 TOOL = Path.home() / ".local/bin/vr-memory-guard-tool"
+INFO_TIMEOUT, APPLY_TIMEOUT = 90, 120   # s: info finds the apps (flatpak list); apply puts them in force
 STEP = 512                 # MiB a press: half a GB, fine enough on 16 GB, few enough presses in VR
 LOWEST = 512               # (the tool takes 256M, but an app limited that low is stopped as it opens)
 NEW_LIMIT = 4096           # (an app given a limit of its own starts here, or at the pool if that's less)
@@ -29,7 +31,7 @@ def size_arg(v):
 
 def gb_text(v):
     """MiB as the page shows it: 5 GB, 2.5 GB, 3.42 GB."""
-    return _("{n} GB").format(n=f"{v / 1024:.2f}".rstrip("0").rstrip("."))
+    return _("{n} GB").format(n=local_number(f"{v / 1024:.2f}".rstrip("0").rstrip(".")))
 
 
 def step(v, direction, lo, hi):
@@ -45,7 +47,9 @@ def read_info():
         return None, _("This page needs vr-memory-guard-tool, which VR memory guard installs since this version: "
                        "reinstall it (↻) first.")
     try:
-        r = subprocess.run([str(TOOL), "info"], capture_output=True, text=True, timeout=90)
+        r = subprocess.run([str(TOOL), "info"], capture_output=True, text=True, timeout=INFO_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return None, _("Didn't work: %s") % no_answer(TOOL, INFO_TIMEOUT)
     except (OSError, subprocess.SubprocessError) as e:
         return None, _("Didn't work: %s") % e
     if r.returncode:
@@ -54,6 +58,24 @@ def read_info():
         return json.loads(r.stdout), None
     except ValueError:
         return None, _("Didn't work: %s") % r.stdout.strip()[:300]
+
+
+def run_calls(calls):
+    """(ok, what the last said, or what the one that failed did): the tool's commands, in order,
+    up to the first that fails (what ran before it is saved)."""
+    said = ""
+    for a in calls:
+        try:
+            r = subprocess.run([str(TOOL), *a], capture_output=True, text=True, timeout=APPLY_TIMEOUT)
+            ok, out = r.returncode == 0, (r.stdout if r.returncode == 0 else r.stderr or r.stdout).strip()
+        except subprocess.TimeoutExpired:
+            ok, out = False, no_answer(TOOL, APPLY_TIMEOUT)
+        except (OSError, subprocess.SubprocessError) as e:
+            ok, out = False, str(e)
+        if not ok:
+            return False, out
+        said = out
+    return True, said
 
 
 def app_entry(app):
@@ -151,15 +173,28 @@ class MemoryLimits(QWidget):
         lay.addWidget(scroll, 1)
         self.fill()
 
-    def fill(self):
-        """The tool's settings, read again; what's shown becomes what's saved (Apply dims)."""
+    def fill(self, said=""):
+        """The tool's settings, read again; what's shown becomes what's saved (Apply dims). Read in
+        the background (in_background): the tool lists the Flatpak apps, which can take long, and
+        the window froze meanwhile. said: the notice once they're in (what Apply did)."""
         while self.rows.count():
             item = self.rows.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        self.controls = {}
-        info, why = read_info()
+        self.controls, self.info = {}, None
+        self.reserve.setEnabled(False)
+        self.show_values()
+        self.notice.setText(html.escape(_("Reading the limits…"), quote=False))
+        self.job = in_background(self, read_info, lambda fut: self.filled(fut, said))
+
+    def filled(self, fut, said):
+        self.job = None
+        try:
+            info, why = fut.result()
+        except Exception as e:                  # (said on the page rather than lost in the worker)
+            info, why = None, _("Didn't work: %s") % e
         self.info = info
+        self.notice.setText(said)
         if info is None:
             self.notice.setText(html.escape(why, quote=False))
             self.reserve.setEnabled(False)
@@ -268,18 +303,16 @@ class MemoryLimits(QWidget):
             self.saved = {"reserve": self.chosen["reserve"], "apps": dict(self.chosen["apps"])}
             self.show_values()
             return
-        said = ""
-        for a in calls:
-            try:
-                r = subprocess.run([str(TOOL), *a], capture_output=True, text=True, timeout=120)
-                ok, out = r.returncode == 0, (r.stdout if r.returncode == 0 else r.stderr or r.stdout).strip()
-            except (OSError, subprocess.SubprocessError) as e:
-                ok, out = False, str(e)
-            if not ok:
-                # (what ran before it is saved: read back, so Apply offers only what's left)
-                self.fill()
-                self.notice.setText(html.escape(_("Didn't work: %s") % out, quote=False))
-                return
-            said = out
-        self.fill()
-        self.notice.setText(html.escape(said, quote=False).replace("\n", "<br>"))
+        self.apply.setEnabled(False)                # (not twice while it runs)
+        self.notice.setText(html.escape(_("Applying…"), quote=False))
+        self.job = in_background(self, lambda: run_calls(calls), self.applied)
+
+    def applied(self, fut):
+        self.job = None
+        try:
+            ok, out = fut.result()
+        except Exception as e:
+            ok, out = False, str(e)
+        # (read back either way: what ran before a failure is saved, so Apply offers only what's left)
+        self.fill(html.escape(out, quote=False).replace("\n", "<br>") if ok
+                  else html.escape(_("Didn't work: %s") % out, quote=False))

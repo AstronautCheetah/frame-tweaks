@@ -1,5 +1,65 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **0.7.2's fixes, three corrections:** a Python environment whose packages can't be installed
+  again (a version gone from PyPI, say) no longer has the login repair retrying every 2 minutes,
+  holding the install lock: it gives up after 10 tries, a day, or a failure other than being
+  offline, and `./install.sh repair` still tries; a pasted picture of light text on a
+  transparent background is read on dark grey, not white; and Scroll strips' settings that
+  couldn't be saved no longer snap back within 5 seconds.
+- **The installer window, nine fixes:** Tick all and Untick all ticked or unticked rows a search
+  left out too, unseen; they now act only on the rows the search shows. Folding a category while
+  searching saved the opposite of what you saw: folding is off while you search. An Apply's
+  terminal closing undid every tick made while it ran; only that Apply's own are done with now,
+  and a second Apply meanwhile leaves out what the first is still installing. Messages the window
+  gives (a setting saved, an update check's outcome) showed only on the list, so from
+  Preferences, a README or Packs nobody saw them: they show under any page now. A pack added or
+  updated from a link that failed after you left the Packs page said nothing; the window says it.
+  In VR, A ticked a box that was off (a tweak not needed here, or a conflict). Translated, the
+  bottom bar's buttons made the window wider than it opens (French, Spanish, Dutch): they wrap
+  onto a second line when they don't fit. The ✔ Works on my Frame report listed the tweaks in
+  the order their checks came back and left out any still checking; it follows the list, with
+  "?" for those.
+- **Memory limits and Wallet apps no longer freeze the window:** reading VR memory guard's
+  limits and applying them, and asking Homebrew for terminal tools, ran on the window's own
+  thread for up to two minutes; they run in the background now, and the page's other commands
+  give up after 30 s with a message instead of hanging the window. Their sizes and times are
+  written with the language's decimal sign ("2,5 Go", "1,5 u").
+- **Dictation, three fixes:** on a US keyboard layout, dictated text with a character outside
+  ASCII (é, ’, —, °, which Whisper and Parakeet often write) went out as random keys, shortcuts
+  among them: such text is now pasted, as on other layouts. A recording whose microphone went
+  away (a Bluetooth or USB one) waited for the next press, which then transcribed it instead of
+  recording, and a push to talk (Cuff's) did the same: what it caught is now transcribed at
+  once, and the next press records. A push to talk stopped by Dictation's own button could say
+  it was done before the text had been typed.
+- **Updates of a copy made with `git clone` weren't signature-checked:** the README's "read the
+  script first" steps cloned the repository, which leaves the copy on the `main` branch, and
+  updates of a copy on a branch pull it without checking any signature. The README now has you
+  download `get.sh`, read it and run it, which installs a signed release. `get.sh` and
+  `./install.sh update` say when a copy follows a branch, and `./install.sh update --to stable`
+  moves it to the newest signed release. A copy isn't moved without you asking.
+- **A pack you trusted could change its Python code without asking you again:** the trust check
+  skipped Python's `__pycache__` folders, so a `.pyc` file pushed in an update ran in place of
+  the code you had trusted. The check now covers them, and a pack whose update changed any file
+  waits until you trust it again. A pack whose own Python writes these files as it runs now
+  shows as changed: run its Python with `python3 -B` (docs/mods.md).
+- **A pack's `config:` entry could name all of `~/.config`:** `~/.config//` passed the check, and
+  removing that tweak's settings (uninstall with `--remove-settings`, **Delete settings left by
+  uninstalled tweaks…** or `forget-settings`) would have deleted the whole folder. Paths with an
+  empty, `.` or `..` part are now refused, so the tweak isn't offered.
+- **One pack with a bad `source:` hid every tweak:** a `source:` that wasn't a mapping, in a tweak
+  with a linked `version:`, stopped the tweak list from loading, and every `./install.sh`
+  command said no tweaks were found. That tweak is now left out with a problem, as other mistakes are.
+- **A dependency's migration could be skipped for good:** installing or reinstalling a tweak
+  installs what it depends on again too, and recorded the new version for it, but ran only the
+  named tweak's `migrate.sh`. Its dependencies' migrations now run too.
+- **Deleting left-behind settings took a broken tweak's:** **Delete settings left by uninstalled
+  tweaks…**, `forget-settings` and `uninstall-self --remove-settings` counted a tweak whose status
+  said missing as uninstalled, even when Frame Tweaks had installed it (repair puts it back).
+  Such a tweak's settings now stay.
+
 ## 0.7.2 (2026-11-04)
 
 ### Added

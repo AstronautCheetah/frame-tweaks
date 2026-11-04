@@ -22,6 +22,8 @@ import registry  # noqa: E402  (after gui: lib/ is on the path through sft)
 import userpacks  # noqa: E402  (after gui: lib/ is on the path through sft)
 from PyQt6.QtTest import QTest  # noqa: E402
 from PyQt6.QtWidgets import QApplication, QPushButton  # noqa: E402
+import i18n  # noqa: E402  (after gui: lib/ is on the path)
+SAY = gui.Window.say        # (the real one: WindowTest stands one in for it)
 
 
 class WindowTest(unittest.TestCase):
@@ -218,6 +220,157 @@ class TickACategory(WindowTest):
             w.wanted.clear()
             w.tick_category(cat, True)
             self.assertNotIn("arrowpad", w.wanted)                            # (not needed: not offered)
+
+
+    def search(self, w, text):
+        w.search_button.setChecked(True)
+        w.search_box.setText(text)
+
+    def test_while_searching_only_the_rows_it_shows(self):
+        """(Tick all ticked the whole category, rows the search left out too, unseen: Apply then
+        installed them. Untick all removed installed ones the same way.)"""
+        w = self.window()
+        cat = next(c["category_en"] for c in w.rows if c["id"] == "arrowpad")
+        in_cat = [c["id"] for c in w.rows if c["category_en"] == cat]
+        self.search(w, "arrowpad")
+        shown = set(w.boxes)
+        self.assertLess(len(shown), len(in_cat))
+        w.tick_category(cat, True)
+        self.assertEqual(set(w.pending_changes()[0]), shown & set(in_cat))
+        w.close()
+        for cid in in_cat:
+            self.statuses[cid] = (0, "ok")
+        w = self.window()
+        self.search(w, "arrowpad")
+        w.tick_category(cat, False)
+        self.assertEqual(set(w.pending_changes()[1]), set(w.boxes) & set(in_cat))
+
+    def test_folding_while_searching_saves_nothing(self):
+        """A search shows every category unfolded: folding one then saved the opposite of what's
+        seen (a folded one came back unfolded for good)."""
+        w = self.window()
+        cat = next(c["category_en"] for c in w.rows if c["id"] == "arrowpad")
+        w.toggle_collapsed(cat)                                     # (folded, saved)
+        self.search(w, "arrowpad")
+        self.assertIn("arrowpad", w.boxes)                          # (shown unfolded while searching)
+        self.assertFalse(self.buttons_toggle(w, cat).isEnabled())
+        w.toggle_collapsed(cat)
+        self.assertIn(cat, gui.sft.read_categories(gui.COLLAPSED, w.rows))
+        QTest.keyClick(w.search_box, gui.Qt.Key.Key_Escape)
+        self.assertNotIn("arrowpad", w.boxes)                       # (still folded)
+        self.assertTrue(self.buttons_toggle(w, cat).isEnabled())
+
+    def buttons_toggle(self, w, category):
+        heads = (w.grid.itemAt(i).widget() for i in range(w.grid.count()))      # (the list's now, not those going)
+        head = next(h for h in heads if isinstance(h, gui.CategoryHeader)
+                    and category.upper() in h.findChild(QPushButton, "cattoggle").text())
+        return head.findChild(QPushButton, "cattoggle")
+
+
+class ApplyTerminal(WindowTest):
+    def test_its_end_keeps_what_was_ticked_meanwhile(self):
+        """An Apply's terminal closing cleared every tick: those made while it ran too."""
+        w = self.window()
+        a, b = w.rows[0]["id"], w.rows[1]["id"]
+        procs = []
+
+        def terminal(proc, script):
+            procs.append(proc)
+            proc.start("sleep", ["0.3"])
+        with mock.patch.object(gui, "in_terminal", terminal), mock.patch.dict(os.environ, {"FRAME_TWEAKS_DRY_RUN": ""}):
+            w.boxes[a].setChecked(True)
+            w.run_changes([a], [])                                  # (Apply: a's terminal opens)
+            self.assertNotIn(a, w.pending_changes()[0])             # (not again while it runs)
+            w.boxes[b].setChecked(True)                             # (meanwhile, b ticked)
+            self.assertEqual(w.pending_changes()[0], [b])
+            procs[0].waitForFinished(3000)
+            QTest.qWait(50)
+            self.settle(w)
+        self.assertNotIn(a, w.wanted)                               # (a: its row says what's installed now)
+        self.assertTrue(w.wanted.get(b))
+        self.assertTrue(w.boxes[b].isChecked())
+        self.assertIn(b, w.pending_changes()[0])
+        self.assertEqual(w.applying, set())
+
+
+class Messages(WindowTest):
+    def test_said_on_every_page(self):
+        """say() wrote in the list's bottom bar only: from Preferences, a README or Packs, nobody
+        saw it."""
+        w = self.window()
+        w.show()
+        w.show_prefs()
+        SAY(w, "Saved somewhere")
+        QTest.qWait(20)
+        self.assertTrue(w.page_notice.isVisible())
+        self.assertIn("Saved somewhere", w.page_notice.text())
+        w.go_back()
+        self.assertFalse(w.page_notice.isVisible())                 # (the list's own bar says it)
+        self.assertIn("Saved somewhere", w.notice.text())
+        SAY(w, "On the list")
+        self.assertFalse(w.page_notice.isVisible())
+        w.say_timer.timeout.emit()                                  # (its few seconds over)
+        self.assertEqual(w.notice.text(), w.hint_text)
+
+    def test_a_pack_job_that_failed_after_back(self):
+        """(It was said on the Packs page only: gone back from it meanwhile, it was lost.)"""
+        import concurrent.futures
+        w = self.window()
+        fut = concurrent.futures.Future()
+        fut.set_exception(gui.sft.PackError("Couldn't fetch the pack: no connection"))
+        w.pack_job = (fut, lambda page, result: None, "Adding the pack…")
+        gui.Window.say.reset_mock()
+        w.finish_pack_job()
+        gui.Window.say.assert_called_once()
+        self.assertIn("no connection", gui.Window.say.call_args[0][0])
+        fut = concurrent.futures.Future()
+        fut.set_exception(OSError("disk full"))
+        w.pack_job = (fut, lambda page, result: None, "Adding the pack…")
+        w.finish_pack_job()
+        self.assertIn("disk full", gui.Window.say.call_args[0][0])
+
+
+class ControllerA(WindowTest):
+    def test_a_doesnt_tick_a_box_that_is_off(self):
+        """A (in VR) ticked a row's box that was off (not needed here, a conflict): Qt's toggle()
+        doesn't look."""
+        w = self.window()
+        cid = w.rows[0]["id"]
+        w.focus_index = next(i for i, r in enumerate(w.row_widgets) if getattr(r, "comp", {}).get("id") == cid)
+        with mock.patch.object(gui.QApplication, "widgetAt", lambda *a: None):     # (the laser on no row)
+            w.boxes[cid].setEnabled(False)
+            w.toggle_pointed_row()
+            self.assertFalse(w.boxes[cid].isChecked())
+            w.boxes[cid].setEnabled(True)
+            w.toggle_pointed_row()
+            self.assertTrue(w.boxes[cid].isChecked())
+
+
+class BottomBar(WindowTest):
+    def test_its_buttons_fit_the_window_in_every_language(self):
+        """On one line, the bottom bar's buttons made the window wider than the 1000 px it opens
+        at, translated and with the update buttons shown (French: 1160 px). They wrap now. (The
+        Frame's own font, Noto Sans, is for the Frame to confirm: here, this machine's.)"""
+        self.addCleanup(setattr, i18n, "CATALOGUE", i18n.CATALOGUE)
+        for language in ("en", "fr", "nl_BE", "es_419"):
+            with self.subTest(language=language):
+                i18n.CATALOGUE = i18n.Catalogue([language])
+                w = self.window()
+                w.set_update_state("finish")
+                w.files_changed = {w.rows[0]["id"]}
+                w.show_install_button.setHidden(False)
+                w.changed_button.setVisible(True)
+                w.show()
+                QTest.qWait(20)
+                page = w.stack.widget(0)
+                bar = page.layout().itemAt(page.layout().count() - 1)
+                margins = w.outer.contentsMargins()
+                self.assertLessEqual(bar.minimumSize().width() + margins.left() + margins.right(), 1000)
+                w.resize(1000, 760)
+                QTest.qWait(20)
+                for b in (w.apply_button, w.update_button, w.show_install_button):
+                    self.assertTrue(page.rect().contains(b.mapTo(page, b.rect().bottomRight())), b.text())
+                w.close()
 
 
 class Narrowest(WindowTest):

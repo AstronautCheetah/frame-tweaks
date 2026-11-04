@@ -5,6 +5,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: get.sh
+msgid ""
+"%s follows the branch %s, not Frame Tweaks' releases: its updates aren't signature-checked. To follow signed releases instead: %s"
+msgstr ""
+
+#: get.sh
 msgid "Couldn't find a release of %s"
 msgstr ""
 
@@ -609,6 +614,10 @@ msgstr ""
 msgid "SteamVR runs it until it restarts. Every open app closes."
 msgstr ""
 
+#: gui/frame-tweaks-gui.py gui/packs_page.py
+msgid "That didn't work: {error}"
+msgstr ""
+
 #: gui/frame-tweaks-gui.py
 msgid ""
 "The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
@@ -737,6 +746,10 @@ msgstr ""
 msgid "Above this, the app is stopped (and it may use some swap on top)"
 msgstr ""
 
+#: gui/memory_page.py
+msgid "Applying…"
+msgstr ""
+
 #: gui/memory_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
 msgid "Didn't work: %s"
 msgstr ""
@@ -801,6 +814,10 @@ msgstr ""
 
 #: gui/memory_page.py
 msgid "Own limit"
+msgstr ""
+
+#: gui/memory_page.py
+msgid "Reading the limits…"
 msgstr ""
 
 #: gui/memory_page.py
@@ -950,10 +967,6 @@ msgstr ""
 
 #: gui/packs_page.py
 msgid "Stop using"
-msgstr ""
-
-#: gui/packs_page.py
-msgid "That didn't work: {error}"
 msgstr ""
 
 #: gui/packs_page.py
@@ -1459,6 +1472,10 @@ msgid ""
 msgstr ""
 
 #: gui/wallet_page.py
+msgid "Asking Homebrew for its commands…"
+msgstr ""
+
+#: gui/wallet_page.py
 msgid "Asks for the wallet password"
 msgstr ""
 
@@ -1698,6 +1715,10 @@ msgstr ""
 
 #: gui/wallet_page.py
 msgid "{app}: removed"
+msgstr ""
+
+#: gui/wallet_page.py
+msgid "{command} didn't answer within {n} s"
 msgstr ""
 
 #: gui/wallet_page.py
@@ -1967,6 +1988,10 @@ msgid "Kept your own translations: %s"
 msgstr ""
 
 #: install.sh
+msgid "Leaving the branch %s for signed releases. To go back: %s"
+msgstr ""
+
+#: install.sh
 msgid ""
 "Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
 msgstr ""
@@ -2114,6 +2139,11 @@ msgstr ""
 msgid ""
 "This checkout and GitHub's main have gone separate ways. Without local work to\n"
 "keep: git reset --hard @{upstream}"
+msgstr ""
+
+#: install.sh
+msgid ""
+"This copy follows the branch %s, not Frame Tweaks' releases: what it pulls isn't signature-checked. To follow signed releases instead: %s"
 msgstr ""
 
 #: install.sh
@@ -2315,6 +2345,10 @@ msgstr ""
 
 #: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
+msgstr ""
+
+#: lib/common.sh
+msgid "%s is no longer tried again at each login."
 msgstr ""
 
 #: lib/common.sh
