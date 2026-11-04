@@ -189,17 +189,7 @@ class VrClipboard(unittest.TestCase):
             with self.subTest(env), mock.patch.dict(os.environ, {"DISPLAY": env}):
                 self.assertEqual(fs.vr_display(), want)
 
-    def test_copied_only_while_the_owner_holds_the_clipboard(self):
-        class Proc:
-            def __init__(self, ends):
-                self.ends = ends
-            def wait(self, timeout):
-                if self.ends:
-                    return 1
-                raise subprocess.TimeoutExpired("frame-snip", timeout)
-        for ends, want in ((True, False), (False, True)):
-            with self.subTest(ends=ends), mock.patch.object(fs.subprocess, "Popen", return_value=Proc(ends)):
-                self.assertIs(fs.hand_to_clipboard_owner({"clip.txt": b"x"}, ":0"), want)
+    # (copied only once the owner holds the clipboard: test_snip_fixes.py, OwnerReady)
 
     def test_the_owner_takes_only_an_x_display(self):
         d = Path(tempfile.mkdtemp(prefix="snip-clip-"))

@@ -402,7 +402,8 @@ def read_handed(folder, files):
 
 
 # What the clipboard owner offers, and the file in its folder each comes from: an image in the
-# formats apps look for, or text under the names X apps ask for it by.
+# formats apps look for, or text under the names X apps ask for it by. clip.txt is UTF-8; STRING
+# is served as a Latin-1 copy of it and TEXT answered as UTF8_STRING (x_clipboard_owner).
 CLIP_FILES = {"image/png": "clip.png", "image/bmp": "clip.bmp", "text/html": "clip.html",
               "UTF8_STRING": "clip.txt", "text/plain;charset=utf-8": "clip.txt", "text/plain": "clip.txt",
               "STRING": "clip.txt", "TEXT": "clip.txt"}
@@ -430,6 +431,10 @@ def x_clipboard_owner(folder, display=":2"):
         print(f"frame-snip: {e}", file=sys.stderr)
         return 1
     data = {k: found[v] for k, v in files.items() if v in found}
+    if "STRING" in data:
+        # STRING is Latin-1 by the ICCCM, and readers decode it so (clipboard_text, here too):
+        # UTF-8 bytes under it came out as "GrÃ¼ÃŸe". What Latin-1 lacks becomes "?".
+        data["STRING"] = data["STRING"].decode("utf-8", "replace").encode("latin-1", "replace")
     x_auth_for(display)
     x = x_lib()
     d = ctypes.c_void_p(x.XOpenDisplay(display.encode()))
@@ -439,9 +444,13 @@ def x_clipboard_owner(folder, display=":2"):
     win = x.XCreateSimpleWindow(d, ctypes.c_ulong(x.XDefaultRootWindow(d)), 0, 0, 1, 1, 0, 0, 0)
     CLIP, TARGETS, TIMESTAMP, XA_ATOM, XA_INTEGER = atom("CLIPBOARD"), atom("TARGETS"), atom("TIMESTAMP"), 4, 19
     offers = {atom(k): v for k, v in data.items()}
+    # TEXT asks for text in whatever type the owner likes; answered with type TEXT itself, a reader
+    # can't tell how to decode it (ICCCM: never reply with TEXT), so it's sent as UTF8_STRING.
+    as_type = {atom("TEXT"): atom("UTF8_STRING")}
     x.XSetSelectionOwner(d, ctypes.c_ulong(CLIP), ctypes.c_ulong(win), ctypes.c_ulong(0))
     if x.XGetSelectionOwner(d, ctypes.c_ulong(CLIP)) != win:
         return 1
+    owner_ready()
 
     class Req(ctypes.Structure):                      # XSelectionRequestEvent
         _fields_ = [("type", ctypes.c_int), ("serial", ctypes.c_ulong), ("send_event", ctypes.c_int),
@@ -474,8 +483,8 @@ def x_clipboard_owner(folder, display=":2"):
             x.XChangeProperty(d, ctypes.c_ulong(r.requestor), ctypes.c_ulong(prop), ctypes.c_ulong(XA_INTEGER), 32, 0, t, 1)
         elif r.target in offers:
             blob = offers[r.target]
-            x.XChangeProperty(d, ctypes.c_ulong(r.requestor), ctypes.c_ulong(prop), ctypes.c_ulong(r.target),
-                              8, 0, ctypes.c_char_p(blob), len(blob))
+            x.XChangeProperty(d, ctypes.c_ulong(r.requestor), ctypes.c_ulong(prop),
+                              ctypes.c_ulong(as_type.get(r.target, r.target)), 8, 0, ctypes.c_char_p(blob), len(blob))
         else:
             prop = 0                                  # can't give that
         note = Note(type=31, send_event=1, display=d, requestor=r.requestor, selection=r.selection,
@@ -491,20 +500,54 @@ def vr_display():
     return d if re.fullmatch(r":\d{1,3}", d) and d != ":2" else ":0"
 
 
+READY_FD = "FRAME_SNIP_READY_FD"     # (environment: the pipe the clipboard owner says it's ready on)
+OWNER_READY_TIMEOUT = 3             # s: the owner imports PyQt6 before it opens the display
+
+
+def owner_ready():
+    """The clipboard owner holds the clipboard: one byte on the pipe hand_to_clipboard_owner gave
+    it (READY_FD), then that's closed. Started some other way (by hand, a test), there's none."""
+    fd = os.environ.pop(READY_FD, "")
+    if not fd.isdigit():
+        return
+    with contextlib.suppress(OSError):
+        os.write(int(fd), b"1")
+    with contextlib.suppress(OSError):
+        os.close(int(fd))
+
+
 def hand_to_clipboard_owner(blobs, display):
     """Start frame-snip --x-clipboard with blobs ({file name: bytes}) for display; True once it
-    holds the clipboard (it ends at once, False, when the display can't be opened or another
-    program kept the clipboard)."""
+    holds the clipboard, False when it ends first (the display can't be opened, another program
+    kept the clipboard) or isn't ready within OWNER_READY_TIMEOUT. It says so on a pipe
+    (owner_ready): only waiting for it to end early said "copied" for an owner still importing
+    PyQt6 after half a second, as on a busy Frame, that then failed."""
     d = Path(tempfile.mkdtemp(prefix="snip-clip-"))
     for name, data in blobs.items():
         (d / name).write_bytes(data)
-    p = subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--x-clipboard", str(d), display],
-                         start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    r, w = os.pipe()
     try:
-        p.wait(timeout=0.5)                           # (a failed start ends within milliseconds)
-    except subprocess.TimeoutExpired:
-        return True                                   # (still holding it: copied)
-    return False
+        p = subprocess.Popen([sys.executable, os.path.abspath(sys.argv[0]), "--x-clipboard", str(d), display],
+                             start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             pass_fds=(w,), env=dict(os.environ, **{READY_FD: str(w)}))
+    except OSError:
+        os.close(r)
+        shutil.rmtree(d, ignore_errors=True)
+        return False
+    finally:
+        os.close(w)                                   # (the owner's copy is all that's left: EOF when it ends)
+    try:
+        ready, _w, _x = select.select([r], [], [], OWNER_READY_TIMEOUT)
+        ok = bool(ready) and os.read(r, 1) == b"1"    # (b"": it ended without holding the clipboard)
+    finally:
+        os.close(r)
+    if not ok:
+        # Not ready in time: ended, so a late grab can't put it on the clipboard after the caller
+        # said "Couldn't copy" (or fell back to wl-copy). Its folder goes if it never read it.
+        with contextlib.suppress(OSError):
+            p.kill()
+        shutil.rmtree(d, ignore_errors=True)
+    return ok
 
 
 def desktop_running():
@@ -539,8 +582,7 @@ def copy_image_everywhere(image):
         return hand_to_clipboard_owner(blobs, vr_display())
     if not list(RUN.glob("nested_plasma/xauth_*")):
         return to_clipboard(png, "image/png")
-    hand_to_clipboard_owner(blobs, ":2")
-    return True
+    return hand_to_clipboard_owner(blobs, ":2") or to_clipboard(png, "image/png")
 
 
 # ---- paste: the clipboard's text or picture, for Narrate's Paste ------------------------------
@@ -825,7 +867,22 @@ def pasted_content():
     img = QImage.fromData(value)
     if img.isNull():
         return "bad-image", None
+    img = on_white(img)             # (shown so on the panel too: dark text on its dark background was lost)
     return "image", (img, narration_text(img))
+
+
+def on_white(img):
+    """img with any transparency laid on white. A copied picture (a logo, a diagram) is often
+    black text on transparent pixels, whose colour is black too: it read as "the snip is black"
+    and Tesseract saw black on black."""
+    if not img.hasAlphaChannel():
+        return img
+    out = QImage(img.size(), QImage.Format.Format_RGB32)
+    out.fill(QColor("white"))
+    p = QPainter(out)
+    p.drawImage(0, 0, img)
+    p.end()
+    return out
 
 
 def notify(title, body=""):
@@ -858,14 +915,25 @@ def no_text_reason(snip):
             else _("No text found in the snip."))
 
 
+OCR_LONG_SIDE = 4000     # px: no larger for Tesseract; a big pasted picture scaled 3x took minutes
+OCR_TIMEOUT = 30         # s, for each Tesseract run: past that, it's taken as no text (heat on the Frame)
+
+
+def ocr_scale(img, want):
+    """want, or less so img's long side stays within OCR_LONG_SIDE; never below 1 (a picture
+    already that large is read as it is, not shrunk: its small text would be lost)."""
+    return max(1.0, min(float(want), OCR_LONG_SIDE / max(1, img.width(), img.height())))
+
+
 def for_ocr(img, scale=3):
     """img made easy for Tesseract: grey, scale times larger, then black text on white, cut at mid
     grey and turned over when the picture is mostly dark. Light text on dark buttons of different
     shades (the Frame Tweaks window: white on green, grey and near black) gave Tesseract nothing at
     all, inverted or not, until thresholded like this. A lookup table over the pixels' bytes, so it
-    costs no Python loop."""
+    costs no Python loop. scale is capped (ocr_scale)."""
+    scale = ocr_scale(img, scale)
     g = img.convertToFormat(QImage.Format.Format_Grayscale8).scaled(
-        img.width() * scale, img.height() * scale, Qt.AspectRatioMode.KeepAspectRatio,
+        round(img.width() * scale), round(img.height() * scale), Qt.AspectRatioMode.KeepAspectRatio,
         Qt.TransformationMode.SmoothTransformation).convertToFormat(QImage.Format.Format_Grayscale8)
     bpl, h = g.bytesPerLine(), g.height()
     data = bytes(g.constBits().asstring(bpl * h))
@@ -879,8 +947,13 @@ def for_ocr(img, scale=3):
 
 
 def tesseract(img, path, psm):
+    """img's text, or None when Tesseract took longer than OCR_TIMEOUT (it's ended)."""
     img.save(str(path))
-    r = subprocess.run([TESSERACT, str(path), "-", "--psm", psm], capture_output=True, text=True)
+    try:
+        r = subprocess.run([TESSERACT, str(path), "-", "--psm", psm], capture_output=True, text=True,
+                           timeout=OCR_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return None
     text = re.sub(r"[ \t]+\n", "\n", r.stdout).strip()
     return re.sub(r"\n{3,}", "\n\n", text)
 
@@ -892,15 +965,20 @@ def letters(text):
 def ocr(img):
     """Text in the image (Tesseract), or None if Tesseract isn't installed. Read as it is first
     (at 2x: small screen text reads better), then, when that finds little, cleaned up (for_ocr) in
-    sparse-text mode, as screen text in buttons and labels is: whichever reads more letters."""
+    sparse-text mode, as screen text in buttons and labels is: whichever reads more letters. A run
+    that times out reads nothing (and a first one that does skips the second, as slow)."""
     if not Path(TESSERACT).exists():
         return None
     with tempfile.TemporaryDirectory() as t:
         path = Path(t) / "snip.png"
-        text = tesseract(img.scaled(img.width() * 2, img.height() * 2, Qt.AspectRatioMode.KeepAspectRatio,
-                                    Qt.TransformationMode.SmoothTransformation), path, "3")
+        scale = ocr_scale(img, 2)
+        text = tesseract(img.scaled(round(img.width() * scale), round(img.height() * scale),
+                                    Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation),
+                         path, "3")
+        if text is None:
+            return ""
         if letters(text) < 20:
-            other = tesseract(for_ocr(img), path, "11")
+            other = tesseract(for_ocr(img), path, "11") or ""
             if letters(other) > letters(text):
                 text = other
     return text
@@ -1542,7 +1620,10 @@ class NarrationWindow(QWidget):
         tr_text(self.state, N_("Reading the clipboard…"))
 
         def work():
-            got = pasted_content()
+            try:
+                got = pasted_content()
+            except Exception:                            # (anything: Paste must come back, not stay greyed out)
+                got = ("failed", None)
             with contextlib.suppress(RuntimeError):      # (the panel closed meanwhile)
                 self.pasted.emit(got)
         threading.Thread(target=work, daemon=True).start()
@@ -2211,8 +2292,10 @@ def vr_panel_available():
 
 # ---- selection window -----------------------------------------------------------------------
 class Snip(QWidget):
-    def __init__(self, image):
+    def __init__(self, image, lock=None):
+        """lock: one_selection's, let go when this window closes (closeEvent)."""
         super().__init__()
+        self.lock = lock
         self.setWindowTitle(_("Screen snip"))
         self.image, self.pix = image, QPixmap.fromImage(image)
         self.start = self.end = None              # a new rectangle being drawn
@@ -2371,6 +2454,15 @@ class Snip(QWidget):
     def keyPressEvent(self, ev):
         if ev.key() == Qt.Key.Key_Escape:
             self.close()
+
+    def closeEvent(self, ev):
+        # The lock only keeps selections from stacking. Held to the process's end, a narration
+        # window opened here (no VR panel) kept it, and Snip something new or Arrow Pad's Snip
+        # did nothing while it was open.
+        if self.lock is not None:
+            self.lock.close()
+            self.lock = None
+        super().closeEvent(ev)
 
     def paintEvent(self, ev):
         p = QPainter(self)
@@ -2570,8 +2662,8 @@ def started_by_steam():
 def one_selection():
     """The open file holding the selection's lock, or None when another selection holds it: Arrow
     Pad's Snip pressed again (or the menu entry) started another full-screen selection over the
-    first, each waiting for its own rectangle. Held for the process's life; the kernel lets go
-    when it ends, a crash included."""
+    first, each waiting for its own rectangle. Held until the selection window closes (Snip's
+    closeEvent), or the process ends, a crash included: the kernel lets go then."""
     f = open(RUN / "frame-snip-select.lock", "a")
     try:
         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -2603,7 +2695,7 @@ def main():
     if image.isNull():
         notify(_("Couldn't take a snip"), _("empty picture"))
         return 1
-    w = Snip(image)
+    w = Snip(image, lock)
     tag_for_theater(w)               # (an app in Theater mode: shown over it, with the laser)
     w.showFullScreen()
     w.activateWindow()
