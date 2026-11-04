@@ -88,6 +88,24 @@ class Heal(unittest.TestCase):
             self.assertEqual(sorted(p.name for p in (v / f"lib/python{NOW}/site-packages").iterdir()), before)
 
 
+class Lock(unittest.TestCase):
+    def test_heal_waits_for_a_setup_of_the_same_venv(self):
+        # (the window's ensure_qt_venv holding the venv, as when it opens during a login's heal:
+        # the heal waits, then finds the venv current and leaves it)
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v")
+            holder = subprocess.Popen(
+                ["bash", "-c", f"source {ROOT}/lib/common.sh 2>/dev/null; venv_lock {v}; echo held; sleep 2; "
+                               f"rm -rf {v}/lib/python3.0; mkdir -p {v}/lib/python{NOW}/site-packages; venv_unlock"],
+                stdout=subprocess.PIPE, text=True, env={**os.environ, "HOME": home})
+            self.assertEqual(holder.stdout.readline().strip(), "held")
+            r = sh(home, Heal.PIP + f"heal_venv {v}; echo done")
+            holder.wait()
+            self.assertEqual(r.stdout.strip(), "done", r.stderr)
+            self.assertFalse((Path(home) / "pip.log").exists())
+            self.assertEqual(sorted(p.name for p in (v / "lib").iterdir()), [f"python{NOW}"])  # (left as the holder made it)
+
+
 class Units(unittest.TestCase):
     def test_a_service_on_the_venv_is_started_again(self):
         with tempfile.TemporaryDirectory() as home:

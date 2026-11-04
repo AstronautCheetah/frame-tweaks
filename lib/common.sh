@@ -585,12 +585,34 @@ venv_stale() {
 ft_venvs() {
     printf '%s\n' "$TWEAKS_VENV" "$QT_VENV" "$HOME/.local/share/frame-tweaks/parakeet/venv"
 }
+# venv_lock DIR / venv_unlock: one setup of a venv at a time. The login service can be
+# installing PyQt6 again (heal_venv, minutes over a slow connection) when the window opens and
+# finds PyQt6 missing: without this its ensure_qt_venv made the venv anew (--clear) under the
+# install going on. Whoever waited checks again, and finds it done. (The lock files sit in
+# Frame Tweaks' state folder, named after the venv's path: none is left in a tweak's folder.)
+venv_lock() {
+    local d="${XDG_STATE_HOME:-$HOME/.local/state}/frame-tweaks/locks" name=${1%/}
+    mkdir -p "$d" || return 1
+    name=${name#/}
+    exec {VENV_LOCK_FD}>"$d/venv-${name//\//_}.lock" && flock "$VENV_LOCK_FD"
+}
+venv_unlock() {
+    [ -z "${VENV_LOCK_FD:-}" ] || exec {VENV_LOCK_FD}>&-
+    VENV_LOCK_FD=
+}
 # heal_venv DIR: the venv made again on SteamOS's Python, with the packages it had. Moved over
 # as they are when none has a compiled part tied to one Python (pure Python, or abi3 like PyQt6's:
 # offline, in a second, at a login with no network yet); else installed again with pip_pinned at
 # the tested versions. Either way each package must import afterwards.
 heal_venv() {
-    local venv=$1 old site have tmp names=() mods=() d n m offline=1
+    local rc
+    venv_lock "$1" || return 1
+    venv_stale "$1" && { heal_venv_locked "$1"; rc=$?; } || rc=0     # (healed meanwhile: nothing to do)
+    venv_unlock
+    return $rc
+}
+heal_venv_locked() {
+    local venv=$1 site have tmp names=() mods=() d n m offline=1
     have=$(venv_python_version "$venv") || return 0
     site="$venv/lib/python$have/site-packages"
     # (the packages asked for, not what they pulled in: pip marks those REQUESTED)
@@ -691,18 +713,29 @@ TWEAKS_VENV="$HOME/.local/share/frame-tweaks/venv"
 # says nothing of how long it takes: that's the user's Internet connection. (QtWidgets, not just
 # PyQt6: a setup cut short can leave PyQt6 there without the parts the window needs.)
 ensure_qt_venv() {
+    local rc=0
     "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null && return 0
-    say "${1:-$(t 'Setting up PyQt6, a window toolkit')}"
-    echo "    ${2:-$(t 'About 280 MB to download, shared by the installer window and the tweaks that use it.')}"
-    new_venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6
+    venv_lock "$QT_VENV" || return 1
+    if ! "$QT_VENV/bin/python" -c 'import PyQt6.QtWidgets' 2>/dev/null; then     # (not made meanwhile)
+        say "${1:-$(t 'Setting up PyQt6, a window toolkit')}"
+        echo "    ${2:-$(t 'About 280 MB to download, shared by the installer window and the tweaks that use it.')}"
+        new_venv "$QT_VENV" && pip_pinned "$QT_VENV" PyQt6; rc=$?
+    fi
+    venv_unlock
+    return $rc
 }
 
 ensure_tweaks_venv() {
+    local rc=0
+    "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null && return 0
+    venv_lock "$TWEAKS_VENV" || return 1
     if ! "$TWEAKS_VENV/bin/python" -c 'import jeepney' 2>/dev/null; then
         say "$(t 'Creating Python venv with jeepney')"
         new_venv "$TWEAKS_VENV"
-        pip_pinned "$TWEAKS_VENV" jeepney
+        pip_pinned "$TWEAKS_VENV" jeepney; rc=$?
     fi
+    venv_unlock
+    return $rc
 }
 
 # ensure_openvr <venv>: the openvr bindings in that venv, on SteamVR's own arm64 library (the
