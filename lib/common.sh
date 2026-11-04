@@ -607,16 +607,24 @@ venv_python_version() {
     done
     return 1
 }
-# venv_stale DIR: a venv there, made for another Python than SteamOS's now.
+# venv_stale DIR: a venv there, made for another Python than SteamOS's now, or one whose heal
+# didn't finish (heal_venv_locked's .ft-heal-pending: already on the new Python, packages missing).
 venv_stale() {
     local have now
     have=$(venv_python_version "$1") || return 1
+    [ ! -f "$1/.ft-heal-pending" ] || return 0
     now=$(system_python_version) && [ -n "$now" ] || return 1
     [ "$have" != "$now" ]
 }
 # The venvs Frame Tweaks makes (a tweak's own folder of them: add it here).
 ft_venvs() {
     printf '%s\n' "$TWEAKS_VENV" "$QT_VENV" "$HOME/.local/share/frame-tweaks/parakeet/venv"
+}
+# any_venv_stale: one of them is (the login service's question before it takes the lock and logs).
+any_venv_stale() {
+    local venv
+    while IFS= read -r venv; do venv_stale "$venv" && return 0; done < <(ft_venvs)
+    return 1
 }
 # venv_lock DIR / venv_unlock: one setup of a venv at a time. The login service can be
 # installing PyQt6 again (heal_venv, minutes over a slow connection) when the window opens and
@@ -645,14 +653,21 @@ heal_venv() {
     return $rc
 }
 heal_venv_locked() {
-    local venv=$1 site have tmp names=() mods=() d n m offline=1
+    local venv=$1 pending="$1/.ft-heal-pending" site have tmp names=() mods=() d n m offline=1
     have=$(venv_python_version "$venv") || return 0
     site="$venv/lib/python$have/site-packages"
+    # (a heal that got as far as the new venv but not through pip: what it was to install)
+    [ ! -f "$pending" ] || mapfile -t names < <(grep -v '^$' "$pending")
+    if [ -f "$pending" ] && [ "$have" = "$(system_python_version)" ]; then
+        [ ${#names[@]} -eq 0 ] || pip_pinned "$venv" "${names[@]}" || return 1
+        rm -f "$pending"; return 0
+    fi
     # (the packages asked for, not what they pulled in: pip marks those REQUESTED)
     for d in "$site"/*.dist-info; do
         [ -f "$d/REQUESTED" ] || continue
         n=$(sed -n 's/^Name: *//p' "$d/METADATA" 2>/dev/null | head -1 | tr -d '\r')
         [ -n "$n" ] || continue
+        printf '%s\n' "${names[@]}" | grep -qixF -- "$n" && continue   # (in .ft-heal-pending too)
         case ${n,,} in pip|setuptools|wheel) continue ;; esac
         names+=("$n")
         if [ -f "$d/top_level.txt" ]; then
@@ -663,6 +678,7 @@ heal_venv_locked() {
     done
     # (a compiled part for one Python: name.cpython-312-aarch64-linux-gnu.so; abi3 and pure ones move)
     find "$site" -name '*.cpython-3*.so' -print -quit 2>/dev/null | grep -q . && offline=
+    [ ! -f "$pending" ] || offline=      # (Python moved on again mid-heal: what's there is partial)
     tmp=$(mktemp -d "${venv%/}.heal.XXXXXX") || return 1
     mv "$site" "$tmp/site-packages" || { rm -rf "$tmp"; return 1; }
     if ! new_venv "$venv" >/dev/null; then
@@ -684,7 +700,14 @@ for m in sys.argv[1:]: importlib.import_module(m)' "${mods[@]}" 2>/dev/null; the
         new_venv "$venv" >/dev/null || { rm -rf "$tmp"; return 1; }
     fi
     rm -rf "$tmp"
-    [ ${#names[@]} -eq 0 ] || pip_pinned "$venv" "${names[@]}" || return 1
+    [ ${#names[@]} -gt 0 ] || { rm -f "$pending"; return 0; }
+    # (The old packages are gone and the new venv is on this Python, so venv_stale alone would
+    # call it current: without this note a pip that failed, offline at a login before the Wi-Fi
+    # is up, was never tried again, neither by the service's restart nor by ./install.sh repair.
+    # Written after the last new_venv: its --clear empties the folder. Removed once pip got them.)
+    printf '%s\n' "${names[@]}" > "$pending" || return 1
+    pip_pinned "$venv" "${names[@]}" || return 1
+    rm -f "$pending"
 }
 # heal_venvs: every stale venv of Frame Tweaks' healed, saying which (one line each); 1 if one
 # couldn't be. Then the openvr bindings linked again to SteamVR's library (heal_venv moves the
@@ -696,7 +719,11 @@ heal_venvs() {
     while IFS= read -r venv; do
         venv_stale "$venv" || continue
         have=$(venv_python_version "$venv")
-        say "$(t 'SteamOS has Python %s now: moving %s from Python %s to it' "$now" "${venv/#$HOME/\~}" "$have")"
+        if [ "$have" = "$now" ]; then           # (.ft-heal-pending: an earlier heal's pip failed)
+            say "$(t 'Installing the packages of %s again, which an earlier move to Python %s could not download' "${venv/#$HOME/\~}" "$now")"
+        else
+            say "$(t 'SteamOS has Python %s now: moving %s from Python %s to it' "$now" "${venv/#$HOME/\~}" "$have")"
+        fi
         if heal_venv "$venv"; then
             healed+=("$venv")
             "$venv/bin/python" -c 'import importlib.util,sys; sys.exit(0 if importlib.util.find_spec("openvr") else 1)' 2>/dev/null &&
@@ -708,8 +735,16 @@ heal_venvs() {
     [ ${#healed[@]} -eq 0 ] || heal_units "${healed[@]}"
     return $bad
 }
-# heal_units VENV...: the user services whose program runs on one of these venvs (its #! line),
-# out of their failed or restarting state: started again where what starts them runs (a
+# venv_units VENV: the user services on that venv that heal_units can't tell by their program's
+# #! line: a bash wrapper that execs the venv's program (Dictation's engine service runs
+# `dictate --serve`, which execs dictate-parakeet). A tweak whose service does that: add it here.
+venv_units() {
+    case ${1%/} in
+        */frame-tweaks/parakeet/venv) echo frame-tweaks-dictate-engine.service ;;
+    esac
+}
+# heal_units VENV...: the user services whose program runs on one of these venvs (its #! line,
+# or venv_units), out of their failed or restarting state: started again where what starts them runs (a
 # WantedBy= that's active: default.target at a login, steamvr.service while SteamVR runs).
 heal_units() {
     local f unit prog line wanted venv on
@@ -719,10 +754,13 @@ heal_units() {
         prog=${prog/#%h/$HOME}
         [ -f "$prog" ] || continue
         IFS= read -r line < "$prog" || continue
-        on=
-        for venv in "$@"; do [[ $line == "#!$venv/bin/python"* ]] && on=1; done
-        [ -n "$on" ] || continue
         unit=${f##*/}
+        on=
+        for venv in "$@"; do
+            [[ $line == "#!$venv/bin/python"* ]] && on=1
+            venv_units "$venv" | grep -qxF -- "$unit" && on=1
+        done
+        [ -n "$on" ] || continue
         sysctl_user reset-failed "$unit" 2>/dev/null || true
         if sysctl_user is-active --quiet "$unit" ||
            [ "$(sysctl_user show -p SubState --value "$unit" 2>/dev/null)" = auto-restart ]; then

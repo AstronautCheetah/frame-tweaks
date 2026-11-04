@@ -92,6 +92,10 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `gui/prefs_page.py:430`
   - was: "Saved. ⟳ Check for updates finds test releases too."
   - now: "Saved. ↻ Check for updates finds test releases too."
+- New in `install.sh:1317`
+  - now: "%s is on SteamOS's Python %s but misses packages it couldn't download: ./install.sh repair installs them"
+- New in `lib/common.sh:723`
+  - now: "Installing the packages of %s again, which an earlier move to Python %s could not download"
 - New in `lib/common.sh:935`
   - now: "installed, turned off (Turn on on its row turns it back on)"
 - New in `lib/common.sh:983`

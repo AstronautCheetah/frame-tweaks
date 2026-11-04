@@ -36,6 +36,10 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **Turn off / Turn on, three fixes:** turning Curved world windows on again curved the windows
+  floated while it was off (they stay as they are now); Back to the previous window, after being
+  off, went back to a window shown before it was turned off; and unticking a turned-off patch then
+  ticking it again at once could leave it off while its status said on.
 - **Tray icon crash fix is offered only where it's needed:** where the VR session gives apps KDE's
   Qt theme (SteamOS 0.5.7's beta on). Elsewhere the window hides it.
 - **↻ Check for updates** has the same ↻ as the tweaks' reinstall buttons.
@@ -47,6 +51,14 @@
   up as a small label just above the button, after resting the laser on it for 0.7 s as in Frame
   Tweaks' windows: the laser's wobble doesn't put it off, and it goes when the laser leaves the
   button or presses it.
+- **Screen snip and Narrate, five fixes:** with Narrate's window open (no VR panel), Snip
+  something new and Arrow Pad's Snip did nothing until it closed; now only an open selection
+  stops another. A big pasted picture is read at no more than 4000 px a side and gives up on
+  Tesseract after 30 s, and Paste no longer stays greyed out when reading fails. A pasted
+  picture with transparency is read on white instead of as "the snip is black". Copy no longer
+  says "copied" when the clipboard was never taken (it waits for the clipboard owner to say so),
+  and on the desktop falls back to plain wl-copy as meant. Copied text pasted into X apps that
+  ask for STRING or TEXT no longer turns "ü" into "Ã¼".
 - **One screen snip at a time:** pressing Arrow Pad's Snip again (or opening Screen snip from the
   menu) while a selection was open laid another full-screen selection over it. Another start now
   leaves the open one as it is.
@@ -70,7 +82,13 @@
   each login, Frame Tweaks now moves its Python environments to SteamOS's Python: offline when
   their packages run on any Python 3, else installed again at the tested versions. Then it starts
   their services again. `./install.sh repair` does the same first, and `./install.sh
-  check-system` says when an environment is for another Python.
+  check-system` says when an environment is for another Python. One that has to be downloaded
+  again and can't be yet (a login before the Wi-Fi is up) is tried again until it is, Dictation's
+  Parakeet engine is started again too, and a login with nothing to move writes no install log
+  and doesn't keep the login's removal of tweaks no longer needed from running.
+- **No failing login service after `./install.sh uninstall-self` kept tweaks:** with the Frame
+  Tweaks folder gone, the service that removes the tweaks this Frame no longer needs failed at
+  each login. It now just doesn't run.
 
 ## 0.7.1 (2026-11-04)
 

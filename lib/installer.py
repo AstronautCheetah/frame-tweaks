@@ -252,12 +252,20 @@ def desktop_string(text):
     return text.replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")
 
 
+# (After= the heal: both run at a login and take the install lock without waiting, so tidy, which
+# has no Restart=, lost the race to it and was skipped for that boot. ExecCondition=: after
+# uninstall-self removed the checkout and kept tweaks, a unit running the gone script failed at
+# each login, and the heal unit, restarted on failure, every two minutes for good; a condition
+# that fails skips the unit, which isn't a failure. Not ConditionPathExists=: it takes the path
+# bare, which can't hold a newline, where ExecCondition's quoted word can hold any path.)
 TIDY_UNIT = """\
 [Unit]
 Description=Frame Tweaks: remove the tweaks this Frame no longer needs
+After=frame-tweaks-heal.service
 
 [Service]
 Type=oneshot
+ExecCondition=/usr/bin/test -f {script}
 ExecStart=/bin/bash {script} tidy
 
 [Install]
@@ -273,6 +281,7 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot
+ExecCondition=/usr/bin/test -f {script}
 ExecStart=/bin/bash {script} _heal
 Restart=on-failure
 RestartSec=120

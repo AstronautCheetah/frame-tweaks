@@ -32,7 +32,7 @@ changes: >-
   `~/Games/MoonlightXRNative`, a Non-Steam entry **Moonlight XR for Frame** in your Steam library
   with its artwork, SteamVR's per-app settings for it (90 Hz, no motion smoothing, the highest
   render resolution), its SteamVR dock icon, an app-menu entry Frame Tweaks adds
-  (`frame-tweaks-moonlight-xr.desktop`), and its settings and pairing in
+  (`moonlight-xr.desktop`), and its settings and pairing in
   `~/.config/moonlight-xr`
 access: >-
   Connects to the PC you pair it with (the stream, its input and audio) over your network, the
@@ -110,7 +110,7 @@ PC's name and addresses: don't post them as they are.
 ## What it changes
 
 - **Survives SteamOS updates:** Yes (everything is in your home folder)
-- **Changes:** Whatever Moonlight XR's own installer sets up (its README lists it): the program in `~/Games/MoonlightXRNative`, a Non-Steam entry **Moonlight XR for Frame** in your Steam library with its artwork, SteamVR's per-app settings for it (90 Hz, no motion smoothing, the highest render resolution), its SteamVR dock icon, an app-menu entry Frame Tweaks adds (`frame-tweaks-moonlight-xr.desktop`), and its settings and pairing in `~/.config/moonlight-xr`
+- **Changes:** Whatever Moonlight XR's own installer sets up (its README lists it): the program in `~/Games/MoonlightXRNative`, a Non-Steam entry **Moonlight XR for Frame** in your Steam library with its artwork, SteamVR's per-app settings for it (90 Hz, no motion smoothing, the highest render resolution), its SteamVR dock icon, an app-menu entry Frame Tweaks adds (`moonlight-xr.desktop`), and its settings and pairing in `~/.config/moonlight-xr`
 - **🧪 Experimental:** A community project: its author wrote its Frame-specific code with Claude and has tested it on one Frame (SteamOS 0.4.5) against one Windows PC; 1.1.1 fixed its start on the newer SteamOS previews. It needs a PC running Sunshine or Apollo, which this tweak doesn't set up.
 - **Unusual access:** Connects to the PC you pair it with (the stream, its input and audio) over your network, the Frame's wireless adapter or USB; asks GitHub once a day for a newer release (off in its Settings)
 - **Undo:** Uncheck it, or `./install.sh uninstall moonlight-xr`: its SteamVR dock icon and app-menu entry are removed and `~/Games/MoonlightXRNative` deleted (keeps your settings and pairing in `~/.config/moonlight-xr`). Remove its Non-Steam library entry yourself, and unpair the Frame in Sunshine's web page.

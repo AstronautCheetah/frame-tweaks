@@ -78,6 +78,22 @@ class Heal(unittest.TestCase):
             self.assertEqual((Path(home) / "pip.log").read_text().split(), ["pkgx"])   # (only what was asked for)
             self.assertEqual(sh(home, f"venv_python_version {v}").stdout.strip(), NOW)
 
+    def test_a_heal_whose_pip_failed_is_tried_again(self):
+        # (SteamOS 3.12 to 3.14 at a login before the Wi-Fi is up: the venv was made anew on the
+        # new Python and the old packages went, so it looked current and was never retried)
+        with tempfile.TemporaryDirectory() as home:
+            v = old_venv(Path(home) / "v", compiled=True)
+            r = sh(home, self.PIP + f"ft_venvs() {{ echo {v}; }}; heal_units() {{ :; }}; heal_venvs")
+            self.assertNotEqual(r.returncode, 0)                       # (offline: pip failed)
+            self.assertEqual(sh(home, f"venv_stale {v}").returncode, 0, "a failed heal must stay stale")
+            ok = 'pip_pinned() { shift; echo "$*" >> "$HOME/pip.log"; return 0; }; '
+            r = sh(home, ok + f"ft_venvs() {{ echo {v}; }}; heal_units() {{ :; }}; heal_venvs")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertEqual((Path(home) / "pip.log").read_text().split(), ["pkgx", "pkgx"])   # (tried, then again)
+            self.assertNotEqual(sh(home, f"venv_stale {v}").returncode, 0)            # (done: current now)
+            r = sh(home, self.PIP + f"ft_venvs() {{ echo {v}; }}; heal_venvs")
+            self.assertEqual((r.returncode, r.stdout), (0, ""))                       # (and left alone)
+
     def test_heal_venvs_leaves_a_current_venv(self):
         with tempfile.TemporaryDirectory() as home:
             v = old_venv(Path(home) / "v", NOW)
@@ -128,6 +144,22 @@ class Units(unittest.TestCase):
             self.assertIn("reset-failed on-venv.service", calls)
             self.assertIn("start --no-block on-venv.service", calls)
             self.assertFalse([c for c in calls if "not.service" in c])
+
+    def test_a_service_whose_bash_wrapper_execs_the_venv_program_too(self):
+        # (Dictation's engine: `dictate --serve`, bash, execs dictate-parakeet on Parakeet's venv)
+        with tempfile.TemporaryDirectory() as home:
+            v = Path(home) / ".local/share/frame-tweaks/parakeet/venv"
+            wrapper = Path(home) / "dictate"
+            wrapper.write_text("#!/bin/bash\nexec dictate-parakeet --serve\n")
+            units = Path(home) / ".config/systemd/user"
+            units.mkdir(parents=True)
+            (units / "frame-tweaks-dictate-engine.service").write_text(f"[Service]\nExecStart={wrapper} --serve\n")
+            stub = ('sysctl_user() { echo "$*" >> "$HOME/calls"; case $1 in '
+                    'is-active) [ "${@: -1}" = frame-tweaks-dictate-engine.service ] ;; esac; }; ')
+            r = sh(home, stub + f"heal_units {v}")
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("restart --no-block frame-tweaks-dictate-engine.service",
+                          (Path(home) / "calls").read_text().splitlines())
 
 
 class Unit(unittest.TestCase):

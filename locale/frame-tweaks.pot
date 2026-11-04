@@ -1819,6 +1819,11 @@ msgid "%s is now called %s"
 msgstr ""
 
 #: install.sh
+msgid ""
+"%s is on SteamOS's Python %s but misses packages it couldn't download: ./install.sh repair installs them"
+msgstr ""
+
+#: install.sh
 msgid "%s isn't linked: it installs what Frame Tweaks has"
 msgstr ""
 
@@ -2379,6 +2384,11 @@ msgstr ""
 
 #: lib/common.sh
 msgid "Install Homebrew now?"
+msgstr ""
+
+#: lib/common.sh
+msgid ""
+"Installing the packages of %s again, which an earlier move to Python %s could not download"
 msgstr ""
 
 #: lib/common.sh

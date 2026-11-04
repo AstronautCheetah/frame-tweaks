@@ -143,8 +143,27 @@ wait_for_steam() {
     return 1
 }
 
+# reconnect_call_only: step 4, the Bluetooth audio devices on the call profile only, though they
+# offer A2DP, disconnected and connected again; 1 when there was none. (LC_ALL=C: call_only_devices
+# reads pactl's headings, "Card #" and "Name:", which pactl translates: under a French locale they
+# are "Carte #" and "Nom :", and no device was ever found. bluetoothctl's "Name:" too, to be safe.)
+reconnect_call_only() {
+    local mac did=1
+    command -v pactl >/dev/null && command -v bluetoothctl >/dev/null || return 1
+    for mac in $(LC_ALL=C pactl list cards 2>/dev/null | call_only_devices); do
+        # (only one that offers A2DP: a headset made for calls alone stays as it is)
+        LC_ALL=C bluetoothctl info "$mac" 2>/dev/null | grep -q '0000110b-' || continue
+        say "$(t 'Reconnecting %s, connected for calls only, so it plays in high quality again…' \
+            "$(LC_ALL=C bluetoothctl info "$mac" | sed -n 's/^[[:space:]]*Name: //p')")"
+        bluetoothctl disconnect "$mac" >/dev/null 2>&1; sleep 3
+        timeout 30 bluetoothctl connect "$mac" >/dev/null 2>&1 || warn "$(t "Couldn't reconnect it: turn it off and on.")"
+        did=0
+    done
+    return $did
+}
+
 main() {
-    local keep_vr='' did='' mac n
+    local keep_vr='' did='' n
     case ${1:-} in
         --keep-steamvr) keep_vr=1 ;;
         "") ;;
@@ -178,17 +197,7 @@ main() {
     fi
 
     # 4. Bluetooth audio on calls only
-    if command -v pactl >/dev/null && command -v bluetoothctl >/dev/null; then
-        for mac in $(pactl list cards 2>/dev/null | call_only_devices); do
-            # (only one that offers A2DP: a headset made for calls alone stays as it is)
-            bluetoothctl info "$mac" 2>/dev/null | grep -q '0000110b-' || continue
-            say "$(t 'Reconnecting %s, connected for calls only, so it plays in high quality again…' \
-                "$(bluetoothctl info "$mac" | sed -n 's/^[[:space:]]*Name: //p')")"
-            bluetoothctl disconnect "$mac" >/dev/null 2>&1; sleep 3
-            timeout 30 bluetoothctl connect "$mac" >/dev/null 2>&1 || warn "$(t "Couldn't reconnect it: turn it off and on.")"
-            did=1
-        done
-    fi
+    reconnect_call_only && did=1
     [ -n "$did" ] || say "$(t 'The VR session looks fine: nothing to recover.')"
 }
 

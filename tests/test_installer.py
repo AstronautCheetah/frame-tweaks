@@ -369,8 +369,8 @@ def systemd_split(line):
     return out
 
 
-def exec_start(text):
-    return systemd_split(next(line for line in text.splitlines() if line.startswith("ExecStart="))[len("ExecStart="):])
+def exec_start(text, key="ExecStart"):
+    return systemd_split(next(line for line in text.splitlines() if line.startswith(key + "="))[len(key) + 1:])
 
 
 def random_path(rng):
@@ -384,10 +384,11 @@ def random_path(rng):
 
 # The units and menu entry install.sh wrote with printf and sed before lib/installer.py did: for a
 # path with nothing to quote, the text must be the same, or every installed unit is rewritten
-# (and its systemctl daemon-reload and enable run) at the next install.
+# (and its systemctl daemon-reload and enable run) at the next install. (tidy: with the two lines
+# added since, After= the heal and ExecCondition=, which rewrote each unit once on purpose.)
 OLD_FILES = r"""
 tidy() {
-    printf '[Unit]\nDescription=Frame Tweaks: remove the tweaks this Frame no longer needs\n\n[Service]\nType=oneshot\nExecStart=/bin/bash %s/install.sh tidy\n\n[Install]\nWantedBy=default.target\n' "$1"
+    printf '[Unit]\nDescription=Frame Tweaks: remove the tweaks this Frame no longer needs\nAfter=frame-tweaks-heal.service\n\n[Service]\nType=oneshot\nExecCondition=/usr/bin/test -f %s/install.sh\nExecStart=/bin/bash %s/install.sh tidy\n\n[Install]\nWantedBy=default.target\n' "$1" "$1"
 }
 menus_path() {
     printf '%s\n' "[Unit]" "Description=Frame Tweaks: menu entries in the keyboard's language" "" \
@@ -436,12 +437,22 @@ class GeneratedFiles(unittest.TestCase):
             path = random_path(rng)
             with self.subTest(path=path):
                 self.assertEqual(exec_start(installer.unit("tidy", path)), ["/bin/bash", path + "/install.sh", "tidy"])
+                for name in ("tidy", "heal"):
+                    self.assertEqual(exec_start(installer.unit(name, path), "ExecCondition"),
+                                     ["/usr/bin/test", "-f", path + "/install.sh"])
                 self.assertEqual(exec_start(installer.unit("menus-service", path)), ["/usr/bin/python3", path, "menus"])
                 entry = installer.desktop_entry(DESKTOP_TEMPLATE.read_text(), path)
                 lines = entry.split("\n")
                 self.assertEqual(len(lines), len(DESKTOP_TEMPLATE.read_text().split("\n")))  # (no line broken)
                 cmd = next(line for line in lines if line.startswith("Exec="))[len("Exec="):]
                 self.assertEqual(needs.exec_args(cmd), ["env", "FRAME_TWEAKS_GUI=1", path + "/install.sh", "gui"])
+
+    def test_login_units_skip_once_the_checkout_is_gone_and_tidy_waits_for_heal(self):
+        # (uninstall-self can remove the checkout and keep tweaks: the heal unit then failed every
+        # two minutes for good; and tidy, started with heal, lost the install lock to it)
+        for name in ("tidy", "heal"):
+            self.assertIn("\nExecCondition=/usr/bin/test -f /opt/ft/install.sh\n", installer.unit(name, "/opt/ft"))
+        self.assertIn("\nAfter=frame-tweaks-heal.service\n", installer.unit("tidy", "/opt/ft"))
 
     def test_examples(self):
         self.assertEqual(installer.systemd_word("/x/frame tweaks 100%"), '"/x/frame tweaks 100%%"')

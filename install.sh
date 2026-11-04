@@ -192,6 +192,9 @@ ensure_menu_entry() {
     touch "$apps" "$icons"     # Steam's "+" menu rescans on these
     ensure_menu_language
     ensure_heal_service
+    # (the tidy unit is set up only by a tweak that asks for it: one already there gets the
+    # current text here too, as the heal's does, e.g. its After= the heal and its ExecCondition=)
+    [[ ! -f $TIDY_UNIT ]] || ensure_tidy_service
 }
 # Menu entries in the keyboard's language (lib/i18n.py menus): a systemd path unit relabels them
 # when Steam saves its keyboard layout or its own language (registry.vdf), or a language is chosen
@@ -1310,7 +1313,10 @@ cmd_check_system() {
     now=$(system_python_version)
     while IFS= read -r venv; do
         have=$(venv_python_version "$venv") || continue
-        if [[ $have == "$now" ]]; then
+        if [[ $have == "$now" ]] && venv_stale "$venv"; then        # (lib/common.sh: .ft-heal-pending)
+            printf '  \e[33m!\e[0m %-15s %s\n' python "$(t "%s is on SteamOS's Python %s but misses packages it couldn't download: ./install.sh repair installs them" \
+                "${venv/#$HOME/\~}" "$now")"; bad=1
+        elif [[ $have == "$now" ]]; then
             printf '  \e[32m✔\e[0m %-15s %s\n' python "$(t "%s on SteamOS's Python %s" "${venv/#$HOME/\~}" "$now")"
         else
             printf '  \e[33m!\e[0m %-15s %s\n' python "$(t '%s is for Python %s, SteamOS has %s: ./install.sh repair moves it' \
@@ -1353,7 +1359,9 @@ case ${1:-} in
     debug-info)  cmd_debug_info ;;
     report)      cmd_report ;;
     check-system) cmd_check_system ;;
-    _heal)       take_lock; start_log heal; heal_venvs ;;
+    # (nothing stale, as at nearly every login: no lock, so tidy isn't kept from it, and no log,
+    # which pushed the logs worth keeping out of the last 5)
+    _heal)       any_venv_stale || exit 0; take_lock; start_log heal; heal_venvs ;;
     _deps)       shift; [[ ${1:-} == all ]] && set -- "${IDS[@]}"; check_ids "$@"; deps=$(with_deps "$@") || exit 1
                  [[ -z $deps ]] || printf '%s\n' "$deps" | tr "\n" " "; echo ;;
     list)        cmd_list ;;

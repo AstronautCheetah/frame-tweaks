@@ -632,6 +632,22 @@ class InstallState(unittest.TestCase):
         for p in theirs:
             self.assertTrue(p.exists(), p)
 
+    def test_the_login_heal_with_nothing_stale_neither_logs_nor_locks(self):
+        """frame-tweaks-heal.service runs _heal at every login: with every venv current it wrote a
+        log each time, pushing real ones out of the last five, and held the install lock, which
+        the login's tidy then didn't get."""
+        lock = self.state / "install.lock"
+        lock.parent.mkdir(parents=True)
+        lock.touch()
+        holder = subprocess.Popen(["flock", str(lock), "-c", "echo held; sleep 5"], stdout=subprocess.PIPE, text=True)
+        self.addCleanup(holder.stdout.close)
+        self.addCleanup(holder.wait)
+        self.addCleanup(holder.kill)
+        self.assertEqual(holder.stdout.readline().strip(), "held")
+        r = self.sh("_heal")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)          # (didn't need the lock held here)
+        self.assertEqual(list((self.state / "logs").glob("*")) if (self.state / "logs").exists() else [], [])
+
     def test_install_all_migrates_too(self):
         self.only_the_probe()
         self.installed_at("0.0.1")

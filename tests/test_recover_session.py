@@ -97,6 +97,22 @@ class FirstDisplay(unittest.TestCase):
 
 
 # (the user manager stubbed: show-environment prints $ENV_NOW, every other call is logged)
+class Reconnect(unittest.TestCase):
+    def test_found_under_a_translated_locale(self):
+        # (pactl translates its headings: under fr_FR "Carte #" and "Nom :", which call_only_devices
+        # can't read; the stub prints them so unless it runs with LC_ALL=C, as pactl would)
+        fr = CARDS.replace("Card #", "Carte #").replace("\tName: ", "\tNom : ")
+        stubs = ('pactl() { if [ "${LC_ALL:-}" = C ]; then printf "%s" "$CARDS"; else printf "%s" "$CARDS_FR"; fi; }; '
+                 'bluetoothctl() { case $1 in info) printf "\\tName: Phones\\n\\tUUID: Audio Sink (0000110b-0000)\\n" ;; '
+                 '*) echo "bt $*" >> "$HOME/calls" ;; esac; }; '
+                 'sleep() { :; }; timeout() { shift; "$@"; }; ')
+        r = sh(stubs + 'reconnect_call_only; echo rc=$?; cat "$HOME/calls"',
+               CARDS=CARDS, CARDS_FR=fr, LC_ALL="fr_FR.UTF-8", LANG="fr_FR.UTF-8")
+        self.assertIn("rc=0", r.stdout, r.stderr)
+        self.assertIn("bt connect AC:BF:71:03:97:6F", r.stdout)
+        self.assertIn("Phones", r.stdout)
+
+
 MANAGER = ('sysctl_user() { case $1 in show-environment) printf "%b" "$ENV_NOW" ;; '
            'show) echo 0 ;; is-active) return 1 ;; *) echo "$*" >> "$HOME/calls" ;; esac; }; '
            'calls() { cat "$HOME/calls" 2>/dev/null; }; ')
