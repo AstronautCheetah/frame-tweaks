@@ -68,23 +68,26 @@ recover-session
 It does only what's needed, and says what it did:
 
 1. **Puts the session's display settings back** when they're gone, copied from SteamVR's server,
-   which still runs with them. Without them Steam can't find its display and stops at once,
-   again and again.
+   which still runs with them (when it doesn't, just the display, gamescope's first one).
+   Without them Steam can't find its display and stops at once, again and again.
 2. **Clears the failed services** (Steam's, the wallet's background service) and waits until Steam
    stays up.
-3. **Restarts SteamVR**, so its dashboard and the overlays start clean. `recover-session
-   --keep-steamvr` leaves it running.
+3. **Restarts SteamVR**, so its dashboard and the overlays start clean, then waits for Steam
+   again (the restart can take the display settings with it). `recover-session --keep-steamvr`
+   leaves it running.
 4. **Reconnects Bluetooth headphones that came back for calls only** (they say "Call ended" every
    half minute, and sound flat): connected again, they play in high quality.
 
-If it can't (no program of the session has the settings any more, or Steam still won't start), it
-says so: then restart the Frame.
+If it can't (the session's settings are all gone, or Steam still won't start), it says so: then
+restart the Frame.
 
 #### Why the session breaks
 On SteamOS 0.5.7's beta, launching VLC (the Flatpak) in VR ran the session's D-Bus out of file
-descriptors within two seconds, and it went down; every program on it stopped, Steam's
-interface too. Gamescope's cleanup then removed the session's display settings while gamescope
-itself kept running, so each new Steam found no display. Headphones that reconnected meanwhile
+descriptors within two seconds: VLC's D-Bus filter (`xdg-dbus-proxy`) opened hundreds of
+connections to it. The bus went down, and every program on it stopped, Steam's interface too.
+The login manager then started the session's script again, which removes the display setting
+and leaves putting it back to gamescope; gamescope was still running, so nothing did, and each
+new Steam found no display. Headphones that reconnected meanwhile
 found no high-quality audio profile to use. It's a SteamOS bug, not Frame Tweaks'.
 
 ## How it works

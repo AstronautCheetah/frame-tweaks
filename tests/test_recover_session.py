@@ -1,6 +1,7 @@
 """Desktop & VR Recovery's recover-session (packs/core/tools): what it reads to bring a VR session
 back after the session's D-Bus went down (SteamOS 0.5.7's beta, VLC). Run: python3 -m unittest -v"""
 import os
+import socket
 import subprocess
 import tempfile
 import unittest
@@ -70,6 +71,69 @@ class SessionVars(unittest.TestCase):
             r = sh("session_vars_of 8", FRAME_TWEAKS_PROC=d)
             self.assertNotEqual(r.returncode, 0)
             self.assertEqual(r.stdout.strip(), "")
+
+
+def x_sockets(d, *names):
+    socks = []
+    for name in names:
+        s = socket.socket(socket.AF_UNIX)
+        s.bind(str(Path(d) / name))
+        socks.append(s)
+    return socks
+
+
+class FirstDisplay(unittest.TestCase):
+    def test_the_lowest_x_socket(self):
+        with tempfile.TemporaryDirectory() as d:
+            socks = x_sockets(d, "X1", "X0", "X10")
+            (Path(d) / "X5").write_text("")             # (not a socket)
+            self.assertEqual(sh("first_display", FRAME_TWEAKS_X11=d).stdout.strip(), ":0")
+            for s in socks:
+                s.close()
+
+    def test_none_without_a_socket(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertNotEqual(sh("first_display", FRAME_TWEAKS_X11=d).returncode, 0)
+
+
+# (the user manager stubbed: show-environment prints $ENV_NOW, every other call is logged)
+MANAGER = ('sysctl_user() { case $1 in show-environment) printf "%b" "$ENV_NOW" ;; '
+           'show) echo 0 ;; is-active) return 1 ;; *) echo "$*" >> "$HOME/calls" ;; esac; }; '
+           'calls() { cat "$HOME/calls" 2>/dev/null; }; ')
+
+
+class Restore(unittest.TestCase):
+    def test_display_alone_when_no_program_has_it(self):
+        # (after a SteamVR restart: its new server lacks DISPLAY like everything else since the crash,
+        # while start-gamescope-session removed DISPLAY only)
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as proc:
+            socks = x_sockets(d, "X0", "X1")
+            r = sh(MANAGER + "session_source() { return 1; }; restore_display && calls",
+                   ENV_NOW="GAMESCOPE_WAYLAND_DISPLAY=gamescope-0\\n", FRAME_TWEAKS_X11=d, FRAME_TWEAKS_PROC=proc)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("set-environment DISPLAY=:0", r.stdout)
+            for s in socks:
+                s.close()
+
+    def test_nothing_outside_a_gamescope_session(self):
+        with tempfile.TemporaryDirectory() as d:
+            socks = x_sockets(d, "X0")
+            r = sh(MANAGER + "session_source() { return 1; }; restore_display; echo rc=$?; calls",
+                   ENV_NOW="", FRAME_TWEAKS_X11=d)
+            self.assertIn("rc=1", r.stdout)
+            self.assertNotIn("set-environment", r.stdout)
+            for s in socks:
+                s.close()
+
+
+class WaitForSteam(unittest.TestCase):
+    def test_steam_is_not_restarted_while_the_display_cannot_be_put_back(self):
+        # (the first fix restarted Steam every few seconds for three minutes, each copy failing)
+        r = sh(MANAGER + "restore_display() { return 1; }; steam_up() { return 1; }; wait_for_steam; calls",
+               RECOVER_WAIT="0", ENV_NOW="")
+        self.assertIn("Steam still doesn't stay up", r.stderr)    # (it waited, and gave up)
+        self.assertNotIn("restart", r.stdout)
+        self.assertNotIn("start --no-block", r.stdout)
 
 
 class Usage(unittest.TestCase):
