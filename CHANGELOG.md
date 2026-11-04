@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.1 (2026-11-04)
 
 ### Added
 - **KnockThru has a Start button:** it starts KnockThru when SteamVR runs and it doesn't (after
