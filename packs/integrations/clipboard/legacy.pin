@@ -1,0 +1,11 @@
+# Frame Tweaks' clipboard-sync fork as SteamOS builds older than 0.5.7's beta (20261103.6153824)
+# install it (pin_for: until_build=): v0.2.0-ft.1, wlr-data-control only, the release those builds
+# were used with. From that build on, KWin 6.6 offers only ext-data-control, which the release in
+# ./pin speaks (and wlr-data-control too). Kept as it is: no latest=, dev/check-pins.sh leaves it.
+until_build=20261103.6153824
+version=0.2.0-ft.1
+url=https://github.com/AstronautCheetah/clipboard-sync/releases/download/v0.2.0-ft.1/clipboard-sync-0.2.0-ft.1-aarch64-linux.tar.gz
+sha256=6dea5dfd3bf4710322fa33afe57eaee8aa7dd42e697461936b0a286aed06cf0b
+nomirror=Frame Tweaks' own build: the fork and its releases are Frame Tweaks'
+license=MIT or Apache-2.0 (dnut/clipboard-sync and this fork; declared in its Cargo.toml, which has no licence file: the standard texts)
+license_file=https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/MIT.txt https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Apache-2.0.txt

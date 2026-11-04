@@ -33,6 +33,34 @@ class NewestTag(unittest.TestCase):
         self.assertEqual(sh("newest_tag", "v1.0.0-rc1\nv1.0.0\n", FRAME_TWEAKS_CHANNEL="beta"), "v1.0.0")
 
 
+class PinFor(unittest.TestCase):
+    """pin_for: Shared clipboard installs the fork release made for this SteamOS: builds before
+    0.5.7's beta (20261103.6153824) keep v0.2.0-ft.1 (legacy.pin), that build and later ones get
+    ./pin (ext-data-control, which KWin 6.6 needs)."""
+
+    def which(self, os_release):
+        with tempfile.NamedTemporaryFile("w", suffix=".os-release") as f:
+            f.write(os_release)
+            f.flush()
+            return sh("pin_for clipboard", FRAME_TWEAKS_OS_RELEASE=f.name)
+
+    def test_an_older_build_keeps_the_legacy_release(self):
+        self.assertEqual(self.which('NAME="SteamOS"\nVERSION_ID=0.5.6\nBUILD_ID=20261020.1\n'), "legacy.pin")
+        self.assertEqual(self.which("BUILD_ID=20261103.6153823\n"), "legacy.pin")
+
+    def test_the_beta_build_and_later_get_the_new_one(self):
+        for build in ("20261103.6153824", '"20261103.6153824"', "20261110.1", "20270101.10"):
+            with self.subTest(build):
+                self.assertEqual(self.which(f"VERSION_ID=0.5.7\nBUILD_ID={build}\n"), "pin")
+
+    def test_an_unknown_build_gets_the_newest(self):
+        self.assertEqual(self.which("NAME=SteamOS\n"), "pin")
+        self.assertEqual(sh("pin_for clipboard", FRAME_TWEAKS_OS_RELEASE="/nonexistent"), "pin")
+
+    def test_a_tweak_without_other_pins(self):
+        self.assertEqual(self.which("BUILD_ID=20200101.1\n").strip() and sh("pin_for ydotool"), "pin")
+
+
 class Pins(unittest.TestCase):
     def test_every_pin_is_complete(self):
         pins = [*ROOT.glob("packs/*/*/pin"), *ROOT.glob("packs/*/*/*.pin")]

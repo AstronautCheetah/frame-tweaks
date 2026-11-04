@@ -15,4 +15,11 @@ if [ -z "$ver" ]; then              # (built on the Frame by an older version: i
     [[ $patched == *sync-sessions* ]] ||
         status_warn "$(t 'older build: files and pictures stay in their session, and a copied file can paste only as text (Reinstall fixes it)')"
 fi
+# (installed before a SteamOS update that needs the other release: KWin 6.6 has only
+# ext-data-control, which the older release can't use, so desktop mode's clipboard drops out)
+# (only for a release of ours made for another SteamOS: a build of your own is left alone)
+want=$(pin_version clipboard "$(pin_for clipboard)")
+known=$(cat "$TWEAK_DIR"/pin "$TWEAK_DIR"/*.pin 2>/dev/null | sed -n 's/^version=//p')
+[ -z "$ver" ] || [ "$ver" = "$want" ] || ! grep -qxF -- "$ver" <<< "$known" ||
+    status_warn "$(t 'this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)' "$want" "$ver")"
 status_ok "$(t '%s running' "clipboard-sync${ver:+ $ver}")"

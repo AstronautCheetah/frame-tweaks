@@ -413,7 +413,30 @@ newest_tag() {
 rank_tags() { sed 's/-/~/' | sort -V | sed 's/~/-/'; }      # oldest first; vX.Y.Z-rc.N before vX.Y.Z
 # tag_newer A B: release tag A is newer than B (ranked as newest_tag ranks them)
 tag_newer() { [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | rank_tags | tail -1)" = "$1" ]; }
-pin_version() { sed -n 's/^version=//p' "$(tweak_dir "$1")/pin"; }
+pin_version() { sed -n 's/^version=//p' "$(tweak_dir "$1")/${2:-pin}"; }
+# steamos_build_id: this SteamOS's BUILD_ID (20261103.6153824), "" when it can't tell.
+# (FRAME_TWEAKS_OS_RELEASE: another file, for the tests; lib/sft.py steamos_build reads the same.)
+steamos_build_id() {
+    sed -n "s/^BUILD_ID=[\"']\{0,1\}\([^\"']*\)[\"']\{0,1\}[[:space:]]*$/\1/p" \
+        "${FRAME_TWEAKS_OS_RELEASE:-/etc/os-release}" 2>/dev/null | head -1 || true
+}
+# build_older A B: SteamOS build A is older than build B (YYYYMMDD.N, compared as versions).
+build_older() { [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -1)" = "$1" ]; }
+# pin_for <id>: the pin file <id> installs on this SteamOS: a <name>.pin with until_build=B when
+# this build is older than B (an older SteamOS kept on the release that was made for it), else
+# pin. An unknown build gets pin, the newest.
+pin_for() {
+    local build p until
+    build=$(steamos_build_id)
+    if [ -n "$build" ]; then
+        for p in "$(tweak_dir "$1")"/*.pin; do
+            [ -f "$p" ] || continue
+            until=$(sed -n 's/^until_build=//p' "$p")
+            [ -n "$until" ] && build_older "$build" "$until" && { basename "$p"; return 0; }
+        done
+    fi
+    echo pin
+}
 
 # Steam's "+" menu resolves Icon= only in the hicolor theme and rescans when the
 # applications/icon directories' mtime changes (writing an existing file doesn't change it).

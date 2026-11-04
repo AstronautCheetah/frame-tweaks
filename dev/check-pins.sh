@@ -12,6 +12,8 @@ for pin in packs/*/*/pin packs/*/*/*.pin; do
     [ -f "$pin" ] || continue
     id=${pin#packs/*/}; id=${id%/pin}; id=${id%.pin}
     cur=$(sed -n 's/^version=//p' "$pin"); api=$(sed -n 's/^latest=//p' "$pin")
+    # (no latest=: kept on purpose, e.g. an older SteamOS's release, until_build=)
+    [ -n "$api" ] || { echo "$id: pinned $cur (kept as it is)"; continue; }
     json=$(curl -fsSL --max-time 15 "$api" 2>/dev/null) || { echo "$id: pinned $cur; couldn't reach upstream"; continue; }
     if grep -q '^rev=' "$pin" && [[ $api != */releases/* ]]; then    # git commit (else: a release's)
         new=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"$json")

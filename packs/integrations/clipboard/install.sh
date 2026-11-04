@@ -4,10 +4,13 @@
 # checked aarch64 release.
 source "${FRAME_TWEAKS_LIB:-$(dirname "$0")/../../../lib}/common.sh"
 ROOT="$HOME/.local/share/frame-tweaks/clipboard-sync"
-VER=$(pin_version clipboard)
+# (the release made for this SteamOS: SteamOS builds before 0.5.7's beta keep the one they were
+# used with, legacy.pin; later ones need the newer release's ext-data-control, for KWin 6.6)
+PIN=$(pin_for clipboard)
+VER=$(pin_version clipboard "$PIN")
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 say "$(t 'Downloading %s %s' clipboard-sync "$VER")"
-fetch_pinned clipboard "$T/clipboard-sync.tar.gz"
+fetch_pinned clipboard "$T/clipboard-sync.tar.gz" "$PIN"
 tar -xzf "$T/clipboard-sync.tar.gz" -C "$T"
 write_file "$ROOT/bin/clipboard-sync" 755 < "$T/clipboard-sync-$VER-aarch64-linux/clipboard-sync"
 echo "$VER" > "$ROOT/VERSION"
