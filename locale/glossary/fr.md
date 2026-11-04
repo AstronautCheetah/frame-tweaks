@@ -208,7 +208,7 @@ it's translated here, in « » (no article inside the quotes).
 | Back to the previous window | Retour à la fenêtre précédente | |
 | VR dashboard patching (helper) | Modification du tableau de bord VR (auxiliaire) | |
 | Battery charge limit | Limite de charge de la batterie | la Limite de charge de la batterie |
-| Desktop Recovery | Récupération du bureau | sur la ligne « Récupération du bureau » |
+| Desktop & VR Recovery | Récupération du bureau et de la VR | sur la ligne « Récupération du bureau et de la VR » |
 | Shared KDE wallet ("the Wallet tweak") | Portefeuille KDE partagé | l'ajustement « Portefeuille KDE partagé » |
 | Signal: key in the wallet | Signal : clé dans le portefeuille | |
 | Shared clipboard | Presse-papiers partagé | |

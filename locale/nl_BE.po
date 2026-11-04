@@ -7120,26 +7120,23 @@ msgstr ""
 msgid "speech-dispatcher is back to SteamOS's setup (no voice)."
 msgstr "speech-dispatcher staat weer zoals SteamOS het instelt (geen stem)."
 
-# needs review
 #: packs/core/tools/README.md
 msgid ""
-"Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+"Brings back a desktop-mode taskbar that has gone missing, and a VR session whose Steam stopped starting"
 msgstr ""
-"Brengt een verdwenen taakbalk in bureaubladmodus terug: vanzelf of met één knop"
+"Brengt een verdwenen taakbalk in bureaubladmodus terug, en een VR-sessie waarin Steam niet meer start"
 
-# needs review
 #: packs/core/tools/README.md
 msgid ""
-"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
+"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one. And one command, `recover-session`, brings back a VR session left with only the room or the backdrop in the headset, without a reboot."
 msgstr ""
-"Brengt de taakbalk (en het systeemvak) van de bureaubladmodus terug als die verdwenen is. Een kleine bewaking start hem vanzelf opnieuw als hij sluit terwijl de bureaubladmodus draait, en één knop, **Taakbalk herstarten**, doet het met de hand (`restart-plasmashell`), ook als hij vastzit."
+"Brengt de taakbalk (en het systeemvak) van de bureaubladmodus terug als die verdwenen is. Een kleine bewaking start hem vanzelf opnieuw als hij sluit terwijl de bureaubladmodus draait, en één knop, **Taakbalk herstarten**, doet het met de hand (`restart-plasmashell`), ook als hij vastzit. En één commando, `recover-session`, brengt een VR-sessie terug waarin je in de headset alleen nog de kamer of de achtergrond ziet, zonder opnieuw op te starten."
 
-# needs review
 #: packs/core/tools/README.md
 msgid ""
-"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
+"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did). In VR, when the session's D-Bus goes down (SteamOS 0.5.7's beta does this as VLC starts), Steam keeps failing to start until a reboot."
 msgstr ""
-"In het geneste bureaublad van de Frame start niets een gesloten taakbalk opnieuw, en hij moet binnen die sessie opnieuw gestart worden. De grafische laag van SteamOS voor bureaubladapps verbreekt soms de verbinding met de taakbalk (een fout in SteamOS, niet iets wat jij gedaan hebt)."
+"In het geneste bureaublad van de Frame start niets een gesloten taakbalk opnieuw, en hij moet binnen die sessie opnieuw gestart worden. De grafische laag van SteamOS voor bureaubladapps verbreekt soms de verbinding met de taakbalk (een fout in SteamOS, niet iets wat jij gedaan hebt). Als in VR de D-Bus van de sessie uitvalt (de bèta van SteamOS 0.5.7 doet dat wanneer VLC start), blijft Steam niet starten tot je opnieuw opstart."
 
 # needs review
 #: packs/core/tools/README.md
@@ -7168,6 +7165,68 @@ msgid ""
 msgstr ""
 "De taakbalk wordt bewaakt: sluit hij terwijl de bureaubladmodus draait, dan komt hij vanzelf terug."
 
+#: packs/core/tools/recover-session
+msgid "Couldn't reconnect it: turn it off and on."
+msgstr "Kon niet opnieuw verbinden: zet het toestel uit en weer aan."
+
+#: packs/core/tools/recover-session
+msgid ""
+"Put back the VR session's display settings (%d of them, from %s), which Steam needs to start."
+msgstr ""
+"De weergave-instellingen van de VR-sessie teruggezet (%d stuks, uit %s), die Steam nodig heeft om te starten."
+
+#: packs/core/tools/recover-session
+msgid ""
+"Reconnecting %s, connected for calls only, so it plays in high quality again…"
+msgstr ""
+"%s opnieuw verbinden, dat alleen voor gesprekken verbonden is, zodat het weer in hoge kwaliteit speelt…"
+
+#: packs/core/tools/recover-session
+msgid "Reset the failed %s."
+msgstr "De mislukte %s gereset."
+
+#: packs/core/tools/recover-session
+msgid "Restarting SteamVR, so its dashboard and overlays start clean…"
+msgstr ""
+"SteamVR herstarten, zodat het dashboard en de overlays schoon starten…"
+
+#: packs/core/tools/recover-session
+msgid "Steam is running."
+msgstr "Steam is actief."
+
+#: packs/core/tools/recover-session
+msgid "Steam still doesn't stay up (see %s): restart the Frame."
+msgstr ""
+"Steam blijft nog altijd niet draaien (zie %s): start de Frame opnieuw op."
+
+#: packs/core/tools/recover-session
+msgid "SteamVR didn't restart: restart it from Steam."
+msgstr "SteamVR is niet herstart: herstart het vanuit Steam."
+
+#: packs/core/tools/recover-session
+msgid ""
+"The VR session isn't running: nothing to recover (in desktop mode, or a reboot brings it back)."
+msgstr ""
+"De VR-sessie is niet actief: niets te herstellen (in bureaubladmodus, of opnieuw opstarten brengt ze terug)."
+
+#: packs/core/tools/recover-session
+msgid "The VR session looks fine: nothing to recover."
+msgstr "De VR-sessie ziet er goed uit: niets te herstellen."
+
+#: packs/core/tools/recover-session
+msgid ""
+"The session's display settings are gone and no program of the session still has them: restart the Frame."
+msgstr ""
+"De weergave-instellingen van de sessie zijn weg en geen enkel programma van de sessie heeft ze nog: start de Frame opnieuw op."
+
+#: packs/core/tools/recover-session
+msgid "Waiting for Steam to start…"
+msgstr "Wachten tot Steam start…"
+
+#: packs/core/tools/recover-session
+msgid "recover-session [--keep-steamvr]"
+msgstr "recover-session [--keep-steamvr]"
+
 # needs review
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
@@ -7182,6 +7241,11 @@ msgstr "%s herstart"
 #: packs/core/tools/restart-plasmashell
 msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
 msgstr "Geen Plasma-sessie (ksmserver) gevonden — ben je in bureaubladmodus?"
+
+#: packs/core/tools/status.sh
+msgid "installed without recover-session (an older version): ↻ adds it"
+msgstr ""
+"geïnstalleerd zonder recover-session (een oudere versie): ↻ voegt het toe"
 
 # needs review
 #: packs/core/tools/status.sh
@@ -7201,24 +7265,21 @@ msgstr ""
 msgid "installed; watching the taskbar in desktop mode"
 msgstr "geïnstalleerd; bewaakt de taakbalk in bureaubladmodus"
 
-# needs review
 #: packs/core/tools/taskbar-guard packs/core/tools/README.md
-msgid "Desktop Recovery"
-msgstr "Bureaubladherstel"
+msgid "Desktop & VR Recovery"
+msgstr "Bureaublad- en VR-herstel"
 
-# needs review
 #: packs/core/tools/taskbar-guard
 msgid ""
-"The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+"The taskbar couldn't be started again. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks to try once more."
 msgstr ""
-"De taakbalk kon niet opnieuw gestart worden. Druk op Taakbalk herstarten in de rij van Bureaubladherstel in Frame Tweaks om het nog eens te proberen."
+"De taakbalk kon niet opnieuw gestart worden. Druk op Taakbalk herstarten in de rij van Bureaublad- en VR-herstel in Frame Tweaks om het nog eens te proberen."
 
-# needs review
 #: packs/core/tools/taskbar-guard
 msgid ""
-"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need it."
 msgstr ""
-"De taakbalk blijft sluiten: hij is {n} keer opnieuw gestart in {minutes} minuten. Druk op Taakbalk herstarten in de rij van Bureaubladherstel in Frame Tweaks als je hem nodig hebt."
+"De taakbalk blijft sluiten: hij is {n} keer opnieuw gestart in {minutes} minuten. Druk op Taakbalk herstarten in de rij van Bureaublad- en VR-herstel in Frame Tweaks als je hem nodig hebt."
 
 # needs review
 #: packs/core/vr-dashboard/README.md
@@ -9560,3 +9621,37 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ # needs review
 #~ msgid "Kept your limits in %s."
 #~ msgstr "Je limieten in %s zijn behouden."
+
+#~ # needs review
+#~ msgid ""
+#~ "Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+#~ msgstr ""
+#~ "Brengt een verdwenen taakbalk in bureaubladmodus terug: vanzelf of met één knop"
+
+#~ # needs review
+#~ msgid ""
+#~ "Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
+#~ msgstr ""
+#~ "Brengt de taakbalk (en het systeemvak) van de bureaubladmodus terug als die verdwenen is. Een kleine bewaking start hem vanzelf opnieuw als hij sluit terwijl de bureaubladmodus draait, en één knop, **Taakbalk herstarten**, doet het met de hand (`restart-plasmashell`), ook als hij vastzit."
+
+#~ # needs review
+#~ msgid ""
+#~ "In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
+#~ msgstr ""
+#~ "In het geneste bureaublad van de Frame start niets een gesloten taakbalk opnieuw, en hij moet binnen die sessie opnieuw gestart worden. De grafische laag van SteamOS voor bureaubladapps verbreekt soms de verbinding met de taakbalk (een fout in SteamOS, niet iets wat jij gedaan hebt)."
+
+#~ # needs review
+#~ msgid "Desktop Recovery"
+#~ msgstr "Bureaubladherstel"
+
+#~ # needs review
+#~ msgid ""
+#~ "The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+#~ msgstr ""
+#~ "De taakbalk kon niet opnieuw gestart worden. Druk op Taakbalk herstarten in de rij van Bureaubladherstel in Frame Tweaks om het nog eens te proberen."
+
+#~ # needs review
+#~ msgid ""
+#~ "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+#~ msgstr ""
+#~ "De taakbalk blijft sluiten: hij is {n} keer opnieuw gestart in {minutes} minuten. Druk op Taakbalk herstarten in de rij van Bureaubladherstel in Frame Tweaks als je hem nodig hebt."

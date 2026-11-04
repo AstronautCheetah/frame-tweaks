@@ -7140,26 +7140,23 @@ msgid "speech-dispatcher is back to SteamOS's setup (no voice)."
 msgstr ""
 "speech-dispatcher est revenu à la configuration de SteamOS (sans voix)."
 
-# needs review
 #: packs/core/tools/README.md
 msgid ""
-"Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+"Brings back a desktop-mode taskbar that has gone missing, and a VR session whose Steam stopped starting"
 msgstr ""
-"Rétablit la barre des tâches du mode bureau quand elle a disparu : d'elle-même, ou d'un seul bouton"
+"Rétablit la barre des tâches du mode bureau quand elle a disparu, et une session VR dont Steam ne démarre plus"
 
-# needs review
 #: packs/core/tools/README.md
 msgid ""
-"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
+"Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one. And one command, `recover-session`, brings back a VR session left with only the room or the backdrop in the headset, without a reboot."
 msgstr ""
-"Rétablit la barre des tâches du mode bureau (et la zone de notification) quand elle a disparu. Un petit programme de surveillance la relance de lui-même si elle se ferme pendant que le mode bureau est actif, et un bouton, **Redémarrer la barre des tâches**, le fait à la main (`restart-plasmashell`), y compris quand elle est figée."
+"Rétablit la barre des tâches du mode bureau (et la zone de notification) quand elle a disparu. Un petit programme de surveillance la relance de lui-même si elle se ferme pendant que le mode bureau est actif, et un bouton, **Redémarrer la barre des tâches**, le fait à la main (`restart-plasmashell`), y compris quand elle est figée. Et une commande, `recover-session`, rétablit sans redémarrage une session VR qui n'affiche plus que la vue de la pièce ou l'arrière-plan dans le casque."
 
-# needs review
 #: packs/core/tools/README.md
 msgid ""
-"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
+"In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did). In VR, when the session's D-Bus goes down (SteamOS 0.5.7's beta does this as VLC starts), Steam keeps failing to start until a reboot."
 msgstr ""
-"Dans le bureau imbriqué du Frame, rien ne redémarre une barre des tâches fermée, et elle doit être relancée dans cette session. La couche graphique de SteamOS pour les applications de bureau déconnecte parfois la barre des tâches (un bug de SteamOS, pas une erreur de votre part)."
+"Dans le bureau imbriqué du Frame, rien ne redémarre une barre des tâches fermée, et elle doit être relancée dans cette session. La couche graphique de SteamOS pour les applications de bureau déconnecte parfois la barre des tâches (un bug de SteamOS, pas une erreur de votre part). En VR, quand le D-Bus de la session tombe (la bêta de SteamOS 0.5.7 le fait au démarrage de VLC), Steam ne parvient plus à démarrer jusqu'au redémarrage du Frame."
 
 # needs review
 #: packs/core/tools/README.md
@@ -7188,6 +7185,67 @@ msgid ""
 msgstr ""
 "Surveillance de la barre des tâches : si elle se ferme pendant que le mode bureau est actif, elle revient d'elle-même."
 
+#: packs/core/tools/recover-session
+msgid "Couldn't reconnect it: turn it off and on."
+msgstr "Impossible de le reconnecter : éteignez-le puis rallumez-le."
+
+#: packs/core/tools/recover-session
+msgid ""
+"Put back the VR session's display settings (%d of them, from %s), which Steam needs to start."
+msgstr ""
+"Paramètres d'affichage de la session VR rétablis (%d, depuis %s) ; Steam en a besoin pour démarrer."
+
+#: packs/core/tools/recover-session
+msgid ""
+"Reconnecting %s, connected for calls only, so it plays in high quality again…"
+msgstr ""
+"Reconnexion de %s, connecté pour les appels uniquement, pour qu'il retrouve la haute qualité audio…"
+
+#: packs/core/tools/recover-session
+msgid "Reset the failed %s."
+msgstr "%s, en échec, réinitialisé."
+
+#: packs/core/tools/recover-session
+msgid "Restarting SteamVR, so its dashboard and overlays start clean…"
+msgstr ""
+"Redémarrage de SteamVR, pour que son tableau de bord et ses superpositions repartent de zéro…"
+
+#: packs/core/tools/recover-session
+msgid "Steam is running."
+msgstr "Steam est lancé."
+
+#: packs/core/tools/recover-session
+msgid "Steam still doesn't stay up (see %s): restart the Frame."
+msgstr "Steam ne reste toujours pas lancé (voir %s) : redémarrez le Frame."
+
+#: packs/core/tools/recover-session
+msgid "SteamVR didn't restart: restart it from Steam."
+msgstr "SteamVR n'a pas redémarré : redémarrez-le depuis Steam."
+
+#: packs/core/tools/recover-session
+msgid ""
+"The VR session isn't running: nothing to recover (in desktop mode, or a reboot brings it back)."
+msgstr ""
+"La session VR n'est pas lancée : rien à récupérer (en mode bureau, ou un redémarrage la rétablit)."
+
+#: packs/core/tools/recover-session
+msgid "The VR session looks fine: nothing to recover."
+msgstr "La session VR semble fonctionner : rien à récupérer."
+
+#: packs/core/tools/recover-session
+msgid ""
+"The session's display settings are gone and no program of the session still has them: restart the Frame."
+msgstr ""
+"Les paramètres d'affichage de la session ont disparu et aucun programme de la session ne les a encore : redémarrez le Frame."
+
+#: packs/core/tools/recover-session
+msgid "Waiting for Steam to start…"
+msgstr "Attente du démarrage de Steam…"
+
+#: packs/core/tools/recover-session
+msgid "recover-session [--keep-steamvr]"
+msgstr "recover-session [--keep-steamvr]"
+
 # needs review
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
@@ -7203,6 +7261,10 @@ msgstr "%s redémarré"
 msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
 msgstr ""
 "Aucune session Plasma (ksmserver) trouvée — êtes-vous en mode bureau ?"
+
+#: packs/core/tools/status.sh
+msgid "installed without recover-session (an older version): ↻ adds it"
+msgstr "installé sans recover-session (ancienne version) : ↻ l'ajoute"
 
 # needs review
 #: packs/core/tools/status.sh
@@ -7222,24 +7284,21 @@ msgstr ""
 msgid "installed; watching the taskbar in desktop mode"
 msgstr "installé ; surveille la barre des tâches en mode bureau"
 
-# needs review
 #: packs/core/tools/taskbar-guard packs/core/tools/README.md
-msgid "Desktop Recovery"
-msgstr "Récupération du bureau"
+msgid "Desktop & VR Recovery"
+msgstr "Récupération du bureau et de la VR"
 
-# needs review
 #: packs/core/tools/taskbar-guard
 msgid ""
-"The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+"The taskbar couldn't be started again. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks to try once more."
 msgstr ""
-"Impossible de relancer la barre des tâches. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau » dans Frame Tweaks pour réessayer."
+"Impossible de relancer la barre des tâches. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau et de la VR » dans Frame Tweaks pour réessayer."
 
-# needs review
 #: packs/core/tools/taskbar-guard
 msgid ""
-"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+"The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need it."
 msgstr ""
-"La barre des tâches se ferme sans cesse : elle a été relancée {n} fois en {minutes} minutes. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau » dans Frame Tweaks quand vous en avez besoin."
+"La barre des tâches se ferme sans cesse : elle a été relancée {n} fois en {minutes} minutes. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau et de la VR » dans Frame Tweaks quand vous en avez besoin."
 
 # needs review
 #: packs/core/vr-dashboard/README.md
@@ -9606,3 +9665,37 @@ msgstr "Installateur d'ajustements"
 #~ # needs review
 #~ msgid "Kept your limits in %s."
 #~ msgstr "Vos limites ont été conservées dans %s."
+
+#~ # needs review
+#~ msgid ""
+#~ "Brings back a desktop-mode taskbar that has gone missing: by itself, or with one button"
+#~ msgstr ""
+#~ "Rétablit la barre des tâches du mode bureau quand elle a disparu : d'elle-même, ou d'un seul bouton"
+
+#~ # needs review
+#~ msgid ""
+#~ "Brings back the desktop-mode taskbar (and system tray) when it has gone missing. A small watch starts it again by itself when it closes while desktop mode runs, and one button, **Restart taskbar**, does it by hand (`restart-plasmashell`), also for a frozen one."
+#~ msgstr ""
+#~ "Rétablit la barre des tâches du mode bureau (et la zone de notification) quand elle a disparu. Un petit programme de surveillance la relance de lui-même si elle se ferme pendant que le mode bureau est actif, et un bouton, **Redémarrer la barre des tâches**, le fait à la main (`restart-plasmashell`), y compris quand elle est figée."
+
+#~ # needs review
+#~ msgid ""
+#~ "In the Frame's nested desktop, nothing restarts a closed taskbar, and it has to be relaunched inside that session. SteamOS's graphics layer for desktop apps sometimes gets the taskbar disconnected (a SteamOS bug, not something you did)."
+#~ msgstr ""
+#~ "Dans le bureau imbriqué du Frame, rien ne redémarre une barre des tâches fermée, et elle doit être relancée dans cette session. La couche graphique de SteamOS pour les applications de bureau déconnecte parfois la barre des tâches (un bug de SteamOS, pas une erreur de votre part)."
+
+#~ # needs review
+#~ msgid "Desktop Recovery"
+#~ msgstr "Récupération du bureau"
+
+#~ # needs review
+#~ msgid ""
+#~ "The taskbar couldn't be started again. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks to try once more."
+#~ msgstr ""
+#~ "Impossible de relancer la barre des tâches. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau » dans Frame Tweaks pour réessayer."
+
+#~ # needs review
+#~ msgid ""
+#~ "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
+#~ msgstr ""
+#~ "La barre des tâches se ferme sans cesse : elle a été relancée {n} fois en {minutes} minutes. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau » dans Frame Tweaks quand vous en avez besoin."

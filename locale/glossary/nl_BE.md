@@ -186,7 +186,7 @@ messages, status lines), so a title can be found in the list.
 | Speech engine (helper) | Spraakengine (hulpprogramma); in sentences "de Spraakengine", capital as in the English |
 | VR dashboard patching (helper) | Patches voor het VR-dashboard (hulpprogramma) |
 | ydotool (helper) / Homebrew / NordVPN (WireGuard) | ydotool (hulpprogramma) / Homebrew / NordVPN (WireGuard) |
-| Desktop Recovery; its Restart taskbar | Bureaubladherstel; Taakbalk herstarten |
+| Desktop & VR Recovery; its Restart taskbar | Bureaublad- en VR-herstel; Taakbalk herstarten |
 | Firefox privacy | Privacy in Firefox |
 | Shared KDE wallet (also "the Wallet tweak") | Gedeelde KDE-portefeuille ("de aanpassing Gedeelde KDE-portefeuille") |
 | Signal: key in the wallet | Signal: sleutel in de portefeuille |
@@ -235,7 +235,7 @@ dat alsnog". Lowercase status lines keep lowercase ("eerst wachtwoord").
 - Numbers: decimal comma ("2,5 s"), "80%", hours "4 u" (short) or "4 uur"; "bv." for "e.g.".
   The Frame is "de Frame", "de Steam Frame" (as in Steam's Dutch).
 - Tweak titles: translate descriptive ones ("Shared clipboard" → "Gedeeld klembord", "Mouse
-  cursor fix" → "Herstel van de muisaanwijzer", "Desktop Recovery" → "Bureaubladherstel"); keep
+  cursor fix" → "Herstel van de muisaanwijzer", "Desktop & VR Recovery" → "Bureaublad- en VR-herstel"); keep
   the product names above; every current title is in "Frame Tweaks' own names" above, and a new
   one goes there. Categories: Toegankelijkheid, Gemak, VR-omgeving, Systeem, Hardware,
   Privacy en beveiliging, Voor ontwikkelaars.
