@@ -27,12 +27,21 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **Tooltips in the headset for the dashboard's icon buttons:** Android Mirror's and Scroll
+  strips' buttons without a word on them (the ⚙, ✕, the PIN pad's ⌫ and ↵, the keypad's arrows,
+  the phone's buttons, the colour swatches) had tooltips that never showed in VR. They now come
+  up as a small label just above the button, after resting the laser on it for 0.7 s as in Frame
+  Tweaks' windows: the laser's wobble doesn't put it off, and it goes when the laser leaves the
+  button or presses it.
 - **One screen snip at a time:** pressing Arrow Pad's Snip again (or opening Screen snip from the
   menu) while a selection was open laid another full-screen selection over it. Another start now
   leaves the open one as it is.
-- **ⓘ and ⚙ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
+- **ⓘ, ⚙ and ↻ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
   window's font has no such symbols, and SteamOS now filled them from a narrow monospace font.
-  Noto's symbol fonts draw them now.
+  Noto's symbol fonts and Adwaita Sans draw them now.
+- **Narrate reads light text on dark backgrounds:** a snip of white text on dark buttons (the Frame
+  Tweaks window's own) gave "no text found". When the first reading finds little, it reads a
+  cleaned-up copy too (grey, larger, black on white) and keeps whichever has more.
 - **Android Mirror swipes again:** right after each press, the laser sends one move that says no
   button is held, and the mirror took it for a let-go that went missing: every press ended
   there, so a swipe reached the phone as a tap. Only a quarter second of such moves ends a touch

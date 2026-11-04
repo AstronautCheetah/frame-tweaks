@@ -301,3 +301,45 @@ class OneSelection(unittest.TestCase):
             lock = fs.one_selection()                          # (gone: the kernel let go)
             self.assertIsNotNone(lock)
             lock.close()
+
+
+class ScreenTextOcr(unittest.TestCase):
+    """Narrate found no text in a picture of the Frame Tweaks window: white text on dark buttons of
+    different shades gave Tesseract nothing. A second pass reads a cleaned-up copy (for_ocr)."""
+
+    @staticmethod
+    def picture(bg, fg):
+        from PyQt6.QtGui import QColor, QImage
+        img = QImage(60, 30, QImage.Format.Format_RGB32)
+        img.fill(QColor(bg))
+        for x in range(20, 40):
+            for y in range(10, 20):
+                img.setPixelColor(x, y, QColor(fg))
+        return img
+
+    def test_light_text_on_dark_turns_black_on_white(self):
+        out = fs.for_ocr(self.picture("#1b2026", "#f0f0f0"), scale=2)
+        self.assertEqual((out.width(), out.height()), (120, 60))
+        self.assertEqual(out.pixelColor(60, 30).lightness(), 0)        # (the text: black)
+        self.assertEqual(out.pixelColor(5, 5).lightness(), 255)        # (the background: white)
+
+    def test_dark_text_on_light_stays_black_on_white(self):
+        out = fs.for_ocr(self.picture("#f4f4f4", "#101010"), scale=2)
+        self.assertEqual(out.pixelColor(60, 30).lightness(), 0)
+        self.assertEqual(out.pixelColor(5, 5).lightness(), 255)
+
+    def test_the_cleaned_up_pass_counts_when_the_first_finds_little(self):
+        img = self.picture("#1b2026", "#f0f0f0")
+        calls = []
+        def fake(image, path, psm):
+            calls.append(psm)
+            return "" if psm == "3" else "Dictate Hide Open Hide"
+        with mock.patch.object(fs, "TESSERACT", sys.executable), mock.patch.object(fs, "tesseract", fake):
+            self.assertEqual(fs.ocr(img), "Dictate Hide Open Hide")
+        self.assertEqual(calls, ["3", "11"])
+
+    def test_a_good_first_read_needs_no_second(self):
+        text = "Plenty of ordinary text, read the first time round without help."
+        with mock.patch.object(fs, "TESSERACT", sys.executable), \
+             mock.patch.object(fs, "tesseract", lambda image, path, psm: text if psm == "3" else "x"):
+            self.assertEqual(fs.ocr(self.picture("#ffffff", "#000000")), text)

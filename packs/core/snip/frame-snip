@@ -858,18 +858,52 @@ def no_text_reason(snip):
             else _("No text found in the snip."))
 
 
+def for_ocr(img, scale=3):
+    """img made easy for Tesseract: grey, scale times larger, then black text on white, cut at mid
+    grey and turned over when the picture is mostly dark. Light text on dark buttons of different
+    shades (the Frame Tweaks window: white on green, grey and near black) gave Tesseract nothing at
+    all, inverted or not, until thresholded like this. A lookup table over the pixels' bytes, so it
+    costs no Python loop."""
+    g = img.convertToFormat(QImage.Format.Format_Grayscale8).scaled(
+        img.width() * scale, img.height() * scale, Qt.AspectRatioMode.KeepAspectRatio,
+        Qt.TransformationMode.SmoothTransformation).convertToFormat(QImage.Format.Format_Grayscale8)
+    bpl, h = g.bytesPerLine(), g.height()
+    data = bytes(g.constBits().asstring(bpl * h))
+    w = g.width()
+    pixels = b"".join(data[y * bpl:y * bpl + w] for y in range(0, h, max(1, h // 64)))
+    dark = sum(pixels) / max(1, len(pixels)) < 128
+    cut = 128
+    table = bytes((0 if v > cut else 255) if dark else (255 if v > cut else 0) for v in range(256))
+    out = QImage(data.translate(table), w, h, bpl, QImage.Format.Format_Grayscale8)
+    return out.copy()                    # (its own pixels: the bytes above go away with this call)
+
+
+def tesseract(img, path, psm):
+    img.save(str(path))
+    r = subprocess.run([TESSERACT, str(path), "-", "--psm", psm], capture_output=True, text=True)
+    text = re.sub(r"[ \t]+\n", "\n", r.stdout).strip()
+    return re.sub(r"\n{3,}", "\n\n", text)
+
+
+def letters(text):
+    return sum(c.isalpha() for c in text)
+
+
 def ocr(img):
-    """Text in the image (Tesseract), or None if Tesseract isn't installed."""
+    """Text in the image (Tesseract), or None if Tesseract isn't installed. Read as it is first
+    (at 2x: small screen text reads better), then, when that finds little, cleaned up (for_ocr) in
+    sparse-text mode, as screen text in buttons and labels is: whichever reads more letters."""
     if not Path(TESSERACT).exists():
         return None
     with tempfile.TemporaryDirectory() as t:
         path = Path(t) / "snip.png"
-        # Small screen text reads better at 2x.
-        img.scaled(img.width() * 2, img.height() * 2, Qt.AspectRatioMode.KeepAspectRatio,
-                   Qt.TransformationMode.SmoothTransformation).save(str(path))
-        r = subprocess.run([TESSERACT, str(path), "-", "--psm", "3"], capture_output=True, text=True)
-    text = re.sub(r"[ \t]+\n", "\n", r.stdout).strip()
-    return re.sub(r"\n{3,}", "\n\n", text)
+        text = tesseract(img.scaled(img.width() * 2, img.height() * 2, Qt.AspectRatioMode.KeepAspectRatio,
+                                    Qt.TransformationMode.SmoothTransformation), path, "3")
+        if letters(text) < 20:
+            other = tesseract(for_ocr(img), path, "11")
+            if letters(other) > letters(text):
+                text = other
+    return text
 
 
 # ---- narration ------------------------------------------------------------------------------
