@@ -26,6 +26,10 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **Android Mirror swipes again:** since a Steam or SteamVR update, the laser's moves said no
+  button was held while you held the trigger, so each press ended at its first move and a swipe
+  reached the phone as a tap. A press now ends only on its real let-go, unless the laser reports
+  buttons and then shows the let-go went missing.
 - **Screen snip copies without desktop mode:** Copy, Copy text and Narrate's Copy image and Copy
   text said "Couldn't copy (is desktop mode running?)" whenever desktop mode wasn't running. They
   now put the picture or text on the VR session's own clipboard then, where floating VR windows

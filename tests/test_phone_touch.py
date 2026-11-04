@@ -1,4 +1,7 @@
 """adb-scrcpy/phone-touch: laser positions on the mirror become scrcpy touch messages."""
+import json
+import shutil
+import subprocess
 import sys
 import re
 import struct
@@ -467,3 +470,29 @@ class UntestedScrcpy(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(shutil.which("node"), "needs Node.js to run the layer's press logic")
+class PressThroughTheLaser(unittest.TestCase):
+    """Since a November 2026 update the laser's moves report no button held (ev.buttons 0) while
+    the trigger is held: the layer took each first move for a missed let-go, so every press ended
+    there (55 presses, 0 moves, 55 "lost" let-gos on the Frame) and swipes reached the phone as
+    taps. A touch now ends on "no button" only once one of its events showed a button."""
+
+    def run_js(self, events):
+        js = (ROOT / "packs/core/adb-scrcpy" / "phone-touch.js").read_text()
+        body = js.split("const letGoMissing = ", 1)[1].split("\n  };", 1)[0] + "\n  }"
+        code = (f"const stats = {{ noButtons: 0 }}; let touch = null; const letGoMissing = {body};\n"
+                f"const out = []; for (const [kind, buttons] of {json.dumps(events)}) {{\n"
+                "  if (kind === 'down') touch = { buttons: buttons !== 0 };\n"
+                "  else out.push(letGoMissing({ buttons }) ? 'ended' : 'goes on');\n"
+                "}\nconsole.log(JSON.stringify(out));")
+        return json.loads(subprocess.run(["node", "-e", code], capture_output=True, text=True, check=True).stdout)
+
+    def test_moves_reporting_no_button_keep_the_touch_going(self):
+        self.assertEqual(self.run_js([["down", 0], ["move", 0], ["move", 0], ["move", 0]]), ["goes on"] * 3)
+        self.assertEqual(self.run_js([["down", 1], ["move", 0]]), ["ended"])
+
+    def test_a_missed_let_go_still_ends_a_touch_that_reports_buttons(self):
+        self.assertEqual(self.run_js([["down", 0], ["move", 1], ["move", 1], ["move", 0]]),
+                         ["goes on", "goes on", "ended"])

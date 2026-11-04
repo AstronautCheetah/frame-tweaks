@@ -15,13 +15,13 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 31;
+  const NAME = 'phone-touch', VERSION = 32;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
   const T = (s) => window.__sftI18n?.t?.[s] ?? s, N = (s) => s;
   const LIFT_M = 0.002;                       // the layer floats 2 mm in front of the picture
-  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, focusPushes: 0, trail: [] };
+  const stats = { downs: 0, moves: 0, ups: 0, wheels: 0, lastWheel: null, hovers: 0, leaves: 0, lostUps: 0, noButtons: 0, focusPushes: 0, trail: [] };
   const all = (window.__sftPatches ??= {});
   if (all[NAME]?.version === VERSION) return 'already patched';
   all[NAME]?.stop?.();
@@ -37,6 +37,16 @@
 
   // A press, then drags, then a let-go: one finger on the phone.
   let touch = null;
+  // A let-go that went missing shows as an event with no button held (ev.buttons 0) while the
+  // touch goes on, but only when this press's events report buttons at all: since an update in
+  // November 2026 the laser's moves say 0 while you hold the trigger, so every press ended at its
+  // first move and a swipe reached the phone as a tap. Until one of its events shows a button,
+  // a touch ends only on a real let-go (mouseup/pointerup) or the next press.
+  const letGoMissing = (ev) => {
+    if (ev.buttons !== 0) { touch.buttons = true; return false; }
+    if (!touch.buttons) { stats.noButtons++; return false; }
+    return true;
+  };
   const send = (a, ev) => {
     const t = touch, r = t.rect;
     try {
@@ -48,7 +58,7 @@
     if (!touch) return;
     // No button held: the let-go went missing (it happens with the laser). End the touch there,
     // or the joystick, which waits for the touch to end, would stay off.
-    if (ev.buttons === 0) { stats.lostUps++; return onUp(ev); }
+    if (letGoMissing(ev)) { stats.lostUps++; return onUp(ev); }
     stats.moves++;
     send('move', ev);
   };
@@ -77,7 +87,7 @@
   let lastHover = 0;
   const mark = (what) => { stats.trail.push([what, Date.now() % 1e6]); if (stats.trail.length > 60) stats.trail.shift(); };
   const onHover = (ev, size) => {
-    if (touch && ev.buttons === 0) { stats.lostUps++; onUp(ev); }
+    if (touch && letGoMissing(ev)) { stats.lostUps++; onUp(ev); }
     if (touch || Date.now() - lastHover < 100) return;
     if (!lastHover) mark('hover');
     lastHover = Date.now();
@@ -125,7 +135,7 @@
             stats.downs++;
             mark('down');
             if (touch) onUp(ev);                    // a new press ends a touch whose let-go went missing
-            touch = { rect: ev.currentTarget.getBoundingClientRect(), size: c };
+            touch = { rect: ev.currentTarget.getBoundingClientRect(), size: c, buttons: ev.buttons !== 0 };
             send('down', ev);
             focusMirror(f);
             window.addEventListener('mousemove', onMove, true);
