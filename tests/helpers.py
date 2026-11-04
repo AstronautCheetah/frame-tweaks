@@ -5,6 +5,7 @@ import importlib.machinery
 import importlib.util
 import os
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,6 +41,19 @@ def sandbox_env(home, stubs=None, path=("/usr/bin", "/bin"), **extra):
            "FRAME_TWEAKS_PYLIB": str(ROOT / "lib")}      # (the shared modules: the repo's, not an installed copy)
     env.update({k: str(v) for k, v in extra.items()})
     return env
+
+
+def wait_until(cond, seconds=20, every=0.02):
+    """cond()'s value as soon as it's true, or its last (false) value after seconds. For what
+    happens on its own time (a detached process, another program taking the clipboard): a fixed
+    sleep long enough on an idle machine is too short when the suite runs 8 parts at once, so
+    wait for the thing itself, with a deadline only a real failure reaches."""
+    end = time.monotonic() + seconds
+    while True:
+        got = cond()
+        if got or time.monotonic() > end:
+            return got
+        time.sleep(every)
 
 
 def load_script(path, name=None):

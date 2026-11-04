@@ -310,13 +310,19 @@ class Narration(unittest.TestCase):
         self.assertTrue(self.wait(lambda: self.played()), w.state.text())
 
     def test_a_clipboard_that_doesnt_answer_says_so(self):
+        # The narration says where it is on the same line as Paste's answer: let it settle on part 1
+        # first (a player that plays until stopped, and it has started), or its "Reading aloud:
+        # part 1 of 2", late under load, lands after "Couldn't read the clipboard."
+        self.slow_player()
         w = self.window(TWO)
+        self.assertTrue(self.wait(lambda: self.playing(), 20), w.state.text())
+        self.assertEqual(w.state.text(), "Reading aloud: part 1 of 2")
         with mock.patch.object(fs, "nested_wayland", lambda: "/nonexistent/wayland-0"), \
                 mock.patch.object(fs, "wl_tool", lambda name: "/bin/true"), \
                 mock.patch.object(fs.subprocess, "run", side_effect=subprocess.TimeoutExpired("wl-paste", 5)):
             self.assertEqual(fs.desktop_paste(), ("failed", None))
             w.paste()                                      # (an exception here would abort the panel)
-            self.assertTrue(self.wait(lambda: w.paste_button.isEnabled(), 5), w.state.text())
+            self.assertTrue(self.wait(lambda: w.paste_button.isEnabled(), 20), w.state.text())
         self.assertEqual(w.state.text(), "Couldn't read the clipboard.")
 
     def test_the_settings_view_follows_a_new_language(self):

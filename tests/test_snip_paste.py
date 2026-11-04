@@ -18,7 +18,7 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import load_script  # noqa: E402
+from helpers import load_script, wait_until  # noqa: E402
 SNIP = ROOT / "packs/core/snip/frame-snip"
 HOME = tempfile.TemporaryDirectory()
 
@@ -426,18 +426,38 @@ class RealX(unittest.TestCase):
         for name, data in blobs.items():
             (d / name).write_bytes(data)
         owner = subprocess.Popen([sys.executable, str(SNIP), "--x-clipboard", str(d), self.display], env=self.env,
-                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.addCleanup(lambda: (owner.kill(), owner.wait(10)))
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        self.addCleanup(lambda: (owner.kill(), owner.wait(10), owner.stderr.close()))
+        self.owner = owner
+
+    def holding(self):
+        """Wait until the owner holds the clipboard, asked of the X server itself. The owner imports
+        PyQt before it takes it: 5 s and more when the suite runs 8 parts at once, and reads
+        through --x-paste (as slow to start) retried for 15 s could all come before it ("empty").
+        An owner that ended instead fails here, saying why."""
+        x = fs.x_lib()
+        d = ctypes.c_void_p(x.XOpenDisplay(self.display.encode()))
+        self.assertTrue(d.value, "can't open " + self.display)
+        try:
+            clip = ctypes.c_ulong(x.XInternAtom(d, b"CLIPBOARD", 0))
+            held = wait_until(lambda: x.XGetSelectionOwner(d, clip) or self.owner.poll() is not None, 30)
+            if self.owner.poll() is not None:              # (stderr read only now: a running owner's never ends)
+                self.fail(f"the owner ended ({self.owner.returncode}): "
+                          + self.owner.stderr.read().decode(errors="replace")[-2000:])
+            self.assertTrue(held, "the owner didn't take the clipboard in 30 s")
+        finally:
+            x.XCloseDisplay(d)
 
     def paste(self):
-        """What Paste reads, through its own process (frame-snip --x-paste), once the owner holds it."""
-        end = time.monotonic() + 15
-        with mock.patch.object(fs.sys, "argv", [str(SNIP)]), mock.patch.dict(os.environ, self.env, clear=True):
-            while True:
-                got = fs.x_clipboard_paste(self.display)
-                if got[0] != "empty" or time.monotonic() > end:
-                    return got
-                time.sleep(0.1)
+        """What Paste reads, through its own process (frame-snip --x-paste), once the owner holds it.
+        (PASTE_TIMEOUT raised here for the reader process's budget only, PASTE_TIMEOUT + 1 s: it
+        imports PyQt before it reads, which alone took 6 s and more under that load, so "failed".
+        The reader's own wait on the owner keeps its timeout, it runs with the module's value;
+        XPasteProcess checks the budget itself.)"""
+        self.holding()
+        with mock.patch.object(fs.sys, "argv", [str(SNIP)]), mock.patch.dict(os.environ, self.env, clear=True), \
+                mock.patch.object(fs, "PASTE_TIMEOUT", 30):
+            return fs.x_clipboard_paste(self.display)
 
     def test_a_picture_copied_is_pasted(self):
         image = png(120, 80)

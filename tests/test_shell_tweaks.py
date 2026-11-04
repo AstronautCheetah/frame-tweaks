@@ -8,13 +8,12 @@ import sys
 import hashlib
 import subprocess
 import tempfile
-import time
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import sandbox_env, stub  # noqa: E402
+from helpers import sandbox_env, stub, wait_until  # noqa: E402
 
 
 class Home(unittest.TestCase):
@@ -204,6 +203,15 @@ class PerfOverlay(Home):
     def calls(self):
         return self.log.read_text().splitlines() if self.log.exists() else []
 
+    def launched(self, count):
+        """The gtk-launch calls, once there are count of them: run.sh starts gtk-launch detached
+        (setsid -f) and exits, so its stand-in may log only after the script has returned (late
+        under load: the suite runs 8 parts at once)."""
+        def launches():
+            return [c for c in self.calls() if c.startswith("gtk-launch")]
+        wait_until(lambda: len(launches()) >= count)
+        return launches()
+
     def test_status_warns_while_the_service_is_disabled(self):
         self.installed()
         r = self.run_script("perf-overlay/status.sh")
@@ -266,7 +274,7 @@ class PerfOverlay(Home):
         (self.home / "running").touch()
         r = self.run_script("perf-overlay/run.sh")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("gtk-launch frame-perf-overlay", self.calls())
+        self.assertEqual(self.launched(1), ["gtk-launch frame-perf-overlay"])
         self.assertIn("Shown in VR", r.stdout)                 # (no config.json yet: it was hidden)
         self.assertNotIn("--user start frame-perf-overlay.service", "\n".join(self.calls()))
 
@@ -294,10 +302,11 @@ class PerfOverlay(Home):
         self.visible(True)
         r = self.run_script("perf-overlay/run.sh")
         self.assertIn("Hidden in VR", r.stdout)
+        self.assertEqual(self.launched(1), ["gtk-launch frame-perf-overlay"])
         self.visible(False)
         r = self.run_script("perf-overlay/run.sh")
         self.assertIn("Shown in VR", r.stdout)
-        self.assertEqual([c for c in self.calls() if c.startswith("gtk-launch")], ["gtk-launch frame-perf-overlay"] * 2)
+        self.assertEqual(self.launched(2), ["gtk-launch frame-perf-overlay"] * 2)
 
     def test_show_ends_a_copy_running_outside_the_service(self):
         """Started from a menu entry while the service's copy was stopped, the panel holds its lock
@@ -389,10 +398,8 @@ class PassthroughPip(Home):
         calls = "\n".join(self.calls())
         self.assertIn("enable framepip.service", calls)
         self.assertIn("--user start framepip.service", calls)
-        for _ in range(20):                                     # (the program runs detached: a moment)
-            if "framepip --open" in "\n".join(self.calls()):
-                break
-            time.sleep(0.1)
+        # (the program runs detached, setsid -f: it may log after run.sh has returned)
+        wait_until(lambda: "framepip --open" in self.calls())
         self.assertIn("framepip --open", self.calls())
         self.assertIn("From now on it starts with SteamVR", r.stdout)
         self.assertIn("Opened", r.stdout)
