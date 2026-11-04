@@ -155,6 +155,9 @@ politeness: no *veuillez*, no *s'il vous plaît*, no *nous* for the app).
 | shortcut | raccourci |
 | mirror (download mirror) / mirror a phone | miroir / afficher en miroir |
 | tray (system tray) | zone de notification |
+| tray icon | icône de notification |
+| stream (verb, to a screen in VR) / game streaming | diffuser / streaming de jeux (the stream: le flux) |
+| Steam library / non-Steam game | bibliothèque Steam / jeu non-Steam (Steam's « Gérer », « Supprimer le jeu non-Steam ») |
 | app | application (the app menu: le menu des applications) |
 | computer | ordinateur |
 
@@ -206,6 +209,7 @@ it's translated here, in « » (no article inside the quotes).
 | Curved world windows | Fenêtres flottantes courbes | |
 | Pick up when floating | Saisir en faisant flotter | |
 | Back to the previous window | Retour à la fenêtre précédente | |
+| Turn on / Turn off (a tweak row's run button) / turned on / turned off | Activer / Désactiver / Activé / Désactivé | « Activer » sur sa ligne |
 | VR dashboard patching (helper) | Modification du tableau de bord VR (auxiliaire) | |
 | Battery charge limit | Limite de charge de la batterie | la Limite de charge de la batterie |
 | Desktop & VR Recovery | Récupération du bureau et de la VR | sur la ligne « Récupération du bureau et de la VR » |
@@ -224,7 +228,9 @@ it's translated here, in « » (no article inside the quotes).
 | Restart taskbar (button) | Redémarrer la barre des tâches | |
 | Categories: Accessibility, Convenience, VR environment, System, Hardware, Privacy & security, Developer | Accessibilité, Confort, Environnement VR, Système, Matériel, Confidentialité et sécurité, Développement | |
 | a VR environment tweak / the VR environment tweaks | | un ajustement de la catégorie Environnement VR / les ajustements de la catégorie Environnement VR |
-| Packs: Core, Integrations, 3rd Party | Base, Intégrations, Tiers | |
+| Packs: Core, Integrations, 3rd Party, Bugfixes | Base, Intégrations, Tiers, Correctifs | |
+| Tray icon crash fix | Correctif du plantage des icônes de notification | |
+| Moonlight XR for Frame (linked project) | unchanged | |
 
 ### The Wallet apps page
 | English | French |

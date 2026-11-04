@@ -196,6 +196,10 @@ messages, status lines), so a title can be found in the list.
 | NordVPN Tray (menu) / App timers (notifications) | NordVPN-systeemvak / Apptimers |
 | [y/N], [Y/n] (yes/no questions in a terminal) | [j/N], [J/n]: the first letter is what the reader types for yes; the scripts accept it, and y too |
 | VR memory guard / Performance Overlay / KnockThru | Geheugenbewaker voor VR / Performance Overlay / KnockThru (linked projects' names stay) |
+| Tray icon crash fix; tray icon | Herstel van crashes door systeemvakpictogrammen; systeemvakpictogram |
+| Moonlight XR for Frame | Moonlight XR for Frame (a linked project's name stays); Steam library: Steam-bibliotheek |
+| Bugfixes (pack name) | Bugfixes (the Dutch word, Groene Boekje "bugfix"; like Basis / Integraties / Van derden) |
+| Turn off / Turn on (a tweak's row button); Turned off / Turned on | Uitschakelen / Inschakelen; Uitgeschakeld / Ingeschakeld ("Inschakelen in de rij ervan zet het weer aan") |
 
 | Wallet apps page (🔑) | Dutch |
 |---|---|

@@ -473,7 +473,7 @@ msgstr ""
 "Choisir quelles applications s'ouvrent avec le portefeuille KDE partagé ; le verrouiller ou le déverrouiller"
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
 msgid "Close"
 msgstr "Fermer"
 
@@ -874,6 +874,11 @@ msgstr "{version} disponible (testée par Frame Tweaks)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
+msgid "↻ Check for updates"
+msgstr "↻ Rechercher des mises à jour"
+
+# needs review
+#: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
 msgstr "↻ Redémarrer"
 
@@ -895,11 +900,6 @@ msgstr "✔ Frame Tweaks est à jour ({version})."
 #: gui/frame-tweaks-gui.py
 msgid "✔ Works on my Frame"
 msgstr "✔ Fonctionne sur mon Frame"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "⟳ Check for updates"
-msgstr "⟳ Rechercher des mises à jour"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1123,9 +1123,9 @@ msgstr ""
 # needs review
 #: gui/packs_page.py
 msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
-"Chaque ajustement présenté ici vient d'un <b>pack</b> : un dossier de dossiers d'ajustements, chacun décrit par son README.md. Ceux de Frame Tweaks se trouvent dans trois packs officiels, Base, Intégrations et Tiers, tous utilisés sauf si vous en désactivez un. Pour en ajouter d'autres, ajoutez-en un depuis son lien ci-dessous, ou placez le dossier d'un pack dans <code>{folder}</code> ; puis approuvez-le. <b>Les ajustements d'un pack s'exécutent avec vos droits</b>, avec vos fichiers et vos mots de passe à portée de main : n'approuvez que les packs de personnes en qui vous avez confiance, et lisez d'abord ce qu'ils font. Si les fichiers d'un pack changent, il attend que vous l'approuviez de nouveau. Pour en écrire un : docs/mods.md."
+"Chaque ajustement présenté ici vient d'un <b>pack</b> : un dossier de dossiers d'ajustements, chacun décrit par son README.md. Ceux de Frame Tweaks se trouvent dans ses packs officiels ({official}), tous utilisés sauf si vous en désactivez un. Pour en ajouter d'autres, ajoutez-en un depuis son lien ci-dessous, ou placez le dossier d'un pack dans <code>{folder}</code> ; puis approuvez-le. <b>Les ajustements d'un pack s'exécutent avec vos droits</b>, avec vos fichiers et vos mots de passe à portée de main : n'approuvez que les packs de personnes en qui vous avez confiance, et lisez d'abord ce qu'ils font. Si les fichiers d'un pack changent, il attend que vous l'approuviez de nouveau. Pour en écrire un : docs/mods.md."
 
 # needs review
 #: gui/packs_page.py
@@ -1433,9 +1433,9 @@ msgstr "Aucun paramètre laissé par des ajustements désinstallés."
 
 # needs review
 #: gui/prefs_page.py
-msgid "Off: only when you press ⟳ Check for updates."
+msgid "Off: only when you press ↻ Check for updates."
 msgstr ""
-"Désactivé : seulement quand vous appuyez sur « ⟳ Rechercher des mises à jour »."
+"Désactivé : seulement quand vous appuyez sur « ↻ Rechercher des mises à jour »."
 
 #: gui/prefs_page.py
 msgid "Open the folder"
@@ -1483,9 +1483,9 @@ msgstr "Enregistré."
 
 # needs review
 #: gui/prefs_page.py
-msgid "Saved. ⟳ Check for updates finds test releases too."
+msgid "Saved. ↻ Check for updates finds test releases too."
 msgstr ""
-"Enregistré. « ⟳ Rechercher des mises à jour » trouve aussi les versions de test."
+"Enregistré. « ↻ Rechercher des mises à jour » trouve aussi les versions de test."
 
 # needs review
 #: gui/prefs_page.py
@@ -2251,7 +2251,7 @@ msgid "not available any more"
 msgstr "plus disponible"
 
 # needs review
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr "non installé"
 
@@ -2317,6 +2317,13 @@ msgstr "%s est nécessaire à %s : désinstallez aussi %s, ou gardez %s"
 #: install.sh
 msgid "%s is now called %s"
 msgstr "%s s'appelle désormais %s"
+
+# needs review
+#: install.sh
+msgid ""
+"%s is on SteamOS's Python %s but misses packages it couldn't download: ./install.sh repair installs them"
+msgstr ""
+"%s est sur le Python %s de SteamOS, mais il lui manque des paquets qui n'ont pas pu être téléchargés : ./install.sh repair les installe"
 
 # needs review
 #: install.sh
@@ -2982,6 +2989,11 @@ msgstr "Actif dès maintenant."
 
 # needs review
 #: lib/common.sh
+msgid "Could not save the setting in %s."
+msgstr "Impossible d'enregistrer le paramètre dans %s."
+
+# needs review
+#: lib/common.sh
 msgid "Couldn't install %s (see above)."
 msgstr "Impossible d'installer %s (voir ci-dessus)."
 
@@ -3035,8 +3047,21 @@ msgstr "Installer Homebrew maintenant ?"
 
 # needs review
 #: lib/common.sh
+msgid ""
+"Installing the packages of %s again, which an earlier move to Python %s could not download"
+msgstr ""
+"Nouvelle installation des paquets de %s, qu'un passage antérieur à Python %s n'a pas pu télécharger"
+
+# needs review
+#: lib/common.sh
 msgid "Not active yet: %s"
 msgstr "Pas encore actif : %s"
+
+# needs review
+#: lib/common.sh
+msgid "Not installed: tick %s and Apply changes first."
+msgstr ""
+"Non installé : cochez « %s » et appuyez d'abord sur « Appliquer les modifications »."
 
 # needs review
 #: lib/common.sh
@@ -3089,6 +3114,11 @@ msgstr ""
 #: lib/common.sh
 msgid "installed (active while SteamVR runs)"
 msgstr "installé (actif pendant que SteamVR tourne)"
+
+# needs review
+#: lib/common.sh
+msgid "installed, turned off (Turn on on its row turns it back on)"
+msgstr "installé, désactivé (« Activer » sur sa ligne le réactive)"
 
 # needs review
 #: lib/common.sh
@@ -3761,6 +3791,118 @@ msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} n'est pas un nom de branche ou d'étiquette"
 
 # needs review
+#: packs/bugfixes/pack.md
+msgid "Bugfixes"
+msgstr "Correctifs"
+
+# needs review
+#: packs/bugfixes/pack.md
+msgid ""
+"Frame Tweaks' fixes for problems in SteamOS, SteamVR and Steam themselves, until Valve fixes them: each one works around a bug found on a Frame, and checks whether your Frame still has it. A fix your SteamOS no longer needs isn't offered."
+msgstr ""
+"Les correctifs de Frame Tweaks pour des problèmes de SteamOS, SteamVR et Steam eux-mêmes, en attendant que Valve les corrige : chacun contourne un bug constaté sur un Frame et vérifie si votre Frame l'a toujours. Un correctif dont votre SteamOS n'a plus besoin n'est pas proposé."
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
+msgstr ""
+"Un petit service en arrière-plan qui répond aux applications demandant une icône de notification dans la session VR, pour qu'elles ne la demandent qu'une fois au lieu d'insister sans fin. Les icônes ne s'affichent nulle part : la session VR n'a pas de zone de notification où les montrer."
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"Keeps apps with a tray icon, such as VLC, from taking the VR session down"
+msgstr ""
+"Empêche les applications à icône de notification, comme VLC, de faire planter la session VR"
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
+msgstr ""
+"Sur la bêta de SteamOS 0.5.7, les applications Qt de la session VR (VLC, par exemple) cherchent la zone de notification du bureau, n'en trouvent aucune et réessaient sans cesse, en ouvrant chaque fois une nouvelle connexion au D-Bus de la session. En quelques secondes, le bus est saturé et s'arrête, entraînant Steam et la session VR avec lui."
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid "Tray icon crash fix"
+msgstr "Correctif du plantage des icônes de notification"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh packs/core/ydotool/install.sh
+msgid "%s didn't start; see: %s"
+msgstr "%s n'a pas démarré ; voir : %s"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh
+msgid "It starts with the VR session"
+msgstr "Il démarre avec la session VR"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh
+msgid ""
+"SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+msgstr ""
+"Le Python de SteamOS n'a pas PyGObject (gi), dont %s a besoin : il ne démarrera pas"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh
+msgid "Tray icons in the VR session get an answer now"
+msgstr ""
+"Les icônes de notification de la session VR obtiennent désormais une réponse"
+
+# needs review
+#: packs/bugfixes/tray-host/needed.sh
+msgid ""
+"this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
+msgstr ""
+"la session VR de ce SteamOS ne donne pas aux applications le thème Qt de KDE, les icônes de notification ne peuvent donc pas saturer son D-Bus"
+
+# needs review
+#: packs/bugfixes/tray-host/run.sh packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
+msgid "%s restarted"
+msgstr "%s redémarré"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "another program answers tray icons in the VR session (%s)"
+msgstr ""
+"un autre programme répond aux icônes de notification dans la session VR (%s)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "installed; starts with the VR session"
+msgstr "installé ; démarre avec la session VR"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "running, but not answering tray icons yet (%s)"
+msgstr ""
+"en cours d'exécution, mais ne répond pas encore aux icônes de notification (%s)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "running: tray icons in the VR session get an answer"
+msgstr ""
+"en cours d'exécution : les icônes de notification de la session VR obtiennent une réponse"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "service failed (%s)"
+msgstr "échec du service (%s)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "service not running (▶ Restart starts it)"
+msgstr "service non lancé (« ▶ Redémarrer » le lance)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
+msgstr ""
+"ne démarrera pas avec la session VR : non activé (« ↻ Réinstaller » l'active)"
+
+# needs review
 #: packs/core/adb-scrcpy/README.md
 msgid "1 hour"
 msgstr "1 heure"
@@ -4370,6 +4512,16 @@ msgid "Clipboard with the phone"
 msgstr "Presse-papiers avec le téléphone"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Close the settings"
+msgstr "Fermer les paramètres"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Delete the last digit"
+msgstr "Effacer le dernier chiffre"
+
+# needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
 msgstr "Déconnexion automatique après"
@@ -4377,6 +4529,11 @@ msgstr "Déconnexion automatique après"
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Drag to change the order"
 msgstr "Faites glisser pour changer l'ordre"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Enter: send the PIN"
+msgstr "Entrée : envoyer le PIN"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4464,6 +4621,11 @@ msgstr "Redémarrer le flux pour appliquer"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Right"
 msgstr "Droite"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Settings: the stream, the buttons and where they go"
+msgstr "Paramètres : le flux, les boutons et leur emplacement"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4571,7 +4733,7 @@ msgstr ""
 "Pavé flottant avec flèches, Début/Fin, touches de fonction, Ctrl/Alt/Super et un bouton de dictée ; ne vole jamais le focus"
 
 # needs review
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "Open"
 msgstr "Ouvrir"
 
@@ -4676,6 +4838,11 @@ msgstr ""
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
+msgid "Down arrow"
+msgstr "Flèche bas"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
 msgid "End"
 msgstr "Fin"
@@ -4744,6 +4911,11 @@ msgstr "Plus grand"
 msgctxt "key legend"
 msgid "Launcher"
 msgstr "Lanceur"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
+msgid "Left arrow"
+msgstr "Flèche gauche"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -4841,6 +5013,11 @@ msgstr "Réinitialiser la position"
 msgctxt "mouse button"
 msgid "Right"
 msgstr "Droit"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
+msgid "Right arrow"
+msgstr "Flèche droite"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -4964,6 +5141,11 @@ msgid ""
 "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
 msgstr ""
 "Libérer les touches : le bureau agit comme si Maj, Ctrl, Alt ou Super étaient maintenues ? Appuyez ici"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
+msgid "Up arrow"
+msgstr "Flèche haut"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -5346,11 +5528,6 @@ msgstr ""
 
 # needs review
 #: packs/core/curvature/README.md
-msgid "Curved world windows"
-msgstr "Fenêtres flottantes courbes"
-
-# needs review
-#: packs/core/curvature/README.md
 msgid ""
 "On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
 msgstr ""
@@ -5374,6 +5551,33 @@ msgstr ""
 #: packs/core/curvature/README.md
 msgid "idea from"
 msgstr "idée de"
+
+# needs review
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md
+msgid "Turn off"
+msgstr "Désactiver"
+
+# needs review
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh
+msgid "Turn on"
+msgstr "Activer"
+
+# needs review
+#: packs/core/curvature/run.sh packs/core/curvature/README.md
+msgid "Curved world windows"
+msgstr "Fenêtres flottantes courbes"
+
+# needs review
+#: packs/core/curvature/run.sh
+msgid ""
+"Turned off: windows you float into the world start flat, as in SteamVR. Windows curved already stay as they are."
+msgstr ""
+"Désactivé : les fenêtres que vous faites flotter commencent à plat, comme dans SteamVR. Les fenêtres déjà courbes restent telles quelles."
+
+# needs review
+#: packs/core/curvature/run.sh
+msgid "Turned on: windows you float into the world start curved."
+msgstr "Activé : les fenêtres que vous faites flotter commencent courbes."
 
 # needs review
 #: packs/core/curvature/status.sh
@@ -6160,9 +6364,20 @@ msgstr ""
 "Dans SteamVR, faire flotter une fenêtre puis la placer demande deux étapes : appuyer sur « Faire flotter les vues », puis saisir la barre sous la fenêtre. Cet ajustement n'en fait qu'une."
 
 # needs review
-#: packs/core/float-grab/README.md
+#: packs/core/float-grab/run.sh packs/core/float-grab/README.md
 msgid "Pick up when floating"
 msgstr "Saisir en faisant flotter"
+
+# needs review
+#: packs/core/float-grab/run.sh
+msgid "Turned off: Float in World only floats the window, as in SteamVR."
+msgstr ""
+"Désactivé : « Faire flotter les vues » fait seulement flotter la fenêtre, comme dans SteamVR."
+
+# needs review
+#: packs/core/float-grab/run.sh
+msgid "Turned on: Float in World picks the window up for placing."
+msgstr "Activé : « Faire flotter les vues » saisit la fenêtre pour la placer."
 
 # needs review
 #: packs/core/float-grab/status.sh
@@ -6185,15 +6400,29 @@ msgstr ""
 
 # needs review
 #: packs/core/float-return/README.md
-msgid "Back to the previous window"
-msgstr "Retour à la fenêtre précédente"
-
-# needs review
-#: packs/core/float-return/README.md
 msgid ""
 "SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
 msgstr ""
 "SteamVR laisse le tableau de bord vide là où se trouvait la fenêtre que vous avez fait flotter, et revient à Steam quand la fenêtre affichée se ferme. Cet ajustement revient pour vous à la fenêtre précédente, comme le ferait un clic sur le bouton de cette fenêtre dans le tableau de bord."
+
+# needs review
+#: packs/core/float-return/run.sh packs/core/float-return/README.md
+msgid "Back to the previous window"
+msgstr "Retour à la fenêtre précédente"
+
+# needs review
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned off: the dashboard stays as SteamVR leaves it after you float a window out or close one."
+msgstr ""
+"Désactivé : le tableau de bord reste tel que SteamVR le laisse après que vous avez fait flotter ou fermé une fenêtre."
+
+# needs review
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned on: after you float a window out, the dashboard goes back to the one before."
+msgstr ""
+"Activé : après que vous avez fait flotter une fenêtre, le tableau de bord revient à la précédente."
 
 # needs review
 #: packs/core/float-return/status.sh
@@ -6252,12 +6481,12 @@ msgstr ""
 "Pour le désinstaller avec tout son contenu, utilisez le programme de désinstallation de Homebrew :"
 
 # needs review
-#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Accessibility"
 msgstr "Accessibilité"
 
 # needs review
-#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/integrations/moonlight-xr/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md packs/bugfixes/pack.md
 msgid "Convenience"
 msgstr "Confort"
 
@@ -6267,7 +6496,7 @@ msgid "Core"
 msgstr "Base"
 
 # needs review
-#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Developer"
 msgstr "Développement"
 
@@ -6279,22 +6508,22 @@ msgstr ""
 "Les correctifs et configurations d'applications de Frame Tweaks pour le Steam Frame, et les auxiliaires dont beaucoup ont besoin : des outils d'autres projets, installés avec les ajustements qui les utilisent et crédités à leurs auteurs. Homebrew installe les programmes qu'utilisent la Dictée, l'outil Capture d'écran et le Miroir Android (whisper.cpp, tesseract, scrcpy) ; ydotool tape pour le Pavé fléché, la Dictée et les Bandes de défilement ; Piper assure la lecture à voix haute. Chacun est testé sur un Frame et installé dans votre dossier personnel : il survit aux mises à jour de SteamOS et se retire proprement (la Limite de charge de la batterie ajoute aussi une règle udev dans /etc, que les mises à jour de SteamOS conservent)."
 
 # needs review
-#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Hardware"
 msgstr "Matériel"
 
 # needs review
-#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Privacy & security"
 msgstr "Confidentialité et sécurité"
 
 # needs review
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md
 msgid "System"
 msgstr "Système"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md packs/bugfixes/pack.md
 msgid "VR environment"
 msgstr "Environnement VR"
 
@@ -6321,25 +6550,10 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/README.md
-msgid "Blue"
-msgstr "Bleu"
-
-# needs review
-#: packs/core/scroll-strips/README.md
 msgid ""
 "Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
 msgstr ""
 "Les modifications apparaissent en VR en quelques secondes. Aussi en VR : la roue dentée à la jonction des bandes."
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Cyan"
-msgstr "Cyan"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Green"
-msgstr "Vert"
 
 # needs review
 #: packs/core/scroll-strips/README.md
@@ -6361,43 +6575,13 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/README.md
-msgid "Magenta"
-msgstr "Magenta"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Orange"
-msgstr "Orange"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Pink"
-msgstr "Rose"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Red"
-msgstr "Rouge"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Sky"
-msgstr "Ciel"
-
-# needs review
-#: packs/core/scroll-strips/README.md
 msgid "Vertical strip (scrolls up and down)"
 msgstr "Bande verticale (défilement vers le haut et le bas)"
 
 # needs review
-#: packs/core/scroll-strips/README.md
-msgid "Violet"
-msgstr "Violet"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Yellow"
-msgstr "Jaune"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Blue"
+msgstr "Bleu"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -6408,6 +6592,11 @@ msgstr "Bas"
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Colour"
 msgstr "Couleur"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Cyan"
+msgstr "Cyan"
 
 # needs review
 #: packs/core/scroll-strips/patch.js
@@ -6421,9 +6610,19 @@ msgid "Gap from the window (cm)"
 msgstr "Écart avec la fenêtre (cm)"
 
 # needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Green"
+msgstr "Vert"
+
+# needs review
 #: packs/core/scroll-strips/patch.js
 msgid "Horizontal strip"
 msgstr "Bande horizontale"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Magenta"
+msgstr "Magenta"
 
 # needs review
 #: packs/core/scroll-strips/patch.js
@@ -6434,8 +6633,23 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Orange"
+msgstr "Orange"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Teinte de la vue de la pièce"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Pink"
+msgstr "Rose"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Red"
+msgstr "Rouge"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -6446,6 +6660,16 @@ msgstr "Bandes de défilement"
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Set back behind the window (cm)"
 msgstr "Recul derrière la fenêtre (cm)"
+
+# needs review
+#: packs/core/scroll-strips/patch.js
+msgid "Settings: where the strips go and how they look"
+msgstr "Paramètres : emplacement et apparence des bandes"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Sky"
+msgstr "Ciel"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -6461,6 +6685,16 @@ msgstr "Haut"
 #: packs/core/scroll-strips/patch.js
 msgid "Vertical strip"
 msgstr "Bande verticale"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Violet"
+msgstr "Violet"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Yellow"
+msgstr "Jaune"
 
 # needs review
 #: packs/core/scroll-strips/status.sh
@@ -6547,11 +6781,6 @@ msgstr ""
 
 # needs review
 #: packs/core/snip/frame-snip
-msgid "Couldn't copy (is desktop mode running?)"
-msgstr "Impossible de copier (le mode bureau est-il lancé ?)"
-
-# needs review
-#: packs/core/snip/frame-snip
 msgid "Couldn't copy the snip"
 msgstr "Impossible de copier la capture"
 
@@ -6559,6 +6788,21 @@ msgstr "Impossible de copier la capture"
 #: packs/core/snip/frame-snip
 msgid "Couldn't copy the text"
 msgstr "Impossible de copier le texte"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't copy to the clipboard."
+msgstr "Impossible de copier dans le presse-papiers."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the clipboard."
+msgstr "Impossible de lire le presse-papiers."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the picture on the clipboard."
+msgstr "Impossible de lire l'image du presse-papiers."
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6650,8 +6894,8 @@ msgstr ""
 
 # needs review
 #: packs/core/snip/frame-snip
-msgid "Paste: read the clipboard's text instead"
-msgstr "Coller : lire plutôt le texte du presse-papiers"
+msgid "Paste: read the clipboard's text or picture instead"
+msgstr "Coller : lire plutôt le texte ou l'image du presse-papiers"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6695,8 +6939,18 @@ msgstr "Mettre le texte lu dans le presse-papiers"
 
 # needs review
 #: packs/core/snip/frame-snip
+msgid "Read faster"
+msgstr "Lire plus vite"
+
+# needs review
+#: packs/core/snip/frame-snip
 msgid "Read it again"
 msgstr "Relire"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Read slower"
+msgstr "Lire plus lentement"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6707,6 +6961,11 @@ msgstr "Lecture à voix haute : partie {part} sur {count}"
 #: packs/core/snip/frame-snip
 msgid "Reading aloud…"
 msgstr "Lecture à voix haute…"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Reading the clipboard…"
+msgstr "Lecture du presse-papiers…"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6815,8 +7074,13 @@ msgstr "Le Moteur vocal n'a pas pu lire la partie {part}."
 
 # needs review
 #: packs/core/snip/frame-snip
-msgid "The clipboard has no text."
-msgstr "Le presse-papiers ne contient pas de texte."
+msgid "The clipboard has neither text nor a picture."
+msgstr "Le presse-papiers ne contient ni texte ni image."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "The clipboard is empty."
+msgstr "Le presse-papiers est vide."
 
 #: packs/core/snip/frame-snip
 msgid ""
@@ -6833,6 +7097,11 @@ msgstr "Baisser le volume"
 #: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr "Augmenter le volume"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "What's on the clipboard is too big to paste."
+msgstr "Le contenu du presse-papiers est trop volumineux pour être collé."
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6872,11 +7141,6 @@ msgstr "image vide"
 #: packs/core/snip/frame-snip
 msgid "no focused window"
 msgstr "aucune fenêtre active"
-
-# needs review
-#: packs/core/snip/frame-snip
-msgid "the desktop isn't available"
-msgstr "le bureau n'est pas disponible"
 
 # needs review
 #: packs/core/snip/frame-snip.desktop
@@ -7255,11 +7519,6 @@ msgstr "recover-session [--keep-steamvr]"
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
 msgstr "Échec de %s ; voir %s"
-
-# needs review
-#: packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
-msgid "%s restarted"
-msgstr "%s redémarré"
 
 # needs review
 #: packs/core/tools/restart-plasmashell
@@ -8228,7 +8487,7 @@ msgstr ""
 "Sur le bureau du Frame (KDE Plasma sous Wayland), les programmes ordinaires ne peuvent pas envoyer de frappes de touches aux autres applications. ydotool le peut : il ajoute au noyau un clavier virtuel (`/dev/uinput`), que toutes les applications traitent comme un vrai."
 
 # needs review
-#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md
+#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md packs/bugfixes/tray-host/README.md
 msgid "Restart"
 msgstr "Redémarrer"
 
@@ -8243,11 +8502,6 @@ msgstr ""
 #: packs/core/ydotool/README.md
 msgid "ydotool (helper)"
 msgstr "ydotool (auxiliaire)"
-
-# needs review
-#: packs/core/ydotool/install.sh
-msgid "%s didn't start; see: %s"
-msgstr "%s n'a pas démarré ; voir : %s"
 
 # needs review
 #: packs/core/ydotool/install.sh
@@ -8326,7 +8580,7 @@ msgstr ""
 "Claude pour ordinateur, l'application Linux officielle d'Anthropic (arm64), installée dans votre dossier personnel et mise à jour d'une seule commande."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr "de"
 
@@ -8432,7 +8686,7 @@ msgid "%s starts with desktop mode."
 msgstr "%s démarre avec le mode bureau."
 
 # needs review
-#: packs/integrations/clipboard/install.sh
+#: packs/integrations/clipboard/install.sh packs/integrations/moonlight-xr/install.sh
 msgid "Downloading %s %s"
 msgstr "Téléchargement de %s %s"
 
@@ -8495,6 +8749,13 @@ msgstr ""
 "ancienne version : remplace les images copiées par du texte (« Réinstaller » corrige le problème)"
 
 # needs review
+#: packs/integrations/clipboard/status.sh
+msgid ""
+"this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
+msgstr ""
+"ce SteamOS a besoin de clipboard-sync %s, %s est installé (« Réinstaller » corrige le problème)"
+
+# needs review
 #: packs/integrations/clipboard/uninstall.sh
 msgid "(frees about 3.4 GB)"
 msgstr "(libère environ 3,4 Go)"
@@ -8505,6 +8766,74 @@ msgid ""
 "Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
 msgstr ""
 "Le Rust de Homebrew (installé par d'anciennes versions pour cette compilation) est toujours là ; si vous ne l'utilisez pas :"
+
+# needs review
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with its own installer and adds an app-menu entry and an Open button."
+msgstr ""
+"Un bureau à distance comme KRdp demande chaque fois l'autorisation de partager l'écran et, sur un PC NVIDIA, il encode sur le processeur (VA-API n'y sait pas encoder le H.264). Sunshine encode sur la carte graphique : le flux a moins de latence, plus d'images par seconde et prend en charge les contrôleurs, et son application « Desktop » couvre aussi les jeux hors de Steam. Frame Tweaks installe la version qu'il a testée avec son propre installateur, et ajoute une entrée au menu des applications et un bouton « Ouvrir »."
+
+# needs review
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
+msgstr ""
+"Diffusez le bureau et les jeux de votre PC sur un grand écran en VR, décodés par le matériel"
+
+# needs review
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
+msgstr ""
+"Moonlight XR for Frame, de simplysanatori : un client natif de streaming de jeux pour le Frame. Le bureau de votre PC ou un jeu, diffusé par Sunshine (ou Apollo) sur le PC, s'affiche sur un écran redimensionnable dans une pièce virtuelle, jusqu'à 2560×1440 en H.264 ou HEVC décodé par le matériel du Frame, et vous le contrôlez avec les contrôleurs du Frame. Associez-le une fois avec un PIN ; il se lance depuis votre bibliothèque Steam."
+
+# needs review
+#: packs/integrations/moonlight-xr/install.sh
+msgid "Moonlight XR's installer stopped (its log: %s)"
+msgstr "L'installateur de Moonlight XR s'est arrêté (son journal : %s)"
+
+# needs review
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Start it from your Steam library, the app menu, or Open on its row; pair with your PC on first start."
+msgstr ""
+"Lancez-le depuis votre bibliothèque Steam, le menu des applications ou « Ouvrir » sur sa ligne ; associez-le à votre PC au premier lancement."
+
+# needs review
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Steam isn't running: the program installs, but its Steam library entry is added only when you install it again with Steam running"
+msgstr ""
+"Steam n'est pas lancé : le programme s'installe, mais son entrée dans la bibliothèque Steam n'est ajoutée que si vous le réinstallez pendant que Steam est lancé"
+
+# needs review
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop packs/integrations/moonlight-xr/README.md
+msgid "Moonlight XR for Frame"
+msgstr "Moonlight XR for Frame"
+
+# needs review
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop
+msgid "Stream your PC to a screen in VR"
+msgstr "Diffuser votre PC sur un écran en VR"
+
+# needs review
+#: packs/integrations/moonlight-xr/status.sh
+msgid "Moonlight XR for Frame %s"
+msgstr "Moonlight XR for Frame %s"
+
+# needs review
+#: packs/integrations/moonlight-xr/status.sh
+msgid "its app-menu entry is missing (Reinstall adds it)"
+msgstr ""
+"son entrée du menu des applications est manquante (« Réinstaller » l'ajoute)"
+
+# needs review
+#: packs/integrations/moonlight-xr/uninstall.sh
+msgid ""
+"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+msgstr ""
+"Paramètres et association conservés dans %s. Retirez son entrée de la bibliothèque Steam dans Steam (« Gérer », « Supprimer le jeu non-Steam »), et dissociez le Frame dans Sunshine."
 
 # needs review
 #: packs/integrations/nordvpn/README.md
@@ -9157,10 +9486,6 @@ msgstr ""
 msgid "KnockThru"
 msgstr "KnockThru"
 
-#: packs/third-party/knockthru/README.md
-msgid "Start"
-msgstr "Démarrer"
-
 # needs review
 #: packs/third-party/knockthru/README.md
 msgid ""
@@ -9364,6 +9689,10 @@ msgstr ""
 msgid "Recline"
 msgstr "Mode allongé"
 
+#: packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+msgid "Start"
+msgstr "Démarrer"
+
 # needs review
 #: packs/third-party/recline/README.md
 msgid ""
@@ -9377,6 +9706,33 @@ msgid ""
 "Use VR lying down or reclined; recentering makes your view level and forward"
 msgstr ""
 "Utiliser la VR en position allongée ou inclinée ; le recentrage remet votre vue droit devant, à l'horizontale"
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Already running: its panel is in the SteamVR dashboard."
+msgstr "Déjà lancé : son panneau est dans le tableau de bord de SteamVR."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Could not start Recline's panel: %s says why."
+msgstr ""
+"Impossible de lancer le panneau du Mode allongé : %s indique pourquoi."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Not installed: tick Recline and Apply changes first."
+msgstr ""
+"Non installé : cochez « Mode allongé » et appuyez d'abord sur « Appliquer les modifications »."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Started: its panel is in the SteamVR dashboard."
+msgstr "Lancé : son panneau est dans le tableau de bord de SteamVR."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "SteamVR is not running: Recline starts with it."
+msgstr "SteamVR n'est pas lancé : le Mode allongé démarre avec lui."
 
 # needs review
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
@@ -9704,3 +10060,39 @@ msgstr "Installateur d'ajustements"
 #~ "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
 #~ msgstr ""
 #~ "La barre des tâches se ferme sans cesse : elle a été relancée {n} fois en {minutes} minutes. Appuyez sur « Redémarrer la barre des tâches » sur la ligne « Récupération du bureau » dans Frame Tweaks quand vous en avez besoin."
+
+#~ # needs review
+#~ msgid "⟳ Check for updates"
+#~ msgstr "⟳ Rechercher des mises à jour"
+
+#~ # needs review
+#~ msgid ""
+#~ "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+#~ msgstr ""
+#~ "Chaque ajustement présenté ici vient d'un <b>pack</b> : un dossier de dossiers d'ajustements, chacun décrit par son README.md. Ceux de Frame Tweaks se trouvent dans trois packs officiels, Base, Intégrations et Tiers, tous utilisés sauf si vous en désactivez un. Pour en ajouter d'autres, ajoutez-en un depuis son lien ci-dessous, ou placez le dossier d'un pack dans <code>{folder}</code> ; puis approuvez-le. <b>Les ajustements d'un pack s'exécutent avec vos droits</b>, avec vos fichiers et vos mots de passe à portée de main : n'approuvez que les packs de personnes en qui vous avez confiance, et lisez d'abord ce qu'ils font. Si les fichiers d'un pack changent, il attend que vous l'approuviez de nouveau. Pour en écrire un : docs/mods.md."
+
+#~ # needs review
+#~ msgid "Off: only when you press ⟳ Check for updates."
+#~ msgstr ""
+#~ "Désactivé : seulement quand vous appuyez sur « ⟳ Rechercher des mises à jour »."
+
+#~ # needs review
+#~ msgid "Saved. ⟳ Check for updates finds test releases too."
+#~ msgstr ""
+#~ "Enregistré. « ⟳ Rechercher des mises à jour » trouve aussi les versions de test."
+
+#~ # needs review
+#~ msgid "Couldn't copy (is desktop mode running?)"
+#~ msgstr "Impossible de copier (le mode bureau est-il lancé ?)"
+
+#~ # needs review
+#~ msgid "Paste: read the clipboard's text instead"
+#~ msgstr "Coller : lire plutôt le texte du presse-papiers"
+
+#~ # needs review
+#~ msgid "The clipboard has no text."
+#~ msgstr "Le presse-papiers ne contient pas de texte."
+
+#~ # needs review
+#~ msgid "the desktop isn't available"
+#~ msgstr "le bureau n'est pas disponible"

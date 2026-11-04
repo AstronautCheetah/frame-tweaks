@@ -437,7 +437,7 @@ msgid "Choose which apps open with the shared KDE wallet; lock or unlock it"
 msgstr ""
 "Elige qué apps se abren con la cartera de KDE compartida; bloquéala o desbloquéala"
 
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
 msgid "Close"
 msgstr "Cerrar"
 
@@ -796,6 +796,10 @@ msgid "{version} available (tested by Frame Tweaks)"
 msgstr "{version} disponible (probada por Frame Tweaks)"
 
 #: gui/frame-tweaks-gui.py
+msgid "↻ Check for updates"
+msgstr "↻ Buscar actualizaciones"
+
+#: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
 msgstr "↻ Reiniciar"
 
@@ -815,10 +819,6 @@ msgstr "✔ Frame Tweaks está actualizado ({version})."
 #: gui/frame-tweaks-gui.py
 msgid "✔ Works on my Frame"
 msgstr "✔ Funciona en mi Frame"
-
-#: gui/frame-tweaks-gui.py
-msgid "⟳ Check for updates"
-msgstr "⟳ Buscar actualizaciones"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1027,12 +1027,11 @@ msgid ""
 msgstr ""
 "Descargar el paquete en tu carpeta de paquetes. Nada de él se ejecuta hasta que confíes en él."
 
-# needs review
 #: gui/packs_page.py
 msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
-"Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Núcleo, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, agrega uno desde su enlace abajo, o pon la carpeta de un paquete en <code>{folder}</code>; luego confía en él. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
+"Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en sus paquetes oficiales ({official}), todos en uso a menos que desactives alguno. Para agregar más, agrega uno desde su enlace abajo, o pon la carpeta de un paquete en <code>{folder}</code>; luego confía en él. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
 
 # needs review
 #: gui/packs_page.py
@@ -1308,8 +1307,8 @@ msgid "No settings left behind by uninstalled tweaks."
 msgstr "Los ajustes desinstalados no dejaron configuración."
 
 #: gui/prefs_page.py
-msgid "Off: only when you press ⟳ Check for updates."
-msgstr "Desactivado: solo cuando presionas ⟳ Buscar actualizaciones."
+msgid "Off: only when you press ↻ Check for updates."
+msgstr "Desactivado: solo cuando presionas ↻ Buscar actualizaciones."
 
 #: gui/prefs_page.py
 msgid "Open the folder"
@@ -1352,11 +1351,10 @@ msgstr "Guardado: {path}"
 msgid "Saved."
 msgstr "Guardado."
 
-# needs review
 #: gui/prefs_page.py
-msgid "Saved. ⟳ Check for updates finds test releases too."
+msgid "Saved. ↻ Check for updates finds test releases too."
 msgstr ""
-"Guardado. ⟳ Buscar actualizaciones también encuentra versiones de prueba."
+"Guardado. ↻ Buscar actualizaciones también encuentra versiones de prueba."
 
 #: gui/prefs_page.py
 msgid "Settings are deleted."
@@ -2018,7 +2016,7 @@ msgstr "revisando…"
 msgid "not available any more"
 msgstr "ya no está disponible"
 
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr "no instalado"
 
@@ -2080,6 +2078,12 @@ msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 #: install.sh
 msgid "%s is now called %s"
 msgstr "%s ahora se llama %s"
+
+#: install.sh
+msgid ""
+"%s is on SteamOS's Python %s but misses packages it couldn't download: ./install.sh repair installs them"
+msgstr ""
+"%s está en el Python %s de SteamOS, pero le faltan paquetes que no pudo descargar: ./install.sh repair los instala"
 
 # needs review
 #: install.sh
@@ -2674,6 +2678,10 @@ msgstr "Activo desde el próximo inicio de SteamVR."
 msgid "Active now."
 msgstr "Activo ahora."
 
+#: lib/common.sh
+msgid "Could not save the setting in %s."
+msgstr "No se pudo guardar la opción en %s."
+
 # needs review
 #: lib/common.sh
 msgid "Couldn't install %s (see above)."
@@ -2720,10 +2728,20 @@ msgstr "El instalador de Homebrew falló (ver arriba)."
 msgid "Install Homebrew now?"
 msgstr "¿Instalar Homebrew ahora?"
 
+#: lib/common.sh
+msgid ""
+"Installing the packages of %s again, which an earlier move to Python %s could not download"
+msgstr ""
+"Instalando de nuevo los paquetes de %s que no se pudieron descargar en un cambio anterior a Python %s"
+
 # needs review
 #: lib/common.sh
 msgid "Not active yet: %s"
 msgstr "Aún no está activo: %s"
+
+#: lib/common.sh
+msgid "Not installed: tick %s and Apply changes first."
+msgstr "No instalado: primero marca %s y haz clic en Aplicar cambios."
 
 # needs review
 #: lib/common.sh
@@ -2769,6 +2787,10 @@ msgstr "Tu usuario aún no tiene contraseña, así que sudo no puede funcionar."
 #: lib/common.sh
 msgid "installed (active while SteamVR runs)"
 msgstr "instalado (activo mientras SteamVR está en ejecución)"
+
+#: lib/common.sh
+msgid "installed, turned off (Turn on on its row turns it back on)"
+msgstr "instalado, desactivado (Activar en su fila lo vuelve a activar)"
 
 #: lib/common.sh
 msgid "not responding"
@@ -3384,6 +3406,97 @@ msgstr ""
 msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} no es el nombre de una rama ni de una etiqueta"
 
+#: packs/bugfixes/pack.md
+msgid "Bugfixes"
+msgstr "Correcciones de errores"
+
+#: packs/bugfixes/pack.md
+msgid ""
+"Frame Tweaks' fixes for problems in SteamOS, SteamVR and Steam themselves, until Valve fixes them: each one works around a bug found on a Frame, and checks whether your Frame still has it. A fix your SteamOS no longer needs isn't offered."
+msgstr ""
+"Las correcciones de Frame Tweaks para problemas de SteamOS, SteamVR y Steam mismos, hasta que Valve los corrija: cada una evita un error encontrado en un Frame y comprueba si tu Frame todavía lo tiene. Una corrección que tu SteamOS ya no necesita no se ofrece."
+
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
+msgstr ""
+"Un pequeño servicio en segundo plano que responde a las apps que piden un ícono en la bandeja en la sesión de RV, para que lo pidan una vez en lugar de una y otra vez. Los íconos no se muestran en ningún lado: la sesión de RV no tiene bandeja donde mostrarlos."
+
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"Keeps apps with a tray icon, such as VLC, from taking the VR session down"
+msgstr ""
+"Evita que las apps con ícono en la bandeja, como VLC, hagan caer la sesión de RV"
+
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
+msgstr ""
+"En la beta de SteamOS 0.5.7, las apps Qt en la sesión de RV (VLC, por ejemplo) buscan la bandeja del escritorio, no la encuentran y siguen intentando, y cada vez abren otra conexión al D-Bus de la sesión. En segundos el bus se queda sin espacio y cae, y Steam y la sesión de RV caen con él."
+
+#: packs/bugfixes/tray-host/README.md
+msgid "Tray icon crash fix"
+msgstr "Corrección del fallo por íconos de bandeja"
+
+#: packs/bugfixes/tray-host/install.sh packs/core/ydotool/install.sh
+msgid "%s didn't start; see: %s"
+msgstr "%s no se inició; consulta: %s"
+
+#: packs/bugfixes/tray-host/install.sh
+msgid "It starts with the VR session"
+msgstr "Se inicia con la sesión de RV"
+
+#: packs/bugfixes/tray-host/install.sh
+msgid ""
+"SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+msgstr ""
+"El Python de SteamOS no tiene PyGObject (gi), que %s necesita: no se iniciará"
+
+#: packs/bugfixes/tray-host/install.sh
+msgid "Tray icons in the VR session get an answer now"
+msgstr "Los íconos de bandeja en la sesión de RV ahora reciben respuesta"
+
+#: packs/bugfixes/tray-host/needed.sh
+msgid ""
+"this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
+msgstr ""
+"la sesión de RV de este SteamOS no da a las apps el tema Qt de KDE, así que los íconos de bandeja no pueden saturar su D-Bus"
+
+#: packs/bugfixes/tray-host/run.sh packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
+msgid "%s restarted"
+msgstr "%s reiniciado"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "another program answers tray icons in the VR session (%s)"
+msgstr ""
+"otro programa responde a los íconos de bandeja en la sesión de RV (%s)"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "installed; starts with the VR session"
+msgstr "instalado; se inicia con la sesión de RV"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "running, but not answering tray icons yet (%s)"
+msgstr "en ejecución, pero todavía no responde a los íconos de bandeja (%s)"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "running: tray icons in the VR session get an answer"
+msgstr ""
+"en ejecución: los íconos de bandeja en la sesión de RV reciben respuesta"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "service failed (%s)"
+msgstr "el servicio falló (%s)"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "service not running (▶ Restart starts it)"
+msgstr "el servicio no está en ejecución (▶ Reiniciar lo inicia)"
+
+#: packs/bugfixes/tray-host/status.sh
+msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
+msgstr ""
+"no se iniciará con la sesión de RV: no está habilitado (↻ Reinstalar lo habilita)"
+
 #: packs/core/adb-scrcpy/README.md
 msgid "1 hour"
 msgstr "1 hora"
@@ -3908,6 +4021,14 @@ msgstr "Botones"
 msgid "Clipboard with the phone"
 msgstr "Portapapeles con el teléfono"
 
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Close the settings"
+msgstr "Cerrar la configuración"
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Delete the last digit"
+msgstr "Borrar el último dígito"
+
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
 msgstr "Desconectarse solo después de"
@@ -3915,6 +4036,10 @@ msgstr "Desconectarse solo después de"
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Drag to change the order"
 msgstr "Arrastra para cambiar el orden"
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Enter: send the PIN"
+msgstr "Intro: enviar el PIN"
 
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Fast"
@@ -3991,6 +4116,10 @@ msgstr "Reinicia la transmisión para aplicar"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Right"
 msgstr "Derecha"
+
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Settings: the stream, the buttons and where they go"
+msgstr "Configuración: la transmisión, los botones y dónde van"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4087,7 +4216,7 @@ msgid ""
 msgstr ""
 "Teclado flotante con flechas, Home/End, teclas F, Ctrl/Alt/Super y un botón de dictado; nunca roba el foco"
 
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "Open"
 msgstr "Abrir"
 
@@ -4176,6 +4305,10 @@ msgstr ""
 "Dictado: toca para empezar (rojo), toca otra vez para detener; amarillo = transcribiendo, luego lo escribe"
 
 #: packs/core/arrowpad/arrowpad.py
+msgid "Down arrow"
+msgstr "Flecha abajo"
+
+#: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
 msgid "End"
 msgstr "Fin"
@@ -4233,6 +4366,10 @@ msgstr "Más grande"
 msgctxt "key legend"
 msgid "Launcher"
 msgstr "Menú"
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Left arrow"
+msgstr "Flecha izquierda"
 
 #: packs/core/arrowpad/arrowpad.py
 msgid "Light"
@@ -4313,6 +4450,10 @@ msgstr "Restablecer posición"
 msgctxt "mouse button"
 msgid "Right"
 msgstr "Derecho"
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Right arrow"
+msgstr "Flecha derecha"
 
 #: packs/core/arrowpad/arrowpad.py
 msgid "Right click: your next click becomes a right click"
@@ -4415,6 +4556,10 @@ msgid ""
 "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
 msgstr ""
 "Soltar teclas: ¿el escritorio actúa como si Shift, Ctrl, Alt o Super estuvieran presionadas? Toca esto"
+
+#: packs/core/arrowpad/arrowpad.py
+msgid "Up arrow"
+msgstr "Flecha arriba"
 
 #: packs/core/arrowpad/arrowpad.py
 msgid ""
@@ -4772,10 +4917,6 @@ msgstr ""
 "Quitar su regla de udev necesita tu contraseña de sudo (administrador)."
 
 #: packs/core/curvature/README.md
-msgid "Curved world windows"
-msgstr "Ventanas curvas en el mundo"
-
-#: packs/core/curvature/README.md
 msgid ""
 "On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
 msgstr ""
@@ -4796,6 +4937,28 @@ msgstr ""
 #: packs/core/curvature/README.md
 msgid "idea from"
 msgstr "idea de"
+
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md
+msgid "Turn off"
+msgstr "Desactivar"
+
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh
+msgid "Turn on"
+msgstr "Activar"
+
+#: packs/core/curvature/run.sh packs/core/curvature/README.md
+msgid "Curved world windows"
+msgstr "Ventanas curvas en el mundo"
+
+#: packs/core/curvature/run.sh
+msgid ""
+"Turned off: windows you float into the world start flat, as in SteamVR. Windows curved already stay as they are."
+msgstr ""
+"Desactivado: las ventanas que haces flotar en el mundo empiezan planas, como en SteamVR. Las ventanas que ya están curvas se quedan como están."
+
+#: packs/core/curvature/run.sh
+msgid "Turned on: windows you float into the world start curved."
+msgstr "Activado: las ventanas que haces flotar en el mundo empiezan curvas."
 
 #: packs/core/curvature/status.sh
 msgid "world windows start curved"
@@ -5533,9 +5696,18 @@ msgid ""
 msgstr ""
 "En SteamVR, hacer flotar una ventana y luego colocarla toma dos pasos: presionar Flotar en el mundo y luego agarrar la barra debajo de la ventana. Esto lo hace en uno solo."
 
-#: packs/core/float-grab/README.md
+#: packs/core/float-grab/run.sh packs/core/float-grab/README.md
 msgid "Pick up when floating"
 msgstr "Tomar al hacer flotar"
+
+#: packs/core/float-grab/run.sh
+msgid "Turned off: Float in World only floats the window, as in SteamVR."
+msgstr ""
+"Desactivado: Flotar en el mundo solo hace flotar la ventana, como en SteamVR."
+
+#: packs/core/float-grab/run.sh
+msgid "Turned on: Float in World picks the window up for placing."
+msgstr "Activado: Flotar en el mundo toma la ventana para que la coloques."
 
 #: packs/core/float-grab/status.sh
 msgid "Float in World picks the window up"
@@ -5554,14 +5726,26 @@ msgstr ""
 "Después de hacer flotar en el mundo la ventana que muestra el menú principal, el menú principal muestra la ventana que mostraba antes (tras 2.5 s), en vez de un espacio vacío; y cuando la ventana mostrada se cierra, vuelve a la anterior en vez de a Steam."
 
 #: packs/core/float-return/README.md
-msgid "Back to the previous window"
-msgstr "Volver a la ventana anterior"
-
-#: packs/core/float-return/README.md
 msgid ""
 "SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
 msgstr ""
 "SteamVR deja el menú principal vacío donde estaba la ventana que hiciste flotar, y vuelve a Steam cuando la ventana mostrada se cierra. Esto vuelve a la anterior por ti, como lo hace un clic en el botón de esa ventana en el menú principal."
+
+#: packs/core/float-return/run.sh packs/core/float-return/README.md
+msgid "Back to the previous window"
+msgstr "Volver a la ventana anterior"
+
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned off: the dashboard stays as SteamVR leaves it after you float a window out or close one."
+msgstr ""
+"Desactivado: el menú principal se queda como SteamVR lo deja después de que haces flotar una ventana fuera de él o cierras una."
+
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned on: after you float a window out, the dashboard goes back to the one before."
+msgstr ""
+"Activado: después de hacer flotar una ventana fuera del menú principal, este vuelve a la anterior."
 
 #: packs/core/float-return/status.sh
 msgid "back to the previous window after floating one"
@@ -5610,11 +5794,11 @@ msgstr ""
 "Recorte de pantalla (tesseract) y todo lo que instalaste tú están en él.\n"
 "Para quitarlo junto con todo lo que contiene, usa el desinstalador propio de Homebrew:"
 
-#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Accessibility"
 msgstr "Accesibilidad"
 
-#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/integrations/moonlight-xr/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md packs/bugfixes/pack.md
 msgid "Convenience"
 msgstr "Comodidad"
 
@@ -5623,7 +5807,7 @@ msgstr "Comodidad"
 msgid "Core"
 msgstr "Núcleo"
 
-#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Developer"
 msgstr "Desarrollo"
 
@@ -5635,19 +5819,19 @@ msgstr ""
 "Las correcciones y configuraciones de apps propias de Frame Tweaks para el Steam Frame, y los ayudantes que muchas de ellas necesitan: herramientas de otros proyectos, instaladas con los ajustes que las usan y con el crédito a sus creadores. Homebrew instala los programas que usan Dictado, Recorte de pantalla y Espejo de Android (whisper.cpp, tesseract, scrcpy); ydotool escribe para Arrow Pad, Dictado y Franjas de desplazamiento; Piper habla para Narrar. Cada uno está probado en un Frame e instalado en tu carpeta personal, así que sobrevive a las actualizaciones de SteamOS y se quita sin dejar rastro (Límite de carga de la batería también agrega una regla de udev en /etc, que las actualizaciones de SteamOS conservan)."
 
 # needs review
-#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Hardware"
 msgstr "Hardware"
 
-#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Privacy & security"
 msgstr "Privacidad y seguridad"
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md
 msgid "System"
 msgstr "Sistema"
 
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md packs/bugfixes/pack.md
 msgid "VR environment"
 msgstr "Entorno de RV"
 
@@ -5670,22 +5854,10 @@ msgstr ""
 "Franjas grandes junto a cada ventana. Presiona una y arrastra alejándote de ese punto para desplazarte (más lejos = más rápido; suelta para detener); toca cerca de un extremo para pasar de página."
 
 #: packs/core/scroll-strips/README.md
-msgid "Blue"
-msgstr "Azul"
-
-#: packs/core/scroll-strips/README.md
 msgid ""
 "Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
 msgstr ""
 "Los cambios se ven en RV en pocos segundos. También en RV: el engranaje donde se juntan las franjas."
-
-#: packs/core/scroll-strips/README.md
-msgid "Cyan"
-msgstr "Cian"
-
-#: packs/core/scroll-strips/README.md
-msgid "Green"
-msgstr "Verde"
 
 #: packs/core/scroll-strips/README.md
 msgid "Haptics (a tick on the controller as you scroll)"
@@ -5702,36 +5874,12 @@ msgstr ""
 "En RV apuntas con un láser, y las barras de desplazamiento de las apps de escritorio están hechas para un mouse: delgadas y difíciles de atinar."
 
 #: packs/core/scroll-strips/README.md
-msgid "Magenta"
-msgstr "Magenta"
-
-#: packs/core/scroll-strips/README.md
-msgid "Orange"
-msgstr "Naranja"
-
-#: packs/core/scroll-strips/README.md
-msgid "Pink"
-msgstr "Rosa"
-
-#: packs/core/scroll-strips/README.md
-msgid "Red"
-msgstr "Rojo"
-
-#: packs/core/scroll-strips/README.md
-msgid "Sky"
-msgstr "Celeste"
-
-#: packs/core/scroll-strips/README.md
 msgid "Vertical strip (scrolls up and down)"
 msgstr "Franja vertical (desplaza hacia arriba y abajo)"
 
-#: packs/core/scroll-strips/README.md
-msgid "Violet"
-msgstr "Violeta"
-
-#: packs/core/scroll-strips/README.md
-msgid "Yellow"
-msgstr "Amarillo"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Blue"
+msgstr "Azul"
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Bottom"
@@ -5741,6 +5889,10 @@ msgstr "Abajo"
 msgid "Colour"
 msgstr "Color"
 
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Cyan"
+msgstr "Cian"
+
 #: packs/core/scroll-strips/patch.js
 msgid "For every window. Changes show at once."
 msgstr "Para todas las ventanas. Los cambios se ven de inmediato."
@@ -5749,9 +5901,17 @@ msgstr "Para todas las ventanas. Los cambios se ven de inmediato."
 msgid "Gap from the window (cm)"
 msgstr "Separación de la ventana (cm)"
 
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Green"
+msgstr "Verde"
+
 #: packs/core/scroll-strips/patch.js
 msgid "Horizontal strip"
 msgstr "Franja horizontal"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Magenta"
+msgstr "Magenta"
 
 #: packs/core/scroll-strips/patch.js
 msgid ""
@@ -5760,8 +5920,20 @@ msgstr ""
 "No se guardó: reinstala Parches del menú principal de RV (vr-dashboard) para conservar la configuración."
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Orange"
+msgstr "Naranja"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Tinte del passthrough"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Pink"
+msgstr "Rosa"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Red"
+msgstr "Rojo"
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Scroll strips"
@@ -5770,6 +5942,14 @@ msgstr "Franjas de desplazamiento"
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Set back behind the window (cm)"
 msgstr "Distancia detrás de la ventana (cm)"
+
+#: packs/core/scroll-strips/patch.js
+msgid "Settings: where the strips go and how they look"
+msgstr "Configuración: dónde van las franjas y cómo se ven"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Sky"
+msgstr "Celeste"
 
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Thickness (cm)"
@@ -5782,6 +5962,14 @@ msgstr "Arriba"
 #: packs/core/scroll-strips/patch.js
 msgid "Vertical strip"
 msgstr "Franja vertical"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Violet"
+msgstr "Violeta"
+
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Yellow"
+msgstr "Amarillo"
 
 #: packs/core/scroll-strips/status.sh
 msgid "scroll strips beside floating windows"
@@ -5852,16 +6040,24 @@ msgstr ""
 "Copiar texto y Narrar leen el texto de un recorte con Tesseract, que Recorte de pantalla instala con Homebrew. Ahora falta (¿se quitó de Homebrew?)."
 
 #: packs/core/snip/frame-snip
-msgid "Couldn't copy (is desktop mode running?)"
-msgstr "No se pudo copiar (¿está en ejecución el modo escritorio?)"
-
-#: packs/core/snip/frame-snip
 msgid "Couldn't copy the snip"
 msgstr "No se pudo copiar el recorte"
 
 #: packs/core/snip/frame-snip
 msgid "Couldn't copy the text"
 msgstr "No se pudo copiar el texto"
+
+#: packs/core/snip/frame-snip
+msgid "Couldn't copy to the clipboard."
+msgstr "No se pudo copiar al portapapeles."
+
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the clipboard."
+msgstr "No se pudo leer el portapapeles."
+
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the picture on the clipboard."
+msgstr "No se pudo leer la imagen del portapapeles."
 
 #: packs/core/snip/frame-snip
 msgid "Couldn't save the snip"
@@ -5938,8 +6134,8 @@ msgid "Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"
 msgstr "¿Abrir Frame Tweaks para reinstalar Recorte de pantalla (su botón ↻)?"
 
 #: packs/core/snip/frame-snip
-msgid "Paste: read the clipboard's text instead"
-msgstr "Pegar: leer en su lugar el texto del portapapeles"
+msgid "Paste: read the clipboard's text or picture instead"
+msgstr "Pegar: leer en su lugar el texto o la imagen del portapapeles"
 
 #: packs/core/snip/frame-snip
 msgid "Pause"
@@ -5976,8 +6172,16 @@ msgid "Put the text being read on the clipboard"
 msgstr "Poner el texto que se está leyendo en el portapapeles"
 
 #: packs/core/snip/frame-snip
+msgid "Read faster"
+msgstr "Leer más rápido"
+
+#: packs/core/snip/frame-snip
 msgid "Read it again"
 msgstr "Volver a leer"
+
+#: packs/core/snip/frame-snip
+msgid "Read slower"
+msgstr "Leer más lento"
 
 #: packs/core/snip/frame-snip
 msgid "Reading aloud: part {part} of {count}"
@@ -5986,6 +6190,10 @@ msgstr "Leyendo en voz alta: parte {part} de {count}"
 #: packs/core/snip/frame-snip
 msgid "Reading aloud…"
 msgstr "Leyendo en voz alta…"
+
+#: packs/core/snip/frame-snip
+msgid "Reading the clipboard…"
+msgstr "Leyendo el portapapeles…"
 
 #: packs/core/snip/frame-snip
 msgid "Reinstall the Speech engine in Frame Tweaks first."
@@ -6075,8 +6283,12 @@ msgid "The Speech engine failed to read part {part}."
 msgstr "El motor de voz no pudo leer la parte {part}."
 
 #: packs/core/snip/frame-snip
-msgid "The clipboard has no text."
-msgstr "El portapapeles no tiene texto."
+msgid "The clipboard has neither text nor a picture."
+msgstr "El portapapeles no tiene texto ni imagen."
+
+#: packs/core/snip/frame-snip
+msgid "The clipboard is empty."
+msgstr "El portapapeles está vacío."
 
 #: packs/core/snip/frame-snip
 msgid ""
@@ -6093,6 +6305,10 @@ msgstr "Bajar el volumen"
 #: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr "Subir el volumen"
+
+#: packs/core/snip/frame-snip
+msgid "What's on the clipboard is too big to paste."
+msgstr "Lo que hay en el portapapeles es demasiado grande para pegarlo."
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6127,10 +6343,6 @@ msgstr "imagen vacía"
 #: packs/core/snip/frame-snip
 msgid "no focused window"
 msgstr "no hay ninguna ventana con el foco"
-
-#: packs/core/snip/frame-snip
-msgid "the desktop isn't available"
-msgstr "el escritorio no está disponible"
 
 #: packs/core/snip/frame-snip.desktop
 msgid ""
@@ -6461,10 +6673,6 @@ msgstr "recover-session [--keep-steamvr]"
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
 msgstr "%s falló; consulta %s"
-
-#: packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
-msgid "%s restarted"
-msgstr "%s reiniciado"
 
 #: packs/core/tools/restart-plasmashell
 msgid "No Plasma session (ksmserver) found — are you in desktop mode?"
@@ -7337,7 +7545,7 @@ msgid ""
 msgstr ""
 "En el escritorio del Frame (KDE Plasma en Wayland), los programas comunes no pueden enviar pulsaciones de teclas a otras apps. ydotool sí puede: agrega un teclado virtual al kernel (`/dev/uinput`), que todas las apps tratan como uno real."
 
-#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md
+#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md packs/bugfixes/tray-host/README.md
 msgid "Restart"
 msgstr "Reiniciar"
 
@@ -7350,10 +7558,6 @@ msgstr ""
 #: packs/core/ydotool/README.md
 msgid "ydotool (helper)"
 msgstr "ydotool (auxiliar)"
-
-#: packs/core/ydotool/install.sh
-msgid "%s didn't start; see: %s"
-msgstr "%s no se inició; consulta: %s"
 
 #: packs/core/ydotool/install.sh
 msgid ""
@@ -7420,7 +7624,7 @@ msgid ""
 msgstr ""
 "Claude para escritorio, la app oficial de Anthropic para Linux (arm64), instalada en tu carpeta personal y actualizada con un solo comando."
 
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr "de"
 
@@ -7515,7 +7719,7 @@ msgid "%s starts with desktop mode."
 msgstr "%s se inicia con el modo escritorio."
 
 # needs review
-#: packs/integrations/clipboard/install.sh
+#: packs/integrations/clipboard/install.sh packs/integrations/moonlight-xr/install.sh
 msgid "Downloading %s %s"
 msgstr "Descargando %s %s"
 
@@ -7570,6 +7774,12 @@ msgid "older build: replaces copied images with text (Reinstall fixes it)"
 msgstr ""
 "compilación anterior: reemplaza las imágenes copiadas con texto (Reinstalar lo corrige)"
 
+#: packs/integrations/clipboard/status.sh
+msgid ""
+"this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
+msgstr ""
+"este SteamOS necesita clipboard-sync %s, está instalado %s (Reinstalar lo corrige)"
+
 #: packs/integrations/clipboard/uninstall.sh
 msgid "(frees about 3.4 GB)"
 msgstr "(libera unos 3.4 GB)"
@@ -7579,6 +7789,62 @@ msgid ""
 "Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
 msgstr ""
 "El Rust de Homebrew (instalado por versiones anteriores para esta compilación) sigue ahí; si no lo usas:"
+
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with its own installer and adds an app-menu entry and an Open button."
+msgstr ""
+"Un escritorio remoto como KRdp pide permiso para compartir la pantalla cada vez, y en una PC con NVIDIA codifica en la CPU (VA-API ahí no puede codificar H.264). Sunshine codifica en la tarjeta gráfica, así que la transmisión tiene menos latencia, más cuadros por segundo y entrada de control, y su app Desktop cubre también juegos fuera de Steam. Frame Tweaks instala la versión que probó con su propio instalador y agrega una entrada en el menú de apps y un botón Abrir."
+
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
+msgstr ""
+"Transmite el escritorio y los juegos de tu PC a una pantalla grande en RV, decodificados por hardware"
+
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
+msgstr ""
+"Moonlight XR for Frame de simplysanatori: un cliente nativo de transmisión de juegos para el Frame. El escritorio de tu PC o un juego, transmitido con Sunshine (o Apollo) en la PC, aparece en una pantalla redimensionable en una habitación virtual, hasta 2560×1440 en H.264 o HEVC decodificado por el hardware del Frame, y lo controlas con los controles del Frame. Vincúlalo una vez con un PIN; se inicia desde tu biblioteca de Steam."
+
+#: packs/integrations/moonlight-xr/install.sh
+msgid "Moonlight XR's installer stopped (its log: %s)"
+msgstr "El instalador de Moonlight XR se detuvo (su registro: %s)"
+
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Start it from your Steam library, the app menu, or Open on its row; pair with your PC on first start."
+msgstr ""
+"Inícialo desde tu biblioteca de Steam, el menú de apps o Abrir en su fila; vincúlalo con tu PC la primera vez que lo inicies."
+
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Steam isn't running: the program installs, but its Steam library entry is added only when you install it again with Steam running"
+msgstr ""
+"Steam no está en ejecución: el programa se instala, pero su entrada en la biblioteca de Steam solo se agrega cuando lo vuelvas a instalar con Steam en ejecución"
+
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop packs/integrations/moonlight-xr/README.md
+msgid "Moonlight XR for Frame"
+msgstr "Moonlight XR for Frame"
+
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop
+msgid "Stream your PC to a screen in VR"
+msgstr "Transmite tu PC a una pantalla en RV"
+
+#: packs/integrations/moonlight-xr/status.sh
+msgid "Moonlight XR for Frame %s"
+msgstr "Moonlight XR for Frame %s"
+
+#: packs/integrations/moonlight-xr/status.sh
+msgid "its app-menu entry is missing (Reinstall adds it)"
+msgstr "falta su entrada en el menú de apps (Reinstalar la agrega)"
+
+#: packs/integrations/moonlight-xr/uninstall.sh
+msgid ""
+"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+msgstr ""
+"Se conservaron tu configuración y la vinculación en %s. Quita su entrada de la biblioteca de Steam en Steam (Administrar, Eliminar juego que no es de Steam) y desvincula el Frame en Sunshine."
 
 #: packs/integrations/nordvpn/README.md
 msgid "NordVPN (WireGuard)"
@@ -8162,10 +8428,6 @@ msgstr ""
 msgid "KnockThru"
 msgstr "KnockThru"
 
-#: packs/third-party/knockthru/README.md
-msgid "Start"
-msgstr "Iniciar"
-
 # needs review
 #: packs/third-party/knockthru/README.md
 msgid ""
@@ -8356,6 +8618,10 @@ msgstr ""
 msgid "Recline"
 msgstr "Reclinar"
 
+#: packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+msgid "Start"
+msgstr "Iniciar"
+
 # needs review
 #: packs/third-party/recline/README.md
 msgid ""
@@ -8369,6 +8635,26 @@ msgid ""
 "Use VR lying down or reclined; recentering makes your view level and forward"
 msgstr ""
 "Usa la RV acostado o reclinado; recentrar deja tu vista nivelada y al frente"
+
+#: packs/third-party/recline/run.sh
+msgid "Already running: its panel is in the SteamVR dashboard."
+msgstr "Ya está en ejecución: su panel está en el menú principal de SteamVR."
+
+#: packs/third-party/recline/run.sh
+msgid "Could not start Recline's panel: %s says why."
+msgstr "No se pudo iniciar el panel de Reclinar: %s dice por qué."
+
+#: packs/third-party/recline/run.sh
+msgid "Not installed: tick Recline and Apply changes first."
+msgstr "No está instalado: marca Reclinar y presiona Aplicar cambios primero."
+
+#: packs/third-party/recline/run.sh
+msgid "Started: its panel is in the SteamVR dashboard."
+msgstr "Iniciado: su panel está en el menú principal de SteamVR."
+
+#: packs/third-party/recline/run.sh
+msgid "SteamVR is not running: Recline starts with it."
+msgstr "SteamVR no está en ejecución: Reclinar se inicia con él."
 
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
 msgid "Frame Tweaks"
@@ -9292,3 +9578,32 @@ msgstr "Instalador de ajustes"
 #~ "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
 #~ msgstr ""
 #~ "La barra de tareas se sigue cerrando: se volvió a iniciar {n} veces en {minutes} minutos. Presiona Reiniciar barra de tareas en la fila de Recuperación del escritorio en Frame Tweaks cuando la necesites."
+
+#~ msgid "⟳ Check for updates"
+#~ msgstr "⟳ Buscar actualizaciones"
+
+#~ # needs review
+#~ msgid ""
+#~ "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+#~ msgstr ""
+#~ "Cada ajuste de aquí viene de un <b>paquete</b>: una carpeta de carpetas de ajustes, cada una descrita por su README.md. Los de Frame Tweaks están en tres paquetes oficiales, Núcleo, Integraciones y De terceros, todos en uso a menos que desactives alguno. Para agregar más, agrega uno desde su enlace abajo, o pon la carpeta de un paquete en <code>{folder}</code>; luego confía en él. <b>Los ajustes de un paquete se ejecutan como tú</b>, con acceso a tus archivos y contraseñas: confía solo en paquetes de personas en las que confías, y lee primero lo que hacen. Si los archivos de un paquete cambian, espera hasta que vuelvas a confiar en él. Cómo escribir uno: docs/mods.md."
+
+#~ msgid "Off: only when you press ⟳ Check for updates."
+#~ msgstr "Desactivado: solo cuando presionas ⟳ Buscar actualizaciones."
+
+#~ # needs review
+#~ msgid "Saved. ⟳ Check for updates finds test releases too."
+#~ msgstr ""
+#~ "Guardado. ⟳ Buscar actualizaciones también encuentra versiones de prueba."
+
+#~ msgid "Couldn't copy (is desktop mode running?)"
+#~ msgstr "No se pudo copiar (¿está en ejecución el modo escritorio?)"
+
+#~ msgid "Paste: read the clipboard's text instead"
+#~ msgstr "Pegar: leer en su lugar el texto del portapapeles"
+
+#~ msgid "The clipboard has no text."
+#~ msgstr "El portapapeles no tiene texto."
+
+#~ msgid "the desktop isn't available"
+#~ msgstr "el escritorio no está disponible"

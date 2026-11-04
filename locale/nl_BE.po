@@ -474,7 +474,7 @@ msgstr ""
 "Kiezen welke apps met de gedeelde KDE-portefeuille openen; hem vergrendelen of ontgrendelen"
 
 # needs review
-#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js
+#: gui/frame-tweaks-gui.py packs/core/snip/frame-snip packs/core/adb-scrcpy/phone packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
 msgid "Close"
 msgstr "Sluiten"
 
@@ -875,6 +875,11 @@ msgstr "{version} beschikbaar (getest door Frame Tweaks)"
 
 # needs review
 #: gui/frame-tweaks-gui.py
+msgid "↻ Check for updates"
+msgstr "↻ Naar updates zoeken"
+
+# needs review
+#: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
 msgstr "↻ Herstarten"
 
@@ -896,11 +901,6 @@ msgstr "✔ Frame Tweaks is bijgewerkt ({version})."
 #: gui/frame-tweaks-gui.py
 msgid "✔ Works on my Frame"
 msgstr "✔ Werkt op mijn Frame"
-
-# needs review
-#: gui/frame-tweaks-gui.py
-msgid "⟳ Check for updates"
-msgstr "⟳ Naar updates zoeken"
 
 # needs review
 #: gui/frame-tweaks-gui.py
@@ -1123,9 +1123,9 @@ msgstr ""
 # needs review
 #: gui/packs_page.py
 msgid ""
-"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+"Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
-"Elke aanpassing hier komt uit een <b>pakket</b>: een map met mappen van aanpassingen, elk beschreven in een eigen README.md. De eigen aanpassingen van Frame Tweaks zitten in drie officiële pakketten, Basis, Integraties en Van derden, allemaal in gebruik tenzij je er een uitschakelt. Wil je er meer, voeg er dan een toe via de link hieronder, of zet de map van een pakket in <code>{folder}</code>; vertrouw het daarna. <b>De aanpassingen van een pakket draaien met jouw rechten</b>, met je bestanden en wachtwoorden binnen bereik: vertrouw alleen pakketten van mensen die je vertrouwt, en lees eerst wat ze doen. Veranderen de bestanden van een pakket, dan wacht het tot je het opnieuw vertrouwt. Zelf een pakket maken: docs/mods.md."
+"Elke aanpassing hier komt uit een <b>pakket</b>: een map met mappen van aanpassingen, elk beschreven in een eigen README.md. De eigen aanpassingen van Frame Tweaks zitten in de officiële pakketten ({official}), allemaal in gebruik tenzij je er een uitschakelt. Wil je er meer, voeg er dan een toe via de link hieronder, of zet de map van een pakket in <code>{folder}</code>; vertrouw het daarna. <b>De aanpassingen van een pakket draaien met jouw rechten</b>, met je bestanden en wachtwoorden binnen bereik: vertrouw alleen pakketten van mensen die je vertrouwt, en lees eerst wat ze doen. Veranderen de bestanden van een pakket, dan wacht het tot je het opnieuw vertrouwt. Zelf een pakket maken: docs/mods.md."
 
 # needs review
 #: gui/packs_page.py
@@ -1432,8 +1432,8 @@ msgstr "Geen instellingen achtergelaten door verwijderde aanpassingen."
 
 # needs review
 #: gui/prefs_page.py
-msgid "Off: only when you press ⟳ Check for updates."
-msgstr "Uit: alleen als je op ⟳ Naar updates zoeken drukt."
+msgid "Off: only when you press ↻ Check for updates."
+msgstr "Uit: alleen als je op ↻ Naar updates zoeken drukt."
 
 #: gui/prefs_page.py
 msgid "Open the folder"
@@ -1481,8 +1481,8 @@ msgstr "Opgeslagen."
 
 # needs review
 #: gui/prefs_page.py
-msgid "Saved. ⟳ Check for updates finds test releases too."
-msgstr "Opgeslagen. ⟳ Naar updates zoeken vindt nu ook testversies."
+msgid "Saved. ↻ Check for updates finds test releases too."
+msgstr "Opgeslagen. ↻ Naar updates zoeken vindt nu ook testversies."
 
 # needs review
 #: gui/prefs_page.py
@@ -2243,7 +2243,7 @@ msgid "not available any more"
 msgstr "niet meer beschikbaar"
 
 # needs review
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr "niet geïnstalleerd"
 
@@ -2310,6 +2310,13 @@ msgstr "%s is nodig voor %s: verwijder %s ook, of behoud %s"
 #: install.sh
 msgid "%s is now called %s"
 msgstr "%s heet nu %s"
+
+# needs review
+#: install.sh
+msgid ""
+"%s is on SteamOS's Python %s but misses packages it couldn't download: ./install.sh repair installs them"
+msgstr ""
+"%s draait op de Python %s van SteamOS, maar mist pakketten die het niet kon downloaden: ./install.sh repair installeert ze"
 
 # needs review
 #: install.sh
@@ -2971,6 +2978,11 @@ msgstr "Nu actief."
 
 # needs review
 #: lib/common.sh
+msgid "Could not save the setting in %s."
+msgstr "Kon de instelling niet opslaan in %s."
+
+# needs review
+#: lib/common.sh
 msgid "Couldn't install %s (see above)."
 msgstr "Kon %s niet installeren (zie hierboven)."
 
@@ -3024,8 +3036,20 @@ msgstr "Homebrew nu installeren?"
 
 # needs review
 #: lib/common.sh
+msgid ""
+"Installing the packages of %s again, which an earlier move to Python %s could not download"
+msgstr ""
+"De pakketten van %s opnieuw installeren, die bij een eerdere overstap naar Python %s niet gedownload konden worden"
+
+# needs review
+#: lib/common.sh
 msgid "Not active yet: %s"
 msgstr "Nog niet actief: %s"
+
+# needs review
+#: lib/common.sh
+msgid "Not installed: tick %s and Apply changes first."
+msgstr "Niet geïnstalleerd: vink eerst %s aan en kies Wijzigingen toepassen."
 
 # needs review
 #: lib/common.sh
@@ -3077,6 +3101,12 @@ msgstr "Je gebruiker heeft nog geen wachtwoord, dus sudo kan niet werken."
 #: lib/common.sh
 msgid "installed (active while SteamVR runs)"
 msgstr "geïnstalleerd (actief zolang SteamVR draait)"
+
+# needs review
+#: lib/common.sh
+msgid "installed, turned off (Turn on on its row turns it back on)"
+msgstr ""
+"geïnstalleerd, uitgeschakeld (Inschakelen in de rij ervan zet het weer aan)"
 
 # needs review
 #: lib/common.sh
@@ -3746,6 +3776,115 @@ msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} is geen branch- of tagnaam"
 
 # needs review
+#: packs/bugfixes/pack.md
+msgid "Bugfixes"
+msgstr "Bugfixes"
+
+# needs review
+#: packs/bugfixes/pack.md
+msgid ""
+"Frame Tweaks' fixes for problems in SteamOS, SteamVR and Steam themselves, until Valve fixes them: each one works around a bug found on a Frame, and checks whether your Frame still has it. A fix your SteamOS no longer needs isn't offered."
+msgstr ""
+"De oplossingen van Frame Tweaks voor problemen in SteamOS, SteamVR en Steam zelf, tot Valve ze oplost: elk ervan omzeilt een bug die op een Frame gevonden is, en controleert of je Frame die nog heeft. Een oplossing die je SteamOS niet meer nodig heeft, wordt niet aangeboden."
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
+msgstr ""
+"Een kleine achtergronddienst die apps antwoordt die in de VR-sessie om een systeemvakpictogram vragen, zodat ze één keer vragen in plaats van telkens opnieuw. De pictogrammen worden nergens getoond: de VR-sessie heeft geen systeemvak om ze in te tonen."
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"Keeps apps with a tray icon, such as VLC, from taking the VR session down"
+msgstr ""
+"Voorkomt dat apps met een systeemvakpictogram, zoals VLC, de VR-sessie laten crashen"
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid ""
+"On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
+msgstr ""
+"In de bèta van SteamOS 0.5.7 zoeken Qt-apps in de VR-sessie (bv. VLC) het systeemvak van het bureaublad, vinden er geen en blijven het proberen, en openen daarbij telkens een nieuwe verbinding met de D-Bus van de sessie. Binnen enkele seconden zit de bus vol en valt hij uit, en Steam en de VR-sessie vallen mee uit."
+
+# needs review
+#: packs/bugfixes/tray-host/README.md
+msgid "Tray icon crash fix"
+msgstr "Herstel van crashes door systeemvakpictogrammen"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh packs/core/ydotool/install.sh
+msgid "%s didn't start; see: %s"
+msgstr "%s is niet gestart; zie: %s"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh
+msgid "It starts with the VR session"
+msgstr "Het start met de VR-sessie"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh
+msgid ""
+"SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+msgstr ""
+"De Python van SteamOS heeft geen PyGObject (gi), dat %s nodig heeft: het start niet"
+
+# needs review
+#: packs/bugfixes/tray-host/install.sh
+msgid "Tray icons in the VR session get an answer now"
+msgstr "Systeemvakpictogrammen in de VR-sessie krijgen nu antwoord"
+
+# needs review
+#: packs/bugfixes/tray-host/needed.sh
+msgid ""
+"this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
+msgstr ""
+"de VR-sessie van deze SteamOS geeft apps het Qt-thema van KDE niet, dus systeemvakpictogrammen kunnen de D-Bus ervan niet overspoelen"
+
+# needs review
+#: packs/bugfixes/tray-host/run.sh packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
+msgid "%s restarted"
+msgstr "%s herstart"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "another program answers tray icons in the VR session (%s)"
+msgstr ""
+"een ander programma antwoordt systeemvakpictogrammen in de VR-sessie (%s)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "installed; starts with the VR session"
+msgstr "geïnstalleerd; start met de VR-sessie"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "running, but not answering tray icons yet (%s)"
+msgstr "actief, maar antwoordt systeemvakpictogrammen nog niet (%s)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "running: tray icons in the VR session get an answer"
+msgstr "actief: systeemvakpictogrammen in de VR-sessie krijgen antwoord"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "service failed (%s)"
+msgstr "dienst mislukt (%s)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "service not running (▶ Restart starts it)"
+msgstr "dienst niet actief (▶ Herstarten start hem)"
+
+# needs review
+#: packs/bugfixes/tray-host/status.sh
+msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
+msgstr ""
+"start niet met de VR-sessie: niet ingeschakeld (↻ Opnieuw installeren schakelt hem in)"
+
+# needs review
 #: packs/core/adb-scrcpy/README.md
 msgid "1 hour"
 msgstr "1 uur"
@@ -4354,6 +4493,16 @@ msgid "Clipboard with the phone"
 msgstr "Klembord met de telefoon"
 
 # needs review
+#: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js
+msgid "Close the settings"
+msgstr "Instellingen sluiten"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Delete the last digit"
+msgstr "Laatste cijfer wissen"
+
+# needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
 msgid "Disconnect by itself after"
 msgstr "Verbinding vanzelf verbreken na"
@@ -4361,6 +4510,11 @@ msgstr "Verbinding vanzelf verbreken na"
 #: packs/core/adb-scrcpy/phone-touch.js
 msgid "Drag to change the order"
 msgstr "Sleep om de volgorde te wijzigen"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Enter: send the PIN"
+msgstr "Enter: pincode versturen"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4448,6 +4602,11 @@ msgstr "Stream herstarten om toe te passen"
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/scroll-strips/patch.js packs/core/adb-scrcpy/README.md packs/core/scroll-strips/README.md
 msgid "Right"
 msgstr "Rechts"
+
+# needs review
+#: packs/core/adb-scrcpy/phone-touch.js
+msgid "Settings: the stream, the buttons and where they go"
+msgstr "Instellingen: de stream, de knoppen en waar ze staan"
 
 # needs review
 #: packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
@@ -4555,7 +4714,7 @@ msgstr ""
 "Zwevend blok met pijltjes, Home/End, F-toetsen, Ctrl/Alt/Super en een dicteerknop; neemt nooit de focus over"
 
 # needs review
-#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/arrowpad/README.md packs/core/adb-scrcpy/README.md packs/core/firefox/README.md packs/integrations/signal/README.md packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "Open"
 msgstr "Openen"
 
@@ -4659,6 +4818,11 @@ msgstr ""
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
+msgid "Down arrow"
+msgstr "Pijl omlaag"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
 msgctxt "key legend"
 msgid "End"
 msgstr "End"
@@ -4727,6 +4891,11 @@ msgstr "Groter"
 msgctxt "key legend"
 msgid "Launcher"
 msgstr "Starter"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
+msgid "Left arrow"
+msgstr "Pijl links"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -4824,6 +4993,11 @@ msgstr "Positie herstellen"
 msgctxt "mouse button"
 msgid "Right"
 msgstr "Rechts"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
+msgid "Right arrow"
+msgstr "Pijl rechts"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -4947,6 +5121,11 @@ msgid ""
 "Unstick keys: the desktop acts as if Shift, Ctrl, Alt or Super were held? Tap this"
 msgstr ""
 "Toetsen losmaken: doet het bureaublad alsof Shift, Ctrl, Alt of Super ingedrukt is? Tik hierop"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.py
+msgid "Up arrow"
+msgstr "Pijl omhoog"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.py
@@ -5326,11 +5505,6 @@ msgstr ""
 
 # needs review
 #: packs/core/curvature/README.md
-msgid "Curved world windows"
-msgstr "Gebogen zwevende vensters"
-
-# needs review
-#: packs/core/curvature/README.md
 msgid ""
 "On the Frame, windows you float out of the dashboard always start flat, and SteamVR has no setting to change that. This presses its Toggle Curvature button for you on each one."
 msgstr ""
@@ -5354,6 +5528,34 @@ msgstr ""
 #: packs/core/curvature/README.md
 msgid "idea from"
 msgstr "idee van"
+
+# needs review
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md
+msgid "Turn off"
+msgstr "Uitschakelen"
+
+# needs review
+#: packs/core/curvature/run-label.sh packs/core/float-grab/run-label.sh packs/core/float-return/run-label.sh
+msgid "Turn on"
+msgstr "Inschakelen"
+
+# needs review
+#: packs/core/curvature/run.sh packs/core/curvature/README.md
+msgid "Curved world windows"
+msgstr "Gebogen zwevende vensters"
+
+# needs review
+#: packs/core/curvature/run.sh
+msgid ""
+"Turned off: windows you float into the world start flat, as in SteamVR. Windows curved already stay as they are."
+msgstr ""
+"Uitgeschakeld: vensters die je in de wereld laat zweven, beginnen plat, zoals in SteamVR. Vensters die al gebogen zijn, blijven zoals ze zijn."
+
+# needs review
+#: packs/core/curvature/run.sh
+msgid "Turned on: windows you float into the world start curved."
+msgstr ""
+"Ingeschakeld: vensters die je in de wereld laat zweven, beginnen gebogen."
 
 # needs review
 #: packs/core/curvature/status.sh
@@ -6140,9 +6342,21 @@ msgstr ""
 "In SteamVR kost een venster laten zweven en daarna plaatsen twee stappen: druk op In wereld zweven en pak dan de balk onder het venster vast. Dit maakt er één stap van."
 
 # needs review
-#: packs/core/float-grab/README.md
+#: packs/core/float-grab/run.sh packs/core/float-grab/README.md
 msgid "Pick up when floating"
 msgstr "Oppakken bij zweven"
+
+# needs review
+#: packs/core/float-grab/run.sh
+msgid "Turned off: Float in World only floats the window, as in SteamVR."
+msgstr ""
+"Uitgeschakeld: In wereld zweven laat het venster alleen zweven, zoals in SteamVR."
+
+# needs review
+#: packs/core/float-grab/run.sh
+msgid "Turned on: Float in World picks the window up for placing."
+msgstr ""
+"Ingeschakeld: In wereld zweven pakt het venster op om het te plaatsen."
 
 # needs review
 #: packs/core/float-grab/status.sh
@@ -6165,15 +6379,29 @@ msgstr ""
 
 # needs review
 #: packs/core/float-return/README.md
-msgid "Back to the previous window"
-msgstr "Terug naar het vorige venster"
-
-# needs review
-#: packs/core/float-return/README.md
 msgid ""
 "SteamVR leaves the dashboard empty where the floated window was, and falls back to Steam when the shown window closes. This switches back for you, the way a click on that window's dashboard button does."
 msgstr ""
 "SteamVR laat het dashboard leeg waar het zwevende venster was, en valt terug op Steam als het getoonde venster sluit. Dit schakelt voor jou terug, zoals een klik op de dashboardknop van dat venster."
+
+# needs review
+#: packs/core/float-return/run.sh packs/core/float-return/README.md
+msgid "Back to the previous window"
+msgstr "Terug naar het vorige venster"
+
+# needs review
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned off: the dashboard stays as SteamVR leaves it after you float a window out or close one."
+msgstr ""
+"Uitgeschakeld: het dashboard blijft zoals SteamVR het laat nadat je een venster laat zweven of er een sluit."
+
+# needs review
+#: packs/core/float-return/run.sh
+msgid ""
+"Turned on: after you float a window out, the dashboard goes back to the one before."
+msgstr ""
+"Ingeschakeld: nadat je een venster laat zweven, gaat het dashboard terug naar het vorige."
 
 # needs review
 #: packs/core/float-return/status.sh
@@ -6232,12 +6460,12 @@ msgstr ""
 "Om het te verwijderen met alles erin, gebruik je het eigen verwijderprogramma van Homebrew:"
 
 # needs review
-#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/dictation/README.md packs/core/arrowpad/README.md packs/core/snip/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Accessibility"
 msgstr "Toegankelijkheid"
 
 # needs review
-#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md
+#: packs/core/pack.md packs/core/adb-scrcpy/README.md packs/integrations/pack.md packs/integrations/clipboard/README.md packs/integrations/moonlight-xr/README.md packs/third-party/pack.md packs/third-party/full-keyboard/README.md packs/third-party/cursor/README.md packs/bugfixes/pack.md
 msgid "Convenience"
 msgstr "Gemak"
 
@@ -6247,7 +6475,7 @@ msgid "Core"
 msgstr "Basis"
 
 # needs review
-#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/integrations/pack.md packs/integrations/claude-desktop/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Developer"
 msgstr "Voor ontwikkelaars"
 
@@ -6259,22 +6487,22 @@ msgstr ""
 "De eigen oplossingen en app-configuraties van Frame Tweaks voor de Steam Frame, en de hulpprogramma's die veel ervan nodig hebben: tools van andere projecten, geïnstalleerd met de aanpassingen die ze gebruiken en met vermelding van hun makers. Homebrew installeert de programma's die Dicteren, Schermknipsel en Android-spiegel gebruiken (whisper.cpp, tesseract, scrcpy); ydotool typt voor Pijltjesblok, Dicteren en Scrolstroken; Piper spreekt voor Voorlezen. Elk ervan is getest op een Frame en wordt in je persoonlijke map geïnstalleerd, zodat het SteamOS-updates overleeft en netjes te verwijderen is (Laadlimiet voor de batterij voegt ook een udev-regel toe in /etc, die SteamOS-updates behouden)."
 
 # needs review
-#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Hardware"
 msgstr "Hardware"
 
 # needs review
-#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md
+#: packs/core/pack.md packs/core/wallet/README.md packs/core/firefox/README.md packs/integrations/pack.md packs/integrations/signal/README.md packs/integrations/nordvpn/README.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Privacy & security"
 msgstr "Privacy en beveiliging"
 
 # needs review
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md
 msgid "System"
 msgstr "Systeem"
 
 # needs review
-#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/core/pack.md packs/core/vr-dashboard/README.md packs/core/curvature/README.md packs/core/float-return/README.md packs/core/float-grab/README.md packs/core/scroll-strips/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/recline/README.md packs/third-party/knockthru/README.md packs/third-party/frame-passthrough-pip/README.md packs/bugfixes/pack.md
 msgid "VR environment"
 msgstr "VR-omgeving"
 
@@ -6301,25 +6529,10 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/README.md
-msgid "Blue"
-msgstr "Blauw"
-
-# needs review
-#: packs/core/scroll-strips/README.md
 msgid ""
 "Changes show in VR within a few seconds. Also in VR: the gear where the strips meet."
 msgstr ""
 "Wijzigingen zijn binnen enkele seconden te zien in VR. Ook in VR: het tandwiel waar de stroken samenkomen."
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Cyan"
-msgstr "Cyaan"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Green"
-msgstr "Groen"
 
 # needs review
 #: packs/core/scroll-strips/README.md
@@ -6340,43 +6553,13 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/README.md
-msgid "Magenta"
-msgstr "Magenta"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Orange"
-msgstr "Oranje"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Pink"
-msgstr "Roze"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Red"
-msgstr "Rood"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Sky"
-msgstr "Hemelsblauw"
-
-# needs review
-#: packs/core/scroll-strips/README.md
 msgid "Vertical strip (scrolls up and down)"
 msgstr "Verticale strook (scrolt omhoog en omlaag)"
 
 # needs review
-#: packs/core/scroll-strips/README.md
-msgid "Violet"
-msgstr "Violet"
-
-# needs review
-#: packs/core/scroll-strips/README.md
-msgid "Yellow"
-msgstr "Geel"
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Blue"
+msgstr "Blauw"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -6389,6 +6572,11 @@ msgid "Colour"
 msgstr "Kleur"
 
 # needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Cyan"
+msgstr "Cyaan"
+
+# needs review
 #: packs/core/scroll-strips/patch.js
 msgid "For every window. Changes show at once."
 msgstr "Voor elk venster. Wijzigingen zijn meteen te zien."
@@ -6399,9 +6587,19 @@ msgid "Gap from the window (cm)"
 msgstr "Afstand tot het venster (cm)"
 
 # needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Green"
+msgstr "Groen"
+
+# needs review
 #: packs/core/scroll-strips/patch.js
 msgid "Horizontal strip"
 msgstr "Horizontale strook"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Magenta"
+msgstr "Magenta"
 
 # needs review
 #: packs/core/scroll-strips/patch.js
@@ -6412,8 +6610,23 @@ msgstr ""
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Orange"
+msgstr "Oranje"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Passthrough tint"
 msgstr "Tint van Kamerweergave"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Pink"
+msgstr "Roze"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Red"
+msgstr "Rood"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -6424,6 +6637,16 @@ msgstr "Scrolstroken"
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
 msgid "Set back behind the window (cm)"
 msgstr "Afstand achter het venster (cm)"
+
+# needs review
+#: packs/core/scroll-strips/patch.js
+msgid "Settings: where the strips go and how they look"
+msgstr "Instellingen: waar de stroken staan en hoe ze eruitzien"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Sky"
+msgstr "Hemelsblauw"
 
 # needs review
 #: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
@@ -6439,6 +6662,16 @@ msgstr "Boven"
 #: packs/core/scroll-strips/patch.js
 msgid "Vertical strip"
 msgstr "Verticale strook"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Violet"
+msgstr "Violet"
+
+# needs review
+#: packs/core/scroll-strips/patch.js packs/core/scroll-strips/README.md
+msgid "Yellow"
+msgstr "Geel"
 
 # needs review
 #: packs/core/scroll-strips/status.sh
@@ -6525,11 +6758,6 @@ msgstr ""
 
 # needs review
 #: packs/core/snip/frame-snip
-msgid "Couldn't copy (is desktop mode running?)"
-msgstr "Kon niet kopiëren (draait de bureaubladmodus?)"
-
-# needs review
-#: packs/core/snip/frame-snip
 msgid "Couldn't copy the snip"
 msgstr "Kon het knipsel niet kopiëren"
 
@@ -6537,6 +6765,21 @@ msgstr "Kon het knipsel niet kopiëren"
 #: packs/core/snip/frame-snip
 msgid "Couldn't copy the text"
 msgstr "Kon de tekst niet kopiëren"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't copy to the clipboard."
+msgstr "Kon niet naar het klembord kopiëren."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the clipboard."
+msgstr "Kon het klembord niet lezen."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the picture on the clipboard."
+msgstr "Kon de afbeelding op het klembord niet lezen."
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6629,8 +6872,9 @@ msgstr ""
 
 # needs review
 #: packs/core/snip/frame-snip
-msgid "Paste: read the clipboard's text instead"
-msgstr "Plakken: in plaats daarvan de tekst op het klembord voorlezen"
+msgid "Paste: read the clipboard's text or picture instead"
+msgstr ""
+"Plakken: in plaats daarvan de tekst of afbeelding op het klembord voorlezen"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6674,8 +6918,18 @@ msgstr "De tekst die voorgelezen wordt op het klembord zetten"
 
 # needs review
 #: packs/core/snip/frame-snip
+msgid "Read faster"
+msgstr "Sneller lezen"
+
+# needs review
+#: packs/core/snip/frame-snip
 msgid "Read it again"
 msgstr "Opnieuw voorlezen"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Read slower"
+msgstr "Trager lezen"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6686,6 +6940,11 @@ msgstr "Voorlezen: deel {part} van {count}"
 #: packs/core/snip/frame-snip
 msgid "Reading aloud…"
 msgstr "Voorlezen…"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "Reading the clipboard…"
+msgstr "Klembord lezen…"
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6796,8 +7055,13 @@ msgstr "De Spraakengine kon deel {part} niet voorlezen."
 
 # needs review
 #: packs/core/snip/frame-snip
-msgid "The clipboard has no text."
-msgstr "Er staat geen tekst op het klembord."
+msgid "The clipboard has neither text nor a picture."
+msgstr "Er staat geen tekst of afbeelding op het klembord."
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "The clipboard is empty."
+msgstr "Het klembord is leeg."
 
 #: packs/core/snip/frame-snip
 msgid ""
@@ -6814,6 +7078,11 @@ msgstr "Volume verlagen"
 #: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
 msgstr "Volume verhogen"
+
+# needs review
+#: packs/core/snip/frame-snip
+msgid "What's on the clipboard is too big to paste."
+msgstr "Wat er op het klembord staat, is te groot om te plakken."
 
 # needs review
 #: packs/core/snip/frame-snip
@@ -6853,11 +7122,6 @@ msgstr "leeg beeld"
 #: packs/core/snip/frame-snip
 msgid "no focused window"
 msgstr "geen venster met focus"
-
-# needs review
-#: packs/core/snip/frame-snip
-msgid "the desktop isn't available"
-msgstr "het bureaublad is niet beschikbaar"
 
 # needs review
 #: packs/core/snip/frame-snip.desktop
@@ -7236,11 +7500,6 @@ msgstr "recover-session [--keep-steamvr]"
 #: packs/core/tools/restart-plasmashell
 msgid "%s failed; see %s"
 msgstr "%s mislukt; zie %s"
-
-# needs review
-#: packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
-msgid "%s restarted"
-msgstr "%s herstart"
 
 # needs review
 #: packs/core/tools/restart-plasmashell
@@ -8194,7 +8453,7 @@ msgstr ""
 "Op het bureaublad van de Frame (KDE Plasma op Wayland) kunnen gewone programma's geen toetsaanslagen naar andere apps sturen. ydotool kan dat wel: het voegt een virtueel toetsenbord toe aan de kernel (`/dev/uinput`), dat elke app als een echt toetsenbord behandelt."
 
 # needs review
-#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md
+#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md packs/bugfixes/tray-host/README.md
 msgid "Restart"
 msgstr "Herstarten"
 
@@ -8209,11 +8468,6 @@ msgstr ""
 #: packs/core/ydotool/README.md
 msgid "ydotool (helper)"
 msgstr "ydotool (hulpprogramma)"
-
-# needs review
-#: packs/core/ydotool/install.sh
-msgid "%s didn't start; see: %s"
-msgstr "%s is niet gestart; zie: %s"
 
 # needs review
 #: packs/core/ydotool/install.sh
@@ -8292,7 +8546,7 @@ msgstr ""
 "Claude voor desktop, de officiële Linux-app van Anthropic (arm64), geïnstalleerd in je persoonlijke map en bijgewerkt met één opdracht."
 
 # needs review
-#: packs/integrations/claude-desktop/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
+#: packs/integrations/claude-desktop/README.md packs/integrations/moonlight-xr/README.md packs/third-party/full-keyboard/README.md packs/third-party/recline/README.md packs/third-party/perf-overlay/README.md packs/third-party/knockthru/README.md packs/third-party/cursor/README.md packs/third-party/frame-passthrough-pip/README.md
 msgid "from"
 msgstr "van"
 
@@ -8398,7 +8652,7 @@ msgid "%s starts with desktop mode."
 msgstr "%s start met de bureaubladmodus."
 
 # needs review
-#: packs/integrations/clipboard/install.sh
+#: packs/integrations/clipboard/install.sh packs/integrations/moonlight-xr/install.sh
 msgid "Downloading %s %s"
 msgstr "%s %s downloaden"
 
@@ -8460,6 +8714,13 @@ msgstr ""
 "oudere versie: vervangt gekopieerde afbeeldingen door tekst (Opnieuw installeren lost het op)"
 
 # needs review
+#: packs/integrations/clipboard/status.sh
+msgid ""
+"this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
+msgstr ""
+"deze SteamOS heeft clipboard-sync %s nodig, %s is geïnstalleerd (Opnieuw installeren lost het op)"
+
+# needs review
 #: packs/integrations/clipboard/uninstall.sh
 msgid "(frees about 3.4 GB)"
 msgstr "(maakt ongeveer 3,4 GB vrij)"
@@ -8470,6 +8731,73 @@ msgid ""
 "Homebrew's Rust (installed by older versions for this build) is still there; if you don't use it:"
 msgstr ""
 "De Rust van Homebrew (door oudere versies geïnstalleerd voor deze compilatie) staat er nog; als je het niet gebruikt:"
+
+# needs review
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"A remote desktop such as KRdp asks for screen-sharing permission each time, and on an NVIDIA PC it encodes on the CPU (VA-API there can't encode H.264). Sunshine encodes on the graphics card, so the stream has lower latency, a higher frame rate and controller input, and its Desktop app covers games outside Steam too. Frame Tweaks installs the release it tested with its own installer and adds an app-menu entry and an Open button."
+msgstr ""
+"Een extern bureaublad zoals KRdp vraagt elke keer toestemming om het scherm te delen, en op een pc met NVIDIA codeert het op de processor (VA-API kan daar geen H.264 coderen). Sunshine codeert op de grafische kaart, dus de stream heeft minder vertraging, een hogere framesnelheid en invoer via de controller, en de app Desktop ervan dekt ook games buiten Steam. Frame Tweaks installeert de versie die het getest heeft, met het eigen installatieprogramma, en voegt een item in het appmenu en een knop Openen toe."
+
+# needs review
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"Stream your PC's desktop and games to a big screen in VR, decoded in hardware"
+msgstr ""
+"Stream het bureaublad en de games van je pc naar een groot scherm in VR, gedecodeerd door de hardware"
+
+# needs review
+#: packs/integrations/moonlight-xr/README.md
+msgid ""
+"simplysanatori's Moonlight XR for Frame: a native game-streaming client for the Frame. Your PC's desktop or a game, streamed with Sunshine (or Apollo) on the PC, shows on a resizable screen in a virtual room, up to 2560×1440 in H.264 or HEVC decoded by the Frame's hardware, and you control it with the Frame's controllers. Pair once with a PIN; it starts from your Steam library."
+msgstr ""
+"Moonlight XR for Frame van simplysanatori: een native client voor gamestreaming voor de Frame. Het bureaublad van je pc of een game, gestreamd met Sunshine (of Apollo) op de pc, verschijnt op een scherm met instelbare grootte in een virtuele kamer, tot 2560×1440 in H.264 of HEVC, gedecodeerd door de hardware van de Frame, en je bedient het met de controllers van de Frame. Koppel één keer met een pincode; het start vanuit je Steam-bibliotheek."
+
+# needs review
+#: packs/integrations/moonlight-xr/install.sh
+msgid "Moonlight XR's installer stopped (its log: %s)"
+msgstr "Het installatieprogramma van Moonlight XR is gestopt (logboek: %s)"
+
+# needs review
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Start it from your Steam library, the app menu, or Open on its row; pair with your PC on first start."
+msgstr ""
+"Start het vanuit je Steam-bibliotheek, het appmenu of met Openen in de rij ervan; koppel het bij de eerste start met je pc."
+
+# needs review
+#: packs/integrations/moonlight-xr/install.sh
+msgid ""
+"Steam isn't running: the program installs, but its Steam library entry is added only when you install it again with Steam running"
+msgstr ""
+"Steam draait niet: het programma wordt geïnstalleerd, maar het item in de Steam-bibliotheek wordt pas toegevoegd als je het opnieuw installeert terwijl Steam draait"
+
+# needs review
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop packs/integrations/moonlight-xr/README.md
+msgid "Moonlight XR for Frame"
+msgstr "Moonlight XR for Frame"
+
+# needs review
+#: packs/integrations/moonlight-xr/moonlight-xr.desktop
+msgid "Stream your PC to a screen in VR"
+msgstr "Stream je pc naar een scherm in VR"
+
+# needs review
+#: packs/integrations/moonlight-xr/status.sh
+msgid "Moonlight XR for Frame %s"
+msgstr "Moonlight XR for Frame %s"
+
+# needs review
+#: packs/integrations/moonlight-xr/status.sh
+msgid "its app-menu entry is missing (Reinstall adds it)"
+msgstr "het item in het appmenu ontbreekt (Opnieuw installeren voegt het toe)"
+
+# needs review
+#: packs/integrations/moonlight-xr/uninstall.sh
+msgid ""
+"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+msgstr ""
+"Je instellingen en koppeling behouden in %s. Verwijder het item uit de Steam-bibliotheek in Steam (Beheren, Niet-Steam-game verwijderen), en ontkoppel de Frame in Sunshine."
 
 # needs review
 #: packs/integrations/nordvpn/README.md
@@ -9116,10 +9444,6 @@ msgstr ""
 msgid "KnockThru"
 msgstr "KnockThru"
 
-#: packs/third-party/knockthru/README.md
-msgid "Start"
-msgstr "Starten"
-
 # needs review
 #: packs/third-party/knockthru/README.md
 msgid ""
@@ -9321,6 +9645,10 @@ msgstr ""
 msgid "Recline"
 msgstr "Achterover"
 
+#: packs/third-party/recline/README.md packs/third-party/knockthru/README.md
+msgid "Start"
+msgstr "Starten"
+
 # needs review
 #: packs/third-party/recline/README.md
 msgid ""
@@ -9334,6 +9662,32 @@ msgid ""
 "Use VR lying down or reclined; recentering makes your view level and forward"
 msgstr ""
 "Gebruik VR liggend of achterovergeleund; opnieuw centreren maakt je zicht horizontaal en recht vooruit"
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Already running: its panel is in the SteamVR dashboard."
+msgstr "Draait al: het paneel staat in het SteamVR-dashboard."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Could not start Recline's panel: %s says why."
+msgstr "Kon het paneel van Achterover niet starten: %s zegt waarom."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Not installed: tick Recline and Apply changes first."
+msgstr ""
+"Niet geïnstalleerd: vink eerst Achterover aan en kies Wijzigingen toepassen."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "Started: its panel is in the SteamVR dashboard."
+msgstr "Gestart: het paneel staat in het SteamVR-dashboard."
+
+# needs review
+#: packs/third-party/recline/run.sh
+msgid "SteamVR is not running: Recline starts with it."
+msgstr "SteamVR draait niet: Achterover start mee met SteamVR."
 
 # needs review
 #: share/applications/io.github.AstronautCheetah.FrameTweaks.desktop
@@ -9660,3 +10014,37 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop Recovery's row in Frame Tweaks when you need it."
 #~ msgstr ""
 #~ "De taakbalk blijft sluiten: hij is {n} keer opnieuw gestart in {minutes} minuten. Druk op Taakbalk herstarten in de rij van Bureaubladherstel in Frame Tweaks als je hem nodig hebt."
+
+#~ # needs review
+#~ msgid "⟳ Check for updates"
+#~ msgstr "⟳ Naar updates zoeken"
+
+#~ # needs review
+#~ msgid ""
+#~ "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in three official packs, Core, Integrations and 3rd Party, all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
+#~ msgstr ""
+#~ "Elke aanpassing hier komt uit een <b>pakket</b>: een map met mappen van aanpassingen, elk beschreven in een eigen README.md. De eigen aanpassingen van Frame Tweaks zitten in drie officiële pakketten, Basis, Integraties en Van derden, allemaal in gebruik tenzij je er een uitschakelt. Wil je er meer, voeg er dan een toe via de link hieronder, of zet de map van een pakket in <code>{folder}</code>; vertrouw het daarna. <b>De aanpassingen van een pakket draaien met jouw rechten</b>, met je bestanden en wachtwoorden binnen bereik: vertrouw alleen pakketten van mensen die je vertrouwt, en lees eerst wat ze doen. Veranderen de bestanden van een pakket, dan wacht het tot je het opnieuw vertrouwt. Zelf een pakket maken: docs/mods.md."
+
+#~ # needs review
+#~ msgid "Off: only when you press ⟳ Check for updates."
+#~ msgstr "Uit: alleen als je op ⟳ Naar updates zoeken drukt."
+
+#~ # needs review
+#~ msgid "Saved. ⟳ Check for updates finds test releases too."
+#~ msgstr "Opgeslagen. ⟳ Naar updates zoeken vindt nu ook testversies."
+
+#~ # needs review
+#~ msgid "Couldn't copy (is desktop mode running?)"
+#~ msgstr "Kon niet kopiëren (draait de bureaubladmodus?)"
+
+#~ # needs review
+#~ msgid "Paste: read the clipboard's text instead"
+#~ msgstr "Plakken: in plaats daarvan de tekst op het klembord voorlezen"
+
+#~ # needs review
+#~ msgid "The clipboard has no text."
+#~ msgstr "Er staat geen tekst op het klembord."
+
+#~ # needs review
+#~ msgid "the desktop isn't available"
+#~ msgstr "het bureaublad is niet beschikbaar"
