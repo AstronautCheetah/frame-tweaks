@@ -2,9 +2,10 @@
 # recover-session: bring the VR session back after the session's D-Bus went down
 # under it, without a reboot. Seen on SteamOS 0.5.7's beta (launching VLC from the Flatpak ran the
 # user bus out of file descriptors in two seconds): every program on the bus aborted, Steam's
-# interface with them. Gamescope's cleanup then removed DISPLAY and its other variables from the
-# user manager's environment while gamescope itself went on running, so systemd restarted Steam
-# hundreds of times, each copy "Unable to open X11 display", and the headset showed only the
+# interface with them. The session's cleanup, which runs each time Steam exits, then removed DISPLAY
+# and its other variables from the user manager's environment while gamescope itself went on
+# running, so systemd restarted Steam hundreds of times, each copy "Unable to open X11 display"
+# (and each exit removing them again, so put back once they can go again), and the headset showed only the
 # room or the backdrop. Programs started by D-Bus activation (ksecretd: the wallet) failed the
 # same way. Bluetooth headphones that reconnected while PipeWire's A2DP endpoints were gone came
 # back with the call profile only (HSP/HFP): "Call ended" every half minute.
@@ -69,12 +70,35 @@ call_only_devices() {
         END { done_card() }'
 }
 
-steam_failures_since() {     # (Steam's failed starts in the last N seconds)
-    XDG_RUNTIME_DIR="/run/user/$(id -u)" journalctl --user -u steam.service --since "-${1}s" --no-pager -o cat 2>/dev/null | grep -c "Failed with result" || true
+# restore_display: the session's variables put back in the user manager's environment when
+# DISPLAY is missing there (nothing when it's there). 1 when they're gone and no program of the
+# session has them. (Gamescope's cleanup can remove them a minute after the crash, so this runs
+# again while waiting for Steam.)
+restore_display() {
+    local pid vars
+    sysctl_user show-environment 2>/dev/null | grep -q '^DISPLAY=' && return 0
+    pid=$(session_source) && vars=$(session_vars_of "$pid") || return 1
+    mapfile -t vars <<< "$vars"
+    sysctl_user set-environment "${vars[@]}" || return 1
+    say "$(t "Put back the VR session's display settings (%d of them, from %s), which Steam needs to start." \
+        "${#vars[@]}" "$(cat "$PROC/$pid/comm" 2>/dev/null)")"
+    RESTORED=1
+}
+
+# steam_up: Steam's own process has the session's display and has run for 30 s, its interface
+# (steamwebhelper) with it. (Not "no failure lately": a Steam without a display took 2 s to fail
+# at first, and 90 s later on.)
+steam_up() {
+    local main age
+    main=$(sysctl_user show -p MainPID --value steam.service 2>/dev/null)
+    [ -n "$main" ] && [ "$main" != 0 ] || return 1
+    tr '\0' '\n' < "$PROC/$main/environ" 2>/dev/null | grep -q '^DISPLAY=' || return 1
+    age=$(ps -o etimes= -p "$main" 2>/dev/null | tr -d ' ')
+    [ "${age:-0}" -ge 30 ] && pgrep -u "$(id -u)" -f steamwebhelper >/dev/null
 }
 
 main() {
-    local keep_vr='' did='' pid vars mac n
+    local keep_vr='' did='' main mac n
     case ${1:-} in
         --keep-steamvr) keep_vr=1 ;;
         "") ;;
@@ -84,43 +108,40 @@ main() {
         { say "$(t "The VR session isn't running: nothing to recover (in desktop mode, or a reboot brings it back).")"; return 1; }
 
     # 1. the session's variables
-    if ! sysctl_user show-environment 2>/dev/null | grep -q '^DISPLAY='; then
-        if pid=$(session_source) && vars=$(session_vars_of "$pid"); then
-            mapfile -t vars <<< "$vars"
-            sysctl_user set-environment "${vars[@]}" &&
-                say "$(t "Put back the VR session's display settings (%d of them, from %s), which Steam needs to start." \
-                    "${#vars[@]}" "$(cat "$PROC/$pid/comm" 2>/dev/null)")"
-            did=1
-        else
-            warn "$(t "The session's display settings are gone and no program of the session still has them: restart the Frame.")"
-            return 1
-        fi
-    fi
+    restore_display || {
+        warn "$(t "The session's display settings are gone and no program of the session still has them: restart the Frame.")"
+        return 1; }
+    [ -z "${RESTORED:-}" ] || did=1
 
-    # 2. failed services
+    # 2. failed services, and Steam up again (started again if it runs without a display)
     for n in $(sysctl_user --failed --no-legend --plain 2>/dev/null | awk '{print $1}'); do
         sysctl_user reset-failed "$n" 2>/dev/null && { say "$(t 'Reset the failed %s.' "$n")"; did=1; }
     done
-    if [ "$(steam_failures_since 30)" -gt 0 ] || ! sysctl_user is-active --quiet steam.service; then
+    if ! steam_up; then
         did=1
-        sysctl_user reset-failed steam.service 2>/dev/null || true
-        sysctl_user start --no-block steam.service 2>/dev/null || true
         say "$(t 'Waiting for Steam to start…')"
-        for n in $(seq 1 12); do
+        for n in $(seq 1 36); do
+            restore_display || true
+            main=$(sysctl_user show -p MainPID --value steam.service 2>/dev/null)
+            if [ -n "$main" ] && [ "$main" != 0 ] && ! tr '\0' '\n' < "$PROC/$main/environ" 2>/dev/null | grep -q '^DISPLAY='; then
+                sysctl_user restart --no-block steam.service 2>/dev/null || true    # (started before the settings were back)
+            elif ! sysctl_user is-active --quiet steam.service; then
+                sysctl_user reset-failed steam.service 2>/dev/null || true
+                sysctl_user start --no-block steam.service 2>/dev/null || true
+            fi
             sleep 5
-            [ "$n" -ge 6 ] && [ "$(steam_failures_since 25)" -eq 0 ] && sysctl_user is-active --quiet steam.service && break
+            steam_up && break
         done
-        if [ "$(steam_failures_since 25)" -gt 0 ] || ! sysctl_user is-active --quiet steam.service; then
-            warn "$(t "Steam still doesn't stay up (see %s): restart the Frame." "journalctl --user -u steam.service")"
-            return 1
-        fi
+        steam_up || { warn "$(t "Steam still doesn't stay up (see %s): restart the Frame." "journalctl --user -u steam.service")"; return 1; }
         say "$(t 'Steam is running.')"
     fi
 
     # 3. SteamVR
     if [ -n "$did" ] && [ -z "$keep_vr" ] && sysctl_user is-active --quiet steamvr.service; then
         say "$(t 'Restarting SteamVR, so its dashboard and overlays start clean…')"
-        sysctl_user restart steamvr.service 2>/dev/null || warn "$(t "SteamVR didn't restart: restart it from Steam.")"
+        sysctl_user restart --no-block steamvr.service 2>/dev/null || true
+        sleep 20
+        sysctl_user is-active --quiet steamvr.service || warn "$(t "SteamVR didn't restart: restart it from Steam.")"
     fi
 
     # 4. Bluetooth audio on calls only
