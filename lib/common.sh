@@ -66,6 +66,13 @@ sysctl_user() {
     DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus" \
     systemctl --user "$@"
 }
+# busctl --user on the same bus as sysctl_user: the VR session's, also from desktop mode, whose
+# own bus (nested Plasma's) is another.
+busctl_user() {
+    XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR_USER" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR_USER/bus" \
+    busctl --user "$@"
+}
 # systemd-run --user through the same bus as sysctl_user (desktop mode's XDG_RUNTIME_DIR,
 # /run/user/<uid>/nested_plasma, has no systemd in it). Give the program its environment with
 # --setenv (session_env_args): what this prefix sets is systemd-run's own, not the program's.

@@ -78,3 +78,33 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "SteamVR not running"
 - New in `lib/vrbindings.py:497`
   - now: "unknown command: {cmd}"
+
+## 2026-11-04
+- New in `packs/core/tray-host/README.md`
+  - now: "A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
+- New in `packs/core/tray-host/README.md`
+  - now: "Keeps apps with a tray icon, such as VLC, from taking the VR session down"
+- New in `packs/core/tray-host/README.md`
+  - now: "On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
+- New in `packs/core/tray-host/README.md`
+  - now: "Tray icon crash fix"
+- New in `packs/core/tray-host/install.sh:18`
+  - now: "Tray icons in the VR session get an answer now"
+- New in `packs/core/tray-host/install.sh:23`
+  - now: "It starts with the VR session"
+- New in `packs/core/tray-host/install.sh:8`
+  - now: "SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+- New in `packs/core/tray-host/status.sh:11`
+  - now: "service failed (%s)"
+- New in `packs/core/tray-host/status.sh:15`
+  - now: "another program answers tray icons in the VR session (%s)"
+- New in `packs/core/tray-host/status.sh:17`
+  - now: "service not running (▶ Restart starts it)"
+- New in `packs/core/tray-host/status.sh:18`
+  - now: "running, but not answering tray icons yet (%s)"
+- New in `packs/core/tray-host/status.sh:19`
+  - now: "running: tray icons in the VR session get an answer"
+- New in `packs/core/tray-host/status.sh:6`
+  - now: "installed; starts with the VR session"
+- New in `packs/core/tray-host/status.sh:9`
+  - now: "won't start with the VR session: not enabled (↻ Reinstall enables it)"

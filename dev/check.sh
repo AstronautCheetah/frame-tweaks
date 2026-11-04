@@ -45,7 +45,8 @@ check_shell() {
 
 check_python() {
     local f bad=0
-    for f in $(files_with '^#!/usr/bin/env python3') gui/*.py lib/*.py packs/*/*/*.py; do
+    # (#!/usr/bin/python3: a program that needs SteamOS's own Python, for its PyGObject)
+    for f in $(files_with '^#!/usr/bin/(env )?python3') gui/*.py lib/*.py packs/*/*/*.py; do
         python3 -m py_compile "$f" || bad=1
     done
     return $bad
@@ -56,7 +57,7 @@ check_python() {
 check_lint() {
     command -v ruff >/dev/null || { missing ruff "brew install ruff, or pipx install ruff"; return; }
     # shellcheck disable=SC2046   # (file names without spaces, one per line)
-    ruff check --quiet $({ files_with '^#!/usr/bin/env python3'; git ls-files -co --exclude-standard -- '*.py'; } | sort -u)
+    ruff check --quiet $({ files_with '^#!/usr/bin/(env )?python3'; git ls-files -co --exclude-standard -- '*.py'; } | sort -u)
 }
 
 check_i18n() { python3 dev/i18n.py check; }       # the translation template is current

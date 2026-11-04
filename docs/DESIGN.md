@@ -201,6 +201,8 @@ uninstall. Then a tweak can keep what other tweaks left in its care; for example
   32 s (`RestartSteps=`, systemd 254+), and give up after 10 starts in 5 minutes
   (`tests/test_units.py` checks each one). systemd counts the growing wait from the last start
   by hand or by its trigger, not from the last stable run; the start limit is what ages out.
+  One never gives up (`StartLimitIntervalSec=0`): Tray icon crash fix's watcher, which exits
+  whenever the session's bus goes away, for as long as that lasts (its unit file says why).
 - **Installs from the window** run through `lib/detached.sh`: a transient service
   (`ft-install-<pid>`) on a pty that `systemd-run --pty` relays to the terminal, so prompts and
   sudo work, and closing the terminal or the window leaves it running (it ignores the hangup; its

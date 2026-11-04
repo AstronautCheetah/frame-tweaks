@@ -319,9 +319,13 @@ class WindowSide(unittest.TestCase):
 
 class RestartPolicy(unittest.TestCase):
     """Every service a tweak installs that stays up restarts on a crash, after 1 s growing to 32 s,
-    and gives up after 10 starts in 5 minutes; oneshots are left out."""
+    and gives up after 10 starts in 5 minutes; oneshots are left out. Except those that must never
+    give up (the start limit off), each saying why in its unit file."""
     WANT_SERVICE = {"Restart": "on-failure", "RestartSec": "1", "RestartSteps": "5", "RestartMaxDelaySec": "32"}
     WANT_UNIT = {"StartLimitIntervalSec": "300", "StartLimitBurst": "10"}
+    # (Tray icon crash fix's watcher: a bus outage outlasts any limit, and given up on, the next
+    # tray icon takes the bus down again)
+    NEVER_GIVE_UP = {"packs/core/tray-host/frame-tweaks-tray-host.service": {"StartLimitIntervalSec": "0", "StartLimitBurst": None}}
 
     @staticmethod
     def units():
@@ -359,7 +363,8 @@ class RestartPolicy(unittest.TestCase):
             found += 1
             with self.subTest(where):
                 self.assertEqual({k: s["Service"].get(k) for k in self.WANT_SERVICE}, self.WANT_SERVICE)
-                self.assertEqual({k: s.get("Unit", {}).get(k) for k in self.WANT_UNIT}, self.WANT_UNIT)
+                want = self.NEVER_GIVE_UP.get(where, self.WANT_UNIT)
+                self.assertEqual({k: s.get("Unit", {}).get(k) for k in want}, want)
         self.assertGreaterEqual(found, 7)       # (ydotoold, charge-limit, wallet's two, the dashboard, dictation's two)
 
 

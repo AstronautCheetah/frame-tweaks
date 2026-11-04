@@ -1,0 +1,208 @@
+#!/usr/bin/python3
+"""frame-tweaks-tray-host: Tray icon crash fix's service. A tray watcher (the StatusNotifierItem
+protocol's org.kde.StatusNotifierWatcher) on the VR session's D-Bus that says a tray host is
+there, so apps register their tray icon once instead of retrying for ever.
+
+On SteamOS 0.5.7's beta the VR session makes Qt apps use KDE's platform theme, whose tray icons
+need a watcher on the session bus. The VR session has none, and an app retrying opens a new bus
+connection each time and never closes it: VLC ran the user bus out of file descriptors in
+seconds, and the bus took the whole VR session down with it (docs/research/tray-icon-flood.md).
+
+No icon is drawn anywhere: it only answers. It keeps the list of registered items, dropping
+those whose bus name has no owner any more. The name is owned with replacement allowed, and
+queued: a program that asks to replace it gets it, and this one waits in the queue and answers
+again once that program has let it go. If the bus goes away under it, it exits with an error, so
+systemd starts it again once the bus is back.
+
+Run by frame-tweaks-tray-host.service, with the VR session (gamescope-session.target). SteamOS's
+own Python, for PyGObject (gi), which the system has and a venv wouldn't.
+"""
+import re
+import sys
+
+NAME = "org.kde.StatusNotifierWatcher"
+PATH = "/StatusNotifierWatcher"
+ITEM_PATH = "/StatusNotifierItem"    # (where an item is when it registers by bus name only)
+XML = f"""<node><interface name="{NAME}">
+ <method name="RegisterStatusNotifierItem"><arg name="service" type="s" direction="in"/></method>
+ <method name="RegisterStatusNotifierHost"><arg name="service" type="s" direction="in"/></method>
+ <property name="RegisteredStatusNotifierItems" type="as" access="read"/>
+ <property name="IsStatusNotifierHostRegistered" type="b" access="read"/>
+ <property name="ProtocolVersion" type="i" access="read"/>
+ <signal name="StatusNotifierItemRegistered"><arg type="s"/></signal>
+ <signal name="StatusNotifierItemUnregistered"><arg type="s"/></signal>
+ <signal name="StatusNotifierHostRegistered"/>
+</interface></node>"""
+
+# D-Bus names and paths as the specification allows them: a name that isn't one would make
+# watching it fail, so it's refused as the call comes in.
+_UNIQUE = re.compile(r":[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)+")
+_WELL_KNOWN = re.compile(r"[A-Za-z_-][A-Za-z0-9_-]*(\.[A-Za-z_-][A-Za-z0-9_-]*)+")
+_OBJECT_PATH = re.compile(r"/|(/[A-Za-z0-9_]+)+")
+
+
+def valid_bus_name(name):
+    return len(name) <= 255 and bool(_UNIQUE.fullmatch(name) or _WELL_KNOWN.fullmatch(name))
+
+
+def item_of(service, sender):
+    """(bus name to watch, item id) for RegisterStatusNotifierItem(service) sent by sender (a
+    unique name), or None if service is neither a bus name nor an object path. As KDE's own
+    watcher does: a path means an item of the sender's connection; a bus name, its item at
+    /StatusNotifierItem (Qt sends its service name, org.kde.StatusNotifierItem-<pid>-<n>). The id
+    is the bus name followed by the path, the form tray hosts read."""
+    if service.startswith("/"):
+        if not sender or not valid_bus_name(sender) or not _OBJECT_PATH.fullmatch(service):
+            return None
+        return sender, sender + service
+    if not valid_bus_name(service):
+        return None
+    return service, service + ITEM_PATH
+
+
+class Items:
+    """The registered items, in the order they came, each with the bus name whose leaving ends it."""
+
+    def __init__(self):
+        self._owner = {}            # item id: bus name
+
+    def add(self, bus, item):
+        """True if it's new (an app registering again changes nothing)."""
+        if item in self._owner:
+            return False
+        self._owner[item] = bus
+        return True
+
+    def drop_owner(self, bus):
+        """Forget the items of a bus name that left; their ids."""
+        gone = [i for i, b in self._owner.items() if b == bus]
+        for i in gone:
+            del self._owner[i]
+        return gone
+
+    def ids(self):
+        return list(self._owner)
+
+
+def log(*args):
+    print(*args, flush=True)        # (the journal, through systemd: a line as it happens)
+
+
+class Watcher:
+    """The D-Bus object at PATH, on one connection."""
+
+    def __init__(self, conn, gio, glib):
+        self.conn, self.Gio, self.GLib = conn, gio, glib
+        self.items = Items()
+        self.watches = {}           # bus name: watch id
+
+    def emit(self, signal, *arg):
+        self.conn.emit_signal(None, PATH, NAME, signal, self.GLib.Variant("(s)", arg) if arg else None)
+
+    def method(self, conn, sender, path, iface, method, params, invocation):
+        (arg,) = params.unpack()
+        if method == "RegisterStatusNotifierHost":
+            # (said to be there already: IsStatusNotifierHostRegistered is always true)
+            self.emit("StatusNotifierHostRegistered")
+            invocation.return_value(None)
+            return
+        found = item_of(arg, sender)
+        if not found:
+            invocation.return_dbus_error("org.freedesktop.DBus.Error.InvalidArgs",
+                                         f"neither a bus name nor an object path: {arg!r}")
+            return
+        bus, item = found
+        # Only a name someone owns now, as KDE's watcher does (it answers the same, and doesn't
+        # list the item): watching one nobody owns would drop the item again at once, after
+        # announcing it. Asked without waiting, so the main loop goes on meanwhile.
+        def owner(conn, result):
+            try:
+                conn.call_finish(result)
+            except self.GLib.Error:
+                log(f"not registered, {bus} has no owner: {item}")
+            else:
+                self.add(bus, item)
+            invocation.return_value(None)
+        conn.call("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "GetNameOwner",
+                  self.GLib.Variant("(s)", (bus,)), self.GLib.VariantType("(s)"), self.Gio.DBusCallFlags.NONE,
+                  5000, None, owner)
+
+    def add(self, bus, item):
+        if self.items.add(bus, item):
+            log(f"item registered: {item}")
+            self.watch(bus)
+            self.emit("StatusNotifierItemRegistered", item)
+
+    def prop(self, conn, sender, path, iface, name):
+        V = self.GLib.Variant
+        if name == "RegisteredStatusNotifierItems":
+            return V("as", self.items.ids())
+        if name == "IsStatusNotifierHostRegistered":
+            return V("b", True)
+        if name == "ProtocolVersion":
+            return V("i", 0)
+        return None
+
+    def watch(self, bus):
+        """Drop bus's items once its owner leaves it, so the list doesn't grow with every app that
+        ever ran. GDBus calls vanished whenever the owner goes, also when the name passes straight
+        to another connection (one queued for it), so an item never outlives the app that had the
+        name: watching the well-known name is enough, as KDE's watcher does."""
+        if bus not in self.watches:
+            self.watches[bus] = self.Gio.bus_watch_name_on_connection(
+                self.conn, bus, self.Gio.BusNameWatcherFlags.NONE, None, self.vanished)
+
+    def vanished(self, conn, bus):
+        for item in self.items.drop_owner(bus):
+            log(f"item gone: {item}")
+            self.emit("StatusNotifierItemUnregistered", item)
+        wid = self.watches.pop(bus, None)
+        if wid is not None:
+            # (outside the watch's own callback)
+            self.GLib.idle_add(lambda: self.Gio.bus_unwatch_name(wid))
+
+
+def main():
+    import gi
+    gi.require_version("Gio", "2.0")
+    from gi.repository import Gio, GLib
+
+    loop, exit_code = GLib.MainLoop(), 0
+    try:
+        conn = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    except GLib.Error as e:
+        log(f"no session bus: {e.message}")
+        return 1
+    # Otherwise GDBus ends the program with SIGTERM when the bus goes away, which systemd counts
+    # as a clean stop and doesn't restart (Restart=on-failure).
+    conn.set_exit_on_close(False)
+
+    def closed(conn, remote_peer_vanished, error):
+        nonlocal exit_code
+        log("the session bus went away")
+        exit_code = 1
+        loop.quit()
+    conn.connect("closed", closed)
+
+    # Registered once, for the program's life: while the name is another program's, calls to
+    # it go there, and this object waits unseen behind the connection's unique name.
+    watcher = Watcher(conn, Gio, GLib)
+    conn.register_object(PATH, Gio.DBusNodeInfo.new_for_xml(XML).interfaces[0], watcher.method, watcher.prop, None)
+
+    def acquired(conn, name):
+        log(f"answering tray icons as {name}")
+
+    def lost(conn, name):
+        if conn is None or conn.is_closed():
+            return              # (closed() ends it)
+        # Queued, not gone: GDBus calls acquired again when the other program lets the name go
+        # (it quits, or releases it). Apps re-register with whichever watcher owns the name.
+        log(f"{name} is another program's for now: waiting for it")
+    # (no DO_NOT_QUEUE: replaced, it stays in the queue instead of losing the name for good)
+    Gio.bus_own_name_on_connection(conn, NAME, Gio.BusNameOwnerFlags.ALLOW_REPLACEMENT, acquired, lost)
+    loop.run()
+    return exit_code
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,38 @@
+[Unit]
+Description=Answer tray icons in the VR session, so apps stop retrying (Frame Tweaks)
+# With the VR session only (docs/research/tray-icon-flood.md): that's where nothing answers tray
+# icons. Desktop mode's Plasma has a bus of its own, with its own watcher, which this never meets.
+# (the target, as steam.service: gamescope-session.service itself restarts under it, when SteamVR
+# restarts, and the bus with this service's answers outlive that)
+PartOf=gamescope-session.target
+# Never gives up, unlike the other tweaks' services (docs/DESIGN.md, "Services a tweak
+# installs"): it exits with an error whenever the session's bus goes away, and a bus outage with
+# its recovery (recover-session) takes minutes, many restarts at the capped wait below. Given up
+# on, it would stay stopped for the rest of the session, and the next app with a tray icon would
+# take the bus down again. Each try costs one short start every 32 s.
+StartLimitIntervalSec=0
+
+[Service]
+ExecStart=%h/.local/bin/frame-tweaks-tray-host
+# On a crash, or when the bus went away under it: again after 1 s, the wait doubling with each
+# restart up to 32 s (systemd 254+; the Frame has 257).
+Restart=on-failure
+RestartSec=1
+RestartSteps=5
+RestartMaxDelaySec=32
+# Sandboxing: it only talks to the session bus. (No PrivateNetwork=: not allowed in this user
+# manager. No MemoryDenyWriteExecute=: PyGObject's callbacks are libffi closures, which may need
+# memory both writable and executable.)
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=gamescope-session.target

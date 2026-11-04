@@ -18,6 +18,7 @@ order:
   - firefox
   - homebrew
   - tools
+  - tray-host
   - ydotool
   - speech
   - charge-limit

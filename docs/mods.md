@@ -322,6 +322,7 @@ tweak whose `survives_updates` starts with **Yes** isn't installed again by it.
 | `ensure_tweaks_venv`, `install_py_tool FILE` | A Python program in `~/.local/bin`, run on Frame Tweaks' shared venv. `pip_pinned VENV PKG` installs packages at tested versions. |
 | `install_dashboard_patch NAME FILE`, `remove_dashboard_patch NAME`, `dashboard_patch_status NAME TEXT` | A SteamVR dashboard patch (see the VR environment tweaks; depend on `vr-dashboard`). |
 | `sysctl_user ...` | `systemctl --user`, also from a desktop-mode shell. |
+| `busctl_user ...` | `busctl --user` on the VR session's bus (the same one), also from a desktop-mode shell. |
 | `tweak_dir ID` | Another tweak's folder, to run its scripts. |
 
 **Pinned downloads:** a `pin` file in the tweak's folder (`version=`, `url=`, `sha256=`;

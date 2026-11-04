@@ -1764,7 +1764,7 @@ msgstr ""
 msgid "not available any more"
 msgstr ""
 
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/tray-host/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
 
@@ -4887,7 +4887,7 @@ msgstr ""
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/tray-host/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md
 msgid "System"
 msgstr ""
 
@@ -5647,7 +5647,7 @@ msgstr ""
 msgid "%s failed; see %s"
 msgstr ""
 
-#: packs/core/tools/restart-plasmashell packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
+#: packs/core/tools/restart-plasmashell packs/core/tray-host/run.sh packs/core/ydotool/run.sh packs/integrations/clipboard/run.sh
 msgid "%s restarted"
 msgstr ""
 
@@ -5684,6 +5684,74 @@ msgstr ""
 #: packs/core/tools/taskbar-guard
 msgid ""
 "The taskbar keeps closing: it was started again {n} times in {minutes} minutes. Press Restart taskbar on Desktop & VR Recovery's row in Frame Tweaks when you need it."
+msgstr ""
+
+#: packs/core/tray-host/README.md
+msgid ""
+"A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
+msgstr ""
+
+#: packs/core/tray-host/README.md
+msgid ""
+"Keeps apps with a tray icon, such as VLC, from taking the VR session down"
+msgstr ""
+
+#: packs/core/tray-host/README.md
+msgid ""
+"On SteamOS 0.5.7's beta, Qt apps in the VR session (VLC, for one) look for the desktop's tray, find none, and keep trying, each time opening another connection to the session's D-Bus. Within seconds the bus runs out of room and goes down, and Steam and the VR session go with it."
+msgstr ""
+
+#: packs/core/tray-host/README.md packs/core/ydotool/README.md packs/integrations/clipboard/README.md
+msgid "Restart"
+msgstr ""
+
+#: packs/core/tray-host/README.md
+msgid "Tray icon crash fix"
+msgstr ""
+
+#: packs/core/tray-host/install.sh packs/core/ydotool/install.sh
+msgid "%s didn't start; see: %s"
+msgstr ""
+
+#: packs/core/tray-host/install.sh
+msgid "It starts with the VR session"
+msgstr ""
+
+#: packs/core/tray-host/install.sh
+msgid ""
+"SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+msgstr ""
+
+#: packs/core/tray-host/install.sh
+msgid "Tray icons in the VR session get an answer now"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "another program answers tray icons in the VR session (%s)"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "installed; starts with the VR session"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "running, but not answering tray icons yet (%s)"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "running: tray icons in the VR session get an answer"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "service failed (%s)"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "service not running (▶ Restart starts it)"
+msgstr ""
+
+#: packs/core/tray-host/status.sh
+msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 msgstr ""
 
 #: packs/core/vr-dashboard/README.md
@@ -6391,10 +6459,6 @@ msgid ""
 "On the Frame's desktop (KDE Plasma on Wayland), ordinary programs can't send key presses to other apps. ydotool can: it adds a virtual keyboard to the kernel (`/dev/uinput`), which every app treats as a real one."
 msgstr ""
 
-#: packs/core/ydotool/README.md packs/integrations/clipboard/README.md
-msgid "Restart"
-msgstr ""
-
 #: packs/core/ydotool/README.md
 msgid ""
 "The virtual keyboard that Dictation, Arrow Pad and Scroll strips type through. Installed automatically with them."
@@ -6402,10 +6466,6 @@ msgstr ""
 
 #: packs/core/ydotool/README.md
 msgid "ydotool (helper)"
-msgstr ""
-
-#: packs/core/ydotool/install.sh
-msgid "%s didn't start; see: %s"
 msgstr ""
 
 #: packs/core/ydotool/install.sh

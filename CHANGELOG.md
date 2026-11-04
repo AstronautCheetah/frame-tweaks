@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Tray icon crash fix keeps VLC from taking the VR session down:** on SteamOS 0.5.7's beta, a
+  Qt app with a tray icon (VLC, for one) looked for a tray in the VR session, found none and kept
+  trying, opening a new D-Bus connection each time, until the session's bus, and Steam with it,
+  went down a few seconds after the app started. A small service now answers such apps in the
+  VR session, so they ask once. No icon is shown: the VR session has no tray.
 - **Desktop & VR Recovery brings back a broken VR session** (Desktop Recovery before): when the
   headset shows only the room or the backdrop and Steam won't start (SteamOS 0.5.7's beta does
   this as VLC starts), `recover-session`, over SSH or in desktop mode's Konsole, puts the
