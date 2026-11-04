@@ -6,4 +6,4 @@ if [ -f "$HOME_DIR/.frame-tweaks-dock_icon.py" ]; then
 fi
 remove_desktop moonlight-xr.desktop
 rm -rf "$HOME_DIR"
-say "$(t 'Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine.' "$HOME/.config/moonlight-xr")"
+say "$(t 'Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game from your library), and unpair the Frame in Sunshine.' "$HOME/.config/moonlight-xr")"

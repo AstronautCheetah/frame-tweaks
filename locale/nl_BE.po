@@ -8792,12 +8792,11 @@ msgstr "Moonlight XR for Frame %s"
 msgid "its app-menu entry is missing (Reinstall adds it)"
 msgstr "het item in het appmenu ontbreekt (Opnieuw installeren voegt het toe)"
 
-# needs review
 #: packs/integrations/moonlight-xr/uninstall.sh
 msgid ""
-"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game from your library), and unpair the Frame in Sunshine."
 msgstr ""
-"Je instellingen en koppeling behouden in %s. Verwijder het item uit de Steam-bibliotheek in Steam (Beheren, Niet-Steam-game verwijderen), en ontkoppel de Frame in Sunshine."
+"Je instellingen en koppeling behouden in %s. Verwijder het item uit de Steam-bibliotheek in Steam (Beheren, Niet-Steam-spel uit je bibliotheek verwijderen), en ontkoppel de Frame in Sunshine."
 
 # needs review
 #: packs/integrations/nordvpn/README.md
@@ -10048,3 +10047,9 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ # needs review
 #~ msgid "the desktop isn't available"
 #~ msgstr "het bureaublad is niet beschikbaar"
+
+#~ # needs review
+#~ msgid ""
+#~ "Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+#~ msgstr ""
+#~ "Je instellingen en koppeling behouden in %s. Verwijder het item uit de Steam-bibliotheek in Steam (Beheren, Niet-Steam-game verwijderen), en ontkoppel de Frame in Sunshine."

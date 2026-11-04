@@ -7842,9 +7842,9 @@ msgstr "falta su entrada en el menú de apps (Reinstalar la agrega)"
 
 #: packs/integrations/moonlight-xr/uninstall.sh
 msgid ""
-"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+"Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game from your library), and unpair the Frame in Sunshine."
 msgstr ""
-"Se conservaron tu configuración y la vinculación en %s. Quita su entrada de la biblioteca de Steam en Steam (Administrar, Eliminar juego que no es de Steam) y desvincula el Frame en Sunshine."
+"Se conservaron tu configuración y la vinculación en %s. Quita su entrada de la biblioteca de Steam en Steam (Administrar, Eliminar un juego que no es de Steam) y desvincula el Frame en Sunshine."
 
 #: packs/integrations/nordvpn/README.md
 msgid "NordVPN (WireGuard)"
@@ -9607,3 +9607,8 @@ msgstr "Instalador de ajustes"
 
 #~ msgid "the desktop isn't available"
 #~ msgstr "el escritorio no está disponible"
+
+#~ msgid ""
+#~ "Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
+#~ msgstr ""
+#~ "Se conservaron tu configuración y la vinculación en %s. Quita su entrada de la biblioteca de Steam en Steam (Administrar, Eliminar juego que no es de Steam) y desvincula el Frame en Sunshine."
