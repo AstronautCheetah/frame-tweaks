@@ -23,6 +23,7 @@ experimental: >-
   Debugging is on, programs on the headset can control Steam's interface; turn it off when you
   stop using KnockThru.
 icon: {file: knockthru-logo.svg}
+run: {label: Start}
 processes: [/KnockThru/knockthru( |$)]
 config: [~/.config/knockthru]
 link:
@@ -85,6 +86,10 @@ The first time you open its **KnockThru** tab in the SteamVR dashboard, a short 
 pick your knocks, calibrate them and try them. The **KnockThru On** switch at the top pauses
 knocking. Its [README](https://github.com/VioletTides/KnockThru#readme) covers the knocks, the
 settings and the troubleshooting.
+
+**Start** on its row in the Frame Tweaks window starts it when SteamVR is running and it isn't
+(it quit, say), without restarting SteamVR; if it's no longer registered with SteamVR, its own
+`--install` registers it again first (`./install.sh run knockthru` does the same).
 
 - **Three buzzes after a knock:** it heard you but couldn't change passthrough. Usually CEF
   Remote Debugging is off, or a Steam update moved the Room View button; its tab says which.

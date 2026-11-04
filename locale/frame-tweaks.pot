@@ -7161,8 +7161,33 @@ msgid "KnockThru"
 msgstr ""
 
 #: packs/third-party/knockthru/README.md
+msgid "Start"
+msgstr ""
+
+#: packs/third-party/knockthru/README.md
 msgid ""
 "VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
+msgstr ""
+
+#: packs/third-party/knockthru/run.sh
+msgid ""
+"Already running: knock twice to turn passthrough on or off; its settings are in its tab in the SteamVR dashboard."
+msgstr ""
+
+#: packs/third-party/knockthru/run.sh
+msgid "Could not start KnockThru: %s writes a report for its author."
+msgstr ""
+
+#: packs/third-party/knockthru/run.sh
+msgid "Not installed: tick KnockThru and Apply changes first."
+msgstr ""
+
+#: packs/third-party/knockthru/run.sh
+msgid "Started: knock twice to turn passthrough on or off."
+msgstr ""
+
+#: packs/third-party/knockthru/run.sh
+msgid "SteamVR is not running: KnockThru starts with it."
 msgstr ""
 
 #: packs/third-party/menu-icons/README.md

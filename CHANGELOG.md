@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+- **KnockThru has a Start button:** it starts KnockThru when SteamVR runs and it doesn't (after
+  it quit, say), without restarting SteamVR.
+
 ### For pack authors
 - **`lib/vrbindings.py`** (experimental): a tweak can change a SteamVR controller binding (drop
   or change one input, such as the system button's long press) and put it back on uninstall,
