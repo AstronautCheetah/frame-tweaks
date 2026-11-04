@@ -27,6 +27,8 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **Scroll strips' gear clear of SteamVR's resize handle:** at the bottom right of a window, where
+  SteamVR draws its resize handle, the gear sits half as far again out from the corner.
 - **Tooltips in the headset for the dashboard's icon buttons:** Android Mirror's and Scroll
   strips' buttons without a word on them (the ⚙, ✕, the PIN pad's ⌫ and ↵, the keypad's arrows,
   the phone's buttons, the colour swatches) had tooltips that never showed in VR. They now come
@@ -36,9 +38,9 @@
 - **One screen snip at a time:** pressing Arrow Pad's Snip again (or opening Screen snip from the
   menu) while a selection was open laid another full-screen selection over it. Another start now
   leaves the open one as it is.
-- **ⓘ, ⚙ and ↻ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
+- **ⓘ, ⚙, ↻ and ⟳ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
   window's font has no such symbols, and SteamOS now filled them from a narrow monospace font.
-  Noto's symbol fonts and Adwaita Sans draw them now.
+  Noto's symbol fonts and Noto Sans Math draw them now (⟳ in Check for updates too).
 - **Narrate reads light text on dark backgrounds:** a snip of white text on dark buttons (the Frame
   Tweaks window's own) gave "no text found". When the first reading finds little, it reads a
   cleaned-up copy too (grey, larger, black on white) and keeps whichever has more.

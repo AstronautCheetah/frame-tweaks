@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 30;
+  const NAME = 'scroll-strips', VERSION = 31;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -264,8 +264,11 @@
     const id = page.GetPanelAnchorID(left ? ANCHOR.CenterLeft : ANCHOR.CenterRight);
     if (!id) return [];
     const isOpen = settingsOpen.has(f.frameID), size = Math.max(t, GEAR_M * k * 0.8);
+    // Bottom right is where SteamVR draws a window's resize handle: there the gear sits half as far
+    // again out from the corner, or pointing at one reached the other.
+    const out_ = !left && bottom ? 1.5 : 1;
     const out = [el(XFORM, { key: `${f.frameID}-sgear`, parent_id: id,
-                            translation: { x: side * (g + t / 2), y: (bottom ? -1 : 1) * (H / 2 + g + t / 2), z: -o.back * k } },
+                            translation: { x: side * out_ * (g + t / 2), y: (bottom ? -1 : 1) * (H / 2 + out_ * (g + t / 2)), z: -o.back * k } },
       el(PANEL, { key: `${f.frameID}-sgear-p`, width: size, interactive: true, only_visible_with_laser: false,
         debug_name: 'SftScrollGear', origin: ANCHOR.Center, inputFocusParams: { bCanTakeKeyboardFocus: false } },
         el('div', { style: { width: '64px', height: '64px', borderRadius: '50%', boxSizing: 'border-box', display: 'flex',

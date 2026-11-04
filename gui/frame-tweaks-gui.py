@@ -1556,9 +1556,10 @@ def _longer_tooltips(app):
 # Fonts for the symbols the window draws as text (ⓘ, ⚙, ↻, ▶, ✕…), tried after the window's own:
 # its font (Noto Sans) has none of them, and fontconfig's fallback picks the next font that does.
 # SteamOS 0.5.7's beta ranks Adwaita Mono second, a monospace font whose narrow cells drew ⓘ, ⚙ and
-# ↻ squeezed sideways; Noto's symbol fonts draw ⓘ and ⚙ at their own width, and Adwaita Sans (the
-# proportional one, on SteamOS since 0.5.7's beta) has ↻, which neither Noto symbol font has.
-SYMBOL_FONTS = ["Noto Sans Symbols", "Noto Sans Symbols 2", "Adwaita Sans"]
+# ↻ squeezed sideways. Noto's symbol fonts draw ⓘ, ⚙, ▶, ✕ and the rest at their own width, Noto
+# Sans Math the arrows they lack (↻, ⟳, ↩); Adwaita Sans (proportional) last, for anything else.
+# (Checked on the Frame: every symbol in gui/ is in one of these.)
+SYMBOL_FONTS = ["Noto Sans Symbols", "Noto Sans Symbols 2", "Noto Sans Math", "Adwaita Sans"]
 
 
 def _symbol_fonts(app):

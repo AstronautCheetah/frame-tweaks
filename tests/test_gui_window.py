@@ -296,6 +296,6 @@ class SymbolFonts(unittest.TestCase):
         gui._symbol_fonts(app)
         fams = app.font().families()
         self.assertEqual(fams[0], before.families()[0] if before.families() else before.family())
-        self.assertEqual(fams[-3:], ["Noto Sans Symbols", "Noto Sans Symbols 2", "Adwaita Sans"])
+        self.assertEqual(fams[-4:], ["Noto Sans Symbols", "Noto Sans Symbols 2", "Noto Sans Math", "Adwaita Sans"])
         gui._symbol_fonts(app)                                  # (twice: no duplicates)
         self.assertEqual(app.font().families().count("Noto Sans Symbols"), 1)
