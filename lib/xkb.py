@@ -270,8 +270,9 @@ def let_go(down):
 
 def main(argv):
     """xkb.py ydotool TEXT: prints the `ydotool key` events that type TEXT on KDE's current layout
-    (exit 0); exit 3 for the plain US layout (ydotool type is right there); exit 2, printing them,
-    when characters have no key on the layout; 1 when the layout can't be compiled.
+    (exit 0); exit 3 for the plain US layout when TEXT is printable ASCII (ydotool type is right
+    there); exit 2, printing them, when characters have no key on the layout (on the US layout:
+    those outside ASCII); 1 when the layout can't be compiled.
     xkb.py let-go: prints the `ydotool key` events that let go of the modifiers held down on
     ydotoold's keyboard (nothing when none is)."""
     if argv[1:] == ["let-go"]:
@@ -282,6 +283,13 @@ def main(argv):
         return 1
     kb = kde_keyboard()
     if is_us(kb):
+        # ydotool type looks each byte up in a 128-entry table with no bounds check, and on aarch64
+        # (char unsigned) the UTF-8 bytes of é, ’, — or ° read past it: random keys, shortcuts among
+        # them. Only what the table holds goes to it; the rest is pasted, as on another layout.
+        missing = [ch for ch in argv[2] if not (" " <= ch <= "~" or ch in "\n\t")]
+        if missing:
+            print("".join(dict.fromkeys(missing)))
+            return 2
         return 3
     try:
         print(" ".join(Keymap(**kb).ydotool(argv[2])))

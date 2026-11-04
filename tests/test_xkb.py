@@ -141,6 +141,15 @@ class Command(unittest.TestCase):
         self.assertEqual(self.run_xkb("[Layout]\nLayoutList=us\nVariantList=intl\n", "'")[0], 0)   # (' is a dead key)
         self.assertEqual(self.run_xkb("[Layout]\nLayoutList=fr\n", "a漢"), (2, "漢"))
 
+    def test_us_layout_types_only_ascii(self):
+        """ydotool type reads each byte from a 128-entry table without a bounds check: on the
+        Frame (aarch64, char unsigned) the UTF-8 bytes of é, ’, — or ° went out as random keys.
+        On the US layout (or one that can't be read), text outside printable ASCII is pasted (2)."""
+        self.assertEqual(self.run_xkb(None, "Tab\there\nand ~{}"), (3, ""))
+        self.assertEqual(self.run_xkb(None, "Café, 20°C — it’s fine"), (2, "é°—’"))
+        self.assertEqual(self.run_xkb("[Layout]\nLayoutList=us\n", "naïve"), (2, "ï"))
+        self.assertEqual(self.run_xkb(None, "bell\a"), (2, "\a"))
+
 
 def bits(*codes):
     """A key bitmap (EVIOCGKEY's) with these keys down."""

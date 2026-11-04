@@ -48,6 +48,7 @@ WHISPER="$HOME/.local/lib/whisper-frame/whisper-cli"
 # Vocabulary hint so Whisper spells these words correctly.
 PROMPT="${DICTATE_PROMPT:-SteamOS, Steam Frame, SteamVR, KDE Plasma.}"
 MAX_SECONDS="${DICTATE_MAX_SECONDS:-300}"
+[[ $MAX_SECONDS =~ ^[0-9]+$ ]] || MAX_SECONDS=300     # (whole seconds: the auto-stop counts them)
 # Greedy decoding (1): on the Frame's CPU about 1.5 times as fast as whisper.cpp's default beam search
 # (5), with the same text in our trials. DICTATE_BEAM=5 brings the beam search back.
 BEAM="${DICTATE_BEAM:-1}"
@@ -165,7 +166,10 @@ paste_text() {
 }
 
 if [ "${1:-}" = --status ]; then
-    if alive "$PID"; then echo recording; elif alive "$BUSY"; then echo transcribing; else echo idle; fi
+    # A rec.pid whose pw-record ended by itself (the microphone gone) is waiting for its transcription:
+    # the auto-stop timer (or --ptt's loop) starts it within half a second. Not idle: a --ptt started
+    # meanwhile would run the toggle into transcribing that old recording instead of recording.
+    if alive "$PID"; then echo recording; elif [ -f "$PID" ] || alive "$BUSY"; then echo transcribing; else echo idle; fi
     exit 0
 fi
 
@@ -305,17 +309,22 @@ transcribe() {   # transcribe <wav>: runs after the lock is released
     # the next dictation replaces: to find out why, play it, or run the engine on it again)
     if [ -z "$text" ]; then cp -f "$wav" "$STATE/last-no-text.wav"; fi
     mv -f "$wav" "$STATE/last.wav"
-    rm -f "$BUSY"
-    if [ -z "$text" ]; then log "no speech ($(engine) heard nothing; kept in last-no-text.wav)"; notify "$(t 'No speech detected')"; status_out idle; return; fi
+    if [ -z "$text" ]; then
+        rm -f "$BUSY"
+        log "no speech ($(engine) heard nothing; kept in last-no-text.wav)"; notify "$(t 'No speech detected')"; status_out idle; return
+    fi
     # Trailing space after a finished sentence, so the next dictation flows on.
     [[ "$text" =~ [.?!]$ ]] && text="$text "
     [ ! -f "$HISTORY" ] || chmod 600 "$HISTORY"          # (an older one was readable by everyone)
     printf '%s\t%s\n' "$(date '+%F %T')" "$text" >> "$HISTORY"
     log "text: $text"
     printf '%s' "$text" | setsid wl-copy 2>>"$LOG" || log "wl-copy failed (WAYLAND_DISPLAY=$WAYLAND_DISPLAY)"
+    # Busy until the text is typed: a --ptt whose recording another press stopped says idle when
+    # busy.pid goes, and its program may start the next one while this text is still being typed.
     if [ -z "${DICTATE_NOTYPE:-}" ]; then
-        type_text "$text" || { status_out "done" "$text"; return 0; }          # (it said so)
+        type_text "$text" || { rm -f "$BUSY"; status_out "done" "$text"; return 0; }          # (it said so)
     fi
+    rm -f "$BUSY"
     notify "$(t 'Copied to clipboard')" "$text"
     status_out "done" "$text"
 }
@@ -329,8 +338,13 @@ if [ "${1:-}" = --ptt ]; then
     stop=""; trap 'stop=1' USR1
     DICTATE_PTT=1 "$0" || exit
     rec=$(cat "$PID" 2>/dev/null)
-    while [ -z "$stop" ] && [ -n "$rec" ] && [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; do sleep 0.1; done
-    if [ -n "$stop" ] && [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then DICTATE_PTT=1 exec "$0"; fi
+    # Until the button is let go, or pw-record ends by itself (the microphone gone): then what it
+    # caught is transcribed now, by us (the JSON lines are ours), not by whatever press comes next.
+    while [ -z "$stop" ] && [ -n "$rec" ] && [ "$(cat "$PID" 2>/dev/null)" = "$rec" ] && kill -0 "$rec" 2>/dev/null; do
+        sleep 0.1
+    done
+    # (USR1 ignored from here: the button let go during that transcription would otherwise end it)
+    if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then trap '' USR1; DICTATE_PTT=1 exec "$0"; fi
     # (stopped some other way, Dictation's own button or the auto-stop, which transcribed it)
     while alive "$BUSY"; do sleep 0.2; done
     status_out idle
@@ -353,11 +367,13 @@ if [ -f "$PID" ]; then
     wav=$(cat "$CUR")
     # A quarter of a second more first: a stop pressed on the last word would cut it off.
     if alive "$PID"; then sleep 0.25; kill -INT "$(cat "$PID")"; else log "the recording had ended by itself"; fi
+    # Busy before rec.pid goes: a --ptt waiting on this recording (stopped by this press) says idle
+    # as soon as it sees neither, before the text has come.
+    echo $$ > "$BUSY"
     rm -f "$PID"
     # Its auto-stop timer goes too (it slept on for MAX_SECONDS; only if it's still a dictate).
     t=$(cat "$TIMER" 2>/dev/null) && grep -qs dictate "/proc/$t/cmdline" && kill "$t" 2>/dev/null
     rm -f "$TIMER"
-    echo $$ > "$BUSY"                 # mark busy before unlocking
     flock -u 9; exec 9>&-
     sleep 0.3
     transcribe "$wav"
@@ -385,12 +401,21 @@ else
     echo "$rec" > "$PID"; echo "$wav" > "$CUR"
     log "start pid $rec"
     # Safety net: stop a forgotten recording after MAX_SECONDS (if it's still this one: the toggle
-    # then stops and transcribes it, or, if pw-record ended by itself, transcribes what it caught).
-    # (Its sleep in the background, so that the stop above, killing it, ends the sleep too.)
+    # then stops and transcribes it). And when pw-record ends by itself (the microphone gone, a
+    # Bluetooth or USB one), what it caught is transcribed now, as at the auto-stop: left for the
+    # next press, that press transcribed it though every view (--status, Arrow Pad's 🎤) said idle,
+    # so a push to talk got old text instead of recording. (Not for --ptt's recordings: its loop
+    # does that itself, so its JSON lines say so.) (Its sleeps in the background, so that the stop
+    # above, killing it, ends the sleep too.)
     ( exec 9>&-; trap 'kill "$s" 2>/dev/null; exit 0' TERM
-      sleep "$MAX_SECONDS" & s=$!; wait "$s"
+      end=$((SECONDS + MAX_SECONDS))
+      while [ "$SECONDS" -lt "$end" ] && { [ -n "${DICTATE_PTT:-}" ] || kill -0 "$rec" 2>/dev/null; }; do
+          sleep 0.5 & s=$!; wait "$s"
+      done
       if [ "$(cat "$PID" 2>/dev/null)" = "$rec" ]; then
-          log "auto-stop after ${MAX_SECONDS}s"; rm -f "$LAST" "$TIMER"; exec "$0"     # ($TIMER: that's us)
+          if kill -0 "$rec" 2>/dev/null; then log "auto-stop after ${MAX_SECONDS}s"
+          else log "the recording ended by itself (the microphone gone?): transcribing what it caught"; fi
+          rm -f "$LAST" "$TIMER"; exec "$0"     # ($TIMER: that's us)
       fi
     ) >/dev/null 2>&1 &
     echo $! > "$TIMER"

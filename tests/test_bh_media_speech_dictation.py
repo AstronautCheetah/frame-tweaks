@@ -3,7 +3,7 @@ the tools that would download, record, play or notify. A speech.conf without a l
 the engine chosen, or reset) is English (US): nothing to download, a real language for
 speech-dispatcher. Without speech-dispatcher (SteamOS 0.5.6 removed it) Speech still installs, for
 Narrate, and an earlier speech-dispatcher setup is undone. A recording that ended by itself is
-transcribed (by the next press, or the auto-stop), not "auto-stopped" into a new one. Installing
+transcribed at once, not left for the next press nor "auto-stopped" into a new one. Installing
 removes the models older versions downloaded, unless the settings use one. Every setting the
 README lists is in the example settings file. Whisper decodes greedily, on a context sized to the
 clip, with voice activity detection (unless turned off) when its model is there; quiet speech is raised first; an
@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from helpers import sandbox_env, stub  # noqa: E402
+from helpers import sandbox_env, stub, wait_until  # noqa: E402
 import xkb  # noqa: E402  (lib/, put on sys.path by helpers)
 SPEECH = ROOT / "packs/core/speech"
 DICTATION = ROOT / "packs/core/dictation"
@@ -172,21 +172,30 @@ class DictateAutoStop(Home):
         self.assertEqual(log.count("record "), 1, log)
         self.assertEqual(dictate("--status").stdout.strip(), "idle")
 
-    def test_the_next_press_transcribes_a_recording_that_ended_by_itself(self):
-        """Pressed again after pw-record ended by itself: that recording is transcribed (its file
-        kept as last.wav), as when it's still running. It started a new recording instead, the
-        last one's file left behind."""
-        dictate = self.dictate(2)
+    def test_a_recording_that_ended_by_itself_is_transcribed_at_once(self):
+        """pw-record ended by itself (a Bluetooth or USB microphone gone): what it caught is
+        transcribed at once (its file kept as last.wav), as at the auto-stop, and the next press
+        records anew. Left for the next press, that press transcribed it though --status (and Arrow
+        Pad's 🎤) said idle, so a push to talk got the old text instead of recording."""
+        dictate = self.dictate(300)
         self.assertEqual(dictate().returncode, 0)
-        time.sleep(0.8)                           # (within 0.7 s, a press is a double tap: ignored)
-        r = dictate()
-        self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(self.typed(), ["ydotool type --key-delay 2 -- Hello from the recording. "])
         self.assertEqual([p.name for p in (self.run / "dictate").glob("*.wav")], ["last.wav"])
-        time.sleep(1.5)                           # the auto-stop timer (2 s) finds nothing to do
+        self.assertTrue(wait_until(lambda: dictate("--status").stdout.strip() == "idle", 10))
+        time.sleep(0.8)                           # (within 0.7 s, a press is a double tap: ignored)
+        self.assertEqual(dictate().returncode, 0)
         log = self.log.read_text()
-        self.assertEqual((log.count("record "), log.count("whisper ")), (1, 1), log)
-        self.assertEqual(dictate("--status").stdout.strip(), "idle")
+        self.assertEqual((log.count("record "), log.count("whisper ")), (2, 1), log)
+
+    def test_a_recording_that_ended_by_itself_is_not_idle(self):
+        """Until its transcription starts (within half a second), a rec.pid whose pw-record is gone
+        is no idle Dictation: a push to talk then would run the toggle into transcribing it."""
+        dictate = self.dictate(300)
+        (self.run / "dictate").mkdir(parents=True)
+        gone = subprocess.Popen(["true"])
+        gone.wait()
+        (self.run / "dictate/rec.pid").write_text(f"{gone.pid}\n")
+        self.assertEqual(dictate("--status").stdout.strip(), "transcribing")
 
     def test_stopping_a_recording_ends_its_auto_stop_timer(self):
         """A recording stopped by a press left its auto-stop timer sleeping out MAX_SECONDS (300 by
@@ -315,6 +324,60 @@ class DictateTyping(Home):
         self.assertIn("ydotool type --key-delay 2 -- Hello from Cuff. ", log)
         self.assertFalse([line for line in log if line.startswith("notify")])
 
+    def test_push_to_talk_transcribes_a_recording_that_ended_by_itself(self):
+        """pw-record ended while the button is held (the microphone gone): what it caught is
+        transcribed then, with our JSON lines, not left for the next press; the button let go
+        meanwhile doesn't cut that transcription short."""
+        import json
+        import signal
+        import threading
+        self.dictate("warm up")
+        self.log.write_text("")
+        bin_, script = self.home / ".local/bin", self.tmp / "dictate"
+        self.stub(bin_, "pw-record", 'for f; do :; done; echo RIFF > "$f"')          # (ends at once)
+        self.stub(bin_, "whisper-cli", "sleep 0.5; printf '%s\\n' 'Caught before it went.'")
+        env = {**sandbox_env(self.home), "DICTATE_STATUS": "stdout"}
+        p = subprocess.Popen(["bash", str(script), "--ptt"], env=env, stdout=subprocess.PIPE, text=True)
+        self.addCleanup(p.kill)
+        let_go = threading.Timer(8, lambda: p.poll() is None and p.send_signal(signal.SIGUSR1))   # (if it waits)
+        let_go.start()
+        self.addCleanup(let_go.cancel)
+        start = time.monotonic()
+        self.assertEqual(json.loads(p.stdout.readline())["phase"], "listening")
+        self.assertEqual(json.loads(p.stdout.readline())["phase"], "transcribing")
+        self.assertLess(time.monotonic() - start, 6, "not transcribed until the button was let go")
+        p.send_signal(signal.SIGUSR1)                                                  # (let go now)
+        rest = [json.loads(line) for line in p.stdout]
+        self.assertEqual(p.wait(timeout=60), 0)
+        self.assertEqual(rest, [{"phase": "done", "text": "Caught before it went. "}])
+        self.assertIn("ydotool type --key-delay 2 -- Caught before it went. ", self.log.read_text())
+
+    def test_push_to_talk_stopped_by_another_press_is_idle_after_the_text(self):
+        """A push to talk whose recording Dictation's own button stopped says idle once that
+        press's text is in: it said so while the press was still between rec.pid and busy.pid (a
+        slow look at the auto-stop timer here), or while the text was still being typed."""
+        import json
+        import shutil
+        self.dictate("warm up")
+        self.log.write_text("")
+        bin_, script = self.home / ".local/bin", self.tmp / "dictate"
+        grep = shutil.which("grep")
+        self.stub(bin_, "grep", f'case "$*" in */proc/*/cmdline*) sleep 0.5;; esac; exec {grep} "$@"')
+        self.stub(bin_, "ydotool", f'sleep 0.3; echo "ydotool $*" >> {self.log}')
+        env = sandbox_env(self.home)
+        p = subprocess.Popen(["bash", str(script), "--ptt"], env={**env, "DICTATE_STATUS": "stdout"},
+                             stdout=subprocess.PIPE, text=True)
+        self.addCleanup(p.kill)
+        self.assertEqual(json.loads(p.stdout.readline())["phase"], "listening")
+        time.sleep(0.8)                           # (within 0.7 s, a press is a double tap: ignored)
+        press = subprocess.Popen(["bash", str(script)], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.addCleanup(press.kill)
+        self.assertEqual([json.loads(line)["phase"] for line in p.stdout], ["idle"])
+        typed = [line for line in self.log.read_text().splitlines() if line.startswith("ydotool type")]
+        self.assertEqual(p.wait(timeout=60), 0)
+        self.assertEqual(press.wait(timeout=60), 0)
+        self.assertEqual(typed, ["ydotool type --key-delay 2 -- warm up"])
+
     def test_push_to_talk_says_busy_while_dictation_records(self):
         self.dictate("warm up")
         script, env = self.tmp / "dictate", sandbox_env(self.home)
@@ -332,6 +395,15 @@ class DictateTyping(Home):
         self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Hello, world. ")
         log = self.dictate("Hi", "[Layout]\nLayoutList=us\nUse=true\n")
         self.assertIn("ydotool type --key-delay 2 -- Hi", log)
+
+    def test_us_keyboard_pastes_what_isnt_ascii(self):
+        """ydotool type has keys for ASCII alone and reads past its table for any other byte (on
+        the Frame, random keys): Whisper's é, ’ or ° on a US layout are pasted, the text whole."""
+        log = self.dictate("Café at 20°C, it’s fine.")
+        self.assertFalse([line for line in log if line.startswith("ydotool type")], log)
+        self.assertIn("copied primary Café at 20°C, it’s fine. ", log)
+        self.assertEqual(self.keys(log)[-1], "ydotool key --key-delay 11 42:1 110:1 110:0 42:0")
+        self.assertEqual(log[-1], "notify -a Dictation -t 1500 Copied to clipboard Café at 20°C, it’s fine. ")
 
     def test_modifiers_held_down_go_up_first(self):
         """Arrow Pad's latched Ctrl, down on the same ydotoold keyboard, turned the text into
