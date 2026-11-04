@@ -4,8 +4,9 @@ with a fake clock and a fake React tree (a button in a PANEL placed by an XFORM,
 A title: shows nothing in the headset (Chromium draws it in a popup window, never in the panels),
 so tip() draws the text as a panel of its own, timed as the desktop window's tooltips
 (lib/tooltips.py): 700 ms on the button, the laser's wobble not starting the wait again, gone on
-leaving or pressing, shown for twice Qt's time. What only the headset shows: that the panel is
-drawn, where it is, and that the laser's events arrive as pointer events."""
+leaving or pressing, shown for twice Qt's time. Events as Chromium sends them: the window's
+capture listeners first, then the button's own (bubbled up from its svg). What only the headset
+shows: that the panel is drawn, where it is, and how big."""
 import json
 import shutil
 import subprocess
@@ -31,6 +32,9 @@ const advance = (to) => {
   now = to;
 };
 globalThis.window = globalThis;
+const listeners = [];
+window.addEventListener = (type, fn, capture) => listeners.push([type, fn]);
+window.removeEventListener = (type, fn) => { const i = listeners.findIndex((l) => l[0] === type && l[1] === fn); if (i >= 0) listeners.splice(i, 1); };
 const S = JSON.parse(process.argv[1]);
 
 // The dashboard's tree: container > Holder (a mount) > XFORM > PANEL > the panel's top div > buttons.
@@ -43,8 +47,9 @@ const fiber = (type, props, stateNode, parent) => {
   if (stateNode) stateNode[FK] = f;
   return f;
 };
-const dom = (rect, title) => ({ isConnected: true, title, getBoundingClientRect: () => rect,
-                                getAttribute(n) { return n === 'title' ? this.title : null; } });
+const dom = (rect, title, parentNode = null) => ({ isConnected: true, title, parentNode, getBoundingClientRect: () => rect,
+  getAttribute(n) { return n === 'title' ? this.title : null; },
+  contains(x) { for (let n = x; n; n = n.parentNode) if (n === this) return true; return false; } });
 const container = fiber(null, null, null, null);
 const holder = fiber(Holder, {}, null, container);
 const xform = fiber(XFORM, { parent_id: 'anchor-L', translation: { x: -0.2, y: 0.1, z: -0.03 }, ...S.xform }, null, holder);
@@ -62,22 +67,41 @@ for (const [name, text, left] of [['a', 'Close', 1300], ['b', 'Volume up', 1100]
 }
 buttons.loose = dom({ left: 0, top: 0, width: 10, height: 10 }, 'Nowhere');     // (in no panel)
 buttons.loose.tip = 'Nowhere';
+buttons.a.svg = dom({ left: 1302, top: 512, width: 16, height: 16 }, undefined, buttons.a);    // (the icon in it)
+const elsewhere = dom({ left: 0, top: 0, width: 5, height: 5 });
 globalThis.document = { getElementById: () => ({ '__reactContainer$test': container }) };
 if (!S.noFrame) {
   globalThis.FrameStore = { frames: [{ activePage: { GetPanelAnchorID: (a) => (a === 3 ? 'anchor-L' : `other-${a}`),
                                                       size: { latestMeasuredPanelLocalHeight: 2, latestMeasuredPanelWorldHeight: 1 } } }] };
 }
 eval(require('fs').readFileSync(S.lib, 'utf8'));
-const L = window.__sftLib;
+let L = window.__sftLib;
+// The laser's events: the window's capture listeners, then the button's handler (React's, bubbled).
+const fire = (type, target, button, related) => {
+  const ev = { type, target, relatedTarget: related ?? null };
+  for (const [t, fn] of [...listeners]) if (t === type) fn(ev);
+  const props = button && L.tip(button.tip);
+  const handler = { pointerover: 'onPointerOver', pointermove: 'onPointerMove', mouseover: 'onMouseOver', mousemove: 'onMouseMove' }[type];
+  if (props && props[handler]) props[handler]({ ...ev, currentTarget: button });
+};
 
 const label = (piece) => piece.props.children.props.children.props.children;     // wrapper > XFORM > PANEL > div
 const out = [];
 for (const [ms, what, name] of S.steps) {
   advance(ms);
   const b = buttons[name];
-  if (what === 'enter') L.tip(b.tip).onPointerEnter({ currentTarget: b });
-  else if (what === 'leave') L.tip(b.tip).onPointerLeave({ currentTarget: b });
-  else if (what === 'down') L.tip(b.tip).onPointerDown({ currentTarget: b });
+  if (what === 'enter') { fire('pointerover', b, b); fire('mouseover', b, b); fire('pointermove', b, b); }
+  else if (what === 'icon') { fire('pointerover', b.svg, b); fire('mousemove', b.svg, b); }   // (on its svg: still on it)
+  else if (what === 'leave') { fire('pointerover', elsewhere, null); fire('pointermove', elsewhere, null); }
+  else if (what === 'offpage') fire('pointerout', b, b, null);
+  else if (what === 'down') { fire('pointerdown', b.svg ?? b, null); fire('mousedown', b.svg ?? b, null); }
+  else if (what === 'newlib') {
+    window.__sftPatches = { p: { version: 7 } };
+    window.__sftLibWanted = 'another';
+    eval(require('fs').readFileSync(S.lib, 'utf8'));
+    L = window.__sftLib;
+    out.push({ patch: window.__sftPatches.p.version, listeners: listeners.length });
+  }
   else if (what === 'detach') b.isConnected = false;
   else if (what === 'retitle') b.title = 'Open the settings';
   else if (what === 'check') {
@@ -121,18 +145,18 @@ class Tooltips(unittest.TestCase):
         c = self.run_js([[0, "enter", "a"], [800, "check", "a"]])[0]
         self.assertEqual(c["parent"], "anchor-L")
         self.assertAlmostEqual(c["at"]["x"], -0.37 + 0.310)
-        self.assertAlmostEqual(c["at"]["y"], 0.44 - 0.010 + 0.006 * 2)          # GAP_M, in the window's units
+        self.assertAlmostEqual(c["at"]["y"], 0.44 - 0.010 + 0.012 * 2)          # GAP_M, in the window's units
         self.assertAlmostEqual(c["at"]["z"], 0.004 * 2)                         # in front of the plane, not set back
         self.assertEqual((c["origin"], c["interactive"], c["edge"], c["other"]), (7, False, "0px", None))
         text_px = min(560, -(-len("Close") * 20 * 0.55 // 1) + 2 * 10 + 8)      # (Node has no canvas: the estimate)
-        self.assertAlmostEqual(c["width"], text_px * 0.0005 * 2)
+        self.assertAlmostEqual(c["width"], text_px * 0.001 * 2)               # (1 mm a px: 2 cm letters)
 
     def test_the_panels_origin_and_curve_are_followed(self):
         """A panel hung by its top centre, curved: the tooltip bends with it."""
         c = self.run_js([[0, "enter", "a"], [800, "check", "a"]],
                         xform={"translation": {"x": 0, "y": 0, "z": 0.002}}, panel={"origin": 1, "curvature_origin_id": "curve-1"})[0]
         self.assertAlmostEqual(c["at"]["x"], -0.17 + 0.310)
-        self.assertAlmostEqual(c["at"]["y"], 0 - 0.010 + 0.012)
+        self.assertAlmostEqual(c["at"]["y"], 0 - 0.010 + 0.024)
         self.assertAlmostEqual(c["at"]["z"], 0.002 + 0.008)
         self.assertEqual(c["curve"], "curve-1")
 
@@ -143,6 +167,26 @@ class Tooltips(unittest.TestCase):
     def test_a_wobble_off_the_edge_and_back_does_not_start_the_wait_again(self):
         self.assertEqual(self.shown([[0, "enter", "a"], [300, "leave", "a"], [400, "enter", "a"], [700, "check", "a"]]),
                          ["Close"])
+
+    def test_moves_on_its_icon_keep_it_on_the_button(self):
+        self.assertEqual(self.shown([[0, "enter", "a"], [200, "icon", "a"], [400, "icon", "a"], [699, "check", "a"],
+                                     [700, "check", "a"], [900, "icon", "a"], [1500, "check", "a"]]), [None, "Close", "Close"])
+
+    def test_off_the_page_is_a_leave(self):
+        self.assertEqual(self.shown([[0, "enter", "a"], [800, "offpage", "a"], [949, "check", "a"], [950, "check", "a"]]),
+                         ["Close", None])
+
+    def test_the_laser_resting_keeps_sending_moves_and_it_still_shows(self):
+        """(moves every 11 ms on the button, as a laser's: none of them starts the wait again)"""
+        steps = [[t, "enter", "a"] for t in range(0, 700, 11)]
+        self.assertEqual(self.shown(steps + [[700, "check", "a"]]), ["Close"])
+
+    def test_a_newer_lib_reloads_the_patches_and_takes_over(self):
+        """A patch injected before a newer lib.js kept the old helpers (Android Mirror's gear without
+        tooltips): a lib.js replacing another clears the patches' versions, so they load again."""
+        out = self.run_js([[0, "enter", "a"], [100, "newlib", "a"], [800, "check", "a"]])
+        self.assertEqual(out[0], {"patch": None, "listeners": 8})                # (the old watcher gone)
+        self.assertIsNone(out[1])                                                # (and its wait with it)
 
     def test_leaving_for_longer_starts_it_again(self):
         self.assertEqual(self.shown([[0, "enter", "a"], [300, "leave", "a"], [500, "enter", "a"],

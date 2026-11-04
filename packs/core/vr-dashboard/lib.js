@@ -11,6 +11,16 @@
   // scroll strips' haptics called a function the loaded copy didn't have).
   const VERSION = window.__sftLibWanted ?? 2;
   if (window.__sftLib?.version === VERSION) return 'already loaded';
+  // A patch keeps the lib.js it was injected with (L), and is injected again only when its own
+  // VERSION changes: one injected just before a newer lib.js (they come from different tweaks'
+  // installs) kept the old helpers, and Android Mirror's gear came without tooltips. So a lib.js
+  // that replaces another clears every running patch's version: sft-dashboard injects the patches
+  // right after this file, each sees a version not its own, stops its old copy and starts on this.
+  const older = window.__sftLib;
+  if (older) {
+    try { older.stopTips?.(); } catch (e) {}
+    for (const p of Object.values(window.__sftPatches ?? {})) if (p && typeof p === 'object') p.version = null;
+  }
   const DOCK = { Dashboard: 1, World: 4 };
   // Panel anchors, for GetPanelAnchorID (a window has no Center anchor of its own).
   const ANCHOR = { TopCenter: 1, CenterLeft: 3, Center: 4, CenterRight: 5, BottomCenter: 7 };
@@ -102,13 +112,19 @@
   // (lib/tooltips.py): after 700 ms on the button; the laser's wobble doesn't start the wait again
   // (moves on the button never do, and leaving it for less than TIP.GRACE_MS doesn't either);
   // gone on leaving it or on a press, and after twice Qt's time (20 s, longer for long texts).
-  // Pointer events, not mouse ones: the patches' own onMouseEnter / onMouseDown (haptics, own())
-  // keep theirs, and Chromium sends both for every move and press of the laser.
+  // Not React's onPointerEnter / onPointerLeave: the laser's pointerover events reached the page
+  // (482 in a few minutes) but never started a wait through them. So: any over or move on the
+  // button (bubbling up from its svg too) is "on it", and one listener on the window, in the
+  // capture phase (before own()'s stopPropagation), sees the pointer land anywhere else (a leave),
+  // leave the page, or press. Over and move only on the button, mouse and pointer both: the
+  // patches' own onMouseEnter / onMouseDown (haptics, own()) keep theirs.
   const TIP = { WAIT_MS: 700, GRACE_MS: 150, REVEAL_MS: 120,
-                FONT_PX: 20, PAD_PX: 10, MAX_PX: 560, M_PER_PX: 0.0005,       // (20 px: 1 cm letters)
-                GAP_M: 0.006, LIFT_M: 0.004 };
+                // (20 px at 1 mm: 2 cm letters; 1 cm was too small, tried in VR)
+                FONT_PX: 20, PAD_PX: 10, MAX_PX: 560, M_PER_PX: 0.001,
+                GAP_M: 0.012, LIFT_M: 0.004 };
   const tipMs = (text) => 2 * (10000 + 40 * Math.max(0, text.length - 100));   // (qt_default_ms, twice)
-  const tips = { on: null, text: '', wait: 0, grace: 0, hide: 0, shown: null, n: 0 };
+  const tips = { on: null, text: '', wait: 0, grace: 0, hide: 0, shown: null, n: 0,
+                 seen: { starts: 0, leaves: 0, presses: 0, shows: 0, unplaced: 0 } };     // (tipState())
   const redraws = new Map();             // mount key -> redraw (mount())
   const fiberOf = (node) => {
     const k = node && Object.keys(node).find((n) => n.startsWith('__reactFiber$') || n.startsWith('__reactInternalInstance$'));
@@ -210,7 +226,8 @@
     // (the title as it is now: a button's text can change with its state, the gear's on opening)
     const text = target.getAttribute?.('title') || tips.text;
     const s = text && place(target, text);
-    if (!s) return;
+    if (!s) { tips.seen.unplaced++; return; }
+    tips.seen.shows++;
     tips.shown = s;
     redrawTip(s.owner);
     // Its first drawing see-through: a panel made anew can be drawn for a moment somewhere else
@@ -218,29 +235,45 @@
     setTimeout(() => { if (tips.shown === s) { s.ready = true; redrawTip(s.owner); } }, TIP.REVEAL_MS);
     tips.hide = setTimeout(hideTip, tipMs(text));
   };
-  const tipEnter = (target, text) => {
-    if (tips.on === target) { clearTimeout(tips.grace); return; }      // (back within the grace: as if never gone)
+  const tipHere = (target, text) => {
+    if (tips.on === target) { clearTimeout(tips.grace); tips.grace = 0; return; }   // (back within the grace: as if never gone)
     dropTip();
+    tips.seen.starts++;
     tips.on = target;
     tips.text = text;
     tips.wait = setTimeout(wakeTip, TIP.WAIT_MS);
   };
-  const tipLeave = (target) => {
-    if (tips.on !== target) return;
-    clearTimeout(tips.grace);
+  const tipLeave = () => {
+    if (!tips.on || tips.grace) return;          // (the first leave counts: later moves don't put it off)
+    tips.seen.leaves++;
     tips.grace = setTimeout(dropTip, TIP.GRACE_MS);
   };
-  const tipPress = (target) => {    // (gone, and not back until the laser leaves and comes again)
-    if (tips.on !== target) return;
+  const tipPress = () => {          // (gone, and not back until the laser leaves and comes again)
+    tips.seen.presses++;
     clearTimeout(tips.wait);
     hideTip();
   };
-  const tip = (text) => ({
-    title: text,                    // (kept: a desktop browser on the DevTools port still shows it)
-    onPointerEnter: (ev) => tipEnter(ev.currentTarget, text),
-    onPointerLeave: (ev) => tipLeave(ev.currentTarget),
-    onPointerDown: (ev) => tipPress(ev.currentTarget),
-  });
+  const watchTips = (ev) => {
+    const on = tips.on;
+    if (!on) return;
+    let inside = false;
+    try { inside = !!ev.target && on.contains(ev.target); } catch (e) {}
+    const type = ev.type;
+    if (type === 'pointerdown' || type === 'mousedown') { if (inside) tipPress(); }
+    else if (type === 'pointerout' || type === 'mouseout') { if (!ev.relatedTarget) tipLeave(); }   // (off the page)
+    else if (!inside) tipLeave();
+  };
+  const WATCHED = ['pointerover', 'pointermove', 'mouseover', 'mousemove', 'pointerout', 'mouseout', 'pointerdown', 'mousedown'];
+  try { for (const t of WATCHED) window.addEventListener(t, watchTips, true); } catch (e) {}
+  const stopTips = () => {          // (a newer lib.js takes over: one watcher on the page at a time)
+    try { for (const t of WATCHED) window.removeEventListener(t, watchTips, true); } catch (e) {}
+    dropTip();
+  };
+  const tip = (text) => {
+    const here = (ev) => tipHere(ev.currentTarget, text);
+    return { title: text,           // (kept: a desktop browser on the DevTools port still shows it)
+             onPointerOver: here, onPointerMove: here, onMouseOver: here, onMouseMove: here };
+  };
   // The tooltip piece for the mount `key`, or null: mount() adds it after the patch's own pieces.
   // Outside the corner's flow (just above it, at its edge), so they don't move for it.
   const tipFor = (key) => {
@@ -319,11 +352,11 @@
   const tick = (name) => haptic(HAPTIC[name]);
 
   // tipState(): what the tooltips are doing, for a look over the DevTools port.
-  const tipState = () => ({ waiting: !!tips.on && !tips.shown,
+  const tipState = () => ({ waiting: !!tips.on && !tips.shown, seen: { ...tips.seen },
                             shown: tips.shown && { text: tips.shown.text, owner: tips.shown.owner, at: tips.shown.at,
                                                    width: tips.shown.width, ready: tips.shown.ready } });
 
   window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount, HAPTIC, haptic, tick,
-                      tip, tipFor, tipState };
+                      tip, tipFor, tipState, stopTips };
   return 'loaded';
 })()
