@@ -7,6 +7,10 @@
   it quit, say), without restarting SteamVR.
 
 ### For contributors
+- **Screenshots of the installer itself:** `dev/screenshots.py installer` takes the main list,
+  a shot per page of scrolling, and `details` every official tweak's page, off-screen with
+  every tweak shown as not installed. `docs/images/` has a folder per pack and `frame-tweaks/`
+  for the installer.
 - **`dev/update-check.sh record` records only the official packs' tweaks:** a local pack on trial
   on the Frame (a field guide pick, the Attic) isn't published, and the records are.
 
