@@ -52,7 +52,7 @@ Lie back and keep playing. Recenter while lying back (SteamVR's own recenter) an
 **Why on a Steam Frame:** SteamVR's own recenter only turns you around; it can't tilt the world, so lying down leaves you looking at the ceiling. Linked: [Recline-VR](https://github.com/new-waifu/Recline-VR) builds and installs itself on the Frame, the way its README describes.
 <!-- /generated:intro -->
 
-![Lying back you'd look at the sky; recentered with Recline, that way is forward and level](../../../docs/images/recline.png)
+![Lying back you'd look at the sky; recentered with Recline, that way is forward and level](../../../docs/images/third-party/recline.png)
 
 A **link**: Frame Tweaks runs Recline-VR's own commands, as its
 [README](https://github.com/new-waifu/Recline-VR#readme) gives them, in the terminal it opens for

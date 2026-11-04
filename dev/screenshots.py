@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Screenshots of the Core tweaks' windows for the README (docs/images/), drawn off-screen with
+"""Screenshots of the installer and the tweaks' windows for the READMEs (docs/images/, a folder per
+pack and frame-tweaks/ for the installer itself), drawn off-screen with
 sample content: a throwaway home, so nothing of this machine's (its settings, apps, files or
 wallet) shows, and they can be taken again whenever a window changes.
 
   ~/.local/share/arrowpad/venv/bin/python dev/screenshots.py [NAME...]    (a Python with PyQt6)
 
 NAME: arrowpad, arrowpad-tools, snip, narrate, wallet, memory-limits, scroll-strips, menu-icons,
-recline (default: all). Views that
+recline, installer (the main list, one shot per page of scrolling), details (every official
+tweak's page) (default: all). Views that
 only exist in VR are taken in the headset instead (Android Mirror's ⚙), or drawn: the scroll
 strips, beside a generic window, as their dashboard patch draws them."""
 import importlib.machinery
@@ -60,8 +62,16 @@ def settle(seconds=0.6):
 def save(widget, name):
     widget.show()
     settle()
-    widget.grab().save(str(OUT / f"{name}.png"))
-    print(f"docs/images/{name}.png  {widget.width()}x{widget.height()}")
+    save_image(widget.grab(), name)
+
+
+def save_image(image, name):
+    """docs/images/NAME.png; NAME is PACK/… or frame-tweaks/… (the folders: one per pack, and
+    Frame Tweaks' own)."""
+    path = OUT / f"{name}.png"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(str(path))
+    print(f"{path.relative_to(ROOT)}  {image.width()}x{image.height()}")
 
 
 class Keys:
@@ -83,7 +93,7 @@ def arrowpad(tools=False):
     if tools:
         pad.layer = "tools"
         pad.relabel()
-    save(pad, "arrowpad-tools" if tools else "arrowpad")
+    save(pad, "core/arrowpad-tools" if tools else "core/arrowpad")
 
 
 def sample_screen(w=1280, h=720):
@@ -121,7 +131,7 @@ def snip():
     s.show()
     settle(0.2)
     s.place_bar()
-    save(s, "snip")
+    save(s, "core/snip")
 
 
 def narrate():
@@ -142,7 +152,7 @@ def narrate():
             return lambda *a, **k: None
     fs.Narrator = Quiet
     w = fs.NarrationWindow(sample_screen().copy(185, 212, 905, 153), PARAGRAPH, fs.load_speed(), panel=True)
-    save(w, "narrate")
+    save(w, "core/narrate")
 
 
 def wallet():
@@ -172,7 +182,7 @@ def wallet():
     win.show()
     settle()
     win.run(gui.component("wallet"))
-    save(win, "wallet")
+    save(win, "core/wallet")
 
 
 def memory():
@@ -196,7 +206,7 @@ def memory():
     win.show()
     settle()
     win.run(gui.component("vr-memory-guard"))
-    save(win, "memory-limits")
+    save(win, "core/memory-limits")
 
 
 def menu_icons():
@@ -233,8 +243,7 @@ def menu_icons():
             p.setFont(QFont("Noto Sans", 17))
             p.drawText(QRect(x + 96, y, box.width() - 120, 52), Qt.AlignmentFlag.AlignVCenter, name)
     p.end()
-    img.save(str(OUT / "menu-icons.png"))
-    print(f"docs/images/menu-icons.png  {w}x{h}")
+    save_image(img, "third-party/menu-icons")
 
 
 def recline():
@@ -297,8 +306,7 @@ def recline():
             p.setPen(ink)
             p.drawText(v.adjusted(0, 8, 0, 0), Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop, "sky")
     p.end()
-    img.save(str(OUT / "recline.png"))
-    print(f"docs/images/recline.png  {w}x{h}")
+    save_image(img, "third-party/recline")
 
 
 def hsla(h, s, l, a=1.0):
@@ -367,13 +375,55 @@ def scroll_strips():
     p.setPen(QPen(hsla(hue, 70, 75, 0.8), 3))
     p.drawLine(right.center().x(), right.y() + 330, w - 20, h - 10)
     p.end()
-    img.save(str(OUT / "scroll-strips.png"))
-    print(f"docs/images/scroll-strips.png  {w}x{h}")
+    save_image(img, "core/scroll-strips")
+
+
+def official_window():
+    """The installer window with the official packs only (a throwaway home trusts no other) and every
+    tweak shown as not installed: the real status checks would show this machine's installs, some
+    of them (a VPN's location, the battery's limit) outside the home folder."""
+    gui = load("gui", ROOT / "gui/frame-tweaks-gui.py")
+    gui.sft.build_version = lambda: gui.current_release()
+    gui.status = lambda cid: (1, gui._("not installed"))
+    win = gui.Window()                               # (its default size, as it opens)
+    win.show()
+    for _ in range(300):
+        settle(0.1)
+        if not win.futures:
+            break
+    settle()
+    return gui, win
+
+
+def installer():
+    """The main list, top to bottom: frame-tweaks/main-NN, a page of scrolling apart."""
+    gui, win = official_window()
+    bar = win.scroll.verticalScrollBar()
+    value, n = 0, 1
+    while True:
+        bar.setValue(value)
+        settle(0.3)
+        save(win, f"frame-tweaks/main-{n:02d}")
+        if value >= bar.maximum():
+            break
+        value, n = min(value + bar.pageStep(), bar.maximum()), n + 1
+    win.close()
+
+
+def details():
+    """Every official tweak's page, top: PACK/details/ID."""
+    gui, win = official_window()
+    for c in win.rows:
+        win.show_tweak(c["id"])
+        settle()
+        save(win, f"{Path(c['dir']).parent.name}/details/{c['id']}")
+        win.close_details()
+    win.close()
 
 
 VIEWS = {"arrowpad": arrowpad, "arrowpad-tools": lambda: arrowpad(tools=True), "snip": snip,
          "narrate": narrate, "wallet": wallet, "memory-limits": memory, "scroll-strips": scroll_strips,
-         "menu-icons": menu_icons, "recline": recline}
+         "menu-icons": menu_icons, "recline": recline, "installer": installer, "details": details}
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(VIEWS)

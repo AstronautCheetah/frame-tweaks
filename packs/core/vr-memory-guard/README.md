@@ -36,7 +36,7 @@ Flatpak apps (Firefox and others from Discover) together always leave 5 GB for S
 **Why on a Steam Frame:** The Frame's 16 GB is shared by VR and every app you open. When one app takes it all (signing in to Firefox can install all your extensions at once and take 10 GB), the whole headset stalls and SteamVR's compositor can crash, dropping you out of VR.
 <!-- /generated:intro -->
 
-![The Memory limits page: the memory kept free for VR, and each Flatpak app's own limit or the shared pool](../../../docs/images/memory-limits.png)
+![The Memory limits page: the memory kept free for VR, and each Flatpak app's own limit or the shared pool](../../../docs/images/core/memory-limits.png)
 
 ## Install
 Tick it in the Frame Tweaks window, or:

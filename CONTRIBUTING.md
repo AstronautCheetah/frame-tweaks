@@ -215,10 +215,13 @@ about it. To add one:
    `dev/check.sh`.
 4. A tweak with a window: a screenshot under its intro, and in the README's **Screenshots**
    (a folded `<details>` section). The Core tweaks' windows are drawn off-screen with sample
-   content by `dev/screenshots.py` (into `docs/images/`; run it with a Python that has PyQt6,
-   such as Arrow Pad's), so they can be taken again when a window changes and never show
-   anything of the machine they're taken on; add yours there. Views that exist only in VR are
-   taken in the headset.
+   content by `dev/screenshots.py` (into `docs/images/`, a folder per pack and `frame-tweaks/`
+   for the installer itself; run it with a Python that has PyQt6, such as Arrow Pad's), so they
+   can be taken again when a window changes and never show anything of the machine they're
+   taken on; add yours there. Its `installer` and `details` views redo the main list (a shot
+   per page of scrolling) and every official tweak's page (`docs/images/PACK/details/ID.png`):
+   run `details` again after adding a tweak. Views that exist only in VR are taken in the
+   headset.
 
 House rules: nothing under `/usr` (SteamOS updates wipe it); no secrets on command lines or in
 plain-text files; verify downloads when the publisher offers checksums; link to other projects

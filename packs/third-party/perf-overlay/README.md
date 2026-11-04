@@ -46,7 +46,7 @@ sasaken1102r's frame-perf-overlay: a small panel in VR with the frame rate and f
 **Why on a Steam Frame:** The Frame doesn't show its own temperatures, clocks or memory while you play, so a slowdown or a hot headset is hard to explain. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
-![The performance panel, from frame-perf-overlay's own README](../../../docs/images/perf-overlay.png)
+![The performance panel, from frame-perf-overlay's own README](../../../docs/images/third-party/perf-overlay.png)
 
 A **link**: Frame Tweaks runs frame-perf-overlay's own steps, as its
 [README](https://github.com/sasaken1102r/frame-perf-overlay#readme) gives them, in the terminal

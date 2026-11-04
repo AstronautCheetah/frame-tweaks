@@ -59,7 +59,7 @@ Sippbox's frame-passthrough-pip: a small, monochrome view from the headset's pas
 **Why on a Steam Frame:** Passthrough on the Frame replaces the game, so checking the room, a drink or a controller means leaving it. This keeps a camera view in the corner of any game, streamed or standalone.
 <!-- /generated:intro -->
 
-![Passthrough PiP's panel in the dashboard, with the camera view beside it (a frame of its own animation)](../../../docs/images/frame-passthrough-pip.png)
+![Passthrough PiP's panel in the dashboard, with the camera view beside it (a frame of its own animation)](../../../docs/images/third-party/frame-passthrough-pip.png)
 
 A **link**: Frame Tweaks runs frame-passthrough-pip's own steps, as its
 [README](https://github.com/Sippbox/frame-passthrough-pip#readme) gives them, in the terminal it

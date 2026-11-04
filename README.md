@@ -8,7 +8,7 @@ on-screen keyboard is missing, dictation that runs on the headset, curved VR win
 clipboard and one KDE wallet for VR and the desktop, and more. Tick what you want; untick it to
 remove it again.
 
-<p align="center"><img src="docs/images/in-vr.jpg" width="720" alt="Frame Tweaks in use in the Steam Frame headset: an Android phone mirrored in a window on the left, the desktop in the middle, and on the right the Frame Tweaks window, Screen snip's reading panel and Arrow Pad"><br>
+<p align="center"><img src="docs/images/frame-tweaks/in-vr.jpg" width="720" alt="Frame Tweaks in use in the Steam Frame headset: an Android phone mirrored in a window on the left, the desktop in the middle, and on the right the Frame Tweaks window, Screen snip's reading panel and Arrow Pad"><br>
 <sub>In the headset: Android Mirror (left), the desktop (middle), and the Frame Tweaks window,
 Screen snip's reading panel and Arrow Pad (right).</sub></p>
 
@@ -62,7 +62,7 @@ terminal); if that fails, or the window can't open, you get a simpler checklist.
 Until you tick a tweak and press **Apply changes**, that's all it installs: the menu entry (with a
 small user service that keeps it in your keyboard's language) and the window's Python setup.
 
-<p align="center"><img src="docs/images/installer.png" width="720" alt="The Frame Tweaks installer window: tweaks grouped by category, each with its status and an Open button"></p>
+<p align="center"><img src="docs/images/frame-tweaks/installer.png" width="720" alt="The Frame Tweaks installer window: tweaks grouped by category, each with its status and an Open button"></p>
 
 <details><summary>Prefer to read the script first?</summary>
 
@@ -152,19 +152,19 @@ SteamVR's dashboard: the picture at the top of this page shows some of them.
 
 <details><summary>⌨️ Arrow Pad, and its Tools layer</summary>
 
-<p align="center"><img src="docs/images/arrowpad.png" width="420" alt="Arrow Pad: Tools, Tab, Bksp, Del, right- and middle-click keys; Fn, Home, the arrows, End, PgUp, PgDn, Esc; Ctrl, Alt, Super, undo, cut, select all, copy and paste; above them settings, pin, recenter, smaller, larger, collapse and close"></p>
-<p align="center"><img src="docs/images/arrowpad-tools.png" width="420" alt="Arrow Pad's Tools layer: screen snip, dictation, the app launcher, save, find, redo, Enter and Unstick in the arrow keys' places"></p>
+<p align="center"><img src="docs/images/core/arrowpad.png" width="420" alt="Arrow Pad: Tools, Tab, Bksp, Del, right- and middle-click keys; Fn, Home, the arrows, End, PgUp, PgDn, Esc; Ctrl, Alt, Super, undo, cut, select all, copy and paste; above them settings, pin, recenter, smaller, larger, collapse and close"></p>
+<p align="center"><img src="docs/images/core/arrowpad-tools.png" width="420" alt="Arrow Pad's Tools layer: screen snip, dictation, the app launcher, save, find, redo, Enter and Unstick in the arrow keys' places"></p>
 </details>
 
 <details><summary>✂️ Screen snip, and Narrate reading a snip aloud</summary>
 
-<p align="center"><img src="docs/images/snip.png" width="720" alt="Screen snip: a paragraph selected with handles on its corners and sides, and below it Copy, Save, Copy text, Narrate with its reading speed, and Cancel"></p>
-<p align="center"><img src="docs/images/narrate.png" width="620" alt="Narrate's panel: the snip, reading aloud part 2 of 3, with Stop, Pause, Show text, the speed, and settings, a new snip, Copy image, Copy text, Paste, Close and Collapse"></p>
+<p align="center"><img src="docs/images/core/snip.png" width="720" alt="Screen snip: a paragraph selected with handles on its corners and sides, and below it Copy, Save, Copy text, Narrate with its reading speed, and Cancel"></p>
+<p align="center"><img src="docs/images/core/narrate.png" width="620" alt="Narrate's panel: the snip, reading aloud part 2 of 3, with Stop, Pause, Show text, the speed, and settings, a new snip, Copy image, Copy text, Paste, Close and Collapse"></p>
 </details>
 
 <details><summary>🔐 Shared KDE wallet: choosing the apps it protects</summary>
 
-<p align="center"><img src="docs/images/wallet.png" width="720" alt="The Wallet apps page in the Frame Tweaks window: the wallet open for 25 minutes and locking by itself in about three and a half hours, auto-lock after 4 h, and Firefox, Signal and VSCodium behind the wallet, each with Close after, Headset off and Password first"></p>
+<p align="center"><img src="docs/images/core/wallet.png" width="720" alt="The Wallet apps page in the Frame Tweaks window: the wallet open for 25 minutes and locking by itself in about three and a half hours, auto-lock after 4 h, and Firefox, Signal and VSCodium behind the wallet, each with Close after, Headset off and Password first"></p>
 </details>
 
 ## Using the installer window
@@ -196,7 +196,7 @@ Open **Frame Tweaks** from the app menu, on the desktop or in Steam's VR "+" men
   the ways to help, from ideas for new tweaks and third-party apps to translations, bug reports
   and code ([docs/contribute.md](docs/contribute.md)).
 
-<p align="center"><img src="docs/images/details.png" width="640" alt="A tweak's details page: what it is, why it's included, who made it, its source and README"></p>
+<p align="center"><img src="docs/images/frame-tweaks/details.png" width="640" alt="A tweak's details page: what it is, why it's included, who made it, its source and README"></p>
 
 ## Using the command line
 

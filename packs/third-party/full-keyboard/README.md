@@ -50,7 +50,7 @@ TaiKeid's Full Keyboard: a full-size keyboard you type on with the controller la
 **Why on a Steam Frame:** Steam's own VR keyboard lacks keys the desktop needs, such as up/down arrows, Ctrl and F-keys. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
-![Full Keyboard, from its own README](../../../docs/images/full-keyboard.png)
+![Full Keyboard, from its own README](../../../docs/images/third-party/full-keyboard.png)
 
 A **link**: Frame Tweaks runs Full Keyboard's own steps, as its
 [README](https://github.com/TaiKeid/steam-frame-full-keyboard#readme) gives them, in the terminal

@@ -52,7 +52,7 @@ VioletTides' KnockThru: knock the controllers together, one controller on a tabl
 **Why on a Steam Frame:** Checking the room means finding the Room View button in the dashboard, or a controller binding. A knock works with a controller in your hand or set down. Linked: it installs the release Frame Tweaks tested with its own installer, the way its README describes.
 <!-- /generated:intro -->
 
-![Knocking twice: your room fades in over VR (a frame of KnockThru's own animation)](../../../docs/images/knockthru.png)
+![Knocking twice: your room fades in over VR (a frame of KnockThru's own animation)](../../../docs/images/third-party/knockthru.png)
 
 A **link**: Frame Tweaks runs KnockThru's own steps, as its
 [README](https://github.com/VioletTides/KnockThru#readme) gives them, in the terminal it opens

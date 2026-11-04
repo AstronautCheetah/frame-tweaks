@@ -1770,7 +1770,7 @@ class DetailsScroll(unittest.TestCase):
 
     def test_wider_than_the_page(self):
         from PyQt6.QtWidgets import QScrollArea
-        view = gui.full_height(gui.readme_browser("Intro.\n\n![The window](docs/images/details.png)\n\nAfter.\n",
+        view = gui.full_height(gui.readme_browser("Intro.\n\n![The window](docs/images/frame-tweaks/details.png)\n\nAfter.\n",
                                                   {"official": True, "id": None, "dir": gui.REPO}))
         area = QScrollArea()
         area.setWidgetResizable(True)
