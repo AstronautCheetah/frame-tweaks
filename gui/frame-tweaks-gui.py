@@ -912,7 +912,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     def set_update_state(self, state, newest=None):
         self.update_state, b = state, self.update_button
         self.update_newest = newest
-        text, tip = {"check": (_("⟳ Check for updates"), _("Look for a newer Frame Tweaks release")),
+        text, tip = {"check": (_("↻ Check for updates"), _("Look for a newer Frame Tweaks release")),
                      "checking": (_("Checking…"), ""),
                      "update": (_("⬇ Update to {version}").format(version=newest),
                                 _("Install it: your tweaks are updated with it")),

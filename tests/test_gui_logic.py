@@ -97,7 +97,7 @@ class Versions(unittest.TestCase):
             self.assertIsNone(gui.self_update_check())
         done = Future()
         done.set_result(None)
-        w = gui.Window.__new__(gui.Window)                 # ⟳ Check for updates, then the answer
+        w = gui.Window.__new__(gui.Window)                 # ↻ Check for updates, then the answer
         w.latest_futures, w.update_futures, w.futures, w.self_update, w.update_state = {}, {}, {}, done, "checking"
         w.pack_check = None
         w.set_update_state, w.say = mock.Mock(), mock.Mock()

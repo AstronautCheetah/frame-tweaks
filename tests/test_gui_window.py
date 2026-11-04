@@ -148,7 +148,7 @@ class PacksChangeUnderIt(WindowTest):
         self.assertIn("recline", self.ids(w))
         gui.sft.set_official(gui.sft.THIRD_PARTY, False)                # (./install.sh mods off third-party)
         with mock.patch.object(userpacks, "packs_with_updates", lambda: (gui.sft.load(refresh=True), [])[1]):
-            w.update_clicked()                                          # ⟳ Check for updates
+            w.update_clicked()                                          # ↻ Check for updates
             self.settle(w)
         self.assertNotIn("recline", self.ids(w))
         self.assertTrue(w.rows and all(c["id"] in w.state for c in w.rows))

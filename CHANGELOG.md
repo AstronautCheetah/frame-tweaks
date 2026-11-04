@@ -27,6 +27,9 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **Tray icon crash fix is offered only where it's needed:** where the VR session gives apps KDE's
+  Qt theme (SteamOS 0.5.7's beta on). Elsewhere the window hides it.
+- **↻ Check for updates** has the same ↻ as the tweaks' reinstall buttons.
 - **Scroll strips' gear clear of SteamVR's resize handle:** at the bottom right of a window, where
   SteamVR draws its resize handle, the gear sits half as far again out from the corner.
 - **Tooltips in the headset for the dashboard's icon buttons:** Android Mirror's and Scroll

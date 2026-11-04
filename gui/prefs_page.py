@@ -31,7 +31,7 @@ OPTIONS = {
     "haptics": (True, N_("Haptic ticks on this window's buttons (in VR)"),
                 N_("A light tick when the laser moves onto a button, a firmer one on a click.")),
     "update_check": (True, N_("Look for a new Frame Tweaks release when this window opens"),
-                     N_("Off: only when you press ⟳ Check for updates.")),
+                     N_("Off: only when you press ↻ Check for updates.")),
 }
 
 
@@ -427,7 +427,7 @@ class Preferences(QWidget):
         current = sft.current_release()
         if on:
             self.going_back.hide()
-            self.window.say(_("Saved. ⟳ Check for updates finds test releases too."), good=True)
+            self.window.say(_("Saved. ↻ Check for updates finds test releases too."), good=True)
         elif "-" in current:                            # on a test release: back now, or with the next release
             self.going_back.text.setText(_("You're on {version}, a test release. Stay on it until the next stable "
                                            "release is out, or go back to the newest stable release now?").format(

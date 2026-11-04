@@ -673,6 +673,10 @@ msgid "{version} available (tested by Frame Tweaks)"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
+msgid "↻ Check for updates"
+msgstr ""
+
+#: gui/frame-tweaks-gui.py
 msgid "↻ Restart"
 msgstr ""
 
@@ -690,10 +694,6 @@ msgstr ""
 
 #: gui/frame-tweaks-gui.py
 msgid "✔ Works on my Frame"
-msgstr ""
-
-#: gui/frame-tweaks-gui.py
-msgid "⟳ Check for updates"
 msgstr ""
 
 #: gui/frame-tweaks-gui.py
@@ -1125,7 +1125,7 @@ msgid "No settings left behind by uninstalled tweaks."
 msgstr ""
 
 #: gui/prefs_page.py
-msgid "Off: only when you press ⟳ Check for updates."
+msgid "Off: only when you press ↻ Check for updates."
 msgstr ""
 
 #: gui/prefs_page.py
@@ -1166,7 +1166,7 @@ msgid "Saved."
 msgstr ""
 
 #: gui/prefs_page.py
-msgid "Saved. ⟳ Check for updates finds test releases too."
+msgid "Saved. ↻ Check for updates finds test releases too."
 msgstr ""
 
 #: gui/prefs_page.py
@@ -5784,6 +5784,11 @@ msgstr ""
 
 #: packs/core/tray-host/install.sh
 msgid "Tray icons in the VR session get an answer now"
+msgstr ""
+
+#: packs/core/tray-host/needed.sh
+msgid ""
+"this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
 msgstr ""
 
 #: packs/core/tray-host/status.sh

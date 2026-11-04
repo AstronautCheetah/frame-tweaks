@@ -330,3 +330,27 @@ class OnABus(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Needed(unittest.TestCase):
+    """Offered only where the VR session sets KDE's Qt theme (what makes tray icons flood the bus):
+    elsewhere the window hides it and ./install.sh install skips it."""
+
+    def needed(self, text):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "gamescope-session"
+            if text is not None:
+                f.write_text(text)
+            return subprocess.run(["bash", str(TWEAK / "needed.sh")], capture_output=True, text=True,
+                                  env={**os.environ, "HOME": d, "FRAME_TWEAKS_GAMESCOPE_SESSION": str(f)})
+
+    def test_needed_where_the_session_sets_the_kde_theme(self):
+        r = self.needed("#!/bin/bash\n# Make Qt apps use the styling\nexport QT_QPA_PLATFORMTHEME=kde\n")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_not_needed_without_it(self):
+        for text in ("#!/bin/bash\nexport XCURSOR_THEME=steam\n", "# export QT_QPA_PLATFORMTHEME=kde (once)\n", None):
+            with self.subTest(text):
+                r = self.needed(text)
+                self.assertEqual(r.returncode, 1)
+                self.assertIn("KDE's Qt theme", r.stdout)

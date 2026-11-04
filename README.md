@@ -278,7 +278,7 @@ How to write one, and share it: [docs/mods.md](docs/mods.md).
 cd ~/frame-tweaks && ./install.sh update
 ```
 
-Or, in the Frame Tweaks window: **⟳ Check for updates**, then **⬇ Update to …**, then
+Or, in the Frame Tweaks window: **↻ Check for updates**, then **⬇ Update to …**, then
 **↻ Restart** when it's done (the window also checks when it opens). Running the install command
 again does the same. This moves to the newest
 release and re-runs the installer of every tweak you have installed (on the newest release
@@ -288,7 +288,7 @@ release is signed by Frame Tweaks' release key and refuses one that isn't. Nothi
 own: a tweak only changes when you update.
 
 - **Packs:** Frame Tweaks' own packs come with its releases, so a change to them, even to their
-  text only, arrives with the next release. For packs added from a link, **⟳ Check for updates**
+  text only, arrives with the next release. For packs added from a link, **↻ Check for updates**
   also asks where each came from (nothing is downloaded) and says how many have a newer version
   (**🧩 N pack updates**, a link to the Packs page); **Update** on the Packs page gets one (`./install.sh mods updates` lists
   them). Linked tweaks (🔗) update their own way: ↻ on their row runs their installer again. One

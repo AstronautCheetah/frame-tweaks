@@ -80,6 +80,15 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "unknown command: {cmd}"
 
 ## 2026-11-04
+- Changed in `gui/frame-tweaks-gui.py:915`
+  - was: "⟳ Check for updates"
+  - now: "↻ Check for updates"
+- Changed in `gui/prefs_page.py:34`
+  - was: "Off: only when you press ⟳ Check for updates."
+  - now: "Off: only when you press ↻ Check for updates."
+- Changed in `gui/prefs_page.py:430`
+  - was: "Saved. ⟳ Check for updates finds test releases too."
+  - now: "Saved. ↻ Check for updates finds test releases too."
 - New in `packs/core/adb-scrcpy/phone-touch.js:205`
   - now: "Delete the last digit"
 - New in `packs/core/adb-scrcpy/phone-touch.js:205`
@@ -135,6 +144,8 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "It starts with the VR session"
 - New in `packs/core/tray-host/install.sh:8`
   - now: "SteamOS's Python has no PyGObject (gi), which %s needs: it won't start"
+- New in `packs/core/tray-host/needed.sh:13`
+  - now: "this SteamOS's VR session doesn't give apps KDE's Qt theme, so tray icons can't flood its D-Bus"
 - New in `packs/core/tray-host/status.sh:11`
   - now: "service failed (%s)"
 - New in `packs/core/tray-host/status.sh:15`
