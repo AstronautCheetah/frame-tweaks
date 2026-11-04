@@ -9071,12 +9071,41 @@ msgstr ""
 msgid "KnockThru"
 msgstr "KnockThru"
 
+#: packs/third-party/knockthru/README.md
+msgid "Start"
+msgstr "Démarrer"
+
 # needs review
 #: packs/third-party/knockthru/README.md
 msgid ""
 "VioletTides' KnockThru: knock the controllers together, one controller on a table (or your leg), or on the headset, and passthrough (Room View) turns on or off. A double knock toggles it, a triple knock can switch its style; you pick and calibrate your knocks in its tab in the SteamVR dashboard. It starts with SteamVR."
 msgstr ""
 "KnockThru de VioletTides : tapez les contrôleurs l'un contre l'autre, un contrôleur sur une table (ou votre jambe), ou sur le casque, et la vue de la pièce s'active ou se désactive. Un double toc l'active ou la désactive, un triple toc peut changer son style ; vous choisissez et calibrez vos tocs dans son onglet du tableau de bord de SteamVR. Il démarre avec SteamVR."
+
+#: packs/third-party/knockthru/run.sh
+msgid ""
+"Already running: knock twice to turn passthrough on or off; its settings are in its tab in the SteamVR dashboard."
+msgstr ""
+"Déjà lancé : frappez deux fois pour activer ou désactiver la vue de la pièce ; ses paramètres sont dans son onglet du tableau de bord de SteamVR."
+
+#: packs/third-party/knockthru/run.sh
+msgid "Could not start KnockThru: %s writes a report for its author."
+msgstr ""
+"Impossible de démarrer KnockThru : %s écrit un rapport pour son auteur."
+
+#: packs/third-party/knockthru/run.sh
+msgid "Not installed: tick KnockThru and Apply changes first."
+msgstr ""
+"Non installé : cochez KnockThru et appliquez d'abord les modifications."
+
+#: packs/third-party/knockthru/run.sh
+msgid "Started: knock twice to turn passthrough on or off."
+msgstr ""
+"Démarré : frappez deux fois pour activer ou désactiver la vue de la pièce."
+
+#: packs/third-party/knockthru/run.sh
+msgid "SteamVR is not running: KnockThru starts with it."
+msgstr "SteamVR n'est pas lancé : KnockThru démarre avec lui."
 
 # needs review
 #: packs/third-party/menu-icons/README.md
