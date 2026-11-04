@@ -78,7 +78,3 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "SteamVR not running"
 - New in `lib/vrbindings.py:497`
   - now: "unknown command: {cmd}"
-
-## 2026-11-04
-- New in `packs/core/tools/recover-session:106`
-  - now: "Put back the VR session's display (%s), which Steam needs to start."

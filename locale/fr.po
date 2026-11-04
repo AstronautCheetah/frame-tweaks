@@ -7190,6 +7190,11 @@ msgid "Couldn't reconnect it: turn it off and on."
 msgstr "Impossible de le reconnecter : éteignez-le puis rallumez-le."
 
 #: packs/core/tools/recover-session
+msgid "Put back the VR session's display (%s), which Steam needs to start."
+msgstr ""
+"Affichage de la session VR rétabli (%s) ; Steam en a besoin pour démarrer."
+
+#: packs/core/tools/recover-session
 msgid ""
 "Put back the VR session's display settings (%d of them, from %s), which Steam needs to start."
 msgstr ""
