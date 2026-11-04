@@ -16,6 +16,7 @@ clipboard tweak carries it to VR windows).
 import contextlib
 import ctypes
 import ctypes.util
+import fcntl
 import json
 import os
 import re
@@ -2532,6 +2533,20 @@ def started_by_steam():
     return True
 
 
+def one_selection():
+    """The open file holding the selection's lock, or None when another selection holds it: Arrow
+    Pad's Snip pressed again (or the menu entry) started another full-screen selection over the
+    first, each waiting for its own rectangle. Held for the process's life; the kernel lets go
+    when it ends, a crash included."""
+    f = open(RUN / "frame-snip-select.lock", "a")
+    try:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.close()
+        return None
+    return f
+
+
 def main():
     if started_by_steam():
         return 0
@@ -2541,6 +2556,9 @@ def main():
         return x_paste(sys.argv[2] if len(sys.argv) > 2 else vr_display())
     if NARRATE:
         return narrate_panel(sys.argv[2], sys.argv[3])
+    lock = one_selection()
+    if lock is None:
+        return 0                     # (a selection is open already: it stays, this one doesn't stack on it)
     app = QApplication(sys.argv[:1])
     _longer_tooltips(app)
     try:

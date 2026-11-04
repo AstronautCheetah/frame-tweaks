@@ -281,3 +281,23 @@ class OpenPanel(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OneSelection(unittest.TestCase):
+    """Arrow Pad's Snip pressed twice opened a second full-screen selection over the first: a
+    selection now holds a lock for its life, and another start while it's held does nothing."""
+
+    def test_a_second_selection_waits_for_the_first_to_end(self):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(fs, "RUN", Path(d)):
+            code = ("import fcntl, sys, time; f = open(sys.argv[1], 'a'); "
+                    "fcntl.flock(f, fcntl.LOCK_EX); print('held', flush=True); time.sleep(30)")
+            first = subprocess.Popen([sys.executable, "-c", code, str(Path(d) / "frame-snip-select.lock")],
+                                     stdout=subprocess.PIPE, text=True)
+            self.addCleanup(first.kill)
+            self.assertEqual(first.stdout.readline().strip(), "held")
+            self.assertIsNone(fs.one_selection())             # (the first one's still open)
+            first.kill()
+            first.wait()
+            lock = fs.one_selection()                          # (gone: the kernel let go)
+            self.assertIsNotNone(lock)
+            lock.close()

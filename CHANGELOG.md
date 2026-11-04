@@ -27,6 +27,9 @@
   Bluetooth headphones left on calls only ("Call ended" every half minute). No reboot.
 
 ### Fixed
+- **One screen snip at a time:** pressing Arrow Pad's Snip again (or opening Screen snip from the
+  menu) while a selection was open laid another full-screen selection over it. Another start now
+  leaves the open one as it is.
 - **ⓘ and ⚙ no longer look squeezed** in the Frame Tweaks window on SteamOS 0.5.7's beta: the
   window's font has no such symbols, and SteamOS now filled them from a narrow monospace font.
   Noto's symbol fonts draw them now.
