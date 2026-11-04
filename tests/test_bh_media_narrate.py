@@ -309,14 +309,15 @@ class Narration(unittest.TestCase):
         w.stop_or_again()                          # Read it again, with Piper back
         self.assertTrue(self.wait(lambda: self.played()), w.state.text())
 
-    def test_a_clipboard_that_doesnt_answer_is_no_text(self):
+    def test_a_clipboard_that_doesnt_answer_says_so(self):
         w = self.window(TWO)
         with mock.patch.object(fs, "nested_wayland", lambda: "/nonexistent/wayland-0"), \
                 mock.patch.object(fs, "wl_tool", lambda name: "/bin/true"), \
                 mock.patch.object(fs.subprocess, "run", side_effect=subprocess.TimeoutExpired("wl-paste", 5)):
-            self.assertIsNone(fs.from_clipboard())
-            w.paste_text()                                 # (an exception here would abort the panel)
-        self.assertEqual(w.state.text(), "The clipboard has no text.")
+            self.assertEqual(fs.desktop_paste(), ("failed", None))
+            w.paste()                                      # (an exception here would abort the panel)
+            self.assertTrue(self.wait(lambda: w.paste_button.isEnabled(), 5), w.state.text())
+        self.assertEqual(w.state.text(), "Couldn't read the clipboard.")
 
     def test_the_settings_view_follows_a_new_language(self):
         from PyQt6.QtWidgets import QLabel, QPushButton

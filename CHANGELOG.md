@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Narrate's Paste reads a picture too, and works without desktop mode:** Paste read only text,
+  and only from desktop mode's clipboard, so it found nothing while desktop mode wasn't running.
+  It now reads a copied picture like a snip (its text, through Tesseract) as well as text, from
+  desktop mode's clipboard while desktop mode runs and otherwise from the VR session's own, where
+  floating VR windows copy to. An app that doesn't answer no longer holds the panel up.
 - **Tray icon crash fix keeps VLC from taking the VR session down:** on SteamOS 0.5.7's beta, a
   Qt app with a tray icon (VLC, for one) looked for a tray in the VR session, found none and kept
   trying, opening a new D-Bus connection each time, until the session's bus, and Steam with it,

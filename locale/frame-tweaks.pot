@@ -5096,6 +5096,14 @@ msgid "Couldn't copy to the clipboard."
 msgstr ""
 
 #: packs/core/snip/frame-snip
+msgid "Couldn't read the clipboard."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Couldn't read the picture on the clipboard."
+msgstr ""
+
+#: packs/core/snip/frame-snip
 msgid "Couldn't save the snip"
 msgstr ""
 
@@ -5166,7 +5174,7 @@ msgid "Open Frame Tweaks to reinstall Screen snip (its ↻ button)?"
 msgstr ""
 
 #: packs/core/snip/frame-snip
-msgid "Paste: read the clipboard's text instead"
+msgid "Paste: read the clipboard's text or picture instead"
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -5211,6 +5219,10 @@ msgstr ""
 
 #: packs/core/snip/frame-snip
 msgid "Reading aloud…"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "Reading the clipboard…"
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -5298,7 +5310,11 @@ msgid "The Speech engine failed to read part {part}."
 msgstr ""
 
 #: packs/core/snip/frame-snip
-msgid "The clipboard has no text."
+msgid "The clipboard has neither text nor a picture."
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "The clipboard is empty."
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -5312,6 +5328,10 @@ msgstr ""
 
 #: packs/core/snip/frame-snip packs/core/adb-scrcpy/phone-touch.js
 msgid "Volume up"
+msgstr ""
+
+#: packs/core/snip/frame-snip
+msgid "What's on the clipboard is too big to paste."
 msgstr ""
 
 #: packs/core/snip/frame-snip
@@ -6644,6 +6664,11 @@ msgstr ""
 
 #: packs/integrations/clipboard/status.sh
 msgid "older build: replaces copied images with text (Reinstall fixes it)"
+msgstr ""
+
+#: packs/integrations/clipboard/status.sh
+msgid ""
+"this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"
 msgstr ""
 
 #: packs/integrations/clipboard/uninstall.sh

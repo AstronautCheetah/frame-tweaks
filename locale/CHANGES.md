@@ -83,6 +83,22 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - Changed in `packs/core/snip/frame-snip:1226`
   - was: "Couldn't copy (is desktop mode running?)"
   - now: "Couldn't copy to the clipboard."
+- Changed in `packs/core/snip/frame-snip:1343`
+  - was: "Paste: read the clipboard's text instead"
+  - now: "Paste: read the clipboard's text or picture instead"
+- New in `packs/core/snip/frame-snip:1505`
+  - now: "Reading the clipboard…"
+- Changed in `packs/core/snip/frame-snip:555`
+  - was: "The clipboard has no text."
+  - now: "The clipboard is empty."
+- New in `packs/core/snip/frame-snip:556`
+  - now: "The clipboard has neither text nor a picture."
+- New in `packs/core/snip/frame-snip:557`
+  - now: "What's on the clipboard is too big to paste."
+- New in `packs/core/snip/frame-snip:558`
+  - now: "Couldn't read the clipboard."
+- New in `packs/core/snip/frame-snip:559`
+  - now: "Couldn't read the picture on the clipboard."
 - New in `packs/core/tray-host/README.md`
   - now: "A small background service that answers apps asking for a tray icon in the VR session, so they ask once instead of over and over. The icons aren't shown anywhere: the VR session has no tray to show them in."
 - New in `packs/core/tray-host/README.md`
@@ -111,3 +127,5 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "installed; starts with the VR session"
 - New in `packs/core/tray-host/status.sh:9`
   - now: "won't start with the VR session: not enabled (↻ Reinstall enables it)"
+- New in `packs/integrations/clipboard/status.sh:22`
+  - now: "this SteamOS needs clipboard-sync %s, %s is installed (Reinstall fixes it)"

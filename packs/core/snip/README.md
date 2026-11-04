@@ -130,8 +130,10 @@ The panel has:
   the text read from it.
 - **Snip** (the dashed rectangle, as on Arrow Pad): snip something new; it's read in this panel.
 - **Copy image** and **Copy text**.
-- **Paste** (icon): read the clipboard's text instead (desktop mode's: it needs desktop mode
-  running). It's shown in place of the snip.
+- **Paste** (icon): read the clipboard's text or picture instead. A picture is read like a snip
+  (its text, through Tesseract); either is shown in place of the snip. It reads desktop mode's
+  clipboard while desktop mode runs, and the VR session's own (what floating VR windows copied)
+  when desktop mode isn't running or its clipboard has neither text nor a picture.
 - **⚙ Settings:** Narrate's engine (Piper or eSpeak NG) and language, with **Apply**. The same
   settings are on this tweak's ⚙ button in the Frame Tweaks window, with the reading speed.
 - **Close** (✕), and **Collapse** at either end of the bottom row. Collapse shrinks the panel to a
@@ -173,6 +175,10 @@ The reading speed and the panel's spot are remembered in `~/.config/frame-tweaks
 - With desktop mode running, **Copy text** and the panel's **Paste** use `wl-copy` and
   `wl-paste` from Homebrew's `wl-clipboard`; installing Screen snip adds it if it isn't there
   yet.
+- **Paste** doesn't need desktop mode. When something offers both a picture and text, it reads
+  the picture: a browser's Copy Image offers the picture's address as text too. An app that
+  doesn't answer within a few seconds gets "Couldn't read the clipboard", and the panel stays
+  usable meanwhile.
 - Without SteamVR's OpenVR library, the narration panel opens as an ordinary window instead.
 - If the Speech engine fails on a part (it doesn't start, or makes no sound), Narrate tries that
   part once more, then stops there and says so; **Again** tries again. If SteamVR fails under
