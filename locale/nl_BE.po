@@ -2296,6 +2296,11 @@ msgstr ""
 msgid "%s has nothing to run"
 msgstr "%s heeft niets om te starten"
 
+#: install.sh
+msgid "%s is for Python %s, SteamOS has %s: ./install.sh repair moves it"
+msgstr ""
+"%s is voor Python %s, SteamOS heeft %s: ./install.sh repair verplaatst het"
+
 # needs review
 #: install.sh
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
@@ -2320,6 +2325,10 @@ msgstr "migratie van %s mislukt"
 #: install.sh
 msgid "%s needs your sudo password, and your user has none yet."
 msgstr "%s heeft je sudo-wachtwoord nodig, en je gebruiker heeft er nog geen."
+
+#: install.sh
+msgid "%s on SteamOS's Python %s"
+msgstr "%s op de Python %s van SteamOS"
 
 # needs review
 #: install.sh
@@ -2919,6 +2928,11 @@ msgid ""
 msgstr ""
 "%s %s is ouder dan de %s waarmee deze versie getest is; wordt niet geïnstalleerd"
 
+#: lib/common.sh
+msgid "%s couldn't be moved to Python %s: ./install.sh repair tries again."
+msgstr ""
+"%s kon niet naar Python %s verplaatst worden: ./install.sh repair probeert het opnieuw."
+
 # needs review
 #: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
@@ -2959,6 +2973,10 @@ msgstr "Nu actief."
 #: lib/common.sh
 msgid "Couldn't install %s (see above)."
 msgstr "Kon %s niet installeren (zie hierboven)."
+
+#: lib/common.sh
+msgid "Couldn't make %s again on this Python."
+msgstr "Kon %s niet opnieuw aanmaken met deze Python."
 
 # needs review
 #: lib/common.sh
@@ -3022,6 +3040,11 @@ msgid ""
 "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
 msgstr ""
 "Stel er een in: open een terminal (Konsole), typ passwd en druk op Enter, en kies dan een wachtwoord (er verschijnt niets terwijl je het typt). Of gebruik Wachtwoord instellen… in het Frame Tweaks-venster."
+
+#: lib/common.sh
+msgid "SteamOS has Python %s now: moving %s from Python %s to it"
+msgstr ""
+"SteamOS heeft nu Python %s: %s wordt van Python %s daarnaar verplaatst"
 
 # needs review
 #: lib/common.sh

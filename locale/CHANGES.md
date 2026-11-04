@@ -8,16 +8,6 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-03
-- New in `install.sh:1310`
-  - now: "%s on SteamOS's Python %s"
-- New in `install.sh:1312`
-  - now: "%s is for Python %s, SteamOS has %s: ./install.sh repair moves it"
-- New in `lib/common.sh:614`
-  - now: "Couldn't make %s again on this Python."
-- New in `lib/common.sh:644`
-  - now: "SteamOS has Python %s now: moving %s from Python %s to it"
-- New in `lib/common.sh:650`
-  - now: "%s couldn't be moved to Python %s: ./install.sh repair tries again."
 - New in `lib/vrbindings.py:109`
   - now: "SteamVR refused {what} (HTTP {code})"
 - New in `lib/vrbindings.py:111`

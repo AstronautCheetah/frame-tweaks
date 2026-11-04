@@ -2069,6 +2069,10 @@ msgid "%s has nothing to run"
 msgstr "%s no tiene nada que ejecutar"
 
 #: install.sh
+msgid "%s is for Python %s, SteamOS has %s: ./install.sh repair moves it"
+msgstr "%s es para Python %s y SteamOS tiene %s: ./install.sh repair lo mueve"
+
+#: install.sh
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
 msgstr "%s es necesario para %s: desinstala también %s, o conserva %s"
 
@@ -2090,6 +2094,10 @@ msgstr "falló la migración de %s"
 #: install.sh
 msgid "%s needs your sudo password, and your user has none yet."
 msgstr "%s necesita tu contraseña de sudo, y tu usuario aún no tiene una."
+
+#: install.sh
+msgid "%s on SteamOS's Python %s"
+msgstr "%s en el Python %s de SteamOS"
 
 #: install.sh
 msgid "%s what? (./install.sh list)"
@@ -2629,6 +2637,11 @@ msgid ""
 msgstr ""
 "%s %s es anterior a la %s con la que se probó esta versión; no se instala"
 
+#: lib/common.sh
+msgid "%s couldn't be moved to Python %s: ./install.sh repair tries again."
+msgstr ""
+"No se pudo mover %s a Python %s: ./install.sh repair lo intenta de nuevo."
+
 # needs review
 #: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
@@ -2665,6 +2678,10 @@ msgstr "Activo ahora."
 #: lib/common.sh
 msgid "Couldn't install %s (see above)."
 msgstr "No se pudo instalar %s (ver arriba)."
+
+#: lib/common.sh
+msgid "Couldn't make %s again on this Python."
+msgstr "No se pudo crear %s de nuevo con este Python."
 
 # needs review
 #: lib/common.sh
@@ -2721,6 +2738,10 @@ msgid ""
 "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
 msgstr ""
 "Establece una: abre una terminal (Konsole), escribe passwd y presiona Enter, luego elige una contraseña (no se ve nada mientras la escribes). O usa Establecer una contraseña… en la ventana de Frame Tweaks."
+
+#: lib/common.sh
+msgid "SteamOS has Python %s now: moving %s from Python %s to it"
+msgstr "SteamOS ahora tiene Python %s: moviendo %s de Python %s a esa versión"
 
 #: lib/common.sh
 msgid "These tweaks target the Steam Frame (aarch64); you're on %s."

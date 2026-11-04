@@ -2304,6 +2304,10 @@ msgstr ""
 msgid "%s has nothing to run"
 msgstr "%s n'a rien à lancer"
 
+#: install.sh
+msgid "%s is for Python %s, SteamOS has %s: ./install.sh repair moves it"
+msgstr "%s est pour Python %s, SteamOS a %s : ./install.sh repair le déplace"
+
 # needs review
 #: install.sh
 msgid "%s is needed by %s: uninstall %s too, or keep %s"
@@ -2329,6 +2333,10 @@ msgstr "échec de la migration de %s"
 msgid "%s needs your sudo password, and your user has none yet."
 msgstr ""
 "%s nécessite votre mot de passe sudo, et votre utilisateur n'en a pas encore."
+
+#: install.sh
+msgid "%s on SteamOS's Python %s"
+msgstr "%s sur le Python %s de SteamOS"
 
 # needs review
 #: install.sh
@@ -2931,6 +2939,11 @@ msgid ""
 msgstr ""
 "%s %s est plus ancien que la version %s avec laquelle cette version de Frame Tweaks a été testée ; pas d'installation"
 
+#: lib/common.sh
+msgid "%s couldn't be moved to Python %s: ./install.sh repair tries again."
+msgstr ""
+"%s n'a pas pu être déplacé vers Python %s : ./install.sh repair réessaie."
+
 # needs review
 #: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
@@ -2971,6 +2984,10 @@ msgstr "Actif dès maintenant."
 #: lib/common.sh
 msgid "Couldn't install %s (see above)."
 msgstr "Impossible d'installer %s (voir ci-dessus)."
+
+#: lib/common.sh
+msgid "Couldn't make %s again on this Python."
+msgstr "Impossible de recréer %s avec ce Python."
 
 # needs review
 #: lib/common.sh
@@ -3034,6 +3051,11 @@ msgid ""
 "Set one: open a terminal (Konsole), type passwd and press Enter, then choose a password (nothing shows as you type it). Or use Set a password… in the Frame Tweaks window."
 msgstr ""
 "Définissez-en un : ouvrez un terminal (Konsole), tapez passwd et appuyez sur Entrée, puis choisissez un mot de passe (rien ne s'affiche pendant la saisie). Ou utilisez « Définir un mot de passe… » dans la fenêtre de Frame Tweaks."
+
+#: lib/common.sh
+msgid "SteamOS has Python %s now: moving %s from Python %s to it"
+msgstr ""
+"SteamOS a maintenant Python %s : déplacement de %s de Python %s vers celui-ci"
 
 # needs review
 #: lib/common.sh
