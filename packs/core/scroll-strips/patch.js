@@ -20,7 +20,7 @@
   // Each strip hangs off its window panel's edge anchor (GetPanelAnchorID: CenterRight / CenterLeft /
   // TopCenter / BottomCenter), so it follows the window wherever it is, docked or floating. A small
   // component of our own draws them; it's mounted beside the dashboard's root (window.Dashboard).
-  const NAME = 'scroll-strips', VERSION = 29;
+  const NAME = 'scroll-strips', VERSION = 30;
   const ANCHOR = { CenterLeft: 3, CenterRight: 5, TopCenter: 1, BottomCenter: 7, Center: 4 };
   const MAX_RATE = 30;               // scroll steps per second at the strip's end
   const DEAD_ZONE = 0.08;            // around the centre (fraction of half the strip): no scrolling
@@ -55,6 +55,9 @@
   if (!FS || !DS) return 'not patched: dashboard objects missing';
   if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
   const { el } = L, DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
+  // The icon buttons' tooltips, drawn as panels of their own (L.tip: a title: alone shows nothing
+  // in VR); a lib.js from before them still gets the title.
+  const tip = L.tip ?? ((text) => ({ title: text }));
   let PANEL = null, XFORM = null;                   // the dashboard's panel / transform (L.components)
   // The settings and their defaults (the gear's panel and the installer window's settings page offer
   // the same; one list, which the panel's Reset also goes back to).
@@ -269,7 +272,7 @@
                              alignItems: 'center', justifyContent: 'center',
                              background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
                              border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
-                    ...tap(), title: isOpen ? T('Close the settings') : T('Settings: where the strips go and how they look'),
+                    ...tap(), ...tip(isOpen ? T('Close the settings') : T('Settings: where the strips go and how they look')),
                     onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))))];
@@ -290,7 +293,7 @@
     rows.push(title('t-color', T('Colour')));
     rows.push(el('div', { key: 'r-color', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center' } },
       button('tint', T('Passthrough tint'), raw.color === 'tint', () => raw.color !== 'tint' && save({ color: 'tint' })),
-      ...SWATCHES.map((v, n) => el('div', { key: `c${v}`, ...tap(), title: T(SWATCH_NAMES[n]),
+      ...SWATCHES.map((v, n) => el('div', { key: `c${v}`, ...tap(), ...tip(T(SWATCH_NAMES[n])),
                                             onClick: () => save({ color: v }), style: {
         width: '40px', height: '40px', margin: '5px', borderRadius: '50%', boxSizing: 'border-box',
         background: `hsl(${Math.round(v * 360)}, 60%, 55%)`,
@@ -307,7 +310,7 @@
                              background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.5)`, color: '#e8ecf0' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Scroll strips')),
-            el('div', { ...tap(), title: T('Close'), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
+            el('div', { ...tap(), ...tip(T('Close')), onClick: () => { settingsOpen.delete(f.frameID); redraw(); },
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },

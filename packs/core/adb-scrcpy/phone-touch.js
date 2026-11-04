@@ -15,7 +15,7 @@
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
 // requires: EDockLocation.World = 4 | .World=4]="World"
 (() => {
-  const NAME = 'phone-touch', VERSION = 33;
+  const NAME = 'phone-touch', VERSION = 34;
   const TITLE = 'Android Mirror';             // the mirror window's title (phone sets it; English, as it's matched)
   const TOP_CENTER = 1, CENTER_LEFT = 3;      // panel anchors
   // Text in the user's language: sft-dashboard sends window.__sftI18n for T(text), N(text).
@@ -29,6 +29,9 @@
   if (!FS || !DS) return 'not patched: dashboard objects missing';
   if (!L) return 'not patched: the dashboard helpers (vr-dashboard/lib.js) are missing';
   const { el } = L, DASH = L.DOCK.Dashboard, WORLD = L.DOCK.World;
+  // The icon buttons' tooltips, drawn as panels of their own (L.tip: a title: alone shows nothing
+  // in VR); a lib.js from before them still gets the title.
+  const tip = L.tip ?? ((text) => ({ title: text }));
   let PANEL = null, XFORM = null;                   // the dashboard's panel / transform (L.components)
   const alive = () => Date.now() - (window.__sftPhoneTouchAlive || 0) < 6000 && typeof window.sftPhoneTouch === 'function';
 
@@ -175,8 +178,8 @@
     'M12 11v3a9 9 0 0 0 2 6M9.5 13.5a2.5 2.5 0 0 1 5 0V15M15 19a12 12 0 0 0 .5-3';
   const OUTLINE_SVG = 'M4 2h4v4H4zM10 2h4v4h-4zM16 2h4v4h-4zM4 8h4v4H4zM10 8h4v4h-4zM16 8h4v4h-4zM4 14h4v4H4zM10 14h4v4h-4z' +
     'M16 14h4v4h-4zM10 20h4v3h-4z';
-  const iconButton = (h, on, svg, outline, tip, fn) =>
-    el('div', { ...own(fn), title: tip,
+  const iconButton = (h, on, svg, outline, text, fn) =>
+    el('div', { ...own(fn), ...tip(text),
                 style: { pointerEvents: 'auto', flex: '0 0 auto', width: '26px', height: '26px', borderRadius: '6px',
                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                          background: on ? `hsla(${h}, 50%, 38%, 0.95)` : 'rgba(255, 255, 255, 0.1)',
@@ -188,7 +191,7 @@
     const w = pxW * 0.72, x = (pxW - w) / 2, y = pxH * 0.22;
     const press = (k) => { call({ a: 'key', k }); unlock.count = k === 'del' ? Math.max(0, unlock.count - 1)
                                                                : k === 'enter' ? 0 : unlock.count + 1; };
-    const key = (label, k, tip) => el('div', { key: `k${label}`, ...own(() => press(k)), ...(tip ? { title: T(tip) } : {}), style: {
+    const key = (label, k, hint) => el('div', { key: `k${label}`, ...own(() => press(k)), ...(hint ? tip(T(hint)) : {}), style: {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         height: '30px', margin: '3px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, color: '#fff',
         background: 'rgba(255, 255, 255, 0.12)', border: `1px solid hsla(${h}, 60%, 70%, 0.5)` } }, label);
@@ -199,7 +202,7 @@
       el('div', { style: { display: 'flex', alignItems: 'center', marginBottom: '4px' } },
         el('div', { style: { flex: '1', textAlign: 'center', color: '#e8ecf0', fontSize: '16px', letterSpacing: '4px',
                              minHeight: '20px' } }, '●'.repeat(Math.min(unlock.count, 16))),
-        el('div', { ...own(() => { unlock.on = false; unlock.count = 0; }), title: T('Close'),
+        el('div', { ...own(() => { unlock.on = false; unlock.count = 0; }), ...tip(T('Close')),
                     style: { fontSize: '14px', color: '#9aa6b2', padding: '0 4px' } }, '✕')),
       el('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' } },
         ...digits, key('⌫', 'del', N('Delete the last digit')), key('0', '0'), key('↵', 'enter', N('Enter: send the PIN'))),
@@ -258,7 +261,7 @@
       const x = ax < 0 ? left - A - gap : ax > 0 ? left + gw + gap : cx - A / 2;
       const y = ay < 0 ? top - A - gap : ay > 0 ? top + gh + gap : cy - A / 2;
       out.push(el('div', { key: `n${label}`, ...own(() => { keypad.dx += ax * NUDGE; keypad.dy += ay * NUDGE; }),
-        title: T('Move the keypad'),
+        ...tip(T('Move the keypad')),
         style: { position: 'absolute', left: `${x}px`, top: `${y}px`, width: `${A}px`, height: `${A}px`,
                  borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px',
                  color: '#e8ecf0', background: `hsla(${h}, 30%, 25%, 0.85)`, border: `1px solid hsla(${h}, 60%, 70%, 0.6)` } },
@@ -414,7 +417,7 @@
                              display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isOpen ? `hsla(${h}, 45%, 34%, 0.9)` : `hsla(${h}, 18%, 20%, 0.75)`,
                              border: `2px solid hsla(${h}, 60%, 68%, 0.7)` },
-                    title: T(isOpen ? N('Close the settings') : N('Settings: the stream, the buttons and where they go')),
+                    ...tip(T(isOpen ? N('Close the settings') : N('Settings: the stream, the buttons and where they go'))),
                     ...tap(), onClick: () => { isOpen ? settingsOpen.delete(f.frameID) : settingsOpen.add(f.frameID); redraw(); } },
           el('svg', { width: 40, height: 40, viewBox: '0 0 26 24' },
             el('path', { d: GEAR_SVG, fill: `hsl(${h}, 65%, 80%)`, fillRule: 'evenodd' })))));
@@ -454,7 +457,7 @@
         }, onMouseEnter: () => { buzz('Enter'); moveTo(name); },
         style: { display: 'flex', alignItems: 'center', padding: '7px 6px', margin: '2px 0', borderRadius: '8px',
                  background: dragKey === name ? `hsla(${h}, 40%, 30%, 0.8)` : 'rgba(255, 255, 255, 0.04)' } },
-        el('div', { title: T('Drag to change the order'), style: { padding: '0 10px 0 4px', fontSize: '22px', color: '#9aa6b2',
+        el('div', { ...tip(T('Drag to change the order')), style: { padding: '0 10px 0 4px', fontSize: '22px', color: '#9aa6b2',
                                                                  cursor: 'grab' },
                     onMouseDown: (ev) => {
                       ev.stopPropagation(); ev.preventDefault(); buzz('Snap');
@@ -541,7 +544,7 @@
                              color: '#e8ecf0', fontFamily: 'inherit', zoom: 0.62, textAlign: 'left' } },
           el('div', { style: { display: 'flex', alignItems: 'center' } },
             el('div', { style: { flex: '1', fontSize: '24px', fontWeight: 700 } }, T('Android Mirror')),
-            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); }, title: T('Close the settings'),
+            el('div', { ...tap(), onClick: () => { settingsOpen.delete(f.frameID); redraw(); }, ...tip(T('Close the settings')),
                         style: { fontSize: '28px', padding: '0 10px', color: '#9aa6b2' } }, '✕')),
           ...rows,
           el('div', { style: { fontSize: '15px', color: '#9aa6b2', margin: '10px 4px 0' } },
@@ -593,7 +596,7 @@
         el('div', { style: { display: 'flex', flexDirection: column ? 'column' : 'row', justifyContent: 'center',
                              alignItems: 'center', width: `${px * (column ? 1 : HW.length)}px`,
                              height: `${px * (column ? HW.length : 1)}px` } },
-          ...on.map(([, k2, d, label]) => el('div', { key: k2, ...tap(), title: T(label),
+          ...on.map(([, k2, d, label]) => el('div', { key: k2, ...tap(), ...tip(T(label)),
               onClick: () => call({ a: 'hwkey', k: k2 }),
               style: { width: `${px - 8}px`, height: `${px - 8}px`, margin: '4px', borderRadius: '50%',
                        display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box',

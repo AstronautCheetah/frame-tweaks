@@ -1,6 +1,6 @@
 // frame-tweaks dashboard helpers: what the patches share (window.__sftLib). sft-dashboard injects
-// this before the patches, each time it injects them. Only plumbing for finding and drawing
-// things in SteamVR's dashboard page; no behaviour of its own.
+// this before the patches, each time it injects them. Plumbing for finding and drawing things in
+// SteamVR's dashboard page, and the tooltips the patches' icon buttons share (tip()).
 // requires: window.Dashboard | window.Dashboard=
 // requires: overlay picture size | GetOverlayMouseScale(
 // requires: EDockLocation.Dashboard = 1 | .Dashboard=1]="Dashboard"
@@ -92,6 +92,164 @@
     return { position: 'absolute', bottom: up, width: '920px', [edge]: '0px', textAlign: edge === 'right' ? 'right' : 'left' };
   };
 
+  // ---- tooltips ----
+  // tip(text): props for a button whose face has no word on it (spread them in:
+  // el('div', { ...tap(), onClick, ...L.tip(T(label)) }, '✕')). A title: alone shows nothing in
+  // the headset: Chromium draws title tooltips in a popup window of their own, and the dashboard
+  // shows only what the page draws at each panel's spot. So the text gets a small panel of its own,
+  // just above the button and a little in front of it, drawn from the page above the corner of
+  // the mount (mount()) whose panel holds the button. Timed as the desktop window's tooltips
+  // (lib/tooltips.py): after 700 ms on the button; the laser's wobble doesn't start the wait again
+  // (moves on the button never do, and leaving it for less than TIP.GRACE_MS doesn't either);
+  // gone on leaving it or on a press, and after twice Qt's time (20 s, longer for long texts).
+  // Pointer events, not mouse ones: the patches' own onMouseEnter / onMouseDown (haptics, own())
+  // keep theirs, and Chromium sends both for every move and press of the laser.
+  const TIP = { WAIT_MS: 700, GRACE_MS: 150, REVEAL_MS: 120,
+                FONT_PX: 20, PAD_PX: 10, MAX_PX: 560, M_PER_PX: 0.0005,       // (20 px: 1 cm letters)
+                GAP_M: 0.006, LIFT_M: 0.004 };
+  const tipMs = (text) => 2 * (10000 + 40 * Math.max(0, text.length - 100));   // (qt_default_ms, twice)
+  const tips = { on: null, text: '', wait: 0, grace: 0, hide: 0, shown: null, n: 0 };
+  const redraws = new Map();             // mount key -> redraw (mount())
+  const fiberOf = (node) => {
+    const k = node && Object.keys(node).find((n) => n.startsWith('__reactFiber$') || n.startsWith('__reactInternalInstance$'));
+    return k ? node[k] : null;
+  };
+  // Anchor units per metre where a panel hangs (a window's anchors are in its own scaled units:
+  // the patches' k): the window whose page gave that anchor id. null: none of them did.
+  const unitsPerMetre = (anchorId) => {
+    for (const f of window.FrameStore?.frames ?? []) {
+      const page = f?.activePage, sz = page?.size;
+      if (typeof page?.GetPanelAnchorID !== 'function' || !(sz?.latestMeasuredPanelWorldHeight > 0)) continue;
+      for (const a of Object.values(ANCHOR)) {
+        try {
+          if (page.GetPanelAnchorID(a) === anchorId) return sz.latestMeasuredPanelLocalHeight / sz.latestMeasuredPanelWorldHeight;
+        } catch (e) { break; }
+      }
+    }
+    return null;
+  };
+  let measure = null;
+  const fontFamily = () => { try { return getComputedStyle(document.body).fontFamily || 'sans-serif'; } catch (e) { return 'sans-serif'; } };
+  const textPx = (text, family) => {
+    try {
+      measure ??= document.createElement('canvas').getContext('2d');
+      measure.font = `${TIP.FONT_PX}px ${family}`;
+      return measure.measureText(text).width;
+    } catch (e) { return text.length * TIP.FONT_PX * 0.55; }
+  };
+  const tintHue = () => {
+    try {
+      const h = window.VRSettingsState?.settings?.get('/settings/camera/monochromeTintHue');
+      if (typeof h === 'number' && isFinite(h)) return Math.round(((h % 1) + 1) % 1 * 360);
+    } catch (e) {}
+    return 210;
+  };
+  // Where the tooltip for this button goes: from its React fibers up, its panel (PANEL: width,
+  // origin, curvature), the transform that places that panel (XFORM: parent_id, translation) and
+  // the mount drawing them. The button's place in its panel is its place in the panel's top
+  // element, so nothing is asked of the patches. null: not in one of our panels as expected.
+  const place = (target, text) => {
+    const c = components();
+    if (!c) return null;
+    let fb = fiberOf(target), panel = null, xf = null, owner = null;
+    const hosts = [];
+    for (let n = 0; fb && n < 400 && !owner; n++, fb = fb.return) {
+      if (!panel) { if (fb.type === c.PANEL) panel = fb; else if (typeof fb.type === 'string') hosts.push(fb); }
+      else if (!xf) { if (fb.type === c.XFORM) xf = fb; }
+      else if (typeof fb.type === 'function' && fb.type.sftMount) owner = fb.type.sftMount;
+    }
+    const P = panel?.memoizedProps, X = xf?.memoizedProps;
+    // (a turned transform, or one nested in another, would need its whole chain: none of ours is;
+    // a rotation of nothing, as a default could give, is no turn)
+    const turned = X?.rotation && ['x', 'y', 'z'].some((a) => Math.abs(X.rotation[a] ?? 0) > 1e-6);
+    if (!owner || !(P?.width > 0) || X?.parent_id == null || turned) return null;
+    const top = hosts.find((h) => h.memoizedProps === P.children?.props) ?? hosts[hosts.length - 1];
+    const r = top?.stateNode?.getBoundingClientRect?.(), b = target.getBoundingClientRect?.();
+    if (!(r?.width > 0 && r?.height > 0 && b)) return null;
+    // (both rects as the page lays them out, a zoom included: only their ratio counts)
+    const W = P.width, s = W / r.width, H = r.height * s, o = P.origin ?? ANCHOR.Center;
+    const t = X.translation ?? {};
+    const left = (t.x ?? 0) - (o % 3) * W / 2, upper = (t.y ?? 0) + Math.floor(o / 3) * H / 2;      // (its edges)
+    // (no window gave that anchor: about the size the patches draw their panels at, 1.2 mm a pixel)
+    const k = unitsPerMetre(X.parent_id) ?? s / 0.0012;
+    const family = fontFamily();
+    const px = Math.min(TIP.MAX_PX, Math.ceil(textPx(text, family)) + 2 * TIP.PAD_PX + 8);
+    const at = { x: left + (b.left + b.width / 2 - r.left) * s, y: upper - (b.top - r.top) * s + TIP.GAP_M * k,
+                 // in front of the button, and of the window's plane (Scroll strips' gear is set back behind it)
+                 z: Math.max(t.z ?? 0, 0) + TIP.LIFT_M * k };
+    const h = tintHue(), n = ++tips.n;
+    const piece = (ready) => el('div', { key: `sft-tip-${n}`, style: { position: 'absolute', bottom: '100%', pointerEvents: 'none',
+                                                                    [owner.side === 'left' ? 'left' : 'right']: '0px' } },
+      el(c.XFORM, { key: `sft-tip-${n}-x`, parent_id: X.parent_id, translation: at },
+        el(c.PANEL, { key: `sft-tip-${n}-p`, width: px * TIP.M_PER_PX * k, interactive: false, only_visible_with_laser: false,
+                      debug_name: 'SftTooltip', origin: ANCHOR.BottomCenter,
+                      ...(P.curvature_origin_id ? { curvature_origin_id: P.curvature_origin_id } : {}) },
+          el('div', { style: { width: `${px}px`, boxSizing: 'border-box', padding: `6px ${TIP.PAD_PX}px`, borderRadius: '10px',
+                               background: 'rgba(22, 27, 34, 0.94)', border: `1px solid hsla(${h}, 60%, 68%, 0.6)`,
+                               color: '#e8ecf0', fontFamily: family, fontSize: `${TIP.FONT_PX}px`, lineHeight: 1.3,
+                               textAlign: 'center', whiteSpace: 'normal', overflowWrap: 'anywhere', opacity: ready ? 1 : 0 } },
+            text))));
+    return { owner: owner.key, target, at, width: px * TIP.M_PER_PX * k, text, ready: false,
+             pieces: [piece(false), piece(true)] };
+  };
+  const redrawTip = (key) => redraws.get(key)?.();
+  const hideTip = () => {
+    clearTimeout(tips.hide);
+    const s = tips.shown;
+    tips.shown = null;
+    if (s) redrawTip(s.owner);
+  };
+  const dropTip = () => {           // (and forget the button: only entering one starts a wait)
+    clearTimeout(tips.wait); clearTimeout(tips.grace);
+    tips.on = null;
+    hideTip();
+  };
+  const wakeTip = () => {
+    const target = tips.on;
+    if (!target || target.isConnected === false) return dropTip();
+    // (the title as it is now: a button's text can change with its state, the gear's on opening)
+    const text = target.getAttribute?.('title') || tips.text;
+    const s = text && place(target, text);
+    if (!s) return;
+    tips.shown = s;
+    redrawTip(s.owner);
+    // Its first drawing see-through: a panel made anew can be drawn for a moment somewhere else
+    // first (phone-touch.js's hwKeys saw it in the middle of the mirror).
+    setTimeout(() => { if (tips.shown === s) { s.ready = true; redrawTip(s.owner); } }, TIP.REVEAL_MS);
+    tips.hide = setTimeout(hideTip, tipMs(text));
+  };
+  const tipEnter = (target, text) => {
+    if (tips.on === target) { clearTimeout(tips.grace); return; }      // (back within the grace: as if never gone)
+    dropTip();
+    tips.on = target;
+    tips.text = text;
+    tips.wait = setTimeout(wakeTip, TIP.WAIT_MS);
+  };
+  const tipLeave = (target) => {
+    if (tips.on !== target) return;
+    clearTimeout(tips.grace);
+    tips.grace = setTimeout(dropTip, TIP.GRACE_MS);
+  };
+  const tipPress = (target) => {    // (gone, and not back until the laser leaves and comes again)
+    if (tips.on !== target) return;
+    clearTimeout(tips.wait);
+    hideTip();
+  };
+  const tip = (text) => ({
+    title: text,                    // (kept: a desktop browser on the DevTools port still shows it)
+    onPointerEnter: (ev) => tipEnter(ev.currentTarget, text),
+    onPointerLeave: (ev) => tipLeave(ev.currentTarget),
+    onPointerDown: (ev) => tipPress(ev.currentTarget),
+  });
+  // The tooltip piece for the mount `key`, or null: mount() adds it after the patch's own pieces.
+  // Outside the corner's flow (just above it, at its edge), so they don't move for it.
+  const tipFor = (key) => {
+    const s = tips.shown;
+    if (!s || s.owner !== key) return null;
+    if (s.target.isConnected === false) { tips.shown = null; return null; }   // (its panel went: a press, a redraw)
+    return s.pieces[s.ready ? 1 : 0];
+  };
+
   // mount(key, render, side): draw render() (an array of pieces, or null) as the last child of
   // the dashboard app, redrawn every `every` ms and on redraw(); in the page corner `side`. Puts
   // itself back (a few times) if something drops it from the app's render. Returns {redraw, stop}.
@@ -103,16 +261,22 @@
     if (!app) return null;
     let on = true, mounted = 0, inst = null, wrapped = null, tries = 0;
     class Holder extends Base {
+      // (how a hovered button's tooltip finds the mount whose corner of the page draws it: tip())
+      static sftMount = { key, side };
       componentDidMount() { mounted++; inst = this; this.timer = setInterval(() => { try { this.forceUpdate(); } catch (e) {} }, every); }
       componentWillUnmount() { mounted--; if (inst === this) inst = null; clearInterval(this.timer); }
       render() {
         try {
           if (!on || !components()) return null;
           const parts = (render() ?? []).filter(Boolean);
+          const t = tipFor(key);
+          if (parts.length && t) parts.push(t);
           return parts.length ? el('div', { key: `${key}-area`, style: area(side) }, ...parts) : null;
         } catch (e) { return null; }
       }
     }
+    const redrawTip = () => { try { inst?.forceUpdate(); } catch (e) {} };
+    redraws.set(key, redrawTip);
     const attach = () => {
       const below = app.render;
       wrapped = app.render = function (...args) {
@@ -134,7 +298,9 @@
     return {
       redraw: () => { try { inst?.forceUpdate(); } catch (e) {} },
       // (stays in the render chain, passing straight through: unwrapping could drop another's)
-      stop: () => { on = false; clearInterval(guard); try { app.forceUpdate(); } catch (e) {} },
+      stop: () => { on = false; clearInterval(guard);
+                   if (redraws.get(key) === redrawTip) redraws.delete(key);
+                   try { app.forceUpdate(); } catch (e) {} },
     };
   };
 
@@ -152,6 +318,12 @@
   // this file can be replaced while they run).
   const tick = (name) => haptic(HAPTIC[name]);
 
-  window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount, HAPTIC, haptic, tick };
+  // tipState(): what the tooltips are doing, for a look over the DevTools port.
+  const tipState = () => ({ waiting: !!tips.on && !tips.shown,
+                            shown: tips.shown && { text: tips.shown.text, owner: tips.shown.owner, at: tips.shown.at,
+                                                   width: tips.shown.width, ready: tips.shown.ready } });
+
+  window.__sftLib = { version: VERSION, DOCK, ANCHOR, walk, components, el, pictureSize, memo, mount, HAPTIC, haptic, tick,
+                      tip, tipFor, tipState };
   return 'loaded';
 })()
