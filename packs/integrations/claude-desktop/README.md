@@ -12,7 +12,7 @@ why: >-
   files are read-only, so this unpacks the package into your home folder instead.
 author: Anthropic
 source: {relation: from, url: https://claude.com/download}
-icon: {theme: help-about}
+icon: {file: claude-desktop.png, theme: help-about}
 run: {label: Open}
 wallet_apps: [com.anthropic.Claude]
 config: [~/.config/Claude]
@@ -100,7 +100,8 @@ the same wallet in desktop mode and in VR, and it's listed on that tweak's **Wal
 
 ## Credits
 Claude Desktop is made by Anthropic. This tweak only downloads it from Anthropic's apt repository,
-checks its checksum and unpacks it. Frame Tweaks isn't affiliated with Anthropic. See also
+checks its checksum and unpacks it. Its icon here (`claude-desktop.png`) is the app's own, unchanged,
+from Anthropic's package: Anthropic's mark, not MIT (see `claude-desktop.png.license`). Frame Tweaks isn't affiliated with Anthropic. See also
 [CREDITS.md](../../../CREDITS.md).
 
 ---

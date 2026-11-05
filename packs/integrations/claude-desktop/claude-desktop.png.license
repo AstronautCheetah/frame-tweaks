@@ -1,0 +1,5 @@
+Claude Desktop's icon (claude-desktop.png, 256 x 256), taken unchanged from Anthropic's own Linux
+package of the app (usr/share/icons/hicolor/256x256/apps/claude-desktop.png in the arm64 .deb at
+https://downloads.claude.ai). It is Anthropic's mark, not under the MIT license of the rest of
+Frame Tweaks: all rights stay with Anthropic. It is shown here only to identify the app. Frame
+Tweaks isn't affiliated with Anthropic.

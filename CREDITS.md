@@ -65,4 +65,6 @@ Steam, Steam Frame and SteamVR are trademarks of Valve; Signal of Signal Technol
 Foundation; NordVPN of Nord Security; Claude of Anthropic; Firefox of Mozilla; Android of
 Google. This project isn't affiliated with or endorsed by any of them. NordVPN's public
 server API is used to look up servers; Claude Desktop is downloaded from Anthropic's own
-repository.
+repository. [Claude Desktop](packs/integrations/claude-desktop/)'s icon in the list is the app's
+own (`claude-desktop.png`, unchanged, from Anthropic's Linux package): Anthropic's mark, not MIT,
+shown only to identify the app (`claude-desktop.png.license`).
