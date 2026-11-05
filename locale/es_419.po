@@ -7,6 +7,13 @@ msgstr ""
 
 # needs review
 #: get.sh
+msgid ""
+"%s follows the branch %s, not Frame Tweaks' releases: its updates aren't signature-checked. To follow signed releases instead: %s"
+msgstr ""
+"%s sigue la rama %s, no las versiones de Frame Tweaks: sus actualizaciones no se verifican con firma. Para seguir las versiones firmadas: %s"
+
+# needs review
+#: get.sh
 msgid "Couldn't find a release of %s"
 msgstr "No se encontró ninguna versión de %s"
 
@@ -723,6 +730,11 @@ msgstr ""
 "SteamVR lo sigue ejecutando hasta que se reinicie. Se cierran todas las apps abiertas."
 
 # needs review
+#: gui/frame-tweaks-gui.py gui/packs_page.py
+msgid "That didn't work: {error}"
+msgstr "Eso no funcionó: {error}"
+
+# needs review
 #: gui/frame-tweaks-gui.py
 msgid ""
 "The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
@@ -865,6 +877,11 @@ msgid "Above this, the app is stopped (and it may use some swap on top)"
 msgstr ""
 "Por encima de esto, la app se detiene (y además puede usar algo de memoria de intercambio)"
 
+# needs review
+#: gui/memory_page.py
+msgid "Applying…"
+msgstr "Aplicando…"
+
 #: gui/memory_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
 msgid "Didn't work: %s"
 msgstr "No funcionó: %s"
@@ -933,6 +950,11 @@ msgstr "Nada que aplicar: primero cambia un límite"
 #: gui/memory_page.py
 msgid "Own limit"
 msgstr "Límite propio"
+
+# needs review
+#: gui/memory_page.py
+msgid "Reading the limits…"
+msgstr "Leyendo los límites…"
 
 #: gui/memory_page.py
 msgid "Save these limits and put them in force, for the apps open now too"
@@ -1111,11 +1133,6 @@ msgstr "Quitar…"
 #: gui/packs_page.py
 msgid "Stop using"
 msgstr "Dejar de usar"
-
-# needs review
-#: gui/packs_page.py
-msgid "That didn't work: {error}"
-msgstr "Eso no funcionó: {error}"
 
 # needs review
 #: gui/packs_page.py
@@ -1683,6 +1700,11 @@ msgid ""
 msgstr ""
 "Pedir la contraseña de la cartera antes de que se abra la app (cuando la cartera está bloqueada)"
 
+# needs review
+#: gui/wallet_page.py
+msgid "Asking Homebrew for its commands…"
+msgstr "Pidiéndole a Homebrew sus comandos…"
+
 #: gui/wallet_page.py
 msgid "Asks for the wallet password"
 msgstr "Pide la contraseña de la cartera"
@@ -1946,6 +1968,11 @@ msgstr "{app}: protegida. Vuelve a abrirla si está en ejecución."
 #: gui/wallet_page.py
 msgid "{app}: removed"
 msgstr "{app}: quitada"
+
+# needs review
+#: gui/wallet_page.py
+msgid "{command} didn't answer within {n} s"
+msgstr "{command} no respondió en {n} s"
 
 #: gui/wallet_page.py
 msgid "{h} h"
@@ -2248,6 +2275,11 @@ msgstr "Se conservaron tus propios paquetes: %s"
 msgid "Kept your own translations: %s"
 msgstr "Se conservaron tus propias traducciones: %s"
 
+# needs review
+#: install.sh
+msgid "Leaving the branch %s for signed releases. To go back: %s"
+msgstr "Dejando la rama %s por las versiones firmadas. Para volver: %s"
+
 #: install.sh
 msgid ""
 "Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
@@ -2423,6 +2455,13 @@ msgid ""
 msgstr ""
 "Esta copia local y la rama main de GitHub se separaron. Si no tienes trabajo local que\n"
 "conservar: git reset --hard @{upstream}"
+
+# needs review
+#: install.sh
+msgid ""
+"This copy follows the branch %s, not Frame Tweaks' releases: what it pulls isn't signature-checked. To follow signed releases instead: %s"
+msgstr ""
+"Esta copia sigue la rama %s, no las versiones de Frame Tweaks: lo que descarga no se verifica con firma. Para seguir las versiones firmadas: %s"
 
 #: install.sh
 msgid ""
@@ -2650,6 +2689,11 @@ msgstr ""
 #: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
 msgstr "%s está compilado para '%s', no para aarch64; no se instala"
+
+# needs review
+#: lib/common.sh
+msgid "%s is no longer tried again at each login."
+msgstr "%s ya no se vuelve a intentar en cada inicio de sesión."
 
 # needs review
 #: lib/common.sh

@@ -7,6 +7,13 @@ msgstr ""
 
 # needs review
 #: get.sh
+msgid ""
+"%s follows the branch %s, not Frame Tweaks' releases: its updates aren't signature-checked. To follow signed releases instead: %s"
+msgstr ""
+"%s volgt de branch %s, niet de versies van Frame Tweaks: de updates worden niet op handtekening gecontroleerd. Om in de plaats de ondertekende versies te volgen: %s"
+
+# needs review
+#: get.sh
 msgid "Couldn't find a release of %s"
 msgstr "Geen versie van %s gevonden"
 
@@ -791,6 +798,11 @@ msgstr ""
 "SteamVR blijft dit draaien tot een herstart. Alle open apps worden gesloten."
 
 # needs review
+#: gui/frame-tweaks-gui.py gui/packs_page.py
+msgid "That didn't work: {error}"
+msgstr "Dat lukte niet: {error}"
+
+# needs review
 #: gui/frame-tweaks-gui.py
 msgid ""
 "The last update didn't finish: {tweaks} weren't installed again. ⬇ Finish the update does it."
@@ -953,6 +965,11 @@ msgstr ""
 "Daarboven wordt de app gestopt (en ze kan er nog wat swap bovenop gebruiken)"
 
 # needs review
+#: gui/memory_page.py
+msgid "Applying…"
+msgstr "Toepassen…"
+
+# needs review
 #: gui/memory_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
 msgid "Didn't work: %s"
 msgstr "Lukte niet: %s"
@@ -1020,6 +1037,11 @@ msgstr "Niets toe te passen: wijzig eerst een limiet"
 #: gui/memory_page.py
 msgid "Own limit"
 msgstr "Eigen limiet"
+
+# needs review
+#: gui/memory_page.py
+msgid "Reading the limits…"
+msgstr "De limieten lezen…"
 
 #: gui/memory_page.py
 msgid "Save these limits and put them in force, for the apps open now too"
@@ -1212,11 +1234,6 @@ msgstr "Wissen…"
 #: gui/packs_page.py
 msgid "Stop using"
 msgstr "Niet meer gebruiken"
-
-# needs review
-#: gui/packs_page.py
-msgid "That didn't work: {error}"
-msgstr "Dat lukte niet: {error}"
 
 # needs review
 #: gui/packs_page.py
@@ -1855,6 +1872,11 @@ msgstr ""
 
 # needs review
 #: gui/wallet_page.py
+msgid "Asking Homebrew for its commands…"
+msgstr "Homebrew om zijn opdrachten vragen…"
+
+# needs review
+#: gui/wallet_page.py
 msgid "Asks for the wallet password"
 msgstr "Vraagt om het wachtwoord van de portefeuille"
 
@@ -2161,6 +2183,11 @@ msgstr "{app}: beveiligd. Draait de app al, open ze dan opnieuw."
 #: gui/wallet_page.py
 msgid "{app}: removed"
 msgstr "{app}: verwijderd"
+
+# needs review
+#: gui/wallet_page.py
+msgid "{command} didn't answer within {n} s"
+msgstr "{command} reageerde niet binnen {n} s"
 
 # needs review
 #: gui/wallet_page.py
@@ -2501,6 +2528,12 @@ msgstr "Je eigen vertalingen behouden: %s"
 
 # needs review
 #: install.sh
+msgid "Leaving the branch %s for signed releases. To go back: %s"
+msgstr ""
+"De branch %s verlaten voor de ondertekende versies. Om terug te gaan: %s"
+
+# needs review
+#: install.sh
 msgid ""
 "Left installed, as asked: %s (to remove them too: ./install.sh uninstall-self --remove-apps)"
 msgstr ""
@@ -2688,6 +2721,13 @@ msgid ""
 msgstr ""
 "Deze checkout en main op GitHub zijn uit elkaar gegroeid. Zonder lokaal werk om\n"
 "te behouden: git reset --hard @{upstream}"
+
+# needs review
+#: install.sh
+msgid ""
+"This copy follows the branch %s, not Frame Tweaks' releases: what it pulls isn't signature-checked. To follow signed releases instead: %s"
+msgstr ""
+"Deze kopie volgt de branch %s, niet de versies van Frame Tweaks: wat ze ophaalt, wordt niet op handtekening gecontroleerd. Om in de plaats de ondertekende versies te volgen: %s"
 
 # needs review
 #: install.sh
@@ -2944,6 +2984,11 @@ msgstr ""
 #: lib/common.sh
 msgid "%s is built for '%s', not aarch64; not installing it"
 msgstr "%s is gebouwd voor '%s', niet voor aarch64; wordt niet geïnstalleerd"
+
+# needs review
+#: lib/common.sh
+msgid "%s is no longer tried again at each login."
+msgstr "%s wordt niet meer bij elke aanmelding opnieuw geprobeerd."
 
 # needs review
 #: lib/common.sh
