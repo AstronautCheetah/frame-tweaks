@@ -311,9 +311,13 @@ def write_changes(log):
 
 
 def translated_everywhere(log):
-    """The log without the texts every language has translated (none without a language)."""
+    """The log without the texts every language has translated (none without a language), nor
+    those the template no longer has: no language ever gets those, so they'd wait for ever."""
     done = [i18n.parse_po(po.read_text()) for po in sorted(LOCALE.glob("*.po"))]
-    return [e for e in log if not (done and all((e["ctx"], e["now"]) in d for d in done))]
+    pot = LOCALE / POT.name                       # (LOCALE, not POT: the tests move LOCALE)
+    live = {(c, m) for c, m, _p, _b in entries_of(pot.read_text())} if pot.exists() else None
+    return [e for e in log if not (done and all((e["ctx"], e["now"]) in d for d in done))
+            and (live is None or (e["ctx"], e["now"]) in live)]
 
 
 def tidy_changes():

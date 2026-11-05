@@ -96,6 +96,13 @@ class Changes(unittest.TestCase):
         tool.tidy_changes()
         self.assertEqual(self.log(), [(None, "Help", "gui/x.py:2")])
 
+    def test_an_entry_whose_text_left_the_template_goes(self):
+        self.po("fr", {})
+        tool.log_changes(pot(), collected(("gui/x.py:1", "Quit"), ("gui/gone.py:1", "Gone")))
+        (self.locale / "frame-tweaks.pot").write_text(pot(("gui/x.py", "Quit")))
+        tool.tidy_changes()
+        self.assertEqual(self.log(), [(None, "Quit", "gui/x.py:1")])
+
     def test_export_hands_over_what_it_was_and_its_translation(self):
         self.po("fr", {}, gone=[("Open the file", "Ouvrir le fichier")])
         tool.log_changes(pot(("gui/x.py", "Open the file")), collected(("gui/x.py:1", "Open the files")))
