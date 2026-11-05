@@ -966,7 +966,7 @@ msgstr ""
 # needs review
 #: gui/memory_page.py
 msgid "Applying…"
-msgstr "Application…"
+msgstr "Application en cours…"
 
 # needs review
 #: gui/memory_page.py gui/settings_page.py gui/wallet_page.py packs/core/snip/frame-snip
@@ -2538,7 +2538,7 @@ msgstr "Vos propres traductions ont été conservées : %s"
 #: install.sh
 msgid "Leaving the branch %s for signed releases. To go back: %s"
 msgstr ""
-"Abandon de la branche %s pour les versions signées. Pour revenir en arrière : %s"
+"Passage de la branche %s aux versions signées. Pour revenir en arrière : %s"
 
 # needs review
 #: install.sh
