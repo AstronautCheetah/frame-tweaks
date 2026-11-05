@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.3 (2026-11-05)
 
 ### Fixed
 - **0.7.2's fixes, three corrections:** a Python environment whose packages can't be installed
