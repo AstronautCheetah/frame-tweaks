@@ -283,7 +283,8 @@ tweak whose `survives_updates` starts with **Yes** isn't installed again by it.
 - `run-label.sh` (optional, with `run:`): prints the Run button's label for the tweak's state
   now, one line, translated with `t`. The window runs it with each status check, and checks a row
   again a few seconds after Run, so a button can read **Show** or **Hide** (the Performance
-  Overlay's). Nothing printed, or none, leaves the manifest's `run.label`.
+  Overlay's). The window puts ▶ before it, unless it starts with a symbol of its own (`⏻ Turn
+  off`, a switch's). Nothing printed, or none, leaves the manifest's `run.label`.
 - `check-system.sh`: whether the SteamOS or SteamVR parts it relies on are still there (one
   line; exit 0 or 1); `./install.sh check-system` and updates run it.
 - `needed.sh`: whether this Frame needs the tweak at all: exit 0 if it does, exit 1 with one line

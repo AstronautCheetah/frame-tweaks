@@ -77,6 +77,20 @@ from settings_page import SettingsSection, running_action  # noqa: E402,F401  (r
 ICONS = Path.home() / ".local/share/icons/hicolor/256x256/apps"
 KNOWN_ISSUES.update({c["id"]: c["known_issue"] for c in components() if c["known_issue"]})   # (window_logic's)
 
+def even_buttons(texts, icons):
+    """A row's buttons all as tall as its tallest, and its icon buttons (⚙ ↻ ⓘ) square. The
+    icons are drawn 24 px (the style sheet), as ↻ needs (Noto Sans Math draws it small), so they
+    stood taller and wider than Run and Hide beside them. Fixed sizes, not the style sheet's
+    min-height: that's the text's height, which differs by font, so no one number fits all."""
+    for b in texts + icons:
+        b.ensurePolished()
+    tall = max([b.sizeHint().height() for b in texts + icons] + [b.sizeHint().width() for b in icons])
+    for b in texts:
+        b.setFixedHeight(tall)
+    for b in icons:
+        b.setFixedSize(tall, tall)
+
+
 STYLE = """
 QWidget { background: #0b1016; color: #e8ecf0; font-size: 14px; }
 QLabel#title { font-size: 20px; font-weight: 600; }
@@ -114,6 +128,7 @@ QPushButton#info { padding: 3px 7px 6px 7px; }
 QPushButton#info:disabled { color: #3a434d; }
 QWidget#timer { background: transparent; }
 QPushButton#again { padding: 0px 7px 3px 7px; font-size: 24px; font-weight: 600; }
+QWidget#row QPushButton#info, QWidget#detailhead QPushButton#info { padding: 0px 7px 3px 7px; font-size: 24px; }
 QPushButton#again:disabled { color: #3a434d; }
 QPushButton#again[updated="true"] { color: #7fb2e5; }
 QPushButton#run { background: #2f6b46; font-weight: 600; min-width: 92px; }
@@ -263,9 +278,10 @@ class Window(ApplyChanges, ControllerInput, QWidget):
     """The installer window. Apply changes (apply_changes.py) and the controller in VR
     (vr_controls.py) are parts of it in modules of their own: mixins, before QWidget so their
     eventFilter is the one Qt calls."""
+    even_buttons = staticmethod(even_buttons)      # (for the tweak's page, details_page.py)
     # (class defaults too: the tests build windows without __init__, and on such a Qt object a missing
     # attribute raises RuntimeError rather than AttributeError, so getattr's default wouldn't help)
-    files_job, files_changed = None, frozenset()
+    files_job, files_changed, details = None, frozenset(), None
     pack_job = None         # a pack being added or updated from a link, (future, done, saying): finish_pack_job
     blocked = {}            # id -> why its box can't be ticked (apply_changes.py update_blocks)
     applying = frozenset()  # ids an Apply's terminal is installing or removing now (run_changes)
@@ -781,6 +797,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
                            f"  <span style='color:#e0b33a;font-size:12px'>🧩 {html.escape(comp['pack'])}</span>") +
                           ("  <span style='color:#6b7783'>" + _("(hidden)") + "</span>" if is_hidden else ""))
             name.setObjectName("name")
+            # (Always rich text: with no tag in it, Qt guessed plain text and showed "&amp;" as is.)
+            name.setTextFormat(Qt.TextFormat.RichText)
             tips = []                                      # (one tooltip says each of them)
             if comp["experimental"]:
                 tips.append(_("Experimental: %s") % comp["experimental"])
@@ -799,6 +817,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             info = QLabel(html.escape(comp["desc"], quote=False) +
                           ("  <i style='color:#6b7783'>" + _("needs: %s") % ", ".join(deps) + "</i>" if deps else ""))
             info.setObjectName("desc")
+            info.setTextFormat(Qt.TextFormat.RichText)        # (as the name's: escaped text)
             info.setWordWrap(True)
             if cid in KNOWN_ISSUES:
                 info.setText(info.text() + "<br><span style='color:#e0b33a'>"
@@ -856,6 +875,7 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             g.addWidget(st, 0, 3, 3, 1)
             g.addWidget(run, 0, 4, 3, 1)
             col = 5
+            gear = None
             if cid in SETTINGS_PAGES and run_label(cid):   # both a Run and settings: ⚙ beside Run
                 gear = QPushButton("⚙")
                 gear.setObjectName("info")
@@ -869,6 +889,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             g.setColumnStretch(2, 3)
             g.setColumnStretch(3, 2)
             self.grid.addWidget(row)
+            # (Measured once in the window: before, the style sheet's 24 px icons hadn't reached them.)
+            even_buttons([run, hide], [b for b in (gear, again, details) if b])
         self.add_contribute_row()
         self.grid.addStretch(1)
         self.update_apply()
@@ -1149,9 +1171,19 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         self.tidy_proc.finished.connect(done)
         self.tidy_proc.start(str(REPO / "install.sh"), ["tidy"])
 
-    def update_again(self, cid):
-        """The ↻ Reinstall button: only for installed tweaks."""
-        button = self.again_buttons.get(cid)
+    def page_buttons(self, cid):
+        """The Run and ↻ buttons on the tweak's page (Details), if it's open: they follow the row's."""
+        page = getattr(self, "details", None)
+        if isinstance(page, Details) and page.comp["id"] == cid and page.buttons:
+            return page.buttons
+        return {}
+
+    def update_again(self, cid, button=None):
+        """The ↻ Reinstall button: only for installed tweaks. (On the row; the tweak's page's too.)"""
+        if button is None:
+            if self.page_buttons(cid).get("again"):
+                self.update_again(cid, self.page_buttons(cid)["again"])
+            button = self.again_buttons.get(cid)
         if button is None:
             return
         state = self.state.get(cid)
@@ -1167,9 +1199,13 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             button.style().unpolish(button)
             button.style().polish(button)
 
-    def update_run(self, cid):
-        """Run/Open/... for installed tweaks with something to launch, Help otherwise."""
-        button = self.run_buttons.get(cid)
+    def update_run(self, cid, button=None):
+        """Run/Open/... for installed tweaks with something to launch, Help otherwise. (On the row;
+        the tweak's page's too.)"""
+        if button is None:
+            if self.page_buttons(cid).get("run"):
+                self.update_run(cid, self.page_buttons(cid)["run"])
+            button = self.run_buttons.get(cid)
         if button is None:
             return
         state = self.state.get(cid)
@@ -1200,7 +1236,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             button.setEnabled(installed)
             button.setToolTip(_("Settings") if installed else _("Settings (tick it and Apply first)"))
             return
-        button.setText(("▶ " + label) if label else _("Help"))
+        # (A label that starts with its own symbol keeps it: ⏻ Turn off is a switch, not a ▶ start.)
+        button.setText((label if not label[0].isalnum() else "▶ " + label) if label else _("Help"))
         button.setProperty("help", "false" if label else "true")
         button.style().unpolish(button)
         button.style().polish(button)
@@ -1208,6 +1245,37 @@ class Window(ApplyChanges, ControllerInput, QWidget):
         button.setToolTip(_("{label} (installs first if needed: tick it and Apply)").format(label=label)
                           if label and not installed
                           else label and f"{label}" or _("Nothing to launch: how to use it"))
+
+    def details_buttons(self, comp):
+        """The row's buttons for the tweak's page (Details), its header's middle: Run, ⚙, ↻ and
+        Hide, as on the row (not ⓘ: this is that page). {"run", "again", "all": in order}."""
+        cid = comp["id"]
+        run = QPushButton()
+        run.setObjectName("run")
+        run.clicked.connect(lambda _=False, c=comp: self.run(c))
+        gear = None
+        if cid in SETTINGS_PAGES and run_label(cid):
+            gear = QPushButton("⚙")
+            gear.setObjectName("info")
+            gear.setToolTip(_("Settings"))
+            gear.clicked.connect(lambda _=False, c=cid: self.open_settings(c))
+        again = QPushButton("↻")
+        again.setObjectName("again")
+        again.clicked.connect(lambda _=False, c=cid: self.ask_reinstall(c))
+        hide = QPushButton()
+
+        def show_hide():
+            hidden = cid in self.hidden()
+            hide.setText(_("Unhide") if hidden else _("Hide"))
+            hide.setToolTip(_("Show this tweak in the list again") if hidden else
+                            _("Hide this tweak from the list (doesn't remove it)"))
+        show_hide()
+        hide.clicked.connect(lambda: (self.toggle_hidden(cid), show_hide()))
+        self.update_run(cid, run)
+        self.update_again(cid, again)
+        # (Sized by the page once it's in the window, as the rows are: see Details.showEvent.)
+        return {"run": run, "again": again, "texts": [run, hide], "icons": [b for b in (gear, again) if b],
+                "all": [b for b in (run, gear, again, hide) if b]}
 
     def open_settings(self, cid):
         self.close_details()

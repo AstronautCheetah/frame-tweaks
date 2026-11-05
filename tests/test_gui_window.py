@@ -374,6 +374,17 @@ class BottomBar(WindowTest):
 
 
 class Narrowest(WindowTest):
+    def test_a_title_with_an_ampersand_shows_it_plain(self):
+        """Desktop & VR Recovery read "Desktop &amp; VR Recovery": its row's name, escaped for rich
+        text, had no tag in it, so Qt took it for plain text."""
+        from PyQt6.QtWidgets import QLabel
+        w = self.window()
+        names = [l for r in w.row_widgets for l in r.findChildren(QLabel) if l.objectName() == "name"
+                 and "&amp;" in l.text()]
+        self.assertTrue(names)
+        for label in names:
+            self.assertEqual(label.textFormat(), gui.Qt.TextFormat.RichText)
+
     def test_every_rows_buttons_at_the_narrowest(self):
         """The list doesn't scroll sideways: at its narrowest the window still fits every row's
         buttons, whole. (It could be made narrower than its rows, which cut off Hide, ↻, ⓘ and Run.)

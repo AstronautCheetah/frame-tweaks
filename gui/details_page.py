@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 import manifest  # (lib/ is on the path)
 import sft
@@ -48,18 +48,35 @@ class Details(QWidget):
         self.window, self.comp = window, comp
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
-        head = QHBoxLayout()
+        # The header: Back, icon and title on the left; the row's buttons (Run, ⚙, ↻, Hide) in the
+        # middle, the grid's outer columns stretching alike to centre them.
+        top = QWidget()
+        top.setObjectName("detailhead")
+        head = QGridLayout(top)
+        head.setContentsMargins(0, 0, 0, 0)
+        left = QHBoxLayout()
         back = QPushButton(_("← Back"))
         back.clicked.connect(window.leave_details)
-        head.addWidget(back)
+        left.addWidget(back)
         icon = QLabel()
         icon.setPixmap(row_icon(comp["id"]).pixmap(56, 56))
-        head.addWidget(icon)
+        left.addWidget(icon)
         title = QLabel(f"{html.escape(comp['title'], quote=False)}  <span style='color:#6b7783;font-size:14px'>"
                        f"{html.escape(comp['category'])}</span>")
         title.setObjectName("title")
-        head.addWidget(title, 1)
-        lay.addLayout(head)
+        title.setWordWrap(True)
+        left.addWidget(title, 1)
+        head.addLayout(left, 0, 0)
+        buttons = window.details_buttons(comp)
+        self.buttons = buttons if isinstance(buttons, dict) else {}     # (a test's stand-in window: none)
+        self.sized = False
+        middle = QHBoxLayout()
+        for b in self.buttons.get("all", []):
+            middle.addWidget(b)
+        head.addLayout(middle, 0, 1)
+        head.setColumnStretch(0, 1)
+        head.setColumnStretch(2, 1)
+        lay.addWidget(top)
 
         issue = KNOWN_ISSUES.get(comp["id"])
         self.issue_label = None
@@ -133,6 +150,14 @@ class Details(QWidget):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scroll.setWidget(body)
         lay.addWidget(self.scroll, 1)
+
+    def showEvent(self, event):
+        """The header's buttons sized as the row's (even_buttons), now the window's style sheet has
+        reached them: measured before, ⚙ and ↻ came out the size of their 14 px text."""
+        super().showEvent(event)
+        if self.buttons and not self.sized:
+            self.sized = True
+            self.window.even_buttons(self.buttons["texts"], self.buttons["icons"])
 
     def show_state(self, state):
         """The table of facts, with this status ((code, text) as the window keeps it; None while

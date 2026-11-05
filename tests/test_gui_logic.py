@@ -549,6 +549,71 @@ class DryRun(unittest.TestCase):
         self.assertIn("Close and reopen Frame Tweaks", w.say.call_args[0][0])
         self.assertEqual(out.getvalue().count("would run"), 1)
 
+    def test_a_label_with_its_own_symbol_gets_no_play_sign(self):
+        """⏻ Turn off is a switch: the window put ▶ before every Run label, so it read ▶ ⏻ Turn off."""
+        from PyQt6.QtWidgets import QApplication, QPushButton
+        self.app = QApplication.instance() or QApplication([])
+        comp = next(c for c in gui.components() if gui.run_label(c["id"]) and c["id"] not in gui.SETTINGS_PAGES
+                    and c["id"] not in gui.PAGES)
+        w = gui.Window.__new__(gui.Window)
+        w.state, w.run_buttons = {comp["id"]: (0, "installed")}, {comp["id"]: QPushButton()}
+        for label, shown in (("⏻ Turn off", "⏻ Turn off"), ("Show", "▶ Show")):
+            with mock.patch.object(gui, "run_label", lambda cid, l=label: l):
+                w.update_run(comp["id"])
+            self.assertEqual(w.run_buttons[comp["id"]].text(), shown)
+
+    def test_a_rows_buttons_are_one_height_and_its_icons_square(self):
+        """↻ drew 24 px, the others 14: it stood taller and wider than ⚙, ⓘ, Run and Hide."""
+        from PyQt6.QtWidgets import QApplication, QPushButton, QWidget, QHBoxLayout
+        self.app = QApplication.instance() or QApplication([])
+        row = QWidget()
+        row.setObjectName("row")
+        row.setStyleSheet(gui.STYLE)
+        lay = QHBoxLayout(row)
+        run, hide, gear, again, info = (QPushButton(t) for t in ("▶ Dictate", "Hide", "⚙", "↻", "ⓘ"))
+        run.setObjectName("run")
+        gear.setObjectName("info")
+        again.setObjectName("again")
+        info.setObjectName("info")
+        for b in (run, gear, again, info, hide):
+            lay.addWidget(b)
+        row.ensurePolished()
+        for b in (run, gear, again, info, hide):
+            b.ensurePolished()
+        gui.even_buttons([run, hide], [gear, again, info])
+        row.adjustSize()
+        heights = {b.height() for b in (run, gear, again, info, hide)}
+        self.assertEqual(len(heights), 1, heights)
+        for b in (gear, again, info):
+            self.assertEqual(b.width(), b.height())
+        self.assertEqual({b.font().pixelSize() for b in (gear, again, info)}, {24})
+
+    def test_a_tweaks_page_has_its_rows_buttons_in_the_header(self):
+        """The page gives what the row gives: Run, ⚙ (beside a Run), ↻ and Hide, not ⓘ (it's that
+        page), styled as the row's and following it."""
+        from PyQt6.QtWidgets import QApplication, QStackedWidget
+        self.app = QApplication.instance() or QApplication([])
+        comp = next(c for c in gui.components() if gui.run_label(c["id"]) and c["id"] in gui.SETTINGS_PAGES)
+        w = gui.Window.__new__(gui.Window)
+        w.state, w.run_buttons, w.again_buttons, w.latest = {comp["id"]: (0, "installed")}, {}, {}, {}
+        w.stack = QStackedWidget()
+        with mock.patch.object(w, "hidden", lambda: set()), mock.patch.object(w, "files_updated", lambda cid: False):
+            w.details = page = gui.Details(w, comp, w.state[comp["id"]])
+            texts = [b.text() for b in page.buttons["all"]]
+            self.assertEqual(texts[1:], ["⚙", "↻", "Hide"])
+            self.assertTrue(page.buttons["again"].isEnabled())
+            w.state[comp["id"]] = (gui.RESTART, "load it")
+            w.update_run(comp["id"])                         # (the row's has gone: the page's still follows)
+            self.assertEqual(page.buttons["run"].text(), "⟳ Restart SteamVR")
+            page.setStyleSheet(gui.STYLE)
+            w.stack.addWidget(page)
+            w.stack.show()
+            self.app.processEvents()
+            heights = {b.height() for b in page.buttons["all"]}
+            self.assertEqual(len(heights), 1, heights)
+            self.assertTrue(all(b.width() == b.height() for b in page.buttons["icons"]))
+            w.stack.hide()
+
     def test_restart_steamvr_button(self):
         """Waiting for a SteamVR restart: the row's button (Settings here) restarts SteamVR, once asked."""
         from PyQt6.QtWidgets import QApplication, QPushButton, QStackedWidget

@@ -49,12 +49,12 @@ class Button(unittest.TestCase):
         for tweak in TWEAKS:
             with self.subTest(tweak):
                 self.install(tweak)
-                self.assertEqual(self.run_script(tweak, "run-label.sh")[1], "Turn off\n")    # (default: on)
+                self.assertEqual(self.run_script(tweak, "run-label.sh")[1], "⏻ Turn off\n")    # (default: on)
                 rc, out, err = self.run_script(tweak, "run.sh")
                 self.assertEqual(rc, 0, err)
                 self.assertTrue(out.startswith("Turned off"), out)
                 self.assertEqual(json.loads(self.conf(tweak).read_text()), {"enabled": False})
-                self.assertEqual(self.run_script(tweak, "run-label.sh")[1], "Turn on\n")
+                self.assertEqual(self.run_script(tweak, "run-label.sh")[1], "⏻ Turn on\n")
                 rc, out, err = self.run_script(tweak, "status.sh")
                 self.assertEqual(rc, 0, out + err)
                 self.assertTrue(out.startswith("ok       installed, turned off"), out)
@@ -65,7 +65,7 @@ class Button(unittest.TestCase):
                 # (true, not removed: the watcher hands over only a file that exists, so the page
                 # would keep the false it had)
                 self.assertEqual(json.loads(self.conf(tweak).read_text()), {"enabled": True})
-                self.assertEqual(self.run_script(tweak, "run-label.sh")[1], "Turn off\n")
+                self.assertEqual(self.run_script(tweak, "run-label.sh")[1], "⏻ Turn off\n")
                 rc, out, _ = self.run_script(tweak, "status.sh")
                 self.assertEqual((rc, out), (0, "ok       installed (active while SteamVR runs)\n"))
         said = self.log.read_text().splitlines()
@@ -83,7 +83,7 @@ class Button(unittest.TestCase):
         self.install("float-grab")
         self.conf("float-grab").parent.mkdir(parents=True)
         self.conf("float-grab").write_text("{not json")
-        self.assertEqual(self.run_script("float-grab", "run-label.sh")[1], "Turn off\n")
+        self.assertEqual(self.run_script("float-grab", "run-label.sh")[1], "⏻ Turn off\n")
         self.run_script("float-grab", "run.sh")
         self.assertEqual(json.loads(self.conf("float-grab").read_text()), {"enabled": False})
 
@@ -97,14 +97,14 @@ class Button(unittest.TestCase):
         for reinstall, kept in (("1", True), ("", False)):
             with self.subTest(reinstall=reinstall):
                 self.install("curvature")
-                if self.run_script("curvature", "run-label.sh")[1] == "Turn off\n":
+                if self.run_script("curvature", "run-label.sh")[1] == "⏻ Turn off\n":
                     self.run_script("curvature", "run.sh")
-                self.assertEqual(self.run_script("curvature", "run-label.sh")[1], "Turn on\n")
+                self.assertEqual(self.run_script("curvature", "run-label.sh")[1], "⏻ Turn on\n")
                 rc, _, err = self.run_script("curvature", "uninstall.sh", FRAME_TWEAKS_REINSTALL=reinstall)
                 self.assertEqual(rc, 0, err)
                 self.assertEqual(self.conf("curvature").exists(), kept)
                 self.install("curvature")
-                self.assertEqual(self.run_script("curvature", "run-label.sh")[1], "Turn on\n" if kept else "Turn off\n")
+                self.assertEqual(self.run_script("curvature", "run-label.sh")[1], "⏻ Turn on\n" if kept else "⏻ Turn off\n")
 
 
 # ---- the patches, in Node ---------------------------------------------------------------------
