@@ -23,7 +23,7 @@ changes: >-
 access: Reads and writes both sessions' clipboards
 survives_updates: Yes (everything is in your home folder)
 undo: "`./install.sh uninstall clipboard`"
-upstream_readme: https://raw.githubusercontent.com/AstronautCheetah/clipboard-sync/v0.2.0-ft.1/README.md
+upstream_readme: https://raw.githubusercontent.com/AstronautCheetah/clipboard-sync/v0.2.0-ft.2/README.md
 ---
 # Shared clipboard
 
@@ -140,7 +140,7 @@ Check: `./install.sh status clipboard` · Remove: `./install.sh uninstall clipbo
 <!-- generated:upstream (dev/gen-docs.py, from upstream.md) -->
 ---
 
-*The rest of this page is [AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync)'s own README at `v0.2.0-ft.1`, © its authors, under [MIT](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/MIT.txt) or [Apache-2.0](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Apache-2.0.txt), as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
+*The rest of this page is [AstronautCheetah/clipboard-sync](https://github.com/AstronautCheetah/clipboard-sync)'s own README at `v0.2.0-ft.2`, © its authors, under [MIT](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/MIT.txt) or [Apache-2.0](https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Apache-2.0.txt), as its author wrote it (only links and heading levels adjusted), included for its instructions and credits. Everything above is Frame Tweaks'.*
 
 ## Clipboard Sync
 

@@ -2,9 +2,9 @@
 # dnut/clipboard-sync plus Frame Tweaks' changes, as commits): the aarch64 binary its Build
 # workflow made, checked against this hash (recorded here, not fetched from the release). Bump
 # with dev/check-pins.sh after tagging a new fork release.
-version=0.2.0-ft.1
-url=https://github.com/AstronautCheetah/clipboard-sync/releases/download/v0.2.0-ft.1/clipboard-sync-0.2.0-ft.1-aarch64-linux.tar.gz
-sha256=6dea5dfd3bf4710322fa33afe57eaee8aa7dd42e697461936b0a286aed06cf0b
+version=0.2.0-ft.2
+url=https://github.com/AstronautCheetah/clipboard-sync/releases/download/v0.2.0-ft.2/clipboard-sync-0.2.0-ft.2-aarch64-linux.tar.gz
+sha256=690890c3fac94ee6eb464e2e1b0839bb58ac01fbbffcb4935c15d2690932fa50
 latest=https://api.github.com/repos/AstronautCheetah/clipboard-sync/releases/latest
 nomirror=Frame Tweaks' own build: the fork and its releases are Frame Tweaks'
 license=MIT or Apache-2.0 (dnut/clipboard-sync and this fork; declared in its Cargo.toml, which has no licence file: the standard texts)
