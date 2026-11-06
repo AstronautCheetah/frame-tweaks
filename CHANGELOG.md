@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Shared clipboard on the newest SteamOS beta:** from build 20261103.6153824, desktop mode's
+  KWin offers only the newer clipboard protocol (ext-data-control), which clipboard-sync
+  0.2.0-ft.1 didn't speak, so nothing copied in desktop mode reached VR and back. It now installs
+  0.2.0-ft.2, which speaks both; older builds keep 0.2.0-ft.1.
+- **The installer window, four fixes:** a row's buttons are one height and its icon buttons
+  (⚙ ↻ ⓘ) square and drawn alike: ↻ stood taller and wider than the others. Curved world windows,
+  Back to the previous window and Pick up when floating show ⏻ Turn off / ⏻ Turn on, a switch,
+  not ▶. A tweak's page has its row's Run, ⚙, ↻ and Hide in its header. A tweak's name with an
+  "&" in it showed "&amp;" (Desktop & VR Recovery).
+- **French:** two of 0.7.3's new texts read oddly ("Application…" for "Applying…"); and
+  `dev/i18n.py todo` kept counting texts the code no longer has as waiting for translation.
+
+### Changed
+- **Claude Desktop** shows the app's own icon in the list, from Anthropic's package (Anthropic's
+  mark; see CREDITS.md).
+
 ## 0.7.3 (2026-11-05)
 
 ### Fixed
