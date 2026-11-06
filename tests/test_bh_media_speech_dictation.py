@@ -184,8 +184,16 @@ class DictateAutoStop(Home):
         self.assertTrue(wait_until(lambda: dictate("--status").stdout.strip() == "idle", 10))
         time.sleep(0.8)                           # (within 0.7 s, a press is a double tap: ignored)
         self.assertEqual(dictate().returncode, 0)
+        # The next press records anew; that recording too ends by itself and is transcribed in the
+        # background. Waited for: left running, it wrote into the runtime folder while the test's
+        # folder was being deleted ("Directory not empty: 'dictate'", now and then).
+        self.assertTrue(wait_until(lambda: len(self.typed(0)) == 2, 10), self.log.read_text())
+        self.assertTrue(wait_until(lambda: dictate("--status").stdout.strip() == "idle", 10))
+        self.assertTrue(wait_until(lambda: not subprocess.run(["pgrep", "-f", str(self.tmp / "dictate")],
+                                                              capture_output=True).stdout, 10))
         log = self.log.read_text()
-        self.assertEqual((log.count("record "), log.count("whisper ")), (2, 1), log)
+        # (the old press transcribed what the first left: one recording, two transcriptions of it)
+        self.assertEqual((log.count("record "), log.count("whisper ")), (2, 2), log)
 
     def test_a_recording_that_ended_by_itself_is_not_idle(self):
         """Until its transcription starts (within half a second), a rec.pid whose pw-record is gone
