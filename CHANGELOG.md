@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.4 (2026-11-06)
 
 ### Fixed
 - **Shared clipboard on the newest SteamOS beta:** from build 20261103.6153824, desktop mode's
