@@ -24,6 +24,7 @@ from i18n import _, N_, ngettext
 import sft
 import splash
 from report_page import translation_form_url, volunteer_form_url
+from window_logic import TERMINAL_ENV
 
 WINDOW = sft.CONF / "window.json"
 # key: (default, label, explanation)
@@ -419,7 +420,7 @@ class Preferences(QWidget):
             return
         script = (f"python3 {shlex.quote(str(sft.REPO / 'lib/splash.py'))} --demo; echo; "
                   f"read -rsn1 -p {shlex.quote(_('Press any key to close'))}")
-        QProcess.startDetached("konsole", ["--separate", "-e", "bash", "-c", script])
+        QProcess.startDetached("env", [TERMINAL_ENV, "konsole", "--separate", "-e", "bash", "-c", script])
 
     def choose_channel(self, on):
         sft.set_release_channel("beta" if on else "stable")

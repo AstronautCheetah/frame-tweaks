@@ -12,6 +12,9 @@
   with "quit it first". It now asks in its terminal whether to close Claude and update. A
   ↻ Reinstall closed Claude but didn't wait for it to quit: the install right after found it
   still open, refused, and left Claude Desktop uninstalled. Both now wait until it's gone.
+- **Text in Frame Tweaks' terminals can be selected in VR:** the controller's laser reaches them
+  as touch, and Konsole took a drag to scroll. They now start with Qt's XInput 2 off
+  (`QT_XCB_NO_XI2=1`), so a laser drag selects as a mouse's does.
 - **The installer window, four fixes:** a row's buttons are one height and its icon buttons
   (⚙ ↻ ⓘ) square and drawn alike: ↻ stood taller and wider than the others. Curved world windows,
   Back to the previous window and Pick up when floating show ⏻ Turn off / ⏻ Turn on, a switch,

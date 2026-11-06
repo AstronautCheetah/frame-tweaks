@@ -154,12 +154,20 @@ def close_prompt():
                        if os.environ.get("DISPLAY") == ":0" else _("Press Enter to close…"))
 
 
+# Every Konsole Frame Tweaks opens gets this. In VR the controller's laser reaches X windows as
+# touch (Xwayland's touch device), and Konsole takes a touch drag to scroll: text couldn't be
+# selected. Without XInput 2, Qt gets the pointer the X server makes from the touch instead: a
+# drag selects, as a mouse's does. (Desktop mode's Konsole is Wayland and never reads this.)
+TERMINAL_ENV = "QT_XCB_NO_XI2=1"
+
+
 def in_terminal(proc, script):
     """Start script (bash) in a Konsole window of its own, through a shell that waits for it: proc
     finishes when the terminal closes, and closing this window (which kills proc) leaves the
     terminal, and the install running in it, alone. (Konsole's messages go nowhere, as before:
     nothing read them, and once this window is gone a pipe to it would stop Konsole.)"""
-    proc.start("bash", ["-c", 'konsole --separate -e bash -c "$1" >/dev/null 2>&1 & wait', "konsole", script])
+    proc.start("bash", ["-c", f'{TERMINAL_ENV} konsole --separate -e bash -c "$1" >/dev/null 2>&1 & wait',
+                        "konsole", script])
 
 
 def detached(cmd):

@@ -1025,7 +1025,9 @@ setup_window() {
         # (in this terminal, under the splash: the one-liner's first minute or two)
         python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window
     elif command -v konsole >/dev/null; then
-        konsole --separate -e python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
+        # (QT_XCB_NO_XI2: in VR, a drag with the laser selects text instead of scrolling; see
+        # gui/window_logic.py, TERMINAL_ENV)
+        QT_XCB_NO_XI2=1 konsole --separate -e python3 "$REPO_DIR/lib/splash.py" -- "$REPO_DIR/install.sh" _setup-window >/dev/null 2>&1
     else
         notify-send -a "Frame Tweaks" "$(t 'Setting up the full installer window')" \
             "$(t "About 280 MB to download: the window opens when it's done.")" 2>/dev/null
@@ -1102,7 +1104,7 @@ cmd_kdialog_gui() {
     local close; close=$(t 'Press Enter to close…')
     [[ ${DISPLAY:-} == :0 ]] && close=$(t 'Press Enter to close, or press the X button floating below to close.')
     cmd+="; echo; read -rp $(printf %q "$close")"
-    exec konsole --separate -e bash -c "$cmd"
+    QT_XCB_NO_XI2=1 exec konsole --separate -e bash -c "$cmd"     # (see _setup-window's)
 }
 
 usage() { sed -n '2,/^#   \.\/install\.sh ID\.\.\./s/^# \{0,1\}//p' "$REPO_DIR/install.sh"; }   # (the header, to the last command)

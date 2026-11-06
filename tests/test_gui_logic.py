@@ -1463,7 +1463,7 @@ class PreferencesPage(unittest.TestCase):
             with mock.patch.object(QProcess, "startDetached") as start:
                 buttons["Show me"].click()
             program, args = start.call_args.args[:2]
-            self.assertEqual(program, "konsole")
+            self.assertEqual((program, args[:2]), ("env", ["QT_XCB_NO_XI2=1", "konsole"]))   # (test_terminal_touch.py)
             self.assertIn("lib/splash.py --demo", args[-1])
 
     def test_deleting_what_uninstalled_tweaks_left(self):

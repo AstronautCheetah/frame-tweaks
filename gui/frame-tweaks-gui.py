@@ -57,7 +57,7 @@ from prefs_page import Preferences, window_prefs  # noqa: E402  (⚙ Preferences
 from report_page import ReportPage  # noqa: E402  (🐞 Report a problem page)
 from works_page import WorksPage  # noqa: E402  (✔ Works on my Frame page)
 from window_logic import (GONE, KNOWN_ISSUES, RESTART, UNLOAD, close_prompt, detached, in_terminal,  # noqa: E402
-                          install_running, latest_release, run_label, self_update_check, status, status_text, update_check)
+                          TERMINAL_ENV, install_running, latest_release, run_label, self_update_check, status, status_text, update_check)
 from readme_view import follow_link, link_label, with_copy  # noqa: E402  (READMEs and links)
 from tweak_rows import BREEZE, CONTRIBUTE, CategoryHeader, ContributeRow, Row, row_icon  # noqa: E402  (the list's rows)
 from details_page import Details, ReadmePage  # noqa: E402  (a tweak's page, a README's)
@@ -1558,8 +1558,8 @@ class Window(ApplyChanges, ControllerInput, QWidget):
             return
         cmd = f"cd {shlex.quote(str(REPO))} && ./install.sh uninstall-self {' '.join(flags)}; echo; read -rp {close_prompt()}"
         # (detached: it must outlive this window, which quits at once)
-        ok, _pid = QProcess.startDetached("bash", ["-c", 'exec konsole --separate -e bash -c "$1" >/dev/null 2>&1',
-                                                  "konsole", cmd])
+        ok, _pid = QProcess.startDetached("bash", ["-c", f'{TERMINAL_ENV} exec konsole --separate -e bash -c "$1" '
+                                                  '>/dev/null 2>&1', "konsole", cmd])
         if ok:
             QApplication.instance().quit()
         else:
