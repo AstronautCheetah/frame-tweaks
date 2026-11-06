@@ -99,18 +99,40 @@ To install %s anyway, run: claude-desktop-update --allow-older" "$CUR" "$VER" "$
     esac
 fi
 
+# stop_claude: close Claude Desktop and wait until it's gone (10 s, then for good). Swapped while
+# it was still quitting, it ran on in files being deleted, and the next look still found it open.
+stop_claude() {
+    pkill -f "^$OPT/" || true
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+        pgrep -f "^$OPT/" >/dev/null || return 0
+        sleep 0.5
+    done
+    pkill -9 -f "^$OPT/" || true
+    sleep 0.5
+}
+
 # Never close a running Claude Desktop without being asked (you could lose an unsent message).
+# Closing its window doesn't quit it (it stays in the background, and in VR there's no tray icon to
+# quit it from), so in a terminal (an update from the Frame Tweaks window) it asks instead.
 if pgrep -f "^$OPT/claude-desktop" >/dev/null && [ -z "$restart" ]; then
-    t 'Claude Desktop %s is available, but Claude Desktop is open: quit it first,
+    if [ -t 0 ]; then
+        keys=$(t '[y/N]'); mine=${keys:1:1}
+        read -rp "$(t "Claude Desktop is still running: closing its window leaves it running in the background.
+Close it now to update to %s? (A message you haven't sent is lost.)" "$VER") $keys " a || a=
+        [[ ${a,,} == y* || ( -n $mine && ${a,,} == "${mine,,}"* ) ]] && restart=1
+    fi
+    if [ -z "$restart" ]; then
+        t 'Claude Desktop %s is available, but Claude Desktop is open: quit it first,
 or run: claude-desktop-update --restart   (closes it, updates, and you reopen it)' "$VER"; echo
-    exit 3
+        exit 3
+    fi
 fi
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 echo "Claude Desktop: $CUR -> $VER"
 curl "${https[@]}" -gfL# --retry 3 --retry-all-errors --retry-delay 3 -o "$T/pkg.deb" "$REPO/$F"
 echo "$H  $T/pkg.deb" | sha256sum -c --quiet
 bsdtar -xf "$T/pkg.deb" -C "$T" data.tar.xz && mkdir "$T/root" && tar -xf "$T/data.tar.xz" -C "$T/root"
-pkill -f "^$OPT/" || true          # only reached when it isn't running, or with --restart
+stop_claude                        # only reached when it isn't running, or with --restart
 # (copied beside it first, then swapped in: deleted first, a copy that failed (disk full) left no
 # Claude Desktop at all)
 mkdir -p "$(dirname "$OPT")" && rm -rf "$OPT.new" && cp -a "$T/root/usr/lib/claude-desktop" "$OPT.new" &&

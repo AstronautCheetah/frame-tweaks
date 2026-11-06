@@ -7395,7 +7395,7 @@ msgid "[Y/n]"
 msgstr "[S/n]"
 
 # needs review
-#: packs/core/wallet/wallet-tool lib/common.sh
+#: packs/core/wallet/wallet-tool lib/common.sh packs/integrations/claude-desktop/claude-desktop-update
 msgid "[y/N]"
 msgstr "[s/N]"
 
@@ -7705,6 +7705,15 @@ msgstr ""
 #: packs/integrations/claude-desktop/claude-desktop-update
 msgid "Claude Desktop already at %s"
 msgstr "Claude para escritorio ya está en %s"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Claude Desktop is still running: closing its window leaves it running in the background.\n"
+"Close it now to update to %s? (A message you haven't sent is lost.)"
+msgstr ""
+"Claude Desktop sigue en ejecución: cerrar su ventana lo deja funcionando en segundo plano.\n"
+"¿Cerrarlo ahora para actualizar a %s? (Se perderá un mensaje que no hayas enviado)."
 
 #: packs/integrations/claude-desktop/claude-desktop-update
 msgid "Done. Launch 'Claude' from the app menu."

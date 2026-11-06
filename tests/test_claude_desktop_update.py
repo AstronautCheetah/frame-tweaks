@@ -8,6 +8,7 @@ followed a redirect to http://.) In a throwaway home; pgrep, pkill and update-de
 are stand-ins (nothing runs)."""
 import hashlib
 import io
+import os
 import shutil
 import subprocess
 import sys
@@ -20,6 +21,15 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import sandbox_env, stub  # noqa: E402
 UPDATE = ROOT / "packs/integrations/claude-desktop/claude-desktop-update"
+UNINSTALL = ROOT / "packs/integrations/claude-desktop/uninstall.sh"
+# A Claude Desktop that's open ($ALIVE exists) and takes a while to quit: told to (pkill), it's
+# gone after two more looks (pgrep); pkill -9 ends it at once.
+SLOW_PGREP = """[ -f "$ALIVE" ] || exit 1
+if [ -f "$ALIVE.told" ]; then n=$(( $(cat "$ALIVE.told") + 1 )); echo $n > "$ALIVE.told"
+    [ $n -lt 3 ] || { rm -f "$ALIVE"; exit 1; }; fi
+exit 0"""
+SLOW_PKILL = """case " $* " in *" -9 "*) rm -f "$ALIVE" ;; *) [ -f "$ALIVE" ] && echo 0 > "$ALIVE.told" ;; esac
+exit 0"""
 REPO = "https://downloads.claude.ai/claude-desktop/apt/stable"
 # curl stand-in: $REPO/<path> is $SERVE/<path> (-o: copied there, else printed); anything else
 # fails like a 404. Each URL asked for goes to $CURL_LOG, each call's arguments to $CURL_LOG.args.
@@ -96,6 +106,49 @@ class ClaudeDesktopUpdate(unittest.TestCase):
 
     def version(self):
         return (self.opt / ".deb-version").read_text().strip()
+
+    def open_slow(self):
+        """Claude Desktop open, and slow to quit (SLOW_PGREP)."""
+        self.alive = Path(self.tmp.name) / "alive"
+        self.alive.write_text("")
+        stub(self.stubs, "pgrep", SLOW_PGREP)
+        stub(self.stubs, "pkill", SLOW_PKILL)
+
+    def run_with(self, script, stdin=None, *args):
+        env = sandbox_env(self.home, self.stubs, REPO=REPO, SERVE=self.serve, CURL_LOG=self.curl_log,
+                          ALIVE=str(self.alive), FRAME_TWEAKS_LIB=str(ROOT / "lib"))
+        return subprocess.run(["bash", str(script), *args], env=env, stdin=stdin, capture_output=True, text=True,
+                              timeout=120)
+
+    def test_open_it_asks_in_a_terminal_and_waits_for_it_to_quit(self):
+        """Closing Claude's window leaves it running (in VR with no tray icon to quit it), so the
+        window's update failed with "quit it first". In a terminal it asks now; and it waits until
+        Claude has quit before putting the new one in place."""
+        self.installed("2.9.0")
+        self.index(("claude-desktop", "2.10.0"))
+        self.open_slow()
+        r = self.run_with(UPDATE, subprocess.DEVNULL)               # (no terminal: as before)
+        self.assertEqual(r.returncode, 3, r.stdout + r.stderr)
+        self.assertEqual(self.version(), "2.9.0")
+        master, slave = os.openpty()
+        self.addCleanup(os.close, master)
+        os.write(master, b"y\n")
+        try:
+            r = self.run_with(UPDATE, slave)
+        finally:
+            os.close(slave)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.version(), "2.10.0")
+        self.assertFalse(self.alive.exists(), "replaced while Claude was still quitting")
+
+    def test_uninstall_waits_for_it_to_quit(self):
+        """A ↻ Reinstall's install, right after the uninstall, found Claude still quitting, refused
+        to close it, and left Claude Desktop uninstalled."""
+        self.installed("2.9.0")
+        self.open_slow()
+        r = self.run_with(UNINSTALL)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse(self.alive.exists(), "still quitting when the uninstall finished")
 
     def test_takes_claude_desktops_own_entry_at_its_newest(self):
         self.index(("claude-desktop", "2.9.0"), ("claude-desktop-beta", "9.0.0"), ("claude-desktop", "2.10.0"),

@@ -7,6 +7,11 @@
   KWin offers only the newer clipboard protocol (ext-data-control), which clipboard-sync
   0.2.0-ft.1 didn't speak, so nothing copied in desktop mode reached VR and back. It now installs
   0.2.0-ft.2, which speaks both; older builds keep 0.2.0-ft.1.
+- **Claude Desktop updates and ↻ Reinstall:** closing Claude's window leaves it running in the
+  background (in VR there's no tray icon to quit it from), so an update from the window failed
+  with "quit it first". It now asks in its terminal whether to close Claude and update. A
+  ↻ Reinstall closed Claude but didn't wait for it to quit: the install right after found it
+  still open, refused, and left Claude Desktop uninstalled. Both now wait until it's gone.
 - **The installer window, four fixes:** a row's buttons are one height and its icon buttons
   (⚙ ↻ ⓘ) square and drawn alike: ↻ stood taller and wider than the others. Curved world windows,
   Back to the previous window and Pick up when floating show ⏻ Turn off / ⏻ Turn on, a switch,

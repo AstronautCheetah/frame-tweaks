@@ -8312,7 +8312,7 @@ msgid "[Y/n]"
 msgstr "[O/n]"
 
 # needs review
-#: packs/core/wallet/wallet-tool lib/common.sh
+#: packs/core/wallet/wallet-tool lib/common.sh packs/integrations/claude-desktop/claude-desktop-update
 msgid "[y/N]"
 msgstr "[o/N]"
 
@@ -8664,6 +8664,15 @@ msgstr ""
 #: packs/integrations/claude-desktop/claude-desktop-update
 msgid "Claude Desktop already at %s"
 msgstr "Claude pour ordinateur est déjà en version %s"
+
+# needs review
+#: packs/integrations/claude-desktop/claude-desktop-update
+msgid ""
+"Claude Desktop is still running: closing its window leaves it running in the background.\n"
+"Close it now to update to %s? (A message you haven't sent is lost.)"
+msgstr ""
+"Claude Desktop est toujours en cours d'exécution : fermer sa fenêtre le laisse tourner en arrière-plan.\n"
+"Le fermer maintenant pour passer à la version %s ? (Un message que vous n'avez pas envoyé sera perdu.)"
 
 # needs review
 #: packs/integrations/claude-desktop/claude-desktop-update
