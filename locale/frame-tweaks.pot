@@ -1785,7 +1785,7 @@ msgstr ""
 msgid "not available any more"
 msgstr ""
 
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/bt-music-only/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
 
@@ -4163,6 +4163,66 @@ msgid ""
 "While Steam's keyboard is open, Arrow Pad only slides when you drag it. To move it closer, further away or turn it, use the bar under it."
 msgstr ""
 
+#: packs/core/bt-music-only/README.md
+msgid ""
+"Bluetooth headphones and earbuds connect for music (A2DP) only, without the call profile"
+msgstr ""
+
+#: packs/core/bt-music-only/README.md
+msgid "Bluetooth headphones: music only"
+msgstr ""
+
+#: packs/core/bt-music-only/README.md
+msgid ""
+"The Frame stops offering Bluetooth audio devices the hands-free and headset profiles (the ones with a microphone and a voice channel). Headphones and earbuds then connect for music (A2DP) only, and stay on that profile. Their microphone isn't used; SteamVR uses the Frame's own."
+msgstr ""
+
+#: packs/core/bt-music-only/README.md
+msgid ""
+"With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds (Bose QuietComfort Earbuds II here) never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
+msgstr ""
+
+#: packs/core/bt-music-only/install.sh
+msgid ""
+"Bluetooth headphones now connect for music only (A2DP). Reconnect ones connected already."
+msgstr ""
+
+#: packs/core/bt-music-only/install.sh
+msgid ""
+"Installed; applies when the Frame restarts (SteamVR is using the sound system now)."
+msgstr ""
+
+#: packs/core/bt-music-only/install.sh
+msgid "Installed; applies when the Frame restarts."
+msgstr ""
+
+#: packs/core/bt-music-only/status.sh
+msgid ""
+"A connected device still offers its call profile: reconnect it, or restart the Frame"
+msgstr ""
+
+#: packs/core/bt-music-only/status.sh
+msgid ""
+"Applies when WirePlumber restarts: restart the Frame, or ↻ Reinstall with SteamVR closed"
+msgstr ""
+
+#: packs/core/bt-music-only/status.sh
+msgid "Bluetooth headphones connect for music only (A2DP)"
+msgstr ""
+
+#: packs/core/bt-music-only/uninstall.sh
+msgid ""
+"The call profiles are back when the Frame restarts (SteamVR is using the sound system now)."
+msgstr ""
+
+#: packs/core/bt-music-only/uninstall.sh
+msgid "The call profiles are back when the Frame restarts."
+msgstr ""
+
+#: packs/core/bt-music-only/uninstall.sh
+msgid "The call profiles are back; reconnect headphones connected already."
+msgstr ""
+
 #: packs/core/charge-limit/README.md
 msgid "80% (the default)"
 msgstr ""
@@ -5084,7 +5144,7 @@ msgid ""
 "Frame Tweaks' own fixes and app setups for the Steam Frame, and the helpers many of them need: other projects' tools, installed with the tweaks that use them and credited to their makers. Homebrew installs the programs that Dictation, Screen snip and Android Mirror run (whisper.cpp, tesseract, scrcpy); ydotool types for Arrow Pad, Dictation and Scroll strips; Piper speaks for Narrate. Each one is tested on a Frame and installed into your home folder, so it survives SteamOS updates and comes off cleanly (Battery charge limit also adds a udev rule in /etc, which SteamOS updates keep)."
 msgstr ""
 
-#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/core/bt-music-only/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Hardware"
 msgstr ""
 

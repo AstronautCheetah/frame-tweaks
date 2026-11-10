@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Bluetooth headphones: music only** (Hardware): Bluetooth headphones and earbuds connect for
+  music (A2DP) only, without the call profile. A WirePlumber setting leaves the hands-free and
+  headset roles out, so a device's voice channel is never opened and never torn down mid-stream
+  when the Frame sleeps, which left a pair of Bose QuietComfort Earbuds II refusing the Frame
+  until they were reset. SteamVR uses the Frame's own microphone anyway. Applies when WirePlumber
+  restarts: at once, or with the Frame's next start while SteamVR runs; the status says which.
+
 ## 0.7.4 (2026-11-06)
 
 ### Fixed

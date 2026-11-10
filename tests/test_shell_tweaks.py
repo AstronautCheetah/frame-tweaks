@@ -3,7 +3,7 @@ Firefox's user.js block (install, the old marker, uninstall resetting prefs.js, 
 default profile) and NordVPN's status line; Shared clipboard's status with and without desktop
 mode, and from an older build; Mouse cursor fix not needed from gamescope 3.16.30; pinned
 downloads falling back to Frame Tweaks' copy; Arrow Pad's uninstall giving a pad it asked to quit
-the time to close."""
+the time to close; Bluetooth headphones: music only's WirePlumber file, restart and status."""
 import sys
 import hashlib
 import subprocess
@@ -628,3 +628,60 @@ class ArrowPadUninstall(Home):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BtMusicOnly(Home):
+    """Bluetooth headphones: music only: its WirePlumber file, the restart that applies it (not
+    under SteamVR), and the status telling a file newer than the running WirePlumber."""
+    CONF = ".config/wireplumber/wireplumber.conf.d/90-frame-tweaks-bt-music-only.conf"
+
+    def setUp(self):
+        super().setUp()
+        self.log = self.home / "systemctl.log"
+        self.started = self.home / "wireplumber-started"       # the stub's ActiveEnterTimestampMonotonic
+        self.started.write_text("1000000000000000\n")          # (long after any file of the test's)
+        self.stub("systemctl", f'echo "$@" >> "{self.log}"\n'
+                               f'case "$*" in *ActiveEnterTimestampMonotonic*) cat "{self.started}";; esac')
+        self.stub("pgrep", "exit 1")                           # SteamVR isn't running
+
+    def restarts(self):
+        return "restart wireplumber" in (self.log.read_text() if self.log.exists() else "")
+
+    def test_install_writes_the_roles_and_restarts_wireplumber(self):
+        r = self.run_script("bt-music-only/install.sh")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        conf = (self.home / self.CONF).read_text()
+        self.assertIn("bluez5.roles", conf)
+        self.assertIn("a2dp_source", conf)
+        self.assertNotIn("hfp_ag", conf.split("bluez5.roles")[1])
+        self.assertTrue(self.restarts())
+        self.assertIn("music only", r.stdout)
+
+    def test_install_under_steamvr_waits_for_the_next_start(self):
+        self.stub("pgrep", "exit 0")
+        r = self.run_script("bt-music-only/install.sh")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertTrue((self.home / self.CONF).exists())
+        self.assertFalse(self.restarts())
+        self.assertIn("restarts", r.stdout)
+
+    def test_status(self):
+        r = self.run_script("bt-music-only/status.sh")
+        self.assertEqual((r.returncode, r.stdout.strip()), (1, "missing  not installed"))
+        self.run_script("bt-music-only/install.sh")
+        r = self.run_script("bt-music-only/status.sh")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("music only", r.stdout)
+        self.started.write_text("1000000\n")                   # WirePlumber up since a second after boot
+        r = self.run_script("bt-music-only/status.sh")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("Applies when WirePlumber restarts", r.stdout)
+
+    def test_uninstall_removes_the_file_and_restarts(self):
+        self.run_script("bt-music-only/install.sh")
+        self.log.unlink()
+        r = self.run_script("bt-music-only/uninstall.sh")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertFalse((self.home / self.CONF).exists())
+        self.assertTrue(self.restarts())
+        self.assertEqual(self.run_script("bt-music-only/status.sh").returncode, 1)
