@@ -8,6 +8,13 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-10
+- Changed in `gui/apply_changes.py:292`
+  - was: "SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
+  - now: "SteamOS was updated ({old} → {new})."
+- New in `gui/apply_changes.py:294`
+  - now: "Broken since, Repair installs again: {tweaks}."
+- New in `gui/apply_changes.py:297`
+  - now: "Not Repair's to fix, their status says what each needs (↻ Reinstall, a restart): {tweaks}."
 - New in `packs/core/adb-scrcpy/phone:345`
   - now: "ended by the system: signal %s"
 - New in `packs/core/adb-scrcpy/phone:347`

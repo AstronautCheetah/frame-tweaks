@@ -2119,14 +2119,15 @@ class RepairBar(unittest.TestCase):
     recorded and an installed tweak is broken; 🛠 Repair names what it installs again (and what it
     leaves: their manifest says they survive updates), then runs ./install.sh repair. A build
     change that broke nothing is recorded as seen."""
-    def window(self, change=("3.8.0 (1)", "3.8.0 (2)"), records=()):
+    def window(self, change=("3.8.0 (1)", "3.8.0 (2)"), records=(), on_build=()):
         w = bare_window()
         state = tempfile.TemporaryDirectory()                      # (held tweaks: none, whatever this machine has)
         self.addCleanup(state.cleanup)
         for p in (mock.patch.object(gui.sft, "build_change", return_value=change),
                   mock.patch.object(gui.sft, "STATE", Path(state.name)),
                   mock.patch.object(gui.sft, "record_build"),
-                  mock.patch.object(gui.sft, "installed_record", side_effect=lambda cid: cid in records)):
+                  mock.patch.object(gui.sft, "installed_record", side_effect=lambda cid: cid in records),
+                  mock.patch.object(gui.sft, "installed_on_this_build", side_effect=lambda cid: cid in on_build)):
             p.start()
             self.addCleanup(p.stop)
         w.make_repair_bar()
@@ -2150,6 +2151,39 @@ class RepairBar(unittest.TestCase):
         self.assertFalse(w.repair_bar.isHidden())
         self.assertIn("SteamOS was updated (3.8.0 (1) → 3.8.0 (2))", w.repair_text.text())
         self.assertIn(html_escape(c["title"]), w.repair_text.text())
+
+    def test_installed_on_this_build_isnt_the_updates_doing(self):
+        """A warning of a tweak installed after the update (a restart pending, say) doesn't bring the
+        bar; with nothing else broken the change is recorded as seen."""
+        w = self.window()
+        c = self.fragile(w)
+        w.state[c["id"]] = (2, "its rule is gone")
+        w.update_repair_bar()
+        self.assertFalse(w.repair_bar.isHidden())
+        w = self.window(on_build=(c["id"],))
+        gui.sft.record_build.reset_mock()
+        w.state[c["id"]] = (2, "applies when the Frame restarts")
+        w.update_repair_bar()
+        self.assertTrue(w.repair_bar.isHidden())
+        gui.sft.record_build.assert_called_once()
+
+    def test_what_repair_leaves_is_said_and_the_button_follows(self):
+        """A broken tweak whose manifest says it survives updates: named as its own status's to fix,
+        and with nothing for Repair to install again the button is hidden."""
+        w = self.window()
+        c = self.fragile(w)
+        other = next(x for x in w.rows if x["id"] != c["id"] and gui.sft.survives_updates(x))
+        w.state[other["id"]] = (2, "needs 0.2.0-ft.2 (Reinstall fixes it)")
+        w.update_repair_bar()
+        self.assertFalse(w.repair_bar.isHidden())
+        self.assertIn(html_escape("Not Repair's to fix"), w.repair_text.text())
+        self.assertIn(html_escape(other["title"]), w.repair_text.text())
+        self.assertNotIn("Repair installs again", w.repair_text.text())
+        self.assertTrue(w.repair_button.isHidden())
+        w.state[c["id"]] = (2, "its rule is gone")
+        w.update_repair_bar()
+        self.assertIn("Repair installs again: " + html_escape(c["title"]), w.repair_text.text())
+        self.assertFalse(w.repair_button.isHidden())
 
     def test_missing_counts_only_with_an_install_record(self):
         w = self.window()

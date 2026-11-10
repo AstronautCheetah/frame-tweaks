@@ -151,7 +151,8 @@ class InstallState(unittest.TestCase):
     def test_install_records_the_version(self):
         r = self.sh("install", "probe")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertEqual(self.record.read_text(), VERSION + "\n")
+        # (the record: the Frame Tweaks version, then the SteamOS build it was installed on)
+        self.assertEqual(self.record.read_text().splitlines()[0], VERSION)
         self.assertEqual(self.log(), ["install"])
 
     def change_the_probe(self):
@@ -328,7 +329,7 @@ class InstallState(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.log(), ["migrate 0.0.1", "install"])
         self.assertIn("migrating probe from 0.0.1", r.stdout)
-        self.assertEqual(self.record.read_text(), VERSION + "\n")
+        self.assertEqual(self.record.read_text().splitlines()[0], VERSION)
 
     def test_newer_record_doesnt_migrate_backwards(self):
         self.installed_at("99.0.0")              # going back to an older Frame Tweaks
@@ -549,7 +550,7 @@ class InstallState(unittest.TestCase):
         r = self.sh("status", "probe")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("installed", r.stdout)
-        self.assertEqual(self.record.read_text().strip(), VERSION)              # (no migration re-run)
+        self.assertEqual(self.record.read_text().splitlines()[0], VERSION)              # (no migration re-run)
         self.assertTrue((self.home / ".config/probe.conf").exists())             # (its settings: in use)
         r = self.sh("install", "probe")
         self.assertNotIn("migrate", " ".join(self.log()))
@@ -673,7 +674,7 @@ class InstallState(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual((self.home / "base.log").read_text().split("\n")[:-1], ["migrate 0.0.1", "install"])
         self.assertEqual(self.log(), ["migrate 0.0.1", "install"])
-        self.assertEqual((self.state / "installed/base").read_text(), VERSION + "\n")
+        self.assertEqual((self.state / "installed/base").read_text().splitlines()[0], VERSION)
 
     def test_a_broken_tweak_keeps_its_settings(self):
         """forget-settings (and uninstall-self's --remove-settings) take only what uninstalled tweaks
@@ -697,7 +698,7 @@ class InstallState(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("Failed: probe", r.stdout)                    # (the log has stderr too)
         self.assertEqual(self.log(), ["install", "uninstall"])
-        self.assertEqual(self.record.read_text(), VERSION + "\n")     # (still installed)
+        self.assertEqual(self.record.read_text().splitlines()[0], VERSION)     # (still installed)
 
     def dependent(self):
         """A second tweak, "needsprobe", that depends on the probe; installed, its status is a warning."""

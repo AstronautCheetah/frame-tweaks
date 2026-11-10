@@ -147,7 +147,8 @@ export FRAME_TWEAKS_DIRS
 # record between its uninstall and its install, and the install then would see none.
 PHASE=install REASON=user
 declare -A PREVIOUS=()
-for r in "$STATE"/installed/*; do [[ -f $r ]] && PREVIOUS[${r##*/}]=$(<"$r"); done
+# (the record's first line: the Frame Tweaks version; its second, the SteamOS build it was installed on)
+for r in "$STATE"/installed/*; do [[ -f $r ]] && PREVIOUS[${r##*/}]=$(head -n1 "$r"); done
 lifecycle() { PHASE=$1 REASON=$2; }
 # with_lifecycle ID COMMAND...: COMMAND with the tweak's context in its environment (only there:
 # exported for good, every status.sh run alongside would see it too)
@@ -1143,7 +1144,14 @@ stop_processes() {
 # installed/<id> records the Frame Tweaks version that last installed a tweak. A tweak's
 # optional migrate.sh runs before its install.sh when that recorded version is older, with the
 # old version as $1 (e.g. to move a setting to a new place).
-record_version() { mkdir -p "$STATE/installed"; echo "$VERSION" > "$STATE/installed/$1"; record_files "$1"; }
+record_version() {
+    mkdir -p "$STATE/installed"
+    # (second line: the SteamOS build it was installed on, so a warning of a tweak installed after
+    # a SteamOS update isn't put down to that update by the window: lib/sft.py installed_on_this_build)
+    [[ -n ${OS_BUILD_NOW+x} ]] || OS_BUILD_NOW=$(python3 lib/sft.py steamos-build 2>/dev/null || true)
+    printf '%s\n%s\n' "$VERSION" "$OS_BUILD_NOW" > "$STATE/installed/$1"
+    record_files "$1"
+}
 forget_version() {
     # (link-version/<id>: which version of a linked project was installed, lib/link.sh)
     rm -f "$STATE/installed/$1" "$STATE/fingerprints/$1" "$STATE/link-version/$1"
@@ -1213,7 +1221,7 @@ run_migrations() {
         is_component "$id" || continue           # (unknown ids are refused right after)
         [[ -f ${DIR[$id]}/migrate.sh && -f $STATE/installed/$id ]] || continue
         held "$id" && [[ -n ${FRAME_TWEAKS_UPDATING:-} ]] && continue
-        old=$(cat "$STATE/installed/$id")
+        old=$(head -n1 "$STATE/installed/$id")
         # Only from an older release: going back to an older one doesn't run them backwards.
         # (Ranked as releases are: 0.7.0-rc.2 before 0.7.0, which plain sort -V puts after it.)
         tag_newer "$VERSION" "$old" || continue

@@ -59,6 +59,10 @@ msgstr ""
 msgid "Asks for your sudo password: %s"
 msgstr ""
 
+#: gui/apply_changes.py
+msgid "Broken since, Repair installs again: {tweaks}."
+msgstr ""
+
 #: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
 msgid "Cancel"
 msgstr ""
@@ -108,6 +112,11 @@ msgstr ""
 
 #: gui/apply_changes.py
 msgid "No password yet: Set a password… again when you're ready."
+msgstr ""
+
+#: gui/apply_changes.py
+msgid ""
+"Not Repair's to fix, their status says what each needs (↻ Reinstall, a restart): {tweaks}."
 msgstr ""
 
 #: gui/apply_changes.py install.sh
@@ -161,8 +170,7 @@ msgid "Set a password…"
 msgstr ""
 
 #: gui/apply_changes.py
-msgid ""
-"SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
+msgid "SteamOS was updated ({old} → {new})."
 msgstr ""
 
 #: gui/apply_changes.py

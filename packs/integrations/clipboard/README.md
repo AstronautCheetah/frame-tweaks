@@ -21,7 +21,10 @@ changes: >-
   `clipboard-sync` (Frame Tweaks' build, a pinned and checked release) in
   `~/.local/share/frame-tweaks/`, a KDE autostart entry
 access: Reads and writes both sessions' clipboards
-survives_updates: Yes (everything is in your home folder)
+survives_updates: >-
+  Mostly: its files are in your home folder, but the clipboard-sync release it needs follows
+  SteamOS's KWin (its clipboard protocol), so Repair (or ↻ Reinstall) after a SteamOS update
+  installs the right one; the status says when
 undo: "`./install.sh uninstall clipboard`"
 upstream_readme: https://raw.githubusercontent.com/AstronautCheetah/clipboard-sync/v0.2.0-ft.2/README.md
 ---
@@ -122,7 +125,7 @@ both.
 <!-- generated:changes (dev/gen-docs.py, from each tweak's README front matter) -->
 ## What it changes
 
-- **Survives SteamOS updates:** Yes (everything is in your home folder)
+- **Survives SteamOS updates:** Mostly: its files are in your home folder, but the clipboard-sync release it needs follows SteamOS's KWin (its clipboard protocol), so Repair (or ↻ Reinstall) after a SteamOS update installs the right one; the status says when
 - **Changes:** `clipboard-sync` (Frame Tweaks' build, a pinned and checked release) in `~/.local/share/frame-tweaks/`, a KDE autostart entry
 - **Unusual access:** Reads and writes both sessions' clipboards
 - **Undo:** `./install.sh uninstall clipboard`

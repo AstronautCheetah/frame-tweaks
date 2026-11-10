@@ -227,6 +227,19 @@ def installed_record(cid):
     return (STATE / "installed" / cid).exists()
 
 
+def installed_on_this_build(cid):
+    """The tweak was installed on the SteamOS build running now: its install record's second line
+    (./install.sh record_version writes it since 0.7.5). A warning of its then isn't the update's
+    doing, so the window's Repair offer leaves it out. An older record, with no build, says
+    nothing (False)."""
+    try:
+        lines = (STATE / "installed" / cid).read_text().splitlines()
+    except OSError:
+        return False
+    now = steamos_build()
+    return bool(now) and len(lines) > 1 and lines[1].strip() == now
+
+
 # link-version/<id>: which version of a linked project Frame Tweaks installed, "tested <version>"
 # or "newest" (lib/link.sh writes it, ./install.sh's forget_version removes it). ./install.sh update
 # moves only a "tested" one, to a newer tested version; a "newest" one is the user's choice.

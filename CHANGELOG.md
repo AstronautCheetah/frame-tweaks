@@ -11,6 +11,13 @@
   restarts: at once, or with the Frame's next start while SteamVR runs; the status says which.
 
 ### Fixed
+- **The 🛠 Repair bar after a SteamOS update** blamed the update for every warning: a tweak
+  installed after the update, with a restart pending, was listed as broken by it. Each install
+  now records the SteamOS build it was made on, and such a tweak is left out. The bar says what
+  Repair installs again and what it leaves to its own status (↻ Reinstall, a restart), and its
+  button only shows with something to install again. **Shared clipboard** says its clipboard-sync
+  release follows SteamOS's KWin, so Repair installs the right one after an update instead of
+  holding it and asking for a Reinstall by hand.
 - **Android Mirror's "didn't start" message** says how scrcpy ended (its exit status, or the signal
   when the system ended it) and shows its ERROR and WARN lines before its last lines, which are
   routine when something else killed it: SteamOS's scx_lavd scheduler failing did, and the message

@@ -246,6 +246,7 @@ class ApplyChanges:
         b.setToolTip(_("Installs again the installed tweaks whose status says they're broken (./install.sh repair)"))
         b.clicked.connect(self.ask_repair)
         row.addWidget(b)
+        self.repair_button = b
         self.repair_bar = bar
         bar.setVisible(False)
         self.update_repair_bar()          # (again after a change of language: build_ui)
@@ -255,15 +256,30 @@ class ApplyChanges:
         """The tweaks the window counts as installed but broken (sft.broken), in the list's order."""
         return [c["id"] for c in self.rows if sft.broken(self.state.get(c["id"]), sft.installed_record(c["id"]))]
 
+    def since_update_ids(self):
+        """The broken tweaks the update can have broken: not one installed on this build (a warning
+        of its, a restart pending say, isn't the update's doing)."""
+        return [cid for cid in self.broken_ids() if not sft.installed_on_this_build(cid)]
+
+    def repair_split(self, ids):
+        """(fix, left): what Repair installs again, and what it leaves: their manifest says SteamOS
+        updates don't touch them (so their status says what they need: ↻ Reinstall, a restart), or
+        they're held."""
+        comps = {c["id"]: c for c in self.rows}
+        held = sft.STATE / "held"
+        fix = [cid for cid in ids if not sft.survives_updates(comps[cid]) and not (held / cid).exists()]
+        return fix, [cid for cid in ids if cid not in fix]
+
     def update_repair_bar(self):
         """Once every row's status is in: the bar shows while the build changed and a tweak is
         broken. A build change that broke nothing is recorded as seen: a problem weeks later
-        mustn't be put down to that update."""
+        mustn't be put down to that update. The text says what Repair installs again and what it
+        leaves to its own status; the button only shows with something to install again."""
         bar = self.repair_bar
         if bar is None or any(self.state.get(c["id"]) is None for c in self.rows):
             return
         change = sft.build_change()
-        ids = self.broken_ids() if change else []
+        ids = self.since_update_ids() if change else []
         if change and not ids:
             try:
                 sft.record_build()
@@ -272,18 +288,22 @@ class ApplyChanges:
         bar.setVisible(bool(ids))
         if ids:
             titles = {c["id"]: c["title"] for c in self.rows}
-            self.repair_text.setText("🛠 " + html.escape(
-                _("SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}.").format(
-                    old=change[0], new=change[1], tweaks=", ".join(titles[cid] for cid in ids))))
+            fix, left = self.repair_split(ids)
+            text = _("SteamOS was updated ({old} → {new}).").format(old=change[0], new=change[1])
+            if fix:
+                text += " " + _("Broken since, Repair installs again: {tweaks}.").format(
+                    tweaks=", ".join(titles[cid] for cid in fix))
+            if left:
+                text += " " + _("Not Repair's to fix, their status says what each needs (↻ Reinstall, a restart): {tweaks}.").format(
+                    tweaks=", ".join(titles[cid] for cid in left))
+            self.repair_button.setVisible(bool(fix))
+            self.repair_text.setText("🛠 " + html.escape(text))
 
     def ask_repair(self):
         """🛠 Repair: the confirm page says first which tweaks it installs again and which it leaves
         (their manifest says SteamOS updates don't touch them; held), as Apply changes does."""
         comps = {c["id"]: c for c in self.rows}
-        ids = self.broken_ids()
-        held = sft.STATE / "held"
-        fix = [cid for cid in ids if not sft.survives_updates(comps[cid]) and not (held / cid).exists()]
-        left = [cid for cid in ids if cid not in fix]
+        fix, left = self.repair_split(self.since_update_ids())
         dim = "<span style='font-size:14px;color:#9aa6b2'>%s</span>"
 
         def line(cid):

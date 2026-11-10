@@ -187,9 +187,12 @@ class Repair(unittest.TestCase):
         window's Repair offer while the others are still broken."""
         self.assertEqual(self.sh("install", "probe").returncode, 0)
         self.assertEqual(self.build.read_text(), "3.8.0 (20261001.1)\n")
+        # (each install record names the build it was made on, after the Frame Tweaks version)
+        self.assertEqual((self.state / "installed/probe").read_text().splitlines()[1], "3.8.0 (20261001.1)")
         os_release(self.osr, "20261020.1")
         self.assertEqual(self.sh("install", "fragile").returncode, 0)
         self.assertEqual(self.build.read_text(), "3.8.0 (20261001.1)\n")
+        self.assertEqual((self.state / "installed/fragile").read_text().splitlines()[1], "3.8.0 (20261020.1)")
         self.assertEqual(self.sh("repair").returncode, 0)
         self.assertEqual(self.build.read_text(), "3.8.0 (20261020.1)\n")
         self.build.unlink()
@@ -245,6 +248,22 @@ class BuildChange(unittest.TestCase):
         self.assertFalse(sft.broken((0, "ok"), True))
         self.assertFalse(sft.broken((sft.installer.RESTART, "load it"), True))   # (a SteamVR restart's to fix)
         self.assertFalse(sft.broken(None, True))                        # (not checked yet)
+
+    def test_installed_on_this_build(self):
+        """The record's second line is the build the tweak was installed on: equal to the one running
+        now, the tweak was installed after the update, so its warning isn't the update's doing."""
+        rec = self.dir / "state/installed"
+        rec.mkdir(parents=True)
+        os_release(self.osr, "2")
+        self.assertFalse(sft.installed_on_this_build("probe"))               # (no record)
+        (rec / "probe").write_text("0.7.4\n")
+        self.assertFalse(sft.installed_on_this_build("probe"))               # (an old record: no build)
+        (rec / "probe").write_text("0.7.5\n3.8.0 (1)\n")
+        self.assertFalse(sft.installed_on_this_build("probe"))               # (installed on the old build)
+        (rec / "probe").write_text("0.7.5\n3.8.0 (2)\n")
+        self.assertTrue(sft.installed_on_this_build("probe"))
+        self.osr.unlink()
+        self.assertFalse(sft.installed_on_this_build("probe"))               # (can't tell the build: says nothing)
 
     def test_survives_updates(self):
         for text, want in (("Yes (everything is in your home folder)", True), ("yes; it checks", True),
