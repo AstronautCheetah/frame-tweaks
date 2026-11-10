@@ -2,21 +2,54 @@
 # translations (dev/i18n-terms.py; don't edit by hand). Columns: English, official,
 # source, other wordings seen, how many of our texts use it.
 English	official	source	alternatives	used
+1 hour	1 hora	SteamVR		1
+1 second	1 segundo	Steam		1
+15 minutes	15 minutos	Steam		1
+30 minutes	30 minutos	SteamVR		1
+8 hours	8 horas	Claude Desktop		1
 Apply changes	Aplicar cambios	Claude Desktop		1
-Caps Lock	Bloq Mayús	Claude Desktop	Bloqueo de mayúsculas (KDE)	1
-Change Password	Cambiar contraseña	Steam		1
-Copied to clipboard	Copiado al portapapeles	Claude Desktop		1
+Back button	Botón Back	Steam	Botón atrás (KDE)	1
+Caps Lock	Bloq Mayús	Claude Desktop	Bloqueo de mayúsculas (Qt); Bloqueo de mayúsculas (KDE)	1
+Change Password	Cambiar contraseña	Steam		6
+Clear Scrollback	Limpiar historial de desplazamiento	KDE		1
+Clear Scrollback and Reset	Limpiar historial de desplazamiento y reiniciar	KDE		1
+Copied to clipboard	Copiado al portapapeles	Claude Desktop	Copió al portapapeles (Claude Desktop)	1
 Copy image	Copiar imagen	Claude Desktop		1
+Copy text	Copiar texto	KDE		1
 English (UK)	Inglés (RU)	KDE		1
 English (US)	Inglés (EE. UU.)	KDE		1
-Float in World	Flotar en el mundo	SteamVR		4
+Float in World	Flotar en el mundo	SteamVR		6
+Get involved	Involucrarse	KDE		1
 Link copied	Enlace copiado	Steam		1
 Made by	Creado por	Claude Desktop		1
+Microphone muted	Micrófono silenciado	KDE		1
+not installed	No instalado	Steam	Sin instalar (Claude Desktop)	1
+Not now	Ahora no	Steam		1
+not responding	Sin respuesta	Claude Desktop	No responde (KDE); No está respondiendo (KDE)	1
+not running	Sin ejecutar	Claude Desktop	No se está ejecutando (KDE); No ejecutándose (KDE); NO EJECUTANDOSE (KDE)	1
+Own limit	Límite propio	Claude Desktop		1
 Pair device with pairing code	Vincular dispositivo con un código de vinculación	Android		1
-Remove them	Eliminarlas	Claude Desktop		1
+password required	La contraseña es obligatoria	Steam	Contraseña obligatoria (Android)	1
+Performance Overlay	Interfaz de rendimiento	Steam		2
+Reading aloud	Leyendo en voz alta	Claude Desktop		1
+Remote Control	Control remoto	KDE		1
 Reset to defaults	Restablecer valores predeterminados	Claude Desktop		1
-Restart SteamVR	Reiniciar SteamVR	SteamVR		2
-Show text	Mostrar texto	KDE		1
-System Settings	Configuraciones del sistema	Steam	Preferencias del sistema (KDE)	2
+Restart SteamVR	Reiniciar SteamVR	SteamVR		5
+Right Ctrl	Ctrl derecho	KDE		1
+Room View	Vista de habitación	SteamVR		2
+Set a password	Establece una contraseña	Android		1
+Show image	Mostrar imagen	Claude Desktop		1
+Show text	Mostrar texto	Claude Desktop	Mostrar el texto (KDE)	1
+Stop charging at	Dejar de cargar al	KDE		1
+System Settings	Configuraciones del sistema	Steam	Preferencias del sistema (KDE)	5
 Text copied	Texto copiado	Claude Desktop		1
+this phone	Este teléfono	Android		1
 Toggle Curvature	Alternar curvatura	SteamVR		3
+Turn off	Desactivar	Android	desactivar (Claude Desktop)	1
+Turn on	Activar	Android	Activado (Android); activar (Claude Desktop)	1
+Unlock wallet	Desbloquear la cartera	KDE		1
+Up arrow	Flecha hacia arriba	Qt		1
+up to date	Actualizado	Steam	actualizado (KDE)	1
+Volume down	Bajar volumen	Claude Desktop	Bajar el volumen (Qt); bajar volumen (KDE)	1
+Volume up	Subir volumen	Claude Desktop	Subir el volumen (Qt); subir volumen (KDE)	1
+What it is	Qué es	Claude Desktop		1

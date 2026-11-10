@@ -4,21 +4,24 @@ names in other software (SteamVR's "Float in World", KDE's "System Settings", �
 
   dev/i18n-terms.py LANG            write locale/glossary/LANG.terms.tsv: each phrase of SteamVR's,
                                     Steam's, KDE's and Claude Desktop's own translations that our
-                                    English text uses, with its official LANG wording
+                                    English text uses, with its official LANG wording; refused
+                                    while a source is missing (--allow-missing writes anyway)
   dev/i18n-terms.py LANG --check    our LANG.po translations that don't use that wording
   dev/i18n-terms.py LANG --lookup WORD…
                                     how those programs translate a word or phrase (for the
                                     glossary's own terms: "Dashboard", "Passthrough", …)
 
 It reads the translations those programs install (SteamVR, Steam, Claude Desktop, Qt, KDE: a
-Steam Frame has all of them; a source that
-isn't on this machine is skipped, and said so), and Android's Settings app's (the phone side of
-Android Mirror), downloaded once from the Android source into ~/.cache/frame-tweaks/i18n-terms. Use it before a translation pass: the terms go
-with the glossary (locale/BATCH.md)."""
+Steam Frame has all of them; a source that isn't on this machine is skipped, and said so, and the
+.tsv isn't rewritten without it: its rows would silently go), and Android's Settings app's (the
+phone side of Android Mirror), downloaded once from the Android source into
+~/.cache/frame-tweaks/i18n-terms. Use it before a translation pass: the terms go with the glossary
+(locale/BATCH.md)."""
 import collections
 import gettext
 import json
 import re
+import struct
 import sys
 from pathlib import Path
 
@@ -30,7 +33,12 @@ HOME = Path.home()
 STEAMVR = Path("/opt/steamvr/resources/webinterface/dashboard/localization")
 STEAMUI = HOME / ".local/share/Steam/steamui/localization"
 KDE = Path("/usr/share/locale")
-CLAUDE = [HOME / ".local/opt/claude-desktop/resources", HOME / ".local/opt/claude-desktop/resources/ion-dist/i18n"]
+CLAUDE = HOME / ".local/opt/claude-desktop/resources"
+# Claude Desktop's texts: loose JSON files up to 4.22 (looked at first, should a later version
+# go back to them), inside its Electron archives since 4.23 (app.asar: the window's, under
+# resources/i18n; ion-dist.asar: the chat's, under i18n and i18n/dynamic).
+CLAUDE_LOOSE = [CLAUDE, CLAUDE / "i18n", CLAUDE / "ion-dist/i18n"]
+CLAUDE_ASARS = [CLAUDE / "app.asar", CLAUDE / "ion-dist.asar"]
 # Our language code → Valve's name for it (Steam, SteamVR) and Claude's file name.
 VALVE = {"es_419": "latam", "es": "spanish", "pt_BR": "brazilian", "pt": "portuguese", "de": "german",
          "fr": "french", "it": "italian", "ru": "russian", "pl": "polish", "ja": "japanese", "ko": "koreana",
@@ -126,14 +134,69 @@ def android(lang):
     yield from ((a[k], b[k]) for k in a if k in b)
 
 
+def asar(path):
+    """{"folder/name": (offset, size)} of the files inside an Electron archive (app.asar), offsets
+    into the archive. Its layout, checked against Claude Desktop 4.23118.0's: four little-endian
+    u32 (4; the header's size, after which, from byte 8, the files' bytes follow end to end; the
+    index's size padded to 4 plus 4; the index's size), the JSON index {"files": {name: {"files":
+    …} | {"offset": "n", "size": n}}} with offsets counted from the files' start, and the files.
+    An entry marked "unpacked" (a native library) is beside the archive, not in it: left out."""
+    with open(path, "rb") as f:
+        _four, header_size, _padded, index_size = struct.unpack("<4I", f.read(16))
+        index = json.loads(f.read(index_size))
+    base, out = 8 + header_size, {}
+
+    def walk(folder, prefix):
+        for name, entry in folder.get("files", {}).items():
+            if "files" in entry:
+                walk(entry, f"{prefix}{name}/")
+            elif "offset" in entry and not entry.get("unpacked"):
+                out[prefix + name] = (base + int(entry["offset"]), int(entry["size"]))
+    walk(index, "")
+    return out
+
+
+def asar_json(f, entry):
+    """One JSON file of an open archive, by its asar() entry."""
+    offset, size = entry
+    f.seek(offset)
+    return json.loads(f.read(size))
+
+
+def claude_file(want, names):
+    """The language's file among a folder's names: es-419.json for es_419, fr-FR.json for fr,
+    nl.json for nl_BE (Claude has no Belgian Dutch, as Android hasn't)."""
+    base = want.split("-")[0]
+    regional = sorted(n for n in names if n.startswith(f"{base}-") and n.endswith(".json"))
+    return next((n for n in (f"{want}.json", *regional, f"{base}.json") if n in names), None)
+
+
 def claude(lang):
+    """Claude Desktop's texts: every folder, loose or in an archive, with an en-US.json and the
+    language's (keys are hashes of the English, the same in every language's file)."""
     want = lang.replace("_", "-")
-    for d in CLAUDE:
-        en = d / "en-US.json"
-        tr = next((f for f in (d / f"{want}.json", *sorted(d.glob(f"{want.split('-')[0]}-*.json"))) if f.exists()), None)
-        if en.exists() and tr:
-            a, b = json.loads(en.read_text()), json.loads(tr.read_text())
-            yield from ((a[k], b[k]) for k in a if isinstance(a[k], str) and isinstance(b.get(k), str))
+
+    def pairs(a, b):
+        return ((a[k], b[k]) for k in a if isinstance(a[k], str) and isinstance(b.get(k), str))
+    for d in CLAUDE_LOOSE:
+        names = {f.name for f in d.glob("*.json")} if d.is_dir() else set()
+        tr = claude_file(want, names)
+        if "en-US.json" in names and tr:
+            yield from pairs(json.loads((d / "en-US.json").read_text()), json.loads((d / tr).read_text()))
+    for archive in CLAUDE_ASARS:
+        if not archive.exists():
+            continue
+        files = asar(archive)
+        folders = collections.defaultdict(set)
+        for p in files:
+            folder, _sep, name = p.rpartition("/")
+            folders[folder].add(name)
+        with open(archive, "rb") as f:
+            for folder, names in sorted(folders.items()):
+                tr = claude_file(want, names)
+                if "en-US.json" in names and tr:
+                    a, b = (asar_json(f, files[f"{folder}/{n}"]) for n in ("en-US.json", tr))
+                    yield from pairs(a, b)
 
 
 def qt(lang):
@@ -163,20 +226,38 @@ def kde(lang):
 
 
 def official(lang):
-    """{English phrase: [(translation, source, count)]}, the most used translation first."""
-    found, here = collections.defaultdict(collections.Counter), []
+    """{English phrase: [(translation, source, count)]}, the most used translation first, and
+    {source: how many texts it gave} (0: not on this machine)."""
+    found, here = collections.defaultdict(collections.Counter), {}
     for name, source in zip(SOURCES, (steamvr, steam, android, claude, qt, kde)):
-        n = 0
+        here[name] = 0
         for en, tr in source(lang):
             en, tr = clean(en), clean(tr)
             if en and tr and en != tr and "\n" not in en and len(en) <= 60 and not re.search(r"[{}%<$]", en):
                 found[en][(tr, name)] += 1
-                n += 1
-        here.append(f"{name}: {n} texts" if n else f"{name}: not on this machine")
+                here[name] += 1
     rank = {s: i for i, s in enumerate(SOURCES)}
     out = {en: sorted(((tr, src, c) for (tr, src), c in counts.items()), key=lambda t: (rank[t[1]], -t[2]))
            for en, counts in found.items()}
     return out, here
+
+
+def summary(here):
+    return "; ".join(f"{name}: {n} texts" if n else f"{name}: not on this machine" for name, n in here.items())
+
+
+def lowered(table):
+    """{phrase lower-cased: [its spellings in table]}: 'Apply changes' finds KDE's 'Apply Changes'."""
+    out = {}
+    for en in table:
+        out.setdefault(en.lower(), []).append(en)
+    return out
+
+
+def same(text):
+    """A wording for comparison: a no-break space (KDE's and Android's French and Spanish, U+00A0
+    or the narrow U+202F) counts as the plain space our .po may use."""
+    return text.replace("\u00a0", " ").replace("\u202f", " ")
 
 
 SMALL = {"a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", "on", "or", "the", "to", "with"}
@@ -218,17 +299,25 @@ def template_msgids():
 def terms(lang):
     """[(English, official, source, alternatives, our texts using it)]"""
     table, here = official(lang)
-    msgids = template_msgids()
-    used = collections.defaultdict(list)
-    for msgid in msgids:
+    lower = lowered(table)
+    rank = {s: i for i, s in enumerate(SOURCES)}
+    used, spelling = collections.defaultdict(list), {}
+    for msgid in template_msgids():
         for p in phrases(msgid):
-            if p in table:
-                used[p].append(msgid)
+            key = clean(p).lower()                    # (as --lookup matches: KDE's 'Apply Changes' is ours)
+            if key in lower:
+                used[key].append(msgid)
+                spelling.setdefault(key, p)
     rows = []
-    for en in sorted(used, key=str.lower):
-        (tr, src, _n), *rest = table[en]
-        alts = "; ".join(dict.fromkeys(f"{t} ({s})" for t, s, _c in rest if t != tr))
-        rows.append((en, tr, src, alts, used[en]))
+    for key in sorted(used):
+        hits = sorted((h for en in lower[key] for h in table[en]), key=lambda t: (rank[t[1]], -t[2]))
+        (tr, src, _n), *rest = hits
+        alts, seen = [], set()
+        for t, s, _c in rest:                         # (one per wording and source; the official's own
+            if same(t) != same(tr) and (same(t), s) not in seen:      # wording with other spaces: no lookalike)
+                seen.add((same(t), s))
+                alts.append(f"{t} ({s})")
+        rows.append((spelling[key], tr, src, "; ".join(alts), used[key]))
     return rows, here
 
 
@@ -238,16 +327,14 @@ def main():
     lang = sys.argv[1]
     if "--lookup" in sys.argv:
         table, here = official(lang)
-        print("; ".join(here))
-        lower = {}
-        for en in table:
-            lower.setdefault(en.lower(), []).append(en)
+        print(summary(here))
+        lower = lowered(table)
         for word in sys.argv[sys.argv.index("--lookup") + 1:]:
             hits = [h for en in lower.get(clean(word).lower(), []) for h in table[en]]
             print(f"{word}: " + ("; ".join(dict.fromkeys(f"{t} ({s}, {c}×)" for t, s, c in hits)) or "not found"))
         return
     rows, here = terms(lang)
-    print("; ".join(here))
+    print(summary(here))
     if "--check" in sys.argv:
         po = ROOT / "locale" / f"{lang}.po"
         done = i18n.parse_po(po.read_text()) if po.exists() else {}
@@ -255,11 +342,16 @@ def main():
         for en, tr, src, _alts, msgids in rows:
             for m in msgids:
                 ours = (done.get((None, m)) or [""])[0]
-                if ours and tr.lower() not in ours.lower() and en.lower() not in {"ok"}:
+                if ours and same(tr).lower() not in same(ours).lower() and en.lower() not in {"ok"}:
                     print(f"{src} says {en!r} is {tr!r}; ours: {m[:60]!r} → {ours[:70]!r}")
                     n += 1
         print(f"{n} to look at")
         return
+    missing = [name for name, n in here.items() if not n]
+    if missing and "--allow-missing" not in sys.argv:
+        # (rewriting without a source would drop its rows, and a glossary row that vanishes
+        # reads as "no official wording"; on a Frame every source is there)
+        sys.exit(f"not written: {', '.join(missing)} missing on this machine (--allow-missing writes anyway)")
     out = ROOT / "locale/glossary" / f"{lang}.terms.tsv"
     out.parent.mkdir(exist_ok=True)
     lines = [f"# Official {lang} wording of what Frame Tweaks names in other software, from their own",

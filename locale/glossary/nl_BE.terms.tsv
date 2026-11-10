@@ -2,21 +2,45 @@
 # translations (dev/i18n-terms.py; don't edit by hand). Columns: English, official,
 # source, other wordings seen, how many of our texts use it.
 English	official	source	alternatives	used
-1 hour	1 uur	Steam		1
-15 minutes	15 minuten	KDE		1
-30 minutes	30 minuten	KDE		1
+1 hour	1 uur	SteamVR		1
+1 second	1 seconde	Steam		1
+15 minutes	Na 15 minuten	Steam	15 minuten (KDE)	1
+30 minutes	30 minuten	SteamVR	Na 30 minuten (Steam)	1
+Apply changes	Wijzigingen toepassen	KDE		1
+Back button	Back-knop	Steam	Knop voor terug (KDE)	1
 Caps Lock	CapsLock	KDE		1
-Change Password	Wachtwoord wijzigen	Steam		1
-Copied to clipboard	Gekopieerd naar klembord	KDE		1
+Change Password	Wachtwoord wijzigen	Steam		6
+Clear Scrollback	Geschiedenis opschonen	KDE		1
+Clear Scrollback and Reset	Geschiedenis opschonen en resetten	KDE		1
+Copy image	Kopieer afbeelding	Claude Desktop		1
+Copy text	Tekst kopiëren	KDE		1
 English (UK)	Engels (GB)	KDE		1
 English (US)	Engels (VS)	KDE		1
-Float in World	In wereld zweven	SteamVR		4
+Float in World	In wereld zweven	SteamVR		6
+Get involved	Doe mee	KDE		1
 Link copied	Link gekopieerd	Steam		1
-Not now	Niet nu	Android		1
+Microphone muted	Microfoon is gedempt	KDE		1
+not installed	Niet geïnstalleerd	Steam		1
+Not now	Niet nu	Steam		1
+not responding	Reageert niet	KDE		1
+not running	Niet actief	KDE	DRAAIT NIET (KDE)	1
 Pair device with pairing code	Apparaat koppelen met koppelingscode	Android		1
-Restart SteamVR	SteamVR herstarten	SteamVR		4
+password required	Wachtwoord vereist	Steam		1
+Performance Overlay	Prestatie-overlay	Steam		2
+Remote Control	Afstandsbediening	KDE		1
+Restart SteamVR	SteamVR herstarten	SteamVR		5
 Right Ctrl	Rechter Ctrl-toets	KDE		1
+Room View	Kamerweergave	SteamVR		2
+Set a password	Stel een wachtwoord in	Android		1
 Show text	Tekst tonen	KDE		1
 Stop charging at	Laden stoppen bij	KDE		1
 System Settings	Systeeminstellingen	Steam		5
+this phone	Deze telefoon	Android		1
 Toggle Curvature	Kromming in-/uitschakelen	SteamVR		3
+Turn off	Uitzetten	Android	Uitschakelen (KDE)	1
+Turn on	Aanzetten	Android	Inschakelen (KDE)	1
+Unlock wallet	Portefeuille ontgrendelen	KDE		1
+Up arrow	Pijl omhoog	Qt		1
+up to date	Bijgewerkt	Steam		1
+Volume down	Volume omlaag	Qt	Zachter (KDE); volume omlaag (KDE)	1
+Volume up	Volume omhoog	Qt	Harder (KDE); volume omhoog (KDE)	1
