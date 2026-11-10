@@ -8,6 +8,13 @@ An entry goes by itself once every language has its text translated (`dev/i18n.p
 adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 
 ## 2026-11-10
+- New in `packs/core/adb-scrcpy/phone:345`
+  - now: "ended by the system: signal %s"
+- New in `packs/core/adb-scrcpy/phone:347`
+  - now: "exit status %s"
+- Changed in `packs/core/adb-scrcpy/phone:439`
+  - was: "scrcpy stopped straight away. It said:\n\n%s\n\nIf the phone asked to allow USB debugging or screen sharing, allow it and try again."
+  - now: "scrcpy stopped straight away (%s). It said:\n\n%s\n\nIf the phone asked to allow USB debugging or screen sharing, allow it and try again. Its whole output: %s"
 - New in `packs/core/bt-music-only/README.md`
   - now: "Bluetooth headphones and earbuds connect for music (A2DP) only, without the call profile"
 - New in `packs/core/bt-music-only/README.md`

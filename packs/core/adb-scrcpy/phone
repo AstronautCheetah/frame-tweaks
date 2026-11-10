@@ -338,6 +338,17 @@ trap 'restart=1; kill "$pid" 2>/dev/null' USR1
 RESTART="$RUN/sft-phone.restart"
 rm -f "$RESTART"
 SCRCPY_LOG="$RUN/phone-scrcpy.log"                         # what scrcpy said, for a failure message
+# ended STATUS: how scrcpy ended, for the message: killed by a signal (128 + its number: the system
+# ended it, not the phone) or its own exit status.
+ended() {
+    if [ "$1" -gt 128 ]; then
+        printf '%s' "$(t 'ended by the system: signal %s' "$(kill -l "$(($1 - 128))" 2>/dev/null || echo $(($1 - 128)))")"
+    else
+        printf '%s' "$(t 'exit status %s' "$1")"
+    fi
+}
+# said: scrcpy's errors and warnings, then its last lines (each once), from its log
+said() { { grep -E '^(ERROR|WARN)' "$SCRCPY_LOG"; tail -n 6 "$SCRCPY_LOG"; } 2>/dev/null | awk '!seen[$0]++'; }
 first=1
 opened=$(date +%s) since=$(date +%s) limit=$(timeout_minutes) timed_out=
 while :; do
@@ -418,13 +429,19 @@ If the phone forgot the Frame (or it's a new phone), pair them again." "${PHONE_
     # like a mirror that didn't start. The restarted one gets this check instead.)
     [ -e "$RESTART" ] && restart=1
     if [ -n "$first" ] && [ -z "$restart" ]; then
-        if ! kill -0 "$pid" 2>/dev/null && wait "$pid"; then exit 0; fi       # closed straight away
         if ! kill -0 "$pid" 2>/dev/null; then
-            fail "$(t "The mirror didn't start")" "$(t 'scrcpy stopped straight away. It said:
+            rc=0; wait "$pid" || rc=$?
+            [ "$rc" -eq 0 ] && exit 0                                          # closed straight away
+            # The log is overwritten by the next try, so the failed one is kept beside it; and the
+            # message says how scrcpy ended: its last lines are routine when the system ended it (a
+            # signal), as SteamOS's scheduler failing did (docs/research/scx-lavd-crashes.md).
+            cp -f "$SCRCPY_LOG" "$SCRCPY_LOG.failed" 2>/dev/null || true
+            fail "$(t "The mirror didn't start")" "$(t 'scrcpy stopped straight away (%s). It said:
 
 %s
 
-If the phone asked to allow USB debugging or screen sharing, allow it and try again.' "$(tail -n 6 "$SCRCPY_LOG")")"
+If the phone asked to allow USB debugging or screen sharing, allow it and try again. Its whole output: %s' \
+                "$(ended "$rc")" "$(said)" "$SCRCPY_LOG.failed")"
         fi
         first=
     fi

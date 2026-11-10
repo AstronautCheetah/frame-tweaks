@@ -613,3 +613,27 @@ class Uninstall(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MirrorDidntStart(PhonePick):
+    """scrcpy ending straight away: the message says how (its exit status, or the signal that
+    ended it), its ERROR/WARN lines come first, and the failed run's log is kept for a later look."""
+    def test_exit_status_and_error_lines(self):
+        scrcpy = ('echo "scrcpy $*" >> ' + str(Path(self.tmp.name) / "log") +
+                  '; echo "WARN: Could not disable minimize on focus loss"; echo "ERROR: Could not create window"; '
+                  'for i in 1 2 3 4 5 6 7; do echo "INFO: line $i"; done; exit 1')
+        rc, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE="Pixel 9"\n', extra={"scrcpy": scrcpy})
+        self.assertEqual(rc, 1)
+        self.assertIn("scrcpy stopped straight away (exit status 1)", log)
+        self.assertIn("ERROR: Could not create window", log)
+        self.assertLess(log.index("ERROR: Could not create window"), log.index("INFO: line 7"))
+        failed = Path(self.tmp.name) / "run/phone-scrcpy.log.failed"
+        self.assertTrue(failed.exists())
+        self.assertIn("ERROR: Could not create window", failed.read_text())
+        self.assertIn(str(failed), log)
+
+    def test_ended_by_a_signal(self):
+        scrcpy = 'echo "INFO: Video decoding: software"; kill -TERM $$'
+        rc, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], conf='PHONE="Pixel 9"\n', extra={"scrcpy": scrcpy})
+        self.assertEqual(rc, 1)
+        self.assertIn("ended by the system: signal TERM", log)

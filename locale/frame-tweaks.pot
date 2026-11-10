@@ -3452,12 +3452,20 @@ msgid ""
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone
+msgid "ended by the system: signal %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
+msgid "exit status %s"
+msgstr ""
+
+#: packs/core/adb-scrcpy/phone
 msgid ""
-"scrcpy stopped straight away. It said:\n"
+"scrcpy stopped straight away (%s). It said:\n"
 "\n"
 "%s\n"
 "\n"
-"If the phone asked to allow USB debugging or screen sharing, allow it and try again."
+"If the phone asked to allow USB debugging or screen sharing, allow it and try again. Its whole output: %s"
 msgstr ""
 
 #: packs/core/adb-scrcpy/phone

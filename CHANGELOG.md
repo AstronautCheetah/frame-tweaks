@@ -10,6 +10,13 @@
   until they were reset. SteamVR uses the Frame's own microphone anyway. Applies when WirePlumber
   restarts: at once, or with the Frame's next start while SteamVR runs; the status says which.
 
+### Fixed
+- **Android Mirror's "didn't start" message** says how scrcpy ended (its exit status, or the signal
+  when the system ended it) and shows its ERROR and WARN lines before its last lines, which are
+  routine when something else killed it: SteamOS's scx_lavd scheduler failing did, and the message
+  blamed the phone. The failed run's log is kept beside the next run's
+  (`phone-scrcpy.log.failed`), which used to overwrite it. See docs/research/scx-lavd-crashes.md.
+
 ## 0.7.4 (2026-11-06)
 
 ### Fixed
