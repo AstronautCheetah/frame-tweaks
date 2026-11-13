@@ -313,7 +313,8 @@ class Update(unittest.TestCase):
                               capture_output=True, text=True, timeout=120)
 
     def recorded(self):
-        return (self.home / ".local/state/frame-tweaks/installed/probe").read_text().strip()
+        # (the record's first line: its second is the SteamOS build, that of the machine running the test)
+        return (self.home / ".local/state/frame-tweaks/installed/probe").read_text().splitlines()[0]
 
     def channel(self, co, *args):
         return subprocess.run([str(co / "install.sh"), "channel", *args], env=self.run_env(), stdin=subprocess.DEVNULL,
