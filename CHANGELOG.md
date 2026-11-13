@@ -23,6 +23,13 @@
   routine when something else killed it: SteamOS's scx_lavd scheduler failing did, and the message
   blamed the phone. The failed run's log is kept beside the next run's
   (`phone-scrcpy.log.failed`), which used to overwrite it. See docs/research/scx-lavd-crashes.md.
+- **Full Keyboard's uninstall** runs its own `uninstall.sh`, as its README says to. Deleting its
+  folder left its start-with-SteamOS service behind and, from Full Keyboard 0.18, what Streaming
+  support sets up for Steam.
+
+### Tested
+- SteamOS 0.5.8 (build 20261106.6144341, beta) with SteamVR 2.19.2: every tweak's status, signed
+  updates from 0.7.1-0.7.3, and the offline tweak tests ([compatibility](docs/compatibility.md)).
 
 ## 0.7.4 (2026-11-06)
 
