@@ -39,6 +39,20 @@ class Links(unittest.TestCase):
         red, _yellow = cl.check([RECLINE], {}, github(None, readme="$HOME/.local/share/recline-vr/uninstall.sh"))
         self.assertEqual(red, [])                           # (written with $HOME: named all the same)
 
+    def test_a_project_whose_installer_names_the_checked_file(self):
+        pip = ("frame-passthrough-pip", "Passthrough PiP", {"installed": "~/.local/share/framepip/bin/framepip"},
+               "Sippbox/frame-passthrough-pip")
+        asked = []
+
+        def get(url):
+            asked.append(url)
+            return None if url.endswith("/releases/latest") else "ExecStart=%h/.local/share/framepip/bin/framepip"
+        self.assertEqual(cl.check([pip], {}, get), ([], []))
+        self.assertIn("https://raw.githubusercontent.com/Sippbox/frame-passthrough-pip/HEAD/packaging/AppRun", asked)
+        red, _yellow = cl.check([pip], {}, lambda url: None if "releases" in url else "DEST=$HOME/elsewhere")
+        self.assertEqual(len(red), 1)
+        self.assertIn("[packaging/AppRun](https://github.com/Sippbox/frame-passthrough-pip/blob/HEAD/packaging/AppRun)", red[0])
+
     def test_no_releases_off_github_and_unreachable(self):
         self.assertEqual(cl.check([RECLINE], {}, github(None)), ([], []))
         _red, yellow = cl.check([("x", "X", {"installed": "~/x"}, None)], {}, github())

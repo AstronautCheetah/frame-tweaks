@@ -6,7 +6,7 @@ installed, so their releases can change what a tweak's page says, or move the fi
 checks (Recline-VR 1.3 did). Prints a Markdown report; exits 1 if something needs attention.
 
   Needs attention: none of the files a link's installed: names is in the project's README any
-  more (a release may have moved them: its status would read "not installed").
+  more (or the file DOCUMENTED_IN names, for a project whose README doesn't) (a release may have moved them: its status would read "not installed").
   Worth a look: a release newer than the one last looked at (lib/tested-versions, link-ID=TAG),
   or for a project without releases (link-ID=COMMIT), newer commits on its default branch. Read
   its notes, check the link's commands and the tweak's page, try it on a Frame, then set the new
@@ -61,6 +61,11 @@ def links():
 
 COMMIT = re.compile(r"^[0-9a-f]{7,40}$")
 
+# Where a project names the file its link's installed: checks, when its README doesn't: there's
+# nothing in Passthrough PiP's README to find (its AppImage installs itself), but its installer
+# script writes the path into the systemd unit it makes, as %h/.local/share/framepip/bin/framepip.
+DOCUMENTED_IN = {"frame-passthrough-pip": "packaging/AppRun"}
+
 
 def tested():
     lines = (ROOT / "lib/tested-versions").read_text().splitlines()
@@ -77,13 +82,14 @@ def check(found, seen, get=get):
             continue
         try:
             release = get(f"https://api.github.com/repos/{repo}/releases/latest")
-            readme = get(f"https://raw.githubusercontent.com/{repo}/HEAD/README.md")
+            readme = get(f"https://raw.githubusercontent.com/{repo}/HEAD/{DOCUMENTED_IN.get(tid, 'README.md')}")
         except (OSError, urllib.error.URLError) as e:
             yellow.append(f"**{title}**: couldn't reach [{repo}](https://github.com/{repo}) ({e})")
             continue
         paths = link["installed"] if isinstance(link["installed"], list) else [link["installed"]]
-        if readme is not None and not any(p in readme or p.replace("~/", "$HOME/") in readme for p in paths):
-            red.append(f"**{title}**: its [README](https://github.com/{repo}#readme) no longer names "
+        if readme is not None and not any(p.replace("~/", home) in readme for p in paths for home in ("~/", "$HOME/", "%h/")):
+            red.append(f"**{title}**: its [{DOCUMENTED_IN.get(tid, 'README')}](https://github.com/{repo}"
+                       f"{'/blob/HEAD/' + DOCUMENTED_IN[tid] if tid in DOCUMENTED_IN else '#readme'}) no longer names "
                        f"{', '.join(f'`{p}`' for p in paths)}, what `link.installed` checks: if a release "
                        "moved it, the status reads \"not installed\". Name a file it documents now.")
         was = seen.get(f"link-{tid}")
