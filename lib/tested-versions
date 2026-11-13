@@ -6,7 +6,8 @@ scrcpy=5.0.1
 android-tools=37.0.0.p1-1
 ydotool=1.0.4-3
 # What SteamOS provides (the Frame: 0.4.5 build 20261007, the same on 0.5.6 build 20261022): an Arch Linux ARM build needing more is
-# flagged before anyone installs it.
+# flagged before anyone installs it. The oldest SteamOS still in use sets these: 0.5.8 (build
+# 20261106, beta) has glibc 2.43 and the same GLIBCXX 3.4.34, but Frames on older builds don't.
 steamos-glibc=2.39
 steamos-glibcxx=3.4.34
 # The linked projects' releases last looked at (dev/check-links.py flags a newer one daily): its

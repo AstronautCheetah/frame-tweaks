@@ -4,37 +4,41 @@ Each tweak's status on the SteamOS and SteamVR builds it was checked on, newest 
 
 Marks: ✔ works; ! needs attention; ⟳ works after a SteamVR restart; · not installed; ✘ broken.
 
-| Tweak | SteamOS 0.5.6<br>20261022.6153909<br>SteamVR 2.18.2 |
-|---|---|
-| `adb-scrcpy` | ✔ |
-| `arrowpad` | ✔ |
-| `charge-limit` | · |
-| `claude-desktop` | ✔ |
-| `clipboard` | ✔ |
-| `cursor` | · |
-| `curvature` | ✔ |
-| `dictation` | ✔ |
-| `firefox` | ✔ |
-| `float-grab` | ✔ |
-| `float-return` | ✔ |
-| `frame-passthrough-pip` | ! |
-| `full-keyboard` | ✔ |
-| `homebrew` | ✔ |
-| `knockthru` | ✔ |
-| `menu-icons` | ✔ |
-| `nordvpn` | ✔ |
-| `perf-overlay` | ✔ |
-| `recline` | ✔ |
-| `scroll-strips` | ✔ |
-| `signal` | ✔ |
-| `snip` | ✔ |
-| `speech` | ✔ |
-| `tools` | ✔ |
-| `vr-dashboard` | ✔ |
-| `vr-memory-guard` | ✔ |
-| `wallet` | ✔ |
-| `ydotool` | ✔ |
+| Tweak | SteamOS 0.5.8<br>20261106.6144341<br>SteamVR 2.19.2 | SteamOS 0.5.6<br>20261022.6153909<br>SteamVR 2.18.2 |
+|---|---|---|
+| `adb-scrcpy` | ✔ | ✔ |
+| `arrowpad` | ✔ | ✔ |
+| `bt-music-only` | ! |  |
+| `charge-limit` | · | · |
+| `claude-desktop` | ✔ | ✔ |
+| `clipboard` | ✔ | ✔ |
+| `cursor` | · | · |
+| `curvature` | ✔ | ✔ |
+| `dictation` | ✔ | ✔ |
+| `firefox` | ✔ | ✔ |
+| `float-grab` | ✔ | ✔ |
+| `float-return` | ✔ | ✔ |
+| `frame-passthrough-pip` | ✔ | ! |
+| `full-keyboard` | ✔ | ✔ |
+| `homebrew` | ✔ | ✔ |
+| `knockthru` | ✔ | ✔ |
+| `menu-icons` | ✔ | ✔ |
+| `moonlight-xr` | ✔ |  |
+| `nordvpn` | ✔ | ✔ |
+| `perf-overlay` | ✔ | ✔ |
+| `recline` | ✔ | ✔ |
+| `scroll-strips` | ✔ | ✔ |
+| `signal` | ✔ | ✔ |
+| `snip` | ✔ | ✔ |
+| `speech` | ✔ | ✔ |
+| `tools` | ✔ | ✔ |
+| `tray-host` | ✔ |  |
+| `vr-dashboard` | ✔ | ✔ |
+| `vr-memory-guard` | ✔ | ✔ |
+| `wallet` | ✔ | ✔ |
+| `ydotool` | ✔ | ✔ |
 
 ## Notes
 
+- **bt-music-only** on SteamOS 0.5.8 (20261106.6144341): Applies when WirePlumber restarts: restart the Frame, or ↻ Reinstall with SteamVR closed
 - **frame-passthrough-pip** on SteamOS 0.5.6 (20261022.6153909): installed; restart SteamVR to load it

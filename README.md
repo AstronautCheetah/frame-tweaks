@@ -497,6 +497,7 @@ on each build checked is in [docs/compatibility.md](docs/compatibility.md).
 <!-- generated:tested (dev/gen-docs.py, from steam-frame.yml) -->
 | Tested | SteamOS | Build | SteamVR | Channel | Result | Frame Tweaks, and notes |
 |---|---|---|---|---|---|---|
+| 2026-11-13 | 0.5.8 | 20261106.6144341 | 2.19.2 | beta | works | 0.7.4: status of 31 tweaks, signed update from 0.7.1-0.7.3, offline tweak tests |
 | 2026-11-03 | 0.5.6 | 20261022.6153909 | 2.18.2 | beta | works | 0.7.0: signed update from 0.6.23+, Dictation, Screen snip, Wallet, Memory limits, Scroll strips |
 | 2026-11-02 | 0.5.6 | 20261022.6153909 | 2.18.2 | beta | works | main after 0.6.23 (24ee830): Dictation, Performance Overlay, KnockThru, Arrow Pad |
 | 2026-10-16 | 0.5.6 | – | – | beta | works | 0.6.9 to 0.6.23 (build not recorded): 0.6.9 made Mouse cursor fix and Speech engine work on it |
