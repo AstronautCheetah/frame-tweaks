@@ -25,7 +25,7 @@ config: [~/.config/framekeyboard]
 app: Full Keyboard
 link:
   install: d=$(mktemp -d) && trap 'rm -rf "$d"' EXIT && cd "$d" && u=https://github.com/TaiKeid/steam-frame-full-keyboard/releases && if [ -n "$FT_LINK_VERSION" ]; then u=$u/download/$FT_LINK_VERSION; else u=$u/latest/download; fi && curl -fsSLO "$u/SHA256SUMS" && f=$(grep -o 'framekeyboard-.*-aarch64\.tar\.gz' SHA256SUMS) && v=${f#framekeyboard-} && v=${v%-aarch64.tar.gz} && c=$(basename "$(readlink ~/.local/share/framekeyboard/current)") && if [ "${c%%-install-*}" = "$v" ]; then echo "Full Keyboard $v is already installed"; else curl -fsSLO "$u/$f" && sha256sum -c --ignore-missing SHA256SUMS && tar -xzf "$f" && bash "${f%.tar.gz}/install.sh"; fi && frame-tweaks-share-whisper
-  uninstall: rm -f ~/.local/bin/framekeyboard ~/.local/share/applications/framekeyboard.desktop && rm -rf ~/.local/share/framekeyboard
+  uninstall: if [ -f ~/.local/share/framekeyboard/current/uninstall.sh ]; then bash ~/.local/share/framekeyboard/current/uninstall.sh --yes; else rm -f ~/.local/bin/framekeyboard ~/.local/share/applications/framekeyboard.desktop && rm -rf ~/.local/share/framekeyboard; fi
   installed: ~/.local/share/framekeyboard/current
   version: c=$(basename "$(readlink ~/.local/share/framekeyboard/current)") && echo "${c%%-install-*}"
   run: gtk-launch framekeyboard
@@ -66,9 +66,10 @@ it opens for installs, and doesn't change what they install.
   Tweaks' own updates move it to a newer tested version, never to an untested one.
   `./install.sh link-version full-keyboard tested|newest` does the same.
   Full Keyboard's installer installs an older release over a newer one too.
-- **Uninstall** (untick it): removes `~/.local/bin/framekeyboard`, its app-menu entry and
-  `~/.local/share/framekeyboard` (every installed release), and keeps your settings, layouts and
-  themes in `~/.config/framekeyboard`.
+- **Uninstall** (untick it): runs Full Keyboard's own `uninstall.sh --yes`, as its README
+  says to: it removes the program, its app-menu entry, its start-with-SteamOS service and, from
+  0.18, what Streaming support set up for Steam, and keeps your settings, layouts and themes in
+  `~/.config/framekeyboard`. (A release too old to have that script: its files are deleted.)
 
 Install, update and uninstall close the keyboard first if it's open.
 
