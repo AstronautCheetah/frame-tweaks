@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import load_script  # noqa: E402
 
+# vrkit.Textures where it can't make a texture: every picture goes as a file, as before it
+FILES = types.SimpleNamespace(set=lambda ov, overlay, image: False, forget=lambda overlay: None)
+
 
 def load():
     # vroverlay imports openvr and Qt at the top; the geometry needs neither.
@@ -307,6 +310,7 @@ class SlideWhileTheKeyboardShows(unittest.TestCase):
 
     def host(self, v):
         o = v.OverlayHost.__new__(v.OverlayHost)
+        o.textures = FILES                                     # (pictures as files: vrkit.Textures can't)
         o.pressed, o.drag, o.grip_drag, o.laser_at = {}, None, False, {}
         o.width_m, o.input_size = 0.5, (500, 400)              # 1 mm a pixel
         o.pose = [[1, 0, 0, 0.0], [0, 0.6, -0.8, 1.0], [0, 0.8, 0.6, -1.0]]   # tilted back

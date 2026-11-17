@@ -384,7 +384,9 @@ class Narration(unittest.TestCase):
         self.panels = Path(panels.name)
         for p in (mock.patch.dict(sys.modules, {"openvr": vr}),
                   mock.patch.object(fs.vrkit.DashboardGrab, "PANELS", self.panels),
-                  mock.patch.object(sys, "excepthook", lambda *e: self.escaped.append(e[1]))):
+                  mock.patch.object(sys, "excepthook", lambda *e: self.escaped.append(e[1])),
+                  # (no OpenGL texture here, whatever this machine has: its pictures go as files)
+                  mock.patch.object(fs.vrkit, "_GL", getattr(self, "gl", NoGL))):
             p.start()
             self.addCleanup(p.stop)
         w = fs.NarrationWindow(QImage(20, 20, QImage.Format.Format_RGB32), TWO, 1.0, panel=True)
@@ -394,6 +396,22 @@ class Narration(unittest.TestCase):
         self.addCleanup(overlay.close)
         self.addCleanup(lambda: [t.stop() for t in overlay.findChildren(QTimer)])
         return w, overlay, vr._vr.VROverlay.return_value
+
+    def test_its_pictures_go_as_textures_not_files(self):
+        """Every file SteamVR loads stays in vrcompositor's memory until it restarts (51 MB for 20
+        pictures on a Frame), and the panel loaded a new one at each redraw. With a texture to be
+        had, no picture goes as a file: one texture, flipped (GL's rows run bottom up), refilled."""
+        self.gl = FakeGL
+        FakeGL.made = []
+        w, overlay, ov = self.panel()
+        w.state.setText("A new line, so a new picture")
+        overlay.render()
+        ov.setOverlayFromFile.assert_not_called()
+        self.assertEqual(len(FakeGL.made), 1)
+        self.assertEqual(ov.setOverlayTexture.call_count, 2)
+        self.assertEqual(FakeGL.made[0].uploads[0], (5, None))      # (made at the first, refilled after)
+        bounds = ov.setOverlayTextureBounds.call_args[0][1]
+        self.assertEqual((bounds.vMin, bounds.vMax), (1.0, 0.0))
 
     def test_an_openvr_error_in_its_timers_closes_it_cleanly(self):
         """An error leaving one of its timers ended the program at once (PyQt6 aborts), with the
@@ -505,6 +523,31 @@ _vr.VRSystem.return_value.getTrackedDeviceIndexForControllerRole.return_value = 
 def __getattr__(name):
     return getattr(_vr, name)
 '''
+
+
+class NoGL:
+    """vrkit's OpenGL context where there's none."""
+    def __init__(self):
+        raise OSError("no EGL here")
+
+
+class FakeGL:
+    """vrkit's OpenGL context, standing in: textures numbered, uploads noted."""
+    made = []
+
+    def __init__(self):
+        FakeGL.made.append(self)
+        self.uploads = []
+
+    def texture(self):
+        return 5
+
+    def upload(self, tex, image, size):
+        self.uploads.append((tex, size))
+        return image.width(), image.height()
+
+    def delete(self, tex):
+        pass
 
 
 class NoText(unittest.TestCase):

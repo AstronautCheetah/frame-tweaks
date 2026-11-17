@@ -39,9 +39,10 @@ except ImportError:
         return text
 
 KEY = "frame-tweaks.arrowpad"
-# The texture goes to SteamVR as a PNG file (SetOverlayFromFile), not SetOverlayRaw: on the Frame
-# raw uploads never showed (an invisible panel that still caught the laser), and a 2.5 MB raw
-# upload crashed vrcompositor (SIGBUS). Capped size and rate keep the compositor's work small.
+# The picture goes to SteamVR as an OpenGL texture refilled in place (vrkit.Textures), else as a
+# PNG file (SetOverlayFromFile), never SetOverlayRaw: on the Frame raw uploads never showed (an
+# invisible panel that still caught the laser), and a 2.5 MB raw upload crashed vrcompositor
+# (SIGBUS). Capped size and rate keep the compositor's work small.
 MAX_TEX = (1024, 768)
 MIN_RENDER_INTERVAL = 0.15           # at most ~7 texture updates a second
 COVER_MS = 120                       # how long the cover hides a reload (the blink is shorter)
@@ -123,6 +124,9 @@ class OverlayHost:
         except Exception:
             self.cover = None
         self.cover_path = None          # image the cover holds (None until its first load)
+        # The pad's pictures as textures: each file loaded stays in vrcompositor's memory until
+        # SteamVR restarts (vrkit.Textures). Files still, if textures can't be had.
+        self.textures = vrkit.Textures(openvr, log=self.log_input)
         self.last_button_time = {}             # event type -> time: drops a click seen twice
         self.image_hash = None          # last uploaded image, to skip identical uploads
         self.hover = None               # button under the laser
@@ -240,15 +244,19 @@ class OverlayHost:
         # reload is shorter; our ~15 ms to encode is the cheaper side. (A direct GPU texture, as
         # Full Keyboard uses, needs an OpenGL context, which here only exists through Gamescope's
         # WSI layer.)
+        # (the file too: SteamVR's grab bar shows it while it carries the pad, vrkit.DashboardGrab)
         img.save(path, "PNG")
-        covered = self.cover is not None and self.cover_path is not None and not resized   # (old size: no cover)
-        if covered:
-            self.ov.showOverlay(self.cover)          # old image on top while the pad reloads
-            self.swapping = True
-        self.ov.setOverlayFromFile(self.input_handle, path)
-        self.set_input_size(w, h)
-        if self.cover is not None:
-            QTimer.singleShot(COVER_MS if covered else 0, lambda: self.uncover(path))
+        if self.textures.set(self.ov, self.input_handle, img):
+            self.set_input_size(w, h)                # (refilled in place: no blink, nothing to cover)
+        else:
+            covered = self.cover is not None and self.cover_path is not None and not resized   # (old size: no cover)
+            if covered:
+                self.ov.showOverlay(self.cover)      # old image on top while the pad reloads
+                self.swapping = True
+            self.ov.setOverlayFromFile(self.input_handle, path)
+            self.set_input_size(w, h)
+            if self.cover is not None:
+                QTimer.singleShot(COVER_MS if covered else 0, lambda: self.uncover(path))
         for old in glob.glob(f"{TEX_DIR}/arrowpad-overlay-*.png"):
             if old not in (path, getattr(self, "_last_path", None), self.cover_path):
                 try:
@@ -397,6 +405,7 @@ class OverlayHost:
                 img = note_image(text)
                 private_file(path)
                 img.save(path, "PNG")
+                self.note_img = img
                 self.note_aspect = img.height() / img.width()
                 if getattr(self, "note_path", None):
                     with contextlib.suppress(OSError):
@@ -408,7 +417,8 @@ class OverlayHost:
                 self.ov.setOverlayWidthInMeters(self.note, NOTE_WIDTH)
                 self.note_loaded = None
             if self.note_loaded != path:
-                self.ov.setOverlayFromFile(self.note, path)
+                if not self.textures.set(self.ov, self.note, self.note_img):
+                    self.ov.setOverlayFromFile(self.note, path)
                 self.note_loaded = path
             self.note_shown = True
             self.place_note()
@@ -459,6 +469,7 @@ class OverlayHost:
             return
         self.note_shown = False
         note, self.note = self.note, None
+        self.textures.forget(note)
         with contextlib.suppress(Exception):
             self.ov.destroyOverlay(note)
 

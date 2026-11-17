@@ -114,6 +114,7 @@ class ArrowPadOverlay(unittest.TestCase):
         p.start()
         self.addCleanup(p.stop)
         self.o = self.v.OverlayHost.__new__(self.v.OverlayHost)
+        self.o.textures = types.SimpleNamespace(set=lambda ov, overlay, image: False, forget=lambda overlay: None)
         self.o.INPUT_LOG = str(self.dir / "arrowpad-input.log")
 
     def test_the_input_log_is_yours_only(self):

@@ -1888,6 +1888,9 @@ class NarrationOverlay(QObject):
         run = os.environ.get("XDG_RUNTIME_DIR")
         self.tex_dir = Path(tempfile.mkdtemp(prefix="snip-panel-", dir=run if run and os.path.isdir(run) else None))
         self.n, self.last_digest, self.cover_path, self.pressed, self.drag = 0, None, None, None, None
+        # Its pictures as textures: each file loaded stays in vrcompositor's memory until SteamVR
+        # restarts (vrkit.Textures). Files still, if textures can't be had.
+        self.textures = vrkit.Textures(openvr, log=lambda m: print(f"frame-snip: {m}", file=sys.stderr))
         self.render()
         self.ov.showOverlay(self.h)
         # Events 45x a second while a laser is on the panel (or it's carried or pressed), 10x
@@ -2085,8 +2088,19 @@ class NarrationOverlay(QObject):
         self.last_digest = digest
         self.n += 1
         path = str(self.tex_dir / f"panel-{self.n}.png")      # new name each time (SteamVR caches by name)
-        img.save(path, "PNG")
-        self.picture = path
+        img.save(path, "PNG")                                 # (SteamVR's grab bar shows it: vrkit.DashboardGrab)
+        old, self.picture = self.picture, path
+        if self.textures.set(self.ov, self.h, img):           # refilled in place: no blink, nothing to cover
+            scale = self.vr.HmdVector2_t()
+            scale.v[0], scale.v[1] = img.width(), img.height()
+            self.ov.setOverlayMouseScale(self.h, scale)
+            if resized:
+                self.ov.hideOverlay(self.cover)
+                self.ov.showOverlay(self.h)
+                self.apply_pose()
+            if old and old != path:
+                Path(old).unlink(missing_ok=True)
+            return
         covered = self.cover_path is not None
         if covered:
             self.ov.showOverlay(self.cover)                   # the old picture on top while it reloads
@@ -2271,7 +2285,8 @@ class NarrationOverlay(QObject):
             self.note = self.ov.createOverlay(self.key + ".note", "Screen snip")     # (display only: no input)
             self.ov.setOverlaySortOrder(self.note, 12)
             self.ov.setOverlayWidthInMeters(self.note, self.NOTE_WIDTH)
-            self.ov.setOverlayFromFile(self.note, path)
+            if not self.textures.set(self.ov, self.note, img):
+                self.ov.setOverlayFromFile(self.note, path)
             self.place_note()
             self.ov.showOverlay(self.note)
         except Exception as e:
@@ -2290,6 +2305,7 @@ class NarrationOverlay(QObject):
         if self.note is None or (self.drag is not None and self.drag[1] is None):
             return
         note, self.note = self.note, None
+        self.textures.forget(note)
         with contextlib.suppress(Exception):
             self.ov.destroyOverlay(note)
 

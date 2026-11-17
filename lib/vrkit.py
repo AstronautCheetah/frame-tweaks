@@ -10,6 +10,8 @@ importing this needs no SteamVR.
   controller button).
 - note_image: the picture of the note shown under a panel (why it only slides: Steam's keyboard
   open), drawn with Qt (imported only then).
+- Textures: an overlay's picture as an OpenGL texture, refilled in place, instead of a file
+  (every file loaded stays in vrcompositor's memory until SteamVR restarts).
 - DashboardGrab: SteamVR's own grab bar under a panel while Steam's keyboard is open (the VR
   environment helper's panel-grab patch), through files in the runtime folder."""
 import json
@@ -102,6 +104,138 @@ def note_image(text):
     painter.drawText(QRectF(NOTE_PAD_PX, NOTE_PAD_PX, inner, h - 2 * NOTE_PAD_PX), flags, text)
     painter.end()
     return img
+
+
+class _GL:
+    """An OpenGL context with no window (EGL on Mesa's surfaceless platform, desktop GL: zink over
+    Turnip on the Frame), current on the thread that made it, and the few calls a texture needs.
+    Through ctypes: no Python package for it."""
+    SURFACELESS_MESA, OPENGL_API = 0x31DD, 0x30A2
+    TEXTURE_2D, RGBA8, RGBA, UNSIGNED_BYTE = 0x0DE1, 0x8058, 0x1908, 0x1401
+    MIN_FILTER, MAG_FILTER, LINEAR, UNPACK_ALIGNMENT = 0x2801, 0x2800, 0x2601, 0x0CF5
+
+    def __init__(self):
+        import ctypes
+        self.c = ctypes
+        vp, i, u = ctypes.c_void_p, ctypes.c_int, ctypes.c_uint
+        egl, gl = ctypes.CDLL("libEGL.so.1"), ctypes.CDLL("libOpenGL.so.0")
+        egl.eglGetProcAddress.restype, egl.eglGetProcAddress.argtypes = vp, [ctypes.c_char_p]
+        address = egl.eglGetProcAddress(b"eglGetPlatformDisplayEXT")
+        if not address:
+            raise OSError("EGL has no eglGetPlatformDisplayEXT")
+        display = ctypes.CFUNCTYPE(vp, u, vp, vp)(address)(self.SURFACELESS_MESA, None, None)
+        egl.eglInitialize.argtypes = [vp, ctypes.POINTER(i), ctypes.POINTER(i)]
+        egl.eglCreateContext.restype, egl.eglCreateContext.argtypes = vp, [vp, vp, vp, vp]
+        egl.eglMakeCurrent.argtypes = [vp, vp, vp, vp]
+        if not display or not egl.eglInitialize(display, None, None):
+            raise OSError("no surfaceless EGL display")
+        if not egl.eglBindAPI(self.OPENGL_API):
+            raise OSError("EGL has no desktop OpenGL")
+        context = egl.eglCreateContext(display, None, None, None)       # (no config: EGL_KHR_no_config_context)
+        if not context or not egl.eglMakeCurrent(display, None, None, context):
+            raise OSError(f"no EGL context (error {egl.eglGetError():#x})")
+        image_args = [u, i, i, i, i, i, u, u, vp]
+        gl.glTexImage2D.argtypes = gl.glTexSubImage2D.argtypes = image_args
+        gl.glGetError.restype = u
+        self.gl = gl
+
+    def texture(self):
+        t = self.c.c_uint()
+        self.gl.glGenTextures(1, self.c.byref(t))
+        self.gl.glBindTexture(self.TEXTURE_2D, t)
+        self.gl.glTexParameteri(self.TEXTURE_2D, self.MIN_FILTER, self.LINEAR)
+        self.gl.glTexParameteri(self.TEXTURE_2D, self.MAG_FILTER, self.LINEAR)
+        if not t.value:
+            raise OSError("glGenTextures gave no texture")
+        return t.value
+
+    def upload(self, tex, image, size):
+        """image (a QImage) into texture tex, which holds size (w, h) so far (None: nothing):
+        refilled in place at the same size, made anew at another. Returns its size."""
+        image = image.convertToFormat(type(image).Format.Format_RGBA8888)
+        w, h, n = image.width(), image.height(), image.sizeInBytes()
+        bits = image.constBits()
+        bits.setsize(n)
+        pixels = (self.c.c_char * n).from_buffer_copy(bits)
+        gl = self.gl
+        gl.glBindTexture(self.TEXTURE_2D, tex)
+        gl.glPixelStorei(self.UNPACK_ALIGNMENT, 4)       # (RGBA rows: always a multiple of 4 bytes)
+        if size == (w, h):
+            gl.glTexSubImage2D(self.TEXTURE_2D, 0, 0, 0, w, h, self.RGBA, self.UNSIGNED_BYTE, pixels)
+        else:
+            gl.glTexImage2D(self.TEXTURE_2D, 0, self.RGBA8, w, h, 0, self.RGBA, self.UNSIGNED_BYTE, pixels)
+        gl.glFinish()                                    # (all there before SteamVR reads it)
+        error = gl.glGetError()
+        if error:
+            raise OSError(f"OpenGL error {error:#x}")
+        return w, h
+
+    def delete(self, tex):
+        self.gl.glDeleteTextures(1, self.c.byref(self.c.c_uint(tex)))
+
+
+class Textures:
+    """Overlay pictures handed to SteamVR as OpenGL textures, one per overlay, refilled in place.
+
+    SetOverlayFromFile keeps every file's picture in vrcompositor until SteamVR restarts, whatever
+    is done with the overlay or the file afterwards, and a name it has loaded once shows that
+    first picture ever after (it caches by path). Arrow Pad and Screen snip loaded a new file for
+    each redraw: on a Frame (SteamOS 0.5.8, SteamVR 2.19.2, 2026-11-17) 20 of them, 800x600, cost
+    vrcompositor 51 MB, still held when the overlay was gone. 100 texture updates cost it nothing
+    (a few MB of GPU memory while the overlay lasts), about 1.3 ms each; this process pays about
+    64 MB once, for EGL and Mesa. (Cuff, references/cuff docs/INTERNALS.md, measured the same.)
+    SetOverlayRaw isn't the way: on the Frame its pictures never showed, a big one crashed
+    vrcompositor, and SteamVR takes only about 200 of them from a process.
+
+    One OpenGL context for the process, made at the first set() and current on that thread (Qt's
+    main thread: set() must always be called there). set() says False when it can't (no EGL, an
+    error): the caller then loads a file as before, and so from then on, every overlay (one
+    failure turns textures off for the process, so an overlay never mixes the two ways)."""
+
+    def __init__(self, vr, log=None):
+        self.vr, self.log = vr, log or (lambda message: None)
+        self.gl, self.failed, self.tex = None, False, {}          # overlay -> [texture, its (w, h)]
+
+    def set(self, ov, overlay, image):
+        """Show image (a QImage) on overlay: True, or False to load it from a file instead."""
+        if self.failed:
+            return False
+        try:
+            if self.gl is None:
+                self.gl = _GL()
+            t = self.tex.get(overlay)
+            if t is None:
+                t = self.tex[overlay] = [self.gl.texture(), None]
+                # GL's first row is a texture's bottom one; the picture's first is its top
+                self.bounds(ov, overlay, 1.0, 0.0)
+            t[1] = self.gl.upload(t[0], image, t[1])
+            texture = self.vr.Texture_t()
+            texture.handle, texture.eType, texture.eColorSpace = t[0], self.vr.TextureType_OpenGL, self.vr.ColorSpace_Auto
+            ov.setOverlayTexture(overlay, texture)
+            return True
+        except Exception as e:
+            self.failed = True
+            self.log(f"overlay pictures go as files from now on (no texture: {type(e).__name__}: {e})")
+            for o in self.tex:                                    # (a file's rows come the right way up)
+                try:
+                    self.bounds(ov, o, 0.0, 1.0)
+                except Exception:
+                    pass
+            return False
+
+    def bounds(self, ov, overlay, v_min, v_max):
+        b = self.vr.VRTextureBounds_t()
+        b.uMin, b.vMin, b.uMax, b.vMax = 0.0, v_min, 1.0, v_max
+        ov.setOverlayTextureBounds(overlay, b)
+
+    def forget(self, overlay):
+        """The overlay is being destroyed: its texture goes too."""
+        t = self.tex.pop(overlay, None)
+        if t is not None and self.gl is not None:
+            try:
+                self.gl.delete(t[0])
+            except Exception:
+                pass
 
 
 class GripReader:
