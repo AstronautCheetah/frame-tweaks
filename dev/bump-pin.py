@@ -106,6 +106,14 @@ def bump(path):
     if new.get("url") == url and new.get("version") == cur:
         print(f"{path.relative_to(ROOT)}: already the newest ({cur})")
         return
+    if "license_file" in p:                                    # (its licence texts, at the new version too)
+        lf = p["license_file"]
+        if "rev" in p and new.get("rev"):
+            lf = lf.replace(p["rev"], new["rev"])
+        else:
+            for at in (f"/v{cur}/", f"/{cur}/"):
+                lf = lf.replace(at, at.replace(cur, new["version"]))
+        new["license_file"] = lf
     if "sha256" in p:
         print(f"{path.relative_to(ROOT)}: downloading {new['url']}")
         new["sha256"] = sha256_of(new["url"])
