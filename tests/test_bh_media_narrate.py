@@ -400,7 +400,7 @@ class Narration(unittest.TestCase):
     def test_its_pictures_go_as_textures_not_files(self):
         """Every file SteamVR loads stays in vrcompositor's memory until it restarts (51 MB for 20
         pictures on a Frame), and the panel loaded a new one at each redraw. With a texture to be
-        had, no picture goes as a file: one texture, flipped (GL's rows run bottom up), refilled."""
+        had, no picture goes as a file: one texture, refilled."""
         self.gl = FakeGL
         FakeGL.made = []
         w, overlay, ov = self.panel()
@@ -410,8 +410,7 @@ class Narration(unittest.TestCase):
         self.assertEqual(len(FakeGL.made), 1)
         self.assertEqual(ov.setOverlayTexture.call_count, 2)
         self.assertEqual(FakeGL.made[0].uploads[0], (5, None))      # (made at the first, refilled after)
-        bounds = ov.setOverlayTextureBounds.call_args[0][1]
-        self.assertEqual((bounds.vMin, bounds.vMax), (1.0, 0.0))
+        ov.setOverlayTextureBounds.assert_not_called()           # (the laser is mapped through them too)
 
     def test_an_openvr_error_in_its_timers_closes_it_cleanly(self):
         """An error leaving one of its timers ended the program at once (PyQt6 aborts), with the

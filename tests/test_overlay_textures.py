@@ -34,7 +34,7 @@ class Overlays:
         self.calls.append(("texture", overlay, texture.handle, texture.eType))
 
     def setOverlayTextureBounds(self, overlay, b):
-        self.calls.append(("bounds", overlay, (b.uMin, b.vMin, b.uMax, b.vMax)))
+        self.calls.append(("bounds", overlay))
 
 
 class GL:
@@ -67,6 +67,28 @@ class Image:
         return self.h
 
 
+class Rows(unittest.TestCase):
+    def test_the_picture_goes_bottom_row_first(self):
+        """GL's first row is a texture's bottom one: the picture is flipped before it goes, rather
+        than the overlay's texture bounds (which the laser is mapped through too)."""
+        from PyQt6.QtGui import QColor, QImage
+        img = QImage(4, 2, QImage.Format.Format_ARGB32)
+        img.fill(QColor(0, 0, 255))
+        for x in range(4):
+            img.setPixelColor(x, 0, QColor(255, 0, 0))                 # (the top row red)
+        sent = []
+        gl = vrkit._GL.__new__(vrkit._GL)
+        import ctypes
+        gl.c = ctypes
+        gl.gl = types.SimpleNamespace(
+            glBindTexture=lambda *a: None, glPixelStorei=lambda *a: None, glFinish=lambda: None,
+            glGetError=lambda: 0, glTexSubImage2D=None,
+            glTexImage2D=lambda target, level, fmt, w, h, border, f, t, pixels: sent.append(bytes(pixels)))
+        self.assertEqual(gl.upload(1, img, None), (4, 2))
+        self.assertEqual(sent[0][:4], bytes([0, 0, 255, 255]))           # first row sent: blue (the bottom)
+        self.assertEqual(sent[0][16:20], bytes([255, 0, 0, 255]))        # then red (the top)
+
+
 class Textures(unittest.TestCase):
     def setUp(self):
         GL.made = 0
@@ -81,22 +103,20 @@ class Textures(unittest.TestCase):
         self.assertTrue(t.set(ov, 9, Image(900, 100)))
         self.assertEqual(GL.made, 1)                                      # (one context for all)
         self.assertEqual(t.gl.uploads, [(41, None), (41, (800, 600)), (42, None)])
-        # flipped once per overlay (GL's first row is the bottom one), then the texture each time
-        self.assertEqual(ov.calls, [("bounds", 7, (0.0, 1.0, 1.0, 0.0)), ("texture", 7, 41, 1),
-                                    ("texture", 7, 41, 1),
-                                    ("bounds", 9, (0.0, 1.0, 1.0, 0.0)), ("texture", 9, 42, 1)])
+        # the texture each time, and never other texture bounds: SteamVR maps the laser through
+        # them too (flipped, Arrow Pad's presses landed on the row mirrored top to bottom)
+        self.assertEqual(ov.calls, [("texture", 7, 41, 1), ("texture", 7, 41, 1), ("texture", 9, 42, 1)])
         t.forget(7)
         self.assertEqual(t.gl.deleted, [41])
         self.assertTrue(t.set(ov, 7, Image(800, 600)))                    # (a new overlay of that number)
         self.assertEqual(t.gl.uploads[-1], (43, None))
 
-    def test_a_failure_turns_them_off_for_good_and_unflips(self):
+    def test_a_failure_turns_them_off_for_good(self):
         logged = []
         t, ov = vrkit.Textures(fake_vr(), log=logged.append), Overlays()
         self.assertTrue(t.set(ov, 7, Image(8, 6)))
         ov.fail = True
         self.assertFalse(t.set(ov, 7, Image(8, 6)))
-        self.assertEqual(ov.calls[-1], ("bounds", 7, (0.0, 0.0, 1.0, 1.0)))   # (a file's rows: the right way up)
         ov.fail, ov.calls = False, []
         self.assertFalse(t.set(ov, 9, Image(8, 6)))                       # (files from then on, every overlay)
         self.assertEqual(ov.calls, [])

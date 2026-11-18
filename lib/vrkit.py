@@ -151,8 +151,13 @@ class _GL:
 
     def upload(self, tex, image, size):
         """image (a QImage) into texture tex, which holds size (w, h) so far (None: nothing):
-        refilled in place at the same size, made anew at another. Returns its size."""
-        image = image.convertToFormat(type(image).Format.Format_RGBA8888)
+        refilled in place at the same size, made anew at another. Returns its size. Its rows go
+        bottom first, as GL's first row is a texture's bottom one: flipping the overlay's texture
+        bounds instead turned the picture the right way up, but SteamVR maps the laser through
+        them too, so each press landed on the row mirrored top to bottom (Arrow Pad's Down was
+        Backspace)."""
+        from PyQt6.QtCore import Qt
+        image = image.flipped(Qt.Orientation.Vertical).convertToFormat(type(image).Format.Format_RGBA8888)
         w, h, n = image.width(), image.height(), image.sizeInBytes()
         bits = image.constBits()
         bits.setsize(n)
@@ -206,8 +211,6 @@ class Textures:
             t = self.tex.get(overlay)
             if t is None:
                 t = self.tex[overlay] = [self.gl.texture(), None]
-                # GL's first row is a texture's bottom one; the picture's first is its top
-                self.bounds(ov, overlay, 1.0, 0.0)
             t[1] = self.gl.upload(t[0], image, t[1])
             texture = self.vr.Texture_t()
             texture.handle, texture.eType, texture.eColorSpace = t[0], self.vr.TextureType_OpenGL, self.vr.ColorSpace_Auto
@@ -216,17 +219,7 @@ class Textures:
         except Exception as e:
             self.failed = True
             self.log(f"overlay pictures go as files from now on (no texture: {type(e).__name__}: {e})")
-            for o in self.tex:                                    # (a file's rows come the right way up)
-                try:
-                    self.bounds(ov, o, 0.0, 1.0)
-                except Exception:
-                    pass
             return False
-
-    def bounds(self, ov, overlay, v_min, v_max):
-        b = self.vr.VRTextureBounds_t()
-        b.uMin, b.vMin, b.uMax, b.vMax = 0.0, v_min, 1.0, v_max
-        ov.setOverlayTextureBounds(overlay, b)
 
     def forget(self, overlay):
         """The overlay is being destroyed: its texture goes too."""
