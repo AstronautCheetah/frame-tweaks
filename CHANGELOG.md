@@ -13,8 +13,9 @@
 ### Changed
 - **Newer versions, tried on a Frame:** Full Keyboard 0.19.1 and KnockThru 1.3.0 (what ticking
   them installs, and what updates move them to), Moonlight XR 1.3.3 (a heat guard for 2D-to-3D,
-  smoother head turns at 144 Hz), Homebrew's installer (unchanged script, newer commit), and the
-  Python packages: PyQt6 6.12.1, onnxruntime 1.32.0 (Dictation's Parakeet engine), numpy 2.5.5.
+  smoother head turns at 144 Hz), and the Python packages: PyQt6 6.12.1, onnxruntime 1.32.0
+  (Dictation's Parakeet engine), numpy 2.5.5.
+- **Homebrew's installer** moves to a newer commit, which also creates Homebrew's `libexec` folder.
 
 ### Fixed
 - **The 🛠 Repair bar after a SteamOS update** blamed the update for every warning: a tweak
