@@ -29,6 +29,11 @@
   routine when something else killed it: SteamOS's scx_lavd scheduler failing did, and the message
   blamed the phone. The failed run's log is kept beside the next run's
   (`phone-scrcpy.log.failed`), which used to overwrite it. See docs/research/scx-lavd-crashes.md.
+- **Arrow Pad and Screen snip no longer fill SteamVR's memory:** each redraw of their VR panels
+  went to SteamVR as a new picture file, and SteamVR keeps every file it loads until it restarts
+  (on a Frame, 20 pictures of 800x600 held 51 MB in vrcompositor). The pictures now go as one
+  OpenGL texture per panel, refilled in place: no growth, about 1.3 ms a redraw, and about 64 MB
+  more for the panel's own process. Where that can't be had, they go as files as before.
 - **Full Keyboard's uninstall** runs its own `uninstall.sh`, as its README says to. Deleting its
   folder left its start-with-SteamOS service behind and, from Full Keyboard 0.18, what Streaming
   support sets up for Steam.
