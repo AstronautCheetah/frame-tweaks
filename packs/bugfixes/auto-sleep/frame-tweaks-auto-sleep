@@ -1,0 +1,190 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: MIT
+"""Sleep when idle in VR (Frame Tweaks): puts the Frame to sleep once the headset has been in standby for a while,
+as Steam's own "Sleep after" setting does on a Steam Deck but doesn't in the Frame's VR session
+(docs/research/idle-sleep.md).
+
+  frame-tweaks-auto-sleep            run (the user service runs this): check every 30 s
+  frame-tweaks-auto-sleep --status   one line: what it would do now, and why (for status.sh)
+
+"Idle" is SteamVR's own word for it: vrserver.txt logs the headset (device 0) entering and leaving standby, which
+happens a short while after it comes off your head. Settings: ~/.config/frame-tweaks/auto-sleep.conf."""
+import datetime
+import glob
+import os
+import re
+import subprocess
+import sys
+import time
+
+CONF = os.path.expanduser("~/.config/frame-tweaks/auto-sleep.conf")
+VRSERVER_LOG = os.path.expanduser("~/.local/share/Steam/logs/vrserver.txt")
+AC_STATUS = "/run/deckardcharger/ac_status"         # SteamOS's charger service: Connected / Disconnected
+DEFAULTS = {"AUTO_SLEEP_BATTERY": "15", "AUTO_SLEEP_PLUGGED": "60", "AUTO_SLEEP_SSH": "no"}
+EVERY = 30
+# "Wed Nov 18 2026 20:36:41.887527 [Info] - 0 - entering standby": device 0 is the headset
+STANDBY = re.compile(r"^(\w{3} \w{3} +\d+ \d{4} \d\d:\d\d:\d\d)\.\d+ \[\w+\] - 0 - (entering|leaving) standby", re.M)
+
+
+def settings(path=CONF):
+    """{key: value} from the KEY=value file, defaults for what's missing or unreadable."""
+    out = dict(DEFAULTS)
+    try:
+        with open(path) as f:
+            for line in f:
+                k, sep, v = line.strip().partition("=")
+                if sep and k in out:
+                    out[k] = v.strip().strip("'\"")
+    except OSError:
+        pass
+    return out
+
+
+def minutes(value):
+    """A setting's minutes (0 = never), or None if it isn't a whole number."""
+    return int(value) if value.isdigit() else None
+
+
+def vrserver_running(proc="/proc"):
+    for p in glob.glob(os.path.join(proc, "[0-9]*/comm")):
+        try:
+            with open(p) as f:
+                if f.read().strip() == "vrserver":
+                    return True
+        except OSError:
+            pass
+    return False
+
+
+def standby_since(log=VRSERVER_LOG, tail=1 << 20):
+    """When (epoch seconds) the headset last went into standby, if that is its latest word; None when it is in use
+    (or SteamVR's log says nothing either way)."""
+    try:
+        with open(log, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            f.seek(max(0, f.tell() - tail))
+            text = f.read().decode(errors="replace")
+    except OSError:
+        return None
+    found = STANDBY.findall(text)
+    if not found or found[-1][1] != "entering":
+        return None
+    try:
+        return datetime.datetime.strptime(found[-1][0], "%a %b %d %Y %H:%M:%S").timestamp()
+    except ValueError:
+        return None
+
+
+def on_battery(path=AC_STATUS):
+    try:
+        with open(path) as f:
+            return f.read().strip() != "Connected"
+    except OSError:
+        for d in glob.glob("/sys/class/power_supply/*"):
+            try:
+                with open(d + "/type") as f, open(d + "/online") as g:
+                    if f.read().strip() in ("USB", "Mains") and g.read().strip() == "1":
+                        return False
+            except OSError:
+                continue
+        return True
+
+
+def remote_sessions():
+    """Names of the users logged in over the network (SSH) right now."""
+    out = []
+    try:
+        r = subprocess.run(["loginctl", "list-sessions", "--no-legend"], capture_output=True, text=True, timeout=10)
+        for line in r.stdout.splitlines():
+            sid = line.split()[0] if line.split() else ""
+            if not sid:
+                continue
+            p = subprocess.run(["loginctl", "show-session", sid, "-p", "Remote", "-p", "State", "-p", "Name"],
+                               capture_output=True, text=True, timeout=10).stdout
+            props = dict(x.split("=", 1) for x in p.splitlines() if "=" in x)
+            if props.get("Remote") == "yes" and props.get("State") in ("active", "online"):
+                out.append(props.get("Name", "?"))
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return out
+
+
+def sleep_blockers():
+    """Programs holding a block on sleep (as systemd-inhibit --mode=block lists them): a backup, an update. Only
+    blocks count; the delays SteamVR, NetworkManager and others hold just ask for a moment to get ready."""
+    import json
+    try:
+        r = subprocess.run(["busctl", "call", "--json=short", "org.freedesktop.login1", "/org/freedesktop/login1",
+                            "org.freedesktop.login1.Manager", "ListInhibitors"],
+                           capture_output=True, text=True, timeout=10)
+        rows = json.loads(r.stdout)["data"][0]
+    except (OSError, subprocess.SubprocessError, ValueError, KeyError, IndexError, TypeError):
+        return []
+    return [who for what, who, why, mode, *_ in rows if mode == "block" and "sleep" in what.split(":")]
+
+
+def decide(now, standby, battery, conf, vr_running=True, remote=(), blockers=(), resumed=0.0):
+    """(seconds left or None, why): None means it won't sleep now, and why says so; 0 means sleep now.
+    The wait counts from when the headset went into standby, or from the last wake if that was later."""
+    if not vr_running:
+        return None, "SteamVR isn't running"
+    if standby is None:
+        return None, "the headset is in use"
+    limit = minutes(conf["AUTO_SLEEP_BATTERY" if battery else "AUTO_SLEEP_PLUGGED"])
+    where = "on battery" if battery else "plugged in"
+    if not limit:
+        return None, f"off while {where}"
+    if remote and conf.get("AUTO_SLEEP_SSH") != "yes":
+        return None, f"{', '.join(remote)} logged in over SSH"
+    if blockers:
+        return None, f"{', '.join(blockers)} is holding off sleep"
+    idle = now - max(standby, resumed)
+    left = max(0.0, limit * 60 - idle)
+    return left, f"headset in standby {int(idle // 60)} min, {where}: sleeps after {limit} min"
+
+
+def suspend():
+    try:
+        return subprocess.run(["systemctl", "suspend"], capture_output=True, timeout=60).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def status():
+    conf = settings()
+    left, why = decide(time.time(), standby_since(), on_battery(), conf, vrserver_running(), remote_sessions(),
+                       sleep_blockers())
+    if left is None:
+        print(f"not now: {why}")
+    else:
+        print(f"{why}; in {max(1, round(left / 60))} min" if left else f"{why}; sleeping now")
+    return 0
+
+
+def run():
+    print("watching: sleeps after the headset is in standby (settings: " + CONF + ")", flush=True)
+    resumed, last_wall, last_why = 0.0, time.time(), None
+    while True:
+        now = time.time()
+        if now - last_wall > EVERY * 3:             # (the clock jumped ahead: the Frame slept; start counting again)
+            resumed = now
+        last_wall = now
+        conf = settings()
+        left, why = decide(now, standby_since(), on_battery(), conf, vrserver_running(), remote_sessions(),
+                           sleep_blockers(), resumed)
+        if why != last_why and left is None:
+            print(f"not sleeping: {why}", flush=True)
+        last_why = why
+        if left == 0:
+            print(f"sleeping: {why}", flush=True)
+            if suspend():
+                resumed = time.time()               # (back from sleep: the wait starts again)
+            else:
+                print("couldn't sleep (systemctl suspend failed); trying again in 5 min", flush=True)
+                time.sleep(300)
+            last_wall = time.time()
+        time.sleep(EVERY)
+
+
+if __name__ == "__main__":
+    sys.exit(status() if sys.argv[1:] == ["--status"] else run())

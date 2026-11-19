@@ -1,0 +1,27 @@
+[Unit]
+Description=Sleep when the headset has been in standby a while (Frame Tweaks)
+# A crash loop gives up: 10 starts within 5 minutes and it stays stopped, rather than restart for
+# ever; running steadily, old starts age out (docs/DESIGN.md, "Services a tweak installs").
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+ExecStart=%h/.local/bin/frame-tweaks-auto-sleep
+Restart=on-failure
+RestartSec=1
+RestartSteps=5
+RestartMaxDelaySec=32
+# Reads SteamVR's log, the charger state and its settings; asks logind (system bus) for the
+# sessions, the sleep blocks and the sleep itself. Writes nothing.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=default.target

@@ -1568,7 +1568,7 @@ msgstr ""
 msgid "Longer"
 msgstr ""
 
-#: gui/wallet_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+#: gui/wallet_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "Never"
 msgstr ""
 
@@ -1793,7 +1793,7 @@ msgstr ""
 msgid "not available any more"
 msgstr ""
 
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/bt-music-only/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/auto-sleep/status.sh packs/bugfixes/tray-host/status.sh packs/core/bt-music-only/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr ""
 
@@ -3011,6 +3011,74 @@ msgstr ""
 msgid "{ref} isn't a branch or tag name"
 msgstr ""
 
+#: packs/bugfixes/auto-sleep/README.md
+msgid "1 hour (the default)"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "10 minutes"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "15 minutes (the default)"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "5 minutes"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"A small background service watches for the headset going into standby (SteamVR does that a short while after it comes off your head). After 15 minutes of standby on battery, or 60 plugged in, it puts the Frame to sleep, as a short press of the power button does."
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"How long the headset stays in standby (off your head) before the Frame goes to sleep. The wait starts again each time it wakes."
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "No"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "On battery, sleep after"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Plugged in, sleep after"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"Puts the Frame to sleep once the headset has been off your head a while, so it doesn't run flat on a shelf"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Sleep even while someone is logged in over SSH"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Sleep when idle in VR"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"Steam's own \"Sleep after\" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf."
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Yes"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/install.sh
+msgid "The Frame now sleeps once the headset has been in standby a while: %s"
+msgstr ""
+
+#: packs/bugfixes/auto-sleep/status.sh
+msgid "service not running (%s)"
+msgstr ""
+
 #: packs/bugfixes/pack.md
 msgid "Bugfixes"
 msgstr ""
@@ -3093,19 +3161,19 @@ msgstr ""
 msgid "won't start with the VR session: not enabled (↻ Reinstall enables it)"
 msgstr ""
 
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "1 hour"
 msgstr ""
 
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "15 minutes"
 msgstr ""
 
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "2 hours"
 msgstr ""
 
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "30 minutes"
 msgstr ""
 
@@ -4195,7 +4263,7 @@ msgstr ""
 
 #: packs/core/bt-music-only/README.md
 msgid ""
-"With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds (Bose QuietComfort Earbuds II here) never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
+"With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
 msgstr ""
 
 #: packs/core/bt-music-only/install.sh
@@ -4248,7 +4316,7 @@ msgid ""
 "A lithium-ion battery wears faster when it's kept full, as it is when the Frame spends a lot of time plugged in, a power bank in your pocket while you play, say. SteamOS offers a charge limit on the Steam Deck (Settings → Power), but not on the Frame."
 msgstr ""
 
-#: packs/core/charge-limit/README.md
+#: packs/core/charge-limit/README.md packs/bugfixes/auto-sleep/README.md
 msgid "Applies within 30 seconds."
 msgstr ""
 
@@ -5168,7 +5236,7 @@ msgstr ""
 msgid "Privacy & security"
 msgstr ""
 
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md packs/bugfixes/auto-sleep/README.md
 msgid "System"
 msgstr ""
 

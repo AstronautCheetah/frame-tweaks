@@ -63,6 +63,7 @@ Everything lives in your home folder unless the table says otherwise. Removing a
 | menu-icons | Copies of Breeze icons in `~/.local/share/icons/hicolor` | – |
 | frame-passthrough-pip | What its AppImage's installer sets up, all in your home folder: the app and its camera driver in `~/.local/share/framepip` (the driver registered with SteamVR), a user service (`framepip.service`) that starts it with SteamVR, and an app-menu entry; settings in `~/.config/framepip` | Reads the headset's tracking cameras through its own SteamVR driver; a SteamVR overlay with a dashboard panel; a controller binding (double-tap View on the left controller) |
 | tray-host | `~/.local/bin/frame-tweaks-tray-host`, user service `frame-tweaks-tray-host` (runs with the VR session) | – |
+| auto-sleep | `~/.local/bin/frame-tweaks-auto-sleep`, user service `frame-tweaks-auto-sleep` | Puts the Frame to sleep (as the power button does; no root) |
 <!-- /generated:security -->
 | Installer window (VR) | – | **Claims the controller's A, B and Y, and the left D-pad's up and down,** through SteamVR Input while the laser is over the window |
 

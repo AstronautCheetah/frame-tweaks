@@ -9,6 +9,11 @@
   when the Frame sleeps, which can leave a pair of earbuds refusing the Frame until they're
   reset. SteamVR uses the Frame's own microphone anyway. Applies when WirePlumber
   restarts: at once, or with the Frame's next start while SteamVR runs; the status says which.
+- **Sleep when idle in VR** (System, Bugfixes): the Frame goes to sleep once the headset has been
+  in standby for 15 minutes on battery, or 60 plugged in (both adjustable), as a short press of the
+  power button does. Steam's own "Sleep after" setting doesn't fire in the Frame's VR session: a
+  Frame left on a shelf stayed awake for hours, losing about 20% an hour. It holds off while
+  someone is logged in over SSH and while a program blocks sleep.
 
 ### Changed
 - **Newer versions, tried on a Frame:** Full Keyboard 0.19.1 and KnockThru 1.3.0 (what ticking

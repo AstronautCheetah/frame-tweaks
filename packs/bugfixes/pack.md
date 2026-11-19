@@ -5,6 +5,7 @@ api: 1
 categories: [Accessibility, Convenience, VR environment, System, Hardware, Privacy & security, Developer]
 order:
   - tray-host
+  - auto-sleep
 ---
 Frame Tweaks' fixes for problems in SteamOS, SteamVR and Steam themselves, until Valve fixes
 them: each one works around a bug found on a Frame, and checks whether your Frame still has it.

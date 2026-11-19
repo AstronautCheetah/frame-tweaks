@@ -28,8 +28,6 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Bluetooth headphones: music only"
 - New in `packs/core/bt-music-only/README.md`
   - now: "The Frame stops offering Bluetooth audio devices the hands-free and headset profiles (the ones with a microphone and a voice channel). Headphones and earbuds then connect for music (A2DP) only, and stay on that profile. Their microphone isn't used; SteamVR uses the Frame's own."
-- New in `packs/core/bt-music-only/README.md`
-  - now: "With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds (Bose QuietComfort Earbuds II here) never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
 - New in `packs/core/bt-music-only/install.sh:10`
   - now: "Installed; applies when the Frame restarts (SteamVR is using the sound system now)."
 - New in `packs/core/bt-music-only/install.sh:12`
@@ -48,3 +46,39 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "The call profiles are back when the Frame restarts."
 - New in `packs/core/bt-music-only/uninstall.sh:8`
   - now: "The call profiles are back when the Frame restarts (SteamVR is using the sound system now)."
+
+## 2026-11-18
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "1 hour (the default)"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "10 minutes"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "15 minutes (the default)"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "5 minutes"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "A small background service watches for the headset going into standby (SteamVR does that a short while after it comes off your head). After 15 minutes of standby on battery, or 60 plugged in, it puts the Frame to sleep, as a short press of the power button does."
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "How long the headset stays in standby (off your head) before the Frame goes to sleep. The wait starts again each time it wakes."
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "No"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "On battery, sleep after"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Plugged in, sleep after"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Puts the Frame to sleep once the headset has been off your head a while, so it doesn't run flat on a shelf"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Sleep even while someone is logged in over SSH"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Sleep when idle in VR"
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Steam's own \"Sleep after\" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf."
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Yes"
+- New in `packs/bugfixes/auto-sleep/install.sh:13`
+  - now: "The Frame now sleeps once the headset has been in standby a while: %s"
+- New in `packs/bugfixes/auto-sleep/status.sh:5`
+  - now: "service not running (%s)"
+- New in `packs/core/bt-music-only/README.md`
+  - now: "With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
