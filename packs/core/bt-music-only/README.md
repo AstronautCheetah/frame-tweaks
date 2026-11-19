@@ -12,8 +12,7 @@ what: >-
 why: >-
   With both profiles on offer, a pair of earbuds is connected on the call profile too, with its
   voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and
-  some earbuds (Bose QuietComfort Earbuds II here) never answer the Frame again until they're
-  reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone
+  some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone
   is what SteamVR uses anyway, so the call profile gives nothing in VR.
 author: Frame Tweaks
 icon: {theme: audio-headphones}
@@ -29,7 +28,7 @@ undo: "`./install.sh uninstall bt-music-only`"
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 The Frame stops offering Bluetooth audio devices the hands-free and headset profiles (the ones with a microphone and a voice channel). Headphones and earbuds then connect for music (A2DP) only, and stay on that profile. Their microphone isn't used; SteamVR uses the Frame's own.
 
-**Why on a Steam Frame:** With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds (Bose QuietComfort Earbuds II here) never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR.
+**Why on a Steam Frame:** With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR.
 <!-- /generated:intro -->
 
 Bluetooth headphones and earbuds connect for music (A2DP) only, without the call profile.
