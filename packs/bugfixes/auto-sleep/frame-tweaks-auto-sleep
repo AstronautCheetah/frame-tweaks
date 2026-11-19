@@ -152,8 +152,13 @@ def suspend():
 
 def status():
     conf = settings()
-    left, why = decide(time.time(), standby_since(), on_battery(), conf, vrserver_running(), remote_sessions(),
-                       sleep_blockers())
+    now, standby, battery, vr = time.time(), standby_since(), on_battery(), vrserver_running()
+    remote, blockers = remote_sessions(), sleep_blockers()
+    left, why = decide(now, standby, battery, conf, vr, remote, blockers)
+    if left is None and remote:                      # (asked over SSH, it is always "someone's logged in")
+        later, _ = decide(now, standby, battery, conf, vr, (), blockers)
+        if later is not None:
+            why += f"; otherwise in {max(1, round(later / 60))} min" if later else "; otherwise now"
     if left is None:
         print(f"not now: {why}")
     else:

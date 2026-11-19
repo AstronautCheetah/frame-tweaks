@@ -100,6 +100,20 @@ class OnBattery(unittest.TestCase):
                 self.assertIs(sleep.on_battery(p), battery)
 
 
+class StatusLine(unittest.TestCase):
+    def test_over_ssh_it_also_says_when_it_would_sleep(self):
+        from unittest import mock
+        with mock.patch.object(sleep, "standby_since", return_value=time.time() - 5 * 60), \
+                mock.patch.object(sleep, "on_battery", return_value=True), \
+                mock.patch.object(sleep, "vrserver_running", return_value=True), \
+                mock.patch.object(sleep, "remote_sessions", return_value=["steamos"]), \
+                mock.patch.object(sleep, "sleep_blockers", return_value=[]), \
+                mock.patch.object(sleep, "settings", return_value=dict(CONF)), \
+                mock.patch("sys.stdout", new_callable=__import__("io").StringIO) as out:
+            sleep.status()
+        self.assertEqual(out.getvalue().strip(), "not now: steamos logged in over SSH; otherwise in 10 min")
+
+
 class Status(unittest.TestCase):
     def test_not_installed(self):
         with tempfile.TemporaryDirectory() as home:
