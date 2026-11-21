@@ -4,6 +4,7 @@ default profile) and NordVPN's status line; Shared clipboard's status with and w
 mode, and from an older build; Mouse cursor fix not needed from gamescope 3.16.30; pinned
 downloads falling back to Frame Tweaks' copy; Arrow Pad's uninstall giving a pad it asked to quit
 the time to close; Bluetooth headphones: music only's WirePlumber file, restart and status."""
+import os
 import sys
 import hashlib
 import subprocess
@@ -664,6 +665,19 @@ class BtMusicOnly(Home):
         self.assertTrue((self.home / self.CONF).exists())
         self.assertFalse(self.restarts())
         self.assertIn("restarts", r.stdout)
+
+    def test_reinstall_leaves_an_unchanged_file_alone(self):
+        # (a README edit makes ./install.sh reinstall it at the next login, after WirePlumber
+        # started: a rewritten file looked newer than WirePlumber, and status said "Applies when
+        # WirePlumber restarts" on a Frame just restarted)
+        self.run_script("bt-music-only/install.sh")
+        conf = self.home / self.CONF
+        os.utime(conf, (1000, 1000))
+        self.stub("pgrep", "exit 0")
+        r = self.run_script("bt-music-only/install.sh")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(conf.stat().st_mtime, 1000)
+        self.assertNotIn("restarts", r.stdout)
 
     def test_status(self):
         r = self.run_script("bt-music-only/status.sh")

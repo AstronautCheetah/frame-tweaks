@@ -4266,6 +4266,10 @@ msgid ""
 "With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
 msgstr ""
 
+#: packs/core/bt-music-only/install.sh packs/core/bt-music-only/status.sh
+msgid "Bluetooth headphones connect for music only (A2DP)"
+msgstr ""
+
 #: packs/core/bt-music-only/install.sh
 msgid ""
 "Bluetooth headphones now connect for music only (A2DP). Reconnect ones connected already."
@@ -4288,10 +4292,6 @@ msgstr ""
 #: packs/core/bt-music-only/status.sh
 msgid ""
 "Applies when WirePlumber restarts: restart the Frame, or ↻ Reinstall with SteamVR closed"
-msgstr ""
-
-#: packs/core/bt-music-only/status.sh
-msgid "Bluetooth headphones connect for music only (A2DP)"
 msgstr ""
 
 #: packs/core/bt-music-only/uninstall.sh
