@@ -10,7 +10,7 @@ what: >-
   plugged in, it puts the Frame to sleep, as a short press of the power button does.
 why: >-
   Steam's own "Sleep after" setting (Settings → Power) doesn't fire in the Frame's VR session: on
-  SteamOS 0.5.8 a Frame left in standby stayed awake for hours with it set to 15 minutes on
+  SteamOS 0.5.8 and 0.5.9 a Frame left in standby stayed awake for hours with it set to 15 minutes on
   battery, losing about 20% an hour, and one ran from full to 2% on a shelf.
 author: Frame Tweaks
 icon: {theme: system-suspend}
@@ -62,7 +62,7 @@ settings:
 <!-- generated:intro (dev/gen-docs.py, from each tweak's README front matter) -->
 A small background service watches for the headset going into standby (SteamVR does that a short while after it comes off your head). After 15 minutes of standby on battery, or 60 plugged in, it puts the Frame to sleep, as a short press of the power button does.
 
-**Why on a Steam Frame:** Steam's own "Sleep after" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf.
+**Why on a Steam Frame:** Steam's own "Sleep after" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 and 0.5.9 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf.
 <!-- /generated:intro -->
 
 ## Install

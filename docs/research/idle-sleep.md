@@ -1,6 +1,7 @@
 # The Frame doesn't sleep when idle in VR
 
-Measured on a Steam Frame with SteamOS 0.5.8 (beta, build 20261106) and SteamVR 2.19, November 2026.
+Measured on a Steam Frame with SteamOS 0.5.8 (beta, build 20261106) until Nov 14, then 0.5.9 (build
+20261113), with SteamVR 2.19, November 2026.
 Behind the Sleep when idle in VR tweak (`packs/bugfixes/auto-sleep`).
 
 ## What happens
@@ -30,6 +31,17 @@ Behind the Sleep when idle in VR tweak (`packs/bugfixes/auto-sleep`).
 Why Steam's idle timer doesn't fire in this session isn't known. The client has
 `CSleepController::CheckIdleTimeout`, `GetSessionIdleTime`, and a callback for the headset's
 activity level, so it may wait for input idle time that the VR session never reports.
+
+## Waking from it
+
+Once so far, a Frame the tweak put to sleep didn't wake normally. It slept on Nov 18 at 22:37
+("PM: suspend entry (deep)", plugged in, battery full) and logged nothing more. On Nov 21 a first
+short press of the power button did nothing visible; a second showed the boot logo and the Frame
+started afresh, with the kernel reporting a warm reset (`PON: warm_reset_reason [0x02]: RESIN_N`)
+and nothing logged in between. Sleeps started with the power button had resumed after 16 to 53
+hours. One difference: Steam's own sleep logs "Issuing Suspend Command" before "Suspending", and
+the tweak's `systemctl suspend` skips that step (Steam still logs "Suspending" and "Suspend
+notification: entering"). Whether that matters, or the length of the sleep does, isn't known yet.
 
 ## What the tweak does
 

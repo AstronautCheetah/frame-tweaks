@@ -73,8 +73,6 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 - New in `packs/bugfixes/auto-sleep/README.md`
   - now: "Sleep when idle in VR"
 - New in `packs/bugfixes/auto-sleep/README.md`
-  - now: "Steam's own \"Sleep after\" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf."
-- New in `packs/bugfixes/auto-sleep/README.md`
   - now: "Yes"
 - New in `packs/bugfixes/auto-sleep/install.sh:13`
   - now: "The Frame now sleeps once the headset has been in standby a while: %s"
@@ -82,3 +80,7 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "service not running (%s)"
 - New in `packs/core/bt-music-only/README.md`
   - now: "With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
+
+## 2026-11-21
+- New in `packs/bugfixes/auto-sleep/README.md`
+  - now: "Steam's own \"Sleep after\" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 and 0.5.9 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf."
