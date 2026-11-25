@@ -41,7 +41,7 @@
 #   ./install.sh info ID             one component's details (as in the installer window)
 #   ./install.sh run ID              its Run / Open button (e.g. open Arrow Pad)
 #   ./install.sh settings ID [KEY=VALUE... | --reset]   show or change its settings (scroll-strips, adb-scrcpy)
-#   ./install.sh mods [trust|untrust|on|off PACK | check FOLDER]   packs of tweaks (docs/mods.md)
+#   ./install.sh mods [trust|untrust PACK|--all | on|off PACK | check FOLDER]   packs of tweaks (docs/mods.md)
 #   ./install.sh mods add LINK [BRANCH|TAG] | update PACK | remove PACK   a pack shared as a git repository
 #   ./install.sh mods updates   which of those have a newer version where they came from
 #   ./install.sh hide|unhide ID...   hide a row in the installer window (or show it again)

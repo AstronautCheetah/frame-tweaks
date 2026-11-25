@@ -11,6 +11,7 @@ The tweaks themselves come from packs (docs/mods.md): each tweak's README.md fro
 Command line (through ./install.sh):
   sft.py mods                           the packs, whether each is in use, and any problems
   sft.py mods trust|untrust PACK        use a user's pack (it runs as you), or stop using it
+  sft.py mods trust|untrust --all       the same for every pack that isn't Frame Tweaks' own
   sft.py mods on|off PACK               use one of Frame Tweaks' own packs, or stop using it
   sft.py mods check FOLDER              check a pack or a single tweak folder, using nothing
   sft.py mods add LINK [BRANCH|TAG]     a pack shared as a git repository: put in your packs folder,

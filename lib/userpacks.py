@@ -187,6 +187,20 @@ def removable(p):
     return p["dir"].parent == registry.USER_PACKS.resolve()
 
 
+def set_all_trusted(trust):
+    """Trust every pack that isn't Frame Tweaks' own, as its files are now (True: the changed ones
+    too), or stop using all of them (False). The official packs need no trust (mods on|off) and
+    stay as they are. The names of the packs this changed."""
+    done = []
+    for p in registry.load(refresh=True)["packs"]:
+        if p["state"] in ("official", "off") or (p["state"] == "trusted") == bool(trust):
+            continue
+        registry.set_trusted(p["dir"], bool(trust))
+        done.append(p["name"])
+    registry.load(refresh=True)
+    return done
+
+
 def remove_pack(d):
     """Delete one of your packs, and its trust. Not while its tweaks are installed."""
     d = Path(d).resolve()
@@ -248,6 +262,15 @@ def mods(args, usage):
         registry.set_official(p["dir"], args[0] == "on")
         print(f"{p['name']}: " + (_("in use; its tweaks are listed") if args[0] == "on" else
                                   _("turned off (installed tweaks of it stay until you uninstall them)")))
+        return
+    if args[:1] in (["trust"], ["untrust"]) and args[1:] == ["--all"]:
+        done = set_all_trusted(args[0] == "trust")
+        for name in done:
+            print(f"{plain(name)}: " + (_("trusted; its tweaks are listed now") if args[0] == "trust" else
+                                        _("no longer used (installed tweaks of it stay until you uninstall them)")))
+        if not done:
+            print(_("Every pack that isn't Frame Tweaks' own is trusted already.") if args[0] == "trust" else
+                  _("No pack that isn't Frame Tweaks' own is in use."))
         return
     if args[:1] in (["trust"], ["untrust"]) and len(args) == 2:
         p = find_pack(args[1])

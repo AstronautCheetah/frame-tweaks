@@ -285,6 +285,30 @@ class Packs(unittest.TestCase):
         self.assertNotIn("hello", self.ids())
         self.assertEqual([p["state"] for p in sft.load(refresh=True)["packs"] if p["name"] == "mypack"], ["changed"])
 
+    def test_trust_all_and_untrust_all_leave_the_official_packs_alone(self):
+        """mods trust --all trusts every pack that isn't Frame Tweaks' own (a changed one too);
+        untrust --all stops using them; the official packs stay as they were."""
+        one = self.tweak("one", "hello").parent
+        two = self.tweak("two", "other").parent
+        sft.set_trusted(two, True)
+        (two / "other" / "install.sh").write_text("#!/bin/bash\necho changed\n")
+        sft.set_official(sft.THIRD_PARTY, False)
+        states = lambda: {p["name"]: p["state"] for p in sft.load(refresh=True)["packs"]}
+        official = {k: v for k, v in states().items() if v in ("official", "off")}
+        self.assertIn("off", official.values())
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            sft.mods(["trust", "--all"])
+        self.assertEqual((states()["one"], states()["two"]), ("trusted", "trusted"))
+        self.assertIn("one: trusted", out.getvalue())
+        self.assertEqual({k: v for k, v in states().items() if v in ("official", "off")}, official)
+        self.assertEqual(sft.set_all_trusted(True), [])
+        with contextlib.redirect_stdout(io.StringIO()):
+            sft.mods(["untrust", "--all"])
+        self.assertEqual((states()["one"], states()["two"]), ("untrusted", "untrusted"))
+        self.assertEqual({k: v for k, v in states().items() if v in ("official", "off")}, official)
+        self.assertNotIn("hello", self.ids())
+        self.assertTrue(one.is_dir())
+
     def test_same_id_needs_replaces(self):
         d = self.tweak("mypack", "cursor", title="My cursor")
         sft.set_trusted(d.parent, True)

@@ -38,6 +38,9 @@ uses most of what's described here.
   `./install.sh mods untrust "<pack name>"` stops using one; tweaks of it you installed stay
   until you uninstall them, which takes trusting the pack again first (Frame Tweaks only knows
   the tweaks of packs in use).
+  **Trust all…** on the Packs page (it asks once more) or `./install.sh mods trust --all` trusts
+  every pack that isn't Frame Tweaks' own, changed ones too; once all are trusted the button is
+  **Stop using all** (`mods untrust --all`). The official packs stay as they are.
 
 ## A pack
 

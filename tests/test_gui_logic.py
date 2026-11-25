@@ -1006,6 +1006,44 @@ class PacksPage(unittest.TestCase):
                 self.assertIn("Stop using", buttons())
         gui.sft.load(refresh=True)
 
+    def test_trust_all_asks_once_more_then_stop_using_all(self):
+        """Trust all trusts every user's pack at its second press (it's many packs at once), then
+        turns into Stop using all; both leave the official packs as they are."""
+        import shutil
+        from PyQt6.QtWidgets import QApplication
+        self.app = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "packs").mkdir()
+            for n in ("mine-a", "mine-b"):
+                shutil.copytree(ROOT / "examples/hello-pack", d / "packs" / n)
+            with mock.patch.object(registry, "USER_PACKS", d / "packs"), \
+                    mock.patch.object(registry, "TRUSTED", d / "trusted"), mock.patch.object(registry, "CONF", d), \
+                    mock.patch.dict(os.environ, {"FRAME_TWEAKS_PACKS": ""}):
+                window = mock.Mock()
+                page = gui.Packs(window)
+                states = lambda: sorted(p["state"] for p in gui.sft.load(refresh=True)["packs"]
+                                        if p["dir"].parent == (d / "packs").resolve())
+                b = page.all_button
+                self.assertEqual(b.text(), "Trust all…")
+                self.assertIn("run as you", b.toolTip())
+                # (any local packs of the checkout (packs/*, gitignored) count too)
+                n = sum(p["state"] not in ("official", "off") for p in gui.sft.load(refresh=True)["packs"])
+                b.click()
+                self.assertEqual(b.text(), f"Yes, trust all {n} packs")
+                self.assertEqual(states(), ["untrusted", "untrusted"])
+                official = [p["state"] for p in gui.sft.load()["packs"] if p["state"] in ("official", "off")]
+                b.click()
+                self.assertEqual(states(), ["trusted", "trusted"])
+                window.reload_tweaks.assert_called_once()
+                self.assertEqual(b.text(), "Stop using all")
+                b.click()
+                self.assertEqual(states(), ["untrusted", "untrusted"])
+                self.assertEqual([p["state"] for p in gui.sft.load()["packs"] if p["state"] in ("official", "off")],
+                                 official)
+                self.assertEqual(b.text(), "Trust all…")
+        gui.sft.load(refresh=True)
+
     def test_trust_keeps_the_scroll_position(self):
         """Trust on one of many packs rebuilt the list and left the view at the bottom: it stays
         where it was."""

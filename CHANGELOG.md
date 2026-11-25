@@ -14,6 +14,9 @@
   power button does. Steam's own "Sleep after" setting doesn't fire in the Frame's VR session: a
   Frame left on a shelf stayed awake for hours, losing about 20% an hour. It holds off while
   someone is logged in over SSH and while a program blocks sleep.
+- **Trust all… / Stop using all** on the Packs page (and `./install.sh mods trust --all`,
+  `untrust --all`): every pack that isn't Frame Tweaks' own at once, changed ones too. Trust all
+  asks once more before it does; the official packs stay as they are.
 
 ### Changed
 - **Newer versions, tried on a Frame:** Full Keyboard 0.19.1 and KnockThru 1.3.0 (what ticking

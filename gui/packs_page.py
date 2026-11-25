@@ -66,6 +66,11 @@ class Packs(QWidget):
         title = QLabel(_("Packs"))
         title.setObjectName("title")
         head.addWidget(title, 1)
+        # (Trust all / Stop using all, for every pack that isn't Frame Tweaks' own: build() sets which)
+        self.all_button = QPushButton()
+        self.all_button.clicked.connect(self.trust_all)
+        self.confirm_all = False                         # (Trust all asks once more: it's many packs at a press)
+        head.addWidget(self.all_button)
         folder = QPushButton(_("Open packs folder"))
         folder.setToolTip(str(sft.USER_PACKS))
         folder.clicked.connect(self.open_folder)
@@ -148,6 +153,7 @@ class Packs(QWidget):
                 w.deleteLater()
         data = sft.load()                               # (read as the page opened, and by what its buttons change)
         used = {c["id"]: c for c in data["components"]}
+        self.show_all_button(data["packs"])
         shown = self.open_packs()
         for p in data["packs"]:
             row = PackRow(self, p["dir"])
@@ -369,8 +375,45 @@ class Packs(QWidget):
             QDesktopServices.openUrl(QUrl(url))
 
     def trust(self, d, on):
-        self.removing = None
+        self.removing, self.confirm_all = None, False
         sft.set_trusted(d, on)
+        self.window.reload_tweaks()
+        self.build()
+
+    def show_all_button(self, packs):
+        """Trust all while any pack that isn't Frame Tweaks' own is not in use (a changed one too),
+        Stop using all once all of them are; hidden when there's none."""
+        others = [p for p in packs if p["state"] not in ("official", "off")]
+        b = self.all_button
+        b.setVisible(bool(others))
+        waiting = [p for p in others if p["state"] != "trusted"]
+        if not waiting:
+            self.confirm_all = False
+            b.setText(_("Stop using all"))
+            b.setToolTip(_("Every pack that isn't Frame Tweaks' own leaves the list, with its tweaks; installed "
+                           "ones stay until you uninstall them"))
+        elif self.confirm_all:
+            b.setText(ngettext("Yes, trust %d pack", "Yes, trust all %d packs", len(waiting)) % len(waiting))
+        else:
+            b.setText(_("Trust all…"))
+            b.setToolTip(_("Use every pack that isn't Frame Tweaks' own, as its files are now: their tweaks join "
+                           "the list, and the ones you tick run as you, with your files and passwords in reach. "
+                           "Trust only packs from people you trust. Asks once more before it does."))
+        name = "danger" if waiting and self.confirm_all else ""
+        if b.objectName() != name:                       # (the style sheet's #danger: polished again to show)
+            b.setObjectName(name)
+            b.style().unpolish(b)
+            b.style().polish(b)
+
+    def trust_all(self):
+        packs = sft.load()["packs"]
+        waiting = any(p["state"] not in ("official", "off", "trusted") for p in packs)
+        if waiting and not self.confirm_all:
+            self.confirm_all = True
+            self.build()
+            return
+        self.removing, self.confirm_all = None, False
+        sft.set_all_trusted(waiting)
         self.window.reload_tweaks()
         self.build()
 

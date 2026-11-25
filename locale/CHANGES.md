@@ -84,3 +84,20 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
 ## 2026-11-21
 - New in `packs/bugfixes/auto-sleep/README.md`
   - now: "Steam's own \"Sleep after\" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 and 0.5.9 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf."
+
+## 2026-11-25
+- New in `gui/packs_page.py:392`
+  - now: "Stop using all"
+- New in `gui/packs_page.py:393`
+  - now: "Every pack that isn't Frame Tweaks' own leaves the list, with its tweaks; installed ones stay until you uninstall them"
+- New in `gui/packs_page.py:396`
+  - now: "Yes, trust %d pack"
+  - plural: "Yes, trust all %d packs"
+- New in `gui/packs_page.py:398`
+  - now: "Trust all…"
+- New in `gui/packs_page.py:399`
+  - now: "Use every pack that isn't Frame Tweaks' own, as its files are now: their tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. Asks once more before it does."
+- New in `lib/userpacks.py:272`
+  - now: "Every pack that isn't Frame Tweaks' own is trusted already."
+- New in `lib/userpacks.py:273`
+  - now: "No pack that isn't Frame Tweaks' own is in use."
