@@ -61,6 +61,23 @@ find_phone() {
     fi
     dev=${pick%% *} id=${pick#* }
 }
+# at_last_address: the remembered phone at the address it last connected at, when mDNS doesn't
+# show it: a phone with its screen off, or on a Wi-Fi that filters multicast, stops advertising
+# but still answers there (its port changes only when Wireless debugging is turned off and on).
+# Taken only if it says it's the phone: its persist.adb.wifi.guid is the identity it advertises
+# (PHONE_ID), so another device that answers at that address isn't taken for it.
+at_last_address() {
+    [ -n "${PHONE_ADDRESS:-}" ] && [ -n "${PHONE_ID:-}" ] || return 1
+    timeout 8 adb connect "$PHONE_ADDRESS" 2>/dev/null | grep -qE '^(already )?connected to' || return 1
+    if [ "$(timeout 4 adb -s "$PHONE_ADDRESS" shell getprop persist.adb.wifi.guid 2>/dev/null | tr -d '\r')" = "$PHONE_ID" ]; then
+        dev=$PHONE_ADDRESS id=$PHONE_ID
+        plog "not advertising, but answering at its last address $dev"
+        return 0
+    fi
+    plog "something else answers at its last address $PHONE_ADDRESS: not taken"
+    adb disconnect "$PHONE_ADDRESS" >/dev/null 2>&1
+    return 1
+}
 # forget: no remembered phone (its name, identity and last address) in phone.conf; other lines kept.
 forget() { plog "forgetting the remembered phone"; [ -f "$CONF" ] && sed -i -E '/^[[:space:]]*PHONE_(NAME|ID|ADDRESS)=/d' "$CONF"; }
 # remember NAME: the phone to use from now on (PHONE_NAME in phone.conf; other lines kept). Its
@@ -222,6 +239,7 @@ if [ -n "$pick" ] || [ -z "${PHONE_NAME:-}" ]; then
     fi
 fi
 find_phone; r=$?
+[ $r -eq 1 ] && at_last_address && r=0
 if [ $r -eq 0 ]; then plog "looked for it: at $dev ($id)"
 elif [ $r -eq 1 ]; then plog "looked for it: not in sight"
 else plog "looked for it: more than one claims it"; fi
@@ -482,6 +500,7 @@ If the phone asked to allow USB debugging or screen sharing, allow it and try ag
     found=
     for _ in $(seq 12); do                             # up to a minute
         find_phone; r=$?
+        [ $r -eq 1 ] && at_last_address && r=0
         [ $r -eq 2 ] && choose_twin
         if [ $r -ne 1 ] && adb connect "$dev" >/dev/null && alive; then found=1; worked; break; fi
         cancelled && exit 0

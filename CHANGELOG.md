@@ -26,6 +26,10 @@
 - **Homebrew's installer** moves to a newer commit, which also creates Homebrew's `libexec` folder.
 
 ### Fixed
+- **Android Mirror lost a phone that stopped advertising:** with the phone's screen off, or on a
+  Wi-Fi that filters multicast, the phone no longer shows on the network, and a dropped mirror
+  ended in "Phone not found" although the phone still answered. It's now tried at the address it
+  last connected at, and used only if it gives the same identity.
 - **The wallet's unlock dialog during status checks:** a tweak whose status ran a command you
   protected with `wallet-tool` (`claude --version`, say) put the unlock dialog up at every refresh
   of the window, while the wallet was locked; closing them had KDE's wallet warn of "repeated
