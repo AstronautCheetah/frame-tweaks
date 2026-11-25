@@ -1200,5 +1200,35 @@ class Gh(Home):
         self.assertTrue((self.bin / "gh").exists())
 
 
+
+class WithKeyringInStatusChecks(unittest.TestCase):
+    """A tweak's status check that ran a command protected by wallet-tool (`claude --version`)
+    put the wallet's unlock dialog up at every refresh of the window; closing them had KDE's
+    wallet warn of "repeated failed attempts". With FRAME_TWEAKS_CHECKING (set for status
+    checks) with-keyring doesn't ask: it says the wallet is locked."""
+    def run_it(self, env_extra):
+        with tempfile.TemporaryDirectory() as h:
+            home = Path(h)
+            asked = home / "asked"
+            stub(home / ".local/bin", "wallet-unlock",
+                 f'[ "$1" = --status ] && {{ echo locked; exit 0; }}; touch "{asked}"; exit 1')
+            r = subprocess.run(["bash", str(WALLET / "with-keyring"), "echo", "ran"], capture_output=True, text=True,
+                               env={**os.environ, "HOME": str(home), **env_extra})
+            return r, asked.exists()
+
+    def test_a_status_check_never_asks(self):
+        r, asked = self.run_it({"FRAME_TWEAKS_CHECKING": "1"})
+        self.assertFalse(asked)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("wallet still locked", r.stderr)
+        self.assertNotIn("ran", r.stdout)
+
+    def test_otherwise_it_asks(self):
+        env = {k: v for k, v in os.environ.items() if k != "FRAME_TWEAKS_CHECKING"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            r, asked = self.run_it({})
+        self.assertTrue(asked)
+        self.assertEqual(r.returncode, 1)
+
 if __name__ == "__main__":
     unittest.main()

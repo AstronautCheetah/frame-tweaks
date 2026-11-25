@@ -66,7 +66,9 @@ def status(cid):
         return UNAVAILABLE, _("not available any more")
     try:
         # (a check that never returns would hold a worker for good; four of them, every status)
-        r = subprocess.run(LOW + sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60)
+        # (FRAME_TWEAKS_CHECKING: what it runs never asks for the wallet; see packs/core/wallet/with-keyring)
+        r = subprocess.run(LOW + sft.script(component(cid), "status"), capture_output=True, text=True, timeout=60,
+                           env={**os.environ, "FRAME_TWEAKS_CHECKING": "1"})
     except subprocess.TimeoutExpired:
         return 2, _("status check didn't finish (took over a minute)")
     refresh_run_label(c)

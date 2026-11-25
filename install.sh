@@ -277,7 +277,8 @@ start_status_server() {
 status_of() {
     local out rc err rec line st
     err=$(mktemp) || err=/dev/null
-    out=$(tweak_script "$1" status 2>"$err"); rc=$?
+    # (FRAME_TWEAKS_CHECKING: what it runs never asks for the wallet; see packs/core/wallet/with-keyring)
+    out=$(FRAME_TWEAKS_CHECKING=1 tweak_script "$1" status 2>"$err"); rc=$?
     [[ -f $STATE/installed/$1 ]] && rec=1 || rec=0
     st=""
     if [[ -n $STATUS_IN ]]; then

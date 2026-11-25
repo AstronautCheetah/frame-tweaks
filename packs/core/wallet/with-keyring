@@ -7,7 +7,10 @@
 uid=$(id -u)
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
 if [ "$("$HOME/.local/bin/wallet-unlock" --status 2>/dev/null)" = locked ]; then
-    if ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
+    # (Not from a tweak's status check (FRAME_TWEAKS_CHECKING, set by ./install.sh and the window):
+    # one that ran a wrapped command, `claude --version` say, put the unlock dialog up at every
+    # refresh, and closing those had KDE's wallet warn of repeated failed attempts.)
+    if [ -n "${FRAME_TWEAKS_CHECKING:-}" ] || ! "$HOME/.local/bin/wallet-unlock" >/dev/null; then
         # Translations (lib/i18n.sh; the copy install_i18n puts here), else English. Only here: it
         # runs python3, and this wraps every gh call.
         # shellcheck source=/dev/null

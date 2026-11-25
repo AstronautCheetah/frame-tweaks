@@ -26,6 +26,10 @@
 - **Homebrew's installer** moves to a newer commit, which also creates Homebrew's `libexec` folder.
 
 ### Fixed
+- **The wallet's unlock dialog during status checks:** a tweak whose status ran a command you
+  protected with `wallet-tool` (`claude --version`, say) put the unlock dialog up at every refresh
+  of the window, while the wallet was locked; closing them had KDE's wallet warn of "repeated
+  failed attempts". Status checks now never ask for the wallet.
 - **The 🛠 Repair bar after a SteamOS update** blamed the update for every warning: a tweak
   installed after the update, with a restart pending, was listed as broken by it. Each install
   now records the SteamOS build it was made on, and such a tweak is left out. The bar says what
