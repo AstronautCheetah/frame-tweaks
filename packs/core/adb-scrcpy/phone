@@ -332,12 +332,17 @@ keep_on() {
 # helpers (they'd go within seconds of it anyway), the phone's connection, and adb's background
 # server when no other device is connected to it.
 close_all() {
+    [ -n "${pid:-}" ] || { adb disconnect "${dev:-?}" >/dev/null 2>&1; return; }   # (no mirror yet)
     kill "$pid" 2>/dev/null
     for _ in 1 2 3 4 5 6; do kill -0 "$pid" 2>/dev/null || break; sleep 0.5; done
     kill -9 "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
     pkill -u "$(id -u)" -f "$HOME/.local/bin/phone-(touch|fit)( |$)" 2>/dev/null
     adb disconnect "$dev" >/dev/null 2>&1
-    adb devices 2>/dev/null | grep -q "$(printf '\t')" || adb kill-server >/dev/null 2>&1
+    # (adb's server also connects by itself to a paired phone it sees on the network, under its
+    # mDNS name, $id._adb-tls-connect._tcp: that's this phone too, so it doesn't keep the server on.)
+    adb devices 2>/dev/null | awk -F'\t' -v ours="$dev" -v named="${id:-?}." \
+        'NF == 2 && $1 != ours && index($1, named) != 1 { other = 1 } END { exit !other }' ||
+        adb kill-server >/dev/null 2>&1
 }
 
 # A wireless connection can die without scrcpy noticing (the phone changed network or address,
@@ -354,6 +359,10 @@ echo $$ > "$PIDFILE"
 trap 'splash_end; [ "$(cat "$PIDFILE" 2>/dev/null)" = $$ ] && rm -f "$PIDFILE"' EXIT
 restart=
 trap 'restart=1; kill "$pid" 2>/dev/null' USR1
+# Stopped from outside (kill, systemctl stop, the session ending): scrcpy is in a scope of its own
+# (cap, above), so it would stay on, still connected to the phone. Close it with this.
+trap 'close_all; exit 143' TERM
+trap 'close_all; exit 129' HUP
 # The request itself is a file phone-touch leaves before the signal, looked for at each check: bash
 # 5.2 can lose the trap (run while it's parsing a $(...), it fails with "unexpected EOF while
 # looking for matching `)'"), and Restart stream then did nothing. The signal only hurries it.

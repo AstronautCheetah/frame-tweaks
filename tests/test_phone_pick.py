@@ -11,6 +11,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -34,7 +35,8 @@ IMPOSTOR = ("Pixel 9", "10.0.0.66", 5555, "adb-OTHER-XyZ789")       # (its name,
 
 class PhonePick(unittest.TestCase):
     def run_phone(self, phones, conf=None, choose=None, args=(), old_place=False, extra=None, env=None,
-                  path=("/usr/bin", "/bin"), timeout=30):
+                  path=("/usr/bin", "/bin"), timeout=30, term_at=None):
+        """term_at: once the log has that text, phone is sent SIGTERM (stopped from outside)."""
         home = Path(self.tmp.name)
         stubs = home / ".local/bin"          # (first on phone's PATH, ahead of Homebrew's real scrcpy)
         stubs.mkdir(parents=True, exist_ok=True)
@@ -59,8 +61,19 @@ class PhonePick(unittest.TestCase):
         (home / "run").mkdir(exist_ok=True)      # (its pid file and scrcpy's log: not a running mirror's)
         env = sandbox_env(home, stubs, path, **{"CHOOSE": choose or "", "XDG_RUNTIME_DIR": home / "run",
                                                 "PHONE_NO_SPLASH": 1, **(env or {})})   # (the splash has a test of its own)
-        r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True, timeout=timeout,
-                           stdin=subprocess.DEVNULL)
+        if term_at is None:
+            r = subprocess.run(["bash", str(PHONE), *args], env=env, capture_output=True, text=True,
+                               timeout=timeout, stdin=subprocess.DEVNULL)
+        else:
+            p = subprocess.Popen(["bash", str(PHONE), *args], env=env, stdin=subprocess.DEVNULL,
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.addCleanup(lambda: p.poll() is None and p.kill())
+            for _ in range(timeout * 50):
+                if term_at in log.read_text() or p.poll() is not None:
+                    break
+                time.sleep(0.02)
+            p.terminate()
+            r = subprocess.CompletedProcess(p.args, p.wait(timeout))
         f = home / ".config/frame-tweaks/phone.conf"
         conf_text = f.read_text() if f.exists() else ""
         return r.returncode, log.read_text(), conf_text
@@ -133,6 +146,20 @@ class PhonePick(unittest.TestCase):
         self.assertNotIn("scrcpy -s", log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
         self.assertIn("Pixel 9 didn't appear", log)
+
+    def test_stopped_from_outside_it_closes_the_mirror(self):
+        """SIGTERM to phone (systemctl stop, kill): scrcpy, in a scope of its own on the Frame,
+        would stay on and connected; it's closed, and the phone disconnected."""
+        # (its pid written before the line that has phone stopped)
+        code, log, _ = self.run_phone([("Pixel 9", "10.0.0.5", 4000)], term_at="scrcpy -s", extra={
+            "systemctl": "exit 1",           # (no user manager: no scope, scrcpy is phone's child)
+            "scrcpy": 'echo $$ > "$HOME/scrcpy.pid"; echo "scrcpy $*" >> "$HOME/log"; exec /usr/bin/sleep 60'})
+        self.assertIn("scrcpy -s 10.0.0.5:4000", log)
+        self.assertEqual(code, 143, log)
+        pid = int((Path(self.tmp.name) / "scrcpy.pid").read_text())
+        with self.assertRaises(ProcessLookupError):
+            os.kill(pid, 0)
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
 
     def test_failed_connection_offers_pairing_again(self):
         """adb can't connect (the phone forgot the Frame): Pair it again finds the phone's pairing
@@ -560,6 +587,15 @@ class AutoDisconnect(unittest.TestCase):
         code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", adb=adb)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)
         self.assertNotIn("adb kill-server", log)
+
+    def test_the_phones_own_mdns_connection_doesnt_keep_adbs_server(self):
+        """adb's server also connects by itself to the paired phone it sees on the network, under its
+        mDNS name: that's the same phone, not another device, so the server still stops."""
+        adb = ('echo "adb $*" >> "$HOME/log"; [ "$1" = connect ] && echo "connected to $2"; '
+               '[ "$1" = devices ] && printf "List of devices attached\\nadb-Pixel9-a1B2c3._adb-tls-connect._tcp\\tdevice\\n"; exit 0')
+        code, log, _ = self.run_auto("PHONE_TIMEOUT=1\n", adb=adb)
+        self.assertIn("adb disconnect 10.0.0.5:4000", log)
+        self.assertIn("adb kill-server", log)
 
     def test_restart_stream_counts_again(self):
         """Restart stream (the gear) starts the time again: asked a full period after it."""

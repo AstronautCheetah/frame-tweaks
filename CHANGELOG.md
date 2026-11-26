@@ -30,6 +30,12 @@
   Wi-Fi that filters multicast, the phone no longer shows on the network, and a dropped mirror
   ended in "Phone not found" although the phone still answered. It's now tried at the address it
   last connected at, and used only if its serial is the one it advertised.
+- **Android Mirror stopped from outside** (`kill`, `systemctl stop`) left scrcpy running and
+  connected to the phone: it's in a scope of its own. Stopping Android Mirror now closes it and
+  disconnects the phone.
+- **adb's background server stayed on after Android Mirror closed:** adb connects by itself to a
+  paired phone it sees on the network, and that second connection to the same phone counted as
+  another device. Now only another device keeps the server on.
 - **The wallet's unlock dialog during status checks:** a tweak whose status ran a command you
   protected with `wallet-tool` (`claude --version`, say) put the unlock dialog up at every refresh
   of the window, while the wallet was locked; closing them had KDE's wallet warn of "repeated
