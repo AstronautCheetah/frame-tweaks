@@ -78,6 +78,11 @@ msgid "Asks for your sudo password: %s"
 msgstr "Vraagt om je sudo-wachtwoord: %s"
 
 # needs review
+#: gui/apply_changes.py
+msgid "Broken since, Repair installs again: {tweaks}."
+msgstr "Sindsdien defect, Herstellen installeert ze opnieuw: {tweaks}."
+
+# needs review
 #: gui/apply_changes.py gui/prefs_page.py packs/core/snip/frame-snip
 msgid "Cancel"
 msgstr "Annuleren"
@@ -144,6 +149,13 @@ msgstr ""
 "Nog geen wachtwoord: kies opnieuw Wachtwoord instellen… als je klaar bent."
 
 # needs review
+#: gui/apply_changes.py
+msgid ""
+"Not Repair's to fix, their status says what each needs (↻ Reinstall, a restart): {tweaks}."
+msgstr ""
+"Niet voor Herstellen, hun status zegt wat elk nodig heeft (↻ Opnieuw installeren, een herstart): {tweaks}."
+
+# needs review
 #: gui/apply_changes.py install.sh
 msgid "Nothing to change."
 msgstr "Niets te wijzigen."
@@ -208,11 +220,10 @@ msgstr ""
 msgid "Set a password…"
 msgstr "Wachtwoord instellen…"
 
+# needs review
 #: gui/apply_changes.py
-msgid ""
-"SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
-msgstr ""
-"SteamOS is bijgewerkt ({old} → {new}), en deze aanpassingen hebben sindsdien aandacht nodig: {tweaks}."
+msgid "SteamOS was updated ({old} → {new})."
+msgstr "SteamOS is bijgewerkt ({old} → {new})."
 
 # needs review
 #: gui/apply_changes.py
@@ -1145,6 +1156,13 @@ msgstr ""
 # needs review
 #: gui/packs_page.py
 msgid ""
+"Every pack that isn't Frame Tweaks' own leaves the list, with its tweaks; installed ones stay until you uninstall them"
+msgstr ""
+"Elk pakket dat niet van Frame Tweaks zelf is, verdwijnt uit de lijst, met de aanpassingen ervan; geïnstalleerde blijven tot je ze verwijdert"
+
+# needs review
+#: gui/packs_page.py
+msgid ""
 "Every tweak here comes from a <b>pack</b>: a folder of tweak folders, each described by its README.md. Frame Tweaks' own are in its official packs ({official}), all in use unless you turn one off. To add more, add one from its link below, or put a pack's folder in <code>{folder}</code>; then trust it. <b>A pack's tweaks run as you</b>, with your files and passwords in reach: trust only packs from people you trust, and read what they do first. If a pack's files change, it waits until you trust it again. How to write one: docs/mods.md."
 msgstr ""
 "Elke aanpassing hier komt uit een <b>pakket</b>: een map met mappen van aanpassingen, elk beschreven in een eigen README.md. De eigen aanpassingen van Frame Tweaks zitten in de officiële pakketten ({official}), allemaal in gebruik tenzij je er een uitschakelt. Wil je er meer, voeg er dan een toe via de link hieronder, of zet de map van een pakket in <code>{folder}</code>; vertrouw het daarna. <b>De aanpassingen van een pakket draaien met jouw rechten</b>, met je bestanden en wachtwoorden binnen bereik: vertrouw alleen pakketten van mensen die je vertrouwt, en lees eerst wat ze doen. Veranderen de bestanden van een pakket, dan wacht het tot je het opnieuw vertrouwt. Zelf een pakket maken: docs/mods.md."
@@ -1237,8 +1255,18 @@ msgstr "Niet meer gebruiken"
 
 # needs review
 #: gui/packs_page.py
+msgid "Stop using all"
+msgstr "Alle niet meer gebruiken"
+
+# needs review
+#: gui/packs_page.py
 msgid "Trust"
 msgstr "Vertrouwen"
+
+# needs review
+#: gui/packs_page.py
+msgid "Trust all…"
+msgstr "Alle vertrouwen…"
 
 # needs review
 #: gui/packs_page.py
@@ -1258,6 +1286,13 @@ msgstr "Gebruiken"
 # needs review
 #: gui/packs_page.py
 msgid ""
+"Use every pack that isn't Frame Tweaks' own, as its files are now: their tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. Asks once more before it does."
+msgstr ""
+"Elk pakket gebruiken dat niet van Frame Tweaks zelf is, zoals de bestanden nu zijn: de aanpassingen ervan komen in de lijst, en die je aanvinkt, draaien met jouw rechten, met je bestanden en wachtwoorden binnen bereik. Vertrouw alleen pakketten van mensen die je vertrouwt. Vraagt eerst nog een keer om bevestiging."
+
+# needs review
+#: gui/packs_page.py
+msgid ""
 "Use this pack: its tweaks join the list, and the ones you tick run as you, with your files and passwords in reach. Trust only packs from people you trust. If its files change (an update), it waits until you trust it again."
 msgstr ""
 "Dit pakket gebruiken: de aanpassingen ervan komen in de lijst, en die je aanvinkt, draaien met jouw rechten, met je bestanden en wachtwoorden binnen bereik. Vertrouw alleen pakketten van mensen die je vertrouwt. Veranderen de bestanden ervan (een update), dan wacht het tot je het opnieuw vertrouwt."
@@ -1266,6 +1301,13 @@ msgstr ""
 #: gui/packs_page.py
 msgid "Yes, delete it"
 msgstr "Ja, wissen"
+
+# needs review
+#: gui/packs_page.py
+msgid "Yes, trust %d pack"
+msgid_plural "Yes, trust all %d packs"
+msgstr[0] "Ja, %d pakket vertrouwen"
+msgstr[1] "Ja, alle %d pakketten vertrouwen"
 
 # needs review
 #: gui/packs_page.py lib/splash.py
@@ -1986,7 +2028,7 @@ msgid "Longer"
 msgstr "Langer"
 
 # needs review
-#: gui/wallet_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md
+#: gui/wallet_page.py packs/core/adb-scrcpy/phone-touch.js packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "Never"
 msgstr "Nooit"
 
@@ -2270,7 +2312,7 @@ msgid "not available any more"
 msgstr "niet meer beschikbaar"
 
 # needs review
-#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/tray-host/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
+#: gui/window_logic.py install.sh lib/common.sh lib/link.sh packs/bugfixes/auto-sleep/status.sh packs/bugfixes/tray-host/status.sh packs/core/bt-music-only/status.sh packs/core/charge-limit/status.sh packs/core/snip/status.sh packs/core/speech/status.sh packs/core/tools/status.sh packs/core/vr-dashboard/status.sh packs/core/vr-memory-guard/status.sh packs/integrations/moonlight-xr/status.sh packs/third-party/menu-icons/status.sh
 msgid "not installed"
 msgstr "niet geïnstalleerd"
 
@@ -3531,7 +3573,7 @@ msgid "Added {name} to the app menu"
 msgstr "{name} toegevoegd aan het appmenu"
 
 # needs review
-#: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
+#: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad-vr.desktop packs/core/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr "Pijltjesblok"
 
@@ -3612,6 +3654,11 @@ msgstr "Door {author}."
 
 # needs review
 #: lib/userpacks.py
+msgid "Every pack that isn't Frame Tweaks' own is trusted already."
+msgstr "Elk pakket dat niet van Frame Tweaks zelf is, wordt al vertrouwd."
+
+# needs review
+#: lib/userpacks.py
 msgid ""
 "It isn't used until you trust it again. Read what changed first, then: {command}"
 msgstr ""
@@ -3630,6 +3677,11 @@ msgid ""
 "Its tweaks {ids} are still installed: trust it again to uninstall them ({command}), then remove it."
 msgstr ""
 "De aanpassingen {ids} ervan zijn nog geïnstalleerd: vertrouw het pakket opnieuw om ze te verwijderen ({command}) en wis het daarna."
+
+# needs review
+#: lib/userpacks.py
+msgid "No pack that isn't Frame Tweaks' own is in use."
+msgstr "Er is geen pakket in gebruik dat niet van Frame Tweaks zelf is."
 
 # needs review
 #: lib/userpacks.py
@@ -3821,6 +3873,95 @@ msgid "{ref} isn't a branch or tag name"
 msgstr "{ref} is geen branch- of tagnaam"
 
 # needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "1 hour (the default)"
+msgstr "1 uur (standaard)"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "10 minutes"
+msgstr "10 minuten"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "15 minutes (the default)"
+msgstr "15 minuten (standaard)"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "5 minutes"
+msgstr "5 minuten"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"A small background service watches for the headset going into standby (SteamVR does that a short while after it comes off your head). After 15 minutes of standby on battery, or 60 plugged in, it puts the Frame to sleep, as a short press of the power button does."
+msgstr ""
+"Een kleine achtergronddienst let erop wanneer de headset in stand-by gaat (SteamVR doet dat kort nadat je hem afzet). Na 15 minuten stand-by op de batterij, of 60 als hij aangesloten is, zet hij de Frame in de slaapstand, zoals een korte druk op de aan/uit-knop doet."
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"How long the headset stays in standby (off your head) before the Frame goes to sleep. The wait starts again each time it wakes."
+msgstr ""
+"Hoelang de headset in stand-by blijft (afgezet) voor de Frame in de slaapstand gaat. De wachttijd begint opnieuw telkens als hij ontwaakt."
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "No"
+msgstr "Nee"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "On battery, sleep after"
+msgstr "Op de batterij, slaapstand na"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Plugged in, sleep after"
+msgstr "Aangesloten, slaapstand na"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"Puts the Frame to sleep once the headset has been off your head a while, so it doesn't run flat on a shelf"
+msgstr ""
+"Zet de Frame in de slaapstand als de headset een tijdje afgezet is, zodat de batterij niet leegloopt op een plank"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Sleep even while someone is logged in over SSH"
+msgstr "Ook in de slaapstand gaan als iemand via SSH aangemeld is"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Sleep when idle in VR"
+msgstr "Slaapstand bij inactiviteit in VR"
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid ""
+"Steam's own \"Sleep after\" setting (Settings → Power) doesn't fire in the Frame's VR session: on SteamOS 0.5.8 and 0.5.9 a Frame left in standby stayed awake for hours with it set to 15 minutes on battery, losing about 20% an hour, and one ran from full to 2% on a shelf."
+msgstr ""
+"De eigen instelling \"Slaapstand na\" van Steam (Instellingen → Energiebeheer) werkt niet in de VR-sessie van de Frame: op SteamOS 0.5.8 en 0.5.9 bleef een Frame in stand-by urenlang wakker terwijl ze op 15 minuten op de batterij stond, met een verlies van zo'n 20% per uur, en één liep op een plank leeg van vol tot 2%."
+
+# needs review
+#: packs/bugfixes/auto-sleep/README.md
+msgid "Yes"
+msgstr "Ja"
+
+# needs review
+#: packs/bugfixes/auto-sleep/install.sh
+msgid "The Frame now sleeps once the headset has been in standby a while: %s"
+msgstr ""
+"De Frame gaat nu in de slaapstand als de headset een tijdje in stand-by is: %s"
+
+# needs review
+#: packs/bugfixes/auto-sleep/status.sh
+msgid "service not running (%s)"
+msgstr "dienst niet actief (%s)"
+
+# needs review
 #: packs/bugfixes/pack.md
 msgid "Bugfixes"
 msgstr "Bugfixes"
@@ -3930,22 +4071,22 @@ msgstr ""
 "start niet met de VR-sessie: niet ingeschakeld (↻ Opnieuw installeren schakelt hem in)"
 
 # needs review
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "1 hour"
 msgstr "1 uur"
 
 # needs review
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "15 minutes"
 msgstr "15 minuten"
 
 # needs review
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "2 hours"
 msgstr "2 uur"
 
 # needs review
-#: packs/core/adb-scrcpy/README.md
+#: packs/core/adb-scrcpy/README.md packs/bugfixes/auto-sleep/README.md
 msgid "30 minutes"
 msgstr "30 minuten"
 
@@ -4410,18 +4551,28 @@ msgstr ""
 
 # needs review
 #: packs/core/adb-scrcpy/phone
+msgid "ended by the system: signal %s"
+msgstr "door het systeem beëindigd: signaal %s"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
+msgid "exit status %s"
+msgstr "afsluitstatus %s"
+
+# needs review
+#: packs/core/adb-scrcpy/phone
 msgid ""
-"scrcpy stopped straight away. It said:\n"
+"scrcpy stopped straight away (%s). It said:\n"
 "\n"
 "%s\n"
 "\n"
-"If the phone asked to allow USB debugging or screen sharing, allow it and try again."
+"If the phone asked to allow USB debugging or screen sharing, allow it and try again. Its whole output: %s"
 msgstr ""
-"scrcpy stopte meteen. Het meldde:\n"
+"scrcpy stopte meteen (%s). Het meldde:\n"
 "\n"
 "%s\n"
 "\n"
-"Als de telefoon vroeg om USB-foutopsporing of scherm delen toe te staan, sta dat toe en probeer het opnieuw."
+"Als de telefoon vroeg om USB-foutopsporing of scherm delen toe te staan, sta dat toe en probeer het opnieuw. De volledige uitvoer: %s"
 
 # needs review
 #: packs/core/adb-scrcpy/phone
@@ -4777,13 +4928,13 @@ msgstr "in de stijl van"
 
 # needs review
 #: packs/core/arrowpad/arrowpad-vr.desktop
-msgid "Arrow Pad (VR window)"
-msgstr "Pijltjesblok (VR-venster)"
-
-# needs review
-#: packs/core/arrowpad/arrowpad-vr.desktop
 msgid "Arrow/navigation keys as their own floating VR window"
 msgstr "Pijltjes- en navigatietoetsen in een eigen zwevend VR-venster"
+
+# needs review
+#: packs/core/arrowpad/arrowpad.desktop
+msgid "Arrow Pad (desktop window)"
+msgstr "Pijltjesblok (bureaubladvenster)"
 
 # needs review
 #: packs/core/arrowpad/arrowpad.desktop
@@ -5316,6 +5467,88 @@ msgstr ""
 "Zolang het toetsenbord van Steam open is, schuift Pijltjesblok alleen als je het versleept. Gebruik de balk eronder om het dichterbij of verder weg te zetten, of te draaien."
 
 # needs review
+#: packs/core/bt-music-only/README.md
+msgid ""
+"Bluetooth headphones and earbuds connect for music (A2DP) only, without the call profile"
+msgstr ""
+"Bluetooth-hoofdtelefoons en -oordopjes verbinden alleen voor muziek (A2DP), zonder het belprofiel"
+
+# needs review
+#: packs/core/bt-music-only/README.md
+msgid "Bluetooth headphones: music only"
+msgstr "Bluetooth-hoofdtelefoons: alleen muziek"
+
+# needs review
+#: packs/core/bt-music-only/README.md
+msgid ""
+"The Frame stops offering Bluetooth audio devices the hands-free and headset profiles (the ones with a microphone and a voice channel). Headphones and earbuds then connect for music (A2DP) only, and stay on that profile. Their microphone isn't used; SteamVR uses the Frame's own."
+msgstr ""
+"De Frame biedt Bluetooth-audioapparaten niet langer de handsfree- en headsetprofielen aan (die met een microfoon en een spraakkanaal). Hoofdtelefoons en oordopjes verbinden dan alleen voor muziek (A2DP) en blijven op dat profiel. Hun microfoon wordt niet gebruikt; SteamVR gebruikt die van de Frame zelf."
+
+# needs review
+#: packs/core/bt-music-only/README.md
+msgid ""
+"With both profiles on offer, a pair of earbuds is connected on the call profile too, with its voice channel open. When the Frame goes to sleep, that channel is torn down mid-stream, and some earbuds then never answer the Frame again until they're reset and paired anew. The music profile alone reconnects cleanly. The Frame's own microphone is what SteamVR uses anyway, so the call profile gives nothing in VR."
+msgstr ""
+"Als beide profielen aangeboden worden, verbinden oordopjes ook met het belprofiel, met het spraakkanaal open. Gaat de Frame in de slaapstand, dan wordt dat kanaal midden in de stream afgebroken, en sommige oordopjes reageren daarna nooit meer op de Frame tot ze gereset en opnieuw gekoppeld zijn. Met alleen het muziekprofiel verbinden ze netjes opnieuw. SteamVR gebruikt toch de microfoon van de Frame zelf, dus het belprofiel levert in VR niets op."
+
+# needs review
+#: packs/core/bt-music-only/install.sh packs/core/bt-music-only/status.sh
+msgid "Bluetooth headphones connect for music only (A2DP)"
+msgstr "Bluetooth-hoofdtelefoons verbinden alleen voor muziek (A2DP)"
+
+# needs review
+#: packs/core/bt-music-only/install.sh
+msgid ""
+"Bluetooth headphones now connect for music only (A2DP). Reconnect ones connected already."
+msgstr ""
+"Bluetooth-hoofdtelefoons verbinden nu alleen voor muziek (A2DP). Verbind die al verbonden zijn opnieuw."
+
+# needs review
+#: packs/core/bt-music-only/install.sh
+msgid ""
+"Installed; applies when the Frame restarts (SteamVR is using the sound system now)."
+msgstr ""
+"Geïnstalleerd; werkt zodra de Frame opnieuw opstart (SteamVR gebruikt nu het geluidssysteem)."
+
+# needs review
+#: packs/core/bt-music-only/install.sh
+msgid "Installed; applies when the Frame restarts."
+msgstr "Geïnstalleerd; werkt zodra de Frame opnieuw opstart."
+
+# needs review
+#: packs/core/bt-music-only/status.sh
+msgid ""
+"A connected device still offers its call profile: reconnect it, or restart the Frame"
+msgstr ""
+"Een verbonden apparaat biedt nog zijn belprofiel aan: verbind het opnieuw of start de Frame opnieuw op"
+
+# needs review
+#: packs/core/bt-music-only/status.sh
+msgid ""
+"Applies when WirePlumber restarts: restart the Frame, or ↻ Reinstall with SteamVR closed"
+msgstr ""
+"Werkt zodra WirePlumber herstart: start de Frame opnieuw op, of ↻ Opnieuw installeren met SteamVR gesloten"
+
+# needs review
+#: packs/core/bt-music-only/uninstall.sh
+msgid ""
+"The call profiles are back when the Frame restarts (SteamVR is using the sound system now)."
+msgstr ""
+"De belprofielen zijn terug zodra de Frame opnieuw opstart (SteamVR gebruikt nu het geluidssysteem)."
+
+# needs review
+#: packs/core/bt-music-only/uninstall.sh
+msgid "The call profiles are back when the Frame restarts."
+msgstr "De belprofielen zijn terug zodra de Frame opnieuw opstart."
+
+# needs review
+#: packs/core/bt-music-only/uninstall.sh
+msgid "The call profiles are back; reconnect headphones connected already."
+msgstr ""
+"De belprofielen zijn terug; verbind hoofdtelefoons die al verbonden zijn opnieuw."
+
+# needs review
 #: packs/core/charge-limit/README.md
 msgid "80% (the default)"
 msgstr "80% (standaard)"
@@ -5328,7 +5561,7 @@ msgstr ""
 "Een lithium-ionbatterij slijt sneller als ze vol gehouden wordt, zoals wanneer de Frame vaak lang aangesloten is, bv. op een powerbank in je zak terwijl je speelt. SteamOS biedt een laadlimiet op de Steam Deck (Instellingen → Energiebeheer), maar niet op de Frame."
 
 # needs review
-#: packs/core/charge-limit/README.md
+#: packs/core/charge-limit/README.md packs/bugfixes/auto-sleep/README.md
 msgid "Applies within 30 seconds."
 msgstr "Wordt binnen 30 seconden toegepast."
 
@@ -6532,7 +6765,7 @@ msgstr ""
 "De eigen oplossingen en app-configuraties van Frame Tweaks voor de Steam Frame, en de hulpprogramma's die veel ervan nodig hebben: tools van andere projecten, geïnstalleerd met de aanpassingen die ze gebruiken en met vermelding van hun makers. Homebrew installeert de programma's die Dicteren, Schermknipsel en Android-spiegel gebruiken (whisper.cpp, tesseract, scrcpy); ydotool typt voor Pijltjesblok, Dicteren en Scrolstroken; Piper spreekt voor Voorlezen. Elk ervan is getest op een Frame en wordt in je persoonlijke map geïnstalleerd, zodat het SteamOS-updates overleeft en netjes te verwijderen is (Laadlimiet voor de batterij voegt ook een udev-regel toe in /etc, die SteamOS-updates behouden)."
 
 # needs review
-#: packs/core/pack.md packs/core/charge-limit/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
+#: packs/core/pack.md packs/core/charge-limit/README.md packs/core/bt-music-only/README.md packs/integrations/pack.md packs/third-party/pack.md packs/bugfixes/pack.md
 msgid "Hardware"
 msgstr "Hardware"
 
@@ -6542,7 +6775,7 @@ msgid "Privacy & security"
 msgstr "Privacy en beveiliging"
 
 # needs review
-#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md
+#: packs/core/pack.md packs/core/homebrew/README.md packs/core/tools/README.md packs/core/ydotool/README.md packs/core/speech/README.md packs/core/vr-memory-guard/README.md packs/integrations/pack.md packs/third-party/pack.md packs/third-party/perf-overlay/README.md packs/third-party/menu-icons/README.md packs/bugfixes/pack.md packs/bugfixes/tray-host/README.md packs/bugfixes/auto-sleep/README.md
 msgid "System"
 msgstr "Systeem"
 
@@ -10107,3 +10340,26 @@ msgstr "Installatieprogramma voor aanpassingen"
 #~ "Kept your settings and pairing in %s. Remove its Steam library entry in Steam (Manage, Remove non-Steam game), and unpair the Frame in Sunshine."
 #~ msgstr ""
 #~ "Je instellingen en koppeling behouden in %s. Verwijder het item uit de Steam-bibliotheek in Steam (Beheren, Niet-Steam-game verwijderen), en ontkoppel de Frame in Sunshine."
+
+#~ msgid ""
+#~ "SteamOS was updated ({old} → {new}), and these tweaks need attention since: {tweaks}."
+#~ msgstr ""
+#~ "SteamOS is bijgewerkt ({old} → {new}), en deze aanpassingen hebben sindsdien aandacht nodig: {tweaks}."
+
+#~ # needs review
+#~ msgid ""
+#~ "scrcpy stopped straight away. It said:\n"
+#~ "\n"
+#~ "%s\n"
+#~ "\n"
+#~ "If the phone asked to allow USB debugging or screen sharing, allow it and try again."
+#~ msgstr ""
+#~ "scrcpy stopte meteen. Het meldde:\n"
+#~ "\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Als de telefoon vroeg om USB-foutopsporing of scherm delen toe te staan, sta dat toe en probeer het opnieuw."
+
+#~ # needs review
+#~ msgid "Arrow Pad (VR window)"
+#~ msgstr "Pijltjesblok (VR-venster)"
