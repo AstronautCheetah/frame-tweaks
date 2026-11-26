@@ -16,3 +16,4 @@ tested:
   - { steamos: "0.5.6", build: "20261022.6153909", steamvr: "2.18.2", channel: beta, date: "2026-11-02", result: works, notes: "main after 0.6.23 (24ee830): Dictation, Performance Overlay, KnockThru, Arrow Pad" }
   - { steamos: "0.5.6", build: "20261022.6153909", steamvr: "2.18.2", channel: beta, date: "2026-11-03", result: works, notes: "0.7.0: signed update from 0.6.23+, Dictation, Screen snip, Wallet, Memory limits, Scroll strips" }
   - { steamos: "0.5.8", build: "20261106.6144341", steamvr: "2.19.2", channel: beta, date: "2026-11-13", result: works, notes: "0.7.4: status of 31 tweaks, signed update from 0.7.1-0.7.3, offline tweak tests" }
+  - { steamos: "0.5.11", build: "20261125.6132624", steamvr: "2.19.5", channel: beta, date: "2026-11-26", result: works, notes: "0.8.0: every tweak's status, signed updates from 0.7.2-0.7.4, Android Mirror, Arrow Pad, Moonlight XR, Full Keyboard, Recline" }

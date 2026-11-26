@@ -67,8 +67,10 @@
   support sets up for Steam.
 
 ### Tested
-- SteamOS 0.5.8 (build 20261106.6144341, beta) with SteamVR 2.19.2: every tweak's status, signed
-  updates from 0.7.1-0.7.3, and the offline tweak tests ([compatibility](docs/compatibility.md)).
+- SteamOS 0.5.11 (build 20261125.6132624, beta) with SteamVR 2.19.5: every tweak's status, signed
+  updates from 0.7.2-0.7.4 to 0.8.0, Android Mirror's reconnect and stop on a phone, and the new
+  Moonlight XR, Full Keyboard and Recline versions ([compatibility](docs/compatibility.md)). Every
+  tweak's status also on SteamOS 0.5.8, 0.5.9 and 0.5.10.
 
 ## 0.7.4 (2026-11-06)
 
