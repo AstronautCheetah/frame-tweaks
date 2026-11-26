@@ -19,10 +19,12 @@
   asks once more before it does; the official packs stay as they are.
 
 ### Changed
-- **Newer versions, tried on a Frame:** Full Keyboard 0.19.1 and KnockThru 1.3.0 (what ticking
-  them installs, and what updates move them to), Moonlight XR 1.3.3 (a heat guard for 2D-to-3D,
-  smoother head turns at 144 Hz), and the Python packages: PyQt6 6.12.1, onnxruntime 1.32.0
-  (Dictation's Parakeet engine), numpy 2.5.5.
+- **Newer versions, tried on a Frame:** Full Keyboard 0.20.0 (a shortcut bar; replacing Steam's
+  keyboard works again with the Steam client SteamOS 0.5.10 brought), KnockThru 1.3.0 and Recline
+  v1.4.1 (its room view with SteamVR 2.19.4 and later): what ticking them installs, and what
+  updates move them to. Moonlight XR 1.3.4 (a rearranged headset menu, foveated rendering, lighter
+  passthrough), and the Python packages: PyQt6 6.12.1 with Qt 6.12.1, onnxruntime 1.32.0
+  (Dictation's Parakeet engine), numpy 2.5.5, packaging 26.4.
 - **Homebrew's installer** moves to a newer commit, which also creates Homebrew's `libexec` folder.
 - **Arrow Pad has one menu entry:** **Arrow Pad**, in Steam's VR "+" menu and the desktop's
   menu, opens the pad as its own VR panel (it was "Arrow Pad (VR window)"). The desktop-mode

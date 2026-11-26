@@ -1,11 +1,11 @@
 # Homebrew's installer script, pinned to a reviewed commit and checked against this hash before
 # it runs (it's run with your sudo password). Homebrew itself then verifies what it installs.
 # Bump with dev/check-pins.sh after reading the new commits.
-version=2026-11-18+eaa2af6
-url=https://raw.githubusercontent.com/Homebrew/install/eaa2af62ca1d5349c9743f82b1b0c4e5d365fb2d/install.sh
+version=2026-11-25+870ddff
+url=https://raw.githubusercontent.com/Homebrew/install/870ddff5dbe61d293a8b4a763090d125e59048a1/install.sh
 sha256=8fd2f1a5287a7c2e3d7362924c677edcc04c5a0e16448c77132d056bc88cf1ed
-rev=eaa2af62ca1d5349c9743f82b1b0c4e5d365fb2d
+rev=870ddff5dbe61d293a8b4a763090d125e59048a1
 latest=https://api.github.com/repos/Homebrew/install/commits/HEAD
 mirror=https://github.com/AstronautCheetah/frame-tweaks/releases/download/mirror/8fd2f1a5287a-install.sh
 license=BSD-2-Clause (Homebrew/install)
-license_file=https://raw.githubusercontent.com/Homebrew/install/eaa2af62ca1d5349c9743f82b1b0c4e5d365fb2d/LICENSE.txt
+license_file=https://raw.githubusercontent.com/Homebrew/install/870ddff5dbe61d293a8b4a763090d125e59048a1/LICENSE.txt

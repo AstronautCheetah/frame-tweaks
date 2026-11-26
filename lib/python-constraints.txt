@@ -3,7 +3,7 @@
 # only when these can't be installed on this Python). dev/check-pins.sh reports newer ones;
 # dev/bump-pin.py python moves to them.
 PyQt6==6.12.1
-PyQt6-Qt6==6.12.0
+PyQt6-Qt6==6.12.1
 PyQt6_sip==13.13.1
 openvr==2.12.1401
 jeepney==0.9.0
@@ -11,5 +11,5 @@ onnx-asr==0.12.0
 onnxruntime==1.32.0
 numpy==2.5.5
 flatbuffers==25.12.19
-packaging==26.3
+packaging==26.4
 protobuf==7.36.2
