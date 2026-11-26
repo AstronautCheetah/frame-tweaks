@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 (2026-11-26)
 
 ### Added
 - **Bluetooth headphones: music only** (Hardware): Bluetooth headphones and earbuds connect for
