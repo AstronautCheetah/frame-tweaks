@@ -101,3 +101,5 @@ adjust. Texts are JSON strings (`\n` is a new line). Don't edit by hand.
   - now: "Every pack that isn't Frame Tweaks' own is trusted already."
 - New in `lib/userpacks.py:273`
   - now: "No pack that isn't Frame Tweaks' own is in use."
+- New in `packs/core/arrowpad/arrowpad.desktop:3`
+  - now: "Arrow Pad (desktop window)"

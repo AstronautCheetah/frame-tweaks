@@ -57,11 +57,15 @@ It sets up [ydotool](../ydotool/) (the helper it types through) and a private co
 
 ## Use
 
-There are two menu entries. Both work from the desktop's app menu and from Steam's VR "+" menu:
+**Arrow Pad**, in Steam's VR "+" menu and the desktop's app menu, opens the pad as its own
+SteamVR panel, like Full Keyboard. It shows while the dashboard is open; point at a key and pull
+the trigger to press it.
 
-- **Arrow Pad** opens the pad inside desktop mode, as an always-on-top window.
-- **Arrow Pad (VR window)** opens it as its own SteamVR panel, like Full Keyboard. It shows
-  while the dashboard is open; point at a key and pull the trigger to press it.
+The pad can also open inside desktop mode, as an always-on-top window: run `arrowpad --desktop`
+(in Konsole, say), or show **Arrow Pad (desktop window)** in the desktop's menu with KDE's Menu
+Editor. Its menu entry is hidden because Steam's "+" menu lists every entry the desktop's menu
+does and ignores the keys that would keep one desktop-only (`OnlyShowIn`, `NotShowIn`): only
+hiding it everywhere (`NoDisplay`) keeps it out of the "+" menu.
 
 They're separate, so you can have both open. Each remembers its own place, size and settings.
 Neither takes keyboard focus, so whatever you press goes to the app you were using.

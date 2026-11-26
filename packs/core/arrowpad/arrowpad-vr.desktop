@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Arrow Pad (VR window)
+Name=Arrow Pad
 Comment=Arrow/navigation keys as their own floating VR window
 Exec=@BIN@/arrowpad --vr
 Icon=frame-tweaks-arrowpad

@@ -24,6 +24,9 @@
   smoother head turns at 144 Hz), and the Python packages: PyQt6 6.12.1, onnxruntime 1.32.0
   (Dictation's Parakeet engine), numpy 2.5.5.
 - **Homebrew's installer** moves to a newer commit, which also creates Homebrew's `libexec` folder.
+- **Arrow Pad has one menu entry:** **Arrow Pad**, in Steam's VR "+" menu and the desktop's
+  menu, opens the pad as its own VR panel (it was "Arrow Pad (VR window)"). The desktop-mode
+  window's entry is hidden, as Steam's "+" menu showed it too; `arrowpad --desktop` still opens it.
 
 ### Fixed
 - **Android Mirror lost a phone that stopped advertising:** with the phone's screen off, or on a

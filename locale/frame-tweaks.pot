@@ -2811,7 +2811,7 @@ msgstr ""
 msgid "Added {name} to the app menu"
 msgstr ""
 
-#: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad.desktop packs/core/arrowpad/README.md
+#: lib/splash.py packs/core/arrowpad/arrowpad.py packs/core/arrowpad/arrowpad-vr.desktop packs/core/arrowpad/README.md
 msgid "Arrow Pad"
 msgstr ""
 
@@ -3855,11 +3855,11 @@ msgid "styled after"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad-vr.desktop
-msgid "Arrow Pad (VR window)"
+msgid "Arrow/navigation keys as their own floating VR window"
 msgstr ""
 
-#: packs/core/arrowpad/arrowpad-vr.desktop
-msgid "Arrow/navigation keys as their own floating VR window"
+#: packs/core/arrowpad/arrowpad.desktop
+msgid "Arrow Pad (desktop window)"
 msgstr ""
 
 #: packs/core/arrowpad/arrowpad.desktop
