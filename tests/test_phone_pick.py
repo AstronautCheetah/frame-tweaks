@@ -72,7 +72,16 @@ class PhonePick(unittest.TestCase):
                 if term_at in log.read_text() or p.poll() is not None:
                     break
                 time.sleep(0.02)
-            p.terminate()
+            # (Again if it's still running after a few seconds: bash 5.2 can lose a trap's action,
+            # as phone's own comment on RESTART says, and GitHub's runners have bash 5.2. The Frame
+            # has 5.3. One TERM then did nothing, so the test timed out.)
+            for _ in range(timeout // 5):
+                p.terminate()
+                try:
+                    p.wait(5)
+                    break
+                except subprocess.TimeoutExpired:
+                    pass
             r = subprocess.CompletedProcess(p.args, p.wait(timeout))
         f = home / ".config/frame-tweaks/phone.conf"
         conf_text = f.read_text() if f.exists() else ""
