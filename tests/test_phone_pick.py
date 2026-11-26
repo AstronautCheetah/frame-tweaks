@@ -112,21 +112,23 @@ class PhonePick(unittest.TestCase):
 
     LAST = 'PHONE_NAME="Pixel 9"\nPHONE_ID=adb-SERIAL1-AbC123\nPHONE_ADDRESS=10.0.0.5:4000\n'
 
-    def adb_answering_as(self, guid):
-        """adb with the phone at 10.0.0.5:4000, saying it's guid (persist.adb.wifi.guid)."""
+    def adb_answering_as(self, serial):
+        """adb with a device at 10.0.0.5:4000 whose serial (ro.serialno) is serial. Like a real
+        phone on recent Android, it gives adb's shell an empty persist.adb.wifi.guid."""
         return {"adb": 'echo "adb $*" >> "$HOME/log"; case "$1 $4 $5" in "connect "*) echo "connected to $2";; '
-                       f'"-s getprop persist.adb.wifi.guid") echo "{guid}";; esac; exit 0'}
+                       f'"-s getprop ro.serialno") echo "{serial}";; "-s getprop persist.adb.wifi.guid") echo;; esac; exit 0'}
 
     def test_a_phone_not_advertising_is_found_at_its_last_address(self):
         """mDNS goes quiet (the phone's screen off, a Wi-Fi filtering multicast) while the phone still
-        answers where it last connected: it's used there, as it says it's the phone."""
-        code, log, _ = self.run_phone([], conf=self.LAST, extra=self.adb_answering_as("adb-SERIAL1-AbC123"))
+        answers where it last connected: it's used there, as its serial is the one in the name it
+        advertised."""
+        code, log, _ = self.run_phone([], conf=self.LAST, extra=self.adb_answering_as("SERIAL1"))
         self.assertEqual(code, 0, log)
         self.assertIn("scrcpy -s 10.0.0.5:4000", log)
         self.assertNotIn("didn't appear", log)
 
     def test_something_else_at_its_last_address_isnt_taken(self):
-        code, log, _ = self.run_phone([], conf=self.LAST, extra=self.adb_answering_as("adb-OTHER-XyZ789"))
+        code, log, _ = self.run_phone([], conf=self.LAST, extra=self.adb_answering_as("OTHER"))
         self.assertNotEqual(code, 0)
         self.assertNotIn("scrcpy -s", log)
         self.assertIn("adb disconnect 10.0.0.5:4000", log)

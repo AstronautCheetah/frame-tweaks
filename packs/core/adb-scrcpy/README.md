@@ -312,7 +312,7 @@ clipboard, set **Share the clipboard with the phone** to **Not shared** (`PHONE_
   looks the phone up on the local network (mDNS) by its adb identity (see
   [Which phone](#use)), connects, and starts scrcpy. A phone that has stopped advertising (its
   screen off, or a Wi-Fi that filters multicast) is tried at the address it last connected at,
-  and used there only if it gives the same identity.
+  and used there only if its serial is the one in its identity.
 - **Reconnecting:** `phone` checks every 5 seconds that the phone still answers. If the
   connection drops, it closes the frozen picture and reconnects (for up to a minute).
 - **Disconnecting by itself:** at the same checks, `phone` reads `PHONE_TIMEOUT` from its
